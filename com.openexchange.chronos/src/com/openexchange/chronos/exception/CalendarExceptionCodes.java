@@ -61,6 +61,7 @@ import static com.openexchange.chronos.exception.CalendarExceptionMessages.MANDA
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.MOVE_OCCURRENCE_NOT_SUPPORTED_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.MOVE_SERIES_NOT_SUPPORTED_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.NO_PERMISSION_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.QUERY_TOO_SHORT_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UID_CONFLICT_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_CLASSIFICATION_MSG;
 import static com.openexchange.exception.OXExceptionStrings.MESSAGE;
@@ -103,6 +104,11 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * <li>Invalid recurrence id [id %1$s, rule %2$s]</li>
      */
     INVALID_RECURRENCE_ID("Invalid recurrence id [id %1$s, rule %2$s]", INVALID_RRULE_MSG, Category.CATEGORY_USER_INPUT, 4044),
+    /**
+     * <li>In order to accomplish the search, %1$d or more characters are required.</li>
+     * <li>Query too short [minimum %1$d, query %2$s]</li>
+     */
+    QUERY_TOO_SHORT("Query too short [minimum %1$d, query %2$s]", QUERY_TOO_SHORT_MSG, Category.CATEGORY_USER_INPUT, 4045),
     /**
      * <li>The operation could not be completed due to insufficient permissions.</li>
      * <li>Insufficient read permissions in folder [folder %1$d]</li>

@@ -47,56 +47,61 @@
  *
  */
 
-package com.openexchange.find.calendar;
+package com.openexchange.find.basic.calendar;
 
-import com.openexchange.find.Document;
-import com.openexchange.find.DocumentVisitor;
+import java.util.Collections;
+import java.util.List;
+import com.openexchange.chronos.service.SearchFilter;
 
 /**
- * {@link CalendarDocument}
+ * {@link DefaultSearchFilter}
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.10.0
  */
-public class CalendarDocument implements Document {
+public class DefaultSearchFilter implements SearchFilter {
 
-    private static final long serialVersionUID = 644937237827581918L;
-
-    private Object object;
-    private String format;
+    private final String id;
+    private final List<String> fields;
+    private final List<String> queries;
 
     /**
-     * Initializes a new {@link CalendarDocument}.
+     * Initializes a new {@link DefaultSearchFilter}.
      *
-     * @param object The underling calendar object
-     * @param format The object's format name
+     * @param id The filter identifier, or <code>null</code> if it is the only filter in the facet
+     * @param fields The fields to filter on
+     * @param queries The queries to search for
      */
-    public CalendarDocument(Object object, String format) {
+    public DefaultSearchFilter(String id, List<String> fields, List<String> queries) {
         super();
-        this.object = object;
-        this.format = format;
+        this.id = id;
+        this.fields = fields;
+        this.queries = queries;
     }
 
     /**
-     * Gets the underlying calendar object.
+     * Initializes a new {@link DefaultSearchFilter}.
      *
-     * @return The underlying calendar object
+     * @param field The field to filter on
+     * @param queries The queries to search for
      */
-    public Object getObject() {
-        return object;
-    }
-
-    /**
-     * Gets the object's format name.
-     *
-     * @return The format name
-     */
-    public String getFormat() {
-        return format;
+    public DefaultSearchFilter(String field, List<String> queries) {
+        this(null, Collections.singletonList(field), queries);
     }
 
     @Override
-    public void accept(DocumentVisitor visitor) {
-        visitor.visit(this);
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public List<String> getFields() {
+        return fields;
+    }
+
+    @Override
+    public List<String> getQueries() {
+        return queries;
     }
 
 }

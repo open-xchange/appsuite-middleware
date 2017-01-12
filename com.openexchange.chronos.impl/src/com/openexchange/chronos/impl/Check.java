@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.impl;
 
+import static com.openexchange.chronos.impl.Utils.getCalendarUser;
 import static com.openexchange.chronos.impl.Utils.getSearchTerm;
 import static com.openexchange.chronos.impl.Utils.i;
 import static com.openexchange.java.Autoboxing.I;
@@ -70,6 +71,7 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.SortOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
+import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -127,8 +129,19 @@ public class Check {
 
     }
 
-    public static void requireMinimumSearchPatternLength(String pattern) throws OXException {
-
+    /**
+     * Checks that the supplied search pattern length is equal to or greater than a configured minimum.
+     *
+     * @param pattern The pattern to check
+     * @return The passed pattern, after the length was checked
+     * @throws OXException {@link CalendarExceptionCodes#QUERY_TOO_SHORT}
+     */
+    public static String minimumSearchPatternLength(String pattern) throws OXException {
+        int minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
+        if (null != pattern && 0 < minimumSearchCharacters && pattern.length() < minimumSearchCharacters) {
+            throw CalendarExceptionCodes.QUERY_TOO_SHORT.create(I(minimumSearchCharacters), pattern);
+        }
+        return pattern;
     }
 
     /**
@@ -202,6 +215,25 @@ public class Check {
     public static Classification classificationIsValid(Classification classification, UserizedFolder folder) throws OXException {
         if (false == Classification.PUBLIC.equals(classification) && PublicType.getInstance().equals(folder.getType())) {
             throw CalendarExceptionCodes.UNSUPPORTED_CLASSIFICATION.create(String.valueOf(classification), I(i(folder)), PublicType.getInstance());
+        }
+        return classification;
+    }
+
+    /**
+     * Checks that the classification is supported during move operations based on the given source- and target folder's type., if it is
+     * different from {@link Classification#PUBLIC}.
+     *
+     * @param classification The classification to check
+     * @param folder The source folder for the event
+     * @param targetFolder The target folder for the event
+     * @return The passed classification, after it was checked for validity
+     * @throws OXException {@link CalendarExceptionCodes#UNSUPPORTED_CLASSIFICATION}
+     */
+    public static Classification classificationIsValidOnMove(Classification classification, UserizedFolder folder, UserizedFolder targetFolder) throws OXException {
+        if (null != classification && false == Classification.PUBLIC.equals(classification)) {
+            if (PublicType.getInstance().equals(targetFolder.getType()) || getCalendarUser(folder).getId() != getCalendarUser(targetFolder).getId()) {
+                throw CalendarExceptionCodes.UNSUPPORTED_CLASSIFICATION.create(String.valueOf(classification), I(i(targetFolder)), targetFolder.getType());
+            }
         }
         return classification;
     }

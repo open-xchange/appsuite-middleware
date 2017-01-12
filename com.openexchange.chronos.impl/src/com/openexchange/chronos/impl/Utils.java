@@ -471,10 +471,6 @@ public class Utils {
         if (0 < event.getPublicFolderId()) {
             return event.getPublicFolderId();
         } else {
-            if (false == event.containsAttendees()) {
-                System.out.println("dsds");
-            }
-
             Attendee userAttendee = CalendarUtils.find(
                 event.containsAttendees() ? event.getAttendees() : storage.getAttendeeStorage().loadAttendees(event.getId()), calendarUser);
             if (null == userAttendee || 0 >= userAttendee.getFolderID()) {

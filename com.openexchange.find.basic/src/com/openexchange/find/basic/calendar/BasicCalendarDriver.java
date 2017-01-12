@@ -319,7 +319,7 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
         int stopIndex = 0 < size ? Math.min(appointments.size(), startIndex + size) : appointments.size();
         List<Document> documents = new ArrayList<Document>(stopIndex - startIndex);
         for (int i = startIndex; i < stopIndex; i++) {
-            documents.add(new CalendarDocument(appointments.get(i)));
+            documents.add(new CalendarDocument(appointments.get(i), "appointment"));
         }
         return documents;
     }
@@ -409,7 +409,7 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
         return emailAddresses;
     }
 
-    private static int getHardResultLimit() throws OXException {
+    protected static int getHardResultLimit() throws OXException {
         return Services.getConfigurationService().getIntProperty("com.openexchange.find.basic.calendar.hardResultLimit", 1000);
     }
 

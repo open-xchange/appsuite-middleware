@@ -52,6 +52,7 @@ package com.openexchange.find.basic.osgi;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.framework.Constants;
+import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
@@ -60,6 +61,7 @@ import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.find.basic.Services;
 import com.openexchange.find.basic.calendar.BasicCalendarDriver;
+import com.openexchange.find.basic.calendar.BasicEventDriver;
 import com.openexchange.find.basic.contacts.AutocompleteFields;
 import com.openexchange.find.basic.contacts.BasicContactsDriver;
 import com.openexchange.find.basic.drive.BasicDriveDriver;
@@ -92,7 +94,7 @@ public class FindBasicActivator extends HousekeepingActivator {
             MailAccountStorageService.class, IDBasedFileAccessFactory.class, UnifiedInboxManagement.class,
             AppointmentSqlFactoryService.class, CalendarCollectionService.class, ThreadPoolService.class,
             IDBasedFolderAccessFactory.class, ResourceService.class, ConfigurationService.class, InfostoreSearchEngine.class,
-            FileStorageServiceRegistry.class, ConfigViewFactory.class };
+            FileStorageServiceRegistry.class, ConfigViewFactory.class, CalendarService.class };
     }
 
     @Override
@@ -103,7 +105,12 @@ public class FindBasicActivator extends HousekeepingActivator {
         registerService(ModuleSearchDriver.class, new BasicMailDriver(searchMailBody), defaultProperties());
         registerService(ModuleSearchDriver.class, new BasicDriveDriver(), defaultProperties());
         registerService(ModuleSearchDriver.class, new BasicContactsDriver(), defaultProperties());
-        registerService(ModuleSearchDriver.class, new BasicCalendarDriver(), defaultProperties());
+        boolean legacy = false;
+        if (legacy) {
+            registerService(ModuleSearchDriver.class, new BasicCalendarDriver(), defaultProperties());
+        } else {
+            registerService(ModuleSearchDriver.class, new BasicEventDriver(), defaultProperties());
+        }
         registerService(ModuleSearchDriver.class, new BasicTasksDriver(), defaultProperties());
         registerService(PreferencesItemService.class, AutocompleteFields.class.newInstance());
     }

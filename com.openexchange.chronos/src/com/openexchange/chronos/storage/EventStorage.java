@@ -55,6 +55,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.SortOptions;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
@@ -96,6 +97,17 @@ public interface EventStorage {
      * @return The found events
      */
     List<Event> searchEvents(SearchTerm<?> searchTerm, SortOptions sortOptions, EventField[] fields) throws OXException;
+
+    /**
+     * Searches for events.
+     *
+     * @param searchTerm The search term to use
+     * @param filters A list of additional filters to be applied on the search, or <code>null</code> if not specified
+     * @param sortOptions The sort options to apply, or <code>null</code> if not specified
+     * @param fields The event fields to retrieve from the storage, or <code>null</code> to query all available data
+     * @return The found events
+     */
+    List<Event> searchEvents(SearchTerm<?> searchTerm, List<SearchFilter> filters, SortOptions sortOptions, EventField[] fields) throws OXException;
 
     /**
      * Searches for previously deleted events.

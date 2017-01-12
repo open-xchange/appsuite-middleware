@@ -78,6 +78,7 @@ import com.openexchange.chronos.compat.Recurrence;
 import com.openexchange.chronos.compat.SeriesPattern;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.RecurrenceData;
+import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.SortOptions;
 import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.chronos.storage.EventStorage;
@@ -112,10 +113,15 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
 
     @Override
     public List<Event> searchEvents(SearchTerm<?> searchTerm, SortOptions sortOptions, EventField[] fields) throws OXException {
+        return searchEvents(searchTerm, null, sortOptions, fields);
+    }
+
+    @Override
+    public List<Event> searchEvents(SearchTerm<?> searchTerm, List<SearchFilter> filters, SortOptions sortOptions, EventField[] fields) throws OXException {
         Connection connection = null;
         try {
             connection = dbProvider.getReadConnection(context);
-            return selectEvents(connection, false, context.getContextId(), searchTerm, sortOptions, fields);
+            return selectEvents(connection, false, context.getContextId(), searchTerm, filters, sortOptions, fields);
         } catch (SQLException e) {
             throw asOXException(e);
         } finally {
@@ -169,7 +175,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         Connection connection = null;
         try {
             connection = dbProvider.getReadConnection(context);
-            return selectEvents(connection, true, context.getContextId(), searchTerm, sortOptions, fields);
+            return selectEvents(connection, true, context.getContextId(), searchTerm, null, sortOptions, fields);
         } catch (SQLException e) {
             throw asOXException(e);
         } finally {
@@ -370,18 +376,20 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         return adjustAfterLoad(EventMapper.getInstance().fromResultSet(resultSet, fields, columnLabelPrefix));
     }
 
-    private static List<Event> selectEvents(Connection connection, boolean deleted, int contextID, SearchTerm<?> searchTerm, SortOptions sortOptions, EventField[] fields) throws SQLException, OXException {
+    private static List<Event> selectEvents(Connection connection, boolean deleted, int contextID, SearchTerm<?> searchTerm, List<SearchFilter> filters, SortOptions sortOptions, EventField[] fields) throws SQLException, OXException {
         EventField[] mappedFields = EventMapper.getInstance().getMappedFields(fields);
-        SearchTermAdapter adapter = new SearchTermAdapter(searchTerm, null, "d.", "m.", "e.");
-        StringBuilder stringBuilder = new StringBuilder().append("SELECT DISTINCT ").append(EventMapper.getInstance().getColumns(mappedFields, "d.")).append(' ')
-            .append("FROM ").append(deleted ? "del_dates" : "prg_dates").append(" AS d ");
+        SearchAdapter adapter = new SearchAdapter(contextID, null, "d.", "m.", "e.").append(searchTerm).append(filters);
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("SELECT DISTINCT ").append(EventMapper.getInstance().getColumns(mappedFields, "d.")).append(' ')
+            .append("FROM ").append(deleted ? "del_dates" : "prg_dates").append(" AS d ")
+        ;
         if (adapter.usesInternalAttendees()) {
             stringBuilder.append("LEFT JOIN ").append(deleted ? "del_dates_members" : "prg_dates_members").append(" AS m ")
-                .append("ON d.cid=m.cid AND d.intfield01=m.object_id ");
+            .append("ON d.cid=m.cid AND d.intfield01=m.object_id ");
         }
         if (adapter.usesExternalAttendees()) {
             stringBuilder.append("LEFT JOIN ").append(deleted ? "delDateExternal" : "dateExternal").append(" AS e ")
-                .append("ON d.cid=e.cid AND d.intfield01=e.objectId ");
+            .append("ON d.cid=e.cid AND d.intfield01=e.objectId ");
         }
         stringBuilder.append("WHERE d.cid=? AND ").append(adapter.getClause()).append(getSortOptions(sortOptions, "d.")).append(';');
         List<Event> events = new ArrayList<Event>();

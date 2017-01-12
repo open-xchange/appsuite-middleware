@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the Open-Xchange, Inc. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,56 +47,37 @@
  *
  */
 
-package com.openexchange.find.calendar;
+package com.openexchange.chronos.service;
 
-import com.openexchange.find.Document;
-import com.openexchange.find.DocumentVisitor;
+import java.util.List;
 
 /**
- * {@link CalendarDocument}
+ * {@link SearchFilter}
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.10.0
  */
-public class CalendarDocument implements Document {
-
-    private static final long serialVersionUID = 644937237827581918L;
-
-    private Object object;
-    private String format;
+public interface SearchFilter {
 
     /**
-     * Initializes a new {@link CalendarDocument}.
+     * Gets the filter identifier.
      *
-     * @param object The underling calendar object
-     * @param format The object's format name
+     * @return The filter identifier, or <code>null</code> if it is the only filter in the facet
      */
-    public CalendarDocument(Object object, String format) {
-        super();
-        this.object = object;
-        this.format = format;
-    }
+    String getId();
 
     /**
-     * Gets the underlying calendar object.
+     * Gets the fields to filter on.
      *
-     * @return The underlying calendar object
+     * @return The fields to filter on
      */
-    public Object getObject() {
-        return object;
-    }
+    List<String> getFields();
 
     /**
-     * Gets the object's format name.
+     * Gets the queries.
      *
-     * @return The format name
+     * @return The queries to search for
      */
-    public String getFormat() {
-        return format;
-    }
-
-    @Override
-    public void accept(DocumentVisitor visitor) {
-        visitor.visit(this);
-    }
+    List<String> getQueries();
 
 }

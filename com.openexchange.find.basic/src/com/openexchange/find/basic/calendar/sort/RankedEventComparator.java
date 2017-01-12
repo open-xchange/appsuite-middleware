@@ -47,56 +47,73 @@
  *
  */
 
-package com.openexchange.find.calendar;
+package com.openexchange.find.basic.calendar.sort;
 
-import com.openexchange.find.Document;
-import com.openexchange.find.DocumentVisitor;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
+import com.openexchange.chronos.Event;
 
 /**
- * {@link CalendarDocument}
+ * {@link RankedEventComparator}
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * A comparator that ranks events by how close their start date is to today. There is an additional
+ * degression factor that causes events in the past to be less relevant than upcoming ones.
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.10.0
  */
-public class CalendarDocument implements Document {
+public class RankedEventComparator implements Comparator<Event> {
 
-    private static final long serialVersionUID = 644937237827581918L;
+    /** Milliseconds per day */
+    private static final long MILLIS_PER_DAY = TimeUnit.DAYS.toMillis(1);
 
-    private Object object;
-    private String format;
+    /** The degression factor that is applied to the ranking of dates that are before the relative date */
+    private static final double DEGRESSION_FACTOR = 1.1;
+
+    private final long relativeTo;
 
     /**
-     * Initializes a new {@link CalendarDocument}.
-     *
-     * @param object The underling calendar object
-     * @param format The object's format name
+     * Initializes a new {@link RankedEventComparator}, using "now" as relative date.
      */
-    public CalendarDocument(Object object, String format) {
+    public RankedEventComparator() {
+        this(new Date());
+    }
+
+    /**
+     * Initializes a new {@link RankedEventComparator}, using the supplied relative date.
+     *
+     * @param relativeTo The relative date to use for comparisons.
+     */
+    public RankedEventComparator(Date relativeTo) {
         super();
-        this.object = object;
-        this.format = format;
-    }
-
-    /**
-     * Gets the underlying calendar object.
-     *
-     * @return The underlying calendar object
-     */
-    public Object getObject() {
-        return object;
-    }
-
-    /**
-     * Gets the object's format name.
-     *
-     * @return The format name
-     */
-    public String getFormat() {
-        return format;
+        this.relativeTo = relativeTo.getTime();
     }
 
     @Override
-    public void accept(DocumentVisitor visitor) {
-        visitor.visit(this);
+    public int compare(Event event1, Event event2) {
+        Date date1 = null != event1 ? event1.getStartDate() : null;
+        Date date2 = null != event2 ? event2.getStartDate() : null;
+        if (date1 == date2) {
+            return 0;
+        } else if (null == date1) {
+            return 1;
+        } else if (null == date2) {
+            return -1;
+        } else {
+            double ranking1 = calculateRating(date1, relativeTo);
+            double ranking2 = calculateRating(date2, relativeTo);
+            return ranking1 > ranking2 ? 1 : ranking1 == ranking2 ? 0 : -1;
+        }
+    }
+
+    private static double calculateRating(Date date, long relativeTo) {
+        long time = date.getTime();
+        if (time > relativeTo) {
+            return Math.pow(((double)(time - relativeTo)) / MILLIS_PER_DAY, 2.0);
+        } else {
+            return Math.pow(DEGRESSION_FACTOR * (relativeTo - time) / MILLIS_PER_DAY, 2.0);
+        }
     }
 
 }

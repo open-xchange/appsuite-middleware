@@ -79,6 +79,7 @@ import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
@@ -161,6 +162,17 @@ public class CalendarServiceImpl implements CalendarService {
             @Override
             protected List<Event> execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 return new SearchPerformer(session, storage).perform(folderIDs, pattern);
+            }
+        }.executeQuery();
+    }
+
+    @Override
+    public List<Event> searchEvents(CalendarSession session, final int[] folderIDs, final List<SearchFilter> filters, final List<String> queries) throws OXException {
+        return new StorageOperation<List<Event>>(session) {
+
+            @Override
+            protected List<Event> execute(CalendarSession session, CalendarStorage storage) throws OXException {
+                return new SearchPerformer(session, storage).perform(folderIDs, filters, queries);
             }
         }.executeQuery();
     }

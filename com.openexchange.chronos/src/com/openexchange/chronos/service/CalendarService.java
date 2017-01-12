@@ -129,6 +129,30 @@ public interface CalendarService {
     List<Event> searchEvents(CalendarSession session, int[] folderIDs, String pattern) throws OXException;
 
     /**
+     * Searches for events by one or more queries in the fields {@link EventField#SUMMARY}, {@link EventField#DESCRIPTION} and
+     * {@link EventField#CATEGORIES}. The queries are surrounded by wildcards implicitly to follow a <i>contains</i> semantic.
+     * Additional, storage-specific search filters can be applied.
+     * <p/>
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_FIELDS}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
+     * <li>{@link CalendarParameters#PARAMETER_INCLUDE_PRIVATE}</li>
+     * <li>{@link CalendarParameters#PARAMETER_ORDER}</li>
+     * <li>{@link CalendarParameters#PARAMETER_ORDER_BY}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RECURRENCE_MASTER}</li>
+     * </ul>
+     *
+     * @param session The calendar session
+     * @param folderIDs The identifiers of the folders to perform the search in, or <code>null</code> to search across all visible folders
+     * @param filters A list of additional filters to be applied on the search, or <code>null</code> if not specified
+     * @param queries The queries to search for, or <code>null</code> if not specified
+     * @return The found events, or an empty list if there are none
+     */
+    List<Event> searchEvents(CalendarSession session, int[] folderIDs, List<SearchFilter> filters, List<String> queries) throws OXException;
+
+    /**
      * Gets all change exceptions of a recurring event series.
      * <p/>
      * The following calendar parameters are evaluated:

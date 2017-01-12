@@ -69,6 +69,11 @@ import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Period;
+import com.openexchange.search.Operand;
+import com.openexchange.search.SingleSearchTerm;
+import com.openexchange.search.SingleSearchTerm.SingleOperation;
+import com.openexchange.search.internal.operands.ColumnFieldOperand;
+import com.openexchange.search.internal.operands.ConstantOperand;
 
 /**
  * {@link CalendarUtils}
@@ -458,6 +463,44 @@ public class CalendarUtils {
             }
         }
         return I2i(userIDs);
+    }
+
+    /**
+     * Gets a single search term using the field itself as column operand and a second operand.
+     *
+     * @param <V> The operand's type
+     * @param <E> The field type
+     * @param operation The operation to use
+     * @param operand The second operand
+     * @return A single search term
+     */
+    public static <V, E extends Enum<?>> SingleSearchTerm getSearchTerm(E field, SingleOperation operation, Operand<V> operand) {
+        return getSearchTerm(field, operation).addOperand(operand);
+    }
+
+    /**
+     * Gets a single search term using the field itself as column operand and adds the supplied value as constant operand.
+     *
+     * @param <V> The operand's type
+     * @param <E> The field type
+     * @param operation The operation to use
+     * @param operand The value to use as constant operand
+     * @return A single search term
+     */
+    public static <V, E extends Enum<?>> SingleSearchTerm getSearchTerm(E field, SingleOperation operation, V operand) {
+        return getSearchTerm(field, operation, new ConstantOperand<V>(operand));
+    }
+
+    /**
+     * Gets a single search term using the field itself as single column operand.
+     *
+     * @param <E> The field type
+     * @param operation The operation to use
+     * @param operand The value to use as constant operand
+     * @return A single search term
+     */
+    public static <E extends Enum<?>> SingleSearchTerm getSearchTerm(E field, SingleOperation operation) {
+        return new SingleSearchTerm(operation).addOperand(new ColumnFieldOperand<E>(field));
     }
 
     /**

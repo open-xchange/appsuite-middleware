@@ -49,11 +49,14 @@
 
 package com.openexchange.chronos.storage.rdb;
 
+import static com.openexchange.chronos.common.CalendarUtils.getSearchTerm;
+import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -68,8 +71,11 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.compat.Event2Appointment;
+import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
+import com.openexchange.java.Enums;
+import com.openexchange.java.util.TimeZones;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.Operand;
@@ -79,6 +85,8 @@ import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SearchTerm.OperationPosition;
 import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
+import com.openexchange.search.internal.operands.ColumnFieldOperand;
+import com.openexchange.search.internal.operands.ConstantOperand;
 import com.openexchange.tools.StringCollection;
 
 /**
@@ -87,8 +95,9 @@ import com.openexchange.tools.StringCollection;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class SearchTermAdapter {
+public class SearchAdapter {
 
+    private final int contextID;
     private final StringBuilder stringBuilder;
     private final List<Object> parameters;
     private final String charset;
@@ -102,21 +111,53 @@ public class SearchTermAdapter {
     /**
      * Initializes a new {@link SearchAdapter}.
      *
-     * @param term The search term to append
+     * @param The context identifier
      * @param charset The optional charset to use for string comparisons, or <code>null</code> if not specified
      * @param prefixEvents The prefix to use when inserting column operands for event fields
      * @param prefixInternalAttendees The prefix to use when inserting column operands for internal attendee fields
      * @param prefixExternalAttendees The prefix to use when inserting column operands for external attendee fields
      */
-    public SearchTermAdapter(SearchTerm<?> term, String charset, String prefixEvents, String prefixInternalAttendees, String prefixExternalAttendees) throws OXException {
+    public SearchAdapter(int contextID, String charset, String prefixEvents, String prefixInternalAttendees, String prefixExternalAttendees) throws OXException {
         super();
+        this.contextID = contextID;
         this.charset = charset;
         this.prefixEvents = prefixEvents;
         this.prefixInternalAttendees = prefixInternalAttendees;
         this.prefixExternalAttendees = prefixExternalAttendees;
         this.parameters = new ArrayList<Object>();
         this.stringBuilder = new StringBuilder(256);
-        this.append(term);
+    }
+
+    /**
+     * Appends the supplied search term to the resulting SQL statement.
+     *
+     * @param term The search term to append
+     * @return A self reference
+     */
+    public SearchAdapter append(SearchTerm<?> term) throws OXException {
+        if (SingleSearchTerm.class.isInstance(term)) {
+            append((SingleSearchTerm) term);
+        } else if (CompositeSearchTerm.class.isInstance(term)) {
+            append((CompositeSearchTerm) term);
+        } else {
+            throw new IllegalArgumentException("Need either an 'SingleSearchTerm' or 'CompositeSearchTerm'.");
+        }
+        return this;
+    }
+
+    /**
+     * Appends the supplied search filters to the resulting SQL statement.
+     *
+     * @param filtere The filters to append
+     * @return A self reference
+     */
+    public SearchAdapter append(List<SearchFilter> filters) throws OXException {
+        if (null != filters) {
+            for (SearchFilter filter : filters) {
+                append(filter);
+            }
+        }
+        return this;
     }
 
     /**
@@ -162,13 +203,178 @@ public class SearchTermAdapter {
         return parameterIndex;
     }
 
-    private void append(SearchTerm<?> term) throws OXException {
-        if (SingleSearchTerm.class.isInstance(term)) {
-            append((SingleSearchTerm) term);
-        } else if (CompositeSearchTerm.class.isInstance(term)) {
-            append((CompositeSearchTerm) term);
+    private void append(SearchFilter filter) throws OXException {
+        List<String> fields = filter.getFields();
+        if (null != fields && 0 < fields.size()) {
+            for (String field : fields) {
+                appendFieldFilter(field, filter.getQueries());
+            }
+        }
+    }
+
+    private void appendFieldFilter(String field, List<String> queries) throws OXException {
+        switch (field) {
+            case "subject":
+                appendFieldFilter(EventField.SUMMARY, queries);
+                break;
+            case "location":
+                appendFieldFilter(EventField.LOCATION, queries);
+                break;
+            case "description":
+                appendFieldFilter(EventField.DESCRIPTION, queries);
+                break;
+            case "range":
+                appendRangeFilter(queries);
+                break;
+            case "type":
+                appendRecurringType(queries);
+                break;
+            case "status":
+                appendStatus(queries);
+                break;
+            case "users":
+                appendUsers(queries);
+                break;
+            case "participants":
+                appendExternalParticipants(queries);
+                break;
+            case "attachment":
+                appendAttachments(queries);
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported filter field: " + field);
+        }
+    }
+
+    private void appendAttachments(List<String> queries) throws OXException {
+        for (String query : queries) {
+            stringBuilder.append(" AND EXISTS (SELECT 1 FROM prg_attachment WHERE prg_attachment.cid = ");
+            appendConstantOperand(Integer.valueOf(contextID), Types.INTEGER);
+            stringBuilder.append(" AND prg_attachment.attached = ").append(prefixEvents).append("intfield01 AND prg_attachment.filename = ");
+            appendConstantOperand(query, Types.VARCHAR);
+            stringBuilder.append(')');
+        }
+    }
+
+    private void appendUsers(List<String> queries) throws OXException {
+        for (String query : queries) {
+            stringBuilder.append(" AND EXISTS (SELECT 1 FROM prg_dates_members WHERE prg_dates_members.cid = ");
+            appendConstantOperand(Integer.valueOf(contextID), Types.INTEGER);
+            stringBuilder.append(" AND prg_dates_members.object_id = ").append(prefixEvents).append("intfield01 AND prg_dates_members.member_uid = ");
+            appendConstantOperand(query, Types.INTEGER);
+            stringBuilder.append(')');
+        }
+    }
+
+    private void appendExternalParticipants(List<String> queries) throws OXException {
+        if (1 == queries.size()) {
+            stringBuilder.append(" AND EXISTS (SELECT 1 FROM dateExternal WHERE dateExternal.cid = ");
+            appendConstantOperand(Integer.valueOf(contextID), Types.INTEGER);
+            stringBuilder.append(" AND dateExternal.objectId=").append(prefixEvents).append("intfield01 AND dateExternal.mailAddress = ");
+            appendConstantOperand(queries.get(0), Types.VARCHAR);
+            stringBuilder.append(')');
         } else {
-            throw new IllegalArgumentException("Need either an 'SingleSearchTerm' or 'CompositeSearchTerm'.");
+            stringBuilder.append(" AND EXISTS (SELECT 1 FROM dateExternal WHERE dateExternal.cid = ");
+            appendConstantOperand(Integer.valueOf(contextID), Types.INTEGER);
+            stringBuilder.append(" AND dateExternal.objectId=").append(prefixEvents).append("intfield01 AND ");
+            appendAsInClause(ExternalAttendeeMapper.getInstance().get(AttendeeField.URI), "dateExternal.", new ArrayList<Object>(queries));
+            stringBuilder.append(')');
+        }
+    }
+
+    private void appendRangeFilter(List<String> queries) throws OXException {
+        Calendar calendar = initCalendar(TimeZones.UTC, null);
+        for (String query : queries) {
+            switch (query) {
+                case "one_month":
+                    calendar.setTime(new Date());
+                    calendar.add(Calendar.MONTH, -1);
+                    stringBuilder.append(" AND ");
+                    append(getSearchTerm(EventField.END_DATE, SingleOperation.GREATER_OR_EQUAL, calendar.getTime()));
+                    calendar.setTime(new Date());
+                    calendar.add(Calendar.MONTH, 1);
+                    stringBuilder.append(" AND ");
+                    append(getSearchTerm(EventField.START_DATE, SingleOperation.LESS_THAN, calendar.getTime()));
+                    break;
+                case "three_months":
+                    calendar.setTime(new Date());
+                    calendar.add(Calendar.MONTH, -3);
+                    stringBuilder.append(" AND ");
+                    append(getSearchTerm(EventField.END_DATE, SingleOperation.GREATER_OR_EQUAL, calendar.getTime()));
+                    calendar.setTime(new Date());
+                    calendar.add(Calendar.MONTH, 3);
+                    stringBuilder.append(" AND ");
+                    append(getSearchTerm(EventField.START_DATE, SingleOperation.LESS_THAN, calendar.getTime()));
+                    break;
+                case "one_year":
+                    calendar.setTime(new Date());
+                    calendar.add(Calendar.YEAR, -1);
+                    stringBuilder.append(" AND ");
+                    append(getSearchTerm(EventField.END_DATE, SingleOperation.GREATER_OR_EQUAL, calendar.getTime()));
+                    calendar.setTime(new Date());
+                    calendar.add(Calendar.YEAR, 1);
+                    stringBuilder.append(" AND ");
+                    append(getSearchTerm(EventField.START_DATE, SingleOperation.LESS_THAN, calendar.getTime()));
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unsupported filter query: " + query);
+            }
+        }
+    }
+
+    private void appendRecurringType(List<String> queries) throws OXException {
+        for (String query : queries) {
+            stringBuilder.append(" AND ");
+            switch (query) {
+                case "series":
+                    append(getSearchTerm(EventField.SERIES_ID, SingleOperation.GREATER_THAN, Integer.valueOf(0)));
+                    break;
+                case "single":
+                    append(getSearchTerm(EventField.SERIES_ID, SingleOperation.ISNULL));
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unsupported filter query: " + query);
+            }
+        }
+    }
+
+    private void appendStatus(List<String> queries) throws OXException {
+        if (2 > queries.size()) {
+            throw new IllegalArgumentException("Unsupported status filter");
+        }
+        int entity;
+        try {
+            entity = Integer.parseInt(queries.get(0));
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Unsupported status filter", e);
+        }
+        List<Object> partStats = new ArrayList<Object>(queries.size() - 1);
+        for (int i = 1; i < queries.size(); i++) {
+            partStats.add(Enums.parse(ParticipationStatus.class, queries.get(i)));
+        }
+        DbMapping<? extends Object, Attendee> entityMapping = InternalAttendeeMapper.getInstance().get(AttendeeField.ENTITY);
+        DbMapping<? extends Object, Attendee> partStatMapping = InternalAttendeeMapper.getInstance().get(AttendeeField.PARTSTAT);
+        stringBuilder.append(" AND (").append(entityMapping.getColumnLabel(prefixInternalAttendees)).append(" = ? AND ");
+        parameters.add(Integer.valueOf(entity));
+        if (1 == partStats.size()) {
+            stringBuilder.append(partStatMapping.getColumnLabel(prefixInternalAttendees)).append(" = ?");
+            parameters.add(Integer.valueOf(Event2Appointment.getConfirm((ParticipationStatus) partStats.get(0))));
+        } else {
+            appendAsInClause(partStatMapping, prefixInternalAttendees, partStats);
+        }
+        usesInternalAttendees = true;
+        stringBuilder.append(") ");
+    }
+
+    private void appendFieldFilter(EventField field, List<String> queries) throws OXException {
+        if (null != queries && 0 < queries.size()) {
+            for (String query : queries) {
+                stringBuilder.append(" AND ");
+                append(new SingleSearchTerm(SingleOperation.EQUALS)
+                    .addOperand(new ColumnFieldOperand<EventField>(field))
+                    .addOperand(new ConstantOperand<String>(query))
+                );
+            }
         }
     }
 
@@ -208,7 +414,6 @@ public class SearchTermAdapter {
                 stringBuilder.append(operation.getSqlRepresentation());
             }
             if (Operand.Type.COLUMN.equals(operands[i].getType())) {
-                //                appendColumnOperand(mapping, prefix);
                 Entry<String, DbMapping<? extends Object, ?>> entry = getMapping(operands[i].getValue());
                 appendColumnOperand(entry.getValue(), entry.getKey());
             } else if (Operand.Type.CONSTANT.equals(operands[i].getType())) {
