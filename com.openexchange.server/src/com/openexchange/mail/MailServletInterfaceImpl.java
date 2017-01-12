@@ -1588,8 +1588,15 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
             if (mail.getColorLabel() == 0 && mail.isFlagged()) {
                 FLAGGING_MODE mode = getFlaggingMode();
-                if (mode.equals(FLAGGING_MODE.apply_color) || mode.equals(FLAGGING_MODE.apply_both)) {
+                if (mode.equals(FLAGGING_MODE.flaggedImplicit)) {
                     mail.setColorLabel(getFlaggingColor());
+                }
+            }
+
+            if (mail.getColorLabel() != 0) {
+                FLAGGING_MODE mode = getFlaggingMode();
+                if (mode.equals(FLAGGING_MODE.flaggedOnly)) {
+                    mail.setColorLabel(0);
                 }
             }
             /*
@@ -1923,7 +1930,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
      */
     private void checkMailsForColor(MailMessage[] mails) {
         FLAGGING_MODE mode = getFlaggingMode();
-        if (mode.equals(FLAGGING_MODE.apply_color) || mode.equals(FLAGGING_MODE.apply_both)) {
+        if (mode.equals(FLAGGING_MODE.flaggedImplicit)) {
             int color = getFlaggingColor();
             for (MailMessage mail : mails) {
                 if (mail.getColorLabel() == 0 && mail.isFlagged()) {
@@ -3861,10 +3868,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
     private enum FLAGGING_MODE {
 
-        def("default"),
-        apply_flagged("apply_flagged"),
-        apply_color("apply_color"),
-        apply_both("apply_both");
+        colorOnly("colorOnly"),
+        flaggedOnly("flaggedOnly"),
+        flaggedAndColor("flaggedAndColor"),
+        flaggedImplicit("flaggedImplicit");
 
         String name;
 
@@ -3878,7 +3885,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     return mode;
                 }
             }
-            return def;
+            return FLAGGING_MODE.flaggedOnly;
         }
 
     }
@@ -3893,13 +3900,13 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             ConfigViewFactory factory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
             if (factory != null) {
                 ConfigView view = factory.getView(session.getUserId(), session.getContextId());
-                String modeName = view.opt(FLAGGING_MODE_PROPERTY, String.class, "default");
+                String modeName = view.opt(FLAGGING_MODE_PROPERTY, String.class, "flaggedOnly");
                 return FLAGGING_MODE.getModeByName(modeName);
             }
         } catch (OXException e) {
             // fall back to default
         }
-        return FLAGGING_MODE.def;
+        return FLAGGING_MODE.flaggedOnly;
     }
 
     @Override
@@ -3946,7 +3953,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
 
         FLAGGING_MODE mode = getFlaggingMode();
-        if (mode.equals(FLAGGING_MODE.apply_flagged) || mode.equals(FLAGGING_MODE.apply_both)) {
+        if (mode.equals(FLAGGING_MODE.flaggedImplicit)) {
             int flags = MailMessage.FLAG_FLAGGED;
             updateMessageFlags(folder, mailIDs, flags, newColorLabel != 0);
         }
