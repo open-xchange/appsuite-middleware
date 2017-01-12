@@ -49,65 +49,32 @@
 
 package com.openexchange.mail;
 
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.settings.IValueHandler;
-import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.groupware.settings.ReadOnlyValue;
-import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.jslob.ConfigTreeEquivalent;
-import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.session.Session;
-
 /**
- * {@link MailFlaggingModePreferenceItem}
+ * {@link FLAGGING_MODE}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-public class MailFlaggingModePreferenceItem implements PreferencesItemService, ConfigTreeEquivalent {
+public enum FLAGGING_MODE {
 
-    @Override
-    public String[] getPath() {
-        return new String[]{"modules", "mail", "flaggingMode"};
+    colorOnly("colorOnly"),
+    flaggedOnly("flaggedOnly"),
+    flaggedAndColor("flaggedAndColor"),
+    flaggedImplicit("flaggedImplicit");
+
+    String name;
+
+    FLAGGING_MODE(String name) {
+        this.name = name;
     }
 
-    @Override
-    public IValueHandler getSharedValue() {
-        return new ReadOnlyValue() {
-
-            @Override
-            public boolean isAvailable(UserConfiguration userConfig) {
-                return true;
+    static FLAGGING_MODE getModeByName(String name) {
+        for (FLAGGING_MODE mode : FLAGGING_MODE.values()) {
+            if (mode.name.equals(name)) {
+                return mode;
             }
-
-            @Override
-            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
-                ConfigViewFactory factory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
-                if(factory==null){
-                    setting.setSingleValue("default");
-                    return;
-                }
-                ConfigView view = factory.getView(user.getId(), ctx.getContextId());
-                String mode = view.opt("com.openexchange.mail.flagging.mode", String.class, "default");
-                setting.setSingleValue(mode);
-
-            }
-        };
-    }
-
-    @Override
-    public String getConfigTreePath() {
-        return "modules/mail/flaggingMode";
-    }
-
-    @Override
-    public String getJslobPath() {
-        return "io.ox/mail//flaggingMode";
+        }
+        return FLAGGING_MODE.flaggedOnly;
     }
 
 }

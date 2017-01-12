@@ -93,7 +93,8 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.jslob.ConfigTreeEquivalent;
-import com.openexchange.mail.MailFlaggingModePreferenceItem;
+import com.openexchange.mail.MailColorModePreferenceItem;
+import com.openexchange.mail.MailFlaggedModePreferenceItem;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.attachment.storage.DefaultMailAttachmentStorage;
 import com.openexchange.mail.attachment.storage.DefaultMailAttachmentStorageRegistry;
@@ -302,9 +303,13 @@ public final class MailJSONActivator extends AJAXModuleActivator {
             }
         });
 
-        MailFlaggingModePreferenceItem item = new MailFlaggingModePreferenceItem();
-        registerService(PreferencesItemService.class, item);
-        registerService(ConfigTreeEquivalent.class, item);
+        MailColorModePreferenceItem colorItem = new MailColorModePreferenceItem();
+        registerService(PreferencesItemService.class, colorItem);
+        registerService(ConfigTreeEquivalent.class, colorItem);
+
+        MailFlaggedModePreferenceItem flaggedItem = new MailFlaggedModePreferenceItem();
+        registerService(PreferencesItemService.class, flaggedItem);
+        registerService(ConfigTreeEquivalent.class, flaggedItem);
     }
 
     @Override

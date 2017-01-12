@@ -3866,30 +3866,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
     private final static String FLAGGING_MODE_PROPERTY = "com.openexchange.mail.flagging.mode";
 
-    private enum FLAGGING_MODE {
-
-        colorOnly("colorOnly"),
-        flaggedOnly("flaggedOnly"),
-        flaggedAndColor("flaggedAndColor"),
-        flaggedImplicit("flaggedImplicit");
-
-        String name;
-
-        FLAGGING_MODE(String name) {
-            this.name = name;
-        }
-
-        static FLAGGING_MODE getModeByName(String name) {
-            for (FLAGGING_MODE mode : FLAGGING_MODE.values()) {
-                if (mode.name.equals(name)) {
-                    return mode;
-                }
-            }
-            return FLAGGING_MODE.flaggedOnly;
-        }
-
-    }
-
     /**
      * Return the currently configured mode for the user. Falls back to default in case an error occurs
      *
