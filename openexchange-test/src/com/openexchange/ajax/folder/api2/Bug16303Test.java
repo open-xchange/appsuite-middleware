@@ -54,15 +54,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import java.util.Iterator;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.folder.actions.GetResponse;
-import com.openexchange.ajax.folder.actions.InsertRequest;
-import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.folder.actions.ListRequest;
 import com.openexchange.ajax.folder.actions.ListResponse;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -85,15 +81,13 @@ public class Bug16303Test extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        clientB = new AJAXClient(testContext.acquireUser());
+        clientB = getClient2();
         createdFolder = new FolderObject();
         createdFolder.setModule(FolderObject.CALENDAR);
         createdFolder.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         createdFolder.setPermissions(PermissionTools.P(I(clientA.getValues().getUserId()), PermissionTools.ADMIN, I(clientB.getValues().getUserId()), "arawada"));
         createdFolder.setFolderName("testFolder4Bug16303");
-        InsertRequest iReq = new InsertRequest(EnumAPI.OUTLOOK, createdFolder);
-        InsertResponse iResp = getClient().execute(iReq);
-        iResp.fillObject(createdFolder);
+        ftm.insertFolderOnServer(createdFolder);
         // Unfortunately no timestamp when creating a mail folder through Outlook folder tree.
         createdFolder.setLastModified(new Date());
 
@@ -122,15 +116,6 @@ public class Bug16303Test extends AbstractAJAXSession {
             }
         }
         assertNotNull("Shared folder expected below shared parent folder.", foundShared);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        try {
-            clientA.execute(new DeleteRequest(EnumAPI.OUTLOOK, createdFolder));
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

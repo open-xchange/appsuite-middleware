@@ -54,6 +54,7 @@ import static org.junit.Assert.assertNotNull;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
+import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.file.storage.File;
@@ -62,6 +63,7 @@ import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.recipient.RecipientType;
+import com.openexchange.test.pool.TestUser;
 
 /**
  * {@link ConvertToInternalPermissionTest}
@@ -70,45 +72,38 @@ import com.openexchange.share.recipient.RecipientType;
  */
 public class ConvertToInternalPermissionTest extends ShareTest {
 
-    /**
-     * Initializes a new {@link ConvertToInternalPermissionTest}.
-     *
-     * @param name The test name
-     */
-    public ConvertToInternalPermissionTest() {
-        super();
-    }
-
     @Test
     public void testConvertToInternalPermissionRandomly() throws Exception {
-        testConvertToInternalPermission(randomFolderAPI(), randomModule());
+        testConvertToInternalPermission(randomFolderAPI(), randomModule(), testContext.acquireUser());
     }
 
     public void noTestConvertToInternalPermissionExtensively() throws Exception {
         for (EnumAPI api : TESTED_FOLDER_APIS) {
             for (int module : TESTED_MODULES) {
-                testConvertToInternalPermission(api, module);
+                testConvertToInternalPermission(api, module, testContext.acquireUser());
             }
         }
     }
 
     @Test
     public void testConvertToInternalObjectPermissionRandomly() throws Exception {
-        testConvertToInternalObjectPermission(randomFolderAPI());
+        testConvertToInternalObjectPermission(randomFolderAPI(), testContext.acquireUser());
     }
 
-    private void testConvertToInternalPermission(EnumAPI api, int module) throws Exception {
-        testConvertToInternalPermission(api, module, getDefaultFolder(module));
+    @Test
+    private void testConvertToInternalPermission(EnumAPI api, int module, TestUser user) throws Exception {
+        testConvertToInternalPermission(api, module, getDefaultFolder(module), user);
     }
 
-    private void testConvertToInternalPermission(EnumAPI api, int module, int parent) throws Exception {
+    private void testConvertToInternalPermission(EnumAPI api, int module, int parent, TestUser user) throws Exception {
         /*
          * prepare guest permission with e-mail address of other other internal user
          */
-        String email = getClient().getValues().getDefaultAddress();
-        int userID = getClient().getValues().getUserId();
-        OCLGuestPermission guestPermission = createNamedGuestPermission(email, "", testUser.getPassword());
-        //        getClient().logout();
+        AJAXClient userClient = new AJAXClient(user);
+        String email = userClient.getValues().getDefaultAddress();
+        int userID = userClient.getValues().getUserId();
+        OCLGuestPermission guestPermission = createNamedGuestPermission(email, "", user.getPassword());
+        userClient.logout();
         /*
          * create folder shared to guest user
          */
@@ -132,19 +127,19 @@ public class ConvertToInternalPermissionTest extends ShareTest {
         assertEquals(RecipientType.USER, entity.getType());
     }
 
-    private void testConvertToInternalObjectPermission(EnumAPI api) throws Exception {
-        testConvertToInternalObjectPermission(api, getDefaultFolder(FolderObject.INFOSTORE));
+    private void testConvertToInternalObjectPermission(EnumAPI api, TestUser user) throws Exception {
+        testConvertToInternalObjectPermission(api, getDefaultFolder(FolderObject.INFOSTORE), user);
     }
 
-    private void testConvertToInternalObjectPermission(EnumAPI api, int parent) throws Exception {
+    private void testConvertToInternalObjectPermission(EnumAPI api, int parent, TestUser user) throws Exception {
         /*
          * prepare guest permission with e-mail address of other other internal user
          */
-        //        AJAXClient userClient = new AJAXClient(user);
-        String email = getClient().getValues().getDefaultAddress();
-        int userID = getClient().getValues().getUserId();
-        FileStorageGuestObjectPermission guestPermission = asObjectPermission(createNamedGuestPermission(email, "", testUser.getPassword()));
-        //        userClient.logout();
+        AJAXClient userClient = new AJAXClient(user);
+        String email = userClient.getValues().getDefaultAddress();
+        int userID = userClient.getValues().getUserId();
+        FileStorageGuestObjectPermission guestPermission = asObjectPermission(createNamedGuestPermission(email, "", user.getPassword()));
+        userClient.logout();
         /*
          * create folder and a shared file inside
          */
@@ -171,5 +166,4 @@ public class ConvertToInternalPermissionTest extends ShareTest {
         ExtendedPermissionEntity entity = discoverGuestEntity(file.getFolderId(), file.getId(), matchingPermission.getEntity());
         assertEquals(RecipientType.USER, entity.getType());
     }
-
 }

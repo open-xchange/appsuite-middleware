@@ -50,6 +50,7 @@
 package com.openexchange.ajax.mail.actions;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.OrderFields;
@@ -92,7 +93,7 @@ public class AllRequest extends AbstractAllRequest<AllResponse> {
      * Default constructor.
      */
     public AllRequest(final String folderPath, final int[] columns, final int sort, final Order order, final boolean failOnError) {
-        super(AbstractMailRequest.MAIL_URL, folderPath, columns, sort, order, failOnError);
+        this(folderPath, columns, sort, order, failOnError, Collections.<Parameter> emptyList());
     }
 
     public AllRequest(final String folderPath, final int[] columns, final int sort, final Order order, final boolean failOnError, List<Parameter> additionalParams) {
@@ -132,8 +133,10 @@ public class AllRequest extends AbstractAllRequest<AllResponse> {
         if (!Strings.isEmpty(categoryId)) {
             params.add(new Parameter("categoryid", categoryId));
         }
-        for (Parameter additional : additionalParams) {
-            params.add(additional);
+        if (additionalParams != null) {
+            for (Parameter additional : additionalParams) {
+                params.add(additional);
+            }
         }
         return params.toArray(new Parameter[params.size()]);
     }

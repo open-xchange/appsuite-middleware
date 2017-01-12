@@ -59,7 +59,6 @@ import java.util.Random;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
-import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
@@ -87,7 +86,6 @@ public class FileStorageTransactionTest extends ShareTest {
     private static final int TEST_FILES = 10;
 
     private FolderObject testFolder;
-    private InfostoreTestManager itm;
     private List<DefaultFile> files;
 
     @Before
