@@ -65,12 +65,14 @@ import org.apache.http.impl.cookie.BasicClientCookie;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.LoginServlet;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.session.actions.EmptyHttpAuthRequest;
 import com.openexchange.ajax.session.actions.HttpAuthRequest;
 import com.openexchange.ajax.session.actions.HttpAuthResponse;
 import com.openexchange.ajax.session.actions.StoreRequest;
-import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.test.pool.TestUser;
 
 /**
  * no autologin with httpauth
@@ -79,20 +81,19 @@ import com.openexchange.configuration.AJAXConfig;
  */
 public class Bug34928Test extends AbstractAJAXSession {
 
-    /**
-     * Initializes a new {@link Bug34928Test}.
-     *
-     * @param name The test name
-     */
-    public Bug34928Test() {
-        super();
-    }
+    private AJAXClient client;
+    private String login;
+    private String password;
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        AJAXConfig.init();
-        getClient().getSession().getHttpClient().getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
+
+        TestUser testUser3 = testContext.acquireUser();
+        login = testUser3.getLogin();
+        password = testUser3.getPassword();
+        client = new AJAXClient(new AJAXSession(), true);
+        client.getSession().getHttpClient().getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
     }
 
     @Test
@@ -104,8 +105,8 @@ public class Bug34928Test extends AbstractAJAXSession {
         /*
          * perform second HTTP Auth login (without providing authorization headers)
          */
-        getClient().getSession().setId(null);
-        HttpAuthResponse httpAuthResponse = getClient().execute(new EmptyHttpAuthRequest(false, false, false));
+        client.getSession().setId(null);
+        HttpAuthResponse httpAuthResponse = client.execute(new EmptyHttpAuthRequest(false, false, false));
         assertThat("Second authentication with cookies failed. Session " + firstSessionID, I(httpAuthResponse.getStatusCode()), equalTo(I(SC_FOUND)));
         String secondSessionID = extractSessionID(httpAuthResponse);
         assertNotNull("No session ID", secondSessionID);
@@ -113,7 +114,7 @@ public class Bug34928Test extends AbstractAJAXSession {
         /*
          * re-enable first session for logout in tearDown
          */
-        getClient().getSession().setId(firstSessionID);
+        client.getSession().setId(firstSessionID);
     }
 
     @Test
@@ -125,16 +126,16 @@ public class Bug34928Test extends AbstractAJAXSession {
         /*
          * perform second HTTP Auth login with wrong secret cookie
          */
-        getClient().getSession().setId(null);
+        client.getSession().setId(null);
         BasicClientCookie cookie = findCookie(LoginServlet.SECRET_PREFIX);
         String correctSecret = cookie.getValue();
         cookie.setValue("wrongsecret");
-        HttpAuthResponse httpAuthResponse = getClient().execute(new EmptyHttpAuthRequest(false, false, false));
+        HttpAuthResponse httpAuthResponse = client.execute(new EmptyHttpAuthRequest(false, false, false));
         assertEquals("Wrong response code", HttpServletResponse.SC_UNAUTHORIZED, httpAuthResponse.getStatusCode());
         /*
          * re-enable first session for logout in tearDown
          */
-        getClient().getSession().setId(firstSessionID);
+        client.getSession().setId(firstSessionID);
         cookie.setValue(correctSecret);
     }
 
@@ -147,16 +148,16 @@ public class Bug34928Test extends AbstractAJAXSession {
         /*
          * perform second HTTP Auth login with wrong secret cookie
          */
-        getClient().getSession().setId(null);
+        client.getSession().setId(null);
         BasicClientCookie cookie = findCookie(LoginServlet.SESSION_PREFIX);
         String correctSession = cookie.getValue();
         cookie.setValue("wrongsecret");
-        HttpAuthResponse httpAuthResponse = getClient().execute(new EmptyHttpAuthRequest(false, false, false));
+        HttpAuthResponse httpAuthResponse = client.execute(new EmptyHttpAuthRequest(false, false, false));
         assertEquals("Wrong response code", HttpServletResponse.SC_UNAUTHORIZED, httpAuthResponse.getStatusCode());
         /*
          * re-enable first session for logout in tearDown
          */
-        getClient().getSession().setId(firstSessionID);
+        client.getSession().setId(firstSessionID);
         cookie.setValue(correctSession);
     }
 
@@ -169,27 +170,27 @@ public class Bug34928Test extends AbstractAJAXSession {
         /*
          * perform second HTTP Auth login
          */
-        getClient().getSession().setId(null);
-        HttpAuthResponse httpAuthResponse = getClient().execute(new EmptyHttpAuthRequest(false, false, false));
+        client.getSession().setId(null);
+        HttpAuthResponse httpAuthResponse = client.execute(new EmptyHttpAuthRequest(false, false, false));
         assertEquals("Wrong response code", HttpServletResponse.SC_UNAUTHORIZED, httpAuthResponse.getStatusCode());
         /*
          * re-enable first session for logout in tearDown
          */
-        getClient().getSession().setId(firstSessionID);
+        client.getSession().setId(firstSessionID);
     }
 
     private String firstHttpAuthLogin(boolean store) throws Exception {
-        HttpAuthResponse httpAuthResponse = getClient().execute(new HttpAuthRequest(testUser.getLogin(), testUser.getPassword()));
+        HttpAuthResponse httpAuthResponse = client.execute(new HttpAuthRequest(testUser.getLogin(), testUser.getPassword()));
         String sessionID = extractSessionID(httpAuthResponse);
-        getClient().getSession().setId(sessionID);
+        client.getSession().setId(sessionID);
         if (store) {
-            getClient().execute(new StoreRequest(sessionID));
+            client.execute(new StoreRequest(sessionID));
         }
         return sessionID;
     }
 
     private BasicClientCookie findCookie(String prefix) {
-        List<Cookie> cookies = getClient().getSession().getHttpClient().getCookieStore().getCookies();
+        List<Cookie> cookies = client.getSession().getHttpClient().getCookieStore().getCookies();
         for (int i = 0; i < cookies.size(); i++) {
             if (cookies.get(i).getName().startsWith(prefix)) {
                 return (BasicClientCookie) cookies.get(i);

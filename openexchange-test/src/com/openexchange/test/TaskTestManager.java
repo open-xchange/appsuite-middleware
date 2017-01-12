@@ -67,6 +67,7 @@ import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.task.actions.AllRequest;
+import com.openexchange.ajax.task.actions.ConfirmWithTaskInBodyRequest;
 import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.GetRequest;
 import com.openexchange.ajax.task.actions.GetResponse;
@@ -176,6 +177,15 @@ public class TaskTestManager implements TestManager {
             doHandleExeption(e, "MoveRequest");
         }
         return taskToMove;
+    }
+
+    public void confirm(Task task) {
+        ConfirmWithTaskInBodyRequest request = new ConfirmWithTaskInBodyRequest(task, task.getConfirm(), task.getConfirmMessage());
+        try {
+            setLastResponse(getClient().execute(request));
+        } catch (Exception e) {
+            doHandleExeption(e, "ConfirmRequest for " + task.getObjectID());
+        }
     }
 
     public void deleteTaskOnServer(Task taskToDelete) {

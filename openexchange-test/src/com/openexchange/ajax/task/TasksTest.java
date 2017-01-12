@@ -68,6 +68,7 @@ import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.test.TaskTestManager;
 
 /**
  * This class tests the AJAX interface of the tasks.
@@ -173,10 +174,9 @@ public class TasksTest extends AbstractAJAXTest {
             }
         }
 
-        final Task updatedTask = new Task();
-        updatedTask.setTitle("Updated delegated task");
-        updatedTask.setObjectID(taskId);
-        updatedTask.setParticipants(secondParticipants);
+        reload.setTitle("Updated delegated task");
+        reload.setParticipants(secondParticipants);
+        ttm.updateTaskOnServer(reload);
         LOG.trace("Updating delegated task with participants: {}", secondParticipants);
         reload = ttm.getTaskFromServer(folderId, taskId);
         lastModified = reload.getLastModified();
@@ -251,6 +251,7 @@ public class TasksTest extends AbstractAJAXTest {
 
     @Test
     public void testConfirmation() throws Throwable {
+        TaskTestManager ttm2 = new TaskTestManager(getClient2());
         final int folderId = getClient().getValues().getPrivateTaskFolder();
 
         final Task task = new Task();
@@ -268,15 +269,12 @@ public class TasksTest extends AbstractAJAXTest {
         final int taskId = ttm.insertTaskOnServer(task).getObjectID();
         LOG.trace("Created delegated task for confirmation: {}", taskId);
 
-        ttm.setClient(getClient2());
-        Task taskForUser = ttm.getTaskFromServer(folderId2, taskId);
+        Task taskForUser = ttm2.getTaskFromServer(folderId2, taskId);
         taskForUser.setConfirm(Task.ACCEPT);
-        ttm.updateTaskOnServer(taskForUser);
-
-        ttm.setClient(getClient());
+        taskForUser.setConfirmMessage("Testconfirmation.");
+        ttm2.confirm(taskForUser);
 
         final Task reload = ttm.getTaskFromServer(folderId, taskId);
-        final Date lastModified = reload.getLastModified();
         final UserParticipant[] users = reload.getUsers();
         boolean confirmed = false;
         for (final UserParticipant user : users) {
@@ -287,8 +285,8 @@ public class TasksTest extends AbstractAJAXTest {
             }
         }
         assertTrue("Can't find confirmation.", confirmed);
-
-        deleteTask(getClient(), lastModified, folderId, taskId);
+        
+        ttm2.cleanUp();
     }
 
     /**
