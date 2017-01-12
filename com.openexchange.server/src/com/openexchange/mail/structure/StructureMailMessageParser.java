@@ -724,16 +724,16 @@ public final class StructureMailMessageParser {
                                     HDR_CONTENT_DISPOSITION,
                                     MimeMessageUtility.foldContentDisposition(cd.toString()));
                             }
-                            CountingOutputStream counter = new CountingOutputStream();
-                            attachment.writeTo(counter);
-                            bodyPart.setSize((int) counter.getCount());
+                            try (CountingOutputStream counter = new CountingOutputStream()) {                                
+                                attachment.writeTo(counter);
+                                bodyPart.setSize((int) counter.getCount());
+                            }
                             parseMailContent(MimeMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
                         } else {
                             /*
                              * Nested message
                              */
-                            final MimeMessage nestedMessage =
-                                TNEFMime.convert(MimeDefaultSession.getDefaultSession(), attachment.getNestedMessage());
+                            MimeMessage nestedMessage = TNEFMime.convert(MimeDefaultSession.getDefaultSession(), attachment.getNestedMessage());
                             os.reset();
                             nestedMessage.writeTo(os);
                             bodyPart.setDataHandler(new DataHandler(new MessageDataSource(os.toByteArray(), MimeTypes.MIME_MESSAGE_RFC822)));
