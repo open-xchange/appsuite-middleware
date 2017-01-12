@@ -1268,6 +1268,10 @@ if [ -e $TMPFILE ]; then
     rm -f $TMPFILE
 fi
 
+# SoftwareChange_Request-3862
+ox_comment html.tag.form add /opt/open-xchange/etc/whitelist.properties
+ox_comment html.tag.input add /opt/open-xchange/etc/whitelist.properties
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
