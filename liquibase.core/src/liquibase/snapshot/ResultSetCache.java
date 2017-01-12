@@ -171,7 +171,7 @@ class ResultSetCache {
 
         ResultSet executeQuery(String sql, Database database) throws DatabaseException, SQLException {
             Statement statement = ((JdbcConnection) database.getConnection()).createStatement();
-            return statement.executeQuery(sql);
+            return new StatementClosingResultSet(statement.executeQuery(sql), statement);
 
         }
 
