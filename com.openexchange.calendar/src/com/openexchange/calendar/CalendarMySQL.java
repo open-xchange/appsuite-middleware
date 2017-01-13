@@ -83,7 +83,6 @@ import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.ReminderService;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.calendar.api.CalendarCollection;
-import com.openexchange.calendar.api.TransactionallyCachingCalendar;
 import com.openexchange.calendar.cache.Attribute;
 import com.openexchange.calendar.cache.CalendarVolatileCache;
 import com.openexchange.calendar.cache.CalendarVolatileCache.CacheType;
@@ -93,7 +92,6 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
-import com.openexchange.exception.OXExceptions;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCallbacks;
@@ -1983,8 +1981,8 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     private final void insertParticipants(final CalendarDataObject cdao, final Connection writecon) throws SQLException, OXException {
         final Participant participants[] = cdao.getParticipants();
-        Arrays.sort(participants);
         if (participants != null) {
+            Arrays.sort(participants);
             PreparedStatement pi = null;
             try {
                 pi = writecon.prepareStatement(SQL_INSERT_PARTICIPANT);
@@ -2194,13 +2192,13 @@ public class CalendarMySQL implements CalendarSqlImp {
                              * Bug 47094 - Missing reminder for appointment from series
                              *
                              * In case of an exception on a series appointment the resulting reminders were bound to the creators folder ID.
-                             * This caused all other participants in not having the permission for the exception.                             * 
+                             * This caused all other participants in not having the permission for the exception.                             *
                              */
                             if (null != reminder) {
                                 changeReminder(
                                     cdao.getObjectID(),
                                     user.getIdentifier(),
-                                    FolderObject.PUBLIC == cdao.getFolderType() ? cdao.getEffectiveFolderId() : user.getPersonalFolderId(), 
+                                    FolderObject.PUBLIC == cdao.getFolderType() ? cdao.getEffectiveFolderId() : user.getPersonalFolderId(),
                                     cdao.getContext(),
                                     cdao.isSequence(true),
                                     cdao.getEndDate(),
