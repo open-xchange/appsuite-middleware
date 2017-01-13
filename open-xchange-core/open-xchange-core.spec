@@ -1424,12 +1424,15 @@ fi
 VALUE=$(ox_read_property NRFILES /opt/open-xchange/etc/ox-scriptconf.sh)
 VALUE=${VALUE//\"/}
 if [ "8192" = "$VALUE" ]; then
-    ox_set_property NRFILES "\"65536\"" /opt/open-xchange/etc/ox-scriptconf.sh
+    ox_set_property NRFILES 65536 /opt/open-xchange/etc/ox-scriptconf.sh
 fi
 
 # SoftwareChange_Request-3862
 ox_comment html.tag.form add /opt/open-xchange/etc/whitelist.properties
 ox_comment html.tag.input add /opt/open-xchange/etc/whitelist.properties
+
+# SoftwareChange_Request-3882
+ox_add_property NPROC 65536 /opt/open-xchange/etc/ox-scriptconf.sh
 
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
 for FILE in "${PROTECT[@]}"

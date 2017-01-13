@@ -12,6 +12,7 @@ ExecStop=/opt/open-xchange/sbin/shutdown -w
 ExecReload=/opt/open-xchange/sbin/triggerreloadconfiguration -d
 KillMode=process
 LimitNOFILE=65536
+LimitNPROC=65536
 
 [Install]
 WantedBy=multi-user.target
