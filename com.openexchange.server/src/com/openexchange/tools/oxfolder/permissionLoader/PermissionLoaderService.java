@@ -253,12 +253,12 @@ public final class PermissionLoaderService implements Runnable {
 
     private final class DelegaterTask implements Task<Object> {
 
-        private final List<Pair> list;
+        private final TIntObjectMap<GroupedPairs> groupByContext;
         private final TObjectProcedure<GroupedPairs> proc;
 
         protected DelegaterTask(List<Pair> list, TObjectProcedure<GroupedPairs> proc) {
             super();
-            this.list = list;
+            this.groupByContext = groupByContext(list);
             this.proc = proc;
         }
 
@@ -279,7 +279,7 @@ public final class PermissionLoaderService implements Runnable {
 
         @Override
         public Object call() throws Exception {
-            groupByContext(list).forEachValue(proc);
+            groupByContext.forEachValue(proc);
             return null;
         }
 
@@ -329,7 +329,7 @@ public final class PermissionLoaderService implements Runnable {
                     queue.drainTo(list);
                     final boolean quit = list.remove(POISON);
                     if (!list.isEmpty()) {
-                        final DelegaterTask task = new DelegaterTask(new ArrayList<Pair>(list), proc);
+                        final DelegaterTask task = new DelegaterTask(list, proc);
                         final ThreadPoolService threadPool = this.threadPool;
                         if (null == threadPool) {
                             task.call();
@@ -362,19 +362,38 @@ public final class PermissionLoaderService implements Runnable {
      * @param groupedPairs The equally-grouped pairs
      */
     protected void handlePairs(GroupedPairs groupedPairs) {
-        final int size = groupedPairs.size();
-        final int configuredBlockSize = MAX_FILLER_CHUNK;
+        int size = groupedPairs.size();
+        int configuredBlockSize = MAX_FILLER_CHUNK;
         if (size <= configuredBlockSize) {
             handlePairsSublist(groupedPairs);
-        } else {
-            int fromIndex = 0;
-            while (fromIndex < size) {
-                int toIndex = fromIndex + configuredBlockSize;
-                if (toIndex > size) {
-                    toIndex = size;
-                    schedulePairsSublist(new GroupedPairs(groupedPairs.contextId, new TIntArrayList(groupedPairs.folderIds.toArray(fromIndex, toIndex - fromIndex))));
-                }
+            return;
+        }
+
+        // Handle chunk-wise...
+        int fromIndex = 0;
+        while (fromIndex < size) {
+            boolean lastChunk;
+            int len;
+
+            int toIndex = fromIndex + configuredBlockSize;
+            if (toIndex > size) {
+                toIndex = size;
+                len = toIndex - fromIndex;
+                lastChunk = true;
+            } else {
+                len = configuredBlockSize;
+                lastChunk = false;
             }
+
+            GroupedPairs chunk = new GroupedPairs(groupedPairs.contextId, new TIntArrayList(groupedPairs.folderIds.toArray(fromIndex, len)));
+            if (lastChunk) {
+                // Handle last chunk with this thread
+                handlePairsSublist(chunk);
+            } else {
+                // Submit (if possible)
+                schedulePairsSublist(chunk);
+            }
+            fromIndex = toIndex;
         }
     }
 
@@ -604,6 +623,7 @@ public final class PermissionLoaderService implements Runnable {
 
     }
 
+    /** A collection of folder identifiers associated with the same context */
     private static final class GroupedPairs {
 
         final int contextId;
