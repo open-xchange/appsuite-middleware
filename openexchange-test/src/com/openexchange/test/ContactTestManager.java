@@ -383,6 +383,17 @@ public class ContactTestManager implements TestManager {
         return allContacts.toArray(new Contact[] {});
     }
 
+//    public InputStream image(final int folderId, final int objectId) {
+//        ImageRequest request = new ImageRequest(folderId, objectId, failOnError);
+//        try {
+//            final ImageResponse response = getClient().execute(request);
+//            lastResponse = response;
+//        } catch (final Exception e) {
+//            doExceptionHandling(e, "AllRequest for folder " + folderId);
+//        }
+//        return null;
+//    }
+
     public Contact[] allAction(final int folderId, final int[] columns) {
         List<Contact> allContacts = new LinkedList<Contact>();
         final AllRequest request = new AllRequest(folderId, columns);

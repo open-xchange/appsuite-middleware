@@ -89,8 +89,6 @@ import com.openexchange.test.FolderTestManager;
  */
 public abstract class AbstractFindTest extends AbstractAJAXSession {
 
-    protected FolderTestManager folderManager;
-
     protected Random random;
 
     protected AJAXClient client2;
@@ -111,14 +109,12 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
         super.setUp();
         random = new Random();
         client2 = getClient2();
-        folderManager = new FolderTestManager(getClient());
         folderManager2 = new FolderTestManager(client2);
     }
 
     @After
     public void tearDown() throws Exception {
         try {
-            folderManager.cleanUp();
             folderManager2.cleanUp();
         } finally {
             super.tearDown();

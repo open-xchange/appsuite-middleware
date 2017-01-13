@@ -62,6 +62,7 @@ import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.test.CalendarTestManager;
 import com.openexchange.test.ContactTestManager;
 import com.openexchange.test.FolderTestManager;
+import com.openexchange.test.TaskTestManager;
 import com.openexchange.test.pool.TestContext;
 import com.openexchange.test.pool.TestContextPool;
 import com.openexchange.test.pool.TestUser;
@@ -81,6 +82,7 @@ public abstract class AbstractAJAXSession {
     protected ContactTestManager cotm;
     protected FolderTestManager ftm;
     protected InfostoreTestManager itm;
+    protected TaskTestManager ttm;
 
     /**
      * Default constructor.
@@ -128,6 +130,7 @@ public abstract class AbstractAJAXSession {
         cotm = new ContactTestManager(client);
         ftm = new FolderTestManager(client);
         itm = new InfostoreTestManager(client);
+        ttm = new TaskTestManager(client);
     }
 
     @After
@@ -144,6 +147,9 @@ public abstract class AbstractAJAXSession {
             }
             if (itm != null) {
                 itm.cleanUp();
+            }
+            if (ttm != null) {
+                ttm.cleanUp();
             }
             if (client != null) {
                 // Client can be null if setUp() fails

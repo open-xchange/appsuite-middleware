@@ -80,15 +80,6 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
  */
 public class GuestAutologinTest extends ShareTest {
 
-    /**
-     * Initializes a new {@link GuestAutologinTest}.
-     *
-     * @param name
-     */
-    public GuestAutologinTest() {
-        super();
-    }
-
     @Test
     public void testGuestAutologin() throws Exception {
         /*
@@ -169,10 +160,11 @@ public class GuestAutologinTest extends ShareTest {
          * login & store guest session for auto-login, then try to auto-login
          */
         String client = AJAXClient.class.getName();
-        AJAXSession sharedSession = getSession();
+        AJAXClient client3 = new AJAXClient(testContext.acquireUser());
+        AJAXSession sharedSession = client3.getSession();
         String oldSessionID = sharedSession.getId();
         try {
-            getSession().setId(null);
+            client3.getSession().setId(null);
             GuestClient guestClient = new GuestClient(sharedSession, shareURL, getUsername(recipient), getPassword(recipient), client, true, false);
             AutologinRequest autologin = new AutologinRequest(new AutologinParameters(randomUID(), client, AJAXClient.VERSION), false);
             AutologinResponse response = guestClient.execute(autologin);

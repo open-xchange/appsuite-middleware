@@ -51,7 +51,6 @@ package com.openexchange.ajax.find.contacts;
 
 import java.util.Date;
 import java.util.List;
-import org.junit.After;
 import org.junit.Before;
 import com.openexchange.ajax.find.AbstractFindTest;
 import com.openexchange.ajax.find.PropDocument;
@@ -60,7 +59,6 @@ import com.openexchange.find.Module;
 import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.test.ContactTestManager;
 import com.openexchange.tools.arrays.Arrays;
 
 /**
@@ -84,36 +82,15 @@ public abstract class ContactsFindTest extends AbstractFindTest {
 
     static final int[] ADDRESSBOOK_COLUMNS = Arrays.addUniquely(NAME_COLUMNS, Arrays.addUniquely(ADDRESS_COLUMNS, Arrays.addUniquely(PHONE_COLUMNS, EMAIL_COLUMNS)));
 
-    protected ContactTestManager manager;
-
     protected int folderID;
-
-    /**
-     * Initializes a new {@link ContactsFindTest}.
-     *
-     * @param name The test name
-     */
-    public ContactsFindTest() {
-        super();
-    }
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        manager = new ContactTestManager(getClient());
         UserValues values = getClient().getValues();
-        FolderObject folder = folderManager.generatePublicFolder("ManagedContactTest_" + (new Date().getTime()), com.openexchange.groupware.modules.Module.CONTACTS.getFolderConstant(), values.getPrivateContactFolder(), values.getUserId());
-        folder = folderManager.insertFolderOnServer(folder);
+        FolderObject folder = ftm.generatePublicFolder("ManagedContactTest_" + (new Date().getTime()), com.openexchange.groupware.modules.Module.CONTACTS.getFolderConstant(), values.getPrivateContactFolder(), values.getUserId());
+        folder = ftm.insertFolderOnServer(folder);
         folderID = folder.getObjectID();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        try {
-            manager.cleanUp();
-        } finally {
-            super.tearDown();
-        }
     }
 
     /**

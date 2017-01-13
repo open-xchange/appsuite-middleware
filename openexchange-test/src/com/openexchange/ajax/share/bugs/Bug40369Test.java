@@ -77,15 +77,6 @@ public class Bug40369Test extends ShareTest {
 
     private static final int NUM_THREADS = 20;
 
-    /**
-     * Initializes a new {@link Bug40369Test}.
-     *
-     * @param name The test name
-     */
-    public Bug40369Test() {
-        super();
-    }
-
     @Test
     public void testCreateFolderLinkConcurrentlyRandomly() throws Exception {
         testCreateFolderLinkConcurrently(randomFolderAPI(), randomModule());

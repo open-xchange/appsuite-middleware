@@ -79,7 +79,7 @@ public class Bug33447Test extends ContactsFindTest {
     public void testSearchContactFromPersonalContactsFolder() throws Exception {
         Map<String, String> options = new HashMap<String, String>();
         options.put("admin", Boolean.FALSE.toString());
-        Contact contact = manager.newAction(randomContact());
+        Contact contact = cotm.newAction(randomContact());
         String prefix = contact.getEmail1().substring(0, 8);
         AutocompleteRequest autocompleteRequest = new AutocompleteRequest(prefix, Module.CONTACTS.getIdentifier(), options);
         AutocompleteResponse autocompleteResponse = getClient().execute(autocompleteRequest);

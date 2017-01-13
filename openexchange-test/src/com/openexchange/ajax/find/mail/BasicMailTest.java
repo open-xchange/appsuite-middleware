@@ -107,10 +107,6 @@ public class BasicMailTest extends AbstractMailFindTest {
 
     private FolderObject testFolder;
 
-    public BasicMailTest() {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -120,7 +116,7 @@ public class BasicMailTest extends AbstractMailFindTest {
         testFolder.setModule(FolderObject.MAIL);
         testFolder.setFullName(inboxFolder + "/" + folderName);
         testFolder.setFolderName(folderName);
-        testFolder = folderManager.insertFolderOnServer(testFolder);
+        testFolder = ftm.insertFolderOnServer(testFolder);
     }
 
     @Test
@@ -425,9 +421,9 @@ public class BasicMailTest extends AbstractMailFindTest {
 
     @Test
     public void testPrefixItemIsLastInContactsFacet() throws Exception {
-        FolderObject contactFolder = folderManager.generatePrivateFolder("findApiMailTestFolder_" + UUID.randomUUID().toString(), FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
+        FolderObject contactFolder = ftm.generatePrivateFolder("findApiMailTestFolder_" + UUID.randomUUID().toString(), FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
 
-        contactFolder = folderManager.insertFolderOnServer(contactFolder);
+        contactFolder = ftm.insertFolderOnServer(contactFolder);
         List<Contact> contacts = new LinkedList<Contact>();
         contacts.add(contactManager.newAction(randomContact("Marc", contactFolder.getObjectID())));
         contacts.add(contactManager.newAction(randomContact("Marcus", contactFolder.getObjectID())));

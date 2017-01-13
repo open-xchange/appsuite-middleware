@@ -90,7 +90,6 @@ public class ConvertToInternalPermissionTest extends ShareTest {
         testConvertToInternalObjectPermission(randomFolderAPI(), testContext.acquireUser());
     }
 
-    @Test
     private void testConvertToInternalPermission(EnumAPI api, int module, TestUser user) throws Exception {
         testConvertToInternalPermission(api, module, getDefaultFolder(module), user);
     }

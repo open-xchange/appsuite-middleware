@@ -88,15 +88,6 @@ import com.openexchange.tools.arrays.Arrays;
  */
 public class Bug40627Test extends ShareTest {
 
-    /**
-     * Initializes a new {@link Bug40627Test}.
-     *
-     * @param name The test name
-     */
-    public Bug40627Test() {
-        super();
-    }
-
     @Test
     public void testCheckExtendedFolderPermissionAsAnonymousGuest() throws Exception {
         testCheckExtendedFolderPermissions(createAnonymousGuestPermission());
@@ -128,7 +119,7 @@ public class Bug40627Test extends ShareTest {
         groupPermission.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
         groupPermission.setGroupPermission(true);
         permissions.add(groupPermission);
-        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
+        AJAXClient client2 = getClient2();
         int userId2 = client2.getValues().getUserId();
         client2.logout();
         OCLPermission userPermission = new OCLPermission(userId2, 0);

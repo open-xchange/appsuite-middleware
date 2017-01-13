@@ -88,7 +88,7 @@ public class Bug39105Test extends AbstractMailFindTest {
         testFolder.setModule(FolderObject.MAIL);
         testFolder.setFullName(inboxFolder + "/" + folderName);
         testFolder.setFolderName(folderName);
-        testFolder = folderManager.insertFolderOnServer(testFolder);
+        testFolder = ftm.insertFolderOnServer(testFolder);
     }
 
     @Test

@@ -107,10 +107,6 @@ public class FindTasksTestsFilterCombinations extends AbstractFindTasksTest {
     /**
      * Static test
      * Test with more external participants
-     * 
-     * @throws OXException
-     * @throws IOException
-     * @throws JSONException
      */
     @Test
     public void testMoreExternalParticipants() throws OXException, IOException, JSONException {
@@ -349,10 +345,6 @@ public class FindTasksTestsFilterCombinations extends AbstractFindTasksTest {
 
     /**
      * Test filter combination 6, i.e. with folder type and status
-     *
-     * @throws OXException
-     * @throws IOException
-     * @throws JSONException
      */
     @Test
     public void testWithFolderTypeAndStatus() throws OXException, IOException, JSONException {

@@ -320,9 +320,9 @@ public class QueryTest extends CalendarFindTest {
     public void testFolderTypeFacet() throws Exception {
         FolderType[] typesInOrder = new FolderType[] { FolderType.PRIVATE, FolderType.PUBLIC, FolderType.SHARED };
         FolderObject[] folders = new FolderObject[3];
-        folders[0] = folderManager.insertFolderOnServer(folderManager.generatePrivateFolder(randomUID(), FolderObject.CALENDAR, getClient().getValues().getPrivateAppointmentFolder(), getClient().getValues().getUserId()));
-        folders[1] = folderManager.insertFolderOnServer(folderManager.generatePublicFolder(randomUID(), FolderObject.CALENDAR, FolderObject.SYSTEM_PUBLIC_FOLDER_ID, getClient().getValues().getUserId()));
-        folders[2] = folderManager2.insertFolderOnServer(folderManager.generateSharedFolder(randomUID(), FolderObject.CALENDAR, client2.getValues().getPrivateAppointmentFolder(), client2.getValues().getUserId(), getClient().getValues().getUserId()));
+        folders[0] = ftm.insertFolderOnServer(ftm.generatePrivateFolder(randomUID(), FolderObject.CALENDAR, getClient().getValues().getPrivateAppointmentFolder(), getClient().getValues().getUserId()));
+        folders[1] = ftm.insertFolderOnServer(ftm.generatePublicFolder(randomUID(), FolderObject.CALENDAR, FolderObject.SYSTEM_PUBLIC_FOLDER_ID, getClient().getValues().getUserId()));
+        folders[2] = folderManager2.insertFolderOnServer(ftm.generateSharedFolder(randomUID(), FolderObject.CALENDAR, client2.getValues().getPrivateAppointmentFolder(), client2.getValues().getUserId(), getClient().getValues().getUserId()));
 
         Appointment[] appointments = new Appointment[3];
         appointments[0] = manager.insert(randomAppointment(folders[0].getObjectID()));

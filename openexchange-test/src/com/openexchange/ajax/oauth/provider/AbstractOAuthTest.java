@@ -103,7 +103,6 @@ public abstract class AbstractOAuthTest extends AbstractAJAXSession {
     @After
     public void tearDown() throws Exception {
         try {
-            getClient().logout();
             oAuthClient.logout();
             unregisterTestClient(clientApp);
         } finally {

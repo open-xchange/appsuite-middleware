@@ -130,8 +130,8 @@ public class BasicDriveTest extends AbstractFindTest {
         java.io.File file = new java.io.File(testDataDir, "BasicDriveTest.tmp");
 
         String folderName = "findApiDriveTestFolder_" + System.currentTimeMillis();
-        testFolder = folderManager.generatePrivateFolder(folderName, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), getClient().getValues().getUserId());
-        testFolder = folderManager.insertFolderOnServer(testFolder);
+        testFolder = ftm.generatePrivateFolder(folderName, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), getClient().getValues().getUserId());
+        testFolder = ftm.insertFolderOnServer(testFolder);
 
         manager = new InfostoreTestManager(getClient());
         metadata = new DefaultFile();
@@ -174,8 +174,8 @@ public class BasicDriveTest extends AbstractFindTest {
         final int num_of_subfolders = 3;
         files = new LinkedList<File>();
         for (int x = 0; x < num_of_subfolders; x++) {
-            FolderObject subfolder = folderManager.generatePrivateFolder("findApiDriveTestFolder_" + UUID.randomUUID().toString(), FolderObject.INFOSTORE, parentId, getClient().getValues().getUserId());
-            subfolder = folderManager.insertFolderOnServer(subfolder);
+            FolderObject subfolder = ftm.generatePrivateFolder("findApiDriveTestFolder_" + UUID.randomUUID().toString(), FolderObject.INFOSTORE, parentId, getClient().getValues().getUserId());
+            subfolder = ftm.insertFolderOnServer(subfolder);
             parentId = subfolder.getObjectID();
 
             File f = new DefaultFile();
@@ -371,9 +371,9 @@ public class BasicDriveTest extends AbstractFindTest {
             FolderType[] typesInOrder = new FolderType[] { FolderType.PRIVATE, FolderType.PUBLIC, FolderType.SHARED };
             AJAXClient[] clients = new AJAXClient[] { getClient(), getClient(), client2 };
             FolderObject[] folders = new FolderObject[3];
-            folders[0] = folderManager.insertFolderOnServer(folderManager.generatePrivateFolder(randomUID(), FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), getClient().getValues().getUserId()));
-            folders[1] = folderManager.insertFolderOnServer(folderManager.generatePublicFolder(randomUID(), FolderObject.INFOSTORE, FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, getClient().getValues().getUserId()));
-            folders[2] = folderManager.insertFolderOnServer(folderManager.generateSharedFolder(randomUID(), FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), getClient().getValues().getUserId(), client2.getValues().getUserId()));
+            folders[0] = ftm.insertFolderOnServer(ftm.generatePrivateFolder(randomUID(), FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), getClient().getValues().getUserId()));
+            folders[1] = ftm.insertFolderOnServer(ftm.generatePublicFolder(randomUID(), FolderObject.INFOSTORE, FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, getClient().getValues().getUserId()));
+            folders[2] = ftm.insertFolderOnServer(ftm.generateSharedFolder(randomUID(), FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), getClient().getValues().getUserId(), client2.getValues().getUserId()));
 
             File[] documents = new File[3];
             documents[0] = new DefaultFile(metadata);
@@ -437,12 +437,12 @@ public class BasicDriveTest extends AbstractFindTest {
 
     @Test
     public void testDeletedFilesAreIgnored() throws Exception {
-        FolderObject deletedFolder = folderManager.insertFolderOnServer(folderManager.generatePrivateFolder(randomUID(), FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), getClient().getValues().getUserId()));
+        FolderObject deletedFolder = ftm.insertFolderOnServer(ftm.generatePrivateFolder(randomUID(), FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), getClient().getValues().getUserId()));
         File deletedDocument = new DefaultFile(metadata);
         deletedDocument.setTitle(randomUID());
         deletedDocument.setFolderId(String.valueOf(deletedFolder.getObjectID()));
         manager.newAction(deletedDocument);
-        folderManager.deleteFolderOnServer(deletedFolder);
+        ftm.deleteFolderOnServer(deletedFolder);
         Folder reloadedFolder = getClient().execute(new GetRequest(EnumAPI.OX_NEW, deletedFolder.getObjectID())).getStorageFolder();
         FolderObject trashFolder = getClient().execute(new GetRequest(EnumAPI.OX_NEW, reloadedFolder.getParentID())).getFolder();
         assertEquals("Wrong type", FolderObject.TRASH, trashFolder.getType());
@@ -477,63 +477,7 @@ public class BasicDriveTest extends AbstractFindTest {
             documents = query(getClient(), facets);
             assertEquals("Wrong number of documents. Document found in " + folderTypeFacets[i].getValueId() + " folder.", 0, documents.size());
         }
-
     }
-
-    //    Takes half an hour do create and delete all those folders...
-    //         @Test
-    //     public void testFolderChunking() throws Exception {
-    //        FolderObject first = null;
-    //        FolderObject middle = null;
-    //        FolderObject last = null;
-    //        for (int i = 0; i < 2002; i++) {
-    //            FolderObject folder = folderManager.insertFolderOnServer(folderManager.generatePrivateFolder(
-    //                randomUID(),
-    //                FolderObject.INFOSTORE,
-    //                client.getValues().getPrivateInfostoreFolder(),
-    //                client.getValues().getUserId()));
-    //            if (i == 0) {
-    //                first = folder;
-    //            } else if (i == 1000) {
-    //                middle = folder;
-    //            } else if (i == 2001) {
-    //                last = folder;
-    //            }
-    //        }
-    //
-    //        DocumentMetadata firstDoc = new DocumentMetadataImpl(metadata);
-    //        firstDoc.setTitle("zzz" + randomUID());
-    //        firstDoc.setFolderId(first.getObjectID());
-    //
-    //        DocumentMetadata middleDoc = new DocumentMetadataImpl(metadata);
-    //        middleDoc.setTitle("aaa" + randomUID());
-    //        middleDoc.setFolderId(middle.getObjectID());
-    //
-    //        DocumentMetadata lastDoc = new DocumentMetadataImpl(metadata);
-    //        lastDoc.setTitle("012" + randomUID());
-    //        lastDoc.setFolderId(last.getObjectID());
-    //        manager.newAction(firstDoc);
-    //        manager.newAction(middleDoc);
-    //        manager.newAction(lastDoc);
-    //
-    //        List<Facet> facets = autocomplete(client, "");
-    //        ExclusiveFacet folderTypeFacet = (ExclusiveFacet) findByType(CommonFacetType.FOLDER_TYPE, facets);
-    //        FacetValue typeValue = findByValueId(FolderType.PRIVATE.getIdentifier(), folderTypeFacet);
-    //        List<PropDocument> docs = query(client, Collections.singletonList(createActiveFacet(folderTypeFacet, typeValue)));
-    //
-    //        List<String> found = new ArrayList<String>(3);
-    //        for (PropDocument doc : docs) {
-    //            String title = (String) doc.getProps().get("title");
-    //            if (title.equals(firstDoc.getTitle()) || title.equals(middleDoc.getTitle()) || title.equals(lastDoc.getTitle())) {
-    //                found.add(title);
-    //            }
-    //        }
-    //
-    //        assertEquals("Did not find all documents", 3, found.size());
-    //        assertEquals("Wrong order", lastDoc.getTitle(), found.get(0));
-    //        assertEquals("Wrong order", middleDoc.getTitle(), found.get(1));
-    //        assertEquals("Wrong order", firstDoc.getTitle(), found.get(2));
-    //    }
 
     protected List<Facet> autocomplete(AJAXClient client, String prefix, List<ActiveFacet> facets) throws Exception {
         AutocompleteRequest autocompleteRequest = new AutocompleteRequest(prefix, Module.DRIVE.getIdentifier(), facets);

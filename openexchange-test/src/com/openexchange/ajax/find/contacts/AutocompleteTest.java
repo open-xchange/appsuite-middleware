@@ -78,7 +78,7 @@ public class AutocompleteTest extends ContactsFindTest {
 
     @Test
     public void testAutocompleteOtherContact() throws Exception {
-        Contact contact = manager.newAction(randomContact());
+        Contact contact = cotm.newAction(randomContact());
         ComplexDisplayItem displayItem = DisplayItems.convert(contact);
         assertFoundFacetInAutocomplete(contact.getDisplayName().substring(0, 3), displayItem.getDisplayName());
         assertFoundFacetInAutocomplete(contact.getSurName().substring(0, 4), displayItem.getDisplayName());

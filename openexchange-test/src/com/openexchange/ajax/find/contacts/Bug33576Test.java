@@ -71,7 +71,7 @@ public class Bug33576Test extends ContactsFindTest {
     public void testAutocompleteContactWithoutEMailAddress() throws Exception {
         Contact contact = randomContact();
         contact.removeEmail1();
-        contact = manager.newAction(contact);
+        contact = cotm.newAction(contact);
         String prefix = contact.getGivenName().substring(0, 6);
         AutocompleteRequest autocompleteRequest = new AutocompleteRequest(prefix, Module.CONTACTS.getIdentifier());
         AutocompleteResponse autocompleteResponse = getClient().execute(autocompleteRequest);
