@@ -295,7 +295,9 @@ public class CSVWriter {
 			case Types.TIMESTAMP:
 				Timestamp tstamp = rs.getTimestamp(colIndex);
 				if (tstamp != null) {
-					value = TIMESTAMP_FORMATTER.format(tstamp);
+				    synchronized (TIMESTAMP_FORMATTER) {                        
+				        value = TIMESTAMP_FORMATTER.format(tstamp);
+                    }
 				}
 			break;
 			case Types.LONGVARCHAR:
