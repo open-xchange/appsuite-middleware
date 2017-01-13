@@ -380,30 +380,33 @@ public class ID implements Serializable {
         String tmp = this.cachedStringRepresentation;
         if (tmp == null) {
             synchronized (this) {
-                final StringBuilder b = new StringBuilder(32);
-                boolean needSep = false;
-                String protocol = this.protocol;
-                if (protocol != null) {
-                    b.append(protocol);
-                    needSep = true;
-                }
-                String component = this.component;
-                if (component != null) {
+                tmp = this.cachedStringRepresentation;
+                if (tmp == null) {
+                    final StringBuilder b = new StringBuilder(32);
+                    boolean needSep = false;
+                    String protocol = this.protocol;
                     if (protocol != null) {
-                        b.append(".");
+                        b.append(protocol);
+                        needSep = true;
                     }
-                    b.append(component);
-                    needSep = true;
+                    String component = this.component;
+                    if (component != null) {
+                        if (protocol != null) {
+                            b.append(".");
+                        }
+                        b.append(component);
+                        needSep = true;
+                    }
+                    if (needSep) {
+                        b.append("://");
+                    }
+                    b.append(escape(user, '@')).append('@').append(escape(context, '@', '/'));
+                    if (resource != null) {
+                        b.append('/').append(resource);
+                    }
+                    tmp = b.toString();
+                    this.cachedStringRepresentation = tmp;
                 }
-                if (needSep) {
-                    b.append("://");
-                }
-                b.append(escape(user, '@')).append('@').append(escape(context, '@', '/'));
-                if (resource != null) {
-                    b.append('/').append(resource);
-                }
-                tmp = b.toString();
-                this.cachedStringRepresentation = tmp;
             }
         }
         return tmp;
