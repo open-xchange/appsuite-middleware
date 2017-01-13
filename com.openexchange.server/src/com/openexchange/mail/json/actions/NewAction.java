@@ -74,6 +74,7 @@ import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.virtual.osgi.Services;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
@@ -110,6 +111,7 @@ import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
+import com.openexchange.mail.service.EncryptedMailService;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.MtaStatusInfo;
 import com.openexchange.mail.usersetting.UserSettingMail;
@@ -268,7 +270,18 @@ public final class NewAction extends AbstractMailAction {
                     composedMail.removeHeader("Message-ID");
                     composedMail.removeMessageId();
                 }
+
                 MailServletInterface mailInterface = getMailInterface(req);
+
+                // Check if Guard email
+                if (composedMail.getSecuritySettings().anythingSet()) {
+                    EncryptedMailService encryptor = Services.getServiceLookup().getOptionalService(EncryptedMailService.class);
+                    if (encryptor != null) {
+                        composedMail = encryptor.encryptDraftEmail(composedMail, session);
+                    }
+                }
+
+
                 msgIdentifier = mailInterface.saveDraft(composedMail, false, accountId).toString();
                 if (msgIdentifier == null) {
                     throw MailExceptionCode.DRAFT_FAILED_UNKNOWN.create();
