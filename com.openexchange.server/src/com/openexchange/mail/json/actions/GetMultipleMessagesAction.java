@@ -77,7 +77,6 @@ import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link GetMultipleMessagesAction}
@@ -155,19 +154,15 @@ public final class GetMultipleMessagesAction extends AbstractMailAction {
                 ajaxRequestData.setResponseHeader("Content-Disposition", sb.toString());
             }
 
-            try {
-                performMultipleFolder(req, pairs, ajaxRequestData.optOutputStream());
-                return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(AJAXRequestResult.ResultType.DIRECT);
-            } catch (IOException e) {
-                throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
-            }
+            performMultipleFolder(req, pairs, ajaxRequestData, null);
+            return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(AJAXRequestResult.ResultType.DIRECT);
         }
 
         // Store to .tmp folder
         ThresholdFileHolder thresholdFileHolder = new ThresholdFileHolder();
         boolean error = true;
         try {
-            performMultipleFolder(req, pairs, thresholdFileHolder.asOutputStream());
+            performMultipleFolder(req, pairs, null, thresholdFileHolder.asOutputStream());
             error = false;
         } finally {
             // Close on error
@@ -185,16 +180,12 @@ public final class GetMultipleMessagesAction extends AbstractMailAction {
         return new AJAXRequestResult(thresholdFileHolder, "file");
     }
 
-    private void performMultipleFolder(MailRequest req, List<IdFolderPair> pairs, OutputStream out) throws OXException {
+    private void performMultipleFolder(MailRequest req, List<IdFolderPair> pairs, AJAXRequestData ajaxRequestData, OutputStream stream) throws OXException {
         final MailServletInterface mailInterface = getMailInterface(req);
 
         // Initialize ZIP'ing
         ZipArchiveOutputStream zipOutput = null;
         try {
-            zipOutput = new ZipArchiveOutputStream(out);
-            zipOutput.setEncoding("UTF-8");
-            zipOutput.setUseLanguageEncodingFlag(true);
-
             int size = pairs.size();
             Set<String> names = new HashSet<String>(size);
             String ext = ".eml";
@@ -220,6 +211,13 @@ public final class GetMultipleMessagesAction extends AbstractMailAction {
                             final int pos = name.indexOf(ext);
                             final String entryName = name.substring(0, pos) + (num > 1 ? "_(" + num + ")" : "") + ext;
                             entry = new ZipArchiveEntry(entryName);
+                            if (ajaxRequestData != null) {
+                                zipOutput = new ZipArchiveOutputStream(ajaxRequestData.optOutputStream());
+                            } else {
+                                zipOutput = new ZipArchiveOutputStream(stream);
+                            }
+                            zipOutput.setEncoding("UTF-8");
+                            zipOutput.setUseLanguageEncodingFlag(true);
                             zipOutput.putArchiveEntry(entry);
                             break;
                         } catch (final java.util.zip.ZipException e) {

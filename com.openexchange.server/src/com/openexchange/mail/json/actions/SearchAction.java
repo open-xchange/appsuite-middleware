@@ -50,6 +50,7 @@
 package com.openexchange.mail.json.actions;
 
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -161,6 +162,8 @@ public final class SearchAction extends AbstractMailAction {
              * Get mail interface
              */
             final MailServletInterface mailInterface = getMailInterface(req);
+            Collection<OXException> warnings = null;
+
             /*
              * Perform search dependent on passed JSON value
              */
@@ -212,6 +215,7 @@ public final class SearchAction extends AbstractMailAction {
                                 mails.add(mail);
                             }
                         }
+                        warnings = mailInterface.getWarnings();
                     } else {
                         int sortCol = req.getSortFieldFor(sort);
 
@@ -261,11 +265,16 @@ public final class SearchAction extends AbstractMailAction {
                                 mails.add(mm);
                             }
                         }
+                        warnings = mailAccess.getWarnings();
                     }
                 } finally {
                     SearchIterators.close(it);
                 }
-                return new AJAXRequestResult(mails, "mail");
+                AJAXRequestResult result = new AJAXRequestResult(mails, "mail");
+                if (warnings != null) {
+                    result.addWarnings(warnings);
+                }
+                return result;
             }
 
             // Body is a JSON object
@@ -335,7 +344,11 @@ public final class SearchAction extends AbstractMailAction {
                 }
             }
 
-            return new AJAXRequestResult(mails, "mail");
+            AJAXRequestResult requestResult = new AJAXRequestResult(mails, "mail");
+            if (!mailAccess.getWarnings().isEmpty()) {
+                requestResult.addWarnings(mailAccess.getWarnings());
+            }
+            return requestResult;
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {

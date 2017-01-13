@@ -266,7 +266,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
         return getMessages(fullName.getFullName(), mailIds, fields, null, session, access);
     }
 
-    private static MailMessage[] getMessages(String fullName, String[] mailIds, final MailField[] fields, final String[] headerNames, Session session, UnifiedInboxAccess access) throws OXException {
+    private static MailMessage[] getMessages(String fullName, String[] mailIds, final MailField[] fields, final String[] headerNames, Session session, final UnifiedInboxAccess access) throws OXException {
         if ((mailIds == null) || (mailIds.length == 0)) {
             return EMPTY_RETVAL;
         }
@@ -382,6 +382,8 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                 }
                             }
                         } catch (OXException e) {
+                            e.setCategory(Category.CATEGORY_WARNING);
+                            access.addWarnings(Collections.singleton(e));
                             getLogger().debug("", e);
                             return GetMessagesResult.EMPTY_RESULT;
                         } finally {
@@ -858,6 +860,8 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
 
                             return ret;
                         } catch (OXException e) {
+                            e.setCategory(Category.CATEGORY_WARNING);
+                            access.addWarnings(Collections.singleton(e));
                             StringBuilder tmp = new StringBuilder(128);
                             tmp.append("Couldn't get messages from folder \"");
                             tmp.append((null == fn ? "<unknown>" : fn)).append("\" from server \"").append(mailAccount.getMailServer());

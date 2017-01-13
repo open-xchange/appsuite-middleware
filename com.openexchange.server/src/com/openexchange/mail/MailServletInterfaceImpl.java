@@ -1037,7 +1037,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         if (messageStorage instanceof ISimplifiedThreadStructureEnhanced) {
             ISimplifiedThreadStructureEnhanced stse = (ISimplifiedThreadStructureEnhanced) messageStorage;
             try {
-                return stse.getThreadSortedMessages(
+                List<List<MailMessage>> result = stse.getThreadSortedMessages(
                     fullName,
                     mergeWithSent,
                     cache,
@@ -1048,6 +1048,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     mailFields.toArray(),
                     headerFields,
                     searchTerm);
+
+                if (!mailAccess.getWarnings().isEmpty()) {
+                    warnings.addAll(mailAccess.getWarnings());
+                }
+                return result;
             } catch (OXException e) {
                 // Check for missing "THREAD=REFERENCES" capability
                 if ((2046 != e.getCode() || (!"MSG".equals(e.getPrefix()) && !"IMAP".equals(e.getPrefix()))) && !MailExceptionCode.UNSUPPORTED_OPERATION.equals(e)) {
@@ -1074,6 +1079,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     MessageUtility.enrichWithHeaders(mails, headerFields, messageStorage);
                 }
 
+                if (!mailAccess.getWarnings().isEmpty()) {
+                    warnings.addAll(mailAccess.getWarnings());
+                }
                 return mails;
             } catch (OXException e) {
                 // Check for missing "THREAD=REFERENCES" capability
@@ -1134,6 +1142,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             int size = list.size();
             if ((fromIndex) > size) {
                 // Return empty iterator if start is out of range
+                if (!mailAccess.getWarnings().isEmpty()) {
+                    warnings.addAll(mailAccess.getWarnings());
+                }
                 return Collections.emptyList();
             }
             // Reset end index if out of range
@@ -1152,6 +1163,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
 
         // Return list
+        if (!mailAccess.getWarnings().isEmpty()) {
+            warnings.addAll(mailAccess.getWarnings());
+        }
         return list;
     }
 
@@ -1999,12 +2013,17 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             }
         }
         try {
-            if (cachable && MailMessageCache.getInstance().containsFolderMessages(accountId, fullName, session.getUserId(), contextId)) {
+            if (cachable && MailMessageCache.getInstance().containsFolderMessages(accountId, fullName, session.getUserId(), contextId) && mailAccess.getWarnings().isEmpty()) {
                 MailMessageCache.getInstance().putMessages(accountId, mails, session.getUserId(), contextId);
             }
         } catch (OXException e) {
             LOG.error("", e);
         }
+
+        if (!mailAccess.getWarnings().isEmpty()) {
+            warnings.addAll(mailAccess.getWarnings());
+        }
+
         return mails;
     }
 
