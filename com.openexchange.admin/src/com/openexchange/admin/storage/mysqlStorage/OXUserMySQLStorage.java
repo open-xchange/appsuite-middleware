@@ -108,6 +108,7 @@ import com.openexchange.admin.storage.sqlStorage.OXUserSQLStorage;
 import com.openexchange.admin.storage.utils.Filestore2UserUtil;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
+import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
@@ -3651,8 +3652,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         int userId = user.getId().intValue();
         PreparedStatement stmt = null;
         try {
-            CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
-            Cache cache = cacheService.getCache("OXFolderCache");
+            FolderCacheManager cache = FolderCacheManager.getInstance();
             List<Pair<Integer, String>> folderIds = prepareFolders(contextId, userId, con);
             StringBuilder sb = new StringBuilder("UPDATE oxfolder_tree SET default_flag = 0, type = 2, fname = ? WHERE cid = ? AND fuid = ?");
             stmt = con.prepareStatement(sb.toString());
@@ -3661,7 +3661,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.setInt(2, contextId);
                 stmt.setInt(3, pair.getFirst());
                 stmt.addBatch();
-                cache.remove(cacheService.newCacheKey(contextId, pair.getFirst().intValue()));
+                cache.removeFolderObject(pair.getFirst().intValue(), ContextStorage.getStorageContext(contextId));
             }
             stmt.executeBatch();
         } catch (SQLException e) {
