@@ -5245,14 +5245,9 @@ public class CalendarMySQL implements CalendarSqlImp {
                             if (le.isGeneric(Generic.NOT_FOUND)) {
                                 LOG.info("Unable to find master during Exception delete. Ignoring. Seems to be corrupt data.", le);
                                 final long modified = deleteAppointment(writecon, cid, oid, uid);
-
-                                if (edao == null) {
-                                    triggerDeleteEvent(writecon, oid, fid, so, ctx, null);
-                                } else {
-                                    edao.setModifiedBy(uid);
-                                    edao.setLastModified(new Date(modified));
-                                    triggerDeleteEvent(writecon, oid, fid, so, ctx, edao);
-                                }
+                                edao.setModifiedBy(uid);
+                                edao.setLastModified(new Date(modified));
+                                triggerDeleteEvent(writecon, oid, fid, so, ctx, edao);
                             } else {
                                 throw le;
                             }
