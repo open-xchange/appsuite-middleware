@@ -993,6 +993,16 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         return count;
     }
 
+    private static final FetchProfile FETCH_PROFILE_PART = new FetchProfile() {
+
+        // Unnamed block
+        {
+            add(UIDFolder.FetchProfileItem.UID);
+            add(FetchProfile.Item.CONTENT_INFO);
+            //add(IMAPFolder.FetchProfileItem.HEADERS);
+        }
+    };
+
     @Override
     public MailPart getAttachmentLong(final String fullName, final long msgUID, final String sequenceId) throws OXException {
         if (msgUID < 0 || null == sequenceId) {
@@ -1008,6 +1018,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
              */
             boolean useGetPart = true;
             {
+                imapFolder.fetch(null, new long[] { msgUID }, FETCH_PROFILE_PART, null);
                 IMAPMessage msg = (IMAPMessage) imapFolder.getMessageByUID(msgUID);
                 if (null == msg) {
                     throw MailExceptionCode.MAIL_NOT_FOUND.create(Long.valueOf(msgUID), fullName);
@@ -1104,6 +1115,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
              */
             boolean useGetPart = true;
             {
+                imapFolder.fetch(null, new long[] { msgUID }, FETCH_PROFILE_PART, null);
                 IMAPMessage msg = (IMAPMessage) imapFolder.getMessageByUID(msgUID);
                 if (null == msg) {
                     throw MailExceptionCode.MAIL_NOT_FOUND.create(Long.valueOf(msgUID), fullName);

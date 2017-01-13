@@ -50,12 +50,14 @@
 package com.openexchange.unifiedinbox.utility;
 
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import com.openexchange.threadpool.Task;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadRenamer;
+import com.openexchange.threadpool.Trackable;
 
 /**
  * {@link UnifiedInboxCompletionService} - A {@link TrackingCompletionService} that uses a supplied {@link Executor} to execute tasks. This
@@ -63,128 +65,157 @@ import java.util.concurrent.TimeUnit;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UnifiedInboxCompletionService<V> implements TrackingCompletionService<V> {
+public final class UnifiedInboxCompletionService<V> {
 
-    /**
-     * FutureTask extension to enqueue upon completion
-     */
-    private static final class QueueingFuture<V> extends FutureTask<V> {
+    /** The result for a submitted task */
+    public static class Result<V> {
 
-        private final BlockingQueue<Future<V>> queue;
+        private final V result;
+        private final Throwable error;
 
-        QueueingFuture(final Callable<V> c, final BlockingQueue<Future<V>> queue) {
-            super(c);
-            this.queue = queue;
+        Result(V result) {
+            super();
+            this.result = result;
+            this.error = null;
         }
 
-        QueueingFuture(final Runnable t, final V r, final BlockingQueue<Future<V>> queue) {
-            super(t, r);
+        Result(Throwable error) {
+            super();
+            this.result = null;
+            this.error = error;
+        }
+
+        /**
+         * Gets the result
+         *
+         * @return The result
+         * @throws ExecutionException If computing the result caused an error
+         */
+        public V get() throws ExecutionException {
+            if (null != error) {
+                throw new ExecutionException(error);
+            }
+            return result;
+        }
+    }
+
+    private static <V> QueueingTask<V> wrapperFor(Task<V> task, BlockingQueue<Result<V>> queue) {
+        return (task instanceof Trackable) ? new TrackableQueueingTask(task, queue) : new QueueingTask<>(task, queue);
+    }
+
+    /**
+     * To enqueue upon completion
+     */
+    private static class QueueingTask<V> implements Task<V> {
+
+        private final Task<V> task;
+        private final BlockingQueue<Result<V>> queue;
+
+        protected QueueingTask(Task<V> task, BlockingQueue<Result<V>> queue) {
+            super();
+            this.task = task;
             this.queue = queue;
         }
 
         @Override
-        protected void done() {
-            queue.add(this);
+        public void setThreadName(ThreadRenamer threadRenamer) {
+            task.setThreadName(threadRenamer);
+        }
+
+        @Override
+        public void beforeExecute(Thread t) {
+            task.beforeExecute(t);
+        }
+
+        @Override
+        public void afterExecute(Throwable t) {
+            task.afterExecute(t);
+        }
+
+        @Override
+        public V call() throws Exception {
+            try {
+                V result = task.call();
+                queue.add(new Result<V>(result));
+                return result;
+            } catch (Exception e) {
+                queue.add(new Result<V>(e));
+                throw e;
+            } catch (Throwable t) {
+                queue.add(new Result<V>(t));
+                throw t;
+            }
         }
     }
 
-    private final Executor executor;
+    /**
+     * To enqueue upon completion
+     */
+    private static class TrackableQueueingTask<V> extends QueueingTask<V> implements Trackable {
 
-    private final BlockingQueue<Future<V>> completionQueue;
+        protected TrackableQueueingTask(Task<V> task, BlockingQueue<Result<V>> queue) {
+            super(task, queue);
+        }
 
+    }
+
+    // --------------------------------------------------------------------------------------------------------------
+
+    private final ThreadPoolService threadPool;
+    private final BlockingQueue<Result<V>> completionQueue;
     private long start;
-
     private long duration;
-
     private int count;
 
     /**
      * Initializes a new {@link UnifiedInboxCompletionService}.
      *
-     * @param executor The executor to use
-     * @throws NullPointerException If executor is <tt>null</tt>
+     * @param threadPool The thread pool to use
+     * @throws NullPointerException If thread pool is <tt>null</tt>
      */
-    public UnifiedInboxCompletionService(final Executor executor) {
+    public UnifiedInboxCompletionService(ThreadPoolService threadPool) {
         super();
-        if (executor == null) {
+        if (threadPool == null) {
             throw new NullPointerException();
         }
-        this.executor = executor;
-        this.completionQueue = new LinkedBlockingQueue<Future<V>>();
+        this.threadPool = threadPool;
+        this.completionQueue = new LinkedBlockingQueue<Result<V>>();
     }
 
     /**
-     * Initializes a new {@link UnifiedInboxCompletionService}.
+     * Submits specified task for execution.
      *
-     * @param executor The executor to use
-     * @param completionQueue The queue to use as the completion queue normally one dedicated for use by this service
-     * @throws NullPointerException If executor or completionQueue are <tt>null</tt>
+     * @param task The task to execute
      */
-    public UnifiedInboxCompletionService(final Executor executor, final BlockingQueue<Future<V>> completionQueue) {
-        super();
-        if (executor == null || completionQueue == null) {
-            throw new NullPointerException();
-        }
-        this.executor = executor;
-        this.completionQueue = completionQueue;
-    }
-
-    @Override
-    public Future<V> submit(final Callable<V> task) {
+    public void submit(final Task<V> task) {
         if (task == null) {
             throw new NullPointerException();
         }
-        final QueueingFuture<V> f = new QueueingFuture<V>(task, completionQueue);
-        executor.execute(f);
+
+        QueueingTask<V> wrapper = wrapperFor(task, completionQueue);
+        threadPool.submit(wrapper);
         if (++count == 1) {
             // First element submitted
             start = System.currentTimeMillis();
         }
-        return f;
     }
 
-    @Override
-    public Future<V> submit(final Runnable task, final V result) {
-        if (task == null) {
-            throw new NullPointerException();
-        }
-        final QueueingFuture<V> f = new QueueingFuture<V>(task, result, completionQueue);
-        executor.execute(f);
-        if (++count == 1) {
-            // First element submitted
-            start = System.currentTimeMillis();
-        }
-        return f;
-    }
-
-    @Override
-    public Future<V> take() throws InterruptedException {
-        final Future<V> f = completionQueue.take();
+    public Result<V> take() throws InterruptedException {
+        final Result<V> r = completionQueue.take();
         if (0 == --count) {
             duration = (System.currentTimeMillis() - start);
         }
-        return f;
+        return r;
     }
 
-    @Override
-    public Future<V> poll() {
-        final Future<V> f = completionQueue.poll();
-        if (null != f && 0 == --count) {
+    public Result<V> poll(final long timeout, final TimeUnit unit) throws InterruptedException {
+        final Result<V> r = completionQueue.poll(timeout, unit);
+        if (null != r && 0 == --count) {
             duration = (System.currentTimeMillis() - start);
         }
-        return f;
+        return r;
     }
 
-    @Override
-    public Future<V> poll(final long timeout, final TimeUnit unit) throws InterruptedException {
-        final Future<V> f = completionQueue.poll(timeout, unit);
-        if (null != f && 0 == --count) {
-            duration = (System.currentTimeMillis() - start);
-        }
-        return f;
-    }
-
-    @Override
     public long getDuration() {
         return duration;
     }

@@ -657,6 +657,8 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         }
         tmp = paramContainer.getStringParam("embedded");
         final boolean embedded = (tmp != null && ("1".equals(tmp) || Boolean.parseBoolean(tmp)));
+        tmp = paramContainer.getStringParam("process_plain_text");
+        boolean asMarkup = (tmp == null || (!"0".equals(tmp) && Boolean.parseBoolean(tmp)));
         tmp = paramContainer.getStringParam("includePlainText");
         final boolean includePlainText = (tmp != null && ("1".equals(tmp) || Boolean.parseBoolean(tmp)));
         tmp = paramContainer.getStringParam("ignorable");
@@ -717,6 +719,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
             MessageWriterParams params = MessageWriterParams.builder(mail.getAccountId(), mail, session)
                                                             .setDisplayMode(displayMode)
                                                             .setEmbedded(embedded)
+                                                            .setAsMarkup(asMarkup)
                                                             .setExactLength(exactLength)
                                                             .setIncludePlainText(includePlainText)
                                                             .setMaxContentSize(maxContentSize)
@@ -801,7 +804,9 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         String view = requestData.getParameter(Mail.PARAMETER_VIEW);
         view = null == view ? null : view.toLowerCase(Locale.US);
         String tmp = requestData.getParameter("embedded");
-        final boolean embedded = (tmp != null && ("1".equals(tmp) || Boolean.parseBoolean(tmp)));
+        boolean embedded = (tmp != null && ("1".equals(tmp) || Boolean.parseBoolean(tmp)));
+        tmp = requestData.getParameter("process_plain_text");
+        boolean asMarkup = (tmp == null || (!"0".equals(tmp) && Boolean.parseBoolean(tmp)));
         tmp = null;
         final UserSettingMail usmNoSave = session.getUserSettingMail().clone();
         /*
@@ -815,7 +820,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         int maxContentSize = AJAXRequestDataTools.parseIntParameter(requestData.getParameter(Mail.PARAMETER_MAX_SIZE), -1);
         boolean allowNestedMessages = AJAXRequestDataTools.parseBoolParameter(Mail.PARAMETER_ALLOW_NESTED_MESSAGES, requestData, true);
         List<OXException> warnings = new ArrayList<OXException>(2);
-        JSONObject jsonObject = MessageWriter.writeMailMessage(mail.getAccountId(), mail, displayMode, embedded, session, usmNoSave, warnings, false, -1, null, null, false, maxContentSize, allowNestedMessages ? -1 : 1);
+        JSONObject jsonObject = MessageWriter.writeMailMessage(mail.getAccountId(), mail, displayMode, embedded, asMarkup, session, usmNoSave, warnings, false, -1, null, null, false, maxContentSize, allowNestedMessages ? -1 : 1);
 
         {
             String csid = (String) result.getParameter("csid");

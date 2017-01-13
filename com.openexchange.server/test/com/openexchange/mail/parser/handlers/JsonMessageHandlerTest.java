@@ -57,7 +57,6 @@ import com.openexchange.groupware.ldap.SimUser;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.SimHtmlService;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.mime.MimeSmilFixer;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.parser.MailMessageParser;
@@ -139,7 +138,7 @@ public class JsonMessageHandlerTest extends TestCase {
 
             ServerSession session = new SimServerSession(new SimContext(1), new SimUser(1), null);
 
-            JsonMessageHandler handler = new JsonMessageHandler(0, "INBOX/1", DisplayMode.DISPLAY, true, session, usm, false, 0);
+            JsonMessageHandler handler = new JsonMessageHandler(0, "INBOX/1", DisplayMode.DISPLAY, true, true, session, usm, false, 0);
 
             // Test
 
@@ -392,7 +391,7 @@ public class JsonMessageHandlerTest extends TestCase {
 
             ServerSession session = new SimServerSession(new SimContext(1), new SimUser(1), null);
 
-            JsonMessageHandler handler = new JsonMessageHandler(0, "INBOX/1", DisplayMode.DISPLAY, true, session, usm, false, 0);
+            JsonMessageHandler handler = new JsonMessageHandler(0, "INBOX/1", DisplayMode.DISPLAY, true, true, session, usm, false, 0);
 
             // Test
 
@@ -448,7 +447,7 @@ public class JsonMessageHandlerTest extends TestCase {
 
             ServerSession session = new SimServerSession(new SimContext(1), new SimUser(1), null);
 
-            JsonMessageHandler handler = new JsonMessageHandler(0, "INBOX/1", DisplayMode.DISPLAY, true, session, usm, false, 0);
+            JsonMessageHandler handler = new JsonMessageHandler(0, "INBOX/1", DisplayMode.DISPLAY, true, true, session, usm, false, 0);
 
             // Test
 
@@ -504,7 +503,7 @@ public class JsonMessageHandlerTest extends TestCase {
 
             ServerSession session = new SimServerSession(new SimContext(1), new SimUser(1), null);
 
-            JsonMessageHandler handler = new JsonMessageHandler(0, "INBOX/1", DisplayMode.DISPLAY, true, session, usm, false, 0);
+            JsonMessageHandler handler = new JsonMessageHandler(0, "INBOX/1", DisplayMode.DISPLAY, true, true, session, usm, false, 0);
 
             // Test
 
@@ -554,7 +553,7 @@ public class JsonMessageHandlerTest extends TestCase {
 
             ServerSession session = new SimServerSession(new SimContext(1), new SimUser(1), null);
 
-            JsonMessageHandler handler = new JsonMessageHandler(0, "INBOX/1", DisplayMode.DISPLAY, true, session, usm, false, 0);
+            JsonMessageHandler handler = new JsonMessageHandler(0, "INBOX/1", DisplayMode.DISPLAY, true, true, session, usm, false, 0);
 
             // Test
 
@@ -595,7 +594,7 @@ public class JsonMessageHandlerTest extends TestCase {
             usm.parseBits(627479);
 
             ServerSession session = new SimServerSession(new SimContext(1), new SimUser(1), null);
-            JsonMessageHandler handler = new JsonMessageHandler(0, folder, DisplayMode.DISPLAY, true, session, usm, false, 0);
+            JsonMessageHandler handler = new JsonMessageHandler(0, folder, DisplayMode.DISPLAY, true, true, session, usm, false, 0);
 
             MailMessageParser parser = new MailMessageParser();
             parser.parseMailMessage(mail, handler);
@@ -606,7 +605,7 @@ public class JsonMessageHandlerTest extends TestCase {
             JSONArray nestedMessages = jMail.getJSONArray("nested_msgs");
             assertNotNull("No nested messages were parsed", nestedMessages);
             assertEquals("Unexpected number of nested messages", 2, nestedMessages.length());
-            
+
             // First and second level nested message-id calculation correct?
             final JSONObject nestedMessage2 = nestedMessages.getJSONObject(1);
             assertNotNull(nestedMessage2);
@@ -617,7 +616,7 @@ public class JsonMessageHandlerTest extends TestCase {
             fail(e.getMessage());
         }
     }
-    
+
     public void testCorrectNestedMessageIdsOnLevel3To4() {
         try {
             final MailMessage mail = MimeMessageConverter.convertMessage(new FileInputStream("./test/com/openexchange/mail/parser/handlers/test_mail_46443.eml"));
@@ -629,10 +628,10 @@ public class JsonMessageHandlerTest extends TestCase {
             usm.parseBits(627479);
 
             ServerSession session = new SimServerSession(new SimContext(1), new SimUser(1), null);
-            JsonMessageHandler handler = new JsonMessageHandler(0, folder, DisplayMode.DISPLAY, true, session, usm, false, 0);
+            JsonMessageHandler handler = new JsonMessageHandler(0, folder, DisplayMode.DISPLAY, true, true, session, usm, false, 0);
             handler.setInitialiserSequenceId("2.2");
             MailMessageParser parser = new MailMessageParser();
-            
+
             parser.parseMailMessage(mail, handler);
 
             JSONObject jMail = handler.getJSONObject();
@@ -640,13 +639,13 @@ public class JsonMessageHandlerTest extends TestCase {
 
             JSONArray nestedMessages = jMail.getJSONArray("nested_msgs");
             JSONArray attachments = jMail.getJSONArray("attachments");
-            
+
             assertNotNull("No nested messages were parsed", nestedMessages);
             assertEquals("Unexpected number of nested messages", 2, nestedMessages.length());
-            
+
             assertNotNull("No attachments were parsed", attachments);
             assertEquals("Unexpected number of attachments", 1, attachments.length());
-            
+
             // third and fourth level nested message-id calculation correct?
             final JSONObject nestedMessage2 = nestedMessages.getJSONObject(1);
             assertNotNull(nestedMessage2);

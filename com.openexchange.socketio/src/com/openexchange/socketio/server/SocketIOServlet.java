@@ -35,6 +35,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.google.common.io.ByteStreams;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.SessionUtility;
+import com.openexchange.java.Streams;
 import com.openexchange.socketio.protocol.EngineIOProtocol;
 import com.openexchange.socketio.protocol.SocketIOProtocol;
 import com.openexchange.timer.TimerService;
@@ -139,11 +140,15 @@ public abstract class SocketIOServlet extends SessionServlet {
                     return;
                 }
 
-                // Transfer bytes to output stream
-                resp.setContentType("text/javascript");
-                OutputStream os = resp.getOutputStream();
-                ByteStreams.copy(is, os);
-                return;
+                try {
+                    // Transfer bytes to output stream
+                    resp.setContentType("text/javascript");
+                    OutputStream os = resp.getOutputStream();
+                    ByteStreams.copy(is, os);
+                    return;
+                } finally {
+                    Streams.close(is);
+                }
             }
         }
 

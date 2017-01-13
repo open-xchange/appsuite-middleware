@@ -53,6 +53,8 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.service.http.HttpService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ForcedReloadable;
+import com.openexchange.config.Interests;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
@@ -84,12 +86,25 @@ public class SpamExpertsActivator extends HousekeepingActivator {
 	protected synchronized void startBundle() throws Exception {
         LOG.info("starting bundle: \"com.openexchange.spamhandler.spamexperts\"");
 
-	    SpamExpertsConfig config = new SpamExpertsConfig(this);
+	    final SpamExpertsConfig config = new SpamExpertsConfig(this);
 
 	    SpamExpertsSpamHandler spamHandler = new SpamExpertsSpamHandler(config, this);
 	    Dictionary<String, String> dictionary = new Hashtable<String, String>(2);
         dictionary.put("name", spamHandler.getSpamHandlerName());
         registerService(SpamHandler.class, spamHandler, dictionary);
+
+        registerService(ForcedReloadable.class, new ForcedReloadable() {
+
+            @Override
+            public void reloadConfiguration(ConfigurationService configService) {
+                config.clearCache();
+            }
+
+            @Override
+            public Interests getInterests() {
+                return null;
+            }
+        });
 
         String alias = getService(ConfigurationService.class).getProperty("com.openexchange.custom.spamexperts.panel_servlet", "/ajax/spamexperts/panel").trim();
 		servletRegistration = new HTTPServletRegistration(context, new com.openexchange.spamhandler.spamexperts.servlets.SpamExpertsServlet(config), alias);

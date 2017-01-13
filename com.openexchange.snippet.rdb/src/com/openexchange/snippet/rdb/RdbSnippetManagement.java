@@ -785,8 +785,13 @@ public final class RdbSnippetManagement implements SnippetManagement {
                     stmt.executeUpdate();
                     closeSQLStuff(stmt);
                     stmt = null;
+                } else {
+                    closeSQLStuff(rs, stmt);
+                    rs = null;
+                    stmt = null;
                 }
             }
+
             // Check passed ones
             if (null != attachments && !attachments.isEmpty()) {
                 for (Attachment attachment : attachments) {

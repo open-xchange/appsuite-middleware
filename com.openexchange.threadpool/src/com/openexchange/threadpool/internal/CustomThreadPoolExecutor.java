@@ -49,17 +49,22 @@
 
 package com.openexchange.threadpool.internal;
 
+import static com.eaio.util.text.HumanTime.exactly;
 import java.io.Closeable;
 import java.io.File;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.AbstractCollection;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.Map.Entry;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
@@ -83,6 +88,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.LockSupport;
 import java.util.concurrent.locks.ReentrantLock;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
@@ -1304,30 +1310,54 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                                 break;
                             }
                             if (taskInfo.stamp < max) {
-                                final Thread thread = taskInfo.t;
-                                final Map<String, Object> logProperties = taskInfo.logProperties;
+                                // The long-running thread
+                                Thread thread = taskInfo.t;
+
+                                // Age info
+                                long age = System.currentTimeMillis() - taskInfo.stamp;
+                                AgeInfo ageInfo = newAgeInfo(age, maxRunningTime);
+
+                                // Get trace of the thread
+                                Throwable trace = new ThreadTrace(ageInfo.sAge, ageInfo.sMaxAge, thread.getName());
+                                trace.setStackTrace(thread.getStackTrace());
+
                                 logBuilder.setLength(0);
-                                if (null != logProperties) {
-                                    final Map<String, String> sorted = new TreeMap<String, String>();
-                                    for (final Map.Entry<String, Object> entry : logProperties.entrySet()) {
-                                        final String propertyName = entry.getKey();
-                                        final Object value = entry.getValue();
-                                        if (null != value) {
-                                            sorted.put(propertyName, value.toString());
+                                try {
+                                    logBuilder.append("Worker thread with age ").append(ageInfo.sAge).append("ms (").append(exactly(age, true)).append(") exceeds max. age of ").append(ageInfo.sMaxAge).append("ms (").append(exactly(maxRunningTime, true)).append(").") ;
+                                } catch (Exception e) {
+                                    LOG.trace("", e);
+                                    logBuilder.append("Worker thread with age ").append(ageInfo.sAge).append("ms exceeds max. age of ").append(ageInfo.sMaxAge).append("ms.");
+                                }
+
+                                // Append log properties from the Thread to logBuilder
+                                {
+                                    Map<String, Object> logProperties = taskInfo.logProperties;
+                                    if (null != logProperties) {
+                                        Map<String, String> sorted = new TreeMap<String, String>();
+                                        for (Map.Entry<String, Object> entry : logProperties.entrySet()) {
+                                            String propertyName = entry.getKey();
+                                            Object value = entry.getValue();
+                                            if (null != value) {
+                                                sorted.put(propertyName, value.toString());
+                                            }
+                                        }
+                                        logBuilder.append(" Worker's properties:").append(lineSeparator);
+
+                                        // And add them to the logBuilder
+                                        Iterator<Entry<String, String>> it = sorted.entrySet().iterator();
+                                        if (it.hasNext()) {
+                                            String prefix = "  ";
+                                            Map.Entry<String, String> propertyEntry = it.next();
+                                            logBuilder.append(prefix).append(propertyEntry.getKey()).append('=').append(propertyEntry.getValue());
+                                            while (it.hasNext()) {
+                                                propertyEntry = it.next();
+                                                logBuilder.append(lineSeparator).append(prefix).append(propertyEntry.getKey()).append('=').append(propertyEntry.getValue());
+                                            }
                                         }
                                     }
-                                    for (final Map.Entry<String, String> entry : sorted.entrySet()) {
-                                        logBuilder.append(entry.getKey()).append('=').append(entry.getValue()).append(lineSeparator);
-                                    }
-                                    logBuilder.append(lineSeparator);
                                 }
-                                logBuilder.append("Worker \"").append(thread.getName());
-                                logBuilder.append("\" exceeds max. running time of ").append(maxRunningTime);
-                                logBuilder.append("msec -> Processing time: ").append(System.currentTimeMillis() - taskInfo.stamp);
-                                logBuilder.append("msec");
-                                final Throwable t = new FastThrowable();
-                                t.setStackTrace(thread.getStackTrace());
-                                LOG.info(logBuilder.toString(), t);
+
+                                LOG.info(logBuilder.toString(), trace);
                             }
                         }
                         if (poisoned) {
@@ -1341,35 +1371,6 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                 }
             } catch (final Exception e) {
                 LOG.error("Watcher aborted execution due to an exception! Watcher is no more active!", e);
-            }
-        }
-
-        void appendStackTrace(final StackTraceElement[] trace, final StringBuilder sb) {
-            if (null == trace) {
-                return;
-            }
-            final String lineSeparator = this.lineSeparator;
-            for (final StackTraceElement ste : trace) {
-                final String className = ste.getClassName();
-                if (null != className) {
-                    sb.append("    at ").append(className).append('.').append(ste.getMethodName());
-                    if (ste.isNativeMethod()) {
-                        sb.append("(Native Method)");
-                    } else {
-                        final String fileName = ste.getFileName();
-                        if (null == fileName) {
-                            sb.append("(Unknown Source)");
-                        } else {
-                            final int lineNumber = ste.getLineNumber();
-                            sb.append('(').append(fileName);
-                            if (lineNumber >= 0) {
-                                sb.append(':').append(lineNumber);
-                            }
-                            sb.append(')');
-                        }
-                    }
-                    sb.append(lineSeparator);
-                }
             }
         }
     }
@@ -1391,15 +1392,78 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         }
     }
 
-    private static final class FastThrowable extends Throwable {
+    private static final class ThreadTrace extends Throwable {
 
-        FastThrowable() {
-            super();
+        private static final long serialVersionUID = -4023507467815652875L;
+
+        /**
+         * Initializes a new {@link ThreadTrace}.
+         *
+         * @param age The current age
+         * @param maxAge The age threshold
+         * @param threadName The thread name
+         */
+        ThreadTrace(String age, String maxAge, String threadName) {
+            super(new StringBuffer(96).append("tracked thread (age=").append(age).append(", max-age=").append(maxAge).append(", thread-name=").append(threadName).append(')').toString());
         }
 
         @Override
         public synchronized Throwable fillInStackTrace() {
             return this;
+        }
+
+    }
+
+    /** The decimal format to use when printing milliseconds */
+    protected static final NumberFormat MILLIS_FORMAT = newNumberFormat();
+
+    /** The accompanying lock for shared decimal format */
+    protected static final Lock MILLIS_FORMAT_LOCK = new ReentrantLock();
+
+    /**
+     * Creates a new {@code DecimalFormat} instance.
+     *
+     * @return The format instance
+     */
+    protected static NumberFormat newNumberFormat() {
+        NumberFormat f = NumberFormat.getInstance(Locale.US);
+        if (f instanceof DecimalFormat) {
+            DecimalFormat df = (DecimalFormat) f;
+            df.applyPattern("#,##0");
+        }
+        return f;
+    }
+
+    /**
+     * Creates a new age info for given arguments.
+     *
+     * @param age The current age
+     * @param requestMaxAge The age threshold
+     * @return The age info
+     */
+    protected static AgeInfo newAgeInfo(long age, long requestMaxAge) {
+        if (MILLIS_FORMAT_LOCK.tryLock()) {
+            try {
+                return new AgeInfo(MILLIS_FORMAT.format(age), MILLIS_FORMAT.format(requestMaxAge));
+            } finally {
+                MILLIS_FORMAT_LOCK.unlock();
+            }
+        }
+
+        // Use thread-specific DecimalFormat instance
+        NumberFormat format = newNumberFormat();
+        return new AgeInfo(format.format(age), format.format(requestMaxAge));
+    }
+
+    private static final class AgeInfo {
+
+        final String sAge;
+        final String sMaxAge;
+
+        AgeInfo(String sAge, String sMaxAge) {
+            super();
+            this.sAge = sAge;
+            this.sMaxAge = sMaxAge;
         }
     }
 

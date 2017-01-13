@@ -70,6 +70,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 import javax.mail.Message;
 import org.apache.commons.lang.StringUtils;
 import org.osgi.service.event.Event;
@@ -80,8 +81,10 @@ import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderEventConstants;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.folderstorage.FolderModifier;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.FolderStorageFolderModifier;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.RemoveAfterAccessFolder;
@@ -152,17 +155,17 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailFolderStorage implements FolderStorage {
+public final class MailFolderStorage implements FolderStorageFolderModifier<MailFolderImpl> {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailFolderStorage.class);
 
     private static final String PRIVATE_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
 
     private final TObjectProcedure<MailAccess<?, ?>> procedure;
-
     private final MailFolderType folderType = MailFolderType.getInstance();
-
     private final String paramAccessFast = StorageParameters.PARAM_ACCESS_FAST;
+    private final List<FolderModifier<MailFolderImpl>> folderModifiers;
+    private volatile boolean hasModifiers;
 
     // -------------------------------------------------------------------------------------------------------------------- //
 
@@ -179,6 +182,25 @@ public final class MailFolderStorage implements FolderStorage {
                 return true;
             }
         };
+        folderModifiers = new CopyOnWriteArrayList<>();
+        hasModifiers = false;
+    }
+
+    @Override
+    public void addFolderModifier(FolderModifier<MailFolderImpl> modifier) {
+        if (null != modifier) {
+            hasModifiers = folderModifiers.add(modifier);
+        }
+    }
+
+    @Override
+    public void removeFolderModifier(FolderModifier<MailFolderImpl> modifier) {
+        if (null != modifier) {
+            boolean removed = folderModifiers.remove(modifier);
+            if (removed) {
+                hasModifiers = !folderModifiers.isEmpty();
+            }
+        }
     }
 
     private MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccessFor(Session ses, int accountId) throws OXException {
@@ -969,7 +991,13 @@ public final class MailFolderStorage implements FolderStorage {
                 mailAccess.connect(false);
 
                 MailFolder rootFolder = mailAccess.getRootFolder();
-                retval = new MailFolderImpl(rootFolder, accountId, mailAccess.getMailConfig(), storageParameters, null, mailAccess, mailAccount, translateDefaultFolders);
+                MailFolderImpl mailFolder = new MailFolderImpl(rootFolder, accountId, mailAccess.getMailConfig(), storageParameters, null, mailAccess, mailAccount, translateDefaultFolders);
+                if (hasModifiers) {
+                    for (FolderModifier<MailFolderImpl> folderModifier : folderModifiers) {
+                        mailFolder = folderModifier.modify(mailFolder, session);
+                    }
+                }
+                retval = mailFolder;
                 addWarnings(mailAccess, storageParameters);
                 hasSubfolders = rootFolder.hasSubfolders();
                 /*
@@ -999,6 +1027,11 @@ public final class MailFolderStorage implements FolderStorage {
              */
             {
                 MailFolderImpl mailFolderImpl = new MailFolderImpl(mailFolder, accountId, mailAccess.getMailConfig(), storageParameters, new MailAccessFullnameProvider(mailAccess), mailAccess, mailAccount, translateDefaultFolders);
+                if (hasModifiers) {
+                    for (FolderModifier<MailFolderImpl> folderModifier : folderModifiers) {
+                        mailFolderImpl = folderModifier.modify(mailFolderImpl, session);
+                    }
+                }
                 if (MailAccount.DEFAULT_ID == accountId || IGNORABLES.contains(mailAccount.getMailProtocol())) {
                     retval = mailFolderImpl;
                 } else {

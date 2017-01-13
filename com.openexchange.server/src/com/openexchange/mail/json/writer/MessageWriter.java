@@ -145,15 +145,16 @@ public final class MessageWriter {
      * @param accountId The account ID
      * @param mail The mail to write
      * @param displayMode The display mode
+     * @param embedded <code>true</code> for embedded display (CSS prefixed, &lt;body&gt; replaced with &lt;div&gt;); otherwise <code>false</code>
+     * @param asMarkup <code>true</code> if the content is supposed to be rendered as HTML (be it HTML or plain text); otherwise <code>false</code> to keep content as-is (plain text is left as such)
      * @param session The session
-     * @param settings The user's mail settings used for writing message; if <code>null</code> the settings are going to be fetched from
-     *            storage, thus no request-specific preparations will take place.
+     * @param settings The user's mail settings used for writing message; if <code>null</code> the settings are going to be fetched from storage, thus no request-specific preparations will take place.
      * @param warnings A container for possible warnings
      * @return The written JSON object
      * @throws OXException If writing message fails
      */
-    public static JSONObject writeMailMessage(int accountId, MailMessage mail, DisplayMode displayMode, boolean embedded, Session session, UserSettingMail settings) throws OXException {
-        return writeMailMessage(accountId, mail, displayMode, embedded, session, settings, null, false, -1);
+    public static JSONObject writeMailMessage(int accountId, MailMessage mail, DisplayMode displayMode, boolean embedded, boolean asMarkup, Session session, UserSettingMail settings) throws OXException {
+        return writeMailMessage(accountId, mail, displayMode, embedded, asMarkup, session, settings, null, false, -1);
     }
 
     /**
@@ -162,17 +163,18 @@ public final class MessageWriter {
      * @param accountId The account ID
      * @param mail The mail to write
      * @param displayMode The display mode
+     * @param embedded <code>true</code> for embedded display (CSS prefixed, &lt;body&gt; replaced with &lt;div&gt;); otherwise <code>false</code>
+     * @param asMarkup <code>true</code> if the content is supposed to be rendered as HTML (be it HTML or plain text); otherwise <code>false</code> to keep content as-is (plain text is left as such)
      * @param session The session
-     * @param settings The user's mail settings used for writing message; if <code>null</code> the settings are going to be fetched from
-     *            storage, thus no request-specific preparations will take place.
+     * @param settings The user's mail settings used for writing message; if <code>null</code> the settings are going to be fetched from storage, thus no request-specific preparations will take place.
      * @param warnings A container for possible warnings
      * @param tokenTimeout
      * @token <code>true</code> to add attachment tokens
      * @return The written JSON object
      * @throws OXException If writing message fails
      */
-    public static JSONObject writeMailMessage(int accountId, MailMessage mail, DisplayMode displayMode, boolean embedded, Session session, UserSettingMail settings, Collection<OXException> warnings, boolean token, int tokenTimeout) throws OXException {
-        return writeMailMessage(accountId, mail, displayMode, embedded, session, settings, warnings, token, tokenTimeout, null);
+    public static JSONObject writeMailMessage(int accountId, MailMessage mail, DisplayMode displayMode, boolean embedded, boolean asMarkup, Session session, UserSettingMail settings, Collection<OXException> warnings, boolean token, int tokenTimeout) throws OXException {
+        return writeMailMessage(accountId, mail, displayMode, embedded, asMarkup, session, settings, warnings, token, tokenTimeout, null);
     }
 
     /**
@@ -181,9 +183,10 @@ public final class MessageWriter {
      * @param accountId The account ID
      * @param mail The mail to write
      * @param displayMode The display mode
+     * @param embedded <code>true</code> for embedded display (CSS prefixed, &lt;body&gt; replaced with &lt;div&gt;); otherwise <code>false</code>
+     * @param asMarkup <code>true</code> if the content is supposed to be rendered as HTML (be it HTML or plain text); otherwise <code>false</code> to keep content as-is (plain text is left as such)
      * @param session The session
-     * @param settings The user's mail settings used for writing message; if <code>null</code> the settings are going to be fetched from
-     *            storage, thus no request-specific preparations will take place.
+     * @param settings The user's mail settings used for writing message; if <code>null</code> the settings are going to be fetched from storage, thus no request-specific preparations will take place.
      * @param warnings A container for possible warnings
      * @param tokenTimeout
      * @param mimeFilter The MIME filter
@@ -191,8 +194,8 @@ public final class MessageWriter {
      * @return The written JSON object
      * @throws OXException If writing message fails
      */
-    public static JSONObject writeMailMessage(int accountId, MailMessage mail, DisplayMode displayMode, boolean embedded, Session session, UserSettingMail settings, Collection<OXException> warnings, boolean token, int tokenTimeout, MimeFilter mimeFilter) throws OXException {
-        return writeMailMessage(accountId, mail, displayMode, embedded, session, settings, warnings, token, tokenTimeout, mimeFilter, null, false, -1, -1);
+    public static JSONObject writeMailMessage(int accountId, MailMessage mail, DisplayMode displayMode, boolean embedded, boolean asMarkup, Session session, UserSettingMail settings, Collection<OXException> warnings, boolean token, int tokenTimeout, MimeFilter mimeFilter) throws OXException {
+        return writeMailMessage(accountId, mail, displayMode, embedded, asMarkup, session, settings, warnings, token, tokenTimeout, mimeFilter, null, false, -1, -1);
     }
 
     /**
@@ -201,6 +204,8 @@ public final class MessageWriter {
      * @param accountId The account ID
      * @param mail The mail to write
      * @param displayMode The display mode
+     * @param embedded <code>true</code> for embedded display (CSS prefixed, &lt;body&gt; replaced with &lt;div&gt;); otherwise <code>false</code>
+     * @param asMarkup <code>true</code> if the content is supposed to be rendered as HTML (be it HTML or plain text); otherwise <code>false</code> to keep content as-is (plain text is left as such)
      * @param session The session
      * @param settings The user's mail settings used for writing message; if <code>null</code> the settings are going to be fetched from storage, thus no request-specific preparations will take place.
      * @param warnings A container for possible warnings
@@ -212,10 +217,11 @@ public final class MessageWriter {
      * @return The written JSON object
      * @throws OXException If writing message fails
      */
-    public static JSONObject writeMailMessage(int accountId, MailMessage mail, DisplayMode displayMode, boolean embedded, Session session, UserSettingMail settings, Collection<OXException> warnings, boolean token, int tokenTimeout, MimeFilter mimeFilter, TimeZone optTimeZone, boolean exactLength, int maxContentSize, int maxNestedMessageLevels) throws OXException {
+    public static JSONObject writeMailMessage(int accountId, MailMessage mail, DisplayMode displayMode, boolean embedded, boolean asMarkup, Session session, UserSettingMail settings, Collection<OXException> warnings, boolean token, int tokenTimeout, MimeFilter mimeFilter, TimeZone optTimeZone, boolean exactLength, int maxContentSize, int maxNestedMessageLevels) throws OXException {
         MessageWriterParams params = MessageWriterParams.builder(accountId, mail, session)
             .setDisplayMode(displayMode)
             .setEmbedded(embedded)
+            .setAsMarkup(asMarkup)
             .setExactLength(exactLength)
             .setMaxContentSize(maxContentSize)
             .setMaxNestedMessageLevels(maxNestedMessageLevels)
@@ -263,7 +269,7 @@ public final class MessageWriter {
         }
 
         try {
-            JsonMessageHandler handler = new JsonMessageHandler(params.getAccountId(), mailPath, mail, params.getDisplayMode(), params.isEmbedded(), params.getSession(), usm, params.isToken(), params.getTokenTimeout(), params.getMaxContentSize(), params.getMaxNestedMessageLevels());
+            JsonMessageHandler handler = new JsonMessageHandler(params.getAccountId(), mailPath, mail, params.getDisplayMode(), params.isEmbedded(), params.isAsMarkup(), params.getSession(), usm, params.isToken(), params.getTokenTimeout(), params.getMaxContentSize(), params.getMaxNestedMessageLevels());
             handler.setExactLength(params.isExactLength());
             if (null != params.getOptTimeZone()) {
                 handler.setTimeZone(params.getOptTimeZone());
@@ -490,19 +496,19 @@ public final class MessageWriter {
             @Override
             public void writeField(JSONValue jsonContainer, MailMessage mail, int level, boolean withKey, int accountId, int user, int cid, TimeZone optTimeZone) throws OXException {
                 try {
-                    int accId = accountId;
-                    if (mail instanceof Delegatized) {
-                        int undelegatedAccountId = ((Delegatized) mail).getUndelegatedAccountId();
-                        if (undelegatedAccountId >= 0) {
-                            accId = undelegatedAccountId;
-                        }
-                    }
-
                     Object originalFolder;
                     if (mail.containsOriginalFolder() && null != mail.getOriginalFolder()) {
-                        originalFolder = prepareFullname(accId, mail.getOriginalFolder());
+                        originalFolder = prepareFullname(accountId, mail.getOriginalFolder());
                     } else {
                         // Fall back to regular folder
+                        int accId = accountId;
+                        if (mail instanceof Delegatized) {
+                            int undelegatedAccountId = ((Delegatized) mail).getUndelegatedAccountId();
+                            if (undelegatedAccountId >= 0) {
+                                accId = undelegatedAccountId;
+                            }
+                        }
+
                         String folder = mail.getFolder();
                         originalFolder = null == folder ? JSONObject.NULL : prepareFullname(accId, folder);
                     }

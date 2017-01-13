@@ -232,13 +232,13 @@ public class HtmlProcessingTest {
     public void testFormatContentForDisplay_isHtmlNoInlineContentInUserSettingMail_onlyDroppedScriptTagsInHeader() {
         Mockito.when(htmlService.dropScriptTagsInHeader(htmlContent)).thenReturn(htmlContent);
 
-        HtmlSanitizeResult formatTextForDisplay = HtmlProcessing.formatContentForDisplay(htmlContent, "UTF-8", true, session, mailPath, userSettingMail, modified, DisplayMode.DISPLAY, true, -1);
+        HtmlSanitizeResult formatTextForDisplay = HtmlProcessing.formatContentForDisplay(htmlContent, "UTF-8", true, session, mailPath, userSettingMail, modified, DisplayMode.DISPLAY, true, true, -1);
         Assert.assertEquals(htmlContent, formatTextForDisplay.getContent());
     }
 
     @Test
     public void testFormatContentForDisplay_isHtmlModeRaw_returnUnchanged() {
-        HtmlSanitizeResult formatTextForDisplay = HtmlProcessing.formatContentForDisplay(htmlContent, "UTF-8", true, session, mailPath, userSettingMail, modified, DisplayMode.RAW, true, -1);
+        HtmlSanitizeResult formatTextForDisplay = HtmlProcessing.formatContentForDisplay(htmlContent, "UTF-8", true, session, mailPath, userSettingMail, modified, DisplayMode.RAW, true, true, -1);
 
         Assert.assertEquals(htmlContent, formatTextForDisplay.getContent());
     }
@@ -249,7 +249,7 @@ public class HtmlProcessingTest {
         Mockito.when(userSettingMail.isAllowHTMLImages()).thenReturn(true);
         Mockito.when(userSettingMail.isDisplayHtmlInlineContent()).thenReturn(true);
 
-        HtmlProcessing.formatContentForDisplay(htmlContent, "UTF-8", true, session, mailPath, userSettingMail, modified, DisplayMode.DISPLAY, true, -1);
+        HtmlProcessing.formatContentForDisplay(htmlContent, "UTF-8", true, session, mailPath, userSettingMail, modified, DisplayMode.DISPLAY, true, true, -1);
 
         Mockito.verify(htmlService, Mockito.times(1)).sanitize(Matchers.anyString(), Matchers.anyString(), Matchers.anyBoolean(), (boolean[]) Matchers.any(), Matchers.anyString(), Matchers.anyInt());
     }
@@ -260,7 +260,7 @@ public class HtmlProcessingTest {
         Mockito.when(userSettingMail.isAllowHTMLImages()).thenReturn(true);
         Mockito.when(userSettingMail.isDisplayHtmlInlineContent()).thenReturn(true);
 
-        HtmlProcessing.formatContentForDisplay(htmlContent, "UTF-8", true, session, null, userSettingMail, modified, DisplayMode.DISPLAY, true, -1);
+        HtmlProcessing.formatContentForDisplay(htmlContent, "UTF-8", true, session, null, userSettingMail, modified, DisplayMode.DISPLAY, true, true, -1);
 
         Mockito.verify(htmlService, Mockito.times(1)).sanitize(Matchers.anyString(), Matchers.anyString(), Matchers.anyBoolean(), (boolean[]) Matchers.any(), Matchers.anyString(), Matchers.anyInt());
     }
@@ -270,7 +270,7 @@ public class HtmlProcessingTest {
         Mockito.when(userSettingMail.isDisplayHtmlInlineContent()).thenReturn(true);
         Mockito.when(htmlService.dropScriptTagsInHeader(htmlContent)).thenReturn(htmlContent);
 
-        HtmlSanitizeResult sanitizeResult = HtmlProcessing.formatContentForDisplay(htmlContent, "UTF-8", true, session, mailPath, userSettingMail, modified, DisplayMode.DISPLAY, false, -1);
+        HtmlSanitizeResult sanitizeResult = HtmlProcessing.formatContentForDisplay(htmlContent, "UTF-8", true, session, mailPath, userSettingMail, modified, DisplayMode.DISPLAY, false, true, -1);
 
         Assert.assertTrue(!sanitizeResult.getContent().contains("<br />"));
         Assert.assertTrue(!sanitizeResult.getContent().contains("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />"));
@@ -279,14 +279,14 @@ public class HtmlProcessingTest {
 
     @Test
     public void testFormatContentForDisplay_noHtmlDisplayMode_formatCalled() {
-        HtmlProcessing.formatContentForDisplay(textContent, "UTF-8", false, session, mailPath, userSettingMail, modified, DisplayMode.DISPLAY, true, -1);
+        HtmlProcessing.formatContentForDisplay(textContent, "UTF-8", false, session, mailPath, userSettingMail, modified, DisplayMode.DISPLAY, true, true, -1);
 
         Mockito.verify(htmlService, Mockito.times(1)).htmlFormat(Matchers.anyString(), Matchers.anyBoolean(), Matchers.anyString(), Matchers.anyInt());
     }
 
     @Test
     public void testFormatContentForDisplay_noHtml_formatCalledOnce() {
-        HtmlProcessing.formatContentForDisplay(textContent, "UTF-8", false, session, mailPath, userSettingMail, modified, DisplayMode.MODIFYABLE, true, -1);
+        HtmlProcessing.formatContentForDisplay(textContent, "UTF-8", false, session, mailPath, userSettingMail, modified, DisplayMode.MODIFYABLE, true, true, -1);
 
         Mockito.verify(htmlService, Mockito.times(1)).htmlFormat(Matchers.anyString(), Matchers.anyBoolean(), Matchers.anyString(), Matchers.anyInt());
     }
@@ -305,6 +305,82 @@ public class HtmlProcessingTest {
 
         String result = HtmlProcessing.replaceBodyWithJericho(htmlContent, "blubber");
         Assert.assertTrue(result.contains("<p>Some content inside head</p>"));
+    }
+
+    @Test
+    public void testExcessiveReplaceBodyWithJericho() {
+        String weirdHtml = "\n" +
+            " Binary Options Broker <br>\n" +
+            "Three simple steps to get free signals<br>\n" +
+            " <br>\n" +
+            " <br>\n" +
+            " <br> \n" +
+            "\n" +
+            "\n" +
+            "\n" +
+            " http://airgina.com  <a href=\"http://airgina.com\">\n" +
+            " <img src=\"\" data-original-src=\"\">\n" +
+            " <html>\n" +
+            "<head>\n" +
+            "\n" +
+            "</head>\n" +
+            "\n" +
+            "<body>\n" +
+            "\n" +
+            "gab\n" +
+            "\n" +
+            " <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2>\n" +
+            " <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2>\n" +
+            " <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2>\n" +
+            " <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2>\n" +
+            " <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2>\n" +
+            " <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2>\n" +
+            "\n" +
+            "<br>\n" +
+            "<br><br>\n" +
+            "<br><br><br>\n" +
+            "\n" +
+            " <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2>\n" +
+            " <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2>\n" +
+            " <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2>\n" +
+            " <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2>\n" +
+            " <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2>\n" +
+            "\n" +
+            " <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2>\n" +
+            " <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2>\n" +
+            " <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2>\n" +
+            " \n" +
+            " <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2>\n" +
+            " <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2>\n" +
+            " <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2>\n" +
+            " <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2>\n" +
+            " <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2>\n" +
+            " <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2>\n" +
+            "\n" +
+            " <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2>\n" +
+            " <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2>\n" +
+            " <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2>\n" +
+            " <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2>\n" +
+            " <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2>\n" +
+            " <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2>\n" +
+            "\n" +
+            " <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2>\n" +
+            " <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2>\n" +
+            " <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2>\n" +
+            " <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2>\n" +
+            " <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2>\n" +
+            " <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2> <html>, <body>,<h1>,<h2>\n" +
+            "\n" +
+            "<br>\n" +
+            "<br><br>\n" +
+            "<br><br><br>\n" +
+            "</body>\n" +
+            "</html>";
+
+        String replacedBody = HtmlProcessing.replaceBodyWithJericho(weirdHtml, "ox-123456");
+
+        Assert.assertFalse(replacedBody.contains("<body>"));
+
     }
 
 }

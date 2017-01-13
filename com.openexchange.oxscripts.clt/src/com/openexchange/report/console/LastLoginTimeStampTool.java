@@ -70,6 +70,8 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
+import com.openexchange.ajax.Client;
+import com.openexchange.cli.AsciiTable;
 import com.openexchange.report.Constants;
 
 
@@ -85,9 +87,10 @@ public final class LastLoginTimeStampTool {
     static {
         final Options opts = new Options();
         opts.addOption("h", "help", false, "Prints a help text");
-        opts.addOption("c", "context", true, "A valid context identifier");
-        opts.addOption("u", "user", true, "A valid user identifier");
-        opts.addOption("t", "client", true, "A client identifier; e.g \"com.openexchange.ox.gui.dhtml\"");
+        opts.addOption("c", "context", true, "A valid (numeric) context identifier");
+        opts.addOption("u", "user", true, "A valid (numeric) user identifier");
+        opts.addOption("i", true, "A valid (numeric) user identifier. As alternative for the \"-u, --user\" option.");
+        opts.addOption("t", "client", true, "A client identifier; e.g \"open-xchange-appsuite\" for App Suite UI. Execute \"./lastlogintimestamp --listclients\" to get a listing of known identifiers.");
 
         opts.addOption("d", "datepattern", true, "The optional date pattern used for formatting retrieved time stamp; e.g \"EEE, d MMM yyyy HH:mm:ss Z\" would yield \"Wed, 4 Jul 2001 12:08:56 -0700\"");
 
@@ -96,12 +99,36 @@ public final class LastLoginTimeStampTool {
         opts.addOption("l", "login", true, "The optional JMX login (if JMX has authentication enabled)");
         opts.addOption("s", "password", true, "The optional JMX password (if JMX has authentication enabled)");
         opts.addOption(new Option(null, "responsetimeout", true, "The optional response timeout in seconds when reading data from server (default: 0s; infinite)"));
+        opts.addOption(new Option(null, "listclients", false, "Outputs a table of known client identifiers"));
         toolkitOptions = opts;
     }
 
     private static void printHelp() {
-        final HelpFormatter helpFormatter = new HelpFormatter();
-        helpFormatter.printHelp("lastlogintimestamp", toolkitOptions);
+        HelpFormatter helpFormatter = new HelpFormatter();
+        helpFormatter.printHelp("lastlogintimestamp", "Prints the time stamp of the last login for a user using a certain client.", toolkitOptions, null);
+
+        StringBuilder footer = new StringBuilder(512);
+        footer.append("\nExamples:");
+        footer.append("\n./lastlogintimestamp -c 1 -u 6 -t open-xchange-appsuite");
+        footer.append("\n./lastlogintimestamp -c 1 -u 6 -t open-xchange-appsuite -d \"yyyy.MM.dd G 'at' HH:mm:ss z\"");
+        System.out.println(footer);
+    }
+
+    private static void printClients() {
+        AsciiTable table = new AsciiTable();
+        table.setMaxColumnWidth(45);
+
+        table.addColumn(new AsciiTable.Column("Client ID"));
+        table.addColumn(new AsciiTable.Column("Description"));
+        for (Client client : Client.values()) {
+            AsciiTable.Row row = new AsciiTable.Row();
+            row.addValue(client.getClientId());
+            row.addValue(client.getDescription());
+            table.addData(row);
+        }
+
+        table.calculateColumnWidth();
+        table.render();
     }
 
     /**
@@ -121,6 +148,10 @@ public final class LastLoginTimeStampTool {
             final CommandLine cmd = parser.parse(toolkitOptions, args);
             if (cmd.hasOption('h')) {
                 printHelp();
+                System.exit(0);
+            }
+            if (cmd.hasOption("listclients")) {
+                printClients();
                 System.exit(0);
             }
             String host = "localhost";
@@ -188,12 +219,15 @@ public final class LastLoginTimeStampTool {
                 System.exit(1);
             }
 
-            if (!cmd.hasOption('u')) {
+            if (cmd.hasOption('u')) {
+                optionValue = cmd.getOptionValue('u');
+            } else if (cmd.hasOption('i')) {
+                optionValue = cmd.getOptionValue('i');
+            } else {
                 System.err.println("Missing user identifier.");
                 printHelp();
                 System.exit(1);
             }
-            optionValue = cmd.getOptionValue('u');
             try {
                 userId = Integer.parseInt(optionValue.trim());
             } catch (final NumberFormatException e) {

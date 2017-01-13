@@ -780,7 +780,7 @@ public abstract class MailConfig {
         CACHE_AUTH_TYPE.invalidateAll();
     }
 
-    private static AuthType getConfiguredAuthType(boolean forMailAccess, Session session) throws OXException {
+    public static AuthType getConfiguredAuthType(boolean forMailAccess, Session session) throws OXException {
         AuthTypeKey key = new AuthTypeKey(forMailAccess, session.getUserId(), session.getContextId());
         ImmutableReference<AuthType> authType = CACHE_AUTH_TYPE.getIfPresent(key);
         if (null == authType) {

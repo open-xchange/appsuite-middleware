@@ -1260,11 +1260,22 @@ d
 }' /opt/open-xchange/etc/ox-scriptconf.sh
 
 # SoftwareChange_Request-3784
-if dpkg --compare-versions "7.6.4-0" gt-nl "$2"; then
+if dpkg --compare-versions "7.8.4-0" gt-nl "$2"; then
     VALUE=$(ox_read_property com.openexchange.IPCheckWhitelist /opt/open-xchange/etc/server.properties)
     if [ "\"open-xchange-mailapp\"" = "$VALUE" ]; then
         ox_set_property com.openexchange.IPCheckWhitelist "\"open-xchange-mailapp\", \"open-xchange-mobile-api-facade\"" /opt/open-xchange/etc/server.properties
     fi
+
+    # SoftwareChange_Request-3859
+    VALUE=$(ox_read_property NRFILES /opt/open-xchange/etc/ox-scriptconf.sh)
+    VALUE=${VALUE//\"/}
+    if [ "8192" = "$VALUE" ]; then
+        ox_set_property NRFILES "\"65536\"" /opt/open-xchange/etc/ox-scriptconf.sh
+    fi
+
+    # SoftwareChange_Request-3862
+    ox_comment html.tag.form add /opt/open-xchange/etc/whitelist.properties
+    ox_comment html.tag.input add /opt/open-xchange/etc/whitelist.properties
 fi
 
 setConfigFilePermissions() {

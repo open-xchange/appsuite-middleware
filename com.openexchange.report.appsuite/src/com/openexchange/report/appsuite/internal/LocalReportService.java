@@ -286,8 +286,12 @@ public class LocalReportService extends AbstractReportService {
         try {
             while (!allContextIds.isEmpty()) {
                 List<Integer> currentSchemaIds;
-
-                currentSchemaIds = dataloaderMySQL.getAllContextIdsInSameSchema(allContextIds.get(0).intValue());
+                int firstContextId = allContextIds.get(0).intValue();
+                
+                currentSchemaIds = dataloaderMySQL.getAllContextIdsInSameSchema(firstContextId);
+                if (currentSchemaIds.size() == 0) {
+                    currentSchemaIds.add(firstContextId);
+                }
                 contextsInSchemas.add(currentSchemaIds);
                 allContextIds.removeAll(currentSchemaIds);
             }

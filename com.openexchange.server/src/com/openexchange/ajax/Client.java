@@ -60,67 +60,69 @@ public enum Client {
     /**
      * The client for OX6 UI: <code>"com.openexchange.ox.gui.dhtml"</code>
      */
-    OX6_UI("com.openexchange.ox.gui.dhtml"),
+    OX6_UI("com.openexchange.ox.gui.dhtml", "The client identifier for OX6 UI"),
     /**
      * The client for App Suite UI: <code>"open-xchange-appsuite"</code>
      */
-    APPSUITE_UI("open-xchange-appsuite"),
+    APPSUITE_UI("open-xchange-appsuite", "The client identifier for App Suite UI"),
     /**
      * The client for Mobile Mail App: <code>"open-xchange-mailapp"</code>
      */
-    MOBILE_APP("open-xchange-mailapp"),
+    MOBILE_APP("open-xchange-mailapp", "The client identifier for Mail App"),
     /**
      * The client for USM/EAS: <code>"USM-EAS"</code>
      */
-    USM_EAS("USM-EAS"),
+    USM_EAS("USM-EAS", "The client identifier for Microsoft Active-Sync"),
     /**
      * The client for USM/JSON (OLOX): <code>"USM-JSON"</code>
      */
-    USM_JSON("USM-JSON"),
+    USM_JSON("USM-JSON", "The client identifier for Outlook Connector (OLOX)"),
     /**
      * The client for Outlook OXtender2 AddIn: <code>"OpenXchange.HTTPClient.OXAddIn"</code>
      */
-    OUTLOOK_OXTENDER2_ADDIN("OpenXchange.HTTPClient.OXAddIn"),
+    OUTLOOK_OXTENDER2_ADDIN("OpenXchange.HTTPClient.OXAddIn", "The client identifier for Outlook OXtender2 AddIn"),
     /**
      * The client for OX Notifier: <code>"OpenXchange.HTTPClient.OXNotifier"</code>
      */
-    OXNOTIFIER("OpenXchange.HTTPClient.OXNotifier"),
+    OXNOTIFIER("OpenXchange.HTTPClient.OXNotifier", "The client identifier for OX Notifier"),
     /**
-     * The client for Outlook Update 1: <code>"com.open-xchange.updater.olox1"</code>
+     * The client for Outlook Updater 1: <code>"com.open-xchange.updater.olox1"</code>
      */
-    OUTLOOK_UPDATER1("com.open-xchange.updater.olox1"),
+    OUTLOOK_UPDATER1("com.open-xchange.updater.olox1", "The client identifier for Outlook Updater v1"),
     /**
-     * The client for Outlook Update 2: <code>"com.open-xchange.updater.olox2"</code>
+     * The client for Outlook Updater 2: <code>"com.open-xchange.updater.olox2"</code>
      */
-    OUTLOOK_UPDATER2("com.open-xchange.updater.olox2"),
+    OUTLOOK_UPDATER2("com.open-xchange.updater.olox2", "The client identifier for Outlook Updater v2"),
     /**
      * The client for CardDAV: <code>"CARDDAV"</code>
      */
-    CARDDAV("CARDDAV"),
+    CARDDAV("CARDDAV", "The client identifier for CardDAV"),
     /**
      * The client for CalDAV: <code>"CALDAV"</code>
      */
-    CALDAV("CALDAV"),
+    CALDAV("CALDAV", "The client identifier for CalDAV"),
     /**
      * The client for WebDAV iCal: <code>"WEBDAV_ICAL"</code>
      */
-    WEBDAV_ICAL("WEBDAV_ICAL"),
+    WEBDAV_ICAL("WEBDAV_ICAL", "The client identifier for WebDAV iCal"),
     /**
      * The client for WebDav InfoStore: <code>"WEBDAV_INFOSTORE"</code>
      */
-    WEBDAV_INFOSTORE("WEBDAV_INFOSTORE"),
+    WEBDAV_INFOSTORE("WEBDAV_INFOSTORE", "The client identifier for WebDav InfoStore"),
     /**
      * The client for WebDav vCard: <code>"WEBDAV_VCARD"</code>
      */
-    WEBDAV_VCARD("WEBDAV_VCARD");
+    WEBDAV_VCARD("WEBDAV_VCARD", "The client identifier for WebDav vCard");
 
     private final String clientId;
+    private final String description;
 
     /**
      * Initializes a new {@link Client}.
      */
-    private Client(String clientId) {
+    private Client(String clientId, String description) {
         this.clientId = clientId;
+        this.description = description;
     }
 
     /**
@@ -132,6 +134,14 @@ public enum Client {
         return clientId;
     }
 
+    /**
+     * Gets the description
+     *
+     * @return The description
+     */
+    public String getDescription() {
+        return description;
+    }
 
     @Override
     public String toString() {

@@ -390,10 +390,9 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
         }
         try {
             return loadUser();
-        } catch (final Exception e) {
-            LOG.error("", e);
+        } catch (OXException e) {
+            throw new IllegalStateException("User object could not be loaded for user " + userId + " in context " + getContextId(), e);
         }
-        return null;
     }
 
     @Override
@@ -412,10 +411,9 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
         }
         try {
             return loadUserPermissionBits();
-        } catch (final Exception e) {
-            LOG.error("", e);
+        } catch (OXException e) {
+            throw new IllegalStateException("User permission bits could not be loaded for user " + userId + " in context " + getContextId(), e);
         }
-        return null;
     }
 
     @Override
@@ -434,10 +432,9 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
         }
         try {
             return loadUserConfiguration();
-        } catch (final Exception e) {
-            LOG.error("", e);
+        } catch (OXException e) {
+            throw new IllegalStateException("User configuration object could not be loaded for user " + userId + " in context " + getContextId(), e);
         }
-        return null;
     }
 
     @Override
@@ -501,7 +498,7 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
         return service.getContext(contextId);
     }
 
-    private User loadUser() throws Exception {
+    private User loadUser() throws OXException {
         UserService service = ServerServiceRegistry.getInstance().getService(UserService.class);
         if (null == service) {
             throw ServiceExceptionCode.absentService(UserService.class);
@@ -510,7 +507,7 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
         return service.getUser(getUserId(), getContextId());
     }
 
-    private UserPermissionBits loadUserPermissionBits() throws Exception {
+    private UserPermissionBits loadUserPermissionBits() throws OXException {
         UserPermissionService service = ServerServiceRegistry.getInstance().getService(UserPermissionService.class);
         if (null == service) {
             throw ServiceExceptionCode.absentService(UserPermissionService.class);
@@ -519,7 +516,7 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
         return service.getUserPermissionBits(getUserId(), getContext());
     }
 
-    private UserConfiguration loadUserConfiguration() throws Exception {
+    private UserConfiguration loadUserConfiguration() throws OXException {
         UserConfigurationService service = ServerServiceRegistry.getInstance().getService(UserConfigurationService.class);
         if (null == service) {
             throw ServiceExceptionCode.absentService(UserConfigurationService.class);

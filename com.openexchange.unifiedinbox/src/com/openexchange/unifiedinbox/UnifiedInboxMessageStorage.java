@@ -84,6 +84,7 @@ import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailMessageStorageExt;
 import com.openexchange.mail.api.ISimplifiedThreadStructure;
+import com.openexchange.mail.api.ISimplifiedThreadStructureEnhanced;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailMessageStorage;
@@ -98,6 +99,7 @@ import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.threader.Conversation;
 import com.openexchange.mail.threader.Conversations;
 import com.openexchange.mail.utils.MailMessageComparator;
+import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -112,7 +114,6 @@ import com.openexchange.unifiedinbox.copy.UnifiedInboxMessageCopier;
 import com.openexchange.unifiedinbox.dataobjects.UnifiedMailMessage;
 import com.openexchange.unifiedinbox.services.Services;
 import com.openexchange.unifiedinbox.utility.LoggingCallable;
-import com.openexchange.unifiedinbox.utility.TrackingCompletionService;
 import com.openexchange.unifiedinbox.utility.UnifiedInboxCompletionService;
 import com.openexchange.unifiedinbox.utility.UnifiedInboxUtility;
 import com.openexchange.user.UserService;
@@ -122,7 +123,7 @@ import com.openexchange.user.UserService;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UnifiedInboxMessageStorage extends MailMessageStorage implements IMailMessageStorageExt, ISimplifiedThreadStructure, UnifiedViewService {
+public final class UnifiedInboxMessageStorage extends MailMessageStorage implements IMailMessageStorageExt, ISimplifiedThreadStructureEnhanced, UnifiedViewService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UnifiedInboxMessageStorage.class);
 
@@ -286,8 +287,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             // Parse mail IDs
             TIntObjectMap<Map<String, List<String>>> parsed = UnifiedInboxUtility.parseMailIDs(mailIds);
             // Create completion service for simultaneous access
-            Executor executor = ThreadPools.getThreadPool().getExecutor();
-            TrackingCompletionService<GetMessagesResult> completionService = new UnifiedInboxCompletionService<>(executor);
+            UnifiedInboxCompletionService<GetMessagesResult> completionService = new UnifiedInboxCompletionService<>(ThreadPools.getThreadPool());
             // Iterate parsed map and submit a task for each iteration
             int numTasks = 0;
             TIntObjectIterator<Map<String, List<String>>> iter = parsed.iterator();
@@ -632,6 +632,8 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 mail.setMailId(mailId);
                 mail.setFolder(fullName);
                 mail.setAccountId(accountId);
+                mail.setOriginalId(uid.getId());
+                mail.setOriginalFolder(uid.getFullName());
                 if (null != future) {
                     try {
                         mail.setUnreadMessages(future.get().intValue());
@@ -673,7 +675,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
     static final MailMessageComparator COMPARATOR = new MailMessageComparator(MailSortField.RECEIVED_DATE, true, null);
 
     @Override
-    public List<List<MailMessage>> getThreadSortedMessages(final String fullName, final boolean includeSent, boolean cache, IndexRange indexRange, final long max, final MailSortField sortField, final OrderDirection order, final MailField[] mailFields, final SearchTerm<?> searchTerm) throws OXException {
+    public List<List<MailMessage>> getThreadSortedMessages(final String fullName, final boolean includeSent, boolean cache, IndexRange indexRange, final long max, final MailSortField sortField, final OrderDirection order, final MailField[] mailFields, final String[] headerNames, final SearchTerm<?> searchTerm) throws OXException {
         if (DEFAULT_FOLDER_ID.equals(fullName)) {
             throw UnifiedInboxException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
         }
@@ -685,13 +687,12 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             MailFields mfs = new MailFields(mailFields);
             mfs.add(MailField.getField(effectiveSortField.getField()));
             final MailField[] checkedFields = mfs.toArray();
+            Session session = this.session;
             // Create completion service for simultaneous access
             int length = accounts.size();
-            Executor executor = ThreadPools.getThreadPool().getExecutor();
-            TrackingCompletionService<List<List<MailMessage>>> completionService = new UnifiedInboxCompletionService<>(executor);
+            UnifiedInboxCompletionService<List<List<MailMessage>>> completionService = new UnifiedInboxCompletionService<>(ThreadPools.getThreadPool());
             final IndexRange applicableRange = null == indexRange ? null : new IndexRange(0, indexRange.end);
             for (final MailAccount mailAccount : accounts) {
-                Session session = this.session;
                 completionService.submit(new LoggingCallable<List<List<MailMessage>>>(session) {
 
                     @Override
@@ -710,9 +711,9 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                             }
                             // Get account's messages
                             IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-                            if (messageStorage instanceof ISimplifiedThreadStructure) {
+                            if (messageStorage instanceof ISimplifiedThreadStructureEnhanced) {
                                 try {
-                                    List<List<MailMessage>> list = ((ISimplifiedThreadStructure) messageStorage).getThreadSortedMessages(fn, includeSent, false, applicableRange, max, sortField, order, checkedFields, searchTerm);
+                                    List<List<MailMessage>> list = ((ISimplifiedThreadStructureEnhanced) messageStorage).getThreadSortedMessages(fn, includeSent, false, applicableRange, max, sortField, order, checkedFields, headerNames, searchTerm);
                                     List<List<MailMessage>> ret = new ArrayList<>(list.size());
                                     UnifiedInboxUID helper = new UnifiedInboxUID();
                                     for (List<MailMessage> list2 : list) {
@@ -723,6 +724,40 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                             umm.setMailId(helper.setUID(accountId, accountMailFolder, accountMail.getMailId()).toString());
                                             umm.setFolder(fn.equals(accountMailFolder) ? fullName : UnifiedInboxAccess.SENT);
                                             umm.setAccountId(accountId);
+                                            umm.setOriginalId(accountMail.getMailId());
+                                            umm.setOriginalFolder(fn);
+                                            messages.add(umm);
+                                        }
+                                        ret.add(messages);
+                                    }
+                                    return ret;
+                                } catch (OXException e) {
+                                    if (!MailExceptionCode.UNSUPPORTED_OPERATION.equals(e)) {
+                                        throw e;
+                                    }
+                                    // Use fall-back mechanism
+                                }
+                            }
+                            if (messageStorage instanceof ISimplifiedThreadStructure) {
+                                try {
+                                    List<List<MailMessage>> list = ((ISimplifiedThreadStructure) messageStorage).getThreadSortedMessages(fn, includeSent, false, applicableRange, max, sortField, order, checkedFields, searchTerm);
+
+                                    if (null != headerNames && headerNames.length > 0) {
+                                        MessageUtility.enrichWithHeaders(list, headerNames, messageStorage);
+                                    }
+
+                                    List<List<MailMessage>> ret = new ArrayList<>(list.size());
+                                    UnifiedInboxUID helper = new UnifiedInboxUID();
+                                    for (List<MailMessage> list2 : list) {
+                                        List<MailMessage> messages = new ArrayList<>(list2.size());
+                                        for (MailMessage accountMail : list2) {
+                                            UnifiedMailMessage umm = new UnifiedMailMessage(accountMail, undelegatedAccountId);
+                                            String accountMailFolder = accountMail.getFolder();
+                                            umm.setMailId(helper.setUID(accountId, accountMailFolder, accountMail.getMailId()).toString());
+                                            umm.setFolder(fn.equals(accountMailFolder) ? fullName : UnifiedInboxAccess.SENT);
+                                            umm.setAccountId(accountId);
+                                            umm.setOriginalId(accountMail.getMailId());
+                                            umm.setOriginalFolder(fn);
                                             messages.add(umm);
                                         }
                                         ret.add(messages);
@@ -809,6 +844,330 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                     umm.setMailId(helper.setUID(accountId, accountMailFolder, accountMail.getMailId()).toString());
                                     umm.setFolder(fn.equals(accountMailFolder) ? fullName : UnifiedInboxAccess.SENT);
                                     umm.setAccountId(accountId);
+                                    umm.setOriginalId(accountMail.getMailId());
+                                    umm.setOriginalFolder(fn);
+                                    messages.add(umm);
+                                }
+                                ret.add(messages);
+                            }
+
+                            if (null != headerNames && headerNames.length > 0) {
+                                MessageUtility.enrichWithHeaders(ret, headerNames, messageStorage);
+                            }
+
+                            return ret;
+                        } catch (OXException e) {
+                            StringBuilder tmp = new StringBuilder(128);
+                            tmp.append("Couldn't get messages from folder \"");
+                            tmp.append((null == fn ? "<unknown>" : fn)).append("\" from server \"").append(mailAccount.getMailServer());
+                            tmp.append("\" for login \"").append(mailAccount.getLogin()).append("\".");
+                            getLogger().warn(tmp.toString(), e);
+                            return Collections.emptyList();
+                        } catch (RuntimeException e) {
+                            StringBuilder tmp = new StringBuilder(128);
+                            tmp.append("Couldn't get messages from folder \"");
+                            tmp.append((null == fn ? "<unknown>" : fn)).append("\" from server \"").append(mailAccount.getMailServer());
+                            tmp.append("\" for login \"").append(mailAccount.getLogin()).append("\".");
+                            getLogger().warn(tmp.toString(), e);
+                            return Collections.emptyList();
+                        } finally {
+                            closeSafe(mailAccess);
+                        }
+                    }
+                });
+            }
+            // Wait for completion of each submitted task
+            try {
+                List<List<MailMessage>> messages = new ArrayList<>(length << 2);
+                for (int i = 0; i < length; i++) {
+                    messages.addAll(completionService.take().get());
+                }
+                LOG.debug("getThreadSortedMessages from folder \"{}\" took {}msec.", fullName, completionService.getDuration());
+
+                // Sort them
+                final MailMessageComparator comparator = new MailMessageComparator(effectiveSortField, descending, null);
+                Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
+
+                    @Override
+                    public int compare(List<MailMessage> o1, List<MailMessage> o2) {
+                        return comparator.compare(o1.get(0), o2.get(0));
+                    }
+                };
+                Collections.sort(messages, listComparator);
+                // Return as array
+                if (null == indexRange) {
+                    return messages;
+                }
+                // Apply index range
+                int fromIndex = indexRange.start;
+                int toIndex = indexRange.end;
+                if (fromIndex > messages.size()) {
+                    /*
+                     * Return empty iterator if start is out of range
+                     */
+                    return Collections.emptyList();
+                }
+                /*
+                 * Reset end index if out of range
+                 */
+                if (toIndex >= messages.size()) {
+                    if (fromIndex == 0) {
+                        return messages;
+                    }
+                    toIndex = messages.size();
+                }
+                messages = messages.subList(fromIndex, toIndex);
+                return messages;
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw MailExceptionCode.INTERRUPT_ERROR.create(e);
+            } catch (ExecutionException e) {
+                throw ThreadPools.launderThrowable(e, OXException.class);
+            }
+        }
+        /*
+         * Certain account's folder
+         */
+        FullnameArgument fa = UnifiedInboxUtility.parseNestedFullName(fullName);
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+        try {
+            int accountId = fa.getAccountId();
+            mailAccess = MailAccess.getInstance(session, accountId);
+            mailAccess.connect();
+            // Get account's messages
+            final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
+            if ((messageStorage instanceof ISimplifiedThreadStructureEnhanced)) {
+                try {
+                    return ((ISimplifiedThreadStructureEnhanced) messageStorage).getThreadSortedMessages(fa.getFullname(), includeSent, false, indexRange, max, sortField, order, mailFields, headerNames, searchTerm);
+                } catch (OXException e) {
+                    if (!MailExceptionCode.UNSUPPORTED_OPERATION.equals(e)) {
+                        throw e;
+                    }
+                    // Use fall-back mechanism
+                }
+            }
+            if ((messageStorage instanceof ISimplifiedThreadStructure)) {
+                try {
+                    List<List<MailMessage>> mails = ((ISimplifiedThreadStructure) messageStorage).getThreadSortedMessages(fa.getFullname(), includeSent, false, indexRange, max, sortField, order, mailFields, searchTerm);
+
+                    if (null != headerNames && headerNames.length > 0) {
+                        MessageUtility.enrichWithHeaders(mails, headerNames, messageStorage);
+                    }
+
+                    return mails;
+                } catch (OXException e) {
+                    if (!MailExceptionCode.UNSUPPORTED_OPERATION.equals(e)) {
+                        throw e;
+                    }
+                    // Use fall-back mechanism
+                }
+            }
+            /*-
+             * --------------------------------------------------------------------------------------------------------------------------
+             *
+             * Manually do thread-sort
+             *
+             * Sort by references
+             */
+            String realFullName = fa.getFullname();
+            boolean mergeWithSent = includeSent && !mailAccess.getFolderStorage().getSentFolder().equals(realFullName);
+            Future<List<MailMessage>> messagesFromSentFolder;
+            if (mergeWithSent) {
+                final String sentFolder = mailAccess.getFolderStorage().getSentFolder();
+                messagesFromSentFolder = ThreadPools.getThreadPool().submit(new AbstractTask<List<MailMessage>>() {
+
+                    @Override
+                    public List<MailMessage> call() throws Exception {
+                        return Conversations.messagesFor(sentFolder, (int) max, new MailFields(mailFields), messageStorage);
+                    }
+                });
+            } else {
+                messagesFromSentFolder = null;
+            }
+            // For actual folder
+            List<Conversation> conversations = Conversations.conversationsFor(realFullName, (int) max, new MailFields(mailFields), messageStorage);
+            // Retrieve from sent folder
+            if (null != messagesFromSentFolder) {
+                List<MailMessage> sentMessages = getFrom(messagesFromSentFolder);
+                for (Conversation conversation : conversations) {
+                    for (MailMessage sentMessage : sentMessages) {
+                        if (conversation.referencesOrIsReferencedBy(sentMessage)) {
+                            conversation.addMessage(sentMessage);
+                        }
+                    }
+                }
+            }
+            // Fold it
+            Conversations.fold(conversations);
+            // Comparator
+            MailMessageComparator threadComparator = COMPARATOR;
+            // Sort
+            List<List<MailMessage>> list = new ArrayList<>(conversations.size());
+            for (Conversation conversation : conversations) {
+                list.add(conversation.getMessages(threadComparator));
+            }
+            // Sort root elements
+            {
+                MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE :  sortField;
+                Comparator<List<MailMessage>> listComparator = getListComparator(effectiveSortField, order, getLocale());
+                Collections.sort(list, listComparator);
+            }
+            // Check for index range
+            list = sliceMessages(list, indexRange);
+            /*
+             * Apply account identifier
+             */
+            setAccountInfo2(list, getAccount(fa.getAccountId()));
+            if (null != headerNames && headerNames.length > 0) {
+                MessageUtility.enrichWithHeaders(list, headerNames, messageStorage);
+            }
+            // Return list
+            return list;
+        } finally {
+            closeSafe(mailAccess);
+        }
+    }
+
+    @Override
+    public List<List<MailMessage>> getThreadSortedMessages(final String fullName, final boolean includeSent, boolean cache, IndexRange indexRange, final long max, final MailSortField sortField, final OrderDirection order, final MailField[] mailFields, final SearchTerm<?> searchTerm) throws OXException {
+        if (DEFAULT_FOLDER_ID.equals(fullName)) {
+            throw UnifiedInboxException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
+        }
+        if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
+            List<MailAccount> accounts = getAccounts();
+            final int undelegatedAccountId = access.getAccountId();
+            boolean descending = OrderDirection.DESC.equals(order);
+            MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE :  sortField;
+            MailFields mfs = new MailFields(mailFields);
+            mfs.add(MailField.getField(effectiveSortField.getField()));
+            final MailField[] checkedFields = mfs.toArray();
+            Session session = this.session;
+            // Create completion service for simultaneous access
+            int length = accounts.size();
+            UnifiedInboxCompletionService<List<List<MailMessage>>> completionService = new UnifiedInboxCompletionService<>(ThreadPools.getThreadPool());
+            final IndexRange applicableRange = null == indexRange ? null : new IndexRange(0, indexRange.end);
+            for (final MailAccount mailAccount : accounts) {
+                completionService.submit(new LoggingCallable<List<List<MailMessage>>>(session) {
+
+                    @Override
+                    public List<List<MailMessage>> call() {
+                        int accountId = mailAccount.getId();
+                        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+                        String fn = null;
+                        try {
+                            mailAccess = MailAccess.getInstance(getSession(), accountId);
+                            mailAccess.connect();
+                            // Get real full name
+                            fn = UnifiedInboxUtility.determineAccountFullName(mailAccess, fullName);
+                            // Check if denoted account has such a default folder
+                            if (fn == null) {
+                                return Collections.emptyList();
+                            }
+                            // Get account's messages
+                            IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
+                            if (messageStorage instanceof ISimplifiedThreadStructure) {
+                                try {
+                                    List<List<MailMessage>> list = ((ISimplifiedThreadStructure) messageStorage).getThreadSortedMessages(fn, includeSent, false, applicableRange, max, sortField, order, checkedFields, searchTerm);
+                                    List<List<MailMessage>> ret = new ArrayList<>(list.size());
+                                    UnifiedInboxUID helper = new UnifiedInboxUID();
+                                    for (List<MailMessage> list2 : list) {
+                                        List<MailMessage> messages = new ArrayList<>(list2.size());
+                                        for (MailMessage accountMail : list2) {
+                                            UnifiedMailMessage umm = new UnifiedMailMessage(accountMail, undelegatedAccountId);
+                                            String accountMailFolder = accountMail.getFolder();
+                                            umm.setMailId(helper.setUID(accountId, accountMailFolder, accountMail.getMailId()).toString());
+                                            umm.setFolder(fn.equals(accountMailFolder) ? fullName : UnifiedInboxAccess.SENT);
+                                            umm.setAccountId(accountId);
+                                            umm.setOriginalId(accountMail.getMailId());
+                                            umm.setOriginalFolder(fn);
+                                            messages.add(umm);
+                                        }
+                                        ret.add(messages);
+                                    }
+                                    return ret;
+                                } catch (OXException e) {
+                                    if (!MailExceptionCode.UNSUPPORTED_OPERATION.equals(e)) {
+                                        throw e;
+                                    }
+                                    // Use fall-back mechanism
+                                }
+                            }
+                            /*-
+                             * 1. Send 'all' request with id, folder_id, level, and received_date - you need all that data.
+                             *
+                             * 2. Whenever level equals 0, a new thread starts (new array)
+                             *
+                             * 3. Add all objects (id, folder_id, received_date) to that list until level !== 0.
+                             *
+                             * 4. Order by received_date (ignore the internal level structure), so that the newest mails show up first.
+                             *
+                             * 5. Generate the real list of all threads. This must be again ordered by received_date, so that the most recent threads show up
+                             *    first. id and folder_id refer to the most recent mail.
+                             */
+                            MailMessage[] msgArr;
+                            try {
+                                int allSort = MailSortField.RECEIVED_DATE.getField();
+                                int allOrder = OrderDirection.DESC.getOrder();
+                                msgArr = messageStorage.getThreadSortedMessages(fn, applicableRange, sortField, order, null, checkedFields);
+                            } catch (OXException e) {
+                                msgArr = messageStorage.getAllMessages(fn, applicableRange, sortField, order, checkedFields);
+                            }
+                            List<List<MailMessage>> list = new LinkedList<>();
+                            List<MailMessage> current = new LinkedList<>();
+                            // Here we go
+                            int size = msgArr.length;
+                            for (int i = 0; i < size; i++) {
+                                MailMessage mail = msgArr[i];
+                                if (null != mail) {
+                                    int threadLevel = mail.getThreadLevel();
+                                    if (0 == threadLevel) {
+                                        list.add(current);
+                                        current = new LinkedList<>();
+                                    }
+                                    current.add(mail);
+                                }
+                            }
+                            list.add(current);
+                            /*
+                             * Sort empty ones
+                             */
+                            for (Iterator<List<MailMessage>> iterator = list.iterator(); iterator.hasNext();) {
+                                List<MailMessage> mails = iterator.next();
+                                if (null == mails || mails.isEmpty()) {
+                                    iterator.remove();
+                                } else {
+                                    Collections.sort(mails, COMPARATOR);
+                                }
+                            }
+                            /*
+                             * Sort root elements
+                             */
+                            boolean descending = OrderDirection.DESC.equals(order);
+                            MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE :  sortField;
+                            if (null == effectiveSortField) {
+                                effectiveSortField = MailSortField.RECEIVED_DATE;
+                            }
+                            final MailMessageComparator comparator = new MailMessageComparator(effectiveSortField, descending, null);
+                            Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
+
+                                @Override
+                                public int compare(List<MailMessage> o1, List<MailMessage> o2) {
+                                    return comparator.compare(o1.get(0), o2.get(0));
+                                }
+                            };
+                            Collections.sort(list, listComparator);
+                            List<List<MailMessage>> ret = new ArrayList<>(list.size());
+                            UnifiedInboxUID helper = new UnifiedInboxUID();
+                            for (List<MailMessage> list2 : list) {
+                                List<MailMessage> messages = new ArrayList<>(list2.size());
+                                for (MailMessage accountMail : list2) {
+                                    UnifiedMailMessage umm = new UnifiedMailMessage(accountMail, undelegatedAccountId);
+                                    String accountMailFolder = accountMail.getFolder();
+                                    umm.setMailId(helper.setUID(accountId, accountMailFolder, accountMail.getMailId()).toString());
+                                    umm.setFolder(fn.equals(accountMailFolder) ? fullName : UnifiedInboxAccess.SENT);
+                                    umm.setAccountId(accountId);
+                                    umm.setOriginalId(accountMail.getMailId());
+                                    umm.setOriginalFolder(fn);
                                     messages.add(umm);
                                 }
                                 ret.add(messages);
@@ -1071,8 +1430,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             int length = accounts.size();
             final int undelegatedAccountId = access.getAccountId();
             Executor executor = ThreadPools.getThreadPool().getExecutor();
-            TrackingCompletionService<List<MailMessage>> completionService =
-                new UnifiedInboxCompletionService<>(executor);
+            UnifiedInboxCompletionService<List<MailMessage>> completionService = new UnifiedInboxCompletionService<>(ThreadPools.getThreadPool());
             for (final MailAccount mailAccount : accounts) {
                 Session session  = this.session;
                 completionService.submit(new LoggingCallable<List<MailMessage>>(session) {
@@ -1101,6 +1459,8 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                     umm.setMailId(helper.setUID(accountId, fn, accountMail.getMailId()).toString());
                                     umm.setFolder(fullName);
                                     umm.setAccountId(accountId);
+                                    umm.setOriginalId(accountMail.getMailId());
+                                    umm.setOriginalFolder(fn);
                                     messages.add(umm);
                                 }
                             }
@@ -1218,9 +1578,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
         if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(folder)) {
             List<MailAccount> accounts = getAccounts(true, unifiedMailAccountId, session.getUserId(), session.getContextId());
             int length = accounts.size();
-            Executor executor = ThreadPools.getThreadPool().getExecutor();
-
-            TrackingCompletionService<Integer> completionService = new UnifiedInboxCompletionService<>(executor);
+            UnifiedInboxCompletionService<Integer> completionService = new UnifiedInboxCompletionService<>(ThreadPools.getThreadPool());
             for (final MailAccount mailAccount : accounts) {
                 completionService.submit(new LoggingCallable<Integer>(session) {
 
@@ -1449,6 +1807,8 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                         umm.setFolder(fullName);
                                         umm.setAccountId(accountId);
                                         umm.setAccountName(name);
+                                        umm.setOriginalId(accountMail.getMailId());
+                                        umm.setOriginalFolder(fn);
                                         messages.add(umm);
                                     }
                                 }
@@ -1479,7 +1839,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             }
 
             // The old way
-            TrackingCompletionService<List<MailMessage>> completionService = new UnifiedInboxCompletionService<>(executor);
+            UnifiedInboxCompletionService<List<MailMessage>> completionService = new UnifiedInboxCompletionService<>(ThreadPools.getThreadPool());
             for (final MailAccount mailAccount : accounts) {
                 completionService.submit(new LoggingCallable<List<MailMessage>>(session) {
 
@@ -1561,6 +1921,8 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                     umm.setFolder(fullName);
                                     umm.setAccountId(accountId);
                                     umm.setAccountName(name);
+                                    umm.setOriginalId(accountMail.getMailId());
+                                    umm.setOriginalFolder(fn);
                                     messages.add(umm);
                                 }
                             }
@@ -1715,9 +2077,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             List<MailAccount> accounts = getAccounts();
             int length = accounts.size();
             final int undelegatedAccountId = access.getAccountId();
-            Executor executor = ThreadPools.getThreadPool().getExecutor();
-            TrackingCompletionService<List<MailMessage>> completionService =
-                new UnifiedInboxCompletionService<>(executor);
+            UnifiedInboxCompletionService<List<MailMessage>> completionService = new UnifiedInboxCompletionService<>(ThreadPools.getThreadPool());
             for (final MailAccount mailAccount : accounts) {
                 Session session  = this.session;
                 completionService.submit(new LoggingCallable<List<MailMessage>>(session) {
@@ -1745,6 +2105,8 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                     umm.setMailId(helper.setUID(accountId, fn, accountMail.getMailId()).toString());
                                     umm.setFolder(fullName);
                                     umm.setAccountId(accountId);
+                                    umm.setOriginalId(accountMail.getMailId());
+                                    umm.setOriginalFolder(fn);
                                     messages.add(umm);
                                 }
                             }
@@ -2125,6 +2487,8 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                     umm.setMailId(mailIds[pos]);
                     umm.setFolder(uiFullname);
                     umm.setAccountId(accountId);
+                    umm.setOriginalId(mail.getMailId());
+                    umm.setOriginalFolder(folder);
                 }
             }
         }

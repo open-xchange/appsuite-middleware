@@ -58,9 +58,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -91,8 +90,8 @@ import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.unifiedinbox.converters.UnifiedInboxFolderConverter;
 import com.openexchange.unifiedinbox.services.Services;
 import com.openexchange.unifiedinbox.utility.LoggingCallable;
-import com.openexchange.unifiedinbox.utility.TrackingCompletionService;
 import com.openexchange.unifiedinbox.utility.UnifiedInboxCompletionService;
+import com.openexchange.unifiedinbox.utility.UnifiedInboxCompletionService.Result;
 import com.openexchange.unifiedinbox.utility.UnifiedInboxUtility;
 import com.openexchange.user.UserService;
 
@@ -108,6 +107,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
     // private final UnifiedINBOXAccess access;
 
     private final int unifiedInboxId;
+    final UnifiedInboxAccess access;
     final Session session;
     private final Context ctx;
     private Locale locale;
@@ -123,6 +123,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
         super();
         // this.access = access;
         unifiedInboxId = access.getAccountId();
+        this.access = access;
         this.session = session;
         ctx = ContextStorage.getStorageContext(session.getContextId());
     }
@@ -151,10 +152,9 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
             return;
         }
         if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
-            final List<MailAccount> accounts = getAccounts();
-            final int length = accounts.size();
-            final Executor executor = ThreadPools.getThreadPool().getExecutor();
-            final TrackingCompletionService<Void> completionService = new UnifiedInboxCompletionService<Void>(executor);
+            List<MailAccount> accounts = getAccounts();
+            int length = accounts.size();
+            UnifiedInboxCompletionService<Void> completionService = new UnifiedInboxCompletionService<Void>(ThreadPools.getThreadPool());
             for (final MailAccount mailAccount : accounts) {
                 completionService.submit(new LoggingCallable<Void>(session) {
 
@@ -266,10 +266,9 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
             return new int[] {0,0};
         }
         if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
-            final List<MailAccount> accounts = getAccounts();
-            final int length = accounts.size();
-            final Executor executor = ThreadPools.getThreadPool().getExecutor();
-            final TrackingCompletionService<int[]> completionService = new UnifiedInboxCompletionService<int[]>(executor);
+            List<MailAccount> accounts = getAccounts();
+            int length = accounts.size();
+            UnifiedInboxCompletionService<int[]> completionService = new UnifiedInboxCompletionService<int[]>(ThreadPools.getThreadPool());
             for (final MailAccount mailAccount : accounts) {
                 completionService.submit(new LoggingCallable<int[]>(session) {
 
@@ -364,10 +363,9 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
             return 0;
         }
         if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
-            final List<MailAccount> accounts = getAccounts();
-            final int length = accounts.size();
-            final Executor executor = ThreadPools.getThreadPool().getExecutor();
-            final TrackingCompletionService<Integer> completionService = new UnifiedInboxCompletionService<Integer>(executor);
+            List<MailAccount> accounts = getAccounts();
+            int length = accounts.size();
+            UnifiedInboxCompletionService<Integer> completionService = new UnifiedInboxCompletionService<Integer>(ThreadPools.getThreadPool());
             for (final MailAccount mailAccount : accounts) {
                 completionService.submit(new LoggingCallable<Integer>(session) {
 
@@ -440,10 +438,9 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
             return 0;
         }
         if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
-            final List<MailAccount> accounts = getAccounts();
-            final int length = accounts.size();
-            final Executor executor = ThreadPools.getThreadPool().getExecutor();
-            final TrackingCompletionService<Integer> completionService = new UnifiedInboxCompletionService<Integer>(executor);
+            List<MailAccount> accounts = getAccounts();
+            int length = accounts.size();
+            UnifiedInboxCompletionService<Integer> completionService = new UnifiedInboxCompletionService<Integer>(ThreadPools.getThreadPool());
             for (final MailAccount mailAccount : accounts) {
                 completionService.submit(new LoggingCallable<Integer>(session) {
 
@@ -519,10 +516,9 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
             return 0;
         }
         if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
-            final List<MailAccount> accounts = getAccounts();
-            final int length = accounts.size();
-            final Executor executor = ThreadPools.getThreadPool().getExecutor();
-            final TrackingCompletionService<Integer> completionService = new UnifiedInboxCompletionService<Integer>(executor);
+            List<MailAccount> accounts = getAccounts();
+            int length = accounts.size();
+            UnifiedInboxCompletionService<Integer> completionService = new UnifiedInboxCompletionService<Integer>(ThreadPools.getThreadPool());
             for (final MailAccount mailAccount : accounts) {
                 completionService.submit(new LoggingCallable<Integer>(session) {
 
@@ -708,9 +704,8 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
             }
             accounts = l.toArray(new MailAccount[l.size()]);
         }
-        final int nAccounts = accounts.length;
-        final Executor executor = ThreadPools.getThreadPool().getExecutor();
-        final TrackingCompletionService<int[][]> completionService = new UnifiedInboxCompletionService<int[][]>(executor);
+        int nAccounts = accounts.length;
+        UnifiedInboxCompletionService<int[][]> completionService = new UnifiedInboxCompletionService<int[][]>(ThreadPools.getThreadPool());
         // Create a task for each account
         for (int i = 0; i < nAccounts; i++) {
             final int accountId = accounts[i].getId();
@@ -749,9 +744,8 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
     }
 
     private MailFolder[] getRootSubfoldersByFolder() throws OXException {
-        final MailFolder[] retval = new MailFolder[5];
-        final Executor executor = ThreadPools.getThreadPool().getExecutor();
-        final TrackingCompletionService<Retval> completionService = new UnifiedInboxCompletionService<Retval>(executor);
+        MailFolder[] retval = new MailFolder[5];
+        UnifiedInboxCompletionService<Retval> completionService = new UnifiedInboxCompletionService<Retval>(ThreadPools.getThreadPool());
         // Init names
         final String[][] names = new String[5][];
         names[0] = new String[] { UnifiedInboxAccess.INBOX, getLocalizedName(UnifiedInboxAccess.INBOX) };
@@ -780,7 +774,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
             int completed = 0;
             while (completed < retval.length) {
                 // No timeout
-                final Future<Retval> future = completionService.poll(UnifiedInboxUtility.getMaxRunningMillis(), TimeUnit.MILLISECONDS);
+                Result<Retval> future = completionService.poll(UnifiedInboxUtility.getMaxRunningMillis(), TimeUnit.MILLISECONDS);
                 completed++;
                 if (null != future) {
                     final Retval r = future.get();
@@ -815,9 +809,8 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
         }
         final Session s = session;
         final int unifiedInboxAccountId = unifiedInboxId;
-        final int length = accounts.length;
-        final Executor executor = ThreadPools.getThreadPool().getExecutor();
-        final TrackingCompletionService<MailFolder> completionService = new UnifiedInboxCompletionService<MailFolder>(executor);
+        int length = accounts.length;
+        UnifiedInboxCompletionService<MailFolder> completionService = new UnifiedInboxCompletionService<MailFolder>(ThreadPools.getThreadPool());
         for (final MailAccount mailAccount : accounts) {
             completionService.submit(new LoggingCallable<MailFolder>(session) {
 
@@ -844,6 +837,8 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                         mailFolder.setDefaultFolderType(DefaultFolderType.NONE);
                         return mailFolder;
                     } catch (final OXException e) {
+                        e.setCategory(Category.CATEGORY_WARNING);
+                        access.addWarnings(Collections.singleton(e));
                         getLogger().debug("", e);
                         return null;
                     } finally {
@@ -922,10 +917,9 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
              */
 
             // Clear Unified Mail folder
-            final List<MailAccount> accounts = getAccounts();
-            final int length = accounts.size();
-            final Executor executor = ThreadPools.getThreadPool().getExecutor();
-            final TrackingCompletionService<Void> completionService = new UnifiedInboxCompletionService<Void>(executor);
+            List<MailAccount> accounts = getAccounts();
+            int length = accounts.size();
+            UnifiedInboxCompletionService<Void> completionService = new UnifiedInboxCompletionService<Void>(ThreadPools.getThreadPool());
             for (final MailAccount mailAccount : accounts) {
                 completionService.submit(new LoggingCallable<Void>(session) {
 

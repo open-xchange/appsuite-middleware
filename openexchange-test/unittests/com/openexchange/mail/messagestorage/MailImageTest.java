@@ -187,7 +187,7 @@ public final class MailImageTest extends AbstractMailTest {
 			try {
 				final MailMessage mail = mailAccess.getMessageStorage().getMessage("INBOX", uid, true);
 
-				final JsonMessageHandler messageHandler = new JsonMessageHandler(MailAccount.DEFAULT_ID, null, mail, DisplayMode.DISPLAY, false,
+				final JsonMessageHandler messageHandler = new JsonMessageHandler(MailAccount.DEFAULT_ID, null, mail, DisplayMode.DISPLAY, false, true,
 						session, UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
 								session.getContextId()), false, -1);
 				new MailMessageParser().parseMailMessage(mail, messageHandler);

@@ -209,44 +209,48 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     public IDTuple saveFileMetadata(File file, long sequenceNumber, List<Field> modifiedFields) throws OXException {
         if (file.getId() == FileStorageFileAccess.NEW) {
             // Create new, empty file ("touch")
+            UploadUploader upload = null;
             try {
                 String path = toPath(file.getFolderId(), file.getFileName());
-                UploadUploader upload = client.files().upload(path);
+                upload = client.files().upload(path);
                 FileMetadata metadata = upload.finish();
                 DropboxFile dbxFile = new DropboxFile(metadata, userId);
                 file.copyFrom(dbxFile, copyFields);
                 return dbxFile.getIDTuple();
             } catch (DbxException e) {
                 throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
+            } finally {
+                Streams.close(upload);
             }
-        } else {
-            String path = toPath(file.getFolderId(), file.getId());
+        }
+        
+        // Update an existing file
+        String path = toPath(file.getFolderId(), file.getId());
 
-            // Rename
-            if (modifiedFields != null && modifiedFields.contains(Field.FILENAME)) {
-                String toPath = toPath(file.getFolderId(), file.getFileName());
-                if (!path.equals(toPath)) {
-                    try {
-                        if (Strings.equalsNormalizedIgnoreCase(path, toPath)) {
-                            String filePath = toPath(file.getFolderId(), UUID.randomUUID().toString() + ' ' + file.getFileName());
-                            Metadata metadata = client.files().move(path, filePath);
-                            path = metadata.getPathDisplay();
-                        }
-
-                        Metadata metadata = client.files().move(path, toPath);
-                        DropboxFile dbxFile = new DropboxFile((FileMetadata) metadata, userId);
-                        file.copyFrom(dbxFile, copyFields);
-                        return dbxFile.getIDTuple();
-                    } catch (RelocationErrorException e) {
-                        throw DropboxExceptionHandler.handleRelocationErrorException(e, file.getFolderId(), file.getId());
-                    } catch (DbxException e) {
-                        throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
+        // Rename
+        if (modifiedFields != null && modifiedFields.contains(Field.FILENAME)) {
+            String toPath = toPath(file.getFolderId(), file.getFileName());
+            if (!path.equals(toPath)) {
+                try {
+                    if (Strings.equalsNormalizedIgnoreCase(path, toPath)) {
+                        String filePath = toPath(file.getFolderId(), UUID.randomUUID().toString() + ' ' + file.getFileName());
+                        Metadata metadata = client.files().move(path, filePath);
+                        path = metadata.getPathDisplay();
                     }
+
+                    Metadata metadata = client.files().move(path, toPath);
+                    DropboxFile dbxFile = new DropboxFile((FileMetadata) metadata, userId);
+                    file.copyFrom(dbxFile, copyFields);
+                    return dbxFile.getIDTuple();
+                } catch (RelocationErrorException e) {
+                    throw DropboxExceptionHandler.handleRelocationErrorException(e, file.getFolderId(), file.getId());
+                } catch (DbxException e) {
+                    throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
                 }
             }
-
-            return new IDTuple(file.getFolderId(), file.getId());
         }
+
+        return new IDTuple(file.getFolderId(), file.getId());
     }
 
     /*
