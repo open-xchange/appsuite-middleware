@@ -136,7 +136,7 @@ public class TempCleaner implements Runnable {
                     return;
                 }
             } else {
-                new Thread(tempCleaner).run();
+                new Thread(tempCleaner, "Drive-TempCleaner").start();
             }
         } catch (OXException e) {
             LOG.error("Error starting temp cleaner", e);
