@@ -205,9 +205,10 @@ public class Check {
     }
 
     /**
-     * Checks that the classification is supported based on the given folder's type, if it is different from {@link Classification#PUBLIC}.
+     * Checks that the classification is supported based on the given folder's type, if it is not <code>null</code> and different from
+     * {@link Classification#PUBLIC}.
      *
-     * @param classification The classification to check
+     * @param classification The classification to check, or <code>null</code> to skip the check
      * @param folder The target folder for the event
      * @return The passed classification, after it was checked for validity
      * @throws OXException {@link CalendarExceptionCodes#UNSUPPORTED_CLASSIFICATION}
@@ -220,19 +221,23 @@ public class Check {
     }
 
     /**
-     * Checks that the classification is supported during move operations based on the given source- and target folder's type., if it is
-     * different from {@link Classification#PUBLIC}.
+     * Checks that the classification is supported during move operations based on the given source- and target folder's type, if it is
+     * not <code>null</code> and different from {@link Classification#PUBLIC}.
+     * <p/>
+     * A move of a confidentially- or private-classified event will be denied in case the target folder is <i>public</i>, or the target
+     * folder's calendar user is different from the sourcefolder's calendar user.
      *
-     * @param classification The classification to check
-     * @param folder The source folder for the event
-     * @param targetFolder The target folder for the event
+     * @param classification The classification to check, or <code>null</code> to skip the check
+     * @param folder The source folder of the event
+     * @param targetFolder The target folder of the event
      * @return The passed classification, after it was checked for validity
-     * @throws OXException {@link CalendarExceptionCodes#UNSUPPORTED_CLASSIFICATION}
+     * @throws OXException {@link CalendarExceptionCodes#UNSUPPORTED_CLASSIFICATION_FOR_MOVE}
      */
     public static Classification classificationIsValidOnMove(Classification classification, UserizedFolder folder, UserizedFolder targetFolder) throws OXException {
         if (null != classification && false == Classification.PUBLIC.equals(classification)) {
             if (PublicType.getInstance().equals(targetFolder.getType()) || getCalendarUser(folder).getId() != getCalendarUser(targetFolder).getId()) {
-                throw CalendarExceptionCodes.UNSUPPORTED_CLASSIFICATION.create(String.valueOf(classification), I(i(targetFolder)), targetFolder.getType());
+                throw CalendarExceptionCodes.UNSUPPORTED_CLASSIFICATION_FOR_MOVE.create(
+                    String.valueOf(classification), I(i(folder)), folder.getType(), I(i(targetFolder)), targetFolder.getType());
             }
         }
         return classification;

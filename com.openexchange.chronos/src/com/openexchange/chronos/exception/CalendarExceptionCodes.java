@@ -63,6 +63,8 @@ import static com.openexchange.chronos.exception.CalendarExceptionMessages.MOVE_
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.NO_PERMISSION_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.QUERY_TOO_SHORT_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UID_CONFLICT_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_CLASSIFICATION_FOR_MOVE_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_CLASSIFICATION_MSG;
 import static com.openexchange.exception.OXExceptionStrings.MESSAGE;
 import com.openexchange.exception.Category;
@@ -179,6 +181,16 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * <li>Unsupported occurrence move [id %1$d, folder %2$d, target folder %3$d]</li>
      */
     MOVE_OCCURRENCE_NOT_SUPPORTED("Unsupported occurrence move [id %1$d, folder %2$d, target folder %3$d]", MOVE_OCCURRENCE_NOT_SUPPORTED_MSG, Category.CATEGORY_USER_INPUT, 4225),
+    /**
+     * <li>Events classified as \"private\" or \"confidential\" cannot be moved to this type of folder.</li>
+     * <li>Unsupported classification for move [classification %1$s, folder %2$d, type %3$s, target folder %4$d, target type %5$s]</li>
+     */
+    UNSUPPORTED_CLASSIFICATION_FOR_MOVE("Unsupported classification for move [classification %1$s, folder %2$d, type %3$s, target folder %4$d, target type %5$s]", UNSUPPORTED_CLASSIFICATION_FOR_MOVE_MSG, Category.CATEGORY_USER_INPUT, 4226),
+    /**
+     * <li>Occurrences of event series must not be classified differently.</li>
+     * <li>Unsupported classification for occurrence [classification %1$s, series id %2$d, recurrence id %3$s]</li>
+     */
+    UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE("Unsupported classification for occurrence [classification %1$s, series id %2$d, recurrence id %3$s]", UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE_MSG, Category.CATEGORY_USER_INPUT, 4227),
     /**
      * <li>Error while reading/writing data from/to the database.</li>
      * <li>Unexpected database error [%1$s]</li>

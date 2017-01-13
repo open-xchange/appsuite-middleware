@@ -75,6 +75,10 @@ public class CalendarExceptionMessages implements LocalizableStrings {
 
     public static final String UNSUPPORTED_CLASSIFICATION_MSG = "Events in non-personal folders must not be classified as \"private\" or \"confidential\".";
 
+    public static final String UNSUPPORTED_CLASSIFICATION_FOR_MOVE_MSG = "Events classified as \"private\" or \"confidential\" cannot be moved to this type of folder.";
+
+    public static final String UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE_MSG = "Occurrences of event series must not be classified differently.";
+
     public static final String INVALID_RRULE_MSG = "The supplied recurrence rule is invalid. Please correct the rule and try again.";
 
     public static final String INVALID_RECURRENCE_ID_MSG = "The targeted occurrence is not part of the event series. Please select a valid recurrence identifier and try again.";

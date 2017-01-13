@@ -574,6 +574,10 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                 case CLASSIFICATION:
                     Check.mandatoryFields(eventUpdate, EventField.CLASSIFICATION);
                     Check.classificationIsValid(eventUpdate.getClassification(), folder);
+                    if (isSeriesException(originalEvent)) {
+                        throw CalendarExceptionCodes.UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE.create(
+                            String.valueOf(eventUpdate.getClassification()), I(originalEvent.getSeriesId()), String.valueOf(originalEvent.getRecurrenceId()));
+                    }
                     break;
                 case ALL_DAY:
                     /*

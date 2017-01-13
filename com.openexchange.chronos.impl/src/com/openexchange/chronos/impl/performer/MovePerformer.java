@@ -134,6 +134,7 @@ public class MovePerformer extends AbstractUpdatePerformer {
          * check current session user's permissions
          */
         Check.eventIsInFolder(originalEvent, folder);
+        Check.classificationIsValidOnMove(originalEvent.getClassification(), folder, targetFolder);
         requireCalendarPermission(targetFolder, CREATE_OBJECTS_IN_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS);
         if (session.getUser().getId() == originalEvent.getCreatedBy()) {
             requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, WRITE_OWN_OBJECTS, DELETE_OWN_OBJECTS);
