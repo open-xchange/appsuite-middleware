@@ -2054,8 +2054,8 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     private final void insertUserParticipants(final CalendarDataObject cdao, final Connection writecon, final int uid) throws SQLException, OXException {
         final UserParticipant users[] = cdao.getUsers();
-        Arrays.sort(users);
         if (users != null && users.length > 0) {
+            Arrays.sort(users);
             PreparedStatement stmt = null;
             try {
                 stmt = writecon.prepareStatement(SQL_INSERT_USER);
