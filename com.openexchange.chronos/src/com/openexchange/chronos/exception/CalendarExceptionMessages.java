@@ -65,6 +65,8 @@ public class CalendarExceptionMessages implements LocalizableStrings {
 
     public static final String NO_PERMISSION_MSG = "The operation could not be completed due to insufficient permissions.";
 
+    public static final String UNSUPPORTED_FOLDER_MSG = "The supplied folder is not supported. Please select a valid folder and try again.";
+
     public static final String CONCURRENT_MODIFICATION_MSG = "The operation could not be completed due to a concurrent modification. Please reload the data and try again.";
 
     public static final String UID_CONFLICT_MSG = "The event could not be created due to another conflicting event with the same unique identifier.";

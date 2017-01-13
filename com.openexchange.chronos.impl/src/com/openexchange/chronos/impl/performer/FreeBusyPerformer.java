@@ -228,7 +228,7 @@ public class FreeBusyPerformer extends AbstractQueryPerformer {
         if (0 < folderID) {
             EventMapper.getInstance().copy(event, resultingEvent, FREEBUSY_FIELDS);
             resultingEvent.setFolderId(folderID);
-            return anonymizeIfNeeded(resultingEvent, session.getUser().getId());
+            return anonymizeIfNeeded(session, resultingEvent);
         } else {
             EventMapper.getInstance().copy(event, resultingEvent, RESTRICTED_FREEBUSY_FIELDS);
             return resultingEvent;

@@ -66,6 +66,7 @@ import static com.openexchange.chronos.exception.CalendarExceptionMessages.UID_C
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_CLASSIFICATION_FOR_MOVE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_CLASSIFICATION_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_FOLDER_MSG;
 import static com.openexchange.exception.OXExceptionStrings.MESSAGE;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
@@ -142,6 +143,11 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      */
     FORBIDDEN_CHANGE("Forbidden change [id %1$d, field %2$s]", NO_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 4035),
     /**
+     * <li>The supplied folder is not supported. Please select a valid folder and try again.</li>
+     * <li>Unsupported folder [id %1$s, content type %2$s]</li>
+     */
+    UNSUPPORTED_FOLDER("Unsupported folder [id %1$s, content type %2$s]", UNSUPPORTED_FOLDER_MSG, Category.CATEGORY_USER_INPUT, 4060),
+    /**
      * <li>The operation could not be completed due to a concurrent modification. Please reload the data and try again.</li>
      * <li>Concurrent modification [id %1$d, client timestamp %2$d, actual timestamp %3$d]</li>
      */
@@ -187,10 +193,15 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      */
     UNSUPPORTED_CLASSIFICATION_FOR_MOVE("Unsupported classification for move [classification %1$s, folder %2$d, type %3$s, target folder %4$d, target type %5$s]", UNSUPPORTED_CLASSIFICATION_FOR_MOVE_MSG, Category.CATEGORY_USER_INPUT, 4226),
     /**
+     * <li>The character \"%1$s\" in field \"%2$s\" can't be saved. Please remove the problematic character and try again.</li>
+     * <li>Incorrect string [string %1$s, field %2$s, column %3$s]</li>
+     */
+    INCORRECT_STRING("Incorrect string [string %1$s, field %2$s, column %3$s]", INCORRECT_STRING_MSG, Category.CATEGORY_USER_INPUT, 4227),
+    /**
      * <li>Occurrences of event series must not be classified differently.</li>
      * <li>Unsupported classification for occurrence [classification %1$s, series id %2$d, recurrence id %3$s]</li>
      */
-    UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE("Unsupported classification for occurrence [classification %1$s, series id %2$d, recurrence id %3$s]", UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE_MSG, Category.CATEGORY_USER_INPUT, 4227),
+    UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE("Unsupported classification for occurrence [classification %1$s, series id %2$d, recurrence id %3$s]", UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE_MSG, Category.CATEGORY_USER_INPUT, 4228),
     /**
      * <li>Error while reading/writing data from/to the database.</li>
      * <li>Unexpected database error [%1$s]</li>
@@ -201,11 +212,6 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * <li>Data truncation [field %1$s, limit %2$d, current %3$d]</li>
      */
     DATA_TRUNCATION("Data truncation [field %1$s, limit %2$d, current %3$d]", DATA_TRUNCATION_MSG, Category.CATEGORY_CAPACITY, 5070),
-    /**
-     * <li>The character \"%1$s\" in field \"%2$s\" can't be saved. Please remove the problematic character and try again.</li>
-     * <li>Incorrect string [string %1$s, field %2$s, column %3$s]</li>
-     */
-    INCORRECT_STRING("Incorrect string [string %1$s, field %2$s, column %3$s]", INCORRECT_STRING_MSG, Category.CATEGORY_USER_INPUT, 4227),
 
     ;
 

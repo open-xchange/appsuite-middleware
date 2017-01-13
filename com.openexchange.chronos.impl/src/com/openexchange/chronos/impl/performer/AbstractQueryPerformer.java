@@ -201,7 +201,7 @@ public abstract class AbstractQueryPerformer {
                 continue;
             }
             event.setFolderId(i(inFolder));
-            event = anonymizeIfNeeded(event, session.getUser().getId());
+            event = anonymizeIfNeeded(session, event);
             if (isSeriesMaster(event)) {
                 if (isResolveOccurrences(session)) {
                     processedEvents.addAll(resolveOccurrences(event));
@@ -237,7 +237,7 @@ public abstract class AbstractQueryPerformer {
                 continue;
             }
             event.setFolderId(Utils.getFolderView(storage, event, forUser));
-            event = anonymizeIfNeeded(event, forUser);
+            event = anonymizeIfNeeded(session, event);
             if (isSeriesMaster(event)) {
                 if (isResolveOccurrences(session)) {
                     processedEvents.addAll(resolveOccurrences(event));

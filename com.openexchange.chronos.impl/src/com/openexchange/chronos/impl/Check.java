@@ -100,11 +100,11 @@ public class Check {
      * @param requiredReadPermission The required read object permission, or {@link Permission#NO_PERMISSIONS} if none required
      * @param requiredWritePermission The required write object permission, or {@link Permission#NO_PERMISSIONS} if none required
      * @param requiredDeletePermission The required delete object permission, or {@link Permission#NO_PERMISSIONS} if none required
-     * @throws OXException {@link CalendarExceptionCodes#NO_READ_PERMISSION}, {@link CalendarExceptionCodes#NO_WRITE_PERMISSION}, {@link CalendarExceptionCodes#NO_DELETE_PERMISSION}
+     * @throws OXException {@link CalendarExceptionCodes#UNSUPPORTED_FOLDER}, {@link CalendarExceptionCodes#NO_READ_PERMISSION}, {@link CalendarExceptionCodes#NO_WRITE_PERMISSION}, {@link CalendarExceptionCodes#NO_DELETE_PERMISSION}
      */
     public static void requireCalendarPermission(UserizedFolder folder, int requiredFolderPermission, int requiredReadPermission, int requiredWritePermission, int requiredDeletePermission) throws OXException {
         if (false == CalendarContentType.class.isInstance(folder.getContentType())) {
-            throw CalendarExceptionCodes.NO_READ_PERMISSION.create(I(folder.getContext().getContextId()), I(folder.getUser().getId()), I(i(folder)));
+            throw CalendarExceptionCodes.UNSUPPORTED_FOLDER.create(folder.getID(), String.valueOf(folder.getContentType()));
         }
         Permission ownPermission = folder.getOwnPermission();
         if (ownPermission.getFolderPermission() < requiredFolderPermission) {

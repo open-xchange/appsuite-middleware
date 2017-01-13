@@ -112,7 +112,7 @@ public class GetPerformer extends AbstractQueryPerformer {
         if (isSeriesMaster(event)) {
             event = applyExceptionDates(storage, event, getCalendarUser(folder).getId());
         }
-        return anonymizeIfNeeded(event, session.getUser().getId());
+        return anonymizeIfNeeded(session, event);
     }
 
 }

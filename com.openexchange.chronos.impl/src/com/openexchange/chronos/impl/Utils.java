@@ -72,6 +72,7 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
+import com.openexchange.chronos.CalendarStrings;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -101,6 +102,7 @@ import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.Operand;
@@ -332,33 +334,34 @@ public class Utils {
      *
      * @param folder The folder to get the identifier for
      * @return The folder identifier
+     * @throws OXException {@link CalendarExceptionCodes#UNSUPPORTED_FOLDER}
      */
     public static int i(UserizedFolder folder) throws OXException {
         try {
             return Integer.parseInt(folder.getID());
         } catch (NumberFormatException e) {
-            throw OXException.general("unsupported folder id: " + folder.getID());//TODO
+            throw CalendarExceptionCodes.UNSUPPORTED_FOLDER.create(e, folder.getID(), String.valueOf(folder.getContentType()));
         }
     }
 
     /**
-     * "Anonymizes" an event in case it is not marked as {@link Classification#PUBLIC}, and the session's user is neither creator, nor
+     * <i>Anonymizes</i> an event in case it is not marked as {@link Classification#PUBLIC}, and the session's user is neither creator, nor
      * attendee of the event.
      * <p/>
      * After anonymization, the event will only contain those properties defined in {@link #NON_CLASSIFIED_FIELDS}, as well as the
      * generic summary "Private".
      *
+     * @param session The calendar session
      * @param event The event to anonymize
-     * @param userID The identifier of the user requesting the event data
      * @return The potentially anonymized event
      */
-    public static Event anonymizeIfNeeded(Event event, int userID) throws OXException {
-        if (false == isClassifiedFor(event, userID)) {
+    public static Event anonymizeIfNeeded(CalendarSession session, Event event) throws OXException {
+        if (false == isClassifiedFor(event, session.getUser().getId())) {
             return event;
         }
         Event anonymizedEvent = new Event();
         EventMapper.getInstance().copy(event, anonymizedEvent, NON_CLASSIFIED_FIELDS);
-        anonymizedEvent.setSummary("Private"); // TODO i18n?
+        anonymizedEvent.setSummary(StringHelper.valueOf(session.getUser().getLocale()).getString(CalendarStrings.SUMMARY_PRIVATE));
         return anonymizedEvent;
     }
 

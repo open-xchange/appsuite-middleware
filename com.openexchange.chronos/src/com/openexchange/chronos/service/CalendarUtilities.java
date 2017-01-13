@@ -61,8 +61,6 @@ import com.openexchange.exception.OXException;
  */
 public interface CalendarUtilities {
 
-    UpdateResult compare(Event originalEvent, Event updatedEvent) throws OXException;
-
     /**
      * Compares all properties of an event to another one.
      *

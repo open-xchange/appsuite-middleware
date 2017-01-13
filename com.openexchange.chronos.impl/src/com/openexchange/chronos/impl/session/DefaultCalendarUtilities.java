@@ -52,10 +52,8 @@ package com.openexchange.chronos.impl.session;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.impl.EventUpdateImpl;
-import com.openexchange.chronos.impl.UpdateResultImpl;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.EventUpdate;
-import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.exception.OXException;
 
 /**
@@ -71,12 +69,6 @@ public class DefaultCalendarUtilities implements CalendarUtilities {
      */
     public DefaultCalendarUtilities() {
         super();
-    }
-
-    @Override
-    public UpdateResult compare(Event originalEvent, Event updatedEvent) throws OXException {
-
-        return new UpdateResultImpl(originalEvent, updatedEvent);
     }
 
     @Override
