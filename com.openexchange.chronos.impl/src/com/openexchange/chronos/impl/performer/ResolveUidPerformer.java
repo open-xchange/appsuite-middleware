@@ -99,8 +99,13 @@ public class ResolveUidPerformer extends AbstractQueryPerformer {
         /*
          * search for an event matching the UID
          */
-        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, null, new EventField[] { EventField.ID });
-        return 0 < events.size() ? events.get(0).getId() : 0;
+        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, null, new EventField[] { EventField.ID, EventField.UID });
+        for (Event foundEvent : events) {
+            if (uid.equals(foundEvent.getUid())) {
+                return foundEvent.getId();
+            }
+        }
+        return 0;
     }
 
 }

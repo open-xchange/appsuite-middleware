@@ -69,7 +69,6 @@ import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.compat.Recurrence;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.CalendarService;
-import com.openexchange.chronos.service.SortOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
@@ -314,9 +313,11 @@ public class Check {
                     .addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID)))
                 )
             ;
-            List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SortOptions().setLimits(0, 1), new EventField[] { EventField.ID });
-            if (0 < events.size()) {
-                throw CalendarExceptionCodes.UID_CONFLICT.create(uid, I(events.get(0).getId()));
+            List<Event> events = storage.getEventStorage().searchEvents(searchTerm, null, new EventField[] { EventField.ID, EventField.UID });
+            for (Event foundEvent : events) {
+                if (uid.equals(foundEvent.getUid())) {
+                    throw CalendarExceptionCodes.UID_CONFLICT.create(uid, I(foundEvent.getId()));
+                }
             }
         }
         return uid;
