@@ -104,4 +104,15 @@ else
     umask 066
 fi
 
+# On distros without systemd we might get called via su which might have
+# applied limits from /etc/security/limits.* depending on the distro. Assure
+# that user configured limits are used
+if ! pidof systemd > /dev/null 2>&1
+then
+  NRFILES=${NRFILES:-65536}
+  NPROC=${NPROC:-65536}
+  ulimit -n ${NRFILE} 2> ${CONSOLELOG}
+  ulimit -u ${NPROC} 2> ${CONSOLELOG}
+fi
+
 exec $JAVA_BIN $JAVA_OPTS $CLASSPATH -jar /opt/open-xchange/bundles/org.eclipse.osgi_3.11.0.v20160603-1336.jar -configuration file:$OSGIPATH >> $CONSOLELOG 2>&1
