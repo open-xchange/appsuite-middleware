@@ -56,6 +56,7 @@ import java.io.IOException;
 import java.rmi.Naming;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -77,6 +78,8 @@ import org.apache.http.util.EntityUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.runner.RunWith;
+import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.openexchange.ajax.framework.ProvisioningSetup;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
@@ -98,6 +101,7 @@ import com.openexchange.test.pool.TestUser;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
+@RunWith(ConcurrentTestRunner.class)
 public abstract class EndpointTest {
 
     public static final String AUTHORIZATION_ENDPOINT = "/ajax/" + OAuthProviderConstants.AUTHORIZATION_SERVLET_ALIAS;
@@ -141,7 +145,7 @@ public abstract class EndpointTest {
         client.getConnectionManager().getSchemeRegistry().register(new Scheme("https", 443, ssf));
 
         // register client application
-        ClientDataDto clientData = prepareClient("Test App " + System.currentTimeMillis());
+        ClientDataDto clientData = prepareClient("Test App " + UUID.randomUUID().toString());
         RemoteClientManagement clientManagement = (RemoteClientManagement) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + RemoteClientManagement.RMI_NAME);
         oauthClient = clientManagement.registerClient(RemoteClientManagement.DEFAULT_GID, clientData, AbstractOAuthTest.getMasterAdminCredentials());
 

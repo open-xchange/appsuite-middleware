@@ -68,7 +68,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.FolderUpdatesResponse;
@@ -103,6 +102,7 @@ import com.openexchange.oauth.provider.resourceserver.scope.Scope;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tasks.json.TaskActionFactory;
 import com.openexchange.test.FolderTestManager;
+import com.openexchange.test.concurrent.ParallelParameterized;
 
 /**
  * {@link ReadFoldersTest}
@@ -110,7 +110,7 @@ import com.openexchange.test.FolderTestManager;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-@RunWith(Parameterized.class)
+@RunWith(ParallelParameterized.class)
 public class ReadFoldersTest extends AbstractOAuthTest {
 
     private UserValues values;
@@ -215,7 +215,7 @@ public class ReadFoldersTest extends AbstractOAuthTest {
         ftm.insertFoldersOnServer(new FolderObject[] { privateSubfolder, publicSubfolder });
 
         // prepare shared folders
-        ajaxClient2 = new AJAXClient(testContext.acquireUser());
+        ajaxClient2 = getClient2();
         ftm2 = new FolderTestManager(ajaxClient2);
         // remove any non-private permissions from client2s private folder
         OCLPermission adminPermission = new OCLPermission();

@@ -57,6 +57,7 @@ import com.openexchange.ajax.drive.DriveAJAXSuite;
 import com.openexchange.ajax.find.FindTestSuite;
 import com.openexchange.ajax.framework.ProvisioningSetup;
 import com.openexchange.ajax.jslob.JSlobTestSuite;
+import com.openexchange.ajax.oauth.provider.OAuthProviderTests;
 import com.openexchange.ajax.onboarding.OnboardingAJAXSuite;
 import com.openexchange.ajax.share.ShareAJAXSuite;
 import com.openexchange.configuration.AJAXConfig;
@@ -69,7 +70,6 @@ import com.openexchange.test.concurrent.ParallelSuite;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 @RunWith(ParallelSuite.class)
-//@RunWith(Suite.class)
 @Suite.SuiteClasses({
     com.openexchange.SmokeTestSuite.class,
     com.openexchange.ajax.FolderTest.class,
@@ -135,12 +135,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
     OnboardingAJAXSuite.class,
     com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRendererTest.class,
     AdvertisementTestSuite.class,
-    
-    //FIXME MS re-add
-//    OAuthProviderTests.class,
-//    com.openexchange.push.udp.PushRegisterTestSuite.class,
-//    com.openexchange.push.udp.PushTestSuite.class,
-
+    OAuthProviderTests.class,
 })
 public final class InterfaceTests {
 

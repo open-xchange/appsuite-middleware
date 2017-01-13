@@ -59,7 +59,7 @@ import org.junit.runners.model.RunnerScheduler;
  * {@link ParallelParameterized}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since v7.8.3
+ * @since v7.8.4
  */
 public class ParallelParameterized extends Parameterized {
 

@@ -121,8 +121,6 @@ import org.junit.runners.Suite;
     com.openexchange.ajax.voipnow.ClientDetailsTest.class,
     com.openexchange.ajax.voipnow.ExtensionDetailsTest.class,
     com.openexchange.ajax.voipnow.NewCallTest.class,
-    com.openexchange.push.udp.PushResponseTest.class,
-    com.openexchange.push.udp.RegisterTest.class,
     com.openexchange.webdav.FreeBusyTest.class,
     com.openexchange.webdav.ICalTest.class,
     com.openexchange.webdav.xml.appointment.Bug12338Test.class,

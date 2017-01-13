@@ -60,7 +60,7 @@ import org.junit.runners.model.RunnerScheduler;
  * {@link ParallelSuite}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since v7.8.3
+ * @since v7.8.4
  */
 public class ParallelSuite extends Suite {
     public ParallelSuite(Class<?> klass, RunnerBuilder builder) throws org.junit.runners.model.InitializationError {

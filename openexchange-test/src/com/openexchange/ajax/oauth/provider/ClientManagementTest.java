@@ -70,6 +70,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.ajax.framework.ProvisioningSetup;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
@@ -104,6 +105,7 @@ public class ClientManagementTest {
     @BeforeClass
     public static void initTestFramework() throws Exception {
         AJAXConfig.init();
+        ProvisioningSetup.init();
     }
 
     @Before

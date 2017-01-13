@@ -92,7 +92,6 @@ public abstract class AbstractOAuthTest extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
         // register client application
         clientApp = registerTestClient();
         if (scope == null) {
