@@ -128,15 +128,21 @@ public class ID implements Serializable {
      */
     public ID(final String id, String defaultContext) {
         IDComponents idComponents = IDComponentsParser.parse(id);
-        protocol = idComponents.protocol;
-        component = idComponents.component;
-        user = idComponents.user;
         String context = idComponents.context;
-        this.context = context == null ? defaultContext : context;
-        resource = idComponents.resource;
-        sanitize();
-        validate();
-
+        if (context == null) {
+            context = defaultContext;
+            if (null == context) {
+                throw new IllegalArgumentException("Context information is obligatory for IDs");
+            }
+        }
+        if (idComponents.user == null) {
+            throw new IllegalArgumentException("User information is obligatory for IDs");
+        }
+        protocol = saneString(idComponents.protocol);
+        component = saneString(idComponents.component);
+        user = idComponents.user;
+        this.context = context;
+        resource = saneString(idComponents.resource);
     }
 
     /**
@@ -147,14 +153,17 @@ public class ID implements Serializable {
      */
     public ID(final String id) {
         IDComponents idComponents = IDComponentsParser.parse(id);
-        protocol = idComponents.protocol;
-        component = idComponents.component;
+        if (idComponents.context == null) {
+            throw new IllegalArgumentException("Context information is obligatory for IDs");
+        }
+        if (idComponents.user == null) {
+            throw new IllegalArgumentException("User information is obligatory for IDs");
+        }
+        protocol = saneString(idComponents.protocol);
+        component = saneString(idComponents.component);
         user = idComponents.user;
         context = idComponents.context;
-        resource = idComponents.resource;
-
-        sanitize();
-        validate();
+        resource = saneString(idComponents.resource);
     }
 
     /**
@@ -182,13 +191,17 @@ public class ID implements Serializable {
      */
     public ID(final String protocol, final String component, final String user, final String context, final String resource) {
         super();
-        this.protocol = protocol;
+        if (context == null) {
+            throw new IllegalArgumentException("Context information is obligatory for IDs");
+        }
+        if (user == null) {
+            throw new IllegalArgumentException("User information is obligatory for IDs");
+        }
+        this.protocol = saneString(protocol);
         this.user = user;
         this.context = context;
-        this.resource = resource;
-        this.component = component;
-        sanitize();
-        validate();
+        this.resource = saneString(resource);
+        this.component = saneString(component);
     }
 
     /**
@@ -205,56 +218,30 @@ public class ID implements Serializable {
      */
     public ID(final String protocol, final String component, final String user, final String context, final String resource, final String cachedStringRepresentation) {
         super();
-        this.protocol = protocol;
-        this.user = user;
-        this.context = context;
-        this.resource = resource;
-        this.component = component;
-        this.cachedStringRepresentation = Strings.isEmpty(cachedStringRepresentation) ? null : cachedStringRepresentation;
-        sanitize();
-        validate();
-    }
-
-    /**
-     * Check optional id components for empty strings and sanitize by setting to null or default values.
-     */
-    protected void sanitize() {
-        String protocol = this.protocol;
-        if (Strings.isEmpty(protocol)) {
-            this.protocol = null;
-        }
-
-        String resource = this.resource;
-        if (Strings.isEmpty(resource)) {
-            this.resource = null;
-        }
-
-        String component = this.component;
-        if (Strings.isEmpty(component)) {
-            this.component = null;
-        }
-    }
-
-    /*
-     * Validate that mandatory id components exist.
-     */
-    protected void validate() throws IllegalArgumentException {
-        if (user == null) {
-            throw new IllegalArgumentException("User information is obligatory for IDs");
-        }
-
         if (context == null) {
             throw new IllegalArgumentException("Context information is obligatory for IDs");
         }
+        if (user == null) {
+            throw new IllegalArgumentException("User information is obligatory for IDs");
+        }
+        this.protocol = saneString(protocol);
+        this.user = user;
+        this.context = context;
+        this.resource = saneString(resource);
+        this.component = saneString(component);
+        this.cachedStringRepresentation = Strings.isEmpty(cachedStringRepresentation) ? null : cachedStringRepresentation;
+    }
+
+    protected static String saneString(String str) {
+        return Strings.isEmpty(str) ? null : str;
     }
 
     public String getProtocol() {
         return protocol;
     }
 
-    public synchronized void setProtocol(final String protocol) {
-        this.protocol = protocol;
-        validate();
+    public void setProtocol(final String protocol) {
+        this.protocol = saneString(protocol);
         cachedStringRepresentation = null;
     }
 
@@ -262,9 +249,11 @@ public class ID implements Serializable {
         return user;
     }
 
-    public synchronized void setUser(final String user) {
+    public void setUser(final String user) {
+        if (user == null) {
+            throw new IllegalArgumentException("User information is obligatory for IDs");
+        }
         this.user = user;
-        validate();
         cachedStringRepresentation = null;
     }
 
@@ -272,9 +261,11 @@ public class ID implements Serializable {
         return context;
     }
 
-    public synchronized void setContext(final String context) {
+    public void setContext(final String context) {
+        if (context == null) {
+            throw new IllegalArgumentException("Context information is obligatory for IDs");
+        }
         this.context = context;
-        validate();
         cachedStringRepresentation = null;
     }
 
@@ -282,9 +273,8 @@ public class ID implements Serializable {
         return resource;
     }
 
-    public synchronized void setResource(final String resource) {
-        this.resource = resource;
-        validate();
+    public void setResource(final String resource) {
+        this.resource = saneString(resource);
         cachedStringRepresentation = null;
     }
 
@@ -292,8 +282,8 @@ public class ID implements Serializable {
         return component;
     }
 
-    public synchronized void setComponent(String component) {
-        this.component = component;
+    public void setComponent(String component) {
+        this.component = saneString(component);
         cachedStringRepresentation = null;
     }
 
