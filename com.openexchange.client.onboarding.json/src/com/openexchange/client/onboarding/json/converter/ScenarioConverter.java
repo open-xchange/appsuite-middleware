@@ -60,6 +60,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.client.onboarding.ClientDevice;
 import com.openexchange.client.onboarding.DefaultOnboardingRequest;
 import com.openexchange.client.onboarding.DeviceAwareScenario;
 import com.openexchange.client.onboarding.FontAwesomeIcon;
@@ -143,7 +144,7 @@ public class ScenarioConverter implements ResultConverter {
     }
 
     private DefaultOnboardingRequest createOnboardingRequest(DeviceAwareScenario scenario, AJAXRequestData requestData, OnboardingAction action) {
-        return new DefaultOnboardingRequest(scenario, action, scenario.getDevice(), requestData.getHostData(), null);
+        return new DefaultOnboardingRequest(scenario, action, ClientDevice.DESKTOP, scenario.getDevice(), requestData.getHostData(), null);
     }
 
     private JSONObject toJson(DeviceAwareScenario scenario, AJAXRequestData requestData, ServerSession session, OnboardingService onboardingService) throws OXException, JSONException {
@@ -195,7 +196,7 @@ public class ScenarioConverter implements ResultConverter {
             List<Scenario> alternatives = scenario.getAlternatives(session);
             JSONArray jAlternatives = new JSONArray(alternatives.size());
             for (Scenario alternative : alternatives) {
-                DeviceAwareScenario deviceAwareScenario = onboardingService.getScenario(alternative.getId(), scenario.getDevice(), session);
+                DeviceAwareScenario deviceAwareScenario = onboardingService.getScenario(alternative.getId(), ClientDevice.DESKTOP, scenario.getDevice(), session);
                 JSONObject jAlternative = toJson(deviceAwareScenario, requestData, session, onboardingService);
                 jAlternatives.put(jAlternative);
             }

@@ -52,6 +52,7 @@ package com.openexchange.client.onboarding.service;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.client.onboarding.ClientDevice;
 import com.openexchange.client.onboarding.CompositeId;
 import com.openexchange.client.onboarding.Device;
 import com.openexchange.client.onboarding.Platform;
@@ -63,6 +64,13 @@ import com.openexchange.client.onboarding.Platform;
  * @since v7.8.1
  */
 public interface OnboardingView {
+
+    /**
+     * Gets the client device associated with this view
+     *
+     * @return The client device
+     */
+    ClientDevice getClientDevice();
 
     /**
      * Gets the available platforms for this view

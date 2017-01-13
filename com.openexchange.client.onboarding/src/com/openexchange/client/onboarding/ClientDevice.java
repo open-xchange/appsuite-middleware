@@ -49,56 +49,59 @@
 
 package com.openexchange.client.onboarding;
 
-import java.util.Map;
-import com.openexchange.groupware.notify.hostname.HostData;
 
 /**
- * {@link OnboardingRequest} - Represents an on-boarding request from a certain selection a user has chosen from configuration tree.
+ * {@link ClientDevice} - The client device, which is the target for the on-boarding action.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.1
+ * @since v7.8.4
  */
-public interface OnboardingRequest {
+public enum ClientDevice {
 
     /**
-     * Gets the on-boarding scenario to execute
-     *
-     * @return The on-boarding scenario
+     * The client is a Desktop PC
      */
-    Scenario getScenario();
+    DESKTOP("desktop"),
+    /**
+     * The client is a smart phone device
+     */
+    SMARTPHONE("smartphone"),
+    /**
+     * The client is a tablet device
+     */
+    TABLET("tablet"),
+    ;
+
+    private final String id;
+
+    private ClientDevice(String id) {
+        this.id = id;
+    }
 
     /**
-     * Gets the action to perform
+     * Gets the identifier
      *
-     * @return The action
+     * @return The identifier
      */
-    OnboardingAction getAction();
+    public String getId() {
+        return id;
+    }
 
     /**
-     * Gets the client device to which the actions apply
+     * Gets the client device associated with specified identifier
      *
-     * @return The client device
+     * @param id The identifier to resolve
+     * @return The client device or <code>null</code>
      */
-    ClientDevice getClientDevice();
+    public static ClientDevice clientDeviceFor(String id) {
+        if (null != id) {
+            for (ClientDevice clientDevice : ClientDevice.values()) {
+                if (id.equalsIgnoreCase(clientDevice.id)) {
+                    return clientDevice;
+                }
+            }
+        }
+        return null;
+    }
 
-    /**
-     * Gets the device to which the scenario applies
-     *
-     * @return The device
-     */
-    Device getDevice();
-
-    /**
-     * Gets the associated host data
-     *
-     * @return The host data
-     */
-    HostData getHostData();
-
-    /**
-     * Gets the optional form content
-     *
-     * @return The form content or <code>null</code>
-     */
-    Map<String, Object> getInput();
 }
