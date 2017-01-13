@@ -83,7 +83,7 @@ public class RealtimeException extends OXException {
         super.copyFrom(origin);
 
         int prime = 31;
-        int result = prime * 1 + ((delegate == null) ? 0 : delegate.hashCode());
+        int result = prime * 1 + delegate.hashCode();
         result = prime * result + ((transformer == null) ? 0 : transformer.hashCode());
         hash = result;
     }
@@ -231,16 +231,19 @@ public class RealtimeException extends OXException {
     }
 
     @Override
+    @Deprecated
     public void log(Logger log) {
         delegate.log(log);
     }
 
     @Override
+    @Deprecated
     public String getLogMessage(LogLevel logLevel) {
         return delegate.getLogMessage(logLevel);
     }
 
     @Override
+    @Deprecated
     public String getLogMessage(LogLevel logLevel, String defaultLog) {
         return delegate.getLogMessage(logLevel, defaultLog);
     }
@@ -266,6 +269,7 @@ public class RealtimeException extends OXException {
     }
 
     @Override
+    @Deprecated
     public boolean isLoggable() {
         return delegate.isLoggable();
     }
@@ -341,6 +345,7 @@ public class RealtimeException extends OXException {
     }
 
     @Override
+    @Deprecated
     public void addTruncatedId(int truncatedId) {
         delegate.addTruncatedId(truncatedId);
     }
