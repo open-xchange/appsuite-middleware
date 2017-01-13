@@ -54,6 +54,7 @@ import org.apache.commons.lang.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.hazelcast.core.MultiMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementAware;
@@ -244,7 +245,9 @@ public class DistributedGroupManagerImpl extends AbstractRealtimeJanitor impleme
             try {
                 // For now groups are the only synthetic resource
                 removeGroup(id);
-            } catch (OXException oxe) {
+            } catch (HazelcastInstanceNotActiveException oxe) {
+                LOG.debug("Hazelcast already shut-down while cleaning for ID {}", id, oxe);
+            } catch (Exception oxe) {
                 LOG.error("Error while cleaning for ID {}", id, oxe);
             }
         }
@@ -255,6 +258,8 @@ public class DistributedGroupManagerImpl extends AbstractRealtimeJanitor impleme
             Collection<? extends SelectorChoice> removedChoices = removeClient(id);
             inactivityMap.remove(id);
             LOG.debug("Cleanup for ID: {}. Removed mappings: {}", id, removedChoices);
+        }  catch (HazelcastInstanceNotActiveException oxe) {
+            LOG.debug("Hazelcast already shut-down while cleaning for ID {}", id, oxe);
         } catch (Exception e) {
             LOG.error("Error while cleaning for ID {}", id, e);
         }
