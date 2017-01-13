@@ -52,6 +52,7 @@ package com.openexchange.ajax.oauth.provider;
 import java.rmi.Naming;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import org.junit.After;
 import org.junit.Before;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -111,7 +112,7 @@ public abstract class AbstractOAuthTest extends AbstractAJAXSession {
     }
 
     public static ClientDto registerTestClient() throws Exception {
-        ClientDataDto clientData = prepareClient("Test App " + System.currentTimeMillis());
+        ClientDataDto clientData = prepareClient("Test App " + UUID.randomUUID().toString());
         RemoteClientManagement clientManagement = (RemoteClientManagement) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + RemoteClientManagement.RMI_NAME);
         return clientManagement.registerClient(RemoteClientManagement.DEFAULT_GID, clientData, getMasterAdminCredentials());
     }

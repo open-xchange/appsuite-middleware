@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.find.contacts;
 
-import java.util.Date;
 import java.util.List;
 import org.junit.Before;
 import com.openexchange.ajax.find.AbstractFindTest;
@@ -88,7 +87,7 @@ public abstract class ContactsFindTest extends AbstractFindTest {
     public void setUp() throws Exception {
         super.setUp();
         UserValues values = getClient().getValues();
-        FolderObject folder = ftm.generatePublicFolder("ManagedContactTest_" + (new Date().getTime()), com.openexchange.groupware.modules.Module.CONTACTS.getFolderConstant(), values.getPrivateContactFolder(), values.getUserId());
+        FolderObject folder = ftm.generatePublicFolder("ManagedContactTest_" + randomUID(), com.openexchange.groupware.modules.Module.CONTACTS.getFolderConstant(), values.getPrivateContactFolder(), values.getUserId());
         folder = ftm.insertFolderOnServer(folder);
         folderID = folder.getObjectID();
     }
