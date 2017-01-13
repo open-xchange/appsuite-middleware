@@ -581,40 +581,27 @@ public final class PermissionLoaderService implements Runnable {
             } else {
                 LOG.debug("Using \"shared\" connection.");
             }
-
             // Working with "shared" connection
-            Lock rlock = readConWrapper.rlock;
+            final Lock rlock = readConWrapper.rlock;
             rlock.lock();
             boolean dec = false;
             try {
-                if (false == readConWrapper.obtain()) {
-                    // Not obtained... Retry
-                    handlePairsSublist(pairsChunk, threadDesc);
-                    return;
-                }
-
-                dec = true;
-                synchronized (readConWrapper) {
-                    Connection con = readConWrapper.con;
-                    if (null == con) {
-                        // Connection became invalid intermittently
-                        handlePairsSublist(pairsChunk, threadDesc);
-                        return;
-                    }
-
-                    try {
+                if (readConWrapper.obtain()) {
+                    dec = true;
+                    synchronized (readConWrapper) {
+                        final Connection con = readConWrapper.con;
                         for (final Pair pair : pairsChunk) {
                             permsMap.put(pair, loadFolderPermissions(pair.folderId, contextId, con), 60);
                         }
-                    } catch (SQLException e) {
-                        // Fatal SQL error
-                        dec = false;
-                        pooledCons.remove(key);
-                        readConWrapper.con = null;
-                        Database.backNoTimeout(contextId, false, con);
-                        throw SearchIteratorExceptionCodes.SQL_ERROR.create(e, EnumComponent.FOLDER, e.getMessage());
                     }
+                } else {
+                    handlePairsSublist(pairsChunk, threadDesc);
+                    return;
                 }
+            } catch (SQLException e) {
+                // Fatal SQL error
+                pooledCons.remove(key);
+                throw SearchIteratorExceptionCodes.SQL_ERROR.create(e, EnumComponent.FOLDER, e.getMessage());
             } finally {
                 if (dec) {
                     readConWrapper.release();
