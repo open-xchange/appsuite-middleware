@@ -163,7 +163,7 @@ public class EventFiringInfostoreFacadeImpl extends InfostoreFacadeImpl implemen
     @Override
     protected void removeDocuments(List<DocumentMetadata> allDocuments, List<DocumentMetadata> allVersions, long date, ServerSession sessionObj, List<DocumentMetadata> rejected) throws OXException {
         super.removeDocuments(allDocuments, allVersions, date, sessionObj, rejected);
-        if (null != allDocuments && 0 < allDocuments.size()) {
+        if (!allDocuments.isEmpty()) {
             for (DocumentMetadata document : allDocuments) {
                 if (null != rejected && rejected.contains(document)) {
                     continue;
