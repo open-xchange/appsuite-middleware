@@ -59,19 +59,24 @@ package com.openexchange.chronos;
 public enum Classification {
 
     /**
-     *
+     * All of the calendar data is visible.
      */
     PUBLIC,
 
     /**
-     *
+     * None of the calendar data is visible.
      */
     PRIVATE,
 
     /**
-     *
+     * Only start and end time of each instance is visible.
      */
     CONFIDENTIAL,
+
+    /**
+     * Only start and end time, summary and location of each instance is visible.
+     */
+    //RESTRICTED,
 
     ;
 }

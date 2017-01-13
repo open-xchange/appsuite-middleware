@@ -85,7 +85,7 @@ public class Appointment2Event {
      * @return The classification
      */
     public static Classification getClassification(boolean privateFlag) {
-        return privateFlag ? Classification.PRIVATE : Classification.PUBLIC;
+        return privateFlag ? Classification.CONFIDENTIAL : Classification.PUBLIC;
     }
 
     /**

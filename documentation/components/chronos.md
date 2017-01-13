@@ -95,5 +95,17 @@ While appropriate handling has originally been in place as incoming/outgoing "pa
 - com.openexchange.chronos.impl.performer.UpdatePerformer.updateDeleteExceptions(Event, Event)
  
 
+## Classification / Private flag
 
+The legacy *private* flag (``pflag`` in database) is used to hide sensitive details from appointments to other users. Participants of the appointment may always see all details of such appointments, while other users who are able to access such appointments based to their permissions (e.g. in shared folders) will only have a restricted view on them. This basically includes the start- and end-time, identifying properties such as the UID, and the appointment's *shown-as* value. Instead of the appointment title, usually "Private" is shown instead.
 
+In iCalendar, this relates to the classification property of an event, with the possible values ``PUBLIC`` (default), ``PRIVATE`` and ``CONFIDENTIAL``. While documentation about the exact meanings of ``PRIVATE`` and ``CONFIDENTIAL`` are quite rare, but the legacy *private* flag best matches the semantics of ``CONFIDENTIAL``, i.e. only start- and end-times of the events are visible when being read by non-participating users. So, the legacy *private* flag will be converted to the classification ``CONFIDENTIAL``; vice-versa, both ``PRIVATE`` and ``CONFIDENTIAL`` will make the *private* flag ``true``.
+
+### References / further reading
+- https://tools.ietf.org/html/rfc5545#section-3.8.1.3
+- https://github.com/apple/ccs-calendarserver/blob/master/doc/Extensions/caldav-privateevents.txt
+- http://blog.coeno.com/offentliche-private-und-vertrauliche-kalenderereignisse-und-wie-man-sie-richtig-nutzt/
+- com.openexchange.chronos.Classification
+- com.openexchange.chronos.compat.Event2Appointment.getPrivateFlag(Classification)
+- com.openexchange.chronos.compat.Appointment2Event.getClassification(boolean)
+- com.openexchange.chronos.impl.Check.classificationIsValid(Classification, UserizedFolder)
