@@ -166,8 +166,12 @@ public class DriveUpdateServiceImpl implements DriveUpdateService {
             values.put(Constants.BRANDING_NAME, StringEscapeUtils.escapeXml(prop.get(Constants.BRANDING_NAME).toString()));
             values.put(Constants.BRANDING_VERSION, prop.get(Constants.BRANDING_VERSION));
             values.put(Constants.BRANDING_RELEASE, prop.get(Constants.BRANDING_RELEASE));
-        } catch (IOException e) {
-            throw UpdaterExceptionCodes.IO_ERROR.create(e, "Could not prepare template variables");
+        } catch (OXException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof IOException) {
+                throw UpdaterExceptionCodes.IO_ERROR.create(cause, "Could not prepare template variables");
+            }
+            throw e;
         }
         return values;
     }
@@ -199,7 +203,7 @@ public class DriveUpdateServiceImpl implements DriveUpdateService {
         return provider.getSize(branding, fileName);
     }
 
-    private String loadIcon(String branding) throws IOException {
+    private String loadIcon(String branding) throws OXException {
         return provider.getIcon(branding);
     }
 
