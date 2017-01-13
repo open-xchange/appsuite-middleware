@@ -71,6 +71,7 @@ import com.openexchange.continuation.ContinuationRegistryService;
 import com.openexchange.continuation.ContinuationResponse;
 import com.openexchange.continuation.ExecutorContinuation;
 import com.openexchange.continuation.ExecutorContinuation.ContinuationResponseGenerator;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.mail.FullnameArgument;
@@ -1676,7 +1677,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
         return searchMessages(fullName.getFullName(), null, MailSortField.RECEIVED_DATE, OrderDirection.DESC, null, fields, null, session, false, unifiedAccountId, locale);
     }
 
-    private static MailMessage[] searchMessages(final String fullName, final IndexRange indexRange, MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, MailField[] fields, final String[] headerNames, Session session, boolean onlyEnabled, int unifiedMailAccountId, final Locale locale) throws OXException {
+    private MailMessage[] searchMessages(final String fullName, final IndexRange indexRange, MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, MailField[] fields, final String[] headerNames, Session session, boolean onlyEnabled, int unifiedMailAccountId, final Locale locale) throws OXException {
         if (DEFAULT_FOLDER_ID.equals(fullName)) {
             throw UnifiedInboxException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
         }
@@ -1928,6 +1929,8 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                             }
                             return messages;
                         } catch (OXException e) {
+                            e.setCategory(Category.CATEGORY_WARNING);
+                            access.addWarnings(Collections.singleton(e));
                             if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.equals(e) || MimeMailExceptionCode.LOGIN_FAILED.equals(e)) {
                                 getLogger().debug("Couldn't get messages from folder \"{}\" from server \"{}\" for login \"{}\".", (null == fn ? "<unknown>" : fn), mailAccount.getMailServer(), mailAccount.getLogin(), e);
                             } else {

@@ -55,10 +55,10 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -81,23 +81,34 @@ import com.openexchange.exception.OXException;
  */
 public class UpdateFilesProviderImpl implements UpdateFilesProvider {
 
-    private final static Logger LOG = LoggerFactory.getLogger(UpdateFilesProvider.class);
-    private static UpdateFilesProviderImpl instance = null;
-    private String path;
-    private final Map<String, FileSystemResourceLoader> loaders;
+    private static final Logger LOG = LoggerFactory.getLogger(UpdateFilesProvider.class);
+
     private static final String DRIVE_ICON = "drive.ico";
 
+    private static volatile UpdateFilesProviderImpl instance;
 
     public static UpdateFilesProviderImpl getInstance() {
-        if (instance == null) {
-            instance = new UpdateFilesProviderImpl();
+        UpdateFilesProviderImpl tmp = instance;
+        if (null == tmp) {
+            synchronized (UpdateFilesProviderImpl.class) {
+                tmp = instance;
+                if (null == tmp) {
+                    tmp = new UpdateFilesProviderImpl();
+                    instance = tmp;
+                }
+            }
         }
-        return instance;
+        return tmp;
     }
+
+    // ---------------------------------------------------------------------------------------------------------------------
+
+    private String path;
+    private final Map<String, FileSystemResourceLoader> loaders;
 
     private UpdateFilesProviderImpl() {
         super();
-        loaders = new HashMap<String, FileSystemResourceLoader>();
+        loaders = new ConcurrentHashMap<String, FileSystemResourceLoader>();
     }
 
     /**
@@ -107,7 +118,9 @@ public class UpdateFilesProviderImpl implements UpdateFilesProvider {
      * @throws OXException
      */
     public UpdateFilesProvider reinit() throws OXException {
-        return init(this.path);
+        synchronized (loaders) {
+            return init(path);
+        }
     }
 
     /**
@@ -119,9 +132,9 @@ public class UpdateFilesProviderImpl implements UpdateFilesProvider {
      */
     public UpdateFilesProvider init(String path) throws OXException {
         synchronized (loaders) {
-
             this.path = path;
             loaders.clear();
+
             File parent = null == path ? null : new File(path);
             if (null == parent || !parent.exists()) {
                 throw new BrandingException(BrandingException.MISSING_FOLDER);
@@ -172,8 +185,13 @@ public class UpdateFilesProviderImpl implements UpdateFilesProvider {
 
     @Override
     public InputStream getFile(String branding, String name) throws OXException {
+        FileSystemResourceLoader resourceLoader = loaders.get(branding);
+        if (null == resourceLoader) {
+            throw UpdaterExceptionCodes.BRANDING_ERROR.create(branding);
+        }
+
         try {
-            return loaders.get(branding).get(name);
+            return resourceLoader.get(name);
         } catch (IOException e) {
             throw new OXException(e);
         }
@@ -181,10 +199,12 @@ public class UpdateFilesProviderImpl implements UpdateFilesProvider {
 
     @Override
     public boolean contains(String branding, String name) throws OXException {
-        if (!contains(branding)) {
+        FileSystemResourceLoader resourceLoader = loaders.get(branding);
+        if (null == resourceLoader) {
             return false;
         }
-        return loaders.get(branding).getAvailableFiles().contains(name);
+
+        return resourceLoader.getAvailableFiles().contains(name);
     }
 
     @Override
@@ -194,8 +214,13 @@ public class UpdateFilesProviderImpl implements UpdateFilesProvider {
 
     @Override
     public long getSize(String branding, String name) throws OXException {
+        FileSystemResourceLoader resourceLoader = loaders.get(branding);
+        if (null == resourceLoader) {
+            throw UpdaterExceptionCodes.BRANDING_ERROR.create(branding);
+        }
+
         try {
-            return loaders.get(branding).getSize(name);
+            return resourceLoader.getSize(name);
         } catch (IOException e) {
             throw new OXException(e);
         }
@@ -203,11 +228,13 @@ public class UpdateFilesProviderImpl implements UpdateFilesProvider {
 
     @Override
     public String getFileName(String branding, Pattern regex) throws OXException {
-        if (!loaders.containsKey(branding)) {
+        FileSystemResourceLoader resourceLoader = loaders.get(branding);
+        if (null == resourceLoader) {
             throw UpdaterExceptionCodes.BRANDING_ERROR.create(branding);
         }
+
         try {
-            Set<String> files = loaders.get(branding).getAvailableFiles();
+            Set<String> files = resourceLoader.getAvailableFiles();
             if (files.isEmpty()) {
                 throw UpdaterExceptionCodes.NO_FILES_AVAILABLE.create();
             }
@@ -228,17 +255,31 @@ public class UpdateFilesProviderImpl implements UpdateFilesProvider {
 
     @Override
     public String getMD5(String branding, String name) throws OXException {
+        FileSystemResourceLoader resourceLoader = loaders.get(branding);
+        if (null == resourceLoader) {
+            throw UpdaterExceptionCodes.BRANDING_ERROR.create(branding);
+        }
+
         try {
-            return loaders.get(branding).getMD5(name);
+            return resourceLoader.getMD5(name);
         } catch (IOException e) {
             throw new OXException(e);
         }
     }
 
     @Override
-    public String getIcon(String branding) throws IOException {
-        File icon = loaders.get(branding).getFile(DRIVE_ICON);
-        return Utils.convertToBase64(icon);
+    public String getIcon(String branding) throws OXException {
+        FileSystemResourceLoader resourceLoader = loaders.get(branding);
+        if (null == resourceLoader) {
+            throw UpdaterExceptionCodes.BRANDING_ERROR.create(branding);
+        }
+
+        try {
+            File icon = resourceLoader.getFile(DRIVE_ICON);
+            return Utils.convertToBase64(icon);
+        } catch (IOException e) {
+            throw new OXException(e);
+        }
     }
 
     @Override
@@ -248,15 +289,12 @@ public class UpdateFilesProviderImpl implements UpdateFilesProvider {
 
     @Override
     public void reload(String path) throws OXException {
-        this.path = path;
-        reinit();
+        init(path);
     }
 
     @Override
     public List<String> getAvailableBrandings() {
-        ArrayList<String> list = new ArrayList<String>(loaders.size());
-        list.addAll(loaders.keySet());
-        return list;
+        return new ArrayList<String>(loaders.keySet());
     }
 }
 

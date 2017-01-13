@@ -294,8 +294,13 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
             if (null == hzMap) {
                 return;
             }
+        } catch (HazelcastInstanceNotActiveException e) {
+            LOGGER.debug("Hazelcast already shut-down", e);
+            myValues.clear();
+            return;
         } catch (Exception e) {
             LOGGER.warn("Failed to acquire Hazelcast map", e);
+            myValues.clear();
             return;
         }
 
@@ -348,7 +353,21 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
             return hzInstance.getMultiMap(mapName);
         } catch (HazelcastInstanceNotActiveException e) {
             // Obviously Hazelcast is absent
-            LOGGER.warn("HazelcastInstance not active", e);
+            LOGGER.debug("HazelcastInstance not active", e);
+            return null;
+        } catch (HazelcastException e) {
+            throw WebSocketExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw WebSocketExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    Cluster cluster(HazelcastInstance hzInstance) throws OXException {
+        try {
+            return hzInstance.getCluster();
+        } catch (HazelcastInstanceNotActiveException e) {
+            // Obviously Hazelcast is absent
+            LOGGER.debug("HazelcastInstance not active", e);
             return null;
         } catch (HazelcastException e) {
             throw WebSocketExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -412,7 +431,13 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
             }
 
             // Get local member
-            Cluster cluster = hzInstance.getCluster();
+            Cluster cluster = cluster(hzInstance);
+
+            if (null == cluster) {
+                LOGGER.warn("Missing Hazelcast cluster (Hazelcast inactive?). Failed to check for open remote Web Sockets for user {} in context {}", I(userId), I(contextId));
+                return false;
+            }
+
             Member localMember = cluster.getLocalMember();
 
             // Determine other cluster members
@@ -525,7 +550,12 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
                 }
 
                 // Get local member
-                Cluster cluster = hzInstance.getCluster();
+                Cluster cluster = cluster(hzInstance);
+                if (null == cluster) {
+                    LOGGER.warn("Missing Hazelcast cluster (Hazelcast inactive?). Failed to remotely distribute notifications");
+                    return;
+                }
+
                 Member localMember = cluster.getLocalMember();
 
                 // Determine other cluster members
@@ -705,13 +735,26 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
             return;
         }
 
+        Cluster cluster;
+        try {
+            cluster = cluster(hzInstance);
+        } catch (Exception e) {
+            LOGGER.warn("Failed to aquire Hazelcast cluster", e);
+            return;
+        }
+
+        if (null == cluster) {
+            LOGGER.warn("Missing Hazelcast cluster (Hazelcast inactive?). Failed to add Web Sockets");
+            return;
+        }
+
+        Address address = cluster.getLocalMember().getAddress();
         for (WebSocket socket : sockets) {
             int userId = socket.getUserId();
             int contextId = socket.getContextId();
             String path = socket.getPath();
 
             try {
-                Address address = hzInstance.getCluster().getLocalMember().getAddress();
                 String key = generateKey(userId, contextId, address.getHost(), address.getPort());
                 String value = generateValue(socket.getConnectionId().getId(), path);
                 map.put(key, value);
@@ -745,7 +788,14 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
                 return;
             }
 
-            Address address = hzInstance.getCluster().getLocalMember().getAddress();
+            Cluster cluster = cluster(hzInstance);
+
+            if (null == cluster) {
+                LOGGER.warn("Missing Hazelcast cluster (Hazelcast inactive?). Failed to add Web Sockets");
+                return;
+            }
+
+            Address address = cluster(hzInstance).getLocalMember().getAddress();
             String key = generateKey(userId, contextId, address.getHost(), address.getPort());
             String value = generateValue(connectionId, path);
             map.put(key, value);
@@ -771,7 +821,14 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
         }
 
         try {
-            Address address = hzInstance.getCluster().getLocalMember().getAddress();
+            Cluster cluster = cluster(hzInstance);
+
+            if (null == cluster) {
+                LOGGER.debug("Missing Hazelcast cluster. Failed to remove Web Socket with path {} for user {} in context {}", path, I(userId), I(contextId));
+                return;
+            }
+
+            Address address = cluster.getLocalMember().getAddress();
             String key = generateKey(userId, contextId, address.getHost(), address.getPort());
             String value = generateValue(connectionId, path);
             synchronized (myValues) {
@@ -891,14 +948,19 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
 
                 MultiMap<String, String> map = map(mapName, hzInstance);
                 if (null == map) {
-                    LOGGER.warn("Missing Hazelcast map (Hazelcast inactive?). Failed to perform cleaner task for user {} in context {}", I(userId), I(contextId));
+                    LOGGER.debug("Missing Hazelcast map (Hazelcast inactive?). Failed to perform cleaner task for user {} in context {}", I(userId), I(contextId));
+                    return;
+                }
+
+                Cluster cluster = cluster(hzInstance);
+                if (null == cluster) {
+                    LOGGER.debug("Missing Hazelcast map (Hazelcast inactive?). Failed to perform cleaner task for user {} in context {}", I(userId), I(contextId));
                     return;
                 }
 
                 LOGGER.debug("Running cleaner task for user {} in context {}...", I(userId), I(contextId));
 
-
-                Address address = hzInstance.getCluster().getLocalMember().getAddress();
+                Address address =  cluster.getLocalMember().getAddress();
                 String key = generateKey(userId, contextId, address.getHost(), address.getPort());
                 Collection<String> collection = map.get(key);
                 if (null == collection || collection.isEmpty()) {

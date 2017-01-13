@@ -299,6 +299,8 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                             final int unreadCount = unreadMessages.length;
                             return new int[] { count, unreadCount };
                         } catch (final OXException e) {
+                            e.setCategory(Category.CATEGORY_WARNING);
+                            access.addWarnings(Collections.singleton(e));
                             getLogger().debug("", e);
                             return new int[] {0,0};
                         } finally {
