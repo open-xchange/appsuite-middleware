@@ -72,14 +72,26 @@ public class StartSMTPRequest implements AJAXRequest<SMTPInitResponse> {
     private int updateNoReplyForContext = -1;
 
     private boolean failOnError = true;
+    
+    private String noReplyAddress;
 
     public StartSMTPRequest() {
         this(true);
     }
 
     public StartSMTPRequest(boolean updateAccount) {
+        this(updateAccount, -1);
+    }
+
+    public StartSMTPRequest(boolean updateAccount, int updateNoReplyForContext) {
+        this(updateAccount, updateNoReplyForContext, "no-reply@ox.io");
+    }
+
+    public StartSMTPRequest(boolean updateAccount, int updateNoReplyForContext, String noReplyAddress) {
         super();
         this.updateAccount = updateAccount;
+        this.updateNoReplyForContext = updateNoReplyForContext;
+        this.noReplyAddress = noReplyAddress;
     }
 
     public void setFailOnError(boolean failOnError) {
@@ -102,7 +114,7 @@ public class StartSMTPRequest implements AJAXRequest<SMTPInitResponse> {
 
     @Override
     public Parameter[] getParameters() throws IOException, JSONException {
-        return new Params(AJAXServlet.PARAMETER_ACTION, "startSMTP", "updateAccount", Boolean.toString(updateAccount), "updateNoReplyForContext", Integer.toString(updateNoReplyForContext)).toArray();
+        return new Params(AJAXServlet.PARAMETER_ACTION, "startSMTP", "updateAccount", Boolean.toString(updateAccount), "updateNoReplyForContext", Integer.toString(updateNoReplyForContext), "noReplyAdress", noReplyAddress).toArray();
     }
 
     @Override
