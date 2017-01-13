@@ -14,6 +14,11 @@ JAVA_OXCMD_OPTS="-Djava.net.preferIPv4Stack=true"
 # at /etc/systemd/system/open-xchange.service.d
 NRFILES=65536
 
+# Maximum number of processes or more precisely threads for the groupware. This
+# value will only be applied when using sysv init. For systemd have a look at
+# the drop-in configs at /etc/systemd/system/open-xchange.service.d
+NPROC=65536
+
 # Specify the umask of file permissions to be created by ox, e.g. in the
 # filestore.
 # BEWARE: setting a nonsense value like 666 will make open-xchange stop working!
