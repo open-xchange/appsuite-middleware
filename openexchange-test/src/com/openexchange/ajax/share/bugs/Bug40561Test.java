@@ -114,7 +114,7 @@ public class Bug40561Test extends ShareTest {
 
     @Test
     public void testShareFileInternallyAndSearchForIt() throws Exception {
-        AJAXClient shareClient = new AJAXClient(testUser);
+        AJAXClient shareClient = getClient2();
         try {
             FolderObject folder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder());
             DefaultFileStorageObjectPermission sharePermission = new DefaultFileStorageObjectPermission(shareClient.getValues().getUserId(), false, FileStorageObjectPermission.READ);
