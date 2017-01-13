@@ -1195,14 +1195,24 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
     @Override
     public char getDefaultSeparator(Session session) throws OXException {
-        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
-        try {
-            mailAccess = MailAccess.getInstance(session);
-            mailAccess.connect(false);
-            return mailAccess.getFolderStorage().getFolder("INBOX").getSeparator();
-        } finally {
-            MailAccess.closeInstance(mailAccess, false);
+        return getSeparator(MailAccount.DEFAULT_ID, session).charValue();
+    }
+
+    private Character getSeparator(int accountId, Session session) throws OXException {
+        final MailSessionCache sessionCache = MailSessionCache.getInstance(session);
+        Character sep = (Character) sessionCache.getParameter(accountId, MailSessionParameterNames.getParamSeparator());
+        if (null == sep) {
+            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> ma = null;
+            try {
+                ma = MailAccess.getInstance(session, accountId);
+                ma.connect(false);
+                sep = Character.valueOf(ma.getFolderStorage().getFolder("INBOX").getSeparator());
+                sessionCache.putParameter(accountId, MailSessionParameterNames.getParamSeparator(), sep);
+            } finally {
+                MailAccess.closeInstance(ma, false);
+            }
         }
+        return sep;
     }
 
     public MailAccount getDefaultMailAccount(final int userId, final int contextId, final Connection con) throws OXException {
