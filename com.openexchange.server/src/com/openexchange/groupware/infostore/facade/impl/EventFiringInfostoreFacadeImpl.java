@@ -179,7 +179,7 @@ public class EventFiringInfostoreFacadeImpl extends InfostoreFacadeImpl implemen
         long sequenceNumber, boolean adjustFilenamesAsNeeded) throws OXException {
         List<DocumentMetadata> rejectedDocuments = super.moveDocuments(
             session, documents, destinationFolderID, sequenceNumber, adjustFilenamesAsNeeded);
-        if (null != documents && 0 < documents.size()) {
+        if (!documents.isEmpty()) {
             for (DocumentMetadata document : documents) {
                 if (null != rejectedDocuments && rejectedDocuments.contains(document)) {
                     continue;
