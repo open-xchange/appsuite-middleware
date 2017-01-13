@@ -49,53 +49,46 @@
 
 package com.openexchange.chronos.ical.ical4j.mapping.event;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.ical.ical4j.mapping.ICalMapping;
+import com.openexchange.chronos.ical.ICalParameters;
+import com.openexchange.chronos.ical.ical4j.mapping.AbstractICalMapping;
+import com.openexchange.exception.OXException;
+import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.VEvent;
+import net.fortuna.ical4j.model.property.DtStart;
+import net.fortuna.ical4j.model.property.Duration;
 
 /**
- * {@link EventMappings}
+ * {@link DurationMapping}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class EventMappings {
-
-	/**
-	 * Holds a collection of all known event mappings.
-	 */
-	public static List<ICalMapping<VEvent, Event>> ALL = Collections.<ICalMapping<VEvent, Event>>unmodifiableList(Arrays.asList(
-        new AttachmentMapping(),
-		new AttendeeMapping(),
-        new CategoriesMapping(),
-        new ClassMapping(),
-		new CreatedMapping(),
-		new DescriptionMapping(),
-        new DtEndMapping(),
-		new DtStampMapping(),
-		new DtStartMapping(),
-        new DurationMapping(),
-        new ExDateMapping(),
-		new LastModifiedMapping(),
-		new LocationMapping(),
-		new OrganizerMapping(),
-        new RecurrenceIdMapping(),
-        new RRuleMapping(),
-		new SequenceMapping(),
-		new StatusMapping(),
-		new SummaryMapping(),
-		new TranspMapping(),
-		new UidMapping()
-	));
+public class DurationMapping extends AbstractICalMapping<VEvent, Event> {
 
     /**
-     * Initializes a new {@link EventMappings}.
+     * Initializes a new {@link DurationMapping}.
      */
-	private EventMappings() {
-		super();
+	public DurationMapping() {
+        super();
 	}
+
+    @Override
+    public void export(Event object, VEvent component, ICalParameters parameters, List<OXException> warnings) {
+        removeProperties(component, Property.DURATION); // stick to DTEND for export
+    }
+
+    @Override
+    public void importICal(VEvent component, Event object, ICalParameters parameters, List<OXException> warnings) {
+        Duration duration = component.getDuration();
+        if (null == duration || null == duration.getDuration()) {
+            return;
+        }
+        DtStart dtStart = component.getStartDate();
+        if (null != dtStart && null != dtStart.getDate()) {
+            object.setEndDate(duration.getDuration().getTime(dtStart.getDate()));
+        }
+    }
 
 }
