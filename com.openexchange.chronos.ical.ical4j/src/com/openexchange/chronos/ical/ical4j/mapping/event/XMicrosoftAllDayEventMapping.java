@@ -49,54 +49,48 @@
 
 package com.openexchange.chronos.ical.ical4j.mapping.event;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.ical.ical4j.mapping.ICalMapping;
+import com.openexchange.chronos.ical.ICalParameters;
+import com.openexchange.chronos.ical.ical4j.mapping.AbstractICalMapping;
+import com.openexchange.exception.OXException;
+import net.fortuna.ical4j.extensions.outlook.AllDayEvent;
+import net.fortuna.ical4j.model.ParameterList;
+import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.VEvent;
 
 /**
- * {@link EventMappings}
+ * {@link XMicrosoftAllDayEventMapping}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class EventMappings {
+public class XMicrosoftAllDayEventMapping extends AbstractICalMapping<VEvent, Event> {
 
-	/**
-	 * Holds a collection of all known event mappings.
-	 */
-	public static List<ICalMapping<VEvent, Event>> ALL = Collections.<ICalMapping<VEvent, Event>>unmodifiableList(Arrays.asList(
-        new AttachmentMapping(),
-		new AttendeeMapping(),
-        new CategoriesMapping(),
-        new ClassMapping(),
-		new CreatedMapping(),
-		new DescriptionMapping(),
-        new DtEndMapping(),
-		new DtStampMapping(),
-		new DtStartMapping(),
-        new DurationMapping(),
-        new ExDateMapping(),
-		new LastModifiedMapping(),
-		new LocationMapping(),
-		new OrganizerMapping(),
-        new RecurrenceIdMapping(),
-        new RRuleMapping(),
-		new SequenceMapping(),
-		new StatusMapping(),
-		new SummaryMapping(),
-		new TranspMapping(),
-		new UidMapping(),
-        new XMicrosoftAllDayEventMapping()
-	));
+    /** Constant for the property with value <code>TRUE</code> */
+    private static final AllDayEvent TRUE = new AllDayEvent(new ParameterList(true), AllDayEvent.FACTORY, "TRUE");
 
     /**
-     * Initializes a new {@link EventMappings}.
+     * Initializes a new {@link XMicrosoftAllDayEventMapping}.
      */
-	private EventMappings() {
-		super();
+	public XMicrosoftAllDayEventMapping() {
+        super();
 	}
+
+    @Override
+    public void export(Event object, VEvent component, ICalParameters parameters, List<OXException> warnings) {
+        removeProperties(component, AllDayEvent.PROPERTY_NAME);
+        if (object.isAllDay()) {
+            component.getProperties().add(TRUE);
+        }
+    }
+
+    @Override
+    public void importICal(VEvent component, Event object, ICalParameters parameters, List<OXException> warnings) {
+        Property property = component.getProperty(AllDayEvent.PROPERTY_NAME);
+        if (null != property && Boolean.valueOf(property.getValue())) {
+            object.setAllDay(true);
+        }
+    }
 
 }
