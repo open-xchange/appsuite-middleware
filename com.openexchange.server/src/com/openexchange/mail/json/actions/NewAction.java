@@ -273,15 +273,6 @@ public final class NewAction extends AbstractMailAction {
 
                 MailServletInterface mailInterface = getMailInterface(req);
 
-                // Check if Guard email
-                if (composedMail.getSecuritySettings().anythingSet()) {
-                    EncryptedMailService encryptor = Services.getServiceLookup().getOptionalService(EncryptedMailService.class);
-                    if (encryptor != null) {
-                        composedMail = encryptor.encryptDraftEmail(composedMail, session);
-                    }
-                }
-
-
                 msgIdentifier = mailInterface.saveDraft(composedMail, false, accountId).toString();
                 if (msgIdentifier == null) {
                     throw MailExceptionCode.DRAFT_FAILED_UNKNOWN.create();
