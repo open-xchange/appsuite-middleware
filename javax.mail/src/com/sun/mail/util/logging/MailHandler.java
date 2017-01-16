@@ -3068,7 +3068,6 @@ public class MailHandler extends Handler {
                 final Address[] any = all.length != 0 ? all : abort.getFrom();
                 if (any != null && any.length != 0) {
                     t = session.getTransport(any[0]);
-                    session.getProperty("mail.transport.protocol"); //Force copy
                 } else {
                     MessagingException me = new MessagingException(
                             "No recipient or from address.");
@@ -3137,19 +3136,11 @@ public class MailHandler extends Handler {
                         + protocol + ".host");
                 if (isEmpty(mailHost)) {
                     mailHost = session.getProperty("mail.host");
-                } else {
-                    session.getProperty("mail.host");
                 }
-                session.getProperty("mail." + protocol + ".port");
-                session.getProperty("mail." + protocol + ".user");
-                session.getProperty("mail.user");
-                session.getProperty("mail." + protocol + ".localport");
                 local = session.getProperty("mail." + protocol + ".localhost");
                 if (isEmpty(local)) {
                     local = session.getProperty("mail."
                             + protocol + ".localaddress");
-                } else {
-                    session.getProperty("mail." + protocol + ".localaddress");
                 }
 
                 if ("resolve".equals(verify)) {
