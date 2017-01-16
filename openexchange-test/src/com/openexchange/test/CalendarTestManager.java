@@ -453,7 +453,14 @@ public class CalendarTestManager implements TestManager {
     }
 
     public Appointment[] all(int parentFolderID, Date start, Date end, int[] columns, boolean recurrenceMaster) {
+        return this.all(parentFolderID, start, end, columns, recurrenceMaster, null);
+    }
+
+    public Appointment[] all(int parentFolderID, Date start, Date end, int[] columns, boolean recurrenceMaster, String timeZoneId) {
         AllRequest request = new AllRequest(parentFolderID, columns, start, end, timezone, recurrenceMaster);
+        if (timeZoneId != null) {
+            request.setTimeZoneId(timeZoneId);
+        }
         CommonAllResponse response = execute(request);
         extractInfo(response);
         List<Appointment> appointments = new ArrayList<Appointment>();
