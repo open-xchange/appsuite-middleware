@@ -230,11 +230,10 @@ public class AttachmentTestManager implements TestManager {
         return response.getContentAsString();
     }
 
-    public List<AttachmentMetadata> all(int folderId, int objectId, int moduleId, int[] columns, int sort, Order order) throws OXException, IOException, JSONException {
-        AllRequest allRequest = new AllRequest(folderId, objectId, moduleId, columns, sort, order);
+    public void all(int folderId, int attachedId, int moduleId, int[] columns, int sort, Order order) throws OXException, IOException, JSONException {
+        AllRequest allRequest = new AllRequest(folderId, attachedId, moduleId, columns, sort, order);
         AllResponse allResponse = client.execute(allRequest);
         extractInfo(allResponse);
-        return allResponse.getAttachments();
     }
 
     public void updates(int folderId, int objectId, int moduleId, int[] columns, long timestamp) throws OXException, IOException, JSONException {

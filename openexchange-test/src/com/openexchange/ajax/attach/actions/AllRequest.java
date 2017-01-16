@@ -68,7 +68,7 @@ import com.openexchange.groupware.search.Order;
 public class AllRequest extends AbstractAttachmentRequest<AllResponse> {
 
     private final int folderId;
-    private final int objectId;
+    private final int attachedId;
     private final int moduleId;
     private final int[] columns;
     private final int sort;
@@ -91,12 +91,12 @@ public class AllRequest extends AbstractAttachmentRequest<AllResponse> {
         this(obj, columns, -1, null, failOnError);
     }
 
-    public AllRequest(final int folderId, final int objectId, final int moduleId, final int[] columns, final int sort, final Order order) {
-        this(folderId, objectId, moduleId, columns, sort, order, false);
+    public AllRequest(final int folderId, final int attachedId, final int moduleId, final int[] columns, final int sort, final Order order) {
+        this(folderId, attachedId, moduleId, columns, sort, order, false);
     }
-    public AllRequest(final int folderId, final int objectId, final int moduleId, final int[] columns, final int sort, final Order order, boolean failOnError) {
+    public AllRequest(final int folderId, final int attachedId, final int moduleId, final int[] columns, final int sort, final Order order, boolean failOnError) {
         this.folderId = folderId;
-        this.objectId = objectId;
+        this.attachedId = attachedId;
         this.moduleId = moduleId;
         this.columns = columns;
         this.sort = sort;
@@ -113,7 +113,7 @@ public class AllRequest extends AbstractAttachmentRequest<AllResponse> {
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
         List<Parameter> parameters = new ArrayList<Parameter>();
         parameters.add(new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL));
-        parameters.add(new Parameter(AJAXServlet.PARAMETER_ATTACHEDID, objectId));
+        parameters.add(new Parameter(AJAXServlet.PARAMETER_ATTACHEDID, attachedId));
         parameters.add(new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderId));
         parameters.add(new Parameter(AJAXServlet.PARAMETER_MODULE, moduleId));
         parameters.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));

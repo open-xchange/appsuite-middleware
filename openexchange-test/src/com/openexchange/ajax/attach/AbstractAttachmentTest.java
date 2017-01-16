@@ -179,7 +179,7 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
         upload();
         upload();
 
-        List<AttachmentMetadata> all = atm.all(folderId, attachedId, moduleId, new int[] { AttachmentField.FOLDER_ID, AttachmentField.ATTACHED_ID, AttachmentField.MODULE_ID, AttachmentField.FILENAME, AttachmentField.FILE_SIZE, AttachmentField.FILE_MIMETYPE, AttachmentField.RTF_FLAG}, AttachmentField.CREATION_DATE, Order.ASCENDING);
+        atm.all(folderId, attachedId, moduleId, new int[] { AttachmentField.ID, AttachmentField.FILENAME }, AttachmentField.CREATION_DATE, Order.ASCENDING);
         assertFalse(atm.getLastResponse().hasError());
 
         final JSONArray arrayOfArrays = (JSONArray) atm.getLastResponse().getData();

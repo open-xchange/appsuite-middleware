@@ -107,7 +107,7 @@ public class AllTest extends AppointmentTest {
         // Verify appointments are included in response
         final JSONArray data = (JSONArray) catm.getLastResponse().getData();
 
-        assertNotInResponse(data, appointment);
+        assertNotInResponse(all, appointment);
         assertInResponse(all, anotherAppointment);
 
     }
@@ -139,17 +139,15 @@ public class AllTest extends AppointmentTest {
         assertTrue("Missing ids: " + expectedIds, expectedIds.isEmpty());
     }
 
-    private void assertNotInResponse(final JSONArray data, final Appointment... appointments) throws JSONException {
+    private void assertNotInResponse(final Appointment[] data, final Appointment... appointments) {
         final Set<Integer> ids = new HashSet<Integer>();
         for (final Appointment appointment : appointments) {
             ids.add(appointment.getObjectID());
         }
-        for (int i = 0, size = data.length(); i < size; i++) {
-            final JSONArray row = data.getJSONArray(i);
+        for (int i = 0, size = data.length; i < size; i++) {
+            Appointment app = data[i];
 
-            final int id = row.getInt(0);
-
-            assertFalse(ids.contains(id));
+            assertFalse(ids.contains(app.getObjectID()));
         }
     }
 
