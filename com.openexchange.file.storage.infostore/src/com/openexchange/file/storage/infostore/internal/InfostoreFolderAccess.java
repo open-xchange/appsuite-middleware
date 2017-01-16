@@ -128,7 +128,7 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess, MediaFold
 
     @Override
     public String deleteFolder(String folderId, boolean hardDelete) throws OXException {
-        getFolderService().deleteFolder(TREE_ID, folderId, null, session, initDecorator().put("hardDelete", String.valueOf(hardDelete))).getResponse();
+        getFolderService().deleteFolder(TREE_ID, folderId, null, session, initDecorator().put("hardDelete", String.valueOf(hardDelete)));
         return folderId;
     }
 
