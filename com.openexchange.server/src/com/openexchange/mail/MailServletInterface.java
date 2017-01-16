@@ -189,6 +189,22 @@ public abstract class MailServletInterface implements Closeable {
     }
 
     /**
+     * Gets the session associated with this instance.
+     *
+     * @return The session
+     */
+    public abstract Session getSession();
+
+    /**
+     * Gets the separator character for given account
+     *
+     * @param acccountId The account identifier
+     * @return The separator character
+     * @throws OXException If separator character cannot be returned
+     */
+    public abstract char getSeparator(int acccountId) throws OXException;
+
+    /**
      * Archives all mails within a given folder which are older than given days
      *
      * @param days the minimum age of a mail to be archived

@@ -63,4 +63,20 @@ Specifies the authentication type which should be used for primary account's mai
       Configcascade_Aware: true
       Related: 
       File: mail.properties
- 
+  - data:
+      Key: com.openexchange.mail.maliciousFolders
+      Description: >
+Specifies such mail folders that are supposed being considered as malicious and therefore a special treatment happens.
+E.g. Hyper-links that occur in mail content are not displayed and/or are not clickable.
+
+The value is supposed to be comma-separated list of folder names.
+Such names starting with "$" character refer to standard folder. Currently supported: $Spam, $Drafts, $Inbox, $Sent, $Trash
+
+Example: $Spam, Malware
+Special treatment happens for standard Spam folder and for every folder named "Malware"
+      Default: $Spam
+      Version: 7.8.4
+      Reloadable: true
+      Configcascade_Aware: true
+      Related: 
+      File: mail.properties

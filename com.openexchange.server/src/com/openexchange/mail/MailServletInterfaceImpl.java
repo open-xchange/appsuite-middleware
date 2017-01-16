@@ -289,6 +289,35 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         checkParameters = false;
     }
 
+    @Override
+    public Session getSession() {
+        return session;
+    }
+
+    @Override
+    public char getSeparator(int acccountId) throws OXException {
+        return getSeparator(acccountId, session).charValue();
+    }
+
+    private Character getSeparator(final int accountId, final Session session) throws OXException {
+        final MailSessionCache sessionCache = MailSessionCache.getInstance(session);
+        Character sep = (Character) sessionCache.getParameter(accountId, MailSessionParameterNames.getParamSeparator());
+        if (null == sep) {
+            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> ma = null;
+            try {
+                ma = MailAccess.getInstance(session, accountId);
+                ma.connect(false);
+                sep = Character.valueOf(ma.getFolderStorage().getFolder("INBOX").getSeparator());
+                sessionCache.putParameter(accountId, MailSessionParameterNames.getParamSeparator(), sep);
+            } finally {
+                if (null != ma) {
+                    ma.close(true);
+                }
+            }
+        }
+        return sep;
+    }
+
     private User getUser() throws OXException {
         if (null == user) {
             user = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
@@ -1360,22 +1389,16 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     private String getDefaultMailFolder(int index, int accountId) {
-        String[] arr = MailSessionCache.getInstance(session).getParameter(
-            accountId,
-            MailSessionParameterNames.getParamDefaultFolderArray());
-        return arr == null ? null : arr[index];
+        String[] arr = MailSessionCache.getInstance(session).getParameter(accountId, MailSessionParameterNames.getParamDefaultFolderArray());
+        return arr == null ? null : (index < arr.length ? arr[index] : null);
     }
 
     private String[] getSortedDefaultMailFolders(int accountId) {
-        String[] arr = MailSessionCache.getInstance(session).getParameter(
-            accountId,
-            MailSessionParameterNames.getParamDefaultFolderArray());
+        String[] arr = MailSessionCache.getInstance(session).getParameter(accountId, MailSessionParameterNames.getParamDefaultFolderArray());
         if (arr == null) {
             return new String[0];
         }
-        return new String[] {
-            INBOX_ID, arr[StorageUtility.INDEX_DRAFTS], arr[StorageUtility.INDEX_SENT], arr[StorageUtility.INDEX_SPAM],
-            arr[StorageUtility.INDEX_TRASH] };
+        return new String[] { INBOX_ID, arr[StorageUtility.INDEX_DRAFTS], arr[StorageUtility.INDEX_SENT], arr[StorageUtility.INDEX_SPAM], arr[StorageUtility.INDEX_TRASH] };
     }
 
     @Override

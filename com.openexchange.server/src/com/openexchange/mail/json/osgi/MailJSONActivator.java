@@ -90,8 +90,10 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.tree.modules.mail.MaliciousFoldersSetting;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.image.ImageLocation;
+import com.openexchange.jslob.ConfigTreeEquivalent;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.attachment.storage.DefaultMailAttachmentStorage;
 import com.openexchange.mail.attachment.storage.DefaultMailAttachmentStorageRegistry;
@@ -101,6 +103,7 @@ import com.openexchange.mail.categories.MailCategoriesConfigService;
 import com.openexchange.mail.categories.internal.MailCategoriesPreferenceItem;
 import com.openexchange.mail.compose.CompositionSpace;
 import com.openexchange.mail.config.MailReloadable;
+import com.openexchange.mail.config.MaliciousFolders;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailActionFactory;
 import com.openexchange.mail.json.MailOAuthConstants;
@@ -279,6 +282,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
             @Override
             public void reloadConfiguration(ConfigurationService configService) {
                 MailConfig.invalidateAuthTypeCache();
+                MaliciousFolders.invalidateCache();
             }
 
             @Override
@@ -288,6 +292,11 @@ public final class MailJSONActivator extends AJAXModuleActivator {
         });
 
         registerService(PreferencesItemService.class, new MailCategoriesPreferenceItem(this));
+        {
+            MaliciousFoldersSetting setting = new MaliciousFoldersSetting();
+            registerService(PreferencesItemService.class, setting, null);
+            registerService(ConfigTreeEquivalent.class, setting, null);
+        }
 
         final ContactField[] fields = new ContactField[] { ContactField.OBJECT_ID, ContactField.INTERNAL_USERID, ContactField.FOLDER_ID, ContactField.NUMBER_OF_IMAGES };
         registerService(AJAXResultDecorator.class, new DecoratorImpl(converter, fields, this));
