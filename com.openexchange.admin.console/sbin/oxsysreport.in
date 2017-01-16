@@ -521,7 +521,7 @@ verify_ox_rpm_packages(){
                 tr [a-z] [A-Z] | \
                 cut -c 9- | \
                 sed 's|^|  Signature Key ID: |g'
-            # strip runtime generated CSS files
+            # use rpm verify
             rpm -V "${package}" | \
                 sed 's|^|  Change: |g'
         else
