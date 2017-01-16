@@ -52,10 +52,17 @@ package com.openexchange.chronos.ical.ical4j.mapping.event;
 import java.util.Date;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ical.ical4j.mapping.ICalDateMapping;
+import net.fortuna.ical4j.model.DateTime;
+import net.fortuna.ical4j.model.Dur;
+import net.fortuna.ical4j.model.Parameter;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.VEvent;
+import net.fortuna.ical4j.model.parameter.Value;
 import net.fortuna.ical4j.model.property.DateProperty;
 import net.fortuna.ical4j.model.property.DtEnd;
+import net.fortuna.ical4j.model.property.DtStart;
+import net.fortuna.ical4j.model.property.Duration;
+import net.fortuna.ical4j.util.Dates;
 
 /**
  * {@link DtEndMapping}
@@ -101,7 +108,33 @@ public class DtEndMapping extends ICalDateMapping<VEvent, Event> {
 
     @Override
     protected DateProperty getProperty(VEvent component) {
-        return component.getEndDate();
+        DtEnd dtEnd = (DtEnd) component.getProperty(Property.DTEND);
+        if (null == dtEnd && null != component.getStartDate()) {
+            /*
+             * derive DTEND from DURATION or take over DTSTART
+             * (similar to net.fortuna.ical4j.model.component.VEvent.getEndDate(boolean), but without bugs)
+             */
+            DtStart dtStart = component.getStartDate();
+            Duration duration = component.getDuration();
+            if (null == duration) {
+                if (DateTime.class.isInstance(dtStart.getDate())) {
+                    // If "DTSTART" is a DATE-TIME, then the event's duration is zero (see: RFC 5545, 3.6.1 Event Component)
+                    //                    duration = new Duration(new Dur(0, 0, 0, 0));
+                    return dtStart;
+                } else {
+                    // If "DTSTART" is a DATE, then the event's duration is one day (see: RFC 5545, 3.6.1 Event Component)
+                    duration = new Duration(new Dur(1, 0, 0, 0));
+                }
+            }
+            dtEnd = new DtEnd(Dates.getInstance(duration.getDuration().getTime(dtStart.getDate()), (Value) dtStart.getParameter(Parameter.VALUE)));
+            if (dtStart.isUtc()) {
+                dtEnd.setUtc(true);
+            } else {
+                dtEnd.setTimeZone(dtStart.getTimeZone());
+            }
+            return dtEnd;
+        }
+        return dtEnd;
     }
 
 }
