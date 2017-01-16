@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail;
+package com.openexchange.groupware.settings.tree.modules.mail;
 
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -60,20 +60,21 @@ import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.jslob.ConfigTreeEquivalent;
+import com.openexchange.mail.FlaggingMode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
 /**
- * {@link MailColorModePreferenceItem}
+ * {@link MailFlaggedModePreferenceItem}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-public class MailColorModePreferenceItem implements PreferencesItemService, ConfigTreeEquivalent {
+public class MailFlaggedModePreferenceItem implements PreferencesItemService, ConfigTreeEquivalent {
 
     @Override
     public String[] getPath() {
-        return new String[] { "modules", "mail", "features", "color" };
+        return new String[] { "modules", "mail", "features", "flag" };
     }
 
     @Override
@@ -89,25 +90,25 @@ public class MailColorModePreferenceItem implements PreferencesItemService, Conf
             public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
                 ConfigViewFactory factory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
                 if(factory==null){
-                    setting.setSingleValue(false);
+                    setting.setSingleValue(true);
                     return;
                 }
                 ConfigView view = factory.getView(user.getId(), ctx.getContextId());
-                String modeStr = view.opt("com.openexchange.mail.flagging.mode", String.class, "default");
-                FLAGGING_MODE mode = FLAGGING_MODE.getModeByName(modeStr);
+                String modeStr = view.opt("com.openexchange.mail.flagging.mode", String.class, FlaggingMode.COLOR_ONLY.getName());
+                FlaggingMode mode = FlaggingMode.getModeByName(modeStr);
 
                 switch (mode) {
-                    case colorOnly:
-                        setting.setSingleValue(true);
-                        break;
-                    case flaggedAndColor:
-                        setting.setSingleValue(true);
-                        break;
-                    case flaggedImplicit:
-                        setting.setSingleValue(true);
-                        break;
-                    case flaggedOnly:
+                    case COLOR_ONLY:
                         setting.setSingleValue(false);
+                        break;
+                    case FLAGGED_AND_COLOR:
+                        setting.setSingleValue(true);
+                        break;
+                    case FLAGGED_IMPLICIT:
+                        setting.setSingleValue(false);
+                        break;
+                    case FLAGGED_ONLY:
+                        setting.setSingleValue(true);
                         break;
                     default:
                         break;
@@ -118,12 +119,12 @@ public class MailColorModePreferenceItem implements PreferencesItemService, Conf
 
     @Override
     public String getConfigTreePath() {
-        return "modules/mail/features/color";
+        return "modules/mail/features/flag";
     }
 
     @Override
     public String getJslobPath() {
-        return "io.ox/mail//features/color";
+        return "io.ox/mail//features/flag";
     }
 
 }

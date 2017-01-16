@@ -1563,22 +1563,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         return getMessage(folder, msgUID, true);
     }
 
-    private static final String FLAGGING_COLOR_PROPERTY = "com.openexchange.mail.flagging.color";
-
-    private final int getFlaggingColor() {
-        try {
-            ConfigViewFactory factory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
-            if (factory != null) {
-                ConfigView view = factory.getView(session.getUserId(), session.getContextId());
-                int color = view.opt(FLAGGING_COLOR_PROPERTY, Integer.class, 1);
-                return color;
-            }
-        } catch (OXException e) {
-            // Fallback to default
-        }
-        return 1;
-    }
-
     @Override
     public MailMessage getMessage(String folder, String msgUID, boolean markAsSeen) throws OXException {
         FullnameArgument argument = prepareMailFolderParam(folder);
@@ -1601,15 +1585,15 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             }
 
             if (mail.getColorLabel() == 0 && mail.isFlagged()) {
-                FLAGGING_MODE mode = getFlaggingMode();
-                if (mode.equals(FLAGGING_MODE.flaggedImplicit)) {
-                    mail.setColorLabel(getFlaggingColor());
+                FlaggingMode mode = FlaggingMode.getFlaggingMode(session);
+                if (mode.equals(FlaggingMode.FLAGGED_IMPLICIT)) {
+                    mail.setColorLabel(FlaggingMode.getFlaggingColor(session));
                 }
             }
 
             if (mail.getColorLabel() != 0) {
-                FLAGGING_MODE mode = getFlaggingMode();
-                if (mode.equals(FLAGGING_MODE.flaggedOnly)) {
+                FlaggingMode mode = FlaggingMode.getFlaggingMode(session);
+                if (mode.equals(FlaggingMode.FLAGGED_ONLY)) {
                     mail.setColorLabel(0);
                 }
             }
@@ -1943,11 +1927,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
      * @param mails The mails to check
      */
     private void checkMailsForColor(MailMessage[] mails) {
-        FLAGGING_MODE mode = getFlaggingMode();
-        if (mode.equals(FLAGGING_MODE.flaggedImplicit)) {
-            int color = getFlaggingColor();
+        FlaggingMode mode = FlaggingMode.getFlaggingMode(session);
+        if (mode.equals(FlaggingMode.FLAGGED_IMPLICIT)) {
+            int color = FlaggingMode.getFlaggingColor(session);
             for (MailMessage mail : mails) {
-                if (mail.getColorLabel() == 0 && mail.isFlagged()) {
+                if (mail!=null && mail.getColorLabel() == 0 && mail.isFlagged()) {
                     mail.setColorLabel(color);
                 }
             }
@@ -2073,6 +2057,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             warnings.addAll(mailAccess.getWarnings());
         }
 
+        checkMailsForColor(mails);
         return mails;
     }
 
@@ -2203,20 +2188,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             }
         }
 
-        checkMailsForColor(mails);
-
-        /*
-         * Set account information
-         */
-        List<MailMessage> l = new LinkedList<>();
-        for (MailMessage mail : mails) {
-            if (mail != null) {
-                if (!mail.containsAccountId() || mail.getAccountId() < 0) {
-                    mail.setAccountId(accountId);
-                }
-                l.add(mail);
-            }
-        }
         /*
          * Put message information into cache
          */
@@ -2233,6 +2204,21 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             }
         } catch (OXException e) {
             LOG.error("", e);
+        }
+
+        checkMailsForColor(mails);
+
+        /*
+         * Set account information
+         */
+        List<MailMessage> l = new LinkedList<>();
+        for (MailMessage mail : mails) {
+            if (mail != null) {
+                if (!mail.containsAccountId() || mail.getAccountId() < 0) {
+                    mail.setAccountId(accountId);
+                }
+                l.add(mail);
+            }
         }
         return new SearchIteratorDelegator<>(l);
     }
@@ -3883,27 +3869,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         MORE_PROPS_UPDATE_LABEL = Collections.unmodifiableMap(m);
     }
 
-    private final static String FLAGGING_MODE_PROPERTY = "com.openexchange.mail.flagging.mode";
-
-    /**
-     * Return the currently configured mode for the user. Falls back to default in case an error occurs
-     *
-     * @return the Mode
-     */
-    private FLAGGING_MODE getFlaggingMode() {
-        try {
-            ConfigViewFactory factory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
-            if (factory != null) {
-                ConfigView view = factory.getView(session.getUserId(), session.getContextId());
-                String modeName = view.opt(FLAGGING_MODE_PROPERTY, String.class, "flaggedOnly");
-                return FLAGGING_MODE.getModeByName(modeName);
-            }
-        } catch (OXException e) {
-            // fall back to default
-        }
-        return FLAGGING_MODE.flaggedOnly;
-    }
-
     @Override
     public void updateMessageColorLabel(String folder, String[] mailIDs, int newColorLabel) throws OXException {
         FullnameArgument argument = prepareMailFolderParam(folder);
@@ -3947,8 +3912,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             LOG.error("", e);
         }
 
-        FLAGGING_MODE mode = getFlaggingMode();
-        if (mode.equals(FLAGGING_MODE.flaggedImplicit)) {
+        FlaggingMode mode = FlaggingMode.getFlaggingMode(session);
+        if (mode.equals(FlaggingMode.FLAGGED_IMPLICIT)) {
             int flags = MailMessage.FLAG_FLAGGED;
             updateMessageFlags(folder, mailIDs, flags, newColorLabel != 0);
         }

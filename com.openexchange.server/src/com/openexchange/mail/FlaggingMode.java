@@ -49,32 +49,88 @@
 
 package com.openexchange.mail;
 
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
+
 /**
- * {@link FLAGGING_MODE}
+ * {@link FlaggingMode} defines possible flagging modes.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-public enum FLAGGING_MODE {
+public enum FlaggingMode {
 
-    colorOnly("colorOnly"),
-    flaggedOnly("flaggedOnly"),
-    flaggedAndColor("flaggedAndColor"),
-    flaggedImplicit("flaggedImplicit");
+    COLOR_ONLY("colorOnly"),
+    FLAGGED_ONLY("flaggedOnly"),
+    FLAGGED_AND_COLOR("flaggedAndColor"),
+    FLAGGED_IMPLICIT("flaggedImplicit");
 
-    String name;
+    final String name;
 
-    FLAGGING_MODE(String name) {
+    FlaggingMode(String name) {
         this.name = name;
     }
 
-    static FLAGGING_MODE getModeByName(String name) {
-        for (FLAGGING_MODE mode : FLAGGING_MODE.values()) {
+    public static FlaggingMode getModeByName(String name) {
+        for (FlaggingMode mode : FlaggingMode.values()) {
             if (mode.name.equals(name)) {
                 return mode;
             }
         }
-        return FLAGGING_MODE.flaggedOnly;
+        return FlaggingMode.COLOR_ONLY;
+    }
+
+    public String getName(){
+        return this.name;
+    }
+
+
+    private final static String FLAGGING_COLOR_PROPERTY = "com.openexchange.mail.flagging.color";
+    private final static String FLAGGING_MODE_PROPERTY = "com.openexchange.mail.flagging.mode";
+
+    /**
+     * Retrieves the configured color for colorless flagged mails.
+     *
+     * @param session The session
+     * @return The color
+     */
+    public static final int getFlaggingColor(Session session) {
+        try {
+            ConfigViewFactory factory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+            if (factory != null) {
+                ConfigView view = factory.getView(session.getUserId(), session.getContextId());
+                int color = view.opt(FLAGGING_COLOR_PROPERTY, Integer.class, 1);
+                return color;
+            }
+        } catch (OXException e) {
+            // Fallback to default
+        }
+        return 1;
+    }
+
+
+
+    /**
+     * Retrieves the configured flagging mode for the user. Falls back to {@link #COLOR_ONLY} in case an error occurs.
+     *
+     * @param session The session
+     * @return the {@link FlaggingMode}
+     */
+    public static FlaggingMode getFlaggingMode(Session session) {
+        try {
+            ConfigViewFactory factory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+            if (factory != null) {
+                ConfigView view = factory.getView(session.getUserId(), session.getContextId());
+                String modeName = view.opt(FLAGGING_MODE_PROPERTY, String.class, FlaggingMode.COLOR_ONLY.getName());
+                return FlaggingMode.getModeByName(modeName);
+            }
+        } catch (OXException e) {
+            // fall back to default
+        }
+        return FlaggingMode.COLOR_ONLY;
     }
 
 }
