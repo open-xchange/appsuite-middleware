@@ -75,6 +75,36 @@ import com.openexchange.java.util.TimeZones;
  */
 public class AlarmUtils extends CalendarUtils {
 
+    public static String getDuration(boolean negative, long weeks, long days, long hours, long minutes, long seconds) {
+        if (0 == weeks + days + hours + minutes + seconds) {
+            return "PT0S";
+        }
+        StringBuilder stringBuilder = new StringBuilder();
+        if (negative) {
+            stringBuilder.append('-');
+        }
+        stringBuilder.append('P');
+        if (0 < weeks) {
+            stringBuilder.append(weeks).append('W');
+        }
+        if (0 < days) {
+            stringBuilder.append(days).append('D');
+        }
+        if (0 < hours || 0 < minutes || 0 < seconds) {
+            stringBuilder.append('T');
+            if (0 < hours) {
+                stringBuilder.append(hours).append('H');
+            }
+            if (0 < minutes) {
+                stringBuilder.append(minutes).append('M');
+            }
+            if (0 < seconds) {
+                stringBuilder.append(seconds).append('S');
+            }
+        }
+        return stringBuilder.toString();
+    }
+
     /**
      * Parses a trigger duration string.
      *

@@ -53,6 +53,7 @@ import java.util.List;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Trigger;
 import com.openexchange.chronos.Trigger.Related;
+import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ical4j.mapping.AbstractICalMapping;
 import com.openexchange.exception.OXException;
@@ -127,7 +128,8 @@ public class TriggerMapping extends AbstractICalMapping<VAlarm, Alarm> {
 				 * import as relative duration
 				 */
 				value.setDateTime(null);
-				value.setDuration(property.getDuration().toString());
+                Dur dur = property.getDuration();
+                value.setDuration(AlarmUtils.getDuration(dur.isNegative(), dur.getWeeks(), dur.getDays(), dur.getHours(), dur.getMinutes(), dur.getSeconds()));
 				Parameter parameter = property.getParameter(Parameter.RELATED);
 				if (null != parameter) {
 					if (net.fortuna.ical4j.model.parameter.Related.END.equals(parameter)) {
