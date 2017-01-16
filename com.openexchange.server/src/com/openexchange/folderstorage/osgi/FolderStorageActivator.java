@@ -244,7 +244,6 @@ public final class FolderStorageActivator implements BundleActivator {
                         return null;
                     }
                 };
-                ConfiguredDefaultPermissions.getInstance();
                 serviceRegistrations.add(context.registerService(ForcedReloadable.class, reloadable, null));
             }
             // Register service trackers
