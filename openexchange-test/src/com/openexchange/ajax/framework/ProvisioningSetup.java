@@ -203,8 +203,6 @@ public class ProvisioningSetup {
         try {
             AJAXClient client = new AJAXClient(user);
             StartSMTPRequest request = new StartSMTPRequest(true);
-            request.setUpdateNoReplyForContext(client.getValues().getContextId());
-
             SMTPInitResponse response = client.execute(request);
         } catch (OXException | IOException | JSONException e) {
             LOG.error("", e);
