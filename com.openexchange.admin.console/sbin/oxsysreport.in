@@ -492,7 +492,7 @@ verify_ox_rpm_packages(){
                     local _origin=$(yum repolist "${_repo_id}" -v | \
                         grep 'Repo-baseurl' | \
                         awk '{print $3}' | \
-                        sed 's|http.*@||g')
+                        sed 's|http.*@|https://<REMOVED BY OXSYSREPORT>@//|g')
                 else
                     echo "Error, missing tool: yum"
                 fi
@@ -505,7 +505,7 @@ verify_ox_rpm_packages(){
                         local _origin=$(zypper -n --no-refresh repos "${_repo_id}" | \
                             grep '^URI' | \
                             awk '{print $3}' | \
-                            sed 's|http.*@||g')
+                            sed 's|http.*@|https://<REMOVED BY OXSYSREPORT>@//|g')
                     fi
                 else
                     echo "Error, missing tool: zypper"
