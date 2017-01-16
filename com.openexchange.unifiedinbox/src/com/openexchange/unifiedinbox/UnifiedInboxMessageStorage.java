@@ -690,7 +690,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             Session session = this.session;
             // Create completion service for simultaneous access
             int length = accounts.size();
-            UnifiedInboxCompletionService<List<List<MailMessage>>> completionService = new UnifiedInboxCompletionService<>(ThreadPools.getThreadPool());
+            UnifiedInboxCompletionService<List<List<MailMessage>>> completionService = new UnifiedInboxCompletionService<>(ThreadPools.getThreadPool().getExecutor());
             final IndexRange applicableRange = null == indexRange ? null : new IndexRange(0, indexRange.end);
             for (final MailAccount mailAccount : accounts) {
                 completionService.submit(new LoggingCallable<List<List<MailMessage>>>(session) {
