@@ -3848,17 +3848,6 @@ public class CalendarMySQL implements CalendarSqlImp {
                     pd.setInt(2, cid);
                     pd.setInt(3, deleted_userparticipant.getIdentifier());
                     pd.addBatch();
-                    if (cdao.containsStartDate()) {
-                        cdao.getStartDate();
-                    } else {
-                        edao.getStartDate();
-                    }
-                    if (cdao.containsEndDate()) {
-                        cdao.getEndDate();
-                    } else {
-                        edao.getEndDate();
-                    }
-
                     deleteReminder(cdao.getObjectID(), uid, cdao.getContext(), writecon);
                     new_deleted.add(deleted_userparticipant);
                 }
