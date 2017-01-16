@@ -737,12 +737,11 @@ public class LoginServlet extends AJAXServlet {
         }
     }
     
-    private boolean isAutologinActivated(String subPath) throws OXException {
+    private boolean isAutologinActivated(String hostName) throws OXException {
         ServerConfigService serverConfigService = ServerServiceRegistry.getInstance().getService(ServerConfigService.class);
-        com.openexchange.serverconfig.ServerConfig serverConfig = serverConfigService.getServerConfig(subPath, -1, -1);
+        com.openexchange.serverconfig.ServerConfig serverConfig = serverConfigService.getServerConfig(hostName, -1, -1);
         Map<String, Object> configurations = serverConfig.forClient();
-        boolean object = (boolean) configurations.get("com.openexchange.sessiond.autologin");
-        return object;
+        return (boolean) configurations.get("com.openexchange.sessiond.autologin");
     }
 
     private void doJSONAuth(final HttpServletRequest req, final HttpServletResponse resp, final String action) throws IOException {
