@@ -737,7 +737,7 @@ public class LoginServlet extends AJAXServlet {
         }
     }
     
-    private boolean isAutologinActivated(String hostName) throws OXException {
+    public static boolean isAutologinActivated(String hostName) throws OXException {
         ServerConfigService serverConfigService = ServerServiceRegistry.getInstance().getService(ServerConfigService.class);
         com.openexchange.serverconfig.ServerConfig serverConfig = serverConfigService.getServerConfig(hostName, -1, -1);
         Map<String, Object> configurations = serverConfig.forClient();
