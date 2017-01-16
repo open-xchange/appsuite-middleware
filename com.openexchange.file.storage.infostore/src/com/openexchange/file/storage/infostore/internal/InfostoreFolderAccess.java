@@ -268,7 +268,7 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess, MediaFold
     public String updateFolder(String identifier, FileStorageFolder toUpdate) throws OXException {
         Folder parsedFolder = FolderParser.parseFolder(toUpdate);
         parsedFolder.setID(identifier);
-        getFolderService().updateFolder(parsedFolder, null, session, initDecorator()).getResponse();
+        getFolderService().updateFolder(parsedFolder, null, session, initDecorator());
         return null != parsedFolder.getNewID() ? parsedFolder.getNewID() : identifier;
     }
 
