@@ -198,7 +198,10 @@ public final class Threadables {
         Threadable threadable = getAllThreadablesFrom(imapFolder, lookAhead);
         if (sorted) {
             if (useCommonsNetThreader()) {
-                threadable = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(threadable))).getDelegatee();
+                ThreadableImpl threadableImpl =  ((ThreadableImpl)new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(threadable)));
+                if(threadableImpl!=null){
+                    threadable = threadableImpl.getDelegatee();
+                }
             } else {
                 threadable = new Threader().thread(threadable);
             }
