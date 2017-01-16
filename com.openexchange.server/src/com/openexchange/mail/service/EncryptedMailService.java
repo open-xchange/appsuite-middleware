@@ -51,6 +51,7 @@ package com.openexchange.mail.service;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -67,6 +68,6 @@ public interface EncryptedMailService {
      * @return a ComposedMailMessage containing the encrypted message
      * @throws OXException
      */
-    public ComposedMailMessage encryptDraftEmail (ComposedMailMessage draft, ServerSession session) throws OXException;
+    public ComposedMailMessage encryptDraftEmail (ComposedMailMessage draft, Session session) throws OXException;
 
 }
