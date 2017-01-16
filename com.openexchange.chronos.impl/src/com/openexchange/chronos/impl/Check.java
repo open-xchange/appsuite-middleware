@@ -50,7 +50,6 @@
 package com.openexchange.chronos.impl;
 
 import static com.openexchange.chronos.impl.Utils.getCalendarUser;
-import static com.openexchange.chronos.impl.Utils.getSearchTerm;
 import static com.openexchange.chronos.impl.Utils.i;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
@@ -68,6 +67,7 @@ import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.compat.Recurrence;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.impl.performer.ResolveUidPerformer;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.configuration.ServerConfig;
@@ -78,10 +78,6 @@ import com.openexchange.folderstorage.database.contentType.CalendarContentType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.tools.mappings.Mapping;
 import com.openexchange.java.Strings;
-import com.openexchange.search.CompositeSearchTerm;
-import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
-import com.openexchange.search.SingleSearchTerm.SingleOperation;
-import com.openexchange.search.internal.operands.ColumnFieldOperand;
 
 /**
  * {@link CalendarService}
@@ -306,18 +302,9 @@ public class Check {
     public static String uidIsUnique(CalendarStorage storage, Event event) throws OXException {
         String uid = event.getUid();
         if (Strings.isNotEmpty(uid)) {
-            CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
-                .addSearchTerm(getSearchTerm(EventField.UID, SingleOperation.EQUALS, uid))
-                .addSearchTerm(new CompositeSearchTerm(CompositeOperation.OR)
-                    .addSearchTerm(getSearchTerm(EventField.SERIES_ID, SingleOperation.ISNULL))
-                    .addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID)))
-                )
-            ;
-            List<Event> events = storage.getEventStorage().searchEvents(searchTerm, null, new EventField[] { EventField.ID, EventField.UID });
-            for (Event foundEvent : events) {
-                if (uid.equals(foundEvent.getUid())) {
-                    throw CalendarExceptionCodes.UID_CONFLICT.create(uid, I(foundEvent.getId()));
-                }
+            int existingId = new ResolveUidPerformer(storage).perform(uid);
+            if (0 < existingId) {
+                throw CalendarExceptionCodes.UID_CONFLICT.create(uid, I(existingId));
             }
         }
         return uid;

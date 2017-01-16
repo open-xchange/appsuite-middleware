@@ -53,7 +53,6 @@ import static com.openexchange.chronos.impl.Utils.getSearchTerm;
 import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.search.CompositeSearchTerm;
@@ -67,16 +66,18 @@ import com.openexchange.search.internal.operands.ColumnFieldOperand;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class ResolveUidPerformer extends AbstractQueryPerformer {
+public class ResolveUidPerformer {
+
+    private final CalendarStorage storage;
 
     /**
      * Initializes a new {@link ResolveUidPerformer}.
      *
-     * @param session The calendar session
      * @param storage The underlying calendar storage
      */
-    public ResolveUidPerformer(CalendarSession session, CalendarStorage storage) throws OXException {
-        super(session, storage);
+    public ResolveUidPerformer(CalendarStorage storage) throws OXException {
+        super();
+        this.storage = storage;
     }
 
     /**
@@ -97,7 +98,7 @@ public class ResolveUidPerformer extends AbstractQueryPerformer {
             )
         ;
         /*
-         * search for an event matching the UID
+         * search for an event matching the UID & verify equality via String#equals
          */
         List<Event> events = storage.getEventStorage().searchEvents(searchTerm, null, new EventField[] { EventField.ID, EventField.UID });
         for (Event foundEvent : events) {

@@ -139,7 +139,7 @@ public class CalendarServiceImpl implements CalendarService {
 
             @Override
             protected Integer execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return I(new ResolveUidPerformer(session, storage).perform(uid));
+                return I(new ResolveUidPerformer(storage).perform(uid));
             }
         }.executeQuery().intValue();
     }
@@ -150,7 +150,7 @@ public class CalendarServiceImpl implements CalendarService {
 
             @Override
             protected Integer execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return I(new ResolveFilenamePerformer(session, storage).perform(filename));
+                return I(new ResolveFilenamePerformer(storage).perform(filename));
             }
         }.executeQuery().intValue();
     }
