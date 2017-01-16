@@ -1,3 +1,9 @@
+open-xchange-freebusy (7.8.2-22) stable; urgency=medium
+
+  * Build for patch 2017-01-23 (3878)
+
+ -- Tobias Friedrich <tobias.friedrich@open-xchange.com>  Mon, 16 Jan 2017 17:24:52 +0100
+
 open-xchange-freebusy (7.8.2-21) stable; urgency=medium
 
   * Build for patch 2017-01-18 (3867)
