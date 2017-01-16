@@ -49,6 +49,7 @@
 
 package com.openexchange.serverconfig.impl.values;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.capabilities.Capability;
@@ -66,6 +67,12 @@ import com.openexchange.session.Session;
 public class Capabilities implements ComputedServerConfigValueService {
 
     private final ServiceLookup services;
+    private final static Map<String, Capability> CAPS_TO_CHECK = new HashMap<String, Capability>();
+
+
+    static {
+        CAPS_TO_CHECK.put("com.openexchange.sessiond.autologin", new Capability("autologin"));
+    }
 
     public Capabilities(ServiceLookup services) {
         super();
@@ -82,7 +89,24 @@ public class Capabilities implements ComputedServerConfigValueService {
         } else {
             capabilities = capabilityService.getCapabilities(optSession, true).asSet();
         }
+
+        removeCapabilitiesDisabledByHost(serverConfig, capabilities);
+
         serverConfig.put("capabilities", capabilities);
+    }
+
+    private void removeCapabilitiesDisabledByHost(Map<String, Object> serverConfig, Set<Capability> capabilities) {
+        for(String property: CAPS_TO_CHECK.keySet()){
+        if (serverConfig.containsKey(property)) {
+            Capability cap = CAPS_TO_CHECK.get(property);
+            if (serverConfig.get(property).equals(Boolean.FALSE)) {
+                capabilities.remove(cap);
+            } else {
+                capabilities.add(cap);
+            }
+            serverConfig.remove(property);
+        }
+    }
     }
 
 }

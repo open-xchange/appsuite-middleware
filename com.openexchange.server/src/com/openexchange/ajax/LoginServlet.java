@@ -57,7 +57,6 @@ import java.io.IOException;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -93,8 +92,8 @@ import com.openexchange.ajax.login.TokenLogin;
 import com.openexchange.ajax.login.Tokens;
 import com.openexchange.ajax.writer.LoginWriter;
 import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.capabilities.Capability;
 import com.openexchange.config.ConfigTools;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ClientWhitelist;
 import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.configuration.ServerConfig;
@@ -740,8 +739,7 @@ public class LoginServlet extends AJAXServlet {
     private boolean isAutologinActivated(String hostName) throws OXException {
         ServerConfigService serverConfigService = ServerServiceRegistry.getInstance().getService(ServerConfigService.class);
         com.openexchange.serverconfig.ServerConfig serverConfig = serverConfigService.getServerConfig(hostName, -1, -1);
-        Map<String, Object> configurations = serverConfig.forClient();
-        return (boolean) configurations.get("com.openexchange.sessiond.autologin");
+        return serverConfig.getCapabilities().contains(new Capability("autologin"));
     }
 
     private void doJSONAuth(final HttpServletRequest req, final HttpServletResponse resp, final String action) throws IOException {
