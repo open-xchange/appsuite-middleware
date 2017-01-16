@@ -57,6 +57,7 @@ import java.io.IOException;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -93,6 +94,7 @@ import com.openexchange.ajax.login.Tokens;
 import com.openexchange.ajax.writer.LoginWriter;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.config.ConfigTools;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ClientWhitelist;
 import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.configuration.ServerConfig;
@@ -113,6 +115,7 @@ import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.session.Reply;
 import com.openexchange.session.Session;
 import com.openexchange.session.SessionResult;
@@ -713,20 +716,33 @@ public class LoginServlet extends AJAXServlet {
         try {
             final String action = req.getParameter(PARAMETER_ACTION);
             final String subPath = getServletSpecificURI(req);
+            
+            String serverName = req.getServerName();
+            if (action.equals("autologin") && null != serverName && !isAutologinActivated(serverName)) {
+                return;
+            } 
+            
             if (null != subPath && subPath.startsWith("/httpAuth")) {
                 handlerMap.get("/httpAuth").handleRequest(req, resp);
-            } else if (null != action) {
+            } else {
                 // Regular login handling
                 doJSONAuth(req, resp, action);
-            } else {
-                logAndSendException(resp, AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_ACTION));
-                return;
             }
         } catch (RateLimitedException e) {
             e.send(resp);
+        } catch (OXException oxException) {
+            logAndSendException(resp, oxException);
         } finally {
             LogProperties.removeProperties(LOG_PROPERTIES);
         }
+    }
+    
+    private boolean isAutologinActivated(String subPath) throws OXException {
+        ServerConfigService serverConfigService = ServerServiceRegistry.getInstance().getService(ServerConfigService.class);
+        com.openexchange.serverconfig.ServerConfig serverConfig = serverConfigService.getServerConfig(subPath, -1, -1);
+        Map<String, Object> configurations = serverConfig.forClient();
+        boolean object = (boolean) configurations.get("com.openexchange.sessiond.autologin");
+        return object;
     }
 
     private void doJSONAuth(final HttpServletRequest req, final HttpServletResponse resp, final String action) throws IOException {
