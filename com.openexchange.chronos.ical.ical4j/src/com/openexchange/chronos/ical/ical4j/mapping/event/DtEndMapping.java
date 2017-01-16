@@ -50,14 +50,12 @@
 package com.openexchange.chronos.ical.ical4j.mapping.event;
 
 import java.util.Date;
-
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ical.ical4j.mapping.ICalDateMapping;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.property.DateProperty;
 import net.fortuna.ical4j.model.property.DtEnd;
-
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.ical.ical4j.mapping.ICalDateMapping;
 
 /**
  * {@link DtEndMapping}
@@ -100,5 +98,10 @@ public class DtEndMapping extends ICalDateMapping<VEvent, Event> {
 	protected DateProperty createProperty() {
 		return new DtEnd();
 	}
+
+    @Override
+    protected DateProperty getProperty(VEvent component) {
+        return component.getEndDate();
+    }
 
 }

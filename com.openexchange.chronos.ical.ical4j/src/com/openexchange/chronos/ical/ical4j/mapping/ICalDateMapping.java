@@ -53,6 +53,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import com.openexchange.chronos.ical.ICalParameters;
+import com.openexchange.chronos.ical.ical4j.ParserTools;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import net.fortuna.ical4j.model.DateTime;
@@ -89,6 +90,8 @@ public abstract class ICalDateMapping<T extends CalendarComponent, U> extends Ab
     protected abstract void setValue(U object, Date value, String timezone, boolean hasTime);
 
     protected abstract DateProperty createProperty();
+
+    protected abstract DateProperty getProperty(T component);
 
     @Override
     public void export(U object, T component, ICalParameters parameters, List<OXException> warnings) {
@@ -130,13 +133,13 @@ public abstract class ICalDateMapping<T extends CalendarComponent, U> extends Ab
 
     @Override
     public void importICal(T component, U object, ICalParameters parameters, List<OXException> warnings) {
-        DateProperty property = (DateProperty) component.getProperty(propertyName);
+        DateProperty property = getProperty(component);
         if (null == property || null == property.getDate()) {
             setValue(object, null, null, true);
         } else {
             TimeZone defaultTimeZone = parameters.get(ICalParameters.DEFAULT_TIMEZONE, TimeZone.class);
             if (ParserTools.isDateTime(property)) {
-                Date value = ParserTools.parseDateConsideringDateType(component, property, defaultTimeZone);
+                Date value = ParserTools.toDateConsideringDateType(property, defaultTimeZone);
                 TimeZone timeZone = TimeZoneUtils.selectTimeZone(property, defaultTimeZone);
                 setValue(object, value, null != timeZone ? timeZone.getID() : null, true);
             } else {

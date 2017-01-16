@@ -99,4 +99,9 @@ public class RecurrenceIdMapping extends ICalDateMapping<VEvent, Event> {
         return new RecurrenceId();
 	}
 
+    @Override
+    protected DateProperty getProperty(VEvent component) {
+        return component.getRecurrenceId();
+    }
+
 }

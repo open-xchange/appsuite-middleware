@@ -98,4 +98,9 @@ public class DtEndMapping extends ICalDateMapping<VFreeBusy, FreeBusyData> {
 		return new DtEnd();
 	}
 
+    @Override
+    protected DateProperty getProperty(VFreeBusy component) {
+        return component.getEndDate();
+    }
+
 }

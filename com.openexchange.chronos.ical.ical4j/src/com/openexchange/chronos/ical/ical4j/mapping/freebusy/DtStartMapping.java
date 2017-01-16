@@ -98,4 +98,9 @@ public class DtStartMapping extends ICalDateMapping<VFreeBusy, FreeBusyData> {
 		return new DtStart();
 	}
 
+    @Override
+    protected DateProperty getProperty(VFreeBusy component) {
+        return component.getStartDate();
+    }
+
 }
