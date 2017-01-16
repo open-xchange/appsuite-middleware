@@ -32,59 +32,55 @@ public class AllTest extends AppointmentTest {
 
     @Test
     public void testShouldListAppointmentsInPrivateFolder() throws Exception {
+        catm.setTimezone(TimeZones.UTC);
         final Appointment appointment = new Appointment();
         appointment.setStartDate(D("24/02/1998 12:00"));
         appointment.setEndDate(D("24/02/1998 14:00"));
         appointment.setTitle("Appointment 1 for All Test");
         appointment.setParentFolderID(appointmentFolderId);
-        create(appointment);
+        catm.insert(appointment);
 
         final Appointment anotherAppointment = new Appointment();
         anotherAppointment.setStartDate(D("03/05/1999 10:00"));
         anotherAppointment.setEndDate(D("03/05/1999 10:30"));
         anotherAppointment.setTitle("Appointment 2 for All Test");
         anotherAppointment.setParentFolderID(appointmentFolderId);
-        create(anotherAppointment);
+        catm.insert(anotherAppointment);
 
-        AllRequest all = new AllRequest(appointmentFolderId, SIMPLE_COLUMNS, D("01/01/1990 00:00"), D("01/01/2000 00:00"), TimeZones.UTC);
-        CommonAllResponse allResponse = getClient().execute(all);
+        Appointment[] all = catm.all(appointmentFolderId, D("01/01/1990 00:00"), D("01/01/2000 00:00"), SIMPLE_COLUMNS);
 
         // Verify appointments are included in response
-        final JSONArray data = (JSONArray) allResponse.getData();
-        assertInResponse(data, appointment, anotherAppointment);
+        assertInResponse(all, appointment, anotherAppointment);
 
-        all = new AllRequest(appointmentFolderId, SIMPLE_COLUMNS, D("01/01/1990 00:00"), D("01/01/2000 00:00"), TimeZones.UTC);
         final TimeZone respTimeZone = TimeZone.getTimeZone("GMT+08:00");
-        all.setTimeZoneId(respTimeZone.getID());
-        allResponse = getClient().execute(all);
+        Appointment[] all2 = catm.all(appointmentFolderId, D("01/01/1990 00:00"), D("01/01/2000 00:00"), SIMPLE_COLUMNS, true, respTimeZone.getID());
 
-        final JSONArray data2 = (JSONArray) allResponse.getData();
-        for (int i = 0, size = data.length(); i < size; i++) {
-            final JSONArray row = data.getJSONArray(i);
+        for (int i = 0, size = all.length; i < size; i++) {
+            final Appointment app1 = all[i];
 
-            final int id = row.getInt(0);
-            final int folderId = row.getInt(1);
-            final String title = row.getString(2);
-            final long startDate = row.getLong(3);
-            final long endDate = row.getLong(4);
+            final int id = app1.getObjectID();
+            final int folderId = app1.getParentFolderID();
+            final String title = app1.getTitle();
+            final long startDate = app1.getStartDate().getTime();
+            final long endDate = app1.getEndDate().getTime();
 
-            final JSONArray row2 = data2.getJSONArray(i);
+            final Appointment app2 = all2[i];
 
-            final int id2 = row2.getInt(0);
-            final int folderId2 = row2.getInt(1);
-            final String title2 = row2.getString(2);
-            final long startDate2 = row2.getLong(3);
-            final long endDate2 = row2.getLong(4);
+            final int id2 = app2.getObjectID();
+            final int folderId2 = app2.getParentFolderID();
+            final String title2 = app2.getTitle();
+            final long startDate2 = app2.getStartDate().getTime();
+            final long endDate2 = app2.getEndDate().getTime();
 
             assertEquals("Unexpected ID.", id, id2);
             assertEquals("Unexpected folder ID.", folderId, folderId2);
             assertEquals("Unexpected title.", title, title2);
 
-            final long userTZStartOffset = timeZone.getOffset(startDate);
+            final long userTZStartOffset = TimeZones.UTC.getOffset(startDate);
             final long respTZStartOffset = respTimeZone.getOffset(startDate);
             assertEquals("Unexpected time zone is response", ((startDate2 - startDate)), (respTZStartOffset - userTZStartOffset));
 
-            final long userTZEndOffset = timeZone.getOffset(endDate);
+            final long userTZEndOffset = TimeZones.UTC.getOffset(endDate);
             final long respTZEndOffset = respTimeZone.getOffset(endDate2);
             assertEquals("Unexpected time zone is response", ((endDate2 - endDate)), (respTZEndOffset - userTZEndOffset));
         }
@@ -97,41 +93,38 @@ public class AllTest extends AppointmentTest {
         appointment.setEndDate(D("24/02/1998 14:00"));
         appointment.setTitle("Appointment 1 for All Test");
         appointment.setParentFolderID(appointmentFolderId);
-        create(appointment);
+        catm.insert(appointment);
 
         final Appointment anotherAppointment = new Appointment();
         anotherAppointment.setStartDate(D("03/05/1999 10:00"));
         anotherAppointment.setEndDate(D("03/05/1999 10:30"));
         anotherAppointment.setTitle("Appointment 2 for All Test");
         anotherAppointment.setParentFolderID(appointmentFolderId);
-        create(anotherAppointment);
+        catm.insert(anotherAppointment);
 
-        final AllRequest all = new AllRequest(appointmentFolderId, SIMPLE_COLUMNS, D("01/01/1999 00:00"), D("01/01/2000 00:00"), TimeZones.UTC);
-        final CommonAllResponse allResponse = getClient().execute(all);
+        Appointment[] all = catm.all(appointmentFolderId, D("01/01/1999 00:00"), D("01/01/2000 00:00"), SIMPLE_COLUMNS);
 
         // Verify appointments are included in response
-        final JSONArray data = (JSONArray) allResponse.getData();
+        final JSONArray data = (JSONArray) catm.getLastResponse().getData();
 
         assertNotInResponse(data, appointment);
-        assertInResponse(data, anotherAppointment);
+        assertInResponse(all, anotherAppointment);
 
     }
 
-    private void assertInResponse(final JSONArray data, final Appointment... appointments) throws JSONException {
+    private void assertInResponse(final Appointment[] data, final Appointment... appointments) throws JSONException {
         final Set<Integer> expectedIds = new HashSet<Integer>();
         final Map<Integer, Appointment> id2appointment = new HashMap<Integer, Appointment>();
         for (final Appointment appointment : appointments) {
             expectedIds.add(appointment.getObjectID());
             id2appointment.put(appointment.getObjectID(), appointment);
         }
-        for (int i = 0, size = data.length(); i < size; i++) {
-            final JSONArray row = data.getJSONArray(i);
-
-            final int id = row.getInt(0);
-            final int folderId = row.getInt(1);
-            final String title = row.getString(2);
-            final long startDate = row.getLong(3);
-            final long endDate = row.getLong(4);
+        for (Appointment appointment : data) {
+            final int id = appointment.getObjectID();
+            final int folderId = appointment.getParentFolderID();
+            final String title = appointment.getTitle();
+            final long startDate = appointment.getStartDate().getTime();
+            final long endDate = appointment.getEndDate().getTime();
 
             final Appointment expectedAppointment = id2appointment.get(id);
             expectedIds.remove(id);
@@ -143,7 +136,6 @@ public class AllTest extends AppointmentTest {
                 assertEquals(endDate, expectedAppointment.getEndDate().getTime());
             }
         }
-
         assertTrue("Missing ids: " + expectedIds, expectedIds.isEmpty());
     }
 

@@ -51,27 +51,19 @@ package com.openexchange.ajax;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.TimeZone;
-import org.json.JSONException;
 import org.junit.Before;
-import org.xml.sax.SAXException;
-import com.openexchange.ajax.appointment.action.DeleteRequest;
-import com.openexchange.ajax.appointment.action.InsertRequest;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.Participant;
-import com.openexchange.java.util.TimeZones;
 import com.openexchange.test.OXTestToolkit;
 
 /**
@@ -196,20 +188,6 @@ public class AppointmentTest extends AbstractAJAXTest {
         sb.append("D" + p.getDisplayName());
 
         return sb.toString();
-    }
-
-    protected void create(final Appointment appointment) throws JSONException, IOException, SAXException, OXException {
-        final InsertRequest insert = new InsertRequest(appointment, TimeZones.UTC, true);
-        getClient().execute(insert).fillAppointment(appointment);
-        clean.add(appointment);
-    }
-
-    protected void clean() throws JSONException, IOException, SAXException, OXException {
-        final AJAXClient client = getClient();
-        for (final Appointment appointment : clean) {
-            final DeleteRequest delete = new DeleteRequest(appointment);
-            client.execute(delete);
-        }
     }
 
     protected Appointment link(final Appointment base, final Appointment update) {
