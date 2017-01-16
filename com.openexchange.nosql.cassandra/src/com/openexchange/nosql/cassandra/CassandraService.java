@@ -63,25 +63,37 @@ import com.openexchange.exception.OXException;
 public interface CassandraService {
 
     /**
-     * Returns the Cassandra {@link Cluster} instance
-     * 
+     * Gets the Cassandra {@link Cluster} instance
+     *
      * @return The Cassandra {@link Cluster} instance
      * @throws OXException if the Cassandra {@link Cluster} cannot be returned or any other error is occurred
      */
     Cluster getCluster() throws OXException;
 
     /**
-     * Returns a Cassandra {@link Session} for the specified keyspace
-     * 
+     * Gets a Cassandra {@link Session} for the specified keyspace
+     *
      * @param keyspace The keyspace name
      * @return a Cassandra {@link Session} for the Cassandra {@link Cluster} with the specified keyspace
      * @throws OXException if there is no such Cassandra keyspace or if the Cassandra {@link Session} cannot be returned
+     * @see CassandraServices#executeQuery(String, Session)
      */
     Session getSession(String keyspace) throws OXException;
 
     /**
-     * Returns a Cassandra {@link Session} for an asynchronous query for the specified keyspace
-     * 
+     * Gets a Cassandra {@link Session} for the Cassandra {@link Cluster}. Note that the returned
+     * {@link Session} is not bound to any keyspace, meaning that all tables in the CQL queries
+     * performed with that {@link Session} will have to be prefixed with the keyspace name.
+     *
+     * @return a Cassandra {@link Session} for the Cassandra {@link Cluster}
+     * @throws OXException if the Cassandra {@link Session} cannot be returned
+     * @see CassandraServices#executeQuery(String, Session)
+     */
+    Session getSession() throws OXException;
+
+    /**
+     * Gets a Cassandra {@link Session} for an asynchronous query for the specified keyspace
+     *
      * @param keyspace The keyspace name
      * @return The Cassandra {@link Session} encapsulated in a {@link Future} object
      * @throws OXException If the Cassandra {@link Session} cannot be returned
@@ -89,8 +101,8 @@ public interface CassandraService {
     Future<Session> getSessionForAsynchronousExecution(String keyspace) throws OXException;
 
     /**
-     * Returns a {@link MappingManager} for the specified keyspace.
-     * 
+     * Gets a {@link MappingManager} for the specified keyspace.
+     *
      * @param keyspace The keyspace for which to get the {@link MappingManager}
      * @return The {@link MappingManager} bound to the specified keyspace
      * @throws OXException if the {@link MappingManager} cannot be returned

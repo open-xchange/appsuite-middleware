@@ -62,6 +62,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.java.Streams;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -76,13 +77,14 @@ public class CopyAttachmentsForChangeExceptions implements CalendarListener {
 
     @Override
     public void createdChangeExceptionInRecurringAppointment(final Appointment master, final Appointment exception,final int inFolder, final ServerSession session) throws OXException {
+        SearchIterator<AttachmentMetadata> iterator = null;
         try {
             attachmentBase.startTransaction();
             final Context ctx = session.getContext();
             final User userObject = UserStorage.getInstance().getUser(session.getUserId(), ctx);
             final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfiguration(session.getUserId(), ctx);
             final TimedResult<AttachmentMetadata> result = attachmentBase.getAttachments(session, master.getParentFolderID(), master.getObjectID(), Types.APPOINTMENT, ctx, userObject, userConfig);
-            final SearchIterator<AttachmentMetadata> iterator = result.results();
+            iterator = result.results();
             int folderId = exception.getParentFolderID();
             if(folderId == 0) {
                 folderId = inFolder;
@@ -111,6 +113,7 @@ public class CopyAttachmentsForChangeExceptions implements CalendarListener {
             attachmentBase.rollback();
             throw x;
         } finally {
+            SearchIterators.close(iterator);
             attachmentBase.finish();
         }
 

@@ -19,7 +19,7 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.util.StreamUtil;
-
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -165,16 +165,26 @@ public class DBDocVisitor implements ChangeSetVisitor {
 
     private void copyFile(String fileToCopy, File rootOutputDir) throws IOException {
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream(fileToCopy);
+        if (inputStream == null) {
+            throw new IOException("Can not find " + fileToCopy);
+        }
+        
         FileOutputStream outputStream = null;
         try {
-            if (inputStream == null) {
-                throw new IOException("Can not find " + fileToCopy);
-            }
             outputStream = new FileOutputStream(new File(rootOutputDir, fileToCopy.replaceFirst(".*\\/", "")), false);
             StreamUtil.copy(inputStream, outputStream);
         } finally {
-            if (outputStream != null) {
-                outputStream.close();
+            closeSafe(inputStream);
+            closeSafe(outputStream);
+        }
+    }
+
+    private void closeSafe(Closeable c) {
+        if (null != c) {
+            try {
+                c.close();
+            } catch (Exception e) {
+                // Ignore
             }
         }
     }

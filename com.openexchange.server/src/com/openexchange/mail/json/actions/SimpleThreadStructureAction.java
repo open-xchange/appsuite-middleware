@@ -385,7 +385,11 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
             int sortCol = req.getSortFieldFor(sort);
             if (!filterApplied) {
                 List<List<MailMessage>> mails = mailInterface.getAllSimpleThreadStructuredMessages(folderId, includeSent, cache, sortCol, orderDir, columns, headers, fromToIndices, lookAhead, null);
-                return new AJAXRequestResult(ThreadedStructure.valueOf(mails), "mail");
+                AJAXRequestResult result = new AJAXRequestResult(ThreadedStructure.valueOf(mails), "mail");
+                if (!mailInterface.getWarnings().isEmpty()) {
+                    result.addWarnings(mailInterface.getWarnings());
+                }
+                return result;
             }
 
             List<List<MailMessage>> mails = mailInterface.getAllSimpleThreadStructuredMessages(folderId, includeSent, false, sortCol, orderDir, columns, headers, null, lookAhead, searchTerm);
@@ -446,6 +450,9 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
             result.setResponseProperty("cached", Boolean.valueOf(cached));
             if (more > 0) {
                 result.setResponseProperty("more", Integer.valueOf(more));
+            }
+            if (!mailInterface.getWarnings().isEmpty()) {
+                result.addWarnings(mailInterface.getWarnings());
             }
             return result.setDurationByStart(start);
         } catch (final RuntimeException e) {

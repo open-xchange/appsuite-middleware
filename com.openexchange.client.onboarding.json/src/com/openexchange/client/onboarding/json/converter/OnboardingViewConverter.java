@@ -66,6 +66,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.client.onboarding.ClientDevice;
 import com.openexchange.client.onboarding.CompositeId;
 import com.openexchange.client.onboarding.DefaultOnboardingRequest;
 import com.openexchange.client.onboarding.Device;
@@ -166,6 +167,7 @@ public class OnboardingViewConverter implements ResultConverter {
         // Devices, scenario-action-association, and actions
         {
             Map<Device, List<CompositeId>> devices = view.getDevices();
+            ClientDevice clientDevice = view.getClientDevice();
 
             ActionCollector actionCollector = new ActionCollector();
             Set<String> scenarioIds = new LinkedHashSet<String>(16, 0.9F);
@@ -193,7 +195,7 @@ public class OnboardingViewConverter implements ResultConverter {
                     for (CompositeId compositeId : compositeIds) {
                         // Check for an appropriate scenario-action-association entry
                         Set<String> missingCapabilities = new LinkedHashSet<String>(4);
-                        JSONObject jScenario2ActionEntry = createScenario2ActionEntry(compositeId, actionCollector, requestData, onboardingService, missingCapabilities, session);
+                        JSONObject jScenario2ActionEntry = createScenario2ActionEntry(compositeId, clientDevice, actionCollector, requestData, onboardingService, missingCapabilities, session);
                         if (null != jScenario2ActionEntry) {
                             // Add to device's list of supported scenarios
                             jCompositeIds.put(compositeId.toString());
@@ -236,11 +238,11 @@ public class OnboardingViewConverter implements ResultConverter {
         return jView;
     }
 
-    private JSONObject createScenario2ActionEntry(CompositeId compositeId, ActionCollector actionCollector, AJAXRequestData requestData, OnboardingService onboardingService, Collection<String> missingCapabilities, Session session) throws OXException, JSONException {
-        DeviceAwareScenario scenario = onboardingService.getScenario(compositeId.getScenarioId(), compositeId.getDevice(), session);
+    private JSONObject createScenario2ActionEntry(CompositeId compositeId, ClientDevice clientDevice, ActionCollector actionCollector, AJAXRequestData requestData, OnboardingService onboardingService, Collection<String> missingCapabilities, Session session) throws OXException, JSONException {
+        DeviceAwareScenario scenario = onboardingService.getScenario(compositeId.getScenarioId(), clientDevice, compositeId.getDevice(), session);
 
         JSONArray jActionIds = new JSONArray(10);
-        collectActions(scenario, compositeId.getScenarioId(), jActionIds, actionCollector, requestData, onboardingService, session);
+        collectActions(scenario, compositeId.getScenarioId(), jActionIds, clientDevice, actionCollector, requestData, onboardingService, session);
         if (jActionIds.length() > 0) {
             JSONObject jScenario2ActionEntry = new JSONObject(6);
             jScenario2ActionEntry.put("id", compositeId.toString());
@@ -269,7 +271,7 @@ public class OnboardingViewConverter implements ResultConverter {
         return null;
     }
 
-    private void collectActions(DeviceAwareScenario scenario, String scenarioAppendix, JSONArray jActionIds, ActionCollector actionCollector, AJAXRequestData requestData, OnboardingService onboardingService, Session session) throws OXException, JSONException {
+    private void collectActions(DeviceAwareScenario scenario, String scenarioAppendix, JSONArray jActionIds, ClientDevice clientDevice, ActionCollector actionCollector, AJAXRequestData requestData, OnboardingService onboardingService, Session session) throws OXException, JSONException {
         List<OnboardingAction> actions = scenario.getActions();
         for (OnboardingAction action : actions) {
             String actionId = null; // <--- Set to a valid, non-null identifier in case action has been successfully added
@@ -303,7 +305,7 @@ public class OnboardingViewConverter implements ResultConverter {
                         String compositeActionId = new StringBuilder(action.getId()).append('/').append(scenario.getCompositeId().getScenarioId()).toString();
                         if (!actionCollector.usedIds.containsKey(compositeActionId)) {
                             try {
-                                ResultObject result = onboardingService.execute(createOnboardingRequest(scenario, requestData, action), session);
+                                ResultObject result = onboardingService.execute(createOnboardingRequest(scenario, clientDevice, requestData, action), session);
                                 JSONObject jAction = new JSONObject(2);
                                 jAction.put("id", compositeActionId);
                                 jAction.put("data", result.getObject());
@@ -324,13 +326,13 @@ public class OnboardingViewConverter implements ResultConverter {
                         try {
                             JSONObject jAction = actionCollector.usedIds.get(compositeActionId);
                             if (null == jAction) {
-                                ResultObject result = onboardingService.execute(createOnboardingRequest(scenario, requestData, action), session);
+                                ResultObject result = onboardingService.execute(createOnboardingRequest(scenario, clientDevice, requestData, action), session);
                                 jAction = new JSONObject(2);
                                 jAction.put("id", compositeActionId);
                                 jAction.put(scenario.getDevice().getId(), result.getObject());
                                 actionCollector.addAction(compositeActionId, jAction);
                             } else {
-                                ResultObject result = onboardingService.execute(createOnboardingRequest(scenario, requestData, action), session);
+                                ResultObject result = onboardingService.execute(createOnboardingRequest(scenario, clientDevice, requestData, action), session);
                                 jAction.put(scenario.getDevice().getId(), result.getObject());
                             }
                             actionId = null == scenarioAppendix ? action.getId() : new StringBuilder(action.getId()).append('/').append(scenarioAppendix).toString();
@@ -351,8 +353,8 @@ public class OnboardingViewConverter implements ResultConverter {
         }
 
         for (Scenario alternative : scenario.getAlternatives(session)) {
-            DeviceAwareScenario alternativeDeviceAwareScenario = onboardingService.getScenario(alternative.getId(), scenario.getDevice(), session);
-            collectActions(alternativeDeviceAwareScenario, alternative.getId(), jActionIds, actionCollector, requestData, onboardingService, session);
+            DeviceAwareScenario alternativeDeviceAwareScenario = onboardingService.getScenario(alternative.getId(), clientDevice, scenario.getDevice(), session);
+            collectActions(alternativeDeviceAwareScenario, alternative.getId(), jActionIds, clientDevice, actionCollector, requestData, onboardingService, session);
         }
     }
 
@@ -389,8 +391,8 @@ public class OnboardingViewConverter implements ResultConverter {
         }
     }
 
-    private DefaultOnboardingRequest createOnboardingRequest(DeviceAwareScenario scenario, AJAXRequestData requestData, OnboardingAction action) {
-        return new DefaultOnboardingRequest(scenario, action, scenario.getDevice(), requestData.getHostData(), null);
+    private DefaultOnboardingRequest createOnboardingRequest(DeviceAwareScenario scenario, ClientDevice clientDevice, AJAXRequestData requestData, OnboardingAction action) {
+        return new DefaultOnboardingRequest(scenario, action, clientDevice, scenario.getDevice(), requestData.getHostData(), null);
     }
 
     // -------------------------------------------------------------------------------------------

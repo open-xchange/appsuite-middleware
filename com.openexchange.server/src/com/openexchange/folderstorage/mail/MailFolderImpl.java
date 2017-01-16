@@ -169,9 +169,11 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
     private int m_total = -1;
     private int m_unread = -1;
 
-    private static final int BIT_USER_FLAG = (1 << 29);
+    /** The special bit for user flag support */
+    public static final int BIT_USER_FLAG = (1 << 29);
 
-    private static final int BIT_RENAME_FLAG = (1 << 30);
+    /** The special bit for rename grant */
+    public static final int BIT_RENAME_FLAG = (1 << 30);
 
     /**
      * Initializes a new {@link MailFolderImpl} from given mail folder.

@@ -49,7 +49,7 @@
 
 package com.openexchange.nosql.cassandra.impl;
 
-import java.util.HashMap;
+import java.io.Closeable;
 import java.util.Map;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
@@ -101,7 +101,7 @@ public class CassandraServiceImpl implements CassandraService {
 
     /**
      * Initialises a new {@link CassandraServiceImpl}.
-     * 
+     *
      * @param services The {@link ServiceLookup} instance
      * @throws OXException
      */
@@ -132,35 +132,20 @@ public class CassandraServiceImpl implements CassandraService {
             throw CassandraServiceExceptionCodes.AUTHENTICATION_ERROR.create(e, initializer.getContactPoints());
         }
         // Initialise the sessions cache
-        synchronousSessions = new HashMap<>();
+        synchronousSessions = new ConcurrentHashMap<>();
         asynchronousSessions = new ConcurrentHashMap<>();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.nosql.cassandra.CassandraService#getCluster()
-     */
     @Override
     public Cluster getCluster() throws OXException {
         return cluster;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.nosql.cassandra.CassandraService#getSession(java.lang.String)
-     */
     @Override
     public Session getSession(String keyspace) throws OXException {
         return getCassandraSession(keyspace).getSession();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.nosql.cassandra.CassandraService#getSessionForAsynchronousExecution(java.lang.String)
-     */
     @Override
     public Future<Session> getSessionForAsynchronousExecution(String keyspace) throws OXException {
         // Fetch a connection from cache
@@ -183,29 +168,17 @@ public class CassandraServiceImpl implements CassandraService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.nosql.cassandra.CassandraService#getMappingManager(java.lang.String)
-     */
     @Override
     public MappingManager getMappingManager(String keyspace) throws OXException {
         return getCassandraSession(keyspace).getMappingManager();
     }
 
-    //////////////////////////////////// HELPERS //////////////////////////////////////////////////
-
-    /**
-     * Returns a Cassandra {@link Session} for the Cassandra {@link Cluster}. Note that the returned
-     * {@link Session} is not bound to any keyspace, meaning that all tables in the CQL queries
-     * performed with that {@link Session} will have to be prefixed with the keyspace name.
-     * 
-     * @return a Cassandra {@link Session} for the Cassandra {@link Cluster}
-     * @throws OXException if the Cassandra {@link Session} cannot be returned
-     */
+    @Override
     public Session getSession() throws OXException {
         return globalSession;
     }
+
+    //////////////////////////////////// HELPERS //////////////////////////////////////////////////
 
     /**
      * Shutdown the service
@@ -219,7 +192,7 @@ public class CassandraServiceImpl implements CassandraService {
         // Close synchronous session
         LOGGER.info("Closing synchronous session");
         for (CassandraSession session : synchronousSessions.values()) {
-            session.getSession().close();
+            closeSafe(session.getSession());
         }
         synchronousSessions.clear();
 
@@ -239,27 +212,35 @@ public class CassandraServiceImpl implements CassandraService {
             } catch (CancellationException e) {
                 LOGGER.warn("{}", e.getMessage(), e);
             }
-            if (futureSession != null) {
-                futureSession.close();
-            }
+            closeSafe(futureSession);
         }
         asynchronousSessions.clear();
 
         // Close the global session
         LOGGER.info("Closing global session");
         if (globalSession != null && !globalSession.isClosed()) {
-            globalSession.close();
+            closeSafe(globalSession);
         }
 
         // Close the cluster
         LOGGER.info("Closing cluster connection");
-        cluster.close();
+        closeSafe(cluster);
+    }
+
+    private void closeSafe(Closeable closeable) {
+        if (null != closeable) {
+            try {
+                closeable.close();
+            } catch (Exception e) {
+                // Ignore
+            }
+        }
     }
 
     /**
      * Helper method for retrieving a {@link CassandraSession} from the local cache. If no session exists
      * one will be created and cached for future use.
-     * 
+     *
      * @param keyspace The keyspace
      * @return A {@link CassandraSession}
      */

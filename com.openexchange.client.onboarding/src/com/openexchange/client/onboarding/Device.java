@@ -215,26 +215,28 @@ public enum Device implements Entity {
     /**
      * Gets the available action for given device and type for session-associated user.
      *
+     * @param clientDevice The client device, which is the target for the on-boarding action
      * @param device The device
      * @param type The type
      * @param session The session
      * @return The available actions
      * @throws OXException If actions cannot be returned
      */
-    public static List<OnboardingAction> getActionsFor(Device device, OnboardingType type, Session session) throws OXException {
-        return getActionsFor(device, type, session.getUserId(), session.getContextId());
+    public static List<OnboardingAction> getActionsFor(ClientDevice clientDevice, Device device, OnboardingType type, Session session) throws OXException {
+        return getActionsFor(clientDevice, device, type, session.getUserId(), session.getContextId());
     }
 
     /**
      * Gets the available action for given device and type for session-associated user.
      *
+     * @param clientDevice The client device, which is the target for the on-boarding action
      * @param device The device
      * @param type The type
      * @param session The session
      * @return The available actions
      * @throws OXException If actions cannot be returned
      */
-    public static List<OnboardingAction> getActionsFor(Device device, OnboardingType type, int userId, int contextId) throws OXException {
+    public static List<OnboardingAction> getActionsFor(ClientDevice clientDevice, Device device, OnboardingType type, int userId, int contextId) throws OXException {
         if (null == device || null == type) {
             return Collections.emptyList();
         }
@@ -250,7 +252,7 @@ public enum Device implements Entity {
         }
 
         // Check for other types
-        List<OnboardingAction> actions = getConfiguredActionsFor(device, type, userId, contextId);
+        List<OnboardingAction> actions = getConfiguredActionsFor(clientDevice, device, type, userId, contextId);
         if (null == actions) {
             // No actions available for specified device and type
             return Collections.emptyList();
@@ -278,7 +280,7 @@ public enum Device implements Entity {
         return actions;
     }
 
-    private static List<OnboardingAction> getConfiguredActionsFor(Device device, OnboardingType type, int userId, int contextId) throws OXException {
+    private static List<OnboardingAction> getConfiguredActionsFor(ClientDevice clientDevice, Device device, OnboardingType type, int userId, int contextId) throws OXException {
         switch (device) {
             case ANDROID_PHONE:
                 {

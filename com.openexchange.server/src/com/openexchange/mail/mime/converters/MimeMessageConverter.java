@@ -2391,9 +2391,12 @@ public final class MimeMessageConverter {
         Boolean tmp = enableMime4j;
         if (null == tmp) {
             synchronized (MimeMessageConverter.class) {
-                final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                tmp = Boolean.valueOf(null == service ? false : service.getBoolProperty("com.openexchange.mail.mime.enableMime4j", false));
-                enableMime4j = tmp;
+                tmp = enableMime4j;
+                if (null == tmp) {
+                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    tmp = Boolean.valueOf(null == service ? false : service.getBoolProperty("com.openexchange.mail.mime.enableMime4j", false));
+                    enableMime4j = tmp;
+                }
             }
         }
         return tmp.booleanValue();

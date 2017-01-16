@@ -334,7 +334,7 @@ public final class SieveTextFilter {
 
     /**
      * Writes an empty script
-     * 
+     *
      * @return The empty script
      */
     public String writeEmptyScript() {
@@ -686,7 +686,12 @@ public final class SieveTextFilter {
         final String errormsg = rightrule.getErrormsg();
         if (null != errormsg) {
             rightrule.setCommands(null);
-            addPlainTextToRule(wholetext, commentedtext, rulename, rightrule);
+            try {
+                addPlainTextToRule(wholetext, commentedtext, rulename, rightrule);
+            } catch (Exception e) {
+                LOG.warn("Unable to add add rule because of: "+e.getMessage());
+                // continue in case an error occurs
+            }
             printErrorForUser(MailFilterExceptionCode.SIEVE_ERROR.create(errormsg));
             return true;
         }

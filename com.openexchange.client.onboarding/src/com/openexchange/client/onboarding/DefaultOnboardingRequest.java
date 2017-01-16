@@ -62,6 +62,7 @@ public class DefaultOnboardingRequest implements OnboardingRequest {
 
     private final Scenario scenario;
     private final OnboardingAction action;
+    private final ClientDevice clientDevice;
     private final Device device;
     private final HostData hostData;
     private final Map<String, Object> input;
@@ -71,14 +72,16 @@ public class DefaultOnboardingRequest implements OnboardingRequest {
      *
      * @param scenario The scenario to execute
      * @param action The action to perform
+     * @param clientDevice The client device, which is the target for the on-boarding action
      * @param device The associated device
      * @param hostData The host data
      * @param input The optional input or <code>null</code>
      */
-    public DefaultOnboardingRequest(Scenario scenario, OnboardingAction action, Device device, HostData hostData, Map<String, Object> input) {
+    public DefaultOnboardingRequest(Scenario scenario, OnboardingAction action, ClientDevice clientDevice, Device device, HostData hostData, Map<String, Object> input) {
         super();
         this.scenario = scenario;
         this.action = action;
+        this.clientDevice = clientDevice;
         this.device = device;
         this.hostData = hostData;
         this.input = input;
@@ -92,6 +95,11 @@ public class DefaultOnboardingRequest implements OnboardingRequest {
     @Override
     public OnboardingAction getAction() {
         return action;
+    }
+
+    @Override
+    public ClientDevice getClientDevice() {
+        return clientDevice;
     }
 
     @Override

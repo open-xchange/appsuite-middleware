@@ -182,9 +182,10 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
             // shut down the connection manager to ensure
             // immediate deallocation of all system resources
             if (null != httpclient) {
-                httpclient.getConnectionManager().shutdown();
+                httpclient.close(); // Performs 'getConnectionManager().shutdown();'
             }
         }
     }
+
 }
 

@@ -60,18 +60,35 @@ import com.openexchange.exception.OXExceptionFactory;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public enum CassandraServiceExceptionCodes implements DisplayableOXExceptionCode {
-    /**
-     * None of the Cassandra contact points '%1%s' is reachable
-     */
-    CONTACT_POINTS_NOT_REACHABLE("None of the Cassandra contact points '%1%s' is reachable", Category.CATEGORY_CONNECTIVITY, 1),
-    /**
-     * An authentication error while contacting the initial contact points '%1%s'
-     */
-    AUTHENTICATION_ERROR("An authentication error while contacting the initial contact points '%1%s'", Category.CATEGORY_ERROR, 2),
+
     /**
      * An unexpected error occurred: %1$s
      */
-    UNEXPECTED_ERROR("An unexpected error occurred: %1$s", Category.CATEGORY_ERROR, 3);
+    UNEXPECTED_ERROR("An unexpected error occurred: %1$s", Category.CATEGORY_ERROR, 1),
+    /**
+     * None of the Cassandra contact points '%1%s' is reachable
+     */
+    CONTACT_POINTS_NOT_REACHABLE("None of the Cassandra contact points '%1%s' is reachable", Category.CATEGORY_CONNECTIVITY, 2),
+    /**
+     * None of the Cassandra contact points is reachable
+     */
+    CONTACT_POINTS_NOT_REACHABLE_SIMPLE("None of the Cassandra contact points is reachable", Category.CATEGORY_CONNECTIVITY, 2),
+    /**
+     * An authentication error while contacting the initial contact points '%1%s'
+     */
+    AUTHENTICATION_ERROR("An authentication error while contacting the initial contact points '%1%s'", Category.CATEGORY_ERROR, 3),
+    /**
+     * Failed to execute query: %1$s
+     * <p>
+     * This corresponds to the exception that Cassandra throws when a (valid) query cannot be executed (TimeoutException, UnavailableException, ...).
+     */
+    QUERY_EXECUTION_ERROR("Failed to execute query: %1$s", Category.CATEGORY_ERROR, 4),
+    /**
+     * Invalid query: %1$s
+     * <p>
+     * An exception indicating that a query cannot be executed because it is syntactically incorrect, invalid, unauthorized or any other reason.
+     */
+    QUERY_VALIDATION_ERROR("Invalid query: %1$s", Category.CATEGORY_ERROR, 5),
     ;
 
     private final int number;
@@ -82,10 +99,6 @@ public enum CassandraServiceExceptionCodes implements DisplayableOXExceptionCode
 
     /**
      * Initialises a new {@link CassandraServiceExceptionCodes}.
-     * 
-     * @param message
-     * @param category
-     * @param number
      */
     private CassandraServiceExceptionCodes(final String message, final Category category, final int number) {
         this.message = message;
@@ -95,61 +108,31 @@ public enum CassandraServiceExceptionCodes implements DisplayableOXExceptionCode
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.exception.OXExceptionCode#equals(com.openexchange.exception.OXException)
-     */
     @Override
     public boolean equals(OXException e) {
         return OXExceptionFactory.getInstance().equals(this, e);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.exception.OXExceptionCode#getNumber()
-     */
     @Override
     public int getNumber() {
         return number;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.exception.OXExceptionCode#getCategory()
-     */
     @Override
     public Category getCategory() {
         return category;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.exception.OXExceptionCode#getPrefix()
-     */
     @Override
     public String getPrefix() {
         return PREFIX;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.exception.OXExceptionCode#getMessage()
-     */
     @Override
     public String getMessage() {
         return message;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.exception.DisplayableOXExceptionCode#getDisplayMessage()
-     */
     @Override
     public String getDisplayMessage() {
         return displayMessage;

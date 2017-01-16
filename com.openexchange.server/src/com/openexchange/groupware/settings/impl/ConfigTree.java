@@ -380,6 +380,8 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.modules.mail.GUI.class,
             com.openexchange.groupware.settings.tree.modules.mail.InlineAttachments.class,
             com.openexchange.groupware.settings.tree.modules.mail.LineWrap.class,
+            com.openexchange.groupware.settings.tree.modules.mail.UploadQuotaPerFile.class,
+            com.openexchange.groupware.settings.tree.modules.mail.UploadQuotaTotal.class,
             com.openexchange.groupware.settings.tree.modules.mail.Module.class,
             com.openexchange.groupware.settings.tree.modules.mail.MsgFormat.class,
             com.openexchange.groupware.settings.tree.modules.mail.Namespace.class,

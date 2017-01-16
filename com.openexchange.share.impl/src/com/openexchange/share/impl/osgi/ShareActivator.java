@@ -53,7 +53,6 @@ import java.util.concurrent.ExecutorService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.cluster.timer.ClusterTimerService;
@@ -134,8 +133,6 @@ public class ShareActivator extends HousekeepingActivator {
 
             private volatile ServiceRegistration<ShareService> shareRegistration;
 
-            private volatile ServiceRegistration<EventHandler> cleanUpRegistration;
-
             @Override
             public CryptoService addingService(ServiceReference<CryptoService> serviceReference) {
                 String cryptKey = getService(ConfigurationService.class).getProperty("com.openexchange.share.cryptKey", "erE2e8OhAo71");
@@ -159,11 +156,6 @@ public class ShareActivator extends HousekeepingActivator {
                 if (null != shareRegistration) {
                     this.shareRegistration = null;
                     shareRegistration.unregister();
-                }
-                ServiceRegistration<EventHandler> cleanUpRegistration = this.cleanUpRegistration;
-                if (null != cleanUpRegistration) {
-                    this.cleanUpRegistration = null;
-                    cleanUpRegistration.unregister();
                 }
 
                 context.ungetService(serviceReference);

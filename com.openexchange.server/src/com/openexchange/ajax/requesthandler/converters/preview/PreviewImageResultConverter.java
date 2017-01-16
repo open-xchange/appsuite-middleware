@@ -266,14 +266,26 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
                     String mimeType = MimeType2ExtMap.getContentType(fileHolder.getName(), null);
                     if (null == mimeType) {
                         // Unknown. Then detect MIME type by content.
-                        fileHolder = new ThresholdFileHolder().write(stream).setContentInfo(fileHolder);
-                        mimeType = AJAXUtility.detectMimeType(fileHolder.getStream());
-                        stream = fileHolder.getStream();
-                        LOG.debug("Determined MIME type for file {} by content: {}", fileHolder.getName(), mimeType);
+                        ThresholdFileHolder tfh = new ThresholdFileHolder();
+                        boolean error = true;
+                        try {
+                            tfh.write(stream).setContentInfo(fileHolder);
+                            fileHolder = tfh;
+                            mimeType = AJAXUtility.detectMimeType(fileHolder.getStream());
+                            stream = fileHolder.getStream();
+                            error = false;
+                            LOG.debug("Determined MIME type for file {} by content: {}", fileHolder.getName(), mimeType);
+                        } finally {
+                            if (error) {
+                                Streams.close(tfh);
+                            }
+                        }
                     } else {
                         LOG.debug("Determined MIME type for file {} by name: {}", fileHolder.getName(), mimeType);
                     }
-                    fileHolder = new ModifyableFileHolder(fileHolder).setContentType(mimeType);
+                    ModifyableFileHolder mfh = new ModifyableFileHolder(fileHolder);
+                    mfh.setContentType(mimeType);
+                    fileHolder = mfh;
 
                     boolean useCurrentThread = true;
                     {

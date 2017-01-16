@@ -206,7 +206,10 @@ rc_reset
 # with force-reload (in case signaling is not supported) are
 # considered a success.
 
-ulimit -n $NRFILES
+NRFILES=${NRFILES:-65536}
+NPROC=${NPROC:-65536}
+ulimit -n ${NRFILES}
+ulimit -u ${NPROC}
 
 if ox_is_running open-xchange-admindaemon "/opt/open-xchange/etc/admindaemon"; then
    echo -n "old 6.20 admin daemon still running, shutting down..."
