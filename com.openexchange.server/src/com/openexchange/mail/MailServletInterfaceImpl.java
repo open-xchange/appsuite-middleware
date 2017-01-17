@@ -1583,20 +1583,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             if (mail.containsPrevSeen() && !mail.isPrevSeen()) {
                 postEvent(PushEventConstants.TOPIC_ATTR, accountId, fullName, true, true);
             }
-
-            if (mail.getColorLabel() == 0 && mail.isFlagged()) {
-                FlaggingMode mode = FlaggingMode.getFlaggingMode(session);
-                if (mode.equals(FlaggingMode.FLAGGED_IMPLICIT)) {
-                    mail.setColorLabel(FlaggingMode.getFlaggingColor(session));
-                }
-            }
-
-            if (mail.getColorLabel() != 0) {
-                FlaggingMode mode = FlaggingMode.getFlaggingMode(session);
-                if (mode.equals(FlaggingMode.FLAGGED_ONLY)) {
-                    mail.setColorLabel(0);
-                }
-            }
             /*
              * Update cache since \Seen flag is possibly changed
              */
@@ -1617,6 +1603,24 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 }
             } catch (OXException e) {
                 LOG.error("", e);
+            }
+            /*
+             * Check color label vs. \Flagged flag
+             */
+            if (mail.getColorLabel() == 0) {
+                // No color label set; check if \Flagged
+                if (mail.isFlagged()) {
+                    FlaggingMode mode = FlaggingMode.getFlaggingMode(session);
+                    if (mode.equals(FlaggingMode.FLAGGED_IMPLICIT)) {
+                        mail.setColorLabel(FlaggingMode.getFlaggingColor(session));
+                    }
+                }
+            } else {
+                // Color label set. Check whether to swallow that information in case only \Flagged should be advertised
+                FlaggingMode mode = FlaggingMode.getFlaggingMode(session);
+                if (mode.equals(FlaggingMode.FLAGGED_ONLY)) {
+                    mail.setColorLabel(0);
+                }
             }
         }
         return mail;
@@ -2705,6 +2709,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         } catch (OXException e) {
             LOG.error("", e);
         }
+        checkMailsForColor(mails);
         return SearchIteratorAdapter.createArrayIterator(mails);
     }
 
