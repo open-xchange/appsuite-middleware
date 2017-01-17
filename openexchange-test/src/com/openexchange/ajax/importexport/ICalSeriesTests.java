@@ -108,6 +108,7 @@ public class ICalSeriesTests extends ManagedAppointmentTest {
 		"VERSION:2.0\n"+
 
 		"BEGIN:VEVENT\n"+
+        "RECURRENCE-ID;TZID=Europe/Rome:20100204T103000\n"+
 		"DTSTART;TZID=Europe/Rome:20100204T113000\n"+
 		"DTEND;TZID=Europe/Rome:20100204T130000\n"+
 		"DTSTAMP:20110105T174810Z\n"+
@@ -150,7 +151,8 @@ public class ICalSeriesTests extends ManagedAppointmentTest {
 		"END:VEVENT\n" +
 
 		"BEGIN:VEVENT\n"+
-		"DTSTART;TZID=Europe/Rome:20100204T160000\n"+
+        "RECURRENCE-ID;TZID=Europe/Rome:20100204T110000\n"+
+        "DTSTART;TZID=Europe/Rome:20100204T160000\n"+
 		"DTEND;TZID=Europe/Rome:20100204T170000\n"+
 		"DTSTAMP:20110105T174810Z\n"+
 		"SUMMARY:"+title+"\n"+
