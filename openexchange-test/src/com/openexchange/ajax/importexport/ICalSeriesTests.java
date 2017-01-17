@@ -81,7 +81,7 @@ public class ICalSeriesTests extends ManagedAppointmentTest {
 		"DTSTART;TZID=Europe/Rome:20100202T103000\n"+
 		"DTEND;TZID=Europe/Rome:20100202T120000\n"+
 		"RRULE:FREQ=DAILY;UNTIL=20100204T215959Z\n"+
-		"EXDATE:20100203T103000\n"+
+		"EXDATE:20100203T093000Z\n"+
 		"DTSTAMP:20110105T174810Z\n"+
 		"SUMMARY:Exceptional Meeting #1\n"+
 		"END:VEVENT\n";
