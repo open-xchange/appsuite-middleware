@@ -1850,7 +1850,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                         throw new InvalidDataException(String.format("The reassign user with id %1$s does not exist in context %2$s. Please choose a different reassign user.", destUser, ctx.getId()));
                     }
                     if (!tool.isMasterFilestoreOwner(ctx, destUser.intValue())) {
-                        throw new InvalidDataException(String.format("The reassign user with id %1$s is not an owner of a filestore. Please choose a different reassign user.", destUser, ctx.getId()));
+                        throw new InvalidDataException(String.format("The reassign user with id %1$s is not an owner of a filestore. Please choose a different reassign user.", destUser));
                     }
                     User masterUser = new User(destUser.intValue());
                     for (User filestoreOwner : filestoreOwners) {

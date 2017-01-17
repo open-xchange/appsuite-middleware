@@ -86,6 +86,7 @@ import com.openexchange.groupware.notify.hostname.internal.HostDataImpl;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.java.Strings;
+import com.openexchange.log.LogProperties;
 import com.openexchange.mail.json.actions.AbstractMailAction;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -1588,6 +1589,9 @@ public class AJAXRequestData {
      * @param hostname The host name
      */
     public void setHostname(final String hostname) {
+        if (null != hostname) {
+            LogProperties.put(LogProperties.Name.HOSTNAME, hostname);
+        }
         this.hostname = hostname;
     }
 

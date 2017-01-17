@@ -73,4 +73,7 @@ public class KnownStatusMessage implements LocalizableStrings {
     // The message advertising that authentication against referenced mail account does not work or stopped working
     public static final String MESSAGE_INVALID_CREDENTIALS = "The entered credential or authentication information does not work or are no longer accepted by provider. Please change them.";
 
+    // The message advertising that affected account is broken and needs to be re-created
+    public static final String MESSAGE_RECREATION_NEEDED = "Account is broken and needs to be re-created";
+
 }
