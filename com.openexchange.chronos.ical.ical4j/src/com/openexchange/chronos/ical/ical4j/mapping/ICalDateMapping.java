@@ -143,7 +143,11 @@ public abstract class ICalDateMapping<T extends CalendarComponent, U> extends Ab
                 TimeZone timeZone = TimeZoneUtils.selectTimeZone(property, defaultTimeZone);
                 setValue(object, value, null != timeZone ? timeZone.getID() : null, true);
             } else {
-                setValue(object, ParserTools.parseDate(component, property, defaultTimeZone), null, false);
+                Date value = new Date(property.getDate().getTime());
+                if (ParserTools.inDefaultTimeZone(property, defaultTimeZone)) {
+                    value = ParserTools.recalculate(value, defaultTimeZone);
+                }
+                setValue(object, value, null, false);
             }
         }
     }
