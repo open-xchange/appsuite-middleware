@@ -56,24 +56,56 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
 /**
- * {@link FlaggingMode} defines possible flagging modes.
+ * {@link FlaggingMode} - Specifies how color labels and special \Flagged system flag are connected (or not).
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
 public enum FlaggingMode {
 
+    /**
+     * Only color flags are available. The special \Flagged system flag is not touched.
+     */
     COLOR_ONLY("colorOnly"),
+    /**
+     * Only special \Flagged system flag is used. Color labels are not published.
+     */
     FLAGGED_ONLY("flaggedOnly"),
+    /**
+     * Both - color flags and special \Flagged system flag - are available and set independently.
+     */
     FLAGGED_AND_COLOR("flaggedAndColor"),
+    /**
+     * Both - color flags and special \Flagged system flag - are available. A certain color label is linked with the \Flagged system flag.
+     * <p>
+     * That is to add a color to colorless flagged mails and to add flagged to unflagged but colored mails.
+     */
     FLAGGED_IMPLICIT("flaggedImplicit");
 
-    final String name;
+    private final String name;
 
-    FlaggingMode(String name) {
+    private FlaggingMode(String name) {
         this.name = name;
     }
 
+    /**
+     * Gets the name for this flagging mode.
+     *
+     * @return The name
+     */
+    public String getName(){
+        return this.name;
+    }
+
+
+    // ------------------------------------------------- Helpers ------------------------------------------------
+
+    /**
+     * Resolves the specified name to a flagging mode.
+     *
+     * @param name The name to resolve
+     * @return The resolved flagging mode or {@link #COLOR_ONLY} in case name does not match any
+     */
     public static FlaggingMode getModeByName(String name) {
         for (FlaggingMode mode : FlaggingMode.values()) {
             if (mode.name.equals(name)) {
@@ -83,13 +115,7 @@ public enum FlaggingMode {
         return FlaggingMode.COLOR_ONLY;
     }
 
-    public String getName(){
-        return this.name;
-    }
-
-
     private final static String FLAGGING_COLOR_PROPERTY = "com.openexchange.mail.flagging.color";
-    private final static String FLAGGING_MODE_PROPERTY = "com.openexchange.mail.flagging.mode";
 
     /**
      * Retrieves the configured color for colorless flagged mails.
@@ -111,7 +137,7 @@ public enum FlaggingMode {
         return 1;
     }
 
-
+    private final static String FLAGGING_MODE_PROPERTY = "com.openexchange.mail.flagging.mode";
 
     /**
      * Retrieves the configured flagging mode for the user. Falls back to {@link #COLOR_ONLY} in case an error occurs.

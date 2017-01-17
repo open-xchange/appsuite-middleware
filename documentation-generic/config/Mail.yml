@@ -66,12 +66,12 @@ Specifies the authentication type which should be used for primary account's mai
   - data:
       Key: com.openexchange.mail.flagging.mode
       Description: >
-Specifies the flagging mode. Possible values:
--<code>colorOnly</code> Only coloring is available.
--<code>flaggedOnly</code> Only flagging is available.
--<code>flaggedAndColor</code> Both coloring and flagging is available.
--<code>flaggedImplicit</code> Like flaggedAndColor but also add a color to colorless flagged mails and add flagged to unflagged but colored mails.
-      Default: flaggedOnly
+Specifies how color labels and special \Flagged system flag are connected (or not). Possible values:
+-<code>colorOnly</code> Only color flags are available. The special \Flagged system flag is not touched.
+-<code>flaggedOnly</code> Only special \Flagged system flag is used. Color labels are not published.
+-<code>flaggedAndColor</code> Both - color flags and special \Flagged system flag - are available and set independently.
+-<code>flaggedImplicit</code>Both - color flags and special \Flagged system flag - are available. A certain color label is linked with the \Flagged system flag. That is to add a color to colorless flagged mails and to add flagged to unflagged but colored mails.
+      Default: colorOnly
       Version: 7.8.4
       Reloadable: true
       Configcascade_Aware: true
