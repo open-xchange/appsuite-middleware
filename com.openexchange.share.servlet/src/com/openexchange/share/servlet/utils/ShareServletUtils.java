@@ -135,7 +135,7 @@ public final class ShareServletUtils {
              */
             LoginServlet.addHeadersAndCookies(loginResult, response);
             response.addCookie(configureCookie(new Cookie(SECRET_PREFIX + session.getHash(), session.getSecret()), request, loginConfig));
-            if (loginConfig.isSessiondAutoLogin()) {
+            if (loginConfig.isSessiondAutoLogin(request.getServerName())) {
                 response.addCookie(configureCookie(new Cookie(LoginServlet.getShareCookieName(request), guest.getBaseToken()), request, loginConfig));
             }
             /*
@@ -152,7 +152,7 @@ public final class ShareServletUtils {
             /*
              * construct & send redirect
              */
-            String url = ShareRedirectUtils.getWebSessionRedirectURL(session, loginResult.getUser(), target, loginConfig);
+            String url = ShareRedirectUtils.getWebSessionRedirectURL(session, loginResult.getUser(), target, loginConfig, request.getServerName());
             LOG.debug("Redirecting share {} to {}...", guest.getBaseToken(), url);
             response.sendRedirect(url);
             return true;

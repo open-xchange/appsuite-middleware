@@ -87,7 +87,7 @@ public class ShareRedirectUtils {
      * @param loginConfig The login configuration to use
      * @return The redirect URL
      */
-    public static String getWebSessionRedirectURL(Session session, User user, ShareTarget target, LoginConfiguration loginConfig) {
+    public static String getWebSessionRedirectURL(Session session, User user, ShareTarget target, LoginConfiguration loginConfig, String host) {
         /*
          * evaluate link destination based on share or target
          */
@@ -132,7 +132,7 @@ public class ShareRedirectUtils {
         if (null != item) {
             redirectLink = P_ITEM.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(item));
         }
-        redirectLink = P_STORE.matcher(redirectLink).replaceAll(loginConfig.isSessiondAutoLogin() ? "true" : "false");
+        redirectLink = P_STORE.matcher(redirectLink).replaceAll(loginConfig.isSessiondAutoLogin(host) ? "true" : "false");
         return redirectLink;
     }
 

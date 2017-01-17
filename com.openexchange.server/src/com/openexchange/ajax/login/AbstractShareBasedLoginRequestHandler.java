@@ -416,7 +416,7 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
                  * set secret & share cookies
                  */
                 response.addCookie(configureCookie(new Cookie(SECRET_PREFIX + session.getHash(), session.getSecret()), request, loginConfig));
-                if (loginConfig.isSessiondAutoLogin()) {
+                if (loginConfig.isSessiondAutoLogin(httpRequest.getServerName())) {
                     response.addCookie(configureCookie(new Cookie(getShareCookieName(request), guest.getBaseToken()), request, loginConfig));
                 }
                 /*

@@ -773,7 +773,7 @@ public class LoginServlet extends AJAXServlet {
             throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
         }
         final LoginConfiguration conf = getLoginConfiguration(session);
-        if (!conf.isSessiondAutoLogin() && CookieType.SESSION == type) {
+        if (!conf.isSessiondAutoLogin(req.getServerName()) && CookieType.SESSION == type) {
             throw AjaxExceptionCodes.DISABLED_ACTION.create("store");
         }
         try {
@@ -986,7 +986,7 @@ public class LoginServlet extends AJAXServlet {
         if (secure || (conf.isCookieForceHTTPS() && !Cookies.isLocalLan(serverName))) {
             cookie.setSecure(true);
         }
-        if (conf.isSessiondAutoLogin() || conf.getCookieExpiry() < 0) {
+        if (conf.isSessiondAutoLogin(serverName) || conf.getCookieExpiry() < 0) {
             /*
              * A negative value means that the cookie is not stored persistently and will be deleted when the Web browser exits. A zero
              * value causes the cookie to be deleted.
