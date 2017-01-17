@@ -142,19 +142,7 @@ public class TestContextPool {
         }
     }
 
-    public static synchronized List<TestContext> acquireAll() {
-        List<TestContext> all = new ArrayList<>();
-
-        while (!contexts.isEmpty()) {
-            TestContext context = acquireContext(TestContextPool.class.getName());
-            all.add(context);
-        }
-        return all;
-    }
-
-    public static synchronized void backAll(List<TestContext> all) {
-        for (TestContext context : all) {
-            backContext(context);
-        }
+    public static synchronized List<TestContext> getCopyOfCurrentlyAvailableContexts() {
+        return new ArrayList<>(contexts);
     }
 }

@@ -68,10 +68,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
  * @since v7.8.4
  */
 @RunWith(ParallelSuite.class)
-@Suite.SuiteClasses({
-    OnboardingAJAXSuite.class,
-    OAuthProviderSmtpTests.class,
-    ShareAJAXSuite.class,
+@Suite.SuiteClasses({ OnboardingAJAXSuite.class, OAuthProviderSmtpTests.class, ShareAJAXSuite.class,
 })
 public final class InterfaceSmtpMockTests {
 
@@ -86,12 +83,7 @@ public final class InterfaceSmtpMockTests {
 
     @AfterClass
     public static void tearDown() {
-        try {
-            SmtpMockSetup.restore();
-        } catch (OXException e) {
-            e.printStackTrace();
-        }
+        SmtpMockSetup.restore();
     }
-    
-    
+
 }

@@ -73,6 +73,8 @@ public class SmtpMockSetup {
 
     private static AtomicBoolean initialized = new AtomicBoolean();
 
+    private static List<TestContext> contextsWithStartedMock;
+
     public static void init() throws OXException {
         synchronized (SmtpMockSetup.class) {
             if (!initialized.get()) {
@@ -86,18 +88,17 @@ public class SmtpMockSetup {
     }
 
     private static void startSmtpMockForAllContexts() {
-        List<TestContext> testContexts = TestContextPool.acquireAll();
+        contextsWithStartedMock = TestContextPool.getCopyOfCurrentlyAvailableContexts();
 
-        for (TestContext testContext : testContexts) {
+        for (TestContext testContext : contextsWithStartedMock) {
             TestUser testUser = testContext.acquireUser();
             startSmtpMockServerAndSetNoReply(testUser);
 
-            List<TestUser> allUsers = testContext.acquireAll();
+            List<TestUser> allUsers = testContext.getCopyOfAll();
             for (TestUser user : allUsers) {
                 startSmtpMockServer(user);
             }
         }
-        TestContextPool.backAll(testContexts);
     }
 
     private static void startSmtpMockServerAndSetNoReply(TestUser user) {
@@ -120,8 +121,8 @@ public class SmtpMockSetup {
             LOG.error("", e);
         }
     }
-    
-    public static void restore() throws OXException {
+
+    public static void restore() {
         synchronized (SmtpMockSetup.class) {
             if (initialized.get()) {
                 stopSMTPMockForAllContexts();
@@ -130,17 +131,16 @@ public class SmtpMockSetup {
             }
         }
     }
-    
+
     private static void stopSMTPMockForAllContexts() {
-        List<TestContext> testContexts = TestContextPool.acquireAll();
+        List<TestContext> testContexts = contextsWithStartedMock;
 
         for (TestContext testContext : testContexts) {
-            List<TestUser> allUsers = testContext.acquireAll();
+            List<TestUser> allUsers = testContext.getCopyOfAll();
             for (TestUser user : allUsers) {
                 stopSMTPMockServer(user);
             }
         }
-        TestContextPool.backAll(testContexts);  
     }
 
     private static void stopSMTPMockServer(TestUser user) {
