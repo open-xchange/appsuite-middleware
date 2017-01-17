@@ -59,7 +59,6 @@ import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.ProvisioningSetup;
 import com.openexchange.ajax.session.actions.LoginRequest;
 import com.openexchange.ajax.session.actions.LoginResponse;
-import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.test.pool.TestContext;
@@ -93,7 +92,6 @@ public class DuplicateAuthIdTest {
 
     @Before
     public void setUp() throws Exception {
-        AJAXConfig.init();
         ProvisioningSetup.init();
         testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
         TestUser testUser = testContext.acquireUser();

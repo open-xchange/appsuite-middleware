@@ -171,7 +171,7 @@ public class CopyTest extends InfostoreAJAXTest {
 
         com.openexchange.file.storage.File copy = itm.getAction(copyId);
 
-        assertTrue("copy" == copy.getTitle());
+        assertEquals("copy", copy.getTitle());
         assertEquals("text/plain", copy.getFileMIMEType());
     }
 

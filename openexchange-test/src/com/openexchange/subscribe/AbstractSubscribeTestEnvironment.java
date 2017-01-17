@@ -58,6 +58,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.ProvisioningSetup;
 import com.openexchange.ajax.oauth.actions.AllOAuthAccountRequest;
 import com.openexchange.ajax.oauth.actions.AllOAuthAccountResponse;
 import com.openexchange.ajax.oauth.actions.DeleteOAuthAccountRequest;
@@ -110,6 +111,8 @@ public abstract class AbstractSubscribeTestEnvironment {
      */
     public void init() {
         try {
+            ProvisioningSetup.init();
+
             initAJAXClient();
             initManagers();
             initEnvironment();

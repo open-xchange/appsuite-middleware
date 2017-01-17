@@ -58,7 +58,6 @@ import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.google.code.tempusfugit.concurrency.annotations.Concurrent;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.ajax.smtptest.actions.ClearMailsRequest;
-import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.test.CalendarTestManager;
 import com.openexchange.test.ContactTestManager;
 import com.openexchange.test.FolderTestManager;
@@ -112,7 +111,6 @@ public abstract class AbstractAJAXSession {
 
     @Before
     public void setUp() throws Exception {
-        AJAXConfig.init();
         ProvisioningSetup.init();
 
         String clientId = getClientId();

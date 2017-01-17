@@ -55,6 +55,7 @@ import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.ProvisioningSetup;
 import com.openexchange.ajax.infostore.fileaccount.actions.DeleteFileaccountRequest;
 import com.openexchange.ajax.infostore.fileaccount.actions.NewFileaccountRequest;
 import com.openexchange.ajax.infostore.fileaccount.actions.NewFileaccountResponse;
@@ -119,6 +120,8 @@ public abstract class AbstractInfostoreThirdpartyEnvironments {
      */
     public void init() {
         try {
+            ProvisioningSetup.init();
+
             initAJAXClient();
             initEnvironments(authProviders);
         } catch (Exception e) {

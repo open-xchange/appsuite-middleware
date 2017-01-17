@@ -55,7 +55,7 @@ import org.junit.runners.Suite;
 import com.openexchange.ajax.advertisement.AdvertisementTestSuite;
 import com.openexchange.ajax.drive.DriveAJAXSuite;
 import com.openexchange.ajax.find.FindTestSuite;
-import com.openexchange.ajax.framework.SmtpMockSetup;
+import com.openexchange.ajax.framework.ProvisioningSetup;
 import com.openexchange.ajax.jslob.JSlobTestSuite;
 import com.openexchange.ajax.oauth.provider.OAuthProviderTests;
 import com.openexchange.exception.OXException;
@@ -137,7 +137,7 @@ public final class InterfaceTests {
     @BeforeClass
     public static void setUp() {
         try {
-            SmtpMockSetup.init();
+            ProvisioningSetup.init();
         } catch (OXException e) {
             e.printStackTrace();
         }

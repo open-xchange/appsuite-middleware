@@ -51,6 +51,7 @@ package com.openexchange.webdav;
 
 import org.junit.After;
 import org.junit.Before;
+import com.openexchange.ajax.framework.ProvisioningSetup;
 import com.openexchange.test.pool.TestContext;
 import com.openexchange.test.pool.TestContextPool;
 import com.openexchange.test.pool.TestUser;
@@ -71,6 +72,8 @@ public abstract class AbstractWebDAVSession {
      */
     @Before
     public void setUp() throws Exception {
+        ProvisioningSetup.init();
+
         testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
         testUser = testContext.acquireUser();
         client = new WebDAVClient(testUser);

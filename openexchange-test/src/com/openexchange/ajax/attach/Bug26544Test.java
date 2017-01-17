@@ -65,6 +65,7 @@ import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.contact.action.InsertRequest;
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.ProvisioningSetup;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.container.Contact;
@@ -89,6 +90,8 @@ public class Bug26544Test {
 
     @Before
     public void setUp() throws Exception {
+        ProvisioningSetup.init();
+
         testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
         client = new AJAXClient(testContext.acquireUser());
         tz = client.getValues().getTimeZone();

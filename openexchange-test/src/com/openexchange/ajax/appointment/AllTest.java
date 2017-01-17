@@ -6,7 +6,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -15,14 +14,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.Executor;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.java.util.TimeZones;
 
@@ -87,7 +83,9 @@ public class AllTest extends AppointmentTest {
     }
 
     @Test
-    public void testShouldOnlyListAppointmentsInSpecifiedTimeRange() throws JSONException, OXException, IOException, SAXException {
+    public void testShouldOnlyListAppointmentsInSpecifiedTimeRange() {
+        catm.setTimezone(TimeZones.UTC);
+        
         final Appointment appointment = new Appointment();
         appointment.setStartDate(D("24/02/1998 12:00"));
         appointment.setEndDate(D("24/02/1998 14:00"));
@@ -109,10 +107,9 @@ public class AllTest extends AppointmentTest {
 
         assertNotInResponse(all, appointment);
         assertInResponse(all, anotherAppointment);
-
     }
 
-    private void assertInResponse(final Appointment[] data, final Appointment... appointments) throws JSONException {
+    private void assertInResponse(final Appointment[] data, final Appointment... appointments) {
         final Set<Integer> expectedIds = new HashSet<Integer>();
         final Map<Integer, Appointment> id2appointment = new HashMap<Integer, Appointment>();
         for (final Appointment appointment : appointments) {

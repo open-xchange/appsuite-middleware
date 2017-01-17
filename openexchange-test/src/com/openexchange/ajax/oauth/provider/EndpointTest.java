@@ -124,7 +124,6 @@ public abstract class EndpointTest {
 
     @BeforeClass
     public static void beforeClass() throws OXException {
-        AJAXConfig.init();
         ProvisioningSetup.init();
         hostname = AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME);
     }

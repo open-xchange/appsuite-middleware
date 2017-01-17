@@ -76,7 +76,6 @@ import com.openexchange.ajax.framework.ProvisioningSetup;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.ajax.mail.MailTestManager;
 import com.openexchange.ajax.smtptest.actions.ClearMailsRequest;
-import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.test.AjaxInit;
 import com.openexchange.test.AttachmentTestManager;
@@ -155,7 +154,6 @@ public abstract class AbstractAJAXTest {
     @Before
     public void setUp() throws Exception {
         try {
-            AJAXConfig.init();
             ProvisioningSetup.init();
 
             testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());

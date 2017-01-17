@@ -84,7 +84,6 @@ public class HttpAuthTest {
 
     @Before
     public void setUp() throws Exception {
-        AJAXConfig.init();
         ProvisioningSetup.init();
         
         testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
