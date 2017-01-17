@@ -187,14 +187,15 @@ public class RssAction implements AJAXActionService {
                 @SuppressWarnings("unchecked") List<SyndContent> contents = entry.getContents();
                 boolean foundHtml = false;
                 for (SyndContent content : contents) {
-                    if ("html".equals(content.getType())) {
+                    String type = content.getType();
+                    if (null != type && (type.startsWith("htm") || type.startsWith("xhtm"))) {
                         foundHtml = true;
                         String htmlContent = preprocessor.process(content.getValue(), result);
                         result.setBody(htmlContent).setFormat("text/html");
                         break;
                     }
                     if (!foundHtml) {
-                        result.setBody(content.getValue()).setFormat(content.getType());
+                        result.setBody(content.getValue()).setFormat(type);
                     }
                 }
             }
