@@ -272,7 +272,7 @@ public class Recurrence {
         try {
             rule = new RecurrenceRule(recurrenceData.getRecurrenceRule());
         } catch (InvalidRecurrenceRuleException | IllegalArgumentException e) {
-            throw CalendarExceptionCodes.INVALID_RRULE.create(recurrenceData.getRecurrenceRule());
+            throw CalendarExceptionCodes.INVALID_RRULE.create(e, recurrenceData.getRecurrenceRule());
         }
         DateTime start;
         if (recurrenceData.isAllDay()) {
@@ -304,7 +304,11 @@ public class Recurrence {
                 }
             }
         }
-        return rule.iterator(start);
+        try {
+            return rule.iterator(start);
+        } catch (IllegalArgumentException e) {
+            throw CalendarExceptionCodes.INVALID_RRULE.create(e, recurrenceData.getRecurrenceRule());
+        }
     }
 
     /**

@@ -111,4 +111,9 @@ public class DefaultRecurrenceData implements RecurrenceData {
         return seriesStart;
     }
 
+    @Override
+    public String toString() {
+        return "DefaultRecurrenceData [rrule=" + rrule + ", allDay=" + allDay + ", timeZoneID=" + timeZoneID + ", seriesStart=" + seriesStart + "]";
+    }
+
 }

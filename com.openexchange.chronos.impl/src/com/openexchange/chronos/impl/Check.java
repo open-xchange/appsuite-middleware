@@ -55,8 +55,6 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import java.util.Date;
 import java.util.List;
-import org.dmfs.rfc5545.recur.InvalidRecurrenceRuleException;
-import org.dmfs.rfc5545.recur.RecurrenceRule;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
@@ -248,11 +246,7 @@ public class Check {
     public static String recurrenceRuleIsValid(Event event) throws OXException {
         String recurrenceRule = event.getRecurrenceRule();
         if (event.containsRecurrenceRule() && null != recurrenceRule) {
-            try {
-                new RecurrenceRule(event.getRecurrenceRule());
-            } catch (InvalidRecurrenceRuleException | IllegalArgumentException e) {
-                throw CalendarExceptionCodes.INVALID_RRULE.create(e, event.getRecurrenceRule());
-            }
+            Recurrence.getRecurrenceIterator(new DefaultRecurrenceData(event));
         }
         return recurrenceRule;
     }
