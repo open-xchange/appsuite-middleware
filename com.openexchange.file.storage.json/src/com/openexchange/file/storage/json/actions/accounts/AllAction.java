@@ -195,9 +195,9 @@ public class AllAction extends AbstractFileStorageAccountAction {
             caps.add(FileStorageCapability.ZIPPABLE_FOLDER.name());
         }
 
-        supported = capabilityAware.supports(FileStorageCapability.COUNTABLE_FOLDER);
+        supported = capabilityAware.supports(FileStorageCapability.COUNT_TOTAL);
         if (null != supported && supported.booleanValue()) {
-            caps.add(FileStorageCapability.COUNTABLE_FOLDER.name());
+            caps.add(FileStorageCapability.COUNT_TOTAL.name());
         }
 
         return caps;

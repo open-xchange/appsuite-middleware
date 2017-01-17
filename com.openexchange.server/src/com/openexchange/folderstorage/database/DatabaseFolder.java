@@ -111,7 +111,7 @@ public class DatabaseFolder extends AbstractFolder {
     private static final String CAPABILITY_ZIPPABLE_FOLDER = Strings.asciiLowerCase(FileStorageCapability.ZIPPABLE_FOLDER.name());
     private static final String CAPABILITY_FILE_VERSIONS = Strings.asciiLowerCase(FileStorageCapability.FILE_VERSIONS.name());
     private static final String CAPABILITY_EXTENDED_METADATA = Strings.asciiLowerCase(FileStorageCapability.EXTENDED_METADATA.name());
-    private static final String CAPABILITY_COUNTABLE_FOLDER = Strings.asciiLowerCase(FileStorageCapability.COUNTABLE_FOLDER.name());
+    private static final String CAPABILITY_COUNT_TOTAL = Strings.asciiLowerCase(FileStorageCapability.COUNT_TOTAL.name());
 
     private static final TIntSet COUNTABLE_MODULES = new TIntHashSet(new int[] { FolderObject.CALENDAR, FolderObject.CONTACT, FolderObject.TASK, FolderObject.INFOSTORE });
 
@@ -160,7 +160,7 @@ public class DatabaseFolder extends AbstractFolder {
         }
         int module = contentType.getModule();
         if (COUNTABLE_MODULES.contains(module)) {
-            addSupportedCapabilities(CAPABILITY_COUNTABLE_FOLDER);
+            addSupportedCapabilities(CAPABILITY_COUNT_TOTAL);
         }
         final OCLPermission[] oclPermissions = folderObject.getPermissionsAsArray();
         permissions = new Permission[oclPermissions.length];
