@@ -4,6 +4,7 @@ package com.openexchange.ajax.infostore;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -110,9 +111,13 @@ public class NewTest extends InfostoreAJAXTest {
         com.openexchange.file.storage.File data = createFile(folderId, "test large upload");
         data.setFileMIMEType("text/plain");
         itm.setFailOnError(false);
-        itm.newAction(data, largeFile);
+        try {
+            itm.newAction(data, largeFile);
+            fail();
+        } catch (Throwable e) {
+            assertTrue(e instanceof AssertionError);
+        }
 
-        assertTrue(itm.getLastResponse().hasError());
     }
 
     // Bug 3928 

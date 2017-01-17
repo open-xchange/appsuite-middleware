@@ -184,7 +184,7 @@ public class InfostoreTestManager implements TestManager {
      */
     public void newAction(File data, java.io.File upload) throws OXException, IOException, JSONException {
         NewInfostoreRequest newRequest = new NewInfostoreRequest(data, upload);
-        newRequest.setFailOnError(getFailOnError());
+        newRequest.setFailOnError(false);
         NewInfostoreResponse newResponse = getClient().execute(newRequest);
         lastResponse = newResponse;
         if (!lastResponse.hasError()) {

@@ -106,7 +106,7 @@ public class GetDocumentRequest extends AbstractInfostoreRequest<GetDocumentResp
     @Override
     public Parameter[] getParameters() {
         Params params = new Params(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DOCUMENT, AJAXServlet.PARAMETER_ID, id, AJAXServlet.PARAMETER_FOLDERID, folder);
-        if (null != version) {
+        if (null != version && !version.equalsIgnoreCase("-1")) {
             params.add(AJAXServlet.PARAMETER_VERSION, version);
         }
         if (null != additionalParameters) {

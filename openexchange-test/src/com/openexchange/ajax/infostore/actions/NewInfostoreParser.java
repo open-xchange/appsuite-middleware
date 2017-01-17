@@ -66,13 +66,7 @@ public class NewInfostoreParser extends AbstractUploadParser<NewInfostoreRespons
 
     @Override
     public String checkResponse(HttpResponse resp, HttpRequest request) throws ParseException, IOException {
-        try {
-            return super.checkResponse(resp, request);
-        } catch (Exception e) {
-            System.out.println(e);
-            // TODO: handle exception
-        }
-        return null;
+        return super.checkResponse(resp, request);
     }
 
     private final boolean upload;

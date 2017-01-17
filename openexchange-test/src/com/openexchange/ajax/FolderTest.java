@@ -53,7 +53,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -100,9 +99,9 @@ public class FolderTest extends AbstractAJAXSession {
     @Test
     public void testDeleteFolder() throws OXException, JSONException, IOException, SAXException, OXException, OXException {
         final int userId = getClient().getValues().getUserId();
-        
+
         FolderObject parentObj = FolderTestManager.createNewFolderObject("DeleteMeImmediately" + UUID.randomUUID().toString(), Module.CALENDAR.getFolderConstant(), FolderObject.PUBLIC, userId, FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
-        
+
         final int parent = ftm.insertFolderOnServer(parentObj).getParentFolderID();
         assertFalse(parent == -1);
         final Calendar cal = GregorianCalendar.getInstance();
@@ -167,7 +166,7 @@ public class FolderTest extends AbstractAJAXSession {
             retrievedNewInfoStoreFolder.setFolderName("ChangedInfostoreFolderName" + System.currentTimeMillis());
             retrievedNewInfoStoreFolder.setLastModified(new Date(Long.MAX_VALUE));
             ftm.updateFolderOnServer(retrievedNewInfoStoreFolder);
-            
+
             ftm.getFolderFromServer(fuid);
             assertFalse(ftm.getLastResponse().hasError());
             ftm.deleteFolderOnServer(fuid, new Date(cal.getTimeInMillis()));
@@ -211,7 +210,7 @@ public class FolderTest extends AbstractAJAXSession {
         FolderObject folderToMove = ftm.getFolderFromServer(moveFuid);
         folderToMove.setParentFolderID(parent02);
         folderToMove.setLastModified(moveMe.getLastModified());
-        
+
         ftm.updateFolderOnServer(folderToMove); //move
         FolderObject movedFolderObj = ftm.getFolderFromServer(moveFuid);
         assertTrue(movedFolderObj.containsParentFolderID() ? movedFolderObj.getParentFolderID() == parent02 : true);
@@ -219,16 +218,10 @@ public class FolderTest extends AbstractAJAXSession {
 
     @Test
     public void testFolderNamesShouldBeEqualRegardlessOfRequestMethod() {
-        try {
-            ftm.setIgnoreMailFolders(false);
-            final FolderObject[] rootFolders = ftm.listRootFoldersOnServer();
-            for (final FolderObject rootFolder : rootFolders) {
-                final FolderObject individuallyLoaded = ftm.getFolderFromServer(rootFolder.getObjectID());
-                assertEquals("Foldernames differ : " + rootFolder.getFolderName() + " != " + individuallyLoaded.getFolderName(), rootFolder.getFolderName(), individuallyLoaded.getFolderName());
-            }
-        } catch (final Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
+        final FolderObject[] rootFolders = ftm.listRootFoldersOnServer();
+        for (final FolderObject rootFolder : rootFolders) {
+            final FolderObject individuallyLoaded = ftm.getFolderFromServer(rootFolder.getObjectID());
+            assertEquals("Foldernames differ : " + rootFolder.getFolderName() + " != " + individuallyLoaded.getFolderName(), rootFolder.getFolderName(), individuallyLoaded.getFolderName());
         }
     }
 

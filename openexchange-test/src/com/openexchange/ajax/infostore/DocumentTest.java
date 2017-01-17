@@ -2,6 +2,7 @@
 package com.openexchange.ajax.infostore;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -23,6 +24,7 @@ public class DocumentTest extends InfostoreAJAXTest {
         super.setUp();
         upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
         com.openexchange.file.storage.File data = createFile(folderId, "test upload" + UUID.randomUUID().toString());
+        data.setFileMIMEType("text/plain");
         itm.newAction(data, upload);
         id = data.getId();
     }
@@ -55,6 +57,6 @@ public class DocumentTest extends InfostoreAJAXTest {
         itm.document(Integer.toString(folderId), id, "-1", null);
 
         contentType = ((GetDocumentResponse) itm.getLastResponse()).getContentType();
-        assertEquals("text/plain", contentType);
+        assertTrue(contentType.startsWith("text/plain"));
     }
 }

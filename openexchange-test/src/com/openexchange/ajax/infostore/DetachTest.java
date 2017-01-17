@@ -22,13 +22,15 @@ import com.openexchange.test.TestInit;
 
 public class DetachTest extends InfostoreAJAXTest {
 
+    private String origId;
+    
     @Before
     public void setUp() throws Exception {
         super.setUp();
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
         final long FAR_FUTURE = Long.MAX_VALUE;
 
-        final String origId = Iterables.get(itm.getCreatedEntities(), 0).getId();
+        origId = Iterables.get(itm.getCreatedEntities(), 0).getId();
         com.openexchange.file.storage.File org = itm.getAction(origId);
         itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE));
         assertFalse(itm.getLastResponse().hasError());
@@ -48,24 +50,20 @@ public class DetachTest extends InfostoreAJAXTest {
 
     @Test
     public void testBasic() throws Exception {
-        com.openexchange.file.storage.File file = Iterables.get(itm.getCreatedEntities(), 0);
-        final String origId = file.getId();
-        ftm.detach(origId, file.getLastModified(), new int[] { 1, 2, 3, 4, 5 });
+        com.openexchange.file.storage.File file = itm.getAction(origId);
+        ftm.detach(file.getId(), file.getLastModified(), new int[] { 1, 2, 3, 4, 5 });
 
-        checkNoVersions(origId);
+        checkVersions(origId, "6", 1);
     }
 
     @Test
     public void testRevert() throws Exception {
-        final String origId = Iterables.get(itm.getCreatedEntities(), 0).getId();
-        itm.revert(origId);
+        com.openexchange.file.storage.File file = itm.getAction(origId);
+
+        itm.revert(file.getId());
         assertFalse(itm.getLastResponse().hasError());
         assertNotNull(itm.getLastResponse().getTimestamp());
         checkVersions(origId, "0", 0);;
-    }
-
-    public void checkNoVersions(String id) throws Exception {
-        checkVersions(id, "6", 1);
     }
 
     public void checkVersions(String objectId, String version, int numberoOfVersions) throws Exception {
