@@ -68,6 +68,10 @@ public enum KnownStatus implements Status {
      * Referenced account currently carries invalid credentials and is therefore unable to connect. Credentials are supposed to be corrected by user.
      */
     INVALID_CREDENTIALS("invalid_credentials", KnownStatusMessage.MESSAGE_INVALID_CREDENTIALS),
+    /**
+     * Account is broken and needs to be re-created
+     */
+    RECREATION_NEEDED("recreation_needed", KnownStatusMessage.MESSAGE_RECREATION_NEEDED),
 
     ;
 
