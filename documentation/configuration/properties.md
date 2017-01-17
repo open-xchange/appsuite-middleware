@@ -577,8 +577,8 @@ If you would like to add a reference to another property use the following appro
 ---
 | Key | <span style="font-weight:normal">com.openexchange.mail.flagging.mode</span> |
 |:----------------|:--------|
-| __Description__ | Specifies the flagging mode. Possible values:<br>-<code>colorOnly</code> Only coloring is available.<br>-<code>flaggedOnly</code> Only flagging is available.<br>-<code>flaggedAndColor</code> Both coloring and flagging is available.<br>-<code>flaggedImplicit</code> Like flaggedAndColor but also add a color to colorless flagged mails and add flagged to unflagged but colored mails.<br> |
-| __Default__ | flaggedOnly  |
+| __Description__ | Specifies how color labels and special \Flagged system flag are connected (or not). Possible values:<br>-<code>colorOnly</code> Only color flags are available. The special \Flagged system flag is not touched.<br>-<code>flaggedOnly</code> Only special \Flagged system flag is used. Color labels are not published.<br>-<code>flaggedAndColor</code> Both - color flags and special \Flagged system flag - are available and set independently.<br>-<code>flaggedImplicit</code>Both - color flags and special \Flagged system flag - are available. A certain color label is linked with the \Flagged system flag. That is to add a color to colorless flagged mails and to add flagged to unflagged but colored mails.<br> |
+| __Default__ | colorOnly  |
 | __Version__ | 7.8.4  |
 | __Reloadable__ | true  |
 | __Configcascade Aware__ | true  |
