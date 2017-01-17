@@ -156,7 +156,7 @@ public enum FileStorageCapability {
      * <p>
      * Not supporting that capability typically means that there is too much performance overhead in order to determine the file count.
      */
-    COUNTABLE_FOLDER,
+    COUNT_TOTAL,
 
     ;
 }

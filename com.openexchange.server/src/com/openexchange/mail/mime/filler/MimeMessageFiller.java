@@ -357,17 +357,19 @@ public class MimeMessageFiller {
      * @throws MessagingException If an error occurs
      */
     public static void addClientIPAddress(final MimeMessage mimeMessage, final Session session) throws MessagingException {
+        IpAddressRenderer renderer = MailProperties.getInstance().getIpAddressRenderer();
         /*
          * Get IP from session
          */
-        final String localIp = session.getLocalIp();
+        String localIp = session.getLocalIp();
         if (isLocalhost(localIp)) {
             LOG.debug("Session provides localhost as client IP address: {}", localIp);
             // Prefer request's remote address if local IP seems to denote local host
             String clientIp = LogProperties.getLogProperty(LogProperties.Name.GRIZZLY_REMOTE_ADDRESS);
-            mimeMessage.setHeader("X-Originating-IP", clientIp == null ? localIp : clientIp);
+            clientIp = clientIp == null ? localIp : clientIp;
+            mimeMessage.setHeader("X-Originating-IP", null == renderer ? clientIp : renderer.render(clientIp));
         } else {
-            mimeMessage.setHeader("X-Originating-IP", localIp);
+            mimeMessage.setHeader("X-Originating-IP", null == renderer ? localIp : renderer.render(localIp));
         }
     }
 

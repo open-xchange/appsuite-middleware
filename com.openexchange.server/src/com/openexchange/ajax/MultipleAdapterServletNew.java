@@ -72,6 +72,7 @@ import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.java.UnsynchronizedPushbackReader;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
@@ -269,6 +270,11 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
                     hn = hostnameService.getHostname(session.getUserId(), session.getContextId());
                 }
                 retval.setHostname(null == hn ? req.getServerName() : hn);
+            }
+
+            String hostname = retval.getHostname();
+            if (null != hostname) {
+                session.setParameter(Session.PARAM_HOST_NAME, hostname);
             }
         }
         retval.setRemoteAddress(req.getRemoteAddr());
