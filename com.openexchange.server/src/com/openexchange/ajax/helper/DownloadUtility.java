@@ -831,7 +831,7 @@ public final class DownloadUtility {
      * @return <code>true</code> if specified uploaded file is an illegal image; otherwise <code>false</code>
      * @throws IOException If uploaded file cannot be checked
      */
-    private static boolean isIllegalImage(UploadFile file) throws IOException {
+    public static boolean isIllegalImage(UploadFile file) throws IOException {
         String contentType = file.getContentType();
         if (isImageContentType(contentType)) {
             return isIllegalImageData(file);
