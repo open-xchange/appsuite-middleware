@@ -58,6 +58,13 @@ package com.openexchange.chronos.ical;
 public interface ICalParameters {
 
     /**
+     * {@link Boolean}
+     *
+     * Configures whether iCal input should be pre-processed and sanitized so that known client quirks are corrected automatically.
+     */
+    String SANITIZE_INPUT = "SANITIZE_INPUT";
+
+    /**
      * {@link String[]} array denoting the names of the extended arbitrary properties to consider during import. Such properties will be
      * made available via {@link ComponentData#getProperties()} of the imported component.
      * <p/>

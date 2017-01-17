@@ -47,65 +47,80 @@
  *
  */
 
-package com.openexchange.chronos.ical.impl;
+package com.openexchange.chronos.ical.ical4j.extensions;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TimeZone;
-import com.openexchange.chronos.ical.ICalParameters;
-import net.fortuna.ical4j.model.TimeZoneRegistryImpl;
+import static org.slf4j.LoggerFactory.getLogger;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.text.ParseException;
+import java.util.StringTokenizer;
+import net.fortuna.ical4j.model.Date;
+import net.fortuna.ical4j.model.DateList;
+import net.fortuna.ical4j.model.DateTime;
+import net.fortuna.ical4j.model.ParameterList;
+import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.PropertyFactory;
+import net.fortuna.ical4j.model.TimeZone;
+import net.fortuna.ical4j.model.property.ExDate;
 
 /**
- * {@link ICalParametersImpl}
+ * {@link LenientExDate}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class ICalParametersImpl implements ICalParameters {
+public class LenientExDate extends ExDate {
 
-    private Map<String, Object> parameters;
+    public static final PropertyFactory FACTORY = new Factory();
+    public static final String PROPERTY_NAME = Property.EXDATE;
 
-    /**
-     * Initializes a new, empty {@link ICalParametersImpl}.
-     */
-    public ICalParametersImpl() {
+    private static final long serialVersionUID = -4174897483634416534L;
+
+    public LenientExDate() {
         super();
-        applyDefaults();
     }
 
-    private void applyDefaults() {
-        set(TIMEZONE_REGISTRY, new TimeZoneRegistryImpl("zoneinfo-outlook/"));
-        set(SANITIZE_INPUT, Boolean.TRUE);
-        set(DEFAULT_TIMEZONE, TimeZone.getTimeZone("EST"));
-        //        set(DEFAULT_TIMEZONE, TimeZone.getDefault());
-        set(KEEP_COMPONENTS, Boolean.TRUE);
-
-        //        set(ATTENDEE_COMMENTS, Boolean.TRUE);
+    public LenientExDate(ParameterList aList, String aValue) throws ParseException {
+        super(aList, aValue);
     }
 
     @Override
-    public <T> T get(String name, Class<T> clazz) {
-        if (null == name || null == parameters) {
-            return null;
-        }
-        try {
-            return clazz.cast(parameters.get(name));
-        } catch (ClassCastException e) {
-            return null;
-        }
-    }
-
-    @Override
-    public <T> ICalParameters set(String name, T value) {
-        if (null != name) {
-            if (null == parameters) {
-                parameters = new HashMap<String, Object>();
+    public void setValue(String value) throws ParseException {
+        DateList dateList = getDates();
+        TimeZone timeZone = getTimeZone();
+        StringTokenizer tokenizer = new StringTokenizer(value, ",");
+        while (tokenizer.hasMoreTokens()) {
+            String token = tokenizer.nextToken();
+            DateTime dateTime;
+            try {
+                dateTime = new DateTime(token, timeZone);
+            } catch (ParseException e) {
+                getLogger(LenientExDate.class).warn("Error parsing EXDATE as DATE-TIME, trying DATE as fallback", e);
+                try {
+                    dateTime = new DateTime(new Date(token));
+                    dateTime.setTimeZone(timeZone);
+                } catch (Exception x) {
+                    throw e;
+                }
             }
-            parameters.put(name, value);
-        } else if (null != parameters) {
-            parameters.remove(name);
+            dateList.add(dateTime);
         }
-        return this;
+    }
+
+    private static class Factory implements PropertyFactory {
+
+        private static final long serialVersionUID = 1010126682318456760L;
+
+        @Override
+        public Property createProperty(String name, ParameterList parameters, String value) throws IOException, URISyntaxException, ParseException {
+            return new LenientExDate(parameters, value);
+        }
+
+        @Override
+        public Property createProperty(String name) {
+            return new LenientExDate();
+        }
+
     }
 
 }

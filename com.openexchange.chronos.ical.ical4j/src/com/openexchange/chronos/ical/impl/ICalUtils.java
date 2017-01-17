@@ -65,8 +65,10 @@ import java.util.regex.Pattern;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.ical.DefaultICalProperty;
+import com.openexchange.chronos.ical.ICalExceptionCodes;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalProperty;
+import com.openexchange.chronos.ical.ical4j.ICal4JParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
@@ -77,11 +79,22 @@ import net.fortuna.ical4j.data.CalendarParser;
 import net.fortuna.ical4j.data.CalendarParserFactory;
 import net.fortuna.ical4j.data.FoldingWriter;
 import net.fortuna.ical4j.data.ParserException;
+import net.fortuna.ical4j.extensions.caldav.parameter.CalendarServerAttendeeRef;
+import net.fortuna.ical4j.extensions.caldav.parameter.CalendarServerDtStamp;
 import net.fortuna.ical4j.extensions.caldav.property.Acknowledged;
+import net.fortuna.ical4j.extensions.caldav.property.AlarmAgent;
+import net.fortuna.ical4j.extensions.caldav.property.CalendarServerAccess;
+import net.fortuna.ical4j.extensions.caldav.property.CalendarServerAttendeeComment;
+import net.fortuna.ical4j.extensions.caldav.property.CalendarServerPrivateComment;
+import net.fortuna.ical4j.extensions.caldav.property.DefaultAlarm;
+import net.fortuna.ical4j.extensions.caldav.property.Proximity;
+import net.fortuna.ical4j.extensions.outlook.AllDayEvent;
+import net.fortuna.ical4j.extensions.outlook.BusyStatus;
 import net.fortuna.ical4j.extensions.property.WrCalName;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.Parameter;
+import net.fortuna.ical4j.model.ParameterFactoryImpl;
 import net.fortuna.ical4j.model.ParameterFactoryRegistry;
 import net.fortuna.ical4j.model.ParameterList;
 import net.fortuna.ical4j.model.Property;
@@ -132,10 +145,17 @@ public class ICalUtils {
     }
 
     static Calendar importCalendar(InputStream iCalFile, ICalParameters parameters) throws OXException {
+        ICalParameters iCalParameters = getParametersOrDefault(parameters);
+        CalendarBuilder calendarBuilder = getCalendarBuilder(iCalParameters);
         try {
-            return getCalendarBuilder(getParametersOrDefault(parameters)).build(iCalFile);
-        } catch (IOException | ParserException e) {
-            throw new OXException(e);
+            if (Boolean.TRUE.equals(parameters.get(ICalParameters.SANITIZE_INPUT, Boolean.class))) {
+                return new ICal4JParser().parse(calendarBuilder, iCalFile);
+            }
+            return calendarBuilder.build(iCalFile);
+        } catch (IOException e) {
+            throw ICalExceptionCodes.IO_ERROR.create(e);
+        } catch (ParserException e) {
+            throw ICalExceptionCodes.CONVERSION_FAILED.create(e);
         }
     }
 
@@ -311,12 +331,22 @@ public class ICalUtils {
     private static PropertyFactoryRegistry initPropertyFactory() {
         PropertyFactoryRegistry factory = new PropertyFactoryRegistry();
         factory.register(Acknowledged.PROPERTY_NAME, PropertyFactoryImpl.getInstance());
+        factory.register(AlarmAgent.PROPERTY_NAME, AlarmAgent.FACTORY);
+        factory.register(CalendarServerAccess.PROPERTY_NAME, CalendarServerAccess.FACTORY);
+        factory.register(CalendarServerAttendeeComment.PROPERTY_NAME, CalendarServerAttendeeComment.FACTORY);
+        factory.register(CalendarServerPrivateComment.PROPERTY_NAME, CalendarServerPrivateComment.FACTORY);
+        factory.register(DefaultAlarm.PROPERTY_NAME, DefaultAlarm.FACTORY);
+        factory.register(Proximity.PROPERTY_NAME, Proximity.FACTORY);
         factory.register(WrCalName.PROPERTY_NAME, WrCalName.FACTORY);
+        factory.register(AllDayEvent.PROPERTY_NAME, AllDayEvent.FACTORY);
+        factory.register(BusyStatus.PROPERTY_NAME, BusyStatus.FACTORY);
         return factory;
     }
 
     private static ParameterFactoryRegistry initParameterFactory() {
         ParameterFactoryRegistry factory = new ParameterFactoryRegistry();
+        factory.register(CalendarServerAttendeeRef.PARAMETER_NAME, ParameterFactoryImpl.getInstance());
+        factory.register(CalendarServerDtStamp.PARAMETER_NAME, ParameterFactoryImpl.getInstance());
         return factory;
     }
 

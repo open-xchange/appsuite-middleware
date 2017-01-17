@@ -47,23 +47,28 @@
  *
  */
 
-package com.openexchange.chronos.ical.ical4j.mapping;
+package com.openexchange.chronos.ical.ical4j;
 
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
-
+import org.apache.commons.collections.BidiMap;
+import org.apache.commons.collections.bidimap.TreeBidiMap;
 import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.Parameter;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.property.DateProperty;
 
-import org.apache.commons.collections.BidiMap;
-import org.apache.commons.collections.bidimap.TreeBidiMap;
-
+/**
+ * {@link ParserTools}
+ *
+ * copied from com.openexchange.data.conversion.ical.ical4j.internal.ParserTools
+ *
+ * @since v7.10.0
+ */
 public final class ParserTools {
 
     /**

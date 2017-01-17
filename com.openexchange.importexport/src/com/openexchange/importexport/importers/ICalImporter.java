@@ -50,9 +50,6 @@
 package com.openexchange.importexport.importers;
 
 import static com.openexchange.java.Autoboxing.I;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.procedure.TObjectProcedure;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -69,6 +66,15 @@ import java.util.TimeZone;
 import java.util.UUID;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.TasksSQLInterface;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ical.CalendarImport;
+import com.openexchange.chronos.ical.ICalParameters;
+import com.openexchange.chronos.ical.ICalService;
+import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.CalendarResult;
+import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.CreateResult;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalParser;
@@ -91,12 +97,16 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.osgi.ImportExportServices;
+import com.openexchange.java.Streams;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.exceptions.SimpleTruncatedAttribute;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TObjectProcedure;
 
 /**
  * Imports ICal files. ICal files can be translated to either tasks or
@@ -244,9 +254,14 @@ public class ICalImporter extends AbstractImporter {
 		final List<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
 
 		if (appointmentFolderId != -1) {
-			importAppointment(session, is, optionalParams, appointmentFolderId,
-					appointmentInterface, parser, ctx, defaultTz, list, errors,
-					warnings);
+            boolean legacy = true;
+		    if (legacy) {
+    			importAppointment(session, is, optionalParams, appointmentFolderId,
+    					appointmentInterface, parser, ctx, defaultTz, list, errors,
+    					warnings);
+		    } else {
+		        list.addAll(importEvents(session, is, optionalParams, appointmentFolderId));
+		    }
 		}
 		if (taskFolderId != -1) {
 			importTask(is, optionalParams, taskFolderId, taskInterface, parser, ctx, defaultTz,
@@ -343,6 +358,52 @@ public class ICalImporter extends AbstractImporter {
 			});
 		}
 	}
+
+    private List<ImportResult> importEvents(ServerSession session, InputStream inputStream, Map<String, String[]> optionalParameters, int folderId) throws OXException {
+
+        List<ImportResult> importResults = new ArrayList<ImportResult>();
+
+        CalendarService calendarService = ImportExportServices.LOOKUP.get().getService(CalendarService.class);
+        CalendarSession calendarSession = calendarService.init(session);
+        calendarSession.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.TRUE);
+        if (null != optionalParameters && optionalParameters.containsKey("suppressNotification")) {
+            calendarSession.set(CalendarParameters.PARAMETER_NOTIFICATION, Boolean.FALSE);
+        }
+
+        ICalService iCalService = ImportExportServices.LOOKUP.get().getService(ICalService.class);
+        ICalParameters iCalParameters = iCalService.initParameters();
+        iCalParameters.set(ICalParameters.DEFAULT_TIMEZONE, TimeZone.getTimeZone(session.getUser().getTimeZone()));
+        CalendarImport calendarImport = null;
+        try {
+            calendarImport = iCalService.importICal(inputStream, iCalParameters);
+
+            List<Event> events = calendarImport.getEvents();
+
+            for (Event event : events) {
+                ImportResult importResult = new ImportResult();
+                CalendarResult result = calendarService.createEvent(calendarSession, folderId, event);
+
+                importResult.setDate(result.getTimestamp());
+                if (0 < result.getCreations().size()) {
+                    CreateResult createResult = result.getCreations().get(0);
+                    importResult.setFolder(String.valueOf(folderId));
+                    importResult.setObjectId(String.valueOf(createResult.getCreatedEvent().getId()));
+
+                }
+
+                importResults.add(importResult);
+
+            }
+
+        } finally {
+            Streams.close(calendarImport);
+        }
+
+
+
+
+        return importResults;
+    }
 
 	private void importAppointment(final ServerSession session,
 			final InputStream is, final Map<String, String[]> optionalParams,
