@@ -55,6 +55,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.json.JSONException;
 import com.openexchange.ajax.smtptest.actions.SMTPInitResponse;
 import com.openexchange.ajax.smtptest.actions.StartSMTPRequest;
+import com.openexchange.ajax.smtptest.actions.StopSMTPRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.test.pool.TestContext;
 import com.openexchange.test.pool.TestContextPool;
@@ -72,9 +73,7 @@ public class SmtpMockSetup {
 
     private static AtomicBoolean initialized = new AtomicBoolean();
 
-    // should only be called once and be valid for all tests
     public static void init() throws OXException {
-
         synchronized (SmtpMockSetup.class) {
             if (!initialized.get()) {
                 ProvisioningSetup.init();
@@ -91,17 +90,17 @@ public class SmtpMockSetup {
 
         for (TestContext testContext : testContexts) {
             TestUser testUser = testContext.acquireUser();
-            startSMTPMockServerAndSetNoReply(testUser);
+            startSmtpMockServerAndSetNoReply(testUser);
 
             List<TestUser> allUsers = testContext.acquireAll();
             for (TestUser user : allUsers) {
-                startSMTPMockServer(user);
+                startSmtpMockServer(user);
             }
         }
         TestContextPool.backAll(testContexts);
     }
 
-    private static void startSMTPMockServerAndSetNoReply(TestUser user) {
+    private static void startSmtpMockServerAndSetNoReply(TestUser user) {
         try {
             AJAXClient client = new AJAXClient(user);
             StartSMTPRequest request = new StartSMTPRequest(true, client.getValues().getContextId(), "no-reply@" + user.getContext()); //TODO provide no-reply via provisioning.properties
@@ -112,10 +111,42 @@ public class SmtpMockSetup {
         }
     }
 
-    private static void startSMTPMockServer(TestUser user) {
+    private static void startSmtpMockServer(TestUser user) {
         try {
             AJAXClient client = new AJAXClient(user);
             StartSMTPRequest request = new StartSMTPRequest(true);
+            SMTPInitResponse response = client.execute(request);
+        } catch (OXException | IOException | JSONException e) {
+            LOG.error("", e);
+        }
+    }
+    
+    public static void restore() throws OXException {
+        synchronized (SmtpMockSetup.class) {
+            if (initialized.get()) {
+                stopSMTPMockForAllContexts();
+
+                initialized.compareAndSet(true, false);
+            }
+        }
+    }
+    
+    private static void stopSMTPMockForAllContexts() {
+        List<TestContext> testContexts = TestContextPool.acquireAll();
+
+        for (TestContext testContext : testContexts) {
+            List<TestUser> allUsers = testContext.acquireAll();
+            for (TestUser user : allUsers) {
+                stopSMTPMockServer(user);
+            }
+        }
+        TestContextPool.backAll(testContexts);  
+    }
+
+    private static void stopSMTPMockServer(TestUser user) {
+        try {
+            AJAXClient client = new AJAXClient(user);
+            StopSMTPRequest request = new StopSMTPRequest(true);
             SMTPInitResponse response = client.execute(request);
         } catch (OXException | IOException | JSONException e) {
             LOG.error("", e);

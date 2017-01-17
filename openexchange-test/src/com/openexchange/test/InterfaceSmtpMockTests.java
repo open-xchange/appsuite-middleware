@@ -49,6 +49,7 @@
 
 package com.openexchange.test;
 
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -82,4 +83,15 @@ public final class InterfaceSmtpMockTests {
             e.printStackTrace();
         }
     }
+
+    @AfterClass
+    public static void tearDown() {
+        try {
+            SmtpMockSetup.restore();
+        } catch (OXException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    
 }
