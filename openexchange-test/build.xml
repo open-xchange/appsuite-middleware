@@ -102,12 +102,12 @@
     </target>
 
     <target name="run-interface-smtpmock-tests">
-        <antcall target="run-tests">
+        <antcall target="run-tests-keep-results-directory">
             <param name="testJar" value="open-xchange-iface-tests.jar"/>
             <param name="testClass" value="com.openexchange.test.InterfaceSmtpMockTests"/>
         </antcall>
     </target>
-
+	
     <target name="run-updater-tests">
         <antcall target="run-tests">
             <param name="testJar" value="open-xchange-updater-test.jar"/>
@@ -139,6 +139,14 @@
     <target name="run-tests">
         <delete dir="${testXmlDir}"/>
         <mkdir dir="${testXmlDir}"/>
+    	
+        <antcall target="run-tests-keep-results-directory">
+            <param name="testJar" value="${testJar}"/>
+            <param name="testClass" value="${testClass}"/>
+        </antcall>
+    </target>
+	
+    <target name="run-tests-keep-results-directory">
         <path id="runClasspath">
             <path refid="classpath"/>
             <pathelement location="${testJar}"/>
@@ -159,5 +167,4 @@
             <sysproperty key="jaxp.debug" value="true"/>
         </junit>
     </target>
-
 </project>
