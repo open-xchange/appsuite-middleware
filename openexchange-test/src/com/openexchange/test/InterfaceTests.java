@@ -55,12 +55,9 @@ import org.junit.runners.Suite;
 import com.openexchange.ajax.advertisement.AdvertisementTestSuite;
 import com.openexchange.ajax.drive.DriveAJAXSuite;
 import com.openexchange.ajax.find.FindTestSuite;
-import com.openexchange.ajax.framework.ProvisioningSetup;
+import com.openexchange.ajax.framework.SmtpMockSetup;
 import com.openexchange.ajax.jslob.JSlobTestSuite;
 import com.openexchange.ajax.oauth.provider.OAuthProviderTests;
-import com.openexchange.ajax.onboarding.OnboardingAJAXSuite;
-import com.openexchange.ajax.share.ShareAJAXSuite;
-import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.test.concurrent.ParallelSuite;
 
@@ -127,12 +124,10 @@ import com.openexchange.test.concurrent.ParallelSuite;
     FindTestSuite.class,
     com.openexchange.ajax.quota.QuotaTestSuite.class,
     JSlobTestSuite.class,
-    ShareAJAXSuite.class,
     // Needs to be disabled as associated test suite requires a frontend package, which is currently not available
     // ManifestsTestSuite.class,
     // TODO: enable
     DriveAJAXSuite.class,
-    OnboardingAJAXSuite.class,
     com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRendererTest.class,
     AdvertisementTestSuite.class,
     OAuthProviderTests.class,
@@ -142,8 +137,7 @@ public final class InterfaceTests {
     @BeforeClass
     public static void setUp() {
         try {
-            AJAXConfig.init();
-            ProvisioningSetup.init();
+            SmtpMockSetup.init();
         } catch (OXException e) {
             e.printStackTrace();
         }

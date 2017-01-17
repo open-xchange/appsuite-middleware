@@ -101,6 +101,13 @@
         </antcall>
     </target>
 
+    <target name="run-interface-smtpmock-tests">
+        <antcall target="run-tests">
+            <param name="testJar" value="open-xchange-iface-tests.jar"/>
+            <param name="testClass" value="com.openexchange.test.InterfaceSmtpMockTests"/>
+        </antcall>
+    </target>
+
     <target name="run-updater-tests">
         <antcall target="run-tests">
             <param name="testJar" value="open-xchange-updater-test.jar"/>

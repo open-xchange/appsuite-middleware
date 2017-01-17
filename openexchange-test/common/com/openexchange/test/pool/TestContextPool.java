@@ -137,8 +137,24 @@ public class TestContextPool {
         if (!watcherInitialized.getAndSet(true)) {
             TestContextWatcher contextWatcherTask = new TestContextWatcher();
             contextWatcher.compareAndSet(null, contextWatcherTask);
-            Thread contextWatcher = new Thread(contextWatcherTask, "TestContextWatcher");
-            contextWatcher.start();
+            Thread contextWatcherThread = new Thread(contextWatcherTask, "TestContextWatcher");
+            contextWatcherThread.start();
+        }
+    }
+
+    public static synchronized List<TestContext> acquireAll() {
+        List<TestContext> all = new ArrayList<>();
+
+        while (!contexts.isEmpty()) {
+            TestContext context = acquireContext(TestContextPool.class.getName());
+            all.add(context);
+        }
+        return all;
+    }
+
+    public static synchronized void backAll(List<TestContext> all) {
+        for (TestContext context : all) {
+            backContext(context);
         }
     }
 }

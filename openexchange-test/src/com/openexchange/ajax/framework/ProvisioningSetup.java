@@ -57,10 +57,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.json.JSONException;
 import com.openexchange.ajax.framework.config.util.PropertyHelper;
-import com.openexchange.ajax.smtptest.actions.SMTPInitResponse;
-import com.openexchange.ajax.smtptest.actions.StartSMTPRequest;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.configuration.TestConfig;
@@ -154,22 +151,18 @@ public class ProvisioningSetup {
                 String userId1 = filter.get(prefix + USER1_IDENTIFIER).toString();
                 TestUser testUser = new TestUser(userId1, contextName, password);
                 context.addUser(testUser);
-                startSMTPMockServerAndSetNoReply(testUser);
 
                 String userId2 = filter.get(prefix + USER2_IDENTIFIER).toString();
                 TestUser testUser2 = new TestUser(userId2, contextName, password);
                 context.addUser(testUser2);
-                startSMTPMockServer(testUser2);
 
                 String userId3 = filter.get(prefix + USER3_IDENTIFIER).toString();
                 TestUser testUser3 = new TestUser(userId3, contextName, password);
                 context.addUser(testUser3);
-                startSMTPMockServer(testUser3);
 
                 String userId4 = filter.get(prefix + USER4_IDENTIFIER).toString();
                 TestUser testUser4 = new TestUser(userId4, contextName, password);
                 context.addUser(testUser4);
-                startSMTPMockServer(testUser4);
 
                 context.addUserParticipants(filter.get(prefix + PARTICIPANT1_IDENTIFIER).toString());
                 context.addUserParticipants(filter.get(prefix + PARTICIPANT2_IDENTIFIER).toString());
@@ -185,27 +178,6 @@ public class ProvisioningSetup {
                 LOG.warn("Unable to add context {} to context registry.", contextName, e);
                 // TODO: handle exception
             }
-        }
-    }
-
-    private static void startSMTPMockServerAndSetNoReply(TestUser user) {
-        try {
-            AJAXClient client = new AJAXClient(user);
-            StartSMTPRequest request = new StartSMTPRequest(true, client.getValues().getContextId(), "no-reply@" + user.getContext()); //TODO provide no-reply via provisioning.properties
-
-            SMTPInitResponse response = client.execute(request);
-        } catch (OXException | IOException | JSONException e) {
-            LOG.error("", e);
-        }
-    }
-
-    private static void startSMTPMockServer(TestUser user) {
-        try {
-            AJAXClient client = new AJAXClient(user);
-            StartSMTPRequest request = new StartSMTPRequest(true);
-            SMTPInitResponse response = client.execute(request);
-        } catch (OXException | IOException | JSONException e) {
-            LOG.error("", e);
         }
     }
 

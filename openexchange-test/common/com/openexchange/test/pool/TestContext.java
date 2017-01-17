@@ -184,6 +184,15 @@ public class TestContext implements Serializable {
     public List<String> getGroupParticipants() {
         return this.groupParticipants;
     }
+    
+    public List<TestUser> acquireAll() {
+        List<TestUser> all = new ArrayList<>();
+        while (!users.isEmpty()) {
+            TestUser user = acquireUser();
+            all.add(user);
+        }
+        return all;
+    }
 
     @Override
     public int hashCode() {
