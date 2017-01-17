@@ -211,7 +211,7 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * <li>Some data entered exceeded the field limit. Please shorten the value for \"%1$s\" (limit: %2$d, current: %3$d) and try again.</li>
      * <li>Data truncation [field %1$s, limit %2$d, current %3$d]</li>
      */
-    DATA_TRUNCATION("Data truncation [field %1$s, limit %2$d, current %3$d]", DATA_TRUNCATION_MSG, Category.CATEGORY_CAPACITY, 5070),
+    DATA_TRUNCATION("Data truncation [field %1$s, limit %2$d, current %3$d]", DATA_TRUNCATION_MSG, Category.CATEGORY_TRUNCATED, 5070),
 
     ;
 
