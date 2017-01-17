@@ -242,8 +242,18 @@ public class Recurrence {
      */
     public static boolean isRecurrence(RecurrenceData recurrenceData, RecurrenceId recurrenceId) throws OXException {
         RecurrenceRuleIterator iterator = getRecurrenceIterator(recurrenceData, true);
-        iterator.fastForward(recurrenceId.getValue());
-        return iterator.hasNext() && recurrenceId.getValue() == iterator.nextMillis();
+        while (iterator.hasNext()) {
+            long millis = iterator.nextMillis();
+            if (recurrenceId.getValue() == millis) {
+                return true;
+            }
+            if (millis > recurrenceId.getValue()) {
+                return false;
+            }
+        }
+        return false;
+        //        iterator.fastForward(recurrenceId.getValue());
+        //        return iterator.hasNext() && recurrenceId.getValue() == iterator.nextMillis();
     }
 
     /**
