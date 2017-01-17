@@ -62,6 +62,7 @@ import com.openexchange.file.storage.json.services.Services;
 import com.openexchange.java.Streams;
 import com.openexchange.rdiff.ChecksumPair;
 import com.openexchange.rdiff.RdiffService;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
@@ -82,6 +83,9 @@ public class DocumentDeltaAction extends AbstractFileAction {
         OutputStream deltaOut = null;
         try {
             final RdiffService rdiff = Services.getRdiffService();
+            if (null == rdiff) {
+                ServiceExceptionCode.absentService(RdiffService.class);
+            }
             documentStream = fileAccess.getDocument(request.getId(), request.getVersion());
             requestStream = request.getUploadStream();
             // Read in signature
