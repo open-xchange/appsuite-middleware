@@ -455,6 +455,10 @@ public class DispatcherServlet extends SessionServlet {
             if (null != session && false == session.isAnonymous()) {
                 // A non-anonymous session
                 enableRateLimitCheckFor(httpRequest);
+                String hostname = requestData.getHostname();
+                if (null != hostname) {
+                    session.setParameter(Session.PARAM_HOST_NAME, hostname);
+                }
             }
 
             // Start dispatcher processing

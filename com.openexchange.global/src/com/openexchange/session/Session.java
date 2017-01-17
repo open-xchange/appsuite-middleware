@@ -212,6 +212,13 @@ public interface Session {
     public static final String PARAM_OAUTH_TOKEN = "__session.oauth".intern();
 
     /**
+     * The parameter for optional host name associated with a session.
+     *
+     * @type <code>java.lang.String</code>
+     */
+    public static final String PARAM_HOST_NAME = "__session.hostname".intern();
+
+    /**
      * @return the context identifier.
      */
     public int getContextId();
