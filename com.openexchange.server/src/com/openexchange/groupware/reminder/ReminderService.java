@@ -65,62 +65,191 @@ import com.openexchange.session.Session;
  */
 public interface ReminderService {
 
+    /**
+     * Inserts a given reminder
+     *
+     * @param session The session
+     * @param reminderObj The reminder to insert
+     * @return The id of the reminder
+     * @throws OXException
+     */
     public int insertReminder(Session session, ReminderObject reminderObj) throws OXException;
 
+    /**
+     * Inserts a given reminder
+     *
+     * @param session The session
+     * @param reminderObj The reminder to insert
+     * @param writeCon A writable database connection
+     * @return The id of the inserted reminder
+     * @throws OXException
+     */
     public int insertReminder(Session session, ReminderObject reminderObj, Connection writeCon) throws OXException;
 
+    /**
+     * Updates a reminder
+     *
+     * @param session The session
+     * @param reminder Object with the new values for the reminder
+     * @throws OXException
+     */
     void updateReminder(Session session, ReminderObject reminder) throws OXException;
 
     /**
-     * This method updates a reminder.
-     * @param reminder object with new values for the reminder.
-     * @param con writable database connection.
-     * @throws OXException TODO
+     * Updates a reminder
+     *
+     * @param session The session
+     * @param reminder Object with new values for the reminder.
+     * @param con A writable database connection.
+     * @throws OXException
      */
     void updateReminder(Session session, ReminderObject reminder, Connection con) throws OXException;
 
+    /**
+     * Deletes a reminder
+     *
+     * @param session The session
+     * @param reminder The reminder object containing at least the reminder id
+     * @throws OXException
+     */
     public void deleteReminder(Session session, ReminderObject reminder) throws OXException;
 
+    /**
+     * Deletes all reminder for a given target
+     *
+     * @param session The session
+     * @param targetId The target id
+     * @param module The module
+     * @throws OXException
+     */
     public void deleteReminder(Session session, int targetId, int module) throws OXException;
 
+    /**
+     * Deletes all reminder for a given target
+     *
+     * @param session The session
+     * @param targetId The target id
+     * @param module The module
+     * @param writeCon A writable database connection
+     * @throws OXException
+     */
     public void deleteReminder(Session session, int targetId, int module, Connection writeCon) throws OXException;
 
+    /**
+     * Deletes a users reminder for a given target
+     *
+     * @param session The session
+     * @param targetId The target id
+     * @param userId The user id
+     * @param module The module
+     * @throws OXException
+     */
     public void deleteReminder(Session session, int targetId, int userId, int module) throws OXException;
 
+    /**
+     * Deletes a users reminder for a given target
+     *
+     * @param session The session
+     * @param targetId The target id
+     * @param userId The user id
+     * @param module The module
+     * @param writeCon A writable database connection
+     * @throws OXException
+     */
     public void deleteReminder(Session session, int targetId, int userId, int module, Connection writeCon) throws OXException;
 
+    /**
+     * Checks whether a reminder exists for the given target and user
+     *
+     * @param session The session
+     * @param targetId The target id
+     * @param userId The user id
+     * @param module The module
+     * @return true if a reminder exists, false otherwise
+     * @throws OXException
+     */
     public boolean existsReminder(Session session, int targetId, int userId, int module) throws OXException;
 
+    /**
+     * Checks whether a reminder exists for the given target and user
+     *
+     * @param session The session
+     * @param targetId The target id
+     * @param userId The user id
+     * @param module The module
+     * @param con A database connection
+     * @return true if a reminder exists, false otherwise
+     * @throws OXException
+     */
     public boolean existsReminder(Session session, int targetId, int userId, int module, Connection con) throws OXException;
 
+    /**
+     * Load the users reminder for a given target
+     *
+     * @param session The session
+     * @param targetId Ther target id
+     * @param userId The user id
+     * @param module The module
+     * @return The reminder
+     * @throws OXException
+     */
     public ReminderObject loadReminder(Session session, int targetId, int userId, int module) throws OXException;
 
+    /**
+     * Loads the reminder with the given reminder id
+     *
+     * @param session The session
+     * @param objectId The reminder id
+     * @return The reminder
+     * @throws OXException if no reminder with this id exists
+     */
     public ReminderObject loadReminder(Session session, int objectId) throws OXException;
 
+    /**
+     * Loads the users reminder for a given target
+     *
+     * @param session The session
+     * @param targetId The target id
+     * @param userId The user id
+     * @param module The module
+     * @param con A database connection
+     * @return The reminder
+     * @throws OXException
+     */
     public ReminderObject loadReminder(Session session, final int targetId, final int userId, final int module, final Connection con) throws OXException;
 
     /**
-     * This method loads the reminder for several target objects.
+     * Loads the reminder for several target objects.
+     *
      * @param targetIds unique identifier of several target objects.
-     * @param userId unique identifier of the user.
+     * @param userId The user id
      * @param module module type of target objects.
      * @return an array of found reminders.
      * @throws OXException if reading the reminder fails.
      */
-    ReminderObject[] loadReminder(Session session, int[] targetIds, int userId, int module)
-        throws OXException;
-
-    ReminderObject[] loadReminders(Session session, int[] targetIds, int userId, int module, Connection con)
-        throws OXException;
+    ReminderObject[] loadReminder(Session session, int[] targetIds, int userId, int module) throws OXException;
 
     /**
-     * Fetches the list of reminder that should pop up in the time frame starting now and ending at the given end date.
-     * @param session the session.
-     * @param ctx the context.
-     * @param user reminder should be for this user.
-     * @param end end of the wanted time frame.
+     * Loads the reminder for several target objects.
+     *
+     * @param targetIds unique identifier of several target objects.
+     * @param userId The user id
+     * @param module module type of target objects.
+     * @param con A database connection
+     * @return an array of found reminders.
+     * @throws OXException if reading the reminder fails.
+     */
+    ReminderObject[] loadReminders(Session session, int[] targetIds, int userId, int module, Connection con) throws OXException;
+
+    /**
+     * Returns a list of reminders that should pop up in the time frame starting now and ending at the given end date.
+     *
+     * @param session The session.
+     * @param ctx The context.
+     * @param user The user
+     * @param end End of the wanted time frame.
      * @return a list of reminder that should pop up.
-     * @throws OXException if loading the reminder failes in some way.
+     * @throws OXException if loading the reminder fails in some way.
      */
     List<ReminderObject> getArisingReminder(Session session, Context ctx, User user, Date end) throws OXException;
 
@@ -130,8 +259,6 @@ public interface ReminderService {
      * @param reminder The reminder with all fields and new alarm date set
      * @param session The session
      * @param ctx The context
-     * @param user The user
-     * @param tz The time zone
      * @throws OXException If alarm of reminder cannot be updated
      */
     public void remindAgain(ReminderObject reminder, Session session, Context ctx) throws OXException;
@@ -142,13 +269,20 @@ public interface ReminderService {
      * @param reminder The reminder with all fields and new alarm date set
      * @param session The session
      * @param ctx The context
-     * @param user The user
-     * @param tz The time zone
      * @param writeCon The read-write connection
      * @throws OXException If alarm of reminder cannot be updated
      */
     public void remindAgain(ReminderObject reminder, Session session, Context ctx, Connection writeCon) throws OXException;
 
+    /**
+     * List all modified reminders that where modified since lastModified
+     *
+     * @param session The session
+     * @param userId The user id
+     * @param lastModified The last known modification time
+     * @return A list of modified reminders
+     * @throws OXException
+     */
     public List<ReminderObject> listModifiedReminder(Session session, int userId, Date lastModified) throws OXException;
 
 }
