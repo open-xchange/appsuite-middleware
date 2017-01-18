@@ -158,6 +158,7 @@ import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.infostore.facade.impl.EventFiringInfostoreFacadeImpl;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.groupware.reminder.ReminderService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.upload.impl.UploadUtility;
 import com.openexchange.groupware.userconfiguration.osgi.CapabilityRegistrationListener;
@@ -438,6 +439,11 @@ public final class ServerActivator extends HousekeepingActivator {
 
         // AJAX request handler
         track(AJAXRequestHandler.class, new AJAXRequestHandlerCustomizer(context));
+
+        // Reminder Service
+        track(ReminderService.class, new RegistryCustomizer<>(context, ReminderService.class));
+
+
 
         // ICal Parser
         track(ICalParser.class, new RegistryCustomizer<ICalParser>(context, ICalParser.class) {
