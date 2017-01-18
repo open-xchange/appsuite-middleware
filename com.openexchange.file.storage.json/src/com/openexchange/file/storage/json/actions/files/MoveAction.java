@@ -195,7 +195,24 @@ public class MoveAction extends AbstractWriteAction {
             }
 
             error = false;
-            return result(conflicting, request);
+            AJAXRequestResult result = result(conflicting, request);
+
+            // Add any warnings to the response
+            Collection<OXException> warnings = fileAccess.getAndFlushWarnings();
+            result.addWarnings(warnings);
+
+            boolean ignoreWarnings = AJAXRequestDataTools.parseBoolParameter("ignoreWarnings", request.getRequestData(), false);
+            if ((warnings != null) && (!warnings.isEmpty()) && (!ignoreWarnings)) {
+                result.setException(FileStorageExceptionCodes.FILE_MOVE_ABORTED.create());
+            }
+            
+            if (ignoreWarnings) {
+                for (String fid : oldFiles) {
+                    moveFile(fid, destFolder, fileAccess);
+                }
+            }
+
+            return result;
         } finally {
             if (error) {
                 for (String folderId : deleteableFolders) {
