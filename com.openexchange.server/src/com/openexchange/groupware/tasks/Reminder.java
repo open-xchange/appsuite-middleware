@@ -54,7 +54,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import com.openexchange.api2.ReminderService;
+import com.openexchange.api2.ReminderSQLInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.FolderObject;
@@ -100,28 +100,28 @@ final class Reminder {
         remind.setTargetId(task.getObjectID());
         remind.setFolder(task.getParentFolderID());
         remind.setUser(task.getCreatedBy());
-        final ReminderService reminder = new ReminderHandler(ctx);
-        reminder.insertReminder(remind);
+        final ReminderSQLInterface reminder = ReminderHandler.getInstance();
+        reminder.insertReminder(remind, ctx);
     }
 
     static void fixAlarm(Context ctx, Task task, Set<TaskParticipant> removed, Set<TaskParticipant> participants, Set<Folder> folders) throws OXException {
-        final ReminderService reminder = new ReminderHandler(ctx);
+        final ReminderSQLInterface reminder = ReminderHandler.getInstance();
         final int taskId = task.getObjectID();
         for (InternalParticipant participant : ParticipantStorage.extractInternal(removed)) {
             final int userId = participant.getIdentifier();
-            if (reminder.existsReminder(taskId, userId, Types.TASK)) {
-                reminder.deleteReminder(taskId, userId, Types.TASK);
+            if (reminder.existsReminder(taskId, userId, Types.TASK, ctx)) {
+                reminder.deleteReminder(taskId, userId, Types.TASK, ctx);
             }
         }
         for (InternalParticipant participant : ParticipantStorage.extractInternal(participants)) {
             final int userId = participant.getIdentifier();
-            if (reminder.existsReminder(taskId, userId, Types.TASK)) {
-                final ReminderObject remind = reminder.loadReminder(taskId, userId, Types.TASK);
+            if (reminder.existsReminder(taskId, userId, Types.TASK, ctx)) {
+                final ReminderObject remind = reminder.loadReminder(taskId, userId, Types.TASK, ctx);
                 final int folderId = getFolderId(participant, folders);
                 try {
                     if (remind.getFolder() != folderId) {
                         remind.setFolder(folderId);
-                        reminder.updateReminder(remind);
+                        reminder.updateReminder(remind, ctx);
                     }
                 } catch (NumberFormatException nfe) {
                     LOG.error("Parsing reminder folder identifier failed.", nfe);
@@ -151,12 +151,12 @@ final class Reminder {
     static void updateAlarm(final Context ctx,
         final Task task, final User user)
         throws OXException {
-        final ReminderService reminder = new ReminderHandler(ctx);
+        final ReminderSQLInterface reminder = ReminderHandler.getInstance();
         final int taskId = task.getObjectID();
         final int userId = user.getId();
         if (null == task.getAlarm()) {
-            if (reminder.existsReminder(taskId, userId, Types.TASK)) {
-                reminder.deleteReminder(taskId, userId, Types.TASK);
+            if (reminder.existsReminder(taskId, userId, Types.TASK, ctx)) {
+                reminder.deleteReminder(taskId, userId, Types.TASK, ctx);
             }
         } else {
             final ReminderObject remind = new ReminderObject();
@@ -165,10 +165,10 @@ final class Reminder {
             remind.setTargetId(taskId);
             remind.setFolder(task.getParentFolderID());
             remind.setUser(userId);
-            if (reminder.existsReminder(taskId, userId, Types.TASK)) {
-                reminder.updateReminder(remind);
+            if (reminder.existsReminder(taskId, userId, Types.TASK, ctx)) {
+                reminder.updateReminder(remind, ctx);
             } else {
-                reminder.insertReminder(remind);
+                reminder.insertReminder(remind, ctx);
             }
         }
     }
@@ -182,7 +182,7 @@ final class Reminder {
      */
     static void loadReminder(final Context ctx, final int userId,
         final Collection<Task> tasks) throws OXException {
-        final ReminderService remStor = new ReminderHandler(ctx);
+        final ReminderSQLInterface remStor = ReminderHandler.getInstance();
         final Map<Integer, Task> tmp = new HashMap<Integer, Task>();
         for (final Task task : tasks) {
             tmp.put(Integer.valueOf(task.getObjectID()), task);
@@ -190,7 +190,7 @@ final class Reminder {
         final ReminderObject[] reminders;
         try {
             reminders = remStor.loadReminder(Collections.toArray(tmp.keySet()),
-                userId, Types.TASK);
+                userId, Types.TASK, ctx);
         } catch (final OXException e) {
             throw e;
         }
@@ -202,13 +202,13 @@ final class Reminder {
 
     static void loadReminder(final Context ctx, final int userId,
         final Collection<Task> tasks, final Connection con) throws OXException {
-            final ReminderService remStor = new ReminderHandler(ctx);
+            final ReminderSQLInterface remStor = ReminderHandler.getInstance();
             final Map<Integer, Task> tmp = new HashMap<Integer, Task>();
             for (final Task task : tasks) {
                 tmp.put(Integer.valueOf(task.getObjectID()), task);
             }
             final ReminderObject[] reminders;
-            reminders = remStor.loadReminders(Collections.toArray(tmp.keySet()), userId, Types.TASK, con);
+            reminders = remStor.loadReminders(Collections.toArray(tmp.keySet()), userId, Types.TASK, con, ctx);
             for (final ReminderObject reminder : reminders) {
                 tmp.get(Integer.valueOf(reminder.getTargetId())).setAlarm(reminder
                     .getDate());
@@ -224,12 +224,12 @@ final class Reminder {
      */
     static void loadReminder(final Context ctx, final int userId,
         final Task task) throws OXException {
-        final ReminderService reminder = new ReminderHandler(ctx);
+        final ReminderSQLInterface reminder = ReminderHandler.getInstance();
         final int taskId = task.getObjectID();
         try {
-            if (reminder.existsReminder(taskId, userId, Types.TASK)) {
+            if (reminder.existsReminder(taskId, userId, Types.TASK, ctx)) {
                 final ReminderObject remind = reminder.loadReminder(taskId,
-                    userId, Types.TASK);
+                    userId, Types.TASK, ctx);
                 task.setAlarm(remind.getDate());
             }
         } catch (final OXException e) {
@@ -238,9 +238,9 @@ final class Reminder {
     }
 
     static void deleteReminder(Context ctx, Connection con, Task task) throws OXException {
-        final ReminderService reminder = new ReminderHandler(ctx);
+        final ReminderSQLInterface reminder = ReminderHandler.getInstance();
         try {
-            reminder.deleteReminder(task.getObjectID(), Types.TASK, con);
+            reminder.deleteReminder(task.getObjectID(), Types.TASK, con, ctx);
         } catch (final OXException e) {
             if (!ReminderExceptionCode.NOT_FOUND.equals(e)) {
                 throw e;
@@ -250,8 +250,8 @@ final class Reminder {
 
     static void updateReminderOnMove(Context ctx, int taskId, int sourceFolderId, int destFolderId, boolean privateFlag) throws OXException {
         FolderObject folder = Tools.getFolder(ctx, destFolderId);
-        ReminderService service = new ReminderHandler(ctx);
-        SearchIterator<ReminderObject> iter = service.listReminder(Types.TASK, taskId);
+        ReminderSQLInterface service = ReminderHandler.getInstance();
+        SearchIterator<ReminderObject> iter = service.listReminder(Types.TASK, taskId, ctx);
         try {
             while (iter.hasNext()) {
                 ReminderObject reminder = iter.next();
@@ -266,10 +266,10 @@ final class Reminder {
                             throw new OXException();
                         }
                         reminder.setFolder(destFolderId);
-                        service.updateReminder(reminder);
+                        service.updateReminder(reminder, ctx);
                     } catch (OXException e) {
                         // Reading is not allowed. Delete the reminder
-                        service.deleteReminder(reminder);
+                        service.deleteReminder(reminder, ctx);
                     }
                 }
             }
