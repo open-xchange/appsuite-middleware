@@ -47,30 +47,29 @@
  *
  */
 
-package com.openexchange.api2;
+package com.openexchange.groupware.reminder;
 
 import java.sql.Connection;
 import java.util.Date;
+import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.session.Session;
-import com.openexchange.tools.iterator.SearchIterator;
 
 /**
- * This is the central interface to the reminder component.
+ * {@link ReminderService}
  *
- * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.4
  */
 public interface ReminderService {
 
-    public int insertReminder(ReminderObject reminderObj) throws OXException;
+    public int insertReminder(Session session, ReminderObject reminderObj) throws OXException;
 
-    public int insertReminder(ReminderObject reminderObj, Connection writeCon) throws OXException;
+    public int insertReminder(Session session, ReminderObject reminderObj, Connection writeCon) throws OXException;
 
-    void updateReminder(ReminderObject reminder) throws OXException;
+    void updateReminder(Session session, ReminderObject reminder) throws OXException;
 
     /**
      * This method updates a reminder.
@@ -78,28 +77,27 @@ public interface ReminderService {
      * @param con writable database connection.
      * @throws OXException TODO
      */
-    void updateReminder(ReminderObject reminder, Connection con)
-        throws OXException;
+    void updateReminder(Session session, ReminderObject reminder, Connection con) throws OXException;
 
-    public void deleteReminder(ReminderObject reminder) throws OXException;
+    public void deleteReminder(Session session, ReminderObject reminder) throws OXException;
 
-    public void deleteReminder(int targetId, int module) throws OXException;
+    public void deleteReminder(Session session, int targetId, int module) throws OXException;
 
-    public void deleteReminder(int targetId, int module, Connection writeCon) throws OXException;
+    public void deleteReminder(Session session, int targetId, int module, Connection writeCon) throws OXException;
 
-    public void deleteReminder(int targetId, int userId, int module) throws OXException;
+    public void deleteReminder(Session session, int targetId, int userId, int module) throws OXException;
 
-    public void deleteReminder(int targetId, int userId, int module, Connection writeCon) throws OXException;
+    public void deleteReminder(Session session, int targetId, int userId, int module, Connection writeCon) throws OXException;
 
-    public boolean existsReminder(int targetId, int userId, int module) throws OXException;
+    public boolean existsReminder(Session session, int targetId, int userId, int module) throws OXException;
 
-    public boolean existsReminder(int targetId, int userId, int module, Connection con) throws OXException;
+    public boolean existsReminder(Session session, int targetId, int userId, int module, Connection con) throws OXException;
 
-    public ReminderObject loadReminder(int targetId, int userId, int module) throws OXException;
+    public ReminderObject loadReminder(Session session, int targetId, int userId, int module) throws OXException;
 
-    public ReminderObject loadReminder(int objectId) throws OXException;
+    public ReminderObject loadReminder(Session session, int objectId) throws OXException;
 
-    public ReminderObject loadReminder(final int targetId, final int userId, final int module, final Connection con) throws OXException;
+    public ReminderObject loadReminder(Session session, final int targetId, final int userId, final int module, final Connection con) throws OXException;
 
     /**
      * This method loads the reminder for several target objects.
@@ -109,13 +107,11 @@ public interface ReminderService {
      * @return an array of found reminders.
      * @throws OXException if reading the reminder fails.
      */
-    ReminderObject[] loadReminder(int[] targetIds, int userId, int module)
+    ReminderObject[] loadReminder(Session session, int[] targetIds, int userId, int module)
         throws OXException;
 
-    ReminderObject[] loadReminders(int[] targetIds, int userId, int module, Connection con)
+    ReminderObject[] loadReminders(Session session, int[] targetIds, int userId, int module, Connection con)
         throws OXException;
-
-    SearchIterator<ReminderObject> listReminder(int module, int targetId) throws OXException;
 
     /**
      * Fetches the list of reminder that should pop up in the time frame starting now and ending at the given end date.
@@ -126,7 +122,7 @@ public interface ReminderService {
      * @return a list of reminder that should pop up.
      * @throws OXException if loading the reminder failes in some way.
      */
-    SearchIterator<ReminderObject> getArisingReminder(Session session, Context ctx, User user, Date end) throws OXException;
+    List<ReminderObject> getArisingReminder(Session session, Context ctx, User user, Date end) throws OXException;
 
     /**
      * Updates the alarm of specified reminder.
@@ -153,6 +149,6 @@ public interface ReminderService {
      */
     public void remindAgain(ReminderObject reminder, Session session, Context ctx, Connection writeCon) throws OXException;
 
-    public SearchIterator listModifiedReminder(int userId, Date lastModified) throws OXException;
+    public List<ReminderObject> listModifiedReminder(Session session, int userId, Date lastModified) throws OXException;
 
 }
