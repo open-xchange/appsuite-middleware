@@ -292,11 +292,13 @@ public class MboxFolder extends Folder {
     private boolean delete(File f) {
 	File[] files = f.listFiles();
 	boolean ret = true;
-	for (int i = 0; ret && i < files.length; i++) {
+	if (null != files) {
+	  for (int i = 0; ret && i < files.length; i++) {
 	    if (files[i].isDirectory())
 		ret = delete(files[i]);
 	    else
 		ret = files[i].delete();
+	  }
 	}
 	return ret;
     }
