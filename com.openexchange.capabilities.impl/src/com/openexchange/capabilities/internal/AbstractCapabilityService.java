@@ -62,6 +62,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -98,6 +99,8 @@ import com.openexchange.groupware.userconfiguration.service.PermissionAvailabili
 import com.openexchange.java.BoolReference;
 import com.openexchange.java.ConcurrentEnumMap;
 import com.openexchange.java.Strings;
+import com.openexchange.log.LogProperties;
+import com.openexchange.log.LogProperties.Name;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.ServiceLookup;
@@ -288,6 +291,8 @@ public abstract class AbstractCapabilityService implements CapabilityService {
 
     private boolean autologin() {
         Boolean tmp = autologin;
+        String hostname = LogProperties.get(Name.HOSTNAME);
+        
         if (null == tmp) {
             synchronized (this) {
                 tmp = autologin;
@@ -302,7 +307,33 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                 }
             }
         }
+        
+        if (!Strings.isEmpty(hostname)) {
+            tmp = isAutologinEnabledForHost(hostname, tmp);
+        }
+        
         return tmp.booleanValue();
+    }
+    
+    private boolean isAutologinEnabledForHost(String hostname, boolean defaultValue) {
+        boolean isEnabled = defaultValue;
+        final ConfigurationService configurationService = services.getService(ConfigurationService.class);
+        try {
+            LinkedList<Map<String, Object>> applicableConfigs = configurationService.getCustomHostConfigurations(hostname, -1, -1, services.getService(ConfigViewFactory.class));
+            isEnabled = getBooleanPropertyFromMap(applicableConfigs, "com.openexchange.sessiond.autologin", isEnabled);
+        } catch (OXException e) {
+            LOG.error("", e);
+        }
+        return isEnabled;
+    }
+
+    private Boolean getBooleanPropertyFromMap(LinkedList<Map<String, Object>> applicableConfigs, String string, boolean defaultValue) {
+        for (Map<String, Object> map : applicableConfigs) {
+            if (map.containsKey(string)) {
+                defaultValue = (boolean) map.get(string);
+            }
+        }
+        return defaultValue;
     }
 
     private static final Capability CAP_AUTO_LOGIN = new Capability("autologin");

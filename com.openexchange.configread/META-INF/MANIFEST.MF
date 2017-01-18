@@ -41,3 +41,4 @@ Import-Package: com.openexchange.annotation,
 Export-Package: com.openexchange.config
 Bundle-Activator: com.openexchange.config.osgi.ConfigActivator
 Bundle-ClassPath: .
+Require-Bundle: com.openexchange.test

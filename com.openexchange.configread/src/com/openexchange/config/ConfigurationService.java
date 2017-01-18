@@ -51,9 +51,11 @@ package com.openexchange.config;
 
 import java.io.File;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
 
@@ -332,5 +334,17 @@ public interface ConfigurationService {
      * @return The value in this property list with the specified key value or given default value argument.
      */
     int getIntProperty(String name, int defaultValue, PropertyListener propertyListener);
+
+    /**
+     * Gets all custom properties for a given host from as-config.yml.
+     * 
+     * @param hostName, the name of the host, to get the properties for
+     * @param userID, can be -1 if no id is available at present
+     * @param contextID, can be -1 if no id is available at present
+     * @param configViewFactory, the factory that should be used to get all properties available
+     * @return the whole map with all custom properties for a host
+     * @throws OXException
+     */
+    LinkedList<Map<String, Object>> getCustomHostConfigurations(String hostName, int userID, int contextID, ConfigViewFactory configViewFactory) throws OXException;
 
 }
