@@ -101,7 +101,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MicroformatServlet.class);
 
-    private static final ConcurrentMap<String, OXMFPublicationService> PUBLISHERS = new ConcurrentHashMap<String, OXMFPublicationService>();
+    private static final ConcurrentMap<String, PublicationAndVars> PUBLISHERS = new ConcurrentHashMap<String, PublicationAndVars>();
 
     private static final String MODULE = OXMFConstants.MODULE;
 
@@ -122,8 +122,6 @@ public class MicroformatServlet extends OnlinePublicationServlet {
         DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
         TIME_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
-
-    private static final Map<String, Map<String, Object>> ADDITONAL_TEMPLATE_VARIABLES = new ConcurrentHashMap<String, Map<String, Object>>();
 
     private static volatile PublicationDataLoaderService dataLoader = null;
     private static volatile UserService userService;
@@ -149,10 +147,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
     }
 
     public static void registerType(final String module, final OXMFPublicationService publisher, final Map<String, Object> additionalVars) {
-        OXMFPublicationService prev = PUBLISHERS.putIfAbsent(module, publisher);
-        if (null == prev) {
-            ADDITONAL_TEMPLATE_VARIABLES.put(module, additionalVars);
-        }
+        PUBLISHERS.putIfAbsent(module, new PublicationAndVars(publisher, additionalVars));
     }
 
     public static void setContactService(final ContactService service) {
@@ -177,24 +172,26 @@ public class MicroformatServlet extends OnlinePublicationServlet {
         try {
             resp.setContentType("text/html; charset=UTF-8");
             final Map<String, String> args = getPublicationArguments(req);
-            if(args==null){
+            if (args==null){
                 final PrintWriter writer = resp.getWriter();
                 writer.println("The publication request is missing some or all parameters.");
                 writer.flush();
                 return;
             }
+
             final String module = args.get(MODULE);
 
-            final OXMFPublicationService publisher = PUBLISHERS.get(module);
-            if (publisher == null) {
+            final PublicationAndVars publisherAndVars = PUBLISHERS.get(module);
+            if (publisherAndVars == null) {
                 final PrintWriter writer = resp.getWriter();
                 String escaped = Publications.escape(module, EscapeMode.HTML);
                 writer.println("The publication has either been revoked in the meantime or module \"" + escaped + "\" is unknown.");
                 writer.flush();
                 return;
             }
+
             final Context ctx = contexts.getContext(Integer.parseInt(args.get(CONTEXTID)));
-            final Publication publication = publisher.getPublication(ctx, args.get(SITE));
+            final Publication publication = publisherAndVars.publisher.getPublication(ctx, args.get(SITE));
             if (publication == null || !publication.isEnabled()) {
                 resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 final PrintWriter writer = resp.getWriter();
@@ -257,11 +254,9 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             variables.put("userContact", userContact);
             variables.put("htmlService", new HTMLUtils(htmlService));
 
-            if (ADDITONAL_TEMPLATE_VARIABLES.containsKey(module)) {
-                variables.putAll(ADDITONAL_TEMPLATE_VARIABLES.get(module));
-            }
+            variables.putAll(publisherAndVars.variables);
 
-            final OXTemplate template = publisher.loadTemplate(publication);
+            final OXTemplate template = publisherAndVars.publisher.loadTemplate(publication);
             final AllocatingStringWriter htmlWriter = new AllocatingStringWriter();
             template.process(variables, htmlWriter);
             String html = htmlWriter.toString();
@@ -350,6 +345,20 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             return site;
         }
         return AJAXUtility.encodeUrl(site, true, false);
+    }
+
+    // --------------------------------------------------- Helper class -----------------------------------------------------
+
+    private static final class PublicationAndVars {
+
+        final OXMFPublicationService publisher;
+        final Map<String, Object> variables;
+
+        PublicationAndVars(OXMFPublicationService publicationService, Map<String, Object> variables) {
+            super();
+            this.publisher = publicationService;
+            this.variables = variables;
+        }
     }
 
 }
