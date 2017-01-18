@@ -387,8 +387,8 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
 
                         MailField[] fields = MailField.getFields(columns);
                         if (null != headers && 0 < headers.length) {
-                            if (messageStorage instanceof IMailMessageStorageExt) {
-                                IMailMessageStorageExt ext = (IMailMessageStorageExt) messageStorage;
+                            IMailMessageStorageExt ext = messageStorage.supports(IMailMessageStorageExt.class);
+                            if (null != ext) {
                                 result = ext.searchMessages(fa.getFullname(), indexRange, sortField, orderDirection, searchTerm, fields, headers);
                             } else {
                                 result = messageStorage.searchMessages(fa.getFullname(), indexRange, sortField, orderDirection, searchTerm, fields);

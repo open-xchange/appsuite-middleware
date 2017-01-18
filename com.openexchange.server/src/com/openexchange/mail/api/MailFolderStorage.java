@@ -65,6 +65,19 @@ import com.openexchange.mail.dataobjects.MailFolderDescription;
 public abstract class MailFolderStorage implements IMailFolderStorage {
 
     @Override
+    public <T> T supports(Class<T> iface) throws OXException {
+        if (iface.isInstance(this)) {
+            return (T) this;
+        }
+
+        if (IMailFolderStorageDelegator.class.isInstance(this)) {
+            return ((IMailFolderStorageDelegator) this).getDelegateFolderStorage().supports(iface);
+        }
+
+        return null;
+    }
+
+    @Override
     public abstract boolean exists(final String fullName) throws OXException;
 
     @Override

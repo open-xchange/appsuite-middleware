@@ -153,8 +153,9 @@ public abstract class AbstractMailTest extends TestCase {
      * @throws OXException If an error occurs
      */
     protected int getMessageCount(final MailAccess<?, ?> mailAccess, final String fullName) throws OXException {
-        if (mailAccess.getFolderStorage() instanceof IMailFolderStorageEnhanced) {
-            return ((IMailFolderStorageEnhanced) mailAccess.getFolderStorage()).getTotalCounter(fullName);
+        IMailFolderStorageEnhanced storageEnhanced = mailAccess.getFolderStorage().supports(IMailFolderStorageEnhanced.class);
+        if (null != storageEnhanced) {
+            return storageEnhanced.getTotalCounter(fullName);
         }
         return getMessageCount(mailAccess.getAccountId(), fullName);
     }

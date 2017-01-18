@@ -227,7 +227,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         List<Facet> facets = new ArrayList<Facet>(5);
         List<String> prefixTokens = null;
         int minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
-        
+
         final boolean prefixAvailable = Strings.isNotEmpty(prefix) && prefix.length() >= minimumSearchCharacters;
         Object[] values = accessMailStorage(autocompleteRequest, session, new MailAccessClosure<Object[]>() {
 
@@ -360,7 +360,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
                 prefix,
                 FIELD_BODY,
                 prefixTokens));
-            
+
             if (addFileNameSearch) {
                 facets.add(buildSimpleFacet(FILENAME, FACET_FILENAME_NAME, prefix, FIELD_FILENAME_NAME, prefixTokens));
             }
@@ -441,8 +441,8 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
 
         MailMessage[] messages;
         if (null != headers && 0 < headers.length) {
-            if (messageStorage instanceof IMailMessageStorageExt) {
-                IMailMessageStorageExt ext = (IMailMessageStorageExt) messageStorage;
+            IMailMessageStorageExt ext = messageStorage.supports(IMailMessageStorageExt.class);
+            if (null != ext) {
                 messages = ext.searchMessages(fullname, indexRange, sortField, orderDirection, searchTerm, fields, headers);
             } else {
                 messages = messageStorage.searchMessages(fullname, indexRange, sortField, orderDirection, searchTerm, fields);
@@ -583,7 +583,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
                 Long timestamp = parsed.getSecond();
                 return buildDateTerm(comparison, timestamp.longValue(), folder.isSent());
             }
-            
+
             // No filter...
             String timeFramePattern = dateFacet.getValueId();
             TimeFrame timeFrame = TimeFrame.valueOf(timeFramePattern);

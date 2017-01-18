@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,54 +47,25 @@
  *
  */
 
-package com.openexchange.mail.json.actions;
+package com.openexchange.mail.api;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.api.IMailFolderStorage;
-import com.openexchange.mail.api.IMailFolderStorageEnhanced;
-import com.openexchange.mail.api.IMailFolderStorageEnhanced2;
-import com.openexchange.mail.dataobjects.MailFolder;
 
 /**
- * {@link FolderInfo} - Simple class to hold folder information.
+ * {@link IMailStorage} - Super interface for folder and message storage.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.1
+ * @since v7.8.4
  */
-class FolderInfo {
+public interface IMailStorage {
 
-    static FolderInfo getFolderInfo(String fullName, IMailFolderStorage folderStorage) throws OXException {
-        IMailFolderStorageEnhanced2 storageEnhanced2 = folderStorage.supports(IMailFolderStorageEnhanced2.class);
-        if (null != storageEnhanced2) {
-            int[] totalAndUnread = storageEnhanced2.getTotalAndUnreadCounter(fullName);
-            return new FolderInfo(totalAndUnread[0], totalAndUnread[1]);
-        }
-
-        IMailFolderStorageEnhanced storageEnhanced = folderStorage.supports(IMailFolderStorageEnhanced.class);
-        if (null != storageEnhanced) {
-            int total = storageEnhanced.getTotalCounter(fullName);
-            int unread = storageEnhanced.getUnreadCounter(fullName);
-            return new FolderInfo(total, unread);
-        }
-
-        MailFolder folder = folderStorage.getFolder(fullName);
-        return new FolderInfo(folder.getMessageCount(), folder.getUnreadMessageCount());
-    }
-
-    // --------------------------------------------------------------------------------------------------------------
-
-    final int total;
-    final int unread;
-
-    FolderInfo(int total, int unread) {
-        super();
-        this.total = total;
-        this.unread = unread;
-    }
-
-    @Override
-    public String toString() {
-        return new StringBuilder(32).append("{total=").append(total).append(", unread=").append(unread).append('}').toString();
-    }
+    /**
+     * Checks if specified sub-interface is supported and returns its concrete instance if so.
+     *
+     * @param iface The sub-interface to check
+     * @return The concrete instance for supported sub-interface or <code>null</code>
+     * @throws OXException If sub-interface instance cannot be returned
+     */
+    <T> T supports(Class<T> iface) throws OXException;
 
 }

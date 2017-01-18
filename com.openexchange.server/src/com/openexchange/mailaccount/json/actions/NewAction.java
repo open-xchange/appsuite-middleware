@@ -219,8 +219,9 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
                     mailAccess = getMailAccess(accountDescription, session, warnings);
                     mailAccess.connect(false);
                     IMailFolderStorage storage = mailAccess.getFolderStorage();
-                    if (storage instanceof IMailFolderStorageDefaultFolderAware) {
-                        defaultFolderNames = ((IMailFolderStorageDefaultFolderAware) storage).getSpecialUseFolder();
+                    IMailFolderStorageDefaultFolderAware defaultFolderAware = storage.supports(IMailFolderStorageDefaultFolderAware.class);
+                    if (null != defaultFolderAware) {
+                        defaultFolderNames = defaultFolderAware.getSpecialUseFolder();
                     }
                     mailAccess.close(false);
                     mailAccess = null;
