@@ -58,7 +58,6 @@ import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.channels.FileChannel;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -865,16 +864,20 @@ public final class ThresholdFileHolder implements IFileHolder {
     }
 
     private static void copyFile(final File in, final File out) throws IOException {
-        FileChannel inChannel = null;
-        FileChannel outChannel = null;
+        FileInputStream inStream = null;
+        FileOutputStream outStream  = null;
         try {
-            inChannel = new FileInputStream(in).getChannel();
-            outChannel = new FileOutputStream(out).getChannel();
-            inChannel.transferTo(0, inChannel.size(), outChannel);
-        } catch (final IOException e) {
-            throw e;
+            inStream = new FileInputStream(in);
+            outStream = new FileOutputStream(out);
+
+            int buflen = 0xFFFF;
+            byte[] buf = new byte[buflen];
+            for (int read; (read = inStream.read(buf, 0, buflen)) > 0;) {
+                outStream.write(buf, 0, read);
+            }
+            outStream.flush();
         } finally {
-            Streams.close(inChannel, outChannel);
+            Streams.close(inStream, outStream);
         }
     }
 
