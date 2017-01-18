@@ -176,9 +176,10 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
         Map<String, FolderObject> foldersA = getFolderStructure(getClient(), userA.getPrivateTaskFolder());
         Map<String, FolderObject> foldersB = getFolderStructure(getClient2(), userB.getPrivateTaskFolder());
 
+        String userAPrivateTaskFolder = "UserA - findAPIPrivateTaskFolder-" + UUID.randomUUID().toString();
         try {
             //create private test folder
-            userAprivateTestFolder = Create.createPrivateFolder("UserA - findAPIPrivateTaskFolder", FolderObject.TASK, userA.getUserId());
+            userAprivateTestFolder = Create.createPrivateFolder(userAPrivateTaskFolder, FolderObject.TASK, userA.getUserId());
             userAprivateTestFolder.setParentFolderID(userA.getPrivateTaskFolder());
             insertRequestReq = new InsertRequest(EnumAPI.OX_NEW, userAprivateTestFolder, false);
             insertResponseResp = getClient().execute(insertRequestReq);
@@ -190,12 +191,13 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
         }
 
         if (userAprivateTestFolder.getObjectID() == 0) {
-            userAprivateTestFolder.setObjectID(foldersA.get("UserA - findAPIPrivateTaskFolder").getObjectID()); //maybe contains to avoid null?
+            userAprivateTestFolder.setObjectID(foldersA.get(userAPrivateTaskFolder).getObjectID()); //maybe contains to avoid null?
         }
 
         //create public test folder
+        String userAPublicTaskFolder = "UserA - findAPIPublicTaskFolder-" + UUID.randomUUID().toString();
         try {
-            userApublicTestFolder = Create.createPublicFolder(getClient(), "UserA - findAPIPublicTaskFolder", FolderObject.TASK, false);
+            userApublicTestFolder = Create.createPublicFolder(getClient(), userAPublicTaskFolder, FolderObject.TASK, false);
         } catch (OXException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -203,12 +205,13 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
         }
 
         if (userApublicTestFolder.getObjectID() == 0) {
-            userApublicTestFolder.setObjectID(foldersA.get("UserA - findAPIPublicTaskFolder").getObjectID());
+            userApublicTestFolder.setObjectID(foldersA.get(userAPublicTaskFolder).getObjectID());
         }
 
+        String userBPrivateSharedTaskFolder = "UserB - findAPIPrivateSharedTaskFolder - RO-" + UUID.randomUUID().toString();
         try {
             //create shared folder, read-only
-            userBsharedTestFolderRO = Create.createPrivateFolder("UserB - findAPIPrivateSharedTaskFolder - RO", FolderObject.TASK, userB.getUserId());
+            userBsharedTestFolderRO = Create.createPrivateFolder(userBPrivateSharedTaskFolder, FolderObject.TASK, userB.getUserId());
             userBsharedTestFolderRO.setParentFolderID(userB.getPrivateTaskFolder());
             insertRequestReq = new InsertRequest(EnumAPI.OX_NEW, userBsharedTestFolderRO, false);
             insertResponseResp = getClient2().execute(insertRequestReq);
@@ -220,7 +223,7 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
         }
 
         if (userBsharedTestFolderRO.getObjectID() == 0) {
-            userBsharedTestFolderRO.setObjectID(foldersB.get("UserB - findAPIPrivateSharedTaskFolder - RO").getObjectID());
+            userBsharedTestFolderRO.setObjectID(foldersB.get(userBPrivateSharedTaskFolder).getObjectID());
         }
 
         try {
@@ -232,9 +235,10 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
             e.printStackTrace();
         }
 
+        String userBPrivateSharedTaskFolderRW = "UserB - findAPIPrivateSharedTaskFolder - RW-" + UUID.randomUUID().toString();
         try {
             //create shared folder, read/write
-            userBsharedTestFolderRW = Create.createPrivateFolder("UserB - findAPIPrivateSharedTaskFolder - RW", FolderObject.TASK, userB.getUserId());
+            userBsharedTestFolderRW = Create.createPrivateFolder(userBPrivateSharedTaskFolderRW, FolderObject.TASK, userB.getUserId());
             userBsharedTestFolderRW.setParentFolderID(userB.getPrivateTaskFolder());
             insertRequestReq = new InsertRequest(EnumAPI.OX_NEW, userBsharedTestFolderRW, false);
             insertResponseResp = getClient2().execute(insertRequestReq);
@@ -246,7 +250,7 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
         }
 
         if (userBsharedTestFolderRW.getObjectID() == 0) {
-            userBsharedTestFolderRW.setObjectID(foldersB.get("UserB - findAPIPrivateSharedTaskFolder - RW").getObjectID());
+            userBsharedTestFolderRW.setObjectID(foldersB.get(userBPrivateSharedTaskFolderRW).getObjectID());
         }
 
         try {
@@ -258,9 +262,10 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
             e.printStackTrace();
         }
 
+        String userBPrivateTaskFolderNA = "UserB - findAPIPrivateTaskFolder - NA-" + UUID.randomUUID().toString();
         try {
             //create userB's private folder
-            userBprivateTestFolder = Create.createPrivateFolder("UserB - findAPIPrivateTaskFolder - NA", FolderObject.TASK, userB.getUserId());
+            userBprivateTestFolder = Create.createPrivateFolder(userBPrivateTaskFolderNA, FolderObject.TASK, userB.getUserId());
             userBprivateTestFolder.setParentFolderID(userB.getPrivateTaskFolder());
             insertRequestReq = new InsertRequest(EnumAPI.OX_NEW, userBprivateTestFolder, false);
             insertResponseResp = getClient2().execute(insertRequestReq);
@@ -272,12 +277,13 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
         }
 
         if (userBprivateTestFolder.getObjectID() == 0) {
-            userBprivateTestFolder.setObjectID(foldersB.get("UserB - findAPIPrivateTaskFolder - NA").getObjectID());
+            userBprivateTestFolder.setObjectID(foldersB.get(userBPrivateTaskFolderNA).getObjectID());
         }
 
+        String userBPublicTaskFolder = "UserB - findAPIPublicTaskFolder" + UUID.randomUUID().toString();
         try {
             //create public test folder for user B
-            userBpublicTestFolder = Create.createPublicFolder(getClient2(), "UserB - findAPIPublicTaskFolder", FolderObject.TASK, false);
+            userBpublicTestFolder = Create.createPublicFolder(getClient2(), userBPublicTaskFolder, FolderObject.TASK, false);
         } catch (OXException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -285,7 +291,7 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
         }
 
         if (userBpublicTestFolder.getObjectID() == 0) {
-            userBpublicTestFolder.setObjectID(foldersB.get("UserB - findAPIPublicTaskFolder").getObjectID());
+            userBpublicTestFolder.setObjectID(foldersB.get(userBPublicTaskFolder).getObjectID());
         }
     }
 
