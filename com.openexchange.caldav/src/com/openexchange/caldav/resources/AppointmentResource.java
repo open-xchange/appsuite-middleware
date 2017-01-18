@@ -100,8 +100,8 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 import com.openexchange.groupware.reminder.ReminderExceptionCode;
+import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
-import com.openexchange.groupware.reminder.ReminderService;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
@@ -1220,8 +1220,8 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
     private ReminderObject optReminder(Appointment appointment) throws OXException {
         if (null != appointment) {
             try {
-                ReminderService reminderService = factory.getService(ReminderService.class);
-                return reminderService.loadReminder(factory.getSession(), appointment.getObjectID(), factory.getSession().getUserId(), Types.APPOINTMENT);
+                ReminderHandler reminderHandler = ReminderHandler.getInstance();
+                return reminderHandler.loadReminder(appointment.getObjectID(), factory.getSession().getUserId(), Types.APPOINTMENT, factory.getContext());
             } catch (OXException e) {
                 if (false == ReminderExceptionCode.NOT_FOUND.equals(e)) {
                     throw e;
@@ -1237,7 +1237,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
      * @param reminder The reminder to insert or update
      */
     private void insertOrUpdateReminder(ReminderObject reminder) throws OXException {
-        ReminderService reminderService = factory.getService(ReminderService.class);
+        ReminderHandler reminderHandler = ReminderHandler.getInstance();
         DatabaseService databaseService = factory.requireService(DatabaseService.class);
         boolean committed = false;
         Connection connection = null;
@@ -1249,7 +1249,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
              */
             ReminderObject reloadedReminder = null;
             try {
-                reloadedReminder = reminderService.loadReminder(factory.getSession(),reminder.getTargetId(), reminder.getUser(), reminder.getModule(), connection);
+                reloadedReminder = reminderHandler.loadReminder(reminder.getTargetId(), reminder.getUser(), reminder.getModule(), connection, factory.getContext());
                 if (null != reloadedReminder.getDate() && reloadedReminder.getDate().equals(reminder.getDate())) {
                     return; // already up-to-date
                 }
@@ -1257,7 +1257,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 if (0 < reminder.getRecurrencePosition()) {
                     reloadedReminder.setRecurrencePosition(reminder.getRecurrencePosition());
                 }
-                reminderService.updateReminder(factory.getSession(), reloadedReminder, connection);
+                reminderHandler.updateReminder(reloadedReminder, connection, factory.getContext());
                 connection.commit();
                 committed = true;
                 return;
@@ -1270,7 +1270,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
              * insert new reminder, otherwise
              */
             reminder.setObjectId(0);
-            reminderService.insertReminder(factory.getSession(), reminder);
+            reminderHandler.insertReminder(reminder, factory.getContext());
             connection.commit();
             committed = true;
         } catch (SQLException e) {
