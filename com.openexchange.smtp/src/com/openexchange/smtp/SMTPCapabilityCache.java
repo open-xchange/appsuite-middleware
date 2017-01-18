@@ -304,7 +304,7 @@ public final class SMTPCapabilityCache {
                     /*
                      * Consume final LF
                      */
-                    i = in.read();
+                    in.read();
                     skipLF = false;
                 }
                 /*
