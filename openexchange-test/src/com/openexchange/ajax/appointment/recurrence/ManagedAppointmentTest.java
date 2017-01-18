@@ -52,6 +52,7 @@ package com.openexchange.ajax.appointment.recurrence;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.UUID;
 import org.junit.Before;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.appointment.helper.AbstractAssertion;
@@ -102,19 +103,19 @@ public abstract class ManagedAppointmentTest extends AppointmentTest {
         super.setUp();
         UserValues values = getClient().getValues();
         userTimeZone = values.getTimeZone();
-        this.folder = ftm.generatePublicFolder("MAT_" + (new Date()).getTime(), Module.CALENDAR.getFolderConstant(), values.getPrivateAppointmentFolder(), values.getUserId());
-        folder = ftm.insertFolderOnServer(folder);
+        this.folder = ftm.generatePublicFolder("MAT_" + UUID.randomUUID().toString(), Module.CALENDAR.getFolderConstant(), values.getPrivateAppointmentFolder(), values.getUserId());
+        this.folder = ftm.insertFolderOnServer(folder);
 
-        this.negativeAssertionOnUpdate = new NegativeAssertionOnUpdate(catm, folder.getObjectID());
-        this.negativeAssertionOnCreate = new NegativeAssertionOnCreate(catm, folder.getObjectID());
-        this.negativeAssertionOnChangeException = new NegativeAssertionOnChangeException(catm, folder.getObjectID());
-        this.negativeAssertionOnDeleteException = new NegativeAssertionOnDeleteException(catm, folder.getObjectID());
-        this.positiveAssertionOnCreateAndUpdate = new PositiveAssertionOnCreateAndUpdate(catm, folder.getObjectID());
-        this.positiveAssertionOnCreate = new PositiveAssertionOnCreate(catm, folder.getObjectID());
-        this.positiveAssertionOnUpdate = new PositiveAssertionOnUpdateOnly(catm, folder.getObjectID());
-        this.positiveAssertionOnChangeException = new PositiveAssertionOnChangeException(catm, folder.getObjectID());
-        this.positiveAssertionOnDeleteException = new PositiveAssertionOnDeleteException(catm, folder.getObjectID());
-
+        int objectID = folder.getObjectID();
+        this.negativeAssertionOnUpdate = new NegativeAssertionOnUpdate(catm, objectID);
+        this.negativeAssertionOnCreate = new NegativeAssertionOnCreate(catm, objectID);
+        this.negativeAssertionOnChangeException = new NegativeAssertionOnChangeException(catm, objectID);
+        this.negativeAssertionOnDeleteException = new NegativeAssertionOnDeleteException(catm, objectID);
+        this.positiveAssertionOnCreateAndUpdate = new PositiveAssertionOnCreateAndUpdate(catm, objectID);
+        this.positiveAssertionOnCreate = new PositiveAssertionOnCreate(catm, objectID);
+        this.positiveAssertionOnUpdate = new PositiveAssertionOnUpdateOnly(catm, objectID);
+        this.positiveAssertionOnChangeException = new PositiveAssertionOnChangeException(catm, objectID);
+        this.positiveAssertionOnDeleteException = new PositiveAssertionOnDeleteException(catm, objectID);
     }
 
     protected Appointment generateDailyAppointment() {
