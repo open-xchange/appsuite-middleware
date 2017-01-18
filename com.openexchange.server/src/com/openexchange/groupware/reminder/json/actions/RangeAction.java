@@ -51,6 +51,7 @@ package com.openexchange.groupware.reminder.json.actions;
 
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -58,21 +59,19 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.writer.ReminderWriter;
-import com.openexchange.api2.ReminderService;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
+import com.openexchange.groupware.reminder.ReminderService;
 import com.openexchange.groupware.reminder.json.ReminderAJAXRequest;
 import com.openexchange.groupware.reminder.json.ReminderActionFactory;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIterators;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.session.ServerSession;
 
@@ -113,49 +112,44 @@ public final class RangeAction extends AbstractReminderAction {
         final ReminderWriter reminderWriter = new ReminderWriter(timeZone);
         try {
             final ServerSession session = req.getSession();
-            final ReminderService reminderSql = new ReminderHandler(session.getContext());
+            final ReminderService reminderService = ServerServiceRegistry.getInstance().getService(ReminderService.class, true);
             final User user = session.getUser();
-            final SearchIterator<ReminderObject> it = reminderSql.getArisingReminder(session, session.getContext(), user, end);
+            final List<ReminderObject> reminders = reminderService.getArisingReminder(session, session.getContext(), user, end);
             final JSONArray jsonResponseArray = new JSONArray();
-            try {
-                while (it.hasNext()) {
-                    final ReminderObject reminder = it.next();
-                    if (reminder.isRecurrenceAppointment()) {
-                        try {
-                            if (!getLatestRecurringReminder(session, tz, end, reminder)) {
-                                final ReminderObject nextReminder = getNextRecurringReminder(session, tz, reminder);
-                                if (nextReminder != null) {
-                                    reminderSql.updateReminder(nextReminder);
-                                } else {
-                                    reminderSql.deleteReminder(reminder);
-                                }
-                                continue;
-                            }
-                        } catch (final OXException e) {
-                            if (e.isGeneric(Generic.NOT_FOUND)) {
-                                LOG.warn("Cannot load target object of this reminder.", e);
-                                deleteReminderSafe(reminder, user.getId(), reminderSql);
-                            } else {
-                                LOG.error("Can not calculate recurrence of appointment {}{}{}", reminder.getTargetId(), ':', session.getContextId(), e);
-                            }
-                        }
-                    }
+            for (ReminderObject reminder : reminders) {
+                if (reminder.isRecurrenceAppointment()) {
                     try {
-                        if (hasModulePermission(reminder, session) && stillAccepted(reminder, session)) {
-                            final JSONObject jsonReminderObj = new JSONObject(12);
-                            reminderWriter.writeObject(reminder, jsonReminderObj);
-                            jsonResponseArray.put(jsonReminderObj);
+                        if (!getLatestRecurringReminder(session, tz, end, reminder)) {
+                            final ReminderObject nextReminder = getNextRecurringReminder(session, tz, reminder);
+                            if (nextReminder != null) {
+                                reminderService.updateReminder(req.getSession(), nextReminder);
+                            } else {
+                                reminderService.deleteReminder(req.getSession(), reminder);
+                            }
+                            continue;
                         }
-                    } catch (OXException e) {
-                        if (!OXFolderExceptionCode.NOT_EXISTS.equals(e)) {
-                            throw e;
+                    } catch (final OXException e) {
+                        if (e.isGeneric(Generic.NOT_FOUND)) {
+                            LOG.warn("Cannot load target object of this reminder.", e);
+                            deleteReminderSafe(req.getSession(), reminder, user.getId(), reminderService);
+                        } else {
+                            LOG.error("Can not calculate recurrence of appointment {}{}{}", reminder.getTargetId(), ':', session.getContextId(), e);
                         }
-                        LOG.warn("Cannot load target object of this reminder.", e);
-                        deleteReminderSafe(reminder, user.getId(), reminderSql);
                     }
                 }
-            } finally {
-                SearchIterators.close(it);
+                try {
+                    if (hasModulePermission(reminder, session) && stillAccepted(reminder, session)) {
+                        final JSONObject jsonReminderObj = new JSONObject(12);
+                        reminderWriter.writeObject(reminder, jsonReminderObj);
+                        jsonResponseArray.put(jsonReminderObj);
+                    }
+                } catch (OXException e) {
+                    if (!OXFolderExceptionCode.NOT_EXISTS.equals(e)) {
+                        throw e;
+                    }
+                    LOG.warn("Cannot load target object of this reminder.", e);
+                    deleteReminderSafe(req.getSession(), reminder, user.getId(), reminderService);
+                }
             }
             return new AJAXRequestResult(jsonResponseArray, "json");
         } catch (final OXException e) {

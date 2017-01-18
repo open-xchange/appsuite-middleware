@@ -56,18 +56,18 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.api2.ReminderService;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.reminder.ReminderExceptionCode;
-import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
+import com.openexchange.groupware.reminder.ReminderService;
 import com.openexchange.groupware.reminder.json.ReminderAJAXRequest;
 import com.openexchange.groupware.reminder.json.ReminderActionFactory;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 
 /**
@@ -101,19 +101,19 @@ public final class DeleteAction extends AbstractReminderAction {
             final int id = DataParser.checkInt(jData, AJAXServlet.PARAMETER_ID);
             final TimeZone tz = req.getTimeZone();
             try {
-                final ReminderService reminderSql = new ReminderHandler(req.getSession().getContext());
-                final ReminderObject reminder = reminderSql.loadReminder(id);
+                final ReminderService reminderService = ServerServiceRegistry.getInstance().getService(ReminderService.class, true);
+                final ReminderObject reminder = reminderService.loadReminder(req.getSession(), id);
 
                 if (reminder.isRecurrenceAppointment()) {
                     final ReminderObject nextReminder = getNextRecurringReminder(req.getSession(), tz, reminder);
                     if (nextReminder != null) {
-                        reminderSql.updateReminder(nextReminder);
+                        reminderService.updateReminder(req.getSession(), nextReminder);
                         response.put(nextReminder.getObjectId());
                     } else {
-                        reminderSql.deleteReminder(reminder);
+                        reminderService.deleteReminder(req.getSession(), reminder);
                     }
                 } else {
-                    reminderSql.deleteReminder(reminder);
+                    reminderService.deleteReminder(req.getSession(), reminder);
                 }
             } catch (final OXException oxe) {
                 LOG.debug("", oxe);
@@ -130,19 +130,19 @@ public final class DeleteAction extends AbstractReminderAction {
                 final int id = DataParser.checkInt(jData, AJAXServlet.PARAMETER_ID);
                 final TimeZone tz = req.getTimeZone();
                 try {
-                    final ReminderService reminderSql = new ReminderHandler(req.getSession().getContext());
-                    final ReminderObject reminder = reminderSql.loadReminder(id);
+                    final ReminderService reminderService = ServerServiceRegistry.getInstance().getService(ReminderService.class, true);
+                    final ReminderObject reminder = reminderService.loadReminder(req.getSession(), id);
 
                     if (reminder.isRecurrenceAppointment()) {
                         final ReminderObject nextReminder = getNextRecurringReminder(req.getSession(), tz, reminder);
                         if (nextReminder != null) {
-                            reminderSql.updateReminder(nextReminder);
+                            reminderService.updateReminder(req.getSession(), nextReminder);
                             response.put(nextReminder.getObjectId());
                         } else {
-                            reminderSql.deleteReminder(reminder);
+                            reminderService.deleteReminder(req.getSession(), reminder);
                         }
                     } else {
-                        reminderSql.deleteReminder(reminder);
+                        reminderService.deleteReminder(req.getSession(), reminder);
                     }
                 } catch (final OXException oxe) {
                     LOG.debug("", oxe);

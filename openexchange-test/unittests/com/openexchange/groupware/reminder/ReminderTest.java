@@ -3,10 +3,8 @@ package com.openexchange.groupware.reminder;
 
 import java.util.Date;
 import java.util.Properties;
-
 import junit.framework.TestCase;
-
-import com.openexchange.api2.ReminderService;
+import com.openexchange.api2.ReminderSQLInterface;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
@@ -16,7 +14,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 
 public class ReminderTest extends TestCase {
 
-	private ReminderService reminderSql = null;
+	private ReminderSQLInterface reminderSql = null;
 
 	protected Properties reminderProps = null;
 
@@ -43,8 +41,7 @@ public class ReminderTest extends TestCase {
 
 		final int contextId = ContextStorage.getInstance().getContextId("defaultcontext");
 		context = ContextStorage.getInstance().getContext(contextId);
-
-		reminderSql = new ReminderHandler(context);
+		reminderSql = ReminderHandler.getInstance();
 	}
 
 	/**
@@ -62,35 +59,35 @@ public class ReminderTest extends TestCase {
 		final int targetId = IDGenerator.getId(context, Types.REMINDER);
 		final ReminderObject reminderObj = createReminderObject(targetId, Types.APPOINTMENT);
 		reminderObj.setDate(new Date(System.currentTimeMillis()-3600000));
-		reminderSql.insertReminder(reminderObj);
+		reminderSql.insertReminder(reminderObj, context);
 	}
 
 	public void testUpdate() throws Exception {
 		final int targetId = IDGenerator.getId(context, Types.REMINDER);
 		ReminderObject reminderObj = createReminderObject(targetId, Types.TASK);
 		reminderObj.setDate(new Date(System.currentTimeMillis()-3600000));
-		reminderSql.insertReminder(reminderObj);
+		reminderSql.insertReminder(reminderObj, context);
 
 		reminderObj = createReminderObject(targetId, Types.TASK);
-		reminderSql.updateReminder(reminderObj);
+		reminderSql.updateReminder(reminderObj, context);
 	}
 
 	public void testDelete() throws Exception {
 		final int targetId = IDGenerator.getId(context, Types.REMINDER);
 		final ReminderObject reminderObj = createReminderObject(targetId, Types.APPOINTMENT);
 		reminderObj.setDate(new Date(System.currentTimeMillis()-3600000));
-		reminderSql.insertReminder(reminderObj);
+		reminderSql.insertReminder(reminderObj, context);
 
-		reminderSql.deleteReminder(targetId, userId, reminderObj.getModule());
+		reminderSql.deleteReminder(targetId, userId, reminderObj.getModule(), context);
 	}
 
 	public void testDeleteAllReminders() throws Exception {
 		final int targetId = IDGenerator.getId(context, Types.REMINDER);
 		final ReminderObject reminderObj = createReminderObject(targetId, Types.TASK);
 		reminderObj.setDate(new Date(System.currentTimeMillis()-3600000));
-		reminderSql.insertReminder(reminderObj);
+		reminderSql.insertReminder(reminderObj, context);
 
-		reminderSql.deleteReminder(targetId, Types.TASK);
+		reminderSql.deleteReminder(targetId, Types.TASK, context);
 	}
 
 	public void testLoad() throws Exception {
@@ -98,10 +95,10 @@ public class ReminderTest extends TestCase {
 		final Date alarm = new Date(System.currentTimeMillis()-3600000);
 		ReminderObject reminderObj = createReminderObject(targetId, Types.CONTACT);
 		reminderObj.setDate(alarm);
-		final int objectId = reminderSql.insertReminder(reminderObj);
+		final int objectId = reminderSql.insertReminder(reminderObj, context);
 		assertTrue("object_id is not > 0", objectId > 0);
 
-		reminderObj = reminderSql.loadReminder(targetId, userId, Types.CONTACT);
+		reminderObj = reminderSql.loadReminder(targetId, userId, Types.CONTACT, context);
 
 		assertNotNull("is reminder object not null", reminderObj);
 		assertEquals("targetId", targetId, reminderObj.getTargetId());
@@ -114,12 +111,12 @@ public class ReminderTest extends TestCase {
 		final int targetId = IDGenerator.getId(context, Types.REMINDER);
 		final ReminderObject reminderObj = createReminderObject(targetId, Types.APPOINTMENT);
 		reminderObj.setDate(new Date(System.currentTimeMillis()-3600000));
-		reminderSql.insertReminder(reminderObj);
+		reminderSql.insertReminder(reminderObj, context);
 
 		int counter = 0;
-		final SearchIterator it = reminderSql.listReminder(Types.APPOINTMENT, targetId);
+		final SearchIterator<ReminderObject> it = reminderSql.listReminder(Types.APPOINTMENT, targetId, context);
 		while (it.hasNext()) {
-			final ReminderObject r = (ReminderObject)it.next();
+			final ReminderObject r = it.next();
 			assertNotNull("check reminder objects in iterator", r);
 			counter++;
 		}
@@ -131,12 +128,12 @@ public class ReminderTest extends TestCase {
 		final int targetId = IDGenerator.getId(context, Types.REMINDER);
 		final ReminderObject reminderObj = createReminderObject(targetId, Types.APPOINTMENT);
 		reminderObj.setDate(new Date(System.currentTimeMillis()-3600000));
-		reminderSql.insertReminder(reminderObj);
+		reminderSql.insertReminder(reminderObj, context);
 
 		int counter = 0;
-		final SearchIterator it = reminderSql.listModifiedReminder(userId, new Date());
+		final SearchIterator<ReminderObject> it = reminderSql.listModifiedReminder(userId, new Date(), context);
 		while (it.hasNext()) {
-			final ReminderObject r = (ReminderObject)it.next();
+			final ReminderObject r = it.next();
 			assertNotNull("check reminder objects in iterator", r);
 			counter++;
 		}
@@ -148,12 +145,12 @@ public class ReminderTest extends TestCase {
 		final int targetId = IDGenerator.getId(context, Types.REMINDER);
 		final ReminderObject reminderObj = createReminderObject(targetId, Types.APPOINTMENT);
 		reminderObj.setDate(new Date(System.currentTimeMillis()-3600000));
-		reminderSql.insertReminder(reminderObj);
+		reminderSql.insertReminder(reminderObj, context);
 
 		int counter = 0;
-		final SearchIterator it = reminderSql.listModifiedReminder(userId, new Date(0));
+		final SearchIterator<ReminderObject> it = reminderSql.listModifiedReminder(userId, new Date(0), context);
 		while (it.hasNext()) {
-			final ReminderObject r = (ReminderObject)it.next();
+			final ReminderObject r = it.next();
 			assertNotNull("check reminder objects in iterator", r);
 			counter++;
 		}
@@ -165,9 +162,9 @@ public class ReminderTest extends TestCase {
 		final int targetId = IDGenerator.getId(context, Types.REMINDER);
 		final ReminderObject reminderObj = createReminderObject(targetId, Types.APPOINTMENT);
 		reminderObj.setDate(new Date());
-		reminderSql.insertReminder(reminderObj);
-		assertTrue("reminder does not exists!", reminderSql.existsReminder(targetId, userId, Types.APPOINTMENT));
-		assertFalse("find invalid reminder!", reminderSql.existsReminder(targetId+1, userId, Types.APPOINTMENT));
+		reminderSql.insertReminder(reminderObj, context);
+		assertTrue("reminder does not exists!", reminderSql.existsReminder(targetId, userId, Types.APPOINTMENT, context));
+		assertFalse("find invalid reminder!", reminderSql.existsReminder(targetId+1, userId, Types.APPOINTMENT, context));
 	}
 
 	protected ReminderObject createReminderObject(final int targetId, final int module) {
