@@ -51,9 +51,10 @@ package com.openexchange.ajax;
 
 import java.io.File;
 import org.junit.Before;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.test.TestInit;
 
-public class AttachmentTest extends AbstractAJAXTest {
+public class AttachmentTest extends AbstractAJAXSession {
 
     protected File testFile = null;
     protected File testFile2 = null;

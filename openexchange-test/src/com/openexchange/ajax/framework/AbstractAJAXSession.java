@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.framework;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -57,10 +59,15 @@ import org.slf4j.LoggerFactory;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.google.code.tempusfugit.concurrency.annotations.Concurrent;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
+import com.openexchange.ajax.mail.MailTestManager;
+import com.openexchange.test.AttachmentTestManager;
 import com.openexchange.test.CalendarTestManager;
 import com.openexchange.test.ContactTestManager;
 import com.openexchange.test.FolderTestManager;
+import com.openexchange.test.ReminderTestManager;
+import com.openexchange.test.ResourceTestManager;
 import com.openexchange.test.TaskTestManager;
+import com.openexchange.test.TestManager;
 import com.openexchange.test.pool.TestContext;
 import com.openexchange.test.pool.TestContextPool;
 import com.openexchange.test.pool.TestUser;
@@ -81,6 +88,12 @@ public abstract class AbstractAJAXSession {
     protected FolderTestManager ftm;
     protected InfostoreTestManager itm;
     protected TaskTestManager ttm;
+    protected ReminderTestManager remTm;
+    protected ResourceTestManager resTm;
+    protected AttachmentTestManager atm;
+    protected MailTestManager mtm;
+
+    private List<TestManager> testManager = new ArrayList<>();
 
     /**
      * Default constructor.
@@ -122,30 +135,38 @@ public abstract class AbstractAJAXSession {
         admin = testContext.getAdmin();
 
         catm = new CalendarTestManager(client);
+        testManager.add(catm);
         cotm = new ContactTestManager(client);
+        testManager.add(cotm);
         ftm = new FolderTestManager(client);
+        testManager.add(ftm);
         itm = new InfostoreTestManager(client);
+        testManager.add(itm);
         ttm = new TaskTestManager(client);
+        testManager.add(ttm);
+        atm = new AttachmentTestManager(client);
+        testManager.add(atm);
+        mtm = new MailTestManager(client);
+        testManager.add(mtm);
+        resTm = new ResourceTestManager(client);
+        testManager.add(resTm);
+        remTm = new ReminderTestManager(client);
+        testManager.add(remTm);
     }
 
     @After
     public void tearDown() throws Exception {
+        for (TestManager manager : testManager) {
+            if (manager != null) {
+                try {
+                    manager.cleanUp();
+                } catch (Exception e) {
+                    LoggerFactory.getLogger(AbstractAJAXSession.class).error("", e);
+                }
+            }
+        }
+
         try {
-            if (catm != null) {
-                catm.cleanUp();
-            }
-            if (cotm != null) {
-                cotm.cleanUp();
-            }
-            if (ftm != null) {
-                ftm.cleanUp();
-            }
-            if (itm != null) {
-                itm.cleanUp();
-            }
-            if (ttm != null) {
-                ttm.cleanUp();
-            }
             if (client != null) {
                 // Client can be null if setUp() fails
                 client.logout();

@@ -185,7 +185,6 @@ public class UpdateTest extends InfostoreAJAXTest {
         assertEquals(orig.getFileName(), reloaded.getFileName());
     }
 
-    //FIXME has to be reviewed 
     @Test
     public void testSwitchVersion() throws Exception {
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
@@ -203,8 +202,8 @@ public class UpdateTest extends InfostoreAJAXTest {
         assertFalse(itm.getLastResponse().hasError());
 
         com.openexchange.file.storage.File org2 = itm.getAction(id);
+        org2.setVersion("2");
 
-        org.setVersion("2");
         itm.updateAction(org2, upload, new com.openexchange.file.storage.File.Field[] { com.openexchange.file.storage.File.Field.VERSION }, org2.getLastModified());
         assertFalse(itm.getLastResponse().hasError());
 

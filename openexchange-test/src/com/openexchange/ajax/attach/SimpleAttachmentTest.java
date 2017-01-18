@@ -53,10 +53,6 @@ import org.junit.Test;
 
 public class SimpleAttachmentTest extends AbstractAttachmentTest {
 
-    public SimpleAttachmentTest() {
-        super();
-    }
-
     @Override
     public int createExclusiveWritableAttachable(final int folderId) throws Exception {
         return 22;

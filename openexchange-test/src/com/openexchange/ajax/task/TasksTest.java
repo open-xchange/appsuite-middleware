@@ -61,8 +61,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import org.junit.Test;
-import com.openexchange.ajax.AbstractAJAXTest;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.participant.ParticipantTools;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.Participant;
@@ -75,7 +75,7 @@ import com.openexchange.test.TaskTestManager;
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class TasksTest extends AbstractAJAXTest {
+public class TasksTest extends AbstractAJAXSession {
 
     /**
      * Logger.

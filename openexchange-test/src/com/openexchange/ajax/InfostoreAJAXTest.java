@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.util.UUID;
 import org.json.JSONException;
 import org.junit.Before;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
@@ -62,7 +63,7 @@ import com.openexchange.groupware.modules.Module;
 import com.openexchange.test.FolderTestManager;
 import com.openexchange.test.TestInit;
 
-public class InfostoreAJAXTest extends AbstractAJAXTest {
+public class InfostoreAJAXTest extends AbstractAJAXSession {
 
     protected static final int[] virtualFolders = { FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID, FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID };
 

@@ -51,10 +51,10 @@ package com.openexchange.ajax.config;
 
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
-import com.openexchange.ajax.AbstractAJAXTest;
 import com.openexchange.ajax.config.actions.GetRequest;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
 
-public class SpamButtonTest extends AbstractAJAXTest {
+public class SpamButtonTest extends AbstractAJAXSession {
 
     /**
      * Path to the configuration parameter.

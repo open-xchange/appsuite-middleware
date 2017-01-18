@@ -89,7 +89,7 @@ public class AdminListTest extends AbstractMailFilterTest {
     public void setUp() throws Exception {
         super.setUp();
         adminClient = new AJAXClient(admin);
-        Context ctx = new Context(testContext.getId());
+        Context ctx = new Context(testContext.getId(), admin.getContext());
         ctx.setUserAttribute("config", "com.openexchange.mail.adminMailLoginEnabled", "true");
 
         Credentials credentials = new Credentials(admin.getUser(), admin.getPassword());

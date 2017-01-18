@@ -131,7 +131,7 @@ public class FreeBusyTest extends ManagedAppointmentTest {
         String[] address = values.getDefaultAddress().split("@");
         assertEquals("Default address (" + values.getDefaultAddress() + ") should contain one @", 2, address.length);
 
-        List<FreeBusyInformation> freeBusyStates = getFreeBusyState(getSecondWebConversation(), address[0], address[1], app.getStartDate());
+        List<FreeBusyInformation> freeBusyStates = getFreeBusyState(getClient2().getSession().getConversation(), address[0], address[1], app.getStartDate());
         for (FreeBusyInformation info : freeBusyStates) {
             if (Math.abs(info.start.getTime() - now.getTime()) < 2000 && Math.abs(info.end.getTime() - inAnHour.getTime()) < 2000) {
                 return info.type;
@@ -143,7 +143,7 @@ public class FreeBusyTest extends ManagedAppointmentTest {
     protected List<FreeBusyInformation> getFreeBusyState(final WebConversation webCon, String username, String mailserver, Date start) throws IOException, SAXException, ParseException {
         String startFreebusy = formatter.format(start);
         String endFreebusy = formatter.format(new Date(start.getTime() + 24 * 60 * 60 * 1000)); //todo: May fail if appointment is > 1day
-        String url = "http://" + getHostName() + "/servlet/webdav.freebusy?contextid=" + contextId + "&username=" + username + "&server=" + mailserver + "&start=" + startFreebusy + "&end=" + endFreebusy;
+        String url = "http://" + getClient().getHostname() + "/servlet/webdav.freebusy?contextid=" + contextId + "&username=" + username + "&server=" + mailserver + "&start=" + startFreebusy + "&end=" + endFreebusy;
         WebRequest request = new GetMethodWebRequest(url);
         WebResponse response = webCon.getResponse(request);
         List<FreeBusyInformation> states = parseFreeBusyResponse(response);
@@ -173,7 +173,7 @@ public class FreeBusyTest extends ManagedAppointmentTest {
     }
 
     protected int getContextID(AJAXClient client) throws IOException, SAXException {
-        String url = "http://" + getHostName() + "/ajax/config/context_id?session=" + client.getSession().getId();
+        String url = "http://" + getClient().getHostname() + "/ajax/config/context_id?session=" + client.getSession().getId();
         WebRequest request = new GetMethodWebRequest(url);
         WebResponse response = client.getSession().getConversation().getResponse(request);
         String text = response.getText();

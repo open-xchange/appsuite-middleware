@@ -53,7 +53,6 @@ import static org.junit.Assert.assertTrue;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.user.actions.GetRequest;
@@ -63,17 +62,11 @@ public class GetTest extends AbstractAJAXSession {
 
     private int userId;
 
-    public GetTest() {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();
         // TODO check context admin, too. Currently this user does not have aliases until bug 14646 is fixed.
-        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
-        userId = client2.getValues().getUserId();
-        client2.logout();
+        userId = getClient2().getValues().getUserId();
     }
 
     @Test

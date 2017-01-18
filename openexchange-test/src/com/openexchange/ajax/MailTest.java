@@ -25,12 +25,13 @@ import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXRequest.Parameter;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.mail.TestMail;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.dataobjects.MailMessage;
 
-public class MailTest extends AbstractAJAXTest {
+public class MailTest extends AbstractAJAXSession {
 
     private static final StringBuilder FILE_CONTENT_BUILDER;
 
@@ -101,8 +102,8 @@ public class MailTest extends AbstractAJAXTest {
     @Test
     public void testSendSimpleMail() throws IOException, SAXException, Exception {
         final JSONObject mailObj = new JSONObject();
-        mailObj.put("from", getSeconduser());
-        mailObj.put("to", getLogin());
+        mailObj.put("from", testUser2.getLogin());
+        mailObj.put("to", testUser.getLogin());
         mailObj.put("subject", "JUnit Test Mail: " + SDF.format(new Date()));
         final JSONArray attachments = new JSONArray();
         /*
@@ -123,8 +124,8 @@ public class MailTest extends AbstractAJAXTest {
     @Test
     public void testSendMailWithMultipleAttachment() throws IOException, SAXException, JSONException, Exception {
         final JSONObject mailObj = new JSONObject();
-        mailObj.put("from", getSeconduser());
-        mailObj.put("to", getLogin());
+        mailObj.put("from", testUser2.getLogin());
+        mailObj.put("to", testUser.getLogin());
         mailObj.put("subject", "JUnit Test Mail with an attachment: " + SDF.format(new Date()));
         final JSONArray attachments = new JSONArray();
         /*
@@ -145,8 +146,8 @@ public class MailTest extends AbstractAJAXTest {
     @Test
     public void testForwardMail() throws IOException, SAXException, JSONException, Exception {
         final JSONObject mailObj = new JSONObject();
-        mailObj.put("from", getSeconduser());
-        mailObj.put("to", getLogin());
+        mailObj.put("from", testUser2.getLogin());
+        mailObj.put("to", testUser.getLogin());
         mailObj.put("subject", "JUnit Test Mail with an attachment: " + SDF.format(new Date()));
         final JSONArray attachments = new JSONArray();
         /*
@@ -173,8 +174,8 @@ public class MailTest extends AbstractAJAXTest {
     @Test
     public void testSendForwardMailWithAttachments() throws IOException, SAXException, JSONException, Exception {
         final JSONObject mailObj = new JSONObject();
-        mailObj.put("from", getSeconduser());
-        mailObj.put("to", getLogin());
+        mailObj.put("from", testUser2.getLogin());
+        mailObj.put("to", testUser.getLogin());
         mailObj.put("subject", "JUnit ForwardMe Mail with an attachment: " + SDF.format(new Date()));
         final JSONArray attachments = new JSONArray();
         /*
@@ -208,8 +209,8 @@ public class MailTest extends AbstractAJAXTest {
     public void testGetMails() throws IOException, SAXException, JSONException, Exception {
         AbstractAJAXResponse jResp = null;
         final JSONObject mailObj = new JSONObject();
-        mailObj.put("from", getSeconduser());
-        mailObj.put("to", getLogin());
+        mailObj.put("from", testUser2.getLogin());
+        mailObj.put("to", testUser.getLogin());
         mailObj.put("subject", "JUnit testGetMails Test Mail: " + SDF.format(new Date()));
         final JSONArray attachments = new JSONArray();
         /*
@@ -251,8 +252,8 @@ public class MailTest extends AbstractAJAXTest {
     public void testGetMsgSrc() throws IOException, SAXException, JSONException, Exception {
         AbstractAJAXResponse jResp = null;
         final JSONObject mailObj = new JSONObject();
-        mailObj.put("from", getSeconduser());
-        mailObj.put("to", getLogin());
+        mailObj.put("from", testUser2.getLogin());
+        mailObj.put("to", testUser.getLogin());
         mailObj.put("subject", "JUnit Source Test Mail: " + SDF.format(new Date()));
         final JSONArray attachments = new JSONArray();
         /*

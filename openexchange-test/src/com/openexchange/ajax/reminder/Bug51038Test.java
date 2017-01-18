@@ -53,6 +53,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.ajax.reminder.actions.RangeRequest;
@@ -60,23 +61,20 @@ import com.openexchange.ajax.reminder.actions.RangeResponse;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.reminder.ReminderObject;
-import com.openexchange.test.CalendarTestManager;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class Bug51038Test extends AbstractAJAXSession {
 
-    private CalendarTestManager ctm2;
     private int nextYear;
     private ReminderObject reminder;
     private Appointment appointment;
 
     @Override
     public void setUp() throws Exception {
-        nextYear = Calendar.getInstance().get(Calendar.YEAR) + 1;
         super.setUp();
-        ctm2 = new CalendarTestManager(getClient2());
+        nextYear = Calendar.getInstance().get(Calendar.YEAR) + 1;
 
         appointment = new Appointment();
         appointment.setTitle(this.getClass().getSimpleName());
@@ -89,15 +87,14 @@ public class Bug51038Test extends AbstractAJAXSession {
         catm.insert(appointment);
     }
 
+    @Test
     public void testBug51038() throws Exception {
-
         Calendar cal = Calendar.getInstance(getClient().getValues().getTimeZone());
         cal.setTime(appointment.getEndDate());
         RangeRequest rangeReq = new RangeRequest(cal.getTime());
         RangeResponse rangeResp = getClient().execute(rangeReq);
         reminder = ReminderTools.searchByTarget(rangeResp.getReminder(getClient().getValues().getTimeZone()), appointment.getObjectID());
         int reminderId = reminder.getObjectId();
-        
         com.openexchange.ajax.reminder.actions.DeleteRequest delReminderReq = new com.openexchange.ajax.reminder.actions.DeleteRequest(reminder, false);
         CommonDeleteResponse response = getClient2().execute(delReminderReq);
         assertTrue("Expected error.", response.hasError());
@@ -108,11 +105,4 @@ public class Bug51038Test extends AbstractAJAXSession {
         assertNotNull("Missing reminder.", reminder);
         assertEquals("Wrong reminder.", reminderId, reminder.getObjectId());
     }
-
-    @Override
-    public void tearDown() throws Exception {
-        ctm2.cleanUp();
-        super.tearDown();
-    }
-
 }

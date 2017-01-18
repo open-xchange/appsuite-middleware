@@ -54,11 +54,11 @@ import java.io.IOException;
 import org.json.JSONException;
 import org.junit.Test;
 import org.xml.sax.SAXException;
-import com.openexchange.ajax.AbstractAJAXTest;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.GetResponse;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.exception.OXException;
 
 /**
@@ -67,7 +67,7 @@ import com.openexchange.exception.OXException;
  * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class ForwardInlineOrAttachmentTest extends AbstractAJAXTest {
+public class ForwardInlineOrAttachmentTest extends AbstractAJAXSession {
 
     /**
      * Path to the configuration parameter.

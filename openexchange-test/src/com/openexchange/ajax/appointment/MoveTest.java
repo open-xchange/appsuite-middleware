@@ -6,7 +6,6 @@ import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
-import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.test.FolderTestManager;
@@ -26,9 +25,9 @@ public class MoveTest extends AppointmentTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        login = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "login", "");
-        context = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "contextName", "defaultcontext");
-        password = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "password", "");
+        login = testUser.getLogin();
+        context = testUser.getContext();
+        password = testUser.getPassword();
     }
 
     @Test

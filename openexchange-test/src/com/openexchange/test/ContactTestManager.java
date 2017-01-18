@@ -597,7 +597,7 @@ public class ContactTestManager implements TestManager {
         return transform(data, Contact.ALL_COLUMNS);
     }
 
-    public List<Contact> transform(final JSONArray data, final int[] columns) throws JSONException, OXException, IOException {
+    public List<Contact> transform(final JSONArray data, final int[] columns) throws JSONException, OXException {
         final List<Contact> contacts = new LinkedList<Contact>();
         for (int i = 0; i < data.length(); i++) {
             final JSONArray jsonArray = data.getJSONArray(i);

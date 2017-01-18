@@ -58,8 +58,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.AbstractAJAXTest;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.AbstractUploadParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.FolderObject;
@@ -76,7 +78,7 @@ import com.openexchange.webdav.xml.FolderTest;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  *
  */
-public abstract class AbstractImportExportServletTest extends AbstractAJAXTest {
+public abstract class AbstractImportExportServletTest extends AbstractAJAXSession {
 
     //private SessionObject sessObj;
     public String FOLDER_NAME = "csv-contact-roundtrip-ajax-test";
@@ -143,11 +145,11 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXTest {
 
     public String getUrl(final String servlet, final int folderId, final Format format) throws IOException, JSONException, OXException {
         final StringBuilder bob = new StringBuilder("http://");
-        bob.append(getHostName());
+        bob.append(getClient().getHostname());
         bob.append("/ajax/");
         bob.append(servlet);
         bob.append("?session=");
-        bob.append(getSessionId());
+        bob.append(getSession().getId());
         addParam(bob, AJAXServlet.PARAMETER_FOLDERID, folderId);
         addParam(bob, AJAXServlet.PARAMETER_ACTION, format.getConstantName());
         return bob.toString();
@@ -188,7 +190,7 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXTest {
         if (folderId == -1) {
             return;
         }
-        FolderTest.deleteFolder(getWebConversation(), new int[] { folderId }, getHostName(), getLogin(), getPassword(), "");
+        FolderTest.deleteFolder(getClient().getSession().getConversation(), new int[] { folderId }, getClient().getHostname(), testUser.getLogin(), testUser.getPassword(), "");
     }
 
     public static void assertEquals(final String message, final List l1, final List l2) {
@@ -199,6 +201,10 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXTest {
         for (final Object o : l2) {
             assertTrue(message, s.remove(o));
         }
+    }
+    
+    public static JSONObject extractFromCallback(final String html) throws JSONException {
+        return new JSONObject(AbstractUploadParser.extractFromCallback(html));
     }
 
 }

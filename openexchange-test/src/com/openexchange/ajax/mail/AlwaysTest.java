@@ -62,11 +62,11 @@ import java.util.Random;
 import org.json.JSONException;
 import org.junit.Test;
 import org.xml.sax.SAXException;
-import com.openexchange.ajax.AbstractAJAXTest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.ListRequest;
 import com.openexchange.ajax.folder.actions.ListResponse;
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -78,7 +78,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 /**
  * @author marcus
  */
-public class AlwaysTest extends AbstractAJAXTest {
+public class AlwaysTest extends AbstractAJAXSession {
 
     /**
      * Logger.

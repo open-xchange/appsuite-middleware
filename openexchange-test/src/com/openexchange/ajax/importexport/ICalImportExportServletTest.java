@@ -70,14 +70,10 @@ import com.openexchange.importexport.formats.Format;
  */
 public class ICalImportExportServletTest extends AbstractImportExportServletTest {
 
-    public ICalImportExportServletTest() {
-        super();
-    }
-
     @Test
     public void testIcalMessage() throws Exception {
         final InputStream is = new ByteArrayInputStream("BEGIN:VCALENDAR".getBytes());
-        final WebConversation webconv = getWebConversation();
+        final WebConversation webconv = getClient().getSession().getConversation();
         final Format format = Format.ICAL;
         final int folderId = createFolder("ical-empty-file-" + UUID.randomUUID().toString(), FolderObject.CONTACT);
         try {

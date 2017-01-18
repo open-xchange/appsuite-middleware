@@ -91,7 +91,7 @@ public class VCardImportExportServletTest extends AbstractImportExportServletTes
     public void testVCardRoundtrip() throws Exception {
         //test: import
         InputStream is = new ByteArrayInputStream(IMPORT_VCARD.getBytes());
-        WebConversation webconv = getWebConversation();
+        WebConversation webconv = getClient().getSession().getConversation();
         WebRequest req = new PostMethodWebRequest(getUrl(IMPORT_SERVLET, folderId, Format.VCARD), true);
         req.selectFile("file", "contact.vcf", is, Format.VCARD.getMimeType());
         WebResponse webRes = webconv.getResource(req);
@@ -99,7 +99,7 @@ public class VCardImportExportServletTest extends AbstractImportExportServletTes
         extractFromCallback(webRes.getText());
 
         //test: export
-        webconv = getWebConversation();
+        webconv = getClient().getSession().getConversation();
         req = new GetMethodWebRequest(getUrl(EXPORT_SERVLET, folderId, Format.VCARD));
         webRes = webconv.sendRequest(req);
         is = webRes.getInputStream();
@@ -121,7 +121,7 @@ public class VCardImportExportServletTest extends AbstractImportExportServletTes
     public void testMultiVCardRoundtrip() throws Exception {
         //test: import
         InputStream is = new ByteArrayInputStream((IMPORT_VCARD + IMPORT_VCARD_2).getBytes());
-        WebConversation webconv = getWebConversation();
+        WebConversation webconv = getClient().getSession().getConversation();
         WebRequest req = new PostMethodWebRequest(getUrl(IMPORT_SERVLET, folderId, Format.VCARD), true);
         req.selectFile("file", "contact.vcf", is, Format.VCARD.getMimeType());
         WebResponse webRes = webconv.getResource(req);
@@ -129,7 +129,7 @@ public class VCardImportExportServletTest extends AbstractImportExportServletTes
         extractFromCallback(webRes.getText());
 
         //test: export
-        webconv = getWebConversation();
+        webconv = getClient().getSession().getConversation();
         req = new GetMethodWebRequest(getUrl(EXPORT_SERVLET, folderId, Format.VCARD));
         webRes = webconv.sendRequest(req);
         is = webRes.getInputStream();

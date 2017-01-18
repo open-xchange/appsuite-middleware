@@ -51,11 +51,12 @@ package com.openexchange.ajax;
 
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.user.UserTools;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DataObject;
 
-public class UserTest extends AbstractAJAXTest {
+public class UserTest extends AbstractAJAXSession {
 
     public final static int[] CONTACT_FIELDS = { DataObject.OBJECT_ID, Contact.INTERNAL_USERID, Contact.EMAIL1, Contact.GIVEN_NAME, Contact.SUR_NAME, Contact.DISPLAY_NAME
     };

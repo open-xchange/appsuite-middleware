@@ -6,6 +6,8 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import com.openexchange.ajax.InfostoreAJAXTest;
@@ -75,4 +77,20 @@ public class SaveAsTest extends InfostoreAJAXTest {
         final String id = itm.saveAs(attachment.getFolderId(), attachment.getAttachedId(), attachment.getModuleId(), attachment.getId(), m("folder_id", "" + folderId, "title", "My Attachment", "description", "An attachment cum InfoItem"));
         assertTrue(itm.getLastResponse().hasError());
     }
+
+    private Map<String, String> m(final String... pairs) {
+        if (pairs.length % 2 != 0) {
+            throw new IllegalArgumentException("Must contain matching pairs");
+        }
+
+        final Map<String, String> m = new HashMap<String, String>();
+
+        for (int i = 0; i < pairs.length; i++) {
+            m.put(pairs[i], pairs[++i]);
+        }
+
+        return m;
+
+    }
+
 }

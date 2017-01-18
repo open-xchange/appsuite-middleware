@@ -58,7 +58,7 @@ import java.util.List;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.junit.Before;
-import com.openexchange.ajax.AbstractAJAXTest;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.importexport.actions.ICalExportRequest;
 import com.openexchange.ajax.importexport.actions.ICalExportResponse;
@@ -80,11 +80,11 @@ import com.openexchange.groupware.tasks.Task;
 
 /**
  * @deprecated Use IcalImportRequest/Response or IcalExportRequest/Response
- *             and a normal AbstractAjaxTest or a managed one.
+ *             and a normal AbstractAJAXSession or a managed one.
  *
  */
 @Deprecated
-public class AbstractICalTest extends AbstractAJAXTest {
+public class AbstractICalTest extends AbstractAJAXSession {
 
     protected static final String IMPORT_URL = "/ajax/import";
 

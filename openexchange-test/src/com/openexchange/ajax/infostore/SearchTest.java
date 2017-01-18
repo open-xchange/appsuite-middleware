@@ -18,7 +18,7 @@ import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
 import com.google.common.collect.Iterables;
-import com.openexchange.ajax.AbstractAJAXTest;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -28,7 +28,7 @@ import com.openexchange.groupware.search.Order;
 import com.openexchange.test.FolderTestManager;
 import com.openexchange.test.TestInit;
 
-public class SearchTest extends AbstractAJAXTest {
+public class SearchTest extends AbstractAJAXSession {
 
     protected String[] all = null;
 
