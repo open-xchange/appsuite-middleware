@@ -84,7 +84,7 @@ public class DocumentDeltaAction extends AbstractFileAction {
         try {
             final RdiffService rdiff = Services.getRdiffService();
             if (null == rdiff) {
-                ServiceExceptionCode.absentService(RdiffService.class);
+                throw ServiceExceptionCode.absentService(RdiffService.class);
             }
             documentStream = fileAccess.getDocument(request.getId(), request.getVersion());
             requestStream = request.getUploadStream();
