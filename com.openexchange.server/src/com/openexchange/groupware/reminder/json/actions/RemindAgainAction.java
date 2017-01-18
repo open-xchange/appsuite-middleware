@@ -58,18 +58,18 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.parser.ReminderParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.writer.ReminderWriter;
-import com.openexchange.api2.ReminderService;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.reminder.ReminderExceptionCode;
-import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
+import com.openexchange.groupware.reminder.ReminderService;
 import com.openexchange.groupware.reminder.json.ReminderAJAXRequest;
 import com.openexchange.groupware.reminder.json.ReminderActionFactory;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -121,9 +121,9 @@ public final class RemindAgainAction extends AbstractReminderAction {
          * Load storage version and check permission
          */
         final ServerSession session = req.getSession();
-        final ReminderService reminderSql = new ReminderHandler(session.getContext());
+        final ReminderService reminderService = ServerServiceRegistry.getInstance().getService(ReminderService.class, true);
         {
-            final ReminderObject storageReminder = reminderSql.loadReminder(reminder.getObjectId());
+            final ReminderObject storageReminder = reminderService.loadReminder(session, reminder.getObjectId());
             /*
              * Check module permission
              */
@@ -142,7 +142,7 @@ public final class RemindAgainAction extends AbstractReminderAction {
         /*
          * Trigger action
          */
-        reminderSql.remindAgain(reminder, session, session.getContext());
+        reminderService.remindAgain(reminder, session, session.getContext());
         final Date timestamp = reminder.getLastModified();
         /*
          * Write updated reminder
