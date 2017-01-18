@@ -66,14 +66,14 @@ Specifies the authentication type which should be used for primary account's mai
   - data:
       Key: com.openexchange.mail.maliciousFolders
       Description: >
-Specifies such mail folders that are supposed being considered as malicious and therefore a special treatment happens.
-E.g. Hyper-links that occur in mail content are not displayed and/or are not clickable.
+Specifies the full paths for such mail folders in the primary account's folder tree that are supposed being considered as malicious
+and therefore a special treatment happens; e.g. hyper-links that occur in mail content are not displayed and/or are not clickable.
 
-The value is supposed to be comma-separated list of folder names.
-Such names starting with "$" character refer to standard folder. Currently supported: $Spam, $Drafts, $Inbox, $Sent, $Trash
+The value is supposed to be comma-separated list of folder paths.
+Such tokens starting with the '$' character refer to a standard folder. Currently supported: $Spam, $Drafts, $Inbox, $Sent, $Trash, $Confirmed-Spam, $Confirmed-Ham
 
-Example: $Spam, Malware
-Special treatment happens for standard Spam folder and for every folder named "Malware"
+Example: $Spam, INBOX/Malware
+Special treatment happens for standard Spam folder and for the "INBOX/Malware" folder in primary account's folder tree hierarchy.
       Default: $Spam
       Version: 7.8.4
       Reloadable: true
