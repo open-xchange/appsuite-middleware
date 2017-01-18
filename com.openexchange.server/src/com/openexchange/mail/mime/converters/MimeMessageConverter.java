@@ -409,10 +409,10 @@ public final class MimeMessageConverter {
                     boolean deleteOnError = false;
                     try {
                         if (null == file) {
-                            deleteOnError = true;
                             File newTempFile = fileManagement.newTempFile();
-                            writeToFile(mail, newTempFile);
                             file = newTempFile;
+                            deleteOnError = true;
+                            writeToFile(mail, newTempFile);
                         }
                         mimeMessage = new ManagedMimeMessage(MimeDefaultSession.getDefaultSession(), file, mail.getReceivedDateDirect());
                         mimeMessage.removeHeader(X_ORIGINAL_HEADERS);
