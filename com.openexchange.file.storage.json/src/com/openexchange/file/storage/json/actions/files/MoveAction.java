@@ -207,6 +207,12 @@ public class MoveAction extends AbstractWriteAction {
             if ((warnings != null) && (!warnings.isEmpty()) && (!ignoreWarnings)) {
                 result.setException(FileStorageExceptionCodes.FILE_MOVE_ABORTED.create());
             }
+            
+            if (ignoreWarnings) {
+                for (String fid : oldFiles) {
+                    moveFile(fid, destFolder, fileAccess);
+                }
+            }
 
             return result;
         } finally {
