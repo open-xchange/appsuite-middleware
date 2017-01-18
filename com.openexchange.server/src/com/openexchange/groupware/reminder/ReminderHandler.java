@@ -80,6 +80,7 @@ import com.openexchange.tools.sql.DBUtils;
  * ReminderHandler
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  */
 public class ReminderHandler implements ReminderSQLInterface {
 
@@ -399,7 +400,7 @@ public class ReminderHandler implements ReminderSQLInterface {
 
     @Override
     public boolean existsReminder(final int targetId, final int userId, final int module, Context context) throws OXException {
-        return existsReminder(targetId, userId, module, null, null);
+        return existsReminder(targetId, userId, module, null, context);
     }
 
     @Override
