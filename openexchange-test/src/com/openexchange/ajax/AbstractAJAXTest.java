@@ -75,7 +75,6 @@ import com.openexchange.ajax.framework.AbstractUploadParser;
 import com.openexchange.ajax.framework.ProvisioningSetup;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.ajax.mail.MailTestManager;
-import com.openexchange.ajax.smtptest.actions.ClearMailsRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.test.AjaxInit;
 import com.openexchange.test.AttachmentTestManager;
@@ -160,9 +159,7 @@ public abstract class AbstractAJAXTest {
             testUser = testContext.acquireUser();
             testUser2 = testContext.acquireUser();
             client = new AJAXClient(testUser);
-            client.execute(new ClearMailsRequest());
             client2 = new AJAXClient(testUser2);
-            client2.execute(new ClearMailsRequest());
 
             ftm = new FolderTestManager(client);
             testManager.add(ftm);

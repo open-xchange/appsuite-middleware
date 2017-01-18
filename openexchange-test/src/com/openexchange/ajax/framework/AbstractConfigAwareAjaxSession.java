@@ -65,7 +65,7 @@ import com.openexchange.ajax.writer.ResponseWriter;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.1
  */
-public abstract class AbstractConfigAwareAjaxSession extends AbstractAJAXSession {
+public abstract class AbstractConfigAwareAjaxSession extends AbstractSmtpAJAXSession {
 
     /**
      * Initializes a new {@link AbstractConfigAwareAjaxSession}.

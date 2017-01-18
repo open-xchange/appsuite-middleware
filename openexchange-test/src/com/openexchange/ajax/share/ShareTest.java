@@ -83,7 +83,7 @@ import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.folder.actions.UpdateRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXRequest;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.AbstractSmtpAJAXSession;
 import com.openexchange.ajax.infostore.actions.DeleteInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.GetInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.GetInfostoreResponse;
@@ -128,7 +128,7 @@ import com.openexchange.share.recipient.ShareRecipient;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class ShareTest extends AbstractAJAXSession {
+public abstract class ShareTest extends AbstractSmtpAJAXSession {
 
     protected static final OCLGuestPermission[] TESTED_PERMISSIONS = new OCLGuestPermission[] { createNamedAuthorPermission("otto@example.com", "Otto Example", "secret"), createNamedGuestPermission("horst@example.com", "Horst Example", "secret"), createAnonymousGuestPermission("secret"), createAnonymousGuestPermission()
     };

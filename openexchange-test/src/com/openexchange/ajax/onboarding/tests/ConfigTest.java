@@ -54,7 +54,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.Test;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.AbstractSmtpAJAXSession;
 import com.openexchange.ajax.onboarding.actions.ConfigRequest;
 import com.openexchange.ajax.onboarding.actions.ConfigResponse;
 import com.openexchange.client.onboarding.Device;
@@ -66,7 +66,7 @@ import com.openexchange.client.onboarding.Platform;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.8.1
  */
-public class ConfigTest extends AbstractAJAXSession {
+public class ConfigTest extends AbstractSmtpAJAXSession {
 
     private final List<Device> EXPECTED_DEVICES = Arrays.asList(Device.values());
     private final List<Platform> EXPECTED_PLATFORMS = Arrays.asList(Platform.values());

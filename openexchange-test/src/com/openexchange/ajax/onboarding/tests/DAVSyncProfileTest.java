@@ -56,7 +56,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.List;
 import org.json.JSONObject;
 import org.junit.Test;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.AbstractSmtpAJAXSession;
 import com.openexchange.ajax.onboarding.actions.ExecuteRequest;
 import com.openexchange.ajax.onboarding.actions.OnboardingTestResponse;
 import com.openexchange.ajax.smtptest.actions.GetMailsRequest;
@@ -69,8 +69,8 @@ import com.openexchange.ajax.smtptest.actions.GetMailsResponse.Message;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.8.1
  */
-public class DAVSyncProfileTest extends AbstractAJAXSession {
-
+public class DAVSyncProfileTest extends AbstractSmtpAJAXSession {
+    
     @Test
     public void testDAVsyncProfileViaEmail() throws Exception {
         JSONObject body = new JSONObject();
@@ -93,12 +93,5 @@ public class DAVSyncProfileTest extends AbstractAJAXSession {
         assertTrue(json.hasAndNotNull("carddav_url"));
         assertTrue(json.hasAndNotNull("carddav_login"));
     }
-
-    //         @Test
-    //     public void testDAVSyncProfileViaDownload() throws Exception {
-    //        ExecuteRequest req = new ExecuteRequest("apple.mac/davsync", "download", null, false);
-    //        OnboardingTestResponse resp = getClient().execute(req);
-    //        assertFalse(resp.hasError());
-    //    }
 
 }

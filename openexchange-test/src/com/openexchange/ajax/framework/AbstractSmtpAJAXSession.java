@@ -47,57 +47,17 @@
  *
  */
 
-package com.openexchange.ajax.onboarding.tests;
+package com.openexchange.ajax.framework;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import java.util.List;
-import org.json.JSONObject;
-import org.junit.Test;
-import com.openexchange.ajax.framework.AbstractSmtpAJAXSession;
-import com.openexchange.ajax.onboarding.actions.ExecuteRequest;
-import com.openexchange.ajax.onboarding.actions.OnboardingTestResponse;
-import com.openexchange.ajax.smtptest.actions.GetMailsRequest;
-import com.openexchange.ajax.smtptest.actions.GetMailsResponse;
-import com.openexchange.ajax.smtptest.actions.GetMailsResponse.Message;
+import org.junit.Before;
+import com.openexchange.ajax.smtptest.actions.ClearMailsRequest;
 
-/**
- * {@link MailSyncProfileTest}
- *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since v7.8.1
- */
-public class MailSyncProfileTest extends AbstractSmtpAJAXSession {
+public abstract class AbstractSmtpAJAXSession extends AbstractAJAXSession {
 
-    @Test
-    public void testIMAPSyncProfileViaEmail() throws Exception {
-        JSONObject body = new JSONObject();
-        body.put("email", getClient().getValues().getDefaultAddress());
-        ExecuteRequest req = new ExecuteRequest("apple.mac/mailsync", "email", body, false);
-        getClient().execute(req);
-        GetMailsRequest mailReq = new GetMailsRequest();
-        GetMailsResponse mailResp = getClient().execute(mailReq);
-        List<Message> messages = mailResp.getMessages();
-        assertNotNull(messages);
-        assertEquals(1, messages.size());
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+        getClient().execute(new ClearMailsRequest());
+        getClient2().execute(new ClearMailsRequest());
     }
-
-    @Test
-    public void testIMAPSyncProfileViaDisplay() throws Exception {
-        ExecuteRequest req = new ExecuteRequest("apple.mac/mailmanual", "display", null, false);
-        OnboardingTestResponse resp = getClient().execute(req);
-        assertFalse(resp.hasError());
-        JSONObject json = (JSONObject) resp.getData();
-        assertTrue(json.hasAndNotNull("imapLogin"));
-        assertTrue(json.hasAndNotNull("imapServer"));
-        assertTrue(json.hasAndNotNull("imapPort"));
-        assertTrue(json.hasAndNotNull("imapSecure"));
-        assertTrue(json.hasAndNotNull("smtpLogin"));
-        assertTrue(json.hasAndNotNull("smtpServer"));
-        assertTrue(json.hasAndNotNull("smtpPort"));
-        assertTrue(json.hasAndNotNull("smtpSecure"));
-    }
-
 }

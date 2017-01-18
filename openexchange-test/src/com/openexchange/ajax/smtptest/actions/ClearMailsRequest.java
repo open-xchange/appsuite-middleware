@@ -89,7 +89,6 @@ public class ClearMailsRequest implements AJAXRequest<ClearMailsResponse> {
             @Override
             protected ClearMailsResponse createResponse(Response response) throws JSONException {
                 ClearMailsResponse clearMailsResponse = new ClearMailsResponse(response);
-//                assertTrue(clearMailsResponse.ok());
                 return clearMailsResponse;
             }
         };

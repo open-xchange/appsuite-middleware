@@ -56,7 +56,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.List;
 import org.json.JSONObject;
 import org.junit.Test;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.AbstractSmtpAJAXSession;
 import com.openexchange.ajax.onboarding.actions.ExecuteRequest;
 import com.openexchange.ajax.onboarding.actions.OnboardingTestResponse;
 import com.openexchange.ajax.smtptest.actions.GetMailsRequest;
@@ -69,7 +69,7 @@ import com.openexchange.ajax.smtptest.actions.GetMailsResponse.Message;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.8.1
  */
-public class EASSyncProfileTest extends AbstractAJAXSession {
+public class EASSyncProfileTest extends AbstractSmtpAJAXSession {
 
     @Test
     public void testEASSyncProfileViaEmail() throws Exception {
