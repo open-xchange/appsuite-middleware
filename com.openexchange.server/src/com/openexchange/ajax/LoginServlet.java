@@ -59,9 +59,9 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -284,11 +284,11 @@ public class LoginServlet extends AJAXServlet {
 
     // --------------------------------------------------------------------------------------- //
 
-    private final Map<String, LoginRequestHandler> handlerMap;
+    private final ConcurrentMap<String, LoginRequestHandler> handlerMap;
 
     public LoginServlet() {
         super();
-        Map<String, LoginRequestHandler> handlerMap = new ConcurrentHashMap<String, LoginRequestHandler>(16, 0.9f, 1);
+        ConcurrentMap<String, LoginRequestHandler> handlerMap = new ConcurrentHashMap<String, LoginRequestHandler>(16, 0.9f, 1);
         handlerMap.put(ACTION_STORE, new LoginRequestHandler() {
 
             @Override
@@ -689,7 +689,8 @@ public class LoginServlet extends AJAXServlet {
     }
 
     public LoginRequestHandler addRequestHandler(String action, LoginRequestHandler handler) {
-        return handlerMap.put(action, handler);
+        LoginRequestHandler prev = handlerMap.putIfAbsent(action, handler);
+        return null == prev ? handler : prev;
     }
 
     public LoginRequestHandler removeRequestHandler(String action) {
