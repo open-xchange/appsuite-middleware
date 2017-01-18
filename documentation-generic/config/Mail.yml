@@ -64,7 +64,17 @@ Specifies the authentication type which should be used for primary account's mai
       Related: 
       File: mail.properties
   - data:
-      Key: com.openexchange.mail.maliciousFolders
+      Key: com.openexchange.mail.maliciousFolders.enabled
+      Description: >
+Enables/disables support for malicious folders
+      Default: true
+      Version: 7.8.4
+      Reloadable: true
+      Configcascade_Aware: true
+      Related: com.openexchange.mail.maliciousFolders.listing
+      File: mail.properties
+  - data:
+      Key: com.openexchange.mail.maliciousFolders.listing
       Description: >
 Specifies the full paths for such mail folders in the primary account's folder tree that are supposed being considered as malicious
 and therefore a special treatment happens; e.g. hyper-links that occur in mail content are not displayed and/or are not clickable.
@@ -78,5 +88,5 @@ Special treatment happens for standard Spam folder and for the "INBOX/Malware" f
       Version: 7.8.4
       Reloadable: true
       Configcascade_Aware: true
-      Related: 
+      Related: com.openexchange.mail.maliciousFolders.enabled
       File: mail.properties
