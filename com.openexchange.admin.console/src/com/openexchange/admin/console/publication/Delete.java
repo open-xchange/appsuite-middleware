@@ -122,7 +122,11 @@ public final class Delete extends PublicationAbstraction {
                     final String entityId = (String) parser.getOptionValue(options.get(OPT_ENTITY));
                     publications = oxpub.deletePublications(context, auth, entityId);
                 } else if (parser.hasOption(options.get(OPT_PUBLICATION_URL))) {
-                    final String publicationUrl = parseAndSetPublicationUrl(parser);
+                    String publicationUrl = parseAndSetPublicationUrl(parser);
+                    if (null == publicationUrl) {
+                        throw new IllegalArgumentException("Publication URL is invalid");
+                    }
+
                     Publication publication = oxpub.deletePublication(context, auth, publicationUrl);
                     if (publication != null) {
                         System.out.println("Publication with URL \"" + publicationUrl + "\" successfully deleted from context " + context.getId());
