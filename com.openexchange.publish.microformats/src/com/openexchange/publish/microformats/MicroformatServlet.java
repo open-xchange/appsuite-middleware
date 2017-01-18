@@ -62,6 +62,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.AJAXUtility;
@@ -100,7 +101,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MicroformatServlet.class);
 
-    private static final Map<String, OXMFPublicationService> PUBLISHERS = new ConcurrentHashMap<String, OXMFPublicationService>();
+    private static final ConcurrentMap<String, OXMFPublicationService> PUBLISHERS = new ConcurrentHashMap<String, OXMFPublicationService>();
 
     private static final String MODULE = OXMFConstants.MODULE;
 
@@ -148,8 +149,10 @@ public class MicroformatServlet extends OnlinePublicationServlet {
     }
 
     public static void registerType(final String module, final OXMFPublicationService publisher, final Map<String, Object> additionalVars) {
-        PUBLISHERS.put(module, publisher);
-        ADDITONAL_TEMPLATE_VARIABLES.put(module, additionalVars);
+        OXMFPublicationService prev = PUBLISHERS.putIfAbsent(module, publisher);
+        if (null == prev) {
+            ADDITONAL_TEMPLATE_VARIABLES.put(module, additionalVars);
+        }
     }
 
     public static void setContactService(final ContactService service) {
