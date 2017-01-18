@@ -50,7 +50,10 @@
 package com.openexchange.file.storage.boxcom.access;
 
 import java.io.UnsupportedEncodingException;
+import java.util.concurrent.TimeUnit;
 import org.scribe.model.Token;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.box.sdk.BoxAPIConnection;
 import com.box.sdk.BoxAPIException;
 import com.box.sdk.BoxUser;
@@ -65,12 +68,15 @@ import com.openexchange.file.storage.boxcom.BoxConstants;
 import com.openexchange.file.storage.boxcom.Services;
 import com.openexchange.oauth.AbstractReauthorizeClusterTask;
 import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.access.AbstractOAuthAccess;
 import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthClient;
 import com.openexchange.session.Session;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link BoxOAuthAccess}
@@ -78,6 +84,8 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class BoxOAuthAccess extends AbstractOAuthAccess {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(BoxOAuthAccess.class);
 
     private final FileStorageAccount fsAccount;
 
@@ -136,11 +144,13 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
 
     @Override
     public OAuthAccess ensureNotExpired() throws OXException {
-        BoxAPIConnection apiConnection = (BoxAPIConnection) getClient().client;
+        final BoxAPIConnection apiConnection = (BoxAPIConnection) getClient().client;
         OAuthAccount oAuthAccount = getOAuthAccount();
 
+        String accessToken = getAccessToken(apiConnection);
+
         // Box SDK performs an automatic access token refresh, so we need to see if the tokens were renewed
-        if (!oAuthAccount.getToken().equals(apiConnection.getAccessToken()) || !oAuthAccount.getSecret().equals(apiConnection.getRefreshToken())) {
+        if (!oAuthAccount.getToken().equals(accessToken) || !oAuthAccount.getSecret().equals(apiConnection.getRefreshToken())) {
             ClusterLockService clusterLockService = Services.getService(ClusterLockService.class);
             OAuthAccount account = clusterLockService.runClusterTask(new BoxReauthorizeClusterTask(getSession(), oAuthAccount), new ExponentialBackOffRetryPolicy());
             setOAuthAccount(account);
@@ -150,6 +160,39 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
 
     //////////////////////////////////////////// HELPERS ///////////////////////////////////////////////////
 
+    /**
+     * Retrieves the access token from the specified {@link BoxAPIConnection}. This method spawns
+     * two {@link Runnable} tasks with the {@link TimerService}: one to fetch the access token from
+     * box.com and a second to act as a guard for the first one in order to cancel it after a predefined
+     * amount of time (60 seconds) in case it gets stuck due to
+     * <a href="https://bugs.openjdk.java.net/browse/JDK-8075484">JDK-8075484</a> (Bug 51016).
+     * 
+     * @param apiConnection The {@link BoxAPIConnection}
+     * @return The access token
+     * @throws OXException If the access token couldn't not be retrieved due to timeout
+     */
+    private String getAccessToken(final BoxAPIConnection apiConnection) throws OXException {
+        TimerService timerService = Services.getService(TimerService.class);
+
+        GetAccessTokenRunnable task = new GetAccessTokenRunnable(apiConnection);
+        ScheduledTimerTask scheduled = timerService.schedule(task, 0);
+
+        TaskStopper taskStopper = new TaskStopper(scheduled);
+        timerService.schedule(taskStopper, 60, TimeUnit.SECONDS);
+
+        if (taskStopper.isTimedOut()) {
+            LOGGER.debug("Failed to fetch the access token for the box.com file storage account {} for user {} in context {}. box.com is facing some connectivity issues at the moment.", getAccountId(), getSession().getUserId(), getSession().getContextId());
+            throw OAuthExceptionCodes.CONNECT_ERROR.create();
+        }
+        return task.getAccessToken();
+    }
+
+    /**
+     * Creates an OAuth client for the specified {@link OAuthAccount}
+     * 
+     * @param account The {@link OAuthAccount} for which to create an {@link OAuthClient}
+     * @throws OXException If the creation fails
+     */
     private void createOAuthClient(OAuthAccount account) throws OXException {
         OAuthServiceMetaData boxMetaData = account.getMetaData();
         BoxAPIConnection boxAPI = new BoxAPIConnection(boxMetaData.getAPIKey(getSession()), boxMetaData.getAPISecret(getSession()), account.getToken(), account.getSecret());
@@ -176,7 +219,84 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
             // Box SDK performs an automatic access token refresh, therefore the access token and refresh token
             // should already be present in the BoxAPIConnection instance.
             BoxAPIConnection apiConnection = (BoxAPIConnection) getClient().client;
-            return new Token(apiConnection.getAccessToken(), apiConnection.getRefreshToken());
+            String accessToken = getAccessToken(apiConnection);
+            return new Token(accessToken, apiConnection.getRefreshToken());
+        }
+    }
+
+    /**
+     * {@link GetAccessTokenRunnable}
+     */
+    private class GetAccessTokenRunnable implements Runnable {
+
+        String accessToken;
+        private BoxAPIConnection apiConnection;
+
+        /**
+         * Initialises a new {@link BoxOAuthAccess.GetAccessTokenRunnable}.
+         * 
+         * @param apiConnection The {@link BoxAPIConnection}
+         */
+        public GetAccessTokenRunnable(BoxAPIConnection apiConnection) {
+            super();
+            this.apiConnection = apiConnection;
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.lang.Runnable#run()
+         */
+        @Override
+        public void run() {
+            accessToken = apiConnection.getAccessToken();
+        }
+
+        /**
+         * Gets the accessToken
+         *
+         * @return The accessToken
+         */
+        public String getAccessToken() {
+            return accessToken;
+        }
+    }
+
+    /**
+     * {@link TaskStopper} - Stops (cancels) a {@link ScheduledTimerTask}
+     */
+    private class TaskStopper implements Runnable {
+
+        boolean timedOut;
+        private ScheduledTimerTask scheduledTimerTask;
+
+        /**
+         * Initialises a new {@link BoxOAuthAccess.TaskStopper}.
+         * 
+         * @param scheduledTimerTask The {@link ScheduledTimerTask} to cancel
+         */
+        public TaskStopper(ScheduledTimerTask scheduledTimerTask) {
+            super();
+            this.scheduledTimerTask = scheduledTimerTask;
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.lang.Runnable#run()
+         */
+        @Override
+        public void run() {
+            timedOut = scheduledTimerTask.cancel(true);
+        }
+
+        /**
+         * Gets the timedOut
+         *
+         * @return The timedOut
+         */
+        public boolean isTimedOut() {
+            return timedOut;
         }
     }
 }
