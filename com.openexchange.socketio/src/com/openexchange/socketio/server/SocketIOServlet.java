@@ -91,7 +91,6 @@ public abstract class SocketIOServlet extends SessionServlet {
         if (ns == null) {
             ns = socketIOManager.createNamespace(id);
         }
-
         return ns;
     }
 
