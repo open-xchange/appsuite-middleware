@@ -67,6 +67,7 @@ import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUP
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_CLASSIFICATION_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_FOLDER_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_RRULE_MSG;
 import static com.openexchange.exception.OXExceptionStrings.MESSAGE;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
@@ -202,6 +203,11 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * <li>Unsupported classification for occurrence [classification %1$s, series id %2$d, recurrence id %3$s]</li>
      */
     UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE("Unsupported classification for occurrence [classification %1$s, series id %2$d, recurrence id %3$s]", UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE_MSG, Category.CATEGORY_USER_INPUT, 4228),
+    /**
+     * <li>The supplied recurrence rule is not supported. Please use adjust the rule and try again.</li>
+     * <li>Unsupported recurrence rule [rule %1$s, part %2$s, error %3$s]</li>
+     */
+    UNSUPPORTED_RRULE("Unsupported recurrence rule [rule %1$s, part %2$s, error %3$s]", UNSUPPORTED_RRULE_MSG, Category.CATEGORY_USER_INPUT, 4229),
     /**
      * <li>Error while reading/writing data from/to the database.</li>
      * <li>Unexpected database error [%1$s]</li>

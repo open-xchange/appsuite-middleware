@@ -246,7 +246,7 @@ public class Check {
     public static String recurrenceRuleIsValid(Event event) throws OXException {
         String recurrenceRule = event.getRecurrenceRule();
         if (event.containsRecurrenceRule() && null != recurrenceRule) {
-            Recurrence.getRecurrenceIterator(new DefaultRecurrenceData(event));
+            Recurrence.checkIsSupported(new DefaultRecurrenceData(event));
         }
         return recurrenceRule;
     }

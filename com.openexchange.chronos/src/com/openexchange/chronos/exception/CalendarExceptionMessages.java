@@ -83,6 +83,8 @@ public class CalendarExceptionMessages implements LocalizableStrings {
 
     public static final String INVALID_RRULE_MSG = "The supplied recurrence rule is invalid. Please correct the rule and try again.";
 
+    public static final String UNSUPPORTED_RRULE_MSG = "The supplied recurrence rule is not supported. Please use adjust the rule and try again.";
+
     public static final String INVALID_RECURRENCE_ID_MSG = "The targeted occurrence is not part of the event series. Please select a valid recurrence identifier and try again.";
 
     public static final String MOVE_SERIES_NOT_SUPPORTED_MSG = "Moving an event series into another folder is not supported.";

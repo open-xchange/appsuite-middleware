@@ -177,17 +177,22 @@ public class Recurrence {
         /*
          * iterate recurrence and take over start date of first occurrence
          */
+        Date startDate;
         RecurrenceRuleIterator iterator = getRecurrenceIterator(recurrenceData, true);
-        long millis = iterator.nextMillis();
-        calendar.setTimeInMillis(millis);
-        calendar.set(Calendar.HOUR_OF_DAY, startHour);
-        calendar.set(Calendar.MINUTE, startMinute);
-        calendar.set(Calendar.SECOND, startSecond);
-        Date startDate = calendar.getTime();
+        if (iterator.hasNext()) {
+            calendar.setTimeInMillis(iterator.nextMillis());
+            calendar.set(Calendar.HOUR_OF_DAY, startHour);
+            calendar.set(Calendar.MINUTE, startMinute);
+            calendar.set(Calendar.SECOND, startSecond);
+            startDate = calendar.getTime();
+        } else {
+            startDate = masterPeriod.getStartDate();
+        }
         /*
          * iterate recurrence and take over end date of "last" occurrence
          */
         //TODO recurrence service should know "max until"
+        long millis = masterPeriod.getEndDate().getTime();
         for (int i = 1; i < 1000 && iterator.hasNext(); millis = iterator.nextMillis(), i++)
             ;
         calendar.setTimeInMillis(millis);
@@ -257,6 +262,46 @@ public class Recurrence {
     }
 
     /**
+     * Gets a value indicating whether the supplied recurrence data is supported or not, throwing an appropriate exception if not.
+     *
+     * @param recurrenceData The recurrence data
+     * @throws OXException {@link CalendarExceptionCodes#INVALID_RRULE} {@link CalendarExceptionCodes#UNSUPPORTED_RRULE}
+     */
+    public static void checkIsSupported(RecurrenceData recurrenceData) throws OXException {
+        RecurrenceRule rule = null;
+        try {
+            rule = new RecurrenceRule(recurrenceData.getRecurrenceRule());
+        } catch (InvalidRecurrenceRuleException | IllegalArgumentException e) {
+            throw CalendarExceptionCodes.INVALID_RRULE.create(e, recurrenceData.getRecurrenceRule());
+        }
+        //TODO: further checks
+        switch (rule.getFreq()) {
+            case DAILY:
+                List<Integer> byMonthPart = rule.getByPart(Part.BYMONTH);
+                if (null != byMonthPart && 0 < byMonthPart.size()) {
+                    // bug #9840
+                    throw CalendarExceptionCodes.UNSUPPORTED_RRULE.create(
+                        recurrenceData.getRecurrenceRule(), "BYMONTH", "BYMONTH not supported in DAILY");
+                }
+                break;
+            case MONTHLY:
+                break;
+            case WEEKLY:
+                break;
+            case YEARLY:
+                break;
+            default:
+                // no BYSECOND, BYMINUTE, BYHOUR, ...
+                throw CalendarExceptionCodes.UNSUPPORTED_RRULE.create(
+                    recurrenceData.getRecurrenceRule(), "FREQ", rule.getFreq() + " not supported");
+        }
+        /*
+         * initializing the iterator implicitly checks the rule within the constraints of the corresponding event parameters
+         */
+        getRecurrenceIterator(rule, recurrenceData.getSeriesStart(), recurrenceData.getTimeZoneID(), recurrenceData.isAllDay(), false);
+    }
+
+    /**
      * Initializes a new recurrence iterator for a specific recurrence rule.
      *
      * @param recurrenceData The recurrence data
@@ -284,13 +329,30 @@ public class Recurrence {
         } catch (InvalidRecurrenceRuleException | IllegalArgumentException e) {
             throw CalendarExceptionCodes.INVALID_RRULE.create(e, recurrenceData.getRecurrenceRule());
         }
+        return getRecurrenceIterator(rule, recurrenceData.getSeriesStart(), recurrenceData.getTimeZoneID(), recurrenceData.isAllDay(), forwardToOccurrence);
+    }
+
+    /**
+     * Initializes a new recurrence iterator for a specific recurrence rule, optionally advancing to the first occurrence. The latter
+     * option ensures that the first date delivered by the iterator matches the start-date of the first occurrence.
+     *
+     * @param rule The recurrence rule
+     * @param seriesStart The series start date, usually the date of the first occurrence
+     * @param timeZoneID The timezone identifier applicable for the recurrence
+     * @param allDay <code>true</code> if the recurrence is <i>all-day</i>, <code>false</code>, otherwise
+     * @param forwardToOccurrence <code>true</code> to fast-forward the iterator to the first occurrence if the recurrence data's start
+     *            does not fall into the pattern, <code>false</code> otherwise
+     * @return The recurrence rule iterator
+     * @throws OXException {@link CalendarExceptionCodes#INVALID_RRULE}
+     */
+    private static RecurrenceRuleIterator getRecurrenceIterator(RecurrenceRule rule, long seriesStart, String timeZoneID, boolean allDay, boolean forwardToOccurrence) throws OXException {
         DateTime start;
-        if (recurrenceData.isAllDay()) {
-            start = new DateTime(TimeZones.UTC, recurrenceData.getSeriesStart()).toAllDay();
-        } else if (null != recurrenceData.getTimeZoneID()) {
-            start = new DateTime(TimeZone.getTimeZone(recurrenceData.getTimeZoneID()), recurrenceData.getSeriesStart());
+        if (allDay) {
+            start = new DateTime(TimeZones.UTC, seriesStart).toAllDay();
+        } else if (null != timeZoneID) {
+            start = new DateTime(TimeZone.getTimeZone(timeZoneID), seriesStart);
         } else {
-            start = new DateTime(recurrenceData.getSeriesStart());
+            start = new DateTime(seriesStart);
         }
         if (forwardToOccurrence && false == isPotentialOccurrence(start, rule)) {
             /*
@@ -303,11 +365,11 @@ public class Recurrence {
                 }
                 for (RecurrenceRuleIterator iterator = rule.iterator(start); iterator.hasNext(); iterator.nextMillis()) {
                     // TODO: max_recurrences guard?
-                    if (iterator.peekMillis() > recurrenceData.getSeriesStart()) {
+                    if (iterator.peekMillis() > seriesStart) {
                         return iterator;
                     }
                 }
-                throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(new DefaultRecurrenceId(recurrenceData.getSeriesStart()), recurrenceData.getRecurrenceRule());
+                throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(new DefaultRecurrenceId(seriesStart), rule);
             } finally {
                 if (null != originalCount) {
                     rule.setCount(originalCount.intValue());
@@ -317,7 +379,7 @@ public class Recurrence {
         try {
             return rule.iterator(start);
         } catch (IllegalArgumentException e) {
-            throw CalendarExceptionCodes.INVALID_RRULE.create(e, recurrenceData.getRecurrenceRule());
+            throw CalendarExceptionCodes.INVALID_RRULE.create(e, rule);
         }
     }
 
@@ -377,7 +439,7 @@ public class Recurrence {
                      */
                     return matchesMonth(dateTime, byMonthPart) && matchesDayOfWeekInMonth(dateTime, byDayPart, bySetPosPart);
                 }
-                break;
+                return true;
             default:
                 return false;
         }
