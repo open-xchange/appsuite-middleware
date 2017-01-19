@@ -102,6 +102,10 @@ public enum SnippetExceptionCodes implements DisplayableOXExceptionCode {
      * Invalid or harmful image data detected.
      */
     INVALID_IMAGE_DATA("Invalid or harmful image data detected.", SnippetStrings.INVALID_IMAGE_DATA_MSG, CATEGORY_ERROR, 10),
+    /**
+     * Snippet %1$s must not be changed by user %2$s in context %3$s
+     */
+    UPDATE_DENIED("Snippet %1$s must not be changed by user %2$s in context %3$s", SnippetStrings.UPDATE_DENIED_MSG, CATEGORY_ERROR, 11),
 
     ;
 
