@@ -2114,17 +2114,18 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             final int pool_id = db.getId().intValue();
 
             if (this.USE_UNIT == UNIT_CONTEXT) {
-                ps = configdb_con.prepareStatement("SELECT COUNT(server_id) FROM context_server2db_pool WHERE write_db_pool_id=?");
+                ps = configdb_con.prepareStatement("SELECT count FROM contexts_per_dbpool WHERE db_pool_id=?");
                 ps.setInt(1, pool_id);
                 final ResultSet rsi = ps.executeQuery();
 
                 if (!rsi.next()) {
                     throw new OXContextException("Unable to count contextsof db_pool_id=" + pool_id);
                 }
-                count = rsi.getInt("COUNT(server_id)");
+                count = rsi.getInt("count");
                 rsi.close();
                 ps.close();
             } else if (this.USE_UNIT == UNIT_USER) {
+                // FIXME: do not forget this condition!!!
                 ppool = configdb_con.prepareStatement("SELECT db_schema FROM context_server2db_pool WHERE write_db_pool_id=?");
                 ppool.setInt(1, pool_id);
                 final ResultSet rpool = ppool.executeQuery();

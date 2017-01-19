@@ -91,7 +91,7 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
     private static final String DELETE = "DELETE FROM context_server2db_pool WHERE cid=? AND server_id=?";
     private static final String CONTEXTS_IN_SCHEMA = "SELECT cid FROM context_server2db_pool WHERE server_id=? AND write_db_pool_id=? AND db_schema=?";
     private static final String CONTEXTS_IN_DATABASE = "SELECT cid FROM context_server2db_pool WHERE read_db_pool_id=? OR write_db_pool_id=?";
-    private static final String NOTFILLED = "SELECT db_schema,COUNT(db_schema) AS count FROM context_server2db_pool WHERE write_db_pool_id=? GROUP BY db_schema HAVING count<? ORDER BY count ASC";
+    private static final String NOTFILLED = "SELECT db_schema,contexts_per_dbpool.count AS count FROM context_server2db_pool LEFT JOIN contexts_per_dbpool ON contexts_per_dbpool.db_pool_id=context_server2db_pool.write_db_pool_id WHERE write_db_pool_id=? GROUP BY db_schema HAVING count<? ORDER BY count ASC;";
 
     private final ConfigDatabaseService configDatabaseService;
 
@@ -379,7 +379,7 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
     public void lock(Connection con, int writePoolId) throws OXException {
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("SELECT COUNT(*) FROM context_server2db_pool WHERE write_db_pool_id=? FOR UPDATE");
+            stmt = con.prepareStatement("SELECT count FROM contexts_per_dbpool WHERE db_pool_id=? FOR UPDATE");
             stmt.setInt(1, writePoolId);
             stmt.execute();
         } catch (SQLException e) {

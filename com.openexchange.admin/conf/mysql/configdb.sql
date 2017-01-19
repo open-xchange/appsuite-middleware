@@ -105,3 +105,24 @@ CREATE TABLE context_server2db_pool (
     INDEX `poolAndSchema` (write_db_pool_id, db_schema),
     FOREIGN KEY(`cid`) REFERENCES context (`cid`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE contexts_per_dbpool (
+    db_pool_id INT4 UNSIGNED NOT NULL,
+    count INT4 UNSIGNED NOT NULL,
+    PRIMARY KEY (db_pool_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+     
+CREATE TABLE contexts_per_filestore (
+    filestore_id INT4 UNSIGNED NOT NULL,
+    count INT4 UNSIGNED NOT NULL,
+    PRIMARY KEY (filestore_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TRIGGER inc_dbpool_ctx_count AFTER INSERT ON context_server2db_pool
+ FOR EACH ROW UPDATE contexts_per_dbpool SET count=count+1 WHERE db_pool_id=NEW.write_db_pool_id;
+CREATE TRIGGER dec_dbpool_ctx_count AFTER DELETE ON context_server2db_pool
+ FOR EACH ROW UPDATE contexts_per_dbpool SET count=count-1 WHERE db_pool_id=OLD.write_db_pool_id;
+CREATE TRIGGER inc_filestore_ctx_count AFTER INSERT ON context
+ FOR EACH ROW UPDATE contexts_per_filestore SET count=count+1 WHERE filestore_id=NEW.filestore_id;
+CREATE TRIGGER dec_filestore_ctx_count AFTER DELETE ON context
+ FOR EACH ROW UPDATE contexts_per_filestore SET count=count-1 WHERE filestore_id=OLD.filestore_id;
