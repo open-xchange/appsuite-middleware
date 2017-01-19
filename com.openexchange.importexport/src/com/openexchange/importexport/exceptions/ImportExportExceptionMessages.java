@@ -68,7 +68,7 @@ public class ImportExportExceptionMessages implements LocalizableStrings {
 
     public static final String VCARD_CONVERSION_FAILED_MSG = "Conversion to vCard failed.";
 
-    public static final String CANNOT_IMPORT_MSG = "Can not import the format %2$s into folder %1$s.";
+    public static final String CANNOT_IMPORT_MSG = "Cannot import the format %2$s into selected folder.";
 
     public static final String CALENDAR_DISABLED_MSG = "Calendar module is not enabled. Appointments can not be imported.";
 

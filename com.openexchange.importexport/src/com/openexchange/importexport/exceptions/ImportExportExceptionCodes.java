@@ -85,8 +85,8 @@ public enum ImportExportExceptionCodes implements DisplayableOXExceptionCode {
     ICAL_CONVERSION_FAILED("Conversion to iCal failed.", CATEGORY_ERROR, 208, ImportExportExceptionMessages.ICAL_CONVERSION_FAILED_MSG),
     /** Conversion to vCard failed. */
     VCARD_CONVERSION_FAILED("Conversion to vCard failed.", CATEGORY_ERROR, 304, ImportExportExceptionMessages.VCARD_CONVERSION_FAILED_MSG),
-    /** Can not import the format %2$s into folder %1$s. */
-    CANNOT_IMPORT("Can not import the format %2$s into folder %1$s.", CATEGORY_ERROR, 500,
+    /** Cannot import the format %2$s into folder %1$s. */
+    CANNOT_IMPORT("Cannot import the format %2$s into folder %1$s.", CATEGORY_ERROR, 500,
         ImportExportExceptionMessages.CANNOT_IMPORT_MSG),
     /** Module calendar not enabled for user, cannot import appointments. */
     CALENDAR_DISABLED("Calendar module is not enabled for the user. Appointments can not be imported.", CATEGORY_PERMISSION_DENIED, 507,
