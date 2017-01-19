@@ -69,12 +69,14 @@ import com.openexchange.snippet.Attachment;
 import com.openexchange.snippet.DefaultSnippet;
 import com.openexchange.snippet.Property;
 import com.openexchange.snippet.Snippet;
+import com.openexchange.snippet.SnippetExceptionCodes;
 import com.openexchange.snippet.SnippetManagement;
 import com.openexchange.snippet.SnippetProcessor;
 import com.openexchange.snippet.SnippetService;
 import com.openexchange.snippet.json.SnippetJsonParser;
 import com.openexchange.snippet.json.SnippetRequest;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link UpdateAction}
@@ -107,6 +109,17 @@ public final class UpdateAction extends SnippetAction {
     @Override
     protected AJAXRequestResult perform(final SnippetRequest snippetRequest) throws OXException, JSONException {
         String id = snippetRequest.checkParameter("id");
+        ServerSession session = snippetRequest.getSession();
+        SnippetService snippetService = getSnippetService(session);
+        SnippetManagement management = snippetService.getManagement(session);
+
+        {
+            Snippet snippetToChange = management.getSnippet(id);
+            if (!snippetToChange.isShared() && snippetToChange.getCreatedBy() != session.getUserId()) {
+                throw SnippetExceptionCodes.UPDATE_DENIED.create(id, session.getUserId(), session.getContextId());
+            }
+        }
+
         JSONObject jsonSnippet = (JSONObject) snippetRequest.getRequestData().getData();
         if (null == jsonSnippet) {
             throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
@@ -128,7 +141,6 @@ public final class UpdateAction extends SnippetAction {
         }
 
         // Update
-        SnippetManagement management = getSnippetService(snippetRequest.getSession()).getManagement(snippetRequest.getSession());
         String newId = management.updateSnippet(id, snippet, properties, attachments, Collections.<Attachment> emptyList());
         Snippet newSnippet = management.getSnippet(newId);
         return new AJAXRequestResult(newSnippet, "snippet");

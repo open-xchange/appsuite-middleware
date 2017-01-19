@@ -49,6 +49,7 @@
 
 package com.openexchange.snippet.json.action;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -63,10 +64,13 @@ import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.ServiceListing;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.snippet.Snippet;
+import com.openexchange.snippet.SnippetExceptionCodes;
 import com.openexchange.snippet.SnippetManagement;
 import com.openexchange.snippet.SnippetService;
 import com.openexchange.snippet.json.SnippetRequest;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link DeleteAction}
@@ -97,18 +101,46 @@ public final class DeleteAction extends SnippetAction {
 
     @Override
     protected AJAXRequestResult perform(final SnippetRequest snippetRequest) throws OXException, JSONException {
-        final JSONArray ids = (JSONArray) snippetRequest.getRequestData().getData();
-        final SnippetService snippetService = getSnippetService(snippetRequest.getSession());
-        if (null != ids) {
-            final int length = ids.length();
+        ServerSession session = snippetRequest.getSession();
+        SnippetService snippetService = getSnippetService(session);
 
-            SnippetManagement management = snippetService.getManagement(snippetRequest.getSession());
+        JSONArray ids = (JSONArray) snippetRequest.getRequestData().getData();
+        if (null != ids) {
+            int length = ids.length();
+
+            SnippetManagement management = snippetService.getManagement(session);
+            List<String> toDelete = new ArrayList<String>(length);
             for (int i = 0; i < length; i++) {
-                management.deleteSnippet(ids.getString(i));
+                String id = ids.getString(i);
+                try {
+                    Snippet snippetToChange = management.getSnippet(id);
+                    if (!snippetToChange.isShared() && snippetToChange.getCreatedBy() != session.getUserId()) {
+                        throw SnippetExceptionCodes.UPDATE_DENIED.create(id, session.getUserId(), session.getContextId());
+                    }
+
+                    toDelete.add(id);
+                } catch (OXException e) {
+                    if (!SnippetExceptionCodes.SNIPPET_NOT_FOUND.equals(e)) {
+                        throw e;
+                    }
+                }
+            }
+
+            for (String id : toDelete) {
+                management.deleteSnippet(id);
             }
         } else {
-            final String id = snippetRequest.checkParameter("id");
-            snippetService.getManagement(snippetRequest.getSession()).deleteSnippet(id);
+            String id = snippetRequest.checkParameter("id");
+            SnippetManagement management = snippetService.getManagement(session);
+
+            {
+                Snippet snippetToChange = management.getSnippet(id);
+                if (!snippetToChange.isShared() && snippetToChange.getCreatedBy() != session.getUserId()) {
+                    throw SnippetExceptionCodes.UPDATE_DENIED.create(id, session.getUserId(), session.getContextId());
+                }
+            }
+
+            management.deleteSnippet(id);
         }
 
         return new AJAXRequestResult(new JSONObject(0), "json");

@@ -97,7 +97,15 @@ public enum SnippetExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Maximum size of '%1$s' for signature image is reached.
      */
-    MAXIMUM_IMAGE_SIZE("Maximum size of '%1$s' for signature image is reached.", "The maximum allowed size of '%1$s' for an image in the signature is reached.", CATEGORY_ERROR, 9),
+    MAXIMUM_IMAGE_SIZE("The signature image exceeds the maximum allowed size of '%1$s' (%2$s bytes).", SnippetStrings.MAXIMUM_IMAGE_SIZE_MSG, CATEGORY_ERROR, 9),
+    /**
+     * Invalid or harmful image data detected.
+     */
+    INVALID_IMAGE_DATA("Invalid or harmful image data detected.", SnippetStrings.INVALID_IMAGE_DATA_MSG, CATEGORY_ERROR, 10),
+    /**
+     * Snippet %1$s must not be changed by user %2$s in context %3$s
+     */
+    UPDATE_DENIED("Snippet %1$s must not be changed by user %2$s in context %3$s", SnippetStrings.UPDATE_DENIED_MSG, CATEGORY_ERROR, 11),
 
     ;
 
@@ -111,7 +119,7 @@ public enum SnippetExceptionCodes implements DisplayableOXExceptionCode {
     private int detailNumber;
 
     private String message;
-    
+
     private String displayMessage;
 
     private SnippetExceptionCodes(String message, String displayMessage, Category category, int detailNumber) {
@@ -120,7 +128,7 @@ public enum SnippetExceptionCodes implements DisplayableOXExceptionCode {
         this.detailNumber = detailNumber;
         this.category = category;
     }
-    
+
     private SnippetExceptionCodes(String message, Category category, int detailNumber) {
         this(message, null, category, detailNumber);
     }
@@ -134,7 +142,7 @@ public enum SnippetExceptionCodes implements DisplayableOXExceptionCode {
     public String getMessage() {
         return message;
     }
-    
+
     @Override
     public String getDisplayMessage() {
         return displayMessage;
