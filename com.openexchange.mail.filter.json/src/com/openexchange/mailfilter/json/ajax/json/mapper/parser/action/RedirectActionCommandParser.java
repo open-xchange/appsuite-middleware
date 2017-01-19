@@ -67,6 +67,7 @@ import com.openexchange.mailfilter.json.ajax.json.fields.RedirectActionField;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserJSONUtil;
 import com.openexchange.mailfilter.json.osgi.Services;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link RedirectActionCommandParser}
@@ -84,11 +85,11 @@ public class RedirectActionCommandParser implements CommandParser<ActionCommand>
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser#parse(org.json.JSONObject)
      */
     @Override
-    public ActionCommand parse(JSONObject jsonObject) throws JSONException, SieveException, OXException {
+    public ActionCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException {
         String stringParam = CommandParserJSONUtil.getString(jsonObject, RedirectActionField.to.name(), Commands.REDIRECT.getCommandName());
         // Check for valid email address here:
         try {
@@ -102,13 +103,13 @@ public class RedirectActionCommandParser implements CommandParser<ActionCommand>
         if (null != service && (null != (filter = service.getFilterFromProperty("com.openexchange.mail.filter.redirectWhitelist"))) && !filter.accepts(stringParam)) {
             throw MailFilterExceptionCode.REJECTED_REDIRECT_ADDRESS.create(stringParam);
         }
-        
+
         return new ActionCommand(Commands.REDIRECT, CommandParserJSONUtil.createArrayOfArrays(stringParam));
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser#parse(org.json.JSONObject, com.openexchange.jsieve.commands.ActionCommand)
      */
     @SuppressWarnings("unchecked")

@@ -1165,8 +1165,9 @@ public final class MessageUtility {
             }
 
             MailMessage[] ms;
-            if (messageStorage instanceof IMailMessageStorageExt) {
-                ms = ((IMailMessageStorageExt) messageStorage).getMessages(fullName, ids.toArray(new String[ids.size()]), MailFields.toArray(MailField.ID), headerNames);
+            IMailMessageStorageExt ext = messageStorage.supports(IMailMessageStorageExt.class);
+            if (null != ext) {
+                ms = ext.getMessages(fullName, ids.toArray(new String[ids.size()]), MailFields.toArray(MailField.ID), headerNames);
             } else {
                 ms = messageStorage.getMessages(fullName, ids.toArray(new String[ids.size()]), MailFields.toArray(MailField.ID, MailField.HEADERS));
             }

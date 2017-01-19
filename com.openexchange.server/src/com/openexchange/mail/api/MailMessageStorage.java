@@ -85,6 +85,19 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
     private static final SearchTerm<Integer> TERM_FLAG_SEEN = new FlagTerm(MailMessage.FLAG_SEEN, false);
 
     @Override
+    public <T> T supports(Class<T> iface) throws OXException {
+        if (iface.isInstance(this)) {
+            return (T) this;
+        }
+
+        if (IMailMessageStorageDelegator.class.isInstance(this)) {
+            return ((IMailMessageStorageDelegator) this).getDelegateMessageStorage().supports(iface);
+        }
+
+        return null;
+    }
+
+    @Override
     public abstract String[] appendMessages(String destFolder, MailMessage[] msgs) throws OXException;
 
     @Override

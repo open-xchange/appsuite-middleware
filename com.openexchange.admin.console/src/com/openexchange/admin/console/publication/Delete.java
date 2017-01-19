@@ -70,7 +70,7 @@ public final class Delete extends PublicationAbstraction {
 
     /**
      * Entry point
-     * 
+     *
      * @param args Command line arguments
      */
     public static void main(String[] args) {
@@ -90,7 +90,7 @@ public final class Delete extends PublicationAbstraction {
 
     /**
      * Process the command
-     * 
+     *
      * @param parser The admin parser
      * @param args The command line arguments
      */
@@ -122,7 +122,11 @@ public final class Delete extends PublicationAbstraction {
                     final String entityId = (String) parser.getOptionValue(options.get(OPT_ENTITY));
                     publications = oxpub.deletePublications(context, auth, entityId);
                 } else if (parser.hasOption(options.get(OPT_PUBLICATION_URL))) {
-                    final String publicationUrl = parseAndSetPublicationUrl(parser);
+                    String publicationUrl = parseAndSetPublicationUrl(parser);
+                    if (null == publicationUrl) {
+                        throw new IllegalArgumentException("Publication URL is invalid");
+                    }
+
                     Publication publication = oxpub.deletePublication(context, auth, publicationUrl);
                     if (publication != null) {
                         System.out.println("Publication with URL \"" + publicationUrl + "\" successfully deleted from context " + context.getId());
@@ -135,7 +139,7 @@ public final class Delete extends PublicationAbstraction {
                         error = true;
                     }
                     publications = null;
-                    sysexit(0);
+                    sysexit(error ? SYSEXIT_UNKNOWN_OPTION : 0);
                 } else {
                     publications = oxpub.deletePublications(context, auth);
                 }
@@ -157,7 +161,7 @@ public final class Delete extends PublicationAbstraction {
 
     /**
      * Print a list of publications
-     * 
+     *
      * @param publications The list of publications to print
      * @param verbose if true then it prints verbose information for the publication; otherwise it prints just the ids
      */
@@ -174,7 +178,7 @@ public final class Delete extends PublicationAbstraction {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.admin.console.publication.PublicationAbstraction#setFurtherOptions(com.openexchange.admin.console.AdminParser)
      */
     @Override

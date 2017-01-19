@@ -54,9 +54,10 @@ import org.json.JSONException;
 import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.Rule;
 import com.openexchange.mailfilter.json.ajax.json.fields.RuleField;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * 
+ *
  * {@link RuleFieldMapper}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
@@ -65,14 +66,14 @@ public interface RuleFieldMapper {
 
     /**
      * Returns the attribute name
-     * 
+     *
      * @return the attribute name
      */
     RuleField getAttributeName();
 
     /**
      * Verifies whether the specified rule is <code>null</code>
-     * 
+     *
      * @param rule The rule to verify
      * @return true if the object {@link T} is <code>null</code>; false otherwise
      */
@@ -80,7 +81,7 @@ public interface RuleFieldMapper {
 
     /**
      * Gets the attribute of the specified {@link T} object
-     * 
+     *
      * @param rule The rule to get the attribute from
      * @return The attribute
      * @throws JSONException If a JSON error occurs
@@ -90,12 +91,13 @@ public interface RuleFieldMapper {
 
     /**
      * Sets the specified attribute to the specified {@link T} object
-     * 
+     *
      * @param rule The rule to set the attribute to
      * @param attribute The attribute to set to the rule
+     * @param session The session
      * @throws JSONException If a JSON error occurs
      * @throws SieveException If a Sieve parsing error occurs
      * @throws OXException If an error occurs
      */
-    void setAttribute(Rule rule, Object attribute) throws JSONException, SieveException, OXException;
+    void setAttribute(Rule rule, Object attribute, ServerSession session) throws JSONException, SieveException, OXException;
 }

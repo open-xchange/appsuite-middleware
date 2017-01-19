@@ -180,11 +180,11 @@ public class ThreadReferencesAction extends AbstractMailAction {
             }
 
             IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-            if (!IMailMessageStorageThreadReferences.class.isInstance(messageStorage)) {
+            IMailMessageStorageThreadReferences threadReferencesMessageStorage = messageStorage.supports(IMailMessageStorageThreadReferences.class);
+            if (null == threadReferencesMessageStorage) {
                 throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
             }
 
-            IMailMessageStorageThreadReferences threadReferencesMessageStorage = (IMailMessageStorageThreadReferences) messageStorage;
             if (!threadReferencesMessageStorage.isThreadReferencesSupported()) {
                 throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
             }

@@ -65,7 +65,7 @@ public final class Get extends PublicationAbstraction {
 
     /**
      * Entry point
-     * 
+     *
      * @param args Command line arguments
      */
     public static void main(final String[] args) {
@@ -85,7 +85,7 @@ public final class Get extends PublicationAbstraction {
 
     /**
      * Process the command
-     * 
+     *
      * @param parser The admin parser
      * @param args The command line arguments
      */
@@ -114,7 +114,11 @@ public final class Get extends PublicationAbstraction {
                 final String entityId = (String) parser.getOptionValue(options.get(OPT_ENTITY));
                 publications = oxpub.listPublications(context, auth, entityId);
             } else if (parser.hasOption(options.get(OPT_PUBLICATION_URL))) {
-                final String publicationUrl = parseAndSetPublicationUrl(parser);
+                String publicationUrl = parseAndSetPublicationUrl(parser);
+                if (null == publicationUrl) {
+                    throw new IllegalArgumentException("Publication URL is invalid");
+                }
+
                 Publication publication = oxpub.getPublication(context, publicationUrl, auth);
                 createMessageForStdout(publication.toString(), null, null, parser);
                 publications = null;

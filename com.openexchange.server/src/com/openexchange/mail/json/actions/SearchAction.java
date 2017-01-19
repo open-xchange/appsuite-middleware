@@ -246,8 +246,8 @@ public final class SearchAction extends AbstractMailAction {
                         MailMessage[] result;
                         IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
                         if (null != headers && 0 < headers.length) {
-                            if (messageStorage instanceof IMailMessageStorageExt) {
-                                IMailMessageStorageExt ext = (IMailMessageStorageExt) messageStorage;
+                            IMailMessageStorageExt ext = messageStorage.supports(IMailMessageStorageExt.class);
+                            if (null != ext) {
                                 result = ext.searchMessages(fa.getFullname(), indexRange, sortField, orderDirection, searchTerm, MailField.getFields(columns), headers);
                             } else {
                                 result = messageStorage.searchMessages(fa.getFullname(), indexRange, sortField, orderDirection, searchTerm, MailField.getFields(columns));
@@ -324,8 +324,8 @@ public final class SearchAction extends AbstractMailAction {
             MailMessage[] result;
             IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
             if (null != headers && 0 < headers.length) {
-                if (messageStorage instanceof IMailMessageStorageExt) {
-                    IMailMessageStorageExt ext = (IMailMessageStorageExt) messageStorage;
+                IMailMessageStorageExt ext = messageStorage.supports(IMailMessageStorageExt.class);
+                if (null != ext) {
                     result = ext.searchMessages(fa.getFullname(), indexRange, sortField, orderDirection, searchTerm, MailField.getFields(columns), headers);
                 } else {
                     result = messageStorage.searchMessages(fa.getFullname(), indexRange, sortField, orderDirection, searchTerm, MailField.getFields(columns));

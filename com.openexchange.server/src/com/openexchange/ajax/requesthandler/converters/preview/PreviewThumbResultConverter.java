@@ -58,6 +58,7 @@ import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
+import java.util.concurrent.ExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
@@ -114,7 +115,7 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
      * placeholder image to the dom
      */
     private static final long LENIENT_EXPIRY = 3000;
-    
+
     private static final String WIDTH = "width";
 
     private static final int DEFAULT_THUMB_WIDTH = 160;
@@ -200,7 +201,12 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
                          * thumbnail generation as existing instances have to be used to indicate the accepted request.
                          */
                         PreviewAndCacheTask previewAndCache = new PreviewAndCacheTask(new AJAXRequestResult(result), requestData.copyOf(), session, previewService, THRESHOLD, true, cacheKeyGenerator);
-                        ThreadPools.getExecutorService().submit(previewAndCache);
+                        ExecutorService executorService = ThreadPools.getExecutorService();
+                        if(executorService==null){
+                            LOG.info("Unable to retrieve ExecutorService from Threadpools. Server is probably shutting down.");
+                            return;
+                        }
+                        executorService.submit(previewAndCache);
                         indicateRequestAccepted(result, requestData);
                     }
                     return;

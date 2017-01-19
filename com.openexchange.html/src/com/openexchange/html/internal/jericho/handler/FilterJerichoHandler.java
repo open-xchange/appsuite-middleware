@@ -244,9 +244,10 @@ public final class FilterJerichoHandler implements JerichoHandler {
     private boolean imageURLFound;
     private boolean replaceUrls = true;
     private String cssPrefix;
+    private boolean suppressLinks;
     private final LinkedList<CellPadding> tablePaddings;
-
     private final boolean changed = false;
+
 
     /**
      * Initializes a new {@link FilterJerichoHandler}.
@@ -314,6 +315,17 @@ public final class FilterJerichoHandler implements JerichoHandler {
         }
 
         this.maxContentSizeExceeded = false;
+        return this;
+    }
+
+    /**
+     * Sets whether to suppress links
+     *
+     * @param suppressLinks <code>true</code> to suppress links; otherwise <code>false</code>
+     * @return This handler with new behavior applied
+     */
+    public FilterJerichoHandler setSuppressLinks(boolean suppressLinks) {
+        this.suppressLinks = suppressLinks;
         return this;
     }
 
@@ -690,6 +702,12 @@ public final class FilterJerichoHandler implements JerichoHandler {
                     prependToStyle("padding: " + cellPadding.cellPadding + "px;", attrMap);
                 }
             }
+        } else if (suppressLinks) {
+            if (isHrefTag(tagName) && attrMap.containsKey("href")) {
+                attrMap.put("href", "#");
+                attrBuilder.append(' ').append("onclick=\"return false\"");
+                attrBuilder.append(' ').append("data-disabled=\"true\"");
+            }
         }
 
         List<Attribute> uriAttributes = replaceUrls ? startTag.getURIAttributes() : Collections.<Attribute> emptyList();
@@ -791,6 +809,16 @@ public final class FilterJerichoHandler implements JerichoHandler {
             htmlBuilder.append('/');
         }
         htmlBuilder.append('>');
+    }
+
+    /**
+     * Checks if denoted tag may hold a <code>"href"</code> attribute according to <a href="http://www.w3schools.com/tags/att_href.asp">this specification</a>.
+     *
+     * @param tagName The name of the tag to check
+     * @return <code>true</code> if tag possibly holds a <code>"href"</code> attribute; otherwise <code>false</code>
+     */
+    private boolean isHrefTag(String tagName) {
+        return HTMLElementName.A == tagName || HTMLElementName.AREA == tagName || HTMLElementName.BASE == tagName || HTMLElementName.LINK == tagName;
     }
 
     /**

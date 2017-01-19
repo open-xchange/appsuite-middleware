@@ -87,5 +87,30 @@ Specifies the color which should be added to colorless flagged mails in case the
       Configcascade_Aware: true
       Related: com.openexchange.mail.flagging.mode
       File: mail.properties      
-      
- 
+  - data:
+      Key: com.openexchange.mail.maliciousFolders.enabled
+      Description: >
+Enables/disables support for malicious folders
+      Default: true
+      Version: 7.8.4
+      Reloadable: true
+      Configcascade_Aware: true
+      Related: com.openexchange.mail.maliciousFolders.listing
+      File: mail.properties
+  - data:
+      Key: com.openexchange.mail.maliciousFolders.listing
+      Description: >
+Specifies the full paths for such mail folders in the primary account's folder tree that are supposed being considered as malicious
+and therefore a special treatment happens; e.g. hyper-links that occur in mail content are not displayed and/or are not clickable.
+
+The value is supposed to be comma-separated list of folder paths.
+Such tokens starting with the '$' character refer to a standard folder. Currently supported: $Spam, $Drafts, $Inbox, $Sent, $Trash, $Confirmed-Spam, $Confirmed-Ham
+
+Example: $Spam, INBOX/Malware
+Special treatment happens for standard Spam folder and for the "INBOX/Malware" folder in primary account's folder tree hierarchy.
+      Default: $Spam
+      Version: 7.8.4
+      Reloadable: true
+      Configcascade_Aware: true
+      Related: com.openexchange.mail.maliciousFolders.enabled
+      File: mail.properties

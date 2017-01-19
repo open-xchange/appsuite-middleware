@@ -27,7 +27,6 @@
 package com.openexchange.socketio.server;
 
 import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.*;
 import com.openexchange.timer.TimerService;
@@ -51,7 +50,7 @@ public final class SocketIOManager {
         SYMBOLS = sb.toString().toCharArray();
     }
 
-    private final Map<String, Namespace> namespaces = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, Namespace> namespaces = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, Session> sessions = new ConcurrentHashMap<>();
     private final TimerService timerService;
     private volatile TransportProvider transportProvider;
@@ -117,14 +116,14 @@ public final class SocketIOManager {
     }
 
     /**
-     * Creates new session
+     * Creates a new session
      *
-     * @return new session
+     * @return The newly created session
      */
     public Session createSession() {
-        Session session = new Session(this, generateSessionId());
-        sessions.put(session.getSessionId(), session);
-        return session;
+        Session newSession = new Session(this, generateSessionId());
+        Session session = sessions.put(newSession.getSessionId(), newSession);
+        return null == session ? newSession : session;
     }
 
     /**
@@ -147,15 +146,15 @@ public final class SocketIOManager {
     }
 
     /**
-     * Creates new namespace
+     * Creates a new namespace
      *
      * @param id namespace in. Should always start with '/'
-     * @return new namespace
+     * @return The newly created namespace
      */
     public Namespace createNamespace(String id) {
-        Namespace ns = new Namespace(id);
-        namespaces.put(ns.getId(), ns);
-        return ns;
+        Namespace newNs = new Namespace(id);
+        Namespace ns = namespaces.putIfAbsent(newNs.getId(), newNs);
+        return null == ns ? newNs : ns;
     }
 
     public Namespace getNamespace(String id) {

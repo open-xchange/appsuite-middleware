@@ -64,6 +64,7 @@ import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserJSO
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserRegistry;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.TestCommandParserRegistry;
 import com.openexchange.mailfilter.json.osgi.Services;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AbstractAllAnyOfTestCommandParser}
@@ -79,7 +80,7 @@ abstract class AbstractAllAnyOfTestCommandParser implements CommandParser<TestCo
         super();
     }
 
-    TestCommand parse(JSONObject jsonObject, Commands command) throws OXException, JSONException, SieveException {
+    TestCommand parse(JSONObject jsonObject, Commands command, ServerSession session) throws OXException, JSONException, SieveException {
         final JSONArray jarray = CommandParserJSONUtil.getJSONArray(jsonObject, AllOfOrAnyOfTestField.tests.name(), command.getCommandName());
         final ArrayList<TestCommand> commandlist = new ArrayList<TestCommand>(jarray.length());
         CommandParserRegistry<TestCommand> parserRegistry = Services.getService(TestCommandParserRegistry.class);
@@ -88,7 +89,7 @@ abstract class AbstractAllAnyOfTestCommandParser implements CommandParser<TestCo
             final JSONObject object = jarray.getJSONObject(i);
             String commandName = CommandParserJSONUtil.getString(object, GeneralField.id.name(), command.getCommandName());
             CommandParser<TestCommand> parser = parserRegistry.get(commandName);
-            commandlist.add(parser.parse(object));
+            commandlist.add(parser.parse(object, session));
         }
         return new TestCommand(command, new ArrayList<Object>(), commandlist);
     }

@@ -224,8 +224,8 @@ public class FileResponseRenderer extends AbstractListenerCollectingResponseRend
             LOG.error(message, e);
             if (AjaxExceptionCodes.BAD_REQUEST.equals(e)) {
                 Throwable cause = e;
-                while (cause.getCause() != null) {
-                    cause = cause.getCause();
+                for (Throwable xc; (xc = cause.getCause()) != null;) {
+                    cause = xc;
                 }
                 final String causeMsg = cause.getMessage();
                 sendErrorSafe(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, null == causeMsg ? message : causeMsg, resp);

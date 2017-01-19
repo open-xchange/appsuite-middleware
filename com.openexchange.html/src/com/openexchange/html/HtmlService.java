@@ -138,9 +138,18 @@ public interface HtmlService {
      * @param modified A <code>boolean</code> array with length <code>1</code> to store modified status
      * @param cssPrefix The optional CSS prefix
      * @param maxContentSize maximum number of bytes that is will be returned for content. '<=0' means unlimited. Below 10000 will be ignor
-     * @return {@link HtmlSanitizeResult} with the content and additional information, e. g. if the content was truncated
+     * @return {@link HtmlSanitizeResult} with the content and additional information, e.g. if the content was truncated
      */
     HtmlSanitizeResult sanitize(String htmlContent, String optConfigName, boolean dropExternalImages, boolean[] modified, String cssPrefix, int maxContentSize);
+
+    /**
+     * Sanitizes specified HTML content by limiting the content size to the character count provided with maxContentSize.
+     *
+     * @param htmlContent The HTML content to sanitize
+     * @param options The options for performing the sanitizing
+     * @return {@link HtmlSanitizeResult} with the content and additional information, e.g. if the content was truncated
+     */
+    HtmlSanitizeResult sanitize(String htmlContent, HtmlSanitizeOptions options);
 
     /**
      * Sanitizes specified HTML content.

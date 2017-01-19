@@ -49,22 +49,31 @@
 
 package com.openexchange.login;
 
+import static com.openexchange.ajax.AJAXServlet.localeFrom;
 import static com.openexchange.ajax.requesthandler.AJAXRequestDataBuilder.request;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Future;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
+import com.google.common.collect.ImmutableList;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.ajax.requesthandler.Dispatchers;
 import com.openexchange.ajax.tools.JSONCoercion;
+import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptions;
+import com.openexchange.json.OXJSONWriter;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.threadpool.AbstractTask;
@@ -99,6 +108,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
         FOLDER_LIST("folderlist"),
         USER("user"),
         ACCOUNTS("accounts"),
+        ERRORS("errors"),
 
         ;
 
@@ -123,11 +133,16 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
         this.services = services;
     }
 
-    static void handleException(OXException e, String key) {
+    static void handleException(OXException e, String key, ConcurrentMap<String, OXException> errors) {
         if (OXExceptions.isCategory(Category.CATEGORY_PERMISSION_DENIED, e)) {
             LOG.debug("Permission error during {} ramp-up", key, e);
         } else {
             LOG.error("Error during {} ramp-up", key, e);
+        }
+
+        // Check for special mail error that standard folders cannot be created due to an "over quota" error
+        if (MailExceptionCode.DEFAULT_FOLDER_CHECK_FAILED_OVER_QUOTA.equals(e)) {
+            errors.putIfAbsent(e.getErrorCode(), e);
         }
     }
 
@@ -136,13 +151,25 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
     }
 
     /** The ramp-up keys. Keep order! */
-    private static final RampUpKey[] KEYS = RampUpKey.values();
+    private static final List<RampUpKey> KEYS;
+    static {
+        RampUpKey[] values = RampUpKey.values();
+        int len = values.length;
+        List<RampUpKey> keys = new ArrayList<>(len);
+        for (RampUpKey rampUpKey : values) {
+            if (RampUpKey.ERRORS != rampUpKey) {
+                keys.add(rampUpKey);
+            }
+        }
+        KEYS = ImmutableList.copyOf(keys);
+    }
 
     @Override
     public JSONObject getContribution(final ServerSession session, final AJAXRequestData loginRequest) throws OXException {
-        int numberOfKeys = KEYS.length;
+        int numberOfKeys = KEYS.size();
 
         ConcurrentMap<String, Future<Object>> rampUps = new ConcurrentHashMap<String, Future<Object>>(numberOfKeys);
+        final ConcurrentMap<String, OXException> errors = new ConcurrentHashMap<String, OXException>(numberOfKeys);
         ThreadPoolService threads = services.getService(ThreadPoolService.class);
 
         final Dispatcher ox = services.getService(Dispatcher.class);
@@ -162,7 +189,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
                 } catch (OXException x) {
                     // Omit result on error. Let the UI deal with this
                     exc = x;
-                    handleException(x, RampUpKey.FOLDER_LIST.key);
+                    handleException(x, RampUpKey.FOLDER_LIST.key, errors);
                 } catch (RuntimeException x) {
                     // Omit result on error. Let the UI deal with this
                     exc = x;
@@ -192,7 +219,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
                     } catch (OXException x) {
                         // Omit result on error. Let the UI deal with this
                         exc = x;
-                        handleException(x, RampUpKey.FOLDER.key);
+                        handleException(x, RampUpKey.FOLDER.key, errors);
                     } catch (RuntimeException x) {
                         // Omit result on error. Let the UI deal with this
                         exc = x;
@@ -211,7 +238,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
                     } catch (OXException x) {
                         // Omit result on error. Let the UI deal with this
                         exc = x;
-                        handleException(x, RampUpKey.FOLDER.key);
+                        handleException(x, RampUpKey.FOLDER.key, errors);
                     } catch (RuntimeException x) {
                         // Omit result on error. Let the UI deal with this
                         exc = x;
@@ -243,7 +270,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
                 } catch (OXException x) {
                     // Omit result on error. Let the UI deal with this
                     exc = x;
-                    handleException(x, RampUpKey.JSLOBS.key);
+                    handleException(x, RampUpKey.JSLOBS.key, errors);
                 } catch (RuntimeException x) {
                     // Omit result on error. Let the UI deal with this
                     exc = x;
@@ -268,7 +295,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
                 } catch (OXException x) {
                     // Omit result on error. Let the UI deal with this
                     exc = x;
-                    handleException(x, RampUpKey.SERVER_CONFIG.key);
+                    handleException(x, RampUpKey.SERVER_CONFIG.key, errors);
                 } catch (RuntimeException x) {
                     // Omit result on error. Let the UI deal with this
                     exc = x;
@@ -298,7 +325,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
                 } catch (OXException x) {
                     // Omit result on error. Let the UI deal with this
                     exc = x;
-                    handleException(x, RampUpKey.OAUTH.key);
+                    handleException(x, RampUpKey.OAUTH.key, errors);
                 } catch (RuntimeException x) {
                     // Omit result on error. Let the UI deal with this
                     exc = x;
@@ -316,7 +343,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
                 } catch (OXException x) {
                     // Omit result on error. Let the UI deal with this
                     exc = x;
-                    handleException(x, RampUpKey.OAUTH.key);
+                    handleException(x, RampUpKey.OAUTH.key, errors);
                 } catch (RuntimeException x) {
                     // Omit result on error. Let the UI deal with this
                     exc = x;
@@ -334,7 +361,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
                 } catch (OXException x) {
                     // Omit result on error. Let the UI deal with this
                     exc = x;
-                    handleException(x, RampUpKey.OAUTH.key);
+                    handleException(x, RampUpKey.OAUTH.key, errors);
                 } catch (RuntimeException x) {
                     // Omit result on error. Let the UI deal with this
                     exc = x;
@@ -360,7 +387,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
                 } catch (OXException x) {
                     // Omit result on error. Let the UI deal with this
                     exc = x;
-                    handleException(x, RampUpKey.USER.key);
+                    handleException(x, RampUpKey.USER.key, errors);
                 } catch (RuntimeException x) {
                     // Omit result on error. Let the UI deal with this
                     exc = x;
@@ -385,7 +412,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
                 } catch (OXException x) {
                     // Omit result on error. Let the UI deal with this
                     exc = x;
-                    handleException(x, RampUpKey.ACCOUNTS.key);
+                    handleException(x, RampUpKey.ACCOUNTS.key, errors);
                 } catch (RuntimeException x) {
                     // Omit result on error. Let the UI deal with this
                     exc = x;
@@ -403,6 +430,18 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
             for (RampUpKey rampUpKey : KEYS) {
                 Object value = rampUps.get(rampUpKey.key).get();
                 jo.put(rampUpKey.key, JSONCoercion.coerceToJSON(value));
+            }
+
+            int numErrors = errors.size();
+            if (numErrors > 0) {
+                Locale locale = localeFrom(session);
+                JSONObject jErrors = new JSONObject(numErrors);
+                for (Map.Entry<String, OXException> errorEntry : errors.entrySet()) {
+                    JSONObject jError = new JSONObject(8);
+                    ResponseWriter.writeException(errorEntry.getValue(), new OXJSONWriter(jError), locale);
+                    jErrors.put(errorEntry.getKey(), jError);
+                }
+                jo.put(RampUpKey.ERRORS.key, jErrors);
             }
             return jo;
         } catch (Throwable t) {

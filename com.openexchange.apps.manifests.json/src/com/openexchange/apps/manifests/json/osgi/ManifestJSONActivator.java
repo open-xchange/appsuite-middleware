@@ -163,7 +163,7 @@ public class ManifestJSONActivator extends AJAXModuleActivator implements Forced
         JSONArray manifests = new JSONArray(paths.length << 1);
         for (String path : paths) {
             File file = new File(path);
-            if (file.exists()) {
+            if (file.exists() && file.isDirectory()) {
                 for (File f : file.listFiles()) {
                     read(f, manifests);
                 }

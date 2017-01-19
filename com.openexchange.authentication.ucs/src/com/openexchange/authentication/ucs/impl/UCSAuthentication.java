@@ -51,9 +51,7 @@
 
 package com.openexchange.authentication.ucs.impl;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -75,6 +73,7 @@ import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.LoginInfo;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 
 /**
@@ -95,7 +94,7 @@ public class UCSAuthentication implements AuthenticationService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UCSAuthentication.class);
 
-    private static final String LDAP_PROPERTY_FILE = "/opt/open-xchange/etc/authplugin.properties";
+    private static final String LDAP_PROPERTY_FILE = "authplugin.properties";
     private static final String PASSWORD_CHANGE_URL_OPTION = "com.openexchange.authentication.ucs.passwordChangeURL";
 
     private final Hashtable<String, String> ldapConfig;
@@ -105,45 +104,39 @@ public class UCSAuthentication implements AuthenticationService {
     /**
      * Default constructor.
      *
+     * @param configService The service to use
      * @throws OXException If initialization fails
      */
-    public UCSAuthentication() throws OXException {
+    public UCSAuthentication(ConfigurationService configService) throws OXException {
         super();
+        Properties props = configService.getFile(LDAP_PROPERTY_FILE);
+        this.props = props;
 
-        File file = new File(LDAP_PROPERTY_FILE);
-        if (!file.exists()) {
-            throw LoginExceptionCodes.MISSING_PROPERTY.create(file.getAbsolutePath());
+        if (!props.containsKey(PASSWORD_CHANGE_URL_OPTION) || ((String) props.get(PASSWORD_CHANGE_URL_OPTION)).length() <= 0) {
+            OXException e = LoginExceptionCodes.UNKNOWN.create("Missing option " + PASSWORD_CHANGE_URL_OPTION);
+            LOG.error("", e);
+            throw e;
         }
 
-        try (FileInputStream fis = new FileInputStream(file)) {
-            Properties props = new Properties();
-            props.load(fis);
-            this.props = props;
-
-            if (!props.containsKey(PASSWORD_CHANGE_URL_OPTION) || ((String) props.get(PASSWORD_CHANGE_URL_OPTION)).length() <= 0) {
-                OXException e = LoginExceptionCodes.UNKNOWN.create("Missing option " + PASSWORD_CHANGE_URL_OPTION);
-                LOG.error("", e);
-                throw e;
-            }
-
-            passwordChangeURL = new URL((String) props.get(PASSWORD_CHANGE_URL_OPTION));
-
-            Hashtable<String, String> ldapConfig = new Hashtable<String, String>();
-
-            String usepool = (String) props.get("USE_POOL");
-            if (usepool.trim().equalsIgnoreCase("true")) {
-                ldapConfig.put("com.sun.jndi.ldap.connect.pool", "true");
-            }
-
-            ldapConfig.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
-
-            // Plain LDAP without secure socket,
-            ldapConfig.put(Context.PROVIDER_URL, "ldap://"+ (String) props.get("LDAP_HOST") + ":"+ (String) props.get("LDAP_PORT") + "/"+ (String) props.get("LDAP_BASE"));
-            this.ldapConfig = ldapConfig;
-        } catch (final IOException e) {
-            LOG.error("",e);
-            throw LoginExceptionCodes.UNKNOWN.create(file.getAbsolutePath());
+        String sURL = (String) props.get(PASSWORD_CHANGE_URL_OPTION);
+        try {
+            passwordChangeURL = new URL(sURL);
+        } catch (MalformedURLException e) {
+            throw LoginExceptionCodes.UNKNOWN.create("Invalid option " + PASSWORD_CHANGE_URL_OPTION + ": " + sURL);
         }
+
+        Hashtable<String, String> ldapConfig = new Hashtable<String, String>();
+
+        String usepool = (String) props.get("USE_POOL");
+        if (usepool.trim().equalsIgnoreCase("true")) {
+            ldapConfig.put("com.sun.jndi.ldap.connect.pool", "true");
+        }
+
+        ldapConfig.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+
+        // Plain LDAP without secure socket,
+        ldapConfig.put(Context.PROVIDER_URL, "ldap://"+ (String) props.get("LDAP_HOST") + ":"+ (String) props.get("LDAP_PORT") + "/"+ (String) props.get("LDAP_BASE"));
+        this.ldapConfig = ldapConfig;
     }
 
     /**
