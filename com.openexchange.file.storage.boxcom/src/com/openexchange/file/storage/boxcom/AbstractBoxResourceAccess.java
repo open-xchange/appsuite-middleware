@@ -188,8 +188,8 @@ public abstract class AbstractBoxResourceAccess {
             return FileStorageExceptionCodes.NOT_FOUND.create(e, "Box", identifier);
         }
         if (null != accountId && SC_UNAUTHORIZED == e.getResponseCode()) {
-            String response = e.getResponse();
-            return FileStorageExceptionCodes.AUTHENTICATION_FAILED.create(e, accountId, BoxConstants.ID, null == response ? "Authentication failed" : response);
+            String resp = e.getResponse();
+            return FileStorageExceptionCodes.AUTHENTICATION_FAILED.create(e, accountId, BoxConstants.ID, null == resp ? "Authentication failed" : resp);
         }
         if (accountId != null && e.getResponseCode() == SC_BAD_REQUEST) {
             try {
