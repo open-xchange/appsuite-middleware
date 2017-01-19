@@ -49,9 +49,13 @@
 
 package com.openexchange.mail;
 
+import java.util.HashMap;
+import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
@@ -100,6 +104,17 @@ public enum FlaggingMode {
 
     // ------------------------------------------------- Helpers ------------------------------------------------
 
+    private static final Map<String, FlaggingMode> MODES;
+    static {
+        FlaggingMode[] modes = FlaggingMode.values();
+        Map<String, FlaggingMode> m = new HashMap<>(modes.length);
+        for (FlaggingMode mode : modes) {
+            m.put(mode.name, mode);
+            m.put(Strings.asciiLowerCase(mode.name), mode);
+        }
+        MODES = ImmutableMap.copyOf(m);
+    }
+
     /**
      * Resolves the specified name to a flagging mode.
      *
@@ -107,12 +122,19 @@ public enum FlaggingMode {
      * @return The resolved flagging mode or {@link #COLOR_ONLY} in case name does not match any
      */
     public static FlaggingMode getModeByName(String name) {
-        for (FlaggingMode mode : FlaggingMode.values()) {
-            if (mode.name.equals(name)) {
-                return mode;
-            }
-        }
-        return FlaggingMode.COLOR_ONLY;
+        return getModeByName(name, FlaggingMode.COLOR_ONLY);
+    }
+
+    /**
+     * Resolves the specified name to a flagging mode.
+     *
+     * @param name The name to resolve
+     * @param def The default mode to return if name cannot be mapped
+     * @return The resolved flagging mode or <code>def</code> in case name does not match any
+     */
+    public static FlaggingMode getModeByName(String name, FlaggingMode def) {
+        FlaggingMode mode = null == name ? null : MODES.get(name);
+        return null == mode ? def : mode;
     }
 
     private final static String FLAGGING_COLOR_PROPERTY = "com.openexchange.mail.flagging.color";
@@ -121,20 +143,21 @@ public enum FlaggingMode {
      * Retrieves the configured color for colorless flagged mails.
      *
      * @param session The session
-     * @return The color
+     * @return The numeric identifier for configured color
      */
     public static final int getFlaggingColor(Session session) {
+        int def = 1;
         try {
             ConfigViewFactory factory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
             if (factory != null) {
                 ConfigView view = factory.getView(session.getUserId(), session.getContextId());
-                int color = view.opt(FLAGGING_COLOR_PROPERTY, Integer.class, 1);
-                return color;
+                Integer color = view.opt(FLAGGING_COLOR_PROPERTY, Integer.class, Integer.valueOf(def));
+                return null == color ? def : color.intValue();
             }
         } catch (OXException e) {
             // Fallback to default
         }
-        return 1;
+        return def;
     }
 
     private final static String FLAGGING_MODE_PROPERTY = "com.openexchange.mail.flagging.mode";
@@ -143,15 +166,15 @@ public enum FlaggingMode {
      * Retrieves the configured flagging mode for the user. Falls back to {@link #COLOR_ONLY} in case an error occurs.
      *
      * @param session The session
-     * @return the {@link FlaggingMode}
+     * @return The configured flagging mode for the user
      */
     public static FlaggingMode getFlaggingMode(Session session) {
         try {
             ConfigViewFactory factory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
             if (factory != null) {
                 ConfigView view = factory.getView(session.getUserId(), session.getContextId());
-                String modeName = view.opt(FLAGGING_MODE_PROPERTY, String.class, FlaggingMode.COLOR_ONLY.getName());
-                return FlaggingMode.getModeByName(modeName);
+                String modeName = view.opt(FLAGGING_MODE_PROPERTY, String.class, null);
+                return null == modeName ? FlaggingMode.COLOR_ONLY : FlaggingMode.getModeByName(modeName);
             }
         } catch (OXException e) {
             // fall back to default
