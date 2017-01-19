@@ -80,7 +80,9 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
+import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.ProvisioningSetup;
+import com.openexchange.ajax.smtptest.actions.ClearMailsRequest;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.exception.OXException;
@@ -122,6 +124,10 @@ public abstract class EndpointTest {
 
     protected TestContext testContext;
 
+    protected AJAXClient noReplyClient;
+
+    protected TestUser noReplyUser;
+
     @BeforeClass
     public static void beforeClass() throws OXException {
         ProvisioningSetup.init();
@@ -132,6 +138,9 @@ public abstract class EndpointTest {
     public void before() throws Exception {
         testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
         testUser = testContext.acquireUser();
+        noReplyUser = testContext.getNoReplyUser();
+        noReplyClient = new AJAXClient(noReplyUser);
+        noReplyClient.execute(new ClearMailsRequest());
         // prepare http client
         client = new DefaultHttpClient(new BasicClientConnectionManager());
         HttpParams params = client.getParams();

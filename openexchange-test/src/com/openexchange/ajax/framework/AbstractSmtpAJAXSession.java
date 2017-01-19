@@ -49,15 +49,37 @@
 
 package com.openexchange.ajax.framework;
 
+import org.junit.After;
 import org.junit.Before;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.smtptest.actions.ClearMailsRequest;
+import com.openexchange.test.pool.TestUser;
 
 public abstract class AbstractSmtpAJAXSession extends AbstractAJAXSession {
+
+    protected TestUser noReplyUser;
+    private AJAXClient noReplyClient;
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        getClient().execute(new ClearMailsRequest());
-        getClient2().execute(new ClearMailsRequest());
+        noReplyUser = testContext.getNoReplyUser();
+        noReplyClient = new AJAXClient(noReplyUser);
+        noReplyClient.execute(new ClearMailsRequest());
     }
+
+    @After
+    public void tearDown() throws Exception {
+        try {
+            if (noReplyClient != null) {
+                noReplyClient.logout();
+                noReplyClient = null;
+            }
+        } catch (Exception e) {
+            LoggerFactory.getLogger(AbstractSmtpAJAXSession.class).error("Unable to correctly tear down test setup.", e);
+        } finally {
+            super.tearDown();
+        }
+    }
+
 }

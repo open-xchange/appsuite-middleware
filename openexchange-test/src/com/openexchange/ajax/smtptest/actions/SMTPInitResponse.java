@@ -63,9 +63,9 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
  */
 public class SMTPInitResponse extends AbstractAJAXResponse {
 
-    private final boolean ok;
-    private final String hostname;
-    private final int port;
+    private boolean ok = false;
+    private String hostname = "localhost";
+    private int port = -1;
 
     /**
      * Initializes a new {@link SMTPInitResponse}.
@@ -75,17 +75,16 @@ public class SMTPInitResponse extends AbstractAJAXResponse {
      */
     protected SMTPInitResponse(Response response) throws JSONException {
         super(response);
-        JSONObject jsonObject = new JSONObject(response.getData().toString());
-        this.ok = jsonObject.getBoolean("ok");
-        if (jsonObject.has("hostname")) {
-            this.hostname = jsonObject.getString("hostname");
-        } else {
-            this.hostname = null;
-        }
-        if (jsonObject.has("port")) {
-            this.port = jsonObject.getInt("port");
-        } else {
-            this.port = -1;
+        
+        if (!response.hasError()) {
+            JSONObject jsonObject = new JSONObject(response.getData().toString());
+            this.ok = jsonObject.getBoolean("ok");
+            if (jsonObject.has("hostname")) {
+                this.hostname = jsonObject.getString("hostname");
+            }
+            if (jsonObject.has("port")) {
+                this.port = jsonObject.getInt("port");
+            }
         }
     }
 

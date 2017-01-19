@@ -87,7 +87,7 @@ public class UpdateMailAccountRequest implements AJAXRequest<SMTPInitResponse> {
 
     @Override
     public Parameter[] getParameters() throws IOException, JSONException {
-        return new Params(AJAXServlet.PARAMETER_ACTION, "updateMailAccount", "hostname", this.hostName, "port", Integer.toString(this.port)).toArray();
+        return new Params(AJAXServlet.PARAMETER_ACTION, "updateMailAccount", "hostAddress", this.hostName, "port", Integer.toString(this.port)).toArray();
     }
 
     @Override
