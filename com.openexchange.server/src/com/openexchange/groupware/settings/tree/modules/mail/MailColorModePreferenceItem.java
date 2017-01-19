@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.settings.tree.modules.mail;
 
-import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -93,10 +92,8 @@ public class MailColorModePreferenceItem implements PreferencesItemService, Conf
                     setting.setSingleValue(false);
                     return;
                 }
-                ConfigView view = factory.getView(user.getId(), ctx.getContextId());
-                String modeStr = view.opt("com.openexchange.mail.flagging.mode", String.class, FlaggingMode.COLOR_ONLY.getName());
-                FlaggingMode mode = FlaggingMode.getModeByName(modeStr);
 
+                FlaggingMode mode = FlaggingMode.getFlaggingMode(session, factory);
                 switch (mode) {
                     case COLOR_ONLY:
                         setting.setSingleValue(true);

@@ -146,16 +146,27 @@ public enum FlaggingMode {
      * @return The numeric identifier for configured color
      */
     public static final int getFlaggingColor(Session session) {
+        ConfigViewFactory factory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+        return getFlaggingColor(session, factory);
+    }
+
+    /**
+     * Retrieves the configured color for colorless flagged mails.
+     *
+     * @param session The session
+     * @param factory The factory to use
+     * @return The numeric identifier for configured color
+     */
+    public static final int getFlaggingColor(Session session, ConfigViewFactory factory) {
         int def = 1;
-        try {
-            ConfigViewFactory factory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
-            if (factory != null) {
+        if (factory != null) {
+            try {
                 ConfigView view = factory.getView(session.getUserId(), session.getContextId());
                 Integer color = view.opt(FLAGGING_COLOR_PROPERTY, Integer.class, Integer.valueOf(def));
                 return null == color ? def : color.intValue();
+            } catch (OXException e) {
+                // Fallback to default
             }
-        } catch (OXException e) {
-            // Fallback to default
         }
         return def;
     }
@@ -169,15 +180,26 @@ public enum FlaggingMode {
      * @return The configured flagging mode for the user
      */
     public static FlaggingMode getFlaggingMode(Session session) {
-        try {
-            ConfigViewFactory factory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
-            if (factory != null) {
+        ConfigViewFactory factory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+        return getFlaggingMode(session, factory);
+    }
+
+    /**
+     * Retrieves the configured flagging mode for the user. Falls back to {@link #COLOR_ONLY} in case an error occurs.
+     *
+     * @param session The session
+     * @param factory The factory to use
+     * @return The configured flagging mode for the user
+     */
+    public static FlaggingMode getFlaggingMode(Session session, ConfigViewFactory factory) {
+        if (factory != null) {
+            try {
                 ConfigView view = factory.getView(session.getUserId(), session.getContextId());
                 String modeName = view.opt(FLAGGING_MODE_PROPERTY, String.class, null);
                 return null == modeName ? FlaggingMode.COLOR_ONLY : FlaggingMode.getModeByName(modeName);
+            } catch (OXException e) {
+                // fall back to default
             }
-        } catch (OXException e) {
-            // fall back to default
         }
         return FlaggingMode.COLOR_ONLY;
     }
