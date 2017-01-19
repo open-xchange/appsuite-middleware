@@ -461,14 +461,15 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
      */
 
-    private byte[] getSubscriptionId(int userId, int contextId, String token, Connection con) throws OXException {
+    private byte[] getSubscriptionId(int userId, int contextId, String token, String client, Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT id FROM pns_subscription WHERE cid=? AND user=? AND token=?");
+            stmt = con.prepareStatement("SELECT id FROM pns_subscription WHERE cid=? AND user=? AND token=? AND client=?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             stmt.setString(3, token);
+            stmt.setString(4, client);
             rs = stmt.executeQuery();
             return false == rs.next() ? null : rs.getBytes(1);
         } catch (SQLException e) {
@@ -490,14 +491,6 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
         boolean rollback = false;
         boolean modified = false;
         try {
-            byte[] id = getSubscriptionId(subscription.getUserId(), contextId, subscription.getToken(), con);
-            if (null != id) {
-                // Already exists...
-                updateLastModified(subscription, con);
-                modified = true;
-                return;
-            }
-
             Databases.startTransaction(con);
             autocommit = true;
             rollback = true;
@@ -525,11 +518,10 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
     }
 
     /**
-     * Registers specified subscription.
+     * Registers or updates specified subscription.
      *
      * @param subscription The subscription to register
      * @param con The connection to use
-     * @return <code>true</code> if subscription was inserted; otherwise <code>false</code>
      * @throws OXException If registration fails
      */
     public void registerSubscription(PushSubscription subscription, Connection con) throws OXException {
@@ -570,11 +562,14 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
                 }
             }
 
-            // Generate random UUID
+            // Insert new or update existing subscription
+            long lastModified = System.currentTimeMillis();
             byte[] id = UUIDs.toByteArray(UUID.randomUUID());
-
-            // Insert into pns_subscription
-            stmt = con.prepareStatement("INSERT INTO pns_subscription (id, cid, user, token, client, transport, all_flag, last_modified) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+            stmt = con.prepareStatement(
+                "INSERT INTO pns_subscription (id,cid,user,token,client,transport,all_flag,last_modified) " +
+                "VALUES (?,?,?,?,?,?,?,?) " +
+                "ON DUPLICATE KEY UPDATE transport=?, all_flag=?, last_modified=?;"
+            );
             stmt.setBytes(1, id);
             stmt.setInt(2, subscription.getContextId());
             stmt.setInt(3, subscription.getUserId());
@@ -582,15 +577,23 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
             stmt.setString(5, subscription.getClient());
             stmt.setString(6, subscription.getTransportId());
             stmt.setInt(7, isAll ? 1 : 0);
-            stmt.setLong(8, System.currentTimeMillis());
-            stmt.executeUpdate();
+            stmt.setLong(8, lastModified);
+            stmt.setString(9, subscription.getTransportId());
+            stmt.setInt(10, isAll ? 1 : 0);
+            stmt.setLong(11, lastModified);
+            int updated = stmt.executeUpdate();
             Databases.closeSQLStuff(stmt);
             stmt = null;
+
+            if (1 != updated) {
+                // Already exists, so take over existing subscription identifier
+                id = getSubscriptionId(subscription.getUserId(), subscription.getContextId(), subscription.getToken(), subscription.getClient(), con);
+            }
 
             // Insert individual topics / topic wild-cards (if subscription is not interested in all)
             if (!isAll) {
                 if (null != prefixes) {
-                    stmt = con.prepareStatement("INSERT INTO pns_subscription_topic_wildcard (id, cid, topic) VALUES (?, ?, ?)");
+                    stmt = con.prepareStatement("INSERT IGNORE INTO pns_subscription_topic_wildcard (id, cid, topic) VALUES (?, ?, ?)");
                     stmt.setBytes(1, id);
                     stmt.setInt(2, subscription.getContextId());
                     for (String prefix : prefixes) {
@@ -603,7 +606,7 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
                 }
 
                 if (null != topics) {
-                    stmt = con.prepareStatement("INSERT INTO pns_subscription_topic_exact (id, cid, topic) VALUES (?, ?, ?)");
+                    stmt = con.prepareStatement("INSERT IGNORE INTO pns_subscription_topic_exact (id, cid, topic) VALUES (?, ?, ?)");
                     stmt.setBytes(1, id);
                     stmt.setInt(2, subscription.getContextId());
                     for (String topic : topics) {
@@ -678,10 +681,19 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT id FROM pns_subscription WHERE cid=? AND user=? AND token=?");
-            stmt.setInt(1, subscription.getContextId());
-            stmt.setInt(2, subscription.getUserId());
-            stmt.setString(3, subscription.getToken());
+            String client = subscription.getClient();
+            if (null == client) {
+                stmt = con.prepareStatement("SELECT id FROM pns_subscription WHERE cid=? AND user=? AND token=?");
+                stmt.setInt(1, subscription.getContextId());
+                stmt.setInt(2, subscription.getUserId());
+                stmt.setString(3, subscription.getToken());
+            } else {
+                stmt = con.prepareStatement("SELECT id FROM pns_subscription WHERE cid=? AND user=? AND token=? AND client=?");
+                stmt.setInt(1, subscription.getContextId());
+                stmt.setInt(2, subscription.getUserId());
+                stmt.setString(3, subscription.getToken());
+                stmt.setString(4, client);
+            }
             rs = stmt.executeQuery();
             if (false == rs.next()) {
                 return false;
@@ -880,12 +892,13 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
 
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("UPDATE pns_subscriptions SET token=?, last_modified=? WHERE cid=? AND user=? AND token=?");
+            stmt = con.prepareStatement("UPDATE pns_subscriptions SET token=?, last_modified=? WHERE cid=? AND user=? AND token=? AND client=?");
             stmt.setString(1, newToken);
             stmt.setLong(2, System.currentTimeMillis());
             stmt.setInt(3, subscription.getContextId());
             stmt.setInt(4, subscription.getUserId());
             stmt.setString(5, subscription.getToken());
+            stmt.setString(6, subscription.getClient());
             int rows = stmt.executeUpdate();
             boolean updated = rows > 0;
 
@@ -897,31 +910,6 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
             }
 
             return updated;
-        } catch (SQLException e) {
-            throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            Databases.closeSQLStuff(stmt);
-        }
-    }
-
-    /**
-     * Updates specified subscription's last-modified time stamp.
-     *
-     * @param subscription The subscription to update
-     * @param con The connection to use
-     * @return <code>true</code> if such a subscription has been updated; otherwise <code>false</code> if no such subscription existed
-     * @throws OXException If update fails
-     */
-    private boolean updateLastModified(PushSubscription subscription, Connection con) throws OXException {
-        PreparedStatement stmt = null;
-        try {
-            stmt = con.prepareStatement("UPDATE pns_subscription SET last_modified=? WHERE cid=? AND user=? AND token=?");
-            stmt.setLong(1, System.currentTimeMillis());
-            stmt.setInt(2, subscription.getContextId());
-            stmt.setInt(3, subscription.getUserId());
-            stmt.setString(4, subscription.getToken());
-            int rows = stmt.executeUpdate();
-            return rows > 0;
         } catch (SQLException e) {
             throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
