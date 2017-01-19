@@ -53,9 +53,9 @@ import static com.openexchange.ajax.AJAXServlet.localeFrom;
 import static com.openexchange.ajax.requesthandler.AJAXRequestDataBuilder.request;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Future;
@@ -434,23 +434,14 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
 
             int numErrors = errors.size();
             if (numErrors > 0) {
-                Collection<OXException> exceptions = errors.values();
                 Locale locale = localeFrom(session);
-                if (numErrors == 1) {
+                JSONObject jErrors = new JSONObject(numErrors);
+                for (Map.Entry<String, OXException> errorEntry : errors.entrySet()) {
                     JSONObject jError = new JSONObject(8);
-                    OXJSONWriter writer = new OXJSONWriter(jError);
-                    ResponseWriter.writeException(exceptions.iterator().next(), writer, locale);
-                    jo.put(RampUpKey.ERRORS.key, jError);
-                } else {
-                    JSONArray jErrors = new JSONArray(numErrors);
-                    for (OXException exception : exceptions) {
-                        JSONObject jError = new JSONObject(8);
-                        OXJSONWriter writer = new OXJSONWriter(jError);
-                        ResponseWriter.writeException(exception, writer, locale);
-                        jErrors.put(jError);
-                    }
-                    jo.put(RampUpKey.ERRORS.key, jErrors);
+                    ResponseWriter.writeException(errorEntry.getValue(), new OXJSONWriter(jError), locale);
+                    jErrors.put(errorEntry.getKey(), jError);
                 }
+                jo.put(RampUpKey.ERRORS.key, jErrors);
             }
             return jo;
         } catch (Throwable t) {
