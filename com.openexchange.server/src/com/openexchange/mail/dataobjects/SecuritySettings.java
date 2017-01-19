@@ -73,6 +73,7 @@ public class SecuritySettings {
     public static final class Builder {
 
         private boolean encrypt;
+        private boolean decrypt;
         private boolean sign;
         private boolean pgpInline;
         private String authentication;
@@ -95,6 +96,16 @@ public class SecuritySettings {
          */
         public Builder encrypt(boolean encrypt) {
             this.encrypt = encrypt;
+            return this;
+        }
+
+        /**
+         * Sets the decrypt flag
+         * @param decrypt The decrypt flag
+         * @return This builder
+         */
+        public Builder decrypt(boolean decrypt) {
+            this.decrypt = decrypt;
             return this;
         }
 
@@ -152,13 +163,14 @@ public class SecuritySettings {
          * @return The <code>SecuritySettings</code> instance
          */
         public SecuritySettings build() {
-            return new SecuritySettings(encrypt, pgpInline, sign, authentication, guest_language, guest_message, pin);
+            return new SecuritySettings(encrypt, decrypt, pgpInline, sign, authentication, guest_language, guest_message, pin);
         }
     }
 
     // ---------------------------------------------------------------------------------------------------------------
 
     private final boolean encrypt;
+    private final boolean decrypt;
     private final boolean sign;
     private final boolean pgpInline;
     private final String authentication;
@@ -166,9 +178,10 @@ public class SecuritySettings {
     private final String guest_message;
     private final String pin;
 
-    SecuritySettings(boolean encrypt, boolean pgpInline, boolean sign, String authentication, String guest_language, String guest_message, String pin) {
+    SecuritySettings(boolean encrypt, boolean decrypt, boolean pgpInline, boolean sign, String authentication, String guest_language, String guest_message, String pin) {
         super();
         this.encrypt = encrypt;
+        this.decrypt = decrypt;
         this.pgpInline = pgpInline;
         this.sign = sign;
         this.authentication = authentication;
@@ -202,6 +215,14 @@ public class SecuritySettings {
      */
     public boolean isEncrypt() {
         return encrypt;
+    }
+
+    /**
+     * Gets the decrypt flag
+     * @return The decrypt flag
+     */
+    public boolean isDecrypt() {
+        return decrypt;
     }
 
     /**

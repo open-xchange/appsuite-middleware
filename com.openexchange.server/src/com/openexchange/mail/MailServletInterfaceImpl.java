@@ -1616,6 +1616,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         String fullName = argument.getFullname();
         MailMessage mail = mailAccess.getMessageStorage().getMessage(fullName, msgUID, markAsSeen);
         if (mail != null) {
+
             if (!mail.containsAccountId() || mail.getAccountId() < 0) {
                 mail.setAccountId(accountId);
             }
@@ -1647,6 +1648,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             } catch (OXException e) {
                 LOG.error("", e);
             }
+
             /*
              * Check color label vs. \Flagged flag
              */
@@ -2312,9 +2314,23 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 }
             } else {
                 mails = mailAccess.getMessageStorage().getMessages(fullName, mailIds, useFields);
+                mails = processMessages(mails);
             }
             if ((mails == null) || (mails.length == 0) || onlyNull(mails)) {
                 return SearchIteratorAdapter.emptyIterator();
+            }
+        }
+
+        /*
+         * Set account information
+         */
+        List<MailMessage> l = new LinkedList<>();
+        for (MailMessage mail : mails) {
+            if (mail != null) {
+                if (!mail.containsAccountId() || mail.getAccountId() < 0) {
+                    mail.setAccountId(accountId);
+                }
+                l.add(mail);
             }
         }
 
@@ -2378,6 +2394,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         } else {
             mails = mailAccess.getMessageStorage().searchMessages(fullName, indexRange, sortField, orderDir, searchTerm, useFields);
         }
+
         /*
          * Set account information & filter null elements
          */
@@ -2964,6 +2981,38 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             }
         }
         return (composedMail);
+    }
+
+    private MailMessage processMessage(MailMessage message) throws OXException {
+        EncryptedMailService encryptor = Services.getServiceLookup().getOptionalService(EncryptedMailService.class);
+        if(encryptor != null) {
+            return encryptor.onProcessMessage(session, message);
+        }
+        return message;
+    }
+
+    private MailMessage[] processMessages(MailMessage[] messages) throws OXException {
+        EncryptedMailService encryptor = Services.getServiceLookup().getOptionalService(EncryptedMailService.class);
+        if(encryptor != null) {
+            return encryptor.onProcessMessages(session, messages);
+        }
+        return messages;
+    }
+
+    private IMailMessageStorage getEncryptedMailMessageStorage() throws OXException {
+        EncryptedMailService encryptor = Services.getServiceLookup().getOptionalService(EncryptedMailService.class);
+        if(encryptor != null) {
+            return encryptor.getEncryptedMailMessageStorage(session, mailAccess.getMessageStorage());
+        }
+        return mailAccess.getMessageStorage();
+    }
+
+    private IMailMessageStorage getEncryptedMailMessageStorage(ComposedMailMessage composedMail) throws OXException {
+        EncryptedMailService encryptor = Services.getServiceLookup().getOptionalService(EncryptedMailService.class);
+        if(encryptor != null) {
+            return encryptor.getEncryptedMailMessageStorage(session, composedMail.getSecuritySettings(), mailAccess.getMessageStorage());
+        }
+        return mailAccess.getMessageStorage();
     }
 
     @Override
