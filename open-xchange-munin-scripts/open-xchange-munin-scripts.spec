@@ -1,7 +1,7 @@
 %define __jar_repack %{nil}
 
 Name:          open-xchange-munin-scripts
-BuildArch:	   noarch
+BuildArch:     noarch
 #!BuildIgnore: post-build-checks
 %if 0%{?rhel_version} && 0%{?rhel_version} >= 700
 BuildRequires: ant
@@ -13,7 +13,7 @@ BuildRequires: java7-devel
 %else
 BuildRequires: java-devel >= 1.7.0
 %endif
-Version:	   @OXVERSION@
+Version:       @OXVERSION@
 %define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
@@ -23,9 +23,8 @@ URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       Open-Xchange Munin scripts
 Autoreqprov:   no
-Requires:	   open-xchange-core >= @OXVERSION@
-Requires:      munin-node
-Conflicts:     open-xchange-munin-scripts-jolokia
+Requires:      munin-node, perl-JSON, perl-libwww-perl
+Conflicts:     open-xchange-munin-scripts
 
 %description
 Munin is a highly flexible and powerful solution used to create graphs of
@@ -53,6 +52,36 @@ export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
 %post
+function contains() { grep $@ >/dev/null 2>&1; return $?; }
+
+# only when updating
+if [ ${1:-0} -eq 2 ]; then
+  #not needed yet
+  #. /opt/open-xchange/lib/oxfunctions.sh
+  #GLOBIGNORE='*'
+
+  # SoftwareChange_request-3870
+  PFILE=/etc/munin/plugin-conf.d/ox
+  if test -f ${PFILE} && ! contains env.oxJolokiaUrl ${PFILE}; then
+    sed -i '$ a env.oxJolokiaUrl http://localhost:8009/monitoring/jolokia' ${PFILE}
+  fi
+
+  if test -f ${PFILE} && ! contains env.oxJolokiaUser ${PFILE}; then
+    sed -i '$ {
+      a ### oxJolokiaUser must be the same as com.openexchange.jolokia.user inside jolokia.properties
+      a env.oxJolokiaUser changeMe!Now
+    }' ${PFILE}
+  fi
+
+  if test -f ${PFILE} && ! contains env.oxJolokiaPassword ${PFILE}; then
+    sed -i '$ {  
+      a ### oxJolokiaPassword must be the same as com.openexchange.jolokia.password inside jolokia.properties
+      a env.oxJolokiaPassword s3cr3t!toBeChanged
+    }' ${PFILE}
+  fi
+
+fi
+
 TMPFILE=`mktemp /tmp/munin-node.configure.XXXXXXXXXX`
 munin-node-configure --libdir /usr/share/munin/plugins/ --shell > $TMPFILE || :
 if [ -f $TMPFILE ] ; then
