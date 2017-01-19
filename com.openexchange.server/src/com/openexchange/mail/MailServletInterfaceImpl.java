@@ -1991,7 +1991,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
      * Checks whether the given fields object contains all necessary fields for the color check
      *
      * @param fields The fields to check
-     * @return true if fields was changed, else otherwise
+     * @return true if fields was changed, false otherwise
      */
     private boolean checkFieldsForColorCheck(MailFields fields){
         FlaggingMode mode = FlaggingMode.getFlaggingMode(session);
