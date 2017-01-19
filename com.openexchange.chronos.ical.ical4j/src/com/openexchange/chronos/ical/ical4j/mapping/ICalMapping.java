@@ -50,11 +50,9 @@
 package com.openexchange.chronos.ical.ical4j.mapping;
 
 import java.util.List;
-
-import net.fortuna.ical4j.model.component.CalendarComponent;
-
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.exception.OXException;
+import net.fortuna.ical4j.model.Component;
 
 /**
  * {@link ICalMapping}
@@ -62,8 +60,8 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface ICalMapping<T extends CalendarComponent, U> {
-	
+public interface ICalMapping<T extends Component, U> {
+
     /**
      * Exports the mapped contact attributes into the supplied vCard.
      *

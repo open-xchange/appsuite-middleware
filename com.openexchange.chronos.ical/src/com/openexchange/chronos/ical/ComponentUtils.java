@@ -49,68 +49,85 @@
 
 package com.openexchange.chronos.ical;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import com.openexchange.chronos.DelegatingEvent;
-import com.openexchange.chronos.Event;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link EventComponent}
+ * {@link ComponentUtils}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class EventComponent extends DelegatingEvent implements ComponentData {
-
-    private List<ICalProperty> properties;
-
-    /**
-     * Initializes a new {@link EventComponent}.
-     */
-    public EventComponent() {
-        this(new Event());
-    }
-
-    /**
-     * Initializes a new {@link EventComponent}.
-     *
-     * @param delegate The underlying event delegate
-     */
-    public EventComponent(Event delegate) {
-        super(delegate);
-    }
+public class ComponentUtils {
 
     /**
      * Gets the extended iCal properties matching the supplied name.
      *
+     * @param component The component to get the properties from
      * @param propertyName The name of the properties to get
      * @return The properties, or an empty list if not found
      */
-    public List<ICalProperty> getProperties(String propertyName) {
-        return ComponentUtils.getProperties(this, propertyName);
+    public static List<ICalProperty> getProperties(ComponentData component, String propertyName) {
+        List<ICalProperty> properties = component.getProperties();
+        if (null == properties || properties.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<ICalProperty> matchingProperties = new ArrayList<ICalProperty>();
+        for (ICalProperty property : properties) {
+            if (propertyName.equals(property.getName())) {
+                matchingProperties.add(property);
+            }
+        }
+        return matchingProperties;
     }
 
     /**
      * Gets the first extended iCal property matching the supplied name.
      *
+     * @param component The component to get the property from
      * @param propertyName The name of the property to get
      * @return The property, or <code>null</code> if not found
      */
-    public ICalProperty getProperty(String propertyName) {
-        return ComponentUtils.getProperty(this, propertyName);
-    }
-
-    @Override
-    public List<ICalProperty> getProperties() {
-        return properties;
+    public static ICalProperty getProperty(ComponentData component, String propertyName) {
+        List<ICalProperty> properties = component.getProperties();
+        if (null != properties) {
+            for (ICalProperty property : properties) {
+                if (propertyName.equals(property.getName())) {
+                    return property;
+                }
+            }
+        }
+        return null;
     }
 
     /**
-     * Sets the list of further arbitrary iCalendar properties associated with the component.
+     * Collects all warnings from multiple imported components.
      *
-     * @param properties The extra properties to set
+     * @param importedComponents The imported components to collect the warnings for
+     * @return The collected warnings, or an empty list if there are none
      */
-    public void setProperties(List<ICalProperty> properties) {
-        this.properties = properties;
+    public static <T> List<OXException> collectWarnings(List<T> importedComponents) {
+        List<OXException> warnings = new ArrayList<OXException>();
+        if (null != importedComponents) {
+            for (T importedComponent : importedComponents) {
+                if (ImportedComponent.class.isInstance(importedComponent)) {
+                    List<OXException> warningsList = ((ImportedComponent) importedComponent).getWarnings();
+                    if (null != warningsList) {
+                        warnings.addAll(warningsList);
+                    }
+                }
+            }
+        }
+        return warnings;
+    }
+
+    /**
+     * Initializes a new {@link ComponentUtils}.
+     */
+    private ComponentUtils() {
+        super();
     }
 
 }

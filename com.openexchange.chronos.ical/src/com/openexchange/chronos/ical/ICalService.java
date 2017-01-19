@@ -63,14 +63,12 @@ import com.openexchange.osgi.annotation.SingletonService;
 public interface ICalService {
 
     /**
-     * Imports an iCal file, optionally merging with an existing event.
+     * Imports an iCalendar file.
      *
-     * @param iCalFile The iCal file to import
-     * @param event The event to merge the iCal file into, or <code>null</code> to import as a new event
+     * @param iCalFile The input stream carrying the iCalendar data to import
      * @param parameters Further parameters for the iCal import, or <code>null</code> if not used
-     * @return The imported iCal file as event, which is a new instance if passed contact reference is <code>null</code>, or the passed
-     *         event itself, otherwise
-     * @throws OXException If importing the event fails - non-fatal conversion warnings are accessible in the import result
+     * @return A calendar import providing access to the imported data
+     * @throws OXException If importing the event fails - non-fatal conversion warnings are accessible within each imported component
      */
     CalendarImport importICal(InputStream iCalFile, ICalParameters parameters) throws OXException;
 

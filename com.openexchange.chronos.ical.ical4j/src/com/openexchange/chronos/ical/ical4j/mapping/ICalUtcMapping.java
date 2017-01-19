@@ -51,13 +51,11 @@ package com.openexchange.chronos.ical.ical4j.mapping;
 
 import java.util.Date;
 import java.util.List;
-
-import net.fortuna.ical4j.model.DateTime;
-import net.fortuna.ical4j.model.component.CalendarComponent;
-import net.fortuna.ical4j.model.property.UtcProperty;
-
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.exception.OXException;
+import net.fortuna.ical4j.model.Component;
+import net.fortuna.ical4j.model.DateTime;
+import net.fortuna.ical4j.model.property.UtcProperty;
 
 /**
  * {@link ICalUtcMapping}
@@ -65,20 +63,20 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public abstract class ICalUtcMapping<T extends CalendarComponent, U> extends AbstractICalMapping<T, U> {
-	
+public abstract class ICalUtcMapping<T extends Component, U> extends AbstractICalMapping<T, U> {
+
 	private final String propertyName;
-	
+
     /**
      * Initializes a new {@link ICalUtcMapping}.
-     * 
-     * @param propertyName The name of the mapping's property 
+     *
+     * @param propertyName The name of the mapping's property
      */
 	protected ICalUtcMapping(String propertyName) {
 		super();
 		this.propertyName = propertyName;
 	}
-	
+
 	protected abstract Date getValue(U object);
 
 	protected abstract void setValue(U object, Date value);
@@ -105,5 +103,5 @@ public abstract class ICalUtcMapping<T extends CalendarComponent, U> extends Abs
 		UtcProperty property = (UtcProperty) component.getProperty(propertyName);
 		setValue(object, null == property ? null : property.getDateTime());
 	}
-	
+
 }

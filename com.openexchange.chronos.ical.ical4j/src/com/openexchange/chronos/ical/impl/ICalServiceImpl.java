@@ -70,6 +70,9 @@ public class ICalServiceImpl implements ICalService {
 
     private final ICalMapper mapper;
 
+    /**
+     * Initializes a new {@link ICalServiceImpl}.
+     */
     public ICalServiceImpl() {
         super();
         this.mapper = new ICalMapper();
@@ -85,9 +88,8 @@ public class ICalServiceImpl implements ICalService {
     @Override
     public CalendarImport importICal(InputStream iCalFile, ICalParameters parameters) throws OXException {
         ICalParameters iCalParameters = ICalUtils.getParametersOrDefault(parameters);
-        List<OXException> warnings = new ArrayList<OXException>();
         Calendar calendar = ICalUtils.importCalendar(iCalFile, iCalParameters);
-        return new CalendarImportImpl(calendar, mapper, iCalParameters, warnings);
+        return new CalendarImportImpl(calendar, mapper, iCalParameters);
     }
 
     @Override

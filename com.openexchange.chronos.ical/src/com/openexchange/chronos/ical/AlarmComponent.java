@@ -50,10 +50,8 @@
 package com.openexchange.chronos.ical;
 
 import java.util.List;
-import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.DelegatingAlarm;
-import com.openexchange.java.Streams;
 
 /**
  * {@link AlarmComponent}
@@ -63,14 +61,13 @@ import com.openexchange.java.Streams;
  */
 public class AlarmComponent extends DelegatingAlarm implements ComponentData {
 
-    private IFileHolder iCalHolder;
     private List<ICalProperty> properties;
 
     /**
      * Initializes a new {@link AlarmComponent}.
      */
     public AlarmComponent() {
-        this(new Alarm(), null);
+        this(new Alarm());
     }
 
     /**
@@ -79,28 +76,28 @@ public class AlarmComponent extends DelegatingAlarm implements ComponentData {
      * @param delegate The underlying alarm delegate
      * @param iCalHolder A file holder storing the original iCal component, or <code>null</code> if not available
      */
-    public AlarmComponent(Alarm delegate, IFileHolder iCalHolder) {
+    public AlarmComponent(Alarm delegate) {
         super(delegate);
-        this.iCalHolder = iCalHolder;
     }
 
     /**
-     * Sets the file holder storing the original iCal component.
+     * Gets the extended iCal properties matching the supplied name.
      *
-     * @param iCalHolder A file holder storing the original iCal component
+     * @param propertyName The name of the properties to get
+     * @return The properties, or an empty list if not found
      */
-    public void setComponent(IFileHolder iCalHolder) {
-        this.iCalHolder = iCalHolder;
+    public List<ICalProperty> getProperties(String propertyName) {
+        return ComponentUtils.getProperties(this, propertyName);
     }
 
-    @Override
-    public IFileHolder getComponent() {
-        return iCalHolder;
-    }
-
-    @Override
-    public void close() {
-        Streams.close(iCalHolder);
+    /**
+     * Gets the first extended iCal property matching the supplied name.
+     *
+     * @param propertyName The name of the property to get
+     * @return The property, or <code>null</code> if not found
+     */
+    public ICalProperty getProperty(String propertyName) {
+        return ComponentUtils.getProperty(this, propertyName);
     }
 
     @Override

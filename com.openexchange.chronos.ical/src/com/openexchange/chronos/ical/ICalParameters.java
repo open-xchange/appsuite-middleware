@@ -61,6 +61,10 @@ public interface ICalParameters {
      * {@link Boolean}
      *
      * Configures whether iCal input should be pre-processed and sanitized so that known client quirks are corrected automatically.
+     * <p/>
+     * This currently includes all legacy workarounds, taken over from the previous parser implementation.
+     * 
+     * @see com.openexchange.data.conversion.ical.ical4j.ICal4JParser.parse(BufferedReader, Collection<Exception>)
      */
     String SANITIZE_INPUT = "SANITIZE_INPUT";
 
@@ -68,7 +72,10 @@ public interface ICalParameters {
      * {@link String[]} array denoting the names of the extended arbitrary properties to consider during import. Such properties will be
      * made available via {@link ComponentData#getProperties()} of the imported component.
      * <p/>
-     * During export, any property preset in {@link ComponentData#getProperties()} will be considered implicitly.
+     * Wildcards are allowed in the names, e.g. <code>X-MOZ-SNOOZE-TIME*</code>, or, to track all iCal properties, <code>*</code> might
+     * be used, too.
+     * <p/>
+     * During export, any property present in {@link ComponentData#getProperties()} will be considered implicitly.
      */
     String EXTRA_PROPERTIES = "EXTRA_PROPERTIES";
 
@@ -77,8 +84,6 @@ public interface ICalParameters {
     String DEFAULT_TIMEZONE = "DEFAULT_TIMEZONE";
 
     String TIMEZONE_REGISTRY = "TIMEZONE_REGISTRY";
-
-    String KEEP_COMPONENTS = "KEEP_COMPONENTS";
 
     String OUTLOOK_TIMEZONES = "OUTLOOK_TIMEZONES";
 

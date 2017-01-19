@@ -75,10 +75,10 @@ public class ICalParametersImpl implements ICalParameters {
 
     private void applyDefaults() {
         set(TIMEZONE_REGISTRY, new TimeZoneRegistryImpl("zoneinfo-outlook/"));
-        set(SANITIZE_INPUT, Boolean.TRUE);
+//        set(SANITIZE_INPUT, Boolean.TRUE);
         set(DEFAULT_TIMEZONE, TimeZone.getTimeZone("EST"));
         //        set(DEFAULT_TIMEZONE, TimeZone.getDefault());
-        set(KEEP_COMPONENTS, Boolean.TRUE);
+        //        set(KEEP_COMPONENTS, Boolean.TRUE);
 
         //        set(ATTENDEE_COMMENTS, Boolean.TRUE);
     }

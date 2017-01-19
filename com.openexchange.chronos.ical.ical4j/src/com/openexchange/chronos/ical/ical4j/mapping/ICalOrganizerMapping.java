@@ -56,9 +56,9 @@ import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.Parameter;
 import net.fortuna.ical4j.model.Property;
-import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.parameter.Cn;
 import net.fortuna.ical4j.model.parameter.SentBy;
 
@@ -68,7 +68,7 @@ import net.fortuna.ical4j.model.parameter.SentBy;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public abstract class ICalOrganizerMapping<T extends CalendarComponent, U> extends AbstractICalMapping<T, U> {
+public abstract class ICalOrganizerMapping<T extends Component, U> extends AbstractICalMapping<T, U> {
 
     /**
      * Initializes a new {@link ICalOrganizerMapping}.

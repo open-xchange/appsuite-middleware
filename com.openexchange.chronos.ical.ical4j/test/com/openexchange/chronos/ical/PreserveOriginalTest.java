@@ -50,10 +50,11 @@
 package com.openexchange.chronos.ical;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import java.io.ByteArrayInputStream;
 import java.util.List;
 import org.junit.Test;
-import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.java.Streams;
 
@@ -68,85 +69,98 @@ public class PreserveOriginalTest extends ICalTest {
     public void testImportVEvent_1() throws Exception {
         String iCal =
             "BEGIN:VCALENDAR\r\n" +
-                "PRODID:-//xyz Corp//NONSGML PDA Calendar Version 1.0//EN\r\n" +
-                "VERSION:2.0\r\n" +
-                "BEGIN:VEVENT\r\n" +
-                "DTSTAMP:19960704T120000Z\r\n" +
-                "UID:uid1@example.com\r\n" +
-                "ORGANIZER:mailto:jsmith@example.com\r\n" +
-                "DTSTART:19960918T143000Z\r\n" +
-                "DTEND:19960920T220000Z\r\n" +
-                "STATUS:CONFIRMED\r\n" +
-                "CATEGORIES:CONFERENCE\r\n" +
-                "X-UNKNOWN1:abc\r\n" +
-                "SUMMARY:Networld+Interop Conference\r\n" +
-                "DESCRIPTION:Networld+Interop Conference\r\n" +
-                "  and Exhibit\\nAtlanta World Congress Center\\n\r\n" +
-                " Atlanta\\, Georgia\r\n" +
-                "BEGIN:VALARM\r\n" +
-                "ACTION:DISPLAY\r\n" +
-                "DESCRIPTION:REMINDER\r\n" +
-                "TRIGGER;RELATED=START:-PT15M\r\n" +
-                "X-UNKNOWN1:abc\r\n" +
-                "END:VALARM\r\n" +
-                "BEGIN:VALARM\r\n" +
-                "ACTION:DISPLAY\r\n" +
-                "DESCRIPTION:REMINDER\r\n" +
-                "TRIGGER;RELATED=START:-PT5M\r\n" +
-                "X-UNKNOWN1:abc\r\n" +
-                "END:VALARM\r\n" +
-                "END:VEVENT\r\n" +
-                "END:VCALENDAR\r\n";
-        EventComponent event = importEvent(iCal);
+            "PRODID:-//xyz Corp//NONSGML PDA Calendar Version 1.0//EN\r\n" +
+            "VERSION:2.0\r\n" +
+            "BEGIN:VEVENT\r\n" +
+            "DTSTAMP:19960704T120000Z\r\n" +
+            "UID:uid1@example.com\r\n" +
+            "ORGANIZER:mailto:jsmith@example.com\r\n" +
+            "DTSTART:19960918T143000Z\r\n" +
+            "DTEND:19960920T220000Z\r\n" +
+            "STATUS:CONFIRMED\r\n" +
+            "CATEGORIES:CONFERENCE\r\n" +
+            "X-UNKNOWN1:abc\r\n" +
+            "SUMMARY:Networld+Interop Conference\r\n" +
+            "DESCRIPTION:Networld+Interop Conference\r\n" +
+            "  and Exhibit\\nAtlanta World Congress Center\\n\r\n" +
+            " Atlanta\\, Georgia\r\n" +
+            "BEGIN:VALARM\r\n" +
+            "ACTION:DISPLAY\r\n" +
+            "DESCRIPTION:REMINDER\r\n" +
+            "TRIGGER;RELATED=START:-PT15M\r\n" +
+            "X-UNKNOWN1:abc\r\n" +
+            "END:VALARM\r\n" +
+            "BEGIN:VALARM\r\n" +
+            "ACTION:DISPLAY\r\n" +
+            "DESCRIPTION:REMINDER\r\n" +
+            "TRIGGER;RELATED=START:-PT5M\r\n" +
+            "X-UNKNOWN1:abc\r\n" +
+            "END:VALARM\r\n" +
+            "END:VEVENT\r\n" +
+            "END:VCALENDAR\r\n"
+        ;
+
+        ByteArrayInputStream inputStream = Streams.newByteArrayInputStream(iCal.getBytes("UTF-8"));
+        ICalParameters iCalParameters = iCalService.initParameters();
+        iCalParameters.set(ICalParameters.EXTRA_PROPERTIES, new String[] { "*" });
+        EventComponent event = (EventComponent) iCalService.importICal(inputStream, iCalParameters).getEvents().get(0);
 
         assertEquals("uid1@example.com", event.getUid());
 
-        String originalICal = Streams.stream2string(event.getComponent().getStream(), "UTF-8");
-        assertTrue(originalICal.contains("X-UNKNOWN1:abc"));
+        ICalProperty xUnknownProperty = event.getProperty("X-UNKNOWN1");
+        assertNotNull(xUnknownProperty);
+        assertEquals("abc", xUnknownProperty.getValue());
 
         List<Alarm> alarms = event.getAlarms();
         assertEquals(2, alarms.size());
-        AlarmComponent alarmData = (AlarmComponent) alarms.get(0);
-        originalICal = Streams.stream2string(alarmData.getComponent().getStream(), "UTF-8");
-        assertTrue(originalICal.contains("X-UNKNOWN1:abc"));
+        AlarmComponent alarm = (AlarmComponent) alarms.get(0);
+
+        xUnknownProperty = alarm.getProperty("X-UNKNOWN1");
+        assertNotNull(xUnknownProperty);
+        assertEquals("abc", xUnknownProperty.getValue());
     }
 
     @Test
     public void testPreserveDirParameter() throws Exception {
         String iCal =
             "BEGIN:VCALENDAR\r\n" +
-                "VERSION:2.0\r\n" +
-                "PRODID:http://www.example.com/calendarapplication/\r\n" +
-                "METHOD:PUBLISH\r\n" +
-                "BEGIN:VEVENT\r\n" +
-                "UID:461092315540@example.com\r\n" +
-                "ORGANIZER;CN=\"Alice Balder, Example Inc.\":MAILTO:alice@example.com\r\n" +
-                "LOCATION:Somewhere\r\n" +
-                "SUMMARY:Eine Kurzinfo\r\n" +
-                "DESCRIPTION:Beschreibung des Termines\r\n" +
-                "CLASS:PUBLIC\r\n" +
-                "DTSTART:20060910T220000Z\r\n" +
-                "DTEND:20060919T215900Z\r\n" +
-                "DTSTAMP:20060812T125900Z\r\n" +
-                "ORGANIZER:mailto:otto@example.com\r\n" +
-                "ATTENDEE;RSVP=TRUE;ROLE=REQ-PARTICIPANT;CUTYPE=INDICIDUAL;\r\n" +
-                " DIR=\"ldap://host.com:66/horst\":mailto:horst@example.org\r\n" +
-                "END:VEVENT\r\n" +
-                "END:VCALENDAR";
-        EventComponent event = importEvent(iCal);
+            "VERSION:2.0\r\n" +
+            "PRODID:http://www.example.com/calendarapplication/\r\n" +
+            "METHOD:PUBLISH\r\n" +
+            "BEGIN:VEVENT\r\n" +
+            "UID:461092315540@example.com\r\n" +
+            "ORGANIZER;CN=\"Alice Balder, Example Inc.\":MAILTO:alice@example.com\r\n" +
+            "LOCATION:Somewhere\r\n" +
+            "SUMMARY:Eine Kurzinfo\r\n" +
+            "DESCRIPTION:Beschreibung des Termines\r\n" +
+            "CLASS:PUBLIC\r\n" +
+            "DTSTART:20060910T220000Z\r\n" +
+            "DTEND:20060919T215900Z\r\n" +
+            "DTSTAMP:20060812T125900Z\r\n" +
+            "ORGANIZER:mailto:otto@example.com\r\n" +
+            "ATTENDEE;RSVP=TRUE;ROLE=REQ-PARTICIPANT;CUTYPE=INDICIDUAL;\r\n" +
+            " DIR=\"ldap://host.com:66/horst\":mailto:horst@example.org\r\n" +
+            "END:VEVENT\r\n" +
+            "END:VCALENDAR"
+        ;
+
+        ByteArrayInputStream inputStream = Streams.newByteArrayInputStream(iCal.getBytes("UTF-8"));
+        ICalParameters iCalParameters = iCalService.initParameters();
+        iCalParameters.set(ICalParameters.EXTRA_PROPERTIES, new String[] { "*" });
+        EventComponent event = (EventComponent) iCalService.importICal(inputStream, iCalParameters).getEvents().get(0);
 
         assertEquals("461092315540@example.com", event.getUid());
         assertEquals("Somewhere", event.getLocation());
 
-        String originalICal = Streams.stream2string(event.getComponent().getStream(), "UTF-8");
-        assertTrue(originalICal.replaceAll("\\s+", "").contains("DIR=\"ldap://host.com:66/horst\""));
+        ICalProperty attendeeProperty = event.getProperty("ATTENDEE");
+        assertNotNull(attendeeProperty);
+        assertEquals("ldap://host.com:66/horst", attendeeProperty.getParameters().get("DIR"));
 
         event.setLocation("Somewhere else");
-        ThresholdFileHolder fileHolder = new ThresholdFileHolder();
-        fileHolder.write(originalICal.getBytes("UTF-8"));
-        event.setComponent(fileHolder);
         String exportedICal = exportEvent(event);
         assertTrue(exportedICal.replaceAll("\\s+", "").contains("DIR=\"ldap://host.com:66/horst\""));
         assertTrue(exportedICal.contains("LOCATION:Somewhere else"));
     }
+
 }
+

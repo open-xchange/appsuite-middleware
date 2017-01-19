@@ -47,66 +47,31 @@
  *
  */
 
-package com.openexchange.chronos.ical.ical4j.mapping;
+package com.openexchange.chronos.ical;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.text.ParseException;
 import java.util.List;
-import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.exception.OXException;
-import net.fortuna.ical4j.model.Component;
-import net.fortuna.ical4j.model.Property;
 
 /**
- * {@link ICalTextMapping}
+ * {@link ImportedComponent}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public abstract class ICalTextMapping<T extends Component, U> extends AbstractICalMapping<T, U> {
-
-	protected final String propertyName;
+public interface ImportedComponent extends ComponentData {
 
     /**
-     * Initializes a new {@link ICalTextMapping}.
+     * Gets the component's index in the parent iCalendar structure.
      *
-     * @param propertyName The name of the mapping's property
+     * @return The component's index
      */
-	protected ICalTextMapping(String propertyName) {
-		super();
-		this.propertyName = propertyName;
-	}
+    int getIndex();
 
-	protected abstract String getValue(U object);
-
-	protected abstract void setValue(U object, String value);
-
-	protected abstract Property createProperty();
-
-	@Override
-	public void export(U object, T component, ICalParameters parameters, List<OXException> warnings) {
-		String value = getValue(object);
-		if (null == value) {
-			removeProperties(component, propertyName);
-		} else {
-			Property property = component.getProperty(propertyName);
-			if (null == property) {
-				property = createProperty();
-				component.getProperties().add(property);
-			}
-			try {
-				property.setValue(value);
-			} catch (IOException | URISyntaxException | ParseException e) {
-				addConversionWarning(warnings, e, propertyName, e.getMessage());
-			}
-		}
-	}
-
-	@Override
-	public void importICal(T component, U object, ICalParameters parameters, List<OXException> warnings) {
-		Property property = component.getProperty(propertyName);
-		setValue(object, null == property ? null : property.getValue());
-	}
+    /**
+     * Gets a list of parser- and conversion warnings.
+     *
+     * @return The warnings
+     */
+    List<OXException> getWarnings();
 
 }

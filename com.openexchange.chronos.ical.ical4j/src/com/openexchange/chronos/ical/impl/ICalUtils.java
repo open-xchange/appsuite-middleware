@@ -64,11 +64,17 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.FreeBusyData;
 import com.openexchange.chronos.ical.DefaultICalProperty;
 import com.openexchange.chronos.ical.ICalExceptionCodes;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalProperty;
+import com.openexchange.chronos.ical.ImportedAlarm;
+import com.openexchange.chronos.ical.ImportedEvent;
 import com.openexchange.chronos.ical.ical4j.ICal4JParser;
+import com.openexchange.chronos.ical.ical4j.mapping.ICalMapper;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
@@ -93,6 +99,7 @@ import net.fortuna.ical4j.extensions.outlook.BusyStatus;
 import net.fortuna.ical4j.extensions.property.WrCalName;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.Component;
+import net.fortuna.ical4j.model.ComponentList;
 import net.fortuna.ical4j.model.Parameter;
 import net.fortuna.ical4j.model.ParameterFactoryImpl;
 import net.fortuna.ical4j.model.ParameterFactoryRegistry;
@@ -107,6 +114,7 @@ import net.fortuna.ical4j.model.ValidationException;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.component.VAlarm;
 import net.fortuna.ical4j.model.component.VEvent;
+import net.fortuna.ical4j.model.component.VFreeBusy;
 import net.fortuna.ical4j.model.parameter.XParameter;
 import net.fortuna.ical4j.model.property.XProperty;
 
@@ -157,6 +165,62 @@ public class ICalUtils {
         } catch (ParserException e) {
             throw ICalExceptionCodes.CONVERSION_FAILED.create(e);
         }
+    }
+
+    static List<Event> importEvents(ComponentList eventComponents, ICalMapper mapper, ICalParameters parameters) throws OXException {
+        if (null == eventComponents) {
+            return null;
+        }
+        List<Event> events = new ArrayList<Event>(eventComponents.size());
+        int index = 0;
+        for (Iterator<?> iterator = eventComponents.iterator(); iterator.hasNext();) {
+            events.add(importEvent(index, (VEvent) iterator.next(), mapper, parameters));
+        }
+        return events;
+    }
+
+    static Event importEvent(int index, VEvent vEvent, ICalMapper mapper, ICalParameters parameters) throws OXException {
+        List<OXException> warnings = new ArrayList<OXException>();
+        ImportedEvent importedEvent = new ImportedEvent(index, mapper.importVEvent(vEvent, parameters, warnings), warnings);
+        importedEvent.setProperties(ICalUtils.importProperties(vEvent, parameters.get(ICalParameters.EXTRA_PROPERTIES, String[].class)));
+        importedEvent.setAlarms(importAlarms(vEvent.getAlarms(), mapper, parameters));
+        return importedEvent;
+    }
+
+    static List<Alarm> importAlarms(ComponentList alarmComponents, ICalMapper mapper, ICalParameters parameters) throws OXException {
+        if (null == alarmComponents) {
+            return null;
+        }
+        List<Alarm> alarms = new ArrayList<Alarm>(alarmComponents.size());
+        int index = 0;
+        for (Iterator<?> iterator = alarmComponents.iterator(); iterator.hasNext(); index++) {
+            alarms.add(importAlarm(index, (VAlarm) iterator.next(), mapper, parameters));
+        }
+        return alarms;
+    }
+
+    static ImportedAlarm importAlarm(int index, VAlarm vAlarm, ICalMapper mapper, ICalParameters parameters) throws OXException {
+        List<OXException> warnings = new ArrayList<OXException>();
+        ImportedAlarm importedAlarm = new ImportedAlarm(index, mapper.importVAlarm(vAlarm, parameters, warnings), warnings);
+        importedAlarm.setProperties(ICalUtils.importProperties(vAlarm, parameters.get(ICalParameters.EXTRA_PROPERTIES, String[].class)));
+        return importedAlarm;
+    }
+
+    static List<FreeBusyData> importFreeBusys(ComponentList freeBusyComponents, ICalMapper mapper, ICalParameters parameters) throws OXException {
+        if (null == freeBusyComponents) {
+            return null;
+        }
+        List<FreeBusyData> alarms = new ArrayList<FreeBusyData>(freeBusyComponents.size());
+        int index = 0;
+        for (Iterator<?> iterator = freeBusyComponents.iterator(); iterator.hasNext(); index++) {
+            alarms.add(importFreeBusy(index, (VFreeBusy) iterator.next(), mapper, parameters));
+        }
+        return alarms;
+    }
+
+    static FreeBusyData importFreeBusy(int index, VFreeBusy vFreeBusy, ICalMapper mapper, ICalParameters parameters) throws OXException {
+        List<OXException> warnings = new ArrayList<OXException>();
+        return mapper.importVFreeBusy(vFreeBusy, parameters, warnings);
     }
 
     static ThresholdFileHolder exportCalendar(Calendar calendar, ICalParameters parameters) throws OXException {

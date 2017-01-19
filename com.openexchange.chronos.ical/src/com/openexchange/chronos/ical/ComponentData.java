@@ -49,9 +49,7 @@
 
 package com.openexchange.chronos.ical;
 
-import java.io.Closeable;
 import java.util.List;
-import com.openexchange.ajax.fileholder.IFileHolder;
 
 /**
  * {@link ComponentData}
@@ -59,14 +57,7 @@ import com.openexchange.ajax.fileholder.IFileHolder;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface ComponentData extends Closeable {
-
-    /**
-     * Gets a file holder storing the underlying iCalendar component in a file, or <code>null</code> if not available
-     *
-     * @return The original iCalendar component, or <code>null</code> if not available
-     */
-    IFileHolder getComponent();
+public interface ComponentData {
 
     /**
      * Gets a list of further arbitrary iCalendar properties associated with the component.

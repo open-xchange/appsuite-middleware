@@ -47,66 +47,39 @@
  *
  */
 
-package com.openexchange.chronos.ical.ical4j.mapping;
+package com.openexchange.chronos.ical;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.text.ParseException;
-import java.util.List;
-import com.openexchange.chronos.ical.ICalParameters;
-import com.openexchange.exception.OXException;
-import net.fortuna.ical4j.model.Component;
-import net.fortuna.ical4j.model.Property;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import org.junit.Test;
+import com.openexchange.chronos.Event;
 
 /**
- * {@link ICalTextMapping}
+ * {@link Bug17963Test}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.10.0
  */
-public abstract class ICalTextMapping<T extends Component, U> extends AbstractICalMapping<T, U> {
+public class Bug17963Test extends ICalTest {
 
-	protected final String propertyName;
-
-    /**
-     * Initializes a new {@link ICalTextMapping}.
-     *
-     * @param propertyName The name of the mapping's property
-     */
-	protected ICalTextMapping(String propertyName) {
-		super();
-		this.propertyName = propertyName;
-	}
-
-	protected abstract String getValue(U object);
-
-	protected abstract void setValue(U object, String value);
-
-	protected abstract Property createProperty();
-
-	@Override
-	public void export(U object, T component, ICalParameters parameters, List<OXException> warnings) {
-		String value = getValue(object);
-		if (null == value) {
-			removeProperties(component, propertyName);
-		} else {
-			Property property = component.getProperty(propertyName);
-			if (null == property) {
-				property = createProperty();
-				component.getProperties().add(property);
-			}
-			try {
-				property.setValue(value);
-			} catch (IOException | URISyntaxException | ParseException e) {
-				addConversionWarning(warnings, e, propertyName, e.getMessage());
-			}
-		}
-	}
-
-	@Override
-	public void importICal(T component, U object, ICalParameters parameters, List<OXException> warnings) {
-		Property property = component.getProperty(propertyName);
-		setValue(object, null == property ? null : property.getValue());
-	}
+    @Test
+    public void testImport() throws Exception {
+        String iCal =
+            "BEGIN:VCALENDAR\n"+
+            "VERSION:2.0\n"+
+            "BEGIN:VEVENT\n"+
+            "DTSTART;TZID=Europe/Rome:20100202T103000\n"+
+            "DTEND;TZID=Europe/Rome:20100202T120000\n"+
+            "RRULE:FREQ=WEEKLY;BYDAY=TU;UNTIL=20100705T215959Z\n"+
+            "EXDATE:20111128\n"+
+            "DTSTAMP:20110105T174810Z\n"+
+            "SUMMARY:Team-Meeting\n"+
+            "END:VEVENT\n" +
+            "END:VCALENDAR\n"
+        ;
+        Event event = importEvent(iCal);
+        assertEquals("Team-Meeting", event.getSummary());
+        assertNotNull(event.getDeleteExceptionDates());
+        assertEquals(1, event.getDeleteExceptionDates().size());
+    }
 
 }

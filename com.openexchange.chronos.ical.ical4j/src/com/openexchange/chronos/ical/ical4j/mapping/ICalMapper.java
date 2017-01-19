@@ -54,8 +54,6 @@ import java.util.List;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.FreeBusyData;
-import com.openexchange.chronos.ical.AlarmComponent;
-import com.openexchange.chronos.ical.EventComponent;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ical4j.mapping.alarm.AlarmMappings;
 import com.openexchange.chronos.ical.ical4j.mapping.event.EventMappings;
@@ -131,18 +129,15 @@ public class ICalMapper {
     }
 
     /**
-     * Imports a vEvent, optionally merging with an existing event.
+     * Imports a vEvent.
      *
      * @param vEvent The vEvent to import
-     * @param event The contact to merge the vEvent into, or <code>null</code> to import as a new contact
      * @param parameters Further options to use, or <code>null</code> to stick with the defaults
      * @param warnings A reference to a collection to store any warnings, or <code>null</code> if not used
-     * @return The imported vEvent as contact
+     * @return The imported event
      */
-    public EventComponent importVEvent(VEvent vEvent, EventComponent event, ICalParameters parameters, List<OXException> warnings) {
-        if (null == event) {
-            event = new EventComponent();
-        }
+    public Event importVEvent(VEvent vEvent, ICalParameters parameters, List<OXException> warnings) {
+        Event event = new Event();
         ICalParameters iCalParameters = ICalUtils.getParametersOrDefault(parameters);
         if (null == warnings) {
             warnings = new ArrayList<OXException>();
@@ -153,10 +148,8 @@ public class ICalMapper {
         return event;
     }
 
-    public Alarm importVAlarm(VAlarm vAlarm, AlarmComponent alarm, ICalParameters parameters, List<OXException> warnings) {
-        if (null == alarm) {
-            alarm = new AlarmComponent();
-        }
+    public Alarm importVAlarm(VAlarm vAlarm, ICalParameters parameters, List<OXException> warnings) {
+        Alarm alarm = new Alarm();
         ICalParameters iCalParameters = ICalUtils.getParametersOrDefault(parameters);
         if (null == warnings) {
             warnings = new ArrayList<OXException>();
@@ -178,5 +171,55 @@ public class ICalMapper {
         }
         return freeBusy;
     }
-
+    //
+    //    
+    //    /**
+    //     * Imports a vEvent, optionally merging with an existing event.
+    //     *
+    //     * @param vEvent The vEvent to import
+    //     * @param event The contact to merge the vEvent into, or <code>null</code> to import as a new contact
+    //     * @param parameters Further options to use, or <code>null</code> to stick with the defaults
+    //     * @param warnings A reference to a collection to store any warnings, or <code>null</code> if not used
+    //     * @return The imported vEvent as contact
+    //     */
+    //    public EventComponent importVEvent(VEvent vEvent, EventComponent event, ICalParameters parameters, List<OXException> warnings) {
+    //        if (null == event) {
+    //            event = new EventComponent();
+    //        }
+    //        ICalParameters iCalParameters = ICalUtils.getParametersOrDefault(parameters);
+    //        if (null == warnings) {
+    //            warnings = new ArrayList<OXException>();
+    //        }
+    //        for (ICalMapping<VEvent, Event> mapping : EventMappings.ALL) {
+    //            mapping.importICal(vEvent, event, iCalParameters, warnings);
+    //        }
+    //        return event;
+    //    }
+    //
+    //    public Alarm importVAlarm(VAlarm vAlarm, AlarmComponent alarm, ICalParameters parameters, List<OXException> warnings) {
+    //        if (null == alarm) {
+    //            alarm = new AlarmComponent();
+    //        }
+    //        ICalParameters iCalParameters = ICalUtils.getParametersOrDefault(parameters);
+    //        if (null == warnings) {
+    //            warnings = new ArrayList<OXException>();
+    //        }
+    //        for (ICalMapping<VAlarm, Alarm> mapping : AlarmMappings.ALL) {
+    //            mapping.importICal(vAlarm, alarm, iCalParameters, warnings);
+    //        }
+    //        return alarm;
+    //    }
+    //
+    //    public FreeBusyData importVFreeBusy(VFreeBusy vFreeBusy, ICalParameters parameters, List<OXException> warnings) {
+    //        FreeBusyData freeBusy = new FreeBusyData();
+    //        ICalParameters iCalParameters = ICalUtils.getParametersOrDefault(parameters);
+    //        if (null == warnings) {
+    //            warnings = new ArrayList<OXException>();
+    //        }
+    //        for (ICalMapping<VFreeBusy, FreeBusyData> mapping : FreeBusyMappings.ALL) {
+    //            mapping.importICal(vFreeBusy, freeBusy, iCalParameters, warnings);
+    //        }
+    //        return freeBusy;
+    //    }
+    //
 }

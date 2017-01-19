@@ -51,12 +51,12 @@ package com.openexchange.chronos.ical.ical4j.mapping;
 
 import java.util.Iterator;
 import java.util.List;
+import com.openexchange.chronos.ical.ICalExceptionCodes;
+import com.openexchange.exception.OXException;
+import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.Parameter;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.PropertyList;
-import net.fortuna.ical4j.model.component.CalendarComponent;
-import com.openexchange.chronos.ical.ICalExceptionCodes;
-import com.openexchange.exception.OXException;
 
 /**
  * {@link AbstractICalMapping}
@@ -64,7 +64,7 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public abstract class AbstractICalMapping<T extends CalendarComponent, U> implements ICalMapping<T, U> {
+public abstract class AbstractICalMapping<T extends Component, U> implements ICalMapping<T, U> {
 
     /**
      * Initializes a new {@link AbstractICalMapping}.

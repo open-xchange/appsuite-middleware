@@ -56,9 +56,9 @@ import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ical4j.ParserTools;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.TimeZoneRegistry;
-import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.property.DateProperty;
 
 /**
@@ -67,7 +67,7 @@ import net.fortuna.ical4j.model.property.DateProperty;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public abstract class ICalDateMapping<T extends CalendarComponent, U> extends AbstractICalMapping<T, U> {
+public abstract class ICalDateMapping<T extends Component, U> extends AbstractICalMapping<T, U> {
 
     private final String propertyName;
 
@@ -144,9 +144,9 @@ public abstract class ICalDateMapping<T extends CalendarComponent, U> extends Ab
                 setValue(object, value, null != timeZone ? timeZone.getID() : null, true);
             } else {
                 Date value = new Date(property.getDate().getTime());
-                if (ParserTools.inDefaultTimeZone(property, defaultTimeZone)) {
-                    value = ParserTools.recalculate(value, defaultTimeZone);
-                }
+                //                if (ParserTools.inDefaultTimeZone(property, defaultTimeZone)) {
+                //                    value = ParserTools.recalculate(value, defaultTimeZone);
+                //                }
                 setValue(object, value, null, false);
             }
         }

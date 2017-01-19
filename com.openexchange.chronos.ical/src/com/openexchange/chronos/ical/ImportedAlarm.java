@@ -47,66 +47,44 @@
  *
  */
 
-package com.openexchange.chronos.ical.ical4j.mapping;
+package com.openexchange.chronos.ical;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.text.ParseException;
 import java.util.List;
-import com.openexchange.chronos.ical.ICalParameters;
+import com.openexchange.chronos.Alarm;
 import com.openexchange.exception.OXException;
-import net.fortuna.ical4j.model.Component;
-import net.fortuna.ical4j.model.Property;
 
 /**
- * {@link ICalTextMapping}
+ * {@link ImportedAlarm}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public abstract class ICalTextMapping<T extends Component, U> extends AbstractICalMapping<T, U> {
+public class ImportedAlarm extends AlarmComponent implements ImportedComponent {
 
-	protected final String propertyName;
+    private final int index;
+    private final List<OXException> warnings;
 
     /**
-     * Initializes a new {@link ICalTextMapping}.
+     * Initializes a new {@link ImportedAlarm}.
      *
-     * @param propertyName The name of the mapping's property
+     * @param index The component's index in the parent iCalendar structure.
+     * @param alarm The imported alarm object
+     * @param warnings A list of parser- and conversion warnings.
      */
-	protected ICalTextMapping(String propertyName) {
-		super();
-		this.propertyName = propertyName;
-	}
+    public ImportedAlarm(int index, Alarm alarm, List<OXException> warnings) {
+        super(alarm);
+        this.warnings = warnings;
+        this.index = index;
+    }
 
-	protected abstract String getValue(U object);
+    @Override
+    public int getIndex() {
+        return index;
+    }
 
-	protected abstract void setValue(U object, String value);
-
-	protected abstract Property createProperty();
-
-	@Override
-	public void export(U object, T component, ICalParameters parameters, List<OXException> warnings) {
-		String value = getValue(object);
-		if (null == value) {
-			removeProperties(component, propertyName);
-		} else {
-			Property property = component.getProperty(propertyName);
-			if (null == property) {
-				property = createProperty();
-				component.getProperties().add(property);
-			}
-			try {
-				property.setValue(value);
-			} catch (IOException | URISyntaxException | ParseException e) {
-				addConversionWarning(warnings, e, propertyName, e.getMessage());
-			}
-		}
-	}
-
-	@Override
-	public void importICal(T component, U object, ICalParameters parameters, List<OXException> warnings) {
-		Property property = component.getProperty(propertyName);
-		setValue(object, null == property ? null : property.getValue());
-	}
+    @Override
+    public List<OXException> getWarnings() {
+        return warnings;
+    }
 
 }

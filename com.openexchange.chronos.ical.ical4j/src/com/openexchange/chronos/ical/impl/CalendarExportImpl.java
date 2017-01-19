@@ -54,7 +54,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.ajax.container.ThresholdFileHolder;
-import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.FreeBusyData;
@@ -204,12 +203,6 @@ public class CalendarExportImpl implements CalendarExport {
          * initialize original vEvent component if available
          */
         VEvent originalVEvent = null;
-        if (ComponentData.class.isInstance(event)) {
-            IFileHolder originalComponent = ((ComponentData) event).getComponent();
-            if (null != originalComponent) {
-                originalVEvent = ICalUtils.parseVEventComponent(originalComponent, parameters, warnings);
-            }
-        }
         /*
          * export event data & track timezones
          */
@@ -237,12 +230,6 @@ public class CalendarExportImpl implements CalendarExport {
 
     private VAlarm exportAlarm(Alarm alarm) throws OXException {
         VAlarm originalVAlarm = null;
-        if (ComponentData.class.isInstance(alarm)) {
-            IFileHolder originalComponent = ((ComponentData) alarm).getComponent();
-            if (null != originalComponent) {
-                originalVAlarm = ICalUtils.parseVAlarmComponent(originalComponent, parameters, warnings);
-            }
-        }
         VAlarm vAlarm = mapper.exportAlarm(alarm, originalVAlarm, parameters, warnings);
         /*
          * export any arbitrary properties

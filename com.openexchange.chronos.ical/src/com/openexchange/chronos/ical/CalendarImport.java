@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.ical;
 
-import java.io.Closeable;
 import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.FreeBusyData;
@@ -61,7 +60,7 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface CalendarImport extends Closeable {
+public interface CalendarImport {
 
     /**
      * Gets the method as declared in the VCALENDAR component.

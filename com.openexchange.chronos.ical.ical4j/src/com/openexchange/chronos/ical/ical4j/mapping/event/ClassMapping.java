@@ -53,7 +53,7 @@ import java.util.List;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ical.ICalParameters;
-import com.openexchange.chronos.ical.ical4j.mapping.ICalTextMapping;
+import com.openexchange.chronos.ical.ical4j.mapping.AbstractICalMapping;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Enums;
 import net.fortuna.ical4j.model.Property;
@@ -66,37 +66,34 @@ import net.fortuna.ical4j.model.property.Clazz;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class ClassMapping extends ICalTextMapping<VEvent, Event> {
+public class ClassMapping extends AbstractICalMapping<VEvent, Event> {
 
     /**
      * Initializes a new {@link ClassMapping}.
      */
 	public ClassMapping() {
-		super(Property.CLASS);
+        super();
 	}
 
-	@Override
-	protected String getValue(Event object) {
-		return null != object.getClassification() ? object.getClassification().toString() : null;
-	}
+    @Override
+    public void export(Event object, VEvent component, ICalParameters parameters, List<OXException> warnings) {
+        removeProperties(component, Property.CLASS);
+        Classification value = object.getClassification();
+        if (null != value) {
+            component.getProperties().add(new Clazz(value.toString().toUpperCase()));
+        }
+    }
 
-	@Override
-	protected void setValue(Event object, String value) {
-        object.setClassification(Enums.parse(Classification.class, value, Classification.PUBLIC));
-	}
-
-	@Override
-	protected Property createProperty() {
-		return new Clazz();
-	}
-
-	@Override
-	public void export(Event object, VEvent component, ICalParameters parameters, List<OXException> warnings) {
-		removeProperties(component, propertyName);
-		String value = getValue(object);
-		if (null != value) {
-			component.getProperties().add(new Clazz(value.toUpperCase()));
-		}
-	}
+    @Override
+    public void importICal(VEvent component, Event object, ICalParameters parameters, List<OXException> warnings) {
+        Clazz clazz = component.getClassification();
+        if (null != clazz) {
+            try {
+                object.setClassification(Enums.parse(Classification.class, clazz.getValue()));
+            } catch (IllegalArgumentException e) {
+                addConversionWarning(warnings, e, Property.CLASS, "Ignoring unknown event classification");
+            }
+        }
+    }
 
 }
