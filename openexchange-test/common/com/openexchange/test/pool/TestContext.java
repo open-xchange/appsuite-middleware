@@ -92,6 +92,8 @@ public class TestContext implements Serializable {
     // the admin is not handled to be acquired only by one party
     private AtomicReference<TestUser> contextAdmin = new AtomicReference<>();
 
+    private AtomicReference<TestUser> noReplyUser = new AtomicReference<>();
+
     public TestContext(String name, int id) {
         this.name = name;
         this.id = id;
@@ -233,6 +235,14 @@ public class TestContext implements Serializable {
             return false;
         }
         return true;
+    }
+
+    public TestUser getNoReplyUser() {
+        return noReplyUser.get();
+    }
+
+    public void setNoReplyUser(TestUser noReplyUser) {
+        this.noReplyUser.set(noReplyUser);
     }
 
 }

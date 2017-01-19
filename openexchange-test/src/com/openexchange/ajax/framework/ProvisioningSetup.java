@@ -91,6 +91,7 @@ public class ProvisioningSetup {
     private static final String USER2_IDENTIFIER = "user2";
     private static final String USER3_IDENTIFIER = "user3";
     private static final String USER4_IDENTIFIER = "user4";
+    private static final String NO_REPLY_IDENTIFIER = "noreply";
     private static final String PARTICIPANT1_IDENTIFIER = "participant1";
     private static final String PARTICIPANT2_IDENTIFIER = "participant2";
     private static final String PARTICIPANT3_IDENTIFIER = "participant3";
@@ -163,6 +164,10 @@ public class ProvisioningSetup {
                 String userId4 = filter.get(prefix + USER4_IDENTIFIER).toString();
                 TestUser testUser4 = new TestUser(userId4, contextName, password);
                 context.addUser(testUser4);
+
+                String noReply = filter.get(prefix + NO_REPLY_IDENTIFIER).toString();
+                TestUser noReplyUser = new TestUser(noReply, contextName, password);
+                context.setNoReplyUser(noReplyUser);
 
                 context.addUserParticipants(filter.get(prefix + PARTICIPANT1_IDENTIFIER).toString());
                 context.addUserParticipants(filter.get(prefix + PARTICIPANT2_IDENTIFIER).toString());

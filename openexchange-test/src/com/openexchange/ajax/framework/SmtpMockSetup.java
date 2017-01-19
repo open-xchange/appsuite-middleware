@@ -56,6 +56,7 @@ import org.json.JSONException;
 import com.openexchange.ajax.smtptest.actions.SMTPInitResponse;
 import com.openexchange.ajax.smtptest.actions.StartSMTPRequest;
 import com.openexchange.ajax.smtptest.actions.StopSMTPRequest;
+import com.openexchange.ajax.smtptest.actions.UpdateMailAccountRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.test.pool.TestContext;
 import com.openexchange.test.pool.TestContextPool;
@@ -91,32 +92,33 @@ public class SmtpMockSetup {
         contextsWithStartedMock = TestContextPool.getCopyOfCurrentlyAvailableContexts();
 
         for (TestContext testContext : contextsWithStartedMock) {
-            TestUser testUser = testContext.acquireUser();
-            startSmtpMockServerAndSetNoReply(testUser);
-
+            TestUser noReplyUser = testContext.getNoReplyUser();
+            SmtpMockConfig smtpMockConfig = startSmtpMockServerAndSetNoReply(noReplyUser);
+            
             List<TestUser> allUsers = testContext.getCopyOfAll();
             for (TestUser user : allUsers) {
-                startSmtpMockServer(user);
+                rewriteMailAccountConfig(user, smtpMockConfig);
             }
         }
     }
 
-    private static void startSmtpMockServerAndSetNoReply(TestUser user) {
+    private static SmtpMockConfig startSmtpMockServerAndSetNoReply(TestUser userNoReply) {
         try {
-            AJAXClient client = new AJAXClient(user);
-            StartSMTPRequest request = new StartSMTPRequest(true, client.getValues().getContextId(), "no-reply@" + user.getContext()); //TODO provide no-reply via provisioning.properties
+            AJAXClient client = new AJAXClient(userNoReply);
+            StartSMTPRequest request = new StartSMTPRequest(true, client.getValues().getContextId(), userNoReply.getLogin());
 
             SMTPInitResponse response = client.execute(request);
+            return new SmtpMockConfig(response.getHostname(), response.getPort());
         } catch (OXException | IOException | JSONException e) {
             LOG.error("", e);
         }
+        return null;
     }
 
-    private static void startSmtpMockServer(TestUser user) {
+    private static void rewriteMailAccountConfig(TestUser user, SmtpMockConfig config) {
         try {
             AJAXClient client = new AJAXClient(user);
-            StartSMTPRequest request = new StartSMTPRequest(true);
-            SMTPInitResponse response = client.execute(request);
+            SMTPInitResponse response = client.execute(new UpdateMailAccountRequest(config.getHostname(), config.getPort()));
         } catch (OXException | IOException | JSONException e) {
             LOG.error("", e);
         }
@@ -150,6 +152,25 @@ public class SmtpMockSetup {
             SMTPInitResponse response = client.execute(request);
         } catch (OXException | IOException | JSONException e) {
             LOG.error("", e);
+        }
+    }
+
+    private static class SmtpMockConfig {
+
+        private final int port;
+        private final String hostname;
+
+        public SmtpMockConfig(String hostname, int port) {
+            this.port = port;
+            this.hostname = hostname;
+        }
+
+        public int getPort() {
+            return port;
+        }
+
+        public String getHostname() {
+            return hostname;
         }
     }
 }

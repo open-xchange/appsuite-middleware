@@ -49,55 +49,66 @@
 
 package com.openexchange.ajax.smtptest.actions;
 
+import java.io.IOException;
 import org.json.JSONException;
-import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.framework.Header;
+import com.openexchange.ajax.framework.Params;
 
 /**
  * 
- * {@link SMTPInitResponse}
+ * {@link UpdateMailAccountRequest}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since v7.8.3
+ * @since v7.8.4
  */
-public class SMTPInitResponse extends AbstractAJAXResponse {
+public class UpdateMailAccountRequest implements AJAXRequest<SMTPInitResponse> {
 
-    private final boolean ok;
-    private final String hostname;
-    private final int port;
+    private String hostName;
+    private int port;
 
-    /**
-     * Initializes a new {@link SMTPInitResponse}.
-     * 
-     * @param response
-     * @throws JSONException
-     */
-    protected SMTPInitResponse(Response response) throws JSONException {
-        super(response);
-        JSONObject jsonObject = new JSONObject(response.getData().toString());
-        this.ok = jsonObject.getBoolean("ok");
-        if (jsonObject.has("hostname")) {
-            this.hostname = jsonObject.getString("hostname");
-        } else {
-            this.hostname = null;
-        }
-        if (jsonObject.has("port")) {
-            this.port = jsonObject.getInt("port");
-        } else {
-            this.port = -1;
-        }
+    public UpdateMailAccountRequest(String hostName, int port) {
+        this.hostName = hostName;
+        this.port = port;
     }
 
-    public boolean ok() throws JSONException {
-        return ok;
+    @Override
+    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
+        return Method.GET;
     }
 
-    public String getHostname() throws JSONException {
-        return hostname;
+    @Override
+    public String getServletPath() {
+        return "/ajax/smtpserver/test";
     }
 
-    public int getPort() throws JSONException {
-        return port;
+    @Override
+    public Parameter[] getParameters() throws IOException, JSONException {
+        return new Params(AJAXServlet.PARAMETER_ACTION, "updateMailAccount", "hostname", this.hostName, "port", Integer.toString(this.port)).toArray();
     }
+
+    @Override
+    public AbstractAJAXParser<? extends SMTPInitResponse> getParser() {
+        return new AbstractAJAXParser<SMTPInitResponse>(false) {
+
+            @Override
+            protected SMTPInitResponse createResponse(Response response) throws JSONException {
+                return new SMTPInitResponse(response);
+            }
+        };
+    }
+
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        return null;
+    }
+
+    @Override
+    public Header[] getHeaders() {
+        return NO_HEADER;
+    }
+
 }
