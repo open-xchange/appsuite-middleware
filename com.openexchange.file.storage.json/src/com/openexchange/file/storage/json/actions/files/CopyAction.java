@@ -49,14 +49,17 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStoragePermission;
@@ -66,7 +69,6 @@ import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
-
 
 /**
  * {@link CopyAction}
@@ -98,7 +100,22 @@ public class CopyAction extends AbstractWriteAction {
             newId = fileAccess.copy(id, version, folder, file, null, request.getSentColumns());
         }
 
-        return new AJAXRequestResult(newId, new Date(file.getSequenceNumber()));
+        if (newId != null) {
+            return new AJAXRequestResult(newId, new Date(file.getSequenceNumber()));
+        }
+
+        boolean ignoreWarnings = AJAXRequestDataTools.parseBoolParameter("ignoreWarnings", request.getRequestData(), false);
+        if (newId == null && ignoreWarnings) {
+            newId = fileAccess.saveDocument(file, null, file.getSequenceNumber(), request.getSentColumns(), false, ignoreWarnings, false);
+            return new AJAXRequestResult(newId, new Date(file.getSequenceNumber()));
+        } else {
+            AJAXRequestResult result = new AJAXRequestResult(id);
+            Collection<OXException> warnings = fileAccess.getAndFlushWarnings();
+            result.addWarnings(warnings);
+            result.setException(FileStorageExceptionCodes.FILE_UPDATE_ABORTED.create(getFilenameSave(id, fileAccess), id));
+
+            return result;
+        }
     }
 
     private AJAXRequestResult handlePairs(List<IdVersionPair> pairs, InfostoreRequest request) throws OXException {
@@ -153,13 +170,37 @@ public class CopyAction extends AbstractWriteAction {
         } finally {
             if (error) {
                 for (String folderId : newFolders) {
-                    try { folderAccess.deleteFolder(folderId, true); } catch (Exception e) {/* ignore */}
+                    try {
+                        folderAccess.deleteFolder(folderId, true);
+                    } catch (Exception e) {
+                        /* ignore */}
                 }
                 for (String fileId : newFiles) {
-                    try { fileAccess.removeDocument(Collections.singletonList(fileId), FileStorageFileAccess.DISTANT_FUTURE, true); } catch (Exception e) {/* ignore */}
+                    try {
+                        fileAccess.removeDocument(Collections.singletonList(fileId), FileStorageFileAccess.DISTANT_FUTURE, true);
+                    } catch (Exception e) {
+                        /* ignore */}
                 }
             }
         }
+    }
+
+    private static String getFilenameSave(String id, IDBasedFileAccess fileAccess) {
+        String name = null;
+        if (null != id && null != fileAccess) {
+            try {
+                File metadata = fileAccess.getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION);
+                if (null != metadata) {
+                    name = metadata.getFileName();
+                    if (null == name) {
+                        name = metadata.getTitle();
+                    }
+                }
+            } catch (OXException e) {
+                org.slf4j.LoggerFactory.getLogger(UpdateAction.class).debug("Error getting name for file {}: {}", id, e.getMessage(), e);
+            }
+        }
+        return name;
     }
 
 }
