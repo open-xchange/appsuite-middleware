@@ -107,8 +107,8 @@ public class CurrentDateTestCommandParser implements CommandParser<TestCommand> 
         // add the zone tag
         if (session != null && session.getUser().getTimeZone() != null) {
             argList.add(ArgumentUtil.createTagArgument("zone"));
-            String zone = java.time.ZoneOffset.ofTotalSeconds(TimeZone.getTimeZone(session.getUser().getTimeZone()).getRawOffset() / 1000).toString();
-            zone = zone.replace(":", "");
+            TimeZone tZone = TimeZone.getTimeZone(session.getUser().getTimeZone());
+            String zone = String.format("%+03d%02d", tZone.getRawOffset() / 3600000, Math.abs((tZone.getRawOffset() / 60000) % 60));
             argList.add(CommandParserJSONUtil.stringToList(zone));
         }
 
