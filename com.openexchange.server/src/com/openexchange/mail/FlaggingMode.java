@@ -144,6 +144,7 @@ public enum FlaggingMode {
      *
      * @param session The session
      * @return The numeric identifier for configured color
+     * @throws NullPointerException If specified session is <code>null</code>
      */
     public static final int getFlaggingColor(Session session) {
         ConfigViewFactory factory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
@@ -156,6 +157,7 @@ public enum FlaggingMode {
      * @param session The session
      * @param factory The factory to use
      * @return The numeric identifier for configured color
+     * @throws NullPointerException If specified session is <code>null</code>
      */
     public static final int getFlaggingColor(Session session, ConfigViewFactory factory) {
         int def = 1;
@@ -178,6 +180,7 @@ public enum FlaggingMode {
      *
      * @param session The session
      * @return The configured flagging mode for the user
+     * @throws NullPointerException If specified session is <code>null</code>
      */
     public static FlaggingMode getFlaggingMode(Session session) {
         ConfigViewFactory factory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
@@ -190,6 +193,7 @@ public enum FlaggingMode {
      * @param session The session
      * @param factory The factory to use
      * @return The configured flagging mode for the user
+     * @throws NullPointerException If specified session is <code>null</code>
      */
     public static FlaggingMode getFlaggingMode(Session session, ConfigViewFactory factory) {
         if (factory != null) {
