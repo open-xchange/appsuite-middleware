@@ -1,9 +1,3 @@
-open-xchange-l10n (7.8.0-42) stable; urgency=medium
-
-  * Build for patch 2017-01-23 (3876)
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 16 Jan 2017 11:57:48 +0100
-
 open-xchange-l10n (7.8.0-41) stable; urgency=medium
 
   * Build for patch 2016-11-21 (3729)
