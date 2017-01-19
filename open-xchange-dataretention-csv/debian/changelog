@@ -1,3 +1,9 @@
+open-xchange-dataretention-csv (7.8.2-22) stable; urgency=medium
+
+  * Build for patch 2017-01-23 (3878)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 19 Jan 2017 12:04:17 +0100
+
 open-xchange-dataretention-csv (7.8.2-21) stable; urgency=medium
 
   * Build for patch 2017-01-18 (3867)
