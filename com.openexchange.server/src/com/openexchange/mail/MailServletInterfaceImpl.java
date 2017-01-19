@@ -1630,20 +1630,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             }
         }
 
-        if (mail.getColorLabel() == 0 && mail.isFlagged()) {
-            FlaggingMode mode = FlaggingMode.getFlaggingMode(session);
-            if (mode.equals(FlaggingMode.FLAGGED_IMPLICIT)) {
-                mail.setColorLabel(FlaggingMode.getFlaggingColor(session));
-            }
-        }
-
-        if (mail.getColorLabel() != 0) {
-            FlaggingMode mode = FlaggingMode.getFlaggingMode(session);
-            if (mode.equals(FlaggingMode.FLAGGED_ONLY)) {
-                mail.setColorLabel(0);
-            }
-        }
-
         return mail;
     }
 
@@ -1993,7 +1979,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
         if (mode.equals(FlaggingMode.FLAGGED_ONLY)) {
             for (MailMessage mail : mails) {
-                if (mail.getColorLabel() != 0) {
+                if (mail != null && mail.getColorLabel() != 0) {
                     mail.setColorLabel(0);
                 }
             }
