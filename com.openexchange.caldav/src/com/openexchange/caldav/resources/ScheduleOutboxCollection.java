@@ -159,16 +159,13 @@ public class ScheduleOutboxCollection extends DAVCollection {
     }
 
     private List<FreeBusyData> parseFreeBusyRequest(InputStream inputStream) throws WebdavProtocolException {
-        CalendarImport calendarImport = null;
         try {
             ICalService iCalService = getFactory().requireService(ICalService.class);
             ICalParameters parameters = iCalService.initParameters();
-            calendarImport = iCalService.importICal(inputStream, parameters);
+            CalendarImport calendarImport = iCalService.importICal(inputStream, parameters);
             return calendarImport.getFreeBusy();
         } catch (OXException e) {
             throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), HttpServletResponse.SC_BAD_REQUEST);
-        } finally {
-            Streams.close(calendarImport);
         }
     }
 

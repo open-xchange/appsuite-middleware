@@ -163,11 +163,11 @@ public class Tools {
         if (EventComponent.class.isInstance(event)) {
             return (EventComponent) event;
         }
-        return new EventComponent(event, null);
+        return new EventComponent(event);
     }
 
     public static AlarmComponent addProperty(Alarm alarm, ICalProperty property) {
-        AlarmComponent component = AlarmComponent.class.isInstance(alarm) ? (AlarmComponent) alarm : new AlarmComponent(alarm, null);
+        AlarmComponent component = AlarmComponent.class.isInstance(alarm) ? (AlarmComponent) alarm : new AlarmComponent(alarm);
         List<ICalProperty> properties = component.getProperties();
         if (null == properties) {
             properties = new ArrayList<ICalProperty>();
@@ -178,7 +178,7 @@ public class Tools {
     }
 
     public static EventComponent addProperty(Event event, ICalProperty property) {
-        EventComponent component = EventComponent.class.isInstance(event) ? (EventComponent) event : new EventComponent(event, null);
+        EventComponent component = asComponent(event);
         List<ICalProperty> properties = component.getProperties();
         if (null == properties) {
             properties = new ArrayList<ICalProperty>();
