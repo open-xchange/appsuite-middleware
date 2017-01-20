@@ -131,6 +131,9 @@ public class InitService extends SAMLServlet {
             if (flow.equals("login") || flow.equals("relogin")) {
                 redirectURI = tryAutoLogin(httpRequest, httpResponse);
                 if (redirectURI == null) {
+                    redirectURI = provider.getStaticLoginRedirectLocation(httpRequest, httpResponse);
+                }
+                if (redirectURI == null) {
                     redirectURI = provider.buildAuthnRequest(httpRequest, httpResponse);
                 }
             } else if (flow.equals("logout")) {

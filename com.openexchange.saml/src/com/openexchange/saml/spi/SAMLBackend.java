@@ -220,4 +220,26 @@ public interface SAMLBackend {
      */
     AuthnRequestInfo parseRelayState(Response response, String relayState);
 
+    /**
+     * Method to retrieve the SAMLConfig
+     * When requesting config parameters, this method should always be used instead of saving the config parameters
+     * @return The SAMLConfig to be used
+     */
+    SAMLConfig getConfig();
+
+    /**
+     * Returns the samlPath part of the servlet path, can be left empty for default path <br>prefix/saml/</br>
+     * If set, the servlet path for this SAMLBackend will be changed to <br>prefix/saml/samlPath/</br>
+     * Allowed values are [a-zA-Z] or <code>null</code>
+     * @return samlPath or <code>null</code>
+     */
+    String getPath();
+
+    /**
+     * Returns a static redirect for login if present or <code>null</code>
+     * @param httpRequest The servlet request
+     * @param httpResponse The servlet response
+     * @return a static redirect for login situations or <code>null</code>
+     */
+    String getStaticLoginRedirectLocation(HttpServletRequest httpRequest, HttpServletResponse httpResponse);
 }

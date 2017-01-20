@@ -208,14 +208,15 @@ public class SAMLWebSSOProviderTest {
                 return "/appsuite/api/";
             }
         });
-        services.add(SAMLBackend.class, new TestSAMLBackend(credentialProvider));
+        TestSAMLBackend samlBackend = new TestSAMLBackend(credentialProvider, config);
+        services.add(SAMLBackend.class, samlBackend);
         sessiondService = new SimSessiondService();
         services.add(SessiondService.class, sessiondService);
         userService = new SimUserService();
         services.add(UserService.class, userService);
         userService.addUser(new SimUser(1), 1);
         stateManagement = new SimStateManagement();
-        provider = new WebSSOProviderImpl(config, openSAML, stateManagement, services);
+        provider = new WebSSOProviderImpl(config, openSAML, stateManagement, services, samlBackend);
     }
 
     @Test

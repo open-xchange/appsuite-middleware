@@ -47,61 +47,33 @@
  *
  */
 
-package com.openexchange.saml;
+package com.openexchange.saml.impl;
 
-import java.io.IOException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.opensaml.saml2.core.Assertion;
-import org.opensaml.saml2.core.LogoutRequest;
-import org.opensaml.saml2.core.Response;
-import com.openexchange.exception.OXException;
-import com.openexchange.saml.spi.AbstractSAMLBackend;
-import com.openexchange.saml.spi.AuthenticationInfo;
-import com.openexchange.saml.spi.CredentialProvider;
-import com.openexchange.saml.spi.LogoutInfo;
-
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.saml.SAMLConfig;
 
 /**
- * {@link TestSAMLBackend}
+ * Default implementation of {@link SAMLConfig} based on {@link ConfigurationService} and
+ * <code>saml.properties</code>.
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.1
+ * @author <a href="mailto:felix.marx@open-xchange.com">Felix Marx</a>
+ * @since v7.8.4
  */
-public class TestSAMLBackend extends AbstractSAMLBackend {
+public class DefaultConfigReference {
 
-    private final CredentialProvider credentialProvider;
-    private SAMLConfig config;
+    private static final AtomicReference<DefaultConfig> REGISTRY = new AtomicReference<DefaultConfig>();
 
-    public TestSAMLBackend(CredentialProvider credentialProvider, SAMLConfig config) {
-        this.credentialProvider = credentialProvider;
-        this.config = config;
+    public static DefaultConfig getDefaultConfig() {
+        DefaultConfig defaultConfig = REGISTRY.get();
+        if (null == defaultConfig) {
+            throw new IllegalArgumentException("DefaultConfig not started");
+        }
+        return defaultConfig;
     }
 
-    @Override
-    protected CredentialProvider doGetCredentialProvider() {
-        return credentialProvider;
+    public static void setDefaultConfig(DefaultConfig defaultConfig) {
+        REGISTRY.set(defaultConfig);
     }
 
-    @Override
-    protected AuthenticationInfo doResolveAuthnResponse(Response response, Assertion assertion) throws OXException {
-        AuthenticationInfo authInfo = new AuthenticationInfo(1, 1);
-        authInfo.setProperty("com.openexchange.saml.test.IsTest", Boolean.TRUE.toString());
-        return authInfo;
-    }
-
-    @Override
-    protected LogoutInfo doResolveLogoutRequest(LogoutRequest request) throws OXException {
-        return new LogoutInfo();
-    }
-
-    @Override
-    protected void doFinishLogout(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException {
-
-    }
-
-    @Override
-    public SAMLConfig getConfig() {
-        return config;
-    }
 }

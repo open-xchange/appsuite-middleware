@@ -133,4 +133,12 @@ public interface SAMLWebSSOProvider {
      */
     String getMetadataXML() throws OXException;
 
+    /**
+     * Returns a static redirect for login if present or <code>null</code>
+     * @param httpRequest The servlet request
+     * @param httpResponse The servlet response
+     * @return a static redirect for login situations or <code>null</code>
+     */
+    String getStaticLoginRedirectLocation(HttpServletRequest httpRequest, HttpServletResponse httpResponse);
+
 }

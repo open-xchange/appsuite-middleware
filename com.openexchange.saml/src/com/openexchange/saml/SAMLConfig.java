@@ -49,6 +49,7 @@
 
 package com.openexchange.saml;
 
+import java.util.Set;
 import com.openexchange.saml.impl.DefaultConfig;
 
 /**
@@ -162,4 +163,10 @@ public interface SAMLConfig {
      * @return <code>true</code> if auto-login is on for SessionIndex.
      */
     boolean isSessionIndexAutoLoginEnabled();
+
+    /**
+     * Gets the hosts that this SAMLConfig is related to;
+     * @return The Set of hosts or all, that this configuration should apply to
+     */
+    Set<String> getHosts();
 }
