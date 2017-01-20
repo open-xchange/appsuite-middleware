@@ -56,10 +56,14 @@ import java.net.InetAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.channels.SocketChannel;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import javax.net.ssl.HandshakeCompletedListener;
 import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
+import com.openexchange.net.utils.Strings;
 
 /**
  * {@link DelegatingSSLSocket} - A sub-class of <code>javax.net.ssl.SSLSocket</code> that delegates to an existing instance of <code>javax.net.ssl.SSLSocket</code>.
@@ -70,6 +74,7 @@ import javax.net.ssl.SSLSocket;
 public class DelegatingSSLSocket extends SSLSocket {
 
     private final SSLSocket delegate;
+    private volatile SocketAddress endpoint;
 
     /**
      * Initializes a new {@link DelegatingSSLSocket}.
@@ -86,11 +91,13 @@ public class DelegatingSSLSocket extends SSLSocket {
 
     @Override
     public void connect(SocketAddress endpoint) throws IOException {
+        this.endpoint = endpoint;
         delegate.connect(endpoint);
     }
 
     @Override
     public void connect(SocketAddress endpoint, int timeout) throws IOException {
+        this.endpoint = endpoint;
         delegate.connect(endpoint, timeout);
     }
 
@@ -384,33 +391,90 @@ public class DelegatingSSLSocket extends SSLSocket {
         delegate.setWantClientAuth(want);
     }
 
+    private static final MessageMatcher MATCHER_TRUST_ANCHORS_ERROR = new EqualsMatcher("the trustAnchors parameter must be non-empty", true);
+    private static final MessageMatcher MATCHER_INCORRECT_SHUTDOWN_ERROR = new EqualsMatcher("ssl peer shut down incorrectly", true);
+    private static final MessageMatcher MATCHER_HANDSHAKE_FAILURE_ERROR = new ContainsMatcher("handshake_failure", false);
+
     @Override
     public void startHandshake() throws IOException {
         try {
             delegate.startHandshake();
         } catch (javax.net.ssl.SSLException e) {
-            if (matchesException(e, java.security.InvalidAlgorithmParameterException.class, "the trustAnchors parameter must be non-empty")) {
+            if (matchesException(e, java.security.InvalidAlgorithmParameterException.class, MATCHER_TRUST_ANCHORS_ERROR)) {
                 throw new javax.net.ssl.SSLException("The JVM cannot find the truststore required for SSL, or it does not contain the required certificates."
                     + " Please check JVM's truststore configuration; e.g. specified via \"javax.net.ssl.trustStore\" JVM argument (if \"com.openexchange.net.ssl.default.truststore.enabled\" is true)"
                     + " or \"com.openexchange.net.ssl.custom.truststore.path\" property (if \"com.openexchange.net.ssl.custom.truststore.enabled\" is true)", e);
             }
 
-            if (matchesException(e, java.io.EOFException.class, "ssl peer shut down incorrectly")) {
-                throw new javax.net.ssl.SSLException("The remote host closed connection during handshake unexpectedly. Most likey because the end-point expects a protocol (TLSv1, TLSv1.1, TLSv1.2, whatever),"
-                    + " that is not enabled/available for the JVM.", e);
+            if (matchesException(e, java.io.EOFException.class, MATCHER_INCORRECT_SHUTDOWN_ERROR)) {
+                // E.g. determine supported protocols/cipher suites using https://www.ssllabs.com/ssltest/index.html
+                SocketAddress endpoint = this.endpoint;
+                String endpointInfo = null == endpoint ? "" : (" \"" + endpoint + "\"");
+                Set<String> protocols = new LinkedHashSet<String>(Arrays.asList(getEnabledProtocols()));
+                throw new javax.net.ssl.SSLException("The remote end-point" + endpointInfo + " closed connection during handshake unexpectedly. Most likey because the end-point expects a protocol,"
+                    + " that is not enabled/available for the JVM. Enabled protocols are: " + protocols + ". You may want to let supported protocols/cipher suite be determined by using https://www.ssllabs.com/ssltest/index.html", e);
+            }
+
+            if (MATCHER_HANDSHAKE_FAILURE_ERROR.matches(e.getMessage())) {
+                // E.g. determine supported protocols/cipher suites using https://www.ssllabs.com/ssltest/index.html
+                SocketAddress endpoint = this.endpoint;
+                String endpointInfo = null == endpoint ? "" : (" \"" + endpoint + "\"");
+                Set<String> protocols = new LinkedHashSet<String>(Arrays.asList(getEnabledProtocols()));
+                // Set<String> ciperSuites = new LinkedHashSet<String>(Arrays.asList(getEnabledCipherSuites()));
+                throw new javax.net.ssl.SSLException("The SSL hand-shake with remote end-point" + endpointInfo + " failed. Most likey because the end-point expects a protocol or cipher suite,"
+                    + " that is not enabled/available for the JVM. Enabled protocols are: " + protocols + ". You may want to let supported protocols/cipher suite be determined by using https://www.ssllabs.com/ssltest/index.html", e);
             }
 
             throw e;
         }
     }
 
-    private static boolean matchesException(Throwable error, Class<? extends Exception> expectedClass, String expectedMessage) {
+    private static boolean matchesException(Throwable error, Class<? extends Exception> expectedClass, MessageMatcher messageMatcher) {
         if (expectedClass.isInstance(error)) {
-            return expectedMessage.equalsIgnoreCase(error.getMessage());
+            return messageMatcher.matches(error.getMessage());
         }
 
         Throwable cause = error.getCause();
-        return null == cause ? false : matchesException(cause, expectedClass, expectedMessage);
+        return null == cause ? false : matchesException(cause, expectedClass, messageMatcher);
+    }
+
+    private static interface MessageMatcher {
+
+        boolean matches(String message);
+    }
+
+    private static final class EqualsMatcher implements MessageMatcher {
+
+        private final String expectedMessage;
+        private final boolean ignoreCase;
+
+        EqualsMatcher(String expectedMessage, boolean ignoreCase) {
+            super();
+            this.expectedMessage = expectedMessage;
+            this.ignoreCase = ignoreCase;
+        }
+
+        @Override
+        public boolean matches(String message) {
+            return ignoreCase ? expectedMessage.equalsIgnoreCase(message) : expectedMessage.equals(message);
+        }
+    }
+
+    private static final class ContainsMatcher implements MessageMatcher {
+
+        private final String containedSequence;
+        private final boolean ignoreCase;
+
+        ContainsMatcher(String containedSequence, boolean ignoreCase) {
+            super();
+            this.containedSequence = containedSequence;
+            this.ignoreCase = ignoreCase;
+        }
+
+        @Override
+        public boolean matches(String message) {
+            return null != message && (ignoreCase ? Strings.asciiLowerCase(message) : message).indexOf(containedSequence) >= 0;
+        }
     }
 
 }
