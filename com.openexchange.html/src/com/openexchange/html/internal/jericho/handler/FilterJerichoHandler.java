@@ -63,7 +63,9 @@ import java.net.MalformedURLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -710,7 +712,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
             }
         }
 
-        List<Attribute> uriAttributes = replaceUrls ? startTag.getURIAttributes() : Collections.<Attribute> emptyList();
+        Set<String> uriAttributes = replaceUrls ? setFor(startTag.getURIAttributes()) : Collections.<Attribute> emptySet();
         for (Map.Entry<String, String> attribute : attrMap.entrySet()) {
             String attr = attribute.getKey();
             if ("style".equals(attr)) {
@@ -809,6 +811,24 @@ public final class FilterJerichoHandler implements JerichoHandler {
             htmlBuilder.append('/');
         }
         htmlBuilder.append('>');
+    }
+
+    private Set<String> setFor(List<Attribute> attributes) {
+        if (null == attributes) {
+            return Collections.emptySet();
+        }
+
+        int size = attributes.size();
+        if (size <= 0) {
+            return Collections.emptySet();
+        }
+
+        Set<String> names = new LinkedHashSet<>(size);
+        Iterator<Attribute> iter = attributes.iterator();
+        for (int i = size; i-- > 0;) {
+            names.add(iter.next().getKey());
+        }
+        return names;
     }
 
     /**
