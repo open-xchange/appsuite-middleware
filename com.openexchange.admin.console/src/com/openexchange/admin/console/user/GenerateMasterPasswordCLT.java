@@ -231,6 +231,7 @@ public class GenerateMasterPasswordCLT {
      * @param password The plain-text password to encrypt
      * @return The encrypted password
      * @throws OXException
+     * @throws IllegalArgumentException if the request encryption algorithm string is either <code>null</code>, or empty, or unknown
      */
     private static String encryptPassword(final String encryption, final String password) throws OXException {
         IPasswordMech pm = getPasswordMechFor(encryption);
@@ -279,11 +280,12 @@ public class GenerateMasterPasswordCLT {
      * Gets the password mechanism for given identifier
      *
      * @param identifier The identifier
-     * @return The password mechanism or <code>null</code>
+     * @return The password mechanism
+     * @throws IllegalArgumentException if the identifier is either <code>null</code>, or empty, or unknown
      */
     public static IPasswordMech getPasswordMechFor(String identifier) {
         if (Strings.isEmpty(identifier)) {
-            return null;
+            throw new IllegalArgumentException("The identifier for the password mechanism can neither be 'null' nor empty.");
         }
         String id = Strings.toUpperCase(identifier);
         if (false == id.startsWith("{")) {
@@ -298,6 +300,6 @@ public class GenerateMasterPasswordCLT {
                 return pm;
             }
         }
-        return null;
+        throw new IllegalArgumentException("The identifier '" + identifier + "' for the password mechanism is unknown.");
     }
 }
