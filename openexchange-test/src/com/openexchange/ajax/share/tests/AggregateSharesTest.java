@@ -222,7 +222,7 @@ public class AggregateSharesTest extends ShareTest {
          */
         ExtendedPermissionEntity guestB = discoverGuestEntity(client2, api, module2, folderB.getObjectID(), matchingPermissionB.getEntity());
         checkGuestPermission(guestPermission, guestB);
-        String shareURLB = discoverShareURL(client2, guestB);
+        String shareURLB = discoverShareURL(getNoReplyClient(), guestB);
         /*
          * check permission entities
          */
@@ -312,7 +312,7 @@ public class AggregateSharesTest extends ShareTest {
          */
         ExtendedPermissionEntity guestB = discoverGuestEntity(client2, api, module2, folderB.getObjectID(), matchingPermissionB.getEntity());
         checkGuestPermission(guestPermission, guestB);
-        String shareURLB = discoverShareURL(client2, guestB);
+        String shareURLB = discoverShareURL(getNoReplyClient(), guestB);
         /*
          * check permission entities
          */
