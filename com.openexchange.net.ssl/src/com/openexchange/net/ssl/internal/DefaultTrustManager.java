@@ -85,7 +85,7 @@ public class DefaultTrustManager extends AbstractTrustManager {
         }
 
         if (false == useDefaultTruststore) {
-            LOG.info("Using default JVM truststore is disabled by configuration.");
+            LOG.info("Using default JVM truststore is disabled.");
             return null;
         }
 
