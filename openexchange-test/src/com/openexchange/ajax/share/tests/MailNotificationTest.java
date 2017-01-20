@@ -342,7 +342,7 @@ public class MailNotificationTest extends ShareTest {
         permission.setEntity(internalUserId);
         permission.setAllPermission(OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
         share(testFolder, file, permission, null, false);
-        List<Message> messages = getClient().execute(new GetMailsRequest()).getMessages();
+        List<Message> messages = getNoReplyClient().execute(new GetMailsRequest()).getMessages();
         assertEquals(0, messages.size());
     }
 
@@ -359,7 +359,7 @@ public class MailNotificationTest extends ShareTest {
     }
 
     private Message assertAndGetMessage() throws JSONException, MessagingException, OXException, IOException {
-        List<Message> messages = getClient().execute(new GetMailsRequest()).getMessages();
+        List<Message> messages = getNoReplyClient().execute(new GetMailsRequest()).getMessages();
         assertEquals(1, messages.size());
         return messages.get(0);
     }

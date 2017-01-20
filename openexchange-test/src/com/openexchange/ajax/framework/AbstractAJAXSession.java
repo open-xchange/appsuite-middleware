@@ -78,7 +78,6 @@ public abstract class AbstractAJAXSession {
 
     private AJAXClient client;
     private AJAXClient client2;
-    private AJAXClient noReply;
     protected TestContext testContext;
     protected TestUser admin;
     protected TestUser testUser;
@@ -113,10 +112,6 @@ public abstract class AbstractAJAXSession {
         return client2;
     }
 
-    protected final AJAXClient getNoReply() {
-        return noReply;
-    }
-
     /**
      * Gets the client identifier to use when performing a login
      *
@@ -138,7 +133,6 @@ public abstract class AbstractAJAXSession {
         client = null == clientId ? new AJAXClient(testUser) : new AJAXClient(testUser, clientId);
         client2 = null == clientId ? new AJAXClient(testUser2) : new AJAXClient(testUser2, clientId);
         admin = testContext.getAdmin();
-        noReply = new AJAXClient(testContext.getNoReplyUser());
 
         catm = new CalendarTestManager(client);
         testManager.add(catm);

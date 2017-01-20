@@ -750,7 +750,7 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
      * @return The share URL, or <code>null</code> if not found
      */
     protected String discoverShareURL(ExtendedPermissionEntity guestEntity) throws Exception {
-        return discoverShareURL(getClient(), guestEntity);
+        return discoverShareURL(getNoReplyClient(), guestEntity);
     }
 
     /**

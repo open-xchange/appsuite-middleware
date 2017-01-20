@@ -65,14 +65,14 @@ public abstract class AbstractSmtpAJAXSession extends AbstractAJAXSession {
         super.setUp();
         noReplyUser = testContext.getNoReplyUser();
         noReplyClient = new AJAXClient(noReplyUser);
-        noReplyClient.execute(new ClearMailsRequest());
+        getNoReplyClient().execute(new ClearMailsRequest());
     }
 
     @After
     public void tearDown() throws Exception {
         try {
-            if (noReplyClient != null) {
-                noReplyClient.logout();
+            if (getNoReplyClient() != null) {
+                getNoReplyClient().logout();
                 noReplyClient = null;
             }
         } catch (Exception e) {
@@ -82,4 +82,7 @@ public abstract class AbstractSmtpAJAXSession extends AbstractAJAXSession {
         }
     }
 
+    public AJAXClient getNoReplyClient() {
+        return noReplyClient;
+    }
 }

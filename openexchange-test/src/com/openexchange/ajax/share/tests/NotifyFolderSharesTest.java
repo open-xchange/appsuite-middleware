@@ -56,7 +56,7 @@ import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.NotifyFolderRequest;
-import com.openexchange.ajax.smtptest.actions.GetMailsRequest;
+import com.openexchange.ajax.smtptest.actions.ClearMailsRequest;
 import com.openexchange.ajax.smtptest.actions.GetMailsResponse.Message;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.container.FolderObject;
@@ -138,12 +138,12 @@ public class NotifyFolderSharesTest extends ShareTest {
         /*
          * pop inbox, then notify recipient again
          */
-        getClient().execute(new GetMailsRequest());
+        getNoReplyClient().execute(new ClearMailsRequest());
         getClient().execute(new NotifyFolderRequest(String.valueOf(folder.getObjectID()), matchingPermission.getEntity()));
         /*
          * verify notification message
          */
-        Message notificationMessage = discoverInvitationMessage(getClient(), emailAddress);
+        Message notificationMessage = discoverInvitationMessage(getNoReplyClient(), emailAddress);
         assertNotNull(notificationMessage);
     }
 

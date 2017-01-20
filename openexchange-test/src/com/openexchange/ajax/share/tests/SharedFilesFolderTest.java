@@ -143,7 +143,7 @@ public class SharedFilesFolderTest extends ShareTest {
         file = updateFile(file, new Field[] { Field.OBJECT_PERMISSIONS });
         String sharedFileId = sharedFileId(file.getId());
 
-        String invitationLink = discoverInvitationLink(getClient(), guestEmail);
+        String invitationLink = discoverInvitationLink(getNoReplyClient(), guestEmail);
         GuestClient guestClient = resolveShare(invitationLink);
         guestPermission.setEntity(guestClient.getValues().getUserId());
         guestClient.checkFileAccessible(sharedFileId, guestPermission);

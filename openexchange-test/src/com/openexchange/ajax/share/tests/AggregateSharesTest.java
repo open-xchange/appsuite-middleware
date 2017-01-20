@@ -191,7 +191,7 @@ public class AggregateSharesTest extends ShareTest {
          */
         ExtendedPermissionEntity guestA = discoverGuestEntity(client1, api, module1, folderA.getObjectID(), matchingPermissionA.getEntity());
         checkGuestPermission(guestPermission, guestA);
-        String shareURLA = discoverShareURL(client1, guestA);
+        String shareURLA = discoverShareURL(getNoReplyClient(), guestA);
         /*
          * as user 2 with client 2, create folder B shared to guest user
          */
@@ -281,7 +281,7 @@ public class AggregateSharesTest extends ShareTest {
          */
         ExtendedPermissionEntity guestA = discoverGuestEntity(client1, api, module1, folderA.getObjectID(), matchingPermissionA.getEntity());
         checkGuestPermission(guestPermission, guestA);
-        String shareURLA = discoverShareURL(client1, guestA);
+        String shareURLA = discoverShareURL(getNoReplyClient(), guestA);
         /*
          * as user 2 with client 2, create folder B shared to guest user
          */

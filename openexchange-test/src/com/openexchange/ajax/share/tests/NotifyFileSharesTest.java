@@ -57,7 +57,7 @@ import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.NotifyFileRequest;
-import com.openexchange.ajax.smtptest.actions.GetMailsRequest;
+import com.openexchange.ajax.smtptest.actions.ClearMailsRequest;
 import com.openexchange.ajax.smtptest.actions.GetMailsResponse.Message;
 import com.openexchange.file.storage.DefaultFileStorageObjectPermission;
 import com.openexchange.file.storage.File;
@@ -138,12 +138,12 @@ public class NotifyFileSharesTest extends ShareTest {
         /*
          * pop inbox, then notify recipient again
          */
-        getClient().execute(new GetMailsRequest());
+        getNoReplyClient().execute(new ClearMailsRequest());
         getClient().execute(new NotifyFileRequest(file.getId(), matchingPermission.getEntity()));
         /*
          * verify notification message
          */
-        Message notificationMessage = discoverInvitationMessage(getClient(), emailAddress);
+        Message notificationMessage = discoverInvitationMessage(getNoReplyClient(), emailAddress);
         assertNotNull(notificationMessage);
     }
 

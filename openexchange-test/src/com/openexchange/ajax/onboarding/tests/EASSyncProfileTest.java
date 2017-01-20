@@ -79,7 +79,7 @@ public class EASSyncProfileTest extends AbstractSmtpAJAXSession {
         OnboardingTestResponse resp = getClient().execute(req);
         assertFalse(resp.hasError());
         GetMailsRequest mailReq = new GetMailsRequest();
-        GetMailsResponse mailResp = getNoReply().execute(mailReq);
+        GetMailsResponse mailResp = getNoReplyClient().execute(mailReq);
         List<Message> messages = mailResp.getMessages();
         assertNotNull(messages);
         assertEquals(1, messages.size());

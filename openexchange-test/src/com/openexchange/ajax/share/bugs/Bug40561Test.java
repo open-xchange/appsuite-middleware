@@ -101,7 +101,7 @@ public class Bug40561Test extends ShareTest {
         tmp.setFolderId(sharedFolderID);
         String sharedFileID = tmp.toUniqueID();
 
-        GuestClient guestClient = resolveShare(discoverInvitationLink(getClient(), guestEmailAddress));
+        GuestClient guestClient = resolveShare(discoverInvitationLink(getNoReplyClient(), guestEmailAddress));
         guestClient.checkFileAccessible(sharedFolderID, sharedFileID, guestPermission);
 
         List<Facet> facets = AbstractFindTest.autocomplete(guestClient, Module.DRIVE, "tests");

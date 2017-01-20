@@ -119,7 +119,7 @@ public class Bug41184Test extends ShareTest {
         /*
          * fetch & check internal link from notification mail
          */
-        String folderLink = discoverInvitationLink(getClient(), client2.getValues().getDefaultAddress());
+        String folderLink = discoverInvitationLink(getNoReplyClient(), client2.getValues().getDefaultAddress());
         Assert.assertNotNull("Invitation link not found", folderLink);
         String fragmentParams = new URI(folderLink).getRawFragment();
         Matcher folderMatcher = Pattern.compile("folder=([0-9]+)").matcher(fragmentParams);
@@ -133,7 +133,7 @@ public class Bug41184Test extends ShareTest {
         /*
          * fetch & check internal link from notification mail
          */
-        String fileLink = discoverInvitationLink(getClient(), client2.getValues().getDefaultAddress());
+        String fileLink = discoverInvitationLink(getNoReplyClient(), client2.getValues().getDefaultAddress());
         Assert.assertNotNull("Invitation link not found", fileLink);
         fragmentParams = new URI(fileLink).getRawFragment();
         folderMatcher = Pattern.compile("folder=([0-9]+)").matcher(fragmentParams);
