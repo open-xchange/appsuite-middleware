@@ -52,13 +52,15 @@ package com.openexchange.mailaccount.internal;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.list.linked.TIntLinkedList;
-import gnu.trove.procedure.TIntProcedure;
+import gnu.trove.procedure.TIntErrorAwareAbstractProcedure;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
+import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedExceptionCode;
@@ -84,29 +86,28 @@ public class MailAccountDeleteListener implements DeleteListener {
     @Override
     public void deletePerformed(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon) throws OXException {
         if (deleteEvent.getType() == DeleteEvent.TYPE_USER) {
-            final MailAccountStorageService storageService =
-                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-            final int user = deleteEvent.getId();
-            final int cid = deleteEvent.getContext().getContextId();
-            final OXException[] cup = new OXException[1];
-            final TIntList ids = getUserMailAccountIDs(user, cid, writeCon);
-            ids.forEach(new TIntProcedure() {
+            final int userId = deleteEvent.getId();
+            final int contextId = deleteEvent.getContext().getContextId();
+
+            TIntList ids = getUserMailAccountIDs(userId, contextId, writeCon);
+
+            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+            final Map<String, Object> emptyMap = Collections.<String, Object> emptyMap();
+            TIntErrorAwareAbstractProcedure<OXException> procedure = new TIntErrorAwareAbstractProcedure<OXException>() {
 
                 @Override
-                public boolean execute(final int accountId) {
+                protected boolean next(int accountId) throws OXException {
                     try {
-                        storageService.deleteMailAccount(accountId, Collections.<String, Object> emptyMap(), user, cid, true, writeCon);
+                        storageService.deleteMailAccount(accountId, emptyMap, userId, contextId, true, writeCon);
                         return true;
-                    } catch (final OXException e) {
-                        cup[0] = e;
-                        return false;
-                    } catch (final RuntimeException e) {
-                        cup[0] = MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-                        return false;
+                    } catch (RuntimeException e) {
+                        throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
                     }
                 }
-            });
-            final OXException err = cup[0];
+            };
+            ids.forEach(procedure);
+
+            OXException err = procedure.getException();
             if (null != err) {
                 throw err;
             }
@@ -121,13 +122,29 @@ public class MailAccountDeleteListener implements DeleteListener {
             stmt.setLong(1, cid);
             stmt.setLong(2, user);
             result = stmt.executeQuery();
-            if (!result.next()) {
-                return new TIntLinkedList();
+
+            TIntList ids = new TIntArrayList(8);
+            TIntSet set = new TIntHashSet(8);
+
+            while (result.next()) {
+                int id = result.getInt(1);
+                if (set.add(id)) {
+                    ids.add(id);
+                }
             }
-            final TIntList ids = new TIntArrayList(8);
-            do {
-                ids.add(result.getInt(1));
-            } while (result.next());
+
+            closeSQLStuff(result, stmt);
+            stmt = con.prepareStatement("SELECT id FROM user_transport_account WHERE cid = ? AND user = ? ORDER BY id");
+            stmt.setLong(1, cid);
+            stmt.setLong(2, user);
+            result = stmt.executeQuery();
+
+            while (result.next()) {
+                int id = result.getInt(1);
+                if (set.add(id)) {
+                    ids.add(id);
+                }
+            }
             return ids;
         } catch (final SQLException e) {
             throw DeleteFailedExceptionCode.SQL_ERROR.create(e, e.getMessage());
