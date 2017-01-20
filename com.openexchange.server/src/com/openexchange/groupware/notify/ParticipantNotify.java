@@ -1557,21 +1557,21 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 switch (participant.getType()) {
                 case Participant.USER:
                     EmailableParticipant p = getUserParticipant(participant, ctx);
-                    if (p.type == Participant.USER && p.folderId > 0 && p.email.equalsIgnoreCase(email)) {
+                        if (p != null && p.type == Participant.USER && p.folderId > 0 && p.email.equalsIgnoreCase(email)) {
                         folderRepl.setChanged(p.folderId != folderId);
                         return;
                     }
                     break;
                 case Participant.EXTERNAL_USER:
                     p = getExternalParticipant(participant, session);
-                    if (p.type == Participant.USER && p.folderId > 0 && p.email.equalsIgnoreCase(email)) {
+                        if (p != null && p.type == Participant.USER && p.folderId > 0 && p.email.equalsIgnoreCase(email)) {
                         folderRepl.setChanged(p.folderId != folderId);
                         return;
                     }
                     break;
                 case Participant.RESOURCE:
                     p = getResourceParticipant(participant, session);
-                    if (p.type == Participant.USER && p.folderId > 0 && p.email.equalsIgnoreCase(email)) {
+                        if (p != null && p.type == Participant.USER && p.folderId > 0 && p.email.equalsIgnoreCase(email)) {
                         folderRepl.setChanged(p.folderId != folderId);
                         return;
                     }
