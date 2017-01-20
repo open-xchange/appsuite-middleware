@@ -52,6 +52,7 @@ package com.openexchange.ajax.framework;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.apache.commons.lang.Validate;
 import org.json.JSONException;
 import com.openexchange.ajax.smtptest.actions.SMTPInitResponse;
 import com.openexchange.ajax.smtptest.actions.StartSMTPRequest;
@@ -94,7 +95,7 @@ public class SmtpMockSetup {
         for (TestContext testContext : contextsWithStartedMock) {
             TestUser noReplyUser = testContext.getNoReplyUser();
             SmtpMockConfig smtpMockConfig = startSmtpMockServerAndSetNoReply(noReplyUser);
-            
+
             List<TestUser> allUsers = testContext.getCopyOfAll();
             for (TestUser user : allUsers) {
                 rewriteMailAccountConfig(user, smtpMockConfig);
@@ -116,6 +117,8 @@ public class SmtpMockSetup {
     }
 
     private static void rewriteMailAccountConfig(TestUser user, SmtpMockConfig config) {
+        Validate.notNull(user);
+        Validate.notNull(config);
         try {
             AJAXClient client = new AJAXClient(user);
             SMTPInitResponse response = client.execute(new UpdateMailAccountRequest(config.getHostname(), config.getPort()));
@@ -138,21 +141,25 @@ public class SmtpMockSetup {
         List<TestContext> testContexts = contextsWithStartedMock;
 
         for (TestContext testContext : testContexts) {
+            SmtpMockConfig smtpMockConfig = stopSMTPMockServer(testContext.getNoReplyUser());
+
             List<TestUser> allUsers = testContext.getCopyOfAll();
             for (TestUser user : allUsers) {
-                stopSMTPMockServer(user);
+                rewriteMailAccountConfig(user, smtpMockConfig);
             }
         }
     }
 
-    private static void stopSMTPMockServer(TestUser user) {
+    private static SmtpMockConfig stopSMTPMockServer(TestUser user) {
         try {
             AJAXClient client = new AJAXClient(user);
             StopSMTPRequest request = new StopSMTPRequest(true);
             SMTPInitResponse response = client.execute(request);
+            return new SmtpMockConfig(response.getHostname(), response.getPort());
         } catch (OXException | IOException | JSONException e) {
             LOG.error("", e);
         }
+        return null;
     }
 
     private static class SmtpMockConfig {
