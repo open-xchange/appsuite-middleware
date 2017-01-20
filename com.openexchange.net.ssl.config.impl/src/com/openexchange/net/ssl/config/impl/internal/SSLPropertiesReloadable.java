@@ -53,8 +53,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.DefaultInterests;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
-import com.openexchange.net.ssl.config.SSLConfigurationService;
-import com.openexchange.net.ssl.config.impl.osgi.Services;
 
 /**
  * {@link SSLPropertiesReloadable}
@@ -64,13 +62,22 @@ import com.openexchange.net.ssl.config.impl.osgi.Services;
  */
 public class SSLPropertiesReloadable implements Reloadable {
 
+    private final RestrictedSSLConfigurationService sslConfigurationService;
+
+    /**
+     * Initializes a new {@link SSLPropertiesReloadable}.
+     */
+    public SSLPropertiesReloadable(RestrictedSSLConfigurationService sslConfigurationService) {
+        super();
+        this.sslConfigurationService = sslConfigurationService;
+    }
+
     @Override
     public void reloadConfiguration(ConfigurationService configService) {
-        Services.getService(SSLConfigurationService.class).reload();
+        sslConfigurationService.reload(configService);
     }
 
     private static final String[] RELOADABLES = new String[] {
-        SSLProperties.TRUST_LEVEL_KEY,
         SSLProperties.PROTOCOLS_KEY,
         SSLProperties.CIPHERS_KEY,
         SSLProperties.TRUSTSTORE_WHITELIST_KEY,

@@ -1197,6 +1197,10 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
 
     @Override
     public void checkDefaultFolders() throws OXException {
+        boolean b = true;
+        if (b) {
+            throw new OXException(new IllegalStateException("folder quota exceeded"));
+        }
         getChecker().checkDefaultFolders();
     }
 
