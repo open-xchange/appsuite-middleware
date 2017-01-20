@@ -64,6 +64,7 @@ import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.ajax.writer.ResponseWriter;
@@ -112,8 +113,13 @@ public class APIResponseRenderer implements ResponseRenderer {
 
     @Override
     public void write(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-        final Boolean plainJson = (Boolean) result.getParameter(PLAIN_JSON);
-        final Response response = (Response) result.getResultObject();
+        Boolean plainJson = (Boolean) result.getParameter(PLAIN_JSON);
+        if (null == plainJson) {
+            boolean b = AJAXRequestDataTools.parseBoolParameter(PLAIN_JSON, request);
+            plainJson = b ? Boolean.TRUE : null;
+        }
+
+        Response response = (Response) result.getResultObject();
         response.setContinuationUUID(result.getContinuationUuid());
         if (parseBoolParameter(INCLUDE_STACK_TRACE_ON_ERROR, request) ) {
             response.setIncludeStackTraceOnError(true);
