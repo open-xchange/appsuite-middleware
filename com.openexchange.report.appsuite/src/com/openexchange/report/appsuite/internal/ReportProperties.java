@@ -31,47 +31,59 @@ public class ReportProperties implements Reloadable {
 
     public static String getStoragePath() {
         if (storagePath == null) {
-            storagePath = loadStringValue(STORAGE_PATH, STORAGE_PATH_DEFAULT);
+            synchronized (storagePath) {
+                if (storagePath == null) {
+                    storagePath = loadStringValue(STORAGE_PATH, STORAGE_PATH_DEFAULT);
+                }
+            }
         }
         return storagePath;
     }
 
     public static int getMaxChunkSize() {
         if (maxChunkSize == null) {
-            maxChunkSize = loadIntegerValue(MAX_CHUNK_SIZE, MAX_CHUNK_SIZE_DEFAULT);
+            synchronized (maxChunkSize) {
+                if (maxChunkSize == null) {
+                    maxChunkSize = loadIntegerValue(MAX_CHUNK_SIZE, MAX_CHUNK_SIZE_DEFAULT);
+                }
+            }
         }
         return maxChunkSize.intValue();
     }
 
     public static int getMaxThreadPoolSize() {
         if (maxThreadPoolSize == null) {
-            maxThreadPoolSize = loadIntegerValue(MAX_THREAD_POOL_SIZE, MAX_THREAD_POOL_SIZE_DEFAULT);
+            synchronized (maxThreadPoolSize) {
+                if (maxThreadPoolSize == null) {
+                    maxThreadPoolSize = loadIntegerValue(MAX_THREAD_POOL_SIZE, MAX_THREAD_POOL_SIZE_DEFAULT);
+                }
+            }
         }
         return maxThreadPoolSize.intValue();
     }
 
     public static int getThreadPriority() {
         if (threadPriority == null) {
-            threadPriority = loadIntegerValue(THREAD_PRIORITY, THREAD_PRIORITY_DEFAULT);
+            synchronized (threadPriority) {
+                if (threadPriority == null) {
+                    threadPriority = loadIntegerValue(THREAD_PRIORITY, THREAD_PRIORITY_DEFAULT);
+                }
+            }
         }
         return threadPriority.intValue();
     }
 
     private static Integer loadIntegerValue(String key, int defaultValue) {
         Integer propertyValue = null;
-        synchronized (ReportProperties.class) {
-            ConfigurationService service = Services.getService(ConfigurationService.class);
-            propertyValue = service.getIntProperty(key, defaultValue);
-        }
+        ConfigurationService service = Services.getService(ConfigurationService.class);
+        propertyValue = service.getIntProperty(key, defaultValue);
         return propertyValue;
     }
 
     private static String loadStringValue(String key, String defaultValue) {
         String propertyValue = null;
-        synchronized (ReportProperties.class) {
-            ConfigurationService service = Services.getService(ConfigurationService.class);
-            propertyValue = service.getProperty(key, defaultValue);
-        }
+        ConfigurationService service = Services.getService(ConfigurationService.class);
+        propertyValue = service.getProperty(key, defaultValue);
         return propertyValue;
     }
 
