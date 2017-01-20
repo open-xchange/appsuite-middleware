@@ -533,7 +533,12 @@ public final class IMAPSort {
                                 ir.readAtomStringList();
                                 ir.readAtom();
 
-                                String partialResults = ir.readAtomStringList()[1];
+                                String[] stringArray = ir.readAtomStringList();
+                                if (stringArray == null || stringArray.length <= 1) {
+                                    LOG.error("Unable to parse imap response!");
+                                    return new SortPartialResult(null, SortPartialReason.COMMAND_FAILED);
+                                }
+                                String partialResults = stringArray[1];
                                 if ("NIL".equalsIgnoreCase(partialResults)) {
                                     return new SortPartialResult(new int[0], SortPartialReason.SUCCESS);
                                 }
