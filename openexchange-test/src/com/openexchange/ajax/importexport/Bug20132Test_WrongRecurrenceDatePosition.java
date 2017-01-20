@@ -94,8 +94,8 @@ public class Bug20132Test_WrongRecurrenceDatePosition extends ManagedAppointment
 		List<ConversionWarning> warnings = imports[0].getWarnings();
 		assertEquals(1, warnings.size());
 		String message = warnings.get(0).getMessage();
-        assertTrue(message.contains("truncated"));
-		assertTrue(message.contains("Here comes a long (actually too long) story"));
+        assertTrue(message.contains("truncated") || message.contains("exceeded"));
+        assertTrue(message.contains("Here comes a long (actually too long) story") || message.contains("ummary"));
 		//System.out.println(message);
 	}
 }
