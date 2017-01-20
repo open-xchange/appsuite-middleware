@@ -177,7 +177,7 @@ public class ReminderServiceImpl implements ReminderService{
         ServerSession serverSession = ServerSessionAdapter.valueOf(session);
         ReminderObject oldReminder = ReminderHandler.getInstance().loadReminder(targetId, userId, module, writeCon, serverSession.getContext());
         checkPermission(session, oldReminder, true);
-        ReminderHandler.getInstance().deleteReminder(oldReminder.getTargetId(), oldReminder.getModule(), userId, writeCon, serverSession.getContext());
+        ReminderHandler.getInstance().deleteReminder(oldReminder.getTargetId(), userId, oldReminder.getModule(), writeCon, serverSession.getContext());
 
     }
 
