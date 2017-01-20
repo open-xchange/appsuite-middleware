@@ -151,5 +151,12 @@ public enum FileStorageCapability {
      */
     ZIPPABLE_FOLDER,
 
+    /**
+     * The file count is known for a folder.
+     * <p>
+     * Not supporting that capability typically means that there is too much performance overhead in order to determine the file count.
+     */
+    COUNT_TOTAL,
+
     ;
 }

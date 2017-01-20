@@ -61,7 +61,6 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.AppointmentSQLInterface;
-import com.openexchange.api2.ReminderService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
@@ -73,6 +72,7 @@ import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.reminder.ReminderObject;
+import com.openexchange.groupware.reminder.ReminderService;
 import com.openexchange.groupware.reminder.json.ReminderAJAXRequest;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.server.ServiceLookup;
@@ -314,9 +314,9 @@ public abstract class AbstractReminderAction implements AJAXActionService {
      * @param userId The associated user
      * @param reminderSql The reminder SQL
      */
-    protected static void deleteReminderSafe(ReminderObject reminder, int userId, ReminderService reminderSql) {
+    protected static void deleteReminderSafe(Session session, ReminderObject reminder, int userId, ReminderService reminderService) {
         try {
-            reminderSql.deleteReminder(reminder.getTargetId(), userId, reminder.getModule());
+            reminderService.deleteReminder(session, reminder.getTargetId(), userId, reminder.getModule());
         } catch (Exception e) {
             // Ignore
         }

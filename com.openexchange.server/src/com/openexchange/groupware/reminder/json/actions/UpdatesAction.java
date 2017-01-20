@@ -51,6 +51,7 @@ package com.openexchange.groupware.reminder.json.actions;
 
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -59,16 +60,14 @@ import org.slf4j.Logger;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.writer.ReminderWriter;
-import com.openexchange.api2.ReminderService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
+import com.openexchange.groupware.reminder.ReminderService;
 import com.openexchange.groupware.reminder.json.ReminderAJAXRequest;
 import com.openexchange.groupware.reminder.json.ReminderActionFactory;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIterators;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.session.ServerSession;
 
@@ -100,15 +99,12 @@ public final class UpdatesAction extends AbstractReminderAction {
         }
 
         final JSONArray jsonResponseArray = new JSONArray();
-        SearchIterator<?> it = null;
-        try {
             final ServerSession session = req.getSession();
-            final ReminderService reminderSql = new ReminderHandler(session.getContext());
+            final ReminderService reminderService = ServerServiceRegistry.getInstance().getService(ReminderService.class, true);
 
-            it = reminderSql.listModifiedReminder(session.getUserId(), timestamp);
-            while (it.hasNext()) {
+            List<ReminderObject> reminders = reminderService.listModifiedReminder(session, session.getUserId(), timestamp);
+            for(ReminderObject reminder: reminders){
                 final ReminderWriter reminderWriter = new ReminderWriter(timeZone);
-                final ReminderObject reminder = (ReminderObject) it.next();
 
                 if (reminder.isRecurrenceAppointment()) {
                     // final int targetId = reminder.getTargetId();
@@ -136,14 +132,11 @@ public final class UpdatesAction extends AbstractReminderAction {
                         throw e;
                     }
                     LOG.warn("Cannot load target object of this reminder.", e);
-                    deleteReminderSafe(reminder, session.getUserId(), reminderSql);
+                    deleteReminderSafe(session, reminder, session.getUserId(), reminderService);
                 }
             }
 
             return new AJAXRequestResult(jsonResponseArray, timestamp, "json");
-        } finally {
-            SearchIterators.close(it);
-        }
     }
 
 }

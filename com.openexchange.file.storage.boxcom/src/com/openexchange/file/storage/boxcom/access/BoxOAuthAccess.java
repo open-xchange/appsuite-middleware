@@ -50,6 +50,12 @@
 package com.openexchange.file.storage.boxcom.access;
 
 import java.io.UnsupportedEncodingException;
+import java.util.concurrent.TimeUnit;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.scribe.builder.ServiceBuilder;
+import org.scribe.builder.api.BoxApi;
+import org.scribe.builder.api.BoxApi.BoxApiService;
 import org.scribe.model.Token;
 import com.box.sdk.BoxAPIConnection;
 import com.box.sdk.BoxAPIException;
@@ -63,10 +69,13 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.boxcom.BoxClosure;
 import com.openexchange.file.storage.boxcom.BoxConstants;
 import com.openexchange.file.storage.boxcom.Services;
+import com.openexchange.oauth.API;
 import com.openexchange.oauth.AbstractReauthorizeClusterTask;
 import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.oauth.OAuthUtil;
 import com.openexchange.oauth.access.AbstractOAuthAccess;
 import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthClient;
@@ -80,6 +89,8 @@ import com.openexchange.session.Session;
 public class BoxOAuthAccess extends AbstractOAuthAccess {
 
     private final FileStorageAccount fsAccount;
+
+    private final static long THRESHOLD = TimeUnit.MINUTES.toMillis(5);
 
     /**
      * Initializes a new {@link BoxOAuthAccess}.
@@ -139,8 +150,10 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
         BoxAPIConnection apiConnection = (BoxAPIConnection) getClient().client;
         OAuthAccount oAuthAccount = getOAuthAccount();
 
-        // Box SDK performs an automatic access token refresh, so we need to see if the tokens were renewed
-        if (!oAuthAccount.getToken().equals(apiConnection.getAccessToken()) || !oAuthAccount.getSecret().equals(apiConnection.getRefreshToken())) {
+        long timeNow = System.currentTimeMillis();
+        long delta = timeNow - apiConnection.getLastRefresh();
+        boolean expired = delta >= (apiConnection.getExpires() - THRESHOLD);
+        if (expired) {
             ClusterLockService clusterLockService = Services.getService(ClusterLockService.class);
             OAuthAccount account = clusterLockService.runClusterTask(new BoxReauthorizeClusterTask(getSession(), oAuthAccount), new ExponentialBackOffRetryPolicy());
             setOAuthAccount(account);
@@ -153,6 +166,8 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
     private void createOAuthClient(OAuthAccount account) throws OXException {
         OAuthServiceMetaData boxMetaData = account.getMetaData();
         BoxAPIConnection boxAPI = new BoxAPIConnection(boxMetaData.getAPIKey(getSession()), boxMetaData.getAPISecret(getSession()), account.getToken(), account.getSecret());
+        boxAPI.setAutoRefresh(false);
+
         OAuthClient<BoxAPIConnection> oAuthClient = new OAuthClient<>(boxAPI, account.getToken());
         setOAuthClient(oAuthClient);
     }
@@ -168,15 +183,63 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see com.openexchange.cluster.lock.ClusterTask#perform()
          */
         @Override
         public Token reauthorize() throws OXException {
-            // Box SDK performs an automatic access token refresh, therefore the access token and refresh token
-            // should already be present in the BoxAPIConnection instance.
+            Session session = getSession();
+            OAuthAccount dbAccount = getDBAccount();
+
+            final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(BoxApi.class);
+            serviceBuilder.apiKey(dbAccount.getMetaData().getAPIKey(session)).apiSecret(dbAccount.getMetaData().getAPISecret(session));
+            BoxApi.BoxApiService oAuthService = (BoxApiService) serviceBuilder.build();
+            Token accessToken = getTokenUsing(session, oAuthService);
+
             BoxAPIConnection apiConnection = (BoxAPIConnection) getClient().client;
-            return new Token(apiConnection.getAccessToken(), apiConnection.getRefreshToken());
+            apiConnection.setLastRefresh(System.currentTimeMillis());
+            apiConnection.setExpires(accessToken.getExpiry().getTime());
+            apiConnection.setAccessToken(accessToken.getToken());
+            apiConnection.setRefreshToken(accessToken.getSecret());
+
+            return accessToken;
+        }
+
+        private Token getTokenUsing(Session session, BoxApi.BoxApiService oAuthService) throws OXException {
+            OAuthAccount oAuthAccount = getCachedAccount();
+            try {
+                return oAuthService.getAccessToken(new Token(oAuthAccount.getToken(), oAuthAccount.getSecret()), null);
+            } catch (org.scribe.exceptions.OAuthException e) {
+                String message = e.getMessage();
+                if (null == message) {
+                    throw OAuthExceptionCodes.OAUTH_ERROR.create(e, "OAuth error");
+                }
+
+                // Check for JSON content
+                int startPos = message.indexOf('{');
+                if (startPos >= 0) {
+                    int endPos = message.lastIndexOf('}');
+                    if (endPos > startPos) {
+                        try {
+                            JSONObject jError = new JSONObject(message.substring(startPos, endPos + 1));
+                            String error = jError.optString("error");
+                            if (null != error) {
+                                if ("invalid_grant".equals(error)) {
+                                    String cburl = OAuthUtil.buildCallbackURL(oAuthAccount);
+                                    API api = oAuthAccount.getAPI();
+                                    throw OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(e, api.getShortName(), oAuthAccount.getId(), session.getUserId(), session.getContextId(), api.getFullName(), cburl);
+                                }
+
+                                throw OAuthExceptionCodes.INVALID_ACCOUNT_EXTENDED.create(e, oAuthAccount.getDisplayName(), oAuthAccount.getId());
+                            }
+                        } catch (JSONException je) {
+                            // No JSON...
+                        }
+                    }
+                }
+
+                throw OAuthExceptionCodes.OAUTH_ERROR.create(e, message);
+            }
         }
     }
 }

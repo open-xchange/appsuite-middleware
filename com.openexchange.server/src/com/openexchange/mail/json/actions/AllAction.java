@@ -50,6 +50,7 @@
 package com.openexchange.mail.json.actions;
 
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -291,6 +292,7 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
             /*
              * Start response
              */
+            Collection<OXException> warnings = null;
             final long start = System.currentTimeMillis();
             List<MailMessage> mails = new LinkedList<MailMessage>();
             SearchIterator<MailMessage> it = null;
@@ -309,6 +311,7 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                             mails.add(mm);
                         }
                     }
+                    warnings = mailInterface.getWarnings();
                 } else {
                     int sortCol = req.getSortFieldFor(sort);
                     String category_filter = req.getParameter("categoryid");
@@ -384,8 +387,8 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
 
                         MailField[] fields = MailField.getFields(columns);
                         if (null != headers && 0 < headers.length) {
-                            if (messageStorage instanceof IMailMessageStorageExt) {
-                                IMailMessageStorageExt ext = (IMailMessageStorageExt) messageStorage;
+                            IMailMessageStorageExt ext = messageStorage.supports(IMailMessageStorageExt.class);
+                            if (null != ext) {
                                 result = ext.searchMessages(fa.getFullname(), indexRange, sortField, orderDirection, searchTerm, fields, headers);
                             } else {
                                 result = messageStorage.searchMessages(fa.getFullname(), indexRange, sortField, orderDirection, searchTerm, fields);
@@ -403,6 +406,9 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                                 mails.add(mm);
                             }
                         }
+
+                        warnings = mailAccess.getWarnings();
+
                     } else {
                         // Get iterator
                         it = mailInterface.getAllMessages(folderId, sortCol, orderDir, columns, headers, fromToIndices, AJAXRequestDataTools.parseBoolParameter("continuation", req.getRequest()));
@@ -415,6 +421,7 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                                 mails.add(mm);
                             }
                         }
+                        warnings = mailInterface.getWarnings();
                     }
                 }
             } finally {
@@ -441,6 +448,9 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
             }
             final AJAXRequestResult result = new AJAXRequestResult(mails, "mail").setDurationByStart(start);
             result.setResponseProperty("cached", Boolean.valueOf(cache));
+            if (warnings != null) {
+                result.addWarnings(warnings);
+            }
             return result;
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());

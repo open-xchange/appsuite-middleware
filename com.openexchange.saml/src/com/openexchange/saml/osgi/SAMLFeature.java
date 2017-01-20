@@ -49,15 +49,7 @@
 
 package com.openexchange.saml.osgi;
 
-import java.security.Provider;
-import java.security.Security;
-import java.util.Dictionary;
-import java.util.Hashtable;
 import java.util.Stack;
-import javax.xml.parsers.DocumentBuilderFactory;
-import org.opensaml.Configuration;
-import org.opensaml.DefaultBootstrap;
-import org.opensaml.xml.ConfigurationException;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.InvalidSyntaxException;
@@ -66,45 +58,24 @@ import org.osgi.service.http.HttpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.hazelcast.core.HazelcastInstance;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.login.LoginRequestHandler;
-import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.osgi.DependentServiceStarter;
-import com.openexchange.saml.OpenSAML;
 import com.openexchange.saml.SAMLProperties;
-import com.openexchange.saml.SAMLWebSSOProvider;
-import com.openexchange.saml.http.AssertionConsumerService;
-import com.openexchange.saml.http.InitService;
-import com.openexchange.saml.http.MetadataService;
-import com.openexchange.saml.http.SingleLogoutService;
 import com.openexchange.saml.impl.DefaultConfig;
-import com.openexchange.saml.impl.DefaultLoginConfigurationLookup;
-import com.openexchange.saml.impl.LoginConfigurationLookup;
-import com.openexchange.saml.impl.SAMLLoginRequestHandler;
-import com.openexchange.saml.impl.SAMLLogoutRequestHandler;
+import com.openexchange.saml.impl.DefaultConfigReference;
 import com.openexchange.saml.impl.SAMLSessionInspector;
-import com.openexchange.saml.impl.WebSSOProviderImpl;
-import com.openexchange.saml.impl.hz.HzStateManagement;
 import com.openexchange.saml.impl.hz.PortableAuthnRequestInfoFactory;
 import com.openexchange.saml.impl.hz.PortableLogoutRequestInfoFactory;
-import com.openexchange.saml.spi.ExceptionHandler;
-import com.openexchange.saml.spi.SAMLBackend;
-import com.openexchange.saml.tools.SAMLLoginTools;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
 import com.openexchange.session.inspector.SessionInspectorService;
 import com.openexchange.session.reservation.SessionReservationService;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.templating.TemplateService;
-import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
 
 /**
@@ -116,6 +87,8 @@ import com.openexchange.user.UserService;
  */
 public class SAMLFeature extends DependentServiceStarter {
 
+    private SAMLBackendRegistry samlBackends;
+
     private static final Logger LOG = LoggerFactory.getLogger(SAMLFeature.class);
 
     private final static Class<?>[] NEEDED_SERVICES = new Class[] {
@@ -123,7 +96,6 @@ public class SAMLFeature extends DependentServiceStarter {
         ConfigurationService.class,
         DispatcherPrefixService.class,
         SessionReservationService.class,
-        SAMLBackend.class,
         HazelcastInstance.class,
         SessiondService.class,
         CapabilityService.class,
@@ -150,68 +122,30 @@ public class SAMLFeature extends DependentServiceStarter {
         boolean enabled = configService.getBoolProperty(SAMLProperties.ENABLED, false);
         if (enabled) {
             LOG.info("Starting SAML 2.0 support...");
-            OpenSAML openSAML = initOpenSAML();
-            DefaultConfig config = DefaultConfig.init(configService);
-
-            HzStateManagement hzStateManagement = new HzStateManagement(services.getService(HazelcastInstance.class));
-            SAMLWebSSOProvider serviceProvider = new WebSSOProviderImpl(config, openSAML, hzStateManagement, services);
             SessiondService sessiondService = services.getService(SessiondService.class);
+            DefaultConfig config = DefaultConfig.init(configService);
+            DefaultConfigReference.setDefaultConfig(config);
             serviceRegistrations.push(context.registerService(SessionInspectorService.class, new SAMLSessionInspector(sessiondService), null));
-
-            SAMLBackend samlBackend = services.getService(SAMLBackend.class);
-
             serviceRegistrations.push(context.registerService(CustomPortableFactory.class, new PortableAuthnRequestInfoFactory(), null));
             serviceRegistrations.push(context.registerService(CustomPortableFactory.class, new PortableLogoutRequestInfoFactory(), null));
-
-            LoginConfigurationLookup loginConfigurationLookup = new DefaultLoginConfigurationLookup();
-            ExceptionHandler exceptionHandler = samlBackend.getExceptionHandler();
-            HttpService httpService = services.getService(HttpService.class);
-            String prefix = services.getService(DispatcherPrefixService.class).getPrefix() + "saml/";
-
-            String acsServletAlias = prefix + "acs";
-            httpService.registerServlet(acsServletAlias, new AssertionConsumerService(serviceProvider, exceptionHandler), null, null);
-            servlets.push(acsServletAlias);
-
-            Dictionary<String, Object> loginRHProperties = new Hashtable<String, Object>();
-            loginRHProperties.put(AJAXServlet.PARAMETER_ACTION, SAMLLoginTools.ACTION_SAML_LOGIN);
-            SAMLLoginRequestHandler loginRH = new SAMLLoginRequestHandler(config, samlBackend, loginConfigurationLookup, services);
-            serviceRegistrations.push(context.registerService(LoginRequestHandler.class, loginRH, loginRHProperties));
-
-            String initAuthServletAlias = prefix + "init";
-            httpService.registerServlet(initAuthServletAlias, new InitService(config, serviceProvider, exceptionHandler, loginConfigurationLookup, services), null, null);
-            servlets.push(initAuthServletAlias);
-
-            if (config.singleLogoutEnabled()) {
-                Dictionary<String, Object> logoutRHProperties = new Hashtable<String, Object>();
-                logoutRHProperties.put(AJAXServlet.PARAMETER_ACTION, SAMLLoginTools.ACTION_SAML_LOGOUT);
-                serviceRegistrations.push(context.registerService(LoginRequestHandler.class, new SAMLLogoutRequestHandler(samlBackend, loginConfigurationLookup), logoutRHProperties));
-                String slsServletAlias = prefix + "sls";
-                httpService.registerServlet(slsServletAlias, new SingleLogoutService(serviceProvider, exceptionHandler), null, null);
-                servlets.push(slsServletAlias);
-                services.getService(CapabilityService.class).declareCapability("saml-single-logout");
-                serviceRegistrations.push(context.registerService(CapabilityChecker.class, new CapabilityChecker() {
-                    @Override
-                    public boolean isEnabled(String capability, Session session) throws OXException {
-                        if ("saml-single-logout".equals(capability)) {
-                            ServerSession serverSession = ServerSessionAdapter.valueOf(session);
-                            if (serverSession.isAnonymous() || serverSession.getUser().isGuest()) {
-                                return false;
-                            }
-                        }
-
-                        return true;
-                    }
-                }, null));
-            }
-
-            if (config.enableMetadataService()) {
-                String metadataServletAlias = prefix + "metadata";
-                httpService.registerServlet(metadataServletAlias, new MetadataService(serviceProvider, exceptionHandler), null, null);
-                servlets.push(metadataServletAlias);
-            }
+            getSamlBackend(services);
         } else {
             LOG.info("SAML 2.0 support is disabled by configuration. Skipping initialization...");
         }
+    }
+
+    /**
+     * Helper method to get the SAMLBackendRegistry
+     * @param services the ServiceLookup
+     * @throws BundleException if start fails
+     */
+    private void getSamlBackend(ServiceLookup services) throws BundleException {
+        SAMLBackendRegistry samlBackends = this.samlBackends;
+        if (null == samlBackends) {
+            samlBackends = new SAMLBackendRegistry(context, services);
+        }
+        samlBackends.open();
+        this.samlBackends = samlBackends;
     }
 
     @Override
@@ -225,26 +159,12 @@ public class SAMLFeature extends DependentServiceStarter {
         while (!serviceRegistrations.isEmpty()) {
             serviceRegistrations.pop().unregister();
         }
-    }
-
-    private OpenSAML initOpenSAML() throws BundleException {
-        if (!Configuration.validateJCEProviders()) {
-            LOG.error("The necessary JCE providers for OpenSAML could not be found. SAML 2.0 integration will be disabled!");
-            throw new BundleException("The necessary JCE providers for OpenSAML could not be found.", BundleException.ACTIVATOR_ERROR);
+        if (samlBackends != null) {
+            samlBackends.close();
+            samlBackends.stop();
+            samlBackends = null;
         }
-
-        LOG.info("OpenSAML will use {} as API for XML processing", DocumentBuilderFactory.newInstance().getClass().getName());
-        for (Provider jceProvider : Security.getProviders()) {
-            LOG.info("OpenSAML found {} as potential JCE provider", jceProvider.getInfo());
-        }
-
-        try {
-            DefaultBootstrap.bootstrap();
-        } catch (ConfigurationException e) {
-            LOG.error("Error while bootstrapping OpenSAML library", e);
-            throw new BundleException("Error while bootstrapping OpenSAML library", BundleException.ACTIVATOR_ERROR, e);
-        }
-        return new OpenSAML();
+        DefaultConfigReference.setDefaultConfig(null);
     }
 
 }

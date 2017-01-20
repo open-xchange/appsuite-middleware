@@ -635,6 +635,9 @@ public final class InternalList {
 
         list.add(new com.openexchange.groupware.update.tasks.ChangePrimaryKeyForUserAttribute());
 
+        // Drops rather needless foreign keys from tables.
+        list.add(new com.openexchange.groupware.update.tasks.DropFKTaskv3());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 

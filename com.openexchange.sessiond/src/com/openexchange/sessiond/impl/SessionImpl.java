@@ -160,9 +160,9 @@ public final class SessionImpl implements PutIfAbsent {
             parameters.put(PARAM_ALTERNATIVE_ID, obj);
         }
 
-        obj = s.getParameter(PARAM_OAUTH_TOKEN);
+        obj = s.getParameter(PARAM_OAUTH_ACCESS_TOKEN);
         if (null != obj) {
-            parameters.put(PARAM_OAUTH_TOKEN, obj);
+            parameters.put(PARAM_OAUTH_ACCESS_TOKEN, obj);
         }
     }
 

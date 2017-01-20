@@ -100,4 +100,9 @@ public interface ITestCommand {
      */
     List<String[]> getJsonMatchTypes();
 
+    /**
+     * @return
+     */
+    Hashtable<String, String> getOtherArguments();
+
 }

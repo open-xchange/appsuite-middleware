@@ -75,6 +75,13 @@ public interface OnboardingRequest {
     OnboardingAction getAction();
 
     /**
+     * Gets the client device to which the actions apply
+     *
+     * @return The client device
+     */
+    ClientDevice getClientDevice();
+
+    /**
      * Gets the device to which the scenario applies
      *
      * @return The device

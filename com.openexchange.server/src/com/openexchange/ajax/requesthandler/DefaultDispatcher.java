@@ -197,7 +197,7 @@ public class DefaultDispatcher implements Dispatcher {
             }
 
             // State already initialized for module?
-            if (factory instanceof AJAXStateHandler) {
+            if (state!=null && factory instanceof AJAXStateHandler) {
                 final AJAXStateHandler handler = (AJAXStateHandler) factory;
                 if (state.addInitializer(modifiedRequestData.getModule(), handler)) {
                     handler.initialize(state);

@@ -143,7 +143,7 @@ public class DriveAppOnboardingProvider implements OnboardingProvider {
         }
 
         Scenario scenario = request.getScenario();
-        if (!Device.getActionsFor(device, scenario.getType(), session).contains(request.getAction())) {
+        if (!Device.getActionsFor(request.getClientDevice(), device, scenario.getType(), session).contains(request.getAction())) {
             throw OnboardingExceptionCodes.UNSUPPORTED_ACTION.create(request.getAction().getId());
         }
 
@@ -170,7 +170,7 @@ public class DriveAppOnboardingProvider implements OnboardingProvider {
     private Link getAppStoreLink(OnboardingRequest request, Session session) throws OXException {
         ConfigViewFactory viewFactory = services.getService(ConfigViewFactory.class);
         ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
-        
+
         LinkType linkType;
         String propertyName;
         {

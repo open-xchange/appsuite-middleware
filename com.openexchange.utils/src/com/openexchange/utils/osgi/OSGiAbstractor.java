@@ -56,8 +56,6 @@ import java.util.Collections;
 import java.util.Dictionary;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -715,45 +713,37 @@ public abstract class OSGiAbstractor implements ServiceLookup, BundleActivator{
         if (filter != null) {
             ServiceTracker<Object, Object> serviceTracker = new ServiceTracker<Object, Object>(m_context, filter, new ServiceTrackerCustomizer<Object, Object>() {
 
-                private final Lock lock = new ReentrantLock();
-
                 private final Object[] objects = new Object[ownDependingServices.size()];
-
                 private ServiceRegistration<?> registration;
 
                 @Override
-                public Object addingService(final ServiceReference<Object> reference) {
+                public synchronized Object addingService(final ServiceReference<Object> reference) {
                     final Object addedService = m_context.getService(reference);
-                    final boolean needsRegistration;
-                    lock.lock();
-                    try {
-                        if (null != propertyInterfaces && 0 != propertyInterfaces.length) {
-                            if (ConfigurationService.class.isInstance(addedService)) {
-                                // Check properties
-                                try {
-                                    PropertyHandler.check((ConfigurationService) addedService, propertyInterfaces,
-                                        m_context.getBundle().getSymbolicName() + " bundle");
-                                } catch (final OXException e) {
-                                    LOG.error("Error while checking Properties", e);
-                                    shutdownBundle();
-                                    return addedService;
-                                }
+
+                    if (null != propertyInterfaces && 0 != propertyInterfaces.length) {
+                        if (ConfigurationService.class.isInstance(addedService)) {
+                            // Check properties
+                            try {
+                                PropertyHandler.check((ConfigurationService) addedService, propertyInterfaces,
+                                    m_context.getBundle().getSymbolicName() + " bundle");
+                            } catch (final OXException e) {
+                                LOG.error("Error while checking Properties", e);
+                                shutdownBundle();
+                                return addedService;
                             }
                         }
-
-                        for (int i = 0; i < ownDependingServices.size(); i++) {
-                            final SimpleEntry<?> entry = ownDependingServices.get(i);
-                            final Class<?> clazz = entry.getClazz();
-                            if (clazz.isInstance(addedService)) {
-                                objects[i] = clazz.cast(addedService);
-                            }
-                        }
-
-                        final int found = countObjects();
-                        needsRegistration = found == objects.length && null == registration;
-                    } finally {
-                        lock.unlock();
                     }
+
+                    for (int i = 0; i < ownDependingServices.size(); i++) {
+                        final SimpleEntry<?> entry = ownDependingServices.get(i);
+                        final Class<?> clazz = entry.getClazz();
+                        if (clazz.isInstance(addedService)) {
+                            objects[i] = clazz.cast(addedService);
+                        }
+                    }
+
+                    int found = countObjects();
+                    boolean needsRegistration = found == objects.length && null == registration;
                     if (needsRegistration) {
                         try {
                             service.setObjects(objects);
@@ -761,10 +751,10 @@ public abstract class OSGiAbstractor implements ServiceLookup, BundleActivator{
                             registeredServiceImplementations++;
                             checkStarted();
                             LOG.info("Registered {} service.", className);
-                        } catch (final OXException e) {
+                        } catch (OXException e) {
                             LOG.error("Error while setting required services in \"{}\"", service.getClass().getCanonicalName(), e);
                             shutdownBundle();
-                        } catch (final RuntimeException e) {
+                        } catch (RuntimeException e) {
                             LOG.error("Error while setting required services in \"{}\"", service.getClass().getCanonicalName(), e);
                             shutdownBundle();
                         }
@@ -780,25 +770,22 @@ public abstract class OSGiAbstractor implements ServiceLookup, BundleActivator{
                 @Override
                 public void removedService(final ServiceReference<Object> reference, final Object obj) {
                     ServiceRegistration<?> unregister = null;
-                    lock.lock();
-                    try {
-                        for (int i = 0; i < ownDependingServices.size(); i++) {
-                            final SimpleEntry<?> entry = ownDependingServices.get(i);
-                            if (entry.getClazz().isInstance(obj)) {
-                                objects[i] = null;
-                            }
-                        }
 
-                        final int found = countObjects();
-                        if (registration != null && found != objects.length) {
-                            unregister = registration;
-                            registration = null;
-                            registeredServiceImplementations--;
-                            checkStarted();
+                    for (int i = 0; i < ownDependingServices.size(); i++) {
+                        SimpleEntry<?> entry = ownDependingServices.get(i);
+                        if (entry.getClazz().isInstance(obj)) {
+                            objects[i] = null;
                         }
-                    } finally {
-                        lock.unlock();
                     }
+
+                    int found = countObjects();
+                    if (registration != null && found != objects.length) {
+                        unregister = registration;
+                        registration = null;
+                        registeredServiceImplementations--;
+                        checkStarted();
+                    }
+
                     if (null != unregister) {
                         LOG.info("Unregistering {} service.", className);
                         unregister.unregister();

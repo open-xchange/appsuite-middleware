@@ -832,7 +832,7 @@ public abstract class MailConfig {
             AuthType configuredAuthType = getConfiguredAuthType(account.isMailAccount(), session);
             if (AuthType.isOAuthType(configuredAuthType)) {
                 // Apparently, OAuth is supposed to be used
-                Object obj = session.getParameter(Session.PARAM_OAUTH_TOKEN);
+                Object obj = session.getParameter(Session.PARAM_OAUTH_ACCESS_TOKEN);
                 if (obj == null) {
                     throw MailExceptionCode.MISSING_CONNECT_PARAM.create("The session contains no OAuth token.");
                 }

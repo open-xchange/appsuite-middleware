@@ -59,6 +59,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -144,7 +145,7 @@ public class GenerateMasterPasswordCLT {
                 if (console != null && (passwd = console.readPassword("[%s]", builder.toString())) != null) {
                     clearPassword = new String(passwd);
                 } else {
-                    BufferedWriter bufferWrite = new BufferedWriter(new OutputStreamWriter(System.out));
+                    BufferedWriter bufferWrite = new BufferedWriter(new OutputStreamWriter(System.out, Charset.forName("UTF-8")));
                     bufferWrite.write(builder.toString());
                     bufferWrite.flush();
 
@@ -188,8 +189,11 @@ public class GenerateMasterPasswordCLT {
      */
     private static void invoke(Map<Parameter, String> parameters) throws IOException {
         File file = new File(parameters.get(Parameter.mpasswdfile));
-        if (!file.exists()) {
-            file.createNewFile();
+        boolean created = file.createNewFile();
+        if (created) {
+            System.out.println("Created a new file in '" + file.getAbsolutePath() + "'");
+        } else {
+            System.err.println("Using already existing file '" + file.getAbsolutePath() + "'");
         }
 
         BufferedReader br = null;
@@ -231,6 +235,7 @@ public class GenerateMasterPasswordCLT {
      * @param password The plain-text password to encrypt
      * @return The encrypted password
      * @throws OXException
+     * @throws IllegalArgumentException if the request encryption algorithm string is either <code>null</code>, or empty, or unknown
      */
     private static String encryptPassword(final String encryption, final String password) throws OXException {
         IPasswordMech pm = getPasswordMechFor(encryption);
@@ -279,11 +284,12 @@ public class GenerateMasterPasswordCLT {
      * Gets the password mechanism for given identifier
      *
      * @param identifier The identifier
-     * @return The password mechanism or <code>null</code>
+     * @return The password mechanism
+     * @throws IllegalArgumentException if the identifier is either <code>null</code>, or empty, or unknown
      */
     public static IPasswordMech getPasswordMechFor(String identifier) {
         if (Strings.isEmpty(identifier)) {
-            return null;
+            throw new IllegalArgumentException("The identifier for the password mechanism can neither be 'null' nor empty.");
         }
         String id = Strings.toUpperCase(identifier);
         if (false == id.startsWith("{")) {
@@ -298,6 +304,6 @@ public class GenerateMasterPasswordCLT {
                 return pm;
             }
         }
-        return null;
+        throw new IllegalArgumentException("The identifier '" + identifier + "' for the password mechanism is unknown.");
     }
 }

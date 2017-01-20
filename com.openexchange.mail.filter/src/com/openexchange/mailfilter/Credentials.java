@@ -84,7 +84,7 @@ public class Credentials {
         userid = session.getUserId();
         contextid = session.getContextId();
         subject = (Subject) session.getParameter("kerberosSubject");
-        oauthToken = (String) session.getParameter(Session.PARAM_OAUTH_TOKEN);
+        oauthToken = (String) session.getParameter(Session.PARAM_OAUTH_ACCESS_TOKEN);
         username = null;
         b_contextid = true;
     }

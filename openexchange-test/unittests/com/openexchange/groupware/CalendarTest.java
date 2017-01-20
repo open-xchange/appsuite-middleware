@@ -57,7 +57,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Properties;
 import java.util.TimeZone;
-import com.openexchange.api2.ReminderService;
+import com.openexchange.api2.ReminderSQLInterface;
 import com.openexchange.calendar.CalendarMySQL;
 import com.openexchange.calendar.CalendarOperation;
 import com.openexchange.calendar.CalendarSql;
@@ -141,7 +141,7 @@ public class CalendarTest extends TestCase {
         contextid = ctx.getContextId();
         userid = user;
         ContextStorage.start();
-        
+
         CalendarMySQL.setApppointmentSqlFactory(new AppointmentSqlFactory());
     }
 
@@ -504,8 +504,8 @@ public class CalendarTest extends TestCase {
 
         csql.deleteAppointmentObject(testobject2, fid, new Date());
 
-        final ReminderService rsql = new ReminderHandler(context);
-        assertTrue("Check if reminder has been deleted", rsql.existsReminder(object_id, userid, Types.APPOINTMENT) == false);
+        final ReminderSQLInterface rsql = ReminderHandler.getInstance();
+        assertTrue("Check if reminder has been deleted", rsql.existsReminder(object_id, userid, Types.APPOINTMENT, context) == false);
 
 
     }
@@ -1478,8 +1478,9 @@ public class CalendarTest extends TestCase {
         assertTrue("Alarm should be set", testobject2.containsAlarm());
         assertEquals("Test correct alarm value", 15, testobject2.getAlarm());
 
-        final ReminderService rsql = new ReminderHandler(ContextStorage.getInstance().getContext(so.getContextId()));
-        ReminderObject ro = rsql.loadReminder(object_id, userid, Types.APPOINTMENT);
+        final ReminderSQLInterface rsql = ReminderHandler.getInstance();
+        Context ctx = ContextStorage.getInstance().getContext(so.getContextId());
+        ReminderObject ro = rsql.loadReminder(object_id, userid, Types.APPOINTMENT, ctx);
         long check_date = new Date((testobject2.getStartDate().getTime() - (15*60*1000))).getTime();
         assertEquals("Check correct alam in reminder object" , check_date, ro.getDate().getTime());
 
@@ -1499,7 +1500,7 @@ public class CalendarTest extends TestCase {
         assertEquals("Test correct alarm value", 30, testobject3.getAlarm());
 
 
-        ro = rsql.loadReminder(object_id, userid, Types.APPOINTMENT);
+        ro = rsql.loadReminder(object_id, userid, Types.APPOINTMENT, ctx);
         check_date = new Date((testobject3.getStartDate().getTime() - (30*60*1000))).getTime();
         assertEquals("Check correct alam in reminder object" , check_date, ro.getDate().getTime());
 
@@ -1863,14 +1864,14 @@ public class CalendarTest extends TestCase {
                 for (int a = 0; a < up_test.length; a++) {
                     if (up_test[a].getIdentifier() == userid2) {
                         assertEquals("Check Confirm State", CalendarDataObject.NONE, up_test[a].getConfirm());
-                        final ReminderHandler rh = new ReminderHandler(getContext());
-                        final ReminderObject ro = rh.loadReminder(object_id, userid2, Types.APPOINTMENT);
+                        final ReminderHandler rh = ReminderHandler.getInstance();
+                        final ReminderObject ro = rh.loadReminder(object_id, userid2, Types.APPOINTMENT, getContext());
                         final Date check_date = ro.getDate();
                         assertEquals("Check correct Alarm", new Date(test_date.getTime()-(30*60000)), check_date);
                     } else if (up_test[a].getIdentifier() == userid) {
                         assertEquals("Check Confirm State", CalendarDataObject.ACCEPT, up_test[a].getConfirm());
-                        final ReminderHandler rh = new ReminderHandler(getContext());
-                        final ReminderObject ro = rh.loadReminder(object_id, userid, Types.APPOINTMENT);
+                        final ReminderHandler rh = ReminderHandler.getInstance();
+                        final ReminderObject ro = rh.loadReminder(object_id, userid, Types.APPOINTMENT, getContext());
                         final Date check_date = ro.getDate();
                         assertEquals("Check correct Alarm", new Date(test_date.getTime()-(15*60000)), check_date);
                     }

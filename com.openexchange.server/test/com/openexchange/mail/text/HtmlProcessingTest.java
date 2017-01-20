@@ -60,6 +60,7 @@ import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import com.openexchange.html.HtmlSanitizeOptions;
 import com.openexchange.html.HtmlSanitizeResult;
 import com.openexchange.html.HtmlService;
 import com.openexchange.mail.MailPath;
@@ -226,6 +227,7 @@ public class HtmlProcessingTest {
         PowerMockito.when(ServerServiceRegistry.getInstance()).thenReturn(serverServiceRegistry);
         PowerMockito.when(serverServiceRegistry.getService(HtmlService.class)).thenReturn(htmlService);
         PowerMockito.when(htmlService.sanitize(Matchers.anyString(), Matchers.anyString(), Matchers.anyBoolean(), (boolean[]) Matchers.any(), Matchers.anyString(), Matchers.anyInt())).thenReturn(new HtmlSanitizeResult(sanitizedHtmlContent));
+        PowerMockito.when(htmlService.sanitize(Matchers.anyString(), Matchers.any(HtmlSanitizeOptions.class))).thenReturn(new HtmlSanitizeResult(sanitizedHtmlContent));
     }
 
     @Test
@@ -251,7 +253,7 @@ public class HtmlProcessingTest {
 
         HtmlProcessing.formatContentForDisplay(htmlContent, "UTF-8", true, session, mailPath, userSettingMail, modified, DisplayMode.DISPLAY, true, true, -1);
 
-        Mockito.verify(htmlService, Mockito.times(1)).sanitize(Matchers.anyString(), Matchers.anyString(), Matchers.anyBoolean(), (boolean[]) Matchers.any(), Matchers.anyString(), Matchers.anyInt());
+        Mockito.verify(htmlService, Mockito.times(1)).sanitize(Matchers.anyString(), Matchers.any(HtmlSanitizeOptions.class));
     }
 
     @Test
@@ -262,7 +264,7 @@ public class HtmlProcessingTest {
 
         HtmlProcessing.formatContentForDisplay(htmlContent, "UTF-8", true, session, null, userSettingMail, modified, DisplayMode.DISPLAY, true, true, -1);
 
-        Mockito.verify(htmlService, Mockito.times(1)).sanitize(Matchers.anyString(), Matchers.anyString(), Matchers.anyBoolean(), (boolean[]) Matchers.any(), Matchers.anyString(), Matchers.anyInt());
+        Mockito.verify(htmlService, Mockito.times(1)).sanitize(Matchers.anyString(), Matchers.any(HtmlSanitizeOptions.class));
     }
 
     @Test
@@ -274,7 +276,7 @@ public class HtmlProcessingTest {
 
         Assert.assertTrue(!sanitizeResult.getContent().contains("<br />"));
         Assert.assertTrue(!sanitizeResult.getContent().contains("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />"));
-        Mockito.verify(htmlService, Mockito.times(1)).sanitize(Matchers.anyString(), Matchers.anyString(), Matchers.anyBoolean(), (boolean[]) Matchers.any(), Matchers.anyString(), Matchers.anyInt());
+        Mockito.verify(htmlService, Mockito.times(1)).sanitize(Matchers.anyString(), Matchers.any(HtmlSanitizeOptions.class));
     }
 
     @Test

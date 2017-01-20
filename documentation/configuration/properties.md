@@ -575,6 +575,50 @@ If you would like to add a reference to another property use the following appro
 | __File__ | mail.properties  |
 
 ---
+| Key | <span style="font-weight:normal">com.openexchange.mail.flagging.mode</span> |
+|:----------------|:--------|
+| __Description__ | Specifies how color labels and special \Flagged system flag are connected (or not). Possible values:<br>-<code>colorOnly</code> Only color flags are available. The special \Flagged system flag is not touched.<br>-<code>flaggedOnly</code> Only special \Flagged system flag is used. Color labels are not published.<br>-<code>flaggedAndColor</code> Both - color flags and special \Flagged system flag - are available and set independently.<br>-<code>flaggedImplicit</code>Both - color flags and special \Flagged system flag - are available. A certain color label is linked with the \Flagged system flag. That is to add a color to colorless flagged mails and to add flagged to unflagged but colored mails.<br> |
+| __Default__ | colorOnly  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | true  |
+| __Configcascade Aware__ | true  |
+| __Related__ | com.openexchange.mail.flagging.color  |
+| __File__ | mail.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexchange.mail.flagging.color</span> |
+|:----------------|:--------|
+| __Description__ | Specifies the color which should be added to colorless flagged mails in case the flagging mode is "flaggedImplicit". Only values from 1 to 10 are allowed.<br> |
+| __Default__ | 1  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | true  |
+| __Configcascade Aware__ | true  |
+| __Related__ | com.openexchange.mail.flagging.mode  |
+| __File__ | mail.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexchange.mail.maliciousFolders.enabled</span> |
+|:----------------|:--------|
+| __Description__ | Enables/disables support for malicious folders<br> |
+| __Default__ | true  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | true  |
+| __Configcascade Aware__ | true  |
+| __Related__ | com.openexchange.mail.maliciousFolders.listing  |
+| __File__ | mail.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexchange.mail.maliciousFolders.listing</span> |
+|:----------------|:--------|
+| __Description__ | Specifies the full paths for such mail folders in the primary account's folder tree that are supposed being considered as malicious<br>and therefore a special treatment happens; e.g. hyper-links that occur in mail content are not displayed and/or are not clickable.<br><br>The value is supposed to be comma-separated list of folder paths.<br>Such tokens starting with the '$' character refer to a standard folder. Currently supported: $Spam, $Drafts, $Inbox, $Sent, $Trash, $Confirmed-Spam, $Confirmed-Ham<br><br> Example $Spam, INBOX/Malware<br>Special treatment happens for standard Spam folder and for the "INBOX/Malware" folder in primary account's folder tree hierarchy.<br> |
+| __Default__ | $Spam  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | true  |
+| __Configcascade Aware__ | true  |
+| __Related__ | com.openexchange.mail.maliciousFolders.enabled  |
+| __File__ | mail.properties  |
+
+---
 
 
 ## OAuth 

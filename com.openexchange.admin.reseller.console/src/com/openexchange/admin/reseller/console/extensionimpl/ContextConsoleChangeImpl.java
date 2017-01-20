@@ -92,6 +92,10 @@ public class ContextConsoleChangeImpl extends BasicCommandlineOptions implements
 
     @Override
     public void setAndFillExtension(final AdminParser parser, final Context ctx, final Credentials auth) throws OXConsolePluginException {
+        if (null == ctx) {
+            return;
+        }
+
         final OXContextExtensionImpl firstExtensionByName = (OXContextExtensionImpl) ctx.getFirstExtensionByName(OXContextExtensionImpl.class.getName());
         try {
             final HashSet<Restriction> addres = ResellerAbstraction.parseRestrictions(parser, this.addRestrictionsOption);

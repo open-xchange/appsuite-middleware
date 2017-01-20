@@ -150,7 +150,7 @@ public abstract class DefaultSearchAdapter implements SearchAdapter {
 
     protected static String getSelectClause(String tableAlias, ContactField[] fields) throws OXException {
         StringBuilder stringBuilder = new StringBuilder(10 * fields.length);
-        if (null != fields && 0 < fields.length) {
+        if (0 < fields.length) {
             stringBuilder.append("SELECT ");
             stringBuilder.append(tableAlias).append('.').append(Mappers.CONTACT.get(fields[0]).getColumnLabel());
             for (int i = 1; i < fields.length; i++) {

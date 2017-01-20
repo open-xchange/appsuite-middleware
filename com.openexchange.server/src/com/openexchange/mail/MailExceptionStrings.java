@@ -111,7 +111,7 @@ public final class MailExceptionStrings implements LocalizableStrings {
 
     public final static String DEFAULT_FOLDER_CHECK_FAILED_MSG = "Checking default folders failed for user %2$s.";
 
-    public final static String DEFAULT_FOLDER_CHECK_FAILED_OVER_QUOTA_MSG = "Default folders cannot be created as mail system denies to create more folders. Please delete other folders first";
+    public final static String DEFAULT_FOLDER_CHECK_FAILED_OVER_QUOTA_MSG = "Default folders cannot be created as mail system denies to create more folders. Consequently, the mail module is not usable at the moment. Please delete other folders first in order to re-use the mail module again";
 
     public final static String UNSUPPORTED_DATASOURCE_MSG = "The types of specified data source are not supported.";
 

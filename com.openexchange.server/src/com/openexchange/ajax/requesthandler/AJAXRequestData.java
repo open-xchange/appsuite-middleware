@@ -86,6 +86,7 @@ import com.openexchange.groupware.notify.hostname.internal.HostDataImpl;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.java.Strings;
+import com.openexchange.log.LogProperties;
 import com.openexchange.mail.json.actions.AbstractMailAction;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -811,12 +812,12 @@ public class AJAXRequestData {
     }
 
     /**
-     * Gets this request's parameters as a {@link Map map}
+     * Gets this request's parameters as an unmodifiable {@link Map map}
      *
-     * @return The parameters as a {@link Map map}
+     * @return The parameters as an unmodifiable {@link Map map}
      */
     public @NonNull Map<String, String> getParameters() {
-        return new HashMap<String, String>(params);
+        return Collections.unmodifiableMap(params);
     }
 
     /**
@@ -1588,6 +1589,9 @@ public class AJAXRequestData {
      * @param hostname The host name
      */
     public void setHostname(final String hostname) {
+        if (null != hostname) {
+            LogProperties.put(LogProperties.Name.HOSTNAME, hostname);
+        }
         this.hostname = hostname;
     }
 

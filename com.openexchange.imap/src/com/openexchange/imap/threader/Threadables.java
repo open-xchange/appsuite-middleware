@@ -160,7 +160,12 @@ public final class Threadables {
      */
     public static Threadable applyThreaderTo(final Threadable threadable) {
         if (useCommonsNetThreader()) {
-            return ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(threadable))).getDelegatee();
+            ThreadableImpl threadableImpl = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(threadable)));
+            if(threadableImpl!=null){
+                return threadableImpl.getDelegatee();
+            } else {
+                LOG.warn("Unable to use apache commom net threader. Falling back to default threader.");
+            }
         }
         return new Threader().thread(threadable);
     }
@@ -198,7 +203,10 @@ public final class Threadables {
         Threadable threadable = getAllThreadablesFrom(imapFolder, lookAhead);
         if (sorted) {
             if (useCommonsNetThreader()) {
-                threadable = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(threadable))).getDelegatee();
+                ThreadableImpl threadableImpl =  ((ThreadableImpl)new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(threadable)));
+                if(threadableImpl!=null){
+                    threadable = threadableImpl.getDelegatee();
+                }
             } else {
                 threadable = new Threader().thread(threadable);
             }

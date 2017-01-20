@@ -88,4 +88,13 @@ public class SAMLSessionParameters {
      */
     public static final String ACCESS_TOKEN = "com.openexchange.saml.AccessToken";
 
+    /**
+     * com.openexchange.saml.SamlPath
+     */
+    public static final String SAML_PATH = "com.openexchange.saml.SamlPath";
+
+    /**
+     * com.openexchange.saml.SingleLogout
+     */
+    public static final String SINGLE_LOGOUT = "com.openexchange.saml.SingleLogout";
 }

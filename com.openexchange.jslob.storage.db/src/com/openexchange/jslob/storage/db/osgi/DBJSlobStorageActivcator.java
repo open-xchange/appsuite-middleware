@@ -176,7 +176,7 @@ public class DBJSlobStorageActivcator extends HousekeepingActivator {
                                     cache.clear();
                                     cache.dispose();
                                 } catch (final Exception e) {
-                                    // Ignore
+                                    LOG.error("Stopping cache for 'com.openexchange.jslob.storage.db' failed.", e);
                                 }
                             }
                         }

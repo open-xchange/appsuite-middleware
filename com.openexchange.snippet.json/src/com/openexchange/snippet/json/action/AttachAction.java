@@ -49,6 +49,7 @@
 
 package com.openexchange.snippet.json.action;
 
+import static com.openexchange.java.Strings.toLowerCase;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -58,7 +59,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.json.JSONException;
-import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.configuration.ServerConfig;
@@ -66,8 +67,10 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadException;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.osgi.ServiceListing;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.snippet.Attachment;
@@ -75,9 +78,13 @@ import com.openexchange.snippet.DefaultAttachment;
 import com.openexchange.snippet.DefaultAttachment.InputStreamProvider;
 import com.openexchange.snippet.DefaultSnippet;
 import com.openexchange.snippet.Property;
+import com.openexchange.snippet.Snippet;
+import com.openexchange.snippet.SnippetExceptionCodes;
+import com.openexchange.snippet.SnippetManagement;
 import com.openexchange.snippet.SnippetService;
 import com.openexchange.snippet.json.SnippetRequest;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AttachAction}
@@ -109,8 +116,17 @@ public final class AttachAction extends SnippetAction {
 
     @Override
     protected AJAXRequestResult perform(final SnippetRequest snippetRequest) throws OXException, JSONException {
-        final String id = snippetRequest.checkParameter("id");
-        final SnippetService snippetService = getSnippetService(snippetRequest.getSession());
+        String id = snippetRequest.checkParameter("id");
+        ServerSession session = snippetRequest.getSession();
+        SnippetService snippetService = getSnippetService(session);
+        SnippetManagement management = snippetService.getManagement(session);
+
+        {
+            Snippet snippetToChange = management.getSnippet(id);
+            if (!snippetToChange.isShared() && snippetToChange.getCreatedBy() != session.getUserId()) {
+                throw SnippetExceptionCodes.UPDATE_DENIED.create(id, session.getUserId(), session.getContextId());
+            }
+        }
 
         final DefaultSnippet snippet = new DefaultSnippet().setId(id);
         final AJAXRequestData requestData = snippetRequest.getRequestData();
@@ -119,10 +135,6 @@ public final class AttachAction extends SnippetAction {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create("Not an upload request.");
         }
         final UploadEvent upload = requestData.getUploadEvent();
-        final String fileTypeFilter = requestData.getParameter(AJAXServlet.PARAMETER_TYPE);
-        if (fileTypeFilter == null) {
-            throw UploadException.UploadCode.MISSING_PARAM.create(AJAXServlet.PARAMETER_TYPE);
-        }
         /*
          * Iterate uploaded files
          */
@@ -132,27 +144,43 @@ public final class AttachAction extends SnippetAction {
             /*
              * Check file item's content type
              */
-            final String sContentType = uploadFile.getContentType();
-            final ContentType ct = new ContentType(sContentType);
-            if (!checkFileType(fileTypeFilter, ct)) {
-                throw UploadException.UploadCode.INVALID_FILE_TYPE.create(sContentType, fileTypeFilter);
+            String sContentType = uploadFile.getContentType();
+            ContentType ct = new ContentType(sContentType);
+            if (ct.startsWith("application/octet-stream")) {
+                String fileName = uploadFile.getPreparedFileName();
+                if (null != fileName) {
+                    sContentType = MimeType2ExtMap.getContentType(fileName);
+                    final int pos = sContentType.indexOf('/');
+                    ct.setPrimaryType(sContentType.substring(0, pos));
+                    ct.setSubType(sContentType.substring(pos + 1));
+                }
             }
+
+            if (!ct.startsWith("image/")) {
+                throw UploadException.UploadCode.UPLOAD_FAILED.create("Only images allowed");
+            }
+            if (Strings.startsWithAny(toLowerCase(ct.getSubType()), "svg")) {
+                throw UploadException.UploadCode.UPLOAD_FAILED.create("No SVG allowed");
+            }
+            try {
+                if (DownloadUtility.isIllegalImage(uploadFile)) {
+                    throw UploadException.UploadCode.UPLOAD_FAILED.create("Invalid image data");
+                }
+            } catch (IOException e) {
+                throw UploadException.UploadCode.UPLOAD_FAILED.create(e, e.getMessage());
+            }
+
             attachments.add(processFileItem(uploadFile));
         }
         /*
          * Update
          */
-        final String newId = snippetService.getManagement(snippetRequest.getSession()).updateSnippet(
-            id,
-            snippet,
-            Collections.<Property> emptySet(),
-            attachments,
-            Collections.<Attachment> emptyList());
+        String newId = management.updateSnippet(id, snippet, Collections.<Property> emptySet(), attachments, Collections.<Attachment> emptyList());
         return new AJAXRequestResult(newId, "string");
     }
 
     private static Attachment processFileItem(final UploadFile fileItem) {
-        final DefaultAttachment attachment = new DefaultAttachment();
+        DefaultAttachment attachment = new DefaultAttachment();
         attachment.setStreamProvider(new InputStreamProviderImpl(fileItem));
         {
             final String fileName = fileItem.getPreparedFileName();

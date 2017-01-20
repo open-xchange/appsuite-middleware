@@ -63,7 +63,9 @@ import java.net.MalformedURLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -244,9 +246,10 @@ public final class FilterJerichoHandler implements JerichoHandler {
     private boolean imageURLFound;
     private boolean replaceUrls = true;
     private String cssPrefix;
+    private boolean suppressLinks;
     private final LinkedList<CellPadding> tablePaddings;
-
     private final boolean changed = false;
+
 
     /**
      * Initializes a new {@link FilterJerichoHandler}.
@@ -314,6 +317,17 @@ public final class FilterJerichoHandler implements JerichoHandler {
         }
 
         this.maxContentSizeExceeded = false;
+        return this;
+    }
+
+    /**
+     * Sets whether to suppress links
+     *
+     * @param suppressLinks <code>true</code> to suppress links; otherwise <code>false</code>
+     * @return This handler with new behavior applied
+     */
+    public FilterJerichoHandler setSuppressLinks(boolean suppressLinks) {
+        this.suppressLinks = suppressLinks;
         return this;
     }
 
@@ -690,9 +704,15 @@ public final class FilterJerichoHandler implements JerichoHandler {
                     prependToStyle("padding: " + cellPadding.cellPadding + "px;", attrMap);
                 }
             }
+        } else if (suppressLinks) {
+            if (isHrefTag(tagName) && attrMap.containsKey("href")) {
+                attrMap.put("href", "#");
+                attrBuilder.append(' ').append("onclick=\"return false\"");
+                attrBuilder.append(' ').append("data-disabled=\"true\"");
+            }
         }
 
-        List<Attribute> uriAttributes = replaceUrls ? startTag.getURIAttributes() : Collections.<Attribute> emptyList();
+        Set<String> uriAttributes = replaceUrls ? setFor(startTag.getURIAttributes()) : Collections.<String> emptySet();
         for (Map.Entry<String, String> attribute : attrMap.entrySet()) {
             String attr = attribute.getKey();
             if ("style".equals(attr)) {
@@ -791,6 +811,34 @@ public final class FilterJerichoHandler implements JerichoHandler {
             htmlBuilder.append('/');
         }
         htmlBuilder.append('>');
+    }
+
+    private Set<String> setFor(List<Attribute> attributes) {
+        if (null == attributes) {
+            return Collections.emptySet();
+        }
+
+        int size = attributes.size();
+        if (size <= 0) {
+            return Collections.emptySet();
+        }
+
+        Set<String> names = new LinkedHashSet<>(size);
+        Iterator<Attribute> iter = attributes.iterator();
+        for (int i = size; i-- > 0;) {
+            names.add(iter.next().getKey());
+        }
+        return names;
+    }
+
+    /**
+     * Checks if denoted tag may hold a <code>"href"</code> attribute according to <a href="http://www.w3schools.com/tags/att_href.asp">this specification</a>.
+     *
+     * @param tagName The name of the tag to check
+     * @return <code>true</code> if tag possibly holds a <code>"href"</code> attribute; otherwise <code>false</code>
+     */
+    private boolean isHrefTag(String tagName) {
+        return HTMLElementName.A == tagName || HTMLElementName.AREA == tagName || HTMLElementName.BASE == tagName || HTMLElementName.LINK == tagName;
     }
 
     /**

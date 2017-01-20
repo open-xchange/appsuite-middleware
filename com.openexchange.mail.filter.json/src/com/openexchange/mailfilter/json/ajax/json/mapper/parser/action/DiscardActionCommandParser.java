@@ -58,6 +58,7 @@ import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.jsieve.commands.ActionCommand.Commands;
 import com.openexchange.mailfilter.json.ajax.json.fields.GeneralField;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link DiscardActionCommandParser}
@@ -75,17 +76,17 @@ public class DiscardActionCommandParser implements CommandParser<ActionCommand> 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser#parse(org.json.JSONObject)
      */
     @Override
-    public ActionCommand parse(JSONObject jsonObject) throws JSONException, SieveException {
+    public ActionCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException {
         return new ActionCommand(Commands.DISCARD, new ArrayList<Object>(0));
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser#parse(org.json.JSONObject, com.openexchange.jsieve.commands.ActionCommand)
      */
     @Override

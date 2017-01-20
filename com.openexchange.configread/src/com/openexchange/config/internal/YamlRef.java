@@ -76,7 +76,14 @@ public class YamlRef {
         super();
         this.yamlFile = yamlFile;
         lastModified = yamlFile.lastModified();
-        checksum = ConfigurationServices.getHash(yamlFile);
+        try {
+            checksum = ConfigurationServices.getHash(yamlFile);
+        } catch (IllegalStateException e) {
+            Throwable cause = e.getCause();
+            String message = "Failed to load YAML file '" + yamlFile + "'. Reason: " + (null == cause ? e.getMessage() : cause.getMessage());
+            StaticSignalStartedService.getInstance().setState(State.INVALID_CONFIGURATION, e, message);
+            throw e;
+        }
     }
 
     /**
@@ -104,7 +111,7 @@ public class YamlRef {
                         tmp = ConfigurationServices.loadYamlFrom(yamlFile);
                         value = tmp;
                     } catch (IOException e) {
-                        String message = "Failed to load YAML file '" + yamlFile + "'. Reason:" + e.getMessage();
+                        String message = "Failed to load YAML file '" + yamlFile + "'. Reason: " + e.getMessage();
                         StaticSignalStartedService.getInstance().setState(State.INVALID_CONFIGURATION, e, message);
                         throw new IllegalArgumentException(message, e);
                     } catch (RuntimeException e) {

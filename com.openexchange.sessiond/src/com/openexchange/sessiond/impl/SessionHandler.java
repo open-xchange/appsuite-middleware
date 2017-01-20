@@ -1954,7 +1954,7 @@ public final class SessionHandler {
         }
 
         @Override
-        public Void call() {
+        public Void call() throws OXException {
             try {
                 if (addIfAbsent) {
                     if (sessionStorageService.addSessionIfAbsent(getObfuscator().wrap(session, config.getRemoteParameterNames()))) {

@@ -72,6 +72,29 @@ via APNS, but not for "new appointment".
 and/or invalid tokens.<br>
 Default is 3600000 (1 hour).
 
+Furthermore the actual APNS options need to be configured on a per client basis. APNS options are specified in the ``/opt/open-xchange/etc/pns-apns-options.yml`` file; e.g.
+
+```
+# Only an example
+myiosclient:
+    # Disabled...
+    enabled: false
+    keystore: /opt/open-xchange/etc/mykey-apns.p12
+    password: A3JWKAKR8XB
+    production: true
+```
+
+In this example, ``myiosclient`` is the identifier of the client, to which the push notifications are supposed to be routed. Below a certain client identifier, the options specify:
+
+* `enabled`<br>
+  Boolean. If set to "false" the client configuration will not be available. Default is "true".
+* `keystore`<br>
+  String. Specifies the path to the local keystore file (PKCS #12) containing the APNS certificate and keys for the client-associated iOS application
+* `password`
+  String. Specifies the password to use when creating the referenced keystore containing the certificate of the iOS application.
+* `production`
+  Boolean. Indicates which APNS service is used when sending push notifications to iOS devices. A value of "true" will use the production service, a value of "false" references to the sandbox service. Default is "true".
+
 ### GCM transport
 
 The following setting controls whether a push notification message is allowed to be transported to associated user using GCM transport
@@ -88,6 +111,23 @@ Example
 That allows the client "open-xchange-appsuite" (App Suite UI) to receive "new mail" notifications
 via GCM, but not for "new appointment".
 
+Furthermore the actual GCM options need to be configured on a per client basis. GCM options are specified in the ``/opt/open-xchange/etc/pns-gcm-options.yml`` file; e.g.
+
+```
+# Only an example
+mygoogleclient:
+    # Disabled...
+    enabled: false
+    key: AIzaSy2535345TbVL2r4yaZ4ZVQvJdcE1vth24546
+```
+
+In this example, ``mygoogleclient`` is the identifier of the client, to which the push notifications are supposed to be routed. Below a certain client identifier, the options specify:
+
+* `enabled`<br>
+  Boolean. If set to "false" the client configuration will not be available. Default is "true".
+* `key`<br>
+  String. Specifies the API key of the server application.
+
 ### WNS transport
 
 The following setting controls whether a push notification message is allowed to be transported to associated user using WNS transport
@@ -103,3 +143,23 @@ Example
 `com.openexchange.pns.transport.wns.enabled.open-xchange-appsuite.ox:calendar:new=false`<br>
 That allows the client "open-xchange-appsuite" (App Suite UI) to receive "new mail" notifications
 via WNS, but not for "new appointment".
+
+Furthermore the actual WNS options need to be configured on a per client basis. WNS options are specified in the ``/opt/open-xchange/etc/pns-wns-options.yml`` file; e.g.
+
+```
+# Only an example
+mywindowsclient:
+    # Disabled...
+    enabled: false
+    sid: AIzaSy2535345TbVL2r4yaZ4ZVQvJdcE1vth24546
+    secret: 14e435y2535345TbVL2r4yaZ4ZVQvJdcE1vth24546
+```
+
+In this example, ``mywindowsclient`` is the identifier of the client, to which the push notifications are supposed to be routed. Below a certain client identifier, the options specify:
+
+* `enabled`<br>
+  Boolean. If set to "false" the client configuration will not be available. Default is "true".
+* `sid`<br>
+  String. Specifies the SID (Package security identifier).
+* `secret`<br>
+  String. Specifies the client secret.

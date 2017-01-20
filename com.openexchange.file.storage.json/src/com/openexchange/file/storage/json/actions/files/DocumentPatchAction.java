@@ -66,6 +66,7 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.json.services.Services;
 import com.openexchange.java.Streams;
 import com.openexchange.rdiff.RdiffService;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
@@ -110,6 +111,9 @@ public class DocumentPatchAction extends AbstractFileAction {
                 final OutputStream patchOut = gen(new FileOutputStream(patchedFile), closeables);
                 final InputStream requestStream = gen(request.getUploadStream(), closeables);
                 final RdiffService rdiff = Services.getRdiffService();
+                if (rdiff == null) {
+                    throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(RdiffService.class.getSimpleName());
+                }
                 rdiff.rebuildFile(baseFile, requestStream, patchOut);
                 patchOut.flush();
                 dropFirstFrom(closeables);

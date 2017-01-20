@@ -148,6 +148,7 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.MailThread;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.dataobjects.compose.ContentAware;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -4043,38 +4044,68 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     @Override
     public MailMessage saveDraft(final String draftFullName, final ComposedMailMessage composedMail) throws OXException {
         try {
-            MimeMessage mimeMessage = new MimeMessage(imapAccess.getMailSession());
+            /*
+             * Message content available?
+             */
+            MimeMessage mimeMessage = null;
+            if (composedMail instanceof ContentAware) {
+                try {
+                    final Object content = composedMail.getContent();
+                    if (content instanceof MimeMessage) {
+                        mimeMessage = (MimeMessage) content;
+                        mimeMessage.removeHeader("x-original-headers");
+
+                        /*
+                         * Set common headers
+                         */
+                        MimeMessageFiller filler = new MimeMessageFiller(session, ctx);
+                        filler.setAccountId(accountId);
+                        filler.setCommonHeaders(mimeMessage);
+                    }
+                } catch (final Exception e) {
+                    mimeMessage = null;
+                }
+            }
+
+            long uid;
             /*
              * Fill message
              */
-            long uid;
-            try {
-                UserSettingMail customSettings = composedMail.getMailSettings();
-                MimeMessageFiller filler = null == customSettings ? new MimeMessageFiller(session, ctx) : new MimeMessageFiller(session, ctx, customSettings);
-                filler.setAccountId(accountId);
-                composedMail.setFiller(filler);
-                /*
-                 * Set headers
-                 */
-                filler.setMessageHeaders(composedMail, mimeMessage);
-                /*
-                 * Set common headers
-                 */
-                filler.setCommonHeaders(mimeMessage);
-                /*
-                 * Fill body
-                 */
-                filler.fillMailBody(composedMail, mimeMessage, ComposeType.NEW);
-                mimeMessage.setFlag(DRAFT, true);
-                mimeMessage.saveChanges();
-                // Remove generated Message-Id for template message
-                mimeMessage.removeHeader(MessageHeaders.HDR_MESSAGE_ID);
+            if (mimeMessage == null) {
+                mimeMessage = new MimeMessage(imapAccess.getMailSession());
+                try {
+                    UserSettingMail customSettings = composedMail.getMailSettings();
+                    MimeMessageFiller filler = null == customSettings ? new MimeMessageFiller(session, ctx) : new MimeMessageFiller(session, ctx, customSettings);
+                    filler.setAccountId(accountId);
+                    composedMail.setFiller(filler);
+                    /*
+                     * Set headers
+                     */
+                    filler.setMessageHeaders(composedMail, mimeMessage);
+                    /*
+                     * Set common headers
+                     */
+                    filler.setCommonHeaders(mimeMessage);
+                    /*
+                     * Fill body
+                     */
+                    filler.fillMailBody(composedMail, mimeMessage, ComposeType.NEW);
+                    mimeMessage.setFlag(DRAFT, true);
+                    mimeMessage.saveChanges();
+                    // Remove generated Message-Id for template message
+                    mimeMessage.removeHeader(MessageHeaders.HDR_MESSAGE_ID);
+                    /*
+                     * Append message to draft folder
+                     */
+                    uid = appendMessagesLong(draftFullName, new MailMessage[] { MimeMessageConverter.convertMessage(mimeMessage, false) })[0];
+                } finally {
+                    composedMail.cleanUp();
+                }
+            } else {
                 /*
                  * Append message to draft folder
                  */
                 uid = appendMessagesLong(draftFullName, new MailMessage[] { MimeMessageConverter.convertMessage(mimeMessage, false) })[0];
-            } finally {
-                composedMail.cleanUp();
             }
             /*
              * Check for draft-edit operation: Delete old version

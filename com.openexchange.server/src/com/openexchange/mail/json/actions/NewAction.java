@@ -135,6 +135,7 @@ public final class NewAction extends AbstractMailAction {
     private static final String FLAGS = MailJSONField.FLAGS.getKey();
     private static final String FROM = MailJSONField.FROM.getKey();
     private static final String UPLOAD_FORMFIELD_MAIL = AJAXServlet.UPLOAD_FORMFIELD_MAIL;
+    private static final String PLAIN_JSON = AJAXServlet.PARAM_PLAIN_JSON;
 
     private final EnumSet<ComposeType> draftTypes;
 
@@ -287,7 +288,8 @@ public final class NewAction extends AbstractMailAction {
 
                 warnings.addAll(mailInterface.getWarnings());
 
-                AJAXRequestResult result = new AJAXRequestResult(msgIdentifier, "string");
+                boolean plainJson = AJAXRequestDataTools.parseBoolParameter(PLAIN_JSON, request);
+                AJAXRequestResult result = resultFor(msgIdentifier, plainJson);
                 result.addWarnings(warnings);
                 return result;
             }
@@ -344,7 +346,7 @@ public final class NewAction extends AbstractMailAction {
                 String[] ids = mailInterface.appendMessages(folder, new MailMessage[] { mm }, false);
                 msgIdentifier = ids[0];
                 mailInterface.updateMessageFlags(folder, ids, MailMessage.FLAG_SEEN, true);
-                return new AJAXRequestResult(new JSONObject(2).put(FolderChildFields.FOLDER_ID, folder).put(DataFields.ID, ids[0]), "json");
+                return resultFor(new JSONObject(2).put(FolderChildFields.FOLDER_ID, folder).put(DataFields.ID, ids[0]));
             }
 
             // Normal transport
@@ -455,14 +457,14 @@ public final class NewAction extends AbstractMailAction {
 
         if (msgIdentifier == null) {
             if (null != userSettingMail && userSettingMail.isNoCopyIntoStandardSentFolder()) {
-                final AJAXRequestResult result = new AJAXRequestResult(JSONObject.NULL, "json");
+                final AJAXRequestResult result = resultFor(null, false);
                 result.addWarnings(warnings);
                 return result;
             }
             if (warnings.isEmpty()) {
                 throw MailExceptionCode.SEND_FAILED_UNKNOWN.create();
             }
-            final AJAXRequestResult result = new AJAXRequestResult(JSONObject.NULL, "json");
+            final AJAXRequestResult result = resultFor(null, false);
             result.addWarnings(warnings);
             return result;
         }
@@ -470,9 +472,32 @@ public final class NewAction extends AbstractMailAction {
         /*
          * Create JSON response object
          */
-        final AJAXRequestResult result = new AJAXRequestResult(msgIdentifier, "string");
+        boolean plainJson = AJAXRequestDataTools.parseBoolParameter(PLAIN_JSON, request);
+        AJAXRequestResult result = resultFor(msgIdentifier, plainJson);
         result.addWarnings(warnings);
         return result;
+    }
+
+    private AJAXRequestResult resultFor(String msgIdentifier, boolean asJsonObject) {
+        if (null == msgIdentifier) {
+            return new AJAXRequestResult(JSONObject.NULL, "json");
+        }
+
+        if (false == asJsonObject) {
+            return new AJAXRequestResult(msgIdentifier, "string");
+        }
+
+        try {
+            MailPath mp = new MailPath(msgIdentifier);
+            return new AJAXRequestResult(new JSONObject(2).put(FolderChildFields.FOLDER_ID, prepareFullname(mp.getAccountId(), mp.getFolder())).put(DataFields.ID, mp.getMailID()), "json");
+        } catch (Exception e) {
+            // Invalid mail path
+            return new AJAXRequestResult(msgIdentifier, "string");
+        }
+    }
+
+    private AJAXRequestResult resultFor(JSONObject jObject) {
+        return new AJAXRequestResult(null == jObject ? JSONObject.NULL : jObject, "json");
     }
 
     private void checkAndApplyLineWrapAfter(AJAXRequestData request, UserSettingMail usm) throws OXException {

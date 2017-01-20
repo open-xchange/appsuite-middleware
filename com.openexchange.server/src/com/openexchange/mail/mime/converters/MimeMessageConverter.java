@@ -409,10 +409,10 @@ public final class MimeMessageConverter {
                     boolean deleteOnError = false;
                     try {
                         if (null == file) {
-                            deleteOnError = true;
                             File newTempFile = fileManagement.newTempFile();
-                            writeToFile(mail, newTempFile);
                             file = newTempFile;
+                            deleteOnError = true;
+                            writeToFile(mail, newTempFile);
                         }
                         mimeMessage = new ManagedMimeMessage(MimeDefaultSession.getDefaultSession(), file, mail.getReceivedDateDirect());
                         mimeMessage.removeHeader(X_ORIGINAL_HEADERS);
@@ -2391,9 +2391,12 @@ public final class MimeMessageConverter {
         Boolean tmp = enableMime4j;
         if (null == tmp) {
             synchronized (MimeMessageConverter.class) {
-                final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                tmp = Boolean.valueOf(null == service ? false : service.getBoolProperty("com.openexchange.mail.mime.enableMime4j", false));
-                enableMime4j = tmp;
+                tmp = enableMime4j;
+                if (null == tmp) {
+                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    tmp = Boolean.valueOf(null == service ? false : service.getBoolProperty("com.openexchange.mail.mime.enableMime4j", false));
+                    enableMime4j = tmp;
+                }
             }
         }
         return tmp.booleanValue();

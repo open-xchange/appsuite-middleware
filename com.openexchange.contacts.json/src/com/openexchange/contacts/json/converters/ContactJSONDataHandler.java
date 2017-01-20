@@ -199,16 +199,14 @@ public class ContactJSONDataHandler implements DataHandler {
          */
         try {
             JSONObject json = ContactMapper.getInstance().serialize(contact, fields, session.getUser().getTimeZone(), session);
+            /*
+             * include contact image inline if available
+             */
             if (null != image1) {
-                /*
-                 * include contact image inline if available
-                 */
-                if (null != image1) {
-                    json.put(ContactMapper.getInstance().get(ContactField.IMAGE1).getAjaxName(), Base64.encodeBase64String(image1));
-                    json.put(ContactMapper.getInstance().get(ContactField.NUMBER_OF_IMAGES).getAjaxName(), 1);
-                    String contentType = null != contact.getImageContentType() ? contact.getImageContentType() : "image/jpeg";
-                    json.put(ContactMapper.getInstance().get(ContactField.IMAGE1_CONTENT_TYPE).getAjaxName(), contentType);
-                }
+                json.put(ContactMapper.getInstance().get(ContactField.IMAGE1).getAjaxName(), Base64.encodeBase64String(image1));
+                json.put(ContactMapper.getInstance().get(ContactField.NUMBER_OF_IMAGES).getAjaxName(), 1);
+                String contentType = null != contact.getImageContentType() ? contact.getImageContentType() : "image/jpeg";
+                json.put(ContactMapper.getInstance().get(ContactField.IMAGE1_CONTENT_TYPE).getAjaxName(), contentType);
             }
             return json;
         } catch (JSONException e) {

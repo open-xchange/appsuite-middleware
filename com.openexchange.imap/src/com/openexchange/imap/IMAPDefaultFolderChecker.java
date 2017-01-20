@@ -244,8 +244,6 @@ public class IMAPDefaultFolderChecker {
                     return DefaultFolderType.SPAM;
                 case StorageUtility.INDEX_TRASH:
                     return DefaultFolderType.TRASH;
-                default:
-                    break;
                 }
             }
         }

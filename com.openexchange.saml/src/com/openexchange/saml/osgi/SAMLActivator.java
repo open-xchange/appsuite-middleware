@@ -65,8 +65,8 @@ public class SAMLActivator implements BundleActivator {
 
     @Override
     public void start(BundleContext context) throws Exception {
-      samlFeature = new SAMLFeature(context);
-      samlFeature.open();
+        samlFeature = new SAMLFeature(context);
+        samlFeature.open();
     }
 
     @Override

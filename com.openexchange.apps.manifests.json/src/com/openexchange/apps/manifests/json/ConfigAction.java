@@ -98,8 +98,7 @@ public class ConfigAction implements AJAXActionService {
         ServerConfigService serverConfigService = services.getService(ServerConfigService.class);
         HostnameService hostNameService = services.getOptionalService(HostnameService.class);
 
-        String hostname;
-
+        String hostname = null;
         if (hostNameService != null) {
             if (session.getUser().isGuest()) {
                 hostname = hostNameService.getGuestHostname(session.getUserId(), session.getContextId());
@@ -107,11 +106,10 @@ public class ConfigAction implements AJAXActionService {
                 hostname = hostNameService.getHostname(session.getUserId(), session.getContextId());
             }
         }
-        HttpServletRequest servletRequest = requestData.optHttpServletRequest();
-        if (null != servletRequest) {
-            hostname = servletRequest.getServerName();
-        } else {
-            hostname = requestData.getHostname();
+
+        if (null == hostname) {
+            HttpServletRequest servletRequest = requestData.optHttpServletRequest();
+            hostname = null == servletRequest ? requestData.getHostname() : servletRequest.getServerName();
         }
 
         ServerConfig serverConfig = serverConfigService.getServerConfig(hostname, session);
@@ -130,7 +128,7 @@ public class ConfigAction implements AJAXActionService {
 
     /**
      * Converts the specified {@link Map} into a {@link JSONObject}
-     * 
+     *
      * @param serverConfig The map with the server configuration
      * @return The converted {@link JSONObject} with the server configuration
      * @throws JSONException if a JSON error occurs
@@ -156,7 +154,7 @@ public class ConfigAction implements AJAXActionService {
 
     /**
      * Reads the specified attributes from the specified {@link Map} and casts them into a type {@link T}
-     * 
+     *
      * @param serverConfig The {@link Map} containing the attributes
      * @param key The key of the attributes
      * @param clazz The type {@link T} to cast them

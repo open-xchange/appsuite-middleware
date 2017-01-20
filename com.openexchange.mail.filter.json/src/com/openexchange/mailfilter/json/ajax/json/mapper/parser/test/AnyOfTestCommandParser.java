@@ -55,6 +55,7 @@ import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.TestCommand;
 import com.openexchange.jsieve.commands.TestCommand.Commands;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AnyOfTestCommandParser}
@@ -72,17 +73,17 @@ public class AnyOfTestCommandParser extends AbstractAllAnyOfTestCommandParser {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser#parse(org.json.JSONObject)
      */
     @Override
-    public TestCommand parse(JSONObject jsonObject) throws JSONException, SieveException, OXException {
-        return parse(jsonObject, Commands.ANYOF);
+    public TestCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException {
+        return parse(jsonObject, Commands.ANYOF, session);
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser#parse(org.json.JSONObject, java.lang.Object)
      */
     @Override

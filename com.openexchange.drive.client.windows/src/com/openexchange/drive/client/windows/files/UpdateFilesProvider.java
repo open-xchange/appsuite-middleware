@@ -49,7 +49,6 @@
 
 package com.openexchange.drive.client.windows.files;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -57,7 +56,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link UpdateFilesProvider} provides all setup files for the update
- * 
+ *
  * Initially checks for existing setup files and provides them afterwards
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
@@ -67,21 +66,21 @@ public interface UpdateFilesProvider {
 
     /**
      * Forget all knows configuration's and setup files and search them under the last used path.
-     * 
+     *
      * @throws OXException if branding's couldn't be reloaded
      */
     public void reload() throws OXException;
 
     /**
      * Forget all knows configuration's and setup files and search them under given path.
-     * 
+     *
      * @throws OXException if branding's couldn't be reloaded
      */
     void reload(String path) throws OXException;
 
     /**
      * Returns the given setup file as a stream
-     * 
+     *
      * @param branding The branding of the file.
      * @param name The filename
      * @return the given file as a stream
@@ -91,7 +90,7 @@ public interface UpdateFilesProvider {
 
     /**
      * Tests if the provider knows the given file und the given brand.
-     * 
+     *
      * @param branding The branding identifier
      * @param name The name of the file
      * @return true if it knows the file, false otherwise
@@ -101,7 +100,7 @@ public interface UpdateFilesProvider {
 
     /**
      * Retrieves the size of the given file
-     * 
+     *
      * @param branding The branding identifier
      * @param name The name of the file
      * @return The size of the file
@@ -111,7 +110,7 @@ public interface UpdateFilesProvider {
 
     /**
      * Retrieves the first filename which matches the given regex expression.
-     * 
+     *
      * @param branding The branding identifier
      * @param regex A regex expression
      * @return the name or null
@@ -121,7 +120,7 @@ public interface UpdateFilesProvider {
 
     /**
      * Retrieves the md5 checksum for the given file.
-     * 
+     *
      * @param branding The branding identifier
      * @param name The name of the file
      * @return The md5 checksum
@@ -131,23 +130,23 @@ public interface UpdateFilesProvider {
 
     /**
      * Retrieves the icon for the given branding as a base64 String.
-     * 
+     *
      * @param branding The branding identifier
      * @return The icon as a base64 String
-     * @throws IOException if is is unable to retrieve the icon
+     * @throws OXException if is is unable to retrieve the icon
      */
-    public String getIcon(String branding) throws IOException;
+    public String getIcon(String branding) throws OXException;
 
     /**
      * Retrieves the branding identifiers of all available branding's.
-     * 
+     *
      * @return A list of identifiers.
      */
     public List<String> getAvailableBrandings();
 
     /**
      * Tests if the Provider knows the given branding
-     * 
+     *
      * @param branding The branding identifier
      * @return true if the UpdateFilesProvider knows the branding, false otherwise.
      */

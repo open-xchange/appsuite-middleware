@@ -223,7 +223,13 @@ public class DispatcherServlet extends SessionServlet {
      * Clears all registered renderer.
      */
     public static void clearRenderer() {
-        RESPONSE_RENDERERS.set(Collections.<ResponseRenderer> emptyList());
+        List<ResponseRenderer> expect;
+        do {
+            expect = RESPONSE_RENDERERS.get();
+            if (expect.isEmpty()) {
+                return;
+            }
+        } while (!RESPONSE_RENDERERS.compareAndSet(expect, Collections.<ResponseRenderer> emptyList()));
     }
 
     // -------------------------------------------------------------------------------------------------
@@ -455,6 +461,10 @@ public class DispatcherServlet extends SessionServlet {
             if (null != session && false == session.isAnonymous()) {
                 // A non-anonymous session
                 enableRateLimitCheckFor(httpRequest);
+                String hostname = requestData.getHostname();
+                if (null != hostname) {
+                    session.setParameter(Session.PARAM_HOST_NAME, hostname);
+                }
             }
 
             // Start dispatcher processing

@@ -399,6 +399,11 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     public static final String PARAMETER_DELIVERY = "delivery".intern();
 
     /**
+     * The parameter that signals that client expects plain JSON; no JavaScript callback.
+     */
+    public static final String PARAM_PLAIN_JSON = "plainJson";
+
+    /**
      * The content type if the response body contains javascript data. Set it with
      * <code>resp.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT)</code> .
      */
@@ -462,7 +467,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * @param session The server session
      * @return The locale
      */
-    protected static Locale localeFrom(ServerSession session) {
+    public static Locale localeFrom(ServerSession session) {
         if (null == session) {
             return Locale.US;
         }
