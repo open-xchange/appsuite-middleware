@@ -832,10 +832,12 @@ public final class MailConverter implements ResultConverter, MailActionConstants
          * Check for malicious folder
          */
         {
-            String folderPath = requestData.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
-            FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(folderPath);
-            if (MaliciousFolders.instanceFor(session).isMalicious(fa.getFullName(), fa.getAccountId(), getMailInterface(requestData, session))) {
-                usmNoSave.setSuppressLinks(true);
+            String folderPath = requestData.getParameter(AJAXServlet.PARAMETER_FOLDERID);
+            if (null != folderPath) {
+                FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(folderPath);
+                if (MaliciousFolders.instanceFor(session).isMalicious(fa.getFullName(), fa.getAccountId(), getMailInterface(requestData, session))) {
+                    usmNoSave.setSuppressLinks(true);
+                }
             }
         }
         boolean allowNestedMessages = AJAXRequestDataTools.parseBoolParameter(Mail.PARAMETER_ALLOW_NESTED_MESSAGES, requestData, true);
