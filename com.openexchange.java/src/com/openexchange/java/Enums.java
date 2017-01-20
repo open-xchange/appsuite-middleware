@@ -75,7 +75,7 @@ public class Enums {
         if (null != value) {
             return value;
         }
-        throw new IllegalArgumentException("No enum value '" + name + "' in Enum " + enumeration.getClass().getName());
+        throw new IllegalArgumentException("No enum value '" + name + "' in Enum " + enumeration);
     }
 
     /**
