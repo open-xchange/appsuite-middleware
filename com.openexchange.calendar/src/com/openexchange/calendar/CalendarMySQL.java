@@ -3890,8 +3890,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                     pidm.setString(10, edao.getUid());
                     pidm.setString(11, edao.getFilename());
                     pidm.addBatch();
-                    int[] a = pidm.executeBatch();
-                    System.out.println(a);
+                    pidm.executeBatch();
 
                 } finally {
                     COLLECTION.closePreparedStatement(pidm);
