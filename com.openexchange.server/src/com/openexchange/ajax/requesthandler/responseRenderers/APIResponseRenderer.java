@@ -60,6 +60,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.Response;
@@ -88,7 +89,7 @@ public class APIResponseRenderer implements ResponseRenderer {
 
     private static final String CALLBACK = "callback";
 
-    private static final String PLAIN_JSON = "plainJson";
+    private static final String PLAIN_JSON = AJAXServlet.PARAM_PLAIN_JSON;
 
     private static final String INCLUDE_STACK_TRACE_ON_ERROR = com.openexchange.ajax.AJAXServlet.PARAMETER_INCLUDE_STACK_TRACE_ON_ERROR;
 
