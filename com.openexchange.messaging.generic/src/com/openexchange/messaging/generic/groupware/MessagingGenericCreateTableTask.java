@@ -87,8 +87,7 @@ public final class MessagingGenericCreateTableTask extends AbstractCreateTableIm
         " account INT4 unsigned NOT NULL," +
         " confId INT4 unsigned NOT NULL," +
         " displayName VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
-        " PRIMARY KEY (cid, user, serviceId, account)," +
-        " FOREIGN KEY (cid, user) REFERENCES user (cid, id)" +
+        " PRIMARY KEY (cid, user, serviceId, account)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
     }
 

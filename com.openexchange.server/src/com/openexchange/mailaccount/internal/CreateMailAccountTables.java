@@ -109,8 +109,7 @@ public final class CreateMailAccountTables extends AbstractCreateTableImpl {
             + "starttls TINYINT UNSIGNED NOT NULL DEFAULT 0,"
             + "oauth INT(10) UNSIGNED DEFAULT NULL,"
             + "PRIMARY KEY (cid, id, user),"
-            + "INDEX (cid, user),"
-            + "FOREIGN KEY (cid, user) REFERENCES user (cid, id)"
+            + "INDEX (cid, user)"
             + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
     }
 
@@ -131,8 +130,7 @@ public final class CreateMailAccountTables extends AbstractCreateTableImpl {
             + "starttls TINYINT UNSIGNED NOT NULL DEFAULT 0,"
             + "oauth INT(10) UNSIGNED DEFAULT NULL,"
             + "PRIMARY KEY (cid, id, user),"
-            + "INDEX (cid, user),"
-            + "FOREIGN KEY (cid, user) REFERENCES user (cid, id)"
+            + "INDEX (cid, user)"
             + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
     }
 

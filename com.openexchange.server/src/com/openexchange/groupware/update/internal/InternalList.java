@@ -631,6 +631,9 @@ public final class InternalList {
         // Extends the "password" column for "user_mail_account" and "user_transport_account" tables
         list.add(new com.openexchange.groupware.update.tasks.MailAccountExtendPasswordTask());
 
+        // Drops rather needless foreign keys from tables.
+        list.add(new com.openexchange.groupware.update.tasks.DropFKTaskv3());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 

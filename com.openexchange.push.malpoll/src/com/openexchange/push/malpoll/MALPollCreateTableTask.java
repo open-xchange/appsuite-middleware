@@ -80,7 +80,6 @@ public final class MALPollCreateTableTask extends AbstractCreateTableImpl implem
         " fullname VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
         " hash BINARY(16) NOT NULL," +
         " PRIMARY KEY (cid,user,id,fullname)," +
-        " FOREIGN KEY (cid,user) REFERENCES user(cid,id)," +
         " FOREIGN KEY (cid,user,id) REFERENCES user_mail_account(cid,user,id)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
     }
