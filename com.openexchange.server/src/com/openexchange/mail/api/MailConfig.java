@@ -73,6 +73,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.config.ConfiguredServer;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.config.MailReloadable;
@@ -386,7 +387,7 @@ public abstract class MailConfig {
             return new UrlInfo(mailAccount.generateMailServerURL(), mailAccount.isMailStartTls());
         }
         if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource())) {
-            return new UrlInfo(IDNA.toASCII(MailProperties.getInstance().getMailServer()), MailProperties.getInstance().isMailStartTls());
+            return new UrlInfo(MailProperties.getInstance().getMailServer().getUrlString(true), MailProperties.getInstance().isMailStartTls());
         }
         return new UrlInfo(mailAccount.generateMailServerURL(), mailAccount.isMailStartTls());
     }
@@ -401,7 +402,7 @@ public abstract class MailConfig {
      */
     public static final UrlInfo getMailServerURL(final Session session, final int accountId) throws OXException {
         if (MailAccount.DEFAULT_ID == accountId && ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource())) {
-            return new UrlInfo(IDNA.toASCII(MailProperties.getInstance().getMailServer()), MailProperties.getInstance().isMailStartTls());
+            return new UrlInfo(MailProperties.getInstance().getMailServer().getUrlString(true), MailProperties.getInstance().isMailStartTls());
         }
         final MailAccountStorageService storage = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
         return new UrlInfo(storage.getMailAccount(accountId, session.getUserId(), session.getContextId()).generateMailServerURL(), storage.getMailAccount(accountId, session.getUserId(), session.getContextId()).isMailStartTls());
@@ -553,7 +554,10 @@ public abstract class MailConfig {
                         shouldMatch = toSocketAddrString(candidate.generateMailServerURL(), 143);
                         break;
                     case GLOBAL:
-                        shouldMatch = toSocketAddrString(MailProperties.getInstance().getMailServer(), 143);
+                        {
+                            ConfiguredServer server = MailProperties.getInstance().getMailServer();
+                            shouldMatch = toSocketAddrString(server.getHostName(), server.getPort());
+                        }
                         break;
                     default:
                         throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create("Unimplemented mail server source.");

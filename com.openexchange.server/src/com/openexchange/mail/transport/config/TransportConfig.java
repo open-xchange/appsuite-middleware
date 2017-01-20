@@ -135,7 +135,7 @@ public abstract class TransportConfig extends MailConfig {
             return new UrlInfo(transportAccount.generateTransportServerURL(), transportAccount.isTransportStartTls());
         }
         if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getTransportServerSource())) {
-            return new UrlInfo(MailProperties.getInstance().getTransportServer(), MailProperties.getInstance().isTransportStartTls());
+            return new UrlInfo(MailProperties.getInstance().getTransportServer().getUrlString(true), MailProperties.getInstance().isTransportStartTls());
         }
         return new UrlInfo(transportAccount.generateTransportServerURL(), transportAccount.isTransportStartTls());
     }
