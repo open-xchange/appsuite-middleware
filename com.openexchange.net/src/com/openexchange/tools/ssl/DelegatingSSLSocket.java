@@ -406,6 +406,8 @@ public class DelegatingSSLSocket extends SSLSocket {
                     + " or \"com.openexchange.net.ssl.custom.truststore.path\" property (if \"com.openexchange.net.ssl.custom.truststore.enabled\" is true)", e);
             }
 
+            // See http://stackoverflow.com/a/6353956
+
             if (matchesException(e, java.io.EOFException.class, MATCHER_INCORRECT_SHUTDOWN_ERROR)) {
                 // E.g. determine supported protocols/cipher suites using https://www.ssllabs.com/ssltest/index.html
                 SocketAddress endpoint = this.endpoint;
