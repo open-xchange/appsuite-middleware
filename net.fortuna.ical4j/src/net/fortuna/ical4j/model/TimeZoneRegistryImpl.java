@@ -72,7 +72,9 @@ public class TimeZoneRegistryImpl implements TimeZoneRegistry {
     private static final Properties ALIASES = new Properties();
     static {
         try (InputStream in = ResourceLoader.getResourceAsStream("net/fortuna/ical4j/model/tz.alias")) {
-            ALIASES.load(in);
+            if (null != in) {
+                ALIASES.load(in);
+            }
         }
         catch (IOException ioe) {
             LogFactory.getLog(TimeZoneRegistryImpl.class).warn(
@@ -80,7 +82,9 @@ public class TimeZoneRegistryImpl implements TimeZoneRegistry {
         }
 
         try (InputStream resourceStream = ResourceLoader.getResourceAsStream("tz.alias")) {
-            ALIASES.load(resourceStream);
+            if (null != resourceStream) {
+                ALIASES.load(resourceStream);
+            }
         }
         catch (Exception e) {
         	LogFactory.getLog(TimeZoneRegistryImpl.class).debug(
