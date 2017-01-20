@@ -50,6 +50,7 @@
 package com.openexchange.chronos.ical.impl;
 
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -168,6 +169,13 @@ public class CalendarExportImpl implements CalendarExport {
 
     @Override
     public ThresholdFileHolder getVCalendar() throws OXException {
+        ThresholdFileHolder fileHolder = new ThresholdFileHolder();
+        writeVCalendar(fileHolder.asOutputStream());
+        return fileHolder;
+    }
+
+    @Override
+    public void writeVCalendar(OutputStream outputStream) throws OXException {
         /*
          * add components for all contained timezones
          */
@@ -183,7 +191,7 @@ public class CalendarExportImpl implements CalendarExport {
         /*
          * export calendar
          */
-        return ICalUtils.exportCalendar(calendar, parameters);
+        ICalUtils.exportCalendar(calendar, parameters, outputStream);
     }
 
     @Override

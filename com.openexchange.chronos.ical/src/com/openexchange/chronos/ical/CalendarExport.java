@@ -50,6 +50,7 @@
 package com.openexchange.chronos.ical;
 
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.Event;
@@ -65,7 +66,9 @@ import com.openexchange.exception.OXException;
 public interface CalendarExport {
 
     /**
-     * Adds a new event component to this VCALENDAR component.
+     * Adds a new event component to this <code>VCALENDAR</code> component.
+     * <p/>
+     * For slipstreaming arbitrary iCal parameters to the exported component, an {@link EventComponent} can be passed.
      *
      * @param event The event component to add
      * @return A self reference
@@ -73,7 +76,7 @@ public interface CalendarExport {
     CalendarExport add(Event event) throws OXException;
 
     /**
-     * Adds a new free/busy data component to this VCALENDAR component.
+     * Adds a new free/busy data component to this <code>VCALENDAR</code> component.
      *
      * @param freeBusyData The free/busy component to add
      * @return A self reference
@@ -81,7 +84,7 @@ public interface CalendarExport {
     CalendarExport add(FreeBusyData freeBusyData) throws OXException;
 
     /**
-     * Explicitly adds a timezone identifier to this VCALENDAR component.
+     * Explicitly adds a timezone identifier to this <code>VCALENDAR</code> component.
      *
      * @param timeZoneID The time zone identifier to add
      * @return A self reference
@@ -89,14 +92,14 @@ public interface CalendarExport {
     CalendarExport add(String timeZoneID) throws OXException;
 
     /**
-     * Sets the method to be declared in the VCALENDAR component.
+     * Sets the method to be declared in the <code>VCALENDAR</code> component.
      *
      * @param method The method, or <code>null</code> to remove
      */
     void setMethod(String method);
 
     /**
-     * Sets the exported calendar's name using the <code>X-WR-CALNAME</code> property in the <code>VCALENDAR</code> component.
+     * Sets the exported calendar's name using the <code>X-WR-CALNAME</code> property in the <code><code>VCALENDAR</code></code> component.
      *
      * @param name The calendar name, or <code>null</code> to remove
      */
@@ -110,15 +113,22 @@ public interface CalendarExport {
     List<OXException> getWarnings();
 
     /**
-     * Gets a file holder storing the exported vCalendar.
+     * Writes the <code>VCALENDAR</code> to the supplied output stream.
      *
-     * @return The exported vCalendar, or <code>null</code> if not available
+     * @param outputStream The output stream to write to
+     */
+    void writeVCalendar(OutputStream outputStream) throws OXException;
+
+    /**
+     * Gets a file holder storing the exported <code>VCALENDAR</code>.
+     *
+     * @return The exported <code>VCALENDAR</code>, or <code>null</code> if not available
      * @throws OXException
      */
     IFileHolder getVCalendar() throws OXException;
 
     /**
-     * Gets the input stream carrying the vCalendar contents.
+     * Gets the input stream carrying the <code>VCALENDAR</code> contents.
      * <p>
      * Closing the stream will also {@link #close() close} this {@link CalendarExport} instance.
      *
@@ -127,9 +137,9 @@ public interface CalendarExport {
     InputStream getClosingStream() throws OXException;
 
     /**
-     * Gets the exported vCalendar as byte array.
+     * Gets the exported <code>VCALENDAR</code> as byte array.
      *
-     * @return The vCalendar bytes
+     * @return The <code>VCALENDAR</code> bytes
      */
     byte[] toByteArray() throws OXException;
 

@@ -51,6 +51,7 @@ package com.openexchange.chronos.ical.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.SequenceInputStream;
 import java.util.ArrayList;
@@ -225,13 +226,17 @@ public class ICalUtils {
 
     static ThresholdFileHolder exportCalendar(Calendar calendar, ICalParameters parameters) throws OXException {
         ThresholdFileHolder fileHolder = new ThresholdFileHolder();
+        exportCalendar(calendar, parameters, fileHolder.asOutputStream());
+        return fileHolder;
+    }
+
+    static void exportCalendar(Calendar calendar, ICalParameters parameters, OutputStream outputStream) throws OXException {
         CalendarOutputter outputter = new CalendarOutputter(false);
         try {
-            outputter.output(calendar, fileHolder.asOutputStream());
+            outputter.output(calendar, outputStream);
         } catch (IOException | ValidationException e) {
             throw new OXException(e);
         }
-        return fileHolder;
     }
 
     static ThresholdFileHolder exportComponent(Component component, ICalParameters parameters) throws OXException {

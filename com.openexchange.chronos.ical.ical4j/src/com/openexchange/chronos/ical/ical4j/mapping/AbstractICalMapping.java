@@ -73,6 +73,13 @@ public abstract class AbstractICalMapping<T extends Component, U> implements ICa
         super();
     }
 
+    /**
+     * Removes all properties with a specific name from the supplied iCalendar component.
+     *
+     * @param component The component to remove the properties from
+     * @param name The name of the properties to remove
+     * @return <code>true</code> if at least one property has been removed, <code>false</code>, otherwise
+     */
     protected boolean removeProperties(T component, String name) {
         int removed = 0;
         PropertyList properties = component.getProperties(name);

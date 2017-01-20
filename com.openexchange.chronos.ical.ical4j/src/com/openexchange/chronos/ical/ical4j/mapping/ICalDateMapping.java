@@ -105,26 +105,24 @@ public abstract class ICalDateMapping<T extends Component, U> extends AbstractIC
                 component.getProperties().add(property);
             }
             if (hasTime(object)) {
+                DateTime dateTime;
                 String timezoneID = getTimezone(object);
                 if (Strings.isNotEmpty(timezoneID) && false == "UTC".equals(timezoneID)) {
                     TimeZoneRegistry timeZoneRegistry = parameters.get(ICalParameters.TIMEZONE_REGISTRY, TimeZoneRegistry.class);
                     net.fortuna.ical4j.model.TimeZone timeZone = timeZoneRegistry.getTimeZone(timezoneID);
                     if (null != timeZone) {
-                        DateTime dateTime = new DateTime(false);
+                        dateTime = new DateTime(false);
                         dateTime.setTimeZone(timeZone);
                         dateTime.setTime(value.getTime());
-                        property.setDate(dateTime);
                     } else {
                         addConversionWarning(warnings, propertyName, "No timezone '" + timezoneID + "' registered.");
-                        DateTime dateTime = new DateTime(true);
+                        dateTime = new DateTime(true);
                         dateTime.setTime(value.getTime());
-                        property.setDate(dateTime);
                     }
                 } else {
-                    DateTime dateTime = new DateTime(true);
-                    dateTime.setTime(value.getTime());
-                    property.setDate(dateTime);
+                    dateTime = new DateTime(true);
                 }
+                property.setDate(dateTime);
             } else {
                 property.setDate(new net.fortuna.ical4j.model.Date(value.getTime()));
             }
@@ -137,17 +135,13 @@ public abstract class ICalDateMapping<T extends Component, U> extends AbstractIC
         if (null == property || null == property.getDate()) {
             setValue(object, null, null, true);
         } else {
-            TimeZone defaultTimeZone = parameters.get(ICalParameters.DEFAULT_TIMEZONE, TimeZone.class);
             if (ParserTools.isDateTime(property)) {
+                TimeZone defaultTimeZone = parameters.get(ICalParameters.DEFAULT_TIMEZONE, TimeZone.class);
                 Date value = ParserTools.toDateConsideringDateType(property, defaultTimeZone);
                 TimeZone timeZone = TimeZoneUtils.selectTimeZone(property, defaultTimeZone);
                 setValue(object, value, null != timeZone ? timeZone.getID() : null, true);
             } else {
-                Date value = new Date(property.getDate().getTime());
-                //                if (ParserTools.inDefaultTimeZone(property, defaultTimeZone)) {
-                //                    value = ParserTools.recalculate(value, defaultTimeZone);
-                //                }
-                setValue(object, value, null, false);
+                setValue(object, new Date(property.getDate().getTime()), null, false);
             }
         }
     }

@@ -65,15 +65,26 @@ public interface ICalService {
     /**
      * Imports an iCalendar file.
      *
-     * @param iCalFile The input stream carrying the iCalendar data to import
-     * @param parameters Further parameters for the iCal import, or <code>null</code> if not used
+     * @param inputStream The input stream carrying the iCalendar data to import
+     * @param parameters Further parameters for the iCalendar import, or <code>null</code> to stick with the defaults
      * @return A calendar import providing access to the imported data
-     * @throws OXException If importing the event fails - non-fatal conversion warnings are accessible within each imported component
+     * @throws OXException If importing the iCalendar data fails; non-fatal conversion warnings are accessible within each imported component
      */
-    CalendarImport importICal(InputStream iCalFile, ICalParameters parameters) throws OXException;
+    CalendarImport importICal(InputStream inputStream, ICalParameters parameters) throws OXException;
 
-    CalendarExport exportICal(ICalParameters parameters) throws OXException;
+    /**
+     * Initializes a new {@link CalendarExport} for adding events or other iCalendar components to the export.
+     *
+     * @param parameters Further parameters for the iCalendar export, or <code>null</code> to stick with the defaults
+     * @return The calendar export
+     */
+    CalendarExport exportICal(ICalParameters parameters);
 
+    /**
+     * Initializes a new {@link ICalParameters} instance for use with the iCal service.
+     *
+     * @return The parameters
+     */
     ICalParameters initParameters();
 
 }

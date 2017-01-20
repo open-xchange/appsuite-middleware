@@ -79,7 +79,7 @@ public class ICalServiceImpl implements ICalService {
     }
 
     @Override
-    public CalendarExport exportICal(ICalParameters parameters) throws OXException {
+    public CalendarExport exportICal(ICalParameters parameters) {
         ICalParameters iCalParameters = ICalUtils.getParametersOrDefault(parameters);
         List<OXException> warnings = new ArrayList<OXException>();
         return new CalendarExportImpl(mapper, iCalParameters, warnings);

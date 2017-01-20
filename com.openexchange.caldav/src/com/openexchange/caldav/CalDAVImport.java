@@ -62,7 +62,6 @@ import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.PreconditionException;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.webdav.protocol.WebdavPath;
 
@@ -210,12 +209,7 @@ public class CalDAVImport {
     }
 
     private static List<Event> importEvents(GroupwareCaldavFactory factory, InputStream inputStream) throws OXException {
-        CalendarImport calendarImport = null;
-        try {
-            calendarImport = importICal(factory, inputStream);
-        } finally {
-            Streams.close(calendarImport);
-        }
+        CalendarImport calendarImport = importICal(factory, inputStream);
         return null != calendarImport ? calendarImport.getEvents() : null;
     }
 
