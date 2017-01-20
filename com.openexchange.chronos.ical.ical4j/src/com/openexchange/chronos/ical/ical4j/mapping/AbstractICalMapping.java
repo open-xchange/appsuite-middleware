@@ -51,6 +51,8 @@ package com.openexchange.chronos.ical.ical4j.mapping;
 
 import java.util.Iterator;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.ical.ICalExceptionCodes;
 import com.openexchange.exception.OXException;
 import net.fortuna.ical4j.model.Component;
@@ -65,6 +67,9 @@ import net.fortuna.ical4j.model.PropertyList;
  * @since v7.10.0
  */
 public abstract class AbstractICalMapping<T extends Component, U> implements ICalMapping<T, U> {
+
+    /** A named logger reference */
+    protected static final Logger LOG = LoggerFactory.getLogger(AbstractICalMapping.class);
 
     /**
      * Initializes a new {@link AbstractICalMapping}.
@@ -93,10 +98,23 @@ public abstract class AbstractICalMapping<T extends Component, U> implements ICa
         return 0 < removed;
     }
 
+    /**
+     * Optionally gets the value of a specific parameter.
+     *
+     * @param parameter The parameter to get the value for, or <code>null</code> to do nothing
+     * @return The parameter value, or <code>null</code> if passed parameter instance was <code>null</code>
+     */
     protected static String optParameterValue(Parameter parameter) {
         return null != parameter ? parameter.getValue() : null;
     }
 
+    /**
+     * Optionally gets the value of a specific parameter from a property.
+     *
+     * @param property The property to get the parameter from, or <code>null</code> to do nothing
+     * @param parameterName The name of the parameter to get the value for
+     * @return The parameter value, or <code>null</code> if passed parameter instance was <code>null</code>
+     */
     protected static String optParameterValue(Property property, String parameterName) {
         return optParameterValue(property.getParameter(parameterName));
     }
@@ -135,6 +153,7 @@ public abstract class AbstractICalMapping<T extends Component, U> implements ICa
      */
     protected static boolean addWarning(List<OXException> warnings, OXException warning) {
         if (null != warnings) {
+            LOG.debug("", warning);
             return warnings.add(warning);
         }
         return false;

@@ -68,6 +68,7 @@ import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.FreeBusyData;
+import com.openexchange.chronos.ical.ComponentData;
 import com.openexchange.chronos.ical.DefaultICalProperty;
 import com.openexchange.chronos.ical.ICalExceptionCodes;
 import com.openexchange.chronos.ical.ICalParameters;
@@ -112,7 +113,6 @@ import net.fortuna.ical4j.model.PropertyList;
 import net.fortuna.ical4j.model.TimeZoneRegistry;
 import net.fortuna.ical4j.model.TimeZoneRegistryFactory;
 import net.fortuna.ical4j.model.ValidationException;
-import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.component.VAlarm;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.component.VFreeBusy;
@@ -134,10 +134,6 @@ public class ICalUtils {
     private static final byte[] VEVENT_EPILOGUE = "END:VEVENT\r\nEND:VCALENDAR\r\n".getBytes(Charsets.UTF_8);
     private static final byte[] VALARM_PROLOGUE = "BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nBEGIN:VALARM\r\n".getBytes(Charsets.UTF_8);
     private static final byte[] VALARM_EPILOGUE = "END:VALARM\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n".getBytes(Charsets.UTF_8);
-
-    static String optPropertyValue(CalendarComponent component, String propertyName) {
-        return optPropertyValue(component.getProperty(propertyName));
-    }
 
     static String optPropertyValue(Property property) {
         return null != property ? property.getValue() : null;
@@ -183,7 +179,7 @@ public class ICalUtils {
     static Event importEvent(int index, VEvent vEvent, ICalMapper mapper, ICalParameters parameters) throws OXException {
         List<OXException> warnings = new ArrayList<OXException>();
         ImportedEvent importedEvent = new ImportedEvent(index, mapper.importVEvent(vEvent, parameters, warnings), warnings);
-        importedEvent.setProperties(ICalUtils.importProperties(vEvent, parameters.get(ICalParameters.EXTRA_PROPERTIES, String[].class)));
+        importedEvent.setProperties(importProperties(vEvent, parameters.get(ICalParameters.EXTRA_PROPERTIES, String[].class)));
         importedEvent.setAlarms(importAlarms(vEvent.getAlarms(), mapper, parameters));
         return importedEvent;
     }
@@ -203,7 +199,7 @@ public class ICalUtils {
     static ImportedAlarm importAlarm(int index, VAlarm vAlarm, ICalMapper mapper, ICalParameters parameters) throws OXException {
         List<OXException> warnings = new ArrayList<OXException>();
         ImportedAlarm importedAlarm = new ImportedAlarm(index, mapper.importVAlarm(vAlarm, parameters, warnings), warnings);
-        importedAlarm.setProperties(ICalUtils.importProperties(vAlarm, parameters.get(ICalParameters.EXTRA_PROPERTIES, String[].class)));
+        importedAlarm.setProperties(importProperties(vAlarm, parameters.get(ICalParameters.EXTRA_PROPERTIES, String[].class)));
         return importedAlarm;
     }
 
@@ -254,6 +250,21 @@ public class ICalUtils {
             Streams.close(writer);
         }
         return fileHolder;
+    }
+
+    /**
+     * Exports all arbitrary iCal properties from the supplied source object to the target calendar component, in case the source
+     * implements {@link ComponentData}.
+     *
+     * @param object The source object being exported, possibly implementing {@link ComponentData}
+     * @param component The component to export the properties to
+     */
+    static void exportProperties(Object object, Component component) {
+        if (ComponentData.class.isInstance(object)) {
+            for (Property property : exportProperties(((ComponentData) object).getProperties())) {
+                component.getProperties().add(property);
+            }
+        }
     }
 
     static List<Property> exportProperties(List<ICalProperty> iCalProperties) {

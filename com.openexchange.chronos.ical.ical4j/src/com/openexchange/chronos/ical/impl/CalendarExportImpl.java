@@ -59,7 +59,6 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.FreeBusyData;
 import com.openexchange.chronos.ical.CalendarExport;
-import com.openexchange.chronos.ical.ComponentData;
 import com.openexchange.chronos.ical.ICalExceptionCodes;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ical4j.mapping.ICalMapper;
@@ -163,7 +162,7 @@ public class CalendarExportImpl implements CalendarExport {
 
     @Override
     public CalendarExport add(String timeZoneID) throws OXException {
-        trackTimezone(timeZoneID);
+        trackTimezones(timeZoneID);
         return this;
     }
 
@@ -208,24 +207,13 @@ public class CalendarExportImpl implements CalendarExport {
 
     private VEvent exportEvent(Event event) throws OXException {
         /*
-         * initialize original vEvent component if available
+         * export event data & extended properties, track timezones
          */
-        VEvent originalVEvent = null;
+        VEvent vEvent = mapper.exportEvent(event, parameters, warnings);
+        ICalUtils.exportProperties(event, vEvent);
+        trackTimezones(event.getStartTimeZone(), event.getEndTimeZone());
         /*
-         * export event data & track timezones
-         */
-        VEvent vEvent = mapper.exportEvent(event, originalVEvent, parameters, warnings);
-        trackTimezones(event);
-        /*
-         * export any arbitrary properties
-         */
-        if (ComponentData.class.isInstance(event)) {
-            for (Property property : ICalUtils.exportProperties(((ComponentData) event).getProperties())) {
-                vEvent.getProperties().add(property);
-            }
-        }
-        /*
-         * export sub-components
+         * export alarms as sub-components
          */
         List<Alarm> alarms = event.getAlarms();
         if (null != alarms && 0 < alarms.size()) {
@@ -237,51 +225,34 @@ public class CalendarExportImpl implements CalendarExport {
     }
 
     private VAlarm exportAlarm(Alarm alarm) throws OXException {
-        VAlarm originalVAlarm = null;
-        VAlarm vAlarm = mapper.exportAlarm(alarm, originalVAlarm, parameters, warnings);
         /*
-         * export any arbitrary properties
+         * export alarm data & extended properties
          */
-        if (ComponentData.class.isInstance(alarm)) {
-            for (Property property : ICalUtils.exportProperties(((ComponentData) alarm).getProperties())) {
-                vAlarm.getProperties().add(property);
-            }
-        }
+        VAlarm vAlarm = mapper.exportAlarm(alarm, parameters, warnings);
+        ICalUtils.exportProperties(alarm, vAlarm);
         return vAlarm;
     }
 
     private VFreeBusy exportFreeBusy(FreeBusyData freeBusyData) throws OXException {
         /*
-         * export free/busy data & track timezones
+         * export free/busy data & extended properties, track timezones
          */
         VFreeBusy vFreeBusy = mapper.exportFreeBusy(freeBusyData, parameters, warnings);
-        trackTimezones(freeBusyData);
-        /*
-         * export any arbitrary properties
-         */
-        if (ComponentData.class.isInstance(freeBusyData)) {
-            for (Property property : ICalUtils.exportProperties(((ComponentData) freeBusyData).getProperties())) {
-                vFreeBusy.getProperties().add(property);
-            }
-        }
+        ICalUtils.exportProperties(freeBusyData, vFreeBusy);
+        trackTimezones(freeBusyData.getStartTimeZone(), freeBusyData.getEndTimeZone());
         return vFreeBusy;
     }
 
-    private void trackTimezones(Event event) {
-        trackTimezone(event.getStartTimeZone());
-        trackTimezone(event.getEndTimeZone());
-    }
-
-    private void trackTimezones(FreeBusyData freeBusyData) {
-        trackTimezone(freeBusyData.getStartTimeZone());
-        trackTimezone(freeBusyData.getEndTimeZone());
-    }
-
-    private boolean trackTimezone(String timeZoneID) {
-        if (null != timeZoneID && false == "UTC".equals(timeZoneID)) {
-            return timezoneIDs.add(timeZoneID);
+    private boolean trackTimezones(String... timeZoneIDs) {
+        boolean added = false;
+        if (null != timeZoneIDs && 0 < timeZoneIDs.length) {
+            for (String timeZoneID : timeZoneIDs) {
+                if (null != timeZoneID && false == "UTC".equals(timeZoneID)) {
+                    added |= timezoneIDs.add(timeZoneID);
+                }
+            }
         }
-        return false;
+        return added;
     }
 
     private static Calendar initCalendar() {
