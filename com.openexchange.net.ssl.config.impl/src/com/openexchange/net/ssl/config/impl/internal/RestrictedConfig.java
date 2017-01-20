@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,72 +47,88 @@
  *
  */
 
-package com.openexchange.net.ssl.config.impl.osgi;
+package com.openexchange.net.ssl.config.impl.internal;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.java.Strings;
+import com.openexchange.net.HostList;
 
 /**
- * {@link Services} - Provides static access to tracked services.
+ * {@link RestrictedConfig} - The immutable configuration representation.
  *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class Services {
+public class RestrictedConfig {
 
-    /**
-     * Initializes a new {@link Services}.
-     */
-    private Services() {
+    private final String[] protocols;
+    private final String[] ciphers;
+    private final HostList whitelistedHosts;
+
+    RestrictedConfig(String[] protocols, String[] ciphers, HostList whitelistedHosts) {
         super();
-    }
-
-    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<>();
-
-    /**
-     * Sets the service lookup.
-     *
-     * @param serviceLookup The service lookup or <code>null</code>
-     */
-    public static void setServiceLookup(final ServiceLookup serviceLookup) {
-        REF.set(serviceLookup);
+        this.protocols = protocols;
+        this.ciphers = ciphers;
+        this.whitelistedHosts = whitelistedHosts;
     }
 
     /**
-     * Gets the service lookup.
+     * Gets the protocols
      *
-     * @return The service lookup or <code>null</code>
+     * @return The protocols
      */
-    public static ServiceLookup getServiceLookup() {
-        return REF.get();
+    public String[] getProtocols() {
+        return protocols;
     }
 
     /**
-     * Gets the service of specified type
+     * Gets the ciphers
      *
-     * @param clazz The service's class
-     * @return The service
-     * @throws IllegalStateException If an error occurs while returning the demanded service
+     * @return The ciphers
      */
-    public static <S extends Object> S getService(final Class<? extends S> clazz) {
-        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
-        if (null == serviceLookup) {
-            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.net.ssl.config.impl\" not started?");
+    public String[] getCiphers() {
+        return ciphers;
+    }
+
+    /**
+     * Gets the white-listed hosts
+     *
+     * @return The white-listed hosts
+     */
+    public HostList getWhitelistedHosts() {
+        return whitelistedHosts;
+    }
+
+    /**
+     * Checks if specified host name is white-listed.
+     * <p>
+     * The host name can either be a machine name, such as "<code>java.sun.com</code>", or a textual representation of its IP address.
+     *
+     * @param hostName The host name; either a machine name or a textual representation of its IP address
+     * @return <code>true</code> if white-listed; otherwise <code>false</code>
+     */
+    public boolean isWhitelisted(String hostName) {
+        if (Strings.isEmpty(hostName)) {
+            return false;
         }
-        return serviceLookup.getService(clazz);
+        return whitelistedHosts.contains(hostName);
     }
 
     /**
-     * (Optionally) Gets the service of specified type
+     * Checks if one of the specified host names is white-listed.
+     * <p>
+     * The host names can either be a machine name, such as "<code>java.sun.com</code>", or a textual representation of its IP address.
      *
-     * @param clazz The service's class
-     * @return The service or <code>null</code> if absent
+     * @param hostNames The host names as an array; either a machine name or a textual representation of its IP address
+     * @return <code>true</code> if at least one of the hosts is white-listed; otherwise <code>false</code>
      */
-    public static <S extends Object> S optService(final Class<? extends S> clazz) {
-        try {
-            return getService(clazz);
-        } catch (final IllegalStateException e) {
-            return null;
+    public boolean isWhitelisted(String... hostNames) {
+        for (String hostName : hostNames) {
+            boolean whitelisted = isWhitelisted(hostName);
+            if (whitelisted) {
+                return true;
+            }
         }
+        return false;
     }
 
 }
