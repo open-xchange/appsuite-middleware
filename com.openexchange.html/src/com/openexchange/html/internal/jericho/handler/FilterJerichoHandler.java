@@ -712,7 +712,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
             }
         }
 
-        Set<String> uriAttributes = replaceUrls ? setFor(startTag.getURIAttributes()) : Collections.<Attribute> emptySet();
+        Set<String> uriAttributes = replaceUrls ? setFor(startTag.getURIAttributes()) : Collections.<String> emptySet();
         for (Map.Entry<String, String> attribute : attrMap.entrySet()) {
             String attr = attribute.getKey();
             if ("style".equals(attr)) {
