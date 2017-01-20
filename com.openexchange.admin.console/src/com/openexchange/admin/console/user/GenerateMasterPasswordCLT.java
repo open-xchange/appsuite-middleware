@@ -59,6 +59,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -144,7 +145,7 @@ public class GenerateMasterPasswordCLT {
                 if (console != null && (passwd = console.readPassword("[%s]", builder.toString())) != null) {
                     clearPassword = new String(passwd);
                 } else {
-                    BufferedWriter bufferWrite = new BufferedWriter(new OutputStreamWriter(System.out));
+                    BufferedWriter bufferWrite = new BufferedWriter(new OutputStreamWriter(System.out, Charset.forName("UTF-8")));
                     bufferWrite.write(builder.toString());
                     bufferWrite.flush();
 
