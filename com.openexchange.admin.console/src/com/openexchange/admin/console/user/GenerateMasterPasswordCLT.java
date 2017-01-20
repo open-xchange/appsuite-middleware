@@ -188,8 +188,11 @@ public class GenerateMasterPasswordCLT {
      */
     private static void invoke(Map<Parameter, String> parameters) throws IOException {
         File file = new File(parameters.get(Parameter.mpasswdfile));
-        if (!file.exists()) {
-            file.createNewFile();
+        boolean created = file.createNewFile();
+        if (created) {
+            System.out.println("Created a new file in '" + file.getAbsolutePath() + "'");
+        } else {
+            System.err.println("Using already existing file '" + file.getAbsolutePath() + "'");
         }
 
         BufferedReader br = null;
