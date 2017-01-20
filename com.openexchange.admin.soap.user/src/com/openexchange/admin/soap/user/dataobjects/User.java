@@ -1023,11 +1023,11 @@ public class User {
     public void setDefaultSenderAddress(final String value) {
         this.defaultSenderAddress = value;
     }
-    
+
 
     /**
      * Get driveFolderMode value.
-     * 
+     *
      * @return
      *      possible object is
      *     {@link String }
@@ -3777,11 +3777,11 @@ public class User {
     public void setPrimaryAccountName(String primaryAccountName) {
         this.primaryAccountName = primaryAccountName;
     }
-    
-    public boolean isRemoveDriveFolderFlags() {
-        return removeDriveFolderFlags;
+
+    public Boolean isRemoveDriveFolderFlags() {
+        return this.removeDriveFolderFlags;
     }
-    
+
     public void setRemoveDriveFolderFlags(Boolean removeDriveFolderFlags) {
         this.removeDriveFolderFlags = removeDriveFolderFlags;
     }
