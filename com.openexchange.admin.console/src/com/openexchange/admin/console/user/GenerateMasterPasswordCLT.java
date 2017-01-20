@@ -149,7 +149,7 @@ public class GenerateMasterPasswordCLT {
                     bufferWrite.write(builder.toString());
                     bufferWrite.flush();
 
-                    BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
+                    BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in, Charset.forName("UTF-8")));
                     clearPassword = bufferRead.readLine();
                 }
             }
