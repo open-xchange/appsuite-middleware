@@ -7,6 +7,39 @@ title: Calendar v2 aka Chronos
 
 This section provides some deeper insights for certain topics.
 
+## Date/Time handling
+
+There are some different modes for the start- and end-date of events. This affects all areas where dates are used and exchanged (HTTP API, iCal, Java, database). Most basically, there are dates (without time fraction) and datetimes (a date with time fraction). For the latter one, three different forms are possible.
+
+### Date
+
+A calendar date with no time component, i.e. only year, month and date are set. It is not possible to assign a concrete timezone to a date, so that dates do always appear in the timezone of the actual viewer. *All-day* events start- and end on a date. This characteristic is called *floating*, and needs to be handled appropriately whenever concrete periods of such *all-day* events need to be considered, e.g. during free/busy lookups or conflict checks.
+
+### Date with Time
+
+A precise calendar date and time consisting of day, year, month, date, hour, minute, second. A datetime may be defined in three different forms, which are **local time** (no specific timezone), in **UTC**, or in **local time with timezone reference**. 
+
+1. **Local time** - no specific timezone
+    - Used for *floating* events
+    - Represent the same year, month, day, hour, minute, second no matter in what time zone they are observed
+    - Example in iCal: ``DTSTART:19980118T230000``
+    - In the database, the unix timestamp is stored, and the timezone is set to ``NULL``
+
+2. **UTC** - UTC timezone
+    - Easiest form, but not much useful for events
+    - Example in iCal: ``DTSTART:19980118T230000Z``
+    - In the database, the unix timestamp is stored, and the timezone is set to ``UTC``
+
+3. **Local time with Timezone reference** - specific timezone
+    - Most common form for events
+    - Example in iCal: ``DTSTART;TZID=America/New_York:19980119T020000``
+    - In the database, the unix timestamp ans the timezone are stored
+
+### References / further reading
+- https://tools.ietf.org/html/rfc5545
+- https://devguide-calconnect.rhcloud.com/Handling-Dates-and-Times
+
+
 ## Relation of Organizer / Principal / Folder-Owner / Creator
 
 ### Terminology
@@ -109,3 +142,59 @@ In iCalendar, this relates to the classification property of an event, with the 
 - com.openexchange.chronos.compat.Event2Appointment.getPrivateFlag(Classification)
 - com.openexchange.chronos.compat.Appointment2Event.getClassification(boolean)
 - com.openexchange.chronos.impl.Check.classificationIsValid(Classification, UserizedFolder)
+
+
+## Move between Folders
+
+Whenever events are moved between different folders, some special handling applies, especially for move operations between different *types* of folders. We basically differentiate between two types of folders, which are on the one hand *personal* calendar folders of the internal users, and *public* folders on the other hand that are not directly associated explicitly with a user. The following gives an overview about the possible move actions and their outcome.
+
+### General restrictions
+
+The user performing the move must be equipped with appropriate permissions for the source- and target folder. For the source folder, these are at least *Read folder*, *Read own/all objects*, *Write own/all objects* and *Delete own/all objects*. *All* or *own* depends on the event being created by a different user or not. In the target folder, at least the following permissions must be granted: *Create objects in folder*. 
+
+Additionally, recurring event series (or change exception events) cannot be moved. And finally, there's a limitation towards moving events with a classification of ``PRIVATE`` or ``CONFIDENTIAL`` (which correlates to the legacy *private* flag). In this case, events must not be moved to a *public* folder, or moved between personal folders of different user (~ *shared* to *private* and vice versa).
+
+After the general restrictions have been checked and are fulfilled, the following happens depending on the source- and target folder type. Implicitly, this also includes triggering of further updates, like updating the folder informations for stored alarm triggers or inserting tombstone objects in the database so that the deletion from the source folder can be successfully tracked by differential synchronization algorithms.    
+
+### Public calendar folder 1 -> Public calendar folder 2
+- Update the common public folder identifier of the event
+
+### Personal calendar folder 1 of User A -> Personal calendar folder 2 of same User A
+- Update attendee A's parent folder identifier
+
+### Personal calendar folder of User A -> Personal calendar folder of other User B (executed by user A, *"re-assign" event*)
+- Remove the original calendar user attendee A 
+- Ensure that calendar user B becomes attendee and set take over his parent folder identifier
+- Reset the parent folder identifier of all other attendee's to their default calendar
+
+### Personal calendar folder of User A -> Personal calendar folder of other User B (not executed by user A)
+- Ensure that calendar user B becomes attendee and set take over his parent folder identifier
+- Reset the parent folder identifier of all other attendee's to their default calendar
+  
+### References / further reading
+- com.openexchange.chronos.impl.performer.MovePerformer
+- https://intranet.open-xchange.com/wiki/backend-team:info:calendar#move_appointments_between_folders
+- com.openexchange.ajax.appointment.MoveTestNew
+
+   
+## Conversion of Recurrence Rules
+
+Within the Chronos stack, the recurrence information is transferred and treated as plain ``RRULE`` string, like it is defined in RFC 5545. Any series calculations are performed ad-hoc, under the constraints of some further influencing properties (start-date, start timezone, all-day flag) of the series master event. In the legacy implementation, the recurrence information was split over different properties in the class ``CalendarDataObject``, and provided as such to clients accessing the HTTP API. In particular, the properties ``recurrence_type``, ``days``, ``day_in_month``, ``month``, ``interval`` and ``until``. In the database, this recurrence information is stored in a combined field as so-called *series pattern*. 
+
+For interoperability with the old API and database format, distinct conversion routines are in place, which were built upon already existing (de-)serialization routines to and from iCalendar. This also means that consequently still only those recurrence rules are supported that can also be expressed with the legacy series pattern, at least as long as the data is stored in this format. However, any recurrence calculations in the Chronos stack so already support all ''RRULE`` parts as described in RFC 5545.
+
+### Supported ``RRULE`` parts
+
+The following list gives an overview about the supported ``RRULE`` parts, based on the limitations described before.
+
+- ``FREQ:DAILY``: ``INTERVAL``, ``UNTIL``, ``COUNT``
+- ``FREQ:WEEKLY``: ``INTERVAL``, ``UNTIL``, ``COUNT``, ``BYDAY``
+- ``FREQ:MONTHLY``: ``INTERVAL``, ``UNTIL``, ``COUNT``, ``BYDAY``, ``BYSETPOS``, ``BYMONTHDAY``
+- ``FREQ:YEARLY``: ``INTERVAL``, ``UNTIL``, ``COUNT``, ``BYDAY``, ``BYMONTH``, ``BYSETPOS``, ``BYMONTHDAY``
+
+### References / further reading
+- https://tools.ietf.org/html/rfc5545#section-3.3.10
+- https://intranet.open-xchange.com/wiki/backend-team:info:calendar#serientermine
+- com.openexchange.groupware.calendar.CalendarDataObject
+- com.openexchange.chronos.compat.Recurrence
+
