@@ -50,9 +50,6 @@
 package com.openexchange.mail.service;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.api.IMailMessageStorage;
-import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.dataobjects.SecuritySettings;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.session.Session;
 
@@ -71,12 +68,4 @@ public interface EncryptedMailService {
      * @throws OXException
      */
     public ComposedMailMessage encryptDraftEmail (ComposedMailMessage draft, Session session) throws OXException;
-
-    public IMailMessageStorage getEncryptedMailMessageStorage(Session session, IMailMessageStorage messageStorage) throws OXException ;
-
-    public IMailMessageStorage getEncryptedMailMessageStorage(Session session, SecuritySettings securityOptions, IMailMessageStorage mailMessageStorage) throws OXException;
-
-    public MailMessage[] onProcessMessages(Session session, MailMessage[] messages) throws OXException;
-
-    public MailMessage onProcessMessage(Session session, MailMessage message) throws OXException;
 }
