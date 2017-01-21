@@ -91,9 +91,16 @@ public class ReminderHandler implements ReminderSQLInterface {
 
     private static final ReminderHandler INSTANCE = new ReminderHandler();
 
+    /**
+     * Gets the singleton instance
+     *
+     * @return The instance
+     */
     public static ReminderHandler getInstance(){
         return INSTANCE;
     }
+
+    // -----------------------------------------------------------------------------------------------------------------
 
     private ReminderHandler() {
         super();
