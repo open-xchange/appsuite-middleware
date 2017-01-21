@@ -262,7 +262,7 @@ public class ConfiguredDefaultPermissions {
                 off = pos + 1;
 
                 dp = Integer.parseInt(permExpression.substring(off));
-                off = pos + 1;
+                //off = pos + 1;
             }
 
             permissionBuilder.setFolderPermission(fp).setReadPermission(rp).setWritePermission(wp).setDeletePermission(dp).setSystem(0);
