@@ -54,11 +54,21 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.Locale;
+import java.util.TimeZone;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.api2.TasksSQLInterface;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.ical.CalendarExport;
+import com.openexchange.chronos.ical.ICalParameters;
+import com.openexchange.chronos.ical.ICalService;
+import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
@@ -125,6 +135,17 @@ public class ICalHandler extends HttpAuthShareHandler {
     };
 
     /**
+     * The appointment properties being exported
+     */
+    private final static EventField[] EVENT_FIELDS;
+    static {
+        EnumSet<EventField> fields = EnumSet.allOf(EventField.class);
+        fields.remove(EventField.ATTACHMENTS);
+        fields.remove(EventField.ALARMS);
+        EVENT_FIELDS = fields.toArray(new EventField[fields.size()]);
+    }
+
+    /**
      * Initializes a new {@link ICalHandler}.
      */
     public ICalHandler() {
@@ -149,28 +170,49 @@ public class ICalHandler extends HttpAuthShareHandler {
 
     @Override
     protected void handleResolvedShare(ResolvedShare resolvedShare) throws OXException, IOException {
+        /*
+         * export tasks or events based on share target
+         */
         ShareTarget target = resolvedShare.getShareRequest().getTarget();
+        int module = target.getModule();
+        if (Module.CALENDAR.getFolderConstant() == module) {
+            boolean legacy = false;
+            if (legacy) {
+                writeAppointments(resolvedShare, target);
+            } else {
+                writeEvents(resolvedShare, target);
+            }
+        } else if (Module.TASK.getFolderConstant() == module) {
+            writeTasks(resolvedShare, target);
+        } else {
+            throw new UnsupportedOperationException("Unsupported module: " + module);
+        }
+    }
+
+    /**
+     * Writes the appointments of a calendar folder.
+     *
+     * @param share The resolved share
+     * @param target The share target
+     */
+    private static void writeAppointments(ResolvedShare share, ShareTarget target) throws OXException, IOException {
         /*
          * prepare iCal export
          */
         ICalEmitter iCalEmitter = Services.getService(ICalEmitter.class);
         ICalSession iCalSession = iCalEmitter.createSession();
-        String name = extractName(resolvedShare, target);
+        String name = extractName(share, target);
         if (false == Strings.isEmpty(name)) {
             iCalSession.setName(name);
         }
-        int module = target.getModule();
-        if (Module.CALENDAR.getFolderConstant() == module) {
-            writeCalendar(iCalEmitter, iCalSession, resolvedShare, target);
-        } else if (Module.TASK.getFolderConstant() == module) {
-            writeTasks(iCalEmitter, iCalSession, resolvedShare, target);
-        } else {
-            throw new UnsupportedOperationException("Unsupported module: " + module);
-        }
+        /*
+         * perform the export
+         */
+        writeCalendar(iCalEmitter, iCalSession, share, target);
         /*
          * write response
          */
-        HttpServletResponse response = resolvedShare.getResponse();
+        HttpServletResponse response = share.getResponse();
         response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType("text/calendar");
         iCalEmitter.writeSession(iCalSession, response.getOutputStream());
@@ -210,6 +252,83 @@ public class ICalHandler extends HttpAuthShareHandler {
         } finally {
             SearchIterators.close(searchIterator);
         }
+    }
+
+    /**
+     * Writes the events of a calendar folder.
+     *
+     * @param share The resolved share
+     * @param target The share target
+     */
+    private static void writeEvents(ResolvedShare share, ShareTarget target) throws OXException, IOException {
+        /*
+         * prepare iCal export
+         */
+        ICalService iCalService = Services.getService(ICalService.class, true);
+        CalendarService calendarService = Services.getService(CalendarService.class, true);
+        CalendarSession calendarSession = calendarService.init(share.getSession());
+        calendarSession
+            .set(CalendarParameters.PARAMETER_ORDER_BY, EventField.START_DATE)
+            .set(CalendarParameters.PARAMETER_ORDER, "ASC")
+            .set(CalendarParameters.PARAMETER_FIELDS, EVENT_FIELDS)
+            .set(CalendarParameters.PARAMETER_RECURRENCE_MASTER, Boolean.TRUE)
+            .set(CalendarParameters.PARAMETER_RANGE_START, getIntervalStart())
+            .set(CalendarParameters.PARAMETER_RANGE_END, getIntervalEnd())
+        ;
+        ICalParameters iCalParameters = iCalService.initParameters();
+        iCalParameters.set(ICalParameters.DEFAULT_TIMEZONE, TimeZone.getTimeZone(share.getUser().getTimeZone()));
+        CalendarExport calendarExport = iCalService.exportICal(iCalParameters);
+        String name = extractName(share, target);
+        if (Strings.isEmpty(name)) {
+            name = "Calendar";
+        }
+        calendarExport.setName(name);
+        calendarExport.setMethod("PUBLISH");
+        /*
+         * perform export
+         */
+        for (Event event : calendarService.getEventsInFolder(calendarSession, Integer.parseInt(target.getFolder()))) {
+            calendarExport.add(event);
+        }
+        /*
+         * write response
+         */
+        HttpServletResponse response = share.getResponse();
+        response.setStatus(HttpServletResponse.SC_OK);
+        response.setContentType("text/calendar; charset=UTF-8");
+        com.openexchange.tools.servlet.http.Tools.setHeaderForFileDownload(
+            share.getRequest().getHeader("User-Agent"), response, name + ".ics");
+        calendarExport.writeVCalendar(response.getOutputStream());
+    }
+
+    /**
+     * Writes the tasks of a task folder.
+     *
+     * @param share The resolved share
+     * @param target The share target
+     */
+    private static void writeTasks(ResolvedShare share, ShareTarget target) throws OXException, IOException {
+        /*
+         * prepare iCal export
+         */
+        ICalEmitter iCalEmitter = Services.getService(ICalEmitter.class);
+        ICalSession iCalSession = iCalEmitter.createSession();
+        String name = extractName(share, target);
+        if (false == Strings.isEmpty(name)) {
+            iCalSession.setName(name);
+        }
+        /*
+         * perform the export
+         */
+        writeTasks(iCalEmitter, iCalSession, share, target);
+        /*
+         * write response
+         */
+        HttpServletResponse response = share.getResponse();
+        response.setStatus(HttpServletResponse.SC_OK);
+        response.setContentType("text/calendar");
+        iCalEmitter.writeSession(iCalSession, response.getOutputStream());
+        iCalEmitter.flush(iCalSession, response.getOutputStream());
     }
 
     /**

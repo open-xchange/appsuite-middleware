@@ -49,6 +49,8 @@
 
 package com.openexchange.share.handler.ical.osgi;
 
+import com.openexchange.chronos.ical.ICalService;
+import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.folderstorage.FolderService;
@@ -77,7 +79,7 @@ public class ICalHandlerActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { AppointmentSqlFactoryService.class, ConfigurationService.class, FolderService.class,
-            CalendarCollectionService.class, ICalEmitter.class, UserService.class };
+            CalendarCollectionService.class, ICalEmitter.class, UserService.class, ICalService.class, CalendarService.class };
     }
 
     @Override
