@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax;
 
-import static com.openexchange.ajax.AJAXUtility.htmlEscaper;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -995,7 +994,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     }
 
     public static String substituteJS(String json, String action) {
-        return JS_FRAGMENT.replace("**json**", json.replaceAll(Pattern.quote("</") , "<\\/")).replace("**action**", htmlEscaper().escape(action));
+        return JS_FRAGMENT.replace("**json**", json.replaceAll(Pattern.quote("</") , "<\\/")).replace("**action**", sanitizeParam(action));
     }
 
     /* --------------------- STUFF FOR UPLOAD --------------------- */
