@@ -49,11 +49,15 @@
 
 package com.openexchange.ajax.parser;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
-import junit.framework.TestCase;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.writer.TaskWriter;
 import com.openexchange.groupware.tasks.Task;
 
@@ -62,12 +66,9 @@ import com.openexchange.groupware.tasks.Task;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class TaskLastModifiedTest extends TestCase {
+public class TaskLastModifiedTest {
 
-    public TaskLastModifiedTest(String name) {
-        super(name);
-    }
-
+    @Test
     public void testNotParsing() throws Throwable {
         TimeZone UTC = TimeZone.getTimeZone("UTC");
         Task task = new Task();
@@ -80,6 +81,7 @@ public class TaskLastModifiedTest extends TestCase {
         assertNull("lastModified is not null but should.", parsed.getLastModified());
     }
 
+    @Test
     public void testParsing() throws Throwable {
         TimeZone UTC = TimeZone.getTimeZone("UTC");
         Task task = new Task();

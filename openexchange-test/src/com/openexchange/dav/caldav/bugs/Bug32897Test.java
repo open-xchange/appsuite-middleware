@@ -49,7 +49,8 @@
 
 package com.openexchange.dav.caldav.bugs;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.MultiStatusResponse;
 import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
@@ -68,35 +69,31 @@ import com.openexchange.java.Strings;
  */
 public class Bug32897Test extends CalDAVTest {
 
-	@Test
-	public void testDefaultAlarms() throws Exception {
-	    /*
+    @Test
+    public void testDefaultAlarms() throws Exception {
+        /*
          * discover default alarms
          */
         final DavPropertyNameSet props = new DavPropertyNameSet();
         props.add(PropertyNames.DEFAULT_ALARM_VEVENT_DATE);
         props.add(PropertyNames.DEFAULT_ALARM_VEVENT_DATETIME);
         props.add(PropertyNames.SUPPORTED_CALENDAR_COMPONENT_SET);
-        final PropFindMethod propFind = new PropFindMethod(getWebDAVClient().getBaseURI() + "/caldav/",
-                DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_1);
+        final PropFindMethod propFind = new PropFindMethod(getWebDAVClient().getBaseURI() + "/caldav/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_1);
         final MultiStatusResponse[] responses = getWebDAVClient().doPropFind(propFind);
         assertNotNull("got no response", responses);
         assertTrue("got no responses", 0 < responses.length);
         for (final MultiStatusResponse response : responses) {
             if (response.getProperties(StatusCodes.SC_OK).contains(PropertyNames.SUPPORTED_CALENDAR_COMPONENT_SET)) {
                 final Node node = extractNodeValue(PropertyNames.SUPPORTED_CALENDAR_COMPONENT_SET, response);
-                if (null != node && null != node.getAttributes() && null != node.getAttributes().getNamedItem("name") &&
-                            "VEVENT".equals(node.getAttributes().getNamedItem("name").getTextContent())) {
-                    Object defaultAlarmVEventDate = response.getProperties(StatusCodes.SC_OK).get(
-                        PropertyNames.DEFAULT_ALARM_VEVENT_DATE).getValue();
+                if (null != node && null != node.getAttributes() && null != node.getAttributes().getNamedItem("name") && "VEVENT".equals(node.getAttributes().getNamedItem("name").getTextContent())) {
+                    Object defaultAlarmVEventDate = response.getProperties(StatusCodes.SC_OK).get(PropertyNames.DEFAULT_ALARM_VEVENT_DATE).getValue();
                     assertTrue("wrong default alarm", null == defaultAlarmVEventDate || Strings.isEmpty(String.valueOf(defaultAlarmVEventDate)));
-                    Object defaultAlarmVEventDatetime = response.getProperties(StatusCodes.SC_OK).get(
-                        PropertyNames.DEFAULT_ALARM_VEVENT_DATETIME).getValue();
+                    Object defaultAlarmVEventDatetime = response.getProperties(StatusCodes.SC_OK).get(PropertyNames.DEFAULT_ALARM_VEVENT_DATETIME).getValue();
                     assertTrue("wrong default alarm", null == defaultAlarmVEventDatetime || Strings.isEmpty(String.valueOf(defaultAlarmVEventDatetime)));
                 }
             }
         }
 
-	}
+    }
 
 }

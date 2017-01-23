@@ -55,9 +55,8 @@ import com.openexchange.ajax.session.LoginTools;
 import com.openexchange.ajax.session.actions.LoginRequest;
 import com.openexchange.ajax.session.actions.LogoutRequest;
 import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.configuration.AJAXConfig.Property;
-import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
+import com.openexchange.test.pool.TestUser;
 
 /**
  * This class implements the temporary memory of an AJAX client and provides some convenience methods to determine user specific values for
@@ -85,69 +84,25 @@ public class AJAXClient {
         this.mustLogout = logout;
     }
 
-    public AJAXClient(User user) throws OXException, OXException, IOException, JSONException {
+    public AJAXClient(TestUser user) throws OXException, OXException, IOException, JSONException {
         this(user, AJAXClient.class.getName());
     }
 
-    public AJAXClient(User user, String client) throws OXException, OXException, IOException, JSONException {
+    public AJAXClient(TestUser user, String client) throws OXException, OXException, IOException, JSONException {
         super();
-        AJAXConfig.init();
-        String login = AJAXConfig.getProperty(user.getLogin());
-        if (null == login) {
-            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(user.getLogin().getPropertyName());
-        }
-        if (!login.contains("@")) {
-            final String context = AJAXConfig.getProperty(Property.CONTEXTNAME);
-            if (null == context) {
-                throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(Property.CONTEXTNAME.getPropertyName());
-            }
-            login += "@" + context;
-        }
+
         if (hostname == null) {
             this.hostname = AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME);
         }
 
         if (protocol == null) {
             this.protocol = AJAXConfig.getProperty(AJAXConfig.Property.PROTOCOL);
-        }
-
-        final String password = AJAXConfig.getProperty(user.getPassword());
-        if (null == password) {
-            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(user.getPassword().getPropertyName());
+            if (this.protocol == null) {
+                this.protocol = "http";
+            }
         }
         session = new AJAXSession();
-        session.setId(execute(new LoginRequest(login, password, LoginTools.generateAuthId(), null == client ? AJAXClient.class.getName() : client, VERSION)).getSessionId());
-    }
-
-    public AJAXClient() throws OXException {
-        super();
-        AJAXConfig.init();
-        session = new AJAXSession();
-    }
-
-    public enum User {
-        User1(Property.LOGIN, Property.PASSWORD),
-        User2(Property.SECONDUSER, Property.PASSWORD),
-        User3(Property.THIRDLOGIN, Property.PASSWORD),
-        User4(Property.FOURTHLOGIN, Property.PASSWORD),
-        OXAdmin(Property.OXADMIN, Property.PASSWORD);
-
-        private Property login;
-
-        private Property password;
-
-        private User(final Property login, final Property password) {
-            this.login = login;
-            this.password = password;
-        }
-
-        public Property getLogin() {
-            return login;
-        }
-
-        public Property getPassword() {
-            return password;
-        }
+        session.setId(execute(new LoginRequest(user.getLogin(), user.getPassword(), LoginTools.generateAuthId(), null == client ? AJAXClient.class.getName() : client, VERSION)).getSessionId());
     }
 
     /**

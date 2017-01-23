@@ -49,7 +49,7 @@
 
 package com.openexchange.dav.carddav.tests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import org.apache.jackrabbit.webdav.client.methods.OptionsMethod;
 import org.junit.Test;
 import com.openexchange.dav.StatusCodes;
@@ -64,47 +64,47 @@ import com.openexchange.dav.carddav.CardDAVTest;
  */
 public class OptionsTest extends CardDAVTest {
 
-	private static final String[] EXPECTED_ALLOW_HEADERS = {
-		"PROPFIND", "OPTIONS", "REPORT", "PUT", "DELETE", "ACL"
-	};
+    private static final String[] EXPECTED_ALLOW_HEADERS = { "PROPFIND", "OPTIONS", "REPORT", "PUT", "DELETE", "ACL"
+    };
 
-	private static final String[] EXPECTED_DAV_HEADERS = {
-		"1", "2", "3", "addressbook", "access-control", "extended-mkcol"
-	};
+    private static final String[] EXPECTED_DAV_HEADERS = { "1", "2", "3", "addressbook", "access-control", "extended-mkcol"
+    };
 
-	public OptionsTest() {
-		super();
-	}
+    public OptionsTest() {
+        super();
+    }
 
-	/**
-	 * Tests if the necessary 'Allow' header elements are present in the OPTIONS response.
-	 * @throws Exception
-	 */
-	@Test
-	public void testAllowHeaders() throws Exception {
-		OptionsMethod options = null;
-		try {
-			options = new OptionsMethod(getBaseUri());
-	    	assertEquals("unexpected http status", StatusCodes.SC_OK, super.getWebDAVClient().executeMethod(options));
-	    	assertResponseHeaders(EXPECTED_ALLOW_HEADERS, "Allow", options);
-		} finally {
-			release(options);
-		}
-	}
+    /**
+     * Tests if the necessary 'Allow' header elements are present in the OPTIONS response.
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void testAllowHeaders() throws Exception {
+        OptionsMethod options = null;
+        try {
+            options = new OptionsMethod(getBaseUri());
+            assertEquals("unexpected http status", StatusCodes.SC_OK, super.getWebDAVClient().executeMethod(options));
+            assertResponseHeaders(EXPECTED_ALLOW_HEADERS, "Allow", options);
+        } finally {
+            release(options);
+        }
+    }
 
-	/**
-	 * Tests if the necessary 'DAV' header elements are present in the OPTIONS response.
-	 * @throws Exception
-	 */
-	@Test
-	public void testDAVHeaders() throws Exception {
-		OptionsMethod options = null;
-		try {
-			options = new OptionsMethod(getBaseUri());
-	    	assertEquals("unexpected http status", StatusCodes.SC_OK, super.getWebDAVClient().executeMethod(options));
-	    	assertResponseHeaders(EXPECTED_DAV_HEADERS, "DAV", options);
-		} finally {
-			release(options);
-		}
-	}
+    /**
+     * Tests if the necessary 'DAV' header elements are present in the OPTIONS response.
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void testDAVHeaders() throws Exception {
+        OptionsMethod options = null;
+        try {
+            options = new OptionsMethod(getBaseUri());
+            assertEquals("unexpected http status", StatusCodes.SC_OK, super.getWebDAVClient().executeMethod(options));
+            assertResponseHeaders(EXPECTED_DAV_HEADERS, "DAV", options);
+        } finally {
+            release(options);
+        }
+    }
 }

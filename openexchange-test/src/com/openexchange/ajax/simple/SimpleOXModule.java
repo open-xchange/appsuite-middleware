@@ -53,7 +53,6 @@ import java.io.IOException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-
 /**
  * {@link SimpleOXModule}
  *
@@ -70,13 +69,12 @@ public class SimpleOXModule {
         this.moduleName = moduleName;
     }
 
-    public SimpleResponse call(String action, Object...parameters) throws JSONException, IOException {
+    public SimpleResponse call(String action, Object... parameters) throws JSONException, IOException {
         return client.call(moduleName, action, parameters);
     }
 
-    public JSONObject raw(String action, Object...parameters) throws JSONException, IOException {
+    public JSONObject raw(String action, Object... parameters) throws JSONException, IOException {
         return client.raw(moduleName, action, parameters);
     }
-
 
 }

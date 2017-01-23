@@ -58,7 +58,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
- * {@link CalendarMultiGetReportInfo} - Encapsulates the BODY of a 
+ * {@link CalendarMultiGetReportInfo} - Encapsulates the BODY of a
  * {@link CalendarMultiGetReport} request ("calendar-multiget").
  * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
@@ -70,17 +70,17 @@ public class CalendarMultiGetReportInfo extends ReportInfo {
     /**
      * Creates a new {@link CalendarMultiGetReportInfo}.
      * 
-     * @param hrefs The resource data references to include in the request 
+     * @param hrefs The resource data references to include in the request
      */
     public CalendarMultiGetReportInfo(String[] hrefs) {
-    	this(hrefs, null);
+        this(hrefs, null);
     }
 
     /**
      * Creates a new {@link CalendarMultiGetReportInfo}.
      * 
      * @param hrefs The resource data references to include in the request
-     *  
+     * 
      * @param propertyNames the properties to include in the request
      */
     public CalendarMultiGetReportInfo(String[] hrefs, DavPropertyNameSet propertyNames) {
@@ -90,23 +90,21 @@ public class CalendarMultiGetReportInfo extends ReportInfo {
 
     @Override
     public Element toXml(final Document document) {
-    	/*
-    	 * create calendar-multiget element
-    	 */
-    	Element multiGetElement = DomUtil.createElement(document, CalendarMultiGetReport.CALENDAR_MULTIGET.getLocalName(), 
-    			CalendarMultiGetReport.CALENDAR_MULTIGET.getNamespace());
-    	multiGetElement.setAttributeNS(Namespace.XMLNS_NAMESPACE.getURI(), 
-    			Namespace.XMLNS_NAMESPACE.getPrefix() + ":" + DavConstants.NAMESPACE.getPrefix(), DavConstants.NAMESPACE.getURI());
-    	/*
-    	 * append properties element
-    	 */
-    	multiGetElement.appendChild(super.getPropertyNameSet().toXml(document));
-    	/*
-    	 * append hrefs
-    	 */
-    	for (String href : hrefs) {
+        /*
+         * create calendar-multiget element
+         */
+        Element multiGetElement = DomUtil.createElement(document, CalendarMultiGetReport.CALENDAR_MULTIGET.getLocalName(), CalendarMultiGetReport.CALENDAR_MULTIGET.getNamespace());
+        multiGetElement.setAttributeNS(Namespace.XMLNS_NAMESPACE.getURI(), Namespace.XMLNS_NAMESPACE.getPrefix() + ":" + DavConstants.NAMESPACE.getPrefix(), DavConstants.NAMESPACE.getURI());
+        /*
+         * append properties element
+         */
+        multiGetElement.appendChild(super.getPropertyNameSet().toXml(document));
+        /*
+         * append hrefs
+         */
+        for (String href : hrefs) {
             multiGetElement.appendChild(DomUtil.createElement(document, DavConstants.XML_HREF, DavConstants.NAMESPACE, href));
-    	}
+        }
         return multiGetElement;
     }
 }

@@ -102,8 +102,8 @@ public class StatisticToolsTest extends AbstractRMITest {
 
     private int returnMemoryPool;
 
-    @Test
-    public void testGetXchangeStats() {
+     @Test
+     public void testGetXchangeStats() {
         final StatisticTools statisticTools = new StatisticTools() {
 
             @Override
@@ -115,8 +115,8 @@ public class StatisticToolsTest extends AbstractRMITest {
         assertEquals("Expected 0 as return code!", 0, this.returnCodeXchange);
     }
 
-    @Test
-    public void testGetAllStats() {
+     @Test
+     public void testGetAllStats() {
         final StatisticTools statisticTools = new StatisticTools() {
 
             @Override
@@ -128,8 +128,8 @@ public class StatisticToolsTest extends AbstractRMITest {
         assertEquals("Expected 0 as return code!", 0, this.returnCodeAll);
     }
 
-    @Test
-    public void testGetThreadpoolstats() {
+     @Test
+     public void testGetThreadpoolstats() {
         final StatisticTools statisticTools = new StatisticTools() {
 
             @Override
@@ -141,8 +141,8 @@ public class StatisticToolsTest extends AbstractRMITest {
         assertEquals("Expected 0 as return code!", 0, this.returnCodeThreadpool);
     }
 
-    @Test
-    public void testGetRuntimestats() {
+     @Test
+     public void testGetRuntimestats() {
         final StatisticTools statisticTools = new StatisticTools() {
 
             @Override
@@ -154,8 +154,8 @@ public class StatisticToolsTest extends AbstractRMITest {
         assertEquals("Expected 0 as return code!", 0, this.returnCodeRuntime);
     }
 
-    @Test
-    public void testGetOsstats() {
+     @Test
+     public void testGetOsstats() {
         final StatisticTools statisticTools = new StatisticTools() {
 
             @Override
@@ -167,8 +167,8 @@ public class StatisticToolsTest extends AbstractRMITest {
         assertEquals("Expected 0 as return code!", 0, this.returnCodeOs);
     }
 
-    @Test
-    public void testGetThreadingstats() {
+     @Test
+     public void testGetThreadingstats() {
         final StatisticTools statisticTools = new StatisticTools() {
 
             @Override
@@ -180,8 +180,8 @@ public class StatisticToolsTest extends AbstractRMITest {
         assertEquals("Expected 0 as return code!", 0, this.returnCodeThreading);
     }
 
-    @Test
-    public void testGetShowoperationsstats() {
+     @Test
+     public void testGetShowoperationsstats() {
         final StatisticTools statisticTools = new StatisticTools() {
 
             @Override
@@ -193,8 +193,8 @@ public class StatisticToolsTest extends AbstractRMITest {
         assertEquals("Expected 0 as return code!", 0, this.returnCodeShowOperations);
     }
 
-    @Test
-    public void testGetMemory() {
+     @Test
+     public void testGetMemory() {
         final StatisticTools statisticTools = new StatisticTools() {
 
             @Override
@@ -206,8 +206,8 @@ public class StatisticToolsTest extends AbstractRMITest {
         assertEquals("Expected 0 as return code!", 0, this.returnCodeMemory);
     }
 
-    @Test
-    public void testGetGcstats() {
+     @Test
+     public void testGetGcstats() {
         final StatisticTools statisticTools = new StatisticTools() {
 
             @Override
@@ -219,8 +219,8 @@ public class StatisticToolsTest extends AbstractRMITest {
         assertEquals("Expected 0 as return code!", 0, this.returnCodeGc);
     }
 
-    @Test
-    public void testGetMemoryFullstats() {
+     @Test
+     public void testGetMemoryFullstats() {
         final StatisticTools statisticTools = new StatisticTools() {
 
             @Override
@@ -232,8 +232,8 @@ public class StatisticToolsTest extends AbstractRMITest {
         assertEquals("Expected 0 as return code!", 0, this.returnCodeMemoryFull);
     }
 
-    @Test
-    public void testGetDocumentconverterstats() {
+     @Test
+     public void testGetDocumentconverterstats() {
         final StatisticTools statisticTools = new StatisticTools() {
 
             @Override
@@ -245,8 +245,8 @@ public class StatisticToolsTest extends AbstractRMITest {
         assertEquals("Expected 0 as return code!", 0, this.returnCodeDocumentconverter);
     }
 
-    @Test
-    public void testGetOfficestats() {
+     @Test
+     public void testGetOfficestats() {
         final StatisticTools statisticTools = new StatisticTools() {
 
             @Override
@@ -258,8 +258,8 @@ public class StatisticToolsTest extends AbstractRMITest {
         assertEquals("Expected 0 as return code!", 0, this.returnCodeOffice);
     }
 
-    @Test
-    public void testEventAdminStats() {
+     @Test
+     public void testEventAdminStats() {
         final StatisticTools statisticTools = new StatisticTools() {
 
             @Override
@@ -271,8 +271,8 @@ public class StatisticToolsTest extends AbstractRMITest {
         assertEquals("Expected 0 as return code!", 0, this.returnEventAdmin);
     }
 
-    @Test
-    public void testCachestats() {
+     @Test
+     public void testCachestats() {
         final StatisticTools statisticTools = new StatisticTools() {
 
             @Override
@@ -284,8 +284,8 @@ public class StatisticToolsTest extends AbstractRMITest {
         assertEquals("Expected 0 as return code!", 0, this.returnCache);
     }
 
-    @Test
-    public void testClusterstats() {
+     @Test
+     public void testClusterstats() {
         final StatisticTools statisticTools = new StatisticTools() {
 
             @Override
@@ -297,8 +297,8 @@ public class StatisticToolsTest extends AbstractRMITest {
         assertEquals("Expected 0 as return code!", 0, this.returnCluster);
     }
 
-    @Test
-    public void testGeneralstats() {
+     @Test
+     public void testGeneralstats() {
         final StatisticTools statisticTools = new StatisticTools() {
 
             @Override
@@ -310,8 +310,8 @@ public class StatisticToolsTest extends AbstractRMITest {
         assertEquals("Expected 0 as return code!", 0, this.returnGeneral);
     }
 
-    @Test
-    public void testMailinterfacestats() {
+     @Test
+     public void testMailinterfacestats() {
         final StatisticTools statisticTools = new StatisticTools() {
 
             @Override
@@ -323,8 +323,8 @@ public class StatisticToolsTest extends AbstractRMITest {
         assertEquals("Expected 0 as return code!", 0, this.returnMailinterface);
     }
 
-    @Test
-    public void testPoolingstats() {
+     @Test
+     public void testPoolingstats() {
         final StatisticTools statisticTools = new StatisticTools() {
 
             @Override
@@ -336,8 +336,8 @@ public class StatisticToolsTest extends AbstractRMITest {
         assertEquals("Expected 0 as return code!", 0, this.returnPooling);
     }
 
-    @Test
-    public void testCallMonitorstats() {
+     @Test
+     public void testCallMonitorstats() {
         final StatisticTools statisticTools = new StatisticTools() {
 
             @Override
@@ -349,8 +349,8 @@ public class StatisticToolsTest extends AbstractRMITest {
         assertEquals("Expected 0 as return code!", 0, this.returnCallMonitor);
     }
 
-    @Test
-    public void testMiscstats() {
+     @Test
+     public void testMiscstats() {
         final StatisticTools statisticTools = new StatisticTools() {
 
             @Override
@@ -362,8 +362,8 @@ public class StatisticToolsTest extends AbstractRMITest {
         assertEquals("Expected 0 as return code!", 0, this.returnMisc);
     }
 
-    @Test
-    public void testOverviewstats() {
+     @Test
+     public void testOverviewstats() {
         final StatisticTools statisticTools = new StatisticTools() {
 
             @Override
@@ -375,8 +375,8 @@ public class StatisticToolsTest extends AbstractRMITest {
         assertEquals("Expected 0 as return code!", 0, this.returnOverview);
     }
 
-    @Test
-    public void testMemoryPoolstats() {
+     @Test
+     public void testMemoryPoolstats() {
         final StatisticTools statisticTools = new StatisticTools() {
 
             @Override

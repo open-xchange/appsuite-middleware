@@ -49,18 +49,22 @@
 
 package com.openexchange.subscribe.xing;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.subscribe.crawler.internal.ContactSanitizer;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * {@link ContactSanitationTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class ContactSanitationTest extends TestCase {
-
-    public void testSanitizesEmptyStrings() {
+public class ContactSanitationTest {
+         @Test
+     public void testSanitizesEmptyStrings() {
         Contact contact = new Contact();
         contact.setDisplayName("");
         contact.setGivenName("");

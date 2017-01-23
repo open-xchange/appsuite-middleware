@@ -1,23 +1,22 @@
 package liquibase.change.core;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 import liquibase.change.ChangeFactory;
 import liquibase.change.StandardChangeTest;
 import liquibase.database.core.MockDatabase;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropViewStatement;
-import static org.junit.Assert.*;
-import org.junit.Test;
 
 public class DropViewChangeTest  extends StandardChangeTest {
 
-    @Override
-    @Test
+     @Test
     public void getRefactoringName() throws Exception {
         assertEquals("dropView", ChangeFactory.getInstance().getChangeMetaData(new DropViewChange()).getName());
     }
 
-    @Override
-    @Test
+     @Test
     public void generateStatement() throws Exception {
         DropViewChange change = new DropViewChange();
         change.setSchemaName("SCHEMA_NAME");
@@ -30,8 +29,7 @@ public class DropViewChangeTest  extends StandardChangeTest {
         assertEquals("VIEW_NAME", ((DropViewStatement) sqlStatements[0]).getViewName());
     }
 
-    @Override
-    @Test
+     @Test
     public void getConfirmationMessage() throws Exception {
         DropViewChange change = new DropViewChange();
         change.setViewName("VIEW_NAME");

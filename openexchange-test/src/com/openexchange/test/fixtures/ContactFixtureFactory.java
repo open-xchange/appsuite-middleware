@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.test.fixtures;
 
 import java.util.Comparator;
@@ -66,19 +67,20 @@ public class ContactFixtureFactory implements FixtureFactory<Contact> {
 
     private final FixtureLoader fixtureLoader;
 
-	public ContactFixtureFactory(FixtureLoader fixtureLoader) {
-		super();
-		this.fixtureLoader = fixtureLoader;
-	}
-
-	@Override
-    public Fixtures<Contact> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
-		return new ContactFixtures(fixtureName, entries, fixtureLoader);
+    public ContactFixtureFactory(FixtureLoader fixtureLoader) {
+        super();
+        this.fixtureLoader = fixtureLoader;
     }
 
-    private class ContactFixtures  extends DefaultFixtures<Contact> implements Fixtures<Contact>{
+    @Override
+    public Fixtures<Contact> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
+        return new ContactFixtures(fixtureName, entries, fixtureLoader);
+    }
+
+    private class ContactFixtures extends DefaultFixtures<Contact> implements Fixtures<Contact> {
+
         private final Map<String, Map<String, String>> entries;
-        private final Map<String, Fixture<Contact>>  contacts = new HashMap<String,Fixture<Contact>>();
+        private final Map<String, Fixture<Contact>> contacts = new HashMap<String, Fixture<Contact>>();
 
         public ContactFixtures(final String fixtureName, final Map<String, Map<String, String>> entries, FixtureLoader fixtureLoader) {
             super(Contact.class, entries, fixtureLoader);
@@ -99,16 +101,17 @@ public class ContactFixtureFactory implements FixtureFactory<Contact> {
             }
             defaults(values);
             final Contact contact = new Contact();
-            apply(contact,values);
+            apply(contact, values);
 
             final Fixture<Contact> fixture = new Fixture<Contact>(contact, values.keySet().toArray(new String[values.size()]), values) {
-            	@Override
+
+                @Override
                 public Comparator getComparator(final String field) {
-            		if("birthday".equals(field) || "anniversary".equals(field)) {
-            			return new DayOnlyDateComparator();
-            		}
-            		return super.getComparator(field);
-            	}
+                    if ("birthday".equals(field) || "anniversary".equals(field)) {
+                        return new DayOnlyDateComparator();
+                    }
+                    return super.getComparator(field);
+                }
             };
 
             contacts.put(entryName, fixture);
@@ -116,15 +119,15 @@ public class ContactFixtureFactory implements FixtureFactory<Contact> {
         }
 
         private void defaults(final Map values) {
-        	if (false == values.containsKey("display_name")) {
-            	final String surName = values.containsKey("sur_name") ? values.get("sur_name").toString() : null;
-            	final String givenName = values.containsKey("given_name") ? values.get("given_name").toString() : null;
-        		if (null != surName) {
-        			values.put("display_name", null == givenName ? surName : String.format("%s, %s", surName, givenName));
-        		} else if (null != givenName) {
-        			values.put("display_name", givenName);
-        		}
-        	}
+            if (false == values.containsKey("display_name")) {
+                final String surName = values.containsKey("sur_name") ? values.get("sur_name").toString() : null;
+                final String givenName = values.containsKey("given_name") ? values.get("given_name").toString() : null;
+                if (null != surName) {
+                    values.put("display_name", null == givenName ? surName : String.format("%s, %s", surName, givenName));
+                } else if (null != givenName) {
+                    values.put("display_name", givenName);
+                }
+            }
         }
     }
 }

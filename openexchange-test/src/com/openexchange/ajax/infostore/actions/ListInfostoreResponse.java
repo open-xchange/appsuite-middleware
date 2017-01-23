@@ -57,7 +57,6 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.json.FileMetadataFieldParser;
 
-
 /**
  * {@link ListInfostoreResponse}
  *
@@ -70,6 +69,7 @@ public class ListInfostoreResponse extends AbstractColumnsResponse {
 
     /**
      * Initializes a new {@link ListInfostoreResponse}.
+     * 
      * @param response
      */
     protected ListInfostoreResponse(Response response) {

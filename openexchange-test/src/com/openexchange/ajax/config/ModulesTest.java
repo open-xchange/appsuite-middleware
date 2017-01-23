@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.config;
 
+import static org.junit.Assert.assertNotNull;
+import org.junit.Test;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -57,14 +59,16 @@ public class ModulesTest extends AbstractAJAXSession {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ModulesTest.class);
 
-    public ModulesTest(final String name) {
-        super(name);
+    public ModulesTest() {
+        super();
     }
 
     /**
      * Tests if the spam button option is sent to the GUI.
+     * 
      * @throws Throwable if an exception occurs.
      */
+    @Test
     public void testModules() throws Throwable {
         String value = getClient().execute(new GetRequest(Tree.Modules)).getJSON().toString();
         LOG.info("Modules: " + value);

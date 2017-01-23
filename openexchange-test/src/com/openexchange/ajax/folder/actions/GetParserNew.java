@@ -68,7 +68,6 @@ import com.openexchange.folderstorage.filestorage.contentType.FileStorageContent
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
 import com.openexchange.java.util.TimeZones;
 
-
 /**
  * {@link GetParserNew}
  *
@@ -89,6 +88,7 @@ public class GetParserNew extends AbstractAJAXParser<GetResponseNew> implements 
 
     /**
      * Initializes a new {@link GetParserNew}.
+     * 
      * @param failOnError
      */
     protected GetParserNew(boolean failOnError) {

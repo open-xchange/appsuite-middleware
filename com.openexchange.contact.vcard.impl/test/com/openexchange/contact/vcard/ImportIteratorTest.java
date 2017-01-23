@@ -49,6 +49,12 @@
 
 package com.openexchange.contact.vcard;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import org.junit.Assert;
+import org.junit.Test;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -68,7 +74,8 @@ public class ImportIteratorTest extends VCardTest {
         super();
     }
 
-    public void testImportAndKeepMultipleVCards() throws Exception {
+         @Test
+     public void testImportAndKeepMultipleVCards() throws Exception {
         String vCardString =
             "BEGIN:VCARD\r\n"+
             "VERSION:2.1\r\n"+
@@ -116,10 +123,10 @@ public class ImportIteratorTest extends VCardTest {
                 assertNotNull(originalVCard);
                 assertTrue(originalVCard.startsWith("BEGIN:VCARD"));
                 assertTrue(originalVCard.trim().endsWith("END:VCARD"));
-                assertEquals(1, countSubstring("BEGIN:VCARD", originalVCard));
-                assertEquals(1, countSubstring("END:VCARD", originalVCard));
+                Assert.assertEquals(1, countSubstring("BEGIN:VCARD", originalVCard));
+                Assert.assertEquals(1, countSubstring("END:VCARD", originalVCard));
             }
-            assertEquals(5, count);
+            Assert.assertEquals(5, count);
         } finally {
             SearchIterators.close(searchIterator);
         }
@@ -134,7 +141,8 @@ public class ImportIteratorTest extends VCardTest {
         return count;
     }
 
-    public void testEmptyHasNext() throws Exception {
+         @Test
+     public void testEmptyHasNext() throws Exception {
         VCardParameters parameters = getService().createParameters().setKeepOriginalVCard(true);
         SearchIterator<VCardImport> searchIterator = null;
         try {
@@ -145,7 +153,8 @@ public class ImportIteratorTest extends VCardTest {
         }
     }
 
-    public void testEmptyNext() throws Exception {
+         @Test
+     public void testEmptyNext() throws Exception {
         VCardParameters parameters = getService().createParameters().setKeepOriginalVCard(true);
         SearchIterator<VCardImport> searchIterator = null;
         try {

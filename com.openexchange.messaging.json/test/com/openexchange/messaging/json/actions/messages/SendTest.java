@@ -49,10 +49,14 @@
 
 package com.openexchange.messaging.json.actions.messages;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Collection;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingAddressHeader;
@@ -72,7 +76,8 @@ public class SendTest extends AbstractMessagingActionTest {
 
     // Success Case
 
-    public void testSendWithRecipients() throws JSONException, OXException {
+         @Test
+     public void testSendWithRecipients() throws JSONException, OXException {
         final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("messagingService", "com.openexchange.test1");
         req.putParameter("account", "12");
@@ -95,7 +100,8 @@ public class SendTest extends AbstractMessagingActionTest {
 
     }
 
-    public void testSendWithoutRecipients() throws OXException, JSONException {
+         @Test
+     public void testSendWithoutRecipients() throws OXException, JSONException {
         final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("messagingService", "com.openexchange.test1");
         req.putParameter("account", "12");
@@ -116,7 +122,8 @@ public class SendTest extends AbstractMessagingActionTest {
 
     // Error Cases
 
-    public void testInvalidBody() throws OXException {
+         @Test
+     public void testInvalidBody() throws OXException {
         final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("messagingService", "com.openexchange.test1");
         req.putParameter("account", "12");
@@ -126,7 +133,8 @@ public class SendTest extends AbstractMessagingActionTest {
         assertFails(req);
     }
 
-    public void testMissingBody() throws OXException {
+         @Test
+     public void testMissingBody() throws OXException {
         final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("messagingService", "com.openexchange.test1");
         req.putParameter("account", "12");
@@ -134,7 +142,8 @@ public class SendTest extends AbstractMessagingActionTest {
         assertFails(req);
     }
 
-    public void testMissingMessagingServiceID() throws JSONException, OXException {
+         @Test
+     public void testMissingMessagingServiceID() throws JSONException, OXException {
         final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("account", "12");
 
@@ -143,7 +152,8 @@ public class SendTest extends AbstractMessagingActionTest {
         assertFails(req);
     }
 
-    public void testMissingAccountID() throws OXException, JSONException {
+         @Test
+     public void testMissingAccountID() throws OXException, JSONException {
         final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("messagingService", "com.openexchange.test1");
 

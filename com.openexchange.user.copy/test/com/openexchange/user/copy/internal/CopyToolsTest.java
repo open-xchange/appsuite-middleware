@@ -53,7 +53,10 @@ import static com.openexchange.java.Autoboxing.I;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.user.copy.ObjectMapping;
 
@@ -63,8 +66,7 @@ import com.openexchange.user.copy.ObjectMapping;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class CopyToolsTest extends TestCase {
-    
+public class CopyToolsTest {    
     private static final int SRC_CTX = 1337;
     
     private static final int DST_CTX = 1338;    
@@ -74,7 +76,8 @@ public class CopyToolsTest extends TestCase {
     private static final int DST_USR = 8331;
     
     
-    public void testCopyTools() throws Exception {
+         @Test
+     public void testCopyTools() throws Exception {
         final ObjectMapping<Integer> contextIdMapping = createContextIdMapping();
         final ObjectMapping<Integer> userIdMapping = createUserIdMapping();
         final ObjectMapping<User> userMapping = createUserMapping();

@@ -46,10 +46,10 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.groupware.attach;
 
 import static com.openexchange.java.Autoboxing.I;
-import gnu.trove.map.TIntObjectMap;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
@@ -64,11 +64,13 @@ import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
+import gnu.trove.map.TIntObjectMap;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class InMemoryAttachmentBase implements AttachmentBase{
+public class InMemoryAttachmentBase implements AttachmentBase {
+
     private final Map<Context, Map<Integer, AttachmentMetadata>> data = new HashMap<Context, Map<Integer, AttachmentMetadata>>();
     private final Map<Context, List<AttachmentMetadata>> changes = new HashMap<Context, List<AttachmentMetadata>>();
     private final Map<Context, List<AttachmentMetadata>> deletions = new HashMap<Context, List<AttachmentMetadata>>();
@@ -96,7 +98,7 @@ public class InMemoryAttachmentBase implements AttachmentBase{
     @Override
     public SortedSet<String> getAttachmentFileStoreLocationsperContext(final Context ctx) {
         final SortedSet<String> locations = new TreeSet<String>();
-        for(final AttachmentMetadata metadata : getCtxMap(ctx).values()) {
+        for (final AttachmentMetadata metadata : getCtxMap(ctx).values()) {
             locations.add(metadata.getFileId());
         }
         return locations;
@@ -139,21 +141,21 @@ public class InMemoryAttachmentBase implements AttachmentBase{
 
     @Override
     public int[] removeAttachment(final String file_id, final Context ctx) {
-        for(final AttachmentMetadata attachment : getCtxMap(ctx).values()) {
+        for (final AttachmentMetadata attachment : getCtxMap(ctx).values()) {
             final String location = attachment.getFileId();
-            if(location != null && location.equals(file_id)){
+            if (location != null && location.equals(file_id)) {
                 deletions.get(ctx).add(attachment);
-                return new int[]{1,1};
+                return new int[] { 1, 1 };
             }
         }
-        return new int[]{1,1};
+        return new int[] { 1, 1 };
     }
 
     @Override
     public int modifyAttachment(final String file_id, final String new_file_id, final String new_comment, final String new_mime, final Context ctx) {
-        for(final AttachmentMetadata attachment : getCtxMap(ctx).values()) {
+        for (final AttachmentMetadata attachment : getCtxMap(ctx).values()) {
             final String location = attachment.getFileId();
-            if(location != null && location.equals(file_id)){
+            if (location != null && location.equals(file_id)) {
                 attachment.setFileId(new_file_id);
                 attachment.setComment(new_comment);
                 attachment.setFileMIMEType(new_mime);
@@ -219,7 +221,7 @@ public class InMemoryAttachmentBase implements AttachmentBase{
     }
 
     private Map<Integer, AttachmentMetadata> getCtxMap(final Context ctx) {
-        if(data.containsKey(ctx)) {
+        if (data.containsKey(ctx)) {
             return data.get(ctx);
         }
         final Map<Integer, AttachmentMetadata> attachments = new HashMap<Integer, AttachmentMetadata>();
@@ -232,7 +234,7 @@ public class InMemoryAttachmentBase implements AttachmentBase{
     }
 
     public List<AttachmentMetadata> getChanges(final Context ctx) {
-        if(!changes.containsKey(ctx)) {
+        if (!changes.containsKey(ctx)) {
             return new ArrayList<AttachmentMetadata>();
         }
         return changes.get(ctx);

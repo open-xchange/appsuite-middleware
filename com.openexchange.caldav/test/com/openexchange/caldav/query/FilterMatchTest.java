@@ -52,7 +52,11 @@ package com.openexchange.caldav.query;
 import static com.openexchange.time.TimeTools.D;
 import java.util.ArrayList;
 import java.util.Date;
-import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 
 /**
@@ -60,9 +64,9 @@ import junit.framework.TestCase;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class FilterMatchTest extends TestCase {
-
-    public void testMatcherForTimeSpanQuery() {
+public class FilterMatchTest {
+         @Test
+     public void testMatcherForTimeSpanQuery() {
         FilterAnalyzer analyzer = new FilterAnalyzerBuilder()
             .compFilter("VCALENDAR")
               .compFilter("VEVENT")

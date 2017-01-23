@@ -66,7 +66,6 @@ public class NewSubscriptionRequest extends AbstractSubscriptionRequest<NewSubsc
     private Subscription subscription;
     private DynamicFormDescription formDescription;
 
-
     public void setSubscription(Subscription subscription) {
         this.subscription = subscription;
     }
@@ -83,12 +82,11 @@ public class NewSubscriptionRequest extends AbstractSubscriptionRequest<NewSubsc
         return formDescription;
     }
 
-
     public NewSubscriptionRequest() {
         super();
     }
 
-    public NewSubscriptionRequest(Subscription subscription, DynamicFormDescription formDescription){
+    public NewSubscriptionRequest(Subscription subscription, DynamicFormDescription formDescription) {
         this();
         setSubscription(subscription);
         setFormDescription(formDescription);
@@ -110,7 +108,7 @@ public class NewSubscriptionRequest extends AbstractSubscriptionRequest<NewSubsc
 
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
-        return new Parameter[]{ new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW)};
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW) };
     }
 
     @Override

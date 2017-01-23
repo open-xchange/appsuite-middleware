@@ -50,20 +50,20 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertFalse;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.ajax.framework.MultipleRequest;
 import com.openexchange.ajax.framework.MultipleResponse;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.test.CalendarTestManager;
-import com.openexchange.test.FolderTestManager;
 
 /**
  * {@link Bug26350Test}
@@ -72,42 +72,24 @@ import com.openexchange.test.FolderTestManager;
  */
 public class Bug26350Test extends AbstractAJAXSession {
 
-    private AJAXClient client1;
-
-    private CalendarTestManager ctm1;
-
     private final int cycles = 3;
 
     private final int chunkSize = 20;
 
     private List<List<Integer>> ids;
 
-    private FolderTestManager ftm;
-
     private FolderObject folder;
 
-    public Bug26350Test(String name) {
-        super(name);
-    }
-
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         ids = new ArrayList<List<Integer>>();
 
-        client1 = new AJAXClient(User.User1);
-
-        ctm1 = new CalendarTestManager(client1);
-        ctm1.setFailOnError(true);
-        ftm = new FolderTestManager(client1);
-        folder = ftm.generatePrivateFolder(
-            "Bug26350 Folder" + System.currentTimeMillis(),
-            FolderObject.CALENDAR,
-            client1.getValues().getPrivateAppointmentFolder(),
-            client1.getValues().getUserId());
+        folder = ftm.generatePrivateFolder("Bug26350 Folder" + UUID.randomUUID().toString(), FolderObject.CALENDAR, getClient().getValues().getPrivateAppointmentFolder(), getClient().getValues().getUserId());
         ftm.insertFolderOnServer(folder);
     }
 
+    @Test
     public void testBug26350() throws Exception {
         for (int i = 0; i < cycles; i++) {
             List<Integer> chunkIds = new ArrayList<Integer>();
@@ -118,7 +100,7 @@ public class Bug26350Test extends AbstractAJAXSession {
                 app.setEndDate(D("13.06.2013 09:00"));
                 app.setParentFolderID(folder.getObjectID());
                 app.setIgnoreConflicts(true);
-                Appointment insert = ctm1.insert(app);
+                Appointment insert = catm.insert(app);
                 chunkIds.add(insert.getObjectID());
             }
             ids.add(chunkIds);
@@ -131,20 +113,11 @@ public class Bug26350Test extends AbstractAJAXSession {
                 requests[j] = new DeleteRequest(chunkIds.get(j), folder.getObjectID(), new Date(Long.MAX_VALUE));
             }
 
-            MultipleResponse<CommonDeleteResponse> response = client1.execute(MultipleRequest.create(requests));
+            MultipleResponse<CommonDeleteResponse> response = getClient().execute(MultipleRequest.create(requests));
             for (CommonDeleteResponse deleteResponse : response) {
                 assertFalse("Delete Response should not have an error.", deleteResponse.hasError());
             }
         }
 
     }
-
-    @Override
-    public void tearDown() throws Exception {
-        ctm1.cleanUp();
-        ftm.cleanUp();
-        client1.logout();
-        super.tearDown();
-    }
-
 }

@@ -46,12 +46,15 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.test.fixtures.transformators;
 
 import com.openexchange.exception.OXException;
+
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public interface Transformator {
+
     Object transform(String value) throws OXException;
 }

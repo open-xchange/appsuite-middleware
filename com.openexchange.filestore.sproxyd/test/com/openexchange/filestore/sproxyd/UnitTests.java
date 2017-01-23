@@ -49,26 +49,18 @@
 
 package com.openexchange.filestore.sproxyd;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 /**
  * {@link UnitTests}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    SproxydBufferedInputStreamTest.class
+})
 public class UnitTests {
 
-    /**
-     * Initializes a new {@link UnitTests}.
-     */
-    public UnitTests() {
-        super();
-    }
-
-    public static Test suite() {
-        TestSuite tests = new TestSuite();
-        tests.addTestSuite(SproxydBufferedInputStreamTest.class);
-        return tests;
-    }
 }

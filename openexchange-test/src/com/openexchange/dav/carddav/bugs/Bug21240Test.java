@@ -70,35 +70,25 @@ import com.openexchange.groupware.container.Contact;
  */
 public class Bug21240Test extends CardDAVTest {
 
-	public Bug21240Test() {
-		super();
-	}
+    public Bug21240Test() {
+        super();
+    }
 
     @Before
     public void setUserAgent() throws Exception {
-		super.getWebDAVClient().setUserAgent(UserAgents.MACOS_10_6_8);
+        super.getWebDAVClient().setUserAgent(UserAgents.MACOS_10_6_8);
     }
 
     @Test
-	public void testDeleteContact() throws Exception {
-		/*
-		 * create contact
-		 */
-    	final String uid = randomUID() + "-ABSPlugin";
-    	final String pathUid = randomUID() + "-ABSPlugin";
-    	final String firstName = "test";
-    	final String lastName = "hannes";
-    	final String vCard =
-    			"BEGIN:VCARD" + "\r\n" +
-				"VERSION:3.0" + "\r\n" +
-				"N:" + lastName + ";" + firstName + ";;;" + "\r\n" +
-				"FN:" + firstName + " " + lastName + "\r\n" +
-				"CATEGORIES:Kontakte" + "\r\n" +
-				"X-ABUID:A33920F3-656F-47B7-A335-2C603DA3F324\\:ABPerson" + "\r\n" +
-				"UID:" + uid + "\r\n" +
-				"REV:" + super.formatAsUTC(new Date()) + "\r\n" +
-				"END:VCARD" + "\r\n"
-		;
+    public void testDeleteContact() throws Exception {
+        /*
+         * create contact
+         */
+        final String uid = randomUID() + "-ABSPlugin";
+        final String pathUid = randomUID() + "-ABSPlugin";
+        final String firstName = "test";
+        final String lastName = "hannes";
+        final String vCard = "BEGIN:VCARD" + "\r\n" + "VERSION:3.0" + "\r\n" + "N:" + lastName + ";" + firstName + ";;;" + "\r\n" + "FN:" + firstName + " " + lastName + "\r\n" + "CATEGORIES:Kontakte" + "\r\n" + "X-ABUID:A33920F3-656F-47B7-A335-2C603DA3F324\\:ABPerson" + "\r\n" + "UID:" + uid + "\r\n" + "REV:" + super.formatAsUTC(new Date()) + "\r\n" + "END:VCARD" + "\r\n";
         assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putVCard(pathUid, vCard));
         /*
          * verify contact on server
@@ -108,9 +98,9 @@ public class Bug21240Test extends CardDAVTest {
         assertEquals("uid wrong", uid, contact.getUid());
         assertEquals("firstname wrong", firstName, contact.getGivenName());
         assertEquals("lastname wrong", lastName, contact.getSurName());
-		/*
-		 * delete contact
-		 */
+        /*
+         * delete contact
+         */
         assertEquals("response code wrong", StatusCodes.SC_NO_CONTENT, super.delete(pathUid));
         /*
          * verify deletion on server
@@ -121,7 +111,7 @@ public class Bug21240Test extends CardDAVTest {
          */
         Map<String, String> allETags = super.getAllETags();
         for (String href : allETags.values()) {
-        	assertFalse("resource still present", href.contains(pathUid));
+            assertFalse("resource still present", href.contains(pathUid));
         }
-	}
+    }
 }

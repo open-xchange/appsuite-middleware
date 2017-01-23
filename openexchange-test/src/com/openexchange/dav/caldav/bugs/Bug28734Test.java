@@ -68,12 +68,12 @@ import com.openexchange.groupware.container.Appointment;
  */
 public class Bug28734Test extends CalDAVTest {
 
-	@Test
-	public void testTimeZoneHongKong() throws Exception {
-		/*
-		 * create appointment in timezone on server
-		 */
-		String uid = randomUID();
+    @Test
+    public void testTimeZoneHongKong() throws Exception {
+        /*
+         * create appointment in timezone on server
+         */
+        String uid = randomUID();
         Appointment appointment = new Appointment();
         appointment.setUid(uid);
         appointment.setTitle(getClass().getCanonicalName());
@@ -91,6 +91,6 @@ public class Bug28734Test extends CalDAVTest {
         assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
         assertTrue("DTSTART wrong", iCalResource.getVEvent().getPropertyValue("DTSTART").endsWith("T200000"));
         assertTrue("DTEND wrong", iCalResource.getVEvent().getPropertyValue("DTEND").endsWith("T210000"));
-	}
+    }
 
 }

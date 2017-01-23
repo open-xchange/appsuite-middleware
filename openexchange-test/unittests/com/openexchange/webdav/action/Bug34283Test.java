@@ -49,8 +49,12 @@
 
 package com.openexchange.webdav.action;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.util.UUID;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.java.Charsets;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavCollection;
@@ -64,7 +68,7 @@ import com.openexchange.webdav.protocol.WebdavResource;
  */
 public class Bug34283Test extends ActionTestCase {
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         /*
@@ -80,13 +84,13 @@ public class Bug34283Test extends ActionTestCase {
         }
     }
 
+    @Test
     public void testMarshallingLimit() throws Exception {
         /*
          * prepare propfind request
          */
         MockWebdavRequest request = new MockWebdavRequest(factory, "http://localhost/");
-        request.setBodyAsString("<?xml version=\"1.0\" encoding=\"utf-8\" ?>"
-            + "<D:propfind xmlns:D=\"DAV:\"><D:prop><D:displayname/></D:prop></D:propfind>");
+        request.setBodyAsString("<?xml version=\"1.0\" encoding=\"utf-8\" ?>" + "<D:propfind xmlns:D=\"DAV:\"><D:prop><D:displayname/></D:prop></D:propfind>");
         request.setHeader("depth", "1");
         request.setUrl(testCollection);
         MockWebdavResponse response = new MockWebdavResponse();

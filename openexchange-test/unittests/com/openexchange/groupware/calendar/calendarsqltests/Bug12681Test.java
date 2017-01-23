@@ -49,7 +49,10 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.CalendarSql;
 import com.openexchange.groupware.calendar.CalendarDataObject;
@@ -58,11 +61,12 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.tools.iterator.SearchIterator;
 
-
 public class Bug12681Test extends CalendarSqlTest {
+
     /**
      * Test for <a href= "http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=12681">bug #12681</a>
      */
+    @Test
     public void testUpdatingRecAppToEndsNever() {
         try {
             // Create daily appointment on 15. January 2009 08:00:00 UTC
@@ -88,13 +92,7 @@ public class Bug12681Test extends CalendarSqlTest {
                 final Date queryStart = new Date(1230508800000L);
                 final Date queryEnd = new Date(1233532800000L);
 
-                final SearchIterator<Appointment> listIterator = appointmentsql.getAppointmentsBetweenInFolder(
-                    appointments.getPrivateFolder(),
-                    ACTION_ALL_FIELDS,
-                    queryStart,
-                    queryEnd,
-                    CalendarObject.START_DATE,
-                    Order.ASCENDING);
+                final SearchIterator<Appointment> listIterator = appointmentsql.getAppointmentsBetweenInFolder(appointments.getPrivateFolder(), ACTION_ALL_FIELDS, queryStart, queryEnd, CalendarObject.START_DATE, Order.ASCENDING);
                 try {
                     boolean found = false;
                     while (listIterator.hasNext() && !found) {

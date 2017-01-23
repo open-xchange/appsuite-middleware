@@ -53,18 +53,22 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import junit.framework.TestCase;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * {@link DefaultDispatcherTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class DefaultDispatcherTest extends TestCase {
-
-    public void testDispatchesToActionService() throws OXException {
+public class DefaultDispatcherTest {
+         @Test
+     public void testDispatchesToActionService() throws OXException {
         final DefaultDispatcher dispatcher = new DefaultDispatcher();
 
         final AJAXRequestResult res = new AJAXRequestResult();
@@ -83,7 +87,8 @@ public class DefaultDispatcherTest extends TestCase {
         assertSame(res, receivedResult);
     }
 
-    public void testChain() throws OXException {
+         @Test
+     public void testChain() throws OXException {
         final DefaultDispatcher dispatcher = new DefaultDispatcher();
 
         final AJAXRequestResult res = new AJAXRequestResult();
@@ -122,7 +127,8 @@ public class DefaultDispatcherTest extends TestCase {
         assertEquals(SimAJAXCustomizer.LOG, Arrays.asList("c1:incoming", "c2:incoming", "c3:incoming", "c3:outgoing", "c2:outgoing", "c1:outgoing"));
     }
 
-    public void testLaterIncoming() throws OXException {
+         @Test
+     public void testLaterIncoming() throws OXException {
         final DefaultDispatcher dispatcher = new DefaultDispatcher();
 
         final AJAXRequestResult res = new AJAXRequestResult();
@@ -163,7 +169,8 @@ public class DefaultDispatcherTest extends TestCase {
         assertEquals(SimAJAXCustomizer.LOG, Arrays.asList("c2:incoming", "c3:incoming", "c1:incoming", "c1:outgoing", "c3:outgoing", "c2:outgoing"));
     }
 
-    public void testLaterIncomingTwice() throws OXException {
+         @Test
+     public void testLaterIncomingTwice() throws OXException {
         final DefaultDispatcher dispatcher = new DefaultDispatcher();
 
         final AJAXRequestResult res = new AJAXRequestResult();
@@ -204,7 +211,8 @@ public class DefaultDispatcherTest extends TestCase {
         assertEquals(SimAJAXCustomizer.LOG, Arrays.asList("c2:incoming", "c3:incoming", "c1:incoming", "c1:outgoing", "c3:outgoing", "c2:outgoing"));
     }
 
-    public void testLaterOutgoing() throws OXException {
+         @Test
+     public void testLaterOutgoing() throws OXException {
         final DefaultDispatcher dispatcher = new DefaultDispatcher();
 
         final AJAXRequestResult res = new AJAXRequestResult();
@@ -245,7 +253,8 @@ public class DefaultDispatcherTest extends TestCase {
         assertEquals(SimAJAXCustomizer.LOG, Arrays.asList("c1:incoming", "c2:incoming", "c3:incoming", "c2:outgoing", "c1:outgoing", "c3:outgoing"));
     }
 
-    public void testLaterOutgoingTwice() throws OXException {
+         @Test
+     public void testLaterOutgoingTwice() throws OXException {
         final DefaultDispatcher dispatcher = new DefaultDispatcher();
 
         final AJAXRequestResult res = new AJAXRequestResult();
@@ -288,7 +297,8 @@ public class DefaultDispatcherTest extends TestCase {
 
     // Error Cases
 
-    public void testUnknownModule() throws OXException {
+         @Test
+     public void testUnknownModule() throws OXException {
         final DefaultDispatcher dispatcher = new DefaultDispatcher();
         final AJAXRequestData requestData = new AJAXRequestData();
         requestData.setModule("someModule");
@@ -303,7 +313,8 @@ public class DefaultDispatcherTest extends TestCase {
 
     }
 
-    public void testUnknownAction() throws OXException {
+         @Test
+     public void testUnknownAction() throws OXException {
         final DefaultDispatcher dispatcher = new DefaultDispatcher();
 
         final StaticActionFactory factory = new StaticActionFactory(null);
@@ -322,7 +333,8 @@ public class DefaultDispatcherTest extends TestCase {
         }
     }
 
-    public void testNullCustomizer() throws OXException {
+         @Test
+     public void testNullCustomizer() throws OXException {
         final DefaultDispatcher dispatcher = new DefaultDispatcher();
         final AJAXRequestResult res = new AJAXRequestResult();
 

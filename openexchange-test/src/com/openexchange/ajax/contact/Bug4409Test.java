@@ -1,5 +1,8 @@
+
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.assertNotNull;
+import org.junit.Test;
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.groupware.container.Contact;
 
@@ -13,34 +16,17 @@ import com.openexchange.groupware.container.Contact;
  */
 public class Bug4409Test extends ContactTest {
 
-	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug4409Test.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug4409Test.class);
     private int objectId = -1;
 
-	public Bug4409Test(final String name) {
-		super(name);
-	}
+    @Test
+    public void testBug4409() throws Exception {
+        final Contact contactObj = new Contact();
+        contactObj.setSurName("testBug4409");
+        contactObj.setParentFolderID(contactFolderId);
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-	}
-
-	public void testBug4409() throws Exception {
-		final Contact contactObj = new Contact();
-		contactObj.setSurName("testBug4409");
-		contactObj.setParentFolderID(contactFolderId);
-
-		objectId  = insertContact(getWebConversation(), contactObj, getHostName(), getSessionId());
-
-		loadImage(getWebConversation(),objectId, contactFolderId, getHostName(), getSessionId());
-	}
-
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-        if(objectId != -1){
-            deleteContact(getWebConversation(), objectId, contactFolderId, getHostName(), getSessionId());
-        }
+        objectId = cotm.newAction(contactObj).getObjectID();
+        Contact reloaded = cotm.getAction(contactObj);
+        assertNotNull(reloaded.getImage1());
     }
-
 }

@@ -50,9 +50,7 @@
 package com.openexchange.admin.console.util;
 
 import static org.junit.Assert.assertTrue;
-
 import org.junit.Test;
-
 import com.openexchange.admin.console.AbstractTest;
 import com.openexchange.admin.console.BasicCommandlineOptions;
 import com.openexchange.admin.console.util.filestore.RegisterFilestore;
@@ -64,8 +62,8 @@ import com.openexchange.admin.console.util.filestore.RegisterFilestore;
 public class RegisterFilestoreTest extends AbstractTest {
     
     
-    @Test
-    public void testRegisterFilestore() {
+     @Test
+     public void testRegisterFilestore() {
         
         resetBuffers();
         String store = "file:/tmp/"+System.currentTimeMillis();
@@ -79,8 +77,8 @@ public class RegisterFilestoreTest extends AbstractTest {
         assertTrue("Expected 0 as return code!",0==this.returnCode);
     }
     
-    @Test
-    public void testRegisterFilestoreWithInvalidData() {
+     @Test
+     public void testRegisterFilestoreWithInvalidData() {
         
         resetBuffers();
         String store = "tmp/"+System.currentTimeMillis();
@@ -94,8 +92,8 @@ public class RegisterFilestoreTest extends AbstractTest {
         assertTrue("Expected invalid data as return code!",BasicCommandlineOptions.SYSEXIT_INVALID_DATA==this.returnCode);
     }
     
-    @Test
-    public void testRegisterFilestoreWithMissingOption() {
+     @Test
+     public void testRegisterFilestoreWithMissingOption() {
         
         resetBuffers();
         
@@ -109,8 +107,8 @@ public class RegisterFilestoreTest extends AbstractTest {
         assertTrue("Expected missing option as return code!",BasicCommandlineOptions.SYSEXIT_MISSING_OPTION==this.returnCode);
     }
     
-    @Test
-    public void testRegisterFilestoreWithUnknownOption() {
+     @Test
+     public void testRegisterFilestoreWithUnknownOption() {
         
         resetBuffers();
         
@@ -124,8 +122,8 @@ public class RegisterFilestoreTest extends AbstractTest {
         assertTrue("Expected unknown option as return code!",BasicCommandlineOptions.SYSEXIT_UNKNOWN_OPTION==this.returnCode);
     }
     
-    @Test
-    public void testRegisterFilestoreWithInvalidCredentials() {
+     @Test
+     public void testRegisterFilestoreWithInvalidCredentials() {
         
         resetBuffers();
         String store = "file:/tmp/"+System.currentTimeMillis();

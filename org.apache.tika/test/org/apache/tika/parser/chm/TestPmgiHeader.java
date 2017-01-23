@@ -16,13 +16,12 @@
  */
 package org.apache.tika.parser.chm;
 
-import junit.framework.Assert;
-import junit.framework.TestCase;
-
 import org.apache.tika.parser.chm.accessor.ChmPmgiHeader;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Test;
 
-public class TestPmgiHeader extends TestCase {
-    ChmPmgiHeader chmPmgiHeader = null;
+public class TestPmgiHeader {    ChmPmgiHeader chmPmgiHeader = null;
 
     public void setUp() throws Exception {
         byte[] data = TestParameters.chmData;
@@ -30,14 +29,18 @@ public class TestPmgiHeader extends TestCase {
         chmPmgiHeader.parse(data, chmPmgiHeader);
     }
 
-    public void testToString() {
+         @Test
+     public void testToString() {
         Assert.assertTrue((chmPmgiHeader != null) && (chmPmgiHeader.toString().length() > 0));
     }
 
-    public void testGetFreeSpace() {
+         @Test
+     public void testGetFreeSpace() {
         Assert.assertEquals(TestParameters.VP_PMGI_FREE_SPACE, chmPmgiHeader.getFreeSpace());
     }
 
-    public void tearDown() throws Exception {
+    @After
+    public void tearDown()
+ throws Exception {
     }
 }

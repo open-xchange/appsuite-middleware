@@ -52,7 +52,6 @@ package com.openexchange.ajax.mail.actions;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
-
 /**
  * {@link ReplyResponse}
  *
@@ -62,6 +61,7 @@ public class ReplyResponse extends AbstractAJAXResponse {
 
     /**
      * Initializes a new {@link ReplyResponse}.
+     * 
      * @param response
      */
     public ReplyResponse(Response response) {

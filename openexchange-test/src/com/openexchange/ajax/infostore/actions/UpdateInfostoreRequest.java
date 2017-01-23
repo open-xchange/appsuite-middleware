@@ -75,12 +75,6 @@ public class UpdateInfostoreRequest extends AbstractInfostoreRequest<UpdateInfos
     private String notificationMessage;
     private long offset;
 
-    public UpdateInfostoreRequest(String id, Date lastModified, java.io.File upload) {
-        this.id = id;
-        this.upload = upload;
-        this.lastModified = lastModified;
-    }
-
     public UpdateInfostoreRequest(File data, Field[] fields, java.io.File upload, Date lastModified) {
         this.metadata = data;
         this.id = data.getId();
@@ -90,10 +84,7 @@ public class UpdateInfostoreRequest extends AbstractInfostoreRequest<UpdateInfos
     }
 
     public UpdateInfostoreRequest(File data, Field[] fields, Date lastModified) {
-        this.metadata = data;
-        this.id = data.getId();
-        this.lastModified = lastModified;
-        this.fields = fields;
+        this(data, fields, null, lastModified);
     }
 
     public void setMetadata(File metadata) {
@@ -164,7 +155,7 @@ public class UpdateInfostoreRequest extends AbstractInfostoreRequest<UpdateInfos
 
     @Override
     public Parameter[] getParameters() throws IOException, JSONException {
-        List<Parameter> tmp = new ArrayList<Parameter>(3);
+        List<Parameter> tmp = new ArrayList<Parameter>();
         tmp.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE));
         tmp.add(new Parameter(AJAXServlet.PARAMETER_ID, id));
         tmp.add(new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, lastModified));

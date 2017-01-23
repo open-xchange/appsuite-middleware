@@ -49,12 +49,15 @@
 
 package com.openexchange.ajax.share.tests;
 
+import static org.junit.Assert.assertNotNull;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.NotifyFileRequest;
-import com.openexchange.ajax.smtptest.actions.GetMailsRequest;
+import com.openexchange.ajax.smtptest.actions.ClearMailsRequest;
 import com.openexchange.ajax.smtptest.actions.GetMailsResponse.Message;
 import com.openexchange.file.storage.DefaultFileStorageObjectPermission;
 import com.openexchange.file.storage.File;
@@ -70,27 +73,22 @@ import com.openexchange.share.recipient.RecipientType;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
+@RunWith(BlockJUnit4ClassRunner.class)
 public class NotifyFileSharesTest extends ShareTest {
 
-    /**
-     * Initializes a new {@link NotifyFileSharesTest}.
-     *
-     * @param name The test name
-     */
-    public NotifyFileSharesTest(String name) {
-        super(name);
-    }
-
+    @Test
     public void testNotifyGuest() throws Exception {
         testNotifyGuest(getDefaultFolder(FolderObject.INFOSTORE));
         testNotifyGuest(insertPublicFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE).getObjectID());
     }
 
+    @Test
     public void testNotifyGroup() throws Exception {
         testNotifyGroup(getDefaultFolder(FolderObject.INFOSTORE));
         testNotifyGroup(insertPublicFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE).getObjectID());
     }
 
+    @Test
     public void testNotifyUser() throws Exception {
         testNotifyUser(getDefaultFolder(FolderObject.INFOSTORE));
         testNotifyUser(insertPublicFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE).getObjectID());
@@ -103,16 +101,15 @@ public class NotifyFileSharesTest extends ShareTest {
     }
 
     private void testNotifyGroup(int parent) throws Exception {
-        DefaultFileStorageObjectPermission permission = new DefaultFileStorageObjectPermission(
-            GroupStorage.GROUP_ZERO_IDENTIFIER, true, FileStorageObjectPermission.READ);
-        AJAXClient client2 = new AJAXClient(User.User2);
+        DefaultFileStorageObjectPermission permission = new DefaultFileStorageObjectPermission(GroupStorage.GROUP_ZERO_IDENTIFIER, true, FileStorageObjectPermission.READ);
+        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
         String emailAddress = client2.getValues().getDefaultAddress();
         client2.logout();
         testNotify(parent, permission, emailAddress);
     }
 
     private void testNotifyUser(int parent) throws Exception {
-        AJAXClient client2 = new AJAXClient(User.User2);
+        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
         int userId = client2.getValues().getUserId();
         String emailAddress = client2.getValues().getDefaultAddress();
         client2.logout();
@@ -131,7 +128,7 @@ public class NotifyFileSharesTest extends ShareTest {
          */
         FileStorageObjectPermission matchingPermission = null;
         for (FileStorageObjectPermission objectPermission : file.getObjectPermissions()) {
-            if (objectPermission.getEntity() != client.getValues().getUserId()) {
+            if (objectPermission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = objectPermission;
                 break;
             }
@@ -141,12 +138,12 @@ public class NotifyFileSharesTest extends ShareTest {
         /*
          * pop inbox, then notify recipient again
          */
-        client.execute(new GetMailsRequest());
-        client.execute(new NotifyFileRequest(file.getId(), matchingPermission.getEntity()));
+        getNoReplyClient().execute(new ClearMailsRequest());
+        getClient().execute(new NotifyFileRequest(file.getId(), matchingPermission.getEntity()));
         /*
          * verify notification message
          */
-        Message notificationMessage = discoverInvitationMessage(client, emailAddress);
+        Message notificationMessage = discoverInvitationMessage(getNoReplyClient(), emailAddress);
         assertNotNull(notificationMessage);
     }
 

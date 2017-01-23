@@ -49,13 +49,19 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.UUID;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.GetRequest;
@@ -69,7 +75,6 @@ import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.reminder.ReminderTools;
 import com.openexchange.ajax.reminder.actions.RangeRequest;
@@ -100,50 +105,33 @@ public class Bug16211Test extends AbstractAJAXSession {
 
     private TimeZone tz;
 
-    public Bug16211Test(final String name) {
-        super(name);
+    public Bug16211Test() {
+        super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
-        client = getClient();
-        client2 = new AJAXClient(User.User2);
-        client3 = new AJAXClient(User.User3);
-        tz = client.getValues().getTimeZone();
+        client2 = new AJAXClient(testContext.acquireUser());
+        client3 = new AJAXClient(testContext.acquireUser());
+        tz = getClient().getValues().getTimeZone();
         calendar = TimeTools.createCalendar(tz);
 
-        sharedAppointmentFolder = Create.createPublicFolder(
-            client2,
-            "Bug16211PublicFolder" + System.currentTimeMillis(),
-            FolderObject.CALENDAR);
-        FolderTools.shareFolder(
-            client2,
-            EnumAPI.OX_NEW,
-            sharedAppointmentFolder.getObjectID(),
-            client.getValues().getUserId(),
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION);
+        sharedAppointmentFolder = Create.createPublicFolder(client2, "Bug16211PublicFolder" + UUID.randomUUID().toString(), FolderObject.CALENDAR);
+        FolderTools.shareFolder(client2, EnumAPI.OX_NEW, sharedAppointmentFolder.getObjectID(), getClient().getValues().getUserId(), OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
 
         appointment = createAppointment();
 
         // Create and insert the personal folder
-        personalAppointmentFolder = Create.createPrivateFolder(
-            "Bug16211PersonalFolder",
-            FolderObject.CALENDAR,
-            client.getValues().getUserId());
+        personalAppointmentFolder = Create.createPrivateFolder("Bug16211PersonalFolder", FolderObject.CALENDAR, getClient().getValues().getUserId());
 
-        personalAppointmentFolder.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
-        final com.openexchange.ajax.folder.actions.InsertRequest insertFolderReq = new com.openexchange.ajax.folder.actions.InsertRequest(
-            EnumAPI.OX_NEW,
-            personalAppointmentFolder,
-            false);
-        final InsertResponse insertFolderResp = client.execute(insertFolderReq);
+        personalAppointmentFolder.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
+        final com.openexchange.ajax.folder.actions.InsertRequest insertFolderReq = new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_NEW, personalAppointmentFolder, false);
+        final InsertResponse insertFolderResp = getClient().execute(insertFolderReq);
         insertFolderResp.fillObject(personalAppointmentFolder);
     }
 
+    @Test
     public void testMoveToPersonalFolder() throws Exception {
         // Use this to test if reminder of the moving user also has been updated. See Bug 16358
         // -------------
@@ -164,11 +152,11 @@ public class Bug16211Test extends AbstractAJAXSession {
         // Perform move and check if appointment appears in the right folder
         appointment.setParentFolderID(personalAppointmentFolder.getObjectID());
         final UpdateRequest moveAppointmentReq = new UpdateRequest(sharedAppointmentFolder.getObjectID(), appointment, tz, false);
-        final UpdateResponse moveAppointmentResp = client.execute(moveAppointmentReq);
+        final UpdateResponse moveAppointmentResp = getClient().execute(moveAppointmentReq);
         moveAppointmentResp.fillObject(appointment);
 
         final GetRequest getAppointmentReq = new GetRequest(appointment, false);
-        final GetResponse getAppointmentResp = client.execute(getAppointmentReq);
+        final GetResponse getAppointmentResp = getClient().execute(getAppointmentReq);
 
         final JSONObject respObj = (JSONObject) getAppointmentResp.getData();
 
@@ -187,44 +175,42 @@ public class Bug16211Test extends AbstractAJAXSession {
             if (rem.getTargetId() == appointment.getObjectID()) {
                 final int uid = rem.getUser();
                 if (uid == client2.getValues().getUserId()) {
-                    assertTrue(
-                        "Reminder is incorrect after move for User " + uid + ".",
-                        rem.getFolder() == client2.getValues().getPrivateAppointmentFolder());
+                    assertTrue("Reminder is incorrect after move for User " + uid + ".", rem.getFolder() == client2.getValues().getPrivateAppointmentFolder());
                 } else if (uid == client3.getValues().getUserId()) {
-                    assertTrue(
-                        "Reminder is incorrect after move for User " + uid + ".",
-                        rem.getFolder() == client3.getValues().getPrivateAppointmentFolder());
+                    assertTrue("Reminder is incorrect after move for User " + uid + ".", rem.getFolder() == client3.getValues().getPrivateAppointmentFolder());
                 }
             }
         }
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        // Delete Appointment
-        final GetRequest toDeleteReq = new GetRequest(personalAppointmentFolder.getObjectID(), appointment.getObjectID());
-        final GetResponse toDeleteResp = client.execute(toDeleteReq);
-        final Appointment toDelete = toDeleteResp.getAppointment(tz);
-        if (null != toDelete) {
-            client.execute(new com.openexchange.ajax.appointment.action.DeleteRequest(toDelete));
-        }
+        try {
+            // Delete Appointment
+            final GetRequest toDeleteReq = new GetRequest(personalAppointmentFolder.getObjectID(), appointment.getObjectID());
+            final GetResponse toDeleteResp = getClient().execute(toDeleteReq);
+            final Appointment toDelete = toDeleteResp.getAppointment(tz);
+            if (null != toDelete) {
+                getClient().execute(new com.openexchange.ajax.appointment.action.DeleteRequest(toDelete));
+            }
 
-        // Delete folders
-        if (null != personalAppointmentFolder) {
-            client.execute(new DeleteRequest(EnumAPI.OX_NEW, personalAppointmentFolder.getObjectID(), new Date()));
-        }
-        if (null != sharedAppointmentFolder) {
-            client2.execute(new DeleteRequest(EnumAPI.OX_NEW, sharedAppointmentFolder.getObjectID(), new Date()));
-        }
+            // Delete folders
+            if (null != personalAppointmentFolder) {
+                getClient().execute(new DeleteRequest(EnumAPI.OX_NEW, personalAppointmentFolder.getObjectID(), new Date()));
+            }
+            if (null != sharedAppointmentFolder) {
+                client2.execute(new DeleteRequest(EnumAPI.OX_NEW, sharedAppointmentFolder.getObjectID(), new Date()));
+            }
 
-        if (null != client2) {
-            client2.logout();
+            if (null != client2) {
+                client2.logout();
+            }
+            if (null != client3) {
+                client3.logout();
+            }
+        } finally {
+            super.tearDown();
         }
-        if (null != client3) {
-            client3.logout();
-        }
-
-        super.tearDown();
     }
 
     private Appointment createAppointment() throws OXException, IOException, SAXException, JSONException {

@@ -50,6 +50,11 @@
 package com.openexchange.groupware;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.ArrayList;
@@ -57,6 +62,9 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Properties;
 import java.util.TimeZone;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.api2.ReminderSQLInterface;
 import com.openexchange.calendar.CalendarMySQL;
 import com.openexchange.calendar.CalendarOperation;
@@ -100,10 +108,8 @@ import com.openexchange.test.AjaxInit;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderManager;
-import junit.framework.TestCase;
 
-public class CalendarTest extends TestCase {
-
+public class CalendarTest {
 
     private final static int TEST_PASS = 1;
     private final static int TEST_PASS_HOT_SPOT = 1;
@@ -123,9 +129,8 @@ public class CalendarTest extends TestCase {
         return new Date(d.getTime() - 1);
     }
 
-    @Override
-	protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         Init.startServer();
         init = true;
         final EventConfigImpl event = new EventConfigImpl();
@@ -145,13 +150,12 @@ public class CalendarTest extends TestCase {
         CalendarMySQL.setApppointmentSqlFactory(new AppointmentSqlFactory());
     }
 
-    @Override
-	protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         if (init) {
             init = false;
             Init.stopServer();
         }
-        super.tearDown();
     }
 
     private static Properties getAJAXProperties() {
@@ -232,13 +236,13 @@ public class CalendarTest extends TestCase {
         final int fid = cdao.getParentFolderID();
         try {
             csql.deleteAppointmentObject(deleteit, fid, new Date(Long.MAX_VALUE));
-        } catch(final Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace();
         }
         DBPool.pushWrite(context, writecon);
     }
 
-    void deleteAllAppointments() throws Exception  {
+    void deleteAllAppointments() throws Exception {
         if (do_not_delete) {
             return;
         }
@@ -247,7 +251,7 @@ public class CalendarTest extends TestCase {
         final Context context = new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "deleteAllApps");
         final CalendarSql csql = new CalendarSql(so);
-        final SearchIterator<Appointment> si = csql.getAppointmentsBetween(userid, new Date(0), new Date(253402210800000L), cols, 0,  null);
+        final SearchIterator<Appointment> si = csql.getAppointmentsBetween(userid, new Date(0), new Date(253402210800000L), cols, 0, null);
         while (si.hasNext()) {
             final Appointment cdao = si.next();
             testDelete(cdao);
@@ -256,8 +260,9 @@ public class CalendarTest extends TestCase {
         DBPool.push(context, readcon);
     }
 
-    /* ----- test cases -------*/
+    /* ----- test cases ------- */
 
+    @Test
     public void testWholeDay() throws Throwable { // TODO: Need connection
         final long s = 1149768000000L; // 08.06.2006 12:00 (GMT)
         final long e = 1149771600000L; // 08.06.2006 13:00 (GMT)
@@ -281,12 +286,12 @@ public class CalendarTest extends TestCase {
         assertFalse("Checking for update", co.prepareUpdateAction(cdao, cdao, userid, privatefolder, "Europe/Berlin"));
         final long realstart = 1149724800000L;
         assertEquals("Testing start time", cdao.getStartDate().getTime(), realstart);
-        assertEquals("Testing end time", cdao.getEndDate().getTime(), realstart+Constants.MILLI_DAY);
+        assertEquals("Testing end time", cdao.getEndDate().getTime(), realstart + Constants.MILLI_DAY);
         DBPool.push(context, readcon);
 
     }
 
-
+    @Test
     public void testWholeDayWithDB() throws Throwable {
         final Context context = new ContextImpl(contextid);
         final int fid = getCalendarDefaultFolderForUser(userid, context);
@@ -321,6 +326,7 @@ public class CalendarTest extends TestCase {
 
     }
 
+    @Test
     public void testMultiSpanWholeDay() throws Throwable {
         final int wanted_length = 3;
         final Context context = new ContextImpl(contextid);
@@ -350,14 +356,14 @@ public class CalendarTest extends TestCase {
         final long check_start = cdao.getStartDate().getTime();
         final long check_end = cdao.getEndDate().getTime();
 
-        final int test_length = (int)((check_end-check_start)/1000/60/60/24);
+        final int test_length = (int) ((check_end - check_start) / 1000 / 60 / 60 / 24);
 
         assertEquals("Check app length ", wanted_length, test_length);
 
-
     }
 
-    public void testfillUserParticipantsWithoutGroups() throws Exception  {
+    @Test
+    public void testfillUserParticipantsWithoutGroups() throws Exception {
         final CalendarDataObject cdao = new CalendarDataObject();
         cdao.setContext(getContext());
         final Participants participants = new Participants();
@@ -376,13 +382,14 @@ public class CalendarTest extends TestCase {
         assertEquals("Check participant size", cdao.getParticipants().length, cdao.getUsers().length);
     }
 
-    public void cisco_testFreeBusy() throws Exception  {
+    public void cisco_testFreeBusy() throws Exception {
         final Connection readcon = DBPool.pickup(getContext());
         final CalendarSqlImp calmysql = CalendarSql.getCalendarSqlImplementation();
         final PreparedStatement prep = calmysql.getFreeBusy(userid, getContext(), new Date(0), new Date(253402210800000L), readcon);
         calmysql.getResultSet(prep);
     }
 
+    @Test
     public void testInsertAndLabel() throws Throwable {
         final Context context = new ContextImpl(contextid);
         final int fid = getCalendarDefaultFolderForUser(userid, context);
@@ -409,6 +416,7 @@ public class CalendarTest extends TestCase {
 
     }
 
+    @Test
     public void testNoAlarm() throws Throwable {
         final Context context = new ContextImpl(contextid);
         final int fid = getCalendarDefaultFolderForUser(userid, context);
@@ -449,6 +457,7 @@ public class CalendarTest extends TestCase {
 
     }
 
+    @Test
     public void testInsertAndAlarm() throws Throwable {
         final Context context = new ContextImpl(contextid);
         final int fid = getCalendarDefaultFolderForUser(userid, context);
@@ -463,7 +472,6 @@ public class CalendarTest extends TestCase {
         final UserParticipant up = new UserParticipant(userid);
         up.setAlarmMinutes(5);
         cdao.setUsers(new UserParticipant[] { up });
-
 
         final Participants participants = new Participants();
         final Participant p = new UserParticipant(userid);
@@ -482,7 +490,7 @@ public class CalendarTest extends TestCase {
         csql.insertAppointmentObject(cdao);
         int object_id = cdao.getObjectID();
         final CalendarDataObject testobject = csql.getObjectById(object_id, fid);
-        assertEquals("Check Alarm" , 5, testobject.getAlarm());
+        assertEquals("Check Alarm", 5, testobject.getAlarm());
 
         final CalendarDataObject cdao2 = new CalendarDataObject();
         cdao2.setTitle("testInsertAndAlarm(2) - Step 1 - Insert");
@@ -500,17 +508,17 @@ public class CalendarTest extends TestCase {
         csql.insertAppointmentObject(cdao2);
         object_id = cdao2.getObjectID();
         final CalendarDataObject testobject2 = csql.getObjectById(object_id, fid);
-        assertEquals("Check Alarm" , 5, testobject2.getAlarm());
+        assertEquals("Check Alarm", 5, testobject2.getAlarm());
 
         csql.deleteAppointmentObject(testobject2, fid, new Date());
 
         final ReminderSQLInterface rsql = ReminderHandler.getInstance();
         assertTrue("Check if reminder has been deleted", rsql.existsReminder(object_id, userid, Types.APPOINTMENT, context) == false);
 
-
     }
 
-    public void testBasicSearch() throws Exception  {
+    @Test
+    public void testBasicSearch() throws Exception {
         final Context context = new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
 
@@ -527,7 +535,7 @@ public class CalendarTest extends TestCase {
         oclp.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         oclp.setFolderAdmin(true);
         FolderObject fo = new FolderObject();
-        fo.setFolderName("MyTestFolder"+System.currentTimeMillis());
+        fo.setFolderName("MyTestFolder" + System.currentTimeMillis());
         fo.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
         fo.setModule(FolderObject.CALENDAR);
         fo.setType(FolderObject.PUBLIC);
@@ -560,7 +568,7 @@ public class CalendarTest extends TestCase {
             boolean gotresults = si.hasNext();
             assertTrue("Got real results by searching \"test\"", gotresults);
             while (si.hasNext()) {
-                final CalendarDataObject tcdao = (CalendarDataObject)si.next();
+                final CalendarDataObject tcdao = (CalendarDataObject) si.next();
                 assertTrue("Found only results with something like *test*", tcdao.getTitle().toLowerCase().indexOf("test") != -1);
                 assertTrue("Got real folder id ", tcdao.getParentFolderID() == folder_id);
             }
@@ -588,7 +596,7 @@ public class CalendarTest extends TestCase {
             gotresults = si.hasNext();
             assertTrue("Got real results by searching \"*\"", gotresults);
             while (si.hasNext()) {
-                final CalendarDataObject tcdao = (CalendarDataObject)si.next();
+                final CalendarDataObject tcdao = (CalendarDataObject) si.next();
                 assertTrue("Got real folder id ", tcdao.getParentFolderID() == public_folder_id);
             }
             si.close();
@@ -599,26 +607,25 @@ public class CalendarTest extends TestCase {
             assertTrue("Got some results by searching \"*e*\"", !gotresults);
             si.close();
         } finally {
-        	oxma.deleteFolder(new FolderObject(public_folder_id), true, System.currentTimeMillis());
-        	for (Integer objectId : appointments2Delete) {
-        	    CalendarDataObject cdao = new CalendarDataObject();
-        	    cdao.setObjectID(objectId.intValue());
-        	    cdao.setContext(context);
-        	    csql.deleteAppointmentObject(cdao, folder_id, new Date(Long.MAX_VALUE), false);
+            oxma.deleteFolder(new FolderObject(public_folder_id), true, System.currentTimeMillis());
+            for (Integer objectId : appointments2Delete) {
+                CalendarDataObject cdao = new CalendarDataObject();
+                cdao.setObjectID(objectId.intValue());
+                cdao.setContext(context);
+                csql.deleteAppointmentObject(cdao, folder_id, new Date(Long.MAX_VALUE), false);
             }
         }
-
 
         try {
             DBPool.push(context, readcon);
             DBPool.pushWrite(context, writecon);
-        } catch(final Exception ignore) {
+        } catch (final Exception ignore) {
             ignore.printStackTrace();
         }
 
     }
 
-
+    @Test
     public void testInsertMoveAndDeleteAppointments() throws Throwable {
         final Context context = new ContextImpl(contextid);
         final CalendarDataObject cdao = new CalendarDataObject();
@@ -647,7 +654,7 @@ public class CalendarTest extends TestCase {
         oclp.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         oclp.setFolderAdmin(true);
         FolderObject fo = new FolderObject();
-        fo.setFolderName("MyTestFolder"+System.currentTimeMillis());
+        fo.setFolderName("MyTestFolder" + System.currentTimeMillis());
         fo.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
         fo.setModule(FolderObject.CALENDAR);
         fo.setType(FolderObject.PUBLIC);
@@ -707,14 +714,14 @@ public class CalendarTest extends TestCase {
             update3.setIgnoreConflicts(true);
             csql.updateAppointmentObject(update3, private_folder_id, new Date());
         } finally {
-        	oxma.deleteFolder(new FolderObject(public_folder_id), true, System.currentTimeMillis());
+            oxma.deleteFolder(new FolderObject(public_folder_id), true, System.currentTimeMillis());
             //ofa.deleteFolder(public_folder_id, so, true, SUPER_END);
         }
 
         try {
             DBPool.push(context, readcon);
             DBPool.pushWrite(context, writecon);
-        } catch(final Exception ignore) {
+        } catch (final Exception ignore) {
             ignore.printStackTrace();
         }
 
@@ -727,8 +734,7 @@ public class CalendarTest extends TestCase {
 
     }
 
-
-
+    @Test
     public void testInsertMoveAllDelete() throws Throwable {
         final Context context = new ContextImpl(contextid);
         final CalendarDataObject cdao = new CalendarDataObject();
@@ -757,7 +763,7 @@ public class CalendarTest extends TestCase {
         oclp.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         oclp.setFolderAdmin(true);
         FolderObject fo = new FolderObject();
-        fo.setFolderName("MyTestFolder"+System.currentTimeMillis());
+        fo.setFolderName("MyTestFolder" + System.currentTimeMillis());
         fo.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
         fo.setModule(FolderObject.CALENDAR);
         fo.setType(FolderObject.PUBLIC);
@@ -768,7 +774,7 @@ public class CalendarTest extends TestCase {
         final int public_folder_id = fo.getObjectID();
         CalendarDataObject testobject = null;
         try {
-        	final long startTime = System.currentTimeMillis();
+            final long startTime = System.currentTimeMillis();
             // TODO: "Move" folder to a public folder
             final CalendarDataObject update1 = new CalendarDataObject();
             update1.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
@@ -834,29 +840,29 @@ public class CalendarTest extends TestCase {
 
             // Magic test
 
-            si = csql.getAppointmentsBetween(userid, new Date(0), new Date(253402210800000L), cols, 0,  null);
+            si = csql.getAppointmentsBetween(userid, new Date(0), new Date(253402210800000L), cols, 0, null);
             while (si.hasNext()) {
-            	final Appointment tdao = si.next();
-            	final Date compare = tdao.getLastModified();
-            	if (compare != null) {
-					assertFalse("Got results. An available appointment created in test case! " + tdao.getTitle(), compare.getTime() >= startTime && tdao.getTitle().startsWith("testInsertMoveAllDelete"));
-				} else {
-					fail("Missing last-modified time stamp in appointment");
-				}
+                final Appointment tdao = si.next();
+                final Date compare = tdao.getLastModified();
+                if (compare != null) {
+                    assertFalse("Got results. An available appointment created in test case! " + tdao.getTitle(), compare.getTime() >= startTime && tdao.getTitle().startsWith("testInsertMoveAllDelete"));
+                } else {
+                    fail("Missing last-modified time stamp in appointment");
+                }
             }
 
             //assertTrue("Got results", !si.hasNext());
 
             si.close();
         } finally {
-        	oxma.deleteFolder(new FolderObject(public_folder_id), true, System.currentTimeMillis());
+            oxma.deleteFolder(new FolderObject(public_folder_id), true, System.currentTimeMillis());
             //ofa.deleteFolder(public_folder_id, so, true, SUPER_END);
         }
 
         try {
             DBPool.push(context, readcon);
             DBPool.pushWrite(context, writecon);
-        } catch(final Exception ignore) {
+        } catch (final Exception ignore) {
             ignore.printStackTrace();
         }
 
@@ -869,7 +875,8 @@ public class CalendarTest extends TestCase {
 
     }
 
-    public void testConflictHandling() throws Exception  {
+    @Test
+    public void testConflictHandling() throws Exception {
         final Context context = new ContextImpl(contextid);
         final CalendarDataObject cdao = new CalendarDataObject();
 
@@ -900,7 +907,7 @@ public class CalendarTest extends TestCase {
             assertTrue("Check if the conflict has been detected", conflicts.length > 0);
 
             boolean found_first_appointment = false;
-            for (int a  = 0; a < conflicts.length; a++) {
+            for (int a = 0; a < conflicts.length; a++) {
                 if (conflicts[a].getObjectID() == cdao.getObjectID()) {
                     found_first_appointment = true;
                     break;
@@ -918,13 +925,14 @@ public class CalendarTest extends TestCase {
 
     }
 
+    @Test
     public void testGetAllAppointmentsFromUserInAllFolders() throws Exception {
         final Connection readcon = DBPool.pickup(getContext());
         final Context context = new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "testGetAllAppointmentsFromUserInAllFolders");
         final CalendarSql csql = new CalendarSql(so);
 
-        SearchIterator<Appointment> si = csql.getAppointmentsBetween(userid, new Date(0), new Date(253402210800000L), cols, 0,  null);
+        SearchIterator<Appointment> si = csql.getAppointmentsBetween(userid, new Date(0), new Date(253402210800000L), cols, 0, null);
         assertTrue("Test if we got appointments", si.hasNext());
         while (si.hasNext()) {
             final Appointment cdao = si.next();
@@ -936,21 +944,19 @@ public class CalendarTest extends TestCase {
         si = csql.getAppointmentsBetween(userid, new Date(0), new Date(253402210800000L), cols, 0, null);
 
         while (si.hasNext()) {
-			final Appointment cdao = si.next();
+            final Appointment cdao = si.next();
 
-			final EffectivePermission ep = new OXFolderAccess(context).getFolderPermission(cdao.getParentFolderID(),
-					userid, UserConfigurationStorage.getInstance().getUserConfiguration(userid, context));
+            final EffectivePermission ep = new OXFolderAccess(context).getFolderPermission(cdao.getParentFolderID(), userid, UserConfigurationStorage.getInstance().getUserConfiguration(userid, context));
 
-			if (ep.getDeletePermission() != OCLPermission.NO_PERMISSIONS
-					&& (ep.canDeleteAllObjects() || (cdao.getCreatedBy() == userid && ep.canDeleteOwnObjects()))) {
-				fail("Not all appointments were deleted: objectID=" + cdao.getObjectID() + " title=" + cdao.getTitle());
-			}
-		}
+            if (ep.getDeletePermission() != OCLPermission.NO_PERMISSIONS && (ep.canDeleteAllObjects() || (cdao.getCreatedBy() == userid && ep.canDeleteOwnObjects()))) {
+                fail("Not all appointments were deleted: objectID=" + cdao.getObjectID() + " title=" + cdao.getTitle());
+            }
+        }
 
         DBPool.push(context, readcon);
     }
 
-
+    @Test
     public void testResourceConflictHandling() throws Exception {
         final Context context = new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
@@ -964,7 +970,6 @@ public class CalendarTest extends TestCase {
         CalendarTest.fillDatesInDao(cdao);
 
         cdao.setTitle("testResourceConflictHandling - Step 1 - Insert");
-
 
         final Participants p = new Participants();
 
@@ -1029,7 +1034,8 @@ public class CalendarTest extends TestCase {
         csql.deleteAppointmentObject(cdao, folder_id, new Date());
     }
 
-    public void testComplexConflictHandling() throws Exception  {
+    @Test
+    public void testComplexConflictHandling() throws Exception {
         deleteAllAppointments(); // Clean up !
 
         final Context context = new ContextImpl(contextid);
@@ -1037,18 +1043,16 @@ public class CalendarTest extends TestCase {
         final int fid = getCalendarDefaultFolderForUser(userid, context);
         final CalendarSql csql = new CalendarSql(so);
 
-        final SearchIterator<Appointment> si = csql.getAppointmentsBetween(userid, new Date(0), new Date(253402210800000L), cols, 0,  null);
+        final SearchIterator<Appointment> si = csql.getAppointmentsBetween(userid, new Date(0), new Date(253402210800000L), cols, 0, null);
         while (si.hasNext()) {
-			final Appointment cdao = si.next();
+            final Appointment cdao = si.next();
 
-			final EffectivePermission ep = new OXFolderAccess(context).getFolderPermission(cdao.getParentFolderID(),
-					userid, UserConfigurationStorage.getInstance().getUserConfiguration(userid, context));
+            final EffectivePermission ep = new OXFolderAccess(context).getFolderPermission(cdao.getParentFolderID(), userid, UserConfigurationStorage.getInstance().getUserConfiguration(userid, context));
 
-			if (ep.getDeletePermission() != OCLPermission.NO_PERMISSIONS
-					&& (ep.canDeleteAllObjects() || (cdao.getCreatedBy() == userid && ep.canDeleteOwnObjects()))) {
-				fail("Not all appointments were deleted: objectID=" + cdao.getObjectID() + " title=" + cdao.getTitle());
-			}
-		}
+            if (ep.getDeletePermission() != OCLPermission.NO_PERMISSIONS && (ep.canDeleteAllObjects() || (cdao.getCreatedBy() == userid && ep.canDeleteOwnObjects()))) {
+                fail("Not all appointments were deleted: objectID=" + cdao.getObjectID() + " title=" + cdao.getTitle());
+            }
+        }
         si.close();
 
         final CalendarDataObject cdao = new CalendarDataObject();
@@ -1099,7 +1103,7 @@ public class CalendarTest extends TestCase {
 
     }
 
-
+    @Test
     public void testConfirmation() throws Throwable {
         final Context context = new ContextImpl(contextid);
         final int fid = getCalendarDefaultFolderForUser(userid, context);
@@ -1118,8 +1122,8 @@ public class CalendarTest extends TestCase {
         userparticipants.setConfirmMessage(check_confirm_message);
         cdao.setUsers(new UserParticipant[] { userparticipants });
 
-        assertEquals("Check id" , userid, userparticipants.getIdentifier());
-        assertEquals("Check confirm state" , Appointment.ACCEPT, userparticipants.getConfirm());
+        assertEquals("Check id", userid, userparticipants.getIdentifier());
+        assertEquals("Check confirm state", Appointment.ACCEPT, userparticipants.getConfirm());
         assertEquals("Check confirm message", check_confirm_message, userparticipants.getConfirmMessage());
 
         final Participants participants = new Participants();
@@ -1131,14 +1135,13 @@ public class CalendarTest extends TestCase {
 
         fillDatesInDao(cdao);
 
-
         UserParticipant up[] = cdao.getUsers();
         assertTrue("Check participants (1)", up != null);
         assertTrue("Check participants (1)", up.length > 0);
         boolean found = false;
         for (int a = 0; a < up.length; a++) {
             if (up[a].getIdentifier() == userid) {
-                assertEquals("Check confirm state (1)" , Appointment.ACCEPT, up[a].getConfirm());
+                assertEquals("Check confirm state (1)", Appointment.ACCEPT, up[a].getConfirm());
                 found = true;
             }
         }
@@ -1154,18 +1157,18 @@ public class CalendarTest extends TestCase {
         found = false;
         for (int a = 0; a < up.length; a++) {
             if (up[a].getIdentifier() == userid) {
-                assertEquals("Check confirm state (2)" , Appointment.ACCEPT, up[a].getConfirm());
+                assertEquals("Check confirm state (2)", Appointment.ACCEPT, up[a].getConfirm());
                 assertEquals("Check confirm message", check_confirm_message, up[a].getConfirmMessage());
                 found = true;
             }
         }
         assertTrue("Check correct participants", found);
 
-
         //csql.deleteAppointmentObject(testobject, fid, new Date(SUPER_END));
 
     }
 
+    @Test
     public void testSharedFolder() throws Throwable {
         final Context context = new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
@@ -1236,7 +1239,7 @@ public class CalendarTest extends TestCase {
             while (si.hasNext()) {
                 si.next();
                 if (object_id == cdao.getObjectID()) {
-                found_deleted = true;
+                    found_deleted = true;
                 }
             }
             si.close();
@@ -1245,12 +1248,12 @@ public class CalendarTest extends TestCase {
         } finally {
             try {
                 if (shared_folder_id > 0) {
-                	oxma.deleteFolder(new FolderObject(shared_folder_id), true, System.currentTimeMillis());
+                    oxma.deleteFolder(new FolderObject(shared_folder_id), true, System.currentTimeMillis());
                     //ofa.deleteFolder(shared_folder_id, so, true, SUPER_END);
                 } else {
                     fail("Folder was not created.");
                 }
-            } catch(final Exception e) {
+            } catch (final Exception e) {
                 e.printStackTrace();
                 fail("Error deleting folder object.");
             }
@@ -1258,12 +1261,12 @@ public class CalendarTest extends TestCase {
         try {
             DBPool.push(context, readcon);
             DBPool.pushWrite(context, writecon);
-        } catch(final Exception ignore) {
+        } catch (final Exception ignore) {
             ignore.printStackTrace();
         }
     }
 
-
+    @Test
     public void testHasAppointmentsBetween() throws Throwable {
 
         deleteAllAppointments();
@@ -1278,7 +1281,6 @@ public class CalendarTest extends TestCase {
         cdao.setIgnoreConflicts(true);
         cdao.setStartDate(D("01.10.2013 08:00"));
         cdao.setEndDate(D("01.10.2013 09:00"));
-
 
         final CalendarSql csql = new CalendarSql(so);
         csql.insertAppointmentObject(cdao);
@@ -1303,19 +1305,19 @@ public class CalendarTest extends TestCase {
         Date range_start = D("01.10.2013 00:00");
         Date range_end = D("01.11.2013 00:00");
 
-        boolean[] check_array = new boolean[]{true, false, false, true, false, false, false, false, false, false, true, false, false, false, false, false, false, true, false, false, false, false, false, false, true, false, false, false, false, false, false};
+        boolean[] check_array = new boolean[] { true, false, false, true, false, false, false, false, false, false, true, false, false, false, false, false, false, true, false, false, false, false, false, false, true, false, false, false, false, false, false };
         boolean test_array[] = csql.hasAppointmentsBetween(range_start, range_end);
 
         assertEquals("Check arrays (length)", check_array.length, test_array.length);
 
         for (int a = 0; a < check_array.length; a++) {
-            assertEquals("Check arrays (position "+a+")", check_array[a], test_array[a]);
+            assertEquals("Check arrays (position " + a + ")", check_array[a], test_array[a]);
         }
 
     }
 
-
-   public void testInsertUpdateAlarm() throws Throwable {
+    @Test
+    public void testInsertUpdateAlarm() throws Throwable {
         final Context context = new ContextImpl(contextid);
         final int fid = getCalendarDefaultFolderForUser(userid, context);
         final CalendarDataObject cdao = new CalendarDataObject();
@@ -1363,6 +1365,7 @@ public class CalendarTest extends TestCase {
 
     }
 
+    @Test
     public void testInsertMoveAndDeleteAppointmentsWithPrivateFlag() throws Throwable {
         final Context context = new ContextImpl(contextid);
         final CalendarDataObject cdao = new CalendarDataObject();
@@ -1392,7 +1395,7 @@ public class CalendarTest extends TestCase {
         oclp.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         oclp.setFolderAdmin(true);
         FolderObject fo = new FolderObject();
-        fo.setFolderName("testInsertMoveAndDeleteAppointmentsWithPrivateFlagFolder"+System.currentTimeMillis());
+        fo.setFolderName("testInsertMoveAndDeleteAppointmentsWithPrivateFlagFolder" + System.currentTimeMillis());
         fo.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
         fo.setModule(FolderObject.CALENDAR);
         fo.setType(FolderObject.PUBLIC);
@@ -1411,21 +1414,21 @@ public class CalendarTest extends TestCase {
             try {
                 csql.updateAppointmentObject(update1, private_folder_id, new Date());
                 fail("Move from a private folder with private flag should not be possibe!");
-            } catch(final OXException e) {
+            } catch (final OXException e) {
                 // Very good if we get an error
-            } catch(final Exception e) {
-                fail ("Nooo "+e.getMessage());
+            } catch (final Exception e) {
+                fail("Nooo " + e.getMessage());
             }
 
         } finally {
-        	oxma.deleteFolder(new FolderObject(public_folder_id), true, System.currentTimeMillis());
+            oxma.deleteFolder(new FolderObject(public_folder_id), true, System.currentTimeMillis());
             //ofa.deleteFolder(public_folder_id, so, true, SUPER_END);
         }
 
         try {
             DBPool.push(context, readcon);
             DBPool.pushWrite(context, writecon);
-        } catch(final Exception ignore) {
+        } catch (final Exception ignore) {
             ignore.printStackTrace();
         }
 
@@ -1438,6 +1441,7 @@ public class CalendarTest extends TestCase {
 
     }
 
+    @Test
     public void testAlarmAndUpdate() throws Throwable {
         final Context context = new ContextImpl(contextid);
         final int fid = getCalendarDefaultFolderForUser(userid, context);
@@ -1499,14 +1503,12 @@ public class CalendarTest extends TestCase {
         assertTrue("Alarm should be set", testobject3.containsAlarm());
         assertEquals("Test correct alarm value", 30, testobject3.getAlarm());
 
-
         ro = rsql.loadReminder(object_id, userid, Types.APPOINTMENT, ctx);
         check_date = new Date((testobject3.getStartDate().getTime() - (30*60*1000))).getTime();
         assertEquals("Check correct alam in reminder object" , check_date, ro.getDate().getTime());
-
-
     }
 
+    @Test
     public void testDataTuncationException() throws Throwable {
         final Context context = new ContextImpl(contextid);
         final int fid = getCalendarDefaultFolderForUser(userid, context);
@@ -1536,12 +1538,12 @@ public class CalendarTest extends TestCase {
         try {
             csql.insertAppointmentObject(cdao);
             object_id = cdao.getObjectID();
-        } catch(final OXException oxe) {
+        } catch (final OXException oxe) {
             final ProblematicAttribute[] problematics = oxe.getProblematics();
             if (problematics.length == 0) {
                 fail("Got no TruncatedIds ");
             }
-        } catch(final Exception e) {
+        } catch (final Exception e) {
             fail("Wrong exception!");
         }
 
@@ -1551,6 +1553,7 @@ public class CalendarTest extends TestCase {
 
     }
 
+    @Test
     public void testExternalParticipants() throws Throwable {
         final Context context = new ContextImpl(contextid);
         final int fid = getCalendarDefaultFolderForUser(userid, context);
@@ -1568,7 +1571,6 @@ public class CalendarTest extends TestCase {
 
         final String mail_address = "firsttest@example.org";
         final String display_name = "Externer test user";
-
 
         final String mail_address2 = "othertest@example.org";
         final String display_name2 = "Externer test user2";
@@ -1592,7 +1594,7 @@ public class CalendarTest extends TestCase {
         final CalendarDataObject testobject = csql.getObjectById(object_id, fid);
 
         final Participant test_participants[] = testobject.getParticipants();
-        assertTrue("Check return is not null" , test_participants != null);
+        assertTrue("Check return is not null", test_participants != null);
         boolean found = false;
         for (int a = 0; a < test_participants.length; a++) {
             if (test_participants[a].getType() == Participant.EXTERNAL_USER) {
@@ -1623,11 +1625,10 @@ public class CalendarTest extends TestCase {
         update.setIgnoreConflicts(true);
         boolean check_update = false;
 
-
         try {
             csql.updateAppointmentObject(update, fid, cdao.getLastModified());
             check_update = true;
-        } catch(final Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace();
         }
         assertFalse("Participant has no mail, update must fail!", check_update);
@@ -1657,7 +1658,6 @@ public class CalendarTest extends TestCase {
         update_participants.setIgnoreConflicts(true);
 
         csql.updateAppointmentObject(update_participants, fid, cdao.getLastModified());
-
 
         final CalendarDataObject testobject_update = csql.getObjectById(object_id, fid);
 
@@ -1690,14 +1690,11 @@ public class CalendarTest extends TestCase {
 
         final CalendarDataObject update_participants2 = new CalendarDataObject();
 
-
         final Participants participants_update2 = new Participants();
 
         participants_update2.add(p1);
 
         participants_update2.add(p2);
-
-
 
         update_participants2.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         update_participants2.setObjectID(object_id);
@@ -1705,7 +1702,6 @@ public class CalendarTest extends TestCase {
         update_participants2.setIgnoreConflicts(true);
 
         csql.updateAppointmentObject(update_participants2, fid, update_participants.getLastModified());
-
 
         final CalendarDataObject testobject_update2 = csql.getObjectById(object_id, fid);
 
@@ -1738,7 +1734,8 @@ public class CalendarTest extends TestCase {
 
     }
 
-    public void testGroupZero() throws Exception  {
+    @Test
+    public void testGroupZero() throws Exception {
         final CalendarDataObject cdao = new CalendarDataObject();
         cdao.setContext(getContext());
         final Participants participants = new Participants();
@@ -1759,9 +1756,9 @@ public class CalendarTest extends TestCase {
         csql.insertAppointmentObject(cdao);
         cdao.getObjectID();
 
-
     }
 
+    @Test
     public void testSetAlarmAndConfirmStateWithParticipantsAndChangeTime() throws Exception {
         final String user2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");
         final int userid2 = resolveUser(user2);
@@ -1799,13 +1796,12 @@ public class CalendarTest extends TestCase {
 
         csql2.updateAppointmentObject(update_user2, fid2, cdao.getLastModified());
 
-
         final CalendarDataObject testobject = csql.getObjectById(object_id, fid);
 
         SearchIterator si = csql.getModifiedAppointmentsInFolder(fid, cols, decrementDate(cdao.getLastModified()));
         boolean found = false;
         while (si.hasNext()) {
-            final CalendarDataObject tdao = (CalendarDataObject)si.next();
+            final CalendarDataObject tdao = (CalendarDataObject) si.next();
             if (tdao.getObjectID() == object_id) {
                 found = true;
                 assertTrue("Check that userA has an alarm set in the cdao", tdao.containsAlarm());
@@ -1817,7 +1813,7 @@ public class CalendarTest extends TestCase {
         SearchIterator si2 = csql2.getModifiedAppointmentsInFolder(fid2, cols, decrementDate(cdao.getLastModified()));
         found = false;
         while (si2.hasNext()) {
-            final CalendarDataObject tdao = (CalendarDataObject)si2.next();
+            final CalendarDataObject tdao = (CalendarDataObject) si2.next();
             if (tdao.getObjectID() == object_id) {
                 found = true;
                 assertTrue("Check that userB has an alarm set in the cdao", tdao.containsAlarm());
@@ -1826,24 +1822,22 @@ public class CalendarTest extends TestCase {
         }
         assertTrue("Found our object (userB)", found);
 
-
         final CalendarDataObject update_with_time_change = testobject.clone();
         update_with_time_change.setContext(getContext());
         update_with_time_change.setIgnoreConflicts(true);
         update_with_time_change.setObjectID(object_id);
 
-        final Date test_date = new Date(testobject.getStartDate().getTime()+3600000);
+        final Date test_date = new Date(testobject.getStartDate().getTime() + 3600000);
 
         update_with_time_change.setStartDate(test_date);
-        update_with_time_change.setEndDate(new Date(testobject.getEndDate().getTime()+3600000));
+        update_with_time_change.setEndDate(new Date(testobject.getEndDate().getTime() + 3600000));
 
         csql.updateAppointmentObject(update_with_time_change, fid, testobject.getLastModified());
-
 
         si = csql.getModifiedAppointmentsInFolder(fid, cols, decrementDate(cdao.getLastModified()));
         found = false;
         while (si.hasNext()) {
-            final CalendarDataObject tdao = (CalendarDataObject)si.next();
+            final CalendarDataObject tdao = (CalendarDataObject) si.next();
             if (tdao.getObjectID() == object_id) {
                 found = true;
                 assertTrue("Check that userA has an alarm set in the cdao", tdao.containsAlarm());
@@ -1855,7 +1849,7 @@ public class CalendarTest extends TestCase {
         si2 = csql2.getModifiedAppointmentsInFolder(fid2, cols, decrementDate(cdao.getLastModified()));
         found = false;
         while (si2.hasNext()) {
-            final CalendarDataObject tdao = (CalendarDataObject)si2.next();
+            final CalendarDataObject tdao = (CalendarDataObject) si2.next();
             if (tdao.getObjectID() == object_id) {
                 found = true;
                 assertTrue("Check that userB has an alarm set in the cdao", tdao.containsAlarm());
@@ -1867,13 +1861,13 @@ public class CalendarTest extends TestCase {
                         final ReminderHandler rh = ReminderHandler.getInstance();
                         final ReminderObject ro = rh.loadReminder(object_id, userid2, Types.APPOINTMENT, getContext());
                         final Date check_date = ro.getDate();
-                        assertEquals("Check correct Alarm", new Date(test_date.getTime()-(30*60000)), check_date);
+                        assertEquals("Check correct Alarm", new Date(test_date.getTime() - (30 * 60000)), check_date);
                     } else if (up_test[a].getIdentifier() == userid) {
                         assertEquals("Check Confirm State", CalendarDataObject.ACCEPT, up_test[a].getConfirm());
                         final ReminderHandler rh = ReminderHandler.getInstance();
                         final ReminderObject ro = rh.loadReminder(object_id, userid, Types.APPOINTMENT, getContext());
                         final Date check_date = ro.getDate();
-                        assertEquals("Check correct Alarm", new Date(test_date.getTime()-(15*60000)), check_date);
+                        assertEquals("Check correct Alarm", new Date(test_date.getTime() - (15 * 60000)), check_date);
                     }
                 }
 
@@ -1888,6 +1882,5 @@ public class CalendarTest extends TestCase {
         assertEquals("Check folder for userB", fid2, test_fid2.getParentFolderID());
 
     }
-
 
 }

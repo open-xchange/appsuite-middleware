@@ -52,7 +52,6 @@ package com.openexchange.admin.rmi;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import java.rmi.Naming;
-import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -64,16 +63,8 @@ import com.openexchange.admin.rmi.dataobjects.Database;
  */
 public final class Bug16865Test {
 
-    public Bug16865Test() {
-        super();
-    }
-
-    public static final junit.framework.Test suite() {
-        return new JUnit4TestAdapter(Bug16865Test.class);
-    }
-
-    @Test
-    public void testDefaultInitial() throws Throwable {
+     @Test
+     public void testDefaultInitial() throws Throwable {
         Credentials cred = ContextTest.DummyMasterCredentials();
         String host = AbstractRMITest.getRMIHostUrl();
         OXUtilInterface util = (OXUtilInterface) Naming.lookup(host + OXUtilInterface.RMI_NAME);

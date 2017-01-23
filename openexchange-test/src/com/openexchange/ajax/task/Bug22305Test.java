@@ -50,9 +50,12 @@
 package com.openexchange.ajax.task;
 
 import static com.openexchange.ajax.task.TaskTools.valuesForUpdate;
+import static org.junit.Assert.assertFalse;
 import java.util.TimeZone;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.InsertResponse;
@@ -63,7 +66,7 @@ import com.openexchange.groupware.tasks.Create;
 import com.openexchange.groupware.tasks.Task;
 
 /**
- * This test ensures that bug 22305 does not occur again. 
+ * This test ensures that bug 22305 does not occur again.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
@@ -74,16 +77,16 @@ public class Bug22305Test extends AbstractTaskTest {
     private TimeZone bertaTZ;
     private Task task, bertaTask;
 
-    public Bug22305Test(String name) {
-        super(name);
+    public Bug22305Test() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         anton = getClient();
         antonId = anton.getValues().getUserId();
-        berta = new AJAXClient(User.User2);
+        berta = new AJAXClient(testContext.acquireUser());
         bertaId = berta.getValues().getUserId();
         bertaTZ = berta.getValues().getTimeZone();
         task = Create.createWithDefaults(getPrivateFolder(), "Task to test for bug 22305");
@@ -100,13 +103,17 @@ public class Bug22305Test extends AbstractTaskTest {
         bertaTask.setLastModified(uResp.getTimestamp());
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        DeleteRequest request = new DeleteRequest(bertaTask);
-        berta.execute(request);
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
+        try {
+            DeleteRequest request = new DeleteRequest(bertaTask);
+            berta.execute(request);
+        } finally {
+            super.tearDown();
+        }
     }
 
+    @Test
     public void testConfirmWithIdOnlyInBody() throws Throwable {
         bertaTask = valuesForUpdate(bertaTask);
         bertaTask.setNote("Update to test for NullPointerException");

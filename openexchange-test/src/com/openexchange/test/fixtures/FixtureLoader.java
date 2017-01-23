@@ -46,15 +46,19 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.test.fixtures;
 
 import com.openexchange.exception.OXException;
+
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public interface FixtureLoader {
 
-	void appendToLoadPath(String...paths);
-    void load(String...fixtureNames) throws OXException;
+    void appendToLoadPath(String... paths);
+
+    void load(String... fixtureNames) throws OXException;
+
     <T> Fixtures<T> getFixtures(String fixtureName, Class<T> aClass) throws OXException;
 }

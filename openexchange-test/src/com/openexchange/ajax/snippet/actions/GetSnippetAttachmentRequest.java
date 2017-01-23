@@ -90,6 +90,7 @@ public class GetSnippetAttachmentRequest extends AbstractSnippetRequest<GetSnipp
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
      */
     @Override
@@ -99,6 +100,7 @@ public class GetSnippetAttachmentRequest extends AbstractSnippetRequest<GetSnipp
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
      */
     @Override
@@ -112,6 +114,7 @@ public class GetSnippetAttachmentRequest extends AbstractSnippetRequest<GetSnipp
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
      */
     @Override
@@ -121,6 +124,7 @@ public class GetSnippetAttachmentRequest extends AbstractSnippetRequest<GetSnipp
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
      */
     @Override

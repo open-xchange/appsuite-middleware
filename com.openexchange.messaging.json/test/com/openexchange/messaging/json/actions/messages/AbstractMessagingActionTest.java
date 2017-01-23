@@ -51,7 +51,6 @@ package com.openexchange.messaging.json.actions.messages;
 
 import java.util.Arrays;
 import java.util.List;
-import junit.framework.TestCase;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
@@ -64,6 +63,10 @@ import com.openexchange.messaging.SimMessageAccess;
 import com.openexchange.messaging.SimMessageAccess.Call;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.tools.session.SimServerSession;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 
 /**
@@ -71,8 +74,7 @@ import com.openexchange.tools.session.SimServerSession;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class AbstractMessagingActionTest extends TestCase {
-
+public abstract class AbstractMessagingActionTest {
     protected MessagingServiceRegistry registry = TestRegistryBuilder.buildTestRegistry();
 
     protected AJAXRequestResult perform(final AJAXRequestData req) throws OXException {

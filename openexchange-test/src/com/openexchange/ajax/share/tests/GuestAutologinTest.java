@@ -49,10 +49,14 @@
 
 package com.openexchange.ajax.share.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.session.actions.AutologinRequest;
 import com.openexchange.ajax.session.actions.AutologinRequest.AutologinParameters;
@@ -76,15 +80,7 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
  */
 public class GuestAutologinTest extends ShareTest {
 
-    /**
-     * Initializes a new {@link GuestAutologinTest}.
-     *
-     * @param name
-     */
-    public GuestAutologinTest(String name) {
-        super(name);
-    }
-
+    @Test
     public void testGuestAutologin() throws Exception {
         /*
          * create folder shared to guest user
@@ -98,7 +94,7 @@ public class GuestAutologinTest extends ShareTest {
          */
         OCLPermission matchingPermission = null;
         for (OCLPermission permission : folder.getPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
                 break;
             }
@@ -132,6 +128,8 @@ public class GuestAutologinTest extends ShareTest {
             sharedSession.setId(oldSessionID);
         }
     }
+
+    @Test
     public void testGuestAutologinWithoutStore() throws Exception {
         /*
          * create folder shared to guest user
@@ -145,7 +143,7 @@ public class GuestAutologinTest extends ShareTest {
          */
         OCLPermission matchingPermission = null;
         for (OCLPermission permission : folder.getPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
                 break;
             }
@@ -162,10 +160,11 @@ public class GuestAutologinTest extends ShareTest {
          * login & store guest session for auto-login, then try to auto-login
          */
         String client = AJAXClient.class.getName();
-        AJAXSession sharedSession = getSession();
+        AJAXClient client3 = new AJAXClient(testContext.acquireUser());
+        AJAXSession sharedSession = client3.getSession();
         String oldSessionID = sharedSession.getId();
         try {
-            getSession().setId(null);
+            client3.getSession().setId(null);
             GuestClient guestClient = new GuestClient(sharedSession, shareURL, getUsername(recipient), getPassword(recipient), client, true, false);
             AutologinRequest autologin = new AutologinRequest(new AutologinParameters(randomUID(), client, AJAXClient.VERSION), false);
             AutologinResponse response = guestClient.execute(autologin);
@@ -173,7 +172,6 @@ public class GuestAutologinTest extends ShareTest {
             assertEquals(OXJSONExceptionCodes.INVALID_COOKIE.getNumber(), response.getException().getCode());
         } finally {
             sharedSession.setId(oldSessionID);
-            super.client = new AJAXClient(User.User1); // for teardown
         }
     }
 

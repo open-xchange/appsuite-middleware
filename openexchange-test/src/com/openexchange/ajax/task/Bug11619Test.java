@@ -49,7 +49,9 @@
 
 package com.openexchange.ajax.task;
 
+import static org.junit.Assert.assertTrue;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.GetRequest;
@@ -65,22 +67,26 @@ import com.openexchange.groupware.tasks.Task;
 
 /**
  * Updates a task and adds an external participant.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Bug11619Test extends AbstractTaskTest {
 
     /**
      * Default constructor.
+     * 
      * @param name test name
      */
-    public Bug11619Test(final String name) {
-        super(name);
+    public Bug11619Test() {
+        super();
     }
 
     /**
      * Creates and updates a task and adds on updating an external participant.
+     * 
      * @throws Throwable if some problem occurs.
      */
+    @Test
     public void testExternalParticipant() throws Throwable {
         final AJAXClient client = getClient();
         final TimeZone tz = getTimeZone();
@@ -93,8 +99,7 @@ public final class Bug11619Test extends AbstractTaskTest {
                 task = response.getTask(tz);
             }
             {
-                task.setParticipants(new Participant[] {
-                    new ExternalUserParticipant("test@example.org")
+                task.setParticipants(new Participant[] { new ExternalUserParticipant("test@example.org")
                 });
                 final UpdateRequest request = new UpdateRequest(task, tz);
                 final UpdateResponse response = TaskTools.update(client, request);
@@ -104,8 +109,7 @@ public final class Bug11619Test extends AbstractTaskTest {
                 final GetRequest request = new GetRequest(insertR);
                 final GetResponse response = client.execute(request);
                 task = response.getTask(tz);
-                assertTrue("External participant get lost.",
-                    task.getParticipants().length > 0);
+                assertTrue("External participant get lost.", task.getParticipants().length > 0);
             }
         } finally {
             final GetRequest request = new GetRequest(insertR);

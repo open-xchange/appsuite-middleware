@@ -91,6 +91,7 @@ public class NewManagedFileRequest extends AbstractManagedFileRequest<NewManaged
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
      */
     @Override
@@ -100,6 +101,7 @@ public class NewManagedFileRequest extends AbstractManagedFileRequest<NewManaged
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
      */
     @Override
@@ -114,6 +116,7 @@ public class NewManagedFileRequest extends AbstractManagedFileRequest<NewManaged
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
      */
     @Override
@@ -123,6 +126,7 @@ public class NewManagedFileRequest extends AbstractManagedFileRequest<NewManaged
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
      */
     @Override

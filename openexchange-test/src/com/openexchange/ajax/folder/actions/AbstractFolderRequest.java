@@ -114,39 +114,34 @@ public abstract class AbstractFolderRequest<T extends AbstractAJAXResponse> impl
                     ShareRecipient recipient = guestPerm.getRecipient();
                     jsonPermission.put("type", recipient.getType());
                     switch (recipient.getType()) {
-                    case ANONYMOUS:
-                        AnonymousRecipient anonymousRecipient = (AnonymousRecipient) recipient;
-                        jsonPermission.putOpt(FolderField.PASSWORD.getName(), anonymousRecipient.getPassword());
-                        if (null != anonymousRecipient.getExpiryDate()) {
-                            long date = anonymousRecipient.getExpiryDate().getTime();
-                            if (null != timeZone) {
-                                date += timeZone.getOffset(date);
+                        case ANONYMOUS:
+                            AnonymousRecipient anonymousRecipient = (AnonymousRecipient) recipient;
+                            jsonPermission.putOpt(FolderField.PASSWORD.getName(), anonymousRecipient.getPassword());
+                            if (null != anonymousRecipient.getExpiryDate()) {
+                                long date = anonymousRecipient.getExpiryDate().getTime();
+                                if (null != timeZone) {
+                                    date += timeZone.getOffset(date);
+                                }
+                                jsonPermission.put(FolderField.EXPIRY_DATE.getName(), date);
                             }
-                            jsonPermission.put(FolderField.EXPIRY_DATE.getName(), date);
-                        }
-                        break;
-                    case GUEST:
-                        GuestRecipient guestRecipient = (GuestRecipient) recipient;
-                        jsonPermission.putOpt(FolderField.EMAIL_ADDRESS.getName(), guestRecipient.getEmailAddress());
-                        jsonPermission.putOpt(FolderField.PASSWORD.getName(), guestRecipient.getPassword());
-                        jsonPermission.putOpt(FolderField.DISPLAY_NAME.getName(), guestRecipient.getDisplayName());
-                        jsonPermission.putOpt(FolderField.CONTACT_FOLDER_ID.getName(), guestRecipient.getContactFolder());
-                        jsonPermission.putOpt(FolderField.CONTACT_ID.getName(), guestRecipient.getContactID());
-                        break;
-                    default:
-                        Assert.fail("Unsupported recipient: " + recipient.getType());
-                        break;
+                            break;
+                        case GUEST:
+                            GuestRecipient guestRecipient = (GuestRecipient) recipient;
+                            jsonPermission.putOpt(FolderField.EMAIL_ADDRESS.getName(), guestRecipient.getEmailAddress());
+                            jsonPermission.putOpt(FolderField.PASSWORD.getName(), guestRecipient.getPassword());
+                            jsonPermission.putOpt(FolderField.DISPLAY_NAME.getName(), guestRecipient.getDisplayName());
+                            jsonPermission.putOpt(FolderField.CONTACT_FOLDER_ID.getName(), guestRecipient.getContactFolder());
+                            jsonPermission.putOpt(FolderField.CONTACT_ID.getName(), guestRecipient.getContactID());
+                            break;
+                        default:
+                            Assert.fail("Unsupported recipient: " + recipient.getType());
+                            break;
                     }
                 } else {
                     jsonPermission.put(FolderFields.ENTITY, perm.getEntity());
                     jsonPermission.put(FolderFields.GROUP, perm.isGroupPermission());
                 }
-                jsonPermission.put(FolderFields.BITS, Permissions.createPermissionBits(
-                    perm.getFolderPermission(),
-                    perm.getReadPermission(),
-                    perm.getWritePermission(),
-                    perm.getDeletePermission(),
-                    perm.isFolderAdmin()));
+                jsonPermission.put(FolderFields.BITS, Permissions.createPermissionBits(perm.getFolderPermission(), perm.getReadPermission(), perm.getWritePermission(), perm.getDeletePermission(), perm.isFolderAdmin()));
                 jsonPerms.put(jsonPermission);
             }
             jsonFolder.put(FolderFields.PERMISSIONS, jsonPerms);
@@ -170,23 +165,23 @@ public abstract class AbstractFolderRequest<T extends AbstractAJAXResponse> impl
     private String convertModule(final int module) {
         final String retval;
         switch (module) {
-        case FolderObject.TASK:
-            retval = Folder.MODULE_TASK;
-            break;
-        case FolderObject.CALENDAR:
-            retval = Folder.MODULE_CALENDAR;
-            break;
-        case FolderObject.CONTACT:
-            retval = Folder.MODULE_CONTACT;
-            break;
-        case FolderObject.MAIL:
-            retval = Folder.MODULE_MAIL;
-            break;
-        case FolderObject.INFOSTORE:
-            retval = Folder.MODULE_INFOSTORE;
-            break;
-        default:
-            retval = "";
+            case FolderObject.TASK:
+                retval = Folder.MODULE_TASK;
+                break;
+            case FolderObject.CALENDAR:
+                retval = Folder.MODULE_CALENDAR;
+                break;
+            case FolderObject.CONTACT:
+                retval = Folder.MODULE_CONTACT;
+                break;
+            case FolderObject.MAIL:
+                retval = Folder.MODULE_MAIL;
+                break;
+            case FolderObject.INFOSTORE:
+                retval = Folder.MODULE_INFOSTORE;
+                break;
+            default:
+                retval = "";
         }
         return retval;
     }

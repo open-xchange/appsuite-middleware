@@ -56,7 +56,6 @@ import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.SimHtmlService;
-import com.openexchange.rest.services.html.HtmlRESTService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
@@ -77,38 +76,38 @@ public class HtmlRESTServiceTest {
         body.put("content", "<script>alert('Hello World!');</script><p>Hello World!</p><img src=\"http://lorempixel.com/400/200/\" />");
     }
 
-    @Test
-    public void testSanitizeHtmlString() throws OXException, JSONException {
+     @Test
+     public void testSanitizeHtmlString() throws OXException, JSONException {
         String actual = service.getSanitizedHtmlString(body.getString("content"));
         String expected = "<p>Hello World!</p><img src=\"\">";
         assertEquals(expected, actual);
     }
 
-    @Test
-    public void testSanitizeHtmlJSON() throws OXException, JSONException {
+     @Test
+     public void testSanitizeHtmlJSON() throws OXException, JSONException {
         JSONObject actual = service.getSanitizedHtmlJSON(body);
         JSONObject expected = new JSONObject();
         expected.put("content", "<p>Hello World!</p><img src=\"\">");
         assertEquals(expected.toString(), actual.toString());
     }
 
-    @Test
-    public void testSanitizeHtmlStringKeepImages() throws OXException, JSONException {
+     @Test
+     public void testSanitizeHtmlStringKeepImages() throws OXException, JSONException {
         String actual = service.getSanitizedHtmlWithoutExternalImages(body.getString("content"));
         String expected = "<p>Hello World!</p><img src=\"http://lorempixel.com/400/200/\">";
         assertEquals(expected, actual);
     }
 
-    @Test
-    public void testSanitizeHtmlJSONKeepImages() throws OXException, JSONException {
+     @Test
+     public void testSanitizeHtmlJSONKeepImages() throws OXException, JSONException {
         JSONObject actual = service.getSanitizedHtmlWithoutExternalImages(body);
         JSONObject expected = new JSONObject();
         expected.put("content", "<p>Hello World!</p><img src=\"http://lorempixel.com/400/200/\">");
         assertEquals(expected.toString(), actual.toString());
     }
 
-    @Test
-    public void testMissingBody() {
+     @Test
+     public void testMissingBody() {
         try {
             service.getSanitizedHtmlJSON(null);
         } catch (OXException e) {

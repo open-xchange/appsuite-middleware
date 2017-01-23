@@ -51,8 +51,8 @@ package com.openexchange.exception.interception;
 
 import java.util.LinkedList;
 import java.util.List;
-import junit.framework.TestCase;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.interception.internal.OXExceptionInterceptorRegistration;
@@ -65,18 +65,17 @@ import com.openexchange.test.mock.MockUtils;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.6.1
  */
-public class OXExceptionInterceptorRegistrationTest extends TestCase {
-
+public class OXExceptionInterceptorRegistrationTest {
     /**
      * @throws java.lang.Exception
      */
-    @Override
+    @Before
     public void setUp() throws Exception {
         OXExceptionInterceptorRegistration.initInstance();
     }
 
-    @Test
-    public void testIsResponsibleInterceptorRegistered_completelySameInterceptor_returnFalse() {
+     @Test
+     public void testIsResponsibleInterceptorRegistered_completelySameInterceptor_returnFalse() {
         // PREPARATION
         List<OXExceptionInterceptor> interceptors = new LinkedList<OXExceptionInterceptor>();
         AbstractOXExceptionInterceptor oxExceptionInterceptor = new AbstractOXExceptionInterceptor(1) {
@@ -105,8 +104,8 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
         Assert.assertTrue("A responsible interceptor might already be registered but cannot be found", responsibleInterceptorRegistered);
     }
 
-    @Test
-    public void testIsResponsibleInterceptorRegistered_differentRanking_returnFalse() {
+     @Test
+     public void testIsResponsibleInterceptorRegistered_differentRanking_returnFalse() {
         // PREPARATION
         List<OXExceptionInterceptor> interceptors = new LinkedList<OXExceptionInterceptor>();
         AbstractOXExceptionInterceptor oxExceptionInterceptor = new AbstractOXExceptionInterceptor(1) {
@@ -135,8 +134,8 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
         Assert.assertFalse("A responsible interceptor might NOT be registered but can be found", responsibleInterceptorRegistered);
     }
 
-    @Test
-    public void testIsResponsibleInterceptorRegistered_compareManyInterceptorsWithManyResponsibilities_returnFalse() {
+     @Test
+     public void testIsResponsibleInterceptorRegistered_compareManyInterceptorsWithManyResponsibilities_returnFalse() {
         // PREPARATION
         List<OXExceptionInterceptor> interceptors = new LinkedList<OXExceptionInterceptor>();
         AbstractOXExceptionInterceptor oxExceptionInterceptor = new AbstractOXExceptionInterceptor(1) {
@@ -197,8 +196,8 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
         Assert.assertFalse("A responsible interceptor might NOT be registered but can be found", responsibleInterceptorRegistered);
     }
 
-    @Test
-    public void testIsResponsibleInterceptorRegistered_compareManyInterceptorsWithManyResponsibilitiesWithTestInterceptorWithManyResponsibilities_returnFalse() {
+     @Test
+     public void testIsResponsibleInterceptorRegistered_compareManyInterceptorsWithManyResponsibilitiesWithTestInterceptorWithManyResponsibilities_returnFalse() {
         // PREPARATION
         List<OXExceptionInterceptor> interceptors = new LinkedList<OXExceptionInterceptor>();
         AbstractOXExceptionInterceptor oxExceptionInterceptor = new AbstractOXExceptionInterceptor(1) {
@@ -265,8 +264,8 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
         Assert.assertFalse("A responsible interceptor might NOT be registered but can be found", responsibleInterceptorRegistered);
     }
 
-    @Test
-    public void testIsResponsibleInterceptorRegistered_sameResponsibilitiesButdifferentRanking_returnFalse() {
+     @Test
+     public void testIsResponsibleInterceptorRegistered_sameResponsibilitiesButdifferentRanking_returnFalse() {
         // PREPARATION
         List<OXExceptionInterceptor> interceptors = new LinkedList<OXExceptionInterceptor>();
         AbstractOXExceptionInterceptor oxExceptionInterceptor = new AbstractOXExceptionInterceptor(1) {
@@ -333,15 +332,15 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
         Assert.assertTrue("A responsible interceptor might already be registered but cannot be found", responsibleInterceptorRegistered);
     }
 
-    @Test
-    public void testGetResponsibleInterceptors_noResponsibleRegisteredBecauseNoOneRegistered_returnEmptyList() {
+     @Test
+     public void testGetResponsibleInterceptors_noResponsibleRegisteredBecauseNoOneRegistered_returnEmptyList() {
         List<OXExceptionInterceptor> responsibleInterceptors = OXExceptionInterceptorRegistration.getInstance().getResponsibleInterceptors("moduleNotAvailable", "actionNotAvailable");
 
         Assert.assertEquals("Wrong number of responsible interceptor found", 0, responsibleInterceptors.size());
     }
 
-    @Test
-    public void testGetResponsibleInterceptors_noResponsibleRegistered_returnEmptyList() {
+     @Test
+     public void testGetResponsibleInterceptors_noResponsibleRegistered_returnEmptyList() {
         // PREPARATION
         List<OXExceptionInterceptor> interceptors = new LinkedList<OXExceptionInterceptor>();
         AbstractOXExceptionInterceptor oxExceptionInterceptor = new AbstractOXExceptionInterceptor(1) {
@@ -363,8 +362,8 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
         Assert.assertEquals("Wrong number of responsible interceptor found", 0, responsibleInterceptors.size());
     }
 
-    @Test
-    public void testGetResponsibleInterceptors_oneResponsibleRegistered_returnOne() {
+     @Test
+     public void testGetResponsibleInterceptors_oneResponsibleRegistered_returnOne() {
         // PREPARATION
         List<OXExceptionInterceptor> interceptors = new LinkedList<OXExceptionInterceptor>();
         AbstractOXExceptionInterceptor oxExceptionInterceptor = new AbstractOXExceptionInterceptor(1) {
@@ -386,8 +385,8 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
         Assert.assertEquals("Wrong number of responsible interceptor found", 1, responsibleInterceptors.size());
     }
 
-    @Test
-    public void testGetResponsibleInterceptors_wrongAction_returnEmptyList() {
+     @Test
+     public void testGetResponsibleInterceptors_wrongAction_returnEmptyList() {
         // PREPARATION
         List<OXExceptionInterceptor> interceptors = new LinkedList<OXExceptionInterceptor>();
         AbstractOXExceptionInterceptor oxExceptionInterceptor = new AbstractOXExceptionInterceptor(1) {
@@ -409,8 +408,8 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
         Assert.assertEquals("Wrong number of responsible interceptor found", 0, responsibleInterceptors.size());
     }
 
-    @Test
-    public void testGetResponsibleInterceptors_wrongModule_returnEmptyList() {
+     @Test
+     public void testGetResponsibleInterceptors_wrongModule_returnEmptyList() {
         // PREPARATION
         List<OXExceptionInterceptor> interceptors = new LinkedList<OXExceptionInterceptor>();
         AbstractOXExceptionInterceptor oxExceptionInterceptor = new AbstractOXExceptionInterceptor(1) {
@@ -432,8 +431,8 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
         Assert.assertEquals("Wrong number of responsible interceptor found", 0, responsibleInterceptors.size());
     }
 
-    @Test
-    public void testGetResponsibleInterceptors_twoResponsibleRegistered_returnTwo() {
+     @Test
+     public void testGetResponsibleInterceptors_twoResponsibleRegistered_returnTwo() {
         // PREPARATION
         List<OXExceptionInterceptor> interceptors = new LinkedList<OXExceptionInterceptor>();
         AbstractOXExceptionInterceptor oxExceptionInterceptor = new AbstractOXExceptionInterceptor(1) {
@@ -468,8 +467,8 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
         Assert.assertEquals("Wrong number of responsible interceptor found", 2, responsibleInterceptors.size());
     }
 
-    @Test
-    public void testGetResponsibleInterceptors_ThreeRegisteredTwoResponsible_returnTwo() {
+     @Test
+     public void testGetResponsibleInterceptors_ThreeRegisteredTwoResponsible_returnTwo() {
         // PREPARATION
         List<OXExceptionInterceptor> interceptors = new LinkedList<OXExceptionInterceptor>();
         AbstractOXExceptionInterceptor oxExceptionInterceptor = new AbstractOXExceptionInterceptor(1) {
@@ -517,8 +516,8 @@ public class OXExceptionInterceptorRegistrationTest extends TestCase {
     }
 
 
-    @Test
-    public void testGetResponsibleInterceptors_fourRegistered_returnInCorrectOrder() {
+     @Test
+     public void testGetResponsibleInterceptors_fourRegistered_returnInCorrectOrder() {
         // PREPARATION
         List<OXExceptionInterceptor> interceptors = new LinkedList<OXExceptionInterceptor>();
         AbstractOXExceptionInterceptor oxExceptionInterceptor = new AbstractOXExceptionInterceptor(Integer.MIN_VALUE) {

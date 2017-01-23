@@ -62,8 +62,8 @@ public class JarFileProviderTest {
         rootFolder = Mockito.mock(File.class);
     }
 
-    @Test
-    public void testReadConfigurationFiles_listFilesNull_returnEmptyArray() {
+     @Test
+     public void testReadConfigurationFiles_listFilesNull_returnEmptyArray() {
         PowerMockito.when(FileUtils.listFiles((File) Matchers.any(), Matchers.any(String[].class), Matchers.anyBoolean())).thenReturn(null);
 
         List<File> readConfigurationFiles = fileProvider.readConfigurationFiles(new DiffResult(), rootFolder, ConfigurationFileTypes.CONFIGURATION_FILE_TYPE);
@@ -71,8 +71,8 @@ public class JarFileProviderTest {
         Assert.assertEquals(0, readConfigurationFiles.size());
     }
 
-    @Test
-    public void testReadConfigurationFiles_fileFound_fileInList() {
+     @Test
+     public void testReadConfigurationFiles_fileFound_fileInList() {
         PowerMockito.when(FileUtils.listFiles((File) Matchers.any(), Matchers.any(AndFileFilter.class), Matchers.any(IOFileFilter.class))).thenReturn(configurationFiles);
 
         List<File> readConfigurationFiles = fileProvider.readConfigurationFiles(new DiffResult(), rootFolder, ConfigurationFileTypes.CONFIGURATION_FILE_TYPE);
@@ -80,16 +80,16 @@ public class JarFileProviderTest {
         Assert.assertEquals(1, readConfigurationFiles.size());
     }
 
-    @Test
-    public void testAddFilesToDiffQueue_filesNull_noFileAddedToQueue() throws IOException {
+     @Test
+     public void testAddFilesToDiffQueue_filesNull_noFileAddedToQueue() throws IOException {
         fileProvider.addFilesToDiffQueue(new DiffResult(), rootFolder, null, true);
 
         PowerMockito.verifyStatic(Mockito.never());
         ConfFileHandler.addConfigurationFile((DiffResult) Matchers.any(), (ConfigurationFile) Matchers.any());
     }
 
-    @Test
-    public void testAddFilesToDiffQueue_filesNotInConfFolder_noFileAddedToQueue() throws IOException {
+     @Test
+     public void testAddFilesToDiffQueue_filesNotInConfFolder_noFileAddedToQueue() throws IOException {
         File newFile = folder.newFile("file1.jar");
         File newFile2 = folder.newFile("file2.jar");
         List<File> files = new ArrayList<File>();

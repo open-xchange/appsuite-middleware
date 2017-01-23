@@ -49,8 +49,11 @@
 
 package com.openexchange.ajax.mail;
 
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import org.json.JSONException;
+import org.junit.Before;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.mail.actions.AllRequest;
@@ -61,7 +64,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.dataobjects.MailMessage;
 
-
 /**
  * {@link AllSeenMailTest}
  *
@@ -71,35 +73,15 @@ public class AllSeenMailTest extends AbstractMailTest {
 
     private UserValues values;
 
-    public AllSeenMailTest(final String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         values = getClient().getValues();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
-
-    public void testAllSeen() throws OXException, IOException, SAXException, JSONException{
-        String eml =
-            "Message-Id: <4A002517.4650.0059.212@foobar.com>\n" +
-            "Date: Tue, 05 May 2009 11:37:58 -0500\n" +
-            "From: " + getSendAddress() + "\n" +
-            "To: " + getSendAddress() + "\n" +
-            "Subject: Invitation for launch\n" +
-            "Mime-Version: 1.0\n" +
-            "Content-Type: text/plain; charset=\"UTF-8\"\n" +
-            "Content-Transfer-Encoding: 8bit\n" +
-            "\n" +
-            "This is a MIME message. If you are reading this text, you may want to \n" +
-            "consider changing to a mail reader or gateway that understands how to \n" +
-            "properly handle MIME multipart messages.";
+    @Test
+    public void testAllSeen() throws OXException, IOException, SAXException, JSONException {
+        String eml = "Message-Id: <4A002517.4650.0059.212@foobar.com>\n" + "Date: Tue, 05 May 2009 11:37:58 -0500\n" + "From: " + getSendAddress() + "\n" + "To: " + getSendAddress() + "\n" + "Subject: Invitation for launch\n" + "Mime-Version: 1.0\n" + "Content-Type: text/plain; charset=\"UTF-8\"\n" + "Content-Transfer-Encoding: 8bit\n" + "\n" + "This is a MIME message. If you are reading this text, you may want to \n" + "consider changing to a mail reader or gateway that understands how to \n" + "properly handle MIME multipart messages.";
 
         for (int i = 0; i < 12; i++) {
             getClient().execute(new NewMailRequest(values.getInboxFolder(), eml, -1, true));

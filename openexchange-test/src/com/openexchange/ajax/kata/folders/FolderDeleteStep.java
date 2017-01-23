@@ -53,13 +53,12 @@ import com.openexchange.ajax.kata.NeedExistingStep;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.test.FolderTestManager;
 
-
 /**
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class FolderDeleteStep extends NeedExistingStep<FolderObject> {
 
-	private final FolderObject entry;
+    private final FolderObject entry;
 
     public FolderDeleteStep(FolderObject entry, String name, String expectedError) {
         super(name, expectedError);
@@ -67,19 +66,17 @@ public class FolderDeleteStep extends NeedExistingStep<FolderObject> {
     }
 
     @Override
-    public void cleanUp() throws Exception {
-    }
+    public void cleanUp() throws Exception {}
 
     @Override
     public void perform(AJAXClient client) throws Exception {
         assumeIdentity(entry);
         FolderTestManager manager = new FolderTestManager(client);
         manager.setFailOnError(false);
-        Assert.assertNotNull("Should have found folder before deletion" , manager.getFolderFromServer(this.entry , false) );
+        Assert.assertNotNull("Should have found folder before deletion", manager.getFolderFromServer(this.entry, false));
         manager.deleteFolderOnServer(this.entry);
-        Assert.assertNull("Should not have found folder after deletion" , manager.getFolderFromServer(this.entry , false) );
+        Assert.assertNull("Should not have found folder after deletion", manager.getFolderFromServer(this.entry, false));
         forgetIdentity(entry);
     }
-
 
 }

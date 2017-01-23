@@ -1,10 +1,12 @@
+
 package com.openexchange.ajax.appointment;
 
+import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
-import com.openexchange.ajax.ResourceTest;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.ResourceParticipant;
@@ -12,182 +14,169 @@ import com.openexchange.groupware.container.UserParticipant;
 
 public class FreeBusyTest extends AppointmentTest {
 
-	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FreeBusyTest.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FreeBusyTest.class);
 
-	public FreeBusyTest(final String name) {
-		super(name);
-	}
+    @Test
+    public void testUserParticipant() throws Exception {
+        final Appointment appointmentObj = new Appointment();
+        appointmentObj.setTitle("testUserParticipant");
+        appointmentObj.setStartDate(new Date(startTime));
+        appointmentObj.setEndDate(new Date(endTime));
+        appointmentObj.setShownAs(Appointment.RESERVED);
+        appointmentObj.setParentFolderID(appointmentFolderId);
+        appointmentObj.setIgnoreConflicts(true);
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-	}
+        final int objectId = catm.insert(appointmentObj).getObjectID();
+        appointmentObj.setObjectID(objectId);
 
-	public void testUserParticipant() throws Exception {
-		final Appointment appointmentObj = new Appointment();
-		appointmentObj.setTitle("testUserParticipant");
-		appointmentObj.setStartDate(new Date(startTime));
-		appointmentObj.setEndDate(new Date(endTime));
-		appointmentObj.setShownAs(Appointment.RESERVED);
-		appointmentObj.setParentFolderID(appointmentFolderId);
-		appointmentObj.setIgnoreConflicts(true);
+        final Date start = new Date(System.currentTimeMillis() - (dayInMillis * 2));
+        final Date end = new Date(System.currentTimeMillis() + (dayInMillis * 2));
+        final Appointment[] appointmentArray = catm.freeBusy(userId, Participant.USER, start, end);
 
-		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-		appointmentObj.setObjectID(objectId);
+        boolean found = false;
 
-		final Date start = new Date(System.currentTimeMillis()-(dayInMillis*2));
-		final Date end = new Date(System.currentTimeMillis()+(dayInMillis*2));
-		final Appointment[] appointmentArray = getFreeBusy(getWebConversation(), userId, Participant.USER, start, end, timeZone, PROTOCOL + getHostName(), getSessionId());
+        for (int a = 0; a < appointmentArray.length; a++) {
+            if (objectId == appointmentArray[a].getObjectID()) {
+                found = true;
 
-		boolean found = false;
+                appointmentObj.removeTitle();
+                //appointmentObj.removeParentFolderID();
+                compareObject(appointmentObj, appointmentArray[a], startTime, endTime);
+            }
+        }
 
-		for (int a = 0; a < appointmentArray.length; a++) {
-			if (objectId == appointmentArray[a].getObjectID()) {
-				found = true;
+        assertTrue("appointment with id " + objectId + " not found in free busy response!", found);
+    }
 
-				appointmentObj.removeTitle();
-				//appointmentObj.removeParentFolderID();
-				compareObject(appointmentObj, appointmentArray[a], startTime, endTime);
-			}
-		}
+    @Test
+    public void testFullTimeUserParticipant() throws Exception {
+        final Calendar c = Calendar.getInstance();
+        c.setTimeZone(TimeZone.getTimeZone("UTC"));
+        c.set(Calendar.HOUR_OF_DAY, 0);
+        c.set(Calendar.MINUTE, 0);
+        c.set(Calendar.SECOND, 0);
+        c.set(Calendar.MILLISECOND, 0);
 
-		assertTrue("appointment with id " + objectId + " not found in free busy response!", found);
+        final long newStartTime = c.getTimeInMillis();
+        final Appointment appointmentObj = new Appointment();
+        appointmentObj.setTitle("testFullTimeUserParticipant");
+        appointmentObj.setStartDate(new Date(startTime));
+        appointmentObj.setEndDate(new Date(endTime));
+        appointmentObj.setShownAs(Appointment.RESERVED);
+        appointmentObj.setParentFolderID(appointmentFolderId);
+        appointmentObj.setIgnoreConflicts(true);
 
-		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
-	}
+        final int objectId = catm.insert(appointmentObj).getObjectID();
+        appointmentObj.setObjectID(objectId);
 
-	public void testFullTimeUserParticipant() throws Exception {
-		final Calendar c = Calendar.getInstance();
-		c.setTimeZone(TimeZone.getTimeZone("UTC"));
-		c.set(Calendar.HOUR_OF_DAY, 0);
-		c.set(Calendar.MINUTE, 0);
-		c.set(Calendar.SECOND, 0);
-		c.set(Calendar.MILLISECOND, 0);
+        final Date start = new Date(System.currentTimeMillis() - (dayInMillis * 2));
+        final Date end = new Date(System.currentTimeMillis() + (dayInMillis * 2));
+        
+        final Appointment[] appointmentArray = catm.freeBusy(userId, Participant.USER, start, end);
 
-		final long newStartTime = c.getTimeInMillis();
-		final Appointment appointmentObj = new Appointment();
-		appointmentObj.setTitle("testFullTimeUserParticipant");
-		appointmentObj.setStartDate(new Date(startTime));
-		appointmentObj.setEndDate(new Date(endTime));
-		appointmentObj.setShownAs(Appointment.RESERVED);
-		appointmentObj.setParentFolderID(appointmentFolderId);
-		appointmentObj.setIgnoreConflicts(true);
+        boolean found = false;
 
-		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-		appointmentObj.setObjectID(objectId);
+        for (int a = 0; a < appointmentArray.length; a++) {
+            if (objectId == appointmentArray[a].getObjectID()) {
+                found = true;
 
-		final Date start = new Date(System.currentTimeMillis()-(dayInMillis*2));
-		final Date end = new Date(System.currentTimeMillis()+(dayInMillis*2));
-		final Appointment[] appointmentArray = getFreeBusy(getWebConversation(), userId, Participant.USER, start, end, timeZone, PROTOCOL + getHostName(), getSessionId());
+                appointmentObj.removeTitle();
+                //appointmentObj.removeParentFolderID();
+                compareObject(appointmentObj, appointmentArray[a], startTime, endTime);
+            }
+        }
 
-		boolean found = false;
+        assertTrue("appointment with id " + objectId + " not found in free busy response!", found);
+    }
 
-		for (int a = 0; a < appointmentArray.length; a++) {
-			if (objectId == appointmentArray[a].getObjectID()) {
-				found = true;
+    @Test
+    public void testUserParticipantStatusFree() throws Exception {
+        final Appointment appointmentObj = new Appointment();
+        appointmentObj.setTitle("testUserParticipantStatusFree");
+        appointmentObj.setStartDate(new Date(startTime));
+        appointmentObj.setEndDate(new Date(endTime));
+        appointmentObj.setShownAs(Appointment.FREE);
+        appointmentObj.setParentFolderID(appointmentFolderId);
+        appointmentObj.setIgnoreConflicts(true);
 
-				appointmentObj.removeTitle();
-				//appointmentObj.removeParentFolderID();
-				compareObject(appointmentObj, appointmentArray[a], startTime, endTime);
-			}
-		}
+        final int objectId = catm.insert(appointmentObj).getObjectID();
+        appointmentObj.setObjectID(objectId);
 
-		assertTrue("appointment with id " + objectId + " not found in free busy response!", found);
+        final Date start = new Date(System.currentTimeMillis() - (dayInMillis * 2));
+        final Date end = new Date(System.currentTimeMillis() + (dayInMillis * 2));
+        final Appointment[] appointmentArray = catm.freeBusy(userId, Participant.USER, start, end);
 
-		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
-	}
+        boolean found = false;
 
-	public void testUserParticipantStatusFree() throws Exception {
-		final Appointment appointmentObj = new Appointment();
-		appointmentObj.setTitle("testUserParticipantStatusFree");
-		appointmentObj.setStartDate(new Date(startTime));
-		appointmentObj.setEndDate(new Date(endTime));
-		appointmentObj.setShownAs(Appointment.FREE);
-		appointmentObj.setParentFolderID(appointmentFolderId);
-		appointmentObj.setIgnoreConflicts(true);
+        for (int a = 0; a < appointmentArray.length; a++) {
+            if (objectId == appointmentArray[a].getObjectID()) {
+                found = true;
 
-		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-		appointmentObj.setObjectID(objectId);
+                appointmentObj.removeTitle();
+                //appointmentObj.removeParentFolderID();
+                compareObject(appointmentObj, appointmentArray[a], startTime, endTime);
+            }
+        }
 
-		final Date start = new Date(System.currentTimeMillis()-(dayInMillis*2));
-		final Date end = new Date(System.currentTimeMillis()+(dayInMillis*2));
-		final Appointment[] appointmentArray = getFreeBusy(getWebConversation(), userId, Participant.USER, start, end, timeZone, PROTOCOL + getHostName(), getSessionId());
+        assertTrue("appointment with id " + objectId + " was found in free busy response!", found);
+    }
 
-		boolean found = false;
+    @Test
+    public void testResourceParticipantStatusFree() throws Exception {
+        final Appointment appointmentObj = new Appointment();
+        appointmentObj.setTitle("testResourceParticipantStatusFree");
+        appointmentObj.setStartDate(new Date(startTime));
+        appointmentObj.setEndDate(new Date(endTime));
+        appointmentObj.setShownAs(Appointment.FREE);
+        appointmentObj.setParentFolderID(appointmentFolderId);
+        appointmentObj.setIgnoreConflicts(true);
 
-		for (int a = 0; a < appointmentArray.length; a++) {
-			if (objectId == appointmentArray[a].getObjectID()) {
-				found = true;
+        final int resourceParticipantId = resTm.search(testContext.getResourceParticipants().get(0)).get(0).getIdentifier();
 
-				appointmentObj.removeTitle();
-				//appointmentObj.removeParentFolderID();
-				compareObject(appointmentObj, appointmentArray[a], startTime, endTime);
-			}
-		}
+        final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[2];
+        participants[0] = new UserParticipant(userId);
+        participants[1] = new ResourceParticipant(resourceParticipantId);
 
-		assertTrue("appointment with id " + objectId + " was found in free busy response!", found);
+        appointmentObj.setParticipants(participants);
 
-		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
-	}
+        final int objectId = catm.insert(appointmentObj).getObjectID();
+        appointmentObj.setObjectID(objectId);
 
-	public void testResourceParticipantStatusFree() throws Exception {
-		final Appointment appointmentObj = new Appointment();
-		appointmentObj.setTitle("testResourceParticipantStatusFree");
-		appointmentObj.setStartDate(new Date(startTime));
-		appointmentObj.setEndDate(new Date(endTime));
-		appointmentObj.setShownAs(Appointment.FREE);
-		appointmentObj.setParentFolderID(appointmentFolderId);
-		appointmentObj.setIgnoreConflicts(true);
+        appointmentObj.removeParticipants();
 
-		final int resourceParticipantId = ResourceTest.searchResource(getWebConversation(), resourceParticipant, PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
+        final Date start = new Date(System.currentTimeMillis() - (dayInMillis * 2));
+        final Date end = new Date(System.currentTimeMillis() + (dayInMillis * 2));
 
-		final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[2];
-		participants[0] = new UserParticipant(userId);
-		participants[1] = new ResourceParticipant(resourceParticipantId);
+        Appointment[] appointmentArray =catm.freeBusy(userId, Participant.USER, start, end);; 
 
-		appointmentObj.setParticipants(participants);
+        boolean found = false;
 
-		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-		appointmentObj.setObjectID(objectId);
+        for (int a = 0; a < appointmentArray.length; a++) {
+            if (objectId == appointmentArray[a].getObjectID()) {
+                found = true;
 
-		appointmentObj.removeParticipants();
+                appointmentObj.removeTitle();
+                //appointmentObj.removeParentFolderID();
+                compareObject(appointmentObj, appointmentArray[a], startTime, endTime);
+            }
+        }
 
-		final Date start = new Date(System.currentTimeMillis()-(dayInMillis*2));
-		final Date end = new Date(System.currentTimeMillis()+(dayInMillis*2));
+        assertTrue("appointment with id " + objectId + " was found in free busy response!", found);
+        
+        appointmentArray = catm.freeBusy(resourceParticipantId, Participant.RESOURCE, start, end);
 
-		Appointment[] appointmentArray = getFreeBusy(getWebConversation(), userId, Participant.USER, start, end, timeZone, PROTOCOL + getHostName(), getSessionId());
+        found = false;
 
-		boolean found = false;
+        for (int a = 0; a < appointmentArray.length; a++) {
+            if (objectId == appointmentArray[a].getObjectID()) {
+                found = true;
 
-		for (int a = 0; a < appointmentArray.length; a++) {
-			if (objectId == appointmentArray[a].getObjectID()) {
-				found = true;
+                appointmentObj.removeTitle();
+                appointmentObj.removeParentFolderID();
+                compareObject(appointmentObj, appointmentArray[a], startTime, endTime);
+            }
+        }
 
-				appointmentObj.removeTitle();
-				//appointmentObj.removeParentFolderID();
-				compareObject(appointmentObj, appointmentArray[a], startTime, endTime);
-			}
-		}
-
-		assertTrue("appointment with id " + objectId + " was found in free busy response!", found);
-
-		appointmentArray = getFreeBusy(getWebConversation(), resourceParticipantId, Participant.RESOURCE, start, end, timeZone, PROTOCOL + getHostName(), getSessionId());
-
-		found = false;
-
-		for (int a = 0; a < appointmentArray.length; a++) {
-			if (objectId == appointmentArray[a].getObjectID()) {
-				found = true;
-
-				appointmentObj.removeTitle();
-				appointmentObj.removeParentFolderID();
-				compareObject(appointmentObj, appointmentArray[a], startTime, endTime);
-			}
-		}
-
-		assertTrue("appointment with id " + objectId + " was found in free busy response!", found);
-
-		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
-	}
+        assertTrue("appointment with id " + objectId + " was found in free busy response!", found);
+    }
 }
-

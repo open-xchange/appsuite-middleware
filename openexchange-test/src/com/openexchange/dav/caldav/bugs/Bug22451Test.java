@@ -49,7 +49,9 @@
 
 package com.openexchange.dav.caldav.bugs;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -73,42 +75,42 @@ import com.openexchange.groupware.container.Appointment;
  */
 public class Bug22451Test extends CalDAVTest {
 
-	@Test
-	public void testUntilDate() throws Exception {
-		/*
-		 * fetch sync token for later synchronization
-		 */
-		SyncToken syncToken = new SyncToken(super.fetchSyncToken());
-		/*
-		 * create appointment series on server
-		 */
-		List<Appointment> appointments = new ArrayList<Appointment>();
-		Calendar calendar = Calendar.getInstance();
+    @Test
+    public void testUntilDate() throws Exception {
+        /*
+         * fetch sync token for later synchronization
+         */
+        SyncToken syncToken = new SyncToken(super.fetchSyncToken());
+        /*
+         * create appointment series on server
+         */
+        List<Appointment> appointments = new ArrayList<Appointment>();
+        Calendar calendar = Calendar.getInstance();
         calendar.setTime(TimeTools.D("3 days after midnight", TimeZone.getTimeZone("UTC")));
         Date serverUntil = calendar.getTime();
-		calendar.setTime(TimeTools.D("Tomorrow at midnight", TimeZone.getTimeZone("Europe/Berlin")));
-		for (int i = 0; i < 24; i++) {
-		    Appointment appointment = new Appointment();
-		    appointment.setUid(randomUID());
-		    appointment.setTitle("Series " + i);
-		    appointment.setIgnoreConflicts(true);
-		    appointment.setStartDate(calendar.getTime());
-		    calendar.add(Calendar.HOUR_OF_DAY, 1);
+        calendar.setTime(TimeTools.D("Tomorrow at midnight", TimeZone.getTimeZone("Europe/Berlin")));
+        for (int i = 0; i < 24; i++) {
+            Appointment appointment = new Appointment();
+            appointment.setUid(randomUID());
+            appointment.setTitle("Series " + i);
+            appointment.setIgnoreConflicts(true);
+            appointment.setStartDate(calendar.getTime());
+            calendar.add(Calendar.HOUR_OF_DAY, 1);
             appointment.setEndDate(calendar.getTime());
-		    appointment.setRecurrenceType(Appointment.DAILY);
-		    appointment.setInterval(1);
-		    appointment.setUntil(serverUntil);
-	        super.create(appointment);
+            appointment.setRecurrenceType(Appointment.DAILY);
+            appointment.setInterval(1);
+            appointment.setUntil(serverUntil);
+            super.create(appointment);
             appointments.add(appointment);
-		}
-		Date clientLastModified = getManager().getLastModification();
+        }
+        Date clientLastModified = getManager().getLastModification();
         /*
          * verify appointment series on client
          */
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         Calendar userCalendar = Calendar.getInstance(getClient().getValues().getTimeZone());
-		Map<String, String> eTags = super.syncCollection(syncToken).getETagsStatusOK();
+        Map<String, String> eTags = super.syncCollection(syncToken).getETagsStatusOK();
         assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
         List<ICalResource> calendarData = super.calendarMultiget(eTags.keySet());
         for (Appointment appointment : appointments) {
@@ -121,8 +123,7 @@ public class Bug22451Test extends CalDAVTest {
             assertNotNull("RRULE not found", rruleProperty);
             int startIndex = rruleProperty.getValue().indexOf("UNTIL=") + 6;
             int endIndex = rruleProperty.getValue().indexOf(";", startIndex);
-            String iCalUntil = 0 < endIndex ? rruleProperty.getValue().substring(startIndex, endIndex) :
-                rruleProperty.getValue().substring(startIndex);
+            String iCalUntil = 0 < endIndex ? rruleProperty.getValue().substring(startIndex, endIndex) : rruleProperty.getValue().substring(startIndex);
             userCalendar.setTime(dateFormat.parse(iCalUntil));
             calendar.setTime(appointment.getUntil());
             assertEquals("UNTIL date wrong", calendar.get(Calendar.DATE), userCalendar.get(Calendar.DATE));
@@ -166,12 +167,11 @@ public class Bug22451Test extends CalDAVTest {
             assertNotNull("RRULE not found", rruleProperty);
             int startIndex = rruleProperty.getValue().indexOf("UNTIL=") + 6;
             int endIndex = rruleProperty.getValue().indexOf(";", startIndex);
-            String iCalUntil = 0 < endIndex ? rruleProperty.getValue().substring(startIndex, endIndex) :
-                rruleProperty.getValue().substring(startIndex);
+            String iCalUntil = 0 < endIndex ? rruleProperty.getValue().substring(startIndex, endIndex) : rruleProperty.getValue().substring(startIndex);
             userCalendar.setTime(dateFormat.parse(iCalUntil));
             calendar.setTime(appointment.getUntil());
             assertEquals("UNTIL date wrong", calendar.get(Calendar.DATE), userCalendar.get(Calendar.DATE));
         }
-	}
+    }
 
 }

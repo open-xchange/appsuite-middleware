@@ -65,7 +65,6 @@ import com.openexchange.test.fixtures.Fixture;
  */
 public class AppointmentFixtureTransformer extends AbstractFixtureTransformer<Appointment> {
 
-
     @Override
     public boolean handles(Class aClass, String fixtureName, Fixture fixture) {
         return aClass == Appointment.class;
@@ -74,22 +73,13 @@ public class AppointmentFixtureTransformer extends AbstractFixtureTransformer<Ap
     @Override
     public Step transform(Class aClass, String fixtureName, Fixture fixture, String displayName) {
         if (isDelete(fixtureName)) {
-            return assign( fixtureName, new AppointmentDeleteStep(
-                (Appointment) fixture.getEntry(),
-                displayName,
-                (String) fixture.getAttribute("expectedError")));
+            return assign(fixtureName, new AppointmentDeleteStep((Appointment) fixture.getEntry(), displayName, (String) fixture.getAttribute("expectedError")));
         } else if (isUpdate(fixtureName)) {
-            return assign(fixtureName, new AppointmentUpdateStep(
-                (Appointment) fixture.getEntry(),
-                displayName,
-                (String) fixture.getAttribute("expectedError")));
+            return assign(fixtureName, new AppointmentUpdateStep((Appointment) fixture.getEntry(), displayName, (String) fixture.getAttribute("expectedError")));
         } else if (isVerification(fixtureName)) {
             return assign(fixtureName, new AppointmentVerificationStep((Appointment) fixture.getEntry(), displayName));
         } else if (isCreate(fixtureName)) {
-            AppointmentCreateStep step = new AppointmentCreateStep(
-                (Appointment) fixture.getEntry(),
-                displayName,
-                (String) fixture.getAttribute("expectedError"));
+            AppointmentCreateStep step = new AppointmentCreateStep((Appointment) fixture.getEntry(), displayName, (String) fixture.getAttribute("expectedError"));
             remember(fixtureName, step);
             return step;
         }

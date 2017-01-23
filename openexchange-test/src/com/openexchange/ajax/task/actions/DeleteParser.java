@@ -56,6 +56,7 @@ import com.openexchange.ajax.framework.CommonDeleteResponse;
 
 /**
  * Stores the delete response.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class DeleteParser extends AbstractAJAXParser<CommonDeleteResponse> {
@@ -71,8 +72,7 @@ public class DeleteParser extends AbstractAJAXParser<CommonDeleteResponse> {
      * {@inheritDoc}
      */
     @Override
-    protected CommonDeleteResponse createResponse(final Response response)
-        throws JSONException {
+    protected CommonDeleteResponse createResponse(final Response response) throws JSONException {
         return new CommonDeleteResponse(response);
     }
 }

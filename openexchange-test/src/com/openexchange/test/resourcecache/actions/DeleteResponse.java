@@ -52,7 +52,6 @@ package com.openexchange.test.resourcecache.actions;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
-
 /**
  * {@link DeleteResponse}
  *

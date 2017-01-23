@@ -7,8 +7,10 @@
 
 package com.openexchange.groupware;
 
+import static org.junit.Assert.assertTrue;
 import java.sql.Connection;
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.calendar.CalendarSql;
 import com.openexchange.event.impl.EventConfigImpl;
 import com.openexchange.groupware.calendar.CalendarDataObject;
@@ -22,15 +24,14 @@ import com.openexchange.tools.oxfolder.OXFolderTools;
  *
  * @author bishoph
  */
-public class AppointmentAttachmentTest extends TestCase {
+public class AppointmentAttachmentTest {
 
     private int userid = 11;
     private Context context;
     private SessionObject session;
 
-    @Override
-	protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         final EventConfigImpl event = new EventConfigImpl();
         event.setEventQueueEnabled(false);
         userid = CalendarTest.getUserId();
@@ -38,11 +39,7 @@ public class AppointmentAttachmentTest extends TestCase {
         session = CalendarTest.getSession();
     }
 
-    @Override
-	protected void tearDown() throws Exception {
-        super.tearDown();
-    }
-
+    @Test
     public void testAttachAndDetachToAppointment() throws Exception {
         final CalendarDataObject cdao = new CalendarDataObject();
         cdao.setContext(context);
@@ -78,7 +75,7 @@ public class AppointmentAttachmentTest extends TestCase {
             final long check_modified = System.currentTimeMillis();
             last_modified = csql.attachmentAction(fid, oid, userid, session, context, -1);
             assertTrue("Check for last_modified ", last_modified > check_modified);
-        } catch(final Exception e) {
+        } catch (final Exception e) {
             return;
         }
         throw new Exception("Test failed because detach should not be possible!");

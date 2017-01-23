@@ -49,11 +49,15 @@
 
 package com.openexchange.groupware.infostore;
 
-import com.openexchange.exception.OXException;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import org.junit.Before;
+import org.junit.Test;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.infostore.database.impl.AbstractDocumentListAction;
@@ -72,18 +76,20 @@ public class AbstractDocumentListActionTest extends AbstractInfostoreTest {
 
     private final List<DocumentMetadata> clean = new LinkedList<DocumentMetadata>();
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         createDocument();
     }
 
+    @Test
     public void testExists() throws OXException {
         TestDocumentListAction action = getActionWithDocumentId(existingId);
         action.perform();
         // Hooray! Survived!
     }
 
+    @Test
     public void testDoesNotExist() {
         TestDocumentListAction action = getActionWithDocumentId(notExistingId);
         try {
@@ -107,7 +113,7 @@ public class AbstractDocumentListActionTest extends AbstractInfostoreTest {
 
     protected void createDocument() throws OXException, SQLException {
         DocumentMetadata document = new DocumentMetadataImpl();
-        document.setTitle(getName());
+        document.setTitle(this.getClass().getCanonicalName());
         document.setFolderId(getFolderId());
 
         getInfostore().saveDocumentMetadata(document, InfostoreFacade.NEW, getSession());
@@ -115,11 +121,6 @@ public class AbstractDocumentListActionTest extends AbstractInfostoreTest {
         existingId = document.getId();
 
         notExistingId = IDGenerator.getId(getCtx(), Types.INFOSTORE);
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
     }
 
     static final class TestDocumentListAction extends AbstractDocumentListAction {

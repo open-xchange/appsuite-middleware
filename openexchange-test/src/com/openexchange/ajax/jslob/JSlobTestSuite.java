@@ -49,20 +49,20 @@
 
 package com.openexchange.ajax.jslob;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 /**
  * {@link JSlobTestSuite}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    Bug28821Test.class,
+    Bug34552Test.class,
+
+})
 public class JSlobTestSuite {
-    public static Test suite() {
-        final TestSuite tests = new TestSuite(JSlobTestSuite.class.getName());
-        tests.addTestSuite(Bug28821Test.class);
-        tests.addTestSuite(Bug34552Test.class);
-        return tests;
-    }
+
 }

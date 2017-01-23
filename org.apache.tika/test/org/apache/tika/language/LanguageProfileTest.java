@@ -17,12 +17,15 @@
 package org.apache.tika.language;
 
 import java.io.IOException;
+import org.junit.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
-import junit.framework.TestCase;
-
-public class LanguageProfileTest extends TestCase {
-
-    public void testLanguageProfile() throws IOException {
+public class LanguageProfileTest {
+         @Test
+     public void testLanguageProfile() throws IOException {
         LanguageProfile foo = new LanguageProfile();
         assertEquals(0, foo.getCount("foo"));
 

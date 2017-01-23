@@ -49,7 +49,8 @@
 
 package com.openexchange.contact.storage.rdb.internal;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -69,32 +70,32 @@ public class RdbContactStorageTest {
         rdbContactStorage = new RdbContactStorage();
     }
 
-    @Test
-    public void testSupports_allSupported_returnTrue() {
+     @Test
+     public void testSupports_allSupported_returnTrue() {
         boolean supports = rdbContactStorage.supports(ContactField.SUR_NAME, ContactField.TITLE);
         assertTrue(supports);
     }
 
-    @Test
-    public void testSupports_providedOneSupported_returnTrue() {
+     @Test
+     public void testSupports_providedOneSupported_returnTrue() {
         boolean supports = rdbContactStorage.supports(ContactField.CELLULAR_TELEPHONE1);
         assertTrue(supports);
     }
 
-    @Test
-    public void testSupports_providedOneNotSupported_returnFalse() {
+     @Test
+     public void testSupports_providedOneNotSupported_returnFalse() {
         boolean supports = rdbContactStorage.supports(ContactField.IMAGE1_URL);
         assertFalse(supports);
     }
 
-    @Test
-    public void testSupports_multipleProvidedOneNotSupported_returnFlase() {
+     @Test
+     public void testSupports_multipleProvidedOneNotSupported_returnFlase() {
         boolean supports = rdbContactStorage.supports(ContactField.CELLULAR_TELEPHONE1, ContactField.CITY_HOME, ContactField.USERFIELD15, ContactField.TELEPHONE_CALLBACK, ContactField.LAST_MODIFIED_OF_NEWEST_ATTACHMENT, ContactField.DEFAULT_ADDRESS, ContactField.TELEPHONE_PRIMARY);
         assertFalse(supports);
     }
 
-    @Test
-    public void testSupports_allFieldsProvidedThatContainNotSupportedOnes_returnFalse() {
+     @Test
+     public void testSupports_allFieldsProvidedThatContainNotSupportedOnes_returnFalse() {
         boolean supports = rdbContactStorage.supports(ContactField.values());
         assertFalse(supports);
     }

@@ -49,10 +49,10 @@
 
 package com.openexchange.http.grizzly.servletfilter;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static com.openexchange.http.grizzly.util.IPTools.COMMA_SEPARATOR;
 import static com.openexchange.http.grizzly.util.IPTools.splitAndTrim;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import java.util.Collections;
 import java.util.List;
 import org.junit.Test;
@@ -84,50 +84,50 @@ public class RemoteIPFinderTest {
 
     private final List<String> emptyKnown = Collections.emptyList();
 
-    @Test
-    public void testValidIPv4() {
+     @Test
+     public void testValidIPv4() {
         String remoteIP = IPTools.getRemoteIP(validIPv4Remotes, knownIPv4);
         assertEquals("192.168.32.50", remoteIP);
     }
 
-    @Test
-    public void testEmptyKnownIPv4() {
+     @Test
+     public void testEmptyKnownIPv4() {
         String remoteIP = IPTools.getRemoteIP(validIPv4Remotes, emptyKnown);
         assertEquals("192.168.33.224", remoteIP);
     }
 
-    @Test
-    public void testEmptyRemoteIPv4() {
+     @Test
+     public void testEmptyRemoteIPv4() {
         String remoteIP = IPTools.getRemoteIP(emptyRemote, knownIPv4);
         assertNull(remoteIP);
     }
 
-    @Test
-    public void testInvalidRemoteIPv4() {
+     @Test
+     public void testInvalidRemoteIPv4() {
         String remoteIP = IPTools.getRemoteIP(invalidIPv4Remotes, knownIPv4);
         assertNull(remoteIP);
     }
 
-    @Test
-    public void testValidIPv6() {
+     @Test
+     public void testValidIPv6() {
         String remoteIP = IPTools.getRemoteIP(validIPv6Remotes, knownIPv6);
         assertEquals("2001:db8:0:8d3:0:8a2e:70:7341", remoteIP);
     }
 
-    @Test
-    public void testEmptyKnownIPv6() {
+     @Test
+     public void testEmptyKnownIPv6() {
         String remoteIP = IPTools.getRemoteIP(validIPv6Remotes, emptyKnown);
         assertEquals("2001:db8:0:8d3:0:8a2e:70:7344", remoteIP);
     }
 
-    @Test
-    public void testEmptyRemoteIPv6() {
+     @Test
+     public void testEmptyRemoteIPv6() {
         String remoteIP = IPTools.getRemoteIP(emptyRemote, knownIPv6);
         assertNull(remoteIP);
     }
 
-    @Test
-    public void testInvalidRemoteIPv6() {
+     @Test
+     public void testInvalidRemoteIPv6() {
         String remoteIP = IPTools.getRemoteIP(invalidIPv6Remotes, knownIPv6);
         assertNull(remoteIP);
     }

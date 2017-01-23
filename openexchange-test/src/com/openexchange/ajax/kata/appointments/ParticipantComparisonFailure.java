@@ -53,7 +53,6 @@ import java.util.Arrays;
 import org.junit.ComparisonFailure;
 import com.openexchange.groupware.container.Participant;
 
-
 /**
  * {@link ParticipantComparisonFailure}
  *
@@ -67,35 +66,28 @@ public class ParticipantComparisonFailure extends ComparisonFailure {
 
     /**
      * Initializes a new {@link ParticipantComparisonFailure}.
+     * 
      * @param message
      * @param expected
      * @param actual
      */
     public ParticipantComparisonFailure(String message, Participant[] expected, Participant[] actual) {
-        super(
-            message,
-            expected == null ? null : Arrays.toString(expected),
-            actual == null ? null : Arrays.toString(expected)
-        );
-        if(expected != null) {
+        super(message, expected == null ? null : Arrays.toString(expected), actual == null ? null : Arrays.toString(expected));
+        if (expected != null) {
             this.expectedParticipants = expected;
         }
-        if(actual != null) {
+        if (actual != null) {
             this.actualParticipants = actual;
         }
 
     }
 
-
     public Participant[] getActualParticipants() {
         return actualParticipants;
     }
 
-
     public Participant[] getExpectedParticipants() {
         return expectedParticipants;
     }
-
-
 
 }

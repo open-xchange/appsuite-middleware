@@ -49,11 +49,14 @@
 
 package com.openexchange.ajax.importexport;
 
+import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.Random;
-import junit.framework.AssertionFailedError;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.importexport.actions.VCardImportRequest;
@@ -61,6 +64,7 @@ import com.openexchange.ajax.importexport.actions.VCardImportResponse;
 
 /**
  * Checks if the problem described in bug 9475 appears again.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Bug9475Test extends AbstractAJAXSession {
@@ -74,17 +78,18 @@ public final class Bug9475Test extends AbstractAJAXSession {
 
     /**
      * Default constructor.
+     * 
      * @param name name of the test.
      */
-    public Bug9475Test(final String name) {
-        super(name);
+    public Bug9475Test() {
+        super();
     }
 
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         tmp = File.createTempFile("tmp", null);
         final FileOutputStream fos = new FileOutputStream(tmp);
@@ -103,24 +108,27 @@ public final class Bug9475Test extends AbstractAJAXSession {
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected void tearDown() throws Exception {
-        tmp.delete();
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
+        try {
+            tmp.delete();
+        } finally {
+            super.tearDown();
+        }
     }
 
     /**
      * Checks if the vcard tokenizer is too slow to parse a big unuseful file.
+     * 
      * @throws Throwable if an exception occurs.
      */
+    @Test
     public void testBigFile() throws Throwable {
         final AJAXClient client = getClient();
         try {
-            final VCardImportResponse iResponse = Tools.importVCard(client,
-                new VCardImportRequest(client.getValues().getPrivateContactFolder(),
-                    new FileInputStream(tmp), false));
+            final VCardImportResponse iResponse = Tools.importVCard(client, new VCardImportRequest(client.getValues().getPrivateContactFolder(), new FileInputStream(tmp), false));
             assertTrue("VCard importer does not give an error.", iResponse.hasError());
-        } catch (final AssertionFailedError assertionFailed) {
+        } catch (final Exception assertionFailed) {
             // Response Parsing dies with an AssertionFailedError on a response code different from 200, which is also okay in our case
             assertTrue(assertionFailed.getMessage().contains("Response code"));
             // quite a hack

@@ -46,12 +46,14 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.ajax.mail.actions;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 public class DeleteResponse extends AbstractAJAXResponse {
+
     protected DeleteResponse(final Response response) {
         super(response);
     }

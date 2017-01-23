@@ -52,7 +52,6 @@ package com.openexchange.ajax.subscribe.actions;
 import org.json.JSONArray;
 import com.openexchange.ajax.container.Response;
 
-
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
@@ -62,7 +61,7 @@ public class AllSubscriptionsResponse extends AbstractSubscriptionResponse {
         super(response);
     }
 
-    public JSONArray getAll(){
+    public JSONArray getAll() {
         return (JSONArray) getData();
     }
 }

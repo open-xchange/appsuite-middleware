@@ -49,6 +49,10 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
+import static org.junit.Assert.assertEquals;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -60,7 +64,7 @@ public class Bug13995And14922Test extends CalendarSqlTest {
 
     private CalendarDataObject appointment;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
@@ -71,6 +75,7 @@ public class Bug13995And14922Test extends CalendarSqlTest {
         clean.add(appointment);
     }
 
+    @Test
     public void testBug13995And14922() throws Exception {
         appointments.save(appointment);
         CalendarDataObject loadedAppointment = appointments.load(appointment.getObjectID(), appointment.getParentFolderID());
@@ -79,6 +84,7 @@ public class Bug13995And14922Test extends CalendarSqlTest {
         assertEquals("Wrong status", CalendarObject.ACCEPT, loadedAppointment.getUsers()[0].getConfirm());
     }
 
+    @Test
     public void testBugWithoutUsers() throws Exception {
         appointment.removeUsers();
         appointments.save(appointment);
@@ -88,7 +94,7 @@ public class Bug13995And14922Test extends CalendarSqlTest {
         assertEquals("Wrong status", CalendarObject.ACCEPT, loadedAppointment.getUsers()[0].getConfirm());
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         super.tearDown();
     }

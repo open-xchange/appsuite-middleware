@@ -67,13 +67,11 @@ public final class FolderToolkit {
         super();
     }
 
-    public static final int getStandardTaskFolder(final int user,
-        final Context ctx) throws OXException {
+    public static final int getStandardTaskFolder(final int user, final Context ctx) throws OXException {
         return getStandardFolder(user, ctx, FolderObject.TASK);
     }
 
-    public static final int getStandardFolder(final int user,
-        final Context ctx, final int type) throws OXException {
+    public static final int getStandardFolder(final int user, final Context ctx, final int type) throws OXException {
         final OXFolderAccess access = new OXFolderAccess(ctx);
         return access.getDefaultFolder(user, type).getObjectID();
     }

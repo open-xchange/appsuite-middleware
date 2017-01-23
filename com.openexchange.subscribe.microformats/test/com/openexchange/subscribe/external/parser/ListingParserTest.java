@@ -50,11 +50,15 @@
 package com.openexchange.subscribe.external.parser;
 
 import java.util.List;
-import junit.framework.TestCase;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.subscribe.external.ExternalSubscriptionSource;
 import com.openexchange.subscribe.microformats.parser.HTMLMicroformatParserFactory;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 
 /**
@@ -63,8 +67,7 @@ import com.openexchange.subscribe.microformats.parser.HTMLMicroformatParserFacto
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class ListingParserTest extends TestCase {
-
+public class ListingParserTest {
     private static final String LISTING1 =
         "<html>\n\n"+
         "   <head>\n"+
@@ -94,7 +97,8 @@ public class ListingParserTest extends TestCase {
 
 
 
-    public void testParseCompleteListing() throws OXException {
+         @Test
+     public void testParseCompleteListing() throws OXException {
         final List<ExternalSubscriptionSource> externalSources = new ListingParser(new HTMLMicroformatParserFactory()).parse(LISTING1);
 
         assertNotNull(externalSources);

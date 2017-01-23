@@ -49,15 +49,18 @@
 
 package com.openexchange.ajax.share.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AbstractColumnsResponse;
 import com.openexchange.ajax.infostore.actions.AllInfostoreRequest;
-import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
@@ -85,22 +88,12 @@ public class FileStorageTransactionTest extends ShareTest {
     private static final int TEST_FILES = 10;
 
     private FolderObject testFolder;
-    private InfostoreTestManager itm;
     private List<DefaultFile> files;
 
-    /**
-     * Initializes a new {@link FileStorageTransactionTest}.
-     * @param name
-     */
-    public FileStorageTransactionTest(String name) {
-        super(name);
-    }
-
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
-        itm = new InfostoreTestManager(client);
-        testFolder = insertPrivateFolder(EnumAPI.OX_NEW, Module.INFOSTORE.getFolderConstant(), client.getValues().getPrivateInfostoreFolder());
+        testFolder = insertPrivateFolder(EnumAPI.OX_NEW, Module.INFOSTORE.getFolderConstant(), getClient().getValues().getPrivateInfostoreFolder());
         files = new ArrayList<DefaultFile>(TEST_FILES);
         long now = System.currentTimeMillis();
         for (int i = 0; i < TEST_FILES; i++) {
@@ -113,14 +106,7 @@ public class FileStorageTransactionTest extends ShareTest {
         }
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        if (itm != null) {
-            itm.cleanUp();
-        }
-        super.tearDown();
-    }
-
+    @Test
     public void testShareItemsInFolder() throws Exception {
         DefaultFileStorageGuestObjectPermission permission = new DefaultFileStorageGuestObjectPermission();
         permission.setPermissions(ObjectPermission.READ);
@@ -136,7 +122,7 @@ public class FileStorageTransactionTest extends ShareTest {
         }
 
         List<FileShare> fileShares = new ArrayList<FileShare>(sharedFiles.size());
-        List<FileShare> allShares = client.execute(new FileSharesRequest()).getShares(client.getValues().getTimeZone());
+        List<FileShare> allShares = getClient().execute(new FileSharesRequest()).getShares(getClient().getValues().getTimeZone());
         for (DefaultFile file : sharedFiles) {
             for (FileShare share : allShares) {
                 if (share.getId().equals(file.getId())) {

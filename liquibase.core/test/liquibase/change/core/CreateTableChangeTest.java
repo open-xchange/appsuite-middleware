@@ -1,14 +1,21 @@
 package liquibase.change.core;
 
-import liquibase.change.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import org.junit.Before;
+import org.junit.Test;
+import liquibase.change.Change;
+import liquibase.change.ChangeFactory;
+import liquibase.change.ColumnConfig;
+import liquibase.change.ConstraintsConfig;
+import liquibase.change.StandardChangeTest;
 import liquibase.database.core.MockDatabase;
 import liquibase.statement.ForeignKeyConstraint;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.UniqueConstraint;
 import liquibase.statement.core.CreateTableStatement;
-import static org.junit.Assert.*;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * Tests for {@link CreateTableChange}
@@ -22,14 +29,12 @@ public class CreateTableChangeTest extends StandardChangeTest {
         change = new CreateTableChange();
     }
 
-    @Override
-    @Test
+     @Test
     public void getRefactoringName() throws Exception {
         assertEquals("createTable", ChangeFactory.getInstance().getChangeMetaData(change).getName());
     }
 
-    @Override
-    @Test
+     @Test
     public void generateStatement() throws Exception {
         change.setTableName("TABLE_NAME");
 
@@ -103,8 +108,7 @@ public class CreateTableChangeTest extends StandardChangeTest {
         assertTrue(keyConstraint.isInitiallyDeferred());
     }
 
-    @Override
-    @Test
+     @Test
     public void getConfirmationMessage() throws Exception {
         change.setTableName("TAB_NAME");
         assertEquals("Table TAB_NAME created", change.getConfirmationMessage());

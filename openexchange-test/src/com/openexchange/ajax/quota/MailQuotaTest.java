@@ -49,7 +49,10 @@
 
 package com.openexchange.ajax.quota;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 
 /**
@@ -64,16 +67,17 @@ public class MailQuotaTest extends AbstractAJAXSession {
      *
      * @param name The test name
      */
-    public MailQuotaTest(String name) {
-        super(name);
+    public MailQuotaTest() {
+        super();
     }
 
+    @Test
     public void testMailQuota() throws Exception {
         /*
          * get filestore usage quota
          */
         MailQuotaRequest request = new MailQuotaRequest();
-        MailQuotaResponse response = client.execute(request);
+        MailQuotaResponse response = getClient().execute(request);
         JSONObject jsonQuota = (JSONObject) response.getData();
         assertNotNull("No response data", jsonQuota);
         assertTrue("No use found", jsonQuota.hasAndNotNull("use"));

@@ -83,8 +83,7 @@ public class AllParser extends AbstractColumnsParser<CommonAllResponse> {
      * {@inheritDoc}
      */
     @Override
-    protected CommonAllResponse createResponse(final Response response)
-        throws JSONException {
+    protected CommonAllResponse createResponse(final Response response) throws JSONException {
         final CommonAllResponse retval = super.createResponse(response);
         final Iterator<Object[]> iter = retval.iterator();
         final ListIDs list = new ListIDs();
@@ -92,8 +91,7 @@ public class AllParser extends AbstractColumnsParser<CommonAllResponse> {
         final int identifierPos = retval.getColumnPos(Task.OBJECT_ID);
         while (iter.hasNext()) {
             final Object[] row = iter.next();
-            list.add(new ListIDInt(((Integer) row[folderPos]).intValue(),
-                ((Integer) row[identifierPos]).intValue()));
+            list.add(new ListIDInt(((Integer) row[folderPos]).intValue(), ((Integer) row[identifierPos]).intValue()));
         }
         retval.setListIDs(list);
         return retval;

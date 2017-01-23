@@ -64,8 +64,8 @@ import com.openexchange.share.core.tools.ShareToken;
  */
 public class ShareTokenTest {
 
-    @Test
-    public void testSomeCombinations() throws Exception {
+     @Test
+     public void testSomeCombinations() throws Exception {
         Random r = new Random();
         for (int i = 0; i < 100000; i++) {
             int userId = r.nextInt(Integer.MAX_VALUE);

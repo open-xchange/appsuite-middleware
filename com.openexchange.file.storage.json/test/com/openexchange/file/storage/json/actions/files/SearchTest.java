@@ -49,16 +49,18 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.Arrays;
 import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
-
 
 /**
  * {@link SearchTest}
@@ -67,6 +69,7 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
  */
 public class SearchTest extends FileActionTest {
 
+    @Test
     public void testMissingParameters() {
         try {
             action.handle(request());
@@ -76,16 +79,10 @@ public class SearchTest extends FileActionTest {
         }
     }
 
+    @Test
     public void testAction() throws OXException, JSONException {
-        request()
-            .body(new JSONObject("{pattern: 'someSearch'}"))
-            .param("folder", "12")
-            .param("columns", "1,700,702") // id, title and filename
-            .param("sort", "700")
-            .param("order", "desc")
-            .param("start", "10")
-            .param("end", "12")
-            .param("timezone", "Europe/Berlin");
+        request().body(new JSONObject("{pattern: 'someSearch'}")).param("folder", "12").param("columns", "1,700,702") // id, title and filename
+            .param("sort", "700").param("order", "desc").param("start", "10").param("end", "12").param("timezone", "Europe/Berlin");
 
         List<Field> columns = Arrays.asList(File.Field.ID, File.Field.TITLE, File.Field.FILENAME);
         fileAccess().expectCall("search", "someSearch", columns, "12", File.Field.TITLE, SortDirection.DESC, 10, 12).andReturn(SearchIteratorAdapter.emptyIterator());
@@ -94,7 +91,6 @@ public class SearchTest extends FileActionTest {
 
         fileAccess().assertAllWereCalled();
     }
-
 
     @Override
     public AbstractFileAction createAction() {

@@ -63,84 +63,81 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  */
 public final class MultipleAttachmentRequest extends AbstractMailRequest {
 
-	class MultipleAttachmentParser extends AbstractAJAXParser<MultipleAttachmentResponse> {
+    class MultipleAttachmentParser extends AbstractAJAXParser<MultipleAttachmentResponse> {
 
-		/**
-		 * Default constructor.
-		 */
-		MultipleAttachmentParser(final boolean failOnError) {
-			super(failOnError);
-		}
+        /**
+         * Default constructor.
+         */
+        MultipleAttachmentParser(final boolean failOnError) {
+            super(failOnError);
+        }
 
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		protected MultipleAttachmentResponse createResponse(final Response response) throws JSONException {
-			return new MultipleAttachmentResponse(response);
-		}
-	}
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        protected MultipleAttachmentResponse createResponse(final Response response) throws JSONException {
+            return new MultipleAttachmentResponse(response);
+        }
+    }
 
-	/**
-	 * Unique identifier
-	 */
-	private final String folderId;
+    /**
+     * Unique identifier
+     */
+    private final String folderId;
 
-	private final String id;
+    private final String id;
 
-	private final String[] sequenceIds;
+    private final String[] sequenceIds;
 
-	private final boolean failOnError;
+    private final boolean failOnError;
 
-	public MultipleAttachmentRequest(final String folder, final String ID, final String[] sequenceIds) {
-		super();
-		this.folderId = folder;
-		this.id = ID;
-		this.sequenceIds = sequenceIds;
-		failOnError = true;
-	}
+    public MultipleAttachmentRequest(final String folder, final String ID, final String[] sequenceIds) {
+        super();
+        this.folderId = folder;
+        this.id = ID;
+        this.sequenceIds = sequenceIds;
+        failOnError = true;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-	 */
-	@Override
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
+     */
+    @Override
     public Object getBody() throws JSONException {
-		return null;
-	}
+        return null;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-	 */
-	@Override
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
+     */
+    @Override
     public Method getMethod() {
-		return Method.GET;
-	}
+        return Method.GET;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-	 */
-	@Override
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
+     */
+    @Override
     public Parameter[] getParameters() {
-		return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, Mail.ACTION_ZIP_MATTACH),
-				new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderId),
-				new Parameter(AJAXServlet.PARAMETER_ID, id),
-				new Parameter(Mail.PARAMETER_MAILATTCHMENT, sequenceIds)};
-	}
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, Mail.ACTION_ZIP_MATTACH), new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderId), new Parameter(AJAXServlet.PARAMETER_ID, id), new Parameter(Mail.PARAMETER_MAILATTCHMENT, sequenceIds) };
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-	 */
-	@Override
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
+     */
+    @Override
     public AbstractAJAXParser<?> getParser() {
-		return new MultipleAttachmentParser(failOnError);
-	}
+        return new MultipleAttachmentParser(failOnError);
+    }
 
 }

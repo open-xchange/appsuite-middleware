@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.importexport;
 
+import static org.junit.Assert.assertFalse;
+import org.junit.Test;
 import com.openexchange.ajax.UserTest;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
@@ -76,15 +78,9 @@ import com.openexchange.resource.Resource;
 public final class Bug11868Test extends AbstractAJAXSession {
 
     /**
-     * @param name
-     */
-    public Bug11868Test(final String name) {
-        super(name);
-    }
-
-    /**
      * Checks if a whole day appointment is imported properly.
      */
+    @Test
     public void testWholeDayAppointment() throws Throwable {
         final AJAXClient client = getClient();
         String ical;
@@ -95,9 +91,7 @@ public final class Bug11868Test extends AbstractAJAXSession {
             final SearchRequest request = new SearchRequest(search, UserTest.CONTACT_FIELDS);
             final SearchResponse response = Executor.execute(client, request);
             final User[] user = response.getUser();
-            ical = ICAL.replace("@email1@", user[0].getMail())
-                .replace("@email2@", user[1].getMail())
-                .replace("@email3@", user[2].getMail());
+            ical = ICAL.replace("@email1@", user[0].getMail()).replace("@email2@", user[1].getMail()).replace("@email3@", user[2].getMail());
         }
         final Resource resource = new Resource();
         {
@@ -105,46 +99,23 @@ public final class Bug11868Test extends AbstractAJAXSession {
             resource.setDisplayName("Bug 11868 test resource" + different);
             resource.setSimpleName("Bug 11868 test resource " + different);
             resource.setMail("bug11868testresource" + different + "@example.org");
-            final ResourceNewResponse response = Executor.execute(client,
-                new ResourceNewRequest(resource));
+            final ResourceNewResponse response = Executor.execute(client, new ResourceNewRequest(resource));
             resource.setIdentifier(response.getID());
             resource.setLastModified(response.getTimestamp());
             ical = ical.replace("@resource1@", resource.getDisplayName());
         }
         final int folderId = client.getValues().getPrivateAppointmentFolder();
-        final ICalImportResponse iResponse = Executor.execute(client,
-            new ICalImportRequest(folderId, ical));
+        final ICalImportResponse iResponse = Executor.execute(client, new ICalImportRequest(folderId, ical));
         final ImportResult result = iResponse.getImports()[0];
         final int objectId = Integer.parseInt(result.getObjectId());
         try {
-            final GetResponse gResponse = Executor.execute(client,
-                new GetRequest(folderId, objectId));
+            final GetResponse gResponse = Executor.execute(client, new GetRequest(folderId, objectId));
             assertFalse(gResponse.hasError());
         } finally {
-            Executor.execute(client, new DeleteRequest(objectId, folderId,
-                result.getDate()));
+            Executor.execute(client, new DeleteRequest(objectId, folderId, result.getDate()));
             Executor.execute(client, new ResourceDeleteRequest(resource));
         }
     }
 
-    private static final String ICAL =
-        "BEGIN:VCALENDAR\n" +
-        "VERSION:2.0\n" +
-        "PRODID:OPEN-XCHANGE\n" +
-        "BEGIN:VEVENT\n" +
-        "DTSTAMP:20080807T103300Z\n" +
-        "SUMMARY:Hosting Call\n" +
-        "DESCRIPTION:Recreated due to several reasons\n" +
-        "DTSTART:20080225T130000Z\n" +
-        "DTEND:20080225T140000Z\n" +
-        "CLASS:PUBLIC\n" +
-        "LOCATION:TelCo1\n" +
-        "TRANSP:OPAQUE\n" +
-        "ATTENDEE:MAILTO:@email1@\n" +
-        "ATTENDEE:MAILTO:@email2@\n" +
-        "ATTENDEE:MAILTO:@email3@\n" +
-        "RESOURCES:@resource1@\n" +
-        "RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=MO\n" +
-        "END:VEVENT\n" +
-        "END:VCALENDAR\n";
+    private static final String ICAL = "BEGIN:VCALENDAR\n" + "VERSION:2.0\n" + "PRODID:OPEN-XCHANGE\n" + "BEGIN:VEVENT\n" + "DTSTAMP:20080807T103300Z\n" + "SUMMARY:Hosting Call\n" + "DESCRIPTION:Recreated due to several reasons\n" + "DTSTART:20080225T130000Z\n" + "DTEND:20080225T140000Z\n" + "CLASS:PUBLIC\n" + "LOCATION:TelCo1\n" + "TRANSP:OPAQUE\n" + "ATTENDEE:MAILTO:@email1@\n" + "ATTENDEE:MAILTO:@email2@\n" + "ATTENDEE:MAILTO:@email3@\n" + "RESOURCES:@resource1@\n" + "RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=MO\n" + "END:VEVENT\n" + "END:VCALENDAR\n";
 }

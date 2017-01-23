@@ -49,17 +49,20 @@
 
 package com.openexchange.ajax.subscribe.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.subscribe.Subscription;
-
 
 /**
  *
@@ -67,11 +70,12 @@ import com.openexchange.subscribe.Subscription;
  */
 public class AllSubscriptionsTest extends AbstractSubscriptionTest {
 
-    public AllSubscriptionsTest(String name) {
-        super(name);
+    public AllSubscriptionsTest() {
+        super();
     }
 
-    public void testBasicOXMFAllRequest() throws OXException, IOException, SAXException, JSONException{
+    @Test
+    public void testBasicOXMFAllRequest() throws OXException, IOException, SAXException, JSONException {
         FolderObject folder = createDefaultContactFolder();
         DynamicFormDescription formDescription = generateFormDescription();
         Subscription subscription = generateOXMFSubscription(formDescription);
@@ -79,7 +83,7 @@ public class AllSubscriptionsTest extends AbstractSubscriptionTest {
 
         subMgr.newAction(subscription);
         assertFalse("Precondition: Creation of test file should work", subMgr.getLastResponse().hasError());
-        List<String> columns = Arrays.asList("id","folder", "source");
+        List<String> columns = Arrays.asList("id", "folder", "source");
         JSONArray all = subMgr.allAction(folder.getObjectID(), columns);
 
         assertFalse("Should be able to handle all request", subMgr.getLastResponse().hasError());
@@ -91,6 +95,7 @@ public class AllSubscriptionsTest extends AbstractSubscriptionTest {
         assertEquals("Should return the same source ID", subscription.getSource().getId(), elements.getString(2));
     }
 
+    @Test
     public void testAllRequestForUser() throws OXException, IOException, SAXException, JSONException {
         FolderObject folder = createDefaultContactFolder();
         DynamicFormDescription formDescription = generateFormDescription();
@@ -99,12 +104,12 @@ public class AllSubscriptionsTest extends AbstractSubscriptionTest {
 
         subMgr.newAction(subscription);
         assertFalse("Precondition: Creation of test file should work", subMgr.getLastResponse().hasError());
-        List<String> columns = Arrays.asList("id","folder", "source");
+        List<String> columns = Arrays.asList("id", "folder", "source");
         JSONArray all = subMgr.allAction(folder.getObjectID(), columns);
         assertFalse("Should be able to handle all request", subMgr.getLastResponse().hasError());
 
         boolean containsSubscription = false;
-        checkID : for (int i = 0; i < all.length(); i++) {
+        checkID: for (int i = 0; i < all.length(); i++) {
             JSONArray actual = all.getJSONArray(i);
             if (actual.getInt(0) == subscription.getId()) {
                 containsSubscription = true;

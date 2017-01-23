@@ -74,7 +74,7 @@ public class GetChangeExceptionsRequest extends AbstractAppointmentRequest<GetCh
     public GetChangeExceptionsRequest(int folderId, int objectId, int[] columns) {
         this(folderId, objectId, columns, true);
     }
-    
+
     public GetChangeExceptionsRequest(int folderId, int objectId, int[] columns, boolean failOnError) {
         this.folderId = folderId;
         this.objectId = objectId;

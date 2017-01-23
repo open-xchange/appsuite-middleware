@@ -61,7 +61,6 @@ import com.openexchange.client.onboarding.Device;
 import com.openexchange.client.onboarding.Platform;
 import com.openexchange.client.onboarding.Scenario;
 
-
 /**
  * {@link ConfigResponse}
  *
@@ -73,7 +72,7 @@ public class ConfigResponse extends AbstractAJAXResponse {
     protected ConfigResponse(Response response) {
         super(response);
     }
-    
+
     public List<Platform> getPlatforms() throws Exception {
         JSONObject json = (JSONObject) getData();
         List<Platform> platforms = new ArrayList<Platform>();
@@ -84,7 +83,7 @@ public class ConfigResponse extends AbstractAJAXResponse {
         }
         return platforms;
     }
-    
+
     public List<Device> getDevices() throws Exception {
         JSONObject json = (JSONObject) getData();
         List<Device> devices = new ArrayList<Device>();
@@ -95,18 +94,18 @@ public class ConfigResponse extends AbstractAJAXResponse {
         }
         return devices;
     }
-    
+
     public List<Scenario> getScenario() throws Exception {
         JSONObject json = (JSONObject) getData();
         List<Scenario> scenarios = new ArrayList<Scenario>();
         JSONArray jsonScenarios = json.getJSONArray("scenarios");
         for (int i = 0; i < jsonScenarios.length(); i++) {
-//            JSONArray scenario = jsonScenarios.getJSONObject(i);
-//            scenarios.add(new Sc)
+            //            JSONArray scenario = jsonScenarios.getJSONObject(i);
+            //            scenarios.add(new Sc)
         }
         return scenarios;
     }
-    
+
     public Map<String, List<String>> getMatching() throws Exception {
         JSONObject json = (JSONObject) getData();
         JSONArray matching = json.getJSONArray("matching");
@@ -123,5 +122,5 @@ public class ConfigResponse extends AbstractAJAXResponse {
         }
         return result;
     }
-    
+
 }

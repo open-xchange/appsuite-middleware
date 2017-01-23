@@ -72,23 +72,23 @@ import net.sourceforge.cardme.vcard.types.NType;
  */
 public class VCardResource {
 
-	private static final VCardEngine PARSER = new VCardEngine(CompatibilityMode.MAC_ADDRESS_BOOK);
-	private static final VCardWriter WRITER = new VCardWriter(VCardVersion.V3_0, CompatibilityMode.MAC_ADDRESS_BOOK);
+    private static final VCardEngine PARSER = new VCardEngine(CompatibilityMode.MAC_ADDRESS_BOOK);
+    private static final VCardWriter WRITER = new VCardWriter(VCardVersion.V3_0, CompatibilityMode.MAC_ADDRESS_BOOK);
 
-	private final String eTag;
-	private final String href;
-	private final VCard vCard;
+    private final String eTag;
+    private final String href;
+    private final VCard vCard;
 
-	public VCardResource(final String vCardString, final String href, final String eTag) throws IOException, VCardParseException {
-		this.vCard = PARSER.parse(vCardString);
-		this.href = href;
-		this.eTag = eTag;
-	}
+    public VCardResource(final String vCardString, final String href, final String eTag) throws IOException, VCardParseException {
+        this.vCard = PARSER.parse(vCardString);
+        this.href = href;
+        this.eTag = eTag;
+    }
 
-	public String getUID() {
-		final UidFeature uidFeature = this.vCard.getUid();
-		return null != uidFeature ? uidFeature.getUid() : null;
-	}
+    public String getUID() {
+        final UidFeature uidFeature = this.vCard.getUid();
+        return null != uidFeature ? uidFeature.getUid() : null;
+    }
 
     public String getFN() {
         FNType formattedName = this.vCard.getFN();
@@ -105,80 +105,80 @@ public class VCardResource {
         return null != n ? n.getFamilyName() : null;
     }
 
-	public List<ExtendedType> getExtendedTypes(String extendedName) {
-		List<ExtendedType> xTypes = new ArrayList<ExtendedType>();
-		List<ExtendedType> extendedTypes = this.vCard.getExtendedTypes();
-		if (null != extendedTypes) {
-    		for (ExtendedType xType : extendedTypes) {
+    public List<ExtendedType> getExtendedTypes(String extendedName) {
+        List<ExtendedType> xTypes = new ArrayList<ExtendedType>();
+        List<ExtendedType> extendedTypes = this.vCard.getExtendedTypes();
+        if (null != extendedTypes) {
+            for (ExtendedType xType : extendedTypes) {
                 if (extendedName.equals(xType.getExtendedName())) {
                     xTypes.add(xType);
                 }
-    		}
-		}
-		return xTypes;
-	}
+            }
+        }
+        return xTypes;
+    }
 
-	/**
-	 * @return the eTag
-	 */
-	public String getETag() {
-		return eTag;
-	}
+    /**
+     * @return the eTag
+     */
+    public String getETag() {
+        return eTag;
+    }
 
-	/**
-	 * @return the href
-	 */
-	public String getHref() {
-		return href;
-	}
+    /**
+     * @return the href
+     */
+    public String getHref() {
+        return href;
+    }
 
-	/**
-	 * @return the vCard
-	 */
-	public VCard getVCard() {
-		return vCard;
-	}
+    /**
+     * @return the vCard
+     */
+    public VCard getVCard() {
+        return vCard;
+    }
 
-	public boolean isGroup() {
-		final List<ExtendedType> xFeatures = this.getExtendedTypes("X-ADDRESSBOOKSERVER-KIND");
-		return null != xFeatures && 0 < xFeatures.size() && "group".equals(xFeatures.get(0).getExtendedValue());
-	}
+    public boolean isGroup() {
+        final List<ExtendedType> xFeatures = this.getExtendedTypes("X-ADDRESSBOOKSERVER-KIND");
+        return null != xFeatures && 0 < xFeatures.size() && "group".equals(xFeatures.get(0).getExtendedValue());
+    }
 
-	public List<String> getMemberUIDs() {
-		List<ExtendedType> members = this.getExtendedTypes("X-ADDRESSBOOKSERVER-MEMBER");
-		if (null == members) {
-			return null;
-		}
-		List<String> uids = new ArrayList<String>();
-		for (ExtendedType memberType : members) {
-			uids.add(memberType.getExtendedValue().substring(9));
+    public List<String> getMemberUIDs() {
+        List<ExtendedType> members = this.getExtendedTypes("X-ADDRESSBOOKSERVER-MEMBER");
+        if (null == members) {
+            return null;
+        }
+        List<String> uids = new ArrayList<String>();
+        for (ExtendedType memberType : members) {
+            uids.add(memberType.getExtendedValue().substring(9));
 
-		}
-		return uids;
-	}
+        }
+        return uids;
+    }
 
-	public ExtendedFeature getMemberXFeature(String uid) {
-		List<ExtendedType> members = this.getExtendedTypes("X-ADDRESSBOOKSERVER-MEMBER");
-		if (null == members) {
-			return null;
-		}
-		for (ExtendedType memberType : members) {
-			if (uid.equals(memberType.getExtendedValue().substring(9))) {
-				return memberType;
-			}
-		}
-		return null;
-	}
+    public ExtendedFeature getMemberXFeature(String uid) {
+        List<ExtendedType> members = this.getExtendedTypes("X-ADDRESSBOOKSERVER-MEMBER");
+        if (null == members) {
+            return null;
+        }
+        for (ExtendedType memberType : members) {
+            if (uid.equals(memberType.getExtendedValue().substring(9))) {
+                return memberType;
+            }
+        }
+        return null;
+    }
 
-	@Override
+    @Override
     public String toString() {
-		WRITER.setVCard(this.vCard);
-		try {
+        WRITER.setVCard(this.vCard);
+        try {
             return WRITER.buildVCardString();
         } catch (VCardBuildException e) {
             e.printStackTrace();
             return null;
         }
-	}
+    }
 
 }

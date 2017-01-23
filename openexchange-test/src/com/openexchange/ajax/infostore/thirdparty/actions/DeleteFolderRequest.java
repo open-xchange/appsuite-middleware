@@ -57,13 +57,13 @@ import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
-
 /**
  * {@link DeleteFolderRequest}
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class DeleteFolderRequest extends AbstractFolderRequest<DeleteFolderResponse> {
+
     private final int tree;
     private final String folderId;
 

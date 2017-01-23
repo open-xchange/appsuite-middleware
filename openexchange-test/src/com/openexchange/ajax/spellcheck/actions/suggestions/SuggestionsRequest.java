@@ -63,63 +63,63 @@ import com.openexchange.ajax.spellcheck.actions.AbstractSpellCheckRequest;
  */
 public final class SuggestionsRequest extends AbstractSpellCheckRequest {
 
-	private final String misspeltWord;
+    private final String misspeltWord;
 
-	private final String locale;
+    private final String locale;
 
-	private final boolean failOnError;
+    private final boolean failOnError;
 
-	/**
-	 * Initializes a new {@link SuggestionsRequest}
-	 */
-	public SuggestionsRequest(final String misspeltWord, final String locale, final boolean failOnError) {
-		super();
-		this.misspeltWord = misspeltWord;
-		this.locale = locale;
-		this.failOnError = failOnError;
-	}
+    /**
+     * Initializes a new {@link SuggestionsRequest}
+     */
+    public SuggestionsRequest(final String misspeltWord, final String locale, final boolean failOnError) {
+        super();
+        this.misspeltWord = misspeltWord;
+        this.locale = locale;
+        this.failOnError = failOnError;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-	 */
-	@Override
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
+     */
+    @Override
     public Object getBody() throws JSONException {
-		return misspeltWord;
-	}
+        return misspeltWord;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-	 */
-	@Override
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
+     */
+    @Override
     public Method getMethod() {
-		return Method.PUT;
-	}
+        return Method.PUT;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-	 */
-	@Override
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
+     */
+    @Override
     public Parameter[] getParameters() {
-		final List<Parameter> params = new ArrayList<Parameter>();
-		params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "suggestions"));
-		params.add(new Parameter("lang", locale));
-		return params.toArray(new Parameter[params.size()]);
-	}
+        final List<Parameter> params = new ArrayList<Parameter>();
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "suggestions"));
+        params.add(new Parameter("lang", locale));
+        return params.toArray(new Parameter[params.size()]);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-	 */
-	@Override
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
+     */
+    @Override
     public SuggestionsParser getParser() {
-		return new SuggestionsParser(failOnError);
-	}
+        return new SuggestionsParser(failOnError);
+    }
 
 }

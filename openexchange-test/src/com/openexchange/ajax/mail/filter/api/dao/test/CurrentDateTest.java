@@ -63,6 +63,7 @@ public class CurrentDateTest extends AbstractTest implements Test<CurrentDateTes
 
     /**
      * Initialises a new {@link AllOfTest}.
+     * 
      * @param testCommand
      */
     public CurrentDateTest(String datePart, String comparison, long dateValue) {

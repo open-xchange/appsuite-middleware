@@ -49,6 +49,10 @@
 
 package com.openexchange.ajax.share.bugs;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
@@ -70,18 +74,21 @@ public class Bug40826Test extends ShareTest {
      *
      * @param name The test name
      */
-    public Bug40826Test(String name) {
-        super(name);
+    public Bug40826Test() {
+        super();
     }
 
+    @Test
     public void testShareCalendarToAuthor() throws Exception {
         testShareToAuthor(FolderObject.CALENDAR);
     }
 
+    @Test
     public void testShareTasksToAuthor() throws Exception {
         testShareToAuthor(FolderObject.TASK);
     }
 
+    @Test
     public void testShareContactsToAuthor() throws Exception {
         testShareToAuthor(FolderObject.CONTACT);
     }
@@ -91,11 +98,11 @@ public class Bug40826Test extends ShareTest {
         /*
          * try and create folder shared to guest user
          */
-        FolderObject folder = Create.createPrivateFolder(randomUID(), module, client.getValues().getUserId(), guestPermission);
+        FolderObject folder = Create.createPrivateFolder(randomUID(), module, getClient().getValues().getUserId(), guestPermission);
         folder.setParentFolderID(getDefaultFolder(module));
-        InsertRequest insertRequest = new InsertRequest(randomFolderAPI(), folder, client.getValues().getTimeZone());
+        InsertRequest insertRequest = new InsertRequest(randomFolderAPI(), folder, getClient().getValues().getTimeZone());
         insertRequest.setFailOnError(false);
-        InsertResponse insertResponse = client.execute(insertRequest);
+        InsertResponse insertResponse = getClient().execute(insertRequest);
         assertNotNull(insertResponse);
         assertTrue("No error in response", insertResponse.hasError());
         assertNotNull("No error in response", insertResponse.getException());

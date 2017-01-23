@@ -63,8 +63,8 @@ public class Bug28637Test extends AbstractSanitizing {
     /**
      * Also covers test for Bug 28668
      */
-    @Test
-    public void testHTML2Text() {
+     @Test
+     public void testHTML2Text() {
         String txtContent = "test<br>test<br>test<br>test";
         String actual = getHtmlService().html2text(txtContent, false);
         String expected = "test\r\ntest\r\ntest\r\ntest";

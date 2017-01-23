@@ -49,7 +49,6 @@
 
 package com.openexchange.contacts.json.mapping;
 
-import static org.junit.Assert.*;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Assert;
@@ -71,10 +70,8 @@ public class ContactMapperTest {
      * @throws java.lang.Exception
      */
     @Before
-    public void setUp() throws Exception {}
-
-    @Test
-    public void testDeserialize_distListWithTwoMembers_markAsDistList() throws OXException, JSONException {
+     @Test
+     public void testDeserialize_distListWithTwoMembers_markAsDistList() throws OXException, JSONException {
         String json = "{\"distribution_list\":[{\"id\":2345,\"folder_id\":6,\"display_name\":\"Steffen Templin\",\"mail\":\"steffen.templin@premium\",\"mail_field\":1},{\"id\":3,\"folder_id\":6,\"display_name\":\"Marcus Klein\",\"mail\":\"marcus.klein@premium\",\"mail_field\":1}]}";
         Contact contact = ContactMapper.getInstance().deserialize(new JSONObject(json), ContactMapper.getInstance().getAllFields(ContactAction.VIRTUAL_FIELDS));
         Assert.assertTrue(contact.getMarkAsDistribtuionlist());
@@ -84,8 +81,8 @@ public class ContactMapperTest {
     /**
      * Related to bug 42726
      */
-    @Test
-    public void testDeserialize_distListWithNoMember_markAsDistList() throws OXException, JSONException {
+     @Test
+     public void testDeserialize_distListWithNoMember_markAsDistList() throws OXException, JSONException {
         String json = "{\"distribution_list\":[]}";
         Contact contact = ContactMapper.getInstance().deserialize(new JSONObject(json), ContactMapper.getInstance().getAllFields(ContactAction.VIRTUAL_FIELDS));
         Assert.assertTrue(contact.getMarkAsDistribtuionlist());

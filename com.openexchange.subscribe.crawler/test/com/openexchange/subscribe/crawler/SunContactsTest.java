@@ -49,6 +49,7 @@
 
 package com.openexchange.subscribe.crawler;
 
+import org.junit.Test;
 
 /**
  * {@link SunContactsTest}
@@ -57,7 +58,8 @@ package com.openexchange.subscribe.crawler;
  */
 public class SunContactsTest extends GenericSubscribeServiceTestHelpers {
 
-    public void testSunContacts(){
+         @Test
+     public void testSunContacts(){
         checkSingleCrawler("Sun Contacts");
     }
 }

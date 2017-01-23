@@ -49,12 +49,13 @@
 
 package com.openexchange.grizzly;
 
+import static org.junit.Assert.assertEquals;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.junit.Test;
 import com.openexchange.ajax.simple.AbstractSimpleClientTest;
 import com.openexchange.ajax.simple.SimpleOXClient;
-import org.junit.Test;
 
 /**
  * {@link OmitUserInputTest} - Check that user input via request url isn't echoed to the client.
@@ -64,7 +65,7 @@ import org.junit.Test;
  */
 public class OmitUserInputTest extends AbstractSimpleClientTest {
 
-    private static String USER_INPUT="i_do_not_exist_at_all";
+    private static String USER_INPUT = "i_do_not_exist_at_all";
 
     @Test
     public void test() throws Exception {

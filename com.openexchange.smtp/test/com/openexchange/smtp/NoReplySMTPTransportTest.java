@@ -128,14 +128,15 @@ public class NoReplySMTPTransportTest {
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown()
+ throws Exception {
         if (server != null) {
             server.stop();
         }
     }
 
-    @Test
-    public void testSendMailMessage() throws Exception {
+     @Test
+     public void testSendMailMessage() throws Exception {
         InternetAddress[] recipients = QuotedInternetAddress.parse("otto@example.com");
         String subject = UUID.randomUUID().toString();
         String body = UUID.randomUUID().toString();
@@ -165,8 +166,8 @@ public class NoReplySMTPTransportTest {
         assertEquals(body, received.getBody());
     }
 
-    @Test
-    public void testSendRawMessage() throws Exception {
+     @Test
+     public void testSendRawMessage() throws Exception {
         InternetAddress[] recipients = QuotedInternetAddress.parse("otto@example.com");
         String subject = UUID.randomUUID().toString();
         String body = UUID.randomUUID().toString();

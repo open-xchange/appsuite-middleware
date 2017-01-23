@@ -122,13 +122,7 @@ public abstract class AbstractAttachmentEventActionTest extends AbstractAttachme
         }
 
         public String getStatus() {
-            return String.format(
-                "OK : %s ReadIds: %s WriteIds: %s Called: %s \n LOG: %s",
-                String.valueOf(ok),
-                read.toString(),
-                write.toString(),
-                String.valueOf(called),
-                log.toString());
+            return String.format("OK : %s ReadIds: %s WriteIds: %s Called: %s \n LOG: %s", String.valueOf(ok), read.toString(), write.toString(), String.valueOf(called), log.toString());
         }
 
     }

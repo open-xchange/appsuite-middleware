@@ -21,23 +21,24 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-
 import java.io.InputStream;
-
-import junit.framework.TestCase;
-
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
 import org.apache.tika.sax.XHTMLContentHandler;
+import org.junit.Test;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.helpers.DefaultHandler;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
-public class MboxParserTest extends TestCase {
-
-    public void testSimple() {
+public class MboxParserTest {
+         @Test
+     public void testSimple() {
         Parser parser = new MboxParser();
         Metadata metadata = new Metadata();
         InputStream stream = getStream("test-documents/simple.mbox");
@@ -56,7 +57,8 @@ public class MboxParserTest extends TestCase {
         }
     }
 
-    public void testHeaders() {
+         @Test
+     public void testHeaders() {
         Parser parser = new MboxParser();
         Metadata metadata = new Metadata();
         InputStream stream = getStream("test-documents/headers.mbox");
@@ -83,7 +85,8 @@ public class MboxParserTest extends TestCase {
         }
     }
 
-    public void testMultilineHeader() {
+         @Test
+     public void testMultilineHeader() {
         Parser parser = new MboxParser();
         Metadata metadata = new Metadata();
         InputStream stream = getStream("test-documents/multiline.mbox");
@@ -103,7 +106,8 @@ public class MboxParserTest extends TestCase {
         }
     }
 
-    public void testQuoted() {
+         @Test
+     public void testQuoted() {
         Parser parser = new MboxParser();
         Metadata metadata = new Metadata();
         InputStream stream = getStream("test-documents/quoted.mbox");
@@ -125,7 +129,8 @@ public class MboxParserTest extends TestCase {
         }
     }
 
-    public void testComplex() {
+         @Test
+     public void testComplex() {
         Parser parser = new MboxParser();
         Metadata metadata = new Metadata();
         InputStream stream = getStream("test-documents/complex.mbox");

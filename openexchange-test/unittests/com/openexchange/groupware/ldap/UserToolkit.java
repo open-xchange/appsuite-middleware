@@ -65,15 +65,13 @@ public final class UserToolkit {
         super();
     }
 
-    public static final User getUser(final String username,
-        final Context ctx) throws OXException {
+    public static final User getUser(final String username, final Context ctx) throws OXException {
         final UserStorage stor = UserStorage.getInstance();
         final int userId = stor.getUserId(username, ctx);
         return stor.getUser(userId, ctx);
     }
 
-    public static final int[] getGroups(final Context ctx, final int userId)
-        throws OXException {
+    public static final int[] getGroups(final Context ctx, final int userId) throws OXException {
         final UserStorage stor = UserStorage.getInstance();
         return stor.getUser(userId, ctx).getGroups();
     }

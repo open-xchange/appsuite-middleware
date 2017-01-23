@@ -50,6 +50,9 @@
 package com.openexchange.ajax.share.tests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -62,7 +65,10 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
@@ -92,33 +98,36 @@ public class BasicAuthTest extends ShareTest {
      *
      * @param name The test name
      */
-    public BasicAuthTest(String name) {
-        super(name);
+    public BasicAuthTest() {
+        super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
-        calendarManager = new CalendarTestManager(client);
+        calendarManager = new CalendarTestManager(getClient());
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        CalendarTestManager calendarManager = this.calendarManager;
-        if (null != calendarManager) {
-            calendarManager.cleanUp();
-            this.calendarManager = null;
-        }
+    @After
+    public void tearDown() throws Exception {
+        try {
+            CalendarTestManager calendarManager = this.calendarManager;
+            if (null != calendarManager) {
+                calendarManager.cleanUp();
+                this.calendarManager = null;
+            }
 
-        if (null != folder) {
-            client.execute(new DeleteRequest(EnumAPI.OX_OLD, false, folder).setFailOnErrorParam(Boolean.FALSE));
-            folder = null;
+            if (null != folder) {
+                getClient().execute(new DeleteRequest(EnumAPI.OX_OLD, false, folder).setFailOnErrorParam(Boolean.FALSE));
+                folder = null;
+            }
+        } finally {
+            super.tearDown();
         }
-
-        super.tearDown();
     }
 
+    @Test
     public void testBasicAuth() throws Exception {
         EnumAPI api = EnumAPI.OUTLOOK;
         int module = FolderObject.CALENDAR;
@@ -131,7 +140,7 @@ public class BasicAuthTest extends ShareTest {
         // Check permissions
         OCLPermission matchingPermission = null;
         for (OCLPermission permission : folder.getPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
                 break;
             }
@@ -156,7 +165,7 @@ public class BasicAuthTest extends ShareTest {
                 appointment.setParentFolderID(folder.getObjectID());
                 appointment.setIgnoreConflicts(true);
 
-                UserParticipant user = new UserParticipant(client.getValues().getUserId());
+                UserParticipant user = new UserParticipant(getClient().getValues().getUserId());
                 user.setConfirm(Appointment.NONE);
                 UserParticipant guestParticipant = new UserParticipant(guestPermission.getEntity());
                 user.setConfirm(Appointment.NONE);
@@ -175,7 +184,7 @@ public class BasicAuthTest extends ShareTest {
                 appointment.setParentFolderID(folder.getObjectID());
                 appointment.setIgnoreConflicts(true);
 
-                UserParticipant user = new UserParticipant(client.getValues().getUserId());
+                UserParticipant user = new UserParticipant(getClient().getValues().getUserId());
                 user.setConfirm(Appointment.NONE);
                 UserParticipant guestParticipant = new UserParticipant(guestPermission.getEntity());
                 user.setConfirm(Appointment.NONE);
@@ -194,7 +203,7 @@ public class BasicAuthTest extends ShareTest {
                 appointment.setParentFolderID(folder.getObjectID());
                 appointment.setIgnoreConflicts(true);
 
-                UserParticipant user = new UserParticipant(client.getValues().getUserId());
+                UserParticipant user = new UserParticipant(getClient().getValues().getUserId());
                 user.setConfirm(Appointment.NONE);
                 UserParticipant guestParticipant = new UserParticipant(guestPermission.getEntity());
                 user.setConfirm(Appointment.NONE);
@@ -213,7 +222,7 @@ public class BasicAuthTest extends ShareTest {
                 appointment.setParentFolderID(folder.getObjectID());
                 appointment.setIgnoreConflicts(true);
 
-                UserParticipant user = new UserParticipant(client.getValues().getUserId());
+                UserParticipant user = new UserParticipant(getClient().getValues().getUserId());
                 user.setConfirm(Appointment.NONE);
                 UserParticipant guestParticipant = new UserParticipant(guestPermission.getEntity());
                 user.setConfirm(Appointment.NONE);
@@ -227,7 +236,7 @@ public class BasicAuthTest extends ShareTest {
 
         // Check access to share (via guest client)
         String shareURL = discoverShareURL(guest);
-        GuestClient guestClient =  resolveShare(shareURL, guestPermission.getRecipient());
+        GuestClient guestClient = resolveShare(shareURL, guestPermission.getRecipient());
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission);
 

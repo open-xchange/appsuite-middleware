@@ -24,19 +24,21 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import junit.framework.TestCase;
-
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MediaType;
 import org.apache.tika.mime.MediaTypeRegistry;
 import org.apache.tika.sax.BodyContentHandler;
+import org.junit.Test;
 import org.xml.sax.ContentHandler;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
-public class CompositeParserTest extends TestCase {
-
-    public void testFindDuplicateParsers() {
+public class CompositeParserTest {
+         @Test
+     public void testFindDuplicateParsers() {
         Parser a = new EmptyParser() {
             public Set<MediaType> getSupportedTypes(ParseContext context) {
                 return Collections.singleton(MediaType.TEXT_PLAIN);
@@ -65,7 +67,8 @@ public class CompositeParserTest extends TestCase {
         assertEquals(b, parsers.get(1));
     }
 
-    public void testDefaultParser() throws Exception {
+         @Test
+     public void testDefaultParser() throws Exception {
        TikaConfig config = TikaConfig.getDefaultConfig();
 
        CompositeParser parser = (CompositeParser) config.getParser();
@@ -74,7 +77,8 @@ public class CompositeParserTest extends TestCase {
        assertEquals(config.getMediaTypeRegistry(), parser.getMediaTypeRegistry());
     }
 
-    public void testMimeTypeAliases() throws Exception {
+         @Test
+     public void testMimeTypeAliases() throws Exception {
        MediaType bmpCanonical = MediaType.image("x-ms-bmp");
        Map<String,String> bmpCanonicalMetadata = new HashMap<String, String>();
        bmpCanonicalMetadata.put("BMP", "True");

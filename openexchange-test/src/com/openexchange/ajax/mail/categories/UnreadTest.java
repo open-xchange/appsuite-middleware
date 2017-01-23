@@ -50,12 +50,9 @@
 package com.openexchange.ajax.mail.categories;
 
 import static org.junit.Assert.assertTrue;
-import java.io.IOException;
-import org.json.JSONException;
 import org.junit.Test;
 import com.openexchange.ajax.mail.MailTestManager;
 import com.openexchange.ajax.mail.actions.NewMailRequest;
-import com.openexchange.exception.OXException;
 
 /**
  * {@link UnreadTest}
@@ -65,20 +62,9 @@ import com.openexchange.exception.OXException;
  */
 public class UnreadTest extends AbstractMailCategoriesTest {
 
-    /**
-     * Initializes a new {@link UnreadTest}.
-     * 
-     * @param name
-     * @throws JSONException
-     * @throws IOException
-     * @throws OXException
-     */
-    public UnreadTest() {
-    }
-
     @Test
     public void testUnreadCount() throws Exception {
-        MailTestManager manager = new MailTestManager(client, false);
+        MailTestManager manager = new MailTestManager(getClient(), false);
         getClient().execute(new NewMailRequest(getInboxFolder(), EML, -1, true));
         assertTrue("Unread count is not 1.", manager.getUnreadCount(CAT_GENERAL) == 1);
         assertTrue("Unread count is not 0.", manager.getUnreadCount(CAT_1) == 0);

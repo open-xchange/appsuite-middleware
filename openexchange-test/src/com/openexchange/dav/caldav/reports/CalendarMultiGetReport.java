@@ -57,7 +57,6 @@ import org.apache.jackrabbit.webdav.version.report.ReportInfo;
 import org.apache.jackrabbit.webdav.version.report.ReportType;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
 import com.openexchange.dav.PropertyNames;
 
 /**
@@ -67,8 +66,7 @@ import com.openexchange.dav.PropertyNames;
  */
 public class CalendarMultiGetReport implements Report, DeltaVConstants {
 
-    public static final ReportType CALENDAR_MULTIGET = ReportType.register(PropertyNames.CALENDAR_MULTIGET.getName(), 
-    		PropertyNames.CALENDAR_MULTIGET.getNamespace(), CalendarMultiGetReport.class); 
+    public static final ReportType CALENDAR_MULTIGET = ReportType.register(PropertyNames.CALENDAR_MULTIGET.getName(), PropertyNames.CALENDAR_MULTIGET.getNamespace(), CalendarMultiGetReport.class);
 
     @Override
     public ReportType getType() {
@@ -81,11 +79,10 @@ public class CalendarMultiGetReport implements Report, DeltaVConstants {
     }
 
     @Override
-    public void init(DavResource dr, ReportInfo ri) throws DavException {
-    }
+    public void init(DavResource dr, ReportInfo ri) throws DavException {}
 
-	@Override
+    @Override
     public Element toXml(Document arg0) {
         throw new UnsupportedOperationException();
-	}
+    }
 }

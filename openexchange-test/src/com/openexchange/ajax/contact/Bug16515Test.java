@@ -49,7 +49,11 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.assertEquals;
 import java.util.TimeZone;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.contact.action.GetResponse;
@@ -63,41 +67,47 @@ import com.openexchange.groupware.container.Contact;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class Bug16515Test extends AbstractAJAXSession {
+
     private AJAXClient client;
     private TimeZone tz;
     private Contact contact;
 
     private final String FILE_AS_VALUE = "I'm the file_as field of Herbert Meier";
 
-    public Bug16515Test(String name) {
-        super(name);
+    public Bug16515Test() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
-        tz = client.getValues().getTimeZone();
+        tz = getClient().getValues().getTimeZone();
         contact = createContact();
     }
 
+    @Test
     public void testFileAs() throws Exception {
-    	GetRequest getContactReq = new GetRequest(contact.getParentFolderID(), contact.getObjectID(), tz);
-    	GetResponse getContactResp = client.execute(getContactReq);
-    	final Contact toCompare = getContactResp.getContact();
+        GetRequest getContactReq = new GetRequest(contact.getParentFolderID(), contact.getObjectID(), tz);
+        GetResponse getContactResp = getClient().execute(getContactReq);
+        final Contact toCompare = getContactResp.getContact();
 
-    	assertEquals("File as has changed after creating contact.", contact.getFileAs(), toCompare.getFileAs());
+        assertEquals("File as has changed after creating contact.", contact.getFileAs(), toCompare.getFileAs());
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-    	DeleteRequest deleteContactReq = new DeleteRequest(contact, false);
-    	client.execute(deleteContactReq);
+    @After
+    public void tearDown() throws Exception {
+        try {
+            DeleteRequest deleteContactReq = new DeleteRequest(contact, false);
+            getClient().execute(deleteContactReq);
+        } finally {
+            super.tearDown();
+        }
     }
 
     public Contact createContact() throws Exception {
-    	final Contact contact = new Contact();
-    	contact.setTitle("Herr");
+        final Contact contact = new Contact();
+        contact.setTitle("Herr");
         contact.setSurName("Meier");
         contact.setGivenName("Herbert");
         contact.setDisplayName("Herbert Meier");
@@ -108,13 +118,13 @@ public class Bug16515Test extends AbstractAJAXSession {
         contact.setTelephoneBusiness1("+49112233445566");
         contact.setCompany("Internal Test AG");
         contact.setEmail1("hebert.meier@open-xchange.com");
-        contact.setParentFolderID(client.getValues().getPrivateContactFolder());
+        contact.setParentFolderID(getClient().getValues().getPrivateContactFolder());
         contact.setFileAs(FILE_AS_VALUE);
 
         InsertRequest insertContactReq = new InsertRequest(contact);
-        InsertResponse insertContactResp = client.execute(insertContactReq);
+        InsertResponse insertContactResp = getClient().execute(insertContactReq);
         insertContactResp.fillObject(contact);
 
-		return contact;
+        return contact;
     }
 }

@@ -1,3 +1,4 @@
+
 package com.openexchange.server.services;
 
 import java.net.URI;
@@ -33,7 +34,6 @@ import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
-
 /**
  * Unit tests for {@link SharedInfostoreJSlobTest}
  *
@@ -41,8 +41,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @since 7.4.2
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({
-    InfostoreConfig.class, ServerConfig.class, AttachmentConfig.class, ContextStorage.class, UserSettingMailStorage.class, UserSettingMail.class, FilestoreStorage.class, FileStorages.class })
+@PrepareForTest({ InfostoreConfig.class, ServerConfig.class, AttachmentConfig.class, ContextStorage.class, UserSettingMailStorage.class, UserSettingMail.class, FilestoreStorage.class, FileStorages.class })
 public class SharedInfostoreJSlobTest {
 
     @InjectMocks
@@ -51,8 +50,8 @@ public class SharedInfostoreJSlobTest {
     @Mock
     private ServerSession session;
 
-//    @Mock
-//    private QuotaFileStorage quotaFileStorage;
+    //    @Mock
+    //    private QuotaFileStorage quotaFileStorage;
     @Mock
     private com.openexchange.filestore.QuotaFileStorage quotaFileStorage;
 
@@ -94,7 +93,6 @@ public class SharedInfostoreJSlobTest {
         PowerMockito.mockStatic(FilestoreStorage.class);
         PowerMockito.when(FilestoreStorage.createURI(Matchers.eq(context))).thenReturn(new URI(""));
 
-
         QuotaFileStorageService qfsService = PowerMockito.mock(QuotaFileStorageService.class);
         Mockito.when(qfsService.getQuotaFileStorage(Matchers.anyInt(), Matchers.anyInt(), Matchers.any(Info.class))).thenReturn(quotaFileStorage);
 
@@ -109,8 +107,7 @@ public class SharedInfostoreJSlobTest {
         PowerMockito.when(UserSettingMailStorage.getInstance()).thenReturn(userSettingMailStorage);
 
         UserSettingMail userSettingMail = Mockito.mock(UserSettingMail.class);
-        PowerMockito.when(userSettingMailStorage.getUserSettingMail(Matchers.anyInt(), Matchers.eq(Matchers.eq(context)))).thenReturn(
-            userSettingMail);
+        PowerMockito.when(userSettingMailStorage.getUserSettingMail(Matchers.anyInt(), Matchers.eq(Matchers.eq(context)))).thenReturn(userSettingMail);
     }
 
     @Test

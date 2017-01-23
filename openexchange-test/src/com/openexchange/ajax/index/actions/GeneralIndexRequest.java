@@ -53,14 +53,13 @@ import java.io.IOException;
 import org.json.JSONException;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
-
 /**
  * {@link GeneralIndexRequest}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class GeneralIndexRequest extends AbstractIndexRequest<GeneralIndexResponse> {
-    
+
     private Parameter[] parameters;
 
     public GeneralIndexRequest(Parameter[] parameters) {

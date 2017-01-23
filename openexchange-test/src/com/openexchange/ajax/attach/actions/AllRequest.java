@@ -55,10 +55,10 @@ import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.attach.AttachmentTools;
+import com.openexchange.ajax.fields.OrderFields;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.search.Order;
-
 
 /**
  * {@link AllRequest}
@@ -67,7 +67,9 @@ import com.openexchange.groupware.search.Order;
  */
 public class AllRequest extends AbstractAttachmentRequest<AllResponse> {
 
-    private final CommonObject obj;
+    private final int folderId;
+    private final int attachedId;
+    private final int moduleId;
     private final int[] columns;
     private final int sort;
     private final Order order;
@@ -78,12 +80,7 @@ public class AllRequest extends AbstractAttachmentRequest<AllResponse> {
     }
 
     public AllRequest(final CommonObject obj, final int[] columns, final int sort, final Order order, boolean failOnError) {
-        super();
-        this.obj = obj;
-        this.columns = columns;
-        this.sort = sort;
-        this.order = order;
-        this.failOnError = failOnError;
+        this(obj.getParentFolderID(), obj.getObjectID(), AttachmentTools.determineModule(obj), columns, sort, order, failOnError);
     }
 
     public AllRequest(final CommonObject obj, final int[] columns) {
@@ -92,6 +89,19 @@ public class AllRequest extends AbstractAttachmentRequest<AllResponse> {
 
     public AllRequest(final CommonObject obj, final int[] columns, boolean failOnError) {
         this(obj, columns, -1, null, failOnError);
+    }
+
+    public AllRequest(final int folderId, final int attachedId, final int moduleId, final int[] columns, final int sort, final Order order) {
+        this(folderId, attachedId, moduleId, columns, sort, order, false);
+    }
+    public AllRequest(final int folderId, final int attachedId, final int moduleId, final int[] columns, final int sort, final Order order, boolean failOnError) {
+        this.folderId = folderId;
+        this.attachedId = attachedId;
+        this.moduleId = moduleId;
+        this.columns = columns;
+        this.sort = sort;
+        this.order = order;
+        this.failOnError = failOnError;
     }
 
     @Override
@@ -103,14 +113,14 @@ public class AllRequest extends AbstractAttachmentRequest<AllResponse> {
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
         List<Parameter> parameters = new ArrayList<Parameter>();
         parameters.add(new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL));
-        parameters.add(new Parameter(AJAXServlet.PARAMETER_ATTACHEDID, obj.getObjectID()));
-        parameters.add(new Parameter(AJAXServlet.PARAMETER_FOLDERID, obj.getParentFolderID()));
-        parameters.add(new Parameter(AJAXServlet.PARAMETER_MODULE, AttachmentTools.determineModule(obj)));
+        parameters.add(new Parameter(AJAXServlet.PARAMETER_ATTACHEDID, attachedId));
+        parameters.add(new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderId));
+        parameters.add(new Parameter(AJAXServlet.PARAMETER_MODULE, moduleId));
         parameters.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
 
         if (sort > 0) {
             parameters.add(new Parameter(AJAXServlet.PARAMETER_SORT, sort));
-            parameters.add(new Parameter(AJAXServlet.PARAMETER_ORDER, order.toString()));
+            parameters.add(new Parameter(AJAXServlet.PARAMETER_ORDER, OrderFields.write(order)));
         }
 
         return parameters.toArray(new Parameter[parameters.size()]);

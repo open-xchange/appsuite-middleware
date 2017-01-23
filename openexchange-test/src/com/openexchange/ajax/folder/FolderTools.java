@@ -85,9 +85,7 @@ public final class FolderTools {
      * @deprecated the generic type of the request now deals with that.
      */
     @Deprecated
-    public static ListResponse list(final AJAXClient client,
-        final ListRequest request) throws OXException, IOException,
-        SAXException, JSONException {
+    public static ListResponse list(final AJAXClient client, final ListRequest request) throws OXException, IOException, SAXException, JSONException {
         return Executor.execute(client, request);
     }
 

@@ -58,20 +58,19 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.resource.Resource;
 
-
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class ResourceSearchResponse  extends AbstractAJAXResponse{
+public class ResourceSearchResponse extends AbstractAJAXResponse {
 
     protected ResourceSearchResponse(Response response) {
         super(response);
     }
 
-    public List<Resource> getResources() throws JSONException{
+    public List<Resource> getResources() throws JSONException {
         List<Resource> list = new LinkedList<Resource>();
         JSONArray data = (JSONArray) getData();
-        for(int i = 0, length = data.length(); i < length; i++){
+        for (int i = 0, length = data.length(); i < length; i++) {
             JSONObject obj = data.getJSONObject(i);
             Resource temp = new Resource();
             temp.setIdentifier(obj.getInt("id"));

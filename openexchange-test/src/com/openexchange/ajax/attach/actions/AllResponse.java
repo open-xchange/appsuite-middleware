@@ -54,18 +54,18 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 
-
 /**
  * {@link AllResponse}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class AllResponse extends AbstractAJAXResponse {
-    
+
     private List<AttachmentMetadata> attachments;
 
     /**
      * Initializes a new {@link AllResponse}.
+     * 
      * @param response
      */
     public AllResponse(final Response response) {

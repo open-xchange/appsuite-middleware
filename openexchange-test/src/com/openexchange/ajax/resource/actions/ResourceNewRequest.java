@@ -67,90 +67,89 @@ import com.openexchange.resource.json.ResourceWriter;
  */
 public final class ResourceNewRequest extends AbstractResourceRequest<ResourceNewResponse> {
 
-	private final JSONObject resourceJSON;
+    private final JSONObject resourceJSON;
 
-	private final boolean failOnError;
+    private final boolean failOnError;
 
-	/**
-	 * Initializes a new {@link ResourceNewRequest}
-	 *
-	 * @param createMe
-	 *            The resource to create
-	 * @param failOnError
-	 *            <code>true</code> to fail on error; otherwise
-	 *            <code>false</code>
-	 * @throws JSONException
-	 *             If a JSON error occurs
-	 */
-	public ResourceNewRequest(final Resource createMe, final boolean failOnError)
-			throws JSONException {
-		super();
-		this.failOnError = failOnError;
-		resourceJSON = ResourceWriter.writeResource(createMe);
-	}
+    /**
+     * Initializes a new {@link ResourceNewRequest}
+     *
+     * @param createMe
+     *            The resource to create
+     * @param failOnError
+     *            <code>true</code> to fail on error; otherwise
+     *            <code>false</code>
+     * @throws JSONException
+     *             If a JSON error occurs
+     */
+    public ResourceNewRequest(final Resource createMe, final boolean failOnError) throws JSONException {
+        super();
+        this.failOnError = failOnError;
+        resourceJSON = ResourceWriter.writeResource(createMe);
+    }
 
-	public ResourceNewRequest(final Resource resource) throws JSONException {
-	    this(resource, true);
-	}
+    public ResourceNewRequest(final Resource resource) throws JSONException {
+        this(resource, true);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-	 */
-	@Override
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
+     */
+    @Override
     public Object getBody() throws JSONException {
-		return resourceJSON;
-	}
+        return resourceJSON;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-	 */
-	@Override
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
+     */
+    @Override
     public Method getMethod() {
-		return Method.PUT;
-	}
+        return Method.PUT;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-	 */
-	@Override
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
+     */
+    @Override
     public Parameter[] getParameters() {
-		final List<Parameter> params = new ArrayList<Parameter>();
-		params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW));
-		return params.toArray(new Parameter[params.size()]);
-	}
+        final List<Parameter> params = new ArrayList<Parameter>();
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW));
+        return params.toArray(new Parameter[params.size()]);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-	 */
-	@Override
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
+     */
+    @Override
     public ResourceNewParser getParser() {
-		return new ResourceNewParser(failOnError);
-	}
+        return new ResourceNewParser(failOnError);
+    }
 
-	private static final class ResourceNewParser extends AbstractAJAXParser<ResourceNewResponse> {
+    private static final class ResourceNewParser extends AbstractAJAXParser<ResourceNewResponse> {
 
-		/**
-		 * Default constructor.
-		 */
-		ResourceNewParser(final boolean failOnError) {
-			super(failOnError);
-		}
+        /**
+         * Default constructor.
+         */
+        ResourceNewParser(final boolean failOnError) {
+            super(failOnError);
+        }
 
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		protected ResourceNewResponse createResponse(final Response response) throws JSONException {
-			return new ResourceNewResponse(response);
-		}
-	}
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        protected ResourceNewResponse createResponse(final Response response) throws JSONException {
+            return new ResourceNewResponse(response);
+        }
+    }
 
 }

@@ -51,8 +51,14 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.ajax.folder.Create.ocl;
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import org.json.JSONArray;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
@@ -62,7 +68,6 @@ import com.openexchange.ajax.appointment.action.SearchRequest;
 import com.openexchange.ajax.appointment.action.SearchResponse;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.groupware.container.Appointment;
@@ -89,39 +94,19 @@ public class Bug18558Test extends AbstractAJAXSession {
     private AJAXClient clientD;
     private Appointment appointment;
 
-    public Bug18558Test(String name) {
-        super(name);
-    }
-
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
         clientA = getClient();
-        clientB = new AJAXClient(User.User2);
-        clientC = new AJAXClient(User.User3);
-        clientD = new AJAXClient(User.User4);
+        clientB = getClient2();
+        clientC = new AJAXClient(testContext.acquireUser());
+        clientD = new AJAXClient(testContext.acquireUser());
 
         FolderObject folderA = new FolderObject();
         folderA.setObjectID(clientA.getValues().getPrivateAppointmentFolder());
         folderA.setLastModified(new Date(Long.MAX_VALUE));
-        folderA.setPermissionsAsArray(new OCLPermission[] {
-            ocl(
-                clientA.getValues().getUserId(),
-                false,
-                true,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION),
-            ocl(
-                clientD.getValues().getUserId(),
-                false,
-                false,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION) });
+        folderA.setPermissionsAsArray(new OCLPermission[] { ocl(clientA.getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION), ocl(clientD.getValues().getUserId(), false, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION) });
 
         CommonInsertResponse response = clientA.execute(new com.openexchange.ajax.folder.actions.UpdateRequest(EnumAPI.OX_OLD, folderA));
         response.fillObject(folderA);
@@ -129,23 +114,7 @@ public class Bug18558Test extends AbstractAJAXSession {
         FolderObject folderB = new FolderObject();
         folderB.setObjectID(clientB.getValues().getPrivateAppointmentFolder());
         folderB.setLastModified(new Date(Long.MAX_VALUE));
-        folderB.setPermissionsAsArray(new OCLPermission[] {
-            ocl(
-                clientB.getValues().getUserId(),
-                false,
-                true,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION),
-            ocl(
-                clientD.getValues().getUserId(),
-                false,
-                false,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION) });
+        folderB.setPermissionsAsArray(new OCLPermission[] { ocl(clientB.getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION), ocl(clientD.getValues().getUserId(), false, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION) });
 
         response = clientB.execute(new com.openexchange.ajax.folder.actions.UpdateRequest(EnumAPI.OX_OLD, folderB));
         response.fillObject(folderB);
@@ -156,14 +125,15 @@ public class Bug18558Test extends AbstractAJAXSession {
         appointment.setEndDate(D("01.04.2011 09:00"));
         appointment.setParentFolderID(clientC.getValues().getPrivateAppointmentFolder());
         appointment.setIgnoreConflicts(true);
-        appointment.setUsers(new UserParticipant[] {new UserParticipant(clientA.getValues().getUserId()), new UserParticipant(clientB.getValues().getUserId()) });
-        appointment.setParticipants(new Participant[] {new UserParticipant(clientA.getValues().getUserId()), new UserParticipant(clientB.getValues().getUserId()) });
+        appointment.setUsers(new UserParticipant[] { new UserParticipant(clientA.getValues().getUserId()), new UserParticipant(clientB.getValues().getUserId()) });
+        appointment.setParticipants(new Participant[] { new UserParticipant(clientA.getValues().getUserId()), new UserParticipant(clientB.getValues().getUserId()) });
 
         InsertRequest insertRequest = new InsertRequest(appointment, clientC.getValues().getTimeZone());
         AppointmentInsertResponse insertResponse = clientC.execute(insertRequest);
         insertResponse.fillObject(appointment);
     }
 
+    @Test
     public void testBug18558Test() throws Exception {
         SearchRequest search = new SearchRequest(appointment.getTitle(), -1, new int[] { Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.TITLE, Appointment.USERS, Appointment.PARTICIPANTS });
         SearchResponse searchResponse = clientD.execute(search);
@@ -195,12 +165,15 @@ public class Bug18558Test extends AbstractAJAXSession {
         assertFalse("No error expected.", getResponse.hasError());
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        appointment.setLastModified(new Date(Long.MAX_VALUE));
-        if (appointment.getObjectID() > 0) {
-            clientC.execute(new DeleteRequest(appointment));
+        try {
+            appointment.setLastModified(new Date(Long.MAX_VALUE));
+            if (appointment.getObjectID() > 0) {
+                clientC.execute(new DeleteRequest(appointment));
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 }

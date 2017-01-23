@@ -49,6 +49,10 @@
 
 package com.openexchange.contact.storage;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.UUID;
@@ -155,6 +159,7 @@ public class UpdateTest extends ContactStorageTest {
         assertEquals("image content type wrong", savedContact.getImageContentType(), updatedContact.getImageContentType());
     }
 
+    @Test
     public void testUpdateDistList() throws Exception {
         /*
          * create contact
@@ -164,12 +169,7 @@ public class UpdateTest extends ContactStorageTest {
         contact.setCreatedBy(getUserID());
         contact.setSurName("Distributionlist 52");
         contact.setUid(UUID.randomUUID().toString());
-        contact.setDistributionList(new DistributionListEntryObject[] {
-            new DistributionListEntryObject("Horst Hund", "horst.hund@example.com", 0),
-            new DistributionListEntryObject("Werner Hund", "werner.hund@example.com", 0),
-            new DistributionListEntryObject("Dieter Hund", "dieter.hund@example.com", 0),
-            new DistributionListEntryObject("Klaus Hund", "klaus.hund@example.com", 0),
-            new DistributionListEntryObject("Kurt Hund", "kurt.hund@example.com", 0),
+        contact.setDistributionList(new DistributionListEntryObject[] { new DistributionListEntryObject("Horst Hund", "horst.hund@example.com", 0), new DistributionListEntryObject("Werner Hund", "werner.hund@example.com", 0), new DistributionListEntryObject("Dieter Hund", "dieter.hund@example.com", 0), new DistributionListEntryObject("Klaus Hund", "klaus.hund@example.com", 0), new DistributionListEntryObject("Kurt Hund", "kurt.hund@example.com", 0),
         });
         getStorage().create(getSession(), folderId, contact);
         super.rememberForCleanUp(contact);
@@ -187,12 +187,8 @@ public class UpdateTest extends ContactStorageTest {
         /*
          * update contact
          */
-        savedContact.setDistributionList(new DistributionListEntryObject[] {
-                new DistributionListEntryObject("Horst Klotz", "horst.klotz@example.com", 0),
-                new DistributionListEntryObject("Werner Klotz", "werner.klotz@example.com", 0),
-                new DistributionListEntryObject("Klaus Klotz", "klaus.klotz@example.com", 0),
-                new DistributionListEntryObject("Kurt Klotz", "kurt.klotz@example.com", 0),
-            });
+        savedContact.setDistributionList(new DistributionListEntryObject[] { new DistributionListEntryObject("Horst Klotz", "horst.klotz@example.com", 0), new DistributionListEntryObject("Werner Klotz", "werner.klotz@example.com", 0), new DistributionListEntryObject("Klaus Klotz", "klaus.klotz@example.com", 0), new DistributionListEntryObject("Kurt Klotz", "kurt.klotz@example.com", 0),
+        });
         final String objectID = Integer.toString(savedContact.getObjectID());
         getStorage().update(getSession(), folderId, objectID, savedContact, clientLastModified);
         super.rememberForCleanUp(contact);
@@ -208,6 +204,7 @@ public class UpdateTest extends ContactStorageTest {
         assertTrue("distribution list wrong", Arrays.equals(savedContact.getDistributionList(), updatedContact.getDistributionList()));
     }
 
+    @Test
     public void testAddImage() throws Exception {
         /*
          * create contact
@@ -251,6 +248,7 @@ public class UpdateTest extends ContactStorageTest {
         assertEquals("image content type wrong", savedContact.getImageContentType(), updatedContact.getImageContentType());
     }
 
+    @Test
     public void testRemoveImage() throws Exception {
         /*
          * create contact

@@ -50,11 +50,13 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.test.CalendarTestManager;
 
 /**
  * {@link Bug29146Test}
@@ -65,42 +67,32 @@ public class Bug29146Test extends AbstractAJAXSession {
 
     private Appointment appointment;
 
-    private CalendarTestManager ctm;
-
-    public Bug29146Test(String name) {
-        super(name);
+    public Bug29146Test() {
+        super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
-
-        ctm = new CalendarTestManager(client);
 
         appointment = new Appointment();
         appointment.setStartDate(D("18.11.2013 08:00"));
         appointment.setEndDate(D("18.11.2013 09:00"));
         appointment.setTitle("Test Bug 29146");
-        appointment.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         appointment.setIgnoreConflicts(true);
-        UserParticipant user = new UserParticipant(client.getValues().getUserId());
+        UserParticipant user = new UserParticipant(getClient().getValues().getUserId());
         user.setConfirm(Appointment.NONE);
         appointment.setParticipants(new Participant[] { user });
         appointment.setUsers(new UserParticipant[] { user });
     }
 
+    @Test
     public void testInitialParticipantStatus() throws Exception {
-        ctm.insert(appointment);
+        catm.insert(appointment);
 
-        Appointment loadedAppointment = ctm.get(appointment);
+        Appointment loadedAppointment = catm.get(appointment);
         UserParticipant participant = loadedAppointment.getUsers()[0];
         assertEquals("Wrong confirm status.", Appointment.NONE, participant.getConfirm());
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        ctm.cleanUp();
-
-        super.tearDown();
     }
 }

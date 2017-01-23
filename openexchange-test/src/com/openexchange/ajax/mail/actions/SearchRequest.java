@@ -106,6 +106,7 @@ public class SearchRequest extends AbstractMailRequest<SearchResponse> {
 
     /**
      * Initializes a new {@link SearchRequest}.
+     * 
      * @param searchColumns The columns to search in
      * @param patterns The patterns to search for each column
      * @param folder The mail folder fullname

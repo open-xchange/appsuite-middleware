@@ -49,11 +49,15 @@
 
 package com.openexchange.ajax.session;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.apache.http.client.params.ClientPNames;
 import org.apache.http.cookie.Cookie;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -65,8 +69,6 @@ import com.openexchange.ajax.session.actions.StoreRequest;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ReinitializableConfigProviderService;
 import com.openexchange.config.internal.ConfigurationImpl;
-import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.groupware.Init;
 import com.openexchange.java.Strings;
 import com.openexchange.login.ConfigurationProperty;
@@ -77,47 +79,24 @@ import com.openexchange.tools.servlet.http.Tools;
  */
 public class RedirectTest extends AbstractAJAXSession {
 
-    private String login;
-
-    private String password;
-
     private boolean insecure;
 
-    public RedirectTest(final String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        AJAXConfig.init();
-        login = AJAXConfig.getProperty(Property.LOGIN) + "@" + AJAXConfig.getProperty(Property.CONTEXTNAME);
-        password = AJAXConfig.getProperty(Property.PASSWORD);
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
         Init.injectProperty();
         ConfigurationService configService = new ConfigurationImpl(Collections.<ReinitializableConfigProviderService> emptyList());
-        final String value = configService.getProperty(
-            ConfigurationProperty.INSECURE.getPropertyName(),
-            ConfigurationProperty.INSECURE.getDefaultValue());
+        final String value = configService.getProperty(ConfigurationProperty.INSECURE.getPropertyName(), ConfigurationProperty.INSECURE.getDefaultValue());
         insecure = Boolean.parseBoolean(value);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        login = null;
-        password = null;
-        super.tearDown();
-    }
-
+    @Test
     public void testRedirect() throws Throwable {
         final AJAXSession session = new AJAXSession();
         final AJAXClient myClient = new AJAXClient(session, false);
         try {
             // Create session.
-            LoginResponse lResponse = myClient.execute(new LoginRequest(
-                login,
-                password,
-                LoginTools.generateAuthId(),
-                RedirectTest.class.getName(),
-                "6.19.0"));
+            LoginResponse lResponse = myClient.execute(new LoginRequest(testUser.getLogin(), testUser.getPassword(), LoginTools.generateAuthId(), RedirectTest.class.getName(), "6.19.0"));
 
             /*
              * US 52869957 sets com.openexchange.ajax.login.randomToken=false by default. This test only has to run when the response

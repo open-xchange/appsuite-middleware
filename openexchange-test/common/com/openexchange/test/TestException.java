@@ -50,9 +50,11 @@
 package com.openexchange.test;
 
 import com.openexchange.exception.OXException;
+
 /**
  * Exception only for tests. This should be only used if some test is not able
  * to perform its normal operation. E.g. it does not find some folder.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class TestException extends OXException {

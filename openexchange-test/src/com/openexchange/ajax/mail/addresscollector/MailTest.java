@@ -1,13 +1,17 @@
+
 package com.openexchange.ajax.mail.addresscollector;
 
 import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
+import static org.junit.Assert.assertEquals;
 import java.io.IOException;
+import java.util.UUID;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Before;
+import org.junit.Test;
 import org.xml.sax.SAXException;
-import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.folder.Create;
@@ -20,8 +24,6 @@ import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.AbstractMailTest;
 import com.openexchange.ajax.mail.actions.SendRequest;
 import com.openexchange.ajax.mail.contenttypes.MailContentType;
-import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
@@ -36,16 +38,17 @@ public class MailTest extends AbstractMailTest {
 
     private AJAXClient client;
 
-    public MailTest(final String name) {
-        super(name);
+    public MailTest() {
+        super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         this.client = getClient();
     }
 
+    @Test
     public void testAddressCollection() throws Throwable {
         FolderObject folder = null;
         try {
@@ -103,21 +106,21 @@ public class MailTest extends AbstractMailTest {
     }
 
     private void checkContacts(final int folderId) throws Exception {
-        final int[] cols = new int[]{Contact.OBJECT_ID, Contact.EMAIL1};
-        final Contact[] contacts = ContactTest.listContact(client.getSession().getConversation(), folderId, cols, AJAXConfig.getProperty(Property.HOSTNAME), client.getSession().getId());
+        final int[] cols = new int[] { Contact.OBJECT_ID, Contact.EMAIL1 };
+        final Contact[] contacts = cotm.searchAction("*", folderId);
         assertEquals("Number of collected Contacts not correct.", 1, contacts.length);
         assertEquals("Email does not match.", getSendAddress(), contacts[0].getEmail1());
     }
 
     private FolderObject createContactFolder() throws OXException, IOException, SAXException, JSONException {
-        final FolderObject folder = Create.createPrivateFolder("ContactCollectionFolder " + System.currentTimeMillis(), FolderObject.CONTACT, client.getValues().getUserId());
-        folder.setParentFolderID(client.getValues().getPrivateContactFolder());
+        final FolderObject folder = Create.createPrivateFolder("ContactCollectionFolder " + UUID.randomUUID().toString(), FolderObject.CONTACT, getClient().getValues().getUserId());
+        folder.setParentFolderID(getClient().getValues().getPrivateContactFolder());
         final CommonInsertResponse response = Executor.execute(client, new InsertRequest(EnumAPI.OX_OLD, folder));
         folder.setObjectID(response.getId());
         folder.setLastModified(response.getTimestamp());
 
-        client.execute(new SetRequest(Tree.ContactCollectEnabled, B(true)));
-        client.execute(new SetRequest(Tree.ContactCollectFolder, I(folder.getObjectID())));
+        getClient().execute(new SetRequest(Tree.ContactCollectEnabled, B(true)));
+        getClient().execute(new SetRequest(Tree.ContactCollectFolder, I(folder.getObjectID())));
         return folder;
     }
 

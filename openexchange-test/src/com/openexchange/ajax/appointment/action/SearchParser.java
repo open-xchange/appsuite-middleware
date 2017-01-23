@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.ajax.appointment.action;
 
 import com.openexchange.ajax.container.Response;
@@ -55,18 +56,19 @@ import com.openexchange.ajax.framework.AbstractSearchParser;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class SearchParser extends AbstractSearchParser<SearchResponse> {
+
     /**
      * Default constructor.
      *
      * @param failOnError <code>true</code> and this parser checks the server
-     *                    response for containing error messages and lets the test fail.
+     *            response for containing error messages and lets the test fail.
      */
     protected SearchParser(final boolean failOnError, final int[] columns) {
         super(failOnError, columns);
     }
 
     @Override
-	protected SearchResponse instanciateResponse(final Response response) {
+    protected SearchResponse instanciateResponse(final Response response) {
         return new SearchResponse(response);
     }
 }

@@ -64,7 +64,6 @@ import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.rest.services.configuration.ConfigurationRESTService;
 import com.openexchange.server.MockingServiceLookup;
 
 /**

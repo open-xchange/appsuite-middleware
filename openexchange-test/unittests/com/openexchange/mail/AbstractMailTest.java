@@ -59,7 +59,8 @@ import java.util.regex.Pattern;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
 import com.openexchange.configuration.MailConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Folder;
@@ -85,7 +86,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  *
  */
-public abstract class AbstractMailTest extends TestCase {
+public abstract class AbstractMailTest {
 
     private String server;
 
@@ -105,22 +106,8 @@ public abstract class AbstractMailTest extends TestCase {
 
     private SessionObject session;
 
-    /**
-     *
-     */
-    public AbstractMailTest() {
-        super();
-    }
-
-    /**
-     * @param name
-     */
-    public AbstractMailTest(final String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         /*
          * Init
          */
@@ -139,8 +126,8 @@ public abstract class AbstractMailTest extends TestCase {
         testMailDir = MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         Init.stopServer();
     }
 
@@ -362,10 +349,10 @@ public abstract class AbstractMailTest extends TestCase {
      * @throws OXException
      *             If conversion from RFC822 message fails
      */
-    protected static final MailMessage[] getMessages(final String dir, final int limit) throws MessagingException,
-            IOException, OXException {
+    protected static final MailMessage[] getMessages(final String dir, final int limit) throws MessagingException, IOException, OXException {
         final File fdir = new File(dir);
         final File[] messageFiles = fdir.listFiles(new FilenameFilter() {
+
             @Override
             public boolean accept(final File dir, final String name) {
                 return Pattern.compile("mail.*\\.eml").matcher(name).matches();

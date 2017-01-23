@@ -71,7 +71,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactUnificationState;
 import com.openexchange.groupware.container.Contact;
 
-
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
@@ -101,7 +100,7 @@ public class AggregatingContactTestManager extends ContactTestManager {
             contributor.setUserField20(temp.getUserField20());
 
             doJanitorialTasks(doAssociationResponse);
-        } catch(Exception e){
+        } catch (Exception e) {
             doExceptionHandling(e, "DoAssociationRequest");
         }
     }
@@ -113,39 +112,39 @@ public class AggregatingContactTestManager extends ContactTestManager {
             contributor = getAction(contributor);
             doJanitorialTasks(doSeparationResponse);
 
-        } catch(Exception e){
+        } catch (Exception e) {
             doExceptionHandling(e, "DoSeparationRequest");
         }
     }
 
-    public Contact getContactByUID(UUID uid){
+    public Contact getContactByUID(UUID uid) {
         try {
             GetResponse response = getClient().execute(new GetContactByUIDRequest(uid, timeZone));
             doJanitorialTasks(response);
             return response.getContact();
-        } catch(Exception e){
+        } catch (Exception e) {
             doExceptionHandling(e, "GetContactByUIDRequest");
         }
         return null;
     }
 
-    public List<UUID> getAssociatedContactsByUID(UUID uid){
+    public List<UUID> getAssociatedContactsByUID(UUID uid) {
         try {
             GetAssociatedContactsResponse response = getClient().execute(new GetAssociatedContactsRequest(uid, timeZone));
             doJanitorialTasks(response);
             return response.getUUIDs();
-        } catch(Exception e){
+        } catch (Exception e) {
             doExceptionHandling(e, "GetAssociatedContactsRequest");
         }
         return null;
     }
 
-    public List<UUID> getAssociatedContacts(Contact c){
+    public List<UUID> getAssociatedContacts(Contact c) {
         try {
             GetAssociatedContactsResponse response = getClient().execute(new GetAssociatedContactsRequest(c, timeZone));
             doJanitorialTasks(response);
             return response.getUUIDs();
-        } catch(Exception e){
+        } catch (Exception e) {
             doExceptionHandling(e, "GetAssociatedContactsRequest");
         }
         return null;

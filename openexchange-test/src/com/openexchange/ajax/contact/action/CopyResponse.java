@@ -52,7 +52,6 @@ package com.openexchange.ajax.contact.action;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
-
 /**
  * {@link CopyResponse}
  *
@@ -62,6 +61,7 @@ public class CopyResponse extends AbstractAJAXResponse {
 
     /**
      * Initializes a new {@link CopyResponse}.
+     * 
      * @param response
      */
     protected CopyResponse(Response response) {

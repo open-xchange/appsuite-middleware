@@ -49,8 +49,6 @@
 
 package com.openexchange.test.resourcecache.actions;
 
-
-
 /**
  * {@link DownloadRequest}
  *
@@ -67,9 +65,7 @@ public class DownloadRequest extends AbstractResourceCacheRequest<DownloadRespon
 
     @Override
     protected com.openexchange.ajax.framework.AJAXRequest.Parameter[] getAdditionalParameters() {
-        return new Parameter[] {
-            new URLParameter("delivery", "download"),
-            new URLParameter("id", id)
+        return new Parameter[] { new URLParameter("delivery", "download"), new URLParameter("id", id)
         };
     }
 

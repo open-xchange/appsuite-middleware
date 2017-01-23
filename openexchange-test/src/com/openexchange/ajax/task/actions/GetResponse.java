@@ -62,6 +62,7 @@ import com.openexchange.groupware.tasks.Task;
 
 /**
  * Stores the response of getting a task from the server.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class GetResponse extends AbstractAJAXResponse {
@@ -86,7 +87,7 @@ public class GetResponse extends AbstractAJAXResponse {
      *
      * @param timeZone The client timezone
      * @param useLegacyDates <code>true</code> to convert the start- and end-date in legacy mode with <code>Date</code>-types,
-     *                       <code>false</code> to write start- and end-time properties along with the full-time flag
+     *            <code>false</code> to write start- and end-time properties along with the full-time flag
      * @return The task
      * @throws OXException
      */

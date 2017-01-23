@@ -52,6 +52,7 @@ package com.openexchange.ajax.config.actions;
 /**
  * Enumeration containing path of GUI preferences tree. Entries should be sorted
  * by path except all GUI stuff that comes first.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public enum Tree {
@@ -216,9 +217,11 @@ public enum Tree {
     /** [inside GUI] "true" or "false" */
     HoverTaskEnabled("/gui/effects/hover/tasks"),
 
-    /** [inside GUI] 1 = short  =  500 milliseconds
-     *               2 = middle = 1000 milliseconds
-     *               3 = long   = 2000 milliseconds */
+    /**
+     * [inside GUI] 1 = short = 500 milliseconds
+     * 2 = middle = 1000 milliseconds
+     * 3 = long = 2000 milliseconds
+     */
     HoverSpeed("/gui/effects/hover/speed"),
 
     /** [inside GUI] "true" or "false" */
@@ -234,7 +237,6 @@ public enum Tree {
     Categories("/gui/categories"),
 
     CategoriesLocal("/gui/categories/local"),
-
 
     //TODO: more gui settings
 
@@ -406,7 +408,7 @@ public enum Tree {
     /**
      * Default status for new appointments in private/public folders, where the user is participant.
      * This does not affect appointments created by this user, which always have the status "accepted".
-     * The status are described in  User participant object. Default is 0:none (added 2009-07-20/6.12)
+     * The status are described in User participant object. Default is 0:none (added 2009-07-20/6.12)
      */
     CalendarDefaultStatusPrivate("/modules/calendar/defaultStatusPrivate"),
     CalendarDefaultStatusPublic("/modules/calendar/defaultStatusPublic"),
@@ -420,7 +422,7 @@ public enum Tree {
     /** Defines if the user is allowed to search across all contact folders. */
     SingleFolderSearch("/modules/contacts/singleFolderSearch"),
 
-    /** Define if search via Sidebar is available or not .*/
+    /** Define if search via Sidebar is available or not . */
     CharacterSearch("/modules/contacts/characterSearch"),
 
     /** true if an auto complete search may omit the folder identifier array and search in all readable folders. */

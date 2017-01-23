@@ -55,23 +55,22 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Params;
 
-
 /**
  * {@link UpdatesRequest}
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class UpdatesRequest  extends AbstractGroupRequest<UpdatesResponse>{
+public class UpdatesRequest extends AbstractGroupRequest<UpdatesResponse> {
 
     private final boolean failOnError;
     private final Date lastModified;
 
     @Override
-    public Object getBody(){
+    public Object getBody() {
         return null;
     }
 
-    public UpdatesRequest(Date since, boolean failOnError){
+    public UpdatesRequest(Date since, boolean failOnError) {
         this.failOnError = failOnError;
         this.lastModified = since;
     }
@@ -82,16 +81,14 @@ public class UpdatesRequest  extends AbstractGroupRequest<UpdatesResponse>{
     }
 
     @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters(){
-        return new Params(
-            AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATES,
-            AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(this.lastModified.getTime())
-        ).toArray();
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
+        return new Params(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATES, AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(this.lastModified.getTime())).toArray();
     }
 
     @Override
     public AbstractAJAXParser<? extends UpdatesResponse> getParser() {
-        return new AbstractAJAXParser<UpdatesResponse>(this.failOnError){
+        return new AbstractAJAXParser<UpdatesResponse>(this.failOnError) {
+
             @Override
             protected UpdatesResponse createResponse(Response response) {
                 return new UpdatesResponse(response);

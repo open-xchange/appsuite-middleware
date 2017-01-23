@@ -1,3 +1,4 @@
+
 package com.openexchange.ajax.appointment.action;
 
 import com.openexchange.ajax.container.Response;
@@ -12,7 +13,6 @@ public class AppointmentInsertResponse extends CommonInsertResponse {
     AppointmentInsertResponse(final Response response) {
         super(response);
     }
-
 
     /**
      * Puts the data of this insert response into a task object. This are

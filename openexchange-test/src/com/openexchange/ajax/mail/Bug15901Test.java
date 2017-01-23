@@ -49,9 +49,14 @@
 
 package com.openexchange.ajax.mail;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -81,34 +86,38 @@ public class Bug15901Test extends AbstractAJAXSession {
 
     private String[][] ids;
 
-    public Bug15901Test(final String name) {
-        super(name);
+    public Bug15901Test() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
-        folder = client.getValues().getInboxFolder();
-        address = client.getValues().getSendAddress();
+        folder = getClient().getValues().getInboxFolder();
+        address = getClient().getValues().getSendAddress();
         final String testmail = TestMails.replaceAddresses(TestMails.DDDTDL_MAIL, address);
         final byte[] buf = testmail.getBytes();
         final ByteArrayInputStream mail = new ByteArrayInputStream(buf);
         final ImportMailRequest request = new ImportMailRequest(folder, 32, mail);
-        final ImportMailResponse response = client.execute(request);
+        final ImportMailResponse response = getClient().execute(request);
         ids = response.getIds();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        final DeleteRequest del = new DeleteRequest(ids);
-        client.execute(del);
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
+        try {
+            final DeleteRequest del = new DeleteRequest(ids);
+            getClient().execute(del);
+        } finally {
+            super.tearDown();
+        }
     }
 
+    @Test
     public void testBug15901() throws Throwable {
         final GetRequest request = new GetRequest(folder, ids[0][1], false);
-        final GetResponse response = client.execute(request);
+        final GetResponse response = getClient().execute(request);
 
         final JSONArray attachmentArray = response.getAttachments();
 
@@ -130,15 +139,9 @@ public class Bug15901Test extends AbstractAJAXSession {
         final AttachmentRequest attachmentRequest = new AttachmentRequest(folder, ids[0][1], sequenceId);
         attachmentRequest.setSaveToDisk(false);
         attachmentRequest.setFilter(true);
-        final WebResponse webResponse = Executor.execute4Download(
-            getSession(),
-            attachmentRequest,
-            AJAXConfig.getProperty(AJAXConfig.Property.PROTOCOL),
-            AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME));
+        final WebResponse webResponse = Executor.execute4Download(getSession(), attachmentRequest, AJAXConfig.getProperty(AJAXConfig.Property.PROTOCOL), AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME));
         final String mailSourceCode = webResponse.getText();
 
-        assertTrue(
-            "Could not detect expected tags.",
-            mailSourceCode.contains("<dl>") && mailSourceCode.contains("<dt>") && mailSourceCode.contains("<dd>"));
+        assertTrue("Could not detect expected tags.", mailSourceCode.contains("<dl>") && mailSourceCode.contains("<dt>") && mailSourceCode.contains("<dd>"));
     }
 }

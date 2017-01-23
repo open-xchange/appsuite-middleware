@@ -49,6 +49,7 @@
 
 package com.openexchange.subscribe.crawler;
 
+import org.junit.Test;
 
 /**
  * {@link GMXTest}
@@ -57,7 +58,8 @@ package com.openexchange.subscribe.crawler;
  */
 public class GMXTest extends GenericSubscribeServiceTestHelpers {
 
-    public void testGMX(){
+         @Test
+     public void testGMX(){
         checkSingleCrawler("gmx.de");
     }
 }

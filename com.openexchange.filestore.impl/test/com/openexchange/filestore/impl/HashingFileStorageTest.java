@@ -49,6 +49,10 @@
 
 package com.openexchange.filestore.impl;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -58,6 +62,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.SortedSet;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 
 
@@ -69,7 +74,8 @@ import com.openexchange.exception.OXException;
 public class HashingFileStorageTest extends AbstractHashingFileStorageTest {
 
 
-    public void testLifecycle() throws Exception {
+         @Test
+     public void testLifecycle() throws Exception {
         String data = "I am nice data";
         String fileId = fs.saveNewFile( IS(data) );
 
@@ -86,7 +92,8 @@ public class HashingFileStorageTest extends AbstractHashingFileStorageTest {
         compare.close();
     }
 
-    public void testListFiles() throws Exception{
+         @Test
+     public void testListFiles() throws Exception{
         Map<String, Integer> files = new HashMap<String, Integer>();
         for(int i = 0; i < 10; i++) {
             String data = "I am nice data in the file number "+i;
@@ -103,7 +110,8 @@ public class HashingFileStorageTest extends AbstractHashingFileStorageTest {
         }
     }
 
-    public void testRemove() throws Exception {
+         @Test
+     public void testRemove() throws Exception {
         Map<String, Integer> files = new HashMap<String, Integer>();
         for(int i = 0; i < 10; i++) {
             String data = "I am nice data in the file number "+i;
@@ -117,7 +125,8 @@ public class HashingFileStorageTest extends AbstractHashingFileStorageTest {
         assertTrue(list == null || list.length == 0);
     }
 
-    public void testBug34249() throws Exception {
+         @Test
+     public void testBug34249() throws Exception {
         List<String> files = new ArrayList<String>(100);
 
         //fill file storage with files
@@ -135,7 +144,8 @@ public class HashingFileStorageTest extends AbstractHashingFileStorageTest {
         assertTrue("Empty folders were not deleted", folders.length == 0);
     }
 
-    public void testBug34249WithNonemptyFolders() throws Exception {
+         @Test
+     public void testBug34249WithNonemptyFolders() throws Exception {
         List<String> files = new ArrayList<String>(100);
 
         //fill file storage with files
@@ -162,7 +172,8 @@ public class HashingFileStorageTest extends AbstractHashingFileStorageTest {
 
     // Error Cases
 
-    public void testReadUnknownID() {
+         @Test
+     public void testReadUnknownID() {
         try {
             fs.getFile("fantasyName");
             fail("Could read unkown file");
@@ -170,11 +181,13 @@ public class HashingFileStorageTest extends AbstractHashingFileStorageTest {
         }
     }
 
-    public void testDeleteUnknownID() throws Exception {
+         @Test
+     public void testDeleteUnknownID() throws Exception {
         assertFalse(fs.deleteFile("fantasyName"));
     }
 
-    public void testDeleteUnknownIDs() throws Exception {
+         @Test
+     public void testDeleteUnknownIDs() throws Exception {
         String data = "I am nice data";
         String fileId = fs.saveNewFile( IS(data) );
 

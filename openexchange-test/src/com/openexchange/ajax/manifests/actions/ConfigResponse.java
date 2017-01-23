@@ -53,7 +53,6 @@ import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
-
 /**
  * {@link ConfigResponse}
  *
@@ -66,6 +65,7 @@ public class ConfigResponse extends AbstractAJAXResponse {
 
     /**
      * Initializes a new {@link ConfigResponse}.
+     * 
      * @param response
      */
     public ConfigResponse(Response response) {

@@ -1,21 +1,20 @@
 package liquibase.changelog.visitor;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import java.util.ArrayList;
+import java.util.List;
+import org.junit.Before;
+import org.junit.Test;
 import liquibase.change.ColumnConfig;
 import liquibase.change.core.CreateTableChange;
 import liquibase.changelog.ChangeSet;
-import liquibase.changelog.RanChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changelog.RanChangeSet;
+import liquibase.database.Database;
 import liquibase.database.core.MockDatabase;
 import liquibase.exception.SetupException;
-import static org.junit.Assert.*;
-
-import org.junit.Before;
-import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 
 public class ValidatingVisitorTest {

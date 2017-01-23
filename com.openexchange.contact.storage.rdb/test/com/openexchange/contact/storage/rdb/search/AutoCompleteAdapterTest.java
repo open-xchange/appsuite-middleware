@@ -105,7 +105,7 @@ public class AutoCompleteAdapterTest {
         assertPatterns(query, "hu%n%\\%%d%");
     }
 
-    private static void assertPatterns(String query, String...expectedPatterns) throws Exception {
+    private static void assertPatterns(String query, String... expectedPatterns) throws Exception {
         List<String> patterns = AutocompleteAdapter.preparePatterns(SimpleTokenizer.tokenize(query));
         if (null == expectedPatterns || 0 == expectedPatterns.length) {
             assertTrue(null == patterns || 0 == patterns.size());

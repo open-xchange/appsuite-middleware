@@ -1,8 +1,10 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.fail;
 import java.util.Date;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.contact.action.GetResponse;
 import com.openexchange.groupware.container.Contact;
@@ -11,15 +13,7 @@ import com.openexchange.test.OXTestToolkit;
 
 public class UpdateTest extends AbstractContactTest {
 
-    public UpdateTest(final String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
+    @Test
     public void testUpdate() throws Exception {
         final Contact contactObj = createContactObject("testUpdate");
         final int objectId = insertContact(contactObj);
@@ -33,6 +27,7 @@ public class UpdateTest extends AbstractContactTest {
         updateContact(contactObj, contactFolderId);
     }
 
+    @Test
     public void testUpdateWithDistributionList() throws Exception {
         final Contact contactEntry = createContactObject("internal contact");
         contactEntry.setEmail1("internalcontact@x.de");
@@ -42,7 +37,7 @@ public class UpdateTest extends AbstractContactTest {
         final int objectId = createContactWithDistributionList("testUpdateWithDistributionList", contactEntry);
 
         GetRequest getRequest = new GetRequest(contactFolderId, objectId, tz, false);
-        GetResponse getResponse = client.execute(getRequest);
+        GetResponse getResponse = getClient().execute(getRequest);
         Date lastModified = new Date(((JSONObject) getResponse.getData()).getLong("last_modified"));
 
         final Contact contactObj = new Contact();
@@ -61,6 +56,7 @@ public class UpdateTest extends AbstractContactTest {
         updateContact(contactObj, contactFolderId);
     }
 
+    @Test
     public void testContactWithImage() throws Exception {
         final Contact contactObj = createContactObject("testContactWithImage");
         contactObj.setImage1(image);
@@ -68,17 +64,18 @@ public class UpdateTest extends AbstractContactTest {
         final int objectId = insertContact(contactObj);
 
         final GetRequest request = new GetRequest(contactFolderId, objectId, tz);
-        final GetResponse response = client.execute(request);
+        final GetResponse response = getClient().execute(request);
         final String imageUrl = response.getImageUrl();
         if (imageUrl == null) {
             fail("Contact contains no image URL.");
         }
 
-        final byte[] b = loadImageByURL(client.getProtocol(), client.getHostname(), imageUrl);
+        final byte[] b = loadImageByURL(getClient().getProtocol(), getClient().getHostname(), imageUrl);
 
         OXTestToolkit.assertImageBytesEqualsAndNotNull("image", contactObj.getImage1(), b);
     }
 
+    @Test
     public void testUpdateContactWithImage() throws Exception {
         final Contact contactObj = createContactObject("testUpdateContactWithImageUpdate");
         final int objectId = insertContact(contactObj);
@@ -89,13 +86,13 @@ public class UpdateTest extends AbstractContactTest {
         updateContact(contactObj, contactFolderId);
 
         final GetRequest request = new GetRequest(contactFolderId, objectId, tz);
-        final GetResponse response = client.execute(request);
+        final GetResponse response = getClient().execute(request);
         final String imageUrl = response.getImageUrl();
         if (imageUrl == null) {
             fail("Contact contains no image URL.");
         }
 
-        final byte[] b = loadImageByURL(client.getProtocol(), client.getHostname(), imageUrl);
+        final byte[] b = loadImageByURL(getClient().getProtocol(), getClient().getHostname(), imageUrl);
 
         OXTestToolkit.assertImageBytesEqualsAndNotNull("image", contactObj.getImage1(), b);
     }

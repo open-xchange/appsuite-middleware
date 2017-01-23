@@ -49,6 +49,10 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
+import static org.junit.Assert.assertEquals;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.FolderObject;
 
@@ -61,17 +65,11 @@ public class Bug14625Test extends CalendarSqlTest {
 
     private FolderObject folder;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
-        folder = folders.createPublicFolderFor(
-            session,
-            ctx,
-            "Bug 14625 Test Folder",
-            FolderObject.SYSTEM_PUBLIC_FOLDER_ID,
-            userId,
-            secondUserId);
+        folder = folders.createPublicFolderFor(session, ctx, "Bug 14625 Test Folder", FolderObject.SYSTEM_PUBLIC_FOLDER_ID, userId, secondUserId);
         cleanFolders.add(folder);
         appointment = appointments.buildAppointmentWithUserParticipants(secondUser);
         appointment.setParentFolderID(folder.getObjectID());
@@ -81,6 +79,7 @@ public class Bug14625Test extends CalendarSqlTest {
         clean.add(appointment);
     }
 
+    @Test
     public void testBug14625() throws Exception {
         CalendarDataObject loadAppointment = appointments.load(appointment.getObjectID(), folder.getObjectID());
         assertEquals("Wrong amount of Participants.", 1, loadAppointment.getParticipants().length);
@@ -89,7 +88,7 @@ public class Bug14625Test extends CalendarSqlTest {
         assertEquals("Wrong user.", secondUserId, loadAppointment.getUsers()[0].getIdentifier());
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         // Nothing to do
         super.tearDown();

@@ -17,6 +17,8 @@
 
 package org.apache.tika.parser.chm;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -25,13 +27,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
-import junit.framework.TestCase;
-
 import org.apache.tika.metadata.Metadata;
+import org.junit.Test;
 
-public class TestChmExtraction extends TestCase {
-
+public class TestChmExtraction {
     private List<String> files = new ArrayList<String>();
 
     public void setUp() {
@@ -39,7 +38,8 @@ public class TestChmExtraction extends TestCase {
         files.add("/test-documents/testChm3.chm");
     }
 
-    public void testMultiThreadedChmExtraction() throws InterruptedException {
+         @Test
+     public void testMultiThreadedChmExtraction() throws InterruptedException {
         ExecutorService executor = Executors
                 .newFixedThreadPool(TestParameters.NTHREADS);
         for (int i = 0; i < TestParameters.NTHREADS; i++) {

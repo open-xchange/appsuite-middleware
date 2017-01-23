@@ -68,6 +68,7 @@ public class InitOAuthAccountRequest extends AbstractOAuthRequest<InitOAuthAccou
 
     /**
      * Initializes a new {@link InitOAuthAccountRequest}.
+     * 
      * @param oauthUrl
      */
     public InitOAuthAccountRequest(OAuthService oauthProvider) {

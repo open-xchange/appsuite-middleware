@@ -49,7 +49,8 @@
 
 package com.openexchange.dav.caldav.bugs;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.jackrabbit.webdav.DavConstants;
@@ -61,8 +62,6 @@ import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertResponse;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.caldav.CalDAVTest;
 import com.openexchange.groupware.container.FolderObject;
@@ -83,10 +82,10 @@ public class Bug25160Test extends CalDAVTest {
 
     @Before
     public void setUp() throws Exception {
-        manager2 = new CalendarTestManager(new AJAXClient(User.User2));
+        super.setUp();
+        manager2 = new CalendarTestManager(getClient2());
         manager2.setFailOnError(true);
-        FolderObject calendarFolder = manager2.getClient().execute(
-            new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, manager2.getPrivateFolder())).getFolder();
+        FolderObject calendarFolder = manager2.getClient().execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, manager2.getPrivateFolder())).getFolder();
         String subFolderName = "testfolder_" + randomUID();
         FolderObject folder = new FolderObject();
         folder.setFolderName(subFolderName);
@@ -110,15 +109,20 @@ public class Bug25160Test extends CalDAVTest {
 
     @After
     public void tearDown() throws Exception {
-        if (null != this.manager2) {
-            if (null != subfolder) {
-                manager2.getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_NEW, subfolder));
+        try {
+            if (null != this.manager2) {
+                if (null != subfolder) {
+                    manager2.getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_NEW, subfolder));
+                }
+                this.manager2.cleanUp();
+                if (null != manager2.getClient()) {
+                    manager2.getClient().logout();
+                }
             }
-            this.manager2.cleanUp();
-            if (null != manager2.getClient()) {
-                manager2.getClient().logout();
-            }
+        } finally {
+            super.tearDown();
         }
+
     }
 
     @Test
@@ -130,8 +134,7 @@ public class Bug25160Test extends CalDAVTest {
         props.add(PropertyNames.CURRENT_USER_PRINCIPAL);
         props.add(PropertyNames.PRINCIPAL_URL);
         props.add(PropertyNames.RESOURCETYPE);
-        PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + "/",
-                DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
+        PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + "/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
         MultiStatusResponse response = assertSingleResponse(super.getWebDAVClient().doPropFind(propFind));
         String currentUserPrincipal = super.extractHref(PropertyNames.CURRENT_USER_PRINCIPAL, response);
         assertNotNull(currentUserPrincipal);
@@ -143,8 +146,7 @@ public class Bug25160Test extends CalDAVTest {
          */
         props = new DavPropertyNameSet();
         props.add(PropertyNames.OWNER);
-        propFind = new PropFindMethod(getWebDAVClient().getBaseURI() + "/caldav/" + subfolder.getObjectID(),
-                DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
+        propFind = new PropFindMethod(getWebDAVClient().getBaseURI() + "/caldav/" + subfolder.getObjectID(), DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
         response = assertSingleResponse(super.getWebDAVClient().doPropFind(propFind));
         assertTrue("owner found", response.getPropertyNames(HttpServletResponse.SC_NOT_FOUND).contains(PropertyNames.OWNER));
     }

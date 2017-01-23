@@ -52,7 +52,6 @@ package com.openexchange.groupware.contact;
 import java.util.Comparator;
 import com.openexchange.groupware.container.Contact;
 
-
 /**
  * {@link IDComparator}
  *

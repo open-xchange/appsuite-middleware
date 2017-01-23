@@ -49,50 +49,43 @@
 
 package com.openexchange.contact.vcard;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 /**
  * {@link UnitTests}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    AddressTest.class,
+    DistributionListTest.class,
+    BasicTest.class,
+    RoundtripTest.class,
+    UpdateTest.class,
+    WarningsTest.class,
+    ColorLabelTest.class,
+    EmptyTest.class,
+    ImportIteratorTest.class,
+    RemoveImageTest.class,
+    Bug13557Test.class,
+    Bug14349Test.class,
+    Bug14350Test.class,
+    Bug15008Test.class,
+    Bug15229Test.class,
+    Bug15241Test.class,
+    Bug18226Test.class,
+    Bug21656Test.class,
+    Bug6823Test.class,
+    Bug6962Test.class,
+    Bug7106Test.class,
+    Bug7248Test.class,
+    Bug7249Test.class,
+    Bug7250Test.class,
+    Bug7719Test.class,
+
+})
 public class UnitTests {
 
-    /**
-     * Initializes a new {@link UnitTests}.
-     */
-    public UnitTests() {
-        super();
-    }
-
-    public static Test suite() {
-        TestSuite tests = new TestSuite();
-        tests.addTestSuite(AddressTest.class);
-        tests.addTestSuite(DistributionListTest.class);
-        tests.addTestSuite(BasicTest.class);
-        tests.addTestSuite(RoundtripTest.class);
-        tests.addTestSuite(UpdateTest.class);
-        tests.addTestSuite(WarningsTest.class);
-        tests.addTestSuite(ColorLabelTest.class);
-        tests.addTestSuite(EmptyTest.class);
-        tests.addTestSuite(ImportIteratorTest.class);
-        tests.addTestSuite(RemoveImageTest.class);
-        tests.addTestSuite(Bug13557Test.class);
-        tests.addTestSuite(Bug14349Test.class);
-        tests.addTestSuite(Bug14350Test.class);
-        tests.addTestSuite(Bug15008Test.class);
-        tests.addTestSuite(Bug15229Test.class);
-        tests.addTestSuite(Bug15241Test.class);
-        tests.addTestSuite(Bug18226Test.class);
-        tests.addTestSuite(Bug21656Test.class);
-        tests.addTestSuite(Bug6823Test.class);
-        tests.addTestSuite(Bug6962Test.class);
-        tests.addTestSuite(Bug7106Test.class);
-        tests.addTestSuite(Bug7248Test.class);
-        tests.addTestSuite(Bug7249Test.class);
-        tests.addTestSuite(Bug7250Test.class);
-        tests.addTestSuite(Bug7719Test.class);
-        return tests;
-    }
 }

@@ -49,16 +49,18 @@
 
 package com.openexchange.subscribe.json;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import java.util.Map;
-import junit.framework.TestCase;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.subscribe.SimSubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSource;
-
 
 /**
  * {@link SubscriptionJSONParserTest}
@@ -66,17 +68,18 @@ import com.openexchange.subscribe.SubscriptionSource;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class SubscriptionJSONParserTest extends TestCase {
+public class SubscriptionJSONParserTest {
+
     private static final String SOURCE_NAME = "com.openexchange.subscribe.test1";
     private JSONObject object;
     private SimSubscriptionSourceDiscoveryService discovery;
     private DynamicFormDescription form = null;
 
-    @Override
-    public void setUp() throws Exception{
+    @Before
+    public void setUp() throws Exception {
         object = new JSONObject();
         object.put("id", 2);
-        object.put("folder" , 12);
+        object.put("folder", 12);
         object.put("enabled", false);
         object.put("source", SOURCE_NAME);
 
@@ -96,6 +99,7 @@ public class SubscriptionJSONParserTest extends TestCase {
         discovery.addSource(source);
     }
 
+    @Test
     public void testParsing() throws JSONException {
         Subscription subscription = new SubscriptionJSONParser(discovery).parse(object);
         assertNotNull("Subscription may not be null", subscription);
@@ -113,6 +117,7 @@ public class SubscriptionJSONParserTest extends TestCase {
 
     }
 
+    @Test
     public void testShouldNotRequireId() throws JSONException {
         object.remove("id");
         Subscription subscription = new SubscriptionJSONParser(discovery).parse(object);

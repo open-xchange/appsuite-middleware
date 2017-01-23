@@ -49,12 +49,14 @@
 
 package com.openexchange.ajax.appointment;
 
+import static org.junit.Assert.assertTrue;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.test.CalendarTestManager;
 
 /**
  * {@link CreateExceptionWithBadDate}
@@ -64,19 +66,13 @@ import com.openexchange.test.CalendarTestManager;
  */
 public class CreateExceptionWithBadDate extends AbstractAJAXSession {
 
-    private CalendarTestManager ctm;
     private Appointment series;
     private Appointment exception;
 
-    public CreateExceptionWithBadDate(String name) {
-        super(name);
-    }
-
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
-        ctm = new CalendarTestManager(client);
         series = new Appointment();
         series.setTitle("Bug 48165 Test - series");
         series.setStartDate(TimeTools.D("01.08.2016 09:00"));
@@ -84,8 +80,8 @@ public class CreateExceptionWithBadDate extends AbstractAJAXSession {
         series.setRecurrenceType(Appointment.DAILY);
         series.setInterval(1);
         series.setIgnoreConflicts(true);
-        series.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
-        ctm.insert(series);
+        series.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
+        catm.insert(series);
 
         exception = new Appointment();
         exception.setObjectID(series.getObjectID());
@@ -95,44 +91,41 @@ public class CreateExceptionWithBadDate extends AbstractAJAXSession {
         exception.setIgnoreConflicts(false);
     }
 
+    @Test
     public void testExcplicitWrongEndDate() throws Exception {
         exception.setStartDate(TimeTools.D("03.08.2016 11:00"));
         exception.setEndDate(TimeTools.D("03.08.2016 09:00"));
-        ctm.update(exception);
-        assertTrue("Expected error.", ctm.getLastResponse().hasError());
-        OXException e = ctm.getLastResponse().getException();
+        catm.update(exception);
+        assertTrue("Expected error.", catm.getLastResponse().hasError());
+        OXException e = catm.getLastResponse().getException();
         assertTrue("Wrong exception.", e.similarTo(OXCalendarExceptionCodes.END_DATE_BEFORE_START_DATE.create()));
     }
 
+    @Test
     public void testImplicitWrongEndDate() throws Exception {
         exception.setStartDate(TimeTools.D("03.08.2016 11:00"));
-        ctm.update(exception);
-        assertTrue("Expected error.", ctm.getLastResponse().hasError());
-        OXException e = ctm.getLastResponse().getException();
+        catm.update(exception);
+        assertTrue("Expected error.", catm.getLastResponse().hasError());
+        OXException e = catm.getLastResponse().getException();
         assertTrue("Wrong exception.", e.similarTo(OXCalendarExceptionCodes.END_DATE_BEFORE_START_DATE.create()));
     }
 
+    @Test
     public void testExcplicitWrongStartDate() throws Exception {
         exception.setStartDate(TimeTools.D("03.08.2016 11:00"));
         exception.setEndDate(TimeTools.D("03.08.2016 07:00"));
-        ctm.update(exception);
-        assertTrue("Expected error.", ctm.getLastResponse().hasError());
-        OXException e = ctm.getLastResponse().getException();
+        catm.update(exception);
+        assertTrue("Expected error.", catm.getLastResponse().hasError());
+        OXException e = catm.getLastResponse().getException();
         assertTrue("Wrong exception.", e.similarTo(OXCalendarExceptionCodes.END_DATE_BEFORE_START_DATE.create()));
     }
 
+    @Test
     public void testImplicitWrongStartDate() throws Exception {
         exception.setEndDate(TimeTools.D("03.08.2016 07:00"));
-        ctm.update(exception);
-        assertTrue("Expected error.", ctm.getLastResponse().hasError());
-        OXException e = ctm.getLastResponse().getException();
+        catm.update(exception);
+        assertTrue("Expected error.", catm.getLastResponse().hasError());
+        OXException e = catm.getLastResponse().getException();
         assertTrue("Wrong exception.", e.similarTo(OXCalendarExceptionCodes.END_DATE_BEFORE_START_DATE.create()));
     }
-
-    @Override
-    public void tearDown() throws Exception {
-        ctm.cleanUp();
-        super.tearDown();
-    }
-
 }

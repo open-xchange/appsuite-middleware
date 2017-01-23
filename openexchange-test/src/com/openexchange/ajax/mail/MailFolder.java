@@ -56,7 +56,6 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.exception.OXException;
 
-
 /**
  * {@link MailFolder} - an enumeration of all default mail folders that exist
  * in a typical e-mail account.
@@ -71,33 +70,33 @@ public enum MailFolder {
 
     private final String name;
 
-    private MailFolder(String name){
+    private MailFolder(String name) {
         this.name = name;
     }
 
-    public static MailFolder getByName(String name){
+    public static MailFolder getByName(String name) {
         MailFolder[] folders = values();
-        for(MailFolder folder: folders){
-            if(name.equals(folder.name)){
+        for (MailFolder folder : folders) {
+            if (name.equals(folder.name)) {
                 return folder;
             }
         }
         return null;
     }
 
-    public String getFolder(AJAXClient client) throws OXException, IOException, SAXException, JSONException{
+    public String getFolder(AJAXClient client) throws OXException, IOException, SAXException, JSONException {
         UserValues values = client.getValues();
         switch (this) {
-        case INBOX:
-            return values.getInboxFolder();
-        case DRAFTS:
-            return values.getDraftsFolder();
-        case SENT:
-            return values.getSentFolder();
-        case TRASH:
-            return values.getTrashFolder();
-        default:
-            return null;
+            case INBOX:
+                return values.getInboxFolder();
+            case DRAFTS:
+                return values.getDraftsFolder();
+            case SENT:
+                return values.getSentFolder();
+            case TRASH:
+                return values.getTrashFolder();
+            default:
+                return null;
         }
     }
 }

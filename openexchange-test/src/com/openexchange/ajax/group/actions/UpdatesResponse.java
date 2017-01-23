@@ -85,7 +85,7 @@ public class UpdatesResponse extends AbstractAJAXResponse {
         LinkedList<Group> groups = new LinkedList<Group>();
         JSONObject data = (JSONObject) getData();
 
-        if(data.isNull(field)) {
+        if (data.isNull(field)) {
             return new LinkedList<Group>();
         }
 

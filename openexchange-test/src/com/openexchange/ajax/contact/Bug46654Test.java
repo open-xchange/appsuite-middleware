@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.assertFalse;
+import org.junit.Test;
 import com.openexchange.ajax.contact.action.AllRequest;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.groupware.container.Contact;
@@ -71,10 +73,11 @@ public class Bug46654Test extends AbstractManagedContactTest {
      *
      * @param name The test name
      */
-	public Bug46654Test(String name) {
-		super(name);
-	}
+    public Bug46654Test() {
+        super();
+    }
 
+    @Test
     public void testSortUnnamedList() throws Exception {
         /*
          * generate test contact on server (and two more to make sorting kick in)
@@ -82,20 +85,18 @@ public class Bug46654Test extends AbstractManagedContactTest {
         Contact list = new Contact();
         list.setParentFolderID(folderID);
         list.setMarkAsDistributionlist(true);
-        list.setDistributionList(new DistributionListEntryObject[] {
-            new DistributionListEntryObject("Otto", "otto@exmample.com", DistributionListEntryObject.INDEPENDENT),
-            new DistributionListEntryObject("Horst", "horst@exmample.com", DistributionListEntryObject.INDEPENDENT)
+        list.setDistributionList(new DistributionListEntryObject[] { new DistributionListEntryObject("Otto", "otto@exmample.com", DistributionListEntryObject.INDEPENDENT), new DistributionListEntryObject("Horst", "horst@exmample.com", DistributionListEntryObject.INDEPENDENT)
         });
-        list = manager.newAction(list);
-        manager.newAction(generateContact(UUIDs.getUnformattedStringFromRandom()));
-        manager.newAction(generateContact(UUIDs.getUnformattedStringFromRandom()));
+        list = cotm.newAction(list);
+        cotm.newAction(generateContact(UUIDs.getUnformattedStringFromRandom()));
+        cotm.newAction(generateContact(UUIDs.getUnformattedStringFromRandom()));
         /*
          * get all contacts, sorted by column 607
          */
-        int[] columns = { 1,20,101,607 };
+        int[] columns = { 1, 20, 101, 607 };
         AllRequest allRequest = new AllRequest(folderID, columns, Contact.SPECIAL_SORTING, Order.ASCENDING, null);
         CommonAllResponse allResponse = getClient().execute(allRequest);
         assertFalse(allResponse.hasError());
-	}
+    }
 
 }

@@ -1,23 +1,52 @@
 package liquibase.serializer.core.xml;
 
-import liquibase.change.ColumnConfig;
-import liquibase.change.ConstraintsConfig;
-import liquibase.change.core.*;
-import liquibase.resource.ClassLoaderResourceAccessor;
-import liquibase.statement.SequenceNextValueFunction;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import java.math.BigInteger;
+import javax.xml.parsers.DocumentBuilderFactory;
 import org.junit.Test;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-import java.math.BigInteger;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import liquibase.change.ColumnConfig;
+import liquibase.change.ConstraintsConfig;
+import liquibase.change.core.AddAutoIncrementChange;
+import liquibase.change.core.AddColumnChange;
+import liquibase.change.core.AddDefaultValueChange;
+import liquibase.change.core.AddForeignKeyConstraintChange;
+import liquibase.change.core.AddNotNullConstraintChange;
+import liquibase.change.core.AddPrimaryKeyChange;
+import liquibase.change.core.AddUniqueConstraintChange;
+import liquibase.change.core.AlterSequenceChange;
+import liquibase.change.core.CreateIndexChange;
+import liquibase.change.core.CreateProcedureChange;
+import liquibase.change.core.CreateSequenceChange;
+import liquibase.change.core.CreateTableChange;
+import liquibase.change.core.CreateViewChange;
+import liquibase.change.core.DropColumnChange;
+import liquibase.change.core.DropDefaultValueChange;
+import liquibase.change.core.DropForeignKeyConstraintChange;
+import liquibase.change.core.DropIndexChange;
+import liquibase.change.core.DropNotNullConstraintChange;
+import liquibase.change.core.DropPrimaryKeyChange;
+import liquibase.change.core.DropSequenceChange;
+import liquibase.change.core.DropTableChange;
+import liquibase.change.core.DropUniqueConstraintChange;
+import liquibase.change.core.DropViewChange;
+import liquibase.change.core.InsertDataChange;
+import liquibase.change.core.LoadDataChange;
+import liquibase.change.core.RawSQLChange;
+import liquibase.change.core.RenameColumnChange;
+import liquibase.change.core.RenameTableChange;
+import liquibase.change.core.RenameViewChange;
+import liquibase.change.core.SQLFileChange;
+import liquibase.change.core.TagDatabaseChange;
+import liquibase.change.core.UpdateDataChange;
+import liquibase.resource.ClassLoaderResourceAccessor;
+import liquibase.statement.SequenceNextValueFunction;
 
 public class XMLChangeLogSerializerTest {
     @Test

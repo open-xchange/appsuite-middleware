@@ -106,6 +106,6 @@ public class InsertRequest extends AbstractContactRequest<InsertResponse> {
 
     @Override
     public InsertParser getParser() {
-       return new InsertParser();
+        return new InsertParser();
     }
 }

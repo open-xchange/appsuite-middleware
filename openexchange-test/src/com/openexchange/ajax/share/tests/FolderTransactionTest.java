@@ -49,9 +49,13 @@
 
 package com.openexchange.ajax.share.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.share.GuestClient;
@@ -69,15 +73,7 @@ import com.openexchange.server.impl.OCLPermission;
  */
 public class FolderTransactionTest extends ShareTest {
 
-    /**
-     * Initializes a new {@link FolderTransactionTest}.
-     *
-     * @param name
-     */
-    public FolderTransactionTest(String name) {
-        super(name);
-    }
-
+    @Test
     public void testDontCreateShareOnFailingFolderCreate() throws Exception {
         for (EnumAPI api : TESTED_FOLDER_APIS) {
             for (int module : TESTED_MODULES) {
@@ -86,7 +82,7 @@ public class FolderTransactionTest extends ShareTest {
         }
     }
 
-    public void testDontCreateShareOnFailingFolderCreate(EnumAPI api, int module) throws Exception {
+    private void testDontCreateShareOnFailingFolderCreate(EnumAPI api, int module) throws Exception {
         FolderObject parent = getFolder(api, getDefaultFolder(module));
         FolderObject folder = insertPrivateFolder(api, module, parent.getObjectID());
         List<FolderShare> oldShares = getFolderShares(api, module);
@@ -95,12 +91,7 @@ public class FolderTransactionTest extends ShareTest {
          */
         boolean insertionFailed = false;
         try {
-            insertSharedFolder(
-                api,
-                module,
-                parent.getObjectID(),
-                folder.getFolderName(),
-                createAnonymousGuestPermission());
+            insertSharedFolder(api, module, parent.getObjectID(), folder.getFolderName(), createAnonymousGuestPermission());
         } catch (Throwable e) {
             insertionFailed = true;
         }
@@ -110,6 +101,7 @@ public class FolderTransactionTest extends ShareTest {
         assertEquals("The number of shares differs but should not. " + "API: " + api + ", Module: " + module, oldShares.size(), newShares.size());
     }
 
+    @Test
     public void testDontCreateShareOnFailingFolderUpdate() throws Exception {
         for (EnumAPI api : TESTED_FOLDER_APIS) {
             for (int module : TESTED_MODULES) {
@@ -118,7 +110,7 @@ public class FolderTransactionTest extends ShareTest {
         }
     }
 
-    public void testDontCreateShareOnFailingFolderUpdate(EnumAPI api, int module) throws Exception {
+    private void testDontCreateShareOnFailingFolderUpdate(EnumAPI api, int module) throws Exception {
         FolderObject parent = getFolder(api, getDefaultFolder(module));
         FolderObject sharedFolder = insertPrivateFolder(api, module, parent.getObjectID());
         List<FolderShare> oldShares = getFolderShares(api, module);
@@ -144,6 +136,7 @@ public class FolderTransactionTest extends ShareTest {
         assertEquals("The number of shares differs but should not." + "API: " + api + ", Module: " + module, oldShares.size(), newShares.size());
     }
 
+    @Test
     public void testDontRemoveSharesOnFailingFolderUpdate() throws Exception {
         for (EnumAPI api : TESTED_FOLDER_APIS) {
             for (int module : TESTED_MODULES) {
@@ -152,20 +145,16 @@ public class FolderTransactionTest extends ShareTest {
         }
     }
 
-    public void testDontRemoveSharesOnFailingFolderUpdate(EnumAPI api, int module) throws Exception {
+    private void testDontRemoveSharesOnFailingFolderUpdate(EnumAPI api, int module) throws Exception {
         FolderObject parent = getFolder(api, getDefaultFolder(module));
         OCLGuestPermission guestPermission = createAnonymousGuestPermission();
-        FolderObject sharedFolder = insertSharedFolder(
-            api,
-            module,
-            parent.getObjectID(),
-            guestPermission);
+        FolderObject sharedFolder = insertSharedFolder(api, module, parent.getObjectID(), guestPermission);
         /*
          * check permissions
          */
         OCLPermission matchingPermission = null;
         for (OCLPermission permission : sharedFolder.getPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
                 break;
             }

@@ -50,21 +50,25 @@
 package com.openexchange.groupware.calendar.calendarsqltests;
 
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 
-
 public class Bug12571Test extends CalendarSqlTest {
+
     /**
      * Test for <a href= "http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=12571">bug #12571</a><br>
      * <i>Yearly recurrence shifted by one day</i>
      */
+    @Test
     public void testProperOccurrencesOfYearlyApp() {
         try {
             {
@@ -122,10 +126,7 @@ public class Bug12571Test extends CalendarSqlTest {
                 for (int i = 0; i < size; i++) {
                     final RecurringResultInterface result = results.getRecurringResult(i);
                     checker.setTimeInMillis(result.getStart());
-                    assertEquals(
-                        "Unexpected day-of-week in " + (i + 1) + ". occurrence",
-                        Calendar.TUESDAY,
-                        checker.get(Calendar.DAY_OF_WEEK));
+                    assertEquals("Unexpected day-of-week in " + (i + 1) + ". occurrence", Calendar.TUESDAY, checker.get(Calendar.DAY_OF_WEEK));
                     assertEquals("Unexpected month in " + (i + 1) + ". occurrence", Calendar.APRIL, checker.get(Calendar.MONTH));
                     assertEquals("Unexpected year in " + (i + 1) + ". occurrence", year++, checker.get(Calendar.YEAR));
                 }

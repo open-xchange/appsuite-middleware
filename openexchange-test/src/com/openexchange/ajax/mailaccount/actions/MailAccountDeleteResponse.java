@@ -52,7 +52,6 @@ package com.openexchange.ajax.mailaccount.actions;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
-
 /**
  * {@link MailAccountDeleteResponse}
  *

@@ -1,5 +1,8 @@
 package liquibase.change.core;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 import liquibase.change.ChangeFactory;
 import liquibase.change.StandardChangeTest;
 import liquibase.database.Database;
@@ -7,18 +10,14 @@ import liquibase.database.core.MockDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropPrimaryKeyStatement;
-import static org.junit.Assert.*;
-import org.junit.Test;
 
 public class DropPrimaryKeyChangeTest extends StandardChangeTest {
-        @Override
-        @Test
+     @Test
     public void getRefactoringName() throws Exception {
         assertEquals("dropPrimaryKey", ChangeFactory.getInstance().getChangeMetaData(new DropPrimaryKeyChange()).getName());
     }
 
-    @Override
-    @Test
+     @Test
     public void generateStatement() throws Exception {
         DropPrimaryKeyChange change = new DropPrimaryKeyChange();
         change.setSchemaName("SCHEMA_NAME");
@@ -33,8 +32,7 @@ public class DropPrimaryKeyChangeTest extends StandardChangeTest {
         assertEquals("PK_NAME", ((DropPrimaryKeyStatement) sqlStatements[0]).getConstraintName());
     }
 
-    @Override
-    @Test
+     @Test
     public void getConfirmationMessage() throws Exception {
         DropPrimaryKeyChange change = new DropPrimaryKeyChange();
         change.setSchemaName("SCHEMA_NAME");

@@ -59,6 +59,7 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class GetFileaccountRequest extends AbstractFileaccountRequest<GetFileaccountResponse> {
+
     private String filestorageId;
     private String filestorageService;
 

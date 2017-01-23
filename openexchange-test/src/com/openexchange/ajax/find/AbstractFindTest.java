@@ -49,19 +49,21 @@
 
 package com.openexchange.ajax.find;
 
+import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
+import org.junit.After;
+import org.junit.Before;
 import com.openexchange.ajax.find.actions.AutocompleteRequest;
 import com.openexchange.ajax.find.actions.AutocompleteResponse;
 import com.openexchange.ajax.find.actions.QueryRequest;
 import com.openexchange.ajax.find.actions.QueryResponse;
 import com.openexchange.ajax.find.actions.TestDisplayItem;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.find.Document;
 import com.openexchange.find.Module;
@@ -87,8 +89,6 @@ import com.openexchange.test.FolderTestManager;
  */
 public abstract class AbstractFindTest extends AbstractAJAXSession {
 
-    protected FolderTestManager folderManager;
-
     protected Random random;
 
     protected AJAXClient client2;
@@ -100,23 +100,25 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
      *
      * @param name name of the test.
      */
-    protected AbstractFindTest(final String name) {
-        super(name);
+    protected AbstractFindTest() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         random = new Random();
-        client2 = new AJAXClient(User.User2);
-        folderManager = new FolderTestManager(getClient());
+        client2 = getClient2();
         folderManager2 = new FolderTestManager(client2);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        folderManager.cleanUp();
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
+        try {
+            folderManager2.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
     /**
@@ -129,7 +131,7 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
      */
     protected List<PropDocument> query(Module module, List<ActiveFacet> facets) throws Exception {
         QueryRequest queryRequest = new QueryRequest(0, Integer.MAX_VALUE, facets, module.getIdentifier());
-        QueryResponse queryResponse = client.execute(queryRequest);
+        QueryResponse queryResponse = getClient().execute(queryRequest);
         SearchResult result = queryResponse.getSearchResult();
         List<PropDocument> propDocuments = new ArrayList<PropDocument>();
         List<Document> documents = result.getDocuments();
@@ -150,7 +152,7 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
      */
     protected List<PropDocument> query(Module module, List<ActiveFacet> facets, Map<String, String> options) throws Exception {
         QueryRequest queryRequest = new QueryRequest(true, 0, Integer.MAX_VALUE, facets, options, module.getIdentifier(), null);
-        QueryResponse queryResponse = client.execute(queryRequest);
+        QueryResponse queryResponse = getClient().execute(queryRequest);
         SearchResult result = queryResponse.getSearchResult();
         List<PropDocument> propDocuments = new ArrayList<PropDocument>();
         List<Document> documents = result.getDocuments();
@@ -172,7 +174,7 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
      */
     protected List<PropDocument> query(Module module, List<ActiveFacet> facets, int start, int size) throws Exception {
         QueryRequest queryRequest = new QueryRequest(start, size, facets, module.getIdentifier());
-        QueryResponse queryResponse = client.execute(queryRequest);
+        QueryResponse queryResponse = getClient().execute(queryRequest);
         SearchResult result = queryResponse.getSearchResult();
         List<PropDocument> propDocuments = new ArrayList<PropDocument>();
         List<Document> documents = result.getDocuments();
@@ -200,7 +202,7 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
             }
         }
         QueryRequest queryRequest = new QueryRequest(0, Integer.MAX_VALUE, facets, module.getIdentifier(), strColumns);
-        QueryResponse queryResponse = client.execute(queryRequest);
+        QueryResponse queryResponse = getClient().execute(queryRequest);
         SearchResult result = queryResponse.getSearchResult();
         List<PropDocument> propDocuments = new ArrayList<PropDocument>();
         List<Document> documents = result.getDocuments();
@@ -220,10 +222,10 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
      */
     protected List<Facet> autocomplete(Module module, String prefix) throws Exception {
         AutocompleteRequest autocompleteRequest = new AutocompleteRequest(prefix, module.getIdentifier());
-        AutocompleteResponse autocompleteResponse = client.execute(autocompleteRequest);
+        AutocompleteResponse autocompleteResponse = getClient().execute(autocompleteRequest);
         return autocompleteResponse.getFacets();
     }
-    
+
     /**
      * Performs an autocomplete request and returns the facets.
      *
@@ -235,7 +237,7 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
      */
     protected List<Facet> autocomplete(Module module, String prefix, List<ActiveFacet> facets) throws Exception {
         AutocompleteRequest autocompleteRequest = new AutocompleteRequest(prefix, module.getIdentifier(), facets);
-        AutocompleteResponse autocompleteResponse = client.execute(autocompleteRequest);
+        AutocompleteResponse autocompleteResponse = getClient().execute(autocompleteRequest);
         return autocompleteResponse.getFacets();
     }
 
@@ -272,7 +274,7 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
     protected static String randomUID() {
         return UUID.randomUUID().toString();
     }
-    
+
     /**
      * Performs an autocomplete request and returns the facets.
      *
@@ -287,7 +289,7 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
         AutocompleteResponse autocompleteResponse = client.execute(autocompleteRequest);
         return autocompleteResponse.getFacets();
     }
-    
+
     /**
      * Performs a query request using the supplied active facets.
      *
@@ -338,7 +340,7 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
             if (valueId.equals(value.getId())) {
                 return value;
             }
-         }
+        }
 
         return null;
     }
@@ -385,7 +387,7 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
                 if (displayName.equals(displayItem.getDisplayName())) {
                     if (detail == null) {
                         return new FacetValue(facet.getType().getId(), displayItem, -1, ff.getFilter());
-                    } else if (detail.equals(((TestDisplayItem)displayItem).getDetail())) {
+                    } else if (detail.equals(((TestDisplayItem) displayItem).getDetail())) {
                         return new FacetValue(facet.getType().getId(), displayItem, -1, ff.getFilter());
                     }
                 }
@@ -395,7 +397,7 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
                     if (displayName.equals(value.getDisplayItem().getDisplayName())) {
                         if (detail == null) {
                             return value;
-                        } else if (detail.equals(((TestDisplayItem)value.getDisplayItem()).getDetail())) {
+                        } else if (detail.equals(((TestDisplayItem) value.getDisplayItem()).getDetail())) {
                             return value;
                         }
                     }
@@ -406,10 +408,7 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
     }
 
     public static ActiveFacet createFolderTypeFacet(FolderType type) {
-        return createActiveFacet(
-            CommonFacetType.FOLDER_TYPE,
-            type.getIdentifier(),
-            new Filter(Collections.singletonList(CommonFacetType.FOLDER_TYPE.getId()), type.getIdentifier()));
+        return createActiveFacet(CommonFacetType.FOLDER_TYPE, type.getIdentifier(), new Filter(Collections.singletonList(CommonFacetType.FOLDER_TYPE.getId()), type.getIdentifier()));
     }
 
     public static ActiveFacet createQuery(String query) {
@@ -438,29 +437,20 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
     }
 
     public static ActiveFacet createActiveFacet(FacetType type, int valueId, String field, String query) {
-        Filter filter = new FilterBuilder()
-            .addField(field)
-            .addQuery(query)
-            .build();
+        Filter filter = new FilterBuilder().addField(field).addQuery(query).build();
         return new ActiveFacet(type, Integer.toString(valueId), filter);
     }
 
     public static ActiveFacet createActiveFacet(FacetType type, String valueId, String field, String query) {
-        Filter filter = new FilterBuilder()
-            .addField(field)
-            .addQuery(query)
-            .build();
+        Filter filter = new FilterBuilder().addField(field).addQuery(query).build();
         return new ActiveFacet(type, valueId, filter);
     }
 
     public static ActiveFacet createActiveFieldFacet(FacetType type, String field, String query) {
-        Filter filter = new FilterBuilder()
-            .addField(field)
-            .addQuery(query)
-            .build();
+        Filter filter = new FilterBuilder().addField(field).addQuery(query).build();
         return new ActiveFacet(type, type.getId(), filter);
     }
-    
+
     public static ActiveFacet createActiveFolderFacet(String folderId) {
         return createActiveFacet(CommonFacetType.FOLDER, folderId, Filter.NO_FILTER);
     }

@@ -49,14 +49,18 @@
 
 package com.openexchange.ajax.mail;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.mail.actions.MailReferenceResponse;
 import com.openexchange.ajax.mail.actions.NewMailRequestWithUploads;
 import com.openexchange.mail.MailJSONField;
@@ -76,10 +80,11 @@ public class MailPushTest extends AbstractMailTest {
 
     /**
      * Initializes a new {@link MailPushTest}.
+     * 
      * @param name
      */
-    public MailPushTest(String name) {
-        super(name);
+    public MailPushTest() {
+        super();
     }
 
     @Override
@@ -87,20 +92,11 @@ public class MailPushTest extends AbstractMailTest {
         return "open-xchange-appsuite";
     }
 
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
-
+    @Test
     public void testSocketIO() throws Exception {
-        String sessionId = client.getSession().getId();
-        String hostname = client.getHostname();
-        String protocol = client.getProtocol();
+        String sessionId = getClient().getSession().getId();
+        String hostname = getClient().getHostname();
+        String protocol = getClient().getProtocol();
 
         final CountDownLatch latch = new CountDownLatch(1);
         final AtomicReference<Exception> ref = new AtomicReference<>();
@@ -112,24 +108,9 @@ public class MailPushTest extends AbstractMailTest {
             public void run() {
                 AJAXClient client2 = null;
                 try {
-                    client2 = new AJAXClient(User.User2);
+                    client2 = new AJAXClient(testContext.acquireUser());
 
-                    String eml =
-                        "    Date: Tue, 1 Jul 2014 17:37:28 +0200 (CEST)\n" +
-                        "    From: from foo <from@example.tld>\n" +
-                        "    Reply-To: rto foo <bar@example.tld>\n" +
-                        "    To: to bar <to@example.tld>\n" +
-                        "    Cc: cc bar <cc@example.tld>\n" +
-                        "    Bcc: bcc bar <bcc@example.tld>\n" +
-                        "    Message-ID: <11140339.1095068.1404229048881.JavaMail.www@wwinf8905>\n" +
-                        "    Subject: plain text\n" +
-                        "    MIME-Version: 1.0\n" +
-                        "    Content-Type: text/plain; charset=UTF-8\n" +
-                        "    Content-Transfer-Encoding: 7bit\n" +
-                        "\n" +
-                        "    plain text\n" +
-                        "\n" +
-                        "    A test signature";
+                    String eml = "    Date: Tue, 1 Jul 2014 17:37:28 +0200 (CEST)\n" + "    From: from foo <from@example.tld>\n" + "    Reply-To: rto foo <bar@example.tld>\n" + "    To: to bar <to@example.tld>\n" + "    Cc: cc bar <cc@example.tld>\n" + "    Bcc: bcc bar <bcc@example.tld>\n" + "    Message-ID: <11140339.1095068.1404229048881.JavaMail.www@wwinf8905>\n" + "    Subject: plain text\n" + "    MIME-Version: 1.0\n" + "    Content-Type: text/plain; charset=UTF-8\n" + "    Content-Transfer-Encoding: 7bit\n" + "\n" + "    plain text\n" + "\n" + "    A test signature";
 
                     JSONObject composedMail = createEMail(getSendAddress(), "Test mail", "text/plain", eml);
                     composedMail.put(MailJSONField.FROM.getKey(), getSendAddress(client2));
@@ -160,7 +141,7 @@ public class MailPushTest extends AbstractMailTest {
         IO.Options opts = new IO.Options();
         opts.forceNew = true;
         opts.query = "session=" + sessionId;
-        opts.transports = new String[] {"websocket"};
+        opts.transports = new String[] { "websocket" };
 
         int port = -1; // Set to "8009" for local testing
         String uri = protocol + "://" + hostname;

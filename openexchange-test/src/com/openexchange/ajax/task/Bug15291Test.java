@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.task;
 
+import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.util.TimeZone;
 import org.json.JSONException;
@@ -86,13 +87,12 @@ public class Bug15291Test extends AbstractAJAXSession {
     private Task task;
     private TimeZone timeZone;
 
-    public Bug15291Test(String name) {
-        super(name);
+    public Bug15291Test() {
+        super();
     }
 
     @Before
-    @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
         client1 = getClient();
         group.setSimpleName("GroupForTestingBug15291");
@@ -102,18 +102,20 @@ public class Bug15291Test extends AbstractAJAXSession {
         CreateResponse response = client1.execute(new CreateRequest(group));
         response.fillGroup(group);
 
-        timeZone = client.getValues().getTimeZone();
+        timeZone = getClient().getValues().getTimeZone();
         task = Create.createWithDefaults(client1.getValues().getPrivateTaskFolder(), "Test for bug 15291");
         task.addParticipant(participant);
         client1.execute(new InsertRequest(task, timeZone, true)).fillTask(task);
     }
 
     @After
-    @Override
-    protected void tearDown() throws Exception {
-        client1.execute(new DeleteRequest(task));
-        client1.execute(new com.openexchange.ajax.group.actions.DeleteRequest(group));
-        super.tearDown();
+    public void tearDown() throws Exception {
+        try {
+            client1.execute(new DeleteRequest(task));
+            client1.execute(new com.openexchange.ajax.group.actions.DeleteRequest(group));
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

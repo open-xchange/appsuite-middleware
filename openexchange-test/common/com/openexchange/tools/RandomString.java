@@ -41,6 +41,7 @@ import java.util.Random;
 
 /**
  * Contains methods for generating random string with defined length.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class RandomString {

@@ -1,14 +1,9 @@
 package liquibase.change;
 
-import liquibase.database.Database;
-import liquibase.exception.ValidationErrors;
-import liquibase.serializer.core.string.StringChangeLogSerializer;
-import liquibase.statement.DatabaseFunction;
-import liquibase.statement.SequenceNextValueFunction;
-import liquibase.statement.SqlStatement;
-import liquibase.test.TestContext;
-import org.junit.Test;
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
@@ -17,11 +12,14 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import org.junit.Test;
+import liquibase.database.Database;
+import liquibase.exception.ValidationErrors;
+import liquibase.serializer.core.string.StringChangeLogSerializer;
+import liquibase.statement.DatabaseFunction;
+import liquibase.statement.SequenceNextValueFunction;
+import liquibase.statement.SqlStatement;
+import liquibase.test.TestContext;
 
 /**
  * Base test class for changes

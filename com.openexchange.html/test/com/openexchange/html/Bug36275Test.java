@@ -85,12 +85,13 @@ public class Bug36275Test {
     }
 
     @After
-    public void tearDown() {
+    public void tearDown()
+ {
         service = null;
     }
 
-    @Test
-    public void testKeepUnicode() {
+     @Test
+     public void testKeepUnicode() {
         String content = "<html xmlns=\"http://www.w3.org/1999/xhtml\"><head>\n" +
             "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/>\n" +
             "</head><body>\n" +

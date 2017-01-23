@@ -64,7 +64,6 @@ import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.publish.Publication;
 
-
 /**
  * Unit tests for {@link InfostorePublicationUtils}
  * 
@@ -116,8 +115,7 @@ public class PublicationInfostoreUtilsTest {
 
     @Test
     public void testLoadDocumentMetadata_NoFileAccess_ReturndfdNull() throws OXException {
-        PowerMockito.when(this.fileAccessFactory.createAccess((com.openexchange.session.Session) Matchers.any())).thenReturn(
-            this.fileAccess);
+        PowerMockito.when(this.fileAccessFactory.createAccess((com.openexchange.session.Session) Matchers.any())).thenReturn(this.fileAccess);
 
         DocumentMetadata loadDocumentMetadata = InfostorePublicationUtils.loadDocumentMetadata(this.publication, this.fileAccessFactory);
 

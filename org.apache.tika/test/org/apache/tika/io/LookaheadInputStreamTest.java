@@ -19,20 +19,24 @@ package org.apache.tika.io;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
-import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * Test cases for the {@link LookaheadInputStream} class.
  */
-public class LookaheadInputStreamTest extends TestCase {
-
-    public void testNullStream() throws IOException {
+public class LookaheadInputStreamTest {
+         @Test
+     public void testNullStream() throws IOException {
         InputStream lookahead = new LookaheadInputStream(null, 100);
         assertEquals(-1, lookahead.read());
     }
 
-    public void testEmptyStream() throws IOException {
+         @Test
+     public void testEmptyStream() throws IOException {
         InputStream stream = new ByteArrayInputStream(new byte[0]);
         InputStream lookahead = new LookaheadInputStream(stream, 100);
         assertEquals(-1, lookahead.read());
@@ -40,7 +44,8 @@ public class LookaheadInputStreamTest extends TestCase {
         assertEquals(-1, stream.read());
     }
 
-    public void testBasicLookahead() throws IOException {
+         @Test
+     public void testBasicLookahead() throws IOException {
         InputStream stream =
             new ByteArrayInputStream(new byte[] { 'a', 'b', 'c' });
         InputStream lookahead = new LookaheadInputStream(stream, 2);
@@ -54,7 +59,8 @@ public class LookaheadInputStreamTest extends TestCase {
         assertEquals(-1, stream.read());
     }
 
-    public void testZeroLookahead() throws IOException {
+         @Test
+     public void testZeroLookahead() throws IOException {
         InputStream stream =
             new ByteArrayInputStream(new byte[] { 'a', 'b', 'c' });
         InputStream lookahead = new LookaheadInputStream(stream, 0);
@@ -66,7 +72,8 @@ public class LookaheadInputStreamTest extends TestCase {
         assertEquals(-1, stream.read());
     }
 
-    public void testMarkLookahead() throws IOException {
+         @Test
+     public void testMarkLookahead() throws IOException {
         InputStream stream =
             new ByteArrayInputStream(new byte[] { 'a', 'b', 'c' });
         InputStream lookahead = new LookaheadInputStream(stream, 2);
@@ -87,7 +94,8 @@ public class LookaheadInputStreamTest extends TestCase {
         assertEquals(-1, stream.read());
     }
 
-    public void testSkipLookahead() throws IOException {
+         @Test
+     public void testSkipLookahead() throws IOException {
         InputStream stream =
             new ByteArrayInputStream(new byte[] { 'a', 'b', 'c' });
         InputStream lookahead = new LookaheadInputStream(stream, 2);

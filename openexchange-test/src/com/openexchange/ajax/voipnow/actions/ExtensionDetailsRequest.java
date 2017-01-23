@@ -93,10 +93,7 @@ public class ExtensionDetailsRequest extends AbstractVoipNowRequest<ExtensionDet
      */
     @Override
     public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, "extensiondetails"),
-            new Parameter("id", id),
-            new Parameter("identifier", identifier)
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, "extensiondetails"), new Parameter("id", id), new Parameter("identifier", identifier)
         };
     }
 

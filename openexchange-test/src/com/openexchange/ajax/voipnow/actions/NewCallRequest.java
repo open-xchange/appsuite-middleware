@@ -100,11 +100,7 @@ public class NewCallRequest extends AbstractVoipNowRequest<NewCallResponse> {
      */
     @Override
     public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, "newcall"),
-            new Parameter("phone", phone),
-            new Parameter("timeout", timeout),
-            new Parameter("callerid", callerId),
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, "newcall"), new Parameter("phone", phone), new Parameter("timeout", timeout), new Parameter("callerid", callerId),
         };
     }
 

@@ -95,8 +95,8 @@ public class Bug30843Test {
         PowerMockito.when(Services.getService(ConfigurationService.class)).thenReturn(configService);
     }
 
-    @Test
-    public void testIMAPProperties_getSSLProtocols() throws Exception {
+     @Test
+     public void testIMAPProperties_getSSLProtocols() throws Exception {
         IMAPProperties props = IMAPProperties.getInstance();
         props.loadProperties();
         String sslProtocols = props.getSSLProtocols();

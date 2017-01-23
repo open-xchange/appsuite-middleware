@@ -49,7 +49,6 @@
 
 package com.openexchange.publish.online.infostore;
 
-import junit.framework.TestSuite;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
@@ -67,5 +66,5 @@ import com.openexchange.publish.online.infostore.util.PublicationInfostoreUtilsT
     PublicationInfostoreUtilsTest.class,
     ActivatorTest.class
 })
-public class UnitTests extends TestSuite {
+public class UnitTests  {
 }

@@ -49,7 +49,10 @@
 
 package com.openexchange.ajax.spellcheck;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
+import org.junit.Test;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.spellcheck.actions.check.CheckRequest;
 import com.openexchange.ajax.spellcheck.actions.check.CheckResponse;
@@ -62,42 +65,43 @@ import com.openexchange.ajax.spellcheck.actions.check.CheckResponse;
  */
 public final class CheckTest extends AbstractSpellCheckTest {
 
-	/**
-	 * Initializes a new {@link CheckTest}
-	 *
-	 * @param name
-	 */
-	public CheckTest(final String name) {
-		super(name);
-	}
+    /**
+     * Initializes a new {@link CheckTest}
+     *
+     * @param name
+     */
+    public CheckTest() {
+        super();
+    }
 
-	/**
-	 * Tests the <code>action=check</code> request
-	 *
-	 * @throws Throwable
-	 */
-	public void testCheck() throws Throwable {
+    /**
+     * Tests the <code>action=check</code> request
+     *
+     * @throws Throwable
+     */
+    @Test
+    public void testCheck() throws Throwable {
 
-		/*
-		 * en
-		 */
-		String htmlContent = "<html><head><title>quetsche</title></head><body>I lvoe you</body></html>";
-		CheckResponse checkResponse = (CheckResponse) Executor.execute(getSession(), new CheckRequest(htmlContent, "en", true));
+        /*
+         * en
+         */
+        String htmlContent = "<html><head><title>quetsche</title></head><body>I lvoe you</body></html>";
+        CheckResponse checkResponse = (CheckResponse) Executor.execute(getSession(), new CheckRequest(htmlContent, "en", true));
 
-		String[] mw = checkResponse.getMisspeltWords();
-		assertTrue("Too many misspelt words: " + Arrays.toString(mw), mw.length == 1);
-		assertTrue("Unexpected misspelt word: " + mw[0], "lvoe".equals(mw[0]));
-		/*
-		 * de
-		 */
-		htmlContent = "<html><head><title>quetsche</title></head><body>Ich leibe Dich</body></html>";
-		checkResponse = (CheckResponse) Executor.execute(getSession(), new CheckRequest(htmlContent, "de", true));
-		assertFalse("Error occured!", checkResponse.hasError());
+        String[] mw = checkResponse.getMisspeltWords();
+        assertTrue("Too many misspelt words: " + Arrays.toString(mw), mw.length == 1);
+        assertTrue("Unexpected misspelt word: " + mw[0], "lvoe".equals(mw[0]));
+        /*
+         * de
+         */
+        htmlContent = "<html><head><title>quetsche</title></head><body>Ich leibe Dich</body></html>";
+        checkResponse = (CheckResponse) Executor.execute(getSession(), new CheckRequest(htmlContent, "de", true));
+        assertFalse("Error occured!", checkResponse.hasError());
 
-		mw = checkResponse.getMisspeltWords();
-		assertTrue("Too many misspelt words: " + Arrays.toString(mw), mw.length == 1);
-		assertTrue("Unexpected misspelt word: " + mw[0], "leibe".equals(mw[0]));
+        mw = checkResponse.getMisspeltWords();
+        assertTrue("Too many misspelt words: " + Arrays.toString(mw), mw.length == 1);
+        assertTrue("Unexpected misspelt word: " + mw[0], "leibe".equals(mw[0]));
 
-	}
+    }
 
 }

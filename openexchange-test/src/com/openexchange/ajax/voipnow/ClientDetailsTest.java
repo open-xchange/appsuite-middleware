@@ -49,8 +49,10 @@
 
 package com.openexchange.ajax.voipnow;
 
+import static org.junit.Assert.assertNotNull;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.voipnow.actions.ClientDetailsRequest;
@@ -63,21 +65,22 @@ public class ClientDetailsTest extends AbstractAJAXSession {
      *
      * @param name The test name
      */
-    public ClientDetailsTest(final String name) {
-        super(name);
+    public ClientDetailsTest() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         // TODO check context admin, too. Currently this user does not have aliases until bug 14646 is fixed.
-        final AJAXClient client2 = new AJAXClient(User.User2);
+        final AJAXClient client2 = new AJAXClient(testContext.acquireUser());
         client2.logout();
     }
 
+    @Test
     public void testClientDetails() throws Exception {
         final ClientDetailsRequest clientDetailsRequest = new ClientDetailsRequest(4, "open-xchange-client");
-        final ClientDetailsResponse clientDetailsResponse = Executor.execute(client, clientDetailsRequest);
+        final ClientDetailsResponse clientDetailsResponse = Executor.execute(getClient(), clientDetailsRequest);
 
         final Object body = clientDetailsResponse.getData();
 

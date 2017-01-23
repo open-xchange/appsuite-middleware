@@ -108,7 +108,8 @@ public class ContactCopyTest extends AbstractUserCopyTest {
         dstCtxId = getDestinationContext().getContextId(); 
     }
     
-    public void testContactCopy() throws Exception {
+         @Test
+     public void testContactCopy() throws Exception {
         final ContactCopyTask copyTask = new ContactCopyTask();
         final List<Integer> originFolderIds = loadFolderIdsFromDB(srcCon, srcCtxId, srcUsrId);
         final List<ContactField> contactFields = copyTask.getCleanedContactFields();
@@ -207,8 +208,9 @@ public class ContactCopyTest extends AbstractUserCopyTest {
         checkAndGetMatchingObjects(sourceDList, targetDList, new DListComparator());
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown()
+ throws Exception {
         DBUtils.autocommit(dstCon);
         deleteAllFromTablesForCid(dstCtxId, "cid", dstCon, "prg_contacts", "prg_contacts_image", "prg_dlist");
         super.tearDown();

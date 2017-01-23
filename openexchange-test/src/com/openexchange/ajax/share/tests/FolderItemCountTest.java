@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.share.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequestNew;
 import com.openexchange.ajax.folder.actions.GetResponseNew;
@@ -59,7 +62,6 @@ import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
-
 
 /**
  * {@link FolderItemCountTest}
@@ -74,10 +76,11 @@ public class FolderItemCountTest extends ShareTest {
      *
      * @param name The test name
      */
-    public FolderItemCountTest(String name) {
-        super(name);
+    public FolderItemCountTest() {
+        super();
     }
 
+    @Test
     public void testFolderItemCount() throws Exception {
         /*
          * create shared folder with some files inside
@@ -93,7 +96,7 @@ public class FolderItemCountTest extends ShareTest {
          */
         OCLPermission matchingPermission = null;
         for (OCLPermission permission : folder.getPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
                 break;
             }

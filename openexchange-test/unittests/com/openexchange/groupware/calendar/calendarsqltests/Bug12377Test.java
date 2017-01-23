@@ -49,15 +49,18 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarCallbacks;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-
 
 public class Bug12377Test extends CalendarSqlTest {
     // Bug 12377
 
+    @Test
     public void testShouldDoCallbackWhenHavingCreatedAnException() throws OXException {
         final TestCalendarListener calendarListener = new TestCalendarListener();
         CalendarCallbacks.getInstance().addListener(calendarListener);

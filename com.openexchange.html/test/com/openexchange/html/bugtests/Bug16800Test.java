@@ -59,8 +59,8 @@ import com.openexchange.html.AbstractSanitizing;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class Bug16800Test extends AbstractSanitizing {
-    @Test
-    public void testPunycodeLinkGeneration() {
+     @Test
+     public void testPunycodeLinkGeneration() {
         String link = "http://schn\u00f6sel.ws";
         String formattedLink = getHtmlService().formatHrefLinks(link);
         assertEquals("Link " + link + "not correctly formatted, was:", "<a href=\"http://xn--schnsel-d1a.ws\" target=\"_blank\">http://schn\u00f6sel.ws</a>", formattedLink);

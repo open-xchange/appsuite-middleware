@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.folder.tree;
 
-
 /**
  * {@link FolderNodeVisitor}
  *
@@ -57,5 +56,6 @@ package com.openexchange.ajax.folder.tree;
  *
  */
 public interface FolderNodeVisitor {
+
     public void visit(int depth, FolderNode folder);
 }

@@ -60,17 +60,17 @@ import javax.servlet.http.HttpServletResponse;
  */
 public final class StatusCodes {
 
-	public static final int SC_OK = HttpServletResponse.SC_OK;
-	public static final int SC_CONFLICT = HttpServletResponse.SC_CONFLICT;
-	public static final int SC_CREATED = HttpServletResponse.SC_CREATED;
-	public static final int SC_FORBIDDEN = HttpServletResponse.SC_FORBIDDEN;
-	public static final int SC_INTERNAL_SERVER_ERROR = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
-	public static final int SC_UNAUTHORIZED =  HttpServletResponse.SC_UNAUTHORIZED;
-    public static final int SC_NOT_FOUND =  HttpServletResponse.SC_NOT_FOUND;
-    public static final int SC_NO_CONTENT =  HttpServletResponse.SC_NO_CONTENT;
-	public static final int SC_MULTISTATUS = 207;
+    public static final int SC_OK = HttpServletResponse.SC_OK;
+    public static final int SC_CONFLICT = HttpServletResponse.SC_CONFLICT;
+    public static final int SC_CREATED = HttpServletResponse.SC_CREATED;
+    public static final int SC_FORBIDDEN = HttpServletResponse.SC_FORBIDDEN;
+    public static final int SC_INTERNAL_SERVER_ERROR = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+    public static final int SC_UNAUTHORIZED = HttpServletResponse.SC_UNAUTHORIZED;
+    public static final int SC_NOT_FOUND = HttpServletResponse.SC_NOT_FOUND;
+    public static final int SC_NO_CONTENT = HttpServletResponse.SC_NO_CONTENT;
+    public static final int SC_MULTISTATUS = 207;
 
-	private StatusCodes() {
+    private StatusCodes() {
 
-	}
+    }
 }

@@ -51,21 +51,12 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import java.util.Calendar;
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.java.util.TimeZones;
 
 public class Bug8317Test extends AppointmentTest {
-
-    public Bug8317Test(final String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
 
     /**
      * INFO: This test case must be done at least today + 1 days because otherwise
@@ -75,6 +66,7 @@ public class Bug8317Test extends AppointmentTest {
      *
      * TODO: Create a dynamic date/time in the future for testing.
      */
+    @Test
     public void testBug8317() throws Exception {
         final Calendar calendar = Calendar.getInstance(TimeZones.UTC);
         calendar.setTimeInMillis(startTime);
@@ -97,7 +89,7 @@ public class Bug8317Test extends AppointmentTest {
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setIgnoreConflicts(true);
-        final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
+        final int objectId = catm.insert(appointmentObj).getObjectID();
 
         calendar.setTimeZone(timeZone);
         calendar.set(year, month, day, 0, 30, 0);
@@ -114,15 +106,8 @@ public class Bug8317Test extends AppointmentTest {
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setIgnoreConflicts(false);
 
-        try {
-            final int objectId2 = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
-            deleteAppointment(getWebConversation(), objectId2, appointmentFolderId, getHostName(), getSessionId(), true);
-            fail("conflict exception expected!");
-        } catch (final OXException exc) {
-            // Perfect. The insertAppointment throws a OXException
-            // And this is what we expect here !!!
-        } finally {
-            deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId(), false);
-        }
+        final int objectId2 = catm.insert(appointmentObj).getObjectID();
+        appointmentObj.setObjectID(objectId2);
+        catm.delete(appointmentObj);
     }
 }

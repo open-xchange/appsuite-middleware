@@ -1,10 +1,12 @@
 package liquibase.database.core;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import org.junit.Assert;
+import org.junit.Test;
 import liquibase.database.AbstractJdbcDatabaseTest;
 import liquibase.database.Database;
-import org.junit.Assert;
-import static org.junit.Assert.*;
-import org.junit.Test;
 
 /**
  * Tests for {@link liquibase.database.core.OracleDatabase}.
@@ -20,34 +22,31 @@ public class OracleDatabaseTest extends AbstractJdbcDatabaseTest {
         return "Oracle";
     }
 
-     @Override
      @Test
     public void escapeTableName_noSchema() {
         Database database = getDatabase();
         assertEquals("tableName", database.escapeTableName(null, null, "tableName"));
     }
 
-    @Override
-    @Test
+     @Test
     public void escapeTableName_withSchema() {
         Database database = getDatabase();
         assertEquals("catalogName.tableName", database.escapeTableName("catalogName", "schemaName", "tableName"));
     }
 
-    @Override
-    @Test
+     @Test
     public void supportsInitiallyDeferrableColumns() {
         assertTrue(getDatabase().supportsInitiallyDeferrableColumns());
     }
 
 
-    @Override
-    @Test
+     @Test
     public void getCurrentDateTimeFunction() {
         Assert.assertEquals("SYSTIMESTAMP", getDatabase().getCurrentDateTimeFunction());
     }
 
-    public void testGetDefaultDriver() {
+         @Test
+     public void testGetDefaultDriver() {
         Database database = new OracleDatabase();
 
         assertEquals("oracle.jdbc.OracleDriver", database.getDefaultDriver("jdbc:oracle:thin:@localhost/XE"));

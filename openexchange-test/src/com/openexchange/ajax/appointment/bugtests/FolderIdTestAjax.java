@@ -50,14 +50,13 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
+import java.util.UUID;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.test.CalendarTestManager;
-import com.openexchange.test.FolderTestManager;
 
 /**
  * {@link FolderIdTestAjax}
@@ -66,42 +65,19 @@ import com.openexchange.test.FolderTestManager;
  */
 public class FolderIdTestAjax extends AbstractAJAXSession {
 
-    public FolderIdTestAjax(String name) {
-        super(name);
-    }
-
     private Appointment appointment;
-
-    private CalendarTestManager ctm;
-
-    private AJAXClient client2;
-
-    private FolderTestManager ftm;
 
     private FolderObject folderA;
 
     private FolderObject folderB;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
-        client2 = new AJAXClient(User.User2);
-        ftm = new FolderTestManager(client);
-        ctm = new CalendarTestManager(client);
-
-        folderA = ftm.generateSharedFolder(
-            "folder A" + System.currentTimeMillis(),
-            Module.CALENDAR.getFolderConstant(),
-            client.getValues().getPrivateAppointmentFolder(),
-            new int[] { client.getValues().getUserId(), client2.getValues().getUserId() });
+        folderA = ftm.generateSharedFolder("folder A" + UUID.randomUUID().toString(), Module.CALENDAR.getFolderConstant(), getClient().getValues().getPrivateAppointmentFolder(), new int[] { getClient().getValues().getUserId(), getClient2().getValues().getUserId() });
         ftm.insertFolderOnServer(folderA);
-        
 
-        folderB = ftm.generateSharedFolder(
-            "folder B" + System.currentTimeMillis(),
-            Module.CALENDAR.getFolderConstant(),
-            client.getValues().getPrivateAppointmentFolder(),
-            new int[] { client.getValues().getUserId(), client2.getValues().getUserId() });
+        folderB = ftm.generateSharedFolder("folder B" + UUID.randomUUID().toString(), Module.CALENDAR.getFolderConstant(), getClient().getValues().getPrivateAppointmentFolder(), new int[] { getClient().getValues().getUserId(), getClient2().getValues().getUserId() });
         ftm.insertFolderOnServer(folderB);
 
         appointment = new Appointment();
@@ -110,22 +86,15 @@ public class FolderIdTestAjax extends AbstractAJAXSession {
         appointment.setStartDate(D("26.12.2013 08:00"));
         appointment.setEndDate(D("27.12.2013 09:00"));
         appointment.setIgnoreConflicts(true);
-        ctm.insert(appointment);
+        catm.insert(appointment);
     }
 
+    @Test
     public void testSomething() throws Exception {
-        ctm.setClient(client2);
+        catm.setClient(getClient2());
         appointment.setParentFolderID(folderB.getObjectID());
-        ctm.update(folderA.getObjectID(), appointment);
-        Appointment loaded = ctm.get(folderB.getObjectID(), appointment.getObjectID());
+        catm.update(folderA.getObjectID(), appointment);
+        Appointment loaded = catm.get(folderB.getObjectID(), appointment.getObjectID());
         System.out.println(loaded.getTitle());
     }
-
-    @Override
-    public void tearDown() throws Exception {
-        ctm.cleanUp();
-        ftm.cleanUp();
-        super.tearDown();
-    }
-
 }

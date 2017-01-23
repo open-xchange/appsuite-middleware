@@ -67,6 +67,7 @@ import java.util.TimeZone;
 import java.util.UUID;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.junit.After;
 import org.junit.Test;
 import com.openexchange.admin.rmi.AbstractRMITest;
 import com.openexchange.admin.rmi.AbstractTest;
@@ -368,8 +369,9 @@ public class RoundtripTest extends AbstractRMITest {
         compareUsers(srcUser, dstUser);
     }
 
-    @Override
-    public void tearDown() throws Exception {
+    @After
+    public void tearDown()
+ throws Exception {
         if (ui != null) {
             try {
                 ui.delete(srcCtx, srcUser, null, getCredentials());
@@ -391,8 +393,6 @@ public class RoundtripTest extends AbstractRMITest {
                 e.printStackTrace();
             }
         }
-
-        super.tearDown();
     }
 
     private AJAXSession performLogin(final String login, final String password) throws OXException, IOException, JSONException {

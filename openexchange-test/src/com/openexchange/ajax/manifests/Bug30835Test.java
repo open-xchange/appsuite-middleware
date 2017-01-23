@@ -49,9 +49,13 @@
 
 package com.openexchange.ajax.manifests;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.Comparator;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.manifests.actions.ConfigRequest;
 import com.openexchange.ajax.manifests.actions.ConfigResponse;
@@ -69,25 +73,20 @@ public class Bug30835Test extends AbstractAJAXSession {
     /**
      * Initializes a new {@link Bug30835Test}.
      */
-    public Bug30835Test(String name) {
-        super(name);
+    public Bug30835Test() {
+        super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
-        client = getClient();
         comp = new JSONComparator();
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
-
+    @Test
     public void testBug30835() throws Exception {
         ConfigRequest request = new ConfigRequest();
-        ConfigResponse response = client.execute(request);
+        ConfigResponse response = getClient().execute(request);
         JSONArray json = response.getConfig().getJSONArray("languages");
         assertFalse("Response contains no languages", json.isEmpty());
         assertTrue("Response is not ordered", isOrdered(json, comp));

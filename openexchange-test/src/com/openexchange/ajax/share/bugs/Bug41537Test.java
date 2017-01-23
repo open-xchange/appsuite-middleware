@@ -49,9 +49,13 @@
 
 package com.openexchange.ajax.share.bugs;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.google.common.io.BaseEncoding;
 import com.openexchange.ajax.contact.AbstractContactTest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
@@ -67,7 +71,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.impl.OCLPermission;
 
-
 /**
  * {@link Bug41537Test}
  *
@@ -78,22 +81,20 @@ public class Bug41537Test extends ShareTest {
 
     /**
      * Initializes a new {@link Bug41537Test}.
+     * 
      * @param name
      */
-    public Bug41537Test(String name) {
-        super(name);
+    public Bug41537Test() {
+        super();
     }
 
+    @Test
     public void testGuestCanUpdateHisContactImage() throws Exception {
         /*
          * Create share
          */
         OCLGuestPermission guestPermission = createNamedGuestPermission(randomUID() + "@example.com", randomUID());
-        FolderObject folder = insertSharedFolder(
-            EnumAPI.OUTLOOK,
-            FolderObject.INFOSTORE,
-            client.getValues().getPrivateInfostoreFolder(),
-            guestPermission);
+        FolderObject folder = insertSharedFolder(EnumAPI.OUTLOOK, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), guestPermission);
         OCLPermission guestEntityPermission = findFirstGuestPermission(folder);
         assertNotNull(guestEntityPermission);
         ExtendedPermissionEntity guest = discoverGuestEntity(EnumAPI.OUTLOOK, FolderObject.INFOSTORE, folder.getObjectID(), guestEntityPermission.getEntity());
@@ -137,26 +138,15 @@ public class Bug41537Test extends ShareTest {
         /*
          * Try reload as sharing user
          */
-        reloadResponse = client.execute(new GetRequest(guestUserId, timeZone, true));
+        reloadResponse = getClient().execute(new GetRequest(guestUserId, timeZone, true));
         reloaded = reloadResponse.getContact();
         assertEquals("No image set in contact", 1, reloaded.getNumberOfImages());
         assertEquals("Wrong image content type set in contact", "image/png", reloaded.getImageContentType());
         assertNotNull("No image set in contact", reloadResponse.getImageUrl());
-        reloadedImageBytes = AbstractContactTest.loadImageByURL(client, reloadResponse.getImageUrl());
+        reloadedImageBytes = AbstractContactTest.loadImageByURL(getClient(), reloadResponse.getImageUrl());
         assertTrue("Wrong image set in contact", Arrays.equals(imageBytes, reloadedImageBytes));
     }
 
-    private static final String CONTACT_IMAGE =
-        "iVBORw0KGgoAAAANSUhEUgAAAEwAAABMCAMAAADwSaEZAAAAAXNSR0IArs4c6QAAAAlwSFlzAAAN" +
-        "1wAADdcBQiibeAAAAAd0SU1FB9wEDAgrFQPAJ7YAAAAidEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRo" +
-        "IEdJTVAgb24gYSBNYWOHqHdDAAAAUVBMVEUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" +
-        "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD///9cFzNQAAAA" +
-        "GnRSTlMAAQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGXTAuKUAAAABYktHRBp1Z+QyAAABNklEQVRY" +
-        "w+3X3Y6EIAwF4OLPrAq4KjDlvP+L7tUmsztCLHIzCecBvkCNbSH61KjRHIEBDocZ1T1qcXiJW25w" +
-        "4x8KANxYak2Mt/BUaEWcJBZpI+M0XHLTHYnsBZdEMlO9gxUcrUcmvRCbc9gsxNYcttYrmbxoLoc5" +
-        "IeZzmBdiIYeFhjWsYbX+zVCza0h/9C2HbUJM5zAtHSgxbUXpQMkNASvfptITvWCvUse5dRRtQfa0" +
-        "XgWXTFYtiodmwxrWsGFNPSpW6avi8Z1t21N3vfnM2Y0WAJy+1m077XEhTztcKNUTF8NbvniPDaIc" +
-        "X6kWrqYd4rjl7Fso7VAUr/9znfEoTjCvXGcZt8L2l1PmJgUAbBQR0eBRJX4g6gMqJfTno7YslkI9" +
-        "LBDXw5hiPSwSKqZhDfs8zNWz3A+fuiRwXiy9mwAAAABJRU5ErkJggg==";
+    private static final String CONTACT_IMAGE = "iVBORw0KGgoAAAANSUhEUgAAAEwAAABMCAMAAADwSaEZAAAAAXNSR0IArs4c6QAAAAlwSFlzAAAN" + "1wAADdcBQiibeAAAAAd0SU1FB9wEDAgrFQPAJ7YAAAAidEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRo" + "IEdJTVAgb24gYSBNYWOHqHdDAAAAUVBMVEUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" + "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD///9cFzNQAAAA" + "GnRSTlMAAQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGXTAuKUAAAABYktHRBp1Z+QyAAABNklEQVRY" + "w+3X3Y6EIAwF4OLPrAq4KjDlvP+L7tUmsztCLHIzCecBvkCNbSH61KjRHIEBDocZ1T1qcXiJW25w" + "4x8KANxYak2Mt/BUaEWcJBZpI+M0XHLTHYnsBZdEMlO9gxUcrUcmvRCbc9gsxNYcttYrmbxoLoc5" + "IeZzmBdiIYeFhjWsYbX+zVCza0h/9C2HbUJM5zAtHSgxbUXpQMkNASvfptITvWCvUse5dRRtQfa0" + "XgWXTFYtiodmwxrWsGFNPSpW6avi8Z1t21N3vfnM2Y0WAJy+1m077XEhTztcKNUTF8NbvniPDaIc" + "X6kWrqYd4rjl7Fso7VAUr/9znfEoTjCvXGcZt8L2l1PmJgUAbBQR0eBRJX4g6gMqJfTno7YslkI9" + "LBDXw5hiPSwSKqZhDfs8zNWz3A+fuiRwXiy9mwAAAABJRU5ErkJggg==";
 
 }

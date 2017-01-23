@@ -49,9 +49,15 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
@@ -63,50 +69,45 @@ public class SortingInJapanTest extends AbstractManagedContactTest {
 
     private String originalLocale;
 
-	public SortingInJapanTest(String name) {
-		super(name);
-	}
+    public SortingInJapanTest() {
+        super();
+    }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
-        originalLocale = client.execute(new GetRequest(Tree.Language)).getString();
+        originalLocale = getClient().execute(new GetRequest(Tree.Language)).getString();
         if (Strings.isEmpty(originalLocale)) {
             fail("no locale found");
         }
-        client.execute(new SetRequest(Tree.Language, "ja-JP"));
+        getClient().execute(new SetRequest(Tree.Language, "ja-JP"));
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        if (null != originalLocale) {
-            client.execute(new SetRequest(Tree.Language, originalLocale));
+        try {
+            if (null != originalLocale) {
+                getClient().execute(new SetRequest(Tree.Language, originalLocale));
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
+    @Test
     public void testCustomSortingForJapan() throws Exception {
         /*
          * generate test contacts on server
          */
-        Contact[] orderedContacts = new Contact[] {
-            generateContact("\u30a1"),
-            generateContact("\u30a3"),
-            generateContact("\u30a6"),
-            generateContact("\u30ac"),
-            generateContact("#*+$&& ASCII Art"),
-            generateContact("012345"),
-            generateContact("AAAAA"),
-            generateContact("Hans Dampf"),
-            generateContact("Max Mustermann"),
+        Contact[] orderedContacts = new Contact[] { generateContact("\u30a1"), generateContact("\u30a3"), generateContact("\u30a6"), generateContact("\u30ac"), generateContact("#*+$&& ASCII Art"), generateContact("012345"), generateContact("AAAAA"), generateContact("Hans Dampf"), generateContact("Max Mustermann"),
         };
         List<Contact> unorderedContacts = new ArrayList<Contact>(Arrays.asList(orderedContacts));
         Collections.shuffle(unorderedContacts);
-        manager.newActionMultiple(unorderedContacts.toArray(new Contact[unorderedContacts.size()]));
+        cotm.newActionMultiple(unorderedContacts.toArray(new Contact[unorderedContacts.size()]));
         /*
          * get all contacts
          */
-        Contact[] receivedContacts = manager.allAction(folderID);
+        Contact[] receivedContacts = cotm.allAction(folderID);
         assertNotNull("no contacts received", receivedContacts);
         assertEquals("wrong number of contacts received", orderedContacts.length, receivedContacts.length);
         /*
@@ -115,6 +116,6 @@ public class SortingInJapanTest extends AbstractManagedContactTest {
         for (int i = 0; i < receivedContacts.length; i++) {
             assertEquals("contact order wrong", orderedContacts[i].getSurName(), receivedContacts[i].getSurName());
         }
-	}
+    }
 
 }

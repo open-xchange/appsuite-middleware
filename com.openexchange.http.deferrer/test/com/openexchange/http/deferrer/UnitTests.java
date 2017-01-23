@@ -49,8 +49,8 @@
 
 package com.openexchange.http.deferrer;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 import com.openexchange.http.deferrer.impl.DefaultDeferringURLServiceTest;
 
 
@@ -59,15 +59,10 @@ import com.openexchange.http.deferrer.impl.DefaultDeferringURLServiceTest;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    DefaultDeferringURLServiceTest.class
+})
 public class UnitTests {
 
-    private UnitTests() {
-        super();
-    }
-
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(DefaultDeferringURLServiceTest.class);
-        return tests;
-    }
 }

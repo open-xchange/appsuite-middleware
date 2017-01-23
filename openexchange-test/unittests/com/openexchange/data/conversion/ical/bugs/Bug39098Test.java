@@ -49,9 +49,11 @@
 
 package com.openexchange.data.conversion.ical.bugs;
 
+import static org.junit.Assert.assertEquals;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.data.conversion.ical.AbstractICalParserTest;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 
@@ -64,41 +66,9 @@ import com.openexchange.groupware.calendar.CalendarDataObject;
  */
 public class Bug39098Test extends AbstractICalParserTest {
 
+    @Test
     public void testAsiaShanghai() throws Exception {
-        String iCal =
-            "BEGIN:VCALENDAR\n"+
-            "VERSION:2.0\n"+
-            "PRODID:-//Apple Inc.//Mac OS X 10.10.3//EN\n"+
-            "CALSCALE:GREGORIAN\n"+
-            "BEGIN:VTIMEZONE\n"+
-            "TZID:Asia/Shanghai\n"+
-            "BEGIN:STANDARD\n"+
-            "TZOFFSETFROM:+0900\n"+
-            "RRULE:FREQ=YEARLY;UNTIL=19910914T150000Z;BYMONTH=9;BYDAY=3SU\n"+
-            "DTSTART:19890917T000000\n"+
-            "TZNAME:GMT+8\n"+
-            "TZOFFSETTO:+0800\n"+
-            "END:STANDARD\n"+
-            "BEGIN:DAYLIGHT\n"+
-            "TZOFFSETFROM:+0800\n"+
-            "DTSTART:19910414T000000\n"+
-            "TZNAME:GMT+8\n"+
-            "TZOFFSETTO:+0900\n"+
-            "RDATE:19910414T000000\n"+
-            "END:DAYLIGHT\n"+
-            "END:VTIMEZONE\n"+
-            "BEGIN:VEVENT\n"+
-            "CREATED:20150629T100123Z\n"+
-            "UID:335A47A1-464E-440E-9DA7-037507822ED7\n"+
-            "DTSTART;TZID=Asia/Shanghai:20150630T190000\n"+
-            "DTEND;TZID=Asia/Shanghai:20150630T200000\n"+
-            "TRANSP:OPAQUE\n"+
-            "SUMMARY:test\n"+
-            "DTSTAMP:20150629T100123Z\n"+
-            "SEQUENCE:0\n"+
-            "END:VEVENT\n"+
-            "END:VCALENDAR\n"
-        ;
+        String iCal = "BEGIN:VCALENDAR\n" + "VERSION:2.0\n" + "PRODID:-//Apple Inc.//Mac OS X 10.10.3//EN\n" + "CALSCALE:GREGORIAN\n" + "BEGIN:VTIMEZONE\n" + "TZID:Asia/Shanghai\n" + "BEGIN:STANDARD\n" + "TZOFFSETFROM:+0900\n" + "RRULE:FREQ=YEARLY;UNTIL=19910914T150000Z;BYMONTH=9;BYDAY=3SU\n" + "DTSTART:19890917T000000\n" + "TZNAME:GMT+8\n" + "TZOFFSETTO:+0800\n" + "END:STANDARD\n" + "BEGIN:DAYLIGHT\n" + "TZOFFSETFROM:+0800\n" + "DTSTART:19910414T000000\n" + "TZNAME:GMT+8\n" + "TZOFFSETTO:+0900\n" + "RDATE:19910414T000000\n" + "END:DAYLIGHT\n" + "END:VTIMEZONE\n" + "BEGIN:VEVENT\n" + "CREATED:20150629T100123Z\n" + "UID:335A47A1-464E-440E-9DA7-037507822ED7\n" + "DTSTART;TZID=Asia/Shanghai:20150630T190000\n" + "DTEND;TZID=Asia/Shanghai:20150630T200000\n" + "TRANSP:OPAQUE\n" + "SUMMARY:test\n" + "DTSTAMP:20150629T100123Z\n" + "SEQUENCE:0\n" + "END:VEVENT\n" + "END:VCALENDAR\n";
         TimeZone userTimeZone = TimeZone.getTimeZone("Asia/Shanghai");
         /*
          * parse appointment & verify start- and enddate

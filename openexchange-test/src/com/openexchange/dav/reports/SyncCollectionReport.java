@@ -57,7 +57,6 @@ import org.apache.jackrabbit.webdav.version.report.ReportInfo;
 import org.apache.jackrabbit.webdav.version.report.ReportType;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
 import com.openexchange.dav.PropertyNames;
 
 /**
@@ -67,8 +66,7 @@ import com.openexchange.dav.PropertyNames;
  */
 public class SyncCollectionReport implements Report, DeltaVConstants {
 
-    public static final ReportType SYNC_COLLECTION = ReportType.register(PropertyNames.SYNC_COLLECTION.getName(), 
-    		PropertyNames.SYNC_COLLECTION.getNamespace(), SyncCollectionReport.class); 
+    public static final ReportType SYNC_COLLECTION = ReportType.register(PropertyNames.SYNC_COLLECTION.getName(), PropertyNames.SYNC_COLLECTION.getNamespace(), SyncCollectionReport.class);
 
     @Override
     public ReportType getType() {
@@ -82,12 +80,12 @@ public class SyncCollectionReport implements Report, DeltaVConstants {
 
     @Override
     public void init(DavResource dr, ReportInfo ri) throws DavException {
-    	// System.out.println("init");
+        // System.out.println("init");
     }
 
     @Override
     public Element toXml(Document dcmnt) {
-    	// System.out.println("toxml");
+        // System.out.println("toxml");
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }

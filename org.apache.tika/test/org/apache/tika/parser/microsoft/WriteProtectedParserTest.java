@@ -16,16 +16,19 @@
  */
 package org.apache.tika.parser.microsoft;
 
-import junit.framework.TestCase;
+import java.io.InputStream;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.sax.BodyContentHandler;
+import org.junit.Test;
 import org.xml.sax.ContentHandler;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
-import java.io.InputStream;
-
-public class WriteProtectedParserTest extends TestCase {
-    public void testWriteProtected() throws Exception {
+public class WriteProtectedParserTest {         @Test
+     public void testWriteProtected() throws Exception {
         InputStream input = ExcelParserTest.class.getResourceAsStream(
                 "/test-documents/protect.xlsx");
 

@@ -62,6 +62,7 @@ import com.openexchange.groupware.search.TaskSearchObject;
 
 /**
  * Stores the parameter for searching for tasks.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class SearchRequest extends AbstractTaskRequest<SearchResponse> {
@@ -82,18 +83,15 @@ public class SearchRequest extends AbstractTaskRequest<SearchResponse> {
         this(search, columns, true);
     }
 
-    public SearchRequest(final TaskSearchObject search, final int[] columns,
-        final boolean failOnError) {
+    public SearchRequest(final TaskSearchObject search, final int[] columns, final boolean failOnError) {
         this(search, columns, 0, null, failOnError);
     }
 
-    public SearchRequest(final TaskSearchObject search, final int[] columns,
-        final int sort, final Order order) {
+    public SearchRequest(final TaskSearchObject search, final int[] columns, final int sort, final Order order) {
         this(search, columns, sort, order, true);
     }
 
-    public SearchRequest(final TaskSearchObject search, final int[] columns,
-        final int sort, final Order order, final boolean failOnError) {
+    public SearchRequest(final TaskSearchObject search, final int[] columns, final int sort, final Order order, final boolean failOnError) {
         super();
         this.search = search;
         this.columns = AbstractTaskRequest.addGUIColumns(columns);
@@ -123,8 +121,7 @@ public class SearchRequest extends AbstractTaskRequest<SearchResponse> {
         params.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
         if (null != order) {
             params.add(new Parameter(AJAXServlet.PARAMETER_SORT, sort));
-            params.add(new Parameter(AJAXServlet.PARAMETER_ORDER, OrderFields
-                .write(order)));
+            params.add(new Parameter(AJAXServlet.PARAMETER_ORDER, OrderFields.write(order)));
         }
         final Date[] range = search.getRange();
         if (null != range && range.length == 2) {

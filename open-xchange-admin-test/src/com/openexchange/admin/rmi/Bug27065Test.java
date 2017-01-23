@@ -95,7 +95,8 @@ public final class Bug27065Test extends AbstractTest {
     }
 
     @After
-    public void tearDown() throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException, NoSuchContextException, DatabaseUpdateException {
+    public void tearDown()
+ throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException, NoSuchContextException, DatabaseUpdateException {
         if (contextIface.exists(new Context(context.getId()), superAdmin)) {
             contextIface.delete(context, superAdmin);
         }

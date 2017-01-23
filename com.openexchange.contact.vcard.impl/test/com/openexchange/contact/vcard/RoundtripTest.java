@@ -49,6 +49,7 @@
 
 package com.openexchange.contact.vcard;
 
+import org.junit.Test;
 import com.openexchange.groupware.container.Contact;
 import ezvcard.VCard;
 
@@ -66,7 +67,8 @@ public class RoundtripTest extends VCardTest {
         super();
     }
 
-    public void testExportImport() throws Exception {
+         @Test
+     public void testExportImport() throws Exception {
         /*
          * export full contact
          */
@@ -82,7 +84,8 @@ public class RoundtripTest extends VCardTest {
         assertEquals(originalContact, importedContact);
     }
 
-    public void testImportExport() throws Exception {
+         @Test
+     public void testImportExport() throws Exception {
         /*
          * import vCard
          */

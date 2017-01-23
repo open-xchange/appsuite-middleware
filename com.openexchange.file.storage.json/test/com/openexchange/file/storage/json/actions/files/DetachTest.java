@@ -49,13 +49,15 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.Date;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.FileStorageFileAccess;
-
 
 /**
  * {@link DetachTest}
@@ -64,6 +66,7 @@ import com.openexchange.file.storage.FileStorageFileAccess;
  */
 public class DetachTest extends FileActionTest {
 
+    @Test
     public void testMissingParameters() {
         try {
             action.handle(request());
@@ -73,18 +76,15 @@ public class DetachTest extends FileActionTest {
         }
     }
 
+    @Test
     public void testAction() throws OXException, JSONException {
-        request()
-            .param("timestamp", "1337")
-            .param("id", "12")
-            .body(new JSONArray("[1,2,5]"));
+        request().param("timestamp", "1337").param("id", "12").body(new JSONArray("[1,2,5]"));
 
-        fileAccess().expectCall("removeVersion", "12", new int[]{1,2,5}).andReturn(new int[0]);
+        fileAccess().expectCall("removeVersion", "12", new int[] { 1, 2, 5 }).andReturn(new int[0]);
 
         final DefaultFile updated = new DefaultFile();
         updated.setLastModified(new Date());
         fileAccess().expectCall("getFileMetadata", "12", FileStorageFileAccess.CURRENT_VERSION).andReturn(updated);
-
 
         perform();
 

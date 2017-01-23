@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.test.fixtures;
 
 import java.util.HashMap;
@@ -62,19 +63,20 @@ public class PublicationFixtureFactory implements FixtureFactory<Publication> {
 
     private final FixtureLoader fixtureLoader;
 
-	public PublicationFixtureFactory(FixtureLoader fixtureLoader) {
-		super();
-		this.fixtureLoader = fixtureLoader;
-	}
-
-	@Override
-    public Fixtures<Publication> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
-		return new PublicationFixtures(fixtureName, entries, fixtureLoader);
+    public PublicationFixtureFactory(FixtureLoader fixtureLoader) {
+        super();
+        this.fixtureLoader = fixtureLoader;
     }
 
-    private class PublicationFixtures  extends DefaultFixtures<Publication> implements Fixtures<Publication>{
+    @Override
+    public Fixtures<Publication> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
+        return new PublicationFixtures(fixtureName, entries, fixtureLoader);
+    }
+
+    private class PublicationFixtures extends DefaultFixtures<Publication> implements Fixtures<Publication> {
+
         private final Map<String, Map<String, String>> entries;
-        private final Map<String, Fixture<Publication>>  publications = new HashMap<String,Fixture<Publication>>();
+        private final Map<String, Fixture<Publication>> publications = new HashMap<String, Fixture<Publication>>();
 
         public PublicationFixtures(final String fixtureName, final Map<String, Map<String, String>> entries, FixtureLoader fixtureLoader) {
             super(Publication.class, entries, fixtureLoader);
@@ -112,7 +114,7 @@ public class PublicationFixtureFactory implements FixtureFactory<Publication> {
 
             publication.setConfiguration(config);
 
-            apply(publication,values);
+            apply(publication, values);
 
             final Fixture<Publication> fixture = new Fixture<Publication>(publication, values.keySet().toArray(new String[values.size()]), values);
 
@@ -121,9 +123,9 @@ public class PublicationFixtureFactory implements FixtureFactory<Publication> {
         }
 
         private void defaults(final Map<String, String> values) {
-        	if (false == values.containsKey("displayName")) {
-        	    values.put("displayName", values.get("site_name"));
-        	}
+            if (false == values.containsKey("displayName")) {
+                values.put("displayName", values.get("site_name"));
+            }
         }
     }
 }

@@ -119,7 +119,8 @@ public class AttachmentCopyTest extends AbstractUserCopyTest {
     }
     
     
-    public void testAttachmentCopy() throws Exception {      
+         @Test
+     public void testAttachmentCopy() throws Exception {      
         final QuotaFileStorageFactory qfsf = new MockQuotaFileStorageFactory();
         final AttachmentCopyTask copyTask = new AttachmentCopyTask(qfsf);
         
@@ -196,8 +197,9 @@ public class AttachmentCopyTest extends AbstractUserCopyTest {
     /**
      * @see com.openexchange.user.copy.internal.AbstractUserCopyTest#tearDown()
      */
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown()
+ throws Exception {
         DBUtils.autocommit(dstCon);
         deleteAllFromTablesForCid(dstCtxId, "cid", dstCon, "prg_attachment");
         super.tearDown();

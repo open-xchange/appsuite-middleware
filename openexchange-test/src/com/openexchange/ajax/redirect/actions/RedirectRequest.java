@@ -81,8 +81,7 @@ public final class RedirectRequest implements AJAXRequest<RedirectResponse> {
 
     @Override
     public Parameter[] getParameters() {
-        return new Parameter[] {
-            new URLParameter("location", location)
+        return new Parameter[] { new URLParameter("location", location)
         };
     }
 
@@ -98,8 +97,7 @@ public final class RedirectRequest implements AJAXRequest<RedirectResponse> {
 
     @Override
     public Header[] getHeaders() {
-        return new Header[] {
-            new SimpleHeader("Referer", referer)
+        return new Header[] { new SimpleHeader("Referer", referer)
         };
     }
 }

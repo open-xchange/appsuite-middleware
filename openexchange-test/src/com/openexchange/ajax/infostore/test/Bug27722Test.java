@@ -49,14 +49,16 @@
 
 package com.openexchange.ajax.infostore.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
+import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.framework.AbstractColumnsResponse;
-import com.openexchange.ajax.infostore.actions.AllInfostoreRequest;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.groupware.container.CommonObject;
@@ -71,27 +73,17 @@ import com.openexchange.java.util.UUIDs;
  */
 public final class Bug27722Test extends AbstractInfostoreTest {
 
-    private static final int TOTAL_ITEMS = 100/*00*/;  // don't test that much files in continuous build
-    private static final int DELETED_ITEMS = 50/*00*/; // don't test that much files in continuous build
+    private static final int TOTAL_ITEMS = 100/* 00 */;  // don't test that much files in continuous build
+    private static final int DELETED_ITEMS = 50/* 00 */; // don't test that much files in continuous build
 
     private FolderObject testFolder;
     private List<File> items;
 
-    /**
-     * Initializes a new {@link Bug27722Test}.
-     *
-     * @param name
-     */
-    public Bug27722Test(String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
-        testFolder = fMgr.generatePrivateFolder(UUID.randomUUID().toString(), FolderObject.INFOSTORE,
-            client.getValues().getPrivateInfostoreFolder(), client.getValues().getUserId());
-        testFolder = fMgr.insertFolderOnServer(testFolder);
+        testFolder = ftm.generatePrivateFolder(UUID.randomUUID().toString(), FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), getClient().getValues().getUserId());
+        testFolder = ftm.insertFolderOnServer(testFolder);
         items = new ArrayList<File>(TOTAL_ITEMS);
         for (int i = 0; i < TOTAL_ITEMS; i++) {
             java.io.File tempFile = null;
@@ -114,7 +106,7 @@ public final class Bug27722Test extends AbstractInfostoreTest {
                 document.setVersion(String.valueOf(1));
                 document.setFileSize(tempFile.length());
 
-                infoMgr.newAction(document, tempFile);
+                itm.newAction(document, tempFile);
                 items.add(document);
             } finally {
                 if (null != tempFile) {
@@ -122,11 +114,6 @@ public final class Bug27722Test extends AbstractInfostoreTest {
                 }
             }
         }
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
     }
 
     @Test
@@ -148,18 +135,17 @@ public final class Bug27722Test extends AbstractInfostoreTest {
         /*
          * execute delete request
          */
-        infoMgr.deleteAction(objectIDs, folderIDs, infoMgr.getLastResponse().getTimestamp());
-        long duration = infoMgr.getLastResponse().getRequestDuration();
+        itm.deleteAction(objectIDs, folderIDs, itm.getLastResponse().getTimestamp());
+        long duration = itm.getLastResponse().getRequestDuration();
         assertTrue("deletion took " + duration + "ms, which is too long", 10 * DELETED_ITEMS > duration); // allow 10ms per item
         /*
          * verify deletion
          */
         int[] columns = { CommonObject.OBJECT_ID };
-        AllInfostoreRequest allRequest = new AllInfostoreRequest(testFolder.getObjectID(), columns, -1, null);
-        AbstractColumnsResponse allResponse = getClient().execute(allRequest);
-        assertEquals("Unexpected object count", TOTAL_ITEMS - DELETED_ITEMS, allResponse.getArray().length);
-        for (Object[] object : allResponse) {
-            String objectID = object[0].toString();
+        List<File> all = itm.getAll(testFolder.getObjectID(), columns);
+        assertEquals("Unexpected object count", TOTAL_ITEMS - DELETED_ITEMS, all.size());
+        for (File file : all) {
+            String objectID = file.getId();
             assertFalse("Object not deleted", objectIDs.contains(objectID));
         }
     }
@@ -183,18 +169,18 @@ public final class Bug27722Test extends AbstractInfostoreTest {
         /*
          * execute hard delete request
          */
-        infoMgr.deleteAction(objectIDs, folderIDs, infoMgr.getLastResponse().getTimestamp(), Boolean.TRUE);
-        long duration = infoMgr.getLastResponse().getRequestDuration();
+        itm.deleteAction(objectIDs, folderIDs, itm.getLastResponse().getTimestamp(), Boolean.TRUE);
+        long duration = itm.getLastResponse().getRequestDuration();
         assertTrue("hard deletion took " + duration + "ms, which is too long", 50 * DELETED_ITEMS > duration); // allow 50ms per hard-deleted item
         /*
          * verify deletion
          */
         int[] columns = { CommonObject.OBJECT_ID };
-        AllInfostoreRequest allRequest = new AllInfostoreRequest(testFolder.getObjectID(), columns, -1, null);
-        AbstractColumnsResponse allResponse = getClient().execute(allRequest);
-        assertEquals("Unexpected object count", TOTAL_ITEMS - DELETED_ITEMS, allResponse.getArray().length);
-        for (Object[] object : allResponse) {
-            String objectID = object[0].toString();
+        List<File> all = itm.getAll(testFolder.getObjectID(), columns);
+
+        assertEquals("Unexpected object count", TOTAL_ITEMS - DELETED_ITEMS, all.size());
+        for (File file : all) {
+            String objectID = file.getId();
             assertFalse("Object not deleted", objectIDs.contains(objectID));
         }
     }

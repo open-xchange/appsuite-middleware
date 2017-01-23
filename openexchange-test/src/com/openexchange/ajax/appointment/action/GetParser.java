@@ -70,8 +70,7 @@ public class GetParser extends AbstractAJAXParser<GetResponse> {
      * {@inheritDoc}
      */
     @Override
-    protected GetResponse createResponse(final Response response)
-        throws JSONException {
+    protected GetResponse createResponse(final Response response) throws JSONException {
         return new GetResponse(response);
     }
 }

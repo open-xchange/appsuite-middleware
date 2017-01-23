@@ -70,8 +70,7 @@ public final class ListParser extends AbstractAJAXParser<ListResponse> {
      * {@inheritDoc}
      */
     @Override
-    protected ListResponse createResponse(final Response response)
-        throws JSONException {
+    protected ListResponse createResponse(final Response response) throws JSONException {
         assertNotNull("Timestamp is missing.", response.getTimestamp());
         return new ListResponse(response);
     }

@@ -49,8 +49,13 @@
 
 package com.openexchange.ajax.task;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import org.json.JSONException;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonListResponse;
@@ -75,17 +80,18 @@ public final class Bug12727Test extends AbstractTaskTestForAJAXClient {
 
     /**
      * Default constructor.
+     * 
      * @param name test name.
      */
-    public Bug12727Test(final String name) {
-        super(name);
+    public Bug12727Test() {
+        super();
     }
 
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         manager = new TaskTestManager(client);
@@ -95,34 +101,32 @@ public final class Bug12727Test extends AbstractTaskTestForAJAXClient {
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected void tearDown() throws Exception {
-        manager.cleanUp();
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
+        try {
+            manager.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
-    public void testOccurrences() throws OXException, IOException,
-        SAXException, JSONException {
-        final ListRequest request = new ListRequest(ListIDs.l(
-            new int[] {
-                task.getParentFolderID(), task.getObjectID()
-            }),
-            new int[] { Task.FOLDER_ID, Task.OBJECT_ID, Task.RECURRENCE_COUNT },
-            false);
+    @Test
+    public void testOccurrences() throws OXException, IOException, SAXException, JSONException {
+        final ListRequest request = new ListRequest(ListIDs.l(new int[] { task.getParentFolderID(), task.getObjectID()
+        }), new int[]
+        { Task.FOLDER_ID, Task.OBJECT_ID, Task.RECURRENCE_COUNT }, false);
         final CommonListResponse response = client.execute(request);
         if (response.hasError()) {
             fail(response.getException().toString());
         }
         final int columnPos = response.getColumnPos(Task.RECURRENCE_COUNT);
-        for(final Object[] data : response) {
-            assertEquals("Column with recurrence count is missing.", columnPos + 1,
-                data.length);
+        for (final Object[] data : response) {
+            assertEquals("Column with recurrence count is missing.", columnPos + 1, data.length);
             assertEquals("Occurrences does not match.", Integer.valueOf(5), data[columnPos]);
         }
     }
 
-    private void createTask() throws OXException, IOException, SAXException,
-        JSONException {
+    private void createTask() throws OXException, IOException, SAXException, JSONException {
         task = getNewTask("Test for bug 12727");
         task.startsToday();
         task.endsTheFollowingDay();

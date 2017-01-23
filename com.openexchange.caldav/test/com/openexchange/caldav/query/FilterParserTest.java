@@ -1,14 +1,18 @@
 package com.openexchange.caldav.query;
 
+import static com.openexchange.time.TimeTools.D;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.List;
-import junit.framework.TestCase;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
+import org.junit.Test;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
-import static com.openexchange.time.TimeTools.D;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /*
  *
@@ -64,10 +68,10 @@ import static com.openexchange.time.TimeTools.D;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class FilterParserTest extends TestCase {
+public class FilterParserTest {
 
-
-    public void testParseTimeRangeQueryStartAndEnd() throws Exception {
+         @Test
+     public void testParseTimeRangeQueryStartAndEnd() throws Exception {
         String filterDef =
         "<filter xmlns='urn:ietf:params:xml:ns:caldav'>"+
         "   <comp-filter name='VCALENDAR'>"+
@@ -113,7 +117,8 @@ public class FilterParserTest extends TestCase {
         return new FilterParser().parse(rootElement);
     }
 
-    public void testParseTimeRangeQueryStartOnly() throws Exception {
+         @Test
+     public void testParseTimeRangeQueryStartOnly() throws Exception {
         String filterDef =
             "<filter xmlns='urn:ietf:params:xml:ns:caldav'>"+
             "   <comp-filter name='VCALENDAR'>"+
@@ -154,11 +159,13 @@ public class FilterParserTest extends TestCase {
     // YAGNI
     // We'll build these if and when they are needed
     /*
-    public void testParseIsNotDefined() {
+         @Test
+     public void testParseIsNotDefined() {
 
     }
 
-    public void testParsePropFilter() {
+         @Test
+     public void testParsePropFilter() {
 
     }*/
 

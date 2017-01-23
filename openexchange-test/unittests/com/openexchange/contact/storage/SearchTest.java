@@ -49,6 +49,9 @@
 
 package com.openexchange.contact.storage;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.UUID;
 import org.junit.Test;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -64,11 +67,11 @@ import com.openexchange.tools.iterator.SearchIterator;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class SearchTest extends ContactStorageTest {
-    
+
     @Test
     public void testSearchByUID() throws Exception {
         /*
-         * create contact        
+         * create contact
          */
         final String folderId = "500011";
         final Contact contact = new Contact();
@@ -83,21 +86,21 @@ public class SearchTest extends ContactStorageTest {
         /*
          * search contact
          */
-		final SingleSearchTerm term = new SingleSearchTerm(SingleSearchTerm.SingleOperation.EQUALS);
-		term.addOperand(new ColumnOperand("uid"));
-		term.addOperand(new ConstantOperand<String>(contact.getUid()));
-		final SearchIterator<Contact> result = getStorage().search(getSession(), term, ContactField.values());
-		/*
-		 * verify search result
-		 */
-		assertNotNull("got no search result", result);
-		assertTrue("got no search result", 0 < result.size());
-		Contact foundContact = findContact(contact.getUid(), result); 
+        final SingleSearchTerm term = new SingleSearchTerm(SingleSearchTerm.SingleOperation.EQUALS);
+        term.addOperand(new ColumnOperand("uid"));
+        term.addOperand(new ConstantOperand<String>(contact.getUid()));
+        final SearchIterator<Contact> result = getStorage().search(getSession(), term, ContactField.values());
+        /*
+         * verify search result
+         */
+        assertNotNull("got no search result", result);
+        assertTrue("got no search result", 0 < result.size());
+        Contact foundContact = findContact(contact.getUid(), result);
         assertNotNull("contact not in search results", foundContact);
         assertEquals("display name wrong", contact.getDisplayName(), foundContact.getDisplayName());
         assertEquals("surname wrong", contact.getSurName(), foundContact.getSurName());
         assertEquals("givenname wrong", contact.getGivenName(), foundContact.getGivenName());
         assertEquals("email1 wrong", contact.getEmail1(), foundContact.getEmail1());
     }
-        
+
 }

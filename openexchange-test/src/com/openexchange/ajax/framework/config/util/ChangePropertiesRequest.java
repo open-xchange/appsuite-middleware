@@ -58,7 +58,6 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.Header;
 
-
 /**
  * {@link ChangePropertiesRequest}
  *
@@ -71,6 +70,7 @@ public class ChangePropertiesRequest<T extends AbstractAJAXResponse> implements 
     private static final String CONFIG_URL = "/ajax/changeConfigForTest";
     private String scope;
     private String reloadables;
+
     /**
      * Initializes a new {@link ChangePropertiesRequest}.
      */

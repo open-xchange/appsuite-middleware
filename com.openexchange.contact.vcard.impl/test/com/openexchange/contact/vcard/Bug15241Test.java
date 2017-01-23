@@ -49,7 +49,11 @@
 
 package com.openexchange.contact.vcard;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.awt.image.BufferedImage;
+import org.junit.Assert;
+import org.junit.Test;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Streams;
 
@@ -69,7 +73,8 @@ public class Bug15241Test extends VCardTest {
         super();
     }
 
-    public void testImportVCard() throws Exception {
+         @Test
+     public void testImportVCard() throws Exception {
         /*
          * import vCard
          */
@@ -129,7 +134,7 @@ public class Bug15241Test extends VCardTest {
          * verify imported contact
          */
         assertNotNull(contact);
-        assertEquals("image/jpeg", contact.getImageContentType());
+        Assert.assertEquals("image/jpeg", contact.getImageContentType());
         assertNotNull(contact.getImage1());
         BufferedImage bufferedImage = javax.imageio.ImageIO.read(Streams.newByteArrayInputStream(contact.getImage1()));
         assertNotNull(bufferedImage);

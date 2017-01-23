@@ -98,8 +98,8 @@ public class GlobalDatabaseServiceImplTest {
         PowerMockito.mockStatic(GlobalDbInit.class);
     }
 
-    @Test
-    public void testLoadGlobalDbConfigs_emptyCollectionBefore_readCompleteNewConfig() throws OXException {
+     @Test
+     public void testLoadGlobalDbConfigs_emptyCollectionBefore_readCompleteNewConfig() throws OXException {
         MockUtils.injectValueIntoPrivateField(globalDatabaseServiceImpl, "globalDbConfigs", new ConcurrentHashMap<String, GlobalDbConfig>());
         Map<String, GlobalDbConfig> newConfig = new ConcurrentHashMap<String, GlobalDbConfig>();
         newConfig.put("default", config1);
@@ -113,8 +113,8 @@ public class GlobalDatabaseServiceImplTest {
         Assert.assertEquals(newConfig.size(), reloadedConfig.size());
     }
 
-    @Test
-    public void testLoadGlobalDbConfigs_emptyCollectionBefore_verifyCorrectOnesReloaded() throws OXException {
+     @Test
+     public void testLoadGlobalDbConfigs_emptyCollectionBefore_verifyCorrectOnesReloaded() throws OXException {
         MockUtils.injectValueIntoPrivateField(globalDatabaseServiceImpl, "globalDbConfigs", new ConcurrentHashMap<String, GlobalDbConfig>());
         Map<String, GlobalDbConfig> newConfig = new ConcurrentHashMap<String, GlobalDbConfig>();
         newConfig.put("default", config1);
@@ -128,8 +128,8 @@ public class GlobalDatabaseServiceImplTest {
         verifyResult(reloadedConfig, newConfig);
     }
 
-    @Test
-    public void testLoadGlobalDbConfigs_twoInCollection_readAdditionalConfigsConfig() throws OXException {
+     @Test
+     public void testLoadGlobalDbConfigs_twoInCollection_readAdditionalConfigsConfig() throws OXException {
         Map<String, GlobalDbConfig> existingConfig = new ConcurrentHashMap<String, GlobalDbConfig>();
         existingConfig.put("de", config2);
         existingConfig.put("fr", config3);
@@ -147,8 +147,8 @@ public class GlobalDatabaseServiceImplTest {
         Assert.assertEquals(newConfig.size(), reloadedConfig.size());
     }
 
-    @Test
-    public void testLoadGlobalDbConfigs_twoInCollection_verifyCorrectOnesReloaded() throws OXException {
+     @Test
+     public void testLoadGlobalDbConfigs_twoInCollection_verifyCorrectOnesReloaded() throws OXException {
         Map<String, GlobalDbConfig> existingConfig = new ConcurrentHashMap<String, GlobalDbConfig>();
         existingConfig.put("de", config2);
         existingConfig.put("fr", config3);
@@ -166,8 +166,8 @@ public class GlobalDatabaseServiceImplTest {
         verifyResult(reloadedConfig, newConfig);
     }
 
-    @Test
-    public void testLoadGlobalDbConfigs_fourInOriginCollection_readAndRemoveAdditionalConfigs() throws OXException {
+     @Test
+     public void testLoadGlobalDbConfigs_fourInOriginCollection_readAndRemoveAdditionalConfigs() throws OXException {
         Map<String, GlobalDbConfig> existingConfig = new ConcurrentHashMap<String, GlobalDbConfig>();
         existingConfig.put("default", config1);
         existingConfig.put("de", config2);
@@ -185,8 +185,8 @@ public class GlobalDatabaseServiceImplTest {
         Assert.assertEquals(newConfig.size(), reloadedConfig.size());
     }
 
-    @Test
-    public void testLoadGlobalDbConfigs_fourInOriginCollection_verifyCorrectOnesReloaded() throws OXException {
+     @Test
+     public void testLoadGlobalDbConfigs_fourInOriginCollection_verifyCorrectOnesReloaded() throws OXException {
         Map<String, GlobalDbConfig> existingConfig = new ConcurrentHashMap<String, GlobalDbConfig>();
         existingConfig.put("default", config1);
         existingConfig.put("de", config2);
@@ -204,8 +204,8 @@ public class GlobalDatabaseServiceImplTest {
         verifyResult(reloadedConfig, newConfig);
     }
 
-    @Test
-    public void testLoadGlobalDbConfigs_fourInOriginCollection_removeOtherConfigs() throws OXException {
+     @Test
+     public void testLoadGlobalDbConfigs_fourInOriginCollection_removeOtherConfigs() throws OXException {
         Map<String, GlobalDbConfig> existingConfig = new ConcurrentHashMap<String, GlobalDbConfig>();
         existingConfig.put("default", config1);
         existingConfig.put("de", config2);
@@ -221,8 +221,8 @@ public class GlobalDatabaseServiceImplTest {
         Assert.assertEquals(newConfig.size(), reloadedConfig.size());
     }
 
-    @Test
-    public void testLoadGlobalDbConfigs_fourInOriginCollection_verifyNoOneReloaded() throws OXException {
+     @Test
+     public void testLoadGlobalDbConfigs_fourInOriginCollection_verifyNoOneReloaded() throws OXException {
         Map<String, GlobalDbConfig> existingConfig = new ConcurrentHashMap<String, GlobalDbConfig>();
         existingConfig.put("default", config1);
         existingConfig.put("de", config2);

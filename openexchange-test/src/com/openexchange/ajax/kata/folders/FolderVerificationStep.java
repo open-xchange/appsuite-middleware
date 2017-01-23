@@ -96,7 +96,7 @@ public class FolderVerificationStep extends NeedExistingStep<FolderObject> {
         checkWithReadMethods(entry);
     }
 
-    private void checkWithReadMethods(FolderObject folder) throws  JSONException, OXException, IOException, SAXException {
+    private void checkWithReadMethods(FolderObject folder) throws JSONException, OXException, IOException, SAXException {
         checkViaGet(folder);
         checkViaList(folder);
         checkViaUpdates(folder);
@@ -107,10 +107,9 @@ public class FolderVerificationStep extends NeedExistingStep<FolderObject> {
         compare(folder, loaded);
     }
 
-
     private void checkViaList(FolderObject folder) throws OXException, IOException, SAXException, JSONException {
         int[] requestedFields = FolderObject.ALL_COLUMNS;//new int[]{FolderObject.OBJECT_ID, FolderObject.FOLDER_ID};
-        ListRequest listRequest = new ListRequest(EnumAPI.OX_OLD, Integer.toString(folder.getParentFolderID()), requestedFields, true );
+        ListRequest listRequest = new ListRequest(EnumAPI.OX_OLD, Integer.toString(folder.getParentFolderID()), requestedFields, true);
         ListResponse response = client.execute(listRequest);
 
         Object[][] rows = response.getArray();
@@ -119,11 +118,7 @@ public class FolderVerificationStep extends NeedExistingStep<FolderObject> {
     }
 
     private void checkViaUpdates(FolderObject folder) throws OXException, IOException, SAXException, JSONException {
-        UpdatesRequest updates = new UpdatesRequest(EnumAPI.OX_OLD,
-            FolderObject.ALL_COLUMNS,
-            -1,
-            Order.ASCENDING,
-            new Date(0));
+        UpdatesRequest updates = new UpdatesRequest(EnumAPI.OX_OLD, FolderObject.ALL_COLUMNS, -1, Order.ASCENDING, new Date(0));
         FolderUpdatesResponse response = client.execute(updates);
         List<FolderObject> folders = response.getFolders();
         checkInList(folder, folders);
@@ -140,18 +135,17 @@ public class FolderVerificationStep extends NeedExistingStep<FolderObject> {
                 return;
             }
         }
-        fail("Object not found in " +typeOfAction+ "response. " + name);
+        fail("Object not found in " + typeOfAction + "response. " + name);
     }
-
 
     private void compare(FolderObject folder, FolderObject loaded) {
         int[] columns = FolderObject.ALL_COLUMNS;
         for (int i = 0; i < columns.length; i++) {
             int col = columns[i];
-            if (col == DataObject.LAST_MODIFIED_UTC || col== DataObject.LAST_MODIFIED ) {
+            if (col == DataObject.LAST_MODIFIED_UTC || col == DataObject.LAST_MODIFIED) {
                 continue;
             }
-            if( isIgnoredColumn(col)){
+            if (isIgnoredColumn(col)) {
                 continue;
             }
             if (folder.contains(col)) {
@@ -161,18 +155,7 @@ public class FolderVerificationStep extends NeedExistingStep<FolderObject> {
     }
 
     private boolean isIgnoredColumn(int col) {
-        return col == FolderObject.OWN_RIGHTS
-        || col == FolderObject.PERMISSIONS_BITS
-        || col == FolderObject.SUMMARY
-        || col == FolderObject.STANDARD_FOLDER
-        || col == FolderObject.TOTAL
-        || col == FolderObject.NEW
-        || col == FolderObject.UNREAD
-        || col == FolderObject.DELETED
-        || col == FolderObject.CAPABILITIES
-        || col == FolderObject.SUBSCRIBED
-        || col == FolderObject.SUBSCR_SUBFLDS
-        ;
+        return col == FolderObject.OWN_RIGHTS || col == FolderObject.PERMISSIONS_BITS || col == FolderObject.SUMMARY || col == FolderObject.STANDARD_FOLDER || col == FolderObject.TOTAL || col == FolderObject.NEW || col == FolderObject.UNREAD || col == FolderObject.DELETED || col == FolderObject.CAPABILITIES || col == FolderObject.SUBSCRIBED || col == FolderObject.SUBSCR_SUBFLDS;
     }
 
     private void compare(FolderObject folder, Object[] row, int[] columns) {
@@ -182,7 +165,7 @@ public class FolderVerificationStep extends NeedExistingStep<FolderObject> {
             if (column == DataObject.LAST_MODIFIED_UTC || column == DataObject.LAST_MODIFIED) {
                 continue;
             }
-            if( isIgnoredColumn(column)){
+            if (isIgnoredColumn(column)) {
                 continue;
             }
             if (folder.contains(column)) {
@@ -214,7 +197,7 @@ public class FolderVerificationStep extends NeedExistingStep<FolderObject> {
         fail("Object not found in response: (" + folder.getObjectID() + ") " + name);
     }
 
-    private Object transform(Object actual)  {
+    private Object transform(Object actual) {
         return actual;
     }
 

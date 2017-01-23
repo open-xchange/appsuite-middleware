@@ -63,7 +63,6 @@ import com.openexchange.ajax.framework.Params;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.share.ShareTarget;
 
-
 /**
  * {@link UpdateLinkRequest}
  *
@@ -110,7 +109,7 @@ public class UpdateLinkRequest implements AJAXRequest<UpdateLinkResponse> {
     }
 
     public void setPassword(String password) {
-        this.password  = password;
+        this.password = password;
         containsPassword = true;
     }
 
@@ -131,10 +130,7 @@ public class UpdateLinkRequest implements AJAXRequest<UpdateLinkResponse> {
 
     @Override
     public Parameter[] getParameters() throws IOException, JSONException {
-        return new Params(
-            AJAXServlet.PARAMETER_ACTION, "updateLink",
-            AJAXServlet.PARAMETER_TIMESTAMP, Long.toString(timestamp)
-        ).toArray();
+        return new Params(AJAXServlet.PARAMETER_ACTION, "updateLink", AJAXServlet.PARAMETER_TIMESTAMP, Long.toString(timestamp)).toArray();
     }
 
     @Override

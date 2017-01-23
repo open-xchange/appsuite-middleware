@@ -49,7 +49,13 @@
 
 package com.openexchange.ajax.share.tests;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Collections;
+import org.junit.After;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateRequest;
@@ -63,7 +69,6 @@ import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.server.impl.OCLPermission;
 
-
 /**
  * {@link EmptyGuestPasswordTest}
  *
@@ -74,28 +79,27 @@ public class EmptyGuestPasswordTest extends ShareTest {
 
     private FolderObject folder;
 
-    public EmptyGuestPasswordTest(String name) {
-        super(name);
+    public EmptyGuestPasswordTest() {
+        super();
     }
 
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-    }
-
-    @Override
+    @After
     public void tearDown() throws Exception {
-        deleteFoldersSilently(client, Collections.singletonList(folder.getObjectID()));
-        super.tearDown();
+        try {
+            deleteFoldersSilently(getClient(), Collections.singletonList(folder.getObjectID()));
+        } finally {
+            super.tearDown();
+        }
     }
 
+    @Test
     public void testEmptyPassword() throws Exception {
         long now = System.currentTimeMillis();
         OCLGuestPermission perm = createNamedGuestPermission("testGuestPasswordInit" + now + "@example.org", "Test " + now);
-        folder = insertSharedFolder(EnumAPI.OX_NEW, Module.INFOSTORE.getFolderConstant(), client.getValues().getPrivateInfostoreFolder(), perm);
+        folder = insertSharedFolder(EnumAPI.OX_NEW, Module.INFOSTORE.getFolderConstant(), getClient().getValues().getPrivateInfostoreFolder(), perm);
         OCLPermission matchingPermission = null;
         for (OCLPermission permission : folder.getPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
                 break;
             }

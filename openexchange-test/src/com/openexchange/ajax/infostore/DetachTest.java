@@ -1,133 +1,152 @@
+
 package com.openexchange.ajax.infostore;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
-import org.json.JSONObject;
+import org.junit.Before;
+import org.junit.Test;
+import com.google.common.collect.Iterables;
 import com.openexchange.ajax.InfostoreAJAXTest;
-import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.test.TestInit;
 
 public class DetachTest extends InfostoreAJAXTest {
 
-	public DetachTest(final String name){
-		super(name);
-	}
-
-	@Override
-	public void setUp() throws Exception {
-		super.setUp();
-		final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
+    private String origId;
+    
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+        final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
         final long FAR_FUTURE = Long.MAX_VALUE;
-        Response res = update(getWebConversation(),getHostName(),sessionId,clean.get(0), FAR_FUTURE ,m(), upload, "text/plain");
-		assertNoError(res);
-		res = update(getWebConversation(),getHostName(),sessionId,clean.get(0),FAR_FUTURE,m(), upload, "text/plain");
-		assertNoError(res);
-		res = update(getWebConversation(),getHostName(),sessionId,clean.get(0),FAR_FUTURE,m(), upload, "text/plain");
-		assertNoError(res);
-		res = update(getWebConversation(),getHostName(),sessionId,clean.get(0),FAR_FUTURE,m(), upload, "text/plain");
-		assertNoError(res);
-		res = update(getWebConversation(),getHostName(),sessionId,clean.get(0),FAR_FUTURE,m(), upload, "text/plain");
-		assertNoError(res);
-	}
 
-	public void testBasic() throws Exception {
-		final int[] notDetached = detach(getWebConversation(), getHostName(), sessionId, System.currentTimeMillis(), clean.get(0), new int[]{1,2,3,4,5});
-		assertEquals(0, notDetached.length);
+        origId = Iterables.get(itm.getCreatedEntities(), 0).getId();
+        com.openexchange.file.storage.File org = itm.getAction(origId);
+        itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE));
+        assertFalse(itm.getLastResponse().hasError());
 
-		checkNoVersions();
-	}
+        itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE));
+        assertFalse(itm.getLastResponse().hasError());
 
-	public void testRevert() throws Exception {
-		final Response res = revert(getWebConversation(),getHostName(), sessionId, System.currentTimeMillis(), clean.get(0));
-		assertNoError(res);
-        assertNotNull(res.getTimestamp());
-        checkNoVersions();
-	}
+        itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE));
+        assertFalse(itm.getLastResponse().hasError());
 
-	public void checkNoVersions() throws Exception {
-//		 Version magically reverts to 0
-		Response res = get(getWebConversation(), getHostName(), sessionId, clean.get(0));
-		assertNoError(res);
+        itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE));
+        assertFalse(itm.getLastResponse().hasError());
 
-		JSONObject obj = (JSONObject) res.getData();
+        itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE));
+        assertFalse(itm.getLastResponse().hasError());
+    }
 
-		assertEquals(0, obj.getInt("version"));
+    @Test
+    public void testBasic() throws Exception {
+        com.openexchange.file.storage.File file = itm.getAction(origId);
+        ftm.detach(file.getId(), file.getLastModified(), new int[] { 1, 2, 3, 4, 5 });
 
-		final int[] notDetached = detach(getWebConversation(), getHostName(), sessionId, System.currentTimeMillis(), clean.get(0), new int[]{1,2,3});
+        checkVersions(origId, "6", 1);
+    }
 
-		final Set<Integer> versions = new HashSet<Integer>(Arrays.asList(new Integer[]{1,2,3}));
+    @Test
+    public void testRevert() throws Exception {
+        com.openexchange.file.storage.File file = itm.getAction(origId);
 
-		assertEquals(versions.size(), notDetached.length);
-		for(final int id : notDetached) {
-			assertTrue(versions.remove(id));
-		}
-		assertTrue(versions.isEmpty());
+        itm.revert(file.getId());
+        assertFalse(itm.getLastResponse().hasError());
+        assertNotNull(itm.getLastResponse().getTimestamp());
+        checkVersions(origId, "0", 0);;
+    }
 
-		res = get(getWebConversation(), getHostName(), sessionId, clean.get(0));
-		assertNoError(res);
+    public void checkVersions(String objectId, String version, int numberoOfVersions) throws Exception {
+        //       Version magically reverts to 0
+        com.openexchange.file.storage.File obj = itm.getAction(objectId);
 
-		obj = (JSONObject) res.getData();
+        assertEquals(version, obj.getVersion());
+        assertEquals(numberoOfVersions, obj.getNumberOfVersions());
 
-		assertEquals(null,obj.opt("filename"));
-		assertEquals("",obj.get("file_mimetype"));
-		assertEquals(0, obj.get("file_size"));
-	}
+        ftm.detach(objectId, obj.getLastModified(), new int[] { 1, 2, 3 });
 
-	public void testSpotted() throws Exception {
-		final int[] notDetached = detach(getWebConversation(), getHostName(), sessionId, Long.MAX_VALUE, clean.get(0), new int[]{1,3,5});
-		assertEquals(0, notDetached.length);
+        com.openexchange.file.storage.File obj2 = itm.getAction(objectId);
 
-		Response res = versions(getWebConversation(),getHostName(),sessionId, clean.get(0), new int[]{Metadata.VERSION,Metadata.CURRENT_VERSION});
-		assertNoError(res);
-		// Current Version reverts to 4 (being the newest available version
-		VersionsTest.assureVersions(new Integer[]{2,4},res,4);
+        final Set<Integer> versions = new HashSet<Integer>(Arrays.asList(new Integer[] { 1, 2, 3 }));
 
-		res = get(getWebConversation(),getHostName(), sessionId, clean.get(0));
-		assertNoError(res);
+        final int[] notDetached = ftm.detach(objectId, obj2.getLastModified(), new int[] { 1, 2, 3 });
+        assertEquals(versions.size(), notDetached.length);
+        for (final int lId : notDetached) {
+            assertTrue(versions.remove(lId));
+        }
+        assertTrue(versions.isEmpty());
+    }
 
-		final JSONObject obj = (JSONObject)res.getData();
+    @Test
+    public void testSpotted() throws Exception {
+        final String origId = Iterables.get(itm.getCreatedEntities(), 0).getId();
 
-		assertEquals(4,obj.getInt("version"));
-	}
+        final int[] notDetached = ftm.detach(origId, new Date(Long.MAX_VALUE), new int[] { 1, 3, 5, 6 });
+        assertEquals(0, notDetached.length);
 
-	public void testDetachVersion0() throws Exception {
-		final int[] notDetached = detach(getWebConversation(), getHostName(), sessionId, Long.MAX_VALUE, clean.get(0), new int[]{0});
-		assertEquals(1, notDetached.length);
-		assertEquals(0,notDetached[0]);
-	}
+        List<com.openexchange.file.storage.File> versions = itm.versions(origId, new int[] { Metadata.VERSION, Metadata.CURRENT_VERSION }, Metadata.VERSION, Order.DESCENDING);
+        AbstractAJAXResponse lastResponse = itm.getLastResponse();
+        assertFalse(lastResponse.hasError());
+        // Current Version reverts to 4 (being the newest available version
+        VersionsTest.assureVersions(new Integer[] { 2, 4 }, lastResponse, 4);
 
-	// Bug 3818
-	public void testCopyComments() throws Exception{
-		Response res = update(getWebConversation(), getHostName(), sessionId, clean.get(0), Long.MAX_VALUE, m("description","current_description"));
-		assertNoError(res);
+        com.openexchange.file.storage.File obj = itm.getAction(origId);
 
-		final int[] notDetached = detach(getWebConversation(), getHostName(), sessionId, Long.MAX_VALUE, clean.get(0), new int[]{5,4,3});
-		assertEquals(0, notDetached.length);
+        assertEquals("4", obj.getVersion());
+    }
 
-		res = get(getWebConversation(), getHostName(),sessionId, clean.get(0), 0);
-		assertNoError(res);
+    @Test
+    public void testDetachVersion0() throws Exception {
+        final String origId = Iterables.get(itm.getCreatedEntities(), 0).getId();
 
-		final JSONObject document = (JSONObject) res.getData();
-		assertEquals("current_description", document.get("description"));
-	}
+        final int[] notDetached = ftm.detach(origId, new Date(Long.MAX_VALUE), new int[] { 0 });
+        assertEquals(1, notDetached.length);
+        assertEquals(0, notDetached[0]);
+    }
 
-//	Bug 4120
-	public void testUniqueFilenames() throws Exception {
-		final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
+    // Bug 3818
+    @Test
+    public void testCopyComments() throws Exception {
+        final String origId = Iterables.get(itm.getCreatedEntities(), 0).getId();
+        com.openexchange.file.storage.File file = itm.getAction(origId);
+        file.setDescription("current_description");
+        itm.updateAction(file, new com.openexchange.file.storage.File.Field[] { com.openexchange.file.storage.File.Field.DESCRIPTION }, new Date(Long.MAX_VALUE));
+        assertFalse(itm.getLastResponse().hasError());
 
-		final String id = clean.get(0);
+        final int[] notDetached = ftm.detach(origId, new Date(Long.MAX_VALUE), new int[] { 5, 4, 3 });
+        assertEquals(0, notDetached.length);
 
+        com.openexchange.file.storage.File document = itm.getAction(origId);
+        assertEquals("current_description", document.getDescription());
+    }
 
-		Response res = update(getWebConversation(),getHostName(),sessionId,id,Long.MAX_VALUE,m("filename" , "blupp.properties"));
-		assertNoError(res);
+    //	Bug 4120
+    @Test
+    public void testUniqueFilenames() throws Exception {
+        final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
+        final String origId = Iterables.get(itm.getCreatedEntities(), 0).getId();
 
-		final String id2 = createNew(getWebConversation(), getHostName(), sessionId, m("title" , "otherFile", "description","other_desc", "folder_id" ,	((Integer)folderId).toString()), upload, "text/plain");
-		clean.add(id2);
+        com.openexchange.file.storage.File file = itm.getAction(origId);
+        file.setFileName("blubb.properties");
+        itm.updateAction(file, new com.openexchange.file.storage.File.Field[] { com.openexchange.file.storage.File.Field.FILENAME }, new Date(Long.MAX_VALUE));
+        assertFalse(itm.getLastResponse().hasError());
 
-		detach(getWebConversation(), getHostName(), sessionId, Long.MAX_VALUE, clean.get(0), new int[]{5});
+        com.openexchange.file.storage.File data = createFile(folderId, "otherFile");
+        data.setFileMIMEType("text/plain");
+        data.setDescription("other_desc");
+        itm.newAction(data, upload);
 
-	}
+        final int[] notDetached = ftm.detach(origId, new Date(Long.MAX_VALUE), new int[] { 5 });
+
+    }
 }

@@ -58,23 +58,22 @@ package com.openexchange.dav;
  */
 public final class Headers {
 
-	/**
-	 * If-None-Match
-	 */
-	public static final String IF_NONE_MATCH = "If-None-Match";
-	
-	/**
-	 * If-Match
-	 */
-	public static final String IF_MATCH = "If-Match";
-	
-	
+    /**
+     * If-None-Match
+     */
+    public static final String IF_NONE_MATCH = "If-None-Match";
+
+    /**
+     * If-Match
+     */
+    public static final String IF_MATCH = "If-Match";
+
     /**
      * max_similarity
      */
     public static final String MAX_SIMILARITY = "X-OX-MAX-SIMILARITY";
-	
-	private Headers() {
-		// prevent instantiation
-	}	
+
+    private Headers() {
+        // prevent instantiation
+    }
 }

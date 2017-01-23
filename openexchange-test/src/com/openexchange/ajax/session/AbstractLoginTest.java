@@ -49,10 +49,10 @@
 
 package com.openexchange.ajax.session;
 
+import static org.junit.Assert.fail;
 import org.apache.commons.httpclient.Cookie;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.simple.AbstractSimpleClientTest;
-
 
 /**
  * {@link AbstractLoginTest}
@@ -61,8 +61,8 @@ import com.openexchange.ajax.simple.AbstractSimpleClientTest;
  */
 public class AbstractLoginTest extends AbstractSimpleClientTest {
 
-    public AbstractLoginTest(String name) {
-        super(name);
+    public AbstractLoginTest() {
+        super();
     }
 
     protected void assertNoOXCookies() {
@@ -73,6 +73,5 @@ public class AbstractLoginTest extends AbstractSimpleClientTest {
             }
         }
     }
-
 
 }

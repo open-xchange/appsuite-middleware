@@ -51,7 +51,6 @@ package com.openexchange.html;
 
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
-import com.openexchange.html.AbstractSanitizing;
 
 
 /**
@@ -60,8 +59,8 @@ import com.openexchange.html.AbstractSanitizing;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class Bug21042Test extends AbstractSanitizing {
-    @Test
-    public void testNoEmptySpaceBetweenDifferentColors() {
+     @Test
+     public void testNoEmptySpaceBetweenDifferentColors() {
         /**
          * There should be no whitespace between the span tags
          */

@@ -94,23 +94,7 @@ public class DefaultVCardStorageServiceTest {
     @Mock
     private QuotaFileStorage quotaFileStorage;
 
-    private final String vCard = "BEGIN:VCARD\n" +
-        "VERSION:3.0\n" +
-        "PRODID:-//Apple Inc.//Mac OS X 10.10.3//EN\n" +
-        "N:Allison;Christian;;;\n" +
-        "FN:Christian Allison\n" +
-        "EMAIL;type=INTERNET;type=WORK;type=pref:knightmedina@gushkool.com\n" +
-        "EMAIL;type=INTERNET;type=HOME:barkerharmon@orbean.com\n" +
-        "item1.EMAIL;type=INTERNET:terrynorton@netbook.com\n" +
-        "item1.X-ABLabel:_$!<Other>!$_\n" +
-        "TEL;type=HOME;type=VOICE;type=pref:(951) 498-2926\n" +
-        "TEL;type=HOME;type=VOICE:(829) 455-2780\n" +
-        "TEL;type=CELL;type=VOICE:8294552781\n" +
-        "NOTE:laboris\n" +
-        "REV:2015-06-11T13:54:57Z\n" +
-        "UID:f047e394-f638-4578-ad15-cd17e52ecce3\n" +
-        "END:VCARD\n" +
-        "";
+    private final String vCard = "BEGIN:VCARD\n" + "VERSION:3.0\n" + "PRODID:-//Apple Inc.//Mac OS X 10.10.3//EN\n" + "N:Allison;Christian;;;\n" + "FN:Christian Allison\n" + "EMAIL;type=INTERNET;type=WORK;type=pref:knightmedina@gushkool.com\n" + "EMAIL;type=INTERNET;type=HOME:barkerharmon@orbean.com\n" + "item1.EMAIL;type=INTERNET:terrynorton@netbook.com\n" + "item1.X-ABLabel:_$!<Other>!$_\n" + "TEL;type=HOME;type=VOICE;type=pref:(951) 498-2926\n" + "TEL;type=HOME;type=VOICE:(829) 455-2780\n" + "TEL;type=CELL;type=VOICE:8294552781\n" + "NOTE:laboris\n" + "REV:2015-06-11T13:54:57Z\n" + "UID:f047e394-f638-4578-ad15-cd17e52ecce3\n" + "END:VCARD\n" + "";
 
     private final int CONTEXT_ID = 111;
     private final String FILE_STORAGE_ID = "hashed/cf/92/75/cbfd33f804f649738fea4a9e7cf31e3b";
@@ -143,8 +127,7 @@ public class DefaultVCardStorageServiceTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testSaveVCard_vCardNull_doNotPersist() throws OXException
-    {
+    public void testSaveVCard_vCardNull_doNotPersist() throws OXException {
         service.saveVCard(null, CONTEXT_ID);
     }
 

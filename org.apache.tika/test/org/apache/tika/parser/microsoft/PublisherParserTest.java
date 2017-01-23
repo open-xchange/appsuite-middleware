@@ -17,18 +17,20 @@
 package org.apache.tika.parser.microsoft;
 
 import java.io.InputStream;
-
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.sax.BodyContentHandler;
+import org.junit.Test;
 import org.xml.sax.ContentHandler;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
-import junit.framework.TestCase;
-
-public class PublisherParserTest extends TestCase {
-
-    public void testPublisherParser() throws Exception {
+public class PublisherParserTest {
+         @Test
+     public void testPublisherParser() throws Exception {
         InputStream input = PublisherParserTest.class.getResourceAsStream(
                 "/test-documents/testPUBLISHER.pub");
         try {

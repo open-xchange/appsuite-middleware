@@ -60,19 +60,19 @@ import com.openexchange.ajax.framework.Header;
  */
 public abstract class AbstractSpellCheckRequest implements AJAXRequest {
 
-	/**
+    /**
      * URL of the tasks AJAX interface.
      */
     public static final String SPELL_CHECK_URL = "/ajax/spellcheck";
 
-	protected AbstractSpellCheckRequest() {
-		super();
-	}
+    protected AbstractSpellCheckRequest() {
+        super();
+    }
 
-	@Override
+    @Override
     public String getServletPath() {
-		return SPELL_CHECK_URL;
-	}
+        return SPELL_CHECK_URL;
+    }
 
     @Override
     public Header[] getHeaders() {

@@ -58,7 +58,6 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  */
 public class ConfirmParser extends AbstractAJAXParser<ConfirmResponse> {
 
-
     protected ConfirmParser(boolean failOnError) {
         super(failOnError);
     }

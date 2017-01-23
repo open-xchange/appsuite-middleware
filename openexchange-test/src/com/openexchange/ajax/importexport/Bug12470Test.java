@@ -49,11 +49,16 @@
 
 package com.openexchange.ajax.importexport;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 import org.json.JSONException;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -86,18 +91,10 @@ public final class Bug12470Test extends AbstractAJAXSession {
     private Date lastModified = null;
 
     /**
-     * Default constructor.
-     * @param name test name.
-     */
-    public Bug12470Test(final String name) {
-        super(name);
-    }
-
-    /**
      * {@inheritDoc}
      */
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         folderId = client.getValues().getPrivateTaskFolder();
@@ -109,14 +106,17 @@ public final class Bug12470Test extends AbstractAJAXSession {
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected void tearDown() throws Exception {
-        deleteTask();
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
+        try {
+            deleteTask();
+        } finally {
+            super.tearDown();
+        }
     }
 
-    public void testDueDate() throws OXException, IOException, SAXException,
-        JSONException, OXException {
+    @Test
+    public void testDueDate() throws OXException, IOException, SAXException, JSONException, OXException {
         final GetRequest request = new GetRequest(folderId, objectId);
         final GetResponse response = client.execute(request);
         final Task task = response.getTask(tz);
@@ -130,8 +130,7 @@ public final class Bug12470Test extends AbstractAJAXSession {
         assertEquals("Task due dates are not correctly imported.", expected, due);
     }
 
-    private void importvTodo() throws OXException, IOException, SAXException,
-        JSONException {
+    private void importvTodo() throws OXException, IOException, SAXException, JSONException {
         final ICalImportRequest request = new ICalImportRequest(folderId, vTodo);
         final ICalImportResponse response = client.execute(request);
         if (response.hasError()) {
@@ -141,8 +140,7 @@ public final class Bug12470Test extends AbstractAJAXSession {
         objectId = Integer.parseInt(result.getObjectId());
     }
 
-    private void deleteTask() throws OXException, IOException, SAXException,
-        JSONException {
+    private void deleteTask() throws OXException, IOException, SAXException, JSONException {
         if (null == lastModified) {
             lastModified = new Date(Long.MAX_VALUE);
         }
@@ -150,24 +148,5 @@ public final class Bug12470Test extends AbstractAJAXSession {
         client.execute(request);
     }
 
-    private static final String vTodo =
-        "BEGIN:VCALENDAR\n" +
-        "PRODID:-//K Desktop Environment//NONSGML libkcal 3.2//EN\n" +
-        "VERSION:2.0\n" +
-        "BEGIN:VTODO\n" +
-        "DTSTAMP:20070531T093649Z\n" +
-        "ORGANIZER;CN=Horst Schmidt:MAILTO:horst.schmidt@example.invalid\n" +
-        "CREATED:20070531T093612Z\n" +
-        "UID:libkcal-1172232934.1028\n" +
-        "SEQUENCE:0\n" +
-        "LAST-MODIFIED:20070531T093612Z\n" +
-        "DESCRIPTION:das ist ein ical test\n" +
-        "SUMMARY:test ical\n" +
-        "LOCATION:daheim\n" +
-        "CLASS:PUBLIC\n" +
-        "PRIORITY:5\n" +
-        "DUE;VALUE=DATE:20070731\n" +
-        "PERCENT-COMPLETE:30\n" +
-        "END:VTODO\n" +
-        "END:VCALENDAR\n";
+    private static final String vTodo = "BEGIN:VCALENDAR\n" + "PRODID:-//K Desktop Environment//NONSGML libkcal 3.2//EN\n" + "VERSION:2.0\n" + "BEGIN:VTODO\n" + "DTSTAMP:20070531T093649Z\n" + "ORGANIZER;CN=Horst Schmidt:MAILTO:horst.schmidt@example.invalid\n" + "CREATED:20070531T093612Z\n" + "UID:libkcal-1172232934.1028\n" + "SEQUENCE:0\n" + "LAST-MODIFIED:20070531T093612Z\n" + "DESCRIPTION:das ist ein ical test\n" + "SUMMARY:test ical\n" + "LOCATION:daheim\n" + "CLASS:PUBLIC\n" + "PRIORITY:5\n" + "DUE;VALUE=DATE:20070731\n" + "PERCENT-COMPLETE:30\n" + "END:VTODO\n" + "END:VCALENDAR\n";
 }

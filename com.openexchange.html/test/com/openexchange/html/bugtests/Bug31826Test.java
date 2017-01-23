@@ -62,8 +62,8 @@ public class Bug31826Test extends AbstractSanitizing {
     public Bug31826Test() {
         super();
     }
-    @Test
-    public void testKeepUnicode() {
+     @Test
+     public void testKeepUnicode() {
         String content = "dfg &hearts;&diams;&spades;&clubs;&copy;&reg;&trade; dfg";
         String test = getHtmlService().sanitize(content, null, true, null, null);
 

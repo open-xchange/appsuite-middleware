@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment.recurrence;
 
+import org.junit.Test;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.Appointment;
@@ -60,10 +61,11 @@ import com.openexchange.groupware.container.Expectations;
  */
 public class TestsForChangingAmongYearlyRecurrences extends ManagedAppointmentTest {
 
-    public TestsForChangingAmongYearlyRecurrences(String name) {
-        super(name);
+    public TestsForChangingAmongYearlyRecurrences() {
+        super();
     }
 
+    @Test
     public void testShouldChangeFromYearly1ToYearly2() throws Exception {
         Appointment app = generateYearlyAppointment();
 
@@ -79,6 +81,7 @@ public class TestsForChangingAmongYearlyRecurrences extends ManagedAppointmentTe
         positiveAssertionOnCreateAndUpdate.check(app, changes, expectations);
     }
 
+    @Test
     public void testShouldFailChangingFromYearly1ToYearly2UsingOnlyAdditionalData() throws Exception {
         Appointment app = generateYearlyAppointment();
 
@@ -90,12 +93,10 @@ public class TestsForChangingAmongYearlyRecurrences extends ManagedAppointmentTe
         changes.put(Appointment.RECURRENCE_TYPE, Appointment.YEARLY);
         changes.put(Appointment.DAYS, Appointment.MONDAY);
 
-        negativeAssertionOnUpdate.check(
-            app,
-            changes,
-            OXExceptionFactory.getInstance().create(OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_INTERVAL));
+        negativeAssertionOnUpdate.check(app, changes, OXExceptionFactory.getInstance().create(OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_INTERVAL));
     }
 
+    @Test
     public void testShouldChangeFromYearly2ToYearly1With127() throws Exception {
         Appointment app = generateYearlyAppointment();
 
@@ -111,6 +112,7 @@ public class TestsForChangingAmongYearlyRecurrences extends ManagedAppointmentTe
         positiveAssertionOnCreateAndUpdate.check(app, changes, expectations);
     }
 
+    @Test
     public void testShouldChangeFromYearly2ToYearly1WithNull() throws Exception {
         Appointment app = generateYearlyAppointment();
 
@@ -127,6 +129,7 @@ public class TestsForChangingAmongYearlyRecurrences extends ManagedAppointmentTe
         positiveAssertionOnCreateAndUpdate.check(app, changes, expectations);
     }
 
+    @Test
     public void testShouldFailChangingFromYearly2ToYearly1WhileMissingMonth() throws Exception {
         Appointment app = generateYearlyAppointment();
 
@@ -139,6 +142,7 @@ public class TestsForChangingAmongYearlyRecurrences extends ManagedAppointmentTe
         negativeAssertionOnUpdate.check(app, changes, OXCalendarExceptionCodes.RECURRING_MISSING_YEARLY_MONTH.create(1));
     }
 
+    @Test
     public void testShouldFailChangingFromYearly2ToYearly1UsingOnlyAdditionalData() throws Exception {
         Appointment app = generateYearlyAppointment();
 
@@ -150,10 +154,7 @@ public class TestsForChangingAmongYearlyRecurrences extends ManagedAppointmentTe
         changes.put(Appointment.RECURRENCE_TYPE, Appointment.YEARLY);
         changes.put(Appointment.DAYS, 127);
 
-        negativeAssertionOnUpdate.check(
-            app,
-            changes,
-            OXExceptionFactory.getInstance().create(OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_INTERVAL));
+        negativeAssertionOnUpdate.check(app, changes, OXExceptionFactory.getInstance().create(OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_INTERVAL));
     }
 
 }

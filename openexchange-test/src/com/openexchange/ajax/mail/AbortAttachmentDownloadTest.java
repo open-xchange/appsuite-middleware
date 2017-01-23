@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.mail;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -65,6 +68,9 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.UserValues;
@@ -91,24 +97,28 @@ public class AbortAttachmentDownloadTest extends AbstractMailTest {
 
     String[][] fmid;
 
-    public AbortAttachmentDownloadTest(final String name) {
-        super(name);
+    public AbortAttachmentDownloadTest() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         values = getClient().getValues();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        if (null != fmid) {
-            client.execute(new DeleteRequest(fmid, true).ignoreError());
+    @After
+    public void tearDown() throws Exception {
+        try {
+            if (null != fmid) {
+                getClient().execute(new DeleteRequest(fmid, true).ignoreError());
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
+    @Test
     public void testAbortedAttachmentDownload() throws OXException, IOException, JSONException {
         JSONArray json;
         {
@@ -121,9 +131,9 @@ public class AbortAttachmentDownloadTest extends AbstractMailTest {
             }
             streamReader.close();
 
-            InputStream inputStream = new ByteArrayInputStream(TestMails.replaceAddresses(sb.toString(), client.getValues().getSendAddress()).getBytes(com.openexchange.java.Charsets.UTF_8));
+            InputStream inputStream = new ByteArrayInputStream(TestMails.replaceAddresses(sb.toString(), getClient().getValues().getSendAddress()).getBytes(com.openexchange.java.Charsets.UTF_8));
             final ImportMailRequest importMailRequest = new ImportMailRequest(values.getInboxFolder(), MailFlag.SEEN.getValue(), inputStream);
-            final ImportMailResponse importResp = client.execute(importMailRequest);
+            final ImportMailResponse importResp = getClient().execute(importMailRequest);
             json = (JSONArray) importResp.getData();
             fmid = importResp.getIds();
         }
@@ -143,7 +153,6 @@ public class AbortAttachmentDownloadTest extends AbstractMailTest {
         String mailID = json.getJSONObject(0).getString("id");
         String folderID = json.getJSONObject(0).getString("folder_id");
 
-
         final GetRequest getRequest = new GetRequest(folderID, mailID);
         final GetResponse response = Executor.execute(getSession(), getRequest);
         JSONArray array = response.getAttachments();
@@ -155,7 +164,7 @@ public class AbortAttachmentDownloadTest extends AbstractMailTest {
         final String protocol = AJAXConfig.getProperty(Property.PROTOCOL);
         final String hostname = AJAXConfig.getProperty(Property.HOSTNAME);
 
-        final AJAXSession session = client.getSession();
+        final AJAXSession session = getClient().getSession();
         final String sessionId = session.getId();
 
         InputStream in = null;
@@ -199,7 +208,7 @@ public class AbortAttachmentDownloadTest extends AbstractMailTest {
 
         // Delete
         if ((folderID != null) && (mailID != null)) {
-            DeleteResponse deleteResponse = client.execute(new DeleteRequest(folderID, mailID, true));
+            DeleteResponse deleteResponse = getClient().execute(new DeleteRequest(folderID, mailID, true));
             assertNull("Error deleting mail. Artifacts remain", deleteResponse.getErrorMessage());
         }
     }

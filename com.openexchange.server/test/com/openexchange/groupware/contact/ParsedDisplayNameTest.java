@@ -49,15 +49,18 @@
 
 package com.openexchange.groupware.contact;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * {@link ParsedDisplayNameTest}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ParsedDisplayNameTest extends TestCase {
-
+public class ParsedDisplayNameTest {
     /**
      * Initializes a new {@link ParsedDisplayNameTest}.
      */
@@ -65,7 +68,8 @@ public class ParsedDisplayNameTest extends TestCase {
         super();
     }
 
-    public void testBasicParsing() {
+         @Test
+     public void testBasicParsing() {
         assertEquals("heinz", new ParsedDisplayName("heinz otto").getGivenName());
         assertEquals("otto", new ParsedDisplayName("heinz otto").getSurName());
         assertEquals("heinz", new ParsedDisplayName("otto, heinz").getGivenName());
@@ -74,7 +78,8 @@ public class ParsedDisplayNameTest extends TestCase {
         assertEquals("otto", new ParsedDisplayName("otto,heinz").getSurName());
     }
 
-    public void testPrefixTrimming() {
+         @Test
+     public void testPrefixTrimming() {
         assertEquals("heinz", new ParsedDisplayName("\"heinz otto").getGivenName());
         assertEquals("otto", new ParsedDisplayName("\"heinz otto").getSurName());
         assertEquals("heinz", new ParsedDisplayName(" heinz otto").getGivenName());
@@ -87,7 +92,8 @@ public class ParsedDisplayNameTest extends TestCase {
         assertEquals("otto", new ParsedDisplayName("<heinz otto").getSurName());
     }
 
-    public void testSuffixTrimming() {
+         @Test
+     public void testSuffixTrimming() {
         assertEquals("heinz", new ParsedDisplayName("heinz otto\"").getGivenName());
         assertEquals("otto", new ParsedDisplayName("heinz otto\"").getSurName());
         assertEquals("heinz", new ParsedDisplayName("heinz otto ").getGivenName());
@@ -100,14 +106,16 @@ public class ParsedDisplayNameTest extends TestCase {
         assertEquals("otto", new ParsedDisplayName("heinz otto>").getSurName());
     }
 
-    public void testLongerNames() {
+         @Test
+     public void testLongerNames() {
         assertEquals("heinz horst albrecht", new ParsedDisplayName("heinz horst albrecht otto").getGivenName());
         assertEquals("otto", new ParsedDisplayName("heinz horst albrecht otto").getSurName());
         assertEquals("heinz horst albrecht", new ParsedDisplayName("otto, albrecht, horst, heinz").getGivenName());
         assertEquals("otto", new ParsedDisplayName("otto, albrecht, horst, heinz").getSurName());
     }
 
-    public void testShortNames() {
+         @Test
+     public void testShortNames() {
         assertEquals("heinz", new ParsedDisplayName("heinz").getGivenName());
     }
 

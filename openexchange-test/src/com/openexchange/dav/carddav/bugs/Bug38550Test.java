@@ -66,15 +66,15 @@ import com.openexchange.groupware.container.FolderObject;
 /**
  * {@link Bug38550Test}
  *
- *  new contacts added via iOS will be added to the collected addresses folder.
+ * new contacts added via iOS will be added to the collected addresses folder.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class Bug38550Test extends CardDAVTest {
 
-	public Bug38550Test() {
-		super();
-	}
+    public Bug38550Test() {
+        super();
+    }
 
     @Test
     public void testCreateInOtherFolder() throws Exception {
@@ -83,11 +83,11 @@ public class Bug38550Test extends CardDAVTest {
         }
     }
 
-	private void testCreateInOtherFolder(String userAgent) throws Exception {
-	    /*
-	     * apply user agent
-	     */
-	    getWebDAVClient().setUserAgent(userAgent);
+    private void testCreateInOtherFolder(String userAgent) throws Exception {
+        /*
+         * apply user agent
+         */
+        getWebDAVClient().setUserAgent(userAgent);
         String gabCollection = String.valueOf(FolderObject.SYSTEM_LDAP_FOLDER_ID);
         String defaultCollection = String.valueOf(getDefaultFolderID());
         /*
@@ -95,24 +95,14 @@ public class Bug38550Test extends CardDAVTest {
          */
         String gabSyncToken = fetchSyncToken(gabCollection);
         String defaultSyncToken = fetchSyncToken(defaultCollection);
-	    /*
-	     * try & create contact in global address book
-	     */
-    	String uid = randomUID();
-    	String firstName = "test";
-    	String lastName = "test";
-    	String url = "http://";
-        String vCard =
-    		"BEGIN:VCARD" + "\r\n" +
-			"VERSION:3.0" + "\r\n" +
-			"N:" + lastName + ";" + firstName + ";;;" + "\r\n" +
-			"FN:" + firstName + " " + lastName + "\r\n" +
-			"URL:" + url + "\r\n" +
-			"UID:" + uid + "\r\n" +
-			"REV:" + super.formatAsUTC(new Date()) + "\r\n" +
-			"PRODID:-//Apple Inc.//AddressBook 6.1//EN" + "\r\n" +
-			"END:VCARD" + "\r\n"
-		;
+        /*
+         * try & create contact in global address book
+         */
+        String uid = randomUID();
+        String firstName = "test";
+        String lastName = "test";
+        String url = "http://";
+        String vCard = "BEGIN:VCARD" + "\r\n" + "VERSION:3.0" + "\r\n" + "N:" + lastName + ";" + firstName + ";;;" + "\r\n" + "FN:" + firstName + " " + lastName + "\r\n" + "URL:" + url + "\r\n" + "UID:" + uid + "\r\n" + "REV:" + super.formatAsUTC(new Date()) + "\r\n" + "PRODID:-//Apple Inc.//AddressBook 6.1//EN" + "\r\n" + "END:VCARD" + "\r\n";
         assertEquals("response code wrong", StatusCodes.SC_CREATED, putVCard(uid, vCard, gabCollection));
         /*
          * verify contact on server
@@ -138,6 +128,6 @@ public class Bug38550Test extends CardDAVTest {
         assertEquals("N wrong", lastName, card.getFamilyName());
         assertEquals("FN wrong", firstName + " " + lastName, card.getFN());
         assertNotNull("URL wrong", card.getVCard().getUrls().get(0));
-	}
+    }
 
 }

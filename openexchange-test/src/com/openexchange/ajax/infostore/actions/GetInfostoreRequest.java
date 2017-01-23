@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.infostore.actions;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
@@ -61,7 +63,8 @@ import com.openexchange.ajax.framework.Params;
 public class GetInfostoreRequest extends AbstractInfostoreRequest<GetInfostoreResponse> {
 
     private String id;
-    private String[] columns;
+    private int[] columns;
+    private int version;
 
     public void setId(String id) {
         this.id = id;
@@ -76,14 +79,17 @@ public class GetInfostoreRequest extends AbstractInfostoreRequest<GetInfostoreRe
     }
 
     public GetInfostoreRequest(String id) {
-        this();
         setId(id);
     }
 
-    public GetInfostoreRequest(String id, String... columns) {
-        this();
+    public GetInfostoreRequest(String id, int... columns) {
+        this(id, -1, columns);
+    }
+
+    public GetInfostoreRequest(String id, int version, int... columns) {
         setId(id);
         this.columns = columns;
+        this.version = version;
     }
 
     @Override
@@ -100,14 +106,15 @@ public class GetInfostoreRequest extends AbstractInfostoreRequest<GetInfostoreRe
     public Parameter[] getParameters() {
         if (null == columns || columns.length == 0) {
             return new Params(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET, AJAXServlet.PARAMETER_ID, String.valueOf(getId())).toArray();
-        } else {
-            StringBuilder sb = new StringBuilder();
-            for (String col : columns) {
-                sb.append(col).append(",");
-            }
-            sb.deleteCharAt(sb.length() - 1);
-            return new Params(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET, AJAXServlet.PARAMETER_ID, String.valueOf(getId()), AJAXServlet.PARAMETER_COLUMNS, sb.toString()).toArray();
         }
+        final List<Parameter> parameterList = new ArrayList<Parameter>();
+        parameterList.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET));
+        parameterList.add(new Parameter(AJAXServlet.PARAMETER_ID, String.valueOf(getId())));
+        parameterList.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
+        if(version != -1) {
+            parameterList.add(new Parameter(AJAXServlet.PARAMETER_VERSION, version));
+        }
+        return parameterList.toArray(new Parameter[parameterList.size()]);
     }
 
     @Override

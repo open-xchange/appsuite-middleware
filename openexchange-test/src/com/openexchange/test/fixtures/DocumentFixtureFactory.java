@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.test.fixtures;
 
 import java.io.File;
@@ -59,37 +60,38 @@ import com.openexchange.test.fixtures.transformators.CredentialsTransformator;
  */
 public class DocumentFixtureFactory implements FixtureFactory<Document> {
 
-	private final File datapath;
-	private String seleniumDataPath;
-	private String seleniumSeparator;
-	private final FixtureLoader fixtureLoader;
+    private final File datapath;
+    private String seleniumDataPath;
+    private String seleniumSeparator;
+    private final FixtureLoader fixtureLoader;
 
-	public DocumentFixtureFactory(File datapath, FixtureLoader fixtureLoader) {
-		super();
-		this.datapath = datapath;
-		this.fixtureLoader = fixtureLoader;
-	}
-
-	@Override
-    public Fixtures<Document> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
-         DocumentFixtures documentFixtures = new DocumentFixtures(fixtureName, entries, datapath, fixtureLoader);
-         if(seleniumDataPath != null) {
-        	 documentFixtures.setSeleniumConfiguration(seleniumDataPath, seleniumSeparator);
-         }
-         return documentFixtures;
+    public DocumentFixtureFactory(File datapath, FixtureLoader fixtureLoader) {
+        super();
+        this.datapath = datapath;
+        this.fixtureLoader = fixtureLoader;
     }
 
-	public void setSeleniumConfiguration(String seleniumDataPath, String seleniumSeparator) {
-    	this.seleniumDataPath = seleniumDataPath;
-    	this.seleniumSeparator = seleniumSeparator;
+    @Override
+    public Fixtures<Document> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
+        DocumentFixtures documentFixtures = new DocumentFixtures(fixtureName, entries, datapath, fixtureLoader);
+        if (seleniumDataPath != null) {
+            documentFixtures.setSeleniumConfiguration(seleniumDataPath, seleniumSeparator);
+        }
+        return documentFixtures;
+    }
+
+    public void setSeleniumConfiguration(String seleniumDataPath, String seleniumSeparator) {
+        this.seleniumDataPath = seleniumDataPath;
+        this.seleniumSeparator = seleniumSeparator;
     }
 
     private class DocumentFixtures extends DefaultFixtures<Document> implements Fixtures<Document> {
+
         private final Map<String, Map<String, String>> entries;
         private final Map<String, Fixture<Document>> knownDocuments = new HashMap<String, Fixture<Document>>();
-		private final File datapath;
-		private String seleniumDataPath;
-		private String seleniumSeparator;
+        private final File datapath;
+        private String seleniumDataPath;
+        private String seleniumSeparator;
 
         public DocumentFixtures(final String fixtureName, final Map<String, Map<String, String>> values, File datapath, FixtureLoader fixtureLoader) {
             super(Document.class, values, fixtureLoader);
@@ -111,19 +113,18 @@ public class DocumentFixtureFactory implements FixtureFactory<Document> {
             final Document document = new Document(datapath);
             apply(document, values);
 
-            if(seleniumDataPath != null) {
-            	document.setSeleniumConfiguration(seleniumDataPath, seleniumSeparator);
+            if (seleniumDataPath != null) {
+                document.setSeleniumConfiguration(seleniumDataPath, seleniumSeparator);
             }
 
-            final Fixture<Document> fixture = new Fixture<Document>(document,
-            		values.keySet().toArray(new String[values.size()]), values);
+            final Fixture<Document> fixture = new Fixture<Document>(document, values.keySet().toArray(new String[values.size()]), values);
             knownDocuments.put(entryName, fixture);
             return fixture;
         }
 
         public void setSeleniumConfiguration(String seleniumDataPath, String seleniumSeparator) {
-        	this.seleniumDataPath = seleniumDataPath;
-        	this.seleniumSeparator = seleniumSeparator;
+            this.seleniumDataPath = seleniumDataPath;
+            this.seleniumSeparator = seleniumSeparator;
         }
     }
 }

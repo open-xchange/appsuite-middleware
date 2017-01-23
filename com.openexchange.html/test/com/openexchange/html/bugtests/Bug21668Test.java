@@ -64,8 +64,8 @@ import com.openexchange.html.AssertionHelper;
  */
 public class Bug21668Test extends AbstractSanitizing {
 
-    @Test
-    public void testPlainTextQuoting() {
+     @Test
+     public void testPlainTextQuoting() {
         Queue<String> quotedText = new LinkedList<String>();
         quotedText.add("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent nisl diam, egestas");
         quotedText.add(" vulputate bibendum at, ornare pulvinar odio.");

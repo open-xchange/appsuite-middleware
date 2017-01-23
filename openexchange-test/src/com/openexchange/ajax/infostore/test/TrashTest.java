@@ -49,10 +49,17 @@
 
 package com.openexchange.ajax.infostore.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.UUID;
 import org.json.JSONArray;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AbstractColumnsResponse;
@@ -70,12 +77,12 @@ import com.openexchange.groupware.search.Order;
 import com.openexchange.java.Streams;
 import com.openexchange.java.util.UUIDs;
 
-
 /**
  * {@link TrashTest}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
+@RunWith(BlockJUnit4ClassRunner.class)
 public class TrashTest extends AbstractInfostoreTest {
 
     private final int[] COLUMNS = new int[] { Metadata.ID, Metadata.FILENAME, Metadata.FOLDER_ID };
@@ -83,42 +90,33 @@ public class TrashTest extends AbstractInfostoreTest {
     private FolderObject testFolder;
     private int trashFolderID;
 
-    /**
-     * Initializes a new {@link TrashTest}.
-     *
-     * @param name The test name
-     */
-    public TrashTest(final String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
-        testFolder = fMgr.generatePrivateFolder(UUID.randomUUID().toString(), FolderObject.INFOSTORE,
-            client.getValues().getPrivateInfostoreFolder(), client.getValues().getUserId());
-        testFolder = fMgr.insertFolderOnServer(testFolder);
-        trashFolderID = client.getValues().getInfostoreTrashFolder();
+        testFolder = ftm.generatePrivateFolder(UUID.randomUUID().toString(), FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), getClient().getValues().getUserId());
+        testFolder = ftm.insertFolderOnServer(testFolder);
+        trashFolderID = getClient().getValues().getInfostoreTrashFolder();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
-
+    @Test
     public void testHardDeleteFolder() throws Exception {
-        /*
-         * hard-delete folder
-         */
-        FolderObject folder = createRandomFolder(testFolder.getObjectID());
-        deleteFolder(folder, Boolean.TRUE);
-        /*
-         * check source & trash folder contents
-         */
-        assertFolderNotExistsInFolder(testFolder.getObjectID(), folder.getObjectID());
-        assertFolderNotExistsInFolder(trashFolderID, folder.getObjectID());
+        try {
+            /*
+             * hard-delete folder
+             */
+            FolderObject folder = createRandomFolder(testFolder.getObjectID());
+            deleteFolder(folder, Boolean.TRUE);
+            /*
+             * check source & trash folder contents
+             */
+            assertFolderNotExistsInFolder(testFolder.getObjectID(), folder.getObjectID());
+            assertFolderNotExistsInFolder(trashFolderID, folder.getObjectID());
+        } finally {
+            super.tearDown();
+        }
     }
 
+    @Test
     public void testSoftDeleteFolder() throws Exception {
         /*
          * soft-delete folder
@@ -132,6 +130,7 @@ public class TrashTest extends AbstractInfostoreTest {
         assertFolderExistsInFolder(trashFolderID, folder.getObjectID());
     }
 
+    @Test
     public void testDefaultDeleteFolder() throws Exception {
         /*
          * soft-delete file
@@ -145,6 +144,7 @@ public class TrashTest extends AbstractInfostoreTest {
         assertFolderExistsInFolder(trashFolderID, folder.getObjectID());
     }
 
+    @Test
     public void testDeleteDeletedFolder() throws Exception {
         /*
          * soft-delete folder
@@ -167,6 +167,7 @@ public class TrashTest extends AbstractInfostoreTest {
         assertFolderNotExistsInFolder(trashFolderID, folder.getObjectID());
     }
 
+    @Test
     public void testDeleteFolderWithConflictingName() throws Exception {
         String foldername = UUID.randomUUID().toString();
         /*
@@ -188,6 +189,7 @@ public class TrashTest extends AbstractInfostoreTest {
         assertFolderExistsInFolder(trashFolderID, folder2.getObjectID());
     }
 
+    @Test
     public void testHardDeleteFile() throws Exception {
         /*
          * hard-delete file
@@ -201,6 +203,7 @@ public class TrashTest extends AbstractInfostoreTest {
         assertFileNotExistsInFolder(trashFolderID, file.getId());
     }
 
+    @Test
     public void testSoftDeleteFile() throws Exception {
         /*
          * soft-delete file
@@ -214,6 +217,7 @@ public class TrashTest extends AbstractInfostoreTest {
         assertFileExistsInFolder(trashFolderID, file.getId());
     }
 
+    @Test
     public void testDefaultDeleteFile() throws Exception {
         /*
          * soft-delete file
@@ -227,6 +231,7 @@ public class TrashTest extends AbstractInfostoreTest {
         assertFileExistsInFolder(trashFolderID, file.getId());
     }
 
+    @Test
     public void testDeleteDeletedFile() throws Exception {
         /*
          * soft-delete file
@@ -241,7 +246,7 @@ public class TrashTest extends AbstractInfostoreTest {
         /*
          * delete file again
          */
-        file.setFolderId(String.valueOf(client.getValues().getInfostoreTrashFolder()));
+        file.setFolderId(String.valueOf(getClient().getValues().getInfostoreTrashFolder()));
         deleteFile(file, null);
         /*
          * check source & trash folder contents
@@ -250,6 +255,7 @@ public class TrashTest extends AbstractInfostoreTest {
         assertFileNotExistsInFolder(trashFolderID, file.getId());
     }
 
+    @Test
     public void testDeleteFileWithConflictingName() throws Exception {
         String filename = UUID.randomUUID().toString();
         /*
@@ -275,7 +281,7 @@ public class TrashTest extends AbstractInfostoreTest {
         Date timestamp = null != folder.getLastModified() ? folder.getLastModified() : new Date(Long.MAX_VALUE);
         DeleteRequest deleteRequest = new DeleteRequest(EnumAPI.OX_OLD, folder.getObjectID(), timestamp);
         deleteRequest.setHardDelete(hardDelete);
-        CommonDeleteResponse deleteResponse = client.execute(deleteRequest);
+        CommonDeleteResponse deleteResponse = getClient().execute(deleteRequest);
         JSONArray json = (JSONArray) deleteResponse.getData();
         assertEquals("folder not deleted", 0, json.length());
         folder.setLastModified(deleteResponse.getTimestamp());
@@ -286,7 +292,7 @@ public class TrashTest extends AbstractInfostoreTest {
         DeleteInfostoreRequest deleteRequest = new DeleteInfostoreRequest(file.getId(), file.getFolderId(), timestamp);
         deleteRequest.setHardDelete(hardDelete);
         deleteRequest.setFailOnError(true);
-        DeleteInfostoreResponse deleteResponse = client.execute(deleteRequest);
+        DeleteInfostoreResponse deleteResponse = getClient().execute(deleteRequest);
         JSONArray json = (JSONArray) deleteResponse.getData();
         assertEquals("file not deleted", 0, json.length());
         file.setLastModified(deleteResponse.getTimestamp());
@@ -294,7 +300,7 @@ public class TrashTest extends AbstractInfostoreTest {
             // lookup file in trash folder to get new object ID
             // TODO: delete response should be extended to include the new object id (soft delete is a move)
             AllInfostoreRequest allRequest = new AllInfostoreRequest(trashFolderID, COLUMNS, Metadata.ID, Order.ASCENDING);
-            AbstractColumnsResponse allResponse = client.execute(allRequest);
+            AbstractColumnsResponse allResponse = getClient().execute(allRequest);
             for (Object[] object : allResponse) {
                 if (null != object[1] && String.valueOf(object[1]).equals(file.getFileName())) {
                     file.setId(object[0].toString());
@@ -306,7 +312,7 @@ public class TrashTest extends AbstractInfostoreTest {
 
     private void assertFileExistsInFolder(int folderID, String objectID) throws Exception {
         AllInfostoreRequest allRequest = new AllInfostoreRequest(folderID, COLUMNS, Metadata.ID, Order.ASCENDING);
-        AbstractColumnsResponse allResponse = client.execute(allRequest);
+        AbstractColumnsResponse allResponse = getClient().execute(allRequest);
         for (Object[] object : allResponse) {
             String id = object[0].toString();
             if (objectID.equals(id)) {
@@ -317,7 +323,7 @@ public class TrashTest extends AbstractInfostoreTest {
     }
 
     private void assertFolderExistsInFolder(int folderID, int objectID) throws Exception {
-        FolderObject[] folders = fMgr.listFoldersOnServer(folderID);
+        FolderObject[] folders = ftm.listFoldersOnServer(folderID);
         for (FolderObject folder : folders) {
             if (folder.getObjectID() == objectID) {
                 return;
@@ -328,7 +334,7 @@ public class TrashTest extends AbstractInfostoreTest {
 
     private void assertFileNotExistsInFolder(int folderID, String objectID) throws Exception {
         AllInfostoreRequest allRequest = new AllInfostoreRequest(folderID, COLUMNS, Metadata.ID, Order.ASCENDING);
-        AbstractColumnsResponse allResponse = client.execute(allRequest);
+        AbstractColumnsResponse allResponse = getClient().execute(allRequest);
         for (Object[] object : allResponse) {
             String id = object[0].toString();
             assertFalse("File " + objectID + " found in folder: " + folderID, objectID.equals(id));
@@ -336,9 +342,9 @@ public class TrashTest extends AbstractInfostoreTest {
     }
 
     private void assertFolderNotExistsInFolder(int folderID, int objectID) throws Exception {
-        FolderObject[] folders = fMgr.listFoldersOnServer(folderID);
+        FolderObject[] folders = ftm.listFoldersOnServer(folderID);
         for (FolderObject folder : folders) {
-            assertFalse("Folder " + objectID + " found in folder: " + folderID, objectID ==  folder.getObjectID());
+            assertFalse("Folder " + objectID + " found in folder: " + folderID, objectID == folder.getObjectID());
         }
     }
 
@@ -347,8 +353,8 @@ public class TrashTest extends AbstractInfostoreTest {
     }
 
     private FolderObject createRandomFolder(int folderID, String foldername) throws Exception {
-        FolderObject folder = fMgr.generatePrivateFolder(foldername, FolderObject.INFOSTORE, folderID, client.getValues().getUserId());
-        folder = fMgr.insertFolderOnServer(folder);
+        FolderObject folder = ftm.generatePrivateFolder(foldername, FolderObject.INFOSTORE, folderID, getClient().getValues().getUserId());
+        folder = ftm.insertFolderOnServer(folder);
         return folder;
     }
 
@@ -364,10 +370,10 @@ public class TrashTest extends AbstractInfostoreTest {
         InputStream data = null;
         try {
             data = Streams.newByteArrayInputStream(UUIDs.toByteArray(UUID.randomUUID()));
-            NewInfostoreResponse newResponse = client.execute(new NewInfostoreRequest(file, data));
+            NewInfostoreResponse newResponse = getClient().execute(new NewInfostoreRequest(file, data));
             file.setId(newResponse.getID());
             file.setLastModified(newResponse.getTimestamp());
-            infoMgr.getCreatedEntities().add(file);
+            itm.getCreatedEntities().add(file);
         } finally {
             Streams.close(data);
         }

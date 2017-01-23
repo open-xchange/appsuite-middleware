@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.test.fixtures;
 
 import java.util.HashMap;
@@ -60,19 +61,20 @@ public class SubscriptionFixtureFactory implements FixtureFactory<Subscription> 
 
     private final FixtureLoader fixtureLoader;
 
-	public SubscriptionFixtureFactory(FixtureLoader fixtureLoader) {
-		super();
-		this.fixtureLoader = fixtureLoader;
-	}
-
-	@Override
-    public Fixtures<Subscription> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
-		return new SubscriptionFixtures(fixtureName, entries, fixtureLoader);
+    public SubscriptionFixtureFactory(FixtureLoader fixtureLoader) {
+        super();
+        this.fixtureLoader = fixtureLoader;
     }
 
-    private class SubscriptionFixtures  extends DefaultFixtures<Subscription> implements Fixtures<Subscription>{
+    @Override
+    public Fixtures<Subscription> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
+        return new SubscriptionFixtures(fixtureName, entries, fixtureLoader);
+    }
+
+    private class SubscriptionFixtures extends DefaultFixtures<Subscription> implements Fixtures<Subscription> {
+
         private final Map<String, Map<String, String>> entries;
-        private final Map<String, Fixture<Subscription>>  subscriptions = new HashMap<String,Fixture<Subscription>>();
+        private final Map<String, Fixture<Subscription>> subscriptions = new HashMap<String, Fixture<Subscription>>();
 
         public SubscriptionFixtures(final String fixtureName, final Map<String, Map<String, String>> entries, FixtureLoader fixtureLoader) {
             super(Subscription.class, entries, fixtureLoader);
@@ -114,7 +116,7 @@ public class SubscriptionFixtureFactory implements FixtureFactory<Subscription> 
 
             subscription.setConfiguration(config);
 
-            apply(subscription,values);
+            apply(subscription, values);
 
             final Fixture<Subscription> fixture = new Fixture<Subscription>(subscription, values.keySet().toArray(new String[values.size()]), values);
 
@@ -123,13 +125,13 @@ public class SubscriptionFixtureFactory implements FixtureFactory<Subscription> 
         }
 
         private void defaults(final Map<String, String> values) {
-        	if (false == values.containsKey("displayName")) {
-        	    values.put("displayName", values.get("login"));
-        	}
+            if (false == values.containsKey("displayName")) {
+                values.put("displayName", values.get("login"));
+            }
 
-        	if (false == values.containsKey("secret")) {
-        	    values.put("secret", values.get("false"));
-        	}
+            if (false == values.containsKey("secret")) {
+                values.put("secret", values.get("false"));
+            }
         }
     }
 }

@@ -53,18 +53,22 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import junit.framework.TestCase;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.BinaryContent;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * {@link BinaryContentDumperTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class BinaryContentDumperTest extends TestCase {
-
-    public void testHandles() {
+public class BinaryContentDumperTest {
+         @Test
+     public void testHandles() {
         assertTrue(new BinaryContentDumper().handles(new BinaryContent() {
 
             @Override
@@ -76,7 +80,8 @@ public class BinaryContentDumperTest extends TestCase {
         }));
     }
 
-    public void testDump() throws OXException, IOException {
+         @Test
+     public void testDump() throws OXException, IOException {
         final InputStream is = new ByteArrayInputStream("Hello World".getBytes(com.openexchange.java.Charsets.UTF_8));
         final BinaryContent content = getBinaryContent(is);
 

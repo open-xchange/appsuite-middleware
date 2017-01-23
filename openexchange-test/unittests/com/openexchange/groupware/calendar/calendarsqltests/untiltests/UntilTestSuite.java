@@ -49,24 +49,22 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests.untiltests;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class UntilTestSuite extends TestSuite {
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    DailyUntilTest.class,
+    WeeklyUntilTest.class,
+    Monthly1UntilTest.class,
+    Monthly2UntilTest.class,
+    Yearly1UntilTest.class,
+    Yearly2UntilTest.class,
 
-    public static Test suite() {
-        TestSuite tests = new TestSuite();
+})
+public class UntilTestSuite  {
 
-        tests.addTestSuite(DailyUntilTest.class);
-        tests.addTestSuite(WeeklyUntilTest.class);
-        tests.addTestSuite(Monthly1UntilTest.class);
-        tests.addTestSuite(Monthly2UntilTest.class);
-        tests.addTestSuite(Yearly1UntilTest.class);
-        tests.addTestSuite(Yearly2UntilTest.class);
-
-        return tests;
-    }
 }

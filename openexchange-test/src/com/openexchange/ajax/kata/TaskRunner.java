@@ -51,20 +51,19 @@ package com.openexchange.ajax.kata;
 
 import com.openexchange.groupware.tasks.Task;
 
-
 /**
  * {@link TaskRunner}
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  *
  */
-public class TaskRunner extends AbstractDirectoryRunner{
+public class TaskRunner extends AbstractDirectoryRunner {
 
     /**
      * Initializes a new {@link TaskRunner}.
      */
     public TaskRunner(String name) {
-        super(name,"taskKatas" , Task.class);
+        super(name, "taskKatas", Task.class);
     }
 
 }

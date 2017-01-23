@@ -49,8 +49,13 @@
 
 package com.openexchange.contact.vcard;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
+import org.junit.Assert;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
@@ -72,7 +77,8 @@ public class DistributionListTest extends VCardTest {
         super();
     }
 
-    public void testExportDistributionList() throws OXException {
+         @Test
+     public void testExportDistributionList() throws OXException {
         /*
          * create test contact
          */
@@ -101,7 +107,7 @@ public class DistributionListTest extends VCardTest {
         assertTrue(vCard.getKind().isGroup());
         List<Member> members = vCard.getMembers();
         assertTrue("no MEMBERs exported", null != members && 0 < members.size());
-        assertEquals(distributionList.size(), members.size());
+        Assert.assertEquals(distributionList.size(), members.size());
         for (DistributionListEntryObject entry : distributionList) {
             Member matchingMember = null;
             for (Member member : members) {
@@ -114,7 +120,8 @@ public class DistributionListTest extends VCardTest {
         }
     }
 
-    public void testImportDistributionList() throws OXException {
+         @Test
+     public void testImportDistributionList() throws OXException {
         /*
          * import vCard
          */
@@ -136,11 +143,11 @@ public class DistributionListTest extends VCardTest {
          * verify imported contact
          */
         assertNotNull(contact);
-        assertEquals("Liste", contact.getDisplayName());
+        Assert.assertEquals("Liste", contact.getDisplayName());
         assertTrue(contact.getMarkAsDistribtuionlist());
         DistributionListEntryObject[] distributionList = contact.getDistributionList();
         assertNotNull(distributionList);
-        assertEquals(5, distributionList.length);
+        Assert.assertEquals(5, distributionList.length);
         for (String member : new String[] { "otto@example.com", "horst@example.com", "herbert@example.com", "peter@example.com", "klaus@example.com" }) {
             DistributionListEntryObject matchingEntry = null;
             for (DistributionListEntryObject entry : distributionList) {
@@ -152,7 +159,8 @@ public class DistributionListTest extends VCardTest {
         }
     }
 
-    public void testImportOldDistributionList() throws OXException {
+         @Test
+     public void testImportOldDistributionList() throws OXException {
         /*
          * import vCard
          */
@@ -175,11 +183,11 @@ public class DistributionListTest extends VCardTest {
          * verify imported contact
          */
         assertNotNull(contact);
-        assertEquals("Liste", contact.getDisplayName());
+        Assert.assertEquals("Liste", contact.getDisplayName());
         assertTrue(contact.getMarkAsDistribtuionlist());
         DistributionListEntryObject[] distributionList = contact.getDistributionList();
         assertNotNull(distributionList);
-        assertEquals(5, distributionList.length);
+        Assert.assertEquals(5, distributionList.length);
         for (String member : new String[] { "otto@example.com", "horst@example.com", "herbert@example.com", "peter@example.com", "klaus@example.com" }) {
             DistributionListEntryObject matchingEntry = null;
             for (DistributionListEntryObject entry : distributionList) {
@@ -191,7 +199,8 @@ public class DistributionListTest extends VCardTest {
         }
     }
 
-    public void testMergeWithOldDistributionList() throws OXException {
+         @Test
+     public void testMergeWithOldDistributionList() throws OXException {
         /*
          * import original vCard
          */
@@ -223,7 +232,7 @@ public class DistributionListTest extends VCardTest {
         assertTrue(vCard.getKind().isGroup());
         List<Member> members = vCard.getMembers();
         assertTrue("no MEMBERs exported", null != members && 0 < members.size());
-        assertEquals(orignalVCard.getEmails().size(), members.size());
+        Assert.assertEquals(orignalVCard.getEmails().size(), members.size());
         for (Email email : orignalVCard.getEmails()) {
             Member matchingMember = null;
             for (Member member : members) {

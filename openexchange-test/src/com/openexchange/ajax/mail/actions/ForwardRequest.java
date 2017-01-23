@@ -54,7 +54,6 @@ import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
-
 /**
  * {@link ForwardRequest}
  *
@@ -62,7 +61,7 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  */
 public class ForwardRequest extends ReplyRequest {
 
-    public ForwardRequest(String folderID, String mailID){
+    public ForwardRequest(String folderID, String mailID) {
         super(folderID, mailID);
     }
 
@@ -71,13 +70,14 @@ public class ForwardRequest extends ReplyRequest {
     }
 
     @Override
-    public String getAction(){
+    public String getAction() {
         return Mail.ACTION_FORWARD;
     }
 
     @Override
     public AbstractAJAXParser<? extends ReplyResponse> getParser() {
         return new AbstractAJAXParser<ForwardResponse>(failOnError) {
+
             @Override
             protected ForwardResponse createResponse(final Response response) throws JSONException {
                 return new ForwardResponse(response);

@@ -1,13 +1,15 @@
 package liquibase.change.core;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import org.junit.Before;
+import org.junit.Test;
 import liquibase.change.ChangeFactory;
 import liquibase.change.StandardChangeTest;
 import liquibase.database.core.MockDatabase;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropTableStatement;
-import static org.junit.Assert.*;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * Tests for {@link DropTableChange}
@@ -23,14 +25,12 @@ public class DropTableChangeTest extends StandardChangeTest {
         change.setCascadeConstraints(true);
     }
 
-    @Override
-    @Test
+     @Test
     public void getRefactoringName() throws Exception {
         assertEquals("dropTable", ChangeFactory.getInstance().getChangeMetaData(change).getName());
     }
 
-    @Override
-    @Test
+     @Test
     public void generateStatement() throws Exception {
         SqlStatement[] sqlStatements = change.generateStatements(new MockDatabase());
         assertEquals(1, sqlStatements.length);
@@ -47,8 +47,7 @@ public class DropTableChangeTest extends StandardChangeTest {
         assertFalse(((DropTableStatement) sqlStatements[0]).isCascadeConstraints());
     }
 
-    @Override
-    @Test
+     @Test
     public void getConfirmationMessage() throws Exception {
         assertEquals("Table TAB_NAME dropped", change.getConfirmationMessage());
     }

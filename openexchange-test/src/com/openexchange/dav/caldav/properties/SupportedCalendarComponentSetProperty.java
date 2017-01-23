@@ -64,7 +64,7 @@ import com.openexchange.dav.PropertyNames;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class SupportedCalendarComponentSetProperty extends AbstractDavProperty<Set<SupportedCalendarComponentSetProperty.Comp>> {
-    
+
     private final Set<SupportedCalendarComponentSetProperty.Comp> components = new HashSet<SupportedCalendarComponentSetProperty.Comp>();
 
     /**
@@ -73,7 +73,7 @@ public class SupportedCalendarComponentSetProperty extends AbstractDavProperty<S
      * @param name
      * @param isInvisibleInAllprop
      */
-    public SupportedCalendarComponentSetProperty(SupportedCalendarComponentSetProperty.Comp...components) {
+    public SupportedCalendarComponentSetProperty(SupportedCalendarComponentSetProperty.Comp... components) {
         super(PropertyNames.SUPPORTED_CALENDAR_COMPONENT_SET, true);
         for (Comp comp : components) {
             this.components.add(comp);
@@ -83,28 +83,28 @@ public class SupportedCalendarComponentSetProperty extends AbstractDavProperty<S
     @Override
     public Set<Comp> getValue() {
         return components;
-    }    
-    
+    }
+
     public static class Comp implements XmlSerializable {
-        
+
         public static final Comp VTODO = new Comp("VTODO");
 
         public static final Comp VEVENT = new Comp("VEVENT");
-        
+
         private final String name;
-        
+
         private Comp(String name) {
             super();
             this.name = name;
-        }        
+        }
 
         @Override
         public Element toXml(Document document) {
             Element element = PropertyNames.COMP.toXml(document);
             DomUtil.setAttribute(element, "name", null, name);
             return element;
-        }        
-        
+        }
+
     }
-    
+
 }

@@ -49,8 +49,12 @@
 
 package com.openexchange.ajax.mail;
 
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.io.InputStream;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.actions.SendRequest;
 import com.openexchange.ajax.mail.actions.SendResponse;
@@ -70,20 +74,23 @@ public final class ManyAttachmentsSendTest extends AbstractMailTest {
      *
      * @param name Name of this test.
      */
-    public ManyAttachmentsSendTest(final String name) {
-        super(name);
+    public ManyAttachmentsSendTest() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
-        manager = new MailTestManager(client, false);
+        manager = new MailTestManager(getClient(), false);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        manager.cleanUp();
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
+        try {
+            manager.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
     /**
@@ -91,6 +98,7 @@ public final class ManyAttachmentsSendTest extends AbstractMailTest {
      *
      * @throws Throwable
      */
+    @Test
     public void testSend() throws Throwable {
         /*
          * Create JSON mail object

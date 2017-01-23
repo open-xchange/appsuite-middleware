@@ -54,8 +54,8 @@ import com.openexchange.ajax.importexport.actions.AbstractImportRequest.Action;
 
 public class VCardExportRequest extends AbstractExportRequest<VCardExportResponse> {
 
-	private final boolean failOnError;
-	private final Boolean exportDlists;
+    private final boolean failOnError;
+    private final Boolean exportDlists;
 
     public VCardExportRequest(int folderId, boolean failOnError) {
         this(folderId, null, failOnError);

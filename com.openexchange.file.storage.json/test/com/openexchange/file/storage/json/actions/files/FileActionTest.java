@@ -49,10 +49,10 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import org.junit.Before;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.json.FileTest;
-
 
 /**
  * {@link FileActionTest}
@@ -66,7 +66,7 @@ public abstract class FileActionTest extends FileTest {
 
     protected CollectingFileWriter writer = new CollectingFileWriter();
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         action = createAction();
     }
@@ -81,6 +81,4 @@ public abstract class FileActionTest extends FileTest {
 
     public abstract AbstractFileAction createAction();
 
-
-
- }
+}

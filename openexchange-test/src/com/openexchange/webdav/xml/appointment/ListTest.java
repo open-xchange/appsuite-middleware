@@ -49,9 +49,11 @@
 
 package com.openexchange.webdav.xml.appointment;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.Date;
 import java.util.Locale;
-
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
@@ -62,10 +64,11 @@ import com.openexchange.webdav.xml.XmlServlet;
 
 public class ListTest extends AppointmentTest {
 
-    public ListTest(final String name) {
-        super(name);
+    public ListTest() {
+        super();
     }
 
+    @Test
     public void testPropFindWithModified() throws Exception {
         final Appointment appointmentObj = createAppointmentObject("testPropFindWithModified");
         appointmentObj.setIgnoreConflicts(true);
@@ -101,11 +104,12 @@ public class ListTest extends AppointmentTest {
 
         assertTrue("objects not found in response", found1 && found2);
 
-        final int[][] objectIdAndFolderId = { {objectId1, appointmentFolderId }, { objectId2, appointmentFolderId } };
+        final int[][] objectIdAndFolderId = { { objectId1, appointmentFolderId }, { objectId2, appointmentFolderId } };
         deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password, context);
 
     }
 
+    @Test
     public void testPropFindInPublicFolder() throws Exception {
         final FolderObject folderObj = new FolderObject();
         folderObj.setFolderName("testPropFindInPublicFolder" + System.currentTimeMillis());
@@ -113,11 +117,10 @@ public class ListTest extends AppointmentTest {
         folderObj.setType(FolderObject.PRIVATE);
         folderObj.setParentFolderID(1);
 
-        final OCLPermission[] permission = new OCLPermission[] {
-            FolderTest.createPermission( userId, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION),
+        final OCLPermission[] permission = new OCLPermission[] { FolderTest.createPermission(userId, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION),
         };
 
-        folderObj.setPermissionsAsArray( permission );
+        folderObj.setPermissionsAsArray(permission);
 
         final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 
@@ -151,6 +154,7 @@ public class ListTest extends AppointmentTest {
         FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, getHostName(), getLogin(), getPassword(), context);
     }
 
+    @Test
     public void testPropFindInPublicFolderWithGroupPermission() throws Exception {
         final FolderObject folderObj = new FolderObject();
         folderObj.setFolderName("testPropFindInPublicFolderWithGroupPermission" + System.currentTimeMillis());
@@ -158,9 +162,7 @@ public class ListTest extends AppointmentTest {
         folderObj.setType(FolderObject.PUBLIC);
         folderObj.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
         final int usersGroupId = 1; // Users
-        final OCLPermission[] permission = new OCLPermission[] {
-            FolderTest.createPermission( userId, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION),
-            FolderTest.createPermission( usersGroupId, true, OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, false),
+        final OCLPermission[] permission = new OCLPermission[] { FolderTest.createPermission(userId, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION), FolderTest.createPermission(usersGroupId, true, OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, false),
         };
         folderObj.setPermissionsAsArray(permission);
         final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
@@ -191,6 +193,7 @@ public class ListTest extends AppointmentTest {
         FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, getHostName(), getLogin(), getPassword(), context);
     }
 
+    @Test
     public void testPropFindWithDelete() throws Exception {
         final Appointment appointmentObj = createAppointmentObject("testPropFindWithDelete");
         appointmentObj.setIgnoreConflicts(true);
@@ -217,6 +220,7 @@ public class ListTest extends AppointmentTest {
         assertTrue("object not found in response", found);
     }
 
+    @Test
     public void testPropFindWithObjectId() throws Exception {
         final Appointment appointmentObj = createAppointmentObject("testPropFindWithObjectId");
         appointmentObj.setIgnoreConflicts(true);
@@ -224,26 +228,28 @@ public class ListTest extends AppointmentTest {
 
         loadAppointment(webCon, objectId, appointmentFolderId, PROTOCOL + hostName, login, password, context);
 
-        final int[][] objectIdAndFolderId = { { objectId ,appointmentFolderId } };
+        final int[][] objectIdAndFolderId = { { objectId, appointmentFolderId } };
         deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password, context);
     }
 
+    @Test
     public void testObjectNotFound() throws Exception {
         final Appointment appointmentObj = createAppointmentObject("testObjectNotFound");
         appointmentObj.setIgnoreConflicts(true);
         final int objectId = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password, context);
 
         try {
-            loadAppointment(webCon, (objectId+1000), appointmentFolderId, PROTOCOL + hostName, login, password, context);
+            loadAppointment(webCon, (objectId + 1000), appointmentFolderId, PROTOCOL + hostName, login, password, context);
             fail("object not found exception expected!");
         } catch (final OXException exc) {
             assertExceptionMessage(exc.getDisplayMessage(Locale.ENGLISH), XmlServlet.OBJECT_NOT_FOUND_STATUS);
         }
 
-        final int[][] objectIdAndFolderId = { { objectId ,appointmentFolderId } };
+        final int[][] objectIdAndFolderId = { { objectId, appointmentFolderId } };
         deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password, context);
     }
 
+    @Test
     public void testListWithAllFields() throws Exception {
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testListWithAllFields");
@@ -280,10 +286,11 @@ public class ListTest extends AppointmentTest {
 
         assertTrue("object not found in response", found);
 
-        final int[][] objectIdAndFolderId = { {objectId, appointmentFolderId } };
+        final int[][] objectIdAndFolderId = { { objectId, appointmentFolderId } };
         deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password, context);
     }
 
+    @Test
     public void testList() throws Exception {
         final Appointment appointmentObj = createAppointmentObject("testObjectNotFound");
         appointmentObj.setIgnoreConflicts(true);
@@ -301,7 +308,7 @@ public class ListTest extends AppointmentTest {
 
         assertTrue("id " + objectId + " not found in response", found);
 
-        final int[][] objectIdAndFolderId = { { objectId ,appointmentFolderId } };
+        final int[][] objectIdAndFolderId = { { objectId, appointmentFolderId } };
         deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password, context);
     }
 }

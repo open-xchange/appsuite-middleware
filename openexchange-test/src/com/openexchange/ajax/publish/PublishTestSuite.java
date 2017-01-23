@@ -49,8 +49,8 @@
 
 package com.openexchange.ajax.publish;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 import com.openexchange.ajax.mail.MailTestSuite;
 import com.openexchange.ajax.publish.tests.AllPublicationsTest;
 import com.openexchange.ajax.publish.tests.CreatePublicationTest;
@@ -67,23 +67,18 @@ import com.openexchange.ajax.publish.tests.UpdatePublicationTest;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  *
  */
-public final class PublishTestSuite extends TestSuite {
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    AllPublicationsTest.class,
+    CreatePublicationTest.class,
+    GetPublicationTest.class,
+    DeletePublicationTest.class,
+    ListPublicationsTest.class,
+    UpdatePublicationTest.class,
+    OXMFInfostoreTest.class,
+    PublishFolderIconTest.class,
 
-    private PublishTestSuite() {
-        super();
-    }
+})
+public final class PublishTestSuite  {
 
-    public static Test suite() {
-        final TestSuite suite = new TestSuite("com.openexchange.ajax.publish.PublishTestSuite");
-        suite.addTestSuite(AllPublicationsTest.class);
-        suite.addTestSuite(CreatePublicationTest.class);
-        suite.addTestSuite(GetPublicationTest.class);
-        suite.addTestSuite(DeletePublicationTest.class);
-        suite.addTestSuite(ListPublicationsTest.class);
-        suite.addTestSuite(UpdatePublicationTest.class);
-        suite.addTestSuite(OXMFInfostoreTest.class);
-        suite.addTestSuite(PublishFolderIconTest.class);
-        return suite;
-
-    }
 }

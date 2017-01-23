@@ -1,3 +1,4 @@
+
 package com.openexchange.ajax.contact.action;
 
 import java.io.IOException;
@@ -7,37 +8,34 @@ import com.openexchange.ajax.framework.Params;
 
 public class GetContactForUserRequest extends AbstractContactRequest<GetResponse> {
 
-	private final String id;
-	private final boolean failOnError;
-	private final TimeZone timezone;
+    private final String id;
+    private final boolean failOnError;
+    private final TimeZone timezone;
 
-	public GetContactForUserRequest(int id, boolean failOnError, TimeZone tz){
-		this.id = String.valueOf(id);
-		this.failOnError = failOnError;
-		this.timezone = tz;
-	}
+    public GetContactForUserRequest(int id, boolean failOnError, TimeZone tz) {
+        this.id = String.valueOf(id);
+        this.failOnError = failOnError;
+        this.timezone = tz;
+    }
 
-	@Override
+    @Override
     public Method getMethod() {
-		return Method.GET;
-	}
+        return Method.GET;
+    }
 
-	@Override
+    @Override
     public Parameter[] getParameters() throws IOException, JSONException {
-		return new Params(
-			"action", "getuser",
-			"id",this.id)
-		.toArray();
-	}
+        return new Params("action", "getuser", "id", this.id).toArray();
+    }
 
-	@Override
+    @Override
     public GetParser getParser() {
-		return new GetParser(failOnError, timezone);
-	}
+        return new GetParser(failOnError, timezone);
+    }
 
-	@Override
+    @Override
     public Object getBody() throws IOException, JSONException {
-		return null;
-	}
+        return null;
+    }
 
 }

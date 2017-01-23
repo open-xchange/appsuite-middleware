@@ -49,7 +49,7 @@
 
 package com.openexchange.i18n.parsing;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 import org.junit.Test;
@@ -64,7 +64,7 @@ public class Bug22803Test {
 
     @SuppressWarnings("static-method")
     @Test(timeout=1000)
-    public void testWithTab() throws UnsupportedEncodingException, OXException {
+     public void testWithTab() throws UnsupportedEncodingException, OXException {
         Translations translations = new POParser().parse(new ByteArrayInputStream(PO_CONTENTS.getBytes("UTF-8")), "Bug22803Test");
         String actual = translations.translate("Date range in search must contain 2 and not %d values.");
         assertEquals("Translation is wrong.", "Zakres dat w wyszukiwaniu musi zawiera\u0107 dwie warto\u015bci. Aktualna liczba warto\u015bci: %d. \\t", actual);
