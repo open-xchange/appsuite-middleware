@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,47 +49,25 @@
 
 package com.openexchange.sessionstorage.osgi;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.sessionstorage.SessionStorageConfiguration;
+import org.osgi.framework.BundleContext;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
+import com.openexchange.sessionstorage.SessionStorageParameterNamesProvider;
 
 /**
- * {@link SessionStorageActivator}
+ * {@link SessionStorageParameterNamesTracker}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.4
  */
-public class SessionStorageActivator extends HousekeepingActivator {
+public class SessionStorageParameterNamesTracker extends RankingAwareNearRegistryServiceTracker<SessionStorageParameterNamesProvider> {
 
     /**
-     * Initializes a new {@link SessionStorageActivator}.
+     * Initializes a new {@link SessionStorageParameterNamesTracker}.
+     *
+     * @param context The bundle context
      */
-    public SessionStorageActivator() {
-        super();
-    }
-
-    @Override
-    protected boolean stopOnServiceUnavailability() {
-        return true;
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        SessionStorageParameterNamesTracker parameterNamesTracker = new SessionStorageParameterNamesTracker(context);
-        rememberTracker(parameterNamesTracker);
-        openTrackers();
-
-        SessionStorageConfiguration.initInstance(getService(ConfigurationService.class), parameterNamesTracker);
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        SessionStorageConfiguration.releaseInstance();
-        super.stopBundle();
+    public SessionStorageParameterNamesTracker(BundleContext context) {
+        super(context, SessionStorageParameterNamesProvider.class);
     }
 
 }

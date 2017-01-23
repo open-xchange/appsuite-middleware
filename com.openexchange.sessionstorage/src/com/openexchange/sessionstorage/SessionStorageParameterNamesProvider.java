@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,49 +47,32 @@
  *
  */
 
-package com.openexchange.sessionstorage.osgi;
+package com.openexchange.sessionstorage;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.sessionstorage.SessionStorageConfiguration;
+import java.util.List;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link SessionStorageActivator}
+ * {@link SessionStorageParameterNamesProvider} - Provides a listing of names for parameters that
+ * are supposed to be stored along-side with the session representation held in session storage.
+ * <p>
+ * (OSGi-wise) Registered implementations of this interface are tracked and contribute to the set
+ * of parameter names that are supposed to be taken over from a session to its session storage
+ * representation.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.4
  */
-public class SessionStorageActivator extends HousekeepingActivator {
+public interface SessionStorageParameterNamesProvider {
 
     /**
-     * Initializes a new {@link SessionStorageActivator}.
+     * Gets the names for such parameters that are supposed to stored in sessions held in session storage for specified user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The parameter names or <code>null</code> (in case no such parameters shall be stored)
+     * @throws OXException If parameter names cannot be returned
      */
-    public SessionStorageActivator() {
-        super();
-    }
-
-    @Override
-    protected boolean stopOnServiceUnavailability() {
-        return true;
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        SessionStorageParameterNamesTracker parameterNamesTracker = new SessionStorageParameterNamesTracker(context);
-        rememberTracker(parameterNamesTracker);
-        openTrackers();
-
-        SessionStorageConfiguration.initInstance(getService(ConfigurationService.class), parameterNamesTracker);
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        SessionStorageConfiguration.releaseInstance();
-        super.stopBundle();
-    }
+    List<String> getParameterNames(int userId, int contextId) throws OXException;
 
 }
