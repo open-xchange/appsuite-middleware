@@ -82,7 +82,7 @@ public class RecurrenceIterator extends AbstractRecurrenceIterator<Event> {
     protected Event nextInstance() {
         // TODO:
         Event retval = master.clone();
-        retval.setRecurrenceId(new PositionAwareRecurrenceId(recurrenceData, next.longValue(), count, CalendarUtils.truncateTime(new Date(next.longValue()), TimeZones.UTC)));
+        retval.setRecurrenceId(new PositionAwareRecurrenceId(recurrenceData, next.longValue(), position, CalendarUtils.truncateTime(new Date(next.longValue()), TimeZones.UTC)));
         //        retval.removeId();
         //        retval.removeRecurrenceRule();
         retval.removeDeleteExceptionDates();

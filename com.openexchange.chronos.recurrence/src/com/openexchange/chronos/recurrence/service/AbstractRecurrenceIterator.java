@@ -83,6 +83,7 @@ public abstract class AbstractRecurrenceIterator<T> implements Iterator<T> {
 
     protected Long next;
     protected int count;
+    protected int position;
     protected RecurrenceRuleIterator inner;
 
     /**
@@ -114,6 +115,7 @@ public abstract class AbstractRecurrenceIterator<T> implements Iterator<T> {
         }
         inner = Recurrence.getRecurrenceIterator(recurrenceData, true);
         next = null;
+        position = 0;
         count = 0;
         init();
     }
@@ -124,7 +126,7 @@ public abstract class AbstractRecurrenceIterator<T> implements Iterator<T> {
                 long nextMillis = inner.peekMillis();
                 if (!ignoreExceptions && isException(nextMillis)) {
                     inner.nextMillis();
-                    count++;
+                    position++;
                     continue;
                 }
                 Date nextEnd = calculateEnd(master, new Date(nextMillis));
@@ -132,7 +134,7 @@ public abstract class AbstractRecurrenceIterator<T> implements Iterator<T> {
                     break;
                 } else {
                     inner.nextMillis();
-                    count++;
+                    position++;
                 }
             }
         }
@@ -183,6 +185,7 @@ public abstract class AbstractRecurrenceIterator<T> implements Iterator<T> {
                 ChronosLogger.debug("Next instance is exception.");
                 inner.nextMillis();
                 count++;
+                position++;
                 if (inner.hasNext()) {
                     peek = inner.peekMillis();
                 } else {
@@ -199,6 +202,7 @@ public abstract class AbstractRecurrenceIterator<T> implements Iterator<T> {
 
         next = inner.nextMillis();
         count++;
+        position++;
     }
 
     private Date calculateEnd(Event master, Date start) {

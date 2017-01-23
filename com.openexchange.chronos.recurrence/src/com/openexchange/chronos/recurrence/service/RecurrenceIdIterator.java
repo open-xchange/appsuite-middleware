@@ -82,7 +82,7 @@ public class RecurrenceIdIterator extends AbstractRecurrenceIterator<RecurrenceI
     @Override
     protected RecurrenceId nextInstance() {
         long value = next.longValue();
-        return new PositionAwareRecurrenceId(recurrenceData, value, count, CalendarUtils.truncateTime(new Date(value), TimeZones.UTC));
+        return new PositionAwareRecurrenceId(recurrenceData, value, position, CalendarUtils.truncateTime(new Date(value), TimeZones.UTC));
     }
 
 }
