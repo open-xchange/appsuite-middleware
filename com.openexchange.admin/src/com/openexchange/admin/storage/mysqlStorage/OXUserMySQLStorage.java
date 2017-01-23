@@ -687,9 +687,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
             // #################################################################
 
-            if (!isEmpty(usrdata.getPrimaryEmail())) {
+            String primaryEmail = usrdata.getPrimaryEmail();
+            if (!isEmpty(primaryEmail)) {
                 stmt = con.prepareStatement("UPDATE user SET mail = ? WHERE cid = ? AND id = ?");
-                stmt.setString(1, usrdata.getPrimaryEmail());
+                stmt.setString(1, primaryEmail);
                 stmt.setInt(2, contextId);
                 stmt.setInt(3, userId);
                 stmt.executeUpdate();
@@ -1008,6 +1009,17 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                             final boolean test = ((Boolean) methodbool.invoke(usrdata, (Object[]) null)).booleanValue();
                             if (test) {
                                 stmt.setNull(db, java.sql.Types.DATE);
+                            }
+                        }
+                    } else if (returntype.equalsIgnoreCase("java.lang.Long")) {
+                        final long result = ((Long) method.invoke(usrdata, (Object[]) null)).longValue();
+                        if (-1 != result) {
+                            stmt.setLong(db, result);
+                        } else {
+                            final Method methodbool = getMethodforbooleanparameter(method);
+                            final boolean test = ((Boolean) methodbool.invoke(usrdata, (Object[]) null)).booleanValue();
+                            if (test) {
+                                stmt.setNull(db, java.sql.Types.BIGINT);
                             }
                         }
                     }
@@ -1843,6 +1855,14 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                             placeHolders.append("?,");
                             methodlist2.add(method);
                         }
+                    } else if (Long.class.equals(returnType)) {
+                        final long result = ((Long) method.invoke(usrdata, (Object[]) null)).longValue();
+                        if (-1 != result) {
+                            contactInsert.append(Mapper.method2field.get(methodName));
+                            contactInsert.append(",");
+                            placeHolders.append("?,");
+                            methodlist2.add(method);
+                        }
                     }
                 }
                 placeHolders.deleteCharAt(placeHolders.length() - 1);
@@ -1889,6 +1909,13 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                             stmt.setTimestamp(pos++, new Timestamp(result.getTime()));
                         } else {
                             stmt.setNull(pos++, java.sql.Types.VARCHAR);
+                        }
+                    } else if (Long.class.equals(returntype)) {
+                        final long result = ((Integer) method.invoke(usrdata, (Object[]) null)).longValue();
+                        if (-1 != result) {
+                            stmt.setLong(pos++, result);
+                        } else {
+                            stmt.setNull(pos++, java.sql.Types.BIGINT);
                         }
                     }
                 }
