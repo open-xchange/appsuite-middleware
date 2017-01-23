@@ -31,7 +31,7 @@ public class ReportProperties implements Reloadable {
 
     public static String getStoragePath() {
         if (storagePath == null) {
-            synchronized (storagePath) {
+            synchronized (STORAGE_PATH) {
                 if (storagePath == null) {
                     storagePath = loadStringValue(STORAGE_PATH, STORAGE_PATH_DEFAULT);
                 }
@@ -42,7 +42,7 @@ public class ReportProperties implements Reloadable {
 
     public static int getMaxChunkSize() {
         if (maxChunkSize == null) {
-            synchronized (maxChunkSize) {
+            synchronized (MAX_CHUNK_SIZE) {
                 if (maxChunkSize == null) {
                     maxChunkSize = loadIntegerValue(MAX_CHUNK_SIZE, MAX_CHUNK_SIZE_DEFAULT);
                 }
@@ -53,7 +53,7 @@ public class ReportProperties implements Reloadable {
 
     public static int getMaxThreadPoolSize() {
         if (maxThreadPoolSize == null) {
-            synchronized (maxThreadPoolSize) {
+            synchronized (MAX_THREAD_POOL_SIZE) {
                 if (maxThreadPoolSize == null) {
                     maxThreadPoolSize = loadIntegerValue(MAX_THREAD_POOL_SIZE, MAX_THREAD_POOL_SIZE_DEFAULT);
                 }
@@ -64,7 +64,7 @@ public class ReportProperties implements Reloadable {
 
     public static int getThreadPriority() {
         if (threadPriority == null) {
-            synchronized (threadPriority) {
+            synchronized (THREAD_PRIORITY) {
                 if (threadPriority == null) {
                     threadPriority = loadIntegerValue(THREAD_PRIORITY, THREAD_PRIORITY_DEFAULT);
                 }
