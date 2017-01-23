@@ -67,8 +67,8 @@ public class FluidPayloadTreeNodeBuilderTest {
      *
      *            1
      */
-    @Test
-    public void testSinglePayloadTreeNode() {
+     @Test
+     public void testSinglePayloadTreeNode() {
         PayloadTreeNode builderNode = builder()
             .withPayload(1, "Integer", "testNameSpace", "testElement")
             .build();
@@ -86,8 +86,8 @@ public class FluidPayloadTreeNodeBuilderTest {
      *           /
      *          2
      */
-    @Test
-    public void testPayloadTreeNodeWithFirstLevelChild() {
+     @Test
+     public void testPayloadTreeNodeWithFirstLevelChild() {
         PayloadTreeNode builderNode = builder()
             .withPayload(1, "Integer", "testNameSpace", "testElement")
             .andChild(2, "Integer", "testNameSpace", "testElement")
@@ -107,8 +107,8 @@ public class FluidPayloadTreeNodeBuilderTest {
      *           /\
      *          2  3
      */
-    @Test
-    public void testPayloadTreeNodeWithFirstLevelChildren() {
+     @Test
+     public void testPayloadTreeNodeWithFirstLevelChildren() {
         PayloadTreeNode builderNode = builder()
             .withPayload(new PayloadElement(1, "Integer", "testNameSpace", "testElement"))
             .andChild(new PayloadElement(2, "Integer", "testNameSpace", "testElement"))
@@ -132,8 +132,8 @@ public class FluidPayloadTreeNodeBuilderTest {
      *         /   /\
      *        3   5  6
      */
-    @Test
-    public void testPayloadTreeNodeWithMultiLevelChildren() {
+     @Test
+     public void testPayloadTreeNodeWithMultiLevelChildren() {
         PayloadTreeNode builderNode = builder()
             .withPayload(1, "Integer", "testNameSpace", "testElement")
             .andChild(builder()
@@ -169,8 +169,8 @@ public class FluidPayloadTreeNodeBuilderTest {
     /*
      * Build a PayloadTree with the help of the fluent builder.
      */
-    @Test
-    public void testPayloadTree() {
+     @Test
+     public void testPayloadTree() {
         PayloadTree builderTree = new PayloadTree(
             PayloadTreeNode.builder()
             .withPayload(1, "Integer", "testNameSpace", "testElement")

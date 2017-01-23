@@ -72,12 +72,10 @@ public final class GetAttributeRequest extends AbstractUserRequest<GetAttributeR
     public Method getMethod() {
         return Method.GET;
     }
+
     @Override
     public Parameter[] getParameters() {
-        return new Parameter[] {
-            new URLParameter(AJAXServlet.PARAMETER_ACTION, GetAttributeAction.ACTION),
-            new URLParameter(AJAXServlet.PARAMETER_ID, userId),
-            new URLParameter("name", name)
+        return new Parameter[] { new URLParameter(AJAXServlet.PARAMETER_ACTION, GetAttributeAction.ACTION), new URLParameter(AJAXServlet.PARAMETER_ID, userId), new URLParameter("name", name)
         };
     }
 

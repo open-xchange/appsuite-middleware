@@ -49,22 +49,21 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
-import com.openexchange.exception.OXException;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.ArrayList;
+import org.junit.Test;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 
-
 public class Bug11059Test extends CalendarSqlTest {
+
     // Bug 11059
+    @Test
     public void testShouldRespectReadPermissions() throws Exception {
-        final FolderObject folder = folders.createPublicFolderFor(
-            session,
-            ctx,
-            "A nice public folder",
-            FolderObject.SYSTEM_PUBLIC_FOLDER_ID,
-            userId);
+        final FolderObject folder = folders.createPublicFolderFor(session, ctx, "A nice public folder", FolderObject.SYSTEM_PUBLIC_FOLDER_ID, userId);
         cleanFolders.add(folder);
 
         boolean found = false;

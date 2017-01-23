@@ -49,7 +49,10 @@
 
 package com.openexchange.ajax.quota;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 
 /**
@@ -59,21 +62,13 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
  */
 public class FilestoreQuotaTest extends AbstractAJAXSession {
 
-    /**
-     * Initializes a new {@link FilestoreQuotaTest}.
-     *
-     * @param name The test name
-     */
-    public FilestoreQuotaTest(String name) {
-        super(name);
-    }
-
+    @Test
     public void testFilestoreQuota() throws Exception {
         /*
          * get filestore usage quota
          */
         FilestoreQuotaRequest request = new FilestoreQuotaRequest();
-        FilestoreQuotaResponse response = client.execute(request);
+        FilestoreQuotaResponse response = getClient().execute(request);
         JSONObject jsonQuota = (JSONObject) response.getData();
         assertNotNull("No response data", jsonQuota);
         assertTrue("No use found", jsonQuota.hasAndNotNull("use"));

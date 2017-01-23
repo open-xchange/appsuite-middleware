@@ -49,32 +49,26 @@
 
 package com.openexchange.ajax.config;
 
-import com.openexchange.ajax.AbstractAJAXTest;
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
+import com.openexchange.ajax.config.actions.GetRequest;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
 
-public class SpamButtonTest extends AbstractAJAXTest {
+public class SpamButtonTest extends AbstractAJAXSession {
 
     /**
      * Path to the configuration parameter.
      */
-    private static final String PATH = "mail/spambutton";
-
-    /**
-     * Default constructor.
-     * @param name Name of the test.
-     */
-    public SpamButtonTest(final String name) {
-        super(name);
-    }
+    private static final String PATH = "/mail/spambutton";
 
     /**
      * Tests if the spam button option is sent to the GUI.
+     * 
      * @throws Throwable if an exception occurs.
      */
+    @Test
     public void testSpamButton() throws Throwable {
-        final String value = ConfigTools.readSetting(getWebConversation(),
-            getHostName(), getSessionId(), PATH);
-        assertTrue("Got no value for the spam button configuration parameter.",
-            Boolean.TRUE.toString().equals(value)
-            || Boolean.FALSE.toString().equals(value));
+        final String value = getClient().execute(new GetRequest(PATH)).getData().toString();
+        assertTrue("Got no value for the spam button configuration parameter.", Boolean.TRUE.toString().equals(value) || Boolean.FALSE.toString().equals(value));
     }
 }

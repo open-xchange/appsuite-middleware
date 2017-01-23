@@ -95,8 +95,8 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
         oxresell.removeDatabaseRestrictions(creds);
     }
 
-    @Test
-    public void testCreateTooManyOverallUser() throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, StorageException, InvalidCredentialsException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException {
+     @Test
+     public void testCreateTooManyOverallUser() throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, StorageException, InvalidCredentialsException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException {
         final Credentials creds = DummyMasterCredentials();
 
         ResellerAdmin adm = FooAdminUser();
@@ -134,8 +134,8 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
         }
     }
 
-    @Test
-    public void testCreateTooManyPerContextUser() throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, StorageException, InvalidCredentialsException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException {
+     @Test
+     public void testCreateTooManyPerContextUser() throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, StorageException, InvalidCredentialsException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException {
         final Credentials creds = ResellerFooCredentials();
 
         ResellerAdmin adm = FooAdminUser();
@@ -178,8 +178,8 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
      * NOTE: this test must be changed, if /opt/open-xchange/etc/admindaemon/ModuleAccessDefinitions.properties
      * will be changed!
      */
-    @Test
-    public void testCreateTooManyPerContextUserByModuleAccess() throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, StorageException, InvalidCredentialsException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException {
+     @Test
+     public void testCreateTooManyPerContextUserByModuleAccess() throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, StorageException, InvalidCredentialsException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException {
         final Credentials creds = ResellerFooCredentials();
 
         ResellerAdmin adm = FooAdminUser();

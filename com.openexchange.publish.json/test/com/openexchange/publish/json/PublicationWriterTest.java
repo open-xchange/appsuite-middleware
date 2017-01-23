@@ -50,14 +50,16 @@
 package com.openexchange.publish.json;
 
 import static com.openexchange.json.JSONAssertion.assertValidates;
+import static org.junit.Assert.fail;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
-import junit.framework.TestCase;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
@@ -71,12 +73,12 @@ import com.openexchange.publish.PublicationTarget;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class PublicationWriterTest extends TestCase {
+public class PublicationWriterTest {
+
     private Publication publication;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
 
         PublicationTarget target = new PublicationTarget();
         target.setId("com.openexchange.publish.test");
@@ -99,39 +101,23 @@ public class PublicationWriterTest extends TestCase {
         publication.setEnabled(true);
     }
 
+    @Test
     public void testWriteObject() throws JSONException, OXException {
         PublicationWriter writer = new PublicationWriter();
         JSONObject object = writer.write(publication, null, TimeZone.getTimeZone("utc"));
 
-        JSONAssertion assertion = new JSONAssertion()
-                .hasKey("id").withValue(23)
-                .hasKey("entity").withValueObject()
-                    .hasKey("folder").withValue("12")
-                    .objectEnds()
-                .hasKey("enabled").withValue(true)
-                .hasKey("entityModule").withValue("oranges")
-                .hasKey("target").withValue("com.openexchange.publish.test")
-                .hasKey("displayName").withValue("myName")
-                .hasKey("com.openexchange.publish.test").withValueObject()
-                    .hasKey("siteName").withValue("publication")
-                    .hasKey("protected").withValue(true)
-                    .objectEnds()
-                .objectEnds();
+        JSONAssertion assertion = new JSONAssertion().hasKey("id").withValue(23).hasKey("entity").withValueObject().hasKey("folder").withValue("12").objectEnds().hasKey("enabled").withValue(true).hasKey("entityModule").withValue("oranges").hasKey("target").withValue("com.openexchange.publish.test").hasKey("displayName").withValue("myName").hasKey("com.openexchange.publish.test").withValueObject().hasKey("siteName").withValue("publication").hasKey("protected").withValue(true).objectEnds().objectEnds();
 
-
-       assertValidates(assertion, object);
+        assertValidates(assertion, object);
     }
 
+    @Test
     public void testWriteArray() throws JSONException, OXException {
         Map<String, String[]> specialCols = new HashMap<String, String[]>();
         String[] basicCols = new String[] { "id", "target", "displayName", "enabled" };
         specialCols.put("com.openexchange.publish.test", new String[] { "siteName" });
 
-        JSONArray array = new PublicationWriter().writeArray(
-            publication,
-            basicCols,
-            specialCols,
-            Arrays.asList("com.openexchange.publish.test"), publication.getTarget().getFormDescription(), TimeZone.getTimeZone("utc"));
+        JSONArray array = new PublicationWriter().writeArray(publication, basicCols, specialCols, Arrays.asList("com.openexchange.publish.test"), publication.getTarget().getFormDescription(), TimeZone.getTimeZone("utc"));
 
         JSONAssertion assertion = new JSONAssertion().isArray().withValues(23, "com.openexchange.publish.test", "myName", true, "publication");
 
@@ -139,9 +125,10 @@ public class PublicationWriterTest extends TestCase {
 
     }
 
+    @Test
     public void testThrowsExceptionOnUnknownColumn() {
         try {
-            new PublicationWriter().writeArray(publication, new String[]{"id", "unknownColumn"}, new HashMap<String, String[]>(), Arrays.asList("com.openexchange.publish.test"), publication.getTarget().getFormDescription(), TimeZone.getTimeZone("utc"));
+            new PublicationWriter().writeArray(publication, new String[] { "id", "unknownColumn" }, new HashMap<String, String[]>(), Arrays.asList("com.openexchange.publish.test"), publication.getTarget().getFormDescription(), TimeZone.getTimeZone("utc"));
             fail("Should have failed");
         } catch (OXException e) {
 

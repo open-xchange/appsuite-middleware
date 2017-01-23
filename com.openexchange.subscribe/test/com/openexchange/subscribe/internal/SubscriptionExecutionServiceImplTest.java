@@ -49,10 +49,13 @@
 
 package com.openexchange.subscribe.internal;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.context.SimContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -72,8 +75,7 @@ import com.openexchange.tools.session.SimServerSession;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class SubscriptionExecutionServiceImplTest extends TestCase {
-
+public class SubscriptionExecutionServiceImplTest {
 
     /**
      *
@@ -86,9 +88,8 @@ public class SubscriptionExecutionServiceImplTest extends TestCase {
     private SimFolderUpdaterService simFolderUpdaterService;
     private Subscription subscription;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         final SubscriptionSource source = new SubscriptionSource();
         source.setId(SOURCE_NAME);
         subscribeService = new SimSubscribeService();
@@ -118,7 +119,8 @@ public class SubscriptionExecutionServiceImplTest extends TestCase {
         };
     }
 
-    public void testShouldTransferDataCorrectly() throws OXException {
+         @Test
+     public void testShouldTransferDataCorrectly() throws OXException {
         executionService.executeSubscription(SOURCE_NAME, sessionForContext(new SimContext(2)), 12);
         assertEquals("Wrong source used", SOURCE_NAME, discovery.getLoadedSources().get(0));
 
@@ -138,12 +140,14 @@ public class SubscriptionExecutionServiceImplTest extends TestCase {
         return new SimServerSession(simContext, null, null);
     }
 
-    public void testShouldNotThrowNPEWhenNoFolderUpdaterIsFound() {
+         @Test
+     public void testShouldNotThrowNPEWhenNoFolderUpdaterIsFound() {
         //fail("Not yet implemented");
         assertTrue(true);
     }
 
-    public void testShouldGuessCorrectSubscriptionSource() throws OXException {
+         @Test
+     public void testShouldGuessCorrectSubscriptionSource() throws OXException {
         executionService.executeSubscription(sessionForContext(new SimContext(2)), 12);
         assertEquals("Wrong source used", SOURCE_NAME, discovery.getLoadedSources().get(0));
 
@@ -155,16 +159,19 @@ public class SubscriptionExecutionServiceImplTest extends TestCase {
         assertEquals("Wrong data saved", Arrays.asList("entry1", "entry2", "entry3"), simFolderUpdaterService.getData());
     }
 
-    public void testShouldNotThrowNPEWhenNoSubscriptionSourceIsFound() {
+         @Test
+     public void testShouldNotThrowNPEWhenNoSubscriptionSourceIsFound() {
         //fail("Not yet implemented");
         assertTrue(true);
     }
 
-    public void testShouldReturnSingleUpdaterIfItIsTheOnlyOnePresent() throws OXException{
+         @Test
+     public void testShouldReturnSingleUpdaterIfItIsTheOnlyOnePresent() throws OXException{
         assertEquals("The first Updater should be returned", simFolderUpdaterService,executionService.getFolderUpdater(subscription));
     }
 
-    public void testShouldReturnSingleUpdaterIfThereIsOnlyOneSubscriptionOnTheFolder() throws OXException{
+         @Test
+     public void testShouldReturnSingleUpdaterIfThereIsOnlyOneSubscriptionOnTheFolder() throws OXException{
         final SimFolderUpdaterService simFolderUpdaterService2 = new SimFolderUpdaterService();
         simFolderUpdaterService2.setHandles(true);
         simFolderUpdaterService2.setUsesMultipleStrategy(false);
@@ -180,7 +187,8 @@ public class SubscriptionExecutionServiceImplTest extends TestCase {
         assertEquals("The first Updater should be returned", simFolderUpdaterService, executionService.getFolderUpdater(subscription));
     }
 
-    public void testShouldReturnMultipleUpdaterIfThereAreTwoSubscriptionsOnTheFolder() throws OXException{
+         @Test
+     public void testShouldReturnMultipleUpdaterIfThereAreTwoSubscriptionsOnTheFolder() throws OXException{
         final Subscription subscription2 = new Subscription();
         subscription.setContext(new SimContext(2));
         subscription.setId(13);
@@ -204,7 +212,8 @@ public class SubscriptionExecutionServiceImplTest extends TestCase {
         assertEquals("The second Updater should be returned", simFolderUpdaterService2, executionService.getFolderUpdater(subscription));
     }
 
-    public void testShouldReturnSingleUpdaterIfThereAreTwoSubscriptionsOnTheFolderButNoMultipleStrategyIsAvailable() throws OXException{
+         @Test
+     public void testShouldReturnSingleUpdaterIfThereAreTwoSubscriptionsOnTheFolderButNoMultipleStrategyIsAvailable() throws OXException{
         final Subscription subscription2 = new Subscription();
         subscription.setContext(new SimContext(2));
         subscription.setId(13);

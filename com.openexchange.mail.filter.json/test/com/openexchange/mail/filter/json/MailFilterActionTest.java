@@ -1,6 +1,8 @@
 
 package com.openexchange.mail.filter.json;
 
+import org.junit.After;
+
 /*
  *
  *    OPEN-XCHANGE legal information
@@ -51,7 +53,6 @@ package com.openexchange.mail.filter.json;
  */
 
 import org.junit.Assert;
-import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import com.openexchange.config.ConfigurationService;
@@ -75,11 +76,8 @@ public class MailFilterActionTest extends MailFilterAction {
     }
 
     @After
-    public void tearDown() throws Exception {
-    }
-
-    @Test
-    public void testGetRightPasswordNothing() throws OXException {
+     @Test
+     public void testGetRightPasswordNothing() throws OXException {
         final ConfigurationService config = Services.getService(ConfigurationService.class);
         final String credsPW = "pw2";
         final Credentials creds = new Credentials("", credsPW, 0, 0, null);
@@ -91,8 +89,8 @@ public class MailFilterActionTest extends MailFilterAction {
         }
     }
 
-    @Test
-    public void testGetRightPasswordSession() throws OXException {
+     @Test
+     public void testGetRightPasswordSession() throws OXException {
         Common.simConfigurationService.stringProperties.put(
             MailFilterProperties.Values.SIEVE_PASSWORDSRC.property,
             MailFilterProperties.PasswordSource.SESSION.name);
@@ -103,8 +101,8 @@ public class MailFilterActionTest extends MailFilterAction {
         Assert.assertEquals("Password should be equal to \"" + credsPW + "\"", credsPW, rightPassword);
     }
 
-    @Test
-    public void testGetRightPasswordGlobalNoMasterPW() throws OXException {
+     @Test
+     public void testGetRightPasswordGlobalNoMasterPW() throws OXException {
         Common.simConfigurationService.stringProperties.put(
             MailFilterProperties.Values.SIEVE_PASSWORDSRC.property,
             MailFilterProperties.PasswordSource.GLOBAL.name);
@@ -119,8 +117,8 @@ public class MailFilterActionTest extends MailFilterAction {
         }
     }
 
-    @Test
-    public void testGetRightPasswordGlobal() throws OXException {
+     @Test
+     public void testGetRightPasswordGlobal() throws OXException {
         final String masterPW = "masterPW";
         Common.simConfigurationService.stringProperties.put(
             MailFilterProperties.Values.SIEVE_PASSWORDSRC.property,

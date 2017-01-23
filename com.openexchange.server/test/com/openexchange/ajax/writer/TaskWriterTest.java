@@ -79,8 +79,8 @@ public class TaskWriterTest {
      * Tests if a priority value is written correctly.
      * @throws JSONException
      */
-    @Test
-    public void testWriteTaskPriority() throws JSONException {
+     @Test
+     public void testWriteTaskPriority() throws JSONException {
         Task task = new Task();
         task.setPriority(I(0));
         JSONObject json = new JSONObject();
@@ -95,8 +95,8 @@ public class TaskWriterTest {
      * Tests if a null priority is not written.
      * @throws JSONException
      */
-    @Test
-    public void testWriteTaskPriorityNull() throws JSONException {
+     @Test
+     public void testWriteTaskPriorityNull() throws JSONException {
         Task task = new Task();
         task.setPriority(null);
         JSONObject json = new JSONObject();
@@ -107,8 +107,8 @@ public class TaskWriterTest {
         Assert.assertFalse("Task priority should not be written.", json.has(TaskFields.PRIORITY));
     }
 
-    @Test
-    public void testWriteTaskArrayPriority() throws JSONException {
+     @Test
+     public void testWriteTaskArrayPriority() throws JSONException {
         Task task = new Task();
         task.setPriority(I(0));
         JSONArray tmp = new JSONArray();
@@ -120,8 +120,8 @@ public class TaskWriterTest {
         Assert.assertEquals("Written json array does not look like expected.", "[0]", sw.toString());
     }
 
-    @Test
-    public void testWriteTaskArrayPriorityNull() throws JSONException {
+     @Test
+     public void testWriteTaskArrayPriorityNull() throws JSONException {
         Task task = new Task();
         task.setPriority(null);
         JSONArray tmp = new JSONArray();

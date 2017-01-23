@@ -49,8 +49,10 @@
 
 package com.openexchange.ajax.appointment.recurrence;
 
+import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -66,12 +68,14 @@ public final class Bug10859Test extends AbstractAJAXSession {
 
     /**
      * Default constructor.
+     * 
      * @param name test name.
      */
-    public Bug10859Test(final String name) {
-        super(name);
+    public Bug10859Test() {
+        super();
     }
 
+    @Test
     public void testInvalidMonthInRecurringPattern() throws Throwable {
         final AJAXClient client = getClient();
         final int folder = client.getValues().getPrivateAppointmentFolder();

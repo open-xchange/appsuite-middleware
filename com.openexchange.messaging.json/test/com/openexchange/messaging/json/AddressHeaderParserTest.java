@@ -54,13 +54,17 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import junit.framework.TestCase;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingAddressHeader;
 import com.openexchange.messaging.MessagingHeader;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 
 /**
@@ -68,8 +72,8 @@ import com.openexchange.messaging.MessagingHeader;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class AddressHeaderParserTest extends TestCase {
-    public void testResponsible() {
+public class AddressHeaderParserTest {         @Test
+     public void testResponsible() {
         final AddressHeaderParser parser = new AddressHeaderParser();
 
         final List<String> headerNames = Arrays.asList(
@@ -92,7 +96,8 @@ public class AddressHeaderParserTest extends TestCase {
         }
     }
 
-    public void testParseComplex() throws JSONException, OXException {
+         @Test
+     public void testParseComplex() throws JSONException, OXException {
         final JSONObject object = new JSONObject("{address : 'clark.kent@dailyplanet.com', personal : 'Clark Kent'}");
 
         final AddressHeaderParser parser = new AddressHeaderParser();
@@ -113,7 +118,8 @@ public class AddressHeaderParserTest extends TestCase {
         assertEquals("clark.kent@dailyplanet.com", header.getAddress());
     }
 
-    public void testParseSimple() throws OXException, JSONException {
+         @Test
+     public void testParseSimple() throws OXException, JSONException {
 
         final AddressHeaderParser parser = new AddressHeaderParser();
 
@@ -133,7 +139,8 @@ public class AddressHeaderParserTest extends TestCase {
         assertEquals("clark.kent@dailyplanet.com", header.getAddress());
     }
 
-    public void testParseList() throws OXException, JSONException {
+         @Test
+     public void testParseList() throws OXException, JSONException {
         final JSONObject object = new JSONObject("{address : 'clark.kent@dailyplanet.com', personal : 'Clark Kent'}");
 
         final JSONArray array = new JSONArray("['Lois Lane <lois.lane@dailyplanet.com>']");

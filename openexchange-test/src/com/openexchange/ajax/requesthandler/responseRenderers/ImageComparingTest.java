@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.requesthandler.responseRenderers;
 
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -60,7 +63,9 @@ import javax.imageio.ImageIO;
 import javax.servlet.http.sim.SimHttpServletRequest;
 import javax.servlet.http.sim.SimHttpServletResponse;
 import javax.servlet.sim.ByteArrayServletOutputStream;
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -92,10 +97,9 @@ import com.openexchange.tools.session.SimServerSession;
  * @since v7.6.0
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({
-    com.openexchange.imagetransformation.java.osgi.Services.class })
+@PrepareForTest({ com.openexchange.imagetransformation.java.osgi.Services.class })
 @PowerMockIgnore({ "javax.imageio.*" })
-public class ImageComparingTest extends TestCase {
+public class ImageComparingTest {
 
     @Mock
     private SimConfigurationService simConfigurationService;
@@ -108,9 +112,8 @@ public class ImageComparingTest extends TestCase {
 
     private final String TEST_DATA_DIR = "testconf/";
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         PowerMockito.mockStatic(com.openexchange.imagetransformation.java.osgi.Services.class);
 
@@ -124,12 +127,12 @@ public class ImageComparingTest extends TestCase {
         PowerMockito.when(com.openexchange.imagetransformation.java.osgi.Services.getService(TimerService.class)).thenReturn(timerService);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         ServerServiceRegistry.getInstance().removeService(HtmlService.class);
-        super.tearDown();
     }
 
+    @Test
     public void testRotationSuccess_Bug26630() {
         try {
             final File fileInput = new File(TEST_DATA_DIR, "Rotate_90CW.jpg");
@@ -193,6 +196,7 @@ public class ImageComparingTest extends TestCase {
         }
     }
 
+    @Test
     public void testAlphaChannelShouldNotGetTransformed_Bug28163() {
         try {
             final File fileInput = new File(TEST_DATA_DIR, "28163.jpg");
@@ -239,6 +243,7 @@ public class ImageComparingTest extends TestCase {
         }
     }
 
+    @Test
     public void testGIFPictureIsAnimated_Bug29072() {
         try {
             final File fileInput = new File(TEST_DATA_DIR, "29072.gif");
@@ -277,6 +282,7 @@ public class ImageComparingTest extends TestCase {
         }
     }
 
+    @Test
     public void testReadImageWithCMYKProfile_Bug28082() throws IOException {
         final File file = new File(TEST_DATA_DIR, "28082.jpg");
         final FileHolder fileHolder = new FileHolder(file);

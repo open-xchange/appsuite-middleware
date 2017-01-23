@@ -16,18 +16,22 @@
  */
 package org.apache.tika.parser.iwork;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * Test class for the <code>AutoPageNumberUtils</code> helper class.
  */
-public class AutoPageNumberUtilsTest extends TestCase {
-
+public class AutoPageNumberUtilsTest {
 	/**
 	 * Check upper-case alpha-numeric numbers are generated based on the 
 	 * input page number.
 	 */
-	public void testAlphaUpper() {
+	     @Test
+     public void testAlphaUpper() {
 		assertEquals("A", AutoPageNumberUtils.asAlphaNumeric(1));
 		assertEquals("Z", AutoPageNumberUtils.asAlphaNumeric(26));
 		assertEquals("AA", AutoPageNumberUtils.asAlphaNumeric(27));
@@ -40,7 +44,8 @@ public class AutoPageNumberUtilsTest extends TestCase {
 	 * Check lower-case alpha-numeric numbers are generated based on the 
 	 * input page number.
 	 */
-	public void testAlphaLower() {
+	     @Test
+     public void testAlphaLower() {
 		assertEquals("a", AutoPageNumberUtils.asAlphaNumericLower(1));
 		assertEquals("z", AutoPageNumberUtils.asAlphaNumericLower(26));
 		assertEquals("aa", AutoPageNumberUtils.asAlphaNumericLower(27));
@@ -53,7 +58,8 @@ public class AutoPageNumberUtilsTest extends TestCase {
 	 * Check upper-case Roman numerals numbers are generated based on the 
 	 * input page number.
 	 */
-	public void testRomanUpper() {
+	     @Test
+     public void testRomanUpper() {
 		assertEquals("I", AutoPageNumberUtils.asRomanNumerals(1));
 		assertEquals("XXVI", AutoPageNumberUtils.asRomanNumerals(26));
 		assertEquals("XXVII", AutoPageNumberUtils.asRomanNumerals(27));
@@ -63,7 +69,8 @@ public class AutoPageNumberUtilsTest extends TestCase {
 	 * Check lower-case Roman numerals numbers are generated based on the 
 	 * input page number.
 	 */
-	public void testRomanLower() {
+	     @Test
+     public void testRomanLower() {
 		assertEquals("i", AutoPageNumberUtils.asRomanNumeralsLower(1));
 		assertEquals("xxvi", AutoPageNumberUtils.asRomanNumeralsLower(26));
 		assertEquals("xxvii", AutoPageNumberUtils.asRomanNumeralsLower(27));

@@ -71,6 +71,7 @@ public class ListSnippetParser extends AbstractAJAXParser<ListSnippetResponse> {
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.openexchange.ajax.framework.AbstractAJAXParser#createResponse(com.openexchange.ajax.container.Response)
      */
     @Override

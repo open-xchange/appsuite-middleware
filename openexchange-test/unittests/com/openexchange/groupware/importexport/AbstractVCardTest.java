@@ -62,18 +62,18 @@ import com.openexchange.tools.session.ServerSessionFactory;
 
 public class AbstractVCardTest extends AbstractContactTest {
 
-	public final Format format = Format.VCARD;
-	public final Importer imp = new VCardImporter(null);
+    public final Format format = Format.VCARD;
+    public final Importer imp = new VCardImporter(null);
 
-	@BeforeClass
-	public static void initialize() throws Exception {
-		Init.startServer();
-		final UserStorage uStorage = UserStorage.getInstance();
+    @BeforeClass
+    public static void initialize() throws Exception {
+        Init.startServer();
+        final UserStorage uStorage = UserStorage.getInstance();
 
-		final String[] loginParts = AjaxInit.getAJAXProperty("login").split("@");
-		final String name = loginParts[0];
-		String context = null;
-		if(loginParts.length == 2) {
+        final String[] loginParts = AjaxInit.getAJAXProperty("login").split("@");
+        final String name = loginParts[0];
+        String context = null;
+        if (loginParts.length == 2) {
             context = loginParts[1];
         } else {
             context = AjaxInit.getAJAXProperty("contextName");
@@ -81,9 +81,9 @@ public class AbstractVCardTest extends AbstractContactTest {
 
         ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId(context));
         userId = uStorage.getUserId(name, ctx);
-	    sessObj = ServerSessionFactory.createServerSession(userId, 1, "vcard-tests");
-		userId = sessObj.getUserId();
-	}
+        sessObj = ServerSessionFactory.createServerSession(userId, 1, "vcard-tests");
+        userId = sessObj.getUserId();
+    }
 
     @AfterClass
     public static void shutdown() throws Exception {
@@ -91,7 +91,7 @@ public class AbstractVCardTest extends AbstractContactTest {
     }
 
     public AbstractVCardTest() {
-		super();
-	}
+        super();
+    }
 
 }

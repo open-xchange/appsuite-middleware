@@ -49,38 +49,28 @@
 
 package com.openexchange.ajax.config;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 /**
  * Suite for all config tests.
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    AvailableModulesTest.class,
+    ConfigMenuTest.class,
+    ForwardInlineOrAttachmentTest.class,
+    FunctionTests.class,
+    SpamButtonTest.class,
+    ModulesTest.class,
+    BugTests.class,
+    Bug15354Test.class,
+    Bug21619Test.class, // This test hammers 1 minute on the backend to try to reproduce an endless loop.
+    Bug22389Test.class,
+
+})
 public class ConfigTestSuite {
 
-    /**
-     * Prevent instantiation
-     */
-    private ConfigTestSuite() {
-        super();
-    }
-
-    /**
-     * Generates the task test suite.
-     * @return the task tests suite.
-     */
-    public static Test suite() {
-        final TestSuite tests = new TestSuite("com.openexchange.ajax.config.ConfigTestSuite");
-        tests.addTestSuite(AvailableModulesTest.class);
-        tests.addTestSuite(ConfigMenuTest.class);
-        tests.addTestSuite(ForwardInlineOrAttachmentTest.class);
-        tests.addTestSuite(FunctionTests.class);
-        tests.addTestSuite(SpamButtonTest.class);
-        tests.addTestSuite(ModulesTest.class);
-        tests.addTestSuite(BugTests.class);
-        tests.addTestSuite(Bug15354Test.class);
-        tests.addTestSuite(Bug21619Test.class); // This test hammers 1 minute on the backend to try to reproduce an endless loop.
-        tests.addTestSuite(Bug22389Test.class);
-        return tests;
-    }
 }

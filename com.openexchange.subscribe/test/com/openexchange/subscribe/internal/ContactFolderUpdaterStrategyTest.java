@@ -49,9 +49,11 @@
 
 package com.openexchange.subscribe.internal;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
+import org.junit.Before;
 import org.junit.Test;
-import junit.framework.TestCase;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
@@ -63,16 +65,16 @@ import com.openexchange.groupware.container.FolderObject;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class ContactFolderUpdaterStrategyTest extends TestCase {
-
+public class ContactFolderUpdaterStrategyTest {
     private FolderUpdaterStrategy<Contact> strategy;
 
-    @Override
+    @Before
     public void setUp() {
         this.strategy = new ContactFolderUpdaterStrategy();
     }
 
-    public void testHandles() {
+         @Test
+     public void testHandles() {
         final FolderObject contactFolder = new FolderObject();
         contactFolder.setModule(FolderObject.CONTACT);
 
@@ -83,7 +85,8 @@ public class ContactFolderUpdaterStrategyTest extends TestCase {
         assertFalse("Should not handle infostore folders", strategy.handles(infostoreFolder));
     }
 
-    public void testScoring() throws OXException {
+         @Test
+     public void testScoring() throws OXException {
         // First name is not enough
         final Contact contact = new Contact();
         contact.setGivenName("Hans");
@@ -112,7 +115,8 @@ public class ContactFolderUpdaterStrategyTest extends TestCase {
 
     }
 
-    public void testTwoCompaniesDiffer() throws OXException {
+         @Test
+     public void testTwoCompaniesDiffer() throws OXException {
         final Contact contact = new Contact();
         contact.setGivenName("");
         contact.setSurName("");
@@ -128,7 +132,8 @@ public class ContactFolderUpdaterStrategyTest extends TestCase {
         assertTrue("Empty names shouldn't be considered equal.", score < strategy.getThreshold(null));
     }
 
-    public void testNameChangedButMailAdressStayedTheSame() throws OXException {
+         @Test
+     public void testNameChangedButMailAdressStayedTheSame() throws OXException {
         // First name is not enough
         final Contact contact = new Contact();
         contact.setGivenName("Hans");
@@ -145,7 +150,8 @@ public class ContactFolderUpdaterStrategyTest extends TestCase {
         assertTrue("First name and email address should suffice", score >= strategy.getThreshold(null));
     }
 
-    public void testNullValuesShouldNotChangeResult() throws OXException {
+         @Test
+     public void testNullValuesShouldNotChangeResult() throws OXException {
         final Contact contact = new Contact();
         contact.setGivenName("Hans");
         contact.setEmail1(null);
@@ -160,7 +166,8 @@ public class ContactFolderUpdaterStrategyTest extends TestCase {
     }
 
 
-    public void testTwoEmptyContactsAreTheSame() throws OXException {
+         @Test
+     public void testTwoEmptyContactsAreTheSame() throws OXException {
         final Contact contact = new Contact();
         final Contact contact2 = new Contact();
         final int score = strategy.calculateSimilarityScore(contact, contact2, null);
@@ -168,8 +175,8 @@ public class ContactFolderUpdaterStrategyTest extends TestCase {
         assertTrue("Two completely empty objects should match, too", score > strategy.getThreshold(null));
     }
 
-    @Test
-    public void testCalculateSimilarityScore_mobileEqual_increaseSimilarityScore() throws OXException {
+     @Test
+     public void testCalculateSimilarityScore_mobileEqual_increaseSimilarityScore() throws OXException {
         // First name is not enough
         Contact contact = new Contact();
         contact.setGivenName("Hans");
@@ -185,8 +192,8 @@ public class ContactFolderUpdaterStrategyTest extends TestCase {
         assertTrue("Score to low. CellularTelephone is equal.", score >= strategy.getThreshold(null));
     }
 
-    @Test
-    public void testCalculateSimilarityScore_mobileDifferent_smallScore() throws OXException {
+     @Test
+     public void testCalculateSimilarityScore_mobileDifferent_smallScore() throws OXException {
         // First name is not enough
         Contact contact = new Contact();
         contact.setGivenName("Hans");

@@ -52,14 +52,18 @@ package com.openexchange.messaging.json;
 import static com.openexchange.json.JSONAssertion.assertValidates;
 import java.util.HashMap;
 import java.util.Map;
-import junit.framework.TestCase;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.json.JSONAssertion;
 import com.openexchange.messaging.SimMessagingAccount;
 import com.openexchange.messaging.SimMessagingService;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * {@link MessagingAccountWriterTest}
@@ -67,8 +71,8 @@ import com.openexchange.messaging.SimMessagingService;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MessagingAccountWriterTest extends TestCase {
-    public void testWriteAccount() throws JSONException {
+public class MessagingAccountWriterTest {         @Test
+     public void testWriteAccount() throws JSONException {
         final SimMessagingAccount account = new SimMessagingAccount();
         account.setId(12);
         account.setDisplayName("My Twitter Account");

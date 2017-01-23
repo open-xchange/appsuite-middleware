@@ -49,11 +49,14 @@
 
 package com.openexchange.ajax.find.contacts;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import org.junit.Test;
 import com.openexchange.ajax.find.AbstractFindTest;
 import com.openexchange.ajax.find.PropDocument;
 import com.openexchange.ajax.find.actions.AutocompleteRequest;
@@ -61,7 +64,6 @@ import com.openexchange.ajax.find.actions.AutocompleteResponse;
 import com.openexchange.ajax.find.actions.QueryRequest;
 import com.openexchange.ajax.find.actions.QueryResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.user.actions.GetRequest;
 import com.openexchange.find.Document;
 import com.openexchange.find.Module;
@@ -73,27 +75,23 @@ import com.openexchange.find.util.DisplayItems;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.util.TimeZones;
 
-
 /**
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
 public class ExcludeContextAdminTest extends AbstractFindTest {
 
-    public ExcludeContextAdminTest(String name) {
-        super(name);
-    }
-
     /*
      * Perform autocomplete and query on contacts with showAdmin=false and
      * expect the context admin to be excluded.
      */
+    @Test
     public void testAdminIsExcluded() throws Exception {
-        AJAXClient adminClient = new AJAXClient(User.OXAdmin);
+        AJAXClient adminClient = new AJAXClient(admin);
         int adminId = adminClient.getValues().getUserId();
         adminClient.logout();
 
-        Contact adminContact = client.execute(new GetRequest(adminId, TimeZones.UTC)).getContact();
+        Contact adminContact = getClient().execute(new GetRequest(adminId, TimeZones.UTC)).getContact();
         assertNotNull("admin contact was null", adminContact);
 
         String prefix = adminContact.getDisplayName().substring(0, 3);
@@ -112,12 +110,13 @@ public class ExcludeContextAdminTest extends AbstractFindTest {
      * Perform autocomplete and query on contacts with showAdmin=true and
      * expect the context admin to be included.
      */
+    @Test
     public void testAdminIsIncluded() throws Exception {
-        AJAXClient adminClient = new AJAXClient(User.OXAdmin);
+        AJAXClient adminClient = new AJAXClient(admin);
         int adminId = adminClient.getValues().getUserId();
         adminClient.logout();
 
-        Contact adminContact = client.execute(new GetRequest(adminId, TimeZones.UTC)).getContact();
+        Contact adminContact = getClient().execute(new GetRequest(adminId, TimeZones.UTC)).getContact();
         assertNotNull("admin contact was null", adminContact);
 
         String prefix = adminContact.getDisplayName().substring(0, 3);
@@ -136,7 +135,7 @@ public class ExcludeContextAdminTest extends AbstractFindTest {
         Map<String, String> options = new HashMap<String, String>();
         options.put("admin", Boolean.toString(showAdmin));
         QueryRequest queryRequest = new QueryRequest(true, 0, Integer.MAX_VALUE, facets, options, Module.CONTACTS.getIdentifier(), null);
-        QueryResponse queryResponse = client.execute(queryRequest);
+        QueryResponse queryResponse = getClient().execute(queryRequest);
         SearchResult result = queryResponse.getSearchResult();
         List<PropDocument> propDocuments = new ArrayList<PropDocument>();
         List<Document> documents = result.getDocuments();
@@ -150,7 +149,7 @@ public class ExcludeContextAdminTest extends AbstractFindTest {
         Map<String, String> options = new HashMap<String, String>();
         options.put("admin", Boolean.toString(showAdmin));
         AutocompleteRequest autocompleteRequest = new AutocompleteRequest(prefix, Module.CONTACTS.getIdentifier(), options);
-        AutocompleteResponse autocompleteResponse = client.execute(autocompleteRequest);
+        AutocompleteResponse autocompleteResponse = getClient().execute(autocompleteRequest);
         return autocompleteResponse.getFacets();
     }
 

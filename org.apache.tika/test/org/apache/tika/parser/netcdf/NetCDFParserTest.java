@@ -18,25 +18,27 @@ package org.apache.tika.parser.netcdf;
 
 //JDK imports
 import java.io.InputStream;
-
 //TIKA imports
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
 import org.apache.tika.sax.BodyContentHandler;
+import org.junit.Test;
 import org.xml.sax.ContentHandler;
-
 //Junit imports
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * Test cases to exercise the {@link NetCDFParser}.
  * 
  */
-public class NetCDFParserTest extends TestCase {
-
-    public void testParseGlobalMetadata() throws Exception {
+public class NetCDFParserTest {
+         @Test
+     public void testParseGlobalMetadata() throws Exception {
         if(System.getProperty("java.version").startsWith("1.5")) {
             return;
         }

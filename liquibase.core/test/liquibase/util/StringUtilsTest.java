@@ -1,6 +1,7 @@
 package liquibase.util;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 
@@ -193,7 +194,7 @@ public class StringUtilsTest {
     }
 
      @Test
-    public void testSplitWithSemicolon() {
+     public void testSplitWithSemicolon() {
         StringBuilder sb = new StringBuilder();
         sb.append("select * from simple_select_statement;\n");
         sb.append("insert into table ( col ) values (' value with; semicolon ');");

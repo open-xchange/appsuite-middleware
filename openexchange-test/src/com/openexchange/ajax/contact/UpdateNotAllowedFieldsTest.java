@@ -1,9 +1,12 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import java.util.UUID;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.contact.action.UpdateRequest;
 import com.openexchange.ajax.contact.action.UpdateResponse;
@@ -15,10 +18,11 @@ import com.openexchange.groupware.container.Contact;
 
 public class UpdateNotAllowedFieldsTest extends AbstractManagedContactTest {
 
-    public UpdateNotAllowedFieldsTest(String name) {
-        super(name);
+    public UpdateNotAllowedFieldsTest() {
+        super();
     }
 
+    @Test
     public void testTryUpdateContextID() throws Exception {
         for (Contact contact : getContactsToUpdate()) {
             Contact changedContextID = new Contact();
@@ -36,6 +40,7 @@ public class UpdateNotAllowedFieldsTest extends AbstractManagedContactTest {
         }
     }
 
+    @Test
     public void testTryUpdateObjectID() throws Exception {
         for (Contact contact : getContactsToUpdate()) {
             Contact changedObjectID = new Contact();
@@ -52,6 +57,7 @@ public class UpdateNotAllowedFieldsTest extends AbstractManagedContactTest {
         }
     }
 
+    @Test
     public void testTryUpdateUserID() throws Exception {
         for (Contact contact : getContactsToUpdate()) {
             Contact changedUserID = new Contact();
@@ -68,6 +74,7 @@ public class UpdateNotAllowedFieldsTest extends AbstractManagedContactTest {
         }
     }
 
+    @Test
     public void testTryUpdateUID() throws Exception {
         for (Contact contact : getContactsToUpdate()) {
             Contact changedUID = new Contact();
@@ -96,13 +103,11 @@ public class UpdateNotAllowedFieldsTest extends AbstractManagedContactTest {
             assertNotNull("got no exception", exception);
             assertEquals("unexpected exception category", expectedExceptionCategory, exception.getCategory());
         }
-        return manager.getAction(folderID, objectID);
+        return cotm.getAction(folderID, objectID);
     }
 
     private Contact[] getContactsToUpdate() throws Exception {
-        return new Contact[] {
-            client.execute(new GetRequest(client.getValues().getUserId(), client.getValues().getTimeZone())).getContact(),
-            manager.getAction(manager.newAction(generateContact())) };
+        return new Contact[] { getClient().execute(new GetRequest(getClient().getValues().getUserId(), getClient().getValues().getTimeZone())).getContact(), cotm.getAction(cotm.newAction(generateContact())) };
     }
 
     private static class DeltaUpdateRequest extends UpdateRequest {
@@ -120,11 +125,7 @@ public class UpdateNotAllowedFieldsTest extends AbstractManagedContactTest {
 
         @Override
         public Parameter[] getParameters() {
-            return new Parameter[] {
-                new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE),
-                new Parameter(AJAXServlet.PARAMETER_INFOLDER, String.valueOf(folderID)),
-                new Parameter(AJAXServlet.PARAMETER_ID, String.valueOf(objectID)),
-                new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(timestamp))
+            return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE), new Parameter(AJAXServlet.PARAMETER_INFOLDER, String.valueOf(folderID)), new Parameter(AJAXServlet.PARAMETER_ID, String.valueOf(objectID)), new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(timestamp))
             };
         }
 

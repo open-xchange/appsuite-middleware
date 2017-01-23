@@ -57,13 +57,12 @@ import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.publish.json.PublicationParser;
 
-
 /**
  * {@link GetPublicationResponse}
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class GetPublicationResponse extends AbstractPublicationResponse{
+public class GetPublicationResponse extends AbstractPublicationResponse {
 
     public GetPublicationResponse(Response response) {
         super(response);
@@ -71,7 +70,7 @@ public class GetPublicationResponse extends AbstractPublicationResponse{
 
     public Publication getPublication(PublicationTargetDiscoveryService service) throws OXException, OXException, JSONException {
         PublicationParser parser = new PublicationParser(service);
-        return parser.parse( (JSONObject) getData() );
+        return parser.parse((JSONObject) getData());
     }
 
 }

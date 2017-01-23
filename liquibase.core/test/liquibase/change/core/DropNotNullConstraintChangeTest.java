@@ -1,5 +1,8 @@
 package liquibase.change.core;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 import liquibase.change.ChangeFactory;
 import liquibase.change.StandardChangeTest;
 import liquibase.database.Database;
@@ -8,22 +11,18 @@ import liquibase.database.core.MockDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.SetNullableStatement;
-import static org.junit.Assert.*;
-import org.junit.Test;
 
 /**
  * Tests for {@link DropNotNullConstraintChange}
  */
 public class DropNotNullConstraintChangeTest extends StandardChangeTest {
 
-    @Override
-    @Test
+     @Test
     public void getRefactoringName() throws Exception {
         assertEquals("dropNotNullConstraint", ChangeFactory.getInstance().getChangeMetaData(new DropNotNullConstraintChange()).getName());
     }
 
-    @Override
-    @Test
+     @Test
     public void generateStatement() throws Exception {
         DropNotNullConstraintChange change = new DropNotNullConstraintChange();
         change.setSchemaName("SCHEMA_NAME");
@@ -41,8 +40,7 @@ public class DropNotNullConstraintChangeTest extends StandardChangeTest {
         assertTrue(((SetNullableStatement) sqlStatements[0]).isNullable());
     }
 
-    @Override
-    @Test
+     @Test
     public void getConfirmationMessage() throws Exception {
         DropNotNullConstraintChange change = new DropNotNullConstraintChange();
         change.setTableName("TABLE_NAME");

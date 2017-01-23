@@ -49,9 +49,14 @@
 
 package com.openexchange.ajax.task;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import java.io.IOException;
 import java.util.TimeZone;
 import org.json.JSONException;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonListResponse;
@@ -70,6 +75,7 @@ import com.openexchange.groupware.tasks.Task;
 
 /**
  * Tests actual and target duration and costs set to 0.
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class Bug15580Test extends AbstractTaskTest {
@@ -84,12 +90,12 @@ public class Bug15580Test extends AbstractTaskTest {
 
     private Task task;
 
-    public Bug15580Test(String name) {
-        super(name);
+    public Bug15580Test() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         folderId = client.getValues().getPrivateTaskFolder();
@@ -107,12 +113,16 @@ public class Bug15580Test extends AbstractTaskTest {
         mapper.set(task, null);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        client.execute(new DeleteRequest(task));
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
+        try {
+            client.execute(new DeleteRequest(task));
+        } finally {
+            super.tearDown();
+        }
     }
 
+    @Test
     public void testDurationAndCostsSetToZero() throws OXException, IOException, SAXException, JSONException, OXException {
         GetRequest request = new GetRequest(task);
         GetResponse response = client.execute(request);

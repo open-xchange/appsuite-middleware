@@ -54,7 +54,6 @@ import org.json.JSONException;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.Header;
 
-
 /**
  * {@link ImageRequest}
  *
@@ -63,7 +62,6 @@ import com.openexchange.ajax.framework.Header;
 public class ImageRequest implements AJAXRequest<ImageResponse> {
 
     private final String uid;
-
 
     public ImageRequest(final String uid) {
         super();
@@ -82,8 +80,7 @@ public class ImageRequest implements AJAXRequest<ImageResponse> {
 
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
-        Parameter[] parameters = new Parameter[] {
-            new Parameter("uid", uid)
+        Parameter[] parameters = new Parameter[] { new Parameter("uid", uid)
         };
 
         return parameters;

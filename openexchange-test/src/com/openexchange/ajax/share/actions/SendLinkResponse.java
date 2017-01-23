@@ -52,7 +52,6 @@ package com.openexchange.ajax.share.actions;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
-
 /**
  * {@link SendLinkResponse}
  *

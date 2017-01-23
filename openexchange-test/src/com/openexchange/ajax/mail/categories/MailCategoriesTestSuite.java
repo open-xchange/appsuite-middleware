@@ -49,9 +49,8 @@
 
 package com.openexchange.ajax.mail.categories;
 
-import junit.framework.JUnit4TestAdapter;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 /**
  * {@link MailCategoriesTestSuite}
@@ -59,20 +58,14 @@ import junit.framework.TestSuite;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.2
  */
-public class MailCategoriesTestSuite extends TestSuite {
-
-    private MailCategoriesTestSuite() {
-        super();
-    }
-    
-    public static Test suite() {
-        final TestSuite mailSuite = new TestSuite("com.openexchange.ajax.mail.categories.MailCategoriesTestSuite");
-        mailSuite.addTest(new JUnit4TestAdapter(AllRequestCategoryParameterTest.class));
-        mailSuite.addTest(new JUnit4TestAdapter(TrainTest.class));
-        mailSuite.addTest(new JUnit4TestAdapter(MoveTest.class));
-        mailSuite.addTest(new JUnit4TestAdapter(UnreadTest.class));
-        mailSuite.addTest(new JUnit4TestAdapter(ThreadedMailCategoriesTest.class));
-        return mailSuite;
-    }
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    AllRequestCategoryParameterTest.class,
+    TrainTest.class,
+    MoveTest.class,
+    UnreadTest.class,
+    ThreadedMailCategoriesTest.class,
+})
+public class MailCategoriesTestSuite  {
 
 }

@@ -52,9 +52,7 @@ package com.openexchange.ajax.group;
 import java.io.IOException;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
-import com.meterware.httpunit.WebConversation;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.group.actions.SearchRequest;
 import com.openexchange.ajax.group.actions.SearchResponse;
 import com.openexchange.exception.OXException;
@@ -69,18 +67,7 @@ public class GroupTest {
         super();
     }
 
-    /**
-     * @deprecated use {@link AJAXClient#execute(com.openexchange.ajax.framework.AJAXRequest)} with a {@link SearchRequest}
-     */
-    @Deprecated
-    public static final Group[] searchGroup(final WebConversation conv, final String pattern, String protocol, final String host, final String session) throws OXException, IOException, SAXException, JSONException, OXException {
-        AJAXClient client = new AJAXClient(new AJAXSession(conv, host, session), false);
-        if (protocol.endsWith("://")) {
-            client.setProtocol(protocol.substring(0, protocol.length() - 3));
-        } else {
-            client.setProtocol(protocol);
-        }
-        client.setHostname(host);
+    public static final Group[] searchGroup(AJAXClient client, final String pattern) throws OXException, IOException, SAXException, JSONException, OXException {
         final SearchRequest request = new SearchRequest(pattern);
         final SearchResponse response = client.execute(request);
         return response.getGroups();

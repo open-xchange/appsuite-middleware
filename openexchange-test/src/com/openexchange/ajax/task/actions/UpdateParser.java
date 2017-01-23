@@ -74,8 +74,7 @@ public class UpdateParser extends AbstractAJAXParser<UpdateResponse> {
      * {@inheritDoc}
      */
     @Override
-    protected UpdateResponse createResponse(final Response response)
-        throws JSONException {
+    protected UpdateResponse createResponse(final Response response) throws JSONException {
         return new UpdateResponse(response);
     }
 

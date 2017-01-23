@@ -62,128 +62,128 @@ import com.openexchange.tools.conf.AbstractConfig;
  */
 public final class MailConfig extends AbstractConfig {
 
-	/**
-	 * Enumeration of all properties in the ajax.properties file.
-	 */
-	public static enum Property {
-		/**
-		 * Server host.
-		 */
-		SERVER("server"),
-		/**
-		 * port
-		 */
-		PORT("port"),
-		/**
-		 * User login
-		 */
-		LOGIN("login"),
-		/**
-		 * User login2
-		 */
-		LOGIN2("login2"),
-		/**
-		 * User login2
-		 */
-		LOGIN3("login3"),
-		/**
-		 * Password
-		 */
-		PASSWORD("password"),
-		/**
-		 * User ID
-		 */
-		USER("user"),
-		/**
-		 * Context ID
-		 */
-		CONTEXT("cid"),
-		/**
-		 * Directory which contains test mails (rfc 822 files)
-		 */
-		TEST_MAIL_DIR("testMailDir"),
-		/**
-		 * The second user
-		 */
-		SECOND_USER("seconduser");
+    /**
+     * Enumeration of all properties in the ajax.properties file.
+     */
+    public static enum Property {
+        /**
+         * Server host.
+         */
+        SERVER("server"),
+        /**
+         * port
+         */
+        PORT("port"),
+        /**
+         * User login
+         */
+        LOGIN("login"),
+        /**
+         * User login2
+         */
+        LOGIN2("login2"),
+        /**
+         * User login2
+         */
+        LOGIN3("login3"),
+        /**
+         * Password
+         */
+        PASSWORD("password"),
+        /**
+         * User ID
+         */
+        USER("user"),
+        /**
+         * Context ID
+         */
+        CONTEXT("cid"),
+        /**
+         * Directory which contains test mails (rfc 822 files)
+         */
+        TEST_MAIL_DIR("testMailDir"),
+        /**
+         * The second user
+         */
+        SECOND_USER("seconduser");
 
-		/**
-		 * Name of the property in the ajax.properties file.
-		 */
-		private String propertyName;
+        /**
+         * Name of the property in the ajax.properties file.
+         */
+        private String propertyName;
 
-		/**
-		 * Default constructor.
-		 *
-		 * @param propertyName
-		 *            Name of the property in the ajax.properties file.
-		 */
-		private Property(final String propertyName) {
-			this.propertyName = propertyName;
-		}
+        /**
+         * Default constructor.
+         *
+         * @param propertyName
+         *            Name of the property in the ajax.properties file.
+         */
+        private Property(final String propertyName) {
+            this.propertyName = propertyName;
+        }
 
-		/**
-		 * @return the propertyName
-		 */
-		public String getPropertyName() {
-			return propertyName;
-		}
-	}
+        /**
+         * @return the propertyName
+         */
+        public String getPropertyName() {
+            return propertyName;
+        }
+    }
 
-	private static final TestConfig.Property KEY = TestConfig.Property.MAIL_PROPS;
+    private static final TestConfig.Property KEY = TestConfig.Property.MAIL_PROPS;
 
-	private static final Lock LOCK_INIT = new ReentrantLock();
+    private static final Lock LOCK_INIT = new ReentrantLock();
 
-	private static boolean initialized;
+    private static boolean initialized;
 
-	private static MailConfig singleton;
+    private static MailConfig singleton;
 
-	/**
-	 * Default constructor
-	 */
-	public MailConfig() {
+    /**
+     * Default constructor
+     */
+    public MailConfig() {
 
-	}
+    }
 
-	@Override
-	protected String getPropertyFileName() throws OXException {
-		final String fileName = TestConfig.getProperty(KEY);
-		if (null == fileName) {
-			throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(KEY.getPropertyName());
-		}
-		return fileName;
-	}
+    @Override
+    protected String getPropertyFileName() throws OXException {
+        final String fileName = TestConfig.getProperty(KEY);
+        if (null == fileName) {
+            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(KEY.getPropertyName());
+        }
+        return fileName;
+    }
 
-	/**
-	 * Reads the mail configuration.
-	 *
-	 * @throws OXException
-	 *             if reading configuration fails.
-	 */
-	public static void init() throws OXException {
-		TestConfig.init();
-		if (!initialized) {
-			LOCK_INIT.lock();
-			try {
-				if (null == singleton) {
-					singleton = new MailConfig();
-					singleton.loadPropertiesInternal();
-				}
-			} finally {
-				LOCK_INIT.unlock();
-			}
-		}
-	}
+    /**
+     * Reads the mail configuration.
+     *
+     * @throws OXException
+     *             if reading configuration fails.
+     */
+    public static void init() throws OXException {
+        TestConfig.init();
+        if (!initialized) {
+            LOCK_INIT.lock();
+            try {
+                if (null == singleton) {
+                    singleton = new MailConfig();
+                    singleton.loadPropertiesInternal();
+                }
+            } finally {
+                LOCK_INIT.unlock();
+            }
+        }
+    }
 
-	public static String getProperty(final Property key) {
-		if (!initialized) {
-			try {
-				init();
-			} catch (final OXException e) {
-				return null;
-			}
-		}
-		return singleton.getPropertyInternal(key.getPropertyName());
-	}
+    public static String getProperty(final Property key) {
+        if (!initialized) {
+            try {
+                init();
+            } catch (final OXException e) {
+                return null;
+            }
+        }
+        return singleton.getPropertyInternal(key.getPropertyName());
+    }
 
 }

@@ -49,6 +49,12 @@
 
 package com.openexchange.ajax.session;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.session.actions.ChangeIPRequest;
@@ -68,22 +74,26 @@ public final class ChangeIPTest extends AbstractAJAXSession {
 
     private AJAXClient client;
 
-    public ChangeIPTest(String name) {
-        super(name);
+    public ChangeIPTest() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
+        try {
         client = null;
+    } finally {
         super.tearDown();
     }
+    }
 
+    @Test
     public void testIPChange() throws Throwable {
         String ipAdress = "192.168.123.321";
         final ChangeIPRequest request1 = new ChangeIPRequest(ipAdress, false);

@@ -49,9 +49,12 @@
 
 package com.openexchange.ajax.session;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 import org.apache.commons.httpclient.Cookie;
 import org.apache.commons.httpclient.HttpState;
+import org.junit.Test;
 import com.openexchange.ajax.LoginServlet;
 
 /**
@@ -61,10 +64,11 @@ import com.openexchange.ajax.LoginServlet;
  */
 public class AutologinTest extends AbstractLoginTest {
 
-    public AutologinTest(String name) {
-        super(name);
+    public AutologinTest() {
+        super();
     }
 
+    @Test
     public void testGeeIForgotMySessionIDCanYouGiveItBack() throws Exception {
         as(USER1);
         inModule("login");
@@ -82,11 +86,13 @@ public class AutologinTest extends AbstractLoginTest {
 
         assertEquals(sessionID, rawResponse.getString("session"));
 
-        inModule("quota"); call("filestore", "session", sessionID); // Send some request.
+        inModule("quota");
+        call("filestore", "session", sessionID); // Send some request.
 
         assertNoError();
     }
 
+    @Test
     public void testRetrieveSessionIDForCertainClient() throws Exception {
         createClient();
         inModule("login");
@@ -106,7 +112,7 @@ public class AutologinTest extends AbstractLoginTest {
     }
 
     // Error Cases
-
+    @Test
     public void testUnknownSession() throws Exception {
         as(USER1);
         inModule("login");
@@ -133,6 +139,7 @@ public class AutologinTest extends AbstractLoginTest {
         assertNoOXCookies();
     }
 
+    @Test
     public void testSessionAndSecretMismatch() throws Exception {
         as(USER1);
         String sessionID = currentClient.getSessionID();
@@ -161,7 +168,6 @@ public class AutologinTest extends AbstractLoginTest {
         assertError();
         assertNoOXCookies();
     }
-
 
     private void forgetSession() {
         currentClient.setSessionID(null);

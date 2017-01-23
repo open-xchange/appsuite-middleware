@@ -67,7 +67,4 @@ import org.junit.runners.Suite.SuiteClasses;
     OXResellerUserTest.class
 })
 public class AdminResellerRmiTestSuite {
-
-    private AdminResellerRmiTestSuite() {
-    }
 }

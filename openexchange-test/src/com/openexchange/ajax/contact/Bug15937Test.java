@@ -49,6 +49,11 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.contact.action.GetResponse;
@@ -68,32 +73,36 @@ public class Bug15937Test extends AbstractAJAXSession {
     private AJAXClient client;
     private Contact contact;
 
-    public Bug15937Test(String name) {
-        super(name);
+    public Bug15937Test() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         contact = new Contact();
-        contact.setParentFolderID(client.getValues().getPrivateContactFolder());
+        contact.setParentFolderID(getClient().getValues().getPrivateContactFolder());
         contact.setDisplayName("Test for bug 15937");
         contact.setNumberOfAttachments(42);
         InsertRequest request = new InsertRequest(contact);
-        InsertResponse response = client.execute(request);
+        InsertResponse response = getClient().execute(request);
         response.fillObject(contact);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        client.execute(new DeleteRequest(contact));
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
+        try {
+            getClient().execute(new DeleteRequest(contact));
+        } finally {
+            super.tearDown();
+        }
     }
 
+    @Test
     public void testNumberOfAttachments() throws Throwable {
-        GetRequest request = new GetRequest(contact, client.getValues().getTimeZone());
-        GetResponse response = client.execute(request);
+        GetRequest request = new GetRequest(contact, getClient().getValues().getTimeZone());
+        GetResponse response = getClient().execute(request);
         Contact testContact = response.getContact();
         assertTrue("Number of attachments should be send.", testContact.containsNumberOfAttachments());
         assertEquals("Number of attachments must be zero.", 0, testContact.getNumberOfAttachments());

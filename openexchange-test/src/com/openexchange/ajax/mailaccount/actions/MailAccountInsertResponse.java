@@ -53,7 +53,6 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.mailaccount.MailAccountDescription;
 
-
 /**
  * {@link MailAccountInsertResponse}
  *
@@ -66,6 +65,7 @@ public class MailAccountInsertResponse extends AbstractAJAXResponse {
 
     /**
      * Initializes a new {@link MailAccountInsertResponse}.
+     * 
      * @param response
      */
     protected MailAccountInsertResponse(Response response) {

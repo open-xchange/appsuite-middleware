@@ -49,11 +49,15 @@
 
 package com.openexchange.mail.messagestorage;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.UnsupportedEncodingException;
 import java.util.HashSet;
 import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.mail.MailJSONField;
@@ -79,72 +83,7 @@ import com.openexchange.sessiond.impl.SessionObjectWrapper;
  */
 public final class MailAttachmentTest extends MessageStorageTest {
 
-	private static final String RFC822_WITH_ATTACH = "Return-Path: <thorben.betten@open-xchange.com>\n"
-			+ "Received: from ox.netline-is.de ([unix socket])\n"
-			+ "	by ox (Cyrus v2.2.3) with LMTP; Fri, 04 Apr 2008 00:12:36 +0200\n" + "X-Sieve: CMU Sieve 2.2\n"
-			+ "Received: by ox.netline-is.de (Postfix, from userid 65534)\n"
-			+ "	id B0F553DBA6F; Fri,  4 Apr 2008 00:12:36 +0200 (CEST)\n"
-			+ "Received: from oxee (unknown [192.168.32.9])\n"
-			+ "	by ox.netline-is.de (Postfix) with ESMTP id 3C1C33DBA58\n"
-			+ "	for <thorben.betten@open-xchange.com>; Fri,  4 Apr 2008 00:12:36 +0200 (CEST)\n"
-			+ "Date: Fri, 4 Apr 2008 00:11:46 +0200 (CEST)\n"
-			+ "From: \"Betten, Thorben\" <thorben.betten@open-xchange.com>\n"
-			+ "To: \"Betten, Thorben\" <thorben.betten@open-xchange.com>\n"
-			+ "Message-ID: <22037327.8941207260706888.JavaMail.open-xchange@oxee>\n"
-			+ "Subject: DowngradeRegistry-Patch\n" + "MIME-Version: 1.0\n" + "Content-Type: multipart/mixed; \n"
-			+ "	boundary=\"----=_Part_582_17246096.1207260706746\"\n" + "X-Priority: 3\n"
-			+ "X-Mailer: Open-Xchange Mailer v6.5.0-6342\n"
-			+ "X-Spam-Checker-Version: SpamAssassin 2.64 (2004-01-11) on ox.netline-is.de\n" + "X-Spam-Level: \n"
-			+ "X-Spam-Status: No, hits=-4.6 required=5.0 tests=AWL,BAYES_00,HTML_MESSAGE \n"
-			+ "	autolearn=no version=2.64\n" + "\n" + "------=_Part_582_17246096.1207260706746\n"
-			+ "Content-Type: multipart/alternative; \n" + "	boundary=\"----=_Part_583_11954091.1207260706746\"\n"
-			+ "\n" + "------=_Part_583_11954091.1207260706746\n" + "MIME-Version: 1.0\n"
-			+ "Content-Type: text/plain; charset=UTF-8\n" + "Content-Transfer-Encoding: 7bit\n" + "\n" + "\n"
-			+ "(see attached file)\n" + "\n" + "\n" + "--\n" + "with best regards,\n" + "Thorben Betten\n" + "\n"
-			+ "_______________________________________________\n" + "Thorben Betten, Software Developer\n"
-			+ "Phone +49 2761 8385 16\n" + "Fax +49 2761 8385 30\n"
-			+ "Open-Xchange GmbH, Martinstr. 41, D-57462 Olpe\n" + "_______________________________________________\n"
-			+ "------=_Part_583_11954091.1207260706746\n" + "MIME-Version: 1.0\n"
-			+ "Content-Type: text/html; charset=UTF-8\n" + "Content-Transfer-Encoding: 7bit\n" + "\n"
-			+ "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\"\n"
-			+ "\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n" + "\n"
-			+ "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n" + "  <head>\n"
-			+ "    <meta content=\"text/html; charset=UTF-8\" http-equiv=\"Content-Type\">\n"
-			+ "    <meta name=\"generator\"\n"
-			+ "    content=\"HTML Tidy for Java (vers. 26 Sep 2004), see www.w3.org\" />\n" + "\n"
-			+ "    <title></title>\n" + "  </head>\n" + "\n" + "  <body>\n" + "    <br />\n"
-			+ "    (see attached file)<br />\n" + "\n" + "    <div>\n" + "      <br />\n" + "      <br />\n"
-			+ "      --<br />\n" + "      with best regards,<br />\n" + "      Thorben Betten<br />\n"
-			+ "      <br />\n" + "      _______________________________________________<br />\n"
-			+ "      Thorben Betten, Software Developer<br />\n" + "      Phone +49 2761 8385 16<br />\n"
-			+ "      Fax +49 2761 8385 30<br />\n" + "      Open-Xchange GmbH, Martinstr. 41, D-57462 Olpe<br />\n"
-			+ "      _______________________________________________\n" + "    </div>\n" + "  </body>\n" + "\n"
-			+ "</html>\n" + "\n" + "------=_Part_583_11954091.1207260706746--\n" + "\n"
-			+ "------=_Part_582_17246096.1207260706746\n" + "Content-Type: text/x-patch; charset=US-ASCII; \n"
-			+ "	name=downgrade_registry_patch.diff\n" + "Content-Transfer-Encoding: base64\n"
-			+ "Content-Disposition: attachment; filename=downgrade_registry_patch.diff\n" + "\n"
-			+ "SW5kZXg6IHNyYy9jb20vb3BlbmV4Y2hhbmdlL2dyb3Vwd2FyZS9kb3duZ3JhZGUvRG93bmdyYWRl\n"
-			+ "UmVnaXN0cnkuamF2YQo9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09\n"
-			+ "PT09PT09PT09PT09PT09PT09PT09PT09ClJDUyBmaWxlOiAvY3Zzcm9vdC9vcGVuLXhjaGFuZ2Uv\n"
-			+ "c2VydmVyL3NyYy9jb20vb3BlbmV4Y2hhbmdlL2dyb3Vwd2FyZS9kb3duZ3JhZGUvRG93bmdyYWRl\n"
-			+ "UmVnaXN0cnkuamF2YSx2CnJldHJpZXZpbmcgcmV2aXNpb24gMS40CmRpZmYgLXUgLXIxLjQgRG93\n"
-			+ "bmdyYWRlUmVnaXN0cnkuamF2YQotLS0gc3JjL2NvbS9vcGVuZXhjaGFuZ2UvZ3JvdXB3YXJlL2Rv\n"
-			+ "d25ncmFkZS9Eb3duZ3JhZGVSZWdpc3RyeS5qYXZhCTEgQXByIDIwMDggMDk6MzQ6NDMgLTAwMDAJ\n"
-			+ "MS40CisrKyBzcmMvY29tL29wZW5leGNoYW5nZS9ncm91cHdhcmUvZG93bmdyYWRlL0Rvd25ncmFk\n"
-			+ "ZVJlZ2lzdHJ5LmphdmEJMyBBcHIgMjAwOCAyMTozNDowNCAtMDAwMApAQCAtMjg4LDggKzI4OCwy\n"
-			+ "NCBAQAogCXB1YmxpYyB2b2lkIHVucmVnaXN0ZXJEb3duZ3JhZGVMaXN0ZW5lcihmaW5hbCBEb3du\n"
-			+ "Z3JhZGVMaXN0ZW5lciBsaXN0ZW5lcikgewogCQlyZWdpc3RyeUxvY2subG9jaygpOwogCQl0cnkg\n"
-			+ "ewotCQkJbGlzdGVuZXJzLnJlbW92ZShsaXN0ZW5lcik7Ci0JCQljbGFzc2VzLnJlbW92ZShsaXN0\n"
-			+ "ZW5lci5nZXRDbGFzcygpKTsKKwkJCWZpbmFsIENsYXNzPD8gZXh0ZW5kcyBEb3duZ3JhZGVMaXN0\n"
-			+ "ZW5lcj4gY2xhenogPSBsaXN0ZW5lci5nZXRDbGFzcygpOworCQkJaWYgKCFjbGFzc2VzLmNvbnRh\n"
-			+ "aW5zKGNsYXp6KSkgeworCQkJCXJldHVybjsKKwkJCX0KKwkJCWlmICghbGlzdGVuZXJzLnJlbW92\n"
-			+ "ZShsaXN0ZW5lcikpIHsKKwkJCQkvKgorCQkJCSAqIFJlbW92ZSBieSByZWZlcmVuY2UgZGlkIG5v\n"
-			+ "dCB3b3JrCisJCQkJICovCisJCQkJaW50IHNpemUgPSBsaXN0ZW5lcnMuc2l6ZSgpOworCQkJCWZv\n"
-			+ "ciAoaW50IGkgPSAwOyBpIDwgc2l6ZTsgaSsrKSB7CisJCQkJCWlmIChjbGF6ei5lcXVhbHMobGlz\n"
-			+ "dGVuZXJzLmdldChpKS5nZXRDbGFzcygpKSkgeworCQkJCQkJbGlzdGVuZXJzLnJlbW92ZShpKTsK\n"
-			+ "KwkJCQkJCS8vIFJlc2V0IHNpemUgdG8gbGVhdmUgbG9vcAorCQkJCQkJc2l6ZSA9IDA7CisJCQkJ\n"
-			+ "CX0KKwkJCQl9CisJCQl9CisJCQljbGFzc2VzLnJlbW92ZShjbGF6eik7CiAJCX0gZmluYWxseSB7\n"
-			+ "CiAJCQlyZWdpc3RyeUxvY2sudW5sb2NrKCk7CiAJCX0K\n" + "------=_Part_582_17246096.1207260706746--\n";
+    private static final String RFC822_WITH_ATTACH = "Return-Path: <thorben.betten@open-xchange.com>\n" + "Received: from ox.netline-is.de ([unix socket])\n" + "	by ox (Cyrus v2.2.3) with LMTP; Fri, 04 Apr 2008 00:12:36 +0200\n" + "X-Sieve: CMU Sieve 2.2\n" + "Received: by ox.netline-is.de (Postfix, from userid 65534)\n" + "	id B0F553DBA6F; Fri,  4 Apr 2008 00:12:36 +0200 (CEST)\n" + "Received: from oxee (unknown [192.168.32.9])\n" + "	by ox.netline-is.de (Postfix) with ESMTP id 3C1C33DBA58\n" + "	for <thorben.betten@open-xchange.com>; Fri,  4 Apr 2008 00:12:36 +0200 (CEST)\n" + "Date: Fri, 4 Apr 2008 00:11:46 +0200 (CEST)\n" + "From: \"Betten, Thorben\" <thorben.betten@open-xchange.com>\n" + "To: \"Betten, Thorben\" <thorben.betten@open-xchange.com>\n" + "Message-ID: <22037327.8941207260706888.JavaMail.open-xchange@oxee>\n" + "Subject: DowngradeRegistry-Patch\n" + "MIME-Version: 1.0\n" + "Content-Type: multipart/mixed; \n" + "	boundary=\"----=_Part_582_17246096.1207260706746\"\n" + "X-Priority: 3\n" + "X-Mailer: Open-Xchange Mailer v6.5.0-6342\n" + "X-Spam-Checker-Version: SpamAssassin 2.64 (2004-01-11) on ox.netline-is.de\n" + "X-Spam-Level: \n" + "X-Spam-Status: No, hits=-4.6 required=5.0 tests=AWL,BAYES_00,HTML_MESSAGE \n" + "	autolearn=no version=2.64\n" + "\n" + "------=_Part_582_17246096.1207260706746\n" + "Content-Type: multipart/alternative; \n" + "	boundary=\"----=_Part_583_11954091.1207260706746\"\n" + "\n" + "------=_Part_583_11954091.1207260706746\n" + "MIME-Version: 1.0\n" + "Content-Type: text/plain; charset=UTF-8\n" + "Content-Transfer-Encoding: 7bit\n" + "\n" + "\n" + "(see attached file)\n" + "\n" + "\n" + "--\n" + "with best regards,\n" + "Thorben Betten\n" + "\n" + "_______________________________________________\n" + "Thorben Betten, Software Developer\n" + "Phone +49 2761 8385 16\n" + "Fax +49 2761 8385 30\n" + "Open-Xchange GmbH, Martinstr. 41, D-57462 Olpe\n" + "_______________________________________________\n" + "------=_Part_583_11954091.1207260706746\n" + "MIME-Version: 1.0\n" + "Content-Type: text/html; charset=UTF-8\n" + "Content-Transfer-Encoding: 7bit\n" + "\n" + "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\"\n" + "\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n" + "\n" + "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n" + "  <head>\n" + "    <meta content=\"text/html; charset=UTF-8\" http-equiv=\"Content-Type\">\n" + "    <meta name=\"generator\"\n" + "    content=\"HTML Tidy for Java (vers. 26 Sep 2004), see www.w3.org\" />\n" + "\n" + "    <title></title>\n" + "  </head>\n" + "\n" + "  <body>\n" + "    <br />\n" + "    (see attached file)<br />\n" + "\n" + "    <div>\n" + "      <br />\n" + "      <br />\n" + "      --<br />\n" + "      with best regards,<br />\n" + "      Thorben Betten<br />\n" + "      <br />\n" + "      _______________________________________________<br />\n" + "      Thorben Betten, Software Developer<br />\n" + "      Phone +49 2761 8385 16<br />\n" + "      Fax +49 2761 8385 30<br />\n" + "      Open-Xchange GmbH, Martinstr. 41, D-57462 Olpe<br />\n" + "      _______________________________________________\n" + "    </div>\n" + "  </body>\n" + "\n" + "</html>\n" + "\n" + "------=_Part_583_11954091.1207260706746--\n" + "\n" + "------=_Part_582_17246096.1207260706746\n" + "Content-Type: text/x-patch; charset=US-ASCII; \n" + "	name=downgrade_registry_patch.diff\n" + "Content-Transfer-Encoding: base64\n" + "Content-Disposition: attachment; filename=downgrade_registry_patch.diff\n" + "\n" + "SW5kZXg6IHNyYy9jb20vb3BlbmV4Y2hhbmdlL2dyb3Vwd2FyZS9kb3duZ3JhZGUvRG93bmdyYWRl\n" + "UmVnaXN0cnkuamF2YQo9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09\n" + "PT09PT09PT09PT09PT09PT09PT09PT09ClJDUyBmaWxlOiAvY3Zzcm9vdC9vcGVuLXhjaGFuZ2Uv\n" + "c2VydmVyL3NyYy9jb20vb3BlbmV4Y2hhbmdlL2dyb3Vwd2FyZS9kb3duZ3JhZGUvRG93bmdyYWRl\n" + "UmVnaXN0cnkuamF2YSx2CnJldHJpZXZpbmcgcmV2aXNpb24gMS40CmRpZmYgLXUgLXIxLjQgRG93\n" + "bmdyYWRlUmVnaXN0cnkuamF2YQotLS0gc3JjL2NvbS9vcGVuZXhjaGFuZ2UvZ3JvdXB3YXJlL2Rv\n" + "d25ncmFkZS9Eb3duZ3JhZGVSZWdpc3RyeS5qYXZhCTEgQXByIDIwMDggMDk6MzQ6NDMgLTAwMDAJ\n" + "MS40CisrKyBzcmMvY29tL29wZW5leGNoYW5nZS9ncm91cHdhcmUvZG93bmdyYWRlL0Rvd25ncmFk\n" + "ZVJlZ2lzdHJ5LmphdmEJMyBBcHIgMjAwOCAyMTozNDowNCAtMDAwMApAQCAtMjg4LDggKzI4OCwy\n" + "NCBAQAogCXB1YmxpYyB2b2lkIHVucmVnaXN0ZXJEb3duZ3JhZGVMaXN0ZW5lcihmaW5hbCBEb3du\n" + "Z3JhZGVMaXN0ZW5lciBsaXN0ZW5lcikgewogCQlyZWdpc3RyeUxvY2subG9jaygpOwogCQl0cnkg\n" + "ewotCQkJbGlzdGVuZXJzLnJlbW92ZShsaXN0ZW5lcik7Ci0JCQljbGFzc2VzLnJlbW92ZShsaXN0\n" + "ZW5lci5nZXRDbGFzcygpKTsKKwkJCWZpbmFsIENsYXNzPD8gZXh0ZW5kcyBEb3duZ3JhZGVMaXN0\n" + "ZW5lcj4gY2xhenogPSBsaXN0ZW5lci5nZXRDbGFzcygpOworCQkJaWYgKCFjbGFzc2VzLmNvbnRh\n" + "aW5zKGNsYXp6KSkgeworCQkJCXJldHVybjsKKwkJCX0KKwkJCWlmICghbGlzdGVuZXJzLnJlbW92\n" + "ZShsaXN0ZW5lcikpIHsKKwkJCQkvKgorCQkJCSAqIFJlbW92ZSBieSByZWZlcmVuY2UgZGlkIG5v\n" + "dCB3b3JrCisJCQkJICovCisJCQkJaW50IHNpemUgPSBsaXN0ZW5lcnMuc2l6ZSgpOworCQkJCWZv\n" + "ciAoaW50IGkgPSAwOyBpIDwgc2l6ZTsgaSsrKSB7CisJCQkJCWlmIChjbGF6ei5lcXVhbHMobGlz\n" + "dGVuZXJzLmdldChpKS5nZXRDbGFzcygpKSkgeworCQkJCQkJbGlzdGVuZXJzLnJlbW92ZShpKTsK\n" + "KwkJCQkJCS8vIFJlc2V0IHNpemUgdG8gbGVhdmUgbG9vcAorCQkJCQkJc2l6ZSA9IDA7CisJCQkJ\n" + "CX0KKwkJCQl9CisJCQl9CisJCQljbGFzc2VzLnJlbW92ZShjbGF6eik7CiAJCX0gZmluYWxseSB7\n" + "CiAJCQlyZWdpc3RyeUxvY2sudW5sb2NrKCk7CiAJCX0K\n" + "------=_Part_582_17246096.1207260706746--\n";
 
 	private static final String RFC822_WO_ATTACH = "Return-Path: <markus.strotkemper@open-xchange.com>\n"
 			+ "Received: from ox.netline-is.de ([unix socket])\n"
@@ -252,13 +191,7 @@ public final class MailAttachmentTest extends MessageStorageTest {
 			+ "	filename*=utf-8''%EC%84%9C%EC%98%81%EC%A7%84%2Etxt\n" + "\n" + "7ISc7JiB7KeE\n" + "\n"
 			+ "--Boundary-00=_mtJhHd7H54sG6XG--\n";
 
-	/**
-	 *
-	 */
-	public MailAttachmentTest() {
-		super();
-	}
-
+    @Test
 	public void testMailAttachment() {
 		try {
 			final MailAccess<?, ?> mailAccess = getMailAccess();
@@ -330,20 +263,23 @@ public final class MailAttachmentTest extends MessageStorageTest {
 		}
 	}
 
-	    // TODO: Should not be part of "real" MAL tests
+    // TODO: Should not be part of "real" MAL tests
+    @Test
     public void testNoAttachmentMIMEMessageConverter() throws OXException, UnsupportedEncodingException {
         final MailMessage testMail = MimeMessageConverter.convertMessage(RFC822_WO_ATTACH.getBytes(com.openexchange.java.Charsets.US_ASCII));
         assertTrue("Missing hasAttachment", testMail.containsHasAttachment());
         assertFalse("A message w/o attachments is marked to hold attachments", testMail.hasAttachment());
-	}
+    }
 
     // TODO: Should not be part of "real" MAL tests
-	public void testHasAttachmentMIMEMessageConverter() throws OXException, UnsupportedEncodingException {
-	    final MailMessage testMail = MimeMessageConverter.convertMessage(RFC822_WITH_ATTACH.getBytes(com.openexchange.java.Charsets.US_ASCII));
+    @Test
+    public void testHasAttachmentMIMEMessageConverter() throws OXException, UnsupportedEncodingException {
+        final MailMessage testMail = MimeMessageConverter.convertMessage(RFC822_WITH_ATTACH.getBytes(com.openexchange.java.Charsets.US_ASCII));
         assertTrue("Missing hasAttachment", testMail.containsHasAttachment());
         assertTrue("A message with attachments is marked to NOT hold attachments", testMail.hasAttachment());
 	}
 
+    @Test
 	public void testRFC2231() {
 		try {
 			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
@@ -376,5 +312,4 @@ public final class MailAttachmentTest extends MessageStorageTest {
 			fail(e.getMessage());
 		}
 	}
-
 }

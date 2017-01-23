@@ -49,8 +49,13 @@
 
 package com.openexchange.ajax.share.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Collections;
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
@@ -74,25 +79,19 @@ import com.openexchange.share.recipient.RecipientType;
  */
 public class RemoveGuestPermissionTest extends ShareTest {
 
-    /**
-     * Initializes a new {@link RemoveGuestPermissionTest}.
-     *
-     * @param name The test name
-     */
-    public RemoveGuestPermissionTest(String name) {
-        super(name);
-    }
-
+    @Test
     public void testUpdateSharedFolderRandomly() throws Exception {
         int module = randomModule();
         testUpdateSharedFolder(randomFolderAPI(), module, randomGuestPermission(module));
     }
 
+    @Test
     public void testDeleteSharedFolderRandomly() throws Exception {
         int module = randomModule();
         testDeleteSharedFolder(randomFolderAPI(), module, getDefaultFolder(module), randomGuestPermission(module), false);
     }
 
+    @Test
     public void testHardDeleteSharedFolderRandomly() throws Exception {
         int module = randomModule();
         testDeleteSharedFolder(randomFolderAPI(), module, getDefaultFolder(module), randomGuestPermission(module), true);
@@ -108,14 +107,17 @@ public class RemoveGuestPermissionTest extends ShareTest {
         }
     }
 
+    @Test
     public void testUpdateSharedFileRandomly() throws Exception {
         testUpdateSharedFile(randomFolderAPI(), randomGuestObjectPermission());
     }
 
+    @Test
     public void testDeleteSharedFileRandomly() throws Exception {
         testDeleteSharedFile(randomFolderAPI(), getDefaultFolder(FolderObject.INFOSTORE), randomGuestObjectPermission(), false);
     }
 
+    @Test
     public void testHardDeleteSharedFileRandomly() throws Exception {
         testDeleteSharedFile(randomFolderAPI(), getDefaultFolder(FolderObject.INFOSTORE), randomGuestObjectPermission(), true);
     }
@@ -140,7 +142,7 @@ public class RemoveGuestPermissionTest extends ShareTest {
          */
         OCLPermission matchingPermission = null;
         for (OCLPermission permission : folder.getPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
                 break;
             }
@@ -205,7 +207,7 @@ public class RemoveGuestPermissionTest extends ShareTest {
          */
         OCLPermission matchingPermission = null;
         for (OCLPermission permission : folder.getPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
                 break;
             }
@@ -230,7 +232,7 @@ public class RemoveGuestPermissionTest extends ShareTest {
         if (hardDelete) {
             deleteRequest.setHardDelete(Boolean.TRUE);
         }
-        client.execute(deleteRequest);
+        getClient().execute(deleteRequest);
         if (RecipientType.ANONYMOUS.equals(guestPermission.getRecipient().getType())) {
             /*
              * for anonymous guest user, check access with previous guest session (after waiting some time until background operations took place)
@@ -272,7 +274,7 @@ public class RemoveGuestPermissionTest extends ShareTest {
          */
         FileStorageObjectPermission matchingPermission = null;
         for (FileStorageObjectPermission permission : file.getObjectPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
                 break;
             }
@@ -287,7 +289,7 @@ public class RemoveGuestPermissionTest extends ShareTest {
         /*
          * check access to share
          */
-        GuestClient guestClient =  resolveShare(guest, guestPermission.getRecipient());
+        GuestClient guestClient = resolveShare(guest, guestPermission.getRecipient());
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission);
         /*
@@ -295,8 +297,8 @@ public class RemoveGuestPermissionTest extends ShareTest {
          */
         Date futureTimestamp = new Date(System.currentTimeMillis() + 1000000);
         file.setLastModified(futureTimestamp);
-        file.setObjectPermissions(Collections.<FileStorageObjectPermission>emptyList());
-        file = updateFile(file, new Field[] { Field.OBJECT_PERMISSIONS } );
+        file.setObjectPermissions(Collections.<FileStorageObjectPermission> emptyList());
+        file = updateFile(file, new Field[] { Field.OBJECT_PERMISSIONS });
         /*
          * check permissions
          */
@@ -338,7 +340,7 @@ public class RemoveGuestPermissionTest extends ShareTest {
          */
         FileStorageObjectPermission matchingPermission = null;
         for (FileStorageObjectPermission permission : file.getObjectPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
                 break;
             }
@@ -353,7 +355,7 @@ public class RemoveGuestPermissionTest extends ShareTest {
         /*
          * check access to share
          */
-        GuestClient guestClient =  resolveShare(guest, guestPermission.getRecipient());
+        GuestClient guestClient = resolveShare(guest, guestPermission.getRecipient());
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission);
         /*

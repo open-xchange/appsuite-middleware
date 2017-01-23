@@ -1,9 +1,13 @@
+
 package com.openexchange.mail.messagestorage;
 
+import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Set;
 import javax.mail.internet.InternetAddress;
+import org.junit.After;
+import org.junit.Before;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.MailField;
@@ -28,17 +32,13 @@ import com.openexchange.sessiond.impl.SessionObject;
  */
 public abstract class MessageStorageTest extends AbstractMailTest {
 
-    public static final String[] NON_MATCHING_HEADERS = {
-        MessageHeaders.HDR_FROM, MessageHeaders.HDR_TO, MessageHeaders.HDR_CC, MessageHeaders.HDR_BCC, MessageHeaders.HDR_DISP_NOT_TO,
-        MessageHeaders.HDR_REPLY_TO, MessageHeaders.HDR_SUBJECT, MessageHeaders.HDR_DATE, MessageHeaders.HDR_IMPORTANCE, MessageHeaders.HDR_X_PRIORITY,
-        MessageHeaders.HDR_MESSAGE_ID, MessageHeaders.HDR_IN_REPLY_TO, MessageHeaders.HDR_REFERENCES, MessageHeaders.HDR_X_OX_VCARD,
-        MessageHeaders.HDR_X_OX_NOTIFICATION };
+    public static final String[] NON_MATCHING_HEADERS = { MessageHeaders.HDR_FROM, MessageHeaders.HDR_TO, MessageHeaders.HDR_CC, MessageHeaders.HDR_BCC, MessageHeaders.HDR_DISP_NOT_TO, MessageHeaders.HDR_REPLY_TO, MessageHeaders.HDR_SUBJECT, MessageHeaders.HDR_DATE, MessageHeaders.HDR_IMPORTANCE, MessageHeaders.HDR_X_PRIORITY, MessageHeaders.HDR_MESSAGE_ID, MessageHeaders.HDR_IN_REPLY_TO, MessageHeaders.HDR_REFERENCES, MessageHeaders.HDR_X_OX_VCARD, MessageHeaders.HDR_X_OX_NOTIFICATION };
 
     protected static final MailField[] FIELDS_ID = { MailField.ID };
 
-//    private static final MailField[] RELEVANT_FIELD = { MailField.ID, MailField.FOLDER_ID, MailField.CONTENT_TYPE, MailField.FROM, MailField.TO, MailField.CC,
-//        MailField.BCC, MailField.SUBJECT, MailField.SIZE, MailField.SENT_DATE, MailField.RECEIVED_DATE, MailField.FLAGS, MailField.THREAD_LEVEL,
-//        MailField.DISPOSITION_NOTIFICATION_TO, MailField.PRIORITY, MailField.COLOR_LABEL, MailField.HEADERS, MailField.BODY };
+    //    private static final MailField[] RELEVANT_FIELD = { MailField.ID, MailField.FOLDER_ID, MailField.CONTENT_TYPE, MailField.FROM, MailField.TO, MailField.CC,
+    //        MailField.BCC, MailField.SUBJECT, MailField.SIZE, MailField.SENT_DATE, MailField.RECEIVED_DATE, MailField.FLAGS, MailField.THREAD_LEVEL,
+    //        MailField.DISPOSITION_NOTIFICATION_TO, MailField.PRIORITY, MailField.COLOR_LABEL, MailField.HEADERS, MailField.BODY };
 
     protected static final MailField[] FIELDS_MORE = { MailField.ID, MailField.CONTENT_TYPE, MailField.FLAGS, MailField.BODY };
 
@@ -46,21 +46,9 @@ public abstract class MessageStorageTest extends AbstractMailTest {
 
     protected MailMessage[] testmessages = null;
 
-    /**
-     *
-     */
-    protected MessageStorageTest() {
-        super();
-    }
-
-    protected MessageStorageTest(final String name) {
-        super(name);
-    }
-
-
     protected static MailField[][] generateVariations() {
         final MailField[] values = MailField.values();
-        final int number = 1 << values.length ;
+        final int number = 1 << values.length;
         final MailField[][] retval = new MailField[number][];
         int[] indices;
         int t = 0;
@@ -115,7 +103,7 @@ public abstract class MessageStorageTest extends AbstractMailTest {
      * @param mail2name
      *            TODO
      * @param firstvalueParsed Definies if the first mail message object comes out of the parser, this is essential because in this case
-     *                         some part behave different. So e.g. the mailid is contained but null, same for the receive date
+     *            some part behave different. So e.g. the mailid is contained but null, same for the receive date
      */
     protected void compareMailMessages(final MailMessage mail1, final MailMessage mail2, final MailField[] fields1, final MailField[] fields2, final String mail1name, final String mail2name, final boolean firstvalueParsed) {
         // First check if all field of the two objects are set...
@@ -130,7 +118,7 @@ public abstract class MessageStorageTest extends AbstractMailTest {
             comparefields = set2;
         } else if (set2.contains(MailField.FULL) && !set1.contains(MailField.FULL)) {
             comparefields = set1;
-        } else if (set1.size() > set2.size()){
+        } else if (set1.size() > set2.size()) {
             comparefields = EnumSet.copyOf(set1);
             comparefields.retainAll(set2);
         } else {
@@ -176,15 +164,15 @@ public abstract class MessageStorageTest extends AbstractMailTest {
         if (comparefields.contains(MailField.THREAD_LEVEL) || comparefields.contains(MailField.FULL)) {
             check("Thread level", mail1.getThreadLevel(), mail2.getThreadLevel(), mail1name, mail2name);
         }
-/*
- * The size test cannot be done, because the right size value is depending on the underlying mail system
- * and the way how the underlying mail system stored the messages (with CRLF line termination or with LF
- * line termination etc.)
- */
-/*-        if (comparefields.contains(MailField.SIZE) || comparefields.contains(MailField.FULL)) {
- *           check("Size", mail1.getSize(), mail2.getSize(), mail1name, mail2name);
- *         }
-*/
+        /*
+         * The size test cannot be done, because the right size value is depending on the underlying mail system
+         * and the way how the underlying mail system stored the messages (with CRLF line termination or with LF
+         * line termination etc.)
+         */
+        /*-        if (comparefields.contains(MailField.SIZE) || comparefields.contains(MailField.FULL)) {
+         *           check("Size", mail1.getSize(), mail2.getSize(), mail1name, mail2name);
+         *         }
+        */
         if (comparefields.contains(MailField.PRIORITY) || comparefields.contains(MailField.FULL)) {
             check("Priority", mail1.getPriority(), mail2.getPriority(), mail1name, mail2name);
         }
@@ -234,8 +222,7 @@ public abstract class MessageStorageTest extends AbstractMailTest {
         final MailFolder inbox = mailAccess.getFolderStorage().getFolder("INBOX");
         final String parentFullname;
         if (inbox.isHoldsFolders()) {
-            fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(
-                tempFolderName).toString();
+            fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(tempFolderName).toString();
             parentFullname = "INBOX";
         } else {
             fullname = tempFolderName;
@@ -261,15 +248,15 @@ public abstract class MessageStorageTest extends AbstractMailTest {
         return mailAccess;
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         this.testmessages = getMessages(getTestMailDir(), -1);
         this.mailAccess = getMailAccess();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         super.tearDown();
         mailAccess.close(false);
     }
@@ -288,7 +275,6 @@ public abstract class MessageStorageTest extends AbstractMailTest {
         assertTrue(sb.toString(), equalsCheckWithNull(value1, value2));
     }
 
-
     private void check(final String string, final int value1, final int value2, final String mail1name, final String mail2name) {
         final StringBuilder sb = new StringBuilder();
         sb.append(string);
@@ -303,6 +289,7 @@ public abstract class MessageStorageTest extends AbstractMailTest {
         sb.append("''");
         assertTrue(sb.toString(), value1 == value2);
     }
+
     private void check(final String string, final InternetAddress[] address1, final InternetAddress[] address2, final String mail1name, final String mail2name) {
         final StringBuilder sb = new StringBuilder(128);
         sb.append(string);
@@ -319,20 +306,20 @@ public abstract class MessageStorageTest extends AbstractMailTest {
     }
 
     private boolean equals(final InternetAddress[] a, final InternetAddress[] a2) {
-        if (a==a2) {
+        if (a == a2) {
             return true;
         }
-        if (a==null || a2==null) {
+        if (a == null || a2 == null) {
             return false;
         }
         int length = a.length;
         if (a2.length != length) {
             return false;
         }
-        for (int i=0; i<length; i++) {
+        for (int i = 0; i < length; i++) {
             InternetAddress o1 = a[i];
             InternetAddress o2 = a2[i];
-            if (!(o1==null ? o2==null : o1.getAddress().equals(o2.getAddress()))) {
+            if (!(o1 == null ? o2 == null : o1.getAddress().equals(o2.getAddress()))) {
                 return false;
             }
         }
@@ -391,9 +378,7 @@ public abstract class MessageStorageTest extends AbstractMailTest {
             assertTrue("Missing flags in " + mailname, mail.containsFlags());
         } else {
             if (parsed) {
-                assertTrue(
-                    "Flags set in " + mailname + " although not requested",
-                    !mail.containsFlags() || (mail.containsFlags() && mail.getFlags() == 0));
+                assertTrue("Flags set in " + mailname + " although not requested", !mail.containsFlags() || (mail.containsFlags() && mail.getFlags() == 0));
             }
             // Don't complain about additional information
             // else {
@@ -450,7 +435,7 @@ public abstract class MessageStorageTest extends AbstractMailTest {
         // assertTrue("Color label set in " + mailname + " although not requested", !mail.containsColorLabel());
         // }
         if (full || set.contains(MailField.SUBJECT) || headers) { // As Subject is a part of the headers it will be automatically fetched
-                                                                  // when headers are requested
+                                                                 // when headers are requested
             assertTrue("Missing subject in " + mailname, mail.containsSubject());
         }
         // Don't complain about additional information
@@ -472,7 +457,7 @@ public abstract class MessageStorageTest extends AbstractMailTest {
         // assertTrue("Size set in " + mailname + " although not requested", !mail.containsSize());
         // }
         if (full || set.contains(MailField.SENT_DATE) || headers) { // As sent date is a part of the headers it will be automatically
-                                                                    // fetched when headers are requested
+                                                                   // fetched when headers are requested
             assertTrue("Missing sent date in " + mailname, mail.containsSentDate());
         }
         // Don't complain about additional information
@@ -536,16 +521,13 @@ public abstract class MessageStorageTest extends AbstractMailTest {
     }
 
     private String getFullFolderName(final MailFolder inbox, final String tempFolderName) {
-        return new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(
-        		tempFolderName).toString();
+        return new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(tempFolderName).toString();
     }
 
     private MailPermission getPermission(final SessionObject session) throws OXException {
-        final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID)
-        		.createNewMailPermission(session, MailAccount.DEFAULT_ID);
+        final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID).createNewMailPermission(session, MailAccount.DEFAULT_ID);
         p.setEntity(getUser());
-        p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
-        		OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+        p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         p.setFolderAdmin(true);
         p.setGroupPermission(false);
         return p;

@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.test.fixtures;
 
 import java.io.File;
@@ -65,11 +66,11 @@ import com.openexchange.subscribe.Subscription;
 public class FixtureLoaderFactory {
 
     public static FixtureLoader getLoader() {//TODO add datapath to method signature
-    	File datapath = null;
-    	final YAMLFixtureLoader loader = new YAMLFixtureLoader();
+        File datapath = null;
+        final YAMLFixtureLoader loader = new YAMLFixtureLoader();
 
-    	loader.addFixtureFactory(new TaskFixtureFactory(null, loader), Task.class);
-    	// TODO: create and use groupResolver
+        loader.addFixtureFactory(new TaskFixtureFactory(null, loader), Task.class);
+        // TODO: create and use groupResolver
         loader.addFixtureFactory(new AppointmentFixtureFactory(null, loader), Appointment.class);
         loader.addFixtureFactory(new ContactFixtureFactory(loader), Contact.class);
         loader.addFixtureFactory(new InfoItemFixtureFactory(loader), InfoItem.class);

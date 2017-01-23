@@ -61,28 +61,28 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  */
 public final class UserWordParser extends AbstractAJAXParser<UserWordResponse> {
 
-	/**
-	 * Initializes a new {@link UserWordParser}
-	 *
-	 * @param failOnError
-	 */
-	public UserWordParser(final boolean failOnError) {
-		super(failOnError);
-	}
+    /**
+     * Initializes a new {@link UserWordParser}
+     *
+     * @param failOnError
+     */
+    public UserWordParser(final boolean failOnError) {
+        super(failOnError);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AbstractAJAXParser#createResponse(com.openexchange.ajax.container.Response)
-	 */
-	@Override
-	protected UserWordResponse createResponse(final Response response) throws JSONException {
-		final UserWordResponse retval = new UserWordResponse(response);
-		if (isFailOnError()) {
-			final Object nullObj = response.getData();
-			retval.setNullObject(nullObj);
-		}
-		return retval;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AbstractAJAXParser#createResponse(com.openexchange.ajax.container.Response)
+     */
+    @Override
+    protected UserWordResponse createResponse(final Response response) throws JSONException {
+        final UserWordResponse retval = new UserWordResponse(response);
+        if (isFailOnError()) {
+            final Object nullObj = response.getData();
+            retval.setNullObject(nullObj);
+        }
+        return retval;
+    }
 
 }

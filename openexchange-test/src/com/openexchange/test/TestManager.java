@@ -51,7 +51,6 @@ package com.openexchange.test;
 
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
-
 /**
  * This interface is implemented by test manager classes. These are classes
  * that manage tests by making sure you can check all kinds of responses,
@@ -62,6 +61,7 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public interface TestManager {
+
     /**
      * Make sure that all requests called by the manager have
      * failOnError set to this value (if applicable).

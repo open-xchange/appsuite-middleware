@@ -110,7 +110,8 @@ public class FolderCopyTest extends AbstractUserCopyTest {
     /*
      * Test cases
      */
-    public void testFolderCopy() throws Exception {  
+         @Test
+     public void testFolderCopy() throws Exception {  
         final FolderCopyTask copyTask = new FolderCopyTask();
         final SortedMap<Integer, FolderEqualsWrapper> originFolders = copyTask.loadFoldersFromDB(srcCon, srcCtxId, srcUsrId);
         ObjectMapping<FolderObject> folderMapping = null;
@@ -340,8 +341,9 @@ public class FolderCopyTest extends AbstractUserCopyTest {
         deleteAllFromTablesForCid(dstCtxId, "cid", dstCon, "oxfolder_tree", "oxfolder_permissions", "virtualTree");
     }
     
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown()
+ throws Exception {
         cleanDatabase();
         super.tearDown();
     }

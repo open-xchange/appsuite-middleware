@@ -49,9 +49,14 @@
 
 package com.openexchange.ajax.folder.api2;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.FolderUpdatesResponse;
@@ -72,12 +77,14 @@ public class UpdatesTest extends AbstractFolderTest {
 
     /**
      * Initializes a new {@link UpdatesTest}.
+     * 
      * @param name
      */
-    public UpdatesTest(String name) {
-        super(name);
+    public UpdatesTest() {
+        super();
     }
 
+    @Test
     public void testUpdates() throws Throwable {
         int newId = -1;
         try {
@@ -91,11 +98,7 @@ public class UpdatesTest extends AbstractFolderTest {
                 oclP.setEntity(client.getValues().getUserId());
                 oclP.setGroupPermission(false);
                 oclP.setFolderAdmin(true);
-                oclP.setAllPermission(
-                    OCLPermission.ADMIN_PERMISSION,
-                    OCLPermission.ADMIN_PERMISSION,
-                    OCLPermission.ADMIN_PERMISSION,
-                    OCLPermission.ADMIN_PERMISSION);
+                oclP.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
                 fo.setPermissionsAsArray(new OCLPermission[] { oclP });
                 final InsertRequest request = new InsertRequest(EnumAPI.OUTLOOK, fo);
                 final InsertResponse response = client.execute(request);
@@ -109,8 +112,7 @@ public class UpdatesTest extends AbstractFolderTest {
 
             final FolderUpdatesResponse response;
             {
-                final UpdatesRequest request = new UpdatesRequest(EnumAPI.OUTLOOK, new int[] {
-                    FolderObject.LAST_MODIFIED_UTC, FolderObject.OBJECT_ID }, -1, null, new Date(timeStamp.getTime() - 1));
+                final UpdatesRequest request = new UpdatesRequest(EnumAPI.OUTLOOK, new int[] { FolderObject.LAST_MODIFIED_UTC, FolderObject.OBJECT_ID }, -1, null, new Date(timeStamp.getTime() - 1));
                 response = client.execute(request);
             }
 
@@ -137,19 +139,20 @@ public class UpdatesTest extends AbstractFolderTest {
 
     }
 
+    @Test
     public void testUpdatesAll() throws Throwable {
-        final UpdatesRequest request =
-            new UpdatesRequest(EnumAPI.OX_NEW, new int[] { FolderObject.LAST_MODIFIED_UTC }, -1, null, new Date(0));
+        final UpdatesRequest request = new UpdatesRequest(EnumAPI.OX_NEW, new int[] { FolderObject.LAST_MODIFIED_UTC }, -1, null, new Date(0));
         final FolderUpdatesResponse response = client.execute(request);
 
         assertNotNull(response);
         assertFalse("Error occurred: " + response.getResponse().getErrorMessage(), response.getResponse().hasError());
     }
 
+    @Test
     public void testModifiedAndDeleted() throws Throwable {
         // insert some
         final int numberOfFolders = 8;
-        List<FolderObject> newFolders = createAndPersistSeveral("testFolder-" + System.currentTimeMillis(), numberOfFolders);
+        List<FolderObject> newFolders = createAndPersistSeveral("testFolder-" + UUID.randomUUID().toString(), numberOfFolders);
 
         // update 2
         List<FolderObject> updatedFolders = new ArrayList<FolderObject>(2);
@@ -170,8 +173,8 @@ public class UpdatesTest extends AbstractFolderTest {
         deleteFolders(deletedFolders);
 
         // check modified with timestamp from last
-        Date lastModified = newFolders.get(numberOfFolders-1).getLastModified();
-        int[] cols = new int[]{ FolderObject.OBJECT_ID, FolderObject.FOLDER_NAME};
+        Date lastModified = newFolders.get(numberOfFolders - 1).getLastModified();
+        int[] cols = new int[] { FolderObject.OBJECT_ID, FolderObject.FOLDER_NAME };
         FolderUpdatesResponse modifiedFoldersResponse = listModifiedFolders(cols, lastModified, Ignore.NONE);
         assertTrue(modifiedFoldersResponse.getNewOrModifiedIds().containsAll(expectUpdatedFolderIds));
         assertTrue(modifiedFoldersResponse.getDeletedIds().containsAll(expectDeletedFolderIds));

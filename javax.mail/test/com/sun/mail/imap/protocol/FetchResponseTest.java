@@ -69,8 +69,8 @@ public class FetchResponseTest {
         super();
     }
 
-    @Test
-    public void testParseResponse() throws IOException, ProtocolException {
+     @Test
+     public void testParseResponse() throws IOException, ProtocolException {
         IMAPResponse response = new IMAPResponse("* 1 FETCH (ENVELOPE (\"Fri, 4 Jul 2014 15:44:36 +0200\" \"[undeliverable] Fwd: Meble Fwd: FAKTURA\" ((NIL NIL \"Mail Delivery System\" \"\")) ((NIL NIL \"Mail Delivery System\" \"\")) ((NIL NIL \"Mail Delivery System\" \"\")) ((NIL NIL \"i.dzik\" \"cmkardiomed.pl\")) NIL NIL \"<1128626943.74607.1404481476736.open-xchange@poczta-ng.home.pl>\" \"<c9908b086a41c446@serwer1331422.home.pl>\") INTERNALDATE \"04-Jul-2014 15:44:36 +0200\" RFC822.SIZE 2803 FLAGS () BODYSTRUCTURE ((\"text\" \"plain\" (\"charset\" \"utf-8\") NIL NIL \"7bit\" 576 14 NIL NIL NIL NIL)(\"message\" \"delivery-status\" (\"name\" \"Delivery status\") NIL NIL \"7bit\" 351 NIL NIL NIL NIL)(\"message\" \"rfc822\" (\"name\" \"Message headers\") NIL NIL \"7bit\" 899 (\"Fri, 4 Jul 2014 15:44:36 +0200 (CEST)\" \"Fwd: Meble Fwd: FAKTURA\" ((\"Ireneusz Dzik\" NIL \"i.dzik\" \"cmkardiomed.pl\")) ((\"Ireneusz Dzik\" NIL \"i.dzik\" \"cmkardiomed.pl\")) ((\"Ireneusz Dzik\" NIL \"i.dzik\" \"cmkardiomed.pl\")) ((\"i.dzik\" NIL \"i.dzik\" \"cmkardioimed.pl\")) NIL NIL \"<365300416.4775.1404063954568.open-xchange@webmail.home.pl>\" \"<1128626943.74607.1404481476736.open-xchange@poczta-ng.home.pl>\") (NIL \"mixed\" (\"boundary\" \"----=_Part_74606_1220838199.1404481476525\") NIL NIL NIL) 19 NIL NIL NIL NIL) \"report\" (\"report-type\" \"delivery-status\" \"boundary\" \"_0293396865ec58f4e83d0f02fd22325c_idea\") NIL NIL NIL) UID 2 BODY[HEADER.FIELDS (IMPORTANCE X-PRIORITY)] {2}\r\n\r\n)");
         FetchResponse fetchResponse = new FetchResponse(response);
 

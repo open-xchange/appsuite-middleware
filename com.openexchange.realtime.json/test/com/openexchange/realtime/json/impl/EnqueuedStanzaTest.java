@@ -52,7 +52,6 @@ package com.openexchange.realtime.json.impl;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
-import com.openexchange.realtime.json.impl.EnqueuedStanza;
 import com.openexchange.realtime.packet.Message;
 
 

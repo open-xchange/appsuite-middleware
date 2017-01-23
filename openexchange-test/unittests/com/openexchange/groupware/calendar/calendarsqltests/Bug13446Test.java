@@ -49,6 +49,10 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
+import static org.junit.Assert.fail;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 
 /**
@@ -58,7 +62,7 @@ public class Bug13446Test extends CalendarSqlTest {
 
     private CalendarDataObject appointment;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
@@ -68,6 +72,7 @@ public class Bug13446Test extends CalendarSqlTest {
         clean.add(appointment);
     }
 
+    @Test
     public void testBug13446() throws Exception {
         for (int i = 1; i <= 25; i++) {
             CalendarDataObject exception = appointments.createIdentifyingCopy(appointment);
@@ -81,7 +86,7 @@ public class Bug13446Test extends CalendarSqlTest {
         }
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         super.tearDown();
     }

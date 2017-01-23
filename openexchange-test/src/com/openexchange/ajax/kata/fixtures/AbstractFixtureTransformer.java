@@ -57,7 +57,6 @@ import com.openexchange.ajax.kata.IdentitySource;
 import com.openexchange.ajax.kata.NeedExistingStep;
 import com.openexchange.ajax.kata.Step;
 
-
 /**
  * {@link AbstractFixtureTransformer}
  *
@@ -65,7 +64,8 @@ import com.openexchange.ajax.kata.Step;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>: inserted #isDelete
  *
  */
-public abstract class AbstractFixtureTransformer<T> implements FixtureTransformer{
+public abstract class AbstractFixtureTransformer<T> implements FixtureTransformer {
+
     private final Map<String, IdentitySource<T>> memory = new HashMap<String, IdentitySource<T>>();
 
     private final List<PendingResolve> pending = new ArrayList<PendingResolve>();
@@ -110,8 +110,8 @@ public abstract class AbstractFixtureTransformer<T> implements FixtureTransforme
         return postfix(fixtureName).contains("update");
     }
 
-    protected boolean isDelete(String fixtureName){
-        return( postfix(fixtureName).contains("delete") );
+    protected boolean isDelete(String fixtureName) {
+        return (postfix(fixtureName).contains("delete"));
     }
 
     protected boolean isCreate(String fixtureName) {

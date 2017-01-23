@@ -60,7 +60,6 @@ import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
-
 /**
  * {@link ImageParser}
  *
@@ -72,6 +71,7 @@ public class ImageParser extends AbstractAJAXParser<ImageResponse> {
 
     /**
      * Initializes a new {@link ImageParser}.
+     * 
      * @param failOnError
      */
     protected ImageParser(boolean failOnError) {

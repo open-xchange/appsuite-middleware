@@ -67,8 +67,8 @@ public class SaneScriptTagsTest {
         super();
     }
 
-    @Test
-    public void testSaneIt1() {
+     @Test
+     public void testSaneIt1() {
         String str = "<a href=\"https://zeke.com/i/redirect?url=https%3A%2F%2Fsabbi.zeke.com%3Fcn%3DZW1haWxf" +
             "Y29uZmlybQ%253E%253D&amp;t=1&amp;cn=ZW1haWxfY29uZmlybQ%3D%3D&amp;sig=" +
             "c379e14f694d464b604014d39b62beeb4a4ac57d&amp;iid=3169f397e21d4feea6595eed" +
@@ -84,8 +84,8 @@ public class SaneScriptTagsTest {
         Assert.assertTrue("Link no more intact.", result.indexOf("Q%253E%253D&amp;t=1") > 0);
     }
 
-    @Test
-    public void testSaneIt2() {
+     @Test
+     public void testSaneIt2() {
         String str = "<a href=\"https://zeke.com/i/redirect?url=https%3A%2F%2Fsabbi.zeke.com%3Fcn%3DZW1haWxf" +
             "Y29uZmlybQscript%253E%253D&amp;t=1&amp;cn=ZW1haWxfY29uZmlybQ%3D%3D&amp;sig=" +
             "c379e14f694d464b604014d39b62beeb4a4ac57d&amp;iid=3169f397e21d4feea6595eed" +
@@ -101,8 +101,8 @@ public class SaneScriptTagsTest {
         Assert.assertTrue("Link no more intact.", result.indexOf("Qscript%253E%253D&amp;t=1") > 0);
     }
 
-    @Test
-    public void testSaneIt3() {
+     @Test
+     public void testSaneIt3() {
         String str = "<a href=\"https://zeke.com/i/redirect?url=https%3A%2F%2Fsabbi.zeke.com%3Fcn%3DZW1haWxf" +
             "Y29uZmlybQ%253C%253D&amp;t=1&amp;cn=ZW1haWxfY29uZmlybQ%3D%3D&amp;sig=" +
             "c379e14f694d464b604014d39b62beeb4a4ac57d&amp;iid=3169f397e21d4feea6595eed" +
@@ -118,8 +118,8 @@ public class SaneScriptTagsTest {
         Assert.assertTrue("Link no more intact.", result.indexOf("Q%253C%253D&amp;t=1") > 0);
     }
 
-    @Test
-    public void testSaneIt4() {
+     @Test
+     public void testSaneIt4() {
         String str = "<a href=\"https://zeke.com/i/redirect?url=https%3A%2F%2Fsabbi.zeke.com%3Fcn%3DZW1haWxf" +
             "Y29uZmlybQ%253Cscript%253D&amp;t=1&amp;cn=ZW1haWxfY29uZmlybQ%3D%3D&amp;sig=" +
             "c379e14f694d464b604014d39b62beeb4a4ac57d&amp;iid=3169f397e21d4feea6595eed" +
@@ -135,8 +135,8 @@ public class SaneScriptTagsTest {
         Assert.assertTrue("Link no more intact.", result.indexOf("Q%253Cscript%253D&amp;t=1") > 0);
     }
 
-    @Test
-    public void testBug35630() {
+     @Test
+     public void testBug35630() {
         String str = "<a href=\"https://zeke.com/i/redirect?url=https%3A%2F%2Fsabbi.zeke.com%3Fcn%3DZW1haWxf" +
             "Y29uZmlybQ%253D%253D&amp;t=1&amp;cn=ZW1haWxfY29uZmlybQ%3D%3D&amp;sig=" +
             "c379e14f694d464b604014d39b62beeb4a4ac57d&amp;iid=3169f397e21d4feea6595eed" +

@@ -49,8 +49,12 @@
 
 package com.openexchange.database;
 
-import static org.junit.Assert.*;
-import static com.openexchange.database.DatabaseMocking.*;
+import static com.openexchange.database.DatabaseMocking.connection;
+import static com.openexchange.database.DatabaseMocking.verifyConnection;
+import static com.openexchange.database.DatabaseMocking.whenConnection;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -64,8 +68,8 @@ import org.junit.Test;
  */
 public class DatabaseMockingExampleTest {
     
-    @Test
-    public void testStubbingSingleRows() throws SQLException {
+     @Test
+     public void testStubbingSingleRows() throws SQLException {
         Connection con = connection();
         
         whenConnection(con).isQueried("SELECT login, id FROM users WHERE loginName = ?").withParameter("cisco").thenReturnColumns("login", "id").andRow("cisco", 12);
@@ -96,8 +100,8 @@ public class DatabaseMockingExampleTest {
         assertFalse(rs.next());
     }
     
-    @Test
-    public void testStubbingMultipleRows() throws SQLException {
+     @Test
+     public void testStubbingMultipleRows() throws SQLException {
         Connection con = connection();
         
         whenConnection(con).isQueried("SELECT title FROM songs WHERE folder = ?").withParameter(12).thenReturnColumns("title").andRow("Babylon").andRow("Somewhere over the Rainbow").andRow("Manic Monday");
@@ -119,8 +123,8 @@ public class DatabaseMockingExampleTest {
         assertFalse(rs.next());
     }
     
-    @Test
-    public void testVerify() throws SQLException {
+     @Test
+     public void testVerify() throws SQLException {
         Connection con = connection();
                 
         PreparedStatement stmt = con.prepareStatement("INSERT INTO songs (title, folder) VALUES (?, ?)");
@@ -134,8 +138,8 @@ public class DatabaseMockingExampleTest {
         
     }
     
-    @Test
-    public void testCombined() throws SQLException {
+     @Test
+     public void testCombined() throws SQLException {
         Connection con = connection();
         
         whenConnection(con).isQueried("SELECT title FROM songs WHERE folder = ?").withParameter(12).thenReturnColumns("title").andRow("Babylon").andRow("Somewhere over the Rainbow").andRow("Manic Monday");

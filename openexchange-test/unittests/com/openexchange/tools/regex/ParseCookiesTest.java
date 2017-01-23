@@ -49,13 +49,14 @@
 
 package com.openexchange.tools.regex;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class ParseCookiesTest extends TestCase {
+public final class ParseCookiesTest {
 
     private final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ParseCookiesTest.class);
 
@@ -63,9 +64,10 @@ public final class ParseCookiesTest extends TestCase {
      * @param name
      */
     public ParseCookiesTest(final String name) {
-        super(name);
+        super();
     }
 
+    @Test
     public void testCookie() throws Throwable {
 
         LOG.info("Version: " + RFC2616Regex.COOKIE_VERSION);

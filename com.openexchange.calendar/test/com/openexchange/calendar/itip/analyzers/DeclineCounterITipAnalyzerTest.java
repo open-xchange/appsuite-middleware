@@ -59,7 +59,6 @@ import com.openexchange.calendar.itip.ITipAction;
 import com.openexchange.calendar.itip.ITipAnalysis;
 import com.openexchange.calendar.itip.ITipAnnotation;
 import com.openexchange.calendar.itip.ITipIntegrationUtility;
-import com.openexchange.calendar.itip.analyzers.DeclineCounterITipAnalyzer;
 import com.openexchange.data.conversion.ical.itip.ITipMessage;
 import com.openexchange.data.conversion.ical.itip.ITipMethod;
 import com.openexchange.exception.OXException;
@@ -73,14 +72,14 @@ import com.openexchange.sim.SimBuilder;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class DeclineCounterITipAnalyzerTest extends AbstractITipAnalyzerTest {
-    @Test
-    public void testMethod() {
+     @Test
+     public void testMethod() {
         List<ITipMethod> methods = new DeclineCounterITipAnalyzer(null, null).getMethods();
         assertEquals(Arrays.asList(ITipMethod.DECLINECOUNTER), methods);
     }
 
-    @Test
-    public void testDeclineCounter() throws OXException {
+     @Test
+     public void testDeclineCounter() throws OXException {
 
         CalendarDataObject appointment = appointment("123-123-123-123");
         CalendarDataObject declinedFor = appointment("123-123-123-123");
@@ -99,8 +98,8 @@ public class DeclineCounterITipAnalyzerTest extends AbstractITipAnalyzerTest {
         assertActions(analysis, ITipAction.DECLINE, ITipAction.REFRESH);
     }
 
-    @Test
-    public void testDeclineCounterOfAnException() throws OXException {
+     @Test
+     public void testDeclineCounterOfAnException() throws OXException {
         CalendarDataObject appointment = appointment("123-123-123-123");
         appointment.setRecurrenceDatePosition(new Date(12345));
 
@@ -127,8 +126,8 @@ public class DeclineCounterITipAnalyzerTest extends AbstractITipAnalyzerTest {
     }
 
     // Error Cases
-    @Test
-    public void testDeclineCounterForNonExistingAppointment() throws OXException {
+     @Test
+     public void testDeclineCounterForNonExistingAppointment() throws OXException {
 
         CalendarDataObject appointment = appointment("123-123-123-123");
 
@@ -148,8 +147,8 @@ public class DeclineCounterITipAnalyzerTest extends AbstractITipAnalyzerTest {
         assertActions(analysis, ITipAction.IGNORE, ITipAction.REFRESH);
     }
 
-    @Test
-    public void testDeclineCounterForNonExistingException() throws OXException {
+     @Test
+     public void testDeclineCounterForNonExistingException() throws OXException {
         CalendarDataObject appointment = appointment("123-123-123-123");
         appointment.setRecurrenceDatePosition(new Date(12345));
 
@@ -178,8 +177,8 @@ public class DeclineCounterITipAnalyzerTest extends AbstractITipAnalyzerTest {
         assertActions(analysis, ITipAction.IGNORE, ITipAction.REFRESH);
     }
 
-    @Test
-    public void testIrrelevantSequenceNumber() throws OXException {
+     @Test
+     public void testIrrelevantSequenceNumber() throws OXException {
         CalendarDataObject appointment = appointment("123-123-123-123");
         appointment.setSequence(1);
         CalendarDataObject declinedFor = appointment("123-123-123-123");

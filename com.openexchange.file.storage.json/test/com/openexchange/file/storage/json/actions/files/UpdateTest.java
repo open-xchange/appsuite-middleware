@@ -49,13 +49,15 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.Arrays;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
-
 
 /**
  * {@link UpdateTest}
@@ -64,6 +66,7 @@ import com.openexchange.file.storage.File;
  */
 public class UpdateTest extends FileActionTest {
 
+    @Test
     public void testMissingParameters() {
         try {
             action.handle(request());
@@ -73,6 +76,7 @@ public class UpdateTest extends FileActionTest {
         }
     }
 
+    @Test
     public void testNoUpload() throws JSONException, OXException {
         request().param("timestamp", "1337").body(new JSONObject("{id: '23', folder_id: '12', title: 'nice title'}"));
 
@@ -88,6 +92,7 @@ public class UpdateTest extends FileActionTest {
         fileAccess().assertAllWereCalled();
     }
 
+    @Test
     public void testMissingId() throws JSONException {
         request().param("timestamp", "1337").body(new JSONObject("{folder_id: '12', title: 'nice title'}"));
         try {
@@ -99,6 +104,7 @@ public class UpdateTest extends FileActionTest {
 
     }
 
+    @Test
     public void testUpload() {
         // TODO
     }

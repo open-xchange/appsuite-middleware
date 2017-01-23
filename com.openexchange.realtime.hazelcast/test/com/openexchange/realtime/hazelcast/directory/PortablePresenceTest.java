@@ -116,8 +116,8 @@ public class PortablePresenceTest {
             .build();
     }
 
-    @Test
-    public void testPortableRoundtrip() {
+     @Test
+     public void testPortableRoundtrip() {
         IMap<PortableID, PortablePresence> presenceMap = hzInstance.getMap(PRESENCE_MAP);
 
         PortableID portbleUser1 = new PortableID(user1);

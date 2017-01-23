@@ -49,6 +49,9 @@
 
 package com.openexchange.contact.vcard;
 
+import static org.junit.Assert.assertNotNull;
+import org.junit.Assert;
+import org.junit.Test;
 import com.openexchange.groupware.container.Contact;
 
 /**
@@ -67,7 +70,8 @@ public class Bug15008Test extends VCardTest {
         super();
     }
 
-    public void testImportVCard() throws Exception {
+         @Test
+     public void testImportVCard() throws Exception {
         /*
          * import vCard
          */
@@ -91,17 +95,17 @@ public class Bug15008Test extends VCardTest {
          * verify imported contact
          */
         assertNotNull(contact);
-        assertEquals("VPC", contact.getCompany());
-        assertEquals("Stefan.Adams@vipcomag.de", contact.getEmail1());
-        assertEquals("+498954750108", contact.getTelephoneBusiness1());
-        assertEquals("+49 (4952) 610430", contact.getTelephoneHome1());
-        assertEquals("+49 (151) 50104436", contact.getCellularTelephone1());
-        assertEquals("Alerich-Ebelings-Weg 38a", contact.getStreetBusiness());
-        assertEquals("Rhauderfehn", contact.getCityBusiness());
-        assertEquals("26817", contact.getPostalCodeBusiness());
-        assertEquals("Deutschland", contact.getCountryBusiness());
-        assertEquals("Adi", contact.getDisplayName());
-        assertEquals("Adi", contact.getSurName());
+        Assert.assertEquals("VPC", contact.getCompany());
+        Assert.assertEquals("Stefan.Adams@vipcomag.de", contact.getEmail1());
+        Assert.assertEquals("+498954750108", contact.getTelephoneBusiness1());
+        Assert.assertEquals("+49 (4952) 610430", contact.getTelephoneHome1());
+        Assert.assertEquals("+49 (151) 50104436", contact.getCellularTelephone1());
+        Assert.assertEquals("Alerich-Ebelings-Weg 38a", contact.getStreetBusiness());
+        Assert.assertEquals("Rhauderfehn", contact.getCityBusiness());
+        Assert.assertEquals("26817", contact.getPostalCodeBusiness());
+        Assert.assertEquals("Deutschland", contact.getCountryBusiness());
+        Assert.assertEquals("Adi", contact.getDisplayName());
+        Assert.assertEquals("Adi", contact.getSurName());
     }
 
 }

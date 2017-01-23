@@ -49,9 +49,13 @@
 
 package com.openexchange.publish.helpers;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.impl.OCLPermission;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 
 /**
@@ -60,8 +64,8 @@ import com.openexchange.server.impl.OCLPermission;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class FolderSecurityStrategyTest extends TestCase {
-    public void testAllowForAdmin() throws OXException {
+public class FolderSecurityStrategyTest {         @Test
+     public void testAllowForAdmin() throws OXException {
         final OCLPermission adminPermission = new OCLPermission();
         adminPermission.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
 
@@ -74,7 +78,8 @@ public class FolderSecurityStrategyTest extends TestCase {
 
     }
 
-    public void testDenyForNonAdmin() throws OXException {
+         @Test
+     public void testDenyForNonAdmin() throws OXException {
         final OCLPermission adminPermission = new OCLPermission();
         adminPermission.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
 

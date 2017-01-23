@@ -53,6 +53,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONException;
+import org.junit.After;
+import org.junit.Before;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.publish.tests.AbstractPubSubTest;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
@@ -68,20 +70,19 @@ public abstract class AbstractSubscriptionTest extends AbstractPubSubTest {
 
     protected SubscriptionTestManager subMgr;
 
-    public AbstractSubscriptionTest(String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         subMgr = new SubscriptionTestManager(getClient());
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        subMgr.cleanUp();
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
+        try {
+            subMgr.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Override

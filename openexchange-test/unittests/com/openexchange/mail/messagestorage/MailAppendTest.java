@@ -49,10 +49,11 @@
 
 package com.openexchange.mail.messagestorage;
 
+import static org.junit.Assert.assertTrue;
 import java.util.Random;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Ignore;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -65,7 +66,7 @@ import com.openexchange.mail.mime.MessageHeaders;
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Ignore ("Causes OOM on client")
+@Ignore("Causes OOM on client")
 public final class MailAppendTest extends MessageStorageTest {
 
     private static final String INBOX = "INBOX";
@@ -74,39 +75,27 @@ public final class MailAppendTest extends MessageStorageTest {
 
     private static MailField[][] variations = null;
 
-    private final MailField[] fieldWithoutUidFolderAndFlags = {
-        MailField.CONTENT_TYPE, MailField.FROM, MailField.TO, MailField.CC, MailField.BCC, MailField.SUBJECT,
-        MailField.SIZE, MailField.SENT_DATE, MailField.THREAD_LEVEL, MailField.DISPOSITION_NOTIFICATION_TO,
-        MailField.PRIORITY, MailField.COLOR_LABEL, MailField.HEADERS, MailField.BODY };
+    private final MailField[] fieldWithoutUidFolderAndFlags = { MailField.CONTENT_TYPE, MailField.FROM, MailField.TO, MailField.CC, MailField.BCC, MailField.SUBJECT, MailField.SIZE, MailField.SENT_DATE, MailField.THREAD_LEVEL, MailField.DISPOSITION_NOTIFICATION_TO, MailField.PRIORITY, MailField.COLOR_LABEL, MailField.HEADERS, MailField.BODY };
 
     private final MailField[] fieldsfull = { MailField.FULL };
 
     static {
         variations = generateVariations();
     }
-    /**
-	 *
-	 */
-    public MailAppendTest() {
-        super();
-    }
-
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-    }
 
     // First the basic tests so that a mail can be appended and deleted
+    @Test
     public void testMailAppendAndDeleteMails() throws OXException {
         this.uids = this.mailAccess.getMessageStorage().appendMessages(INBOX, testmessages);
         mailAccess.getMessageStorage().deleteMessages(INBOX, uids, true);
     }
 
     // Then we test if the get Methods are running correctly
+    @Test
     public void testMailAppendAndGetOneMessage() throws OXException {
         // At first we should test the append - get - delete operation with one mail only so that we see, that the basic functions
         // are working
-        this.uids = this.mailAccess.getMessageStorage().appendMessages(INBOX, new MailMessage[]{testmessages[0]});
+        this.uids = this.mailAccess.getMessageStorage().appendMessages(INBOX, new MailMessage[] { testmessages[0] });
 
         try {
             final MailMessage m = mailAccess.getMessageStorage().getMessage(INBOX, uids[0], true);
@@ -117,6 +106,7 @@ public final class MailAppendTest extends MessageStorageTest {
         }
     }
 
+    @Test
     public void testMailAppendAndGetMessage() throws OXException {
         // At first we should test the append - get - delete operation with one mail only so that we see, that the basic functions
         // are working
@@ -133,6 +123,7 @@ public final class MailAppendTest extends MessageStorageTest {
         }
     }
 
+    @Test
     public void testMailAppendAndGetMessages() throws OXException {
         this.uids = this.mailAccess.getMessageStorage().appendMessages(INBOX, testmessages);
         try {
@@ -151,6 +142,7 @@ public final class MailAppendTest extends MessageStorageTest {
         }
     }
 
+    @Test
     public void testMailAppendAndGetMessagesRandomFields() throws OXException {
         this.uids = this.mailAccess.getMessageStorage().appendMessages(INBOX, testmessages);
         try {

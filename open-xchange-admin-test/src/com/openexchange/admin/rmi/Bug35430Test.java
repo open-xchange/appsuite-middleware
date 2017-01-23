@@ -57,7 +57,6 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.Map;
-import junit.framework.JUnit4TestAdapter;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -79,14 +78,6 @@ public final class Bug35430Test extends AbstractRMITest {
 
     /** Keeps a list of created contexts for later cleanup */
     private Map<Integer, Context> contexts = new HashMap<Integer, Context>();
-
-    public Bug35430Test() {
-        super();
-    }
-
-    public static final junit.framework.Test suite() {
-        return new JUnit4TestAdapter(Bug35430Test.class);
-    }
 
     @Before
     public void setup() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException, NoSuchContextException, DatabaseUpdateException {

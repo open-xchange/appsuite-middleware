@@ -58,7 +58,6 @@ import org.apache.http.client.utils.URIBuilder;
 import org.json.JSONObject;
 import org.junit.Test;
 
-
 /**
  * {@link RevokeTokensTest}
  *
@@ -69,15 +68,10 @@ public class RevokeTokensTest extends EndpointTest {
 
     @Test
     public void testRevokeAccessToken() throws Exception {
-        OAuthClient oauthClient = new OAuthClient(getClientId(), getClientSecret(), getRedirectURI(), getScope());
+        OAuthClient oauthClient = new OAuthClient(testUser, getClientId(), getClientSecret(), getRedirectURI(), getScope());
         oauthClient.assertAccess();
 
-        HttpGet revoke = new HttpGet(new URIBuilder()
-            .setScheme("https")
-            .setHost(hostname)
-            .setPath(REVOKE_ENDPOINT)
-            .setParameter("access_token", ((OAuthSession) oauthClient.getSession()).getAccessToken())
-            .build());
+        HttpGet revoke = new HttpGet(new URIBuilder().setScheme("https").setHost(hostname).setPath(REVOKE_ENDPOINT).setParameter("access_token", ((OAuthSession) oauthClient.getSession()).getAccessToken()).build());
         HttpResponse revokeResponse = client.execute(revoke);
         revoke.reset();
         assertEquals(HttpStatus.SC_OK, revokeResponse.getStatusLine().getStatusCode());
@@ -86,15 +80,10 @@ public class RevokeTokensTest extends EndpointTest {
 
     @Test
     public void testRevokeRefreshToken() throws Exception {
-        OAuthClient oauthClient = new OAuthClient(getClientId(), getClientSecret(), getRedirectURI(), getScope());
+        OAuthClient oauthClient = new OAuthClient(testUser, getClientId(), getClientSecret(), getRedirectURI(), getScope());
         oauthClient.assertAccess();
 
-        HttpGet revoke = new HttpGet(new URIBuilder()
-            .setScheme("https")
-            .setHost(hostname)
-            .setPath(REVOKE_ENDPOINT)
-            .setParameter("refresh_token", ((OAuthSession) oauthClient.getSession()).getRefreshToken())
-            .build());
+        HttpGet revoke = new HttpGet(new URIBuilder().setScheme("https").setHost(hostname).setPath(REVOKE_ENDPOINT).setParameter("refresh_token", ((OAuthSession) oauthClient.getSession()).getRefreshToken()).build());
         HttpResponse revokeResponse = client.execute(revoke);
         assertEquals(HttpStatus.SC_OK, revokeResponse.getStatusLine().getStatusCode());
         assertNoAccess(oauthClient);
@@ -103,35 +92,21 @@ public class RevokeTokensTest extends EndpointTest {
     @Test
     public void testFailWithInvalidTokens() throws Exception {
         // missing token parameter
-        HttpGet revoke = new HttpGet(new URIBuilder()
-            .setScheme("https")
-            .setHost(hostname)
-            .setPath(REVOKE_ENDPOINT)
-            .build());
+        HttpGet revoke = new HttpGet(new URIBuilder().setScheme("https").setHost(hostname).setPath(REVOKE_ENDPOINT).build());
         HttpResponse revokeResponse = client.execute(revoke);
         assertEquals(HttpStatus.SC_BAD_REQUEST, revokeResponse.getStatusLine().getStatusCode());
         JSONObject errorObject = JSONObject.parse(new InputStreamReader(revokeResponse.getEntity().getContent(), revokeResponse.getEntity().getContentEncoding() == null ? "UTF-8" : revokeResponse.getEntity().getContentEncoding().getValue())).toObject();
         assertEquals("invalid_request", errorObject.getString("error"));
 
         // illegal access token
-        revoke = new HttpGet(new URIBuilder()
-            .setScheme("https")
-            .setHost(hostname)
-            .setPath(REVOKE_ENDPOINT)
-            .setParameter("access_token", "invalid")
-            .build());
+        revoke = new HttpGet(new URIBuilder().setScheme("https").setHost(hostname).setPath(REVOKE_ENDPOINT).setParameter("access_token", "invalid").build());
         revokeResponse = client.execute(revoke);
         assertEquals(HttpStatus.SC_BAD_REQUEST, revokeResponse.getStatusLine().getStatusCode());
         errorObject = JSONObject.parse(new InputStreamReader(revokeResponse.getEntity().getContent(), revokeResponse.getEntity().getContentEncoding() == null ? "UTF-8" : revokeResponse.getEntity().getContentEncoding().getValue())).toObject();
         assertEquals("invalid_request", errorObject.getString("error"));
 
         // illegal refresh token
-        revoke = new HttpGet(new URIBuilder()
-            .setScheme("https")
-            .setHost(hostname)
-            .setPath(REVOKE_ENDPOINT)
-            .setParameter("refresh_token", "invalid")
-            .build());
+        revoke = new HttpGet(new URIBuilder().setScheme("https").setHost(hostname).setPath(REVOKE_ENDPOINT).setParameter("refresh_token", "invalid").build());
         revokeResponse = client.execute(revoke);
         assertEquals(HttpStatus.SC_BAD_REQUEST, revokeResponse.getStatusLine().getStatusCode());
         errorObject = JSONObject.parse(new InputStreamReader(revokeResponse.getEntity().getContent(), revokeResponse.getEntity().getContentEncoding() == null ? "UTF-8" : revokeResponse.getEntity().getContentEncoding().getValue())).toObject();

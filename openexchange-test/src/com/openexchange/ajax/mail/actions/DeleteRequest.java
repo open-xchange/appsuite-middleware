@@ -73,7 +73,7 @@ public class DeleteRequest extends AbstractMailRequest<DeleteResponse> {
     private boolean failOnError = true;
 
     public DeleteRequest(String folder, String id, boolean hardDelete) {
-        this(new String[][] {{ folder, id }}, hardDelete);
+        this(new String[][] { { folder, id } }, hardDelete);
     }
 
     public DeleteRequest(String[] folderAndMailId, boolean hardDelete) {
@@ -101,8 +101,7 @@ public class DeleteRequest extends AbstractMailRequest<DeleteResponse> {
 
     @Override
     public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE), new Parameter("harddelete", hardDelete ? "1" : "0") };
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE), new Parameter("harddelete", hardDelete ? "1" : "0") };
     }
 
     @Override

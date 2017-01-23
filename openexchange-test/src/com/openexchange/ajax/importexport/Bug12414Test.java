@@ -49,9 +49,13 @@
 
 package com.openexchange.ajax.importexport;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import org.json.JSONException;
+import org.junit.Before;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -63,6 +67,7 @@ import com.openexchange.tools.RandomString;
 
 /**
  * Checks if truncation information is properly handled by importer.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Bug12414Test extends AbstractAJAXSession {
@@ -72,36 +77,23 @@ public final class Bug12414Test extends AbstractAJAXSession {
     int folderId;
 
     /**
-     * Default constructor.
-     * @param name test name.
-     */
-    public Bug12414Test(final String name) {
-        super(name);
-    }
-
-    /**
      * {@inheritDoc}
      */
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         folderId = client.getValues().getPrivateContactFolder();
     }
 
-    public void testTruncation() throws OXException, IOException,
-        SAXException, JSONException {
-        final VCardImportRequest request = new VCardImportRequest(folderId,
-            new ByteArrayInputStream(vCard.getBytes(com.openexchange.java.Charsets.UTF_8)), false);
+    @Test
+    public void testTruncation() throws OXException, IOException, SAXException, JSONException {
+        final VCardImportRequest request = new VCardImportRequest(folderId, new ByteArrayInputStream(vCard.getBytes(com.openexchange.java.Charsets.UTF_8)), false);
         final VCardImportResponse importR = client.execute(request);
         assertEquals("Missing import response.", 1, importR.size());
         final Response response = importR.get(0);
         assertFalse("No error occurs.", response.hasError());
     }
 
-    public static final String vCard =
-        "BEGIN:VCARD\n" +
-        "VERSION:2.1\n" +
-        "FN:" + RandomString.generateChars(321) + '\n' +
-        "END:VCARD\n";
+    public static final String vCard = "BEGIN:VCARD\n" + "VERSION:2.1\n" + "FN:" + RandomString.generateChars(321) + '\n' + "END:VCARD\n";
 }

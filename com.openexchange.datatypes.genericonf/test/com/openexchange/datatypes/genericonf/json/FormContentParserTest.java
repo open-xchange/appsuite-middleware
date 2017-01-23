@@ -49,13 +49,15 @@
 
 package com.openexchange.datatypes.genericonf.json;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import java.util.Map;
-import junit.framework.TestCase;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
-
 
 /**
  * {@link FormContentParserTest}
@@ -63,12 +65,13 @@ import com.openexchange.datatypes.genericonf.FormElement;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class FormContentParserTest extends TestCase {
+public class FormContentParserTest {
+
     private JSONObject object = null;
     private DynamicFormDescription form = null;
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         object = new JSONObject();
         object.put("login", "blupp");
         object.put("password", "secret");
@@ -78,6 +81,7 @@ public class FormContentParserTest extends TestCase {
         form.add(FormElement.input("login", "Login Name")).add(FormElement.password("password", "Password")).add(FormElement.checkbox("checkbox", "Checkbox"));
     }
 
+    @Test
     public void testParsing() throws JSONException {
         Map<String, Object> content = new FormContentParser().parse(object, form);
 

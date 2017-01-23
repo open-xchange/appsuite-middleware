@@ -97,27 +97,17 @@ public class BasicTest extends CardDAVTest {
         return UserAgents.IOS_8_4_0;
     }
 
-	@Test
-	public void testPutAndGet() throws Exception {
-		/*
-		 * prepare vCard
-		 */
+    @Test
+    public void testPutAndGet() throws Exception {
+        /*
+         * prepare vCard
+         */
         String collection = String.valueOf(getDefaultFolderID());
-    	String uid = randomUID();
-    	String firstName = "John";
-    	String lastName = "Doe";
-    	String email = firstName.toLowerCase() + '.' + lastName.toLowerCase() + "@example.org";
-        String vCard =
-    		"BEGIN:VCARD" + "\r\n" +
-            "PRODID:-//Example Inc.//Example Client 1.0//EN" + "\r\n" +
-			"VERSION:3.0" + "\r\n" +
-			"N:" + lastName + ";" + firstName + ";;;" + "\r\n" +
-			"FN:" + firstName + " " + lastName + "\r\n" +
-			"EMAIL;type=INTERNET;type=WORK;type=pref:" + email + "\r\n" +
-			"UID:" + uid + "\r\n" +
-			"REV:" + formatAsUTC(new Date()) + "\r\n" +
-			"END:VCARD" + "\r\n"
-		;
+        String uid = randomUID();
+        String firstName = "John";
+        String lastName = "Doe";
+        String email = firstName.toLowerCase() + '.' + lastName.toLowerCase() + "@example.org";
+        String vCard = "BEGIN:VCARD" + "\r\n" + "PRODID:-//Example Inc.//Example Client 1.0//EN" + "\r\n" + "VERSION:3.0" + "\r\n" + "N:" + lastName + ";" + firstName + ";;;" + "\r\n" + "FN:" + firstName + " " + lastName + "\r\n" + "EMAIL;type=INTERNET;type=WORK;type=pref:" + email + "\r\n" + "UID:" + uid + "\r\n" + "REV:" + formatAsUTC(new Date()) + "\r\n" + "END:VCARD" + "\r\n";
         /*
          * create vCard resource on server
          */
@@ -156,19 +146,7 @@ public class BasicTest extends CardDAVTest {
         /*
          * update contact on client
          */
-        String updatedVCard =
-            "BEGIN:VCARD" + "\r\n" +
-            "PRODID:-//Example Inc.//Example Client 1.0//EN" + "\r\n" +
-            "VERSION:3.0" + "\r\n" +
-            "N:" + lastName + ";" + firstName + ";;;" + "\r\n" +
-            "FN:" + firstName + " " + lastName + "\r\n" +
-            "EMAIL;type=INTERNET;type=WORK;type=pref:" + email + "\r\n" +
-            "UID:" + uid + "\r\n" +
-            "REV:" + formatAsUTC(new Date()) + "\r\n" +
-            "TEL;type=CELL:352-3534" + "\r\n" +
-            "CATEGORIES:Family,Private" + "\r\n" +
-            "END:VCARD" + "\r\n"
-        ;
+        String updatedVCard = "BEGIN:VCARD" + "\r\n" + "PRODID:-//Example Inc.//Example Client 1.0//EN" + "\r\n" + "VERSION:3.0" + "\r\n" + "N:" + lastName + ";" + firstName + ";;;" + "\r\n" + "FN:" + firstName + " " + lastName + "\r\n" + "EMAIL;type=INTERNET;type=WORK;type=pref:" + email + "\r\n" + "UID:" + uid + "\r\n" + "REV:" + formatAsUTC(new Date()) + "\r\n" + "TEL;type=CELL:352-3534" + "\r\n" + "CATEGORIES:Family,Private" + "\r\n" + "END:VCARD" + "\r\n";
         try {
             put = new PutMethod(getBaseUri() + href);
             put.addRequestHeader(Headers.IF_MATCH, vCardResource.getETag());
@@ -201,7 +179,7 @@ public class BasicTest extends CardDAVTest {
         assertEquals("TEL wrong", "352-3534", vCardResource.getVCard().getTels().get(0).getTelephone());
         assertTrue("CATEGORIES wrong", vCardResource.getVCard().getCategories().getCategories().contains("Family"));
         assertTrue("CATEGORIES wrong", vCardResource.getVCard().getCategories().getCategories().contains("Private"));
-	}
+    }
 
     @Test
     public void testSyncCollection() throws Exception {
@@ -270,7 +248,6 @@ public class BasicTest extends CardDAVTest {
         assertEquals("href not found", href, hrefsNotFound.get(0));
     }
 
-
     @Test
     public void testDiscoverAddressbooks() throws Exception {
         /*
@@ -278,7 +255,7 @@ public class BasicTest extends CardDAVTest {
          */
         List<String> expectedCollections = new ArrayList<String>();
         VisibleFoldersRequest foldersRequest = new VisibleFoldersRequest(EnumAPI.OX_NEW, "contacts", new int[] { FolderObject.OBJECT_ID, FolderObject.FOLDER_NAME });
-        VisibleFoldersResponse foldersResponse = client.execute(foldersRequest);
+        VisibleFoldersResponse foldersResponse = getClient().execute(foldersRequest);
         Iterator<FolderObject> folders = foldersResponse.getPrivateFolders();
         while (folders.hasNext()) {
             expectedCollections.add("/carddav/" + folders.next().getObjectID() + '/');
@@ -301,7 +278,7 @@ public class BasicTest extends CardDAVTest {
         PropFindMethod propFind = new PropFindMethod(getBaseUri() + "/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
         MultiStatusResponse propFindResponse = assertSingleResponse(getWebDAVClient().doPropFind(propFind));
         String principalURL = extractHref(PropertyNames.CURRENT_USER_PRINCIPAL, propFindResponse);
-        assertTrue("username not found in href child of " + PropertyNames.CURRENT_USER_PRINCIPAL, principalURL.contains("/" +  getClient().getValues().getUserId()));
+        assertTrue("username not found in href child of " + PropertyNames.CURRENT_USER_PRINCIPAL, principalURL.contains("/" + getClient().getValues().getUserId()));
         /*
          * discover the principal's addressbook home set
          */

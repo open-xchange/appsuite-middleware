@@ -72,9 +72,11 @@ public class TestWebdavFactoryBuilder {
     private static final int mode = INFO;
 
     public static WebdavFactory buildFactory() throws Exception {
-        switch(mode) {
-        case DUMMY : return buildDummyFactory();
-        case INFO : return buildInfoFactory();
+        switch (mode) {
+            case DUMMY:
+                return buildDummyFactory();
+            case INFO:
+                return buildInfoFactory();
         }
         return null;
     }
@@ -83,7 +85,7 @@ public class TestWebdavFactoryBuilder {
         return DummyResourceManager.getInstance();
     }
 
-    private static WebdavFactory buildInfoFactory() throws Exception{
+    private static WebdavFactory buildInfoFactory() throws Exception {
         final InfostoreWebdavFactory factory = new InfostoreWebdavFactory();
         final InfostoreFacadeImpl database = new InfostoreFacadeImpl();
         factory.setDatabase(database);
@@ -112,14 +114,14 @@ public class TestWebdavFactoryBuilder {
     }
 
     public static void setUp() throws Exception {
-        if(mode == INFO) {
+        if (mode == INFO) {
             TestInit.loadTestProperties();
             Init.startServer();
         }
     }
 
     public static void tearDown() throws Exception {
-        if(mode == INFO) {
+        if (mode == INFO) {
             Init.stopServer();
         }
     }

@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.test.fixtures.transformators;
 
 import com.openexchange.exception.OXException;
@@ -53,18 +54,18 @@ import com.openexchange.groupware.container.Appointment;
 
 public class RecurrenceTypeTransformator implements Transformator {
 
-	@Override
+    @Override
     public Object transform(final String value) throws OXException {
         if ("NONE".equalsIgnoreCase(value) || "NO_RECURRENCE".equalsIgnoreCase(value)) {
-        	return Appointment.NO_RECURRENCE;
+            return Appointment.NO_RECURRENCE;
         } else if ("DAILY".equalsIgnoreCase(value)) {
-        	return Appointment.DAILY;
+            return Appointment.DAILY;
         } else if ("WEEKLY".equalsIgnoreCase(value)) {
-        	return Appointment.WEEKLY;
-        } else if("MONTHLY".equalsIgnoreCase(value)) {
-        	return Appointment.MONTHLY;
-        } else if("YEARLY".equalsIgnoreCase(value)) {
-        	return Appointment.YEARLY;
+            return Appointment.WEEKLY;
+        } else if ("MONTHLY".equalsIgnoreCase(value)) {
+            return Appointment.MONTHLY;
+        } else if ("YEARLY".equalsIgnoreCase(value)) {
+            return Appointment.YEARLY;
         } else {
             throw OXException.general("Unknown recurrence type: " + value);
         }

@@ -51,6 +51,7 @@ package com.openexchange.ajax.contact;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.contact.action.InsertRequest;
 import com.openexchange.ajax.contact.action.InsertResponse;
 import com.openexchange.ajax.contact.action.UpdateRequest;
@@ -99,8 +100,8 @@ public class EmptyEmailTest extends AbstractContactTest {
      * 
      * @param name
      */
-    public EmptyEmailTest(String name) {
-        super(name);
+    public EmptyEmailTest() {
+        super();
     }
 
     /**
@@ -120,7 +121,7 @@ public class EmptyEmailTest extends AbstractContactTest {
         jsonObject = setEmail(jsonObject, email1, email2, email3);
         // and create new InsertRequest with modified body
         final InsertRequest modifiedRequest = new InsertRequest(jsonObject.toString());
-        final InsertResponse response = client.execute(modifiedRequest);
+        final InsertResponse response = getClient().execute(modifiedRequest);
         response.fillObject(contactObj);
         return contactObj.getObjectID();
     }
@@ -141,11 +142,12 @@ public class EmptyEmailTest extends AbstractContactTest {
         JSONObject jsonObject = (JSONObject) request.getBody();
         jsonObject = setEmail(jsonObject, email1, email2, email3);
         EmptyEmailUpdateRequest modifiedRequest = new EmptyEmailUpdateRequest(contactObj, jsonObject);
-        client.execute(modifiedRequest);
+        getClient().execute(modifiedRequest);
     }
 
     /**
-     * Set the email fields in a contact already converted to a JSONObject. 
+     * Set the email fields in a contact already converted to a JSONObject.
+     * 
      * @param jo JSONObject
      * @param email1 email1
      * @param email2 email2
@@ -166,8 +168,10 @@ public class EmptyEmailTest extends AbstractContactTest {
 
     /**
      * Create new contact with email[1-3] set to null.
+     * 
      * @throws Exception
      */
+    @Test
     public void testNewNull() throws Exception {
         final Contact contactObj = createContactObject("Schmidt, Hans");
         contactObj.setGivenName("Hans");
@@ -177,19 +181,23 @@ public class EmptyEmailTest extends AbstractContactTest {
 
     /**
      * Create a new contact with email[1-3] set to the empty String.
+     * 
      * @throws Exception
      */
+    @Test
     public void testNewEmpty() throws Exception {
         final Contact contactObj = createContactObject("Schmidt, Hans");
         contactObj.setGivenName("Hans");
         contactObj.setSurName("Schmidt");
         insertContact(contactObj, "", "", "");
     }
-    
+
     /**
      * Create a new contact with email[1-3] set to the empty String.
+     * 
      * @throws Exception
      */
+    @Test
     public void testNewSpacy() throws Exception {
         final Contact contactObj = createContactObject("Schmidt, Hans");
         contactObj.setGivenName("Hans");
@@ -199,8 +207,10 @@ public class EmptyEmailTest extends AbstractContactTest {
 
     /**
      * Update an existing contact to hold nulls in email[1-3].
+     * 
      * @throws Exception
      */
+    @Test
     public void testUpdateNull() throws Exception {
         final Contact contactObj = createContactObject("Schmidt, Hans");
         contactObj.setGivenName("Hans");
@@ -215,8 +225,10 @@ public class EmptyEmailTest extends AbstractContactTest {
 
     /**
      * Update an existing contact to hold empty strings in email[1-3].
+     * 
      * @throws Exception
      */
+    @Test
     public void testUpdateEmpty() throws Exception {
         final Contact contactObj = createContactObject("Schmidt, Hans");
         contactObj.setGivenName("Hans");
@@ -228,11 +240,13 @@ public class EmptyEmailTest extends AbstractContactTest {
         Contact loadedContact = loadContact(id, contactFolderId);
         updateContact(loadedContact, contactFolderId, "", "", "");
     }
-    
+
     /**
      * Update an existing contact to hold empty strings in email[1-3].
+     * 
      * @throws Exception
      */
+    @Test
     public void testUpdateSpacy() throws Exception {
         final Contact contactObj = createContactObject("Schmidt, Hans");
         contactObj.setGivenName("Hans");

@@ -49,8 +49,8 @@
 
 package com.openexchange.mail;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 /**
  * {@link MailAPITestSuite}
@@ -58,88 +58,72 @@ import junit.framework.TestSuite;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  *
  */
-public final class MailAPITestSuite extends TestSuite {
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    com.openexchange.mail.storagesconsistency.MailStoragesConsistencyTest.class,
+    /*
+     * Message storage
+     */
+    //      com.openexchange.mail.messagestorage.MailAppendTest.class,
+    com.openexchange.mail.messagestorage.MailAttachmentTest.class,
+    com.openexchange.mail.messagestorage.MailColorLabelTest.class,
+    com.openexchange.mail.messagestorage.MailCopyTest.class,
+    com.openexchange.mail.messagestorage.MailDeleteTest.class,
+    com.openexchange.mail.messagestorage.MailFlagsTest.class,
+    com.openexchange.mail.messagestorage.MailGetTest.class,
+    com.openexchange.mail.messagestorage.MailImageTest.class,
+    com.openexchange.mail.messagestorage.MailMoveTest.class,
+    com.openexchange.mail.messagestorage.MailSaveDraftTest.class,
+    com.openexchange.mail.messagestorage.MailSearchTest.class,
+    /*
+     * Reply/forward
+     */
+    com.openexchange.mail.replyforward.MailForwardTest.class,
+    com.openexchange.mail.replyforward.MailReplyTest.class,
+    /*
+     * Folder storage
+     */
+    com.openexchange.mail.folderstorage.MailFolderTest.class,
+    /*
+     * Utility tests
+     */
+    com.openexchange.mail.utilitytests.MailCharsetDetectorTest.class,
+    com.openexchange.mail.utilitytests.MailMessageSerializationTest.class,
+    com.openexchange.mail.utilitytests.CSSMatcherTest.class,
+    /*
+     * Unique ID tests
+     */
+    com.openexchange.mail.MailIDTest.class,
+    /*
+     * Bugfix tests
+     */
+    com.openexchange.mail.MailBugfixTest.class,
+    /*
+     * Structured output tests
+     */
+    com.openexchange.mail.structure.MailSimpleStructureTest.class,
+    com.openexchange.mail.structure.MailMultipartAlternativeStructureTest.class,
+    com.openexchange.mail.structure.MailMultipartMixedStructureTest.class,
+    com.openexchange.mail.structure.MailNestedMessageStructureTest.class,
+    com.openexchange.mail.structure.MailTNEFStructureTest.class,
+    com.openexchange.mail.structure.MailUUEncodedStructureTest.class,
+    com.openexchange.mail.structure.MailPlainTextStructureTest.class,
+    com.openexchange.mail.structure.Bug16174StructureTest.class,
+    com.openexchange.mail.structure.Bug18846StructureTest.class,
+    com.openexchange.mail.structure.Bug18981StructureTest.class,
+    com.openexchange.mail.structure.Bug19471StructureTest.class,
+    com.openexchange.mail.structure.Bug20425_StructureTest.class,
+    com.openexchange.mail.structure.Bug22735_StructureTest.class,
+    com.openexchange.mail.structure.Bug23037_StructureTest.class,
+    com.openexchange.mail.structure.Bug26317_StructureTest.class,
+    com.openexchange.mail.structure.Bug29227_StructureTest.class,
+    com.openexchange.mail.structure.Bug29484_StructureTest.class,
+    com.openexchange.mail.structure.Bug27640_StructureTest.class,
+    com.openexchange.mail.structure.SMIMEStructureTest.class,
+    com.openexchange.mail.structure.SMIMEStructureTest2.class,
+    MailConverterTest.class,
 
-	/**
-	 * Initializes a new {@link MailAPITestSuite}
-	 */
-	public MailAPITestSuite() {
-		super();
-	}
+})
+public final class MailAPITestSuite  {
 
-	/**
-	 * @return a test suite containing smoke tests.
-	 */
-	public static Test suite() {
-		final TestSuite mailSuite = new TestSuite();
-		/*
-		 * Storages consistency
-		 */
-		mailSuite.addTestSuite(com.openexchange.mail.storagesconsistency.MailStoragesConsistencyTest.class);
-		/*
-		 * Message storage
-		 */
-//		mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailAppendTest.class);
-		mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailAttachmentTest.class);
-		mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailColorLabelTest.class);
-		mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailCopyTest.class);
-		mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailDeleteTest.class);
-		mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailFlagsTest.class);
-		mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailGetTest.class);
-		mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailImageTest.class);
-		mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailMoveTest.class);
-		mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailSaveDraftTest.class);
-		mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailSearchTest.class);
-		/*
-		 * Reply/forward
-		 */
-		mailSuite.addTestSuite(com.openexchange.mail.replyforward.MailForwardTest.class);
-		mailSuite.addTestSuite(com.openexchange.mail.replyforward.MailReplyTest.class);
-		/*
-		 * Folder storage
-		 */
-		mailSuite.addTestSuite(com.openexchange.mail.folderstorage.MailFolderTest.class);
-		/*
-		 * Utility tests
-		 */
-		mailSuite.addTestSuite(com.openexchange.mail.utilitytests.MailCharsetDetectorTest.class);
-		mailSuite.addTestSuite(com.openexchange.mail.utilitytests.MailMessageSerializationTest.class);
-		mailSuite.addTestSuite(com.openexchange.mail.utilitytests.CSSMatcherTest.class);
-		/*
-		 * Unique ID tests
-		 */
-		mailSuite.addTestSuite(com.openexchange.mail.MailIDTest.class);
-		/*
-		 * Bugfix tests
-		 */
-		mailSuite.addTestSuite(com.openexchange.mail.MailBugfixTest.class);
-		/*
-		 * Structured output tests
-		 */
-		mailSuite.addTestSuite(com.openexchange.mail.structure.MailSimpleStructureTest.class);
-		mailSuite.addTestSuite(com.openexchange.mail.structure.MailMultipartAlternativeStructureTest.class);
-		mailSuite.addTestSuite(com.openexchange.mail.structure.MailMultipartMixedStructureTest.class);
-		mailSuite.addTestSuite(com.openexchange.mail.structure.MailNestedMessageStructureTest.class);
-		mailSuite.addTestSuite(com.openexchange.mail.structure.MailTNEFStructureTest.class);
-		mailSuite.addTestSuite(com.openexchange.mail.structure.MailUUEncodedStructureTest.class);
-		mailSuite.addTestSuite(com.openexchange.mail.structure.MailPlainTextStructureTest.class);
-		mailSuite.addTestSuite(com.openexchange.mail.structure.Bug16174StructureTest.class);
-		mailSuite.addTestSuite(com.openexchange.mail.structure.Bug18846StructureTest.class);
-		mailSuite.addTestSuite(com.openexchange.mail.structure.Bug18981StructureTest.class);
-		mailSuite.addTestSuite(com.openexchange.mail.structure.Bug19471StructureTest.class);
-		mailSuite.addTestSuite(com.openexchange.mail.structure.Bug20425_StructureTest.class);
-		mailSuite.addTestSuite(com.openexchange.mail.structure.Bug22735_StructureTest.class);
-		mailSuite.addTestSuite(com.openexchange.mail.structure.Bug23037_StructureTest.class);
-		mailSuite.addTestSuite(com.openexchange.mail.structure.Bug26317_StructureTest.class);
-		mailSuite.addTestSuite(com.openexchange.mail.structure.Bug29227_StructureTest.class);
-		mailSuite.addTestSuite(com.openexchange.mail.structure.Bug29484_StructureTest.class);
-		mailSuite.addTestSuite(com.openexchange.mail.structure.Bug27640_StructureTest.class);
-		mailSuite.addTestSuite(com.openexchange.mail.structure.SMIMEStructureTest.class);
-		mailSuite.addTestSuite(com.openexchange.mail.structure.SMIMEStructureTest2.class);
-		/*
-		 * MimeMessageConverter tests
-		 */
-		mailSuite.addTestSuite(MailConverterTest.class);
-		return mailSuite;
-	}
 }

@@ -52,15 +52,16 @@ package com.openexchange.ajax.infostore.thirdparty.actions;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
-
 /**
  * {@link DeleteFolderResponse}
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class DeleteFolderResponse extends AbstractAJAXResponse {
+
     /**
      * Initializes a new {@link DeleteFolderResponse}.
+     * 
      * @param response
      */
     protected DeleteFolderResponse(Response response) {

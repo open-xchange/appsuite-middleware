@@ -60,7 +60,6 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.oauth.types.OAuthService;
 import com.openexchange.ajax.writer.ResponseWriter;
 
-
 /**
  * {@link OAuthServicesParser}
  *
@@ -70,6 +69,7 @@ public class OAuthServicesParser extends AbstractAJAXParser<OAuthServicesRespons
 
     /**
      * Initializes a new {@link OAuthServicesParser}.
+     * 
      * @param failOnError
      */
     protected OAuthServicesParser(boolean failOnError) {

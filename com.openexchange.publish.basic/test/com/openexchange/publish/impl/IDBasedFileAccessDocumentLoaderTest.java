@@ -109,8 +109,8 @@ public class IDBasedFileAccessDocumentLoaderTest {
         MockitoAnnotations.initMocks(this);
     }
 
-    @Test
-    public void testLoad_NoDocumentFound_ReturnEmptyCollection() throws OXException {
+     @Test
+     public void testLoad_NoDocumentFound_ReturnEmptyCollection() throws OXException {
         PowerMockito.when(this.idBasedFileAccessFactory.createAccess((Session) Matchers.any())).thenReturn(this.idBasedFileAccess);
 
         Collection<? extends Object> load = this.idBasedFileAccessDocumentLoader.load(publication, null);
@@ -118,8 +118,8 @@ public class IDBasedFileAccessDocumentLoaderTest {
         Assert.assertEquals(0, load.size());
     }
 
-    @Test
-    public void testLoad_PublicationNull_ReturnEmptyCollection() throws OXException {
+     @Test
+     public void testLoad_PublicationNull_ReturnEmptyCollection() throws OXException {
         PowerMockito.when(this.idBasedFileAccessFactory.createAccess((Session) Matchers.any())).thenReturn(this.idBasedFileAccess);
 
         Collection<? extends Object> load = this.idBasedFileAccessDocumentLoader.load(null, null);
@@ -127,8 +127,8 @@ public class IDBasedFileAccessDocumentLoaderTest {
         Assert.assertEquals(0, load.size());
     }
 
-    @Test
-    public void testLoad_Fine_ReturnCollectionWithDocument() throws OXException {
+     @Test
+     public void testLoad_Fine_ReturnCollectionWithDocument() throws OXException {
         PowerMockito.when(this.idBasedFileAccessFactory.createAccess((Session) Matchers.any())).thenReturn(this.idBasedFileAccess);
         PowerMockito.when(this.idBasedFileAccess.getDocument(Matchers.anyString(), Matchers.anyString())).thenReturn(this.inputStream);
 

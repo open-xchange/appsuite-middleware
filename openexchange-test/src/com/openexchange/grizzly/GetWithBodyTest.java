@@ -49,12 +49,13 @@
 
 package com.openexchange.grizzly;
 
+import static org.junit.Assert.assertEquals;
 import java.util.Map;
 import org.json.JSONObject;
 import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.simple.AbstractSimpleClientTest;
 import com.openexchange.ajax.simple.SimpleResponse;
-
 
 /**
  * {@link GetWithBodyTest} - Test that the body of HTTP methods that have no clear specification about transporting data within the body is
@@ -81,12 +82,14 @@ public class GetWithBodyTest extends AbstractSimpleClientTest {
     }
 
     /**
-     * Tests that the body of the method is consumed completely. 
+     * Tests that the body of the method is consumed completely.
+     * 
      * @throws Exception
      */
+    @Test
     public void testGetWithBody() throws Exception {
         as(USER1);
-        SimpleResponse response = callGeneral("grizzlytest", "getWithBody", "body", simplePayload );
+        SimpleResponse response = callGeneral("grizzlytest", "getWithBody", "body", simplePayload);
         Map<String, Object> objectData = response.getObjectData();
         Map<String, Object> payloadData = (Map<String, Object>) objectData.get("payload");
         Object responseValue1 = payloadData.get(key1);

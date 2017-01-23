@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.task;
 
+import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.TimeZone;
 import org.junit.After;
@@ -79,16 +80,15 @@ public class Bug38782Test extends AbstractAJAXSession {
     private TimeZone timeZone;
     private Task task;
 
-    public Bug38782Test(String name) {
-        super(name);
+    public Bug38782Test() {
+        super();
     }
 
     @Before
-    @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
         client1 = getClient();
-        timeZone = client.getValues().getTimeZone();
+        timeZone = getClient().getValues().getTimeZone();
         task = new Task();
         task.setParentFolderID(client1.getValues().getPrivateTaskFolder());
         task.setTitle("Test for bug 38782");
@@ -103,10 +103,13 @@ public class Bug38782Test extends AbstractAJAXSession {
     }
 
     @After
-    @Override
-    protected void tearDown() throws Exception {
-        client1.execute(new DeleteRequest(task));
-        super.tearDown();
+    public void tearDown() throws Exception {
+        try {
+            client1.execute(new DeleteRequest(task));
+        } finally {
+            super.tearDown();
+        }
+
     }
 
     @Test

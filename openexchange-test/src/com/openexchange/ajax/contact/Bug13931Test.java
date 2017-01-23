@@ -50,8 +50,13 @@
 package com.openexchange.ajax.contact;
 
 import static com.openexchange.ajax.folder.Create.ocl;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import java.util.Date;
 import org.json.JSONArray;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.contact.action.AllRequest;
 import com.openexchange.ajax.contact.action.InsertRequest;
 import com.openexchange.ajax.folder.Create;
@@ -78,25 +83,18 @@ public class Bug13931Test extends AbstractAJAXSession {
 
     private final int[] columns = new int[] { Contact.OBJECT_ID, Contact.SUR_NAME };
 
-    public Bug13931Test(final String name) {
-        super(name);
+    public Bug13931Test() {
+        super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
         userId = getClient().getValues().getUserId();
         privateFolderId = getClient().getValues().getPrivateContactFolder();
-        final OCLPermission ocl = ocl(
-            userId,
-            false,
-            true,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION);
-        folder = Create.folder(privateFolderId, "Folder to test bug 13931 ("+new Date().getTime()+")", FolderObject.CONTACT, FolderObject.PRIVATE, ocl);
+        final OCLPermission ocl = ocl(userId, false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+        folder = Create.folder(privateFolderId, "Folder to test bug 13931 (" + new Date().getTime() + ")", FolderObject.CONTACT, FolderObject.PRIVATE, ocl);
         final CommonInsertResponse response = getClient().execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_OLD, folder));
         response.fillObject(folder);
         folderId = folder.getObjectID();
@@ -104,27 +102,28 @@ public class Bug13931Test extends AbstractAJAXSession {
         AAA = new Contact();
         AAA.setParentFolderID(folderId);
         AAA.setSurName("AAA");
-        client.execute(new InsertRequest(AAA)).fillObject(AAA);
+        getClient().execute(new InsertRequest(AAA)).fillObject(AAA);
 
         BBB = new Contact();
         BBB.setParentFolderID(folderId);
         BBB.setSurName("BBB");
-        client.execute(new InsertRequest(BBB)).fillObject(BBB);
+        getClient().execute(new InsertRequest(BBB)).fillObject(BBB);
 
         aaa = new Contact();
         aaa.setParentFolderID(folderId);
         aaa.setSurName("aaa");
-        client.execute(new InsertRequest(aaa)).fillObject(aaa);
+        getClient().execute(new InsertRequest(aaa)).fillObject(aaa);
 
         bbb = new Contact();
         bbb.setParentFolderID(folderId);
         bbb.setSurName("bbb");
-        client.execute(new InsertRequest(bbb)).fillObject(bbb);
+        getClient().execute(new InsertRequest(bbb)).fillObject(bbb);
     }
 
+    @Test
     public void testBug13931() throws Exception {
         final AllRequest allRequest = new AllRequest(folderId, columns);
-        final CommonAllResponse allResponse = client.execute(allRequest);
+        final CommonAllResponse allResponse = getClient().execute(allRequest);
         final JSONArray jsonArray = (JSONArray) allResponse.getResponse().getData();
         assertNotNull("No result", jsonArray);
         assertEquals("Wrong amount of results", 4, jsonArray.length());
@@ -134,11 +133,13 @@ public class Bug13931Test extends AbstractAJAXSession {
         assertEquals("Wrong order", bbb.getObjectID(), jsonArray.getJSONArray(3).getInt(0));
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder.getObjectID(), folder.getLastModified()));
-
-        super.tearDown();
+        try {
+            getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder.getObjectID(), folder.getLastModified()));
+        } finally {
+            super.tearDown();
+        }
     }
 
 }

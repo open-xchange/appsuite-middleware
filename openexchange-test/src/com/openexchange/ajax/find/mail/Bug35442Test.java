@@ -49,7 +49,10 @@
 
 package com.openexchange.ajax.find.mail;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import java.util.List;
+import org.junit.Test;
 import com.openexchange.ajax.find.actions.AutocompleteRequest;
 import com.openexchange.ajax.find.actions.AutocompleteResponse;
 import com.openexchange.find.Module;
@@ -63,14 +66,11 @@ import com.openexchange.find.mail.MailFacetType;
  */
 public class Bug35442Test extends AbstractMailFindTest {
 
-    public Bug35442Test(String name) {
-        super(name);
-    }
-
+    @Test
     public void testDefaultContactOptionIsSwitchedToToInSentFolder() throws Exception {
         String prefix = defaultAddress.substring(0, 3);
         AutocompleteRequest autocompleteRequest = new AutocompleteRequest(prefix, Module.MAIL.getIdentifier(), prepareFacets());
-        AutocompleteResponse autocompleteResponse = client.execute(autocompleteRequest);
+        AutocompleteResponse autocompleteResponse = getClient().execute(autocompleteRequest);
         List<Facet> facets = autocompleteResponse.getFacets();
         DefaultFacet contactFacet = (DefaultFacet) findByType(MailFacetType.CONTACTS, facets);
         assertNotNull(contactFacet);
@@ -81,11 +81,8 @@ public class Bug35442Test extends AbstractMailFindTest {
         Option option = contactFacet.getValues().get(0).getOptions().get(0);
         assertEquals("from", option.getId());
 
-        autocompleteRequest = new AutocompleteRequest(
-            prefix,
-            Module.MAIL.getIdentifier(),
-            prepareFacets(client.getValues().getSentFolder()));
-        autocompleteResponse = client.execute(autocompleteRequest);
+        autocompleteRequest = new AutocompleteRequest(prefix, Module.MAIL.getIdentifier(), prepareFacets(getClient().getValues().getSentFolder()));
+        autocompleteResponse = getClient().execute(autocompleteRequest);
         facets = autocompleteResponse.getFacets();
         contactFacet = (DefaultFacet) findByType(MailFacetType.CONTACTS, facets);
         assertNotNull(contactFacet);

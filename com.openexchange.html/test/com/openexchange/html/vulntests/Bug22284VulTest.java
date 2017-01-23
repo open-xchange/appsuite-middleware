@@ -60,8 +60,8 @@ import com.openexchange.html.AssertionHelper;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class Bug22284VulTest extends AbstractSanitizing {
-    @Test
-    public void testSanitize() {
+     @Test
+     public void testSanitize() {
         String content = "<HTML><HEAD><STYLE " +
             "id=\"styletagforeditor\">body{background-color:rgb(255,255,255);direction:ltr;font-family:times " +
             "new " +

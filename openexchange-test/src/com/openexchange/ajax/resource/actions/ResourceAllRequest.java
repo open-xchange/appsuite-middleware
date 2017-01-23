@@ -64,82 +64,82 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  */
 public final class ResourceAllRequest extends AbstractResourceRequest<ResourceAllResponse> {
 
-	private final boolean failOnError;
+    private final boolean failOnError;
 
-	/**
-	 * Initializes a new {@link ResourceAllRequest}
-	 *
-	 * @param failOnError
-	 *            <code>true</code> to fail on error; otherwise
-	 *            <code>false</code>
-	 */
-	public ResourceAllRequest(final boolean failOnError) {
-		super();
-		this.failOnError = failOnError;
-	}
+    /**
+     * Initializes a new {@link ResourceAllRequest}
+     *
+     * @param failOnError
+     *            <code>true</code> to fail on error; otherwise
+     *            <code>false</code>
+     */
+    public ResourceAllRequest(final boolean failOnError) {
+        super();
+        this.failOnError = failOnError;
+    }
 
-	public ResourceAllRequest() {
-	    this(true);
-	}
+    public ResourceAllRequest() {
+        this(true);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-	 */
-	@Override
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
+     */
+    @Override
     public Object getBody() throws JSONException {
-		return null;
-	}
+        return null;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-	 */
-	@Override
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
+     */
+    @Override
     public Method getMethod() {
-		return Method.GET;
-	}
+        return Method.GET;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-	 */
-	@Override
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
+     */
+    @Override
     public Parameter[] getParameters() {
-		final List<Parameter> params = new ArrayList<Parameter>();
-		params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL));
-		return params.toArray(new Parameter[params.size()]);
-	}
+        final List<Parameter> params = new ArrayList<Parameter>();
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL));
+        return params.toArray(new Parameter[params.size()]);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-	 */
-	@Override
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
+     */
+    @Override
     public ResourceAllParser getParser() {
-		return new ResourceAllParser(failOnError);
-	}
+        return new ResourceAllParser(failOnError);
+    }
 
-	private static final class ResourceAllParser extends AbstractAJAXParser<ResourceAllResponse> {
+    private static final class ResourceAllParser extends AbstractAJAXParser<ResourceAllResponse> {
 
-		/**
-		 * Default constructor.
-		 */
-		ResourceAllParser(final boolean failOnError) {
-			super(failOnError);
-		}
+        /**
+         * Default constructor.
+         */
+        ResourceAllParser(final boolean failOnError) {
+            super(failOnError);
+        }
 
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		protected ResourceAllResponse createResponse(final Response response) throws JSONException {
-			return new ResourceAllResponse(response);
-		}
-	}
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        protected ResourceAllResponse createResponse(final Response response) throws JSONException {
+            return new ResourceAllResponse(response);
+        }
+    }
 
 }

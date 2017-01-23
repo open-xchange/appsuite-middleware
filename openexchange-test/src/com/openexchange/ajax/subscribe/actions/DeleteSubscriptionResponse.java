@@ -51,7 +51,6 @@ package com.openexchange.ajax.subscribe.actions;
 
 import com.openexchange.ajax.container.Response;
 
-
 /**
  * {@link DeleteSubscriptionResponse}
  *

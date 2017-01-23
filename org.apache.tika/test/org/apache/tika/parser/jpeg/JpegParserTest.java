@@ -19,20 +19,22 @@ package org.apache.tika.parser.jpeg;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
-
-import junit.framework.TestCase;
-
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.TIFF;
 import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
+import org.junit.Test;
 import org.xml.sax.helpers.DefaultHandler;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
-public class JpegParserTest extends TestCase {
-    private final Parser parser = new JpegParser();
+public class JpegParserTest {    private final Parser parser = new JpegParser();
     
-    public void testJPEG() throws Exception {
+         @Test
+     public void testJPEG() throws Exception {
         Metadata metadata = new Metadata();
         metadata.set(Metadata.CONTENT_TYPE, "image/jpeg");
         InputStream stream =
@@ -82,7 +84,8 @@ public class JpegParserTest extends TestCase {
     /**
      * Test for a file with Geographic information (lat, long etc) in it
      */
-    public void testJPEGGeo() throws Exception {
+         @Test
+     public void testJPEGGeo() throws Exception {
         Metadata metadata = new Metadata();
         metadata.set(Metadata.CONTENT_TYPE, "image/jpeg");
         InputStream stream =
@@ -128,7 +131,8 @@ public class JpegParserTest extends TestCase {
      *  different way, see TIKA-915 for details
      * Disabled for now, pending a fix to the underlying library
      */
-    public void testJPEGGeo2() throws Exception {
+         @Test
+     public void testJPEGGeo2() throws Exception {
        Metadata metadata = new Metadata();
        metadata.set(Metadata.CONTENT_TYPE, "image/jpeg");
        InputStream stream =
@@ -140,7 +144,8 @@ public class JpegParserTest extends TestCase {
        assertEquals("-1.567886", metadata.get(Metadata.LONGITUDE));
     }
     
-    public void testJPEGTitleAndDescription() throws Exception {
+         @Test
+     public void testJPEGTitleAndDescription() throws Exception {
         Metadata metadata = new Metadata();
         metadata.set(Metadata.CONTENT_TYPE, "image/jpeg");
         InputStream stream =
@@ -178,7 +183,8 @@ public class JpegParserTest extends TestCase {
         assertEquals("Inch", metadata.get(Metadata.RESOLUTION_UNIT));          
     }
     
-    public void testJPEGTitleAndDescriptionPhotoshop() throws Exception {
+         @Test
+     public void testJPEGTitleAndDescriptionPhotoshop() throws Exception {
         Metadata metadata = new Metadata();
         metadata.set(Metadata.CONTENT_TYPE, "image/jpeg");
         InputStream stream =
@@ -195,7 +201,8 @@ public class JpegParserTest extends TestCase {
         assertTrue("got " + subject, subject.contains("bird watching")); 
     }
     
-    public void testJPEGTitleAndDescriptionXnviewmp() throws Exception {
+         @Test
+     public void testJPEGTitleAndDescriptionXnviewmp() throws Exception {
         Metadata metadata = new Metadata();
         metadata.set(Metadata.CONTENT_TYPE, "image/jpeg");
         InputStream stream =
@@ -213,7 +220,8 @@ public class JpegParserTest extends TestCase {
         assertTrue("'nature reserve'" + " not in " + keywords, keywords.contains("nature reserve"));     
     }
     
-    public void testJPEGoddTagComponent() throws Exception {
+         @Test
+     public void testJPEGoddTagComponent() throws Exception {
        Metadata metadata = new Metadata();
        metadata.set(Metadata.CONTENT_TYPE, "image/jpeg");
        InputStream stream =

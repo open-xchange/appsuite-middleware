@@ -141,7 +141,7 @@
 //    }
 //
 //    @Test
-//    public void testTargetsAreRemovedFromShares() throws Exception {
+//     public void testTargetsAreRemovedFromShares() throws Exception {
 //        List<Share> toDelete = new ArrayList<Share>(2);
 //        toDelete.add(new Share(t1.getModule(), t1.getFolder()));
 //        toDelete.add(new Share(t2.getModule(), t2.getFolder()));
@@ -153,7 +153,7 @@
 //    }
 //
 //    @Test
-//    public void testShareAndGuestAreRemovedWhenTargetsAreEmpty() throws Exception {
+//     public void testShareAndGuestAreRemovedWhenTargetsAreEmpty() throws Exception {
 //        List<Share> toDelete = new ArrayList<Share>(2);
 //        toDelete.add(new Share(t1.getModule(), t1.getFolder()));
 //        toDelete.add(new Share(t2.getModule(), t2.getFolder()));
@@ -166,7 +166,7 @@
 //    }
 //
 //    @Test
-//    public void testTargetDeletionForAllSharesIfNoGuestsAreSpecified() throws Exception {
+//     public void testTargetDeletionForAllSharesIfNoGuestsAreSpecified() throws Exception {
 //        List<Share> toDelete = new ArrayList<Share>(2);
 //        toDelete.add(new Share(t1.getModule(), t1.getFolder()));
 //        toDelete.add(new Share(t2.getModule(), t2.getFolder()));

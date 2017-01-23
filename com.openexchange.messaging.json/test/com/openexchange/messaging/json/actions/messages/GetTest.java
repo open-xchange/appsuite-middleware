@@ -49,7 +49,11 @@
 
 package com.openexchange.messaging.json.actions.messages;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
@@ -66,7 +70,8 @@ public class GetTest extends AbstractMessagingActionTest {
 
     // Success Cases
 
-    public void testGet() throws OXException {
+         @Test
+     public void testGet() throws OXException {
         final AJAXRequestData req = new AJAXRequestData();
 
         req.putParameter("messagingService", "com.openexchange.test1");
@@ -91,7 +96,8 @@ public class GetTest extends AbstractMessagingActionTest {
         assertEquals(false, args[2]);
     }
 
-    public void testPeek() throws OXException {
+         @Test
+     public void testPeek() throws OXException {
         final AJAXRequestData req = new AJAXRequestData();
 
         req.putParameter("messagingService", "com.openexchange.test1");
@@ -114,7 +120,8 @@ public class GetTest extends AbstractMessagingActionTest {
 
     // Error Cases
 
-    public void testMissingMessagingService() throws OXException {
+         @Test
+     public void testMissingMessagingService() throws OXException {
         final AJAXRequestData req = new AJAXRequestData();
 
         req.putParameter("folder", "theFolderID");
@@ -124,7 +131,8 @@ public class GetTest extends AbstractMessagingActionTest {
         assertFails(req);
     }
 
-    public void testMissingAccountID() throws OXException {
+         @Test
+     public void testMissingAccountID() throws OXException {
         final AJAXRequestData req = new AJAXRequestData();
 
         req.putParameter("messagingService", "com.openexchange.test1");
@@ -134,7 +142,8 @@ public class GetTest extends AbstractMessagingActionTest {
         assertFails(req);
     }
 
-    public void testMissingFolder() throws OXException {
+         @Test
+     public void testMissingFolder() throws OXException {
         final AJAXRequestData req = new AJAXRequestData();
 
         req.putParameter("messagingService", "com.openexchange.test1");
@@ -144,7 +153,8 @@ public class GetTest extends AbstractMessagingActionTest {
         assertFails(req);
     }
 
-    public void testMissingID() throws OXException {
+         @Test
+     public void testMissingID() throws OXException {
         final AJAXRequestData req = new AJAXRequestData();
 
         req.putParameter("messagingService", "com.openexchange.test1");
@@ -154,7 +164,8 @@ public class GetTest extends AbstractMessagingActionTest {
         assertFails(req);
     }
 
-    public void testInvalidPeekParameter() throws OXException {
+         @Test
+     public void testInvalidPeekParameter() throws OXException {
         final AJAXRequestData req = new AJAXRequestData();
 
         req.putParameter("messagingService", "com.openexchange.test1");

@@ -54,13 +54,17 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import junit.framework.TestCase;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.microformats.datasources.SimMicroformatSource;
 import com.openexchange.subscribe.microformats.parser.SimOXMFParser;
 import com.openexchange.subscribe.microformats.parser.SimOXMFParserFactory;
 import com.openexchange.subscribe.microformats.transformers.SimMapTransformer;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 
 /**
@@ -69,12 +73,12 @@ import com.openexchange.subscribe.microformats.transformers.SimMapTransformer;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class MicroformatSubscribeServiceTest extends TestCase {
-
+public class MicroformatSubscribeServiceTest {
     // here we'll test our transformation workflow
     // The data from the microformat source is passed on to the OXMF Parser which turns the OXMF into a List<Map<String, String>> structure
     // which in turn is passed to the transformer that spits out ox objects understood by the rest of the system
-    public void testGetContent() throws OXException {
+         @Test
+     public void testGetContent() throws OXException {
         MicroformatSubscribeService subscribeService = new MicroformatSubscribeService();
 
         SimMicroformatSource mfSource = new SimMicroformatSource("I would normally be microformatted HTML");
@@ -111,7 +115,8 @@ public class MicroformatSubscribeServiceTest extends TestCase {
 
     }
 
-    public void testConfigureParser() {
+         @Test
+     public void testConfigureParser() {
         MicroformatSubscribeService subscribeService = new MicroformatSubscribeService();
 
         SimOXMFParser parser = new SimOXMFParser(null);

@@ -91,9 +91,7 @@ public class UpdateLinkRequest extends AbstractDriveRequest<UpdateLinkResponse> 
 
     @Override
     public Parameter[] getParameters() throws IOException, JSONException {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, "updateLink"),
-            new Parameter("root", root)
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, "updateLink"), new Parameter("root", root)
         };
     }
 

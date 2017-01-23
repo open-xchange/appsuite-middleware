@@ -49,11 +49,15 @@
 
 package com.openexchange.ajax.appointment;
 
+import static org.junit.Assert.assertEquals;
 import java.io.ByteArrayInputStream;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
-import junit.framework.AssertionFailedError;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
@@ -85,15 +89,11 @@ public class AppointmentAttachmentTests extends AbstractAJAXSession {
 
     private Date creationDate;
 
-    public AppointmentAttachmentTests(String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
-        folderId = client.getValues().getPrivateAppointmentFolder();
-        tz = client.getValues().getTimeZone();
+        folderId = getClient().getValues().getPrivateAppointmentFolder();
+        tz = getClient().getValues().getTimeZone();
         appointment = new Appointment();
         appointment.setTitle("Test appointment for testing attachments");
         Calendar calendar = TimeTools.createCalendar(tz);
@@ -102,34 +102,33 @@ public class AppointmentAttachmentTests extends AbstractAJAXSession {
         appointment.setEndDate(calendar.getTime());
         appointment.setParentFolderID(folderId);
         appointment.setIgnoreConflicts(true);
-        client.execute(new InsertRequest(appointment, tz)).fillAppointment(appointment);
-        attachmentId = client.execute(new AttachRequest(appointment, "test.txt", new ByteArrayInputStream("Test".getBytes()), "text/plain")).getId();
-        com.openexchange.ajax.attach.actions.GetResponse response = client.execute(new com.openexchange.ajax.attach.actions.GetRequest(appointment, attachmentId));
+        getClient().execute(new InsertRequest(appointment, tz)).fillAppointment(appointment);
+        attachmentId = getClient().execute(new AttachRequest(appointment, "test.txt", new ByteArrayInputStream("Test".getBytes()), "text/plain")).getId();
+        com.openexchange.ajax.attach.actions.GetResponse response = getClient().execute(new com.openexchange.ajax.attach.actions.GetRequest(appointment, attachmentId));
         long timestamp = response.getAttachment().getCreationDate().getTime();
         creationDate = new Date(timestamp - tz.getOffset(timestamp));
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        client.execute(new DeleteRequest(appointment));
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
+        try {
+            getClient().execute(new DeleteRequest(appointment));
+        } finally {
+            super.tearDown();
+        }
     }
 
+    @Test
     public void testLastModifiedOfNewestAttachmentWithGet() throws Throwable {
-        GetResponse response = client.execute(new GetRequest(appointment.getParentFolderID(), appointment.getObjectID()));
+        GetResponse response = getClient().execute(new GetRequest(appointment.getParentFolderID(), appointment.getObjectID()));
         appointment.setLastModified(response.getTimestamp());
         Appointment test = response.getAppointment(tz);
         assertEquals("Creation date of attachment does not match.", creationDate, test.getLastModifiedOfNewestAttachment());
     }
 
+    @Test
     public void testLastModifiedOfNewestAttachmentWithAll() throws Throwable {
-        CommonAllResponse response = client.execute(new AllRequest(
-            appointment.getParentFolderID(),
-            new int[] { Appointment.OBJECT_ID, Appointment.LAST_MODIFIED_OF_NEWEST_ATTACHMENT },
-            appointment.getStartDate(),
-            appointment.getEndDate(),
-            tz,
-            true));
+        CommonAllResponse response = getClient().execute(new AllRequest(appointment.getParentFolderID(), new int[] { Appointment.OBJECT_ID, Appointment.LAST_MODIFIED_OF_NEWEST_ATTACHMENT }, appointment.getStartDate(), appointment.getEndDate(), tz, true));
         appointment.setLastModified(response.getTimestamp());
         Appointment test = null;
         int objectIdPos = response.getColumnPos(Appointment.OBJECT_ID);
@@ -141,16 +140,13 @@ public class AppointmentAttachmentTests extends AbstractAJAXSession {
                 break;
             }
         }
-        if (null == test) {
-            throw new AssertionFailedError("Can not find the created appointment with an attachment.");
-        }
+        Assert.assertNotNull("Can not find the created appointment with an attachment.", test);
         assertEquals("Creation date of attachment does not match.", creationDate, test.getLastModifiedOfNewestAttachment());
     }
 
+    @Test
     public void testLastModifiedOfNewestAttachmentWithList() throws Throwable {
-        CommonListResponse response = client.execute(new ListRequest(ListIDs.l(new int[] {
-            appointment.getParentFolderID(), appointment.getObjectID() }), new int[] {
-            Appointment.OBJECT_ID, Appointment.LAST_MODIFIED_OF_NEWEST_ATTACHMENT }));
+        CommonListResponse response = getClient().execute(new ListRequest(ListIDs.l(new int[] { appointment.getParentFolderID(), appointment.getObjectID() }), new int[] { Appointment.OBJECT_ID, Appointment.LAST_MODIFIED_OF_NEWEST_ATTACHMENT }));
         appointment.setLastModified(response.getTimestamp());
         Appointment test = null;
         int objectIdPos = response.getColumnPos(Appointment.OBJECT_ID);
@@ -162,9 +158,7 @@ public class AppointmentAttachmentTests extends AbstractAJAXSession {
                 break;
             }
         }
-        if (null == test) {
-            throw new AssertionFailedError("Can not find the created appointment with an attachment.");
-        }
+        Assert.assertNotNull("Can not find the created appointment with an attachment.", test);
         assertEquals("Creation date of attachment does not match.", creationDate, test.getLastModifiedOfNewestAttachment());
     }
 }

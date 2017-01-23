@@ -76,6 +76,4 @@ import org.junit.runners.Suite.SuiteClasses;
 })
 public class AdminRmiTestSuite {
 
-    private AdminRmiTestSuite() {
-    }
 }

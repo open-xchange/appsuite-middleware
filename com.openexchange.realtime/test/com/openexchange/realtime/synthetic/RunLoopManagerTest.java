@@ -100,8 +100,8 @@ public class RunLoopManagerTest {
      *
      * @throws Exception
      */
-    @Test
-    public void testCreateRunLoops() throws Exception {
+     @Test
+     public void testCreateRunLoops() throws Exception {
         ListMultimap<String, SyntheticChannelRunLoop> loopClusters = getloopClusters(runLoopManager);
         assertEquals(LOOP_QUANTITY * 2, loopClusters.size());
         List<SyntheticChannelRunLoop> cluster1 = loopClusters.get(component1.getId());
@@ -116,8 +116,8 @@ public class RunLoopManagerTest {
      *
      * @throws Exception
      */
-    @Test
-    public void testGetRunLoopForIDIDBoolean() throws Exception {
+     @Test
+     public void testGetRunLoopForIDIDBoolean() throws Exception {
         ComponentHandle handle1 = component1.create();
         Optional<SyntheticChannelRunLoop> runLoopForHandle1 = runLoopManager.getRunLoopForID(handle1.getId());
         assertFalse(runLoopForHandle1.isPresent());
@@ -131,8 +131,8 @@ public class RunLoopManagerTest {
      *
      * @throws Exception
      */
-    @Test
-    public void testRemoveIDFromRunLoop() throws Exception {
+     @Test
+     public void testRemoveIDFromRunLoop() throws Exception {
         ComponentHandle handle1 = component1.create();
         Optional<SyntheticChannelRunLoop> runLoopForHandle1 = runLoopManager.getRunLoopForID(handle1.getId(), true);
         assertTrue(runLoopForHandle1.isPresent());
@@ -147,8 +147,8 @@ public class RunLoopManagerTest {
      *
      * @throws Exception
      */
-    @Test
-    public void testDestroyRunLoops() throws Exception {
+     @Test
+     public void testDestroyRunLoops() throws Exception {
         for (int x = 0; x < HANDLER_QUANTITY; x++) {
             runLoopManager.getRunLoopForID(component1.create().getId(), true);
         }

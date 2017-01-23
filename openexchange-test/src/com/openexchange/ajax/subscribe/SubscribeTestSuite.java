@@ -49,8 +49,8 @@
 
 package com.openexchange.ajax.subscribe;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 import com.openexchange.ajax.subscribe.test.AllSubscriptionsTest;
 import com.openexchange.ajax.subscribe.test.DeleteSubscriptionTest;
 import com.openexchange.ajax.subscribe.test.ListSubscriptionsTest;
@@ -64,22 +64,16 @@ import com.openexchange.ajax.subscribe.test.UpdateSubscriptionTest;
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class SubscribeTestSuite extends TestSuite {
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    NewSubscriptionTest.class,
+    DeleteSubscriptionTest.class,
+    ListSubscriptionsTest.class,
+    AllSubscriptionsTest.class,
+    UpdateSubscriptionTest.class,
+    RefreshSubscriptionTest.class,
+    SubscriptionFolderIconTest.class,
 
-    private SubscribeTestSuite() {
-        super();
-    }
-
-    public static Test suite() {
-        final TestSuite suite = new TestSuite("com.openexchange.ajax.subscribe.SubscribeTestSuite");
-        /* there is not test for action=get : many tests validate their result using get, so no need for explicit testing */
-        suite.addTestSuite(NewSubscriptionTest.class);
-        suite.addTestSuite(DeleteSubscriptionTest.class);
-        suite.addTestSuite(ListSubscriptionsTest.class);
-        suite.addTestSuite(AllSubscriptionsTest.class);
-        suite.addTestSuite(UpdateSubscriptionTest.class);
-        suite.addTestSuite(RefreshSubscriptionTest.class);
-        suite.addTestSuite(SubscriptionFolderIconTest.class);
-        return suite;
-    }
+})
+public class SubscribeTestSuite  {
 }

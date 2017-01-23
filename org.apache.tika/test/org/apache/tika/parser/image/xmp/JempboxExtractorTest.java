@@ -20,17 +20,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
-
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.TikaCoreProperties;
-import org.apache.tika.parser.image.xmp.JempboxExtractor;
+import org.junit.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
-import junit.framework.TestCase;
-
-public class JempboxExtractorTest extends TestCase {
-   
-    public void testParseJpeg() throws IOException, TikaException {
+public class JempboxExtractorTest {   
+         @Test
+     public void testParseJpeg() throws IOException, TikaException {
         Metadata metadata = new Metadata();
         InputStream stream = getClass().getResourceAsStream("/test-documents/testJPEG_commented.jpg");
         // set some values before extraction to see that they are overridden
@@ -61,7 +62,8 @@ public class JempboxExtractorTest extends TestCase {
         assertTrue(subject.contains("coast"));
     }
 
-    public void testParseJpegPhotoshop() throws IOException, TikaException {
+         @Test
+     public void testParseJpegPhotoshop() throws IOException, TikaException {
         Metadata metadata = new Metadata();
         InputStream stream = getClass().getResourceAsStream("/test-documents/testJPEG_commented_pspcs2mac.jpg");
        
@@ -77,7 +79,8 @@ public class JempboxExtractorTest extends TestCase {
         assertTrue(keywords.contains("coast"));
     }
     
-    public void testParseJpegXnviewmp() throws IOException, TikaException {
+         @Test
+     public void testParseJpegXnviewmp() throws IOException, TikaException {
         Metadata metadata = new Metadata();
         InputStream stream = getClass().getResourceAsStream("/test-documents/testJPEG_commented_xnviewmp026.jpg");
        
@@ -91,7 +94,8 @@ public class JempboxExtractorTest extends TestCase {
         assertTrue(keywords.contains("nature reserve"));
     }
     
-    public void testJoinCreators() {
+         @Test
+     public void testJoinCreators() {
         assertEquals("Mr B", new JempboxExtractor(null).joinCreators(
                 Arrays.asList("Mr B")));
         // TODO use multi-value property instead?

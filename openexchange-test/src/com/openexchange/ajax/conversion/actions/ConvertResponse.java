@@ -65,36 +65,36 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
  */
 public final class ConvertResponse extends AbstractAJAXResponse {
 
-	/**
-	 * Initializes a new {@link ConvertResponse}
-	 *
-	 * @param response
-	 */
-	public ConvertResponse(final Response response) {
-		super(response);
-	}
+    /**
+     * Initializes a new {@link ConvertResponse}
+     *
+     * @param response
+     */
+    public ConvertResponse(final Response response) {
+        super(response);
+    }
 
-	/**
-	 * Appropriate if conversion response consists of a JSON array of folder and
-	 * object ID:<br>
-	 *
-	 * <pre>
-	 * [{&quot;folder_id&quot;:2567, &quot;id&quot;:7689}, ...]
-	 * </pre>
-	 *
-	 * @return The folders and IDs
-	 * @throws JSONException
-	 *             If a JSON error occurs
-	 */
-	public String[][] getFoldersAndIDs() throws JSONException {
-		final JSONArray ja = (JSONArray) getData();
-		final int len = ja.length();
-		final String[][] sa = new String[len][];
-		for (int i = 0; i < len; i++) {
-			final JSONObject jo = ja.getJSONObject(i);
-			sa[i] = new String[] { jo.getString(FolderChildFields.FOLDER_ID), jo.getString(DataFields.ID) };
-		}
-		return sa;
-	}
+    /**
+     * Appropriate if conversion response consists of a JSON array of folder and
+     * object ID:<br>
+     *
+     * <pre>
+     * [{&quot;folder_id&quot;:2567, &quot;id&quot;:7689}, ...]
+     * </pre>
+     *
+     * @return The folders and IDs
+     * @throws JSONException
+     *             If a JSON error occurs
+     */
+    public String[][] getFoldersAndIDs() throws JSONException {
+        final JSONArray ja = (JSONArray) getData();
+        final int len = ja.length();
+        final String[][] sa = new String[len][];
+        for (int i = 0; i < len; i++) {
+            final JSONObject jo = ja.getJSONObject(i);
+            sa[i] = new String[] { jo.getString(FolderChildFields.FOLDER_ID), jo.getString(DataFields.ID) };
+        }
+        return sa;
+    }
 
 }

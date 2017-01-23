@@ -70,22 +70,22 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.ajax.framework.ProvisioningSetup;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.java.Strings;
-import com.openexchange.oauth.provider.rmi.client.ClientDto;
-import com.openexchange.oauth.provider.rmi.client.ClientDataDto;
-import com.openexchange.oauth.provider.rmi.client.RemoteClientManagementException;
-import com.openexchange.oauth.provider.rmi.client.IconDto;
 import com.openexchange.oauth.provider.authorizationserver.client.ClientManagement;
 import com.openexchange.oauth.provider.authorizationserver.client.ClientManagementException.Reason;
 import com.openexchange.oauth.provider.impl.tools.ClientId;
 import com.openexchange.oauth.provider.resourceserver.scope.Scope;
+import com.openexchange.oauth.provider.rmi.client.ClientDataDto;
+import com.openexchange.oauth.provider.rmi.client.ClientDto;
+import com.openexchange.oauth.provider.rmi.client.IconDto;
 import com.openexchange.oauth.provider.rmi.client.RemoteClientManagement;
+import com.openexchange.oauth.provider.rmi.client.RemoteClientManagementException;
 import com.openexchange.tasks.json.TaskActionFactory;
-
 
 /**
  * {@link ClientManagementTest}
@@ -105,6 +105,7 @@ public class ClientManagementTest {
     @BeforeClass
     public static void initTestFramework() throws Exception {
         AJAXConfig.init();
+        ProvisioningSetup.init();
     }
 
     @Before

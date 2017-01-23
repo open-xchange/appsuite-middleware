@@ -205,7 +205,7 @@ public class TestCredentials {
 
 
 //    @Test
-//    public void testCredentials() throws Exception {
+//     public void testCredentials() throws Exception {
 //        Certificate certificate = spKeyStore.getCertificate(IDP_SIGNING_CERT_ALIAS);
 //        Assert.assertNotNull(certificate);
 //        spKeyStore.store(new FileOutputStream("/tmp/spKeyStore.jks"), SP_KEY_STORE_PASSWORD.toCharArray());

@@ -51,19 +51,25 @@ package com.openexchange.ajax.appointment;
 
 import static com.openexchange.ajax.folder.Create.ocl;
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.test.CalendarTestManager;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -80,65 +86,35 @@ public class UserStory1085Test extends AppointmentTest {
 
     private Date start, end;
 
-    public UserStory1085Test(final String name) {
-        super(name);
-    }
-
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
         clientA = getClient();
-        clientB = new AJAXClient(User.User2);
-        clientC = new AJAXClient(User.User3);
+        clientB = getClient2();
+        clientC = new AJAXClient(testContext.acquireUser());
         userIdA = clientA.getValues().getUserId();
         userIdB = clientB.getValues().getUserId();
         userIdC = clientC.getValues().getUserId();
 
-        folder = Create.folder(
-            FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
-            "UserStory1085Test - " + Long.toString(System.currentTimeMillis()),
-            FolderObject.CALENDAR,
-            FolderObject.PRIVATE,
-            ocl(userIdB, false, true,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION),
-            ocl(userIdA, false, false,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION));
+        folder = Create.folder(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, "UserStory1085Test - " + Long.toString(System.currentTimeMillis()), FolderObject.CALENDAR, FolderObject.PRIVATE, ocl(userIdB, false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION), ocl(userIdA, false, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION));
 
         final CommonInsertResponse response = clientB.execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_OLD, folder));
         response.fillObject(folder);
 
-        appointmenShare = new Appointment();
-        appointmenShare.setTitle("Full");
-        appointmenShare.setStartDate(D("01.02.2009 12:00"));
-        appointmenShare.setEndDate(D("01.02.2009 14:00"));
-        appointmenShare.setParentFolderID(folder.getObjectID());
+        appointmenShare = CalendarTestManager.createAppointmentObject(folder.getObjectID(), "Full", D("01.02.2009 12:00"), D("01.02.2009 14:00"));
         appointmenShare.setIgnoreConflicts(true);
         CommonInsertResponse insertResponse = clientB.execute(new InsertRequest(appointmenShare, clientB.getValues().getTimeZone()));
         insertResponse.fillObject(appointmenShare);
 
-        appointmentPrivate = new Appointment();
-        appointmentPrivate.setTitle("Title of private flagged appointment");
-        appointmentPrivate.setStartDate(D("01.02.2009 12:00"));
-        appointmentPrivate.setEndDate(D("01.02.2009 14:00"));
+        appointmentPrivate = CalendarTestManager.createAppointmentObject(clientC.getValues().getPrivateAppointmentFolder(), "Title of private flagged appointment", D("01.02.2009 12:00"), D("01.02.2009 14:00"));
         appointmentPrivate.setPrivateFlag(true);
         appointmentPrivate.setIgnoreConflicts(true);
-        appointmentPrivate.setParentFolderID(clientC.getValues().getPrivateAppointmentFolder());
         insertResponse = clientC.execute(new InsertRequest(appointmentPrivate, clientC.getValues().getTimeZone()));
         insertResponse.fillObject(appointmentPrivate);
 
-        appointmentNormal = new Appointment();
-        appointmentNormal.setTitle("Title of appointment in not shared folder");
-        appointmentNormal.setStartDate(D("01.02.2009 12:00"));
-        appointmentNormal.setEndDate(D("01.02.2009 14:00"));
+        appointmentNormal = CalendarTestManager.createAppointmentObject(clientC.getValues().getPrivateAppointmentFolder(), "Title of appointment in not shared folder", D("01.02.2009 12:00"), D("01.02.2009 14:00"));
         appointmentNormal.setIgnoreConflicts(true);
-        appointmentNormal.setParentFolderID(clientC.getValues().getPrivateAppointmentFolder());
         insertResponse = clientC.execute(new InsertRequest(appointmentNormal, clientC.getValues().getTimeZone()));
         insertResponse.fillObject(appointmentNormal);
 
@@ -146,19 +122,22 @@ public class UserStory1085Test extends AppointmentTest {
         end = D("02.02.2009 00:00");
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        clientB.execute(new DeleteRequest(appointmenShare));
-        clientC.execute(new DeleteRequest(appointmentPrivate));
-        clientC.execute(new DeleteRequest(appointmentNormal));
-        clientB.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder.getObjectID(), folder.getLastModified()));
-
-        super.tearDown();
+        try {
+            clientB.execute(new DeleteRequest(appointmenShare));
+            clientC.execute(new DeleteRequest(appointmentPrivate));
+            clientC.execute(new DeleteRequest(appointmentNormal));
+            clientB.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder.getObjectID(), folder.getLastModified()));
+        } finally {
+            super.tearDown();
+        }
     }
 
+    @Test
     public void testUserStory1085() throws Exception {
-        final Appointment[] appointmentsB = getFreeBusy(getWebConversation(), userIdB, Participant.USER, start, end, clientB.getValues().getTimeZone(), getHostName(), getSessionId());
-        final Appointment[] appointmentsC = getFreeBusy(getWebConversation(), userIdC, Participant.USER, start, end, clientB.getValues().getTimeZone(), getHostName(), getSessionId());
+        final Appointment[] appointmentsB = catm.freeBusy(userIdB, Participant.USER, start, end);
+        final Appointment[] appointmentsC = catm.freeBusy(userIdC, Participant.USER, start, end);
 
         boolean foundShare = false;
         boolean foundPrivate = false;

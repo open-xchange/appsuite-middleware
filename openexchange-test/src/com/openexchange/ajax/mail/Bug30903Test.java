@@ -49,10 +49,14 @@
 
 package com.openexchange.ajax.mail;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Test;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.mail.actions.AllRequest;
 import com.openexchange.ajax.mail.actions.AllResponse;
@@ -74,16 +78,7 @@ import com.openexchange.mail.MailJSONField;
  */
 public class Bug30903Test extends AbstractMailTest {
 
-    private static String mail = "Message-Id: <blah@non-existent.com>\n" +
-                                        "X-Mailer: AppSuite 7.6.0 \n" +
-                                        "Date: Tue, 08 Apr 2014 13:37:00 +0100\n" +
-                                        "From: #ADDR#\n" +
-                                        "To: #ADDR#\n" +
-                                        "Subject: Bug30903\n" +
-                                        "Mime-Version: 1.0\n" +
-                                        "Content-Type: text/plain; charset=\"UTF-8\"\n" +
-                                        "\n" +
-                                        "Testing";
+    private static String mail = "Message-Id: <blah@non-existent.com>\n" + "X-Mailer: AppSuite 7.6.0 \n" + "Date: Tue, 08 Apr 2014 13:37:00 +0100\n" + "From: #ADDR#\n" + "To: #ADDR#\n" + "Subject: Bug30903\n" + "Mime-Version: 1.0\n" + "Content-Type: text/plain; charset=\"UTF-8\"\n" + "\n" + "Testing";
 
     private final String fmids[][] = new String[2][2];
 
@@ -92,20 +87,18 @@ public class Bug30903Test extends AbstractMailTest {
      *
      * @param name
      */
-    public Bug30903Test(String name) {
-        super(name);
+    public Bug30903Test() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
-    @Override
+    @After
     public void tearDown() throws Exception {
-        DeleteRequest delReq = new DeleteRequest(fmids, true);
-        client.execute(delReq);
-        super.tearDown();
+        try {
+            DeleteRequest delReq = new DeleteRequest(fmids, true);
+            getClient().execute(delReq);
+        } finally {
+            super.tearDown();
+        }
     }
 
     /**
@@ -115,13 +108,12 @@ public class Bug30903Test extends AbstractMailTest {
      * @throws IOException
      * @throws JSONException
      */
+    @Test
     public void testDeleteDraft() throws OXException, IOException, JSONException {
-        UserValues values = client.getValues();
+        UserValues values = getClient().getValues();
         //Save draft
-        NewMailRequest newMailReq = new NewMailRequest(values.getDraftsFolder(),
-                                mail.replaceAll("#ADDR#", values.getSendAddress()),
-                                MailFlag.DRAFT.getValue());
-        NewMailResponse newMailResp = client.execute(newMailReq);
+        NewMailRequest newMailReq = new NewMailRequest(values.getDraftsFolder(), mail.replaceAll("#ADDR#", values.getSendAddress()), MailFlag.DRAFT.getValue());
+        NewMailResponse newMailResp = getClient().execute(newMailReq);
         assertNotNull(newMailResp);
         String draftID = newMailResp.getId();
         fmids[0][0] = values.getDraftsFolder();
@@ -129,7 +121,7 @@ public class Bug30903Test extends AbstractMailTest {
 
         //Get draft
         GetRequest getReq = new GetRequest(values.getDraftsFolder(), draftID);
-        GetResponse getResp = client.execute(getReq);
+        GetResponse getResp = getClient().execute(getReq);
         assertNotNull(getResp);
 
         //Edit draft
@@ -154,16 +146,16 @@ public class Bug30903Test extends AbstractMailTest {
 
         //Send mail
         SendRequest sendRequest = new SendRequest(jsonMail.toString());
-        SendResponse sendResponse = client.execute(sendRequest);
+        SendResponse sendResponse = getClient().execute(sendRequest);
         assertNotNull(sendResponse);
         fmids[1] = sendResponse.getFolderAndID();
 
         //Verify 'Drafts' folder
         AllRequest allReq = new AllRequest(values.getDraftsFolder(), COLUMNS_FOLDER_ID, 0, Order.ASCENDING, true);
-        AllResponse allResp = client.execute(allReq);
+        AllResponse allResp = getClient().execute(allReq);
         assertNotNull(allResp);
-        Object[][] objArray =  allResp.getArray();
-        for(Object o[] : objArray) {
+        Object[][] objArray = allResp.getArray();
+        for (Object o[] : objArray) {
             String s = (String) o[1];
             if (Integer.parseInt(s) == Integer.parseInt(draftID)) {
                 fail("Draft mail still in 'Drafts' folder");

@@ -45,8 +45,8 @@ public class ConfFileHandlerTest {
 
     }
 
-    @Test
-    public void testAddConfigurationFile_noConfigurationFile_fileAdded() {
+     @Test
+     public void testAddConfigurationFile_noConfigurationFile_fileAdded() {
         String fileName = "aaaa.dfdsf";
         String content = "content";
         configurationFile = new ConfigurationFile(fileName, "/opt/open-xchange/bundles", "/jar!/conf", content, false);
@@ -61,8 +61,8 @@ public class ConfFileHandlerTest {
         Assert.assertEquals(content, stringContent);
     }
 
-    @Test
-    public void testAddConfigurationFile_ccfConfigurationFile_fileAdded() {
+     @Test
+     public void testAddConfigurationFile_ccfConfigurationFile_fileAdded() {
         String fileName = "aaaa." + ConfigurationFileTypes.CCF.getFileExtension();
         String content = "content";
 
@@ -79,8 +79,8 @@ public class ConfFileHandlerTest {
 
     }
 
-    @Test
-    public void testAddConfigurationFile_cnfConfigurationFile_fileAdded() {
+     @Test
+     public void testAddConfigurationFile_cnfConfigurationFile_fileAdded() {
         String fileName = "aaaa." + ConfigurationFileTypes.CNF.getFileExtension();
         String content = "content";
 
@@ -96,8 +96,8 @@ public class ConfFileHandlerTest {
         Assert.assertEquals(content, stringContent);
     }
 
-    @Test
-    public void testAddConfigurationFile_confConfigurationFile_fileAdded() {
+     @Test
+     public void testAddConfigurationFile_confConfigurationFile_fileAdded() {
         String fileName = "aaaa." + ConfigurationFileTypes.CONF.getFileExtension();
         String content = "content";
 
@@ -113,8 +113,8 @@ public class ConfFileHandlerTest {
         Assert.assertEquals(content, stringContent);
     }
 
-    @Test
-    public void testAddConfigurationFile_inConfigurationFile_fileAdded() {
+     @Test
+     public void testAddConfigurationFile_inConfigurationFile_fileAdded() {
         String fileName = "aaaa." + ConfigurationFileTypes.PROPERTY.getFileExtension() + "." + ConfigurationFileTypes.IN.getFileExtension();
         String content = "content";
 
@@ -130,8 +130,8 @@ public class ConfFileHandlerTest {
         Assert.assertEquals(content, stringContent);
     }
 
-    @Test
-    public void testAddConfigurationFile_noExtensionConfigurationFile_fileAdded() {
+     @Test
+     public void testAddConfigurationFile_noExtensionConfigurationFile_fileAdded() {
         String fileName = "aaaa." + ConfigurationFileTypes.NO_EXTENSION.getFileExtension();
         String content = "content";
 
@@ -147,8 +147,8 @@ public class ConfFileHandlerTest {
         Assert.assertEquals(content, stringContent);
     }
 
-    @Test
-    public void testAddConfigurationFile_perfmapConfigurationFile_fileAdded() {
+     @Test
+     public void testAddConfigurationFile_perfmapConfigurationFile_fileAdded() {
         String fileName = "aaaa." + ConfigurationFileTypes.PERFMAP.getFileExtension();
         String content = "content";
 
@@ -164,8 +164,8 @@ public class ConfFileHandlerTest {
         Assert.assertEquals(content, stringContent);
     }
 
-    @Test
-    public void testAddConfigurationFile_propertyConfigurationFile_fileAdded() {
+     @Test
+     public void testAddConfigurationFile_propertyConfigurationFile_fileAdded() {
         String fileName = "aaaa." + ConfigurationFileTypes.PROPERTY.getFileExtension();
         String content = "content";
 
@@ -181,8 +181,8 @@ public class ConfFileHandlerTest {
         Assert.assertEquals(content, stringContent);
     }
 
-    @Test
-    public void testAddConfigurationFile_shConfigurationFile_fileAdded() {
+     @Test
+     public void testAddConfigurationFile_shConfigurationFile_fileAdded() {
         String fileName = "aaaa." + ConfigurationFileTypes.SH.getFileExtension();
         String content = "content";
 
@@ -198,8 +198,8 @@ public class ConfFileHandlerTest {
         Assert.assertEquals(content, stringContent);
     }
 
-    @Test
-    public void testAddConfigurationFile_typesConfigurationFile_fileAdded() {
+     @Test
+     public void testAddConfigurationFile_typesConfigurationFile_fileAdded() {
         String fileName = "aaaa." + ConfigurationFileTypes.TYPES.getFileExtension();
         String content = "content";
 
@@ -215,8 +215,8 @@ public class ConfFileHandlerTest {
         Assert.assertEquals(content, stringContent);
     }
 
-    @Test
-    public void testAddConfigurationFile_xmlConfigurationFile_fileAdded() {
+     @Test
+     public void testAddConfigurationFile_xmlConfigurationFile_fileAdded() {
         String fileName = "aaaa." + ConfigurationFileTypes.XML.getFileExtension();
         String content = "content";
 
@@ -232,8 +232,8 @@ public class ConfFileHandlerTest {
         Assert.assertEquals(content, stringContent);
     }
 
-    @Test
-    public void testAddConfigurationFile_yamlConfigurationFile_fileAdded() {
+     @Test
+     public void testAddConfigurationFile_yamlConfigurationFile_fileAdded() {
         String fileName = "aaaa." + ConfigurationFileTypes.YAML.getFileExtension();
         String content = "content";
 
@@ -249,8 +249,8 @@ public class ConfFileHandlerTest {
         Assert.assertEquals(content, stringContent);
     }
 
-    @Test
-    public void testAddConfigurationFile_ymlConfigurationFile_fileAdded() {
+     @Test
+     public void testAddConfigurationFile_ymlConfigurationFile_fileAdded() {
         String fileName = "aaaa." + ConfigurationFileTypes.YML.getFileExtension();
         String content = "content";
 
@@ -267,8 +267,8 @@ public class ConfFileHandlerTest {
     }
 
 
-    @Test
-    public void testAddConfigurationFile_ccfConfigurationFile_origFileAdded() {
+     @Test
+     public void testAddConfigurationFile_ccfConfigurationFile_origFileAdded() {
         String fileName = "aaaa." + ConfigurationFileTypes.CCF.getFileExtension();
         String content = "content";
 
@@ -284,8 +284,8 @@ public class ConfFileHandlerTest {
         Assert.assertEquals(content, stringContent);
     }
 
-    @Test
-    public void testAddConfigurationFile_cnfConfigurationFile_origFileAdded() {
+     @Test
+     public void testAddConfigurationFile_cnfConfigurationFile_origFileAdded() {
         String fileName = "aaaa." + ConfigurationFileTypes.CNF.getFileExtension();
         String content = "content";
 
@@ -301,8 +301,8 @@ public class ConfFileHandlerTest {
         Assert.assertEquals(content, stringContent);
     }
 
-    @Test
-    public void testAddConfigurationFile_confConfigurationFile_origFileAdded() {
+     @Test
+     public void testAddConfigurationFile_confConfigurationFile_origFileAdded() {
         String fileName = "aaaa." + ConfigurationFileTypes.CONF.getFileExtension();
         String content = "content";
 
@@ -318,8 +318,8 @@ public class ConfFileHandlerTest {
         Assert.assertEquals(content, stringContent);
     }
 
-    @Test
-    public void testAddConfigurationFile_inConfigurationFile_origFileAdded() {
+     @Test
+     public void testAddConfigurationFile_inConfigurationFile_origFileAdded() {
         String fileName = "aaaa." + ConfigurationFileTypes.SH.getFileExtension() + "." + ConfigurationFileTypes.IN.getFileExtension();
         String content = "content";
 
@@ -335,8 +335,8 @@ public class ConfFileHandlerTest {
         Assert.assertEquals(content, stringContent);
     }
 
-    @Test
-    public void testAddConfigurationFile_noExtensionConfigurationFile_origFileAdded() {
+     @Test
+     public void testAddConfigurationFile_noExtensionConfigurationFile_origFileAdded() {
         String fileName = "aaaa." + ConfigurationFileTypes.NO_EXTENSION.getFileExtension();
         String content = "content";
 
@@ -352,8 +352,8 @@ public class ConfFileHandlerTest {
         Assert.assertEquals(content, stringContent);
     }
 
-    @Test
-    public void testAddConfigurationFile_perfmapConfigurationFile_origFileAdded() {
+     @Test
+     public void testAddConfigurationFile_perfmapConfigurationFile_origFileAdded() {
         String fileName = "aaaa." + ConfigurationFileTypes.PERFMAP.getFileExtension();
         String content = "content";
 
@@ -369,8 +369,8 @@ public class ConfFileHandlerTest {
         Assert.assertEquals(content, stringContent);
     }
 
-    @Test
-    public void testAddConfigurationFile_propertyConfigurationFile_origFileAdded() {
+     @Test
+     public void testAddConfigurationFile_propertyConfigurationFile_origFileAdded() {
         String fileName = "aaaa." + ConfigurationFileTypes.PROPERTY.getFileExtension();
         String content = "content";
 
@@ -386,8 +386,8 @@ public class ConfFileHandlerTest {
         Assert.assertEquals(content, stringContent);
     }
 
-    @Test
-    public void testAddConfigurationFile_shConfigurationFile_origFileAdded() {
+     @Test
+     public void testAddConfigurationFile_shConfigurationFile_origFileAdded() {
         String fileName = "aaaa." + ConfigurationFileTypes.SH.getFileExtension();
         String content = "content";
 
@@ -403,8 +403,8 @@ public class ConfFileHandlerTest {
         Assert.assertEquals(content, stringContent);
     }
 
-    @Test
-    public void testAddConfigurationFile_typesConfigurationFile_origFileAdded() {
+     @Test
+     public void testAddConfigurationFile_typesConfigurationFile_origFileAdded() {
         String fileName = "aaaa." + ConfigurationFileTypes.TYPES.getFileExtension();
         String content = "content";
 
@@ -420,8 +420,8 @@ public class ConfFileHandlerTest {
         Assert.assertEquals(content, stringContent);
     }
 
-    @Test
-    public void testAddConfigurationFile_xmlConfigurationFile_origFileAdded() {
+     @Test
+     public void testAddConfigurationFile_xmlConfigurationFile_origFileAdded() {
         String fileName = "aaaa." + ConfigurationFileTypes.XML.getFileExtension();
         String content = "content";
 
@@ -437,8 +437,8 @@ public class ConfFileHandlerTest {
         Assert.assertEquals(content, stringContent);
     }
 
-    @Test
-    public void testAddConfigurationFile_yamlConfigurationFile_origFileAdded() {
+     @Test
+     public void testAddConfigurationFile_yamlConfigurationFile_origFileAdded() {
         String fileName = "aaaa." + ConfigurationFileTypes.YAML.getFileExtension();
         String content = "content";
 
@@ -454,8 +454,8 @@ public class ConfFileHandlerTest {
         Assert.assertEquals(content, stringContent);
     }
 
-    @Test
-    public void testAddConfigurationFile_ymlConfigurationFile_origFileAdded() {
+     @Test
+     public void testAddConfigurationFile_ymlConfigurationFile_origFileAdded() {
         String fileName = "aaaa." + ConfigurationFileTypes.YML.getFileExtension();
         String content = "content";
 

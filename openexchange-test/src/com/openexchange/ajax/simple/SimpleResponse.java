@@ -55,13 +55,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.tools.JSONCoercion;
 
-
 /**
  * {@link SimpleResponse}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class SimpleResponse {
+
     private Object data;
     private final JSONObject response;
 
@@ -69,9 +69,9 @@ public class SimpleResponse {
 
     public SimpleResponse(JSONObject response) throws JSONException {
         this.response = response;
-        if(response.has("error")) {
+        if (response.has("error")) {
             this.error = response.toString();
-        } else if(response.has("data")){
+        } else if (response.has("data")) {
             this.data = JSONCoercion.coerceToNative(response.get("data"));
         }
     }

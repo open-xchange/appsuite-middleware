@@ -63,7 +63,7 @@ public class SearchParser extends AbstractColumnsParser<SearchResponse> {
      * Default constructor.
      */
     public SearchParser(final boolean failOnError, final int[] columns) {
-        super(failOnError,columns);
+        super(failOnError, columns);
     }
 
     @Override

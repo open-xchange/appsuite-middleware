@@ -1,11 +1,13 @@
 package liquibase.changelog;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 import liquibase.change.CheckSum;
 import liquibase.change.core.AddDefaultValueChange;
 import liquibase.change.core.CreateTableChange;
 import liquibase.change.core.InsertDataChange;
-import static org.junit.Assert.*;
-import org.junit.Test;
 
 /**
  * Tests for {@link liquibase.changelog.ChangeSet}

@@ -1,17 +1,20 @@
 
 package com.openexchange.ajax.infostore;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.xml.sax.SAXException;
+import java.util.Date;
+import org.junit.Test;
+import com.google.common.collect.Iterables;
 import com.openexchange.ajax.InfostoreAJAXTest;
-import com.openexchange.ajax.container.Response;
+import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.test.TestInit;
 
 public class NewTest extends InfostoreAJAXTest {
@@ -20,40 +23,28 @@ public class NewTest extends InfostoreAJAXTest {
 
     private static final byte[] megabyte = new byte[1000000];
 
-    public NewTest(final String name) {
-        super(name);
-    }
-
-    public void testNothing() {
-        assertTrue(true);
-    }
-
+    @Test
     public void testUpload() throws Exception {
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
-        String id = createNew(getWebConversation(), getHostName(), sessionId, m(
-            "folder_id",
-            ((Integer) folderId).toString(),
-            "title",
-            "test upload",
-            "description",
-            "test upload description"), upload, "text/plain");
-        clean.add(id);
 
-        Response res = get(getWebConversation(), getHostName(), sessionId, id);
-        assertNotNull(res.getTimestamp());
-        JSONObject obj = (JSONObject) res.getData();
+        com.openexchange.file.storage.File data = createFile(folderId, "test upload");
+        data.setFileMIMEType("text/plain");
+        data.setDescription("test upload description");
+        itm.newAction(data, upload);
 
-        assertEquals("test upload", obj.getString("title"));
-        assertEquals("test upload description", obj.getString("description"));
-        assertEquals(1, obj.getInt("version"));
-        assertEquals("text/plain", obj.getString("file_mimetype"));
-        assertEquals(upload.getName(), obj.getString("filename"));
+        String id = data.getId();
+
+        com.openexchange.file.storage.File obj = itm.getAction(id);
+        assertEquals(data.getTitle(), obj.getTitle());
+        assertEquals(data.getDescription(), obj.getDescription());
+        assertEquals("1", obj.getVersion());
+        assertEquals("text/plain", obj.getFileMIMEType());
 
         InputStream is = null;
         InputStream is2 = null;
         try {
             is = new FileInputStream(upload);
-            is2 = document(getWebConversation(), getHostName(), sessionId, id, 1);
+            is2 = itm.document(Integer.toString(folderId), id, "1");
 
         } finally {
             if (is != null) {
@@ -64,46 +55,42 @@ public class NewTest extends InfostoreAJAXTest {
             }
         }
 
-        id = createNew(getWebConversation(), getHostName(), sessionId, m(
-            "folder_id",
-            ((Integer) folderId).toString(),
-            "title",
-            "test no upload",
-            "description",
-            "test no upload description"), null, "");
-        clean.add(id);
+        com.openexchange.file.storage.File dataNoUpload = createFile(folderId, "test no upload");
+        dataNoUpload.setFileMIMEType("");
+        dataNoUpload.setDescription("test no upload description");
+        itm.newAction(dataNoUpload);
 
-        res = get(getWebConversation(), getHostName(), sessionId, id);
-        obj = (JSONObject) res.getData();
+        id = dataNoUpload.getId();
 
-        assertEquals("test no upload", obj.getString("title"));
-        assertEquals("test no upload description", obj.getString("description"));
+        obj = itm.getAction(id);
 
+        assertEquals("test no upload", obj.getTitle());
+        assertEquals("test no upload description", obj.getDescription());
     }
 
-    public void testUploadEmptyFile() throws IOException, JSONException, SAXException {
+    @Test
+    public void testUploadEmptyFile_considerEmptyUpdate() throws Exception {
         File emptyFile = File.createTempFile("infostore-new-test", ".txt");
-        String id = createNew(getWebConversation(), getHostName(), sessionId, m(
-            "folder_id",
-            ((Integer) folderId).toString(),
-            "title",
-            "test upload",
-            "description",
-            "test upload description"), emptyFile, "text/plain");
-        clean.add(id);
 
-        Response res = get(getWebConversation(), getHostName(), sessionId, id);
-        assertNotNull(res.getTimestamp());
-        JSONObject obj = (JSONObject) res.getData();
+        com.openexchange.file.storage.File file = new DefaultFile();
+        file.setFolderId(String.valueOf(folderId));
+        file.setTitle("test upload");
+        file.setDescription("test upload description");
+        file.setFileMIMEType("text/plain");
 
-        assertEquals("test upload", obj.getString("title"));
-        assertEquals("test upload description", obj.getString("description"));
-        assertEquals(1, obj.getInt("version"));
-        assertEquals("text/plain", obj.getString("file_mimetype"));
-        assertEquals(emptyFile.getName(), obj.getString("filename"));
+        itm.newAction(file, emptyFile);
+
+        String id = file.getId();
+
+        com.openexchange.file.storage.File obj = itm.getAction(id);
+        assertEquals(file.getTitle(), obj.getTitle());
+        assertEquals(file.getDescription(), obj.getDescription());
+        assertEquals("0", obj.getVersion());
+        assertEquals("application/octet-stream", obj.getFileMIMEType());
         assertTrue(emptyFile.delete());
     }
 
+    @Test
     public void testLargeFileUpload() throws Exception {
         final File largeFile = File.createTempFile("test", "bin");
         largeFile.deleteOnExit();
@@ -121,133 +108,84 @@ public class NewTest extends InfostoreAJAXTest {
             }
         }
 
+        com.openexchange.file.storage.File data = createFile(folderId, "test large upload");
+        data.setFileMIMEType("text/plain");
+        itm.setFailOnError(false);
         try {
-            final String id = createNew(getWebConversation(), getHostName(), sessionId, m(
-                "folder_id",
-                ((Integer) folderId).toString(),
-                "title",
-                "test large upload",
-                "description",
-                "test large upload description"), largeFile, "text/plain");
-            clean.add(id);
-            fail("Uploaded Large File and got no error");
-        } catch (final Exception x) {
-            // Exception is expected
+            itm.newAction(data, largeFile);
+            fail();
+        } catch (Throwable e) {
+            assertTrue(e instanceof AssertionError);
         }
+
     }
 
-    // Bug 3877
-    /*
-     * public void testEnforceFolderType() throws Exception { final int folderId =
-     * FolderTest.getStandardCalendarFolder(getWebConversation(), getHostName(), sessionId).getObjectID(); try { final int id = createNew(
-     * getWebConversation(), getHostName(), sessionId, m( "folder_id" , ((Integer)folderId).toString(), "title" , "Save to Calendar Folder",
-     * "description" , "This shouldn't work" ), null, "" ); clean.add(id); fail("Could save infoitem in calendar folder"); } catch (final
-     * Exception x) { assertTrue(true); } }
-     */
-
-    // Bug 3928
+    // Bug 3928 
+    @Test
     public void testVersionCommentForNewDocument() throws Exception {
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
-        final String id = createNew(getWebConversation(), getHostName(), sessionId, m(
-            "folder_id",
-            ((Integer) folderId).toString(),
-            "title",
-            "test upload",
-            "description",
-            "test upload description",
-            "version_comment",
-            "Version Comment"), upload, "text/plain");
-        clean.add(id);
 
-        final Response res = get(getWebConversation(), getHostName(), sessionId, id);
-        final JSONObject obj = (JSONObject) res.getData();
-        assertEquals(1, obj.getInt("version"));
-        assertEquals("Version Comment", obj.getString("version_comment"));
+        com.openexchange.file.storage.File data = createFile(folderId, "test upload");
+        data.setFileMIMEType("text/plain");
+        data.setDescription("test upload description");
+        data.setVersionComment("Version Comment");
+        itm.newAction(data, upload);
+
+        String id = data.getId();
+
+        com.openexchange.file.storage.File obj = itm.getAction(id);
+        assertEquals(1, obj.getNumberOfVersions());
+        assertEquals("Version Comment", obj.getVersionComment());
     }
 
-    // Bug 4120
+    // Bug 4120 
+    @Test
     public void testUniqueFilenamesOnUpload() throws Exception {
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 
-        final String id = clean.get(0);
+        final String id = Iterables.get(itm.getCreatedEntities(), 0).getId();
 
-        Response res = update(getWebConversation(), getHostName(), sessionId, id, Long.MAX_VALUE, m(), upload, "text/plain");
-        assertNoError(res);
+        com.openexchange.file.storage.File org = itm.getAction(id);
+        itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE));
+        assertFalse(itm.getLastResponse().hasError());
 
-        final String id2 = createNew(getWebConversation(), getHostName(), sessionId, m(
-            "title",
-            "otherFile",
-            "description",
-            "other_desc",
-            "folder_id",
-            ((Integer) folderId).toString()), upload, "text/plain");
-        clean.add(id2);
+        com.openexchange.file.storage.File data = createFile(folderId, "otherFile");
+        data.setFileMIMEType("text/plain");
+        data.setDescription("other_desc");
+        itm.newAction(data, upload);
 
-        res = get(getWebConversation(), getHostName(), sessionId, id2);
-
-        JSONObject obj = (JSONObject) res.getData();
-        assertFalse(upload.getName().equals(obj.get("filename")));
-
+        com.openexchange.file.storage.File obj = itm.getAction(data.getId());
+        assertFalse(upload.getName().equals(obj.getFileName()));
     }
 
-    // Bug 4269 and Bug 7143
-    public void testVirtualFolder() throws Exception {
-        for (int folderId : virtualFolders) {
-            virtualFolder(folderId);
-        }
-    }
-
-    public void virtualFolder(final int folderId) throws Exception {
-        try {
-            createNew(getWebConversation(), getHostName(), sessionId, m("folder_id", "" + folderId));
-            fail("Expected exception because we can't create a document in this virtual folder");
-        } catch (final JSONException x) {
-            assertTrue(x.getMessage(), x.getMessage().contains("virt"));
-        }
-    }
-
+    @Test
     public void testTitleFromFilename() throws Exception {
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
-        final String id = createNew(
-            getWebConversation(),
-            getHostName(),
-            sessionId,
-            m("folder_id", ((Integer) folderId).toString()),
-            upload,
-            "text/plain");
-        clean.add(id);
 
-        final Response res = get(getWebConversation(), getHostName(), sessionId, id);
-        final JSONObject obj = (JSONObject) res.getData();
+        com.openexchange.file.storage.File data = createFile(folderId, null);
+        data.setFileMIMEType("text/plain");
+        itm.newAction(data, upload);
 
-        assertEquals(upload.getName(), obj.getString("title"));
+        com.openexchange.file.storage.File obj = itm.getAction(data.getId());
+        assertEquals(data.getTitle(), obj.getTitle());
     }
 
+    @SuppressWarnings("deprecation")
+    @Test
     public void testTitleFromFilenameTheSameEvenIfFilenameIsChangedOnCollision() throws Exception {
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
-        final String id = createNew(
-            getWebConversation(),
-            getHostName(),
-            sessionId,
-            m("folder_id", ((Integer) folderId).toString()),
-            upload,
-            "text/plain");
-        clean.add(id);
 
+        com.openexchange.file.storage.File data = createFile(folderId, "test upload");
+        data.setFileMIMEType("text/plain");
+        itm.newAction(data, upload);
 
-        final String id2 = createNew(
-            getWebConversation(),
-            getHostName(),
-            sessionId,
-            m("folder_id", ((Integer) folderId).toString()),
-            upload,
-            "text/plain");
-        clean.add(id2);
+        com.openexchange.file.storage.File data2 = createFile(folderId, "test upload");
+        data.setFileMIMEType("text/plain");
+        itm.newAction(data2, upload);
 
-        Response res = get(getWebConversation(), getHostName(), sessionId, id2);
-        JSONObject obj = (JSONObject) res.getData();
+        com.openexchange.file.storage.File action = itm.getAction(data2.getId());
 
-        assertEquals(obj.getString("filename"), obj.getString("title"));
+        assertEquals(action.getFileName(), action.getTitle());
     }
 
 }

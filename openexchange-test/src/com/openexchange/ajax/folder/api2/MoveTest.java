@@ -49,8 +49,12 @@
 
 package com.openexchange.ajax.folder.api2;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GenJSONRequest;
 import com.openexchange.ajax.folder.actions.GenJSONResponse;
@@ -71,16 +75,17 @@ public class MoveTest extends AbstractAJAXSession {
      *
      * @param name The name of the test.
      */
-    public MoveTest(final String name) {
-        super(name);
+    public MoveTest() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
     }
 
+    @Test
     public void testMoveCalBelowMail() throws Throwable {
         // Get root folder
         String newCalId = null;
@@ -88,9 +93,7 @@ public class MoveTest extends AbstractAJAXSession {
         try {
             final int userId = client.getValues().getUserId();
             {
-                JSONObject newFolder =
-                    new JSONObject(
-                        "{\"title\":\"newCalFolder" + System.currentTimeMillis() + "\",\"module\":\"calendar\",\"permissions\":[{\"group\":false,\"bits\":403710016,\"entity\":" + userId + "}],\"subscribed\":1}");
+                JSONObject newFolder = new JSONObject("{\"title\":\"newCalFolder" + System.currentTimeMillis() + "\",\"module\":\"calendar\",\"permissions\":[{\"group\":false,\"bits\":403710016,\"entity\":" + userId + "}],\"subscribed\":1}");
                 GenJSONRequest request = new GenJSONRequest(EnumAPI.OUTLOOK, true);
                 request.setJSONValue(newFolder);
                 request.setParameter("action", "new");
@@ -99,9 +102,7 @@ public class MoveTest extends AbstractAJAXSession {
                 newCalId = (String) response.getData();
                 assertNotNull("New ID must not be null!", newCalId);
 
-                newFolder =
-                    new JSONObject(
-                        "{\"title\":\"newMailFolder" + System.currentTimeMillis() + "\",\"module\":\"mail\",\"permissions\":[{\"group\":false,\"bits\":403710016,\"entity\":" + userId + "}],\"subscribed\":1}");
+                newFolder = new JSONObject("{\"title\":\"newMailFolder" + System.currentTimeMillis() + "\",\"module\":\"mail\",\"permissions\":[{\"group\":false,\"bits\":403710016,\"entity\":" + userId + "}],\"subscribed\":1}");
                 request = new GenJSONRequest(EnumAPI.OUTLOOK, true);
                 request.setJSONValue(newFolder);
                 request.setParameter("action", "new");
@@ -149,6 +150,7 @@ public class MoveTest extends AbstractAJAXSession {
         }
     }
 
+    @Test
     public void testMoveMailBelowCal() throws Throwable {
         // Get root folder
         String newCalId = null;
@@ -156,9 +158,7 @@ public class MoveTest extends AbstractAJAXSession {
         try {
             final int userId = client.getValues().getUserId();
             {
-                JSONObject newFolder =
-                    new JSONObject(
-                        "{\"title\":\"newCalFolder" + System.currentTimeMillis() + "\",\"module\":\"calendar\",\"permissions\":[{\"group\":false,\"bits\":403710016,\"entity\":" + userId + "}],\"subscribed\":1}");
+                JSONObject newFolder = new JSONObject("{\"title\":\"newCalFolder" + System.currentTimeMillis() + "\",\"module\":\"calendar\",\"permissions\":[{\"group\":false,\"bits\":403710016,\"entity\":" + userId + "}],\"subscribed\":1}");
                 GenJSONRequest request = new GenJSONRequest(EnumAPI.OUTLOOK, true);
                 request.setJSONValue(newFolder);
                 request.setParameter("action", "new");
@@ -167,9 +167,7 @@ public class MoveTest extends AbstractAJAXSession {
                 newCalId = (String) response.getData();
                 assertNotNull("New ID must not be null!", newCalId);
 
-                newFolder =
-                    new JSONObject(
-                        "{\"title\":\"newMailFolder" + System.currentTimeMillis() + "\",\"module\":\"mail\",\"permissions\":[{\"group\":false,\"bits\":403710016,\"entity\":" + userId + "}],\"subscribed\":1}");
+                newFolder = new JSONObject("{\"title\":\"newMailFolder" + System.currentTimeMillis() + "\",\"module\":\"mail\",\"permissions\":[{\"group\":false,\"bits\":403710016,\"entity\":" + userId + "}],\"subscribed\":1}");
                 request = new GenJSONRequest(EnumAPI.OUTLOOK, true);
                 request.setJSONValue(newFolder);
                 request.setParameter("action", "new");

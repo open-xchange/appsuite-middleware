@@ -55,7 +55,6 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.kata.NeedExistingStep;
 import com.openexchange.groupware.container.Appointment;
 
-
 /**
  * {@link AppointmentUpdateStep}
  *
@@ -68,6 +67,7 @@ public class AppointmentUpdateStep extends NeedExistingStep<Appointment> {
 
     /**
      * Initializes a new {@link AppointmentUpdateStep}.
+     * 
      * @param entry
      */
     public AppointmentUpdateStep(Appointment entry, String name, String expectedError) {
@@ -76,8 +76,7 @@ public class AppointmentUpdateStep extends NeedExistingStep<Appointment> {
     }
 
     @Override
-    public void cleanUp() throws Exception {
-    }
+    public void cleanUp() throws Exception {}
 
     @Override
     public void perform(AJAXClient client) throws Exception {
@@ -86,7 +85,7 @@ public class AppointmentUpdateStep extends NeedExistingStep<Appointment> {
         UpdateRequest updateRequest = new UpdateRequest(entry, getTimeZone(), false);
         UpdateResponse updateResponse = execute(updateRequest);
 
-        if(!updateResponse.hasError()) {
+        if (!updateResponse.hasError()) {
             entry.setLastModified(updateResponse.getTimestamp());
             rememberIdentityValues(entry);
         }

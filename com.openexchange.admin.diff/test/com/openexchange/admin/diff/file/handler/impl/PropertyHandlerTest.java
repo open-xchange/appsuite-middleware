@@ -27,8 +27,8 @@ public class PropertyHandlerTest {
         MockitoAnnotations.initMocks(this);
     }
 
-    @Test
-    public void testGetPropertyDiffsPerFile_oneMoreFile_notMarkedForPropertyDiff() {
+     @Test
+     public void testGetPropertyDiffsPerFile_oneMoreFile_notMarkedForPropertyDiff() {
         DiffResult diffResult = new DiffResult();
 
         List<ConfigurationFile> lOriginalFiles = new ArrayList<ConfigurationFile>();
@@ -45,8 +45,8 @@ public class PropertyHandlerTest {
         Assert.assertEquals(0, diffResult.getMissingProperties().size());
     }
 
-    @Test
-    public void testGetPropertyDiffsPerFile_propertyChanged_markAsChanged() {
+     @Test
+     public void testGetPropertyDiffsPerFile_propertyChanged_markAsChanged() {
         DiffResult diffResult = new DiffResult();
 
         List<ConfigurationFile> lOriginalFiles = new ArrayList<ConfigurationFile>();
@@ -62,8 +62,8 @@ public class PropertyHandlerTest {
         Assert.assertEquals(0, diffResult.getMissingProperties().size());
     }
 
-    @Test
-    public void testGetPropertyDiffsPerFile_propertyMissing_markAsChanged() {
+     @Test
+     public void testGetPropertyDiffsPerFile_propertyMissing_markAsChanged() {
         DiffResult diffResult = new DiffResult();
 
         List<ConfigurationFile> lOriginalFiles = new ArrayList<ConfigurationFile>();
@@ -79,8 +79,8 @@ public class PropertyHandlerTest {
         Assert.assertEquals(1, diffResult.getMissingProperties().size());
     }
 
-    @Test
-    public void testGetPropertyDiffsPerFile_valueMissing_markAsChanged() {
+     @Test
+     public void testGetPropertyDiffsPerFile_valueMissing_markAsChanged() {
         DiffResult diffResult = new DiffResult();
 
         List<ConfigurationFile> lOriginalFiles = new ArrayList<ConfigurationFile>();

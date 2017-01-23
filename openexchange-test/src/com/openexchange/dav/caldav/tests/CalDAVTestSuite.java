@@ -59,16 +59,7 @@ import org.junit.runners.Suite.SuiteClasses;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 @RunWith(Suite.class)
-@SuiteClasses({
-    NewTest.class,
-    FreeBusyTest.class,
-    MkCalendarTest.class,
-    CookieTest.class,
-    ConfirmationTest.class,
-    AlarmTestEMClient.class,
-    AlarmTestMacCalendar.class,
-    AlarmTestLightning.class,
-    AlarmTestIOSCalendar.class
+@SuiteClasses({ NewTest.class, FreeBusyTest.class, MkCalendarTest.class, CookieTest.class, ConfirmationTest.class, AlarmTestEMClient.class, AlarmTestMacCalendar.class, AlarmTestLightning.class, AlarmTestIOSCalendar.class
 })
 public final class CalDAVTestSuite {
 

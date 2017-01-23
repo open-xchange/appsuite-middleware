@@ -60,7 +60,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
-import junit.framework.TestCase;
+import org.junit.Assert;
 import com.openexchange.contact.vcard.impl.internal.DefaultVCardService;
 import com.openexchange.contact.vcard.impl.internal.VCardMapper;
 import com.openexchange.contact.vcard.impl.internal.VCardParametersFactoryImpl;
@@ -78,8 +78,7 @@ import ezvcard.VCard;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class VCardTest extends TestCase {
-
+public abstract class VCardTest {
     private static final byte[] OUTLOOK_2007_VCARD = {
         66, 69, 71, 73, 78, 58, 86, 67, 65, 82, 68, 13, 10, 86, 69, 82, 83, 73, 79, 78, 58, 50, 46, 49, 13, 10, 78,
         59, 76, 65, 78, 71, 85, 65, 71, 69, 61, 100, 101, 58, 78, 97, 99, 104, 110, 97, 109, 101, 59, 86, 111, 114,
@@ -423,7 +422,7 @@ public abstract class VCardTest extends TestCase {
 
     protected static void assertEquals(Contact expected, Contact actual, int[] fields) {
         for (int field : fields) {
-            assertEquals("Field " + field + " differs", expected.get(field), actual.get(field));
+            Assert.assertEquals("Field " + field + " differs", expected.get(field), actual.get(field));
         }
     }
 

@@ -49,16 +49,18 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
-import com.openexchange.exception.OXException;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import java.sql.SQLException;
+import org.junit.Test;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.CalendarObject;
 
-
 public class Bug11148Test extends CalendarSqlTest {
 
-
     // Bug #11148
+    @Test
     public void testUpdateWithInvalidRecurrencePatternShouldFail() throws OXException, SQLException {
         final CalendarDataObject cdao = appointments.buildRecurringAppointment();
         appointments.save(cdao);
@@ -82,6 +84,7 @@ public class Bug11148Test extends CalendarSqlTest {
     }
 
     // Bug #11148
+    @Test
     public void testShouldRebuildEntireRecurrencePatternOnUpdate() throws SQLException, OXException {
         final CalendarDataObject cdao = appointments.buildRecurringAppointment();
         appointments.save(cdao);
@@ -115,6 +118,7 @@ public class Bug11148Test extends CalendarSqlTest {
     }
 
     // Bug #11148
+    @Test
     public void testShouldOnlyUpdateRecurrencePatternIfNeeded() throws SQLException, OXException {
         final CalendarDataObject cdao = appointments.buildRecurringAppointment();
         appointments.save(cdao);

@@ -60,9 +60,7 @@ import com.openexchange.groupware.container.FolderObject;
  */
 public class RootRequest extends AbstractFolderRequest<ListResponse> {
 
-    private static final int[] DEFAULT_COLUMNS = {
-        FolderObject.OBJECT_ID, FolderObject.MODULE, FolderObject.FOLDER_NAME, FolderObject.SUBFOLDERS, FolderObject.STANDARD_FOLDER,
-        FolderObject.CREATED_BY };
+    private static final int[] DEFAULT_COLUMNS = { FolderObject.OBJECT_ID, FolderObject.MODULE, FolderObject.FOLDER_NAME, FolderObject.SUBFOLDERS, FolderObject.STANDARD_FOLDER, FolderObject.CREATED_BY };
 
     private final int[] columns;
 

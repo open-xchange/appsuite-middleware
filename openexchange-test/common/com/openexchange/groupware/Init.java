@@ -315,7 +315,9 @@ public final class Init {
 
         SessiondInit.getInstance(),
 
-        new GroupInit() };
+        new GroupInit(),
+    
+    };
 
     private static boolean databaseUpdateinitialized = false;
 

@@ -50,6 +50,8 @@
 package com.openexchange.ajax.appointment.recurrence;
 
 import static com.openexchange.calendar.storage.ParticipantStorage.extractExternal;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -58,6 +60,9 @@ import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
@@ -94,12 +99,8 @@ public class ConfirmationsSeriesTest extends AbstractAJAXSession {
     private Appointment appointment;
     private ExternalUserParticipant participant;
 
-    public ConfirmationsSeriesTest(String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         folderId = client.getValues().getPrivateAppointmentFolder();
@@ -123,12 +124,16 @@ public class ConfirmationsSeriesTest extends AbstractAJAXSession {
         client.execute(new InsertRequest(appointment, tz)).fillAppointment(appointment);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        client.execute(new DeleteRequest(appointment));
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
+        try {
+            client.execute(new DeleteRequest(appointment));
+        } finally {
+            super.tearDown();
+        }
     }
 
+    @Test
     public void testChangeException() throws Throwable {
         GetResponse response1 = client.execute(new GetRequest(appointment.getParentFolderID(), appointment.getObjectID(), 3));
         Appointment occurrence3 = response1.getAppointment(tz);

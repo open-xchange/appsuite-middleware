@@ -55,7 +55,6 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import junit.framework.JUnit4TestAdapter;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -74,10 +73,6 @@ public class UtilDatabaseTest extends AbstractTest {
 
     private OXUtilInterface getUtilClient() throws NotBoundException, MalformedURLException, RemoteException {
         return (OXUtilInterface) Naming.lookup(getRMIHostUrl() + OXUtilInterface.RMI_NAME);
-    }
-
-    public static junit.framework.Test suite() {
-        return new JUnit4TestAdapter(UtilDatabaseTest.class);
     }
 
     public UtilDatabaseTest() throws MalformedURLException, RemoteException, NotBoundException {
@@ -103,8 +98,8 @@ public class UtilDatabaseTest extends AbstractTest {
         client_db = null;
     }
 
-    @Test
-    public void testRegisterDatabase() throws Exception {
+     @Test
+     public void testRegisterDatabase() throws Exception {
 
         Database[] srv_dbs = oxu.listDatabase("db_*", ContextTest.DummyMasterCredentials());
         boolean found_db = false;
@@ -130,8 +125,8 @@ public class UtilDatabaseTest extends AbstractTest {
 
     }
 
-    @Test
-    public void testChangeDatabase() throws Exception {
+     @Test
+     public void testChangeDatabase() throws Exception {
         Database[] srv_dbs = oxu.listDatabase("db_*", ContextTest.DummyMasterCredentials());
         boolean found_db = false;
         for (int a = 0; a < srv_dbs.length; a++) {
@@ -188,8 +183,8 @@ public class UtilDatabaseTest extends AbstractTest {
         }
     }
 
-    @Test
-    public void testUnregisterDatabase() throws Exception {
+     @Test
+     public void testUnregisterDatabase() throws Exception {
         Database[] srv_dbs = oxu.listDatabase("db_*", ContextTest.DummyMasterCredentials());
         boolean found_db = false;
         for (int a = 0; a < srv_dbs.length; a++) {
@@ -231,8 +226,8 @@ public class UtilDatabaseTest extends AbstractTest {
         client_db = null;
     }
 
-    @Test
-    public void testListDatabase() throws Exception {
+     @Test
+     public void testListDatabase() throws Exception {
         Database[] srv_dbs = oxu.listDatabase("db_*", ContextTest.DummyMasterCredentials());
         boolean found_db = false;
         for (int a = 0; a < srv_dbs.length; a++) {

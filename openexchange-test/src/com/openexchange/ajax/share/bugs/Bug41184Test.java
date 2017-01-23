@@ -49,13 +49,17 @@
 
 package com.openexchange.ajax.share.bugs;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import java.net.URI;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.infostore.actions.GetInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.GetInfostoreResponse;
 import com.openexchange.ajax.share.ShareTest;
@@ -77,43 +81,45 @@ public class Bug41184Test extends ShareTest {
 
     private AJAXClient client2;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
-        client2 = new AJAXClient(User.User2);
+        client2 = new AJAXClient(testContext.acquireUser());
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        if (null != client2) {
-            client2.logout();
+    @After
+    public void tearDown() throws Exception {
+        try {
+            if (null != client2) {
+                client2.logout();
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
-
 
     /**
      * Initializes a new {@link Bug41184Test}.
      *
      * @param name The test name
      */
-    public Bug41184Test(String name) {
-        super(name);
+    public Bug41184Test() {
+        super();
     }
 
+    @Test
     public void testAccessSharedFileInSharedFolder() throws Exception {
         /*
          * create folder shared to other user
          */
         int userId = client2.getValues().getUserId();
         OCLPermission permission = new OCLPermission(userId, 0);
-        permission.setAllPermission(OCLPermission.READ_ALL_OBJECTS, OCLPermission.READ_ALL_OBJECTS,
-            OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+        permission.setAllPermission(OCLPermission.READ_ALL_OBJECTS, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
         FolderObject folder = insertSharedFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getDefaultFolder(FolderObject.INFOSTORE), permission);
         /*
          * fetch & check internal link from notification mail
          */
-        String folderLink = discoverInvitationLink(client, client2.getValues().getDefaultAddress());
+        String folderLink = discoverInvitationLink(getNoReplyClient(), client2.getValues().getDefaultAddress());
         Assert.assertNotNull("Invitation link not found", folderLink);
         String fragmentParams = new URI(folderLink).getRawFragment();
         Matcher folderMatcher = Pattern.compile("folder=([0-9]+)").matcher(fragmentParams);
@@ -127,7 +133,7 @@ public class Bug41184Test extends ShareTest {
         /*
          * fetch & check internal link from notification mail
          */
-        String fileLink = discoverInvitationLink(client, client2.getValues().getDefaultAddress());
+        String fileLink = discoverInvitationLink(getNoReplyClient(), client2.getValues().getDefaultAddress());
         Assert.assertNotNull("Invitation link not found", fileLink);
         fragmentParams = new URI(fileLink).getRawFragment();
         folderMatcher = Pattern.compile("folder=([0-9]+)").matcher(fragmentParams);
@@ -142,7 +148,7 @@ public class Bug41184Test extends ShareTest {
          * try and access the file in shared files folder
          */
         GetInfostoreRequest getRequest = new GetInfostoreRequest(fileMatcher.group(1));
-        GetInfostoreResponse getResponse = client.execute(getRequest);
+        GetInfostoreResponse getResponse = getClient().execute(getRequest);
         File metadata = getResponse.getDocumentMetadata();
         assertNotNull(metadata);
         assertEquals(metadata.getId(), fileMatcher.group(1));
@@ -151,7 +157,7 @@ public class Bug41184Test extends ShareTest {
          * try and access the file in it's physical folder, too
          */
         getRequest = new GetInfostoreRequest(file.getId());
-        getResponse = client.execute(getRequest);
+        getResponse = getClient().execute(getRequest);
         metadata = getResponse.getDocumentMetadata();
         assertNotNull(metadata);
         assertEquals(metadata.getId(), file.getId());

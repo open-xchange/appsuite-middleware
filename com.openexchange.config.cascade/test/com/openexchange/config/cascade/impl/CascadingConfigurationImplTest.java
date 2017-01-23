@@ -49,8 +49,12 @@
 
 package com.openexchange.config.cascade.impl;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Map;
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.exception.OXException;
@@ -62,12 +66,11 @@ import com.openexchange.tools.strings.BasicTypesStringParser;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class CascadingConfigurationImplTest extends TestCase {
-
+public class CascadingConfigurationImplTest {
     private final ConfigCascade cascade = new ConfigCascade();
     private ConfigView view = null;
 
-    @Override
+    @Before
     public void setUp() {
         cascade.setProvider("server", new InMemoryConfigProvider());
         cascade.setProvider("context", new InMemoryConfigProvider());
@@ -80,7 +83,8 @@ public class CascadingConfigurationImplTest extends TestCase {
         view = cascade.getView(1, 23);
     }
 
-    public void testCascadingProperty() throws OXException {
+         @Test
+     public void testCascadingProperty() throws OXException {
         view.set("server", "com.openexchange.test.property", "Rosebud");
         assertEquals("Rosebud", view.get("com.openexchange.test.property", String.class));
 
@@ -100,7 +104,8 @@ public class CascadingConfigurationImplTest extends TestCase {
 
     }
 
-    public void testPropertyMetadata() throws OXException {
+         @Test
+     public void testPropertyMetadata() throws OXException {
         view.property("server", "com.openexchange.test.property", String.class).set("published", "true");
 
         assertTrue(view.property("com.openexchange.test.property", String.class).get("published", boolean.class));
@@ -115,7 +120,8 @@ public class CascadingConfigurationImplTest extends TestCase {
     }
 
 
-    public void testFinalProperty() throws OXException {
+         @Test
+     public void testFinalProperty() throws OXException {
         // The metadata key "final" points to the Scope where the search iteration should stop, effectively prohibiting that a value is overridden
         view.set("server", "com.openexchange.test.property", "Rosebud");
         view.set("context", "com.openexchange.test.property", "Lemongrass");
@@ -127,7 +133,8 @@ public class CascadingConfigurationImplTest extends TestCase {
         assertEquals("Lemongrass", view.get("com.openexchange.test.property", String.class));
     }
 
-    public void testFinalPropertyInversesSearchOrder() throws OXException {
+         @Test
+     public void testFinalPropertyInversesSearchOrder() throws OXException {
         // The metadata key "final" points to the Scope where the search iteration should stop, effectively prohibiting that a value is overridden
         view.set("server", "com.openexchange.test.property", "Rosebud");
         view.set("context", "com.openexchange.test.property", "Lemongrass");
@@ -140,7 +147,8 @@ public class CascadingConfigurationImplTest extends TestCase {
         assertEquals("Lemongrass", view.get("com.openexchange.test.property", String.class));
     }
 
-    public void testAllProperties() throws OXException {
+         @Test
+     public void testAllProperties() throws OXException {
         view.set("server", "com.openexchange.test.property1", "Rosebud");
         view.set("server", "com.openexchange.test.property2", "Rosebud");
         view.set("server", "com.openexchange.test.property3", "Rosebud");

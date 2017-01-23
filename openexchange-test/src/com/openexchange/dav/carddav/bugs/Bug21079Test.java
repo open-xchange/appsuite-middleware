@@ -49,7 +49,8 @@
 
 package com.openexchange.dav.carddav.bugs;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.MultiStatusResponse;
 import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
@@ -71,39 +72,39 @@ import com.openexchange.dav.carddav.CardDAVTest;
  */
 public class Bug21079Test extends CardDAVTest {
 
-	public Bug21079Test() {
-		super();
-	}
+    public Bug21079Test() {
+        super();
+    }
 
-	/**
-	 * Checks that at least one resource with "write-content" privileges is present in the carddav collections
-	 * @throws Exception
-	 */
-	@Test
-	public void testCheckWriteContentPrivilige() throws Exception {
-		final DavPropertyNameSet props = new DavPropertyNameSet();
+    /**
+     * Checks that at least one resource with "write-content" privileges is present in the carddav collections
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void testCheckWriteContentPrivilige() throws Exception {
+        final DavPropertyNameSet props = new DavPropertyNameSet();
         props.add(PropertyNames.CURRENT_USER_PRIVILEGE_SET);
-        final PropFindMethod propFind = new PropFindMethod(
-        		super.getWebDAVClient().getBaseURI() + "/carddav/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_1);
+        final PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + "/carddav/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_1);
         final MultiStatusResponse[] responses = super.getWebDAVClient().doPropFind(propFind);
         assertNotNull("got no response", responses);
         assertTrue("got no responses", 0 < responses.length);
         boolean canWriteContent = false;
         for (final MultiStatusResponse response : responses) {
-        	final DavProperty<?> property = response.getProperties(StatusCodes.SC_OK).get(PropertyNames.CURRENT_USER_PRIVILEGE_SET);
-        	if (null != property) {
-            	final CurrentUserPrivilegeSetProperty privilegeSet = new CurrentUserPrivilegeSetProperty(property);
-            	for (final Privilege privilege : privilegeSet.getValue()) {
-            		if (Privilege.PRIVILEGE_WRITE_CONTENT.equals(privilege)) {
-            			canWriteContent = true;
-            			break;
-            		}
-				}
-            	if (canWriteContent) {
-            		break;
-            	}
-        	}
-		}
+            final DavProperty<?> property = response.getProperties(StatusCodes.SC_OK).get(PropertyNames.CURRENT_USER_PRIVILEGE_SET);
+            if (null != property) {
+                final CurrentUserPrivilegeSetProperty privilegeSet = new CurrentUserPrivilegeSetProperty(property);
+                for (final Privilege privilege : privilegeSet.getValue()) {
+                    if (Privilege.PRIVILEGE_WRITE_CONTENT.equals(privilege)) {
+                        canWriteContent = true;
+                        break;
+                    }
+                }
+                if (canWriteContent) {
+                    break;
+                }
+            }
+        }
         assertTrue("no write-content privilege found", canWriteContent);
-	}
+    }
 }

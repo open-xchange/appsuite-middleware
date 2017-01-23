@@ -49,7 +49,9 @@
 
 package com.openexchange.dav.caldav.bugs;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import java.util.Date;
 import org.junit.Test;
 import com.openexchange.dav.StatusCodes;
@@ -69,52 +71,16 @@ import com.openexchange.groupware.container.Appointment;
  */
 public class Bug48242Test extends CalDAVTest {
 
-	@Test
-	public void testICalendarMethod() throws Exception {
-		/*
-		 * create appointment
-		 */
-		String uid = randomUID();
-    	Date start = TimeTools.D("next thursday at 18:30");
-    	Date end = TimeTools.D("next thursday at 19:00");
-		String iCal =
-				"BEGIN:VCALENDAR" + "\r\n" +
-                "VERSION:2.0" + "\r\n" +
-				"PRODID:-//Apple Inc.//Mac OS X 10.8.2//EN" + "\r\n" +
-				"CALSCALE:GREGORIAN" + "\r\n" +
-				"BEGIN:VTIMEZONE" + "\r\n" +
-				"TZID:Europe/Berlin" + "\r\n" +
-				"BEGIN:DAYLIGHT" + "\r\n" +
-				"TZOFFSETFROM:+0100" + "\r\n" +
-				"RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU" + "\r\n" +
-				"DTSTART:19810329T020000" + "\r\n" +
-				"TZNAME:CEST" + "\r\n" +
-				"TZOFFSETTO:+0200" + "\r\n" +
-				"END:DAYLIGHT" + "\r\n" +
-				"BEGIN:STANDARD" + "\r\n" +
-				"TZOFFSETFROM:+0200" + "\r\n" +
-				"RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU" + "\r\n" +
-				"DTSTART:19961027T030000" + "\r\n" +
-				"TZNAME:CET" + "\r\n" +
-				"TZOFFSETTO:+0100" + "\r\n" +
-				"END:STANDARD" + "\r\n" +
-				"END:VTIMEZONE" + "\r\n" +
-				"BEGIN:VEVENT" + "\r\n" +
-				"DTEND;TZID=Europe/Berlin:" + format(end, "Europe/Berlin") + "\r\n" +
-				"TRANSP:OPAQUE" + "\r\n" +
-				"ORGANIZER;CN=Horst:mailto:horst@example.org" + "\r\n" +
-				"UID:" + uid + "\r\n" +
-				"DTSTAMP:" + formatAsUTC(new Date()) + "\r\n" +
-				"SEQUENCE:2" + "\r\n" +
-				"SUMMARY:test accept" + "\r\n" +
-				"DTSTART;TZID=Europe/Berlin:" + format(start, "Europe/Berlin") + "\r\n" +
-				"CREATED:" + formatAsUTC(TimeTools.D("yesterday noon")) + "\r\n" +
-				"ATTENDEE;CN=Horst;CUTYPE=INDIVIDUAL;PARTSTAT=ACCEPTED;ROLE=REQ-PARTICIPANT:mailto:horst@example.org" + "\r\n" +
-				"ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION:mailto:" + getClient().getValues().getDefaultAddress() + "\r\n" +
-				"END:VEVENT" + "\r\n" +
-				"END:VCALENDAR"
-		;
-		assertEquals("response code wrong", StatusCodes.SC_CREATED, putICal(uid, iCal));
+    @Test
+    public void testICalendarMethod() throws Exception {
+        /*
+         * create appointment
+         */
+        String uid = randomUID();
+        Date start = TimeTools.D("next thursday at 18:30");
+        Date end = TimeTools.D("next thursday at 19:00");
+        String iCal = "BEGIN:VCALENDAR" + "\r\n" + "VERSION:2.0" + "\r\n" + "PRODID:-//Apple Inc.//Mac OS X 10.8.2//EN" + "\r\n" + "CALSCALE:GREGORIAN" + "\r\n" + "BEGIN:VTIMEZONE" + "\r\n" + "TZID:Europe/Berlin" + "\r\n" + "BEGIN:DAYLIGHT" + "\r\n" + "TZOFFSETFROM:+0100" + "\r\n" + "RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU" + "\r\n" + "DTSTART:19810329T020000" + "\r\n" + "TZNAME:CEST" + "\r\n" + "TZOFFSETTO:+0200" + "\r\n" + "END:DAYLIGHT" + "\r\n" + "BEGIN:STANDARD" + "\r\n" + "TZOFFSETFROM:+0200" + "\r\n" + "RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU" + "\r\n" + "DTSTART:19961027T030000" + "\r\n" + "TZNAME:CET" + "\r\n" + "TZOFFSETTO:+0100" + "\r\n" + "END:STANDARD" + "\r\n" + "END:VTIMEZONE" + "\r\n" + "BEGIN:VEVENT" + "\r\n" + "DTEND;TZID=Europe/Berlin:" + format(end, "Europe/Berlin") + "\r\n" + "TRANSP:OPAQUE" + "\r\n" + "ORGANIZER;CN=Horst:mailto:horst@example.org" + "\r\n" + "UID:" + uid + "\r\n" + "DTSTAMP:" + formatAsUTC(new Date()) + "\r\n" + "SEQUENCE:2" + "\r\n" + "SUMMARY:test accept" + "\r\n" + "DTSTART;TZID=Europe/Berlin:" + format(start, "Europe/Berlin") + "\r\n" + "CREATED:" + formatAsUTC(TimeTools.D("yesterday noon")) + "\r\n" + "ATTENDEE;CN=Horst;CUTYPE=INDIVIDUAL;PARTSTAT=ACCEPTED;ROLE=REQ-PARTICIPANT:mailto:horst@example.org" + "\r\n" + "ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION:mailto:" + getClient().getValues().getDefaultAddress() + "\r\n" + "END:VEVENT" + "\r\n" + "END:VCALENDAR";
+        assertEquals("response code wrong", StatusCodes.SC_CREATED, putICal(uid, iCal));
         /*
          * verify appointment on server
          */
@@ -129,6 +95,6 @@ public class Bug48242Test extends CalDAVTest {
         assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
         Property methodProperty = iCalResource.getVCalendar().getProperty("METHOD");
         assertNull("METHOD property in vCalendar found", methodProperty);
-	}
+    }
 
 }

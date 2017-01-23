@@ -71,8 +71,7 @@ public class RemindAgainParser extends AbstractAJAXParser<RemindAgainResponse> {
      * {@inheritDoc}
      */
     @Override
-    protected RemindAgainResponse createResponse(final Response response)
-        throws JSONException {
+    protected RemindAgainResponse createResponse(final Response response) throws JSONException {
         return new RemindAgainResponse(response);
     }
 }

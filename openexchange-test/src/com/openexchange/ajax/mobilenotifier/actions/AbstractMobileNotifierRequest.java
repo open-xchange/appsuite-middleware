@@ -53,13 +53,12 @@ import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.Header;
 
-
 /**
  * {@link AbstractMobileNotifierRequest}
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public abstract class AbstractMobileNotifierRequest <T extends AbstractAJAXResponse> implements AJAXRequest<T>  {
+public abstract class AbstractMobileNotifierRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
 
     /**
      * URL of the tasks AJAX interface.

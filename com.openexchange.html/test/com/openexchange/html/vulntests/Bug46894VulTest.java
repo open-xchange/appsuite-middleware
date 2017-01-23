@@ -64,8 +64,8 @@ public class Bug46894VulTest extends AbstractSanitizing {
         super();
     }
 
-    @Test
-    public void testScriptTagSanitizing() {
+     @Test
+     public void testScriptTagSanitizing() {
         String content = "<!DOCTYPE html>\n" + 
             "<html><body>\n" + 
             "<a href=\"data:text/html,<script>alert(document.domain);</script>\">click me</a>\n" + 

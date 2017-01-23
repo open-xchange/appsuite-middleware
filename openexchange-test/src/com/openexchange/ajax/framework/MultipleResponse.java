@@ -1,11 +1,11 @@
+
 package com.openexchange.ajax.framework;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 
-public class MultipleResponse<T extends AbstractAJAXResponse> extends AbstractAJAXResponse implements
-    Iterable<T> {
+public class MultipleResponse<T extends AbstractAJAXResponse> extends AbstractAJAXResponse implements Iterable<T> {
 
     private final T[] responses;
 

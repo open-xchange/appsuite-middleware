@@ -49,12 +49,18 @@
 
 package com.openexchange.ajax.folder;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Random;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GenJSONRequest;
@@ -88,18 +94,17 @@ public class DefaultMediaFoldersTest extends AbstractAJAXSession {
     /**
      * Initializes a new {@link DefaultMediaFoldersTest}.
      */
-    public DefaultMediaFoldersTest(String name) {
-        super(name);
+    public DefaultMediaFoldersTest() {
+        super();
         folders = new int[4];
         types = new int[4];
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
-        ListRequest listRequest = new ListRequest(EnumAPI.OX_NEW, String.valueOf(client.getValues().getPrivateInfostoreFolder()), new int[] { FolderObject.OBJECT_ID, FolderObject.FOLDER_NAME, FolderObject.OWN_RIGHTS, FolderObject.PERMISSIONS_BITS,
-            FolderObject.TYPE, FolderObject.STANDARD_FOLDER }, true);
-        ListResponse listResponse = client.execute(listRequest);
+        ListRequest listRequest = new ListRequest(EnumAPI.OX_NEW, String.valueOf(getClient().getValues().getPrivateInfostoreFolder()), new int[] { FolderObject.OBJECT_ID, FolderObject.FOLDER_NAME, FolderObject.OWN_RIGHTS, FolderObject.PERMISSIONS_BITS, FolderObject.TYPE, FolderObject.STANDARD_FOLDER }, true);
+        ListResponse listResponse = getClient().execute(listRequest);
         Iterator<FolderObject> it = listResponse.getFolder();
         while (it.hasNext()) {
             FolderObject folder = it.next();
@@ -127,38 +132,35 @@ public class DefaultMediaFoldersTest extends AbstractAJAXSession {
                 folders[3] = folder.getObjectID();
                 types[3] = FolderObject.VIDEOS;
             }
-//            if (folder.getType() == FolderObject.TEMPLATES) {
-//                assertEquals("Wrong folder name.", FolderStrings.SYSTEM_USER_TEMPLATES_FOLDER_NAME, folder.getFolderName());
-//                assertTrue("Folder is not a default folder.", folder.isDefaultFolder());
-//                folders[4] = folder.getObjectID();
-//                types[4] = FolderObject.TEMPLATES;
-//            }
+            //            if (folder.getType() == FolderObject.TEMPLATES) {
+            //                assertEquals("Wrong folder name.", FolderStrings.SYSTEM_USER_TEMPLATES_FOLDER_NAME, folder.getFolderName());
+            //                assertTrue("Folder is not a default folder.", folder.isDefaultFolder());
+            //                folders[4] = folder.getObjectID();
+            //                types[4] = FolderObject.TEMPLATES;
+            //            }
         }
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
-
+    @Test
     public void testDelete() throws Exception {
         for (int folderId : folders) {
             DeleteRequest deleteRequest = new DeleteRequest(EnumAPI.OX_NEW, folderId, new Date());
             deleteRequest.setHardDelete(true);
-            CommonDeleteResponse deleteResponse = client.execute(deleteRequest);
+            CommonDeleteResponse deleteResponse = getClient().execute(deleteRequest);
             JSONArray json = (JSONArray) deleteResponse.getData();
             assertEquals("Wrong array size in response.", 1, json.length());
             assertEquals("Wrong folder Id in response.", folderId, json.getInt(0));
             GetRequest getRequest = new GetRequest(EnumAPI.OX_NEW, folderId);
-            GetResponse getResponse = client.execute(getRequest);
+            GetResponse getResponse = getClient().execute(getRequest);
             assertFalse("Folder " + folderId + " was deleted.", getResponse.hasError());
         }
     }
 
+    @Test
     public void testRename() throws Exception {
         for (int folderId : folders) {
             GetRequest getRequest = new GetRequest(EnumAPI.OX_NEW, folderId);
-            GetResponse getResponse = client.execute(getRequest);
+            GetResponse getResponse = getClient().execute(getRequest);
             if (getResponse.hasError()) {
                 fail(getResponse.getErrorMessage());
             }
@@ -166,17 +168,18 @@ public class DefaultMediaFoldersTest extends AbstractAJAXSession {
             folder.setFolderName("renamed");
             folder.setLastModified(new Date());
             UpdateRequest updateRequest = new UpdateRequest(EnumAPI.OX_NEW, folder, false);
-            InsertResponse updateResponse = client.execute(updateRequest);
+            InsertResponse updateResponse = getClient().execute(updateRequest);
             assertTrue("Media folder " + folderId + " renamed.", updateResponse.hasError());
             OXException e = updateResponse.getException();
             assertEquals(OXFolderExceptionCode.NO_DEFAULT_FOLDER_RENAME.getNumber(), e.getCode());
         }
     }
 
+    @Test
     public void testMove() throws Exception {
         int random = new Random(System.currentTimeMillis()).nextInt(4);
         GetRequest getRequest = new GetRequest(EnumAPI.OX_NEW, folders[random]);
-        GetResponse getResponse = client.execute(getRequest);
+        GetResponse getResponse = getClient().execute(getRequest);
         if (getResponse.hasError()) {
             fail(getResponse.getErrorMessage());
         }
@@ -185,30 +188,31 @@ public class DefaultMediaFoldersTest extends AbstractAJAXSession {
         updateRequest.setJSONValue(new JSONObject("{\"folder_id\":\"" + folders[(random + 1) % 4] + "\"}"));
         updateRequest.setParameter("action", "update");
         updateRequest.setParameter("id", String.valueOf(folder.getObjectID()));
-        GenJSONResponse updateResponse = client.execute(updateRequest);
+        GenJSONResponse updateResponse = getClient().execute(updateRequest);
         assertTrue("Media folder moved.", updateResponse.hasError());
         OXException e = updateResponse.getException();
         assertEquals(OXFolderExceptionCode.NO_DEFAULT_FOLDER_MOVE.getNumber(), e.getCode());
     }
 
+    @Test
     public void testSubfoldersInheritType() throws Exception {
         int random = new Random(System.currentTimeMillis()).nextInt(4);
         FolderObject folder = new FolderObject();
         folder.setFolderName("subfolder");
         folder.setParentFolderID(folders[random]);
         folder.setModule(FolderObject.INFOSTORE);
-        OCLPermission perm = new OCLPermission(client.getValues().getUserId(), folders[random]);
+        OCLPermission perm = new OCLPermission(getClient().getValues().getUserId(), folders[random]);
         perm.setFolderAdmin(true);
         folder.setPermissions(Collections.singletonList(perm));
         int subfolderId = -1;
         try {
             InsertRequest insertRequest = new InsertRequest(EnumAPI.OX_NEW, folder);
-            InsertResponse insertResponse = client.execute(insertRequest);
+            InsertResponse insertResponse = getClient().execute(insertRequest);
             insertResponse.fillObject(folder);
             folder.setLastModified(new Date());
             subfolderId = folder.getObjectID();
             GetRequest getRequest = new GetRequest(EnumAPI.OX_NEW, subfolderId, new int[] { FolderObject.TYPE });
-            GetResponse getResponse = client.execute(getRequest);
+            GetResponse getResponse = getClient().execute(getRequest);
             folder = getResponse.getFolder();
             assertEquals("Folder type is not correct.", types[random], folder.getType());
         } finally {
@@ -216,38 +220,39 @@ public class DefaultMediaFoldersTest extends AbstractAJAXSession {
                 folder.setLastModified(new Date());
                 DeleteRequest deleteRequest = new DeleteRequest(EnumAPI.OX_NEW, false, folder);
                 deleteRequest.setHardDelete(true);
-                client.execute(deleteRequest);
+                getClient().execute(deleteRequest);
             }
         }
     }
 
+    @Test
     public void testSubfolderChangeTypeOnMove() throws Exception {
         int random = new Random(System.currentTimeMillis()).nextInt(4);
         FolderObject folder = new FolderObject();
         folder.setFolderName("subfolder");
         folder.setParentFolderID(folders[random]);
         folder.setModule(FolderObject.INFOSTORE);
-        OCLPermission perm = new OCLPermission(client.getValues().getUserId(), folders[random]);
+        OCLPermission perm = new OCLPermission(getClient().getValues().getUserId(), folders[random]);
         perm.setFolderAdmin(true);
         folder.setPermissions(Collections.singletonList(perm));
         int subfolderId = -1;
         try {
             InsertRequest insertRequest = new InsertRequest(EnumAPI.OX_NEW, folder);
-            InsertResponse insertResponse = client.execute(insertRequest);
+            InsertResponse insertResponse = getClient().execute(insertRequest);
             insertResponse.fillObject(folder);
             subfolderId = folder.getObjectID();
             GetRequest getRequest = new GetRequest(EnumAPI.OX_NEW, subfolderId);
-            GetResponse getResponse = client.execute(getRequest);
+            GetResponse getResponse = getClient().execute(getRequest);
             folder = getResponse.getFolder();
             folder.setLastModified(new Date());
             GenJSONRequest updateRequest = new GenJSONRequest(EnumAPI.OX_NEW, false);
             updateRequest.setJSONValue(new JSONObject("{\"folder_id\":\"" + folders[(random + 1) % 4] + "\"}"));
             updateRequest.setParameter("action", "update");
             updateRequest.setParameter("id", String.valueOf(subfolderId));
-            GenJSONResponse updateResponse = client.execute(updateRequest);
+            GenJSONResponse updateResponse = getClient().execute(updateRequest);
             assertFalse("Move subfolder failed.", updateResponse.hasError());
             getRequest = new GetRequest(EnumAPI.OX_NEW, subfolderId);
-            getResponse = client.execute(getRequest);
+            getResponse = getClient().execute(getRequest);
             folder = getResponse.getFolder();
             folder.setLastModified(new Date());
             assertEquals("Folder type not changed when moved.", types[(random + 1) % 4], folder.getType());
@@ -255,7 +260,7 @@ public class DefaultMediaFoldersTest extends AbstractAJAXSession {
             if (subfolderId > 0) {
                 DeleteRequest deleteRequest = new DeleteRequest(EnumAPI.OX_NEW, false, folder);
                 deleteRequest.setHardDelete(true);
-                client.execute(deleteRequest);
+                getClient().execute(deleteRequest);
             }
         }
     }

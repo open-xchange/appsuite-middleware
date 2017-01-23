@@ -49,6 +49,10 @@
 
 package com.openexchange.ajax.mail;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+import org.junit.Test;
 import org.slf4j.Logger;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.Executor;
@@ -71,8 +75,8 @@ public final class ListTest extends AbstractMailTest {
      *
      * @param name Name of this test.
      */
-    public ListTest(final String name) {
-        super(name);
+    public ListTest() {
+        super();
     }
 
     /**
@@ -80,6 +84,7 @@ public final class ListTest extends AbstractMailTest {
      *
      * @throws Throwable
      */
+    @Test
     public void testList() throws Throwable {
         /*
          * Clean everything
@@ -90,26 +95,14 @@ public final class ListTest extends AbstractMailTest {
         /*
          * Create mail
          */
-        final String eml =
-            ("Message-Id: <4A002517.4650.0059.1@foobar.com>\n" +
-            "Date: Tue, 05 May 2009 11:37:58 -0500\n" +
-            "From: #ADDR#\n" +
-            "To: #ADDR#\n" +
-            "Subject: Invitation for launch\n" +
-            "Mime-Version: 1.0\n" +
-            "Content-Type: text/plain; charset=\"UTF-8\"\n" +
-            "Content-Transfer-Encoding: 8bit\n" +
-            "\n" +
-            "This is a MIME message. If you are reading this text, you may want to \n" +
-            "consider changing to a mail reader or gateway that understands how to \n" +
-            "properly handle MIME multipart messages.").replaceAll("#ADDR#", getSendAddress());
+        final String eml = ("Message-Id: <4A002517.4650.0059.1@foobar.com>\n" + "Date: Tue, 05 May 2009 11:37:58 -0500\n" + "From: #ADDR#\n" + "To: #ADDR#\n" + "Subject: Invitation for launch\n" + "Mime-Version: 1.0\n" + "Content-Type: text/plain; charset=\"UTF-8\"\n" + "Content-Transfer-Encoding: 8bit\n" + "\n" + "This is a MIME message. If you are reading this text, you may want to \n" + "consider changing to a mail reader or gateway that understands how to \n" + "properly handle MIME multipart messages.").replaceAll("#ADDR#", getSendAddress());
         /*
          * Insert mails
          */
         final int numOfMails = 25;
         LOG.info("Sending " + numOfMails + " mails to fill emptied INBOX");
         for (int i = 0; i < numOfMails; i++) {
-            getClient().execute(new NewMailRequest(client.getValues().getInboxFolder(), eml, -1, true));
+            getClient().execute(new NewMailRequest(getClient().getValues().getInboxFolder(), eml, -1, true));
             LOG.info("Appended " + (i + 1) + ". mail of " + numOfMails);
         }
         /*
@@ -147,6 +140,7 @@ public final class ListTest extends AbstractMailTest {
      *
      * @throws Throwable
      */
+    @Test
     public void testListWithMimeType() throws Throwable {
         /*
          * Clean everything
@@ -157,26 +151,14 @@ public final class ListTest extends AbstractMailTest {
         /*
          * Create mail
          */
-        final String eml =
-            ("Message-Id: <4A002517.4650.0059.1@foobar.com>\n" +
-            "Date: Tue, 05 May 2009 11:37:58 -0500\n" +
-            "From: #ADDR#\n" +
-            "To: #ADDR#\n" +
-            "Subject: Invitation for launch\n" +
-            "Mime-Version: 1.0\n" +
-            "Content-Type: text/plain; charset=\"UTF-8\"\n" +
-            "Content-Transfer-Encoding: 8bit\n" +
-            "\n" +
-            "This is a MIME message. If you are reading this text, you may want to \n" +
-            "consider changing to a mail reader or gateway that understands how to \n" +
-            "properly handle MIME multipart messages.").replaceAll("#ADDR#", getSendAddress());
+        final String eml = ("Message-Id: <4A002517.4650.0059.1@foobar.com>\n" + "Date: Tue, 05 May 2009 11:37:58 -0500\n" + "From: #ADDR#\n" + "To: #ADDR#\n" + "Subject: Invitation for launch\n" + "Mime-Version: 1.0\n" + "Content-Type: text/plain; charset=\"UTF-8\"\n" + "Content-Transfer-Encoding: 8bit\n" + "\n" + "This is a MIME message. If you are reading this text, you may want to \n" + "consider changing to a mail reader or gateway that understands how to \n" + "properly handle MIME multipart messages.").replaceAll("#ADDR#", getSendAddress());
         /*
          * Insert mails
          */
         final int numOfMails = 25;
         LOG.info("Sending " + numOfMails + " mails to fill emptied INBOX");
         for (int i = 0; i < numOfMails; i++) {
-            getClient().execute(new NewMailRequest(client.getValues().getInboxFolder(), eml, -1, true));
+            getClient().execute(new NewMailRequest(getClient().getValues().getInboxFolder(), eml, -1, true));
             LOG.info("Appended " + (i + 1) + ". mail of " + numOfMails);
         }
         /*

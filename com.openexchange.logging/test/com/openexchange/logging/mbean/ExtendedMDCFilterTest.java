@@ -49,6 +49,8 @@
 
 package com.openexchange.logging.mbean;
 
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.when;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -59,7 +61,6 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.slf4j.MDC;
 import com.openexchange.logging.filter.ExtendedMDCFilter;
-import static org.powermock.api.mockito.PowerMockito.*;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.core.spi.FilterReply;
@@ -74,8 +75,8 @@ import ch.qos.logback.core.spi.FilterReply;
 @PrepareForTest(Logger.class)
 public class ExtendedMDCFilterTest {
 
-    @Test
-    public void testWhitelistBasedFiltering() throws Exception {
+     @Test
+     public void testWhitelistBasedFiltering() throws Exception {
         Set<String> whitelist = new HashSet<String>();
         whitelist.add("com.openexchange.a");
         whitelist.add("com.openexchange.b");
@@ -96,8 +97,8 @@ public class ExtendedMDCFilterTest {
         }
     }
 
-    @Test
-    public void testMultipleTupleBasedFiltering() throws Exception {
+     @Test
+     public void testMultipleTupleBasedFiltering() throws Exception {
         ExtendedMDCFilter filter = new ExtendedMDCFilter(Collections.singleton("com.openexchange"));
         filter.addTuple("user", "5");
         filter.addTuple("context", "3");
@@ -115,8 +116,8 @@ public class ExtendedMDCFilterTest {
         }
     }
 
-    @Test
-    public void testSingleTupleBasedFiltering() throws Exception {
+     @Test
+     public void testSingleTupleBasedFiltering() throws Exception {
         ExtendedMDCFilter filter = new ExtendedMDCFilter(Collections.singleton("com.openexchange"));
         filter.addTuple("context", "3");
         filter.addLogger("com.openexchange.a", Level.TRACE);
@@ -133,8 +134,8 @@ public class ExtendedMDCFilterTest {
         }
     }
 
-    @Test
-    public void testUserFilterWithLoggingLevel() {
+     @Test
+     public void testUserFilterWithLoggingLevel() {
         ExtendedMDCFilter filter = new ExtendedMDCFilter(Collections.singleton("com.openexchange"));
         filter.addTuple("context", "314");
         filter.addTuple("user", "1618");

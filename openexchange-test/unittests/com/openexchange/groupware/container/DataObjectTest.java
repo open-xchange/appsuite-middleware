@@ -6,13 +6,17 @@ import static com.openexchange.groupware.container.DataObject.CREATION_DATE;
 import static com.openexchange.groupware.container.DataObject.LAST_MODIFIED;
 import static com.openexchange.groupware.container.DataObject.MODIFIED_BY;
 import static com.openexchange.groupware.container.DataObject.OBJECT_ID;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class DataObjectTest extends TestCase {
+public class DataObjectTest {
 
+    @Test
     public void testAttrAccessors() {
-        DataObject object = new DataObject(){};
+        DataObject object = new DataObject() {};
 
         // LAST_MODIFIED
         assertFalse(object.contains(LAST_MODIFIED));
@@ -23,14 +27,12 @@ public class DataObjectTest extends TestCase {
         assertTrue(object.containsLastModified());
         assertEquals(new Date(42), object.get(LAST_MODIFIED));
 
-        object.set(LAST_MODIFIED,new Date(23));
+        object.set(LAST_MODIFIED, new Date(23));
         assertEquals(new Date(23), object.getLastModified());
 
         object.remove(LAST_MODIFIED);
         assertFalse(object.contains(LAST_MODIFIED));
         assertFalse(object.containsLastModified());
-
-
 
         // OBJECT_ID
         assertFalse(object.contains(OBJECT_ID));
@@ -41,14 +43,12 @@ public class DataObjectTest extends TestCase {
         assertTrue(object.containsObjectID());
         assertEquals(-12, object.get(OBJECT_ID));
 
-        object.set(OBJECT_ID,12);
+        object.set(OBJECT_ID, 12);
         assertEquals(12, object.getObjectID());
 
         object.remove(OBJECT_ID);
         assertFalse(object.contains(OBJECT_ID));
         assertFalse(object.containsObjectID());
-
-
 
         // MODIFIED_BY
         assertFalse(object.contains(MODIFIED_BY));
@@ -59,14 +59,12 @@ public class DataObjectTest extends TestCase {
         assertTrue(object.containsModifiedBy());
         assertEquals(-12, object.get(MODIFIED_BY));
 
-        object.set(MODIFIED_BY,12);
+        object.set(MODIFIED_BY, 12);
         assertEquals(12, object.getModifiedBy());
 
         object.remove(MODIFIED_BY);
         assertFalse(object.contains(MODIFIED_BY));
         assertFalse(object.containsModifiedBy());
-
-
 
         // CREATION_DATE
         assertFalse(object.contains(CREATION_DATE));
@@ -77,14 +75,12 @@ public class DataObjectTest extends TestCase {
         assertTrue(object.containsCreationDate());
         assertEquals(new Date(42), object.get(CREATION_DATE));
 
-        object.set(CREATION_DATE,new Date(23));
+        object.set(CREATION_DATE, new Date(23));
         assertEquals(new Date(23), object.getCreationDate());
 
         object.remove(CREATION_DATE);
         assertFalse(object.contains(CREATION_DATE));
         assertFalse(object.containsCreationDate());
-
-
 
         // CREATED_BY
         assertFalse(object.contains(CREATED_BY));
@@ -95,7 +91,7 @@ public class DataObjectTest extends TestCase {
         assertTrue(object.containsCreatedBy());
         assertEquals(-12, object.get(CREATED_BY));
 
-        object.set(CREATED_BY,12);
+        object.set(CREATED_BY, 12);
         assertEquals(12, object.getCreatedBy());
 
         object.remove(CREATED_BY);
@@ -105,8 +101,7 @@ public class DataObjectTest extends TestCase {
     }
 
     private DataObject getDataObject() {
-        DataObject dataObject = new DataObject() {
-        };
+        DataObject dataObject = new DataObject() {};
 
         fillDataObject(dataObject);
 

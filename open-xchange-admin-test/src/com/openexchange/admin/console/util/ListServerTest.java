@@ -75,16 +75,16 @@ public class ListServerTest extends AbstractRMITest {
 
     private int returnCodeListServerUnknownOption;
 
-    @Test
-    public void testListServer() throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, MalformedURLException, NotBoundException {
+     @Test
+     public void testListServer() throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, MalformedURLException, NotBoundException {
         OXUtilInterface utilInterface = getUtilInterface();
         Server[] listServer = utilInterface.listServer("*", superAdminCredentials);
 
         Assert.assertNotNull(listServer);
     }
 
-    @Test
-    public void testListServerCSV() {
+     @Test
+     public void testListServerCSV() {
         new ListServer(new String[] { "-A", OXADMINMASTER, "-P", MASTER_PW, "-H", getRMIHost(), "--csv" }) {
 
             @Override
@@ -96,8 +96,8 @@ public class ListServerTest extends AbstractRMITest {
         assertTrue("Listing of server failed with return code: " + returnCodeListServerCSV, returnCodeListServerCSV == 0);
     }
 
-    @Test
-    public void testListServerInvalidCredentials() {
+     @Test
+     public void testListServerInvalidCredentials() {
         new ListServer(new String[] { "-A", OXADMINMASTER + "_xyzfoobar", "-P", MASTER_PW + "_xyzfoobar" }) {
 
             @Override
@@ -111,8 +111,8 @@ public class ListServerTest extends AbstractRMITest {
             returnCodeListServerInvalidCredentials == 0);
     }
 
-    @Test
-    public void testListServerUnknownOption() {
+     @Test
+     public void testListServerUnknownOption() {
         new ListServer(new String[] { "-A", OXADMINMASTER, "-P", MASTER_PW, "-H", getRMIHost(), "--foouknownoption", "bar" }) {
 
             @Override

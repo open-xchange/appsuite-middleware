@@ -56,7 +56,6 @@ import com.openexchange.folderstorage.database.contentType.ContactContentType;
 import com.openexchange.folderstorage.filestorage.contentType.FileStorageContentType;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
 
-
 /**
  * {@link StaticDiscoveryService}
  *

@@ -53,32 +53,30 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import junit.framework.TestCase;
-
+import org.junit.After;
+import org.junit.Before;
 
 /**
  * {@link AbstractHashingFileStorageTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class AbstractHashingFileStorageTest extends TestCase {
-
+public class AbstractHashingFileStorageTest {
     protected File tmpFile;
     protected HashingFileStorage fs;
 
-    @Override
-    protected void setUp() throws Exception {
-        tmpFile = new File("/tmp/"+getName()+"_"+System.currentTimeMillis());
+    @Before
+    public void setUp() throws Exception {
+        tmpFile = new File("/tmp/" + this.getClass().getCanonicalName() + "_" + System.currentTimeMillis());
         tmpFile.mkdirs();
         fs = new HashingFileStorage(tmpFile);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         fs.remove();
         tmpFile.delete();
     }
-
 
     protected InputStream IS(String data) throws UnsupportedEncodingException {
         return new ByteArrayInputStream(data.getBytes(com.openexchange.java.Charsets.UTF_8));

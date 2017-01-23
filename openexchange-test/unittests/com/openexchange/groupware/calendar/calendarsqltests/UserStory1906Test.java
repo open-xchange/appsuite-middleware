@@ -50,6 +50,12 @@
 package com.openexchange.groupware.calendar.calendarsqltests;
 
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.groupware.calendar.CalendarConfig;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.ConfigHook;
@@ -63,7 +69,7 @@ public class UserStory1906Test extends CalendarSqlTest {
 
     private boolean parameterValue;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
@@ -83,6 +89,7 @@ public class UserStory1906Test extends CalendarSqlTest {
         appointment.setIgnoreConflicts(false);
     }
 
+    @Test
     public void testTrue() throws Exception {
         ConfigHook.setUndefinedStatusConflict(true);
         CalendarDataObject[] conflicts = appointments.save(appointment);
@@ -90,13 +97,14 @@ public class UserStory1906Test extends CalendarSqlTest {
         assertTrue("Expected conflicts", conflicts.length > 0);
     }
 
+    @Test
     public void testFalse() throws Exception {
         ConfigHook.setUndefinedStatusConflict(false);
         CalendarDataObject[] conflicts = appointments.save(appointment);
         assertNull("Expected no conflicts", conflicts);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         ConfigHook.setUndefinedStatusConflict(parameterValue);
 

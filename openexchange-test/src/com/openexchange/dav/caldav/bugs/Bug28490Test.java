@@ -67,12 +67,12 @@ import com.openexchange.groupware.container.Appointment;
  */
 public class Bug28490Test extends CalDAVTest {
 
-	@Test
-	public void testTimeZoneCET() throws Exception {
-		/*
-		 * create appointment series on server
-		 */
-		String uid = randomUID();
+    @Test
+    public void testTimeZoneCET() throws Exception {
+        /*
+         * create appointment series on server
+         */
+        String uid = randomUID();
         Appointment appointment = new Appointment();
         appointment.setUid(uid);
         appointment.setTitle(getClass().getCanonicalName());
@@ -93,6 +93,6 @@ public class Bug28490Test extends CalDAVTest {
         assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
         assertNotNull("No TZID attribute found in DTSTART property", iCalResource.getVEvent().getProperty("DTSTART").getAttribute("TZID"));
         assertNotNull("No TZID attribute found in DTEND property", iCalResource.getVEvent().getProperty("DTEND").getAttribute("TZID"));
-	}
+    }
 
 }

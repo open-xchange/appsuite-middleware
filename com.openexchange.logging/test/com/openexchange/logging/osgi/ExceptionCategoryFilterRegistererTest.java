@@ -68,8 +68,8 @@ import com.openexchange.logging.mbean.IncludeStackTraceServiceImpl;
  */
 public class ExceptionCategoryFilterRegistererTest {
 
-    @Test
-    public void testCorrectFilterHandlingOnConfigServiceAppearance() throws Exception {
+     @Test
+     public void testCorrectFilterHandlingOnConfigServiceAppearance() throws Exception {
         /*
          * When ConfigurationService appears, ExceptionCategoryFilter shall be registered.
          * When ConfigurationService appears again, the old filter shall be removed and registered again.

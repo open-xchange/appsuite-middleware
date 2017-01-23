@@ -178,10 +178,6 @@ public class TranslatedTest {
         }
     }
 
-    private static final String[] whiteRegex = {
-        "Africa/.*", "America/.*", "Antarctica/.*", "Arctic/.*", "Asia/.*", "Atlantic/.*", "Australia/.*", "Brazil/.*", "Canada/.*",
-        "Chile/.*", "Cuba", "Egypt", "Eire", "Europe/.*", "Greenwich", "Hongkong", "Iceland", "Indian/.*", "Iran", "Israel", "Jamaica",
-        "Japan", "Kwajalein", "Libya", "Mexico/.*", "Mideast/.*", "Navajo", "Pacific/.*", "Poland", "Portugal", "Singapore", "Turkey",
-        "US/.*", "UTC", "Zulu" };
+    private static final String[] whiteRegex = { "Africa/.*", "America/.*", "Antarctica/.*", "Arctic/.*", "Asia/.*", "Atlantic/.*", "Australia/.*", "Brazil/.*", "Canada/.*", "Chile/.*", "Cuba", "Egypt", "Eire", "Europe/.*", "Greenwich", "Hongkong", "Iceland", "Indian/.*", "Iran", "Israel", "Jamaica", "Japan", "Kwajalein", "Libya", "Mexico/.*", "Mideast/.*", "Navajo", "Pacific/.*", "Poland", "Portugal", "Singapore", "Turkey", "US/.*", "UTC", "Zulu" };
 
 }

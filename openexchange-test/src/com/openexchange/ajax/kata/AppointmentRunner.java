@@ -51,7 +51,6 @@ package com.openexchange.ajax.kata;
 
 import com.openexchange.groupware.container.Appointment;
 
-
 /**
  * {@link AppointmentRunner}
  *
@@ -61,6 +60,6 @@ import com.openexchange.groupware.container.Appointment;
 public class AppointmentRunner extends AbstractDirectoryRunner {
 
     public AppointmentRunner(String name) {
-        super(name,"appointmentKatas" , Appointment.class);
+        super(name, "appointmentKatas", Appointment.class);
     }
 }

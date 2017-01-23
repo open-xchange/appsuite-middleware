@@ -59,7 +59,6 @@ import com.openexchange.ajax.framework.ListIDs;
  */
 public class ListRequest extends CommonListRequest {
 
-
     public ListRequest(final ListIDs identifier, final int[] columns, final boolean failOnError) {
         super(AbstractAppointmentRequest.URL, identifier, columns, failOnError);
     }
@@ -75,7 +74,5 @@ public class ListRequest extends CommonListRequest {
     public ListRequest(final ListIDs identifier, final String alias) {
         this(identifier, alias, true);
     }
-
-
 
 }

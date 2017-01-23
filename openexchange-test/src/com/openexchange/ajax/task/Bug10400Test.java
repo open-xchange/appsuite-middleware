@@ -49,9 +49,10 @@
 
 package com.openexchange.ajax.task;
 
+import static org.junit.Assert.assertFalse;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.GetRequest;
 import com.openexchange.ajax.task.actions.GetResponse;
@@ -72,21 +73,24 @@ public class Bug10400Test extends AbstractTaskTest {
 
     /**
      * Default constructor.
+     * 
      * @param name Name of the test.
      */
-    public Bug10400Test(final String name) {
-        super(name);
+    public Bug10400Test() {
+        super();
     }
 
     /**
      * Checks if the only task participant is able to remove himself and add the
      * creator as participant.
+     * 
      * @throws Throwable if an exception occurs.
      */
+    @Test
     public void testRemoveDelegateAddCreator() throws Throwable {
         final AJAXClient anton = getClient();
         final int antonFID = anton.getValues().getPrivateTaskFolder();
-        final AJAXClient berta = new AJAXClient(User.User2);
+        final AJAXClient berta = new AJAXClient(testContext.acquireUser());
         final TimeZone bertaTZ = berta.getValues().getTimeZone();
         Task task = Create.createWithDefaults();
         task.setTitle("Bug10400Test1");
@@ -95,16 +99,12 @@ public class Bug10400Test extends AbstractTaskTest {
         final InsertResponse insert = anton.execute(new InsertRequest(task, anton.getValues().getTimeZone()));
         task.setLastModified(insert.getTimestamp());
         try {
-            final GetResponse get = TaskTools.get(berta, new GetRequest(berta
-                .getValues().getPrivateTaskFolder(), insert.getId()));
+            final GetResponse get = TaskTools.get(berta, new GetRequest(berta.getValues().getPrivateTaskFolder(), insert.getId()));
             task = get.getTask(bertaTZ);
-            task.setParticipants(new Participant[] { new UserParticipant(anton
-                .getValues().getUserId()) });
-            final UpdateResponse update = TaskTools.update(berta,
-                new UpdateRequest(task, bertaTZ));
+            task.setParticipants(new Participant[] { new UserParticipant(anton.getValues().getUserId()) });
+            final UpdateResponse update = TaskTools.update(berta, new UpdateRequest(task, bertaTZ));
             task.setLastModified(update.getTimestamp());
-            assertFalse("Berta was not able to remove herself and add Anton as "
-                + "task participant.", update.hasError());
+            assertFalse("Berta was not able to remove herself and add Anton as " + "task participant.", update.hasError());
         } finally {
             anton.execute(new DeleteRequest(antonFID, task.getObjectID(), task.getLastModified()));
         }
@@ -113,8 +113,10 @@ public class Bug10400Test extends AbstractTaskTest {
     /**
      * Checks if the only participant is able to remove himself from the
      * participant list.
+     * 
      * @throws Throwable if an exception occurs.
      */
+    @Test
     public void testCreatorAddAsParticipantAndRemove() throws Throwable {
         final AJAXClient anton = getClient();
         final int antonFID = anton.getValues().getPrivateTaskFolder();
@@ -126,29 +128,25 @@ public class Bug10400Test extends AbstractTaskTest {
         task.setObjectID(insert.getId());
         task.setLastModified(insert.getTimestamp());
         try {
-            task.setParticipants(new Participant[] { new UserParticipant(anton
-                .getValues().getUserId()) });
+            task.setParticipants(new Participant[] { new UserParticipant(anton.getValues().getUserId()) });
             task.removeTitle();
-            UpdateResponse update = TaskTools.update(anton, new UpdateRequest(
-                task, antonTZ));
+            UpdateResponse update = TaskTools.update(anton, new UpdateRequest(task, antonTZ));
             task.setLastModified(update.getTimestamp());
-            task.setParticipants(new Participant[] { });
-            update = TaskTools.update(anton, new UpdateRequest(
-                task, antonTZ));
+            task.setParticipants(new Participant[] {});
+            update = TaskTools.update(anton, new UpdateRequest(task, antonTZ));
             task.setLastModified(update.getTimestamp());
-            final GetResponse get = TaskTools.get(anton, new GetRequest(antonFID,
-                task.getObjectID()));
-            assertFalse("Task disappeared due to deleted folder mapping.",
-                get.hasError());
+            final GetResponse get = TaskTools.get(anton, new GetRequest(antonFID, task.getObjectID()));
+            assertFalse("Task disappeared due to deleted folder mapping.", get.hasError());
         } finally {
             anton.execute(new DeleteRequest(antonFID, task.getObjectID(), task.getLastModified()));
         }
     }
 
+    @Test
     public void testRemoveDelegate() throws Throwable {
         final AJAXClient anton = getClient();
         final int antonFID = anton.getValues().getPrivateTaskFolder();
-        final AJAXClient berta = new AJAXClient(User.User2);
+        final AJAXClient berta = new AJAXClient(testContext.acquireUser());
         final TimeZone bertaTZ = berta.getValues().getTimeZone();
         Task task = Create.createWithDefaults();
         task.setTitle("Bug10400Test2");
@@ -157,15 +155,12 @@ public class Bug10400Test extends AbstractTaskTest {
         final InsertResponse insert = anton.execute(new InsertRequest(task, anton.getValues().getTimeZone()));
         task.setLastModified(insert.getTimestamp());
         try {
-            final GetResponse get = TaskTools.get(berta, new GetRequest(berta
-                .getValues().getPrivateTaskFolder(), insert.getId()));
+            final GetResponse get = TaskTools.get(berta, new GetRequest(berta.getValues().getPrivateTaskFolder(), insert.getId()));
             task = get.getTask(bertaTZ);
-            task.setParticipants(new Participant[] { });
-            final UpdateResponse update = TaskTools.update(berta,
-                new UpdateRequest(task, bertaTZ));
+            task.setParticipants(new Participant[] {});
+            final UpdateResponse update = TaskTools.update(berta, new UpdateRequest(task, bertaTZ));
             task.setLastModified(update.getTimestamp());
-            assertFalse("Berta was not able to remove herself.",
-                update.hasError());
+            assertFalse("Berta was not able to remove herself.", update.hasError());
         } finally {
             anton.execute(new DeleteRequest(antonFID, task.getObjectID(), task.getLastModified()));
         }

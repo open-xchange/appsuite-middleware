@@ -79,8 +79,7 @@ public class LogoutParser extends AbstractAJAXParser<LogoutResponse> {
      * {@inheritDoc}
      */
     @Override
-    protected LogoutResponse createResponse(final Response response)
-        throws JSONException {
+    protected LogoutResponse createResponse(final Response response) throws JSONException {
         return new LogoutResponse();
     }
 }

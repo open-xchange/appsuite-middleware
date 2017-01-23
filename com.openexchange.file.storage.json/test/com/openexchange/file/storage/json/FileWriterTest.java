@@ -72,10 +72,13 @@ import static com.openexchange.file.storage.File.Field.VERSION;
 import static com.openexchange.file.storage.File.Field.VERSION_COMMENT;
 import static com.openexchange.json.JSONAssertion.assertValidates;
 import static com.openexchange.time.TimeTools.D;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import java.util.Arrays;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.json.actions.files.TestFriendlyInfostoreRequest;
 import com.openexchange.json.JSONAssertion;
@@ -89,7 +92,8 @@ public class FileWriterTest extends FileTest {
 
     FileMetadataWriter writer = new FileMetadataWriter(null);
 
-    public void testWriteFileAsArray() throws JSONException {
+         @Test
+     public void testWriteFileAsArray() throws JSONException {
         DefaultFile f = createFile();
 
         JSONArray array = writer.writeArray(new JsonFieldHandler(new TestFriendlyInfostoreRequest()), f, Arrays.asList(
@@ -165,7 +169,8 @@ public class FileWriterTest extends FileTest {
         return f;
     }
 
-    public void testTimezone() throws JSONException {
+         @Test
+     public void testTimezone() throws JSONException {
         DefaultFile f = new DefaultFile();
         f.setCreated(D("Today at 10:00"));
         f.setLastModified(D("Today at 12:00"));
@@ -185,7 +190,8 @@ public class FileWriterTest extends FileTest {
         //assertEquals(D("Today at 18:00").getTime(), array.getLong(3));
     }
 
-    public void testWriteAsObject() {
+         @Test
+     public void testWriteAsObject() {
         DefaultFile file = createFile();
 
         JSONObject object = writer.write(new TestFriendlyInfostoreRequest(), file);

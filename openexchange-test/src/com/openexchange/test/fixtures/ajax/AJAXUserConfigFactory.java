@@ -67,13 +67,7 @@ public class AJAXUserConfigFactory implements TestUserConfigFactory {
         AJAXSession session = new AJAXSession();
         try {
             AJAXClient client = new AJAXClient(session, true);
-            session.setId(client.execute(
-                new LoginRequest(
-                    credentials.getLogin(),
-                    credentials.getPassword(),
-                    LoginTools.generateAuthId(),
-                    AJAXUserConfigFactory.class.getName(),
-                    "6.15.0")).getSessionId());
+            session.setId(client.execute(new LoginRequest(credentials.getLogin(), credentials.getPassword(), LoginTools.generateAuthId(), AJAXUserConfigFactory.class.getName(), "6.15.0")).getSessionId());
             return new AJAXUserConfig(client);
         } catch (OXException e) {
             e.printStackTrace();

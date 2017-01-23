@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.share.bugs;
 
+import static org.junit.Assert.assertNotNull;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateRequest;
@@ -68,15 +70,7 @@ import com.openexchange.share.recipient.GuestRecipient;
  */
 public class Bug40722Test extends ShareTest {
 
-    /**
-     * Initializes a new {@link Bug40722Test}.
-     *
-     * @param name The test name
-     */
-    public Bug40722Test(String name) {
-        super(name);
-    }
-
+    @Test
     public void testRemoveGuestPassword() throws Exception {
         OCLGuestPermission guestPermission = createNamedGuestPermission(randomUID() + "@example.com", "Test Guest", "secret");
         /*
@@ -90,7 +84,7 @@ public class Bug40722Test extends ShareTest {
          */
         OCLPermission matchingPermission = null;
         for (OCLPermission permission : folder.getPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
                 break;
             }
@@ -112,8 +106,7 @@ public class Bug40722Test extends ShareTest {
          * update password
          */
         String newPassword = null;
-        PasswordChangeUpdateRequest updateRequest = new PasswordChangeUpdateRequest(
-            newPassword, ((GuestRecipient) guestPermission.getRecipient()).getPassword(), true);
+        PasswordChangeUpdateRequest updateRequest = new PasswordChangeUpdateRequest(newPassword, ((GuestRecipient) guestPermission.getRecipient()).getPassword(), true);
         guestClient.execute(updateRequest);
         /*
          * check access to share link, now without password

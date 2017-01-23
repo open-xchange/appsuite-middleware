@@ -49,60 +49,45 @@
 
 package com.openexchange.ajax.task;
 
-import static com.openexchange.ajax.task.TaskTools.confirmTask;
 import static com.openexchange.ajax.task.TaskTools.deleteTask;
-import static com.openexchange.ajax.task.TaskTools.extractInsertId;
-import static com.openexchange.ajax.task.TaskTools.getAllTasksInFolder;
 import static com.openexchange.ajax.task.TaskTools.getTask;
-import static com.openexchange.ajax.task.TaskTools.insertTask;
-import static com.openexchange.ajax.task.TaskTools.updateTask;
 import static com.openexchange.java.Autoboxing.L;
-import java.io.IOException;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.xml.sax.SAXException;
-import com.openexchange.ajax.AbstractAJAXTest;
-import com.openexchange.ajax.config.ConfigTools;
+import org.junit.Test;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.fields.TaskFields;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.participant.ParticipantTools;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.test.TaskTestManager;
 
 /**
  * This class tests the AJAX interface of the tasks.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class TasksTest extends AbstractAJAXTest {
+public class TasksTest extends AbstractAJAXSession {
 
     /**
      * Logger.
      */
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TasksTest.class);
-    /**
-     * Proxy attribute for the private task folder of the user.
-     */
-    private int privateTaskFolder;
-
-    /**
-     * Default constructor.
-     * @param name Name of this test.
-     */
-    public TasksTest(final String name) {
-        super(name);
-    }
 
     /**
      * Tests inserting a delegated task.
+     * 
      * @throws Throwable if an error occurs.
      */
+    @Test
     public void testInsertDelegatedPrivateTask() throws Throwable {
         final Task task = new Task();
         task.setTitle("Private delegated task");
@@ -126,25 +111,19 @@ public class TasksTest extends AbstractAJAXTest {
         task.setBillingInformation("billing information");
         task.setCompanies("companies");
 
-        final int folderId = TaskTools.getPrivateTaskFolder(getWebConversation(), getHostName(), getSessionId());
+        final int folderId = getClient().getValues().getPrivateTaskFolder();
 
-        final List<Participant> participants = ParticipantTools.getParticipants(
-            getWebConversation(), getHostName(), getSessionId(), 2, true,
-            ConfigTools.getUserId(getWebConversation(), getHostName(),
-                getSessionId()));
+        final List<Participant> participants = ParticipantTools.getParticipants(getClient(), 2, true, getClient().getValues().getUserId());
         final ExternalUserParticipant external = new ExternalUserParticipant("external@external.no");
         external.setDisplayName("External, External");
         participants.add(external);
         task.setParticipants(participants);
         task.setParentFolderID(folderId);
 
-        final int taskId = extractInsertId(insertTask(getWebConversation(),
-            getHostName(), getSessionId(), task));
+        final int taskId = ttm.insertTaskOnServer(task).getObjectID();
         LOG.trace("Created delegated task: {}", taskId);
 
-        final Response response = getTask(getWebConversation(), getHostName(),
-            getSessionId(), folderId, taskId);
-        final Task reload = (Task) response.getData();
+        final Task reload = ttm.getTaskFromServer(folderId, taskId);
         for (final Participant p1 : reload.getParticipants()) {
             boolean found = false;
             for (final Participant p2 : participants) {
@@ -156,42 +135,33 @@ public class TasksTest extends AbstractAJAXTest {
                 fail("Storing participant in delegated task failed.");
             }
         }
-        lastModified = response.getTimestamp();
+        lastModified = reload.getLastModified();
 
-        deleteTask(getWebConversation(), getHostName(), getSessionId(),
-            lastModified, folderId, taskId);
+        deleteTask(getClient(), lastModified, folderId, taskId);
     }
 
+    @Test
     public void testUpdateDelegatedTask() throws Throwable {
-        final List<Participant> participants = ParticipantTools.getParticipants(
-            getWebConversation(), getHostName(), getSessionId(), 4, true,
-            ConfigTools.getUserId(getWebConversation(), getHostName(),
-                getSessionId()));
-        final List<Participant> firstParticipants =
-            new ArrayList<Participant>();
+        final List<Participant> participants = ParticipantTools.getParticipants(getClient(), 4, true, getClient().getValues().getUserId());
+        final List<Participant> firstParticipants = new ArrayList<Participant>();
         firstParticipants.addAll(participants.subList(0, 2));
-        final List<Participant> secondParticipants =
-            new ArrayList<Participant>();
+        final List<Participant> secondParticipants = new ArrayList<Participant>();
         secondParticipants.addAll(participants.subList(2, 4));
         secondParticipants.add(participants.get(0));
 
         final Task task = new Task();
         task.setTitle("Private delegated task");
-        final int folderId = TaskTools.getPrivateTaskFolder(getWebConversation(),
-            getHostName(), getSessionId());
+        final int folderId = getClient().getValues().getPrivateTaskFolder();
         task.setParentFolderID(folderId);
         task.setParticipants(firstParticipants);
 
         LOG.trace("Creating delegated task with participants: {}", firstParticipants);
-        final int taskId = extractInsertId(insertTask(getWebConversation(),
-            getHostName(), getSessionId(), task));
+        final int taskId = ttm.insertTaskOnServer(task).getObjectID();
         LOG.trace("Created delegated task: {}", taskId);
-        Response response = getTask(getWebConversation(), getHostName(),
-            getSessionId(), folderId, taskId);
+        Response response = getTask(getClient(), folderId, taskId);
         Date lastModified = response.getTimestamp();
         Task reload = (Task) response.getData();
-        assertEquals("Number of participants differ", firstParticipants.size(),
-            reload.getParticipants().length);
+        assertEquals("Number of participants differ", firstParticipants.size(), reload.getParticipants().length);
         for (final Participant p1 : firstParticipants) {
             boolean found = false;
             for (final Participant p2 : reload.getParticipants()) {
@@ -200,24 +170,17 @@ public class TasksTest extends AbstractAJAXTest {
                 }
             }
             if (!found) {
-                fail("Delegated task misses participant: "
-                    + p1.getIdentifier());
+                fail("Delegated task misses participant: " + p1.getIdentifier());
             }
         }
 
-        final Task updatedTask = new Task();
-        updatedTask.setTitle("Updated delegated task");
-        updatedTask.setObjectID(taskId);
-        updatedTask.setParticipants(secondParticipants);
+        reload.setTitle("Updated delegated task");
+        reload.setParticipants(secondParticipants);
+        ttm.updateTaskOnServer(reload);
         LOG.trace("Updating delegated task with participants: {}", secondParticipants);
-        failOnError(updateTask(getWebConversation(), getHostName(),
-            getSessionId(), folderId, updatedTask, lastModified));
-        response = getTask(getWebConversation(), getHostName(),
-            getSessionId(), folderId, taskId);
-        lastModified = response.getTimestamp();
-        reload = (Task) response.getData();
-        assertEquals("Number of participants differ", secondParticipants.size(),
-            reload.getParticipants().length);
+        reload = ttm.getTaskFromServer(folderId, taskId);
+        lastModified = reload.getLastModified();
+        assertEquals("Number of participants differ", secondParticipants.size(), reload.getParticipants().length);
         for (final Participant p1 : secondParticipants) {
             boolean found = false;
             for (final Participant p2 : reload.getParticipants()) {
@@ -226,111 +189,92 @@ public class TasksTest extends AbstractAJAXTest {
                 }
             }
             if (!found) {
-                fail("Delegated task misses participant: "
-                    + p1.getIdentifier());
+                fail("Delegated task misses participant: " + p1.getIdentifier());
             }
         }
 
-        deleteTask(getWebConversation(), getHostName(), getSessionId(),
-            lastModified, folderId, taskId);
+        deleteTask(getClient(), lastModified, folderId, taskId);
     }
 
+    @Test
     public void testUpdate() throws Throwable {
         final String title = "Title";
         final String updatedTitle = "Complete other title.";
         final Task task = new Task();
         task.setTitle(title);
 
-        final int folderId = TaskTools.getPrivateTaskFolder(getWebConversation(),
-            getHostName(), getSessionId());
+        final int folderId = getClient().getValues().getPrivateTaskFolder();
 
         task.setParentFolderID(folderId);
-        final int taskId = extractInsertId(insertTask(getWebConversation(),
-            getHostName(), getSessionId(), task));
+        final int taskId = ttm.insertTaskOnServer(task).getObjectID();
 
-        Response response = getTask(getWebConversation(), getHostName(),
-            getSessionId(), folderId, taskId);
-        assertTrue("Response can't be parsed to a task.",
-            response.getData() instanceof Task);
-        Date lastModified = response.getTimestamp();
+        Task response = ttm.getTaskFromServer(folderId, taskId);
+        Date lastModified = response.getLastModified();
 
         task.setObjectID(taskId);
         task.setTitle(updatedTitle);
-        response = updateTask(getWebConversation(), getHostName(),
-            getSessionId(), folderId, task, lastModified);
-        failOnError(response);
+        task.setLastModified(lastModified);
+        Task updated = ttm.updateTaskOnServer(task);
 
-        response = getTask(getWebConversation(), getHostName(), getSessionId(),
-            folderId, taskId);
-        assertEquals("Title of task is not updated.", updatedTitle,
-            ((Task) response.getData()).getTitle());
-        lastModified = response.getTimestamp();
+        response = ttm.getTaskFromServer(folderId, taskId);
+        assertEquals("Title of task is not updated.", updatedTitle, updated.getTitle());
+        lastModified = response.getLastModified();
 
-        deleteTask(getWebConversation(), getHostName(), getSessionId(),
-            lastModified, folderId, taskId);
+        deleteTask(getClient(), lastModified, folderId, taskId);
     }
 
     /**
      * Tests a full list of tasks in a folder with ordering.
+     * 
      * @throws Throwable if an error occurs.
      */
+    @Test
     public void testAllWithOrder() throws Throwable {
-        final int folderId = TaskTools.getPrivateTaskFolder(getWebConversation(),
-            getHostName(), getSessionId());
+        final int folderId = getClient().getValues().getPrivateTaskFolder();
         final Task task = new Task();
         task.setParentFolderID(folderId);
         final int[][] tasks = new int[10][2];
         for (int i = 0; i < tasks.length; i++) {
             task.setTitle("Task " + (i + 1));
-            tasks[i][1] = extractInsertId(insertTask(getWebConversation(),
-                getHostName(), getSessionId(), task));
+            tasks[i][1] = ttm.insertTaskOnServer(task).getObjectID();
             tasks[i][0] = folderId;
         }
-        final int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID,
-            Task.LAST_MODIFIED, Task.FOLDER_ID };
-        final Response response = getAllTasksInFolder(getWebConversation(),
-            getHostName(), getSessionId(), folderId, columns,
-            Task.TITLE, "asc");
-        response.getData();
+        final int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID, Task.LAST_MODIFIED, Task.FOLDER_ID };
+        Task[] loaded = ttm.getAllTasksOnServer(folderId, columns);
+        ;
         // TODO parse JSON array
-        final Date lastModified = response.getTimestamp();
+        final Date lastModified = loaded[0].getLastModified();
         for (final int[] folderAndTask : tasks) {
-            deleteTask(getWebConversation(), getHostName(), getSessionId(),
-                lastModified, folderAndTask[0], folderAndTask[1]);
+            deleteTask(getClient(), lastModified, folderAndTask[0], folderAndTask[1]);
         }
     }
 
+    @Test
     public void testConfirmation() throws Throwable {
-        final int folderId = getPrivateTaskFolder();
+        TaskTestManager ttm2 = new TaskTestManager(getClient2());
+        final int folderId = getClient().getValues().getPrivateTaskFolder();
 
         final Task task = new Task();
         task.setTitle("Task to test confirmation");
 
-        final int folderId2 = TaskTools.getPrivateTaskFolder(getSecondWebConversation(),
-            getHostName(), getSecondSessionId());
-        final int userId2 = ConfigTools.getUserId(getSecondWebConversation(),
-            getHostName(), getSecondSessionId());
+        final int folderId2 = getClient2().getValues().getPrivateTaskFolder();
+        final int userId2 = getClient2().getValues().getUserId();
 
-        final List<UserParticipant> participants =
-            new ArrayList<UserParticipant>();
+        final List<UserParticipant> participants = new ArrayList<UserParticipant>();
         final UserParticipant participant = new UserParticipant(userId2);
         participants.add(participant);
         task.setParticipants(participants);
         task.setParentFolderID(folderId);
 
-        final int taskId = extractInsertId(insertTask(getWebConversation(),
-            getHostName(), getSessionId(), task));
+        final int taskId = ttm.insertTaskOnServer(task).getObjectID();
         LOG.trace("Created delegated task for confirmation: {}", taskId);
 
-        confirmTask(getSecondWebConversation(), getHostName(),
-            getSecondSessionId(), folderId2, taskId, Task.ACCEPT,
-            "Testconfirmation.");
-        LOG.trace("Confirmed task.");
+        Task taskForUser = ttm2.getTaskFromServer(folderId2, taskId);
+        taskForUser.setConfirm(Task.ACCEPT);
+        taskForUser.setConfirmMessage("Testconfirmation.");
+        ttm2.confirm(taskForUser);
 
-        final Response response = getTask(getWebConversation(), getHostName(),
-            getSessionId(), folderId, taskId);
-        final Date lastModified = response.getTimestamp();
-        final Task reload = (Task) response.getData();
+        final Task reload = ttm.getTaskFromServer(folderId, taskId);
         final UserParticipant[] users = reload.getUsers();
         boolean confirmed = false;
         for (final UserParticipant user : users) {
@@ -341,18 +285,19 @@ public class TasksTest extends AbstractAJAXTest {
             }
         }
         assertTrue("Can't find confirmation.", confirmed);
-
-        deleteTask(getWebConversation(), getHostName(), getSessionId(),
-            lastModified, folderId, taskId);
+        
+        ttm2.cleanUp();
     }
 
     /**
      * Creates a task with a reminder and checks if the reminder is stored
      * correctly.
+     * 
      * @throws Throwable if an error occurs.
      */
+    @Test
     public void testReminder() throws Throwable {
-        final int folderId = getPrivateTaskFolder();
+        final int folderId = getClient().getValues().getPrivateTaskFolder();
 
         final Task task = new Task();
         task.setTitle("Task to test reminder");
@@ -361,75 +306,22 @@ public class TasksTest extends AbstractAJAXTest {
         final Date remind = new Date(remindTime);
         task.setAlarm(remind);
 
-        final int taskId = extractInsertId(insertTask(getWebConversation(),
-            getHostName(), getSessionId(), task));
+        final int taskId = ttm.insertTaskOnServer(task).getObjectID();
 
-        final Response response = getTask(getWebConversation(), getHostName(),
-            getSessionId(), folderId, taskId);
+        final Response response = getTask(getClient(), folderId, taskId);
         final Task reload = (Task) response.getData();
         assertEquals("Missing reminder.", remind, reload.getAlarm());
-        deleteTask(getWebConversation(), getHostName(), getSessionId(),
-            response.getTimestamp(), folderId, taskId);
-    }
-
-    /**
-     * Creates a task with a field set. Then it updates the task with
-     * <code>null</code> in that field. Server should not get an error on this.
-     * @throws Throwable if an error occurs.
-     */
-    public void testInternalEqualError() throws Throwable {
-        final int folderId = getPrivateTaskFolder();
-        final Task task = new Task();
-        task.setTitle("Title to remove on update");
-        task.setNote("Not to remove on update");
-        task.setParentFolderID(folderId);
-        Response response = insertTask(getWebConversation(),
-            getHostName(), getSessionId(), task);
-        task.setObjectID(extractInsertId(response));
-        response = getTask(getWebConversation(), getHostName(), getSessionId(),
-            folderId, task.getObjectID());
-        Date lastModified = extractTimestamp(response);
-        final JSONObject json = new JSONObject();
-        json.put(TaskFields.FOLDER_ID, folderId);
-        json.put(TaskFields.ID, task.getObjectID());
-        json.put(TaskFields.TITLE, JSONObject.NULL);
-        json.put(TaskFields.NOTE, JSONObject.NULL);
-        response = updateTask(getWebConversation(), getHostName(),
-            getSessionId(), folderId, task.getObjectID(), json, lastModified);
-        failOnError(response);
-        lastModified = extractTimestamp(response);
-        deleteTask(getWebConversation(), getHostName(), getSessionId(),
-            lastModified, folderId, task.getObjectID());
+        deleteTask(getClient(), response.getTimestamp(), folderId, taskId);
     }
 
     /**
      * @param response response object of an update or some other request that
-     * returns a timestamp.
+     *            returns a timestamp.
      * @return the timestamp of the response.
      */
     public static Date extractTimestamp(final Response response) {
         final Date retval = response.getTimestamp();
         assertNotNull("Timestamp is missing.", retval);
         return retval;
-    }
-
-    public static void failOnError(final Response response) {
-        assertFalse(response.getErrorMessage(), response.hasError());
-    }
-
-    /**
-     * @return the identifier of the private task folder of the primary user.
-     * @throws IOException if the communication with the server fails.
-     * @throws SAXException if a SAX error occurs.
-     * @throws JSONException if parsing of serialized json fails.
-     * @throws OXException if reading the folders fails.
-     */
-    protected int getPrivateTaskFolder() throws IOException, SAXException,
-        JSONException, OXException, OXException {
-        if (0 == privateTaskFolder) {
-            privateTaskFolder = TaskTools.getPrivateTaskFolder(getWebConversation(),
-                getHostName(), getSessionId());
-        }
-        return privateTaskFolder;
     }
 }

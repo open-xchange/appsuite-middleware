@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.importexport;
 
+import static org.junit.Assert.assertFalse;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
@@ -66,47 +68,22 @@ import com.openexchange.groupware.importexport.ImportResult;
 public final class Bug11724Test extends AbstractAJAXSession {
 
     /**
-     * @param name
-     */
-    public Bug11724Test(final String name) {
-        super(name);
-    }
-
-    /**
      * Checks if a whole day appointment is imported properly.
      */
+    @Test
     public void testWholeDayAppointment() throws Throwable {
         final AJAXClient client = getClient();
         final int folderId = client.getValues().getPrivateAppointmentFolder();
-        final ICalImportResponse iResponse = Executor.execute(client,
-            new ICalImportRequest(folderId, ICAL));
+        final ICalImportResponse iResponse = Executor.execute(client, new ICalImportRequest(folderId, ICAL));
         final ImportResult result = iResponse.getImports()[0];
         final int objectId = Integer.parseInt(result.getObjectId());
         try {
-            final GetResponse gResponse = Executor.execute(client,
-                new GetRequest(folderId, objectId));
+            final GetResponse gResponse = Executor.execute(client, new GetRequest(folderId, objectId));
             assertFalse(gResponse.hasError());
         } finally {
-            Executor.execute(client, new DeleteRequest(objectId, folderId,
-                result.getDate()));
+            Executor.execute(client, new DeleteRequest(objectId, folderId, result.getDate()));
         }
     }
 
-    private static final String ICAL =
-        "BEGIN:VCALENDAR\n" +
-        "VERSION:2.0\n" +
-        "PRODID:OPEN-XCHANGE\n" +
-        "BEGIN:VEVENT\n" +
-        "CLASS:PUBLIC\n" +
-        "CREATED:20080728T200752Z\n" +
-        "DESCRIPTION:fasel\n" +
-        "DTSTART;VALUE=DATE:20080728\n" +
-        "LAST-MODIFIED:20080728T200755Z\n" +
-        "ORGANIZER:mailto:user3@oxtest41.de\n" +
-        "DTSTAMP:20080728T200853Z\n" +
-        "SUMMARY:ganztag\n" +
-        "TRANSP:OPAQUE\n" +
-        "UID:21@localhost\n" +
-        "END:VEVENT\n" +
-        "END:VCALENDAR\n";
+    private static final String ICAL = "BEGIN:VCALENDAR\n" + "VERSION:2.0\n" + "PRODID:OPEN-XCHANGE\n" + "BEGIN:VEVENT\n" + "CLASS:PUBLIC\n" + "CREATED:20080728T200752Z\n" + "DESCRIPTION:fasel\n" + "DTSTART;VALUE=DATE:20080728\n" + "LAST-MODIFIED:20080728T200755Z\n" + "ORGANIZER:mailto:user3@oxtest41.de\n" + "DTSTAMP:20080728T200853Z\n" + "SUMMARY:ganztag\n" + "TRANSP:OPAQUE\n" + "UID:21@localhost\n" + "END:VEVENT\n" + "END:VCALENDAR\n";
 }

@@ -49,6 +49,11 @@
 
 package com.openexchange.test.resourcecache;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -61,6 +66,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.exception.OXException;
@@ -75,7 +82,6 @@ import com.openexchange.test.resourcecache.actions.UploadRequest;
 import com.openexchange.test.resourcecache.actions.UploadResponse;
 import com.openexchange.test.resourcecache.actions.UsedRequest;
 
-
 /**
  * {@link ResourceCacheTest}
  *
@@ -89,19 +95,17 @@ public class ResourceCacheTest extends AbstractAJAXSession {
 
     private String current = FS;
 
-    public ResourceCacheTest(String name) {
-        super(name);
+    public ResourceCacheTest() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        clearCache();
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
+        try {
+            clearCache();
+        } finally {
+            super.tearDown();
+        }
     }
 
     private void clearCache() throws OXException, IOException, JSONException {
@@ -109,11 +113,13 @@ public class ResourceCacheTest extends AbstractAJAXSession {
         executeTyped(deleteRequest, current);
     }
 
+    @Test
     public void testLifecycleFS() throws Exception {
         current = FS;
         lifecycle();
     }
 
+    @Test
     public void testLifecycleDB() throws Exception {
         current = DB;
         lifecycle();
@@ -148,12 +154,13 @@ public class ResourceCacheTest extends AbstractAJAXSession {
      * Requires
      * com.openexchange.preview.cache.quotaPerDocument > 0
      * com.openexchange.preview.cache.quota = n * com.openexchange.preview.cache.quotaPerDocument
-     */
+     */ @Test
     public void testQuotaAndInvalidationFS() throws Exception {
         current = FS;
         quotaAndInvalidation();
     }
 
+    @Test
     public void testQuotaAndInvalidationDB() throws Exception {
         current = DB;
         quotaAndInvalidation();
@@ -183,7 +190,7 @@ public class ResourceCacheTest extends AbstractAJAXSession {
         assertEquals("wrong number of ids", n, ids.size());
 
         used = executeTyped(new UsedRequest(), current).getUsed();
-        assertTrue("Quota exceeded: used: " + used + " quota: " + quota , used <= quota);
+        assertTrue("Quota exceeded: used: " + used + " quota: " + quota, used <= quota);
 
         for (String id : ids) {
             DownloadRequest downloadRequest = new DownloadRequest(id);
@@ -216,6 +223,7 @@ public class ResourceCacheTest extends AbstractAJAXSession {
         assertEquals("Exactly one old resource should have been deleted", 1, missing);
     }
 
+    @Test
     public void testPerformance() throws Exception {
         current = FS;
 
@@ -233,6 +241,7 @@ public class ResourceCacheTest extends AbstractAJAXSession {
         List<Future<?>> futures = new ArrayList<Future<?>>(tasks);
         for (int j = 0; j < tasks; j++) {
             futures.add(pool.submit(new Runnable() {
+
                 @Override
                 public void run() {
                     try {
@@ -264,6 +273,7 @@ public class ResourceCacheTest extends AbstractAJAXSession {
         assertTrue("Quota exceeded", used <= quota);
     }
 
+    @Test
     public void testResourceExceedsQuota() throws Exception {
         current = FS;
         resourceExceedsQuota();
@@ -285,6 +295,7 @@ public class ResourceCacheTest extends AbstractAJAXSession {
         assertEquals("resource should not have been cached", 0, uploadResponse.getIds().size());
     }
 
+    @Test
     public void testUpdateFS() throws Exception {
         current = FS;
 
@@ -339,7 +350,7 @@ public class ResourceCacheTest extends AbstractAJAXSession {
 
     private <T extends AbstractAJAXResponse> T executeTyped(AbstractResourceCacheRequest<T> request, String cacheType) throws OXException, IOException, JSONException {
         request.setCacheType(cacheType);
-        return client.execute(request);
+        return getClient().execute(request);
     }
 
     private byte[] prepareFile(int length) {

@@ -56,6 +56,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.file.storage.FileStorageFileAccess;
 
 /**
  * {@link ZipDocumentsRequest}
@@ -65,36 +66,36 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  */
 public final class ZipDocumentsRequest extends AbstractInfostoreRequest {
 
-	class ZipDocumentsParser extends AbstractAJAXParser<ZipDocumentsResponse> {
+    class ZipDocumentsParser extends AbstractAJAXParser<ZipDocumentsResponse> {
 
-		/**
-		 * Default constructor.
-		 */
-		ZipDocumentsParser(final boolean failOnError) {
-			super(failOnError);
-		}
+        /**
+         * Default constructor.
+         */
+        ZipDocumentsParser(final boolean failOnError) {
+            super(failOnError);
+        }
 
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		protected ZipDocumentsResponse createResponse(final Response response) throws JSONException {
-			return new ZipDocumentsResponse(response);
-		}
-	}
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        protected ZipDocumentsResponse createResponse(final Response response) throws JSONException {
+            return new ZipDocumentsResponse(response);
+        }
+    }
 
-	private final List<IdVersionPair> pairs;
-	private final String folderId;
-	private final boolean failOnError;
+    private final List<IdVersionPair> pairs;
+    private final String folderId;
+    private final boolean failOnError;
 
-	/**
+    /**
      * Initializes a new {@link ZipDocumentsRequest}.
      */
     public ZipDocumentsRequest(List<IdVersionPair> pairs, String folderId) {
         this(pairs, folderId, true);
     }
 
-	/**
+    /**
      * Initializes a new {@link ZipDocumentsRequest}.
      */
     public ZipDocumentsRequest(List<IdVersionPair> pairs, String folderId, boolean failOnError) {
@@ -104,10 +105,10 @@ public final class ZipDocumentsRequest extends AbstractInfostoreRequest {
         this.failOnError = failOnError;
     }
 
-	@Override
+    @Override
     public Object getBody() throws JSONException {
-	    final JSONArray ja = new JSONArray(pairs.size());
-	    for (final IdVersionPair pair : pairs) {
+        final JSONArray ja = new JSONArray(pairs.size());
+        for (final IdVersionPair pair : pairs) {
             final JSONObject jo = new JSONObject(3);
             jo.put(AJAXServlet.PARAMETER_FOLDERID, folderId);
             jo.put(AJAXServlet.PARAMETER_ID, pair.getIdentifier());
@@ -117,63 +118,63 @@ public final class ZipDocumentsRequest extends AbstractInfostoreRequest {
             }
             ja.put(jo);
         }
-		return ja;
-	}
+        return ja;
+    }
 
-	@Override
+    @Override
     public Method getMethod() {
-		return Method.PUT;
-	}
+        return Method.PUT;
+    }
 
-	@Override
+    @Override
     public Parameter[] getParameters() {
-		return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, "zipdocuments"), new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderId)};
-	}
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, "zipdocuments"), new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderId) };
+    }
 
-	@Override
+    @Override
     public AbstractAJAXParser<?> getParser() {
-		return new ZipDocumentsParser(failOnError);
-	}
+        return new ZipDocumentsParser(failOnError);
+    }
 
-	/**
-	 * {@link IdVersionPair} - A pair of an identifier and a version.
-	 *
-	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
-	 */
-	public static final class IdVersionPair {
+    /**
+     * {@link IdVersionPair} - A pair of an identifier and a version.
+     *
+     * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+     */
+    public static final class IdVersionPair {
 
-	    private final String identifier;
-	    private final String version;
+        private final String identifier;
+        private final String version;
 
-	    /**
-	     * Initializes a new {@link IdVersionPair}.
-	     *
-	     * @param identifier
-	     * @param version
-	     */
-	    public IdVersionPair(String identifier, String version) {
-	        super();
-	        this.identifier = identifier;
-	        this.version = version;
-	    }
+        /**
+         * Initializes a new {@link IdVersionPair}.
+         *
+         * @param identifier
+         * @param version
+         */
+        public IdVersionPair(String identifier, String version) {
+            super();
+            this.identifier = identifier;
+            this.version = version;
+        }
 
-	    /**
-	     * Gets the identifier
-	     *
-	     * @return The identifier
-	     */
-	    public String getIdentifier() {
-	        return identifier;
-	    }
+        /**
+         * Gets the identifier
+         *
+         * @return The identifier
+         */
+        public String getIdentifier() {
+            return identifier;
+        }
 
-	    /**
-	     * Gets the version
-	     *
-	     * @return The version or {@link FileStorageFileAccess#CURRENT_VERSION}
-	     */
-	    public String getVersion() {
-	        return version;
-	    }
-	}
+        /**
+         * Gets the version
+         *
+         * @return The version or {@link FileStorageFileAccess#CURRENT_VERSION}
+         */
+        public String getVersion() {
+            return version;
+        }
+    }
 
 }

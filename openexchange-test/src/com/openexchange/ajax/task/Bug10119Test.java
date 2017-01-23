@@ -49,8 +49,10 @@
 
 package com.openexchange.ajax.task;
 
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractUpdatesRequest.Ignore;
 import com.openexchange.ajax.framework.MultipleRequest;
@@ -68,15 +70,17 @@ import com.openexchange.groupware.tasks.Task;
  */
 public class Bug10119Test extends AbstractTaskTest {
 
-    public Bug10119Test(final String name) {
-        super(name);
+    public Bug10119Test() {
+        super();
     }
 
     /**
      * Checks if the updates action works correctly if 1 item is deleted and
      * another created.
+     * 
      * @throws Throwable if an exception occurs.
      */
+    @Test
     public void testFunambol() throws Throwable {
         final AJAXClient client = getClient();
         final int folderId = client.getValues().getPrivateTaskFolder();

@@ -64,31 +64,29 @@ import org.junit.Test;
 public class RssPropertiesTest {
 
     @Before
-    public void setUp() throws Exception {}
-
-    @Test
-    public void testIsDenied_everythingAllowed_returnTrue() {
+     @Test
+     public void testIsDenied_everythingAllowed_returnTrue() {
         boolean denied = RssProperties.isDenied("https", "open-xchange.com", 80);
         
         assertFalse(denied);
     }
 
-    @Test
-    public void testIsDenied_schemeDenied_returnFalse() {
+     @Test
+     public void testIsDenied_schemeDenied_returnFalse() {
         boolean denied = RssProperties.isDenied("rss", "open-xchange.com", 80);
 
         assertTrue(denied);
     }
 
-    @Test
-    public void testIsDenied_hostDenied_returnFalse() {
+     @Test
+     public void testIsDenied_hostDenied_returnFalse() {
         boolean denied = RssProperties.isDenied("https", "localhost", 80);
         
         assertTrue(denied);
     }
 
-    @Test
-    public void testIsDenied_portDenied_returnFalse() {
+     @Test
+     public void testIsDenied_portDenied_returnFalse() {
         boolean denied = RssProperties.isDenied("https", "open-xchange.com", 993);
         
         assertTrue(denied);

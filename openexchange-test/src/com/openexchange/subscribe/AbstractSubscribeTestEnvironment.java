@@ -58,11 +58,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
+import com.openexchange.ajax.framework.ProvisioningSetup;
 import com.openexchange.ajax.oauth.actions.AllOAuthAccountRequest;
 import com.openexchange.ajax.oauth.actions.AllOAuthAccountResponse;
 import com.openexchange.ajax.oauth.actions.DeleteOAuthAccountRequest;
-import com.openexchange.ajax.oauth.client.actions.OAuthService;
 import com.openexchange.ajax.subscribe.actions.NewSubscriptionRequest;
 import com.openexchange.ajax.subscribe.actions.NewSubscriptionResponse;
 import com.openexchange.ajax.subscribe.actions.RefreshSubscriptionRequest;
@@ -73,6 +72,8 @@ import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.test.FolderTestManager;
+import com.openexchange.test.pool.TestContext;
+import com.openexchange.test.pool.TestContextPool;
 import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
@@ -92,6 +93,8 @@ public abstract class AbstractSubscribeTestEnvironment {
 
     private int accountId = -1;
 
+    private TestContext testContext;
+
     /**
      * Initializes a new {@link AbstractSubscribeTestEnvironment}.
      *
@@ -108,6 +111,8 @@ public abstract class AbstractSubscribeTestEnvironment {
      */
     public void init() {
         try {
+            ProvisioningSetup.init();
+
             initAJAXClient();
             initManagers();
             initEnvironment();
@@ -125,7 +130,8 @@ public abstract class AbstractSubscribeTestEnvironment {
      * @throws IOException
      */
     private void initAJAXClient() throws OXException, IOException, JSONException {
-        ajaxClient = new AJAXClient(User.User1);
+        testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
+        ajaxClient = new AJAXClient(testContext.acquireUser());
     }
 
     private void initManagers() throws OXException, IOException, SAXException, JSONException {
@@ -234,10 +240,7 @@ public abstract class AbstractSubscribeTestEnvironment {
         final JSONObject jsonFormDesc = json.getJSONArray("formDescription").getJSONObject(0);
 
         DynamicFormDescription formDescription = new DynamicFormDescription();
-        FormElement fe = FormElement.custom(
-            jsonFormDesc.getString("widget"),
-            jsonFormDesc.getString("name"),
-            jsonFormDesc.getString("displayName"));
+        FormElement fe = FormElement.custom(jsonFormDesc.getString("widget"), jsonFormDesc.getString("name"), jsonFormDesc.getString("displayName"));
         fe.setOption("type", jsonFormDesc.getJSONObject("options").getString("type"));
         fe.setMandatory(jsonFormDesc.getBoolean("mandatory"));
         formDescription.add(fe);
@@ -292,11 +295,16 @@ public abstract class AbstractSubscribeTestEnvironment {
      * @throws JSONException
      */
     public void cleanup() throws OXException, IOException, JSONException {
-        if (folderMgr != null) {
-            folderMgr.cleanUp();
+        try {
+            if (folderMgr != null) {
+                folderMgr.cleanUp();
+            }
+            deleteOAuthAccount();
+            logout();
+        } finally {
+            TestContextPool.backContext(testContext);
         }
-        deleteOAuthAccount();
-        logout();
+
     }
 
     /**

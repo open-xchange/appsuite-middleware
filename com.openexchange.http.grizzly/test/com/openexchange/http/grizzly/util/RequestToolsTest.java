@@ -87,8 +87,8 @@ public class RequestToolsTest {
         RequestTools.USM_PATH_CACHE.invalidateAll();
     }
 
-    @Test
-    public void testIsIgnoredEasRequest_noEASRequest_ReturnFalse() {
+     @Test
+     public void testIsIgnoredEasRequest_noEASRequest_ReturnFalse() {
         Mockito.when(servletRequest.getRequestURI()).thenReturn("/No_EAS_Request");
 
         Set<String> ignoredEasCommands = new CopyOnWriteArraySet<String>(Arrays.asList(SYNC, PING));
@@ -97,8 +97,8 @@ public class RequestToolsTest {
         Assert.assertFalse("Non EAS request should return false for definition of 'ignore eas request'", ignoredEasRequest);
     }
 
-    @Test
-    public void testIsIgnoredEasRequest_syncCommandThatShouldBeIgnored_ReturnTrue() {
+     @Test
+     public void testIsIgnoredEasRequest_syncCommandThatShouldBeIgnored_ReturnTrue() {
         Mockito.when(servletRequest.getRequestURI()).thenReturn(RequestTools.EAS_URI_DEFAULT);
         Mockito.when(servletRequest.getParameter(RequestTools.EAS_CMD)).thenReturn("Sync");
 
@@ -108,8 +108,8 @@ public class RequestToolsTest {
         Assert.assertTrue("Given command is defined as beeing ignored!", ignoredEasRequest);
     }
 
-    @Test
-    public void testIsIgnoredEasRequest_syncCommandThatShouldNotBeIgnored_ReturnFalse() {
+     @Test
+     public void testIsIgnoredEasRequest_syncCommandThatShouldNotBeIgnored_ReturnFalse() {
         Mockito.when(servletRequest.getRequestURI()).thenReturn(RequestTools.EAS_URI_DEFAULT);
         Mockito.when(servletRequest.getParameter(RequestTools.EAS_CMD)).thenReturn("Sync");
 
@@ -119,8 +119,8 @@ public class RequestToolsTest {
         Assert.assertFalse("Given command is defined as not beeing ignored but was not ignored!", ignoredEasRequest);
     }
 
-    @Test
-    public void testIsIgnoredEasRequest_easRequestWithUnknownAction_ReturnFalse() {
+     @Test
+     public void testIsIgnoredEasRequest_easRequestWithUnknownAction_ReturnFalse() {
         Mockito.when(servletRequest.getRequestURI()).thenReturn(RequestTools.EAS_URI_DEFAULT);
         Mockito.when(servletRequest.getParameter(RequestTools.EAS_CMD)).thenReturn("thisIsNotAValidRequest");
 
@@ -130,8 +130,8 @@ public class RequestToolsTest {
         Assert.assertFalse("Given command is defined as not beeing ignored but was not ignored!", ignoredEasRequest);
     }
 
-    @Test
-    public void testIsIgnoredEasRequest_base64encodedSyncCommandThatShouldNotBeIngored_returnFalse() {
+     @Test
+     public void testIsIgnoredEasRequest_base64encodedSyncCommandThatShouldNotBeIngored_returnFalse() {
         Mockito.when(servletRequest.getRequestURI()).thenReturn(RequestTools.EAS_URI_DEFAULT);
         Mockito.when(servletRequest.getQueryString()).thenReturn("jAAJBAp2MTQwRGV2aWNlAApTbWFydFBob25l");
 
@@ -141,8 +141,8 @@ public class RequestToolsTest {
         Assert.assertFalse(ignoredEasRequest);
     }
 
-    @Test
-    public void testIsIgnoredEasRequest_base64encodedSyncCommandThatsShouldBeIgnored_returnTrue() {
+     @Test
+     public void testIsIgnoredEasRequest_base64encodedSyncCommandThatsShouldBeIgnored_returnTrue() {
         Mockito.when(servletRequest.getRequestURI()).thenReturn(RequestTools.EAS_URI_DEFAULT);
         Mockito.when(servletRequest.getQueryString()).thenReturn("jAAJBAp2MTQwRGV2aWNlAApTbWFydFBob25l");
 
@@ -152,8 +152,8 @@ public class RequestToolsTest {
         Assert.assertTrue(ignoredEasRequest);
     }
 
-    @Test
-    public void testIsIgnoredEasRequest_base64encodedSyncWithoutARelationToBase64EncodedRequest_returnFalse() {
+     @Test
+     public void testIsIgnoredEasRequest_base64encodedSyncWithoutARelationToBase64EncodedRequest_returnFalse() {
         Mockito.when(servletRequest.getRequestURI()).thenReturn(RequestTools.EAS_URI_DEFAULT);
         Mockito.when(servletRequest.getQueryString()).thenReturn("ZGZhZHNmYWRzZHNmYWRzZmRmYWRz");
 
@@ -163,8 +163,8 @@ public class RequestToolsTest {
         Assert.assertFalse(ignoredEasRequest);
     }
 
-    @Test
-    public void testIsIgnoredUSMRequest_noUsmRequest_ReturnFalse() {
+     @Test
+     public void testIsIgnoredUSMRequest_noUsmRequest_ReturnFalse() {
         Mockito.when(servletRequest.getRequestURI()).thenReturn("/No_USM_Request");
 
         Set<String> ignoredUsmCommands = new CopyOnWriteArraySet<String>(Arrays.asList(SYNC_UPDATE_PATH));
@@ -173,8 +173,8 @@ public class RequestToolsTest {
         Assert.assertFalse("Non USM request should return false for definition of 'ignore usm request'", ignoredUsmRequest);
     }
 
-    @Test
-    public void testIsIgnoredUsmRequest_syncCommandThatShouldBeIgnored_ReturnTrue() {
+     @Test
+     public void testIsIgnoredUsmRequest_syncCommandThatShouldBeIgnored_ReturnTrue() {
         Mockito.when(servletRequest.getRequestURI()).thenReturn(RequestTools.USM_URI_DEFAULT);
         Mockito.when(servletRequest.getPathInfo()).thenReturn(SYNC_UPDATE_PATH);
 
@@ -184,8 +184,8 @@ public class RequestToolsTest {
         Assert.assertTrue("Given command is defined as beeing ignored but was not!", ignoredUsmRequest);
     }
 
-    @Test
-    public void testIsIgnoredUsmRequest_syncCommandThatShouldNotBeIgnored_ReturnFalse() {
+     @Test
+     public void testIsIgnoredUsmRequest_syncCommandThatShouldNotBeIgnored_ReturnFalse() {
         Mockito.when(servletRequest.getRequestURI()).thenReturn(RequestTools.USM_URI_DEFAULT);
         Mockito.when(servletRequest.getPathInfo()).thenReturn(SYNC_UPDATE_PATH);
 
@@ -195,8 +195,8 @@ public class RequestToolsTest {
         Assert.assertFalse("Given command is defined as not beeing ignored but was not ignored!", ignoredUsmRequest);
     }
 
-    @Test
-    public void testIsIgnoredUsmRequest_usmRequestWithUnknownPath_ReturnFalse() {
+     @Test
+     public void testIsIgnoredUsmRequest_usmRequestWithUnknownPath_ReturnFalse() {
         Mockito.when(servletRequest.getRequestURI()).thenReturn(RequestTools.USM_URI_DEFAULT);
         Mockito.when(servletRequest.getPathInfo()).thenReturn("/thisIsNotAValidPath");
 
@@ -206,8 +206,8 @@ public class RequestToolsTest {
         Assert.assertFalse("Given command is defined as not beeing ignored but was not ignored!", ignoredUsmRequest);
     }
 
-    @Test
-    public void testIsIgnoredUsmRequest_pathIsNull_ReturnFalse() {
+     @Test
+     public void testIsIgnoredUsmRequest_pathIsNull_ReturnFalse() {
         Mockito.when(servletRequest.getRequestURI()).thenReturn(RequestTools.USM_URI_DEFAULT);
         Mockito.when(servletRequest.getPathInfo()).thenReturn(null);
 
@@ -217,8 +217,8 @@ public class RequestToolsTest {
         Assert.assertFalse("Given command is defined as not beeing ignored but was not ignored!", ignoredUsmRequest);
     }
 
-    @Test
-    public void testIsIgnoredUsmRequest_cacheUsedToReturnValue_returnTrue() {
+     @Test
+     public void testIsIgnoredUsmRequest_cacheUsedToReturnValue_returnTrue() {
         Mockito.when(servletRequest.getRequestURI()).thenReturn(RequestTools.USM_URI_DEFAULT);
         Mockito.when(servletRequest.getPathInfo()).thenReturn(SYNC_UPDATE_PATH);
 
@@ -233,8 +233,8 @@ public class RequestToolsTest {
         Assert.assertEquals("Received wrong cache size. Should only contain one path", 1, RequestTools.USM_PATH_CACHE.size());
     }
 
-    @Test
-    public void testIsIgnoredUsmRequest_cacheUsedForTwoPaths_returnTrue() {
+     @Test
+     public void testIsIgnoredUsmRequest_cacheUsedForTwoPaths_returnTrue() {
         Mockito.when(servletRequest.getRequestURI()).thenReturn(RequestTools.USM_URI_DEFAULT);
         Mockito.when(servletRequest.getPathInfo()).thenReturn(SYNC_UPDATE_PATH, PING_PATH);
 

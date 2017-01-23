@@ -49,12 +49,15 @@
 
 package com.openexchange.pubsub;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import org.junit.Test;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.microformats.MicroformatSubscribeService;
@@ -67,21 +70,6 @@ import com.openexchange.templating.OXTemplate;
  */
 public abstract class BasicContactTemplateTest extends AbstractContactTemplateTest {
 
-    /**
-     * Initializes a new {@link BasicContactTemplateTest}.
-     */
-    public BasicContactTemplateTest() {
-        super();
-    }
-
-    /**
-     * Initializes a new {@link BasicContactTemplateTest}.
-     * @param name
-     */
-    public BasicContactTemplateTest(String name) {
-        super(name);
-    }
-
     protected abstract OXTemplate getTemplate() throws Exception;
 
     /**
@@ -90,6 +78,7 @@ public abstract class BasicContactTemplateTest extends AbstractContactTemplateTe
      *
      * @throws Exception
      */
+    @Test
     public void testSingle() throws Exception {
         SubscriptionSource source = getSubscriptionSource();
         MicroformatSubscribeService service = getSubscribeService();
@@ -125,6 +114,7 @@ public abstract class BasicContactTemplateTest extends AbstractContactTemplateTe
      *
      * @throws Exception
      */
+    @Test
     public void testSeveral() throws Exception {
         SubscriptionSource source = getSubscriptionSource();
         MicroformatSubscribeService service = getSubscribeService();

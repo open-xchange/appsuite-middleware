@@ -80,7 +80,7 @@ public class BulkImportTest extends CardDAVTest {
     public BulkImportTest() {
         super();
     }
-    
+
     @Test
     public void testBulkImportWithSimilarityCheck() throws Exception {
         /*
@@ -103,48 +103,9 @@ public class BulkImportTest extends CardDAVTest {
 
         final String email1 = uid + "@domain.com";
         final String email2 = uid2 + "@domain.com";
-        final String vCard1 =
-                "BEGIN:VCARD" + "\r\n" +
-                "VERSION:3.0" + "\r\n" +
-                "N:" + lastName + ";" + firstName + ";;;" + "\r\n" +
-                "FN:" + firstName + " " + lastName + "\r\n" +
-                "ORG:test3;" + "\r\n" +
-                "EMAIL;type=INTERNET;type=WORK;type=pref:" + email1 + "\r\n" +
-                "TEL;type=WORK;type=pref:24235423" + "\r\n" +
-                "TEL;type=CELL:352-3534" + "\r\n" +
-                "TEL;type=HOME:346346" + "\r\n" +
-                "UID:" + uid + "\r\n" +
-                "REV:" + super.formatAsUTC(new Date()) + "\r\n" +
-                "PRODID:-//Apple Inc.//AddressBook 6.0//EN" + "\r\n" +
-                "END:VCARD" + "\r\n"   
-        ;
-        final String vCard2 = 
-            "BEGIN:VCARD" + "\r\n" +
-            "VERSION:3.0" + "\r\n" +
-            "N:" + lastName2 + ";" + firstName2 + ";;;" + "\r\n" +
-            "FN:" + firstName2 + " " + lastName2 + "\r\n" +
-            "ORG:test3;" + "\r\n" +
-                "EMAIL;type=INTERNET;type=WORK;type=pref:" + email2 + "\r\n" +
-            "TEL;type=WORK;type=pref:24235423" + "\r\n" +
-            "TEL;type=CELL:352-3534" + "\r\n" +
-            "TEL;type=HOME:346346" + "\r\n" +
-            "UID:" + uid2 + "\r\n" +
-            "REV:" + super.formatAsUTC(new Date()) + "\r\n" +
-            "PRODID:-//Apple Inc.//AddressBook 6.0//EN" + "\r\n" +
-                "END:VCARD" + "\r\n";
-        final String vCard3 = 
-            "BEGIN:VCARD" + "\r\n" + 
-            "VERSION:3.0" + "\r\n" + 
-            "N:" + lastName3 + ";" + firstName3 + ";;;" + "\r\n" + 
-            "FN:" + firstName3 + " " + lastName3 + "\r\n" + 
-            "ORG:test3;" + "\r\n" + 
-                "EMAIL;type=INTERNET;type=WORK;type=pref:" + email1 + "\r\n" + 
-            "TEL;type=WORK;type=pref:24235423" + "\r\n" + 
-            "TEL;type=CELL:352-3534" + "\r\n" + "TEL;type=HOME:346346" + "\r\n" + 
-            "UID:" + uid3 + "\r\n" + 
-            "REV:" + super.formatAsUTC(new Date()) + "\r\n" + 
-            "PRODID:-//Apple Inc.//AddressBook 6.0//EN" + "\r\n" + 
-            "END:VCARD" + "\r\n";
+        final String vCard1 = "BEGIN:VCARD" + "\r\n" + "VERSION:3.0" + "\r\n" + "N:" + lastName + ";" + firstName + ";;;" + "\r\n" + "FN:" + firstName + " " + lastName + "\r\n" + "ORG:test3;" + "\r\n" + "EMAIL;type=INTERNET;type=WORK;type=pref:" + email1 + "\r\n" + "TEL;type=WORK;type=pref:24235423" + "\r\n" + "TEL;type=CELL:352-3534" + "\r\n" + "TEL;type=HOME:346346" + "\r\n" + "UID:" + uid + "\r\n" + "REV:" + super.formatAsUTC(new Date()) + "\r\n" + "PRODID:-//Apple Inc.//AddressBook 6.0//EN" + "\r\n" + "END:VCARD" + "\r\n";
+        final String vCard2 = "BEGIN:VCARD" + "\r\n" + "VERSION:3.0" + "\r\n" + "N:" + lastName2 + ";" + firstName2 + ";;;" + "\r\n" + "FN:" + firstName2 + " " + lastName2 + "\r\n" + "ORG:test3;" + "\r\n" + "EMAIL;type=INTERNET;type=WORK;type=pref:" + email2 + "\r\n" + "TEL;type=WORK;type=pref:24235423" + "\r\n" + "TEL;type=CELL:352-3534" + "\r\n" + "TEL;type=HOME:346346" + "\r\n" + "UID:" + uid2 + "\r\n" + "REV:" + super.formatAsUTC(new Date()) + "\r\n" + "PRODID:-//Apple Inc.//AddressBook 6.0//EN" + "\r\n" + "END:VCARD" + "\r\n";
+        final String vCard3 = "BEGIN:VCARD" + "\r\n" + "VERSION:3.0" + "\r\n" + "N:" + lastName3 + ";" + firstName3 + ";;;" + "\r\n" + "FN:" + firstName3 + " " + lastName3 + "\r\n" + "ORG:test3;" + "\r\n" + "EMAIL;type=INTERNET;type=WORK;type=pref:" + email1 + "\r\n" + "TEL;type=WORK;type=pref:24235423" + "\r\n" + "TEL;type=CELL:352-3534" + "\r\n" + "TEL;type=HOME:346346" + "\r\n" + "UID:" + uid3 + "\r\n" + "REV:" + super.formatAsUTC(new Date()) + "\r\n" + "PRODID:-//Apple Inc.//AddressBook 6.0//EN" + "\r\n" + "END:VCARD" + "\r\n";
 
         final String vCard = vCard2 + vCard3;
 

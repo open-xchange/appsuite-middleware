@@ -49,8 +49,11 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import java.util.List;
 import org.json.JSONArray;
+import org.junit.Test;
 import com.openexchange.ajax.contact.action.AutocompleteRequest;
 import com.openexchange.ajax.framework.CommonSearchResponse;
 import com.openexchange.groupware.container.Contact;
@@ -69,30 +72,26 @@ public class Bug32635Test extends AbstractManagedContactTest {
      *
      * @param name The test name
      */
-    public Bug32635Test(String name) {
-        super(name);
+    public Bug32635Test() {
+        super();
     }
 
-	@Override
-	public void setUp() throws Exception {
-	    super.setUp();
-	}
-
+    @Test
     public void testAutocomplete() throws Exception {
-    	/*
-    	 * create contact
-    	 */
+        /*
+         * create contact
+         */
         Contact contact = super.generateContact("Preu\u00df");
         contact.setGivenName("Stefan");
         contact.setDisplayName("Preu\u00df, Stefan");
-        contact = manager.newAction(contact);
+        contact = cotm.newAction(contact);
         /*
          * check auto-complete
          */
         String parentFolderID = String.valueOf(contact.getParentFolderID());
         AutocompleteRequest request = new AutocompleteRequest("Stefan Preu\u00df", false, parentFolderID, Contact.ALL_COLUMNS, true);
-        CommonSearchResponse response = client.execute(request);
-        List<Contact> contacts = manager.transform((JSONArray) response.getResponse().getData(), Contact.ALL_COLUMNS);
+        CommonSearchResponse response = getClient().execute(request);
+        List<Contact> contacts = cotm.transform((JSONArray) response.getResponse().getData(), Contact.ALL_COLUMNS);
         assertNotNull(contacts);
         assertEquals("wrong number of results", 1, contacts.size());
         assertEquals(contact.getDisplayName(), contacts.get(0).getDisplayName());

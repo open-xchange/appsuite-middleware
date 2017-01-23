@@ -54,7 +54,6 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.ProblematicAttribute;
 
-
 /**
  * {@link DownloadResponse}
  *

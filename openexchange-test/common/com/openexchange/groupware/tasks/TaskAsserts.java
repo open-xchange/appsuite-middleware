@@ -1,13 +1,16 @@
 
 package com.openexchange.groupware.tasks;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Set;
-import junit.framework.TestCase;
 import com.openexchange.groupware.container.CalendarObject;
 
-public class TaskAsserts extends TestCase {
+public class TaskAsserts {
 
     /*
      * ASSERTS GO HERE
@@ -22,17 +25,9 @@ public class TaskAsserts extends TestCase {
         Object comparedValue = mapping.get(comparedTask);
 
         if (expectedValue instanceof Date) {
-            assertTrue(
-                "The following field should be equal in both Tasks: "
-                    + "[" + getReadableName(mapping) + "], expected: "
-                    + expectedValue + ", but was: " + comparedValue,
-                TaskAsserts.checkOXDatesAreEqual((Date) expectedValue, (Date) comparedValue));
+            assertTrue("The following field should be equal in both Tasks: " + "[" + getReadableName(mapping) + "], expected: " + expectedValue + ", but was: " + comparedValue, TaskAsserts.checkOXDatesAreEqual((Date) expectedValue, (Date) comparedValue));
         } else {
-            assertEquals(
-                "The following field should be equal in both Tasks: "
-                    + "[" + getReadableName(mapping) + "]",
-                expectedValue,
-                comparedValue);
+            assertEquals("The following field should be equal in both Tasks: " + "[" + getReadableName(mapping) + "]", expectedValue, comparedValue);
         }
     }
 
@@ -53,11 +48,7 @@ public class TaskAsserts extends TestCase {
         Object expectedValue = mapping.get(expectedTask);
         Object comparedValue = mapping.get(comparedTask);
 
-        assertFalse(
-            "The following field should differ in both Tasks: "
-                + "[" + mapping.getDBColumnName() + "]"
-                + ", value: " + expectedValue,
-            expectedValue.equals(comparedValue));
+        assertFalse("The following field should differ in both Tasks: " + "[" + mapping.getDBColumnName() + "]" + ", value: " + expectedValue, expectedValue.equals(comparedValue));
     }
 
     /**
@@ -148,11 +139,7 @@ public class TaskAsserts extends TestCase {
         cal2.setTime(date2);
         cal1.set(Calendar.MILLISECOND, 0);
         cal2.set(Calendar.MILLISECOND, 0);
-        return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR)
-            && cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH)
-            && cal1.get(Calendar.DAY_OF_MONTH) == cal2.get(Calendar.DAY_OF_MONTH)
-            && cal1.get(Calendar.HOUR_OF_DAY) == cal2.get(Calendar.HOUR_OF_DAY)
-            && cal1.get(Calendar.MINUTE) == cal2.get(Calendar.MINUTE);
+        return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) && cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH) && cal1.get(Calendar.DAY_OF_MONTH) == cal2.get(Calendar.DAY_OF_MONTH) && cal1.get(Calendar.HOUR_OF_DAY) == cal2.get(Calendar.HOUR_OF_DAY) && cal1.get(Calendar.MINUTE) == cal2.get(Calendar.MINUTE);
     }
 
     public static void assertDateInRecurrence(Date date, CalendarObject calendarObject) {

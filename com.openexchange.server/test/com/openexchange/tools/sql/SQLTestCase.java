@@ -49,6 +49,8 @@
 
 package com.openexchange.tools.sql;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -64,7 +66,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import junit.framework.TestCase;
+import org.junit.Before;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tx.ConfigurableDBProvider;
@@ -75,12 +77,11 @@ import com.openexchange.java.Streams;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class SQLTestCase extends TestCase {
-
+public abstract class SQLTestCase {
     private ConfigurableDBProvider dbProvider;
     protected Properties properties;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         loadProperties();
         dbProvider = new ConfigurableDBProvider();

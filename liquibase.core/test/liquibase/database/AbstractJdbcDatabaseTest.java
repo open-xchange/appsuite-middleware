@@ -1,9 +1,10 @@
 package liquibase.database;
 
-import static org.junit.Assert.*;
-import liquibase.structure.core.Table;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.mockito.Mockito;
+import liquibase.structure.core.Table;
 
 /**
  * Base test class for database-specific tests

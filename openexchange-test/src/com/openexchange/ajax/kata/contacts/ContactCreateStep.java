@@ -45,7 +45,6 @@
  *
  */
 
-
 package com.openexchange.ajax.kata.contacts;
 
 import java.util.Date;
@@ -64,7 +63,7 @@ import com.openexchange.test.ContactTestManager;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  *
  */
-public class ContactCreateStep extends AbstractStep implements IdentitySource<Contact>{
+public class ContactCreateStep extends AbstractStep implements IdentitySource<Contact> {
 
     private final Contact entry;
     private boolean inserted;
@@ -77,7 +76,7 @@ public class ContactCreateStep extends AbstractStep implements IdentitySource<Co
 
     @Override
     public void cleanUp() throws Exception {
-        if( inserted ){
+        if (inserted) {
             entry.setLastModified(new Date(Long.MAX_VALUE));
             manager.setFailOnError(false);
             manager.deleteAction(entry);
@@ -98,14 +97,14 @@ public class ContactCreateStep extends AbstractStep implements IdentitySource<Co
 
     @Override
     public void assumeIdentity(Contact contact) {
-        contact.setObjectID( entry.getObjectID() );
-        contact.setParentFolderID( entry.getParentFolderID());
-        contact.setLastModified( entry.getLastModified());
+        contact.setObjectID(entry.getObjectID());
+        contact.setParentFolderID(entry.getParentFolderID());
+        contact.setLastModified(entry.getLastModified());
     }
 
     @Override
     public void rememberIdentityValues(Contact contact) {
-        contact.setLastModified( entry.getLastModified());
+        contact.setLastModified(entry.getLastModified());
         contact.setParentFolderID(entry.getParentFolderID());
     }
 

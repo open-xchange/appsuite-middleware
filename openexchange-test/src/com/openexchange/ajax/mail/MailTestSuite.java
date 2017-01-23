@@ -49,78 +49,70 @@
 
 package com.openexchange.ajax.mail;
 
-import com.openexchange.ajax.mail.categories.MailCategoriesTestSuite;
-import junit.framework.JUnit4TestAdapter;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 /**
  * {@link MailTestSuite}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailTestSuite extends TestSuite {
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    AllTest.class,
+    AttachmentTest.class,
+    ClearTest.class,
+    CopyMailTest.class,
+    CountMailTest.class,
+    ForwardMailTest.class,
+    GetTest.class,
+    ListTest.class,
+    MailSearchTest.class,
+    MoveMailTest.class,
+    NewMailTest.class,
+    MultipleAttachmentTest.class,
+    ReplyAllTest.class,
+    ReplyTest.class,
+    SearchTest.class,
+    SendTest.class,
+    Send2Test.class,
+    ThreadSortTest.class,
+    UpdateMailTest.class,
+    ViewTest.class,
+    AllAliasTest.class,
+    ListAliasTest.class,
+    GetStructureTest.class,
+    Base64Test.class,
+    AllSeenMailTest.class,
+    com.openexchange.ajax.mail.MultipleGetTest.class,
+    
+    /* AlwaysTest.class, */
+    
+    Bug12409Test.class,
+    Bug14234Test.class,
+    Bug15608Test.class,
+    Bug15777Test.class,
+    Bug15901Test.class,
+    Bug16087Test.class,
+    Bug16141Test.class,
+    Bug29865Test.class,
+    Bug19696Test.class,
+    Bug30703Test.class,
+    Bug30903Test.class,
+    Bug31855Test.class,
+    Bug32355Test.class,
+//    Bug27708Test.class,
+    Bug28913Test.class,
+    Bug29437Test.class,
+    Bug34254Test.class,
+    Bug36333Test.class,
+    Bug37247Test.class,
+    
+    MaxMailSizeTest.class,
+    MSISDNAddressTest.class,
+    ExamineTest.class,
 
-    private MailTestSuite() {
-        super();
-    }
+})
+public final class MailTestSuite  {
 
-    public static Test suite() {
-        final TestSuite mailSuite = new TestSuite("com.openexchange.ajax.mail.MailTestSuite");
-        mailSuite.addTestSuite(AllTest.class);
-        mailSuite.addTestSuite(AttachmentTest.class);
-        mailSuite.addTestSuite(ClearTest.class);
-        mailSuite.addTestSuite(CopyMailTest.class);
-        mailSuite.addTestSuite(CountMailTest.class);
-        mailSuite.addTestSuite(ForwardMailTest.class);
-        mailSuite.addTestSuite(GetTest.class);
-        mailSuite.addTestSuite(ListTest.class);
-        mailSuite.addTestSuite(MailSearchTest.class);
-        mailSuite.addTestSuite(MoveMailTest.class);
-        mailSuite.addTestSuite(NewMailTest.class);
-        mailSuite.addTestSuite(MultipleAttachmentTest.class);
-        mailSuite.addTestSuite(ReplyAllTest.class);
-        mailSuite.addTestSuite(ReplyTest.class);
-        mailSuite.addTestSuite(SearchTest.class);
-        mailSuite.addTestSuite(SendTest.class);
-        mailSuite.addTestSuite(Send2Test.class);
-        mailSuite.addTestSuite(ThreadSortTest.class);
-        mailSuite.addTestSuite(UpdateMailTest.class);
-        mailSuite.addTestSuite(ViewTest.class);
-        mailSuite.addTestSuite(AllAliasTest.class);
-        mailSuite.addTestSuite(ListAliasTest.class);
-        mailSuite.addTestSuite(GetStructureTest.class);
-        mailSuite.addTestSuite(Base64Test.class);
-        mailSuite.addTestSuite(AllSeenMailTest.class);
-        mailSuite.addTestSuite(com.openexchange.ajax.mail.MultipleGetTest.class);
-
-        /*mailSuite.addTestSuite(AlwaysTest.class);*/
-
-        mailSuite.addTestSuite(Bug12409Test.class);
-        mailSuite.addTestSuite(Bug14234Test.class);
-        mailSuite.addTestSuite(Bug15608Test.class);
-        mailSuite.addTestSuite(Bug15777Test.class);
-        mailSuite.addTestSuite(Bug15901Test.class);
-        mailSuite.addTestSuite(Bug16087Test.class);
-        mailSuite.addTestSuite(Bug16141Test.class);
-        mailSuite.addTestSuite(Bug29865Test.class);
-        mailSuite.addTestSuite(Bug19696Test.class);
-        mailSuite.addTestSuite(Bug30703Test.class);
-        mailSuite.addTestSuite(Bug30903Test.class);
-        mailSuite.addTestSuite(Bug31855Test.class);
-        mailSuite.addTestSuite(Bug32355Test.class);
-        mailSuite.addTest(new JUnit4TestAdapter(Bug27708Test.class));
-        mailSuite.addTest(new JUnit4TestAdapter(Bug28913Test.class));
-        mailSuite.addTestSuite(Bug29437Test.class);
-        mailSuite.addTestSuite(Bug34254Test.class);
-        mailSuite.addTestSuite(Bug36333Test.class);
-        mailSuite.addTestSuite(Bug37247Test.class);
-
-        mailSuite.addTestSuite(MaxMailSizeTest.class);
-        mailSuite.addTestSuite(MSISDNAddressTest.class);
-        mailSuite.addTestSuite(ExamineTest.class);
-
-        mailSuite.addTest(MailCategoriesTestSuite.suite());
-        return mailSuite;
-    }
 }

@@ -50,10 +50,13 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertFalse;
 import java.util.Calendar;
 import java.util.Date;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.resource.ResourceTools;
 import com.openexchange.groupware.container.Appointment;
@@ -69,13 +72,9 @@ import com.openexchange.test.CalendarTestManager;
  */
 public class Bug35355Test extends AbstractAJAXSession {
 
-    private CalendarTestManager ctm1;
-
     private CalendarTestManager ctm3;
 
     private Appointment appointment;
-
-    private AJAXClient client2;
 
     private AJAXClient client3;
 
@@ -93,24 +92,21 @@ public class Bug35355Test extends AbstractAJAXSession {
 
     private int nextYear;
 
-    public Bug35355Test(String name) {
-        super(name);
+    public Bug35355Test() {
+        super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
-        client2 = new AJAXClient(User.User2);
-        client3 = new AJAXClient(User.User3);
+        client3 = new AJAXClient(testContext.acquireUser());
 
-        up1 = new UserParticipant(client.getValues().getUserId());
-        up2 = new UserParticipant(client2.getValues().getUserId());
+        up1 = new UserParticipant(getClient().getValues().getUserId());
+        up2 = new UserParticipant(getClient2().getValues().getUserId());
         up3 = new UserParticipant(client3.getValues().getUserId());
-        resourceParticipant = new ResourceParticipant(ResourceTools.getSomeResource(client));
+        resourceParticipant = new ResourceParticipant(ResourceTools.getSomeResource(getClient()));
 
-        ctm1 = new CalendarTestManager(client);
-        ctm1.setFailOnError(true);
         ctm3 = new CalendarTestManager(client3);
         ctm3.setFailOnError(true);
 
@@ -124,10 +120,10 @@ public class Bug35355Test extends AbstractAJAXSession {
         appointment.setRecurrenceType(Appointment.DAILY);
         appointment.setInterval(1);
         appointment.setOccurrence(3);
-        appointment.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         appointment.setIgnoreConflicts(true);
         appointment.setParticipants(new Participant[] { up1, up2, resourceParticipant });
-        ctm1.insert(appointment);
+        catm.insert(appointment);
 
         // Remove resource on a specific exception
         exception = new Appointment();
@@ -135,12 +131,12 @@ public class Bug35355Test extends AbstractAJAXSession {
         exception.setObjectID(appointment.getObjectID());
         exception.setStartDate(D("07.11." + nextYear + " 08:00"));
         exception.setEndDate(D("07.11." + nextYear + " 09:00"));
-        exception.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        exception.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         exception.setLastModified(new Date(Long.MAX_VALUE));
         exception.setRecurrencePosition(2);
         exception.setParticipants(new Participant[] { up1, up2 });
         exception.setIgnoreConflicts(true);
-        ctm1.update(exception);
+        catm.update(exception);
 
         // Third party creates appointment with resource on exception position
         blockingApp = new Appointment();
@@ -152,6 +148,7 @@ public class Bug35355Test extends AbstractAJAXSession {
         blockingApp.setParentFolderID(client3.getValues().getPrivateAppointmentFolder());
     }
 
+    @Test
     public void testBug35355() throws Exception {
         ctm3.insert(blockingApp);
         assertFalse(ctm3.getLastResponse().hasConflicts());
@@ -159,7 +156,7 @@ public class Bug35355Test extends AbstractAJAXSession {
 
         Appointment updateSeries = new Appointment();
         updateSeries.setObjectID(appointment.getObjectID());
-        updateSeries.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        updateSeries.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         updateSeries.setStartDate(D("06.11." + nextYear + " 08:00"));
         updateSeries.setEndDate(D("06.11." + nextYear + " 09:00"));
         updateSeries.setRecurrenceType(Appointment.DAILY);
@@ -167,15 +164,17 @@ public class Bug35355Test extends AbstractAJAXSession {
         updateSeries.setOccurrence(3);
         updateSeries.setLastModified(new Date(Long.MAX_VALUE));
         updateSeries.setParticipants(new Participant[] { up1, resourceParticipant });
-        ctm1.update(updateSeries);
-        assertFalse("No conflict expected.", ctm1.getLastResponse().hasConflicts());
+        catm.update(updateSeries);
+        assertFalse("No conflict expected.", catm.getLastResponse().hasConflicts());
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        ctm1.cleanUp();
-        ctm3.cleanUp();
-        super.tearDown();
+        try {
+            ctm3.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
 }

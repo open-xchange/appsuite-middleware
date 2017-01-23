@@ -49,10 +49,14 @@
 
 package com.openexchange.ajax.share.tests;
 
+import static org.junit.Assert.assertTrue;
 import java.rmi.Naming;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -61,7 +65,6 @@ import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.folder.actions.UpdateRequest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.GetLinkRequest;
 import com.openexchange.ajax.share.actions.GetLinkResponse;
@@ -83,20 +86,11 @@ public class QuotaTest extends ShareTest {
     private AJAXClient client2;
     private Map<Integer, FolderObject> foldersToDelete;
 
-    /**
-     * Initializes a new {@link QuotaTest}.
-     *
-     * @param name The test name
-     */
-    public QuotaTest(String name) {
-        super(name);
-    }
-
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         foldersToDelete = new HashMap<Integer, FolderObject>();
-        client2 = new AJAXClient(User.User2);
+        client2 = getClient2();
         Map<String, String> userAttributes = new HashMap<String, String>();
         userAttributes.put("com.openexchange.quota.invite_guests", "0");
         userAttributes.put("com.openexchange.quota.share_links", "0");
@@ -108,10 +102,9 @@ public class QuotaTest extends ShareTest {
         for (String property : props.keySet()) {
             user.setUserAttribute("config", property, props.get(property));
         }
-        Credentials credentials = new Credentials(AJAXConfig.getProperty(AJAXClient.User.OXAdmin.getLogin()), AJAXConfig.getProperty(AJAXClient.User.OXAdmin.getPassword()));
+        Credentials credentials = new Credentials(admin.getUser(), admin.getPassword());
         OXUserInterface iface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
         iface.change(new Context(client2.getValues().getContextId()), user, credentials);
-        
 
         List<UserProperty> userConfigurationSource = iface.getUserConfigurationSource(new Context(client2.getValues().getContextId()), user, "quota", credentials);
         System.out.println("User configuration related to 'quota' after changing the following properties:");
@@ -121,9 +114,9 @@ public class QuotaTest extends ShareTest {
         for (UserProperty prop : userConfigurationSource) {
             System.out.println("Property " + prop.getName() + "(" + prop.getScope() + "): " + prop.getValue());
         }
-	}
+    }
 
-	@Override
+    @After
     public void tearDown() throws Exception {
         try {
             if (null != client2) {
@@ -141,6 +134,7 @@ public class QuotaTest extends ShareTest {
         }
     }
 
+    @Test
     public void testShareLinkButQuotaLimitReached() throws Exception {
         /*
          * try and create more links than allowed
@@ -171,6 +165,7 @@ public class QuotaTest extends ShareTest {
         }
     }
 
+    @Test
     public void testInviteGuestButQuotaLimitReached() throws Exception {
         /*
          * try and invite more guests than allowed
@@ -180,18 +175,17 @@ public class QuotaTest extends ShareTest {
         folder.getPermissions().add(createNamedAuthorPermission(randomUID() + "@example.com", randomUID()));
         UpdateRequest request = new UpdateRequest(EnumAPI.OX_NEW, folder);
         request.setFailOnError(false);
-        
+
         //output the current configuration
         com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(client2.getValues().getUserId());
-        Credentials credentials = new Credentials(AJAXConfig.getProperty(AJAXClient.User.OXAdmin.getLogin()), AJAXConfig.getProperty(AJAXClient.User.OXAdmin.getPassword()));
+        Credentials credentials = new Credentials(admin.getUser(), admin.getPassword());
         OXUserInterface iface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
         List<UserProperty> userConfigurationSource = iface.getUserConfigurationSource(new Context(client2.getValues().getContextId()), user, "quota", credentials);
         System.out.println("User configuration related to 'quota' for the test user at SETUP.");
         for (UserProperty prop : userConfigurationSource) {
-        	System.out.println("Property " + prop.getName() + "(" + prop.getScope() + "): " +prop.getValue());
+            System.out.println("Property " + prop.getName() + "(" + prop.getScope() + "): " + prop.getValue());
         }
 
-        
         InsertResponse updateResponse = client2.execute(request);
         if (updateResponse.hasError()) {
             /*

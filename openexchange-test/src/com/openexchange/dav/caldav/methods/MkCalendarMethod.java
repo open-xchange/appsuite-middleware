@@ -89,8 +89,7 @@ public class MkCalendarMethod extends DavMethodBase {
         }
         try {
             Document document = DomUtil.createDocument();
-            Element propupdate = DomUtil.addChildElement(
-                document, PropertyNames.MKCALENDAR.getName(), PropertyNames.MKCALENDAR.getNamespace());
+            Element propupdate = DomUtil.addChildElement(document, PropertyNames.MKCALENDAR.getName(), PropertyNames.MKCALENDAR.getNamespace());
             Element set = DomUtil.addChildElement(propupdate, XML_SET, NAMESPACE);
             set.appendChild(setProperties.toXml(document));
             setRequestBody(document);
@@ -123,4 +122,3 @@ public class MkCalendarMethod extends DavMethodBase {
     }
 
 }
-

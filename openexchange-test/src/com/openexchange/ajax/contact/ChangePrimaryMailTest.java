@@ -50,6 +50,8 @@
 package com.openexchange.ajax.contact;
 
 import java.util.TimeZone;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.contact.action.UpdateRequest;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -63,6 +65,7 @@ import com.openexchange.groupware.container.FolderObject;
  * Checks if the context administrator is allowed to change the primary email of every user contact.
  * TODO This tests needs the context administrator account. The context administrators account is not configured with it login information
  * and therefore this test is not added to any test suite.
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class ChangePrimaryMailTest extends AbstractAJAXSession {
@@ -72,20 +75,21 @@ public class ChangePrimaryMailTest extends AbstractAJAXSession {
     private Contact userContact;
     private int contactId;
 
-    public ChangePrimaryMailTest(String name) {
-        super(name);
+    public ChangePrimaryMailTest() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         timeZone = getClient().getValues().getTimeZone();
-        GetResponse response = client.execute(new GetRequest(client.getValues().getUserId(), timeZone));
+        GetResponse response = getClient().execute(new GetRequest(getClient().getValues().getUserId(), timeZone));
         userContact = response.getContact();
-        contactId = client.execute(new com.openexchange.ajax.config.actions.GetRequest(Tree.ContactID)).getInteger();
+        contactId = getClient().execute(new com.openexchange.ajax.config.actions.GetRequest(Tree.ContactID)).getInteger();
     }
 
+    @Test
     public void testChangeEMail1() throws Throwable {
         Contact testContact = new Contact();
         testContact.setObjectID(contactId);
@@ -93,6 +97,6 @@ public class ChangePrimaryMailTest extends AbstractAJAXSession {
         testContact.setLastModified(userContact.getLastModified());
         testContact.setEmail1("fummel@fummel.de");
         UpdateRequest updateRequest = new UpdateRequest(testContact);
-        client.execute(updateRequest);
+        getClient().execute(updateRequest);
     }
 }

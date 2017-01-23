@@ -79,6 +79,7 @@ public class PublishConfig extends AbstractConfig {
 
     /**
      * Reads the configuration.
+     * 
      * @throws OXException if reading configuration fails.
      */
     public static PublishConfig init() throws OXException {

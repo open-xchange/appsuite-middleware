@@ -49,8 +49,11 @@
 
 package com.openexchange.contact.vcard;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.List;
 import java.util.Locale;
+import org.junit.Test;
 import com.openexchange.contact.vcard.impl.internal.VCardExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
@@ -71,7 +74,8 @@ public class Bug13557Test extends VCardTest {
         super();
     }
 
-    public void testImportVCard() throws Exception {
+         @Test
+     public void testImportVCard() throws Exception {
         /*
          * import vCard
          */

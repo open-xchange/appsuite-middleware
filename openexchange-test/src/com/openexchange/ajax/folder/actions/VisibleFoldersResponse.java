@@ -102,21 +102,21 @@ public class VisibleFoldersResponse extends AbstractAJAXResponse {
             final Object[][] privateArray = parseData(object.getJSONArray("private"));
             ret.add(Collections.unmodifiableList(Arrays.asList(privateArray)));
         } else {
-            ret.add(Collections.<Object[]>emptyList());
+            ret.add(Collections.<Object[]> emptyList());
         }
         // Parse public folders
         if (object.has("public")) {
             final Object[][] publicArray = parseData(object.getJSONArray("public"));
             ret.add(Collections.unmodifiableList(Arrays.asList(publicArray)));
         } else {
-            ret.add(Collections.<Object[]>emptyList());
+            ret.add(Collections.<Object[]> emptyList());
         }
         // Parse shared folders
         if (object.has("shared")) {
             final Object[][] sharedArray = parseData(object.getJSONArray("shared"));
             ret.add(Collections.unmodifiableList(Arrays.asList(sharedArray)));
         } else {
-            ret.add(Collections.<Object[]>emptyList());
+            ret.add(Collections.<Object[]> emptyList());
         }
         // Return
         return ret;

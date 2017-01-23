@@ -50,18 +50,25 @@
 package com.openexchange.ajax.appointment;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import org.json.JSONException;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.test.CalendarTestManager;
-import com.openexchange.test.FolderTestManager;
 
 /**
  * {@link CalendarTestManagerTest}
@@ -70,97 +77,75 @@ import com.openexchange.test.FolderTestManager;
  */
 public class CalendarTestManagerTest extends AbstractAJAXSession {
 
-    protected CalendarTestManager calendarMgr;
-
-    private FolderTestManager folderMgr;
-
     private FolderObject testFolder;
 
-    /**
-     * Initializes a new {@link CalendarTestManagerTest}.
-     *
-     * @param name
-     */
-    public CalendarTestManagerTest(String name) {
-        super(name);
-    }
-
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
-        calendarMgr = new CalendarTestManager(getClient());
-        folderMgr = new FolderTestManager(getClient());
-        testFolder = folderMgr.generatePublicFolder(
-            "Calendar Manager Tests " + System.currentTimeMillis(),
-            FolderObject.CALENDAR,
-            getClient().getValues().getPrivateAppointmentFolder(),
-            getClient().getValues().getUserId());
-        folderMgr.insertFolderOnServer(testFolder);
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        calendarMgr.cleanUp();
-        folderMgr.cleanUp();
-        super.tearDown();
+        testFolder = ftm.generatePublicFolder("Calendar Manager Tests " + UUID.randomUUID().toString(), FolderObject.CALENDAR, getClient().getValues().getPrivateAppointmentFolder(), getClient().getValues().getUserId());
+        ftm.insertFolderOnServer(testFolder);
     }
 
     protected Appointment generateAppointment() {
         Appointment appointment = new Appointment();
         appointment.setParentFolderID(testFolder.getObjectID());
-        appointment.setTitle(getName());
+        appointment.setTitle(this.getClass().getCanonicalName());
         appointment.setStartDate(new Date());
         appointment.setEndDate(new Date());
         return appointment;
     }
 
+    @Test
     public void testCreate() throws Exception {
         Appointment appointment = generateAppointment();
         appointment.setIgnoreConflicts(true);
 
-        calendarMgr.insert(appointment);
+        catm.insert(appointment);
 
         assertNotNull(appointment.getLastModified());
         assertExists(appointment);
     }
 
+    @Test
     public void testRemove() throws Exception {
         Appointment appointment = generateAppointment();
         appointment.setIgnoreConflicts(true);
 
-        calendarMgr.insert(appointment);
+        catm.insert(appointment);
 
         assertExists(appointment);
 
-        calendarMgr.delete(appointment);
+        catm.delete(appointment);
 
         assertDoesNotExist(appointment);
     }
 
+    @Test
     public void testGet() throws Exception {
         Appointment appointment = generateAppointment();
         appointment.setIgnoreConflicts(true);
 
-        calendarMgr.insert(appointment);
+        catm.insert(appointment);
 
-        Appointment reload = calendarMgr.get(appointment.getParentFolderID(), appointment.getObjectID());
+        Appointment reload = catm.get(appointment.getParentFolderID(), appointment.getObjectID());
 
         assertEquals(appointment.getObjectID(), reload.getObjectID());
         assertEquals(appointment.getTitle(), reload.getTitle());
 
-        reload = calendarMgr.get(appointment);
+        reload = catm.get(appointment);
 
         assertEquals(appointment.getObjectID(), reload.getObjectID());
         assertEquals(appointment.getTitle(), reload.getTitle());
     }
 
+    @Test
     public void testUpdate() throws Exception {
         Appointment appointment = generateAppointment();
         appointment.setIgnoreConflicts(true);
 
-        calendarMgr.insert(appointment);
+        catm.insert(appointment);
 
-        Appointment update = calendarMgr.createIdentifyingCopy(appointment);
+        Appointment update = catm.createIdentifyingCopy(appointment);
 
         assertEquals(update.getObjectID(), appointment.getObjectID());
         assertEquals(update.getParentFolderID(), appointment.getParentFolderID());
@@ -171,23 +156,24 @@ public class CalendarTestManagerTest extends AbstractAJAXSession {
         update.setEndDate(new Date(25000));
         update.setIgnoreConflicts(true);
 
-        calendarMgr.update(update);
+        catm.update(update);
 
-        Appointment reload = calendarMgr.get(appointment);
+        Appointment reload = catm.get(appointment);
 
         assertEquals(23000, reload.getStartDate().getTime());
         assertEquals(25000, reload.getEndDate().getTime());
     }
 
+    @Test
     public void testUpdates() throws Exception {
         Appointment appointment = generateAppointment();
         appointment.setIgnoreConflicts(true);
 
-        calendarMgr.insert(appointment);
+        catm.insert(appointment);
 
         Date beforeUpdate = appointment.getLastModified(); // TODO use global timestamp from ALL request
-        Appointment update = calendarMgr.createIdentifyingCopy(appointment);
-        String updatedTitle = getName() + "2";
+        Appointment update = catm.createIdentifyingCopy(appointment);
+        String updatedTitle = this.getClass().getCanonicalName() + "2";
         update.setTitle(updatedTitle);
         update.setIgnoreConflicts(true);
 
@@ -196,28 +182,26 @@ public class CalendarTestManagerTest extends AbstractAJAXSession {
         assertEquals(update.getLastModified(), appointment.getLastModified());
         assertNotSame(appointment, update);
 
-        calendarMgr.update(update);
+        catm.update(update);
 
-        List<Appointment> updates = calendarMgr.updates(appointment.getParentFolderID(), beforeUpdate, true);
+        List<Appointment> updates = catm.updates(appointment.getParentFolderID(), beforeUpdate, true);
 
         assertEquals("Should have one new update", 1, updates.size());
         assertEquals("Should contain the updated title", updatedTitle, updates.get(0).getTitle());
     }
 
+    @Test
     public void testGetAllInFolder() throws Exception {
         Appointment appointment = new Appointment();
         appointment.setParentFolderID(testFolder.getObjectID());
-        appointment.setTitle(getName());
+        appointment.setTitle(this.getClass().getCanonicalName());
         appointment.setStartDate(D("12/02/1999 10:00"));
         appointment.setEndDate(D("12/02/1999 12:00"));
         appointment.setIgnoreConflicts(true);
 
-        calendarMgr.insert(appointment);
+        catm.insert(appointment);
 
-        Appointment[] appointments = calendarMgr.all(
-            appointment.getParentFolderID(),
-            D("01/01/1999 00:00"),
-            D("01/03/1999 00:00"));
+        Appointment[] appointments = catm.all(appointment.getParentFolderID(), D("01/01/1999 00:00"), D("01/03/1999 00:00"));
 
         assertNotNull(appointments);
         assertInList(appointments, appointment);

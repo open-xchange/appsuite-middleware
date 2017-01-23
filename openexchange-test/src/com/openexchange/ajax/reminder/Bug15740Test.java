@@ -49,10 +49,14 @@
 
 package com.openexchange.ajax.reminder;
 
+import static org.junit.Assert.assertNotNull;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.TimeZone;
 import org.json.JSONException;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
@@ -80,12 +84,12 @@ public class Bug15740Test extends AbstractAJAXSession {
 
     private Appointment appointment;
 
-    public Bug15740Test(final String name) {
-        super(name);
+    public Bug15740Test() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         tz = client.getValues().getTimeZone();
@@ -94,12 +98,16 @@ public class Bug15740Test extends AbstractAJAXSession {
         appointment = createAppointment();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        client.execute(new DeleteRequest(appointment));
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
+        try {
+            client.execute(new DeleteRequest(appointment));
+        } finally {
+            super.tearDown();
+        }
     }
 
+    @Test
     public void testBug15740() throws Exception {
         calendar.setTime(appointment.getEndDate());
         calendar.add(Calendar.DATE, 1);
@@ -116,8 +124,7 @@ public class Bug15740Test extends AbstractAJAXSession {
         assertNotNull("No reminder found for created appointment.", actual);
 
         final ReminderObject expected = new ReminderObject();
-        @SuppressWarnings("null")
-        int reminder = actual.getObjectId();
+        @SuppressWarnings("null") int reminder = actual.getObjectId();
         expected.setObjectId(reminder);
         expected.setFolder(folderId);
         expected.setTargetId(appointment.getObjectID());

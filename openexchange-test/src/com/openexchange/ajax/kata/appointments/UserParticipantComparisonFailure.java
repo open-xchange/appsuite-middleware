@@ -51,7 +51,6 @@ package com.openexchange.ajax.kata.appointments;
 
 import com.openexchange.groupware.container.UserParticipant;
 
-
 /**
  * {@link UserParticipantComparisonFailure}
  *
@@ -62,16 +61,13 @@ public class UserParticipantComparisonFailure extends ParticipantComparisonFailu
 
     /**
      * Initializes a new {@link UserParticipantComparisonFailure}.
+     * 
      * @param message
      * @param expected
      * @param actual
      */
     public UserParticipantComparisonFailure(String message, UserParticipant[] expected, UserParticipant[] actual) {
-        super(
-            message,
-            expected == null ? new UserParticipant[0] : expected,
-            actual == null ? new UserParticipant[0]: actual
-        );
+        super(message, expected == null ? new UserParticipant[0] : expected, actual == null ? new UserParticipant[0] : actual);
     }
 
     @Override

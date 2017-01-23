@@ -51,6 +51,7 @@ package com.openexchange.ajax.session.actions;
 
 import com.openexchange.ajax.framework.Header;
 import com.openexchange.tools.encoding.Base64;
+
 /**
  * {@link HttpAuthRequest}
  *
@@ -81,17 +82,18 @@ public class HttpAuthRequest extends AbstractRequest<HttpAuthResponse> {
 
     @Override
     public Header[] getHeaders() {
-        return new Header[] {
-            new Header() {
-                @Override
-                public String getName() {
-                    return "Authorization";
-                }
-                @Override
-                public String getValue() {
-                    return "Basic " + Base64.encode(login + ':' + password);
-                }
+        return new Header[] { new Header() {
+
+            @Override
+            public String getName() {
+                return "Authorization";
             }
+
+            @Override
+            public String getValue() {
+                return "Basic " + Base64.encode(login + ':' + password);
+            }
+        }
         };
     }
 

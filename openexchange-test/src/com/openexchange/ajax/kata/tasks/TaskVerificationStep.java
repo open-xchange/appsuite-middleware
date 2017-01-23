@@ -88,7 +88,6 @@ import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.test.TaskTestManager;
 
-
 /**
  * {@link TaskVerificationStep}
  *
@@ -104,6 +103,7 @@ public class TaskVerificationStep extends NeedExistingStep<Task> {
 
     /**
      * Initializes a new {@link TaskVerificationStep}.
+     * 
      * @param name
      * @param expectedError
      */
@@ -117,7 +117,7 @@ public class TaskVerificationStep extends NeedExistingStep<Task> {
         expectedFolderId = entry.getParentFolderID();
         boolean containsFolderId = entry.containsParentFolderID();
         super.assumeIdentity(entry);
-        if( ! containsFolderId ){
+        if (!containsFolderId) {
             expectedFolderId = entry.getParentFolderID();
         }
     }
@@ -150,9 +150,7 @@ public class TaskVerificationStep extends NeedExistingStep<Task> {
     }
 
     private void checkViaList(Task task) throws OXException, IOException, SAXException, JSONException {
-        ListRequest listRequest = new ListRequest(
-            ListIDs.l(new int[] { expectedFolderId, task.getObjectID() }),
-            Task.ALL_COLUMNS);
+        ListRequest listRequest = new ListRequest(ListIDs.l(new int[] { expectedFolderId, task.getObjectID() }), Task.ALL_COLUMNS);
         CommonListResponse response = client.execute(listRequest);
 
         Object[][] rows = response.getArray();
@@ -169,7 +167,7 @@ public class TaskVerificationStep extends NeedExistingStep<Task> {
 
     }
 
-    private void checkViaSearch(Task task) throws OXException, IOException, SAXException, JSONException{
+    private void checkViaSearch(Task task) throws OXException, IOException, SAXException, JSONException {
         Object[][] rows = getViaSearch(task);
         checkInList(task, rows, Task.ALL_COLUMNS);
     }
@@ -180,7 +178,7 @@ public class TaskVerificationStep extends NeedExistingStep<Task> {
         return response.getArray();
     }
 
-    private Object[][] getViaSearch(Task task) throws OXException, IOException, SAXException, JSONException{
+    private Object[][] getViaSearch(Task task) throws OXException, IOException, SAXException, JSONException {
         TaskSearchObject searchObject = new TaskSearchObject();
         searchObject.addFolder(expectedFolderId);
         searchObject.setPattern("*");
@@ -214,7 +212,7 @@ public class TaskVerificationStep extends NeedExistingStep<Task> {
                 continue;
             }
             if (task.contains(col)) {
-                assertEquals(name+": Column "+ col + " differs!", task.get(col), loaded.get(col));
+                assertEquals(name + ": Column " + col + " differs!", task.get(col), loaded.get(col));
             }
         }
     }
@@ -224,7 +222,7 @@ public class TaskVerificationStep extends NeedExistingStep<Task> {
 
         for (int i = 0; i < rows.length; i++) {
             Object[] row = rows[i];
-            int id = ( (Integer) row[idPos] ).intValue();
+            int id = ((Integer) row[idPos]).intValue();
             if (id == task.getObjectID()) {
                 compare(task, row, columns);
                 return;
@@ -268,21 +266,21 @@ public class TaskVerificationStep extends NeedExistingStep<Task> {
     }
 
     protected <T> boolean compareArrays(T[] expected, T[] actual) {
-        if (expected == null && actual == null){
+        if (expected == null && actual == null) {
             return true;
         }
-        if (expected == null && actual != null){
+        if (expected == null && actual != null) {
             return false;
         }
-        if (expected != null && actual == null){
+        if (expected != null && actual == null) {
             return false;
         }
         Set<T> expectedParticipants = new HashSet<T>(Arrays.asList(expected));
         Set<T> actualParticipants = new HashSet<T>(Arrays.asList(actual));
-        if (expectedParticipants.size() != actualParticipants.size()){
+        if (expectedParticipants.size() != actualParticipants.size()) {
             return false;
         }
-        if (!expectedParticipants.containsAll(actualParticipants)){
+        if (!expectedParticipants.containsAll(actualParticipants)) {
             return false;
         }
         return true;
@@ -311,47 +309,45 @@ public class TaskVerificationStep extends NeedExistingStep<Task> {
 
     private Object transform(int column, Object actual) throws OXException, IOException, SAXException, JSONException {
         switch (column) {
-        case Task.START_DATE:
-        case Task.END_DATE:
-            return new Date( ( (Long) actual).longValue() );
-        case Task.PARTICIPANTS:
-            JSONArray participantArr = (JSONArray) actual;
-            List<Participant> participants = new LinkedList<Participant>();
-            for (int i = 0, size = participantArr.length(); i < size; i++) {
-                JSONObject participantObj = participantArr.getJSONObject(i);
-                int type = participantObj.getInt("type");
-                switch (type) {
-                case Participant.USER:
-                    participants.add(new UserParticipant(participantObj.getInt("id")));
-                    break;
-                case Participant.GROUP:
-                    participants.add(new GroupParticipant(participantObj.getInt("id")));
-                    break;
-                case Participant.EXTERNAL_USER:
-                    participants.add(new ExternalUserParticipant(participantObj.getString("mail")));
-                    break;
+            case Task.START_DATE:
+            case Task.END_DATE:
+                return new Date(((Long) actual).longValue());
+            case Task.PARTICIPANTS:
+                JSONArray participantArr = (JSONArray) actual;
+                List<Participant> participants = new LinkedList<Participant>();
+                for (int i = 0, size = participantArr.length(); i < size; i++) {
+                    JSONObject participantObj = participantArr.getJSONObject(i);
+                    int type = participantObj.getInt("type");
+                    switch (type) {
+                        case Participant.USER:
+                            participants.add(new UserParticipant(participantObj.getInt("id")));
+                            break;
+                        case Participant.GROUP:
+                            participants.add(new GroupParticipant(participantObj.getInt("id")));
+                            break;
+                        case Participant.EXTERNAL_USER:
+                            participants.add(new ExternalUserParticipant(participantObj.getString("mail")));
+                            break;
+                    }
                 }
-            }
-            return participants.toArray(new Participant[participants.size()]);
+                return participants.toArray(new Participant[participants.size()]);
 
-        case Appointment.USERS:
-            JSONArray userParticipantArr = (JSONArray) actual;
-            List<UserParticipant> userParticipants = new LinkedList<UserParticipant>();
-            for (int i = 0, size = userParticipantArr.length(); i < size; i++) {
-                JSONObject participantObj = userParticipantArr.getJSONObject(i);
-                userParticipants.add(new UserParticipant(participantObj.getInt("id")));
-            }
-            return userParticipants.toArray(new UserParticipant[userParticipants.size()]);
+            case Appointment.USERS:
+                JSONArray userParticipantArr = (JSONArray) actual;
+                List<UserParticipant> userParticipants = new LinkedList<UserParticipant>();
+                for (int i = 0, size = userParticipantArr.length(); i < size; i++) {
+                    JSONObject participantObj = userParticipantArr.getJSONObject(i);
+                    userParticipants.add(new UserParticipant(participantObj.getInt("id")));
+                }
+                return userParticipants.toArray(new UserParticipant[userParticipants.size()]);
         }
 
         return actual;
     }
 
-
     @Override
     public void cleanUp() throws Exception {
 
     }
-
 
 }

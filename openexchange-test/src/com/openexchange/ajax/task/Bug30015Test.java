@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.task;
 
+import static org.junit.Assert.assertNull;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.TimeZone;
@@ -82,13 +83,12 @@ public final class Bug30015Test extends AbstractAJAXSession {
     private Task first;
     private Task second;
 
-    public Bug30015Test(String name) {
-        super(name);
+    public Bug30015Test() {
+        super();
     }
 
     @Before
-    @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
         client1 = getClient();
         timeZone = client1.getValues().getTimeZone();
@@ -106,11 +106,13 @@ public final class Bug30015Test extends AbstractAJAXSession {
     }
 
     @After
-    @Override
-    protected void tearDown() throws Exception {
-        client1.execute(new DeleteRequest(first));
-        client1.execute(new DeleteRequest(second));
-        super.tearDown();
+    public void tearDown() throws Exception {
+        try {
+            client1.execute(new DeleteRequest(first));
+            client1.execute(new DeleteRequest(second));
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test
@@ -124,7 +126,7 @@ public final class Bug30015Test extends AbstractAJAXSession {
         first.setDateCompleted(cal.getTime());
         first.setLastModified(client1.execute(new UpdateRequest(first, timeZone)).getTimestamp());
         second = Bug21026Test.findNextOccurrence(client1, client1.execute(new GetRequest(first)).getTask(timeZone));
-        second = client.execute(new GetRequest(second)).getTask(timeZone);
+        second = getClient().execute(new GetRequest(second)).getTask(timeZone);
         Assert.assertFalse("Next occurrence of task must not contain the attribute 'date completed'.", second.containsDateCompleted());
         assertNull("Next occurrence of task must not contain the attribute 'date completed'.", second.getDateCompleted());
     }

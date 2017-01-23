@@ -62,14 +62,8 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.setuptools.TestConfig;
-import junit.framework.JUnit4TestAdapter;
 
 public class Bug8653 extends AbstractICalImportTest {
-
-    //workaround for JUnit 3 runner
-    public static junit.framework.Test suite() {
-        return new JUnit4TestAdapter(Bug8653.class);
-    }
 
     @Test
     public void testImportIntoCorrectFolder() throws OXException, SQLException, UnsupportedEncodingException {

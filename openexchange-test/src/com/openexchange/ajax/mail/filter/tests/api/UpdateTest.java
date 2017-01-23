@@ -2,6 +2,8 @@
 package com.openexchange.ajax.mail.filter.tests.api;
 
 import java.util.Collections;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
 import com.openexchange.ajax.mail.filter.api.dao.action.Keep;
 import com.openexchange.ajax.mail.filter.api.dao.action.Stop;
@@ -16,12 +18,12 @@ public class UpdateTest extends AbstractMailFilterTest {
 
     private Rule rule;
 
-    public UpdateTest(String name) {
-        super(name);
+    public UpdateTest() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
 
         rule = new Rule();
@@ -39,6 +41,7 @@ public class UpdateTest extends AbstractMailFilterTest {
     /**
      * Tests a simple update name of the rule
      */
+    @Test
     public void testUpdate() throws Exception {
         rule.setName("testUpdate - 2");
 
@@ -53,6 +56,7 @@ public class UpdateTest extends AbstractMailFilterTest {
     /**
      * Tests a condition update of the rule
      */
+    @Test
     public void testUpdateCondition() throws Exception {
         // update condition
         rule.setTest(new HeaderTest(new ContainsComparison(), new String[] { "updatedHeader" }, new String[] { "updatedValue" }));
@@ -66,6 +70,7 @@ public class UpdateTest extends AbstractMailFilterTest {
     /**
      * Test add an action
      */
+    @Test
     public void testUpdateAddActionCommand() throws Exception {
         rule.addAction(new Stop());
         rule.setPosition(0);
@@ -80,6 +85,7 @@ public class UpdateTest extends AbstractMailFilterTest {
     /**
      * Test update test command
      */
+    @Test
     public void testUpdateTestCommand() throws Exception {
         AddressTest addressTest = new AddressTest(new MatchesComparison(), new String[] { "matchesHeader" }, new String[] { "matchesValue1", "matchesValue2" });
         rule.setTest(addressTest);

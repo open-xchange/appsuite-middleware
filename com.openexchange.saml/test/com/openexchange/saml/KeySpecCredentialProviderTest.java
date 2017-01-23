@@ -84,8 +84,8 @@ public class KeySpecCredentialProviderTest {
 
     private static final String SIGNING_INPUT = "IamABunchOfTextPossiblyXMLOrSo";
 
-    @Test
-    public void testSigningWithRawDERKeys() throws Exception {
+     @Test
+     public void testSigningWithRawDERKeys() throws Exception {
         X509EncodedKeySpec idpPublicKeySpec = new X509EncodedKeySpec(Base64.decode(B64_DSA_512_DER_PUBLIC_KEY));
         PKCS8EncodedKeySpec idpPrivateKeySpec = new PKCS8EncodedKeySpec(Base64.decode(B64_DSA_512_DER_PRIVATE_KEY));
         KeySpecCredentialProvider credentialProvider = KeySpecCredentialProvider.newInstance(new SpecContainer(idpPublicKeySpec, null, Algorithm.DSA), new SpecContainer(null, idpPrivateKeySpec, Algorithm.DSA), null);

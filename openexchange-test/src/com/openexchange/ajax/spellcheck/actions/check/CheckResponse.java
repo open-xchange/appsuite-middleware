@@ -60,22 +60,22 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
  */
 public final class CheckResponse extends AbstractAJAXResponse {
 
-	private String[] misspeltWords;
+    private String[] misspeltWords;
 
-	/**
-	 * Initializes a new {@link CheckResponse}
-	 *
-	 * @param response
-	 */
-	public CheckResponse(final Response response) {
-		super(response);
-	}
+    /**
+     * Initializes a new {@link CheckResponse}
+     *
+     * @param response
+     */
+    public CheckResponse(final Response response) {
+        super(response);
+    }
 
-	public String[] getMisspeltWords() {
-		return misspeltWords;
-	}
+    public String[] getMisspeltWords() {
+        return misspeltWords;
+    }
 
-	void setMisspeltWords(final String[] misspeltWords) {
-		this.misspeltWords = misspeltWords;
-	}
+    void setMisspeltWords(final String[] misspeltWords) {
+        this.misspeltWords = misspeltWords;
+    }
 }

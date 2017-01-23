@@ -52,7 +52,6 @@ package com.openexchange.ajax.kata.fixtures;
 import com.openexchange.ajax.kata.Step;
 import com.openexchange.test.fixtures.Fixture;
 
-
 /**
  * {@link FixtureTransformer}
  *
@@ -60,7 +59,10 @@ import com.openexchange.test.fixtures.Fixture;
  *
  */
 public interface FixtureTransformer {
+
     public boolean handles(Class aClass, String fixtureName, Fixture fixture);
+
     public Step transform(Class aClass, String fixtureName, Fixture fixture, String displayName);
+
     public void resolveAll();
 }

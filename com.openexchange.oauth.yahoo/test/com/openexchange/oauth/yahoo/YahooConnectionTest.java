@@ -50,20 +50,23 @@
 package com.openexchange.oauth.yahoo;
 
 import java.util.List;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.oauth.yahoo.internal.OAuthServiceMetaDataYahooImpl;
 import com.openexchange.oauth.yahoo.internal.YahooServiceImpl;
 import com.openexchange.oauth.yahoo.osgi.YahooOAuthActivator;
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * {@link YahooConnectionTest}
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class YahooConnectionTest extends TestCase {
-
+public class YahooConnectionTest {
     // Obviously these 5 values need to fit together. token and tokenSecret can be obtained vio YahooSimpleConnectionTest
     private final String apiKey = "dj0yJmk9eDY3MW9VNXhqYTRWJmQ9WVdrOVJYWTFiRGhKTXpBbWNHbzlNelF6TURnMU5qWXkmcz1jb25zdW1lcnNlY3JldCZ4PTkx";
     private final String apiSecret = "b94fbe3f52d364b4ae5a28228ac7b558fcfbe58c";
@@ -71,7 +74,8 @@ public class YahooConnectionTest extends TestCase {
     private final String tokenSecret = "7a28439ac5d9a3bec5a27f09cc72a402e061bf62";
     private final String callbackURL = "http://www.open-xchange.com";
 
-    public void testUsingExistingAccessToken() throws OXException {
+         @Test
+     public void testUsingExistingAccessToken() throws OXException {
 
         final YahooOAuthActivator activator = new YahooOAuthActivator();
         activator.setOAuthMetaData(new OAuthServiceMetaDataYahooImpl(null));

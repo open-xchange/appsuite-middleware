@@ -98,8 +98,8 @@ public class PayloadTreeNodeTest {
     /**
      * Test method for {@link com.openexchange.realtime.payload.PayloadTreeNode#PayloadTreeNode()}.
      */
-    @Test
-    public void testPayloadTreeNode() {
+     @Test
+     public void testPayloadTreeNode() {
         assertNull(payloadTreeNode.getParent());
         assertNull(payloadTreeNode.getData());
         assertFalse(payloadTreeNode.hasChildren());
@@ -108,8 +108,8 @@ public class PayloadTreeNodeTest {
     /**
      * Test method for {@link com.openexchange.realtime.payload.PayloadTreeNode#PayloadTreeNode(com.openexchange.realtime.payload.PayloadElement)}.
      */
-    @Test
-    public void testPayloadTreeNodePayloadElement() {
+     @Test
+     public void testPayloadTreeNodePayloadElement() {
         PayloadTreeNode node = new PayloadTreeNode(payloadElement1);
         assertNull(node.getParent());
         assertEquals(payloadElement1, node.getPayloadElement());
@@ -120,8 +120,8 @@ public class PayloadTreeNodeTest {
     /**
      * Test method for {@link com.openexchange.realtime.payload.PayloadTreeNode#getParent()}.
      */
-    @Test
-    public void testGetParent() {
+     @Test
+     public void testGetParent() {
         assertNull(payloadTreeNode.getParent());
         payloadTreeNode.setParent(parentPayloadTreeNode);
         assertEquals(parentPayloadTreeNode, payloadTreeNode.getParent());
@@ -130,8 +130,8 @@ public class PayloadTreeNodeTest {
     /**
      * Test method for {@link com.openexchange.realtime.payload.PayloadTreeNode#setParent(com.openexchange.realtime.payload.PayloadTreeNode)}.
      */
-    @Test
-    public void testSetParent() {
+     @Test
+     public void testSetParent() {
         assertNull(payloadTreeNode.getParent());
         payloadTreeNode.setParent(parentPayloadTreeNode);
         assertEquals(parentPayloadTreeNode, payloadTreeNode.getParent());
@@ -140,8 +140,8 @@ public class PayloadTreeNodeTest {
     /**
      * Test method for {@link com.openexchange.realtime.payload.PayloadTreeNode#getPayloadElement()}.
      */
-    @Test
-    public void testGetPayloadElement() {
+     @Test
+     public void testGetPayloadElement() {
         payloadTreeNode.setPayloadElement(payloadElement1);
         assertEquals(payloadElement1, payloadTreeNode.getPayloadElement());
     }
@@ -149,8 +149,8 @@ public class PayloadTreeNodeTest {
     /**
      * Test method for {@link com.openexchange.realtime.payload.PayloadTreeNode#getChildren()}.
      */
-    @Test
-    public void testGetChildren() {
+     @Test
+     public void testGetChildren() {
         assertEquals(emptyPayloadTreeNodeList, new ArrayList(parentPayloadTreeNode.getChildren()));
         parentPayloadTreeNode.addChild(payloadTreeNode1);
         parentPayloadTreeNode.addChild(payloadTreeNode2);
@@ -161,8 +161,8 @@ public class PayloadTreeNodeTest {
     /**
      * Test method for {@link com.openexchange.realtime.payload.PayloadTreeNode#getNumberOfChildren()}.
      */
-    @Test
-    public void testGetNumberOfChildren() {
+     @Test
+     public void testGetNumberOfChildren() {
         assertEquals(0, parentPayloadTreeNode.getChildren().size());
         parentPayloadTreeNode.addChildren(filledPayloadTreeNodeList);
         assertEquals(3, parentPayloadTreeNode.getChildren().size());
@@ -173,8 +173,8 @@ public class PayloadTreeNodeTest {
     /**
      * Test method for {@link com.openexchange.realtime.payload.PayloadTreeNode#hasChildren()}.
      */
-    @Test
-    public void testHasChildren() {
+     @Test
+     public void testHasChildren() {
         assertFalse(parentPayloadTreeNode.hasChildren());
         parentPayloadTreeNode.addChildren(filledPayloadTreeNodeList);
         assertTrue(parentPayloadTreeNode.hasChildren());
@@ -185,8 +185,8 @@ public class PayloadTreeNodeTest {
     /**
      * Test method for {@link com.openexchange.realtime.payload.PayloadTreeNode#setChildren(java.util.Collection)}.
      */
-    @Test
-    public void testSetChildren() {
+     @Test
+     public void testSetChildren() {
         assertFalse(parentPayloadTreeNode.hasChildren());
         parentPayloadTreeNode.setChildren(filledPayloadTreeNodeList);
         assertTrue(parentPayloadTreeNode.hasChildren());
@@ -196,8 +196,8 @@ public class PayloadTreeNodeTest {
     /**
      * Test method for {@link com.openexchange.realtime.payload.PayloadTreeNode#addChild(com.openexchange.realtime.payload.PayloadTreeNode)}.
      */
-    @Test
-    public void testAddChild() {
+     @Test
+     public void testAddChild() {
         assertFalse(parentPayloadTreeNode.hasChildren());
         parentPayloadTreeNode.addChild(payloadTreeNode1);
         parentPayloadTreeNode.addChild(payloadTreeNode2);
@@ -209,8 +209,8 @@ public class PayloadTreeNodeTest {
     /**
      * Test method for {@link com.openexchange.realtime.payload.PayloadTreeNode#addChildren(java.util.Collection)}.
      */
-    @Test
-    public void testAddChildren() {
+     @Test
+     public void testAddChildren() {
         assertFalse(parentPayloadTreeNode.hasChildren());
         parentPayloadTreeNode.addChildren(emptyPayloadTreeNodeList);
         assertFalse(parentPayloadTreeNode.hasChildren());
@@ -222,8 +222,8 @@ public class PayloadTreeNodeTest {
     /**
      * Test method for {@link com.openexchange.realtime.payload.PayloadTreeNode#removeChild(com.openexchange.realtime.payload.PayloadTreeNode)}.
      */
-    @Test
-    public void testRemoveChild() {
+     @Test
+     public void testRemoveChild() {
         assertFalse(parentPayloadTreeNode.hasChildren());
         parentPayloadTreeNode.addChild(payloadTreeNode1);
         assertTrue(parentPayloadTreeNode.hasChildren());
@@ -234,8 +234,8 @@ public class PayloadTreeNodeTest {
     /**
      * Test method for {@link com.openexchange.realtime.payload.PayloadTreeNode#removeChildren(java.util.Collection)}.
      */
-    @Test
-    public void testRemoveChildren() {
+     @Test
+     public void testRemoveChildren() {
         assertFalse(parentPayloadTreeNode.hasChildren());
         parentPayloadTreeNode.addChildren(filledPayloadTreeNodeList);
         assertTrue(parentPayloadTreeNode.hasChildren());
@@ -249,16 +249,16 @@ public class PayloadTreeNodeTest {
     /**
      * Test method for {@link com.openexchange.realtime.payload.PayloadTreeNode#getData()}.
      */
-    @Test
-    public void testGetData() {
+     @Test
+     public void testGetData() {
         assertEquals(payloadElement1.getData(), payloadTreeNode1.getData());
     }
 
     /**
      * Test method for {@link com.openexchange.realtime.payload.PayloadTreeNode#setData(java.lang.Object, java.lang.String)}.
      */
-    @Test
-    public void testSetData() {
+     @Test
+     public void testSetData() {
         payloadTreeNode1.setData(2, "Integer");
         assertEquals(2, payloadTreeNode1.getData());
     }
@@ -266,40 +266,40 @@ public class PayloadTreeNodeTest {
     /**
      * Test method for {@link com.openexchange.realtime.payload.PayloadTreeNode#getElementName()}.
      */
-    @Test
-    public void testGetElementName() {
+     @Test
+     public void testGetElementName() {
         assertEquals(payloadElement1.getElementName(), payloadTreeNode1.getElementName());
     }
 
     /**
      * Test method for {@link com.openexchange.realtime.payload.PayloadTreeNode#getFormat()}.
      */
-    @Test
-    public void testGetFormat() {
+     @Test
+     public void testGetFormat() {
         assertEquals(payloadElement1.getFormat(), payloadTreeNode1.getFormat());
     }
 
     /**
      * Test method for {@link com.openexchange.realtime.payload.PayloadTreeNode#getElementPath()}.
      */
-    @Test
-    public void testGetElementPath() {
+     @Test
+     public void testGetElementPath() {
         assertEquals(new ElementPath(payloadElement1.getNamespace(), payloadElement1.getElementName()), payloadTreeNode1.getElementPath());
     }
 
     /**
      * Test method for {@link com.openexchange.realtime.payload.PayloadTreeNode#getNamespace()}.
      */
-    @Test
-    public void testGetNamespace() {
+     @Test
+     public void testGetNamespace() {
         assertEquals(payloadElement1.getNamespace(), payloadTreeNode1.getNamespace());
     }
 
     /**
      * Test method for {@link com.openexchange.realtime.payload.PayloadTreeNode#equals(java.lang.Object)}.
      */
-    @Test
-    public void testEqualsObject() {
+     @Test
+     public void testEqualsObject() {
         assertEquals(new PayloadTreeNode(payloadElement1), new PayloadTreeNode(payloadElement1));
         assertEquals(new PayloadTreeNode(payloadElement1).addChild(payloadTreeNode2), new PayloadTreeNode(payloadElement1).addChild(payloadTreeNode2));
     }

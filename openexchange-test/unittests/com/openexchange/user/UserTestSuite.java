@@ -49,9 +49,8 @@
 
 package com.openexchange.user;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 /**
  * {@link UserTestSuite}
@@ -59,16 +58,10 @@ import junit.framework.TestSuite;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.6.2
  */
-public class UserTestSuite extends TestSuite {
-
-    public UserTestSuite() {
-        super();
-    }
-
-    public static Test suite() {
-        TestSuite suite = new TestSuite();
-        suite.addTestSuite(Bug36228Test.class);
-        return suite;
-    }
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    Bug36228Test.class
+})
+public class UserTestSuite {
 
 }

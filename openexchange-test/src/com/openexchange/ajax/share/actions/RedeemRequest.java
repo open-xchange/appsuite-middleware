@@ -60,7 +60,6 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Header;
 import com.openexchange.ajax.framework.Params;
 
-
 /**
  * {@link RedeemRequest}
  *
@@ -68,16 +67,16 @@ import com.openexchange.ajax.framework.Params;
  * @since v7.8.2
  */
 public class RedeemRequest implements AJAXRequest<RedeemResponse> {
-    
+
     private final String token;
     private final boolean failOnError;
-    
+
     public RedeemRequest(String token) {
         super();
         this.token = token;
         this.failOnError = false;
     }
-    
+
     public RedeemRequest(String token, boolean failOnError) {
         super();
         this.token = token;
@@ -113,9 +112,9 @@ public class RedeemRequest implements AJAXRequest<RedeemResponse> {
     public Header[] getHeaders() {
         return NO_HEADER;
     }
-    
+
     private static final class RedeemParser extends AbstractAJAXParser<RedeemResponse> {
-        
+
         public RedeemParser(boolean failOnError) {
             super(failOnError);
         }
@@ -144,7 +143,7 @@ public class RedeemRequest implements AJAXRequest<RedeemResponse> {
             }
             return new RedeemResponse(response, null);
         }
-        
+
     }
 
 }

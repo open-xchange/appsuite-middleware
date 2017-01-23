@@ -98,7 +98,8 @@ public class UserCopyTest extends AbstractUserCopyTest {
         dstCtx = getDestinationContext();
     }
     
-    public void testUserCopy() throws Exception {
+         @Test
+     public void testUserCopy() throws Exception {
         final UserService userService = new MockUserService();
         final UserCopyTask copyTask = new UserCopyTask(userService);
         final User sourceUser = userService.getUser(srcCon, srcUsrId, srcCtx);        
@@ -145,8 +146,9 @@ public class UserCopyTest extends AbstractUserCopyTest {
         }
     }
     
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown()
+ throws Exception {
         DBUtils.autocommit(dstCon);
         deleteAllFromTablesForCid(dstCtx.getContextId(), "cid", dstCon, "login2user", "user", "user_attribute", "user_configuration");
         super.tearDown();

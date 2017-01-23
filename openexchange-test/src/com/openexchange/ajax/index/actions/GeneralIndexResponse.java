@@ -53,7 +53,6 @@ import org.json.JSONValue;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
-
 /**
  * {@link GeneralIndexResponse}
  *
@@ -63,18 +62,19 @@ public class GeneralIndexResponse extends AbstractAJAXResponse {
 
     /**
      * Initializes a new {@link GeneralIndexResponse}.
+     * 
      * @param response
      */
     protected GeneralIndexResponse(Response response) {
         super(response);
     }
-    
+
     public JSONValue getJSON() {
         Object data = getData();
         if (data == null) {
             return null;
         }
-        
+
         return (JSONValue) data;
     }
 

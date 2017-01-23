@@ -59,7 +59,6 @@ import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 
-
 /**
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
@@ -80,7 +79,7 @@ public final class POSTResponse extends AbstractResponse {
     }
 
     public URI getRedirectLocation() {
-       return redirectLocation;
+        return redirectLocation;
     }
 
     public void assertRedirect() {
@@ -93,9 +92,7 @@ public final class POSTResponse extends AbstractResponse {
         try {
             URI location = getRedirectLocation();
             Map<String, String> params = HttpTools.extractQueryParams(location);
-            GETRequest getRequest = new GETRequest()
-                .setScheme(location.getScheme())
-                .setHostname(location.getHost());
+            GETRequest getRequest = new GETRequest().setScheme(location.getScheme()).setHostname(location.getHost());
             for (String param : params.keySet()) {
                 getRequest.setParameter(param, params.get(param));
             }

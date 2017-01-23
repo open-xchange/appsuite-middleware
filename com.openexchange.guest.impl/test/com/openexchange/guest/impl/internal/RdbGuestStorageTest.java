@@ -246,7 +246,7 @@ public class RdbGuestStorageTest {
         Mockito.verify(connection, Mockito.times(1)).prepareStatement(RdbGuestStorage.RESOLVE_NUMBER_OF_GUEST_ASSIGNMENTS_BY_GUESTID);
     }
 
-    @Test (expected=OXException.class)
+    @Test(expected = OXException.class)
     public void testIsAssignmentExisting_connectionNull_throwException() throws OXException, SQLException {
         Mockito.when(preparedStatement.executeQuery()).thenReturn(resultSet);
         Mockito.when(resultSet.next()).thenReturn(false);
@@ -352,7 +352,7 @@ public class RdbGuestStorageTest {
         Assert.assertEquals(GUEST_ID, resolveGuestAssignments.get(0).intValue());
     }
 
-    @Test (expected=OXException.class)
+    @Test(expected = OXException.class)
     public void testUpdateGuestAssignment_connectionNull_throwException() throws OXException, SQLException {
         Mockito.when(preparedStatement.executeUpdate()).thenReturn(1);
         Mockito.when(resultSet.next()).thenReturn(true, false);
@@ -378,6 +378,6 @@ public class RdbGuestStorageTest {
         List<Long> groupIds = Arrays.asList(3L, 5L, 10L, 13L);
         String commaSeperatedString = rdbGuestStorage.getIdsAsString(groupIds);
 
-        Assert.assertEquals("3, 5, 10, 13".replaceAll("\\s",""), commaSeperatedString);
+        Assert.assertEquals("3, 5, 10, 13".replaceAll("\\s", ""), commaSeperatedString);
     }
 }

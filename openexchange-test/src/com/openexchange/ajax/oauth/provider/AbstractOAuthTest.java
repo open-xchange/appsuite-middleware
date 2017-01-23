@@ -52,22 +52,24 @@ package com.openexchange.ajax.oauth.provider;
 import java.rmi.Naming;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import org.junit.After;
 import org.junit.Before;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.rmi.client.ClientDto;
 import com.openexchange.oauth.provider.resourceserver.scope.Scope;
 import com.openexchange.oauth.provider.rmi.client.ClientDataDto;
+import com.openexchange.oauth.provider.rmi.client.ClientDto;
 import com.openexchange.oauth.provider.rmi.client.IconDto;
 import com.openexchange.oauth.provider.rmi.client.RemoteClientManagement;
 import com.openexchange.tasks.json.TaskActionFactory;
+import com.openexchange.test.pool.TestContextPool;
+import com.openexchange.test.pool.TestUser;
 
 /**
  * {@link AbstractOAuthTest}
@@ -75,42 +77,42 @@ import com.openexchange.tasks.json.TaskActionFactory;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public abstract class AbstractOAuthTest {
+public abstract class AbstractOAuthTest extends AbstractAJAXSession {
 
     protected ClientDto clientApp;
 
-    protected OAuthClient client;
-
-    protected AJAXClient ajaxClient;
+    protected OAuthClient oAuthClient;
 
     protected Scope scope;
 
     protected AbstractOAuthTest(Scope scope) throws OXException {
         super();
-        AJAXConfig.init();
         this.scope = scope;
     }
 
     @Before
-    public void before() throws Exception {
+    public void setUp() throws Exception {
+        super.setUp();
         // register client application
         clientApp = registerTestClient();
         if (scope == null) {
             scope = Scope.parseScope(clientApp.getDefaultScope());
         }
-        client = new OAuthClient(User.User1, clientApp.getId(), clientApp.getSecret(), clientApp.getRedirectURIs().get(0), scope);
-        ajaxClient = new AJAXClient(User.User1);
+        oAuthClient = new OAuthClient(testUser, clientApp.getId(), clientApp.getSecret(), clientApp.getRedirectURIs().get(0), scope);
     }
 
     @After
-    public void after() throws Exception {
-        ajaxClient.logout();
-        client.logout();
-        unregisterTestClient(clientApp);
+    public void tearDown() throws Exception {
+        try {
+            oAuthClient.logout();
+            unregisterTestClient(clientApp);
+        } finally {
+            super.tearDown();
+        }
     }
 
     public static ClientDto registerTestClient() throws Exception {
-        ClientDataDto clientData = prepareClient("Test App " + System.currentTimeMillis());
+        ClientDataDto clientData = prepareClient("Test App " + UUID.randomUUID().toString());
         RemoteClientManagement clientManagement = (RemoteClientManagement) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + RemoteClientManagement.RMI_NAME);
         return clientManagement.registerClient(RemoteClientManagement.DEFAULT_GID, clientData, getMasterAdminCredentials());
     }
@@ -136,9 +138,8 @@ public abstract class AbstractOAuthTest {
     }
 
     public static Credentials getMasterAdminCredentials() {
-        String username = AJAXConfig.getProperty(AJAXConfig.Property.OX_ADMIN_MASTER);
-        String password = AJAXConfig.getProperty(AJAXConfig.Property.OX_ADMIN_MASTER_PWD);
-        return new Credentials(username, password);
+        TestUser oxAdminMaster = TestContextPool.getOxAdminMaster();
+        return new Credentials(oxAdminMaster.getUser(), oxAdminMaster.getPassword());
     }
 
     public static void unregisterTestClient(ClientDto oAuthClientApp) throws Exception {

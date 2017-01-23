@@ -71,7 +71,7 @@ public class FolderFixtureFactory implements FixtureFactory<FolderObject> {
 
     @Override
     public Fixtures<FolderObject> createFixture(String fixtureName, Map<String, Map<String, String>> entries) {
-        return new FolderFixtures(entries, fixtureLoader );
+        return new FolderFixtures(entries, fixtureLoader);
     }
 
     private class FolderFixtures extends DefaultFixtures<FolderObject> {
@@ -80,7 +80,7 @@ public class FolderFixtureFactory implements FixtureFactory<FolderObject> {
 
         private final Map<String, Fixture<FolderObject>> folders = new HashMap<String, Fixture<FolderObject>>();
 
-        public FolderFixtures( Map<String, Map<String, String>> values, FixtureLoader fixtureLoader) {
+        public FolderFixtures(Map<String, Map<String, String>> values, FixtureLoader fixtureLoader) {
             super(FolderObject.class, values, fixtureLoader);
             addTransformator(new FolderModuleTransformator(), "module");
             addTransformator(new FolderTypeTransformator(), "type");
@@ -98,10 +98,7 @@ public class FolderFixtureFactory implements FixtureFactory<FolderObject> {
             }
             final FolderObject folder = new FolderObject();
             apply(folder, values);
-            final Fixture<FolderObject> fixture = new Fixture<FolderObject>(
-                folder,
-                values.keySet().toArray(new String[values.size()]),
-                values);
+            final Fixture<FolderObject> fixture = new Fixture<FolderObject>(folder, values.keySet().toArray(new String[values.size()]), values);
             folders.put(entryName, fixture);
             return fixture;
         }

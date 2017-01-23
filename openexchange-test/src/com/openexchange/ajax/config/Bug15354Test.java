@@ -50,12 +50,17 @@
 package com.openexchange.ajax.config;
 
 import static com.openexchange.java.Autoboxing.B;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import java.util.Arrays;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 
 /**
@@ -74,11 +79,11 @@ public class Bug15354Test extends AbstractAJAXSession {
     private boolean origValue;
     private Object[] origAliases;
 
-    public Bug15354Test(String name) {
-        super(name);
+    public Bug15354Test() {
+        super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         client = getClient();
@@ -87,7 +92,7 @@ public class Bug15354Test extends AbstractAJAXSession {
         assertNotNull("Aliases are null.", origAliases);
         Arrays.sort(origAliases);
         for (int i = 0; i < writer.length; i++) {
-            writer[i] = new BetaWriter(User.User1, true);
+            writer[i] = new BetaWriter(testUser, true);
             thread[i] = new Thread(writer[i]);
         }
         for (int i = 0; i < thread.length; i++) {
@@ -96,22 +101,26 @@ public class Bug15354Test extends AbstractAJAXSession {
         }
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        for (int i = 0; i < writer.length; i++) {
-            writer[i].stop();
+        try {
+            for (int i = 0; i < writer.length; i++) {
+                writer[i].stop();
+            }
+            for (int i = 0; i < thread.length; i++) {
+                thread[i].join();
+            }
+            for (int i = 0; i < writer.length; i++) {
+                final Throwable throwable = writer[i].getThrowable();
+                assertNull("Expected no Throwable, but there is one: " + throwable, throwable);
+            }
+            client.execute(new SetRequest(Tree.Beta, B(origValue)));
+        } finally {
+            super.tearDown();
         }
-        for (int i = 0; i < thread.length; i++) {
-            thread[i].join();
-        }
-        for (int i = 0; i < writer.length; i++) {
-            final Throwable throwable = writer[i].getThrowable();
-            assertNull("Expected no Throwable, but there is one: " + throwable, throwable);
-        }
-        client.execute(new SetRequest(Tree.Beta, B(origValue)));
-        super.tearDown();
     }
 
+    @Test
     public void testAliases() throws Throwable {
         boolean stop = false;
         for (int i = 0; i < ITERATIONS && !stop; i++) {

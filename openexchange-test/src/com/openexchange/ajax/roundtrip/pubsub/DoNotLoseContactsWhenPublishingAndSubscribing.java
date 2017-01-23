@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.roundtrip.pubsub;
 
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
 import com.openexchange.ajax.publish.tests.PublicationTestManager;
 import com.openexchange.ajax.subscribe.test.SubscriptionTestManager;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
@@ -58,16 +60,12 @@ import com.openexchange.publish.Publication;
 import com.openexchange.publish.SimPublicationTargetDiscoveryService;
 import com.openexchange.subscribe.Subscription;
 
-
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class DoNotLoseContactsWhenPublishingAndSubscribing extends OXMFContactLifeCycleTest {
 
-    public DoNotLoseContactsWhenPublishingAndSubscribing(String name) {
-        super(name);
-    }
-
+    @Test
     public void testShouldNotLoseContactsWhileRoundtripping() throws Exception {
         createContact("Herbert", "Meier");
 
@@ -96,7 +94,7 @@ public class DoNotLoseContactsWhenPublishingAndSubscribing extends OXMFContactLi
 
         // refresh and check subscription
         subMgr.refreshAction(subscription.getId());
-        contacts = cMgr.allAction(subFolder.getObjectID());
+        contacts = cotm.allAction(subFolder.getObjectID());
         assertEquals("Should only contain one contact after first publication", 1, contacts.length);
 
         // publish another contact
@@ -107,7 +105,7 @@ public class DoNotLoseContactsWhenPublishingAndSubscribing extends OXMFContactLi
 
         // refresh and check subscription again
         subMgr.refreshAction(subscription.getId());
-        contacts = cMgr.allAction(subFolder.getObjectID());
+        contacts = cotm.allAction(subFolder.getObjectID());
         assertEquals("Should have two contacts after update", 2, contacts.length);
     }
 

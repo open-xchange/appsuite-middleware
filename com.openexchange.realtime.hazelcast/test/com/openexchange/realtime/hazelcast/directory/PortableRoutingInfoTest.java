@@ -87,8 +87,8 @@ public class PortableRoutingInfoTest {
         HazelcastAccess.setHazelcastInstance(hzInstance);
     }
 
-    @Test
-    public void testRoundTrip() throws Exception {
+     @Test
+     public void testRoundTrip() throws Exception {
         IMap<Integer, PortableRoutingInfo> routingMap = hzInstance.getMap(ROUTING_INFO_MAP);
         InetAddress inet4Address = InetAddress.getByName("10.0.0.0");
         InetAddress inet6Address = InetAddress.getByName("1080:0:0:0:8:800:200C:417A");

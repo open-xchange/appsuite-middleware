@@ -1,17 +1,16 @@
 
 package com.openexchange.groupware.calendar;
 
-import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-import junit.framework.TestCase;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.calendar.api.CalendarCollection;
+import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.calendar.tools.CommonAppointments;
@@ -20,12 +19,13 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
-import com.openexchange.setuptools.TestFolderToolkit;
-import com.openexchange.setuptools.TestContextToolkit;
 import com.openexchange.setuptools.TestConfig;
+import com.openexchange.setuptools.TestContextToolkit;
+import com.openexchange.setuptools.TestFolderToolkit;
 import com.openexchange.tools.events.TestEventAdmin;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
+import junit.framework.TestCase;
 
 public abstract class AbstractCalendarTest extends TestCase {
 

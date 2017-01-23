@@ -49,7 +49,12 @@
 
 package com.openexchange.ajax.folder;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Iterator;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.folder.actions.GetResponse;
@@ -72,18 +77,20 @@ public class GetMailInboxTest extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link GetMailInboxTest}.
+     * 
      * @param name name of the test.
      */
-    public GetMailInboxTest(String name) {
-        super(name);
+    public GetMailInboxTest() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
     }
 
+    @Test
     public void testGetMailInbox() throws Throwable {
         ListRequest request = new ListRequest(EnumAPI.OX_OLD, String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID));
         ListResponse response = client.execute(request);
@@ -111,8 +118,7 @@ public class GetMailInboxTest extends AbstractAJAXSession {
             }
         }
         assertNotNull("Inbox folder for default mail account not found.", inboxFolder);
-        GetRequest request2 = new GetRequest(EnumAPI.OX_OLD, inboxFolder.getFullName(), new int[] {
-            FolderObject.OBJECT_ID, FolderObject.FOLDER_NAME, FolderObject.OWN_RIGHTS, FolderObject.PERMISSIONS_BITS });
+        GetRequest request2 = new GetRequest(EnumAPI.OX_OLD, inboxFolder.getFullName(), new int[] { FolderObject.OBJECT_ID, FolderObject.FOLDER_NAME, FolderObject.OWN_RIGHTS, FolderObject.PERMISSIONS_BITS });
         GetResponse response2 = client.execute(request2);
         assertFalse("Get failed.", response2.hasError());
     }

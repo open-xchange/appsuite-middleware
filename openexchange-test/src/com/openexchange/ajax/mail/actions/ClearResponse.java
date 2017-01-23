@@ -60,8 +60,8 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
  */
 public class ClearResponse extends AbstractAJAXResponse {
 
-	protected ClearResponse(Response response) {
-		super(response);
-	}
+    protected ClearResponse(Response response) {
+        super(response);
+    }
 
 }

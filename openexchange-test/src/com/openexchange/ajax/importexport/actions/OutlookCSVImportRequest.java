@@ -66,8 +66,7 @@ public final class OutlookCSVImportRequest extends AbstractImportRequest {
         this(folderId, csv, true);
     }
 
-    public OutlookCSVImportRequest(final int folderId, final InputStream csv,
-        final boolean failOnError) {
+    public OutlookCSVImportRequest(final int folderId, final InputStream csv, final boolean failOnError) {
         super(Action.OUTLOOK_CSV, folderId, csv);
         this.failOnError = failOnError;
     }

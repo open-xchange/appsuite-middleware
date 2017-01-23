@@ -122,8 +122,8 @@ public class ContextSetConfigProviderTest {
         configProvider = new ContextSetConfigProvider(services);
     }
 
-    @Test
-    public void testPropertyBoundToUserPermission() throws Exception {
+     @Test
+     public void testPropertyBoundToUserPermission() throws Exception {
         ContextImpl contextImpl = new ContextImpl(1);
         BasicProperty property = configProvider.get(TESTPROP, contextImpl, 1);
         assertTrue(property.isDefined());

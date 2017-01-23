@@ -51,7 +51,6 @@ package com.openexchange.ajax.mail.actions;
 
 import com.openexchange.ajax.container.Response;
 
-
 /**
  * {@link ReplyAllResponse}
  *
@@ -61,6 +60,7 @@ public class ReplyAllResponse extends ReplyResponse {
 
     /**
      * Initializes a new {@link ReplyAllResponse}.
+     * 
      * @param response
      */
     public ReplyAllResponse(Response response) {

@@ -49,6 +49,10 @@
 
 package com.openexchange.ajax.infostore.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 import com.openexchange.ajax.infostore.actions.NewInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.NewInfostoreResponse;
 import com.openexchange.exception.OXException;
@@ -64,33 +68,24 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
  */
 public class CreateFileWithIllegalCharactersTest extends AbstractInfostoreTest {
 
-    private final String[] RESERVED_NAMES = new String[] {"COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9", "CON", "NUL",
-                                                          "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9", "AUX", "PRN" };
+    private final String[] RESERVED_NAMES = new String[] { "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9", "CON", "NUL", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9", "AUX", "PRN" };
 
     /**
      * Initializes a new {@link CreateFileWithIllegalCharactersTest}.
+     * 
      * @param name
      */
-    public CreateFileWithIllegalCharactersTest(String name) {
-        super(name);
+    public CreateFileWithIllegalCharactersTest() {
+        super();
     }
 
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
-
+    @Test
     public void testCreateFileWithIllegalCharacters() throws Exception {
         File file = new DefaultFile();
-        file.setFolderId(String.valueOf(client.getValues().getPrivateInfostoreFolder()));
+        file.setFolderId(String.valueOf(getClient().getValues().getPrivateInfostoreFolder()));
         file.setFileName("invalid<>:/?*\"\\|");
         NewInfostoreRequest req = new NewInfostoreRequest(file);
-        NewInfostoreResponse resp = client.execute(req);
+        NewInfostoreResponse resp = getClient().execute(req);
         assertNotNull(resp);
         assertTrue(resp.hasError());
         OXException e = resp.getException();
@@ -106,13 +101,14 @@ public class CreateFileWithIllegalCharactersTest extends AbstractInfostoreTest {
         assertTrue(e.getMessage().contains("|"));
     }
 
+    @Test
     public void testCreateFileWithReservedName() throws Exception {
         for (String name : RESERVED_NAMES) {
             File file = new DefaultFile();
-            file.setFolderId(String.valueOf(client.getValues().getPrivateInfostoreFolder()));
+            file.setFolderId(String.valueOf(getClient().getValues().getPrivateInfostoreFolder()));
             file.setFileName(name);
             NewInfostoreRequest req = new NewInfostoreRequest(file);
-            NewInfostoreResponse resp = client.execute(req);
+            NewInfostoreResponse resp = getClient().execute(req);
             assertNotNull(resp);
             assertTrue(resp.hasError());
             OXException e = resp.getException();
@@ -121,12 +117,13 @@ public class CreateFileWithIllegalCharactersTest extends AbstractInfostoreTest {
         }
     }
 
+    @Test
     public void testCreateFilenameEndsWithWithespace() throws Exception {
         File file = new DefaultFile();
-        file.setFolderId(String.valueOf(client.getValues().getPrivateInfostoreFolder()));
+        file.setFolderId(String.valueOf(getClient().getValues().getPrivateInfostoreFolder()));
         file.setFileName("test ");
         NewInfostoreRequest req = new NewInfostoreRequest(file);
-        NewInfostoreResponse resp = client.execute(req);
+        NewInfostoreResponse resp = getClient().execute(req);
         assertNotNull(resp);
         assertTrue(resp.hasError());
         OXException e = resp.getException();
@@ -134,12 +131,13 @@ public class CreateFileWithIllegalCharactersTest extends AbstractInfostoreTest {
         assertTrue(e.getMessage().contains("whitespace"));
     }
 
+    @Test
     public void testCreateFilenameEndsWithDot() throws Exception {
         File file = new DefaultFile();
-        file.setFolderId(String.valueOf(client.getValues().getPrivateInfostoreFolder()));
+        file.setFolderId(String.valueOf(getClient().getValues().getPrivateInfostoreFolder()));
         file.setFileName("test.");
         NewInfostoreRequest req = new NewInfostoreRequest(file);
-        NewInfostoreResponse resp = client.execute(req);
+        NewInfostoreResponse resp = getClient().execute(req);
         assertNotNull(resp);
         assertTrue(resp.hasError());
         OXException e = resp.getException();
@@ -147,12 +145,13 @@ public class CreateFileWithIllegalCharactersTest extends AbstractInfostoreTest {
         assertTrue(e.getMessage().contains("dot"));
     }
 
+    @Test
     public void testCreateReservedFolderName() throws Exception {
         File file = new DefaultFile();
-        file.setFolderId(String.valueOf(client.getValues().getPrivateInfostoreFolder()));
+        file.setFolderId(String.valueOf(getClient().getValues().getPrivateInfostoreFolder()));
         file.setFileName("..");
         NewInfostoreRequest req = new NewInfostoreRequest(file);
-        NewInfostoreResponse resp = client.execute(req);
+        NewInfostoreResponse resp = getClient().execute(req);
         assertNotNull(resp);
         assertTrue(resp.hasError());
         OXException e = resp.getException();

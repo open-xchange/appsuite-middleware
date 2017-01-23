@@ -46,13 +46,20 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.groupware.infostore;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.osgi.service.event.Event;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.database.provider.DBPoolProvider;
@@ -77,12 +84,11 @@ import com.openexchange.tools.events.TestEventAdmin;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionFactory;
-import junit.framework.TestCase;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class InfostoreDowngradeTest extends TestCase {
+public class InfostoreDowngradeTest {
 
     private Context ctx;
     private int folderId;
@@ -93,8 +99,8 @@ public class InfostoreDowngradeTest extends TestCase {
 
     private final List<DocumentMetadata> clean = new ArrayList<DocumentMetadata>();
 
-    @Override
-	public void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         Init.startServer();
         AJAXConfig.init();
 
@@ -116,14 +122,14 @@ public class InfostoreDowngradeTest extends TestCase {
 
     }
 
-    @Override
-	public void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         deleteAll();
         Init.stopServer();
     }
 
     private void runDelete() {
-        final UserConfiguration config = new UserConfiguration(new HashSet<String>(), userId,userConfig.getGroups() , ctx);
+        final UserConfiguration config = new UserConfiguration(new HashSet<String>(), userId, userConfig.getGroups(), ctx);
         Connection con = null;
         try {
             con = DBPool.pickupWriteable(ctx);
@@ -133,12 +139,13 @@ public class InfostoreDowngradeTest extends TestCase {
             x.printStackTrace();
             fail(x.getMessage());
         } finally {
-            if(con != null) {
+            if (con != null) {
                 DBPool.pushWrite(ctx, con);
             }
         }
     }
 
+    @Test
     public void testDowngrade() throws OXException {
         final DocumentMetadata dm = createDocumentInStandardFolder();
 
@@ -149,12 +156,11 @@ public class InfostoreDowngradeTest extends TestCase {
     }
 
     private void deleteAll() throws OXException {
-        for(final DocumentMetadata document : clean) {
+        for (final DocumentMetadata document : clean) {
             IDTuple idTuple = new IDTuple(Long.toString(document.getFolderId()), Integer.toString(document.getId()));
             database.removeDocument(Collections.singletonList(idTuple), Long.MAX_VALUE, session);
         }
     }
-
 
     private void assertDeletedEvent(final int id) throws OXException {
         Event event = TestEventAdmin.getInstance().getNewestEvent();
@@ -177,7 +183,7 @@ public class InfostoreDowngradeTest extends TestCase {
         dm.setTitle("documentInStandardFolder");
         dm.setFolderId(folderId);
         dm.setId(InfostoreFacade.NEW);
-        database.saveDocumentMetadata(dm,Long.MAX_VALUE,session);
+        database.saveDocumentMetadata(dm, Long.MAX_VALUE, session);
         clean.add(dm);
         return dm;
     }

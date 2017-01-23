@@ -49,19 +49,23 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.groupware.calendar.tools.CalendarAssertions.assertResourceParticipants;
 import static com.openexchange.groupware.calendar.tools.CalendarAssertions.assertUserParticipants;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import java.sql.SQLException;
+import org.junit.Before;
+import org.junit.Test;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 
-
 public class Node1077Test extends CalendarSqlTest {
-    
-    @Override
+
+    @Before
     public void setUp() throws Exception {
         super.setUp();
-        
+
         folders.unsharePrivateFolder(session, ctx);
         folders.unsharePrivateFolder(session2, ctx);
         folders.unsharePrivateFolder(session3, ctx);
@@ -69,14 +73,12 @@ public class Node1077Test extends CalendarSqlTest {
     }
 
     // Node 1077
+    @Test
     public void testShouldSupplyConflictingUserParticipants() throws SQLException, OXException {
         final CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(user, participant1, participant2);
         appointments.save(appointment);
         clean.add(appointment);
-        final CalendarDataObject conflictingAppointment = appointments.buildAppointmentWithUserParticipants(
-            user,
-            participant1,
-            participant3);
+        final CalendarDataObject conflictingAppointment = appointments.buildAppointmentWithUserParticipants(user, participant1, participant3);
         conflictingAppointment.setIgnoreConflicts(false);
         final CalendarDataObject[] conflicts = appointments.save(conflictingAppointment);
 
@@ -88,6 +90,7 @@ public class Node1077Test extends CalendarSqlTest {
     }
 
     // Node 1077
+    @Test
     public void testShouldSupplyConflictingResourceParticipants() throws SQLException, OXException {
         final CalendarDataObject appointment = appointments.buildAppointmentWithResourceParticipants(resource1, resource2);
         appointments.save(appointment);
@@ -104,6 +107,7 @@ public class Node1077Test extends CalendarSqlTest {
     }
 
     // Node 1077
+    @Test
     public void testShouldSupplyConflictingUserParticipantsInGroup() throws OXException {
         final CalendarDataObject appointment = appointments.buildAppointmentWithGroupParticipants(group);
         appointments.save(appointment);
@@ -122,6 +126,7 @@ public class Node1077Test extends CalendarSqlTest {
     }
 
     // Node 1077
+    @Test
     public void testShouldSupplyTitleIfPermissionsAllowIt() throws OXException {
         final CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(participant1, participant2);
         appointments.save(appointment);
@@ -137,6 +142,7 @@ public class Node1077Test extends CalendarSqlTest {
     }
 
     // Node 1077
+    @Test
     public void testShouldSuppressTitleIfPermissionsDenyIt() throws OXException, SQLException, OXException {
         final CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(participant1, participant2);
         appointments.save(appointment);

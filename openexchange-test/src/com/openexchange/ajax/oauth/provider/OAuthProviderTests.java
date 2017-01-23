@@ -53,7 +53,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
-
 /**
  * {@link OAuthProviderTests}
  *
@@ -61,13 +60,13 @@ import org.junit.runners.Suite.SuiteClasses;
  * @since v7.8.0
  */
 @RunWith(Suite.class)
-@SuiteClasses({
-    AuthorizationEndpointTest.class,
-    TokenEndpointTest.class,
-    ProtocolFlowTest.class,
-    RevokeTokensTest.class,
-    ReadFoldersTest.class,
-    JSONApiTest.class,
+@SuiteClasses({ 
+    AuthorizationEndpointTest.class, 
+    TokenEndpointTest.class, 
+    ProtocolFlowTest.class, 
+    RevokeTokensTest.class, 
+    ReadFoldersTest.class, 
+    JSONApiTest.class, 
     ClientManagementTest.class
 })
 public class OAuthProviderTests {

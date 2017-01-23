@@ -17,19 +17,21 @@
 package org.apache.tika.parser.ibooks;
 
 import java.io.InputStream;
-
-import junit.framework.TestCase;
-
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.epub.EpubParser;
 import org.apache.tika.sax.BodyContentHandler;
+import org.junit.Test;
 import org.xml.sax.ContentHandler;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
-public class iBooksParserTest extends TestCase {
-
-    public void testiBooksParser() throws Exception {
+public class iBooksParserTest {
+         @Test
+     public void testiBooksParser() throws Exception {
         InputStream input = iBooksParserTest.class.getResourceAsStream(
                 "/test-documents/testiBooks.ibooks");
         try {

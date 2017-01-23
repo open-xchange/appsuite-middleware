@@ -49,10 +49,16 @@
 
 package com.openexchange.ajax.reminder;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.TimeZone;
 import org.json.JSONException;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
@@ -78,17 +84,18 @@ import com.openexchange.groupware.reminder.ReminderObject;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class Bug16492Test extends AbstractAJAXSession {
+
     AJAXClient client;
     Appointment appointment;
     Appointment pastAppointment;
     TimeZone timezone;
     Calendar calendar;
 
-    public Bug16492Test(String name) {
-        super(name);
+    public Bug16492Test() {
+        super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         client = super.getClient();
@@ -98,6 +105,7 @@ public class Bug16492Test extends AbstractAJAXSession {
         pastAppointment = createSeriesInThePast();
     }
 
+    @Test
     public void testReminder() throws Exception {
         // Request all upcoming reminders until the end of the appointments current occurrence and look for the desired one
         Calendar cal = Calendar.getInstance(timezone);
@@ -124,6 +132,7 @@ public class Bug16492Test extends AbstractAJAXSession {
         assertNotNull("No reminder was found.", reminder);
     }
 
+    @Test
     public void testAlarmForReminderInThePast() throws Exception {
         GetRequest getApp = new GetRequest(pastAppointment);
         GetResponse getAppResp = client.execute(getApp);
@@ -132,13 +141,16 @@ public class Bug16492Test extends AbstractAJAXSession {
         assertFalse("Series in the past contains alarm.", app.containsAlarm());
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        Appointment toDelete = client.execute(new GetRequest(appointment, false)).getAppointment(timezone);
-        client.execute(new DeleteRequest(toDelete, false));
-        toDelete = client.execute(new GetRequest(pastAppointment, false)).getAppointment(timezone);
-        client.execute(new DeleteRequest(toDelete, false));
-        super.tearDown();
+        try {
+            Appointment toDelete = client.execute(new GetRequest(appointment, false)).getAppointment(timezone);
+            client.execute(new DeleteRequest(toDelete, false));
+            toDelete = client.execute(new GetRequest(pastAppointment, false)).getAppointment(timezone);
+            client.execute(new DeleteRequest(toDelete, false));
+        } finally {
+            super.tearDown();
+        }
     }
 
     private Appointment createSeriesInThePast() throws Exception {
@@ -217,7 +229,5 @@ public class Bug16492Test extends AbstractAJAXSession {
 
         return appointment;
     }
-
-
 
 }

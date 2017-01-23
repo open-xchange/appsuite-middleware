@@ -59,7 +59,6 @@ import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.writer.ResponseWriter;
 
-
 /**
  * {@link UpdatesInfostoreParser}
  *
@@ -80,9 +79,9 @@ public class UpdatesInfostoreParser extends AbstractAJAXParser<UpdatesInfostoreR
         for (int i = 0; i < data.length(); i++) {
             Object obj = data.get(i);
             if (obj instanceof String) {
-                deleted.add((String)obj);
+                deleted.add((String) obj);
             } else {
-                newAndModified.add((JSONArray)obj);
+                newAndModified.add((JSONArray) obj);
             }
         }
 

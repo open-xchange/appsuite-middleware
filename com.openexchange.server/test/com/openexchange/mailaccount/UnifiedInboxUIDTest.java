@@ -52,7 +52,10 @@ package com.openexchange.mailaccount;
 import org.junit.Assert;
 import org.junit.Test;
 import com.openexchange.mail.MailPath;
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * {@link UnifiedInboxUIDTest}
@@ -60,8 +63,7 @@ import junit.framework.TestCase;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public class UnifiedInboxUIDTest extends TestCase {
-
+public class UnifiedInboxUIDTest {
     /**
      * Initializes a new {@link UnifiedInboxUIDTest}.
      */
@@ -69,8 +71,8 @@ public class UnifiedInboxUIDTest extends TestCase {
         super();
     }
 
-    @Test
-    public void testExtractPossibleNestedMailPath() {
+     @Test
+     public void testExtractPossibleNestedMailPath() {
         String s = "default371/INBOX/%64%65%66%61ult0%2FIN%42OX%2F396847";
         MailPath path = UnifiedInboxUID.extractPossibleNestedMailPath(s);
         Assert.assertNotNull(path);

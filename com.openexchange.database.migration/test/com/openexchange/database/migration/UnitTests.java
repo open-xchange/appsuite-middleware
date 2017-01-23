@@ -49,10 +49,10 @@
 
 package com.openexchange.database.migration;
 
-import liquibase.precondition.ext.ColumnSizePreconditionTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import liquibase.precondition.ext.ColumnSizePreconditionTest;
 
 /**
  * Unit tests for the bundle com.openexchange.database.migration

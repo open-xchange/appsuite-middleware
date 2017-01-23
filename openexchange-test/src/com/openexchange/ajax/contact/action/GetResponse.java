@@ -100,7 +100,6 @@ public class GetResponse extends AbstractAJAXResponse {
         this.contactObj = contactObj;
     }
 
-
     /**
      * Gets the imageUrl
      *

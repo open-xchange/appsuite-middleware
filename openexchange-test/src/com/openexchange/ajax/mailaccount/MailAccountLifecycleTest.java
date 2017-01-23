@@ -49,10 +49,16 @@
 
 package com.openexchange.ajax.mailaccount;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.EnumSet;
 import java.util.List;
 import org.json.JSONException;
+import org.junit.After;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.mailaccount.actions.MailAccountAllRequest;
 import com.openexchange.ajax.mailaccount.actions.MailAccountAllResponse;
@@ -80,18 +86,22 @@ public class MailAccountLifecycleTest extends AbstractMailAccountTest {
      *
      * @param name
      */
-    public MailAccountLifecycleTest(final String name) {
-        super(name);
+    public MailAccountLifecycleTest() {
+        super();
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        if (null != mailAccountDescription && 0 != mailAccountDescription.getId()) {
-            deleteMailAccount();
+        try {
+            if (null != mailAccountDescription && 0 != mailAccountDescription.getId()) {
+                deleteMailAccount();
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
+    @Test
     public void testLifeCycle() throws OXException, IOException, SAXException, JSONException, OXException {
 
         createMailAccount();
@@ -109,17 +119,13 @@ public class MailAccountLifecycleTest extends AbstractMailAccountTest {
     private void updateMailAccount() throws OXException, IOException, JSONException {
         mailAccountDescription.setName("Other Name");
         mailAccountDescription.setLogin(MailConfig.getProperty(MailConfig.Property.LOGIN2));
-        getClient().execute(
-            new MailAccountUpdateRequest(mailAccountDescription, EnumSet.of(
-                Attribute.NAME_LITERAL,
-                Attribute.LOGIN_LITERAL)));
+        getClient().execute(new MailAccountUpdateRequest(mailAccountDescription, EnumSet.of(Attribute.NAME_LITERAL, Attribute.LOGIN_LITERAL)));
         // *shrugs* don't need the response
     }
 
     private void readByList() throws OXException, IOException, JSONException, OXException {
 
-        final MailAccountListResponse response = getClient().execute(
-            new MailAccountListRequest(new int[] { mailAccountDescription.getId() }, allFields()));
+        final MailAccountListResponse response = getClient().execute(new MailAccountListRequest(new int[] { mailAccountDescription.getId() }, allFields()));
 
         final List<MailAccountDescription> descriptions = response.getDescriptions();
         assertFalse(descriptions.isEmpty());

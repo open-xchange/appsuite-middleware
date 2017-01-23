@@ -49,7 +49,10 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
@@ -58,7 +61,6 @@ import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.tools.iterator.ArrayIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 
-
 /**
  * {@link RevertTest}
  *
@@ -66,6 +68,7 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public class RevertTest extends FileActionTest {
 
+    @Test
     public void testMissingParameters() {
         try {
             action.handle(request());
@@ -75,6 +78,7 @@ public class RevertTest extends FileActionTest {
         }
     }
 
+    @Test
     public void testAction() throws OXException {
         request().param("id", "12");
 
@@ -91,7 +95,7 @@ public class RevertTest extends FileActionTest {
 
             @Override
             public SearchIterator<File> results() throws OXException {
-                return new ArrayIterator<File>(new File[]{f1, f2, f3});
+                return new ArrayIterator<File>(new File[] { f1, f2, f3 });
             }
 
             @Override
@@ -101,12 +105,11 @@ public class RevertTest extends FileActionTest {
 
         });
 
-        fileAccess().expectCall("removeVersion", "12", new int[]{3,4}).andReturn(new int[0]);
+        fileAccess().expectCall("removeVersion", "12", new int[] { 3, 4 }).andReturn(new int[0]);
 
         DefaultFile updated = new DefaultFile();
         updated.setLastModified(new Date());
         fileAccess().expectCall("getFileMetadata", "12", FileStorageFileAccess.CURRENT_VERSION).andReturn(updated);
-
 
         perform();
 

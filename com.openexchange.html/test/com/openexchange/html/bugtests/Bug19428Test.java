@@ -60,8 +60,8 @@ import com.openexchange.html.AbstractSanitizing;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class Bug19428Test extends AbstractSanitizing {
-    @Test
-    public void testGetConformHtml() {
+     @Test
+     public void testGetConformHtml() {
 
         String content = "<html>\n" +
             "<head>\n" +

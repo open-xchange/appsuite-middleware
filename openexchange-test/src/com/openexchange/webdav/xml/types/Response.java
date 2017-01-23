@@ -37,20 +37,20 @@
 
 package com.openexchange.webdav.xml.types;
 
-
 /**
  * Response
+ * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 public class Response {
 
     private Object object = null;
 
-	private int status = 0;
+    private int status = 0;
 
-	private String errorMessage = null;
+    private String errorMessage = null;
 
-	public Response() {
+    public Response() {
         super();
     }
 
@@ -68,7 +68,7 @@ public class Response {
         return errorMessage;
     }
 
-	/**
+    /**
      * @return Returns the status.
      */
     public int getStatus() {

@@ -80,7 +80,6 @@ import org.apache.http.message.BasicHttpEntityEnclosingRequest;
 import org.apache.http.message.BasicHttpRequest;
 import org.apache.http.message.BasicRequestLine;
 
-
 /**
  * {@link RedirectEndpoint}
  *
@@ -140,13 +139,13 @@ public class RedirectEndpoint extends Thread {
                 BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, "ASCII"));
                 String line = br.readLine();
                 if (line == null) {
-                    sendBadRequest(outputStream );
+                    sendBadRequest(outputStream);
                     continue;
                 }
 
                 Matcher rlMatcher = REQUEST_LINE.matcher(line);
                 if (!rlMatcher.matches()) {
-                    sendBadRequest(outputStream );
+                    sendBadRequest(outputStream);
                     continue;
                 }
 

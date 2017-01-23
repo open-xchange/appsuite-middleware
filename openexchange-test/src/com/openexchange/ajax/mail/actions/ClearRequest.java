@@ -63,31 +63,31 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  */
 public class ClearRequest extends AbstractMailRequest<ClearResponse> {
 
-	private final String[] folderIds;
-	private boolean hardDelete = false;
-	private boolean failOnError = true;
+    private final String[] folderIds;
+    private boolean hardDelete = false;
+    private boolean failOnError = true;
 
-	public ClearRequest(final String folderId){
-		this.folderIds = new String [] {folderId};
-	}
+    public ClearRequest(final String folderId) {
+        this.folderIds = new String[] { folderId };
+    }
 
-	public ClearRequest(final String[] folderIds){
-		this.folderIds = folderIds;
-	}
+    public ClearRequest(final String[] folderIds) {
+        this.folderIds = folderIds;
+    }
 
-	public ClearRequest(final String[] folderIds, final boolean failOnError){
-		this.folderIds = folderIds;
-		this.failOnError = failOnError;
-	}
+    public ClearRequest(final String[] folderIds, final boolean failOnError) {
+        this.folderIds = folderIds;
+        this.failOnError = failOnError;
+    }
 
-	@Override
+    @Override
     public Object getBody() throws JSONException {
-		final JSONArray array = new JSONArray();
+        final JSONArray array = new JSONArray();
         for (final String folderId : folderIds) {
             array.put(folderId);
         }
         return array;
-	}
+    }
 
     /**
      * Sets the hard delete flag
@@ -99,27 +99,25 @@ public class ClearRequest extends AbstractMailRequest<ClearResponse> {
         return this;
     }
 
-	@Override
+    @Override
     public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
-		return Method.PUT;
-	}
+        return Method.PUT;
+    }
 
-	@Override
+    @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
-		return new Parameter[] {
-	            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_CLEAR),
-	            new Parameter(AJAXServlet.PARAMETER_HARDDELETE, hardDelete) };
-	}
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_CLEAR), new Parameter(AJAXServlet.PARAMETER_HARDDELETE, hardDelete) };
+    }
 
-	@Override
+    @Override
     public AbstractAJAXParser<ClearResponse> getParser() {
-		return new AbstractAJAXParser<ClearResponse>(failOnError) {
+        return new AbstractAJAXParser<ClearResponse>(failOnError) {
 
             @Override
             protected ClearResponse createResponse(final Response response) throws JSONException {
                 return new ClearResponse(response);
             }
         };
-	}
+    }
 
 }

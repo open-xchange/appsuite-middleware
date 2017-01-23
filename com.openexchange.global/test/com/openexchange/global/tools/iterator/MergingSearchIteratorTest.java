@@ -50,20 +50,24 @@
 package com.openexchange.global.tools.iterator;
 
 import java.util.Comparator;
-import junit.framework.TestCase;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.iterator.ArrayIterator;
 import com.openexchange.tools.iterator.MergingSearchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * {@link MergingSearchIteratorTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class MergingSearchIteratorTest extends TestCase {
-
-    public void testMerge() throws OXException {
+public class MergingSearchIteratorTest {
+         @Test
+     public void testMerge() throws OXException {
         final Integer[] a = new Integer[] { 0, 3, 4, 7, 9, 12, 13, 16 };
         final Integer[] b = new Integer[] { 1, 2, 5, 10, 18 };
         final Integer[] c = new Integer[] { 1, 6, 8, 11, 14, 20 };
@@ -86,7 +90,8 @@ public class MergingSearchIteratorTest extends TestCase {
         assertFalse(complete.hasNext());
     }
 
-    public void testMergeEmptyWithFull() throws OXException {
+         @Test
+     public void testMergeEmptyWithFull() throws OXException {
         final Integer[] a = new Integer[0];
         final Integer[] b = new Integer[] { 1, 2, 5, 10, 18 };
 

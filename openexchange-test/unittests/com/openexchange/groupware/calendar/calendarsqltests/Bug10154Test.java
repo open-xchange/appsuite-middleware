@@ -49,20 +49,21 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.groupware.calendar.tools.CalendarAssertions.assertUserParticipants;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+import org.junit.Test;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.setuptools.TestContextToolkit;
 
-
 public class Bug10154Test extends CalendarSqlTest {
- // Bug 10154
+    // Bug 10154
 
+    @Test
     public void testShouldKeepParticipantsInSharedFolder() throws OXException, SQLException {
         folders.sharePrivateFolder(session, ctx, secondUserId);
         try {

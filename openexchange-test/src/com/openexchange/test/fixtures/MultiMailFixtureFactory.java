@@ -62,19 +62,20 @@ public class MultiMailFixtureFactory implements FixtureFactory<CustomMailAccount
 
     private final FixtureLoader fixtureLoader;
 
-	public MultiMailFixtureFactory(FixtureLoader fixtureLoader) {
-		super();
-		this.fixtureLoader = fixtureLoader;
-	}
-
-	@Override
-    public Fixtures<CustomMailAccount> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
-		return new MultiMailFixtures(fixtureName, entries, fixtureLoader);
+    public MultiMailFixtureFactory(FixtureLoader fixtureLoader) {
+        super();
+        this.fixtureLoader = fixtureLoader;
     }
 
-    private class MultiMailFixtures  extends DefaultFixtures<CustomMailAccount> implements Fixtures<CustomMailAccount>{
+    @Override
+    public Fixtures<CustomMailAccount> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
+        return new MultiMailFixtures(fixtureName, entries, fixtureLoader);
+    }
+
+    private class MultiMailFixtures extends DefaultFixtures<CustomMailAccount> implements Fixtures<CustomMailAccount> {
+
         private final Map<String, Map<String, String>> entries;
-        private final Map<String, Fixture<CustomMailAccount>>  mailaccounts = new HashMap<String,Fixture<CustomMailAccount>>();
+        private final Map<String, Fixture<CustomMailAccount>> mailaccounts = new HashMap<String, Fixture<CustomMailAccount>>();
 
         public MultiMailFixtures(final String fixtureName, final Map<String, Map<String, String>> entries, FixtureLoader fixtureLoader) {
             super(CustomMailAccount.class, entries, fixtureLoader);

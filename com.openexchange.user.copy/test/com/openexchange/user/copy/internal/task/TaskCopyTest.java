@@ -115,14 +115,16 @@ public class TaskCopyTest extends AbstractUserCopyTest {
         dstUser = getDestinationUserId();
     }
     
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown()
+ throws Exception {
         DBUtils.autocommit(dstCon);
         deleteAllFromTablesForCid(dstCtx.getContextId(), "cid", dstCon, "task", "task_eparticipant", "task_folder", "task_participant", "task_removedparticipant");
         super.tearDown();
     }
 
-    public void testTaskCopy() throws Exception {
+         @Test
+     public void testTaskCopy() throws Exception {
         final List<Task> srcTasks = loadTasksFromDB(srcCtx, srcCon, srcUser);
         final TaskCopyTask task = new TaskCopyTask(userService);
         IntegerMapping mapping = null;

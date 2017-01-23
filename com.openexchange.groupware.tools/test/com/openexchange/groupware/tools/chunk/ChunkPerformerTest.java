@@ -49,7 +49,7 @@
 
 package com.openexchange.groupware.tools.chunk;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -67,8 +67,8 @@ public class ChunkPerformerTest {
 
     private static final int CHUNK_SIZE = 3;
 
-    @Test
-    public void testWithoutInitialOffset() throws OXException {
+     @Test
+     public void testWithoutInitialOffset() throws OXException {
         final List<String> bunchOfStrings = prepareStrings();
         final List<String> results = new ArrayList<String>();
         final Incrementable i = new Incrementable();
@@ -115,8 +115,8 @@ public class ChunkPerformerTest {
         assertEquals(bunchOfStrings.size(), found);
     }
 
-    @Test
-    public void testWithoutInitialOffsetForList() throws OXException {
+     @Test
+     public void testWithoutInitialOffsetForList() throws OXException {
         final List<String> bunchOfStrings = prepareStrings();
         final List<String> results = new ArrayList<String>();
         final Incrementable i = new Incrementable();
@@ -145,8 +145,8 @@ public class ChunkPerformerTest {
         assertEquals(bunchOfStrings.size(), found);
     }
 
-    @Test
-    public void testWithoutInitialOffsetForArray() throws OXException {
+     @Test
+     public void testWithoutInitialOffsetForArray() throws OXException {
         final List<String> tmp = prepareStrings();
         final String[] bunchOfStrings = tmp.toArray(new String[tmp.size()]);
         final List<String> results = new ArrayList<String>();
@@ -179,8 +179,8 @@ public class ChunkPerformerTest {
 
 
 
-    @Test
-    public void testWithInitialOffset() throws OXException {
+     @Test
+     public void testWithInitialOffset() throws OXException {
         final List<String> bunchOfStrings = prepareStrings();
         final List<String> results = new ArrayList<String>();
         List<String> toCompare = bunchOfStrings.subList(1, bunchOfStrings.size());
@@ -228,8 +228,8 @@ public class ChunkPerformerTest {
         assertEquals(toCompare.size() - 1, found);
     }
 
-    @Test
-    public void testWithInitialOffsetForList() throws OXException {
+     @Test
+     public void testWithInitialOffsetForList() throws OXException {
         final List<String> bunchOfStrings = prepareStrings();
         final List<String> results = new ArrayList<String>();
         List<String> toCompare = bunchOfStrings.subList(1, bunchOfStrings.size());
@@ -260,8 +260,8 @@ public class ChunkPerformerTest {
         assertEquals(toCompare.size() - 1, found);
     }
 
-    @Test
-    public void testWithInitialOffsetForArray() throws OXException {
+     @Test
+     public void testWithInitialOffsetForArray() throws OXException {
         final List<String> tmp = prepareStrings();
         final String[] bunchOfStrings = tmp.toArray(new String[tmp.size()]);
         final List<String> results = new ArrayList<String>();
@@ -293,8 +293,8 @@ public class ChunkPerformerTest {
         assertEquals(toCompare.length - 1, found);
     }
 
-    @Test
-    public void testWithChunkSize0() throws OXException {
+     @Test
+     public void testWithChunkSize0() throws OXException {
         final List<String> bunchOfStrings = prepareStrings();
         final List<String> results = new ArrayList<String>();
         final Incrementable i = new Incrementable();
@@ -341,8 +341,8 @@ public class ChunkPerformerTest {
         assertEquals(bunchOfStrings.size(), found);
     }
 
-    @Test
-    public void testWithChunkSize0ForList() throws OXException {
+     @Test
+     public void testWithChunkSize0ForList() throws OXException {
         final List<String> tmp = prepareStrings();
         final String[] bunchOfStrings = tmp.toArray(new String[tmp.size()]);
         final List<String> results = new ArrayList<String>();
@@ -373,8 +373,8 @@ public class ChunkPerformerTest {
         assertEquals(bunchOfStrings.length, found);
     }
 
-    @Test
-    public void testWithChunkSize0ForArray() throws OXException {
+     @Test
+     public void testWithChunkSize0ForArray() throws OXException {
         final List<String> bunchOfStrings = prepareStrings();
         final List<String> results = new ArrayList<String>();
         final Incrementable i = new Incrementable();

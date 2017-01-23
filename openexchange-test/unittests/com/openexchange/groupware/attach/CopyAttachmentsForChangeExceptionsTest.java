@@ -46,16 +46,22 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.groupware.attach;
 
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Init;
@@ -80,7 +86,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class CopyAttachmentsForChangeExceptionsTest extends TestCase {
+public class CopyAttachmentsForChangeExceptionsTest {
 
     private CalendarListener listener;
     private String user;
@@ -93,12 +99,11 @@ public class CopyAttachmentsForChangeExceptionsTest extends TestCase {
     private User userObject;
     private UserConfiguration userConfig;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         Init.startServer();
         attachments = new AttachmentBaseImpl(new DBPoolProvider());
         listener = new CopyAttachmentsForChangeExceptions(attachments);
-
 
         final TestConfig config = new TestConfig();
 
@@ -107,7 +112,6 @@ public class CopyAttachmentsForChangeExceptionsTest extends TestCase {
         ctx = tools.getDefaultContext();
 
         appointments = new CommonAppointments(ctx, user);
-
 
         userId = tools.resolveUser(user, ctx);
 
@@ -118,7 +122,7 @@ public class CopyAttachmentsForChangeExceptionsTest extends TestCase {
 
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         appointments.removeAll(user, clean);
         Init.stopServer();
@@ -126,6 +130,7 @@ public class CopyAttachmentsForChangeExceptionsTest extends TestCase {
 
     // Bug 12377
 
+    @Test
     public void testShouldCopyAttachments() throws OXException, IOException {
         final CalendarDataObject master = appointments.buildBasicAppointment(D("10/02/2008 10:00"), D("10/02/2008 12:00"));
         master.setRecurrenceType(CalendarDataObject.DAILY);
@@ -150,7 +155,7 @@ public class CopyAttachmentsForChangeExceptionsTest extends TestCase {
 
         attachments.attachToObject(attachment, new ByteArrayInputStream("Hallo".getBytes(com.openexchange.java.Charsets.UTF_8)), session, ctx, userObject, userConfig);
 
-        listener.createdChangeExceptionInRecurringAppointment(master, exception,0, ServerSessionAdapter.valueOf(session));
+        listener.createdChangeExceptionInRecurringAppointment(master, exception, 0, ServerSessionAdapter.valueOf(session));
 
         TimedResult result = attachments.getAttachments(session, exception.getParentFolderID(), exception.getObjectID(), Types.APPOINTMENT, ctx, userObject, userConfig);
 
@@ -166,7 +171,7 @@ public class CopyAttachmentsForChangeExceptionsTest extends TestCase {
         InputStream is = attachments.getAttachedFile(session, exception.getParentFolderID(), exception.getObjectID(), Types.APPOINTMENT, newAttachment.getId(), ctx, userObject, userConfig);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         int i = 0;
-        while((i = is.read()) != -1) {
+        while ((i = is.read()) != -1) {
             out.write(i);
         }
         String data = out.toString("UTF-8");

@@ -49,6 +49,10 @@
 
 package com.openexchange.ajax.task;
 
+import static org.junit.Assert.assertEquals;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TestTask;
@@ -65,28 +69,27 @@ public class Bug10941Test extends AbstractAJAXSession {
 
     private TestTask task;
 
-    public Bug10941Test(String name) {
-        super(name);
+    public Bug10941Test() {
+        super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         taskManager = new TaskTestManager(getClient());
-        task = taskManager.newTask(getName() + " Task")
-            .startsTomorrow()
-            .endsTheFollowingDay();
+        task = taskManager.newTask(this.getClass().getCanonicalName() + " Task").startsTomorrow().endsTheFollowingDay();
 
         taskManager.insertTaskOnServer(task);
     }
 
+    @Test
     public void testRemoveStartAndEndDateOnUpdate() {
-        TestTask update = new TestTask().relatedTo( task );
+        TestTask update = new TestTask().relatedTo(task);
 
         update.setStartDate(null);
         update.setEndDate(null);
 
-        taskManager.updateTaskOnServer( update );
+        taskManager.updateTaskOnServer(update);
 
         Task saved = taskManager.getTaskFromServer(update);
 
@@ -94,11 +97,13 @@ public class Bug10941Test extends AbstractAJAXSession {
         assertEquals(null, saved.getEndDate());
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        taskManager.cleanUp();
-        super.tearDown();
+        try {
+            taskManager.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
-
 
 }

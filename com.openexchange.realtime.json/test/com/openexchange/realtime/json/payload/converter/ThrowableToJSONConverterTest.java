@@ -58,8 +58,6 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.json.payload.converter.StackTraceElementToJSONConverter;
-import com.openexchange.realtime.json.payload.converter.ThrowableToJSONConverter;
 import com.openexchange.realtime.payload.converter.sim.SimpleConverterSim;
 
 
@@ -82,13 +80,13 @@ public class ThrowableToJSONConverterTest {
         throwable = new Throwable("First throwable");
     }
 
-    @Test
-    public void testGetInputFormat() {
+     @Test
+     public void testGetInputFormat() {
         assertEquals(Throwable.class.getSimpleName(), converter.getInputFormat());
     }
     
-    @Test
-    public void testConvert() throws OXException, JSONException {
+     @Test
+     public void testConvert() throws OXException, JSONException {
         Object object = converter.convert(throwable, null, simpleConverter);
         assertNotNull(object);
         assertTrue(object instanceof JSONObject);
@@ -102,8 +100,8 @@ public class ThrowableToJSONConverterTest {
         assertEquals("setUp", stackTraceElement.getString("methodName"));
     }
 
-    @Test
-    public void testGetOutputFormat() {
+     @Test
+     public void testGetOutputFormat() {
         assertEquals("json", converter.getOutputFormat());
     }
 

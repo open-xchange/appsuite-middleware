@@ -49,6 +49,8 @@
 
 package com.openexchange.dav.carddav.tests;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.MultiStatusResponse;
 import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
@@ -57,8 +59,6 @@ import org.junit.Test;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.carddav.CardDAVTest;
 import com.openexchange.exception.OXException;
-
-import static org.junit.Assert.*;
 
 /**
  * {@link AddressbookPropertiesTest}
@@ -70,17 +70,18 @@ import static org.junit.Assert.*;
  */
 public class AddressbookPropertiesTest extends CardDAVTest {
 
-	public AddressbookPropertiesTest() throws OXException {
-		super();
-	}
+    public AddressbookPropertiesTest() throws OXException {
+        super();
+    }
 
-	/**
-	 * Checks if the CardDAV server reports some information about the address book.
-	 * @throws Exception
-	 */
-	@Test
-	public void testDiscoverAddressbookProperties() throws Exception {
-		final DavPropertyNameSet props = new DavPropertyNameSet();
+    /**
+     * Checks if the CardDAV server reports some information about the address book.
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void testDiscoverAddressbookProperties() throws Exception {
+        final DavPropertyNameSet props = new DavPropertyNameSet();
         props.add(PropertyNames.ADD_MEMBER);
         props.add(PropertyNames.BULK_REQUESTS);
         props.add(PropertyNames.CURRENT_USER_PRIVILEGE_SET);
@@ -96,11 +97,10 @@ public class AddressbookPropertiesTest extends CardDAVTest {
         props.add(PropertyNames.RESOURCETYPE);
         props.add(PropertyNames.SUPPORTED_REPORT_SET);
         props.add(PropertyNames.SYNC_TOKEN);
-        final PropFindMethod propFind = new PropFindMethod(
-        		super.getWebDAVClient().getBaseURI() + "/carddav/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_1);
+        final PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + "/carddav/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_1);
         final MultiStatusResponse[] responses = super.getWebDAVClient().doPropFind(propFind);
         assertNotNull("got no response", responses);
         assertTrue("got no responses", 0 < responses.length);
 
-	}
+    }
 }

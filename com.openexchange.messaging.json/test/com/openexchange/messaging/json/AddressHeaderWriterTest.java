@@ -53,24 +53,28 @@ import static com.openexchange.json.JSONAssertion.assertValidates;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import junit.framework.TestCase;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.json.JSONAssertion;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.StringMessageHeader;
 import com.openexchange.messaging.generic.internet.MimeAddressMessagingHeader;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * {@link AddressHeaderWriterTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class AddressHeaderWriterTest extends TestCase {
-
-    public void testFeelsResponsible() {
+public class AddressHeaderWriterTest {
+         @Test
+     public void testFeelsResponsible() {
         final AddressHeaderWriter writer = new AddressHeaderWriter();
 
         final List<String> headerNames = Arrays.asList(
@@ -94,7 +98,8 @@ public class AddressHeaderWriterTest extends TestCase {
 
     }
 
-    public void testWrite() throws OXException, JSONException {
+         @Test
+     public void testWrite() throws OXException, JSONException {
         final MimeAddressMessagingHeader header = MimeAddressMessagingHeader.valueOfPlain("To", "Clark Kent", "clark.kent@dailyplanet.com");
 
         final AddressHeaderWriter writer = new AddressHeaderWriter();
@@ -111,7 +116,8 @@ public class AddressHeaderWriterTest extends TestCase {
         assertValidates(assertion, headerJSON.getJSONObject(0));
     }
 
-    public void testWriteFromAsSingleObject() throws OXException, JSONException {
+         @Test
+     public void testWriteFromAsSingleObject() throws OXException, JSONException {
         final MimeAddressMessagingHeader header = MimeAddressMessagingHeader.valueOfPlain("From", "Clark Kent", "clark.kent@dailyplanet.com");
 
         final AddressHeaderWriter writer = new AddressHeaderWriter();
@@ -125,7 +131,8 @@ public class AddressHeaderWriterTest extends TestCase {
         assertValidates(assertion, headerJSON);
     }
 
-    public void testWriteBasic() throws OXException, JSONException {
+         @Test
+     public void testWriteBasic() throws OXException, JSONException {
         final MessagingHeader header = new StringMessageHeader("To", "Clark Kent <clark.kent@dailyplanet.com>");
 
         final AddressHeaderWriter writer = new AddressHeaderWriter();

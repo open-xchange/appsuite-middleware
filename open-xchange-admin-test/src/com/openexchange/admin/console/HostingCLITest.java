@@ -60,8 +60,8 @@ import com.openexchange.admin.tools.ShellExecutor.ArrayOutput;
 public class HostingCLITest extends AbstractRMITest {
 
     @After
-    public void teardown() throws Exception {
-        super.tearDown();
+    public void tearDown()
+ throws Exception {
         final ShellExecutor se = new ShellExecutor();
         final ArrayOutput deleteresult = se.executeprocargs(new String[] {
             prefix + "deletecontext", "-c", ctxid, "-A", OXADMINMASTER, "-P",
@@ -69,8 +69,8 @@ public class HostingCLITest extends AbstractRMITest {
         assertTrue("Deleting of context failed", deleteresult.exitstatus==0);
     }
 
-    @Test
-    public void testall() throws IOException, InterruptedException {
+     @Test
+     public void testall() throws IOException, InterruptedException {
         final ShellExecutor se = new ShellExecutor();
         final ArrayOutput result = se.executeprocargs(new String[] {
             prefix + "createcontext", "-c", ctxid, "-A", OXADMINMASTER, "-P",

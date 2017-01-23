@@ -34,8 +34,8 @@ public class TotalTest {
     /**
      * Test the initial addition of a context to an empty report
      */
-    @Test
-    public void testAddFirstContextToReport() {
+     @Test
+     public void testAddFirstContextToReport() {
         total.merge(contextReport, report);
         assertEquals(new Long(8), report.get(Report.TOTAL, Report.USERS, Long.class));
         assertEquals(new Long(3), report.get(Report.TOTAL, Report.GUESTS, Long.class));
@@ -52,8 +52,8 @@ public class TotalTest {
      * Test the correct addition of a context to an already filled report. All mathematical operations
      * in the method are tested.
      */
-    @Test
-    public void testAddContextToReport() {
+     @Test
+     public void testAddContextToReport() {
         fillReport();
         total.merge(contextReport, report);
         assertEquals(new Long(88), report.get(Report.TOTAL, Report.USERS, Long.class));

@@ -53,12 +53,12 @@ import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
-public class VCardExportParser extends AbstractAJAXParser<VCardExportResponse>{
+public class VCardExportParser extends AbstractAJAXParser<VCardExportResponse> {
 
-	   /**
+    /**
      * @param failOnError
      */
-	VCardExportParser(final boolean failOnError) {
+    VCardExportParser(final boolean failOnError) {
         super(failOnError);
     }
 

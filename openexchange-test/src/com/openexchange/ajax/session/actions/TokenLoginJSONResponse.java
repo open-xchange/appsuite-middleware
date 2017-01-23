@@ -61,60 +61,60 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
  */
 public final class TokenLoginJSONResponse extends AbstractAJAXResponse {
 
-//    private final String path;
-//    private final String httpSessionId;
-//    private final String clientToken;
-//    private final String serverToken;
-//    private final String login;
-//    private final int userId;
-//    private final String language;
-//    private final boolean store;
+    //    private final String path;
+    //    private final String httpSessionId;
+    //    private final String clientToken;
+    //    private final String serverToken;
+    //    private final String login;
+    //    private final int userId;
+    //    private final String language;
+    //    private final boolean store;
 
     TokenLoginJSONResponse(Response response) {
         super(response);
     }
 
-//    TokenLoginJSONResponse(String path, String httpSessionId, String clientToken, String serverToken, String login, int userId, String language, boolean store) {
-//        super(null);
-//        this.path = path;
-//        this.httpSessionId = httpSessionId;
-//        this.clientToken = clientToken;
-//        this.serverToken = serverToken;
-//        this.login = login;
-//        this.userId = userId;
-//        this.language = language;
-//        this.store = store;
-//    }
-//
-//    public String getPath() {
-//        return path;
-//    }
-//
-//    public String getHttpSessionId() {
-//        return httpSessionId;
-//    }
-//
-//    public String getClientToken() {
-//        return clientToken;
-//    }
-//
-//    public String getServerToken() {
-//        return serverToken;
-//    }
-//
-//    public String getLogin() {
-//        return login;
-//    }
-//
-//    public int getUserId() {
-//        return userId;
-//    }
-//
-//    public String getLanguage() {
-//        return language;
-//    }
-//
-//    public boolean isStore() {
-//        return store;
-//    }
+    //    TokenLoginJSONResponse(String path, String httpSessionId, String clientToken, String serverToken, String login, int userId, String language, boolean store) {
+    //        super(null);
+    //        this.path = path;
+    //        this.httpSessionId = httpSessionId;
+    //        this.clientToken = clientToken;
+    //        this.serverToken = serverToken;
+    //        this.login = login;
+    //        this.userId = userId;
+    //        this.language = language;
+    //        this.store = store;
+    //    }
+    //
+    //    public String getPath() {
+    //        return path;
+    //    }
+    //
+    //    public String getHttpSessionId() {
+    //        return httpSessionId;
+    //    }
+    //
+    //    public String getClientToken() {
+    //        return clientToken;
+    //    }
+    //
+    //    public String getServerToken() {
+    //        return serverToken;
+    //    }
+    //
+    //    public String getLogin() {
+    //        return login;
+    //    }
+    //
+    //    public int getUserId() {
+    //        return userId;
+    //    }
+    //
+    //    public String getLanguage() {
+    //        return language;
+    //    }
+    //
+    //    public boolean isStore() {
+    //        return store;
+    //    }
 }

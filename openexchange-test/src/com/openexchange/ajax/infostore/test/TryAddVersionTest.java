@@ -49,9 +49,16 @@
 
 package com.openexchange.ajax.infostore.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.infostore.actions.DeleteInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.GetInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.GetInfostoreResponse;
@@ -70,66 +77,71 @@ import com.openexchange.file.storage.File;
 public class TryAddVersionTest extends AbstractInfostoreTest {
 
     private List<String> ids;
-    private final String[] COLUMNS = new String[] { "700", "702", "710", "711" };
+    private final int[] COLUMNS = new int[] { 700, 702, 710, 711 };
     private final String filename = "bug.eml";
 
-    public TryAddVersionTest(String name) {
-        super(name);
+    public TryAddVersionTest() {
+        super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         ids = new ArrayList<>(2);
         File file = new DefaultFile();
-        file.setFolderId(String.valueOf(client.getValues().getPrivateInfostoreFolder()));
+        file.setFolderId(String.valueOf(getClient().getValues().getPrivateInfostoreFolder()));
         file.setFileName("tryAddVersion");
         java.io.File f = new java.io.File(MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR) + filename);
         NewInfostoreRequest req = new NewInfostoreRequest(file, f);
-        NewInfostoreResponse resp = client.execute(req);
+        NewInfostoreResponse resp = getClient().execute(req);
         ids.add(resp.getID());
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        if (ids != null) {
-            for (String id : ids) {
-                DeleteInfostoreRequest req = new DeleteInfostoreRequest(id, String.valueOf(client.getValues().getPrivateInfostoreFolder()), new Date());
-                req.setHardDelete(true);
-                client.execute(req);
+        try {
+            if (ids != null) {
+                for (String id : ids) {
+                    DeleteInfostoreRequest req = new DeleteInfostoreRequest(id, String.valueOf(getClient().getValues().getPrivateInfostoreFolder()), new Date());
+                    req.setHardDelete(true);
+                    getClient().execute(req);
+                }
             }
+            ids = null;
+        } finally {
+            super.tearDown();
         }
-        ids = null;
-        super.tearDown();
     }
 
+    @Test
     public void testAddVersion() throws Exception {
         File file = new DefaultFile();
-        file.setFolderId(String.valueOf(client.getValues().getPrivateInfostoreFolder()));
+        file.setFolderId(String.valueOf(getClient().getValues().getPrivateInfostoreFolder()));
         file.setFileName("tryAddVersion");
         java.io.File f = new java.io.File(MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR) + filename);
         NewInfostoreRequest req = new NewInfostoreRequest(file, f, true);
-        NewInfostoreResponse resp = client.execute(req);
+        NewInfostoreResponse resp = getClient().execute(req);
         assertFalse(resp.hasError());
         ids.add(resp.getID());
         GetInfostoreRequest getReq = new GetInfostoreRequest(resp.getID(), COLUMNS);
-        GetInfostoreResponse getResp = client.execute(getReq);
+        GetInfostoreResponse getResp = getClient().execute(getReq);
         assertNotNull(getResp);
         File uploaded = getResp.getDocumentMetadata();
         assertEquals(2, uploaded.getNumberOfVersions());
     }
 
+    @Test
     public void testFallback() throws Exception {
         File file = new DefaultFile();
-        file.setFolderId(String.valueOf(client.getValues().getPrivateInfostoreFolder()));
+        file.setFolderId(String.valueOf(getClient().getValues().getPrivateInfostoreFolder()));
         file.setFileName("tryAddVersion");
         java.io.File f = new java.io.File(MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR) + filename);
         NewInfostoreRequest req = new NewInfostoreRequest(file, f, false);
-        NewInfostoreResponse resp = client.execute(req);
+        NewInfostoreResponse resp = getClient().execute(req);
         assertFalse(resp.hasError());
         ids.add(resp.getID());
         GetInfostoreRequest getReq = new GetInfostoreRequest(resp.getID(), COLUMNS);
-        GetInfostoreResponse getResp = client.execute(getReq);
+        GetInfostoreResponse getResp = getClient().execute(getReq);
         assertNotNull(getResp);
         File uploaded = getResp.getDocumentMetadata();
         assertFalse("tryAddVersion".equals(uploaded.getFileName()));

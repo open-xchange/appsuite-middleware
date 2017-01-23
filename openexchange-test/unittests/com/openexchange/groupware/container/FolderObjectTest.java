@@ -6,12 +6,17 @@ import static com.openexchange.groupware.container.FolderObject.MODULE;
 import static com.openexchange.groupware.container.FolderObject.PERMISSIONS_BITS;
 import static com.openexchange.groupware.container.FolderObject.SUBFOLDERS;
 import static com.openexchange.groupware.container.FolderObject.TYPE;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.List;
+import org.junit.Test;
 import com.openexchange.server.impl.OCLPermission;
 
 public class FolderObjectTest extends FolderChildObjectTest {
 
+    @Test
     public void testPermissionMethods() {
         FolderObject object = new FolderObject();
 
@@ -19,23 +24,24 @@ public class FolderObjectTest extends FolderChildObjectTest {
         assertFalse(object.contains(PERMISSIONS_BITS));
         assertFalse(object.containsPermissions());
 
-        List<OCLPermission> permissions = Arrays.asList( new OCLPermission[]{} );
+        List<OCLPermission> permissions = Arrays.asList(new OCLPermission[] {});
 
-        object.setPermissions( permissions );
-        assertTrue(object.contains( PERMISSIONS_BITS ) );
+        object.setPermissions(permissions);
+        assertTrue(object.contains(PERMISSIONS_BITS));
         assertTrue(object.containsPermissions());
         assertEquals(permissions, object.get(PERMISSIONS_BITS));
 
-        List<OCLPermission> permissions2 = Arrays.asList( new OCLPermission[]{ new OCLPermission() } );
+        List<OCLPermission> permissions2 = Arrays.asList(new OCLPermission[] { new OCLPermission() });
 
         object.set(PERMISSIONS_BITS, permissions2);
         assertEquals(permissions2, object.getPermissions());
 
         object.remove(PERMISSIONS_BITS);
-        assertFalse( object.contains(PERMISSIONS_BITS));
-        assertFalse( object.containsPermissions() );
+        assertFalse(object.contains(PERMISSIONS_BITS));
+        assertFalse(object.containsPermissions());
     }
 
+    @Test
     public void testSubfolderMethods() {
         FolderObject object = new FolderObject();
 
@@ -53,6 +59,7 @@ public class FolderObjectTest extends FolderChildObjectTest {
         assertFalse(object.containsSubfolderFlag());
     }
 
+    @Test
     public void testTypeMethods() {
         FolderObject object = new FolderObject();
 
@@ -73,6 +80,7 @@ public class FolderObjectTest extends FolderChildObjectTest {
         assertFalse(object.containsType());
     }
 
+    @Test
     public void testFolderMethods() {
         FolderObject object = new FolderObject();
 
@@ -93,6 +101,7 @@ public class FolderObjectTest extends FolderChildObjectTest {
         assertFalse(object.containsFolderName());
     }
 
+    @Test
     public void testModuleMethods() {
         FolderObject object = new FolderObject();
 
@@ -112,17 +121,6 @@ public class FolderObjectTest extends FolderChildObjectTest {
         assertFalse(object.contains(MODULE));
         assertFalse(object.containsModule());
     }
-
-
-
-
-
-
-
-
-
-
-
 
     public FolderObject getFolderObject() {
         FolderObject folderObject = new FolderObject();

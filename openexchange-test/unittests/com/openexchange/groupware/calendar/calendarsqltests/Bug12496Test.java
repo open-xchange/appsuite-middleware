@@ -49,19 +49,23 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.container.CalendarObject;
 
-
 public class Bug12496Test extends CalendarSqlTest {
+
     /**
      * Test for <a href= "http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=12496">bug #12496</a><br>
      * <i>NullPointerException if a daily full time series is changed to not full time</i>
      */
+    @Test
     public void testChangeFulltimeRecAppToNonFulltime() throws Exception {
         try {
             final CalendarDataObject fulltimeSeries = appointments.buildBasicAppointment(new Date(1225670400000L), new Date(1225756800000L));
@@ -90,13 +94,7 @@ public class Bug12496Test extends CalendarSqlTest {
             // Load first occurrence and verify
             final CalendarDataObject firstOccurrence = appointments.reload(fulltimeSeries);
             firstOccurrence.calculateRecurrence();
-            final RecurringResultsInterface recuResults = getTools().calculateRecurring(
-                firstOccurrence,
-                0,
-                0,
-                1,
-                CalendarCollection.MAX_OCCURRENCESE,
-                true);
+            final RecurringResultsInterface recuResults = getTools().calculateRecurring(firstOccurrence, 0, 0, 1, CalendarCollection.MAX_OCCURRENCESE, true);
             if (recuResults.size() == 0) {
                 fail("No occurrence at position " + 1);
             }

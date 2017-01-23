@@ -54,7 +54,6 @@ import java.util.List;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.groupware.container.FolderObject;
 
-
 /**
  * {@link RegularFolderNode}
  *
@@ -67,14 +66,13 @@ public class RegularFolderNode extends AbstractFolderNode {
         super(underlyingObject, client);
     }
 
-
     public RegularFolderNode(int folderId, AJAXClient client) {
         super(folderId, client);
     }
 
     @Override
     public FolderNode getParent() {
-        if(getFolder().getParentFolderID() == FolderObject.SYSTEM_ROOT_FOLDER_ID) {
+        if (getFolder().getParentFolderID() == FolderObject.SYSTEM_ROOT_FOLDER_ID) {
             return new RootNode(getClient());
         }
         return super.getParent();
@@ -88,7 +86,7 @@ public class RegularFolderNode extends AbstractFolderNode {
     @Override
     public List<FolderNode> getChildren() {
         List<FolderNode> folders = new ArrayList<FolderNode>();
-        for(FolderObject folder : getManager().listFoldersOnServer(getFolder())) {
+        for (FolderObject folder : getManager().listFoldersOnServer(getFolder())) {
             folders.add(load(folder));
         }
         return folders;

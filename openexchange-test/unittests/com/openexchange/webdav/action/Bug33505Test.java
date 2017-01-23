@@ -49,7 +49,10 @@
 
 package com.openexchange.webdav.action;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavResource;
 
@@ -60,6 +63,7 @@ import com.openexchange.webdav.protocol.WebdavResource;
  */
 public class Bug33505Test extends ActionTestCase {
 
+    @Test
     public void testBug33505() throws Exception {
         MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
         MockWebdavResponse res = new MockWebdavResponse();

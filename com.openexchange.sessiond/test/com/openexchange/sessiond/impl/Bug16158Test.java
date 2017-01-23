@@ -49,8 +49,11 @@
 
 package com.openexchange.sessiond.impl;
 
+import static org.junit.Assert.assertEquals;
 import java.util.List;
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.threadpool.SimThreadPoolService;
 
 /**
@@ -58,8 +61,7 @@ import com.openexchange.threadpool.SimThreadPoolService;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Bug16158Test extends TestCase {
-
+public class Bug16158Test {
     private static final int RUNTIME = 10000;
 
     SessionData sessionData;
@@ -70,13 +72,8 @@ public class Bug16158Test extends TestCase {
     private final Thread[] rotatorThreads = new Thread[rotators.length];
     private SimThreadPoolService threadPoolService;
 
-    public Bug16158Test(final String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         sessionData = new SessionData(100, 1, 60000, 167, false);
         threadPoolService = new SimThreadPoolService();
         sessionData.addThreadPoolService(threadPoolService);
@@ -94,12 +91,12 @@ public class Bug16158Test extends TestCase {
         }
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         threadPoolService.shutdown();
-        super.tearDown();
     }
 
+    @Test
     public void testNotFoundSession() throws Throwable {
         for (final Thread finderThread : finderThreads) {
             finderThread.start();
@@ -124,14 +121,15 @@ public class Bug16158Test extends TestCase {
         for (final Thread finderThread : finderThreads) {
             finderThread.join();
         }
-        /* testing for a proper result of this is is tricky. it may happen - due to scheduling of threads in front of the lock - that the
+        /*
+         * testing for a proper result of this is is tricky. it may happen - due to scheduling of threads in front of the lock - that the
          * session times out - is removed from last session container by rotator thread.
          * - on timeout:
-         *   + all finders must have notFound true.
-         *   + exactly one rotator found the timeout.
+         * + all finders must have notFound true.
+         * + exactly one rotator found the timeout.
          * - no timeout:
-         *   + all finders must always have found the session.
-         *   + no rotator has a timeout.
+         * + all finders must always have found the session.
+         * + no rotator has a timeout.
          */
         boolean wasTimeout = false;
         for (final SessionRotator rotator : rotators) {
@@ -152,17 +150,22 @@ public class Bug16158Test extends TestCase {
     }
 
     private class SessionFinder implements Runnable {
+
         private boolean run = true;
         private boolean notFound = false;
+
         SessionFinder() {
             super();
         }
+
         boolean hasNotFound() {
             return notFound;
         }
+
         void stop() {
             run = false;
         }
+
         @Override
         public void run() {
             try {
@@ -178,17 +181,22 @@ public class Bug16158Test extends TestCase {
     }
 
     private class SessionRotator implements Runnable {
+
         private boolean run = true;
         private boolean timeout = false;
+
         SessionRotator() {
             super();
         }
+
         boolean hasTimeout() {
             return timeout;
         }
+
         void stop() {
             run = false;
         }
+
         @Override
         public void run() {
             while (run && !timeout) {

@@ -49,9 +49,14 @@
 
 package com.openexchange.ajax.reminder;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
@@ -64,7 +69,6 @@ import com.openexchange.ajax.folder.FolderTools;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.reminder.actions.RangeRequest;
 import com.openexchange.ajax.reminder.actions.RangeResponse;
@@ -96,38 +100,28 @@ public class SharedFolderTest extends AbstractAJAXSession {
 
     TimeZone tz, tz2;
 
-    public SharedFolderTest(final String name) {
-        super(name);
+    public SharedFolderTest() {
+        super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
         client = getClient();
         tz = client.getValues().getTimeZone();
-        client2 = new AJAXClient(User.User2);
+        client2 = new AJAXClient(testContext.acquireUser());
         tz2 = client2.getValues().getTimeZone();
 
         // Create shared folder
         sharedFolder = Create.createPrivateFolder("Bug 17327 shared folder", FolderObject.CALENDAR, client.getValues().getUserId());
         sharedFolder.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
-        final InsertResponse folderInsertResponse = client.execute(new com.openexchange.ajax.folder.actions.InsertRequest(
-            EnumAPI.OUTLOOK,
-            sharedFolder,
-            true));
+        final InsertResponse folderInsertResponse = client.execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OUTLOOK, sharedFolder, true));
         folderInsertResponse.fillObject(sharedFolder);
-        FolderTools.shareFolder(
-            client,
-            EnumAPI.OUTLOOK,
-            sharedFolder.getObjectID(),
-            client2.getValues().getUserId(),
-            OCLPermission.CREATE_OBJECTS_IN_FOLDER,
-            OCLPermission.READ_ALL_OBJECTS,
-            OCLPermission.WRITE_ALL_OBJECTS,
-            OCLPermission.DELETE_ALL_OBJECTS);
+        FolderTools.shareFolder(client, EnumAPI.OUTLOOK, sharedFolder.getObjectID(), client2.getValues().getUserId(), OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
     }
 
+    @Test
     public void testAppointmentCreatorCanChangeReminder() throws Exception {
         // Create appointment
         firstAppointment = createAppointment();
@@ -176,6 +170,7 @@ public class SharedFolderTest extends AbstractAJAXSession {
         client.execute(new DeleteRequest(firstAppointment));
     }
 
+    @Test
     public void testSecretaryCanChangeReminder() throws Exception {
         // Create appointment
         secondAppointment = createAppointment();
@@ -224,12 +219,14 @@ public class SharedFolderTest extends AbstractAJAXSession {
         client2.execute(new DeleteRequest(secondAppointment));
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        client.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OUTLOOK, sharedFolder));
-        client2.logout();
-
-        super.tearDown();
+        try {
+            client.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OUTLOOK, sharedFolder));
+            client2.logout();
+        } finally {
+            super.tearDown();
+        }
     }
 
     public Appointment createAppointment() throws Exception {

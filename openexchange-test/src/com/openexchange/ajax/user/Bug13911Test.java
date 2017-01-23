@@ -49,7 +49,10 @@
 
 package com.openexchange.ajax.user;
 
+import static org.junit.Assert.assertTrue;
 import java.util.Random;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.MultipleRequest;
@@ -69,20 +72,18 @@ public class Bug13911Test extends AbstractAJAXSession {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug13911Test.class);
 
-    private static final int[] COLUMNS = new int[] {
-        Contact.OBJECT_ID, Contact.FOLDER_ID, Contact.DISPLAY_NAME, Contact.EMAIL1, Contact.MARK_AS_DISTRIBUTIONLIST,
-        Contact.INTERNAL_USERID, Contact.EMAIL2, Contact.EMAIL3, Contact.SUR_NAME, Contact.GIVEN_NAME };
+    private static final int[] COLUMNS = new int[] { Contact.OBJECT_ID, Contact.FOLDER_ID, Contact.DISPLAY_NAME, Contact.EMAIL1, Contact.MARK_AS_DISTRIBUTIONLIST, Contact.INTERNAL_USERID, Contact.EMAIL2, Contact.EMAIL3, Contact.SUR_NAME, Contact.GIVEN_NAME };
 
     private AJAXClient client;
 
     private Contact contact;
 
-    public Bug13911Test(final String name) {
-        super(name);
+    public Bug13911Test() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         final GetResponse response = client.execute(new GetRequest(client.getValues().getUserId(), client.getValues().getTimeZone()));
@@ -97,9 +98,9 @@ public class Bug13911Test extends AbstractAJAXSession {
      *
      * @throws Throwable
      */
+    @Test
     public void testPatternSearchMultiple() throws Throwable {
-        for (final String value : new String[] {
-            contact.getDisplayName(), contact.getSurName(), contact.getGivenName(), contact.getEmail1() }) {
+        for (final String value : new String[] { contact.getDisplayName(), contact.getSurName(), contact.getGivenName(), contact.getEmail1() }) {
             final String pattern = surroundWithWildcards(getPart(value));
             LOG.info("Pattern: " + pattern);
             final ContactSearchObject cso = new ContactSearchObject();
@@ -124,9 +125,9 @@ public class Bug13911Test extends AbstractAJAXSession {
         }
     }
 
+    @Test
     public void testPatternSearch() throws Throwable {
-        for (final String value : new String[] {
-            contact.getDisplayName(), contact.getSurName(), contact.getGivenName(), contact.getEmail1() }) {
+        for (final String value : new String[] { contact.getDisplayName(), contact.getSurName(), contact.getGivenName(), contact.getEmail1() }) {
             final String pattern = surroundWithWildcards(getPart(value));
             LOG.info("Pattern: " + pattern);
             final ContactSearchObject cso = new ContactSearchObject();

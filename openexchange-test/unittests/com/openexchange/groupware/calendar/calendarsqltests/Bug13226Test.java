@@ -49,6 +49,9 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
+import static org.junit.Assert.assertFalse;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Participant;
 
@@ -60,7 +63,7 @@ public class Bug13226Test extends CalendarSqlTest {
     private CalendarDataObject appointment;
     private CalendarDataObject changeAppointment;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         appointment = appointments.buildAppointmentWithGroupParticipants(group);
@@ -76,6 +79,7 @@ public class Bug13226Test extends CalendarSqlTest {
         changeAppointment.setParentFolderID(appointments.getPrivateFolder());
     }
 
+    @Test
     public void testBug13226() throws Exception {
         appointments.save(changeAppointment);
         appointments.switchUser(user);
@@ -91,11 +95,4 @@ public class Bug13226Test extends CalendarSqlTest {
 
         assertFalse("Did not expect the change user as participant.", found);
     }
-
-    @Override
-    public void tearDown() throws Exception {
-
-        super.tearDown();
-    }
-
 }

@@ -49,9 +49,8 @@
 
 package com.openexchange.ajax.manifests;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 /**
  * {@link ManifestsTestSuite}
@@ -59,20 +58,10 @@ import junit.framework.TestSuite;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since 7.6.0
  */
-public class ManifestsTestSuite extends TestSuite {
-
-    /**
-     * Initializes a new {@link ManifestsTestSuite}.
-     */
-    private ManifestsTestSuite() {
-        super();
-    }
-
-    public static Test suite() {
-        final TestSuite manifests = new TestSuite("com.openexchange.ajax.manifests.ManifestsTestSuite");
-        manifests.addTestSuite(Bug30835Test.class);
-        return manifests;
-    }
-
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    Bug30835Test.class
+})
+public class ManifestsTestSuite  {
 
 }

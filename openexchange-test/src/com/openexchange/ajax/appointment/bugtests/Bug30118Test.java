@@ -50,9 +50,11 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertTrue;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.test.CalendarTestManager;
 
 /**
  * {@link Bug30118Test}
@@ -61,8 +63,6 @@ import com.openexchange.test.CalendarTestManager;
  */
 public class Bug30118Test extends AbstractAJAXSession {
 
-    private CalendarTestManager ctm;
-
     private Appointment appointment;
 
     /**
@@ -70,15 +70,14 @@ public class Bug30118Test extends AbstractAJAXSession {
      * 
      * @param name
      */
-    public Bug30118Test(String name) {
-        super(name);
+    public Bug30118Test() {
+        super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
-        ctm = new CalendarTestManager(client);
         appointment = new Appointment();
         appointment.setTitle("Bug 30118 Test");
         appointment.setStartDate(D("17.12.2013 08:00"));
@@ -86,41 +85,37 @@ public class Bug30118Test extends AbstractAJAXSession {
         appointment.setRecurrenceType(Appointment.DAILY);
         appointment.setInterval(1);
         appointment.setOccurrence(5);
-        appointment.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         appointment.setIgnoreConflicts(true);
     }
 
+    @Test
     public void testBug30118() throws Exception {
-        ctm.insert(appointment);
-        ctm.createDeleteException(appointment.getParentFolderID(), appointment.getObjectID(), 3);
-        Appointment loaded = ctm.get(appointment);
+        catm.insert(appointment);
+        catm.createDeleteException(appointment.getParentFolderID(), appointment.getObjectID(), 3);
+        Appointment loaded = catm.get(appointment);
         assertTrue("Expected one delete Exception.", loaded.getDeleteException() != null && loaded.getDeleteException().length == 1);
     }
 
+    @Test
     public void testBug30118Fulltime() throws Exception {
         appointment.setStartDate(D("17.12.2013 00:00"));
         appointment.setEndDate(D("18.12.2013 00:00"));
         appointment.setFullTime(true);
-        ctm.insert(appointment);
-        ctm.createDeleteException(appointment.getParentFolderID(), appointment.getObjectID(), 3);
-        Appointment loaded = ctm.get(appointment);
+        catm.insert(appointment);
+        catm.createDeleteException(appointment.getParentFolderID(), appointment.getObjectID(), 3);
+        Appointment loaded = catm.get(appointment);
         assertTrue("Expected one delete Exception.", loaded.getDeleteException() != null && loaded.getDeleteException().length == 1);
     }
 
+    @Test
     public void testBug30118Fulltime2days() throws Exception {
         appointment.setStartDate(D("17.12.2013 00:00"));
         appointment.setEndDate(D("19.12.2013 00:00"));
         appointment.setFullTime(true);
-        ctm.insert(appointment);
-        ctm.createDeleteException(appointment.getParentFolderID(), appointment.getObjectID(), 3);
-        Appointment loaded = ctm.get(appointment);
+        catm.insert(appointment);
+        catm.createDeleteException(appointment.getParentFolderID(), appointment.getObjectID(), 3);
+        Appointment loaded = catm.get(appointment);
         assertTrue("Expected one delete Exception.", loaded.getDeleteException() != null && loaded.getDeleteException().length == 1);
     }
-
-    @Override
-    public void tearDown() throws Exception {
-        ctm.cleanUp();
-        super.tearDown();
-    }
-
 }

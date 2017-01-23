@@ -205,7 +205,8 @@ public class LoginPerformerTest {
     }
 
     @After
-    public void tearDown() {
+    public void tearDown()
+ {
         loginRequest = null;
         testHeader = null;
         testCookie = null;
@@ -217,8 +218,8 @@ public class LoginPerformerTest {
     /**
      * Verifies that certain properties from the login are passed through to the AuthenticationService.
      */
-    @Test
-    public void testAutoLoginProperties() throws OXException {
+     @Test
+     public void testAutoLoginProperties() throws OXException {
         LoginResult result = performer.doAutoLogin(loginRequest);
         Cookie[] cookies = result.getCookies();
         assertNotNull("Cookies should be passed through", cookies);
@@ -234,8 +235,8 @@ public class LoginPerformerTest {
     /**
      * Verifies that certain properties from the login are passed through to the AuthenticationService.
      */
-    @Test
-    public void testLoginProperties() throws OXException {
+     @Test
+     public void testLoginProperties() throws OXException {
         LoginResult result = performer.doLogin(loginRequest);
         Cookie[] cookies = result.getCookies();
         assertNotNull("Cookies should be passed through", cookies);

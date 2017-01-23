@@ -52,7 +52,11 @@ package com.openexchange.datatypes.genericonf;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 
 /**
@@ -61,8 +65,8 @@ import junit.framework.TestCase;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class DynamicFormDescriptionTest extends TestCase {
-    public void testMissingMandatories() {
+public class DynamicFormDescriptionTest {         @Test
+     public void testMissingMandatories() {
         Map<String, Object> content = new HashMap<String, Object>();
         content.put("login", "Blupp");
 

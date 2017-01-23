@@ -59,7 +59,6 @@ import com.openexchange.ajax.kata.IdentitySource;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.test.CalendarTestManager;
 
-
 /**
  * {@link AppointmentCreateStep}
  *
@@ -74,6 +73,7 @@ public class AppointmentCreateStep extends AbstractStep implements IdentitySourc
 
     /**
      * Initializes a new {@link AppointmentCreateStep}.
+     * 
      * @param entry
      */
     public AppointmentCreateStep(Appointment entry, String name, String expectedError) {
@@ -84,7 +84,7 @@ public class AppointmentCreateStep extends AbstractStep implements IdentitySourc
 
     @Override
     public void cleanUp() throws Exception {
-        if(!inserted) {
+        if (!inserted) {
             return;
         }
         manager.delete(entry, false);
@@ -100,23 +100,23 @@ public class AppointmentCreateStep extends AbstractStep implements IdentitySourc
         inserted = false;
         AppointmentInsertResponse insertResponse = execute(insertRequest);
         insertResponse.fillAppointment(entry);
-        inserted = ! ( insertResponse.hasError() ||insertResponse.hasConflicts() );
-        if(insertResponse.hasConflicts()){
+        inserted = !(insertResponse.hasError() || insertResponse.hasConflicts());
+        if (insertResponse.hasConflicts()) {
             StringBuilder conflicts = new StringBuilder("Conflicting appointments: ");
-            for(ConflictObject conflict: insertResponse.getConflicts()){
-                conflicts.append( conflict.getTitle() );
+            for (ConflictObject conflict : insertResponse.getConflicts()) {
+                conflicts.append(conflict.getTitle());
                 conflicts.append(", ");
             }
-            Assert.fail(name + " " + conflicts.substring(0,conflicts.length() - 2));
+            Assert.fail(name + " " + conflicts.substring(0, conflicts.length() - 2));
         }
         checkError(insertResponse);
     }
 
     @Override
     public void assumeIdentity(Appointment newApp) {
-        newApp.setObjectID( entry.getObjectID() );
-        newApp.setParentFolderID( entry.getParentFolderID());
-        newApp.setLastModified( entry.getLastModified());
+        newApp.setObjectID(entry.getObjectID());
+        newApp.setParentFolderID(entry.getParentFolderID());
+        newApp.setLastModified(entry.getLastModified());
     }
 
     @Override
@@ -134,6 +134,5 @@ public class AppointmentCreateStep extends AbstractStep implements IdentitySourc
     public Class<Appointment> getType() {
         return Appointment.class;
     }
-
 
 }

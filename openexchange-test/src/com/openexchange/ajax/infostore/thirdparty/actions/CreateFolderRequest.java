@@ -57,13 +57,13 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
-
 /**
  * {@link CreateFolderRequest}
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class CreateFolderRequest extends AbstractFolderRequest<CreateFolderResponse> {
+
     private final String parentFolderId;
     private final int tree;
     private final boolean autorename;

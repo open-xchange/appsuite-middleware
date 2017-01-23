@@ -49,9 +49,8 @@
 
 package com.openexchange.realtime.util;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import org.junit.Test;
-
 
 /**
  * {@link ElementPathTest}
@@ -64,7 +63,7 @@ public class ElementPathTest {
     public void testBadElementPathString1() {
         new ElementPath(".Element");
     }
-    
+
     @Test(expected = IllegalArgumentException.class)
     public void testBadElementPathString2() {
         new ElementPath("path.");
@@ -72,9 +71,9 @@ public class ElementPathTest {
 
     @Test
     public void testGoodElementPathString() {
-        String namespace ="path.subPath.subSubPath#FunkyStuff";
+        String namespace = "path.subPath.subSubPath#FunkyStuff";
         String element = "Element";
-        ElementPath elementPath = new ElementPath(namespace+"."+element);
+        ElementPath elementPath = new ElementPath(namespace + "." + element);
         assertEquals(namespace, elementPath.getNamespace());
         assertEquals(element, elementPath.getElement());
 

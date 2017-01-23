@@ -49,6 +49,9 @@
 
 package com.openexchange.webdav.xml;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -71,10 +74,6 @@ import com.openexchange.webdav.xml.request.PropFindMethod;
 public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
 
     protected static final int APPEND_MODIFIED = 1000000;
-
-    public AbstractWebdavXMLTest(final String name) {
-        super(name);
-    }
 
     protected static int parseResponse(final Document response, final boolean delete) throws Exception {
         return parseRootElement(response.getRootElement(), delete);
@@ -190,7 +189,7 @@ public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
 
         httpclient.getState().setCredentials(null, new UsernamePasswordCredentials(login, password));
         final PropFindMethod propFindMethod = new PropFindMethod(PROTOCOL + hostName + getURL());
-        propFindMethod.setDoAuthentication( true );
+        propFindMethod.setDoAuthentication(true);
 
         InputStream is = new ByteArrayInputStream(requestByte);
         propFindMethod.setRequestBody(is);
@@ -305,7 +304,7 @@ public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
             assertNotNull(message + " is null", value);
             assertEquals(message + " date array size is not equals", expect.length, value.length);
             for (int a = 0; a < expect.length; a++) {
-                assertEquals(message + " date in pos (" + a + ") is not equals",  expect[a].getTime(), value[a].getTime());
+                assertEquals(message + " date in pos (" + a + ") is not equals", expect[a].getTime(), value[a].getTime());
             }
         }
     }
@@ -315,7 +314,7 @@ public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
             assertNotNull(message + " is null", value);
             assertEquals(message + " byte array size is not equals", expect.length, value.length);
             for (int a = 0; a < expect.length; a++) {
-                assertEquals(message + " byte in pos (" + a + ") is not equals",  expect[a], value[a]);
+                assertEquals(message + " byte in pos (" + a + ") is not equals", expect[a], value[a]);
             }
         }
     }

@@ -49,7 +49,9 @@
 
 package com.openexchange.dav.carddav.bugs;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -79,9 +81,9 @@ public class Bug48661Test extends CardDAVTest {
     /**
      * Initializes a new {@link Bug48661Test}.
      */
-	public Bug48661Test() {
-		super();
-	}
+    public Bug48661Test() {
+        super();
+    }
 
     @Override
     protected String getDefaultUserAgent() {
@@ -107,7 +109,7 @@ public class Bug48661Test extends CardDAVTest {
         /*
          * perform query & check results
          */
-        VCardResource vCardResource = assertQueryMatch(folderID, Collections.<PropFilter>emptyList(), null, uid);
+        VCardResource vCardResource = assertQueryMatch(folderID, Collections.<PropFilter> emptyList(), null, uid);
         assertTrue(null != vCardResource.getVCard().getEmails() && 1 == vCardResource.getVCard().getEmails().size());
         assertEquals(email, vCardResource.getVCard().getEmails().get(0).getEmail());
         assertTrue(null != vCardResource.getVCard().getTels() && 1 == vCardResource.getVCard().getTels().size());

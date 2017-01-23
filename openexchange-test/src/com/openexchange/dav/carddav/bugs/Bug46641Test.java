@@ -49,7 +49,9 @@
 
 package com.openexchange.dav.carddav.bugs;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import org.junit.Test;
 import com.openexchange.dav.SyncToken;
@@ -69,35 +71,25 @@ public class Bug46641Test extends CardDAVTest {
     /**
      * Initializes a new {@link Bug46641Test}.
      */
-	public Bug46641Test() {
-		super();
-	}
+    public Bug46641Test() {
+        super();
+    }
 
-	@Test
-	public void testBulkImportContactGroup() throws Exception {
-		/*
-		 * fetch sync token for later synchronization
-		 */
+    @Test
+    public void testBulkImportContactGroup() throws Exception {
+        /*
+         * fetch sync token for later synchronization
+         */
         SyncToken syncToken = new SyncToken(fetchSyncToken());
-		/*
-		 * try to create contact group using bulk-import
-		 */
-    	String uid = randomUID();
-    	String vCard =
-			"BEGIN:VCARD" + "\r\n" +
-			"VERSION:3.0" + "\r\n" +
-            "PRODID:-//Apple Inc.//AddressBook 9.0//EN" + "\r\n" +
-            "N:untitled group" + "\r\n" +
-            "FN:untitled group" + "\r\n" +
-            "X-ADDRESSBOOKSERVER-KIND:group" + "\r\n" +
-			"REV:" + formatAsUTC(new Date()) + "\r\n" +
-            "UID:" + uid + "\r\n" +
-			"END:VCARD" + "\r\n"
-		;
-    	postVCard(uid, vCard, 0);
-    	/*
-    	 * check that no contact was created on server
-    	 */
+        /*
+         * try to create contact group using bulk-import
+         */
+        String uid = randomUID();
+        String vCard = "BEGIN:VCARD" + "\r\n" + "VERSION:3.0" + "\r\n" + "PRODID:-//Apple Inc.//AddressBook 9.0//EN" + "\r\n" + "N:untitled group" + "\r\n" + "FN:untitled group" + "\r\n" + "X-ADDRESSBOOKSERVER-KIND:group" + "\r\n" + "REV:" + formatAsUTC(new Date()) + "\r\n" + "UID:" + uid + "\r\n" + "END:VCARD" + "\r\n";
+        postVCard(uid, vCard, 0);
+        /*
+         * check that no contact was created on server
+         */
         assertNull(getContact(uid));
         /*
          * check that sync-collection reports the resource as deleted
@@ -105,5 +97,5 @@ public class Bug46641Test extends CardDAVTest {
         SyncCollectionResponse syncCollectionResponse = syncCollection(syncToken);
         assertEquals("no resource deletions reported on sync collection", 1, syncCollectionResponse.getHrefsStatusNotFound().size());
         assertTrue(syncCollectionResponse.getHrefsStatusNotFound().get(0).contains(uid));
-	}
+    }
 }

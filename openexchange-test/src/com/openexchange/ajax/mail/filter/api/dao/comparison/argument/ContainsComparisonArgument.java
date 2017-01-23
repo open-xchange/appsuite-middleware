@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.filter.api.dao.comparison.argument;
 
-
 /**
  * {@link ContainsComparisonArgument}
  *

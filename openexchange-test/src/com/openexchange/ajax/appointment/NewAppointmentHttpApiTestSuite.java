@@ -49,8 +49,8 @@
 
 package com.openexchange.ajax.appointment;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 import com.openexchange.ajax.appointment.recurrence.TestsForChangingAmongMonthlyRecurrences;
 import com.openexchange.ajax.appointment.recurrence.TestsForChangingAmongYearlyRecurrences;
 import com.openexchange.ajax.appointment.recurrence.TestsForCreatingChangeExceptions;
@@ -60,29 +60,24 @@ import com.openexchange.ajax.appointment.recurrence.TestsForModifyingChangeExcep
 import com.openexchange.ajax.appointment.recurrence.TestsForUsingRecurrencePositionToGetChangeExceptions;
 import com.openexchange.ajax.appointment.recurrence.TestsToCreateMinimalAppointmentSeries;
 
-
 /**
  * Suite for systematic tests to check the expected behaviour
  * of the HTTP API for the calendar.
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class NewAppointmentHttpApiTestSuite extends TestSuite{
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    TestsToCreateMinimalAppointmentSeries.class,
+    TestsForChangingAmongMonthlyRecurrences.class,
+    TestsForChangingAmongYearlyRecurrences.class,
+    TestsForDeleteExceptionsAndFixedEndsOfSeries.class,
+    TestsForCreatingChangeExceptions.class,
+    TestsForUsingRecurrencePositionToGetChangeExceptions.class,
+    TestsForDifferentWaysOfEndingASeries.class,
+    TestsForModifyingChangeExceptions.class,
 
-    private NewAppointmentHttpApiTestSuite() {
-        super();
-    }
+})
+public class NewAppointmentHttpApiTestSuite  {
 
-    public static Test suite(){
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(TestsToCreateMinimalAppointmentSeries.class);
-        tests.addTestSuite(TestsForChangingAmongMonthlyRecurrences.class);
-        tests.addTestSuite(TestsForChangingAmongYearlyRecurrences.class);
-        tests.addTestSuite(TestsForDeleteExceptionsAndFixedEndsOfSeries.class);
-        tests.addTestSuite(TestsForCreatingChangeExceptions.class);
-        tests.addTestSuite(TestsForUsingRecurrencePositionToGetChangeExceptions.class);
-        tests.addTestSuite(TestsForDifferentWaysOfEndingASeries.class);
-        tests.addTestSuite(TestsForModifyingChangeExceptions.class);
-        return tests;
-    }
 }

@@ -49,8 +49,12 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.assertEquals;
 import java.util.Calendar;
 import java.util.TimeZone;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
@@ -64,7 +68,6 @@ import com.openexchange.ajax.folder.FolderTools;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.groupware.calendar.TimeTools;
@@ -86,42 +89,39 @@ public class Bug17327Test extends AbstractAJAXSession {
     TimeZone tz, tz2;
     Calendar cal;
 
-    public Bug17327Test(String name) {
-        super(name);
+    public Bug17327Test() {
+        super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
         client = getClient();
-        tz = client.getValues().getTimeZone();
+        tz = getClient().getValues().getTimeZone();
         System.out.println(tz);
-        client2 = new AJAXClient(User.User2);
+        client2 = new AJAXClient(testContext.acquireUser());
         tz2 = client2.getValues().getTimeZone();
 
         // Create shared folder
-        sharedFolder = Create.createPrivateFolder("Bug 17327 shared folder", FolderObject.CALENDAR, client.getValues().getUserId());
-        sharedFolder.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
-        InsertResponse folderInsertResponse = client.execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OUTLOOK, sharedFolder, true));
+        sharedFolder = Create.createPrivateFolder("Bug 17327 shared folder", FolderObject.CALENDAR, getClient().getValues().getUserId());
+        sharedFolder.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
+        InsertResponse folderInsertResponse = getClient().execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OUTLOOK, sharedFolder, true));
         folderInsertResponse.fillObject(sharedFolder);
-        FolderTools.shareFolder(client, EnumAPI.OUTLOOK, sharedFolder.getObjectID(), client2.getValues().getUserId(),
-            OCLPermission.CREATE_OBJECTS_IN_FOLDER,
-            OCLPermission.READ_ALL_OBJECTS,
-            OCLPermission.WRITE_ALL_OBJECTS,
-            OCLPermission.DELETE_ALL_OBJECTS);
+        FolderTools.shareFolder(client, EnumAPI.OUTLOOK, sharedFolder.getObjectID(), client2.getValues().getUserId(), OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
 
         // Create appointment
         appointment = createAppointment();
     }
 
+    @Test
     public void testAlarmInAllRequest() throws Exception {
-        AppointmentInsertResponse insertResponse = client.execute(new InsertRequest(appointment, tz, true));
+        AppointmentInsertResponse insertResponse = getClient().execute(new InsertRequest(appointment, tz, true));
         insertResponse.fillAppointment(appointment);
 
         // Get appointment via AllRequest
-        CommonAllResponse allResponseBeforeUpdate = client2.execute(new AllRequest(sharedFolder.getObjectID(), new int[] {Appointment.ALARM}, appointment.getStartDate(), appointment.getEndDate(), tz2));
-//        CommonListResponse listResponseBeforeUpdate = client2.execute(new ListRequest(new ListIDs(appointment.getParentFolderID(), appointment.getObjectID()), new int[] {Appointment.ALARM}));
+        CommonAllResponse allResponseBeforeUpdate = client2.execute(new AllRequest(sharedFolder.getObjectID(), new int[] { Appointment.ALARM }, appointment.getStartDate(), appointment.getEndDate(), tz2));
+        //        CommonListResponse listResponseBeforeUpdate = client2.execute(new ListRequest(new ListIDs(appointment.getParentFolderID(), appointment.getObjectID()), new int[] {Appointment.ALARM}));
         GetResponse getResponseBeforeUpdate = client2.execute(new GetRequest(appointment));
         Object alarmValue = allResponseBeforeUpdate.getValue(0, Appointment.ALARM);
         int alarmValueInt;
@@ -135,12 +135,12 @@ public class Bug17327Test extends AbstractAJAXSession {
 
         // Update alarm
         appointment.setAlarm(15);
-        UpdateResponse updateResponse = client.execute(new UpdateRequest(appointment, tz));
+        UpdateResponse updateResponse = getClient().execute(new UpdateRequest(appointment, tz));
         appointment.setLastModified(updateResponse.getTimestamp());
 
         // Get appointment via AllRequest
-        CommonAllResponse allResponseAfterUpdate = client2.execute(new AllRequest(sharedFolder.getObjectID(), new int[] {Appointment.ALARM}, appointment.getStartDate(), appointment.getEndDate(), tz2));
-//        CommonListResponse listResponseAfterUpdate = client2.execute(new ListRequest(new ListIDs(appointment.getParentFolderID(), appointment.getObjectID()), new int[] {Appointment.ALARM}));
+        CommonAllResponse allResponseAfterUpdate = client2.execute(new AllRequest(sharedFolder.getObjectID(), new int[] { Appointment.ALARM }, appointment.getStartDate(), appointment.getEndDate(), tz2));
+        //        CommonListResponse listResponseAfterUpdate = client2.execute(new ListRequest(new ListIDs(appointment.getParentFolderID(), appointment.getObjectID()), new int[] {Appointment.ALARM}));
         GetResponse getResponseAfterUpdate = client2.execute(new GetRequest(appointment));
         alarmValue = allResponseAfterUpdate.getValue(0, Appointment.ALARM);
         if (alarmValue == null) {
@@ -152,13 +152,16 @@ public class Bug17327Test extends AbstractAJAXSession {
         assertEquals("Alarm is not equal in All- and GetRequest after update.", getResponseAfterUpdate.getAppointment(tz).getAlarm(), alarmValueInt);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        client.execute(new DeleteRequest(appointment));
-        client.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OUTLOOK, sharedFolder));
-        client2.logout();
+        try {
+            getClient().execute(new DeleteRequest(appointment));
+            getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OUTLOOK, sharedFolder));
+            client2.logout();
 
-        super.tearDown();
+        } finally {
+            super.tearDown();
+        }
     }
 
     public Appointment createAppointment() throws Exception {

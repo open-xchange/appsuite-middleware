@@ -50,8 +50,13 @@
 package com.openexchange.ajax.folder.api2;
 
 import static com.openexchange.java.Autoboxing.I;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.Iterator;
 import org.json.JSONArray;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
@@ -80,42 +85,44 @@ public class SubscribeTest extends AbstractAJAXSession {
      *
      * @param name The name
      */
-    public SubscribeTest(final String name) {
-        super(name);
+    public SubscribeTest() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         testFolder = new FolderObject();
         testFolder.setModule(FolderObject.CALENDAR);
-        appointmentFolder = client.getValues().getPrivateAppointmentFolder();
+        appointmentFolder = getClient().getValues().getPrivateAppointmentFolder();
         testFolder.setParentFolderID(appointmentFolder);
-        testFolder.setPermissions(PermissionTools.P(I(client.getValues().getUserId()), "a/a"));
+        testFolder.setPermissions(PermissionTools.P(I(getClient().getValues().getUserId()), "a/a"));
         testFolder.setFolderName("SubscribeTest-" + System.currentTimeMillis());
         final InsertRequest iReq = new InsertRequest(EnumAPI.OX_NEW, testFolder);
-        final InsertResponse iResp = client.execute(iReq);
+        final InsertResponse iResp = getClient().execute(iReq);
         iResp.fillObject(testFolder);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        getClient().execute(new DeleteRequest(EnumAPI.EAS_FOLDERS, testFolder));
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
+        try {
+            getClient().execute(new DeleteRequest(EnumAPI.EAS_FOLDERS, testFolder));
+        } finally {
+            super.tearDown();
+        }
     }
 
+    @Test
     public void testSubscribe() throws Throwable {
         final API api = EnumAPI.EAS_FOLDERS;
         final int fuid = testFolder.getObjectID();
         final SubscribeRequest subscribeRequest = new SubscribeRequest(api, FolderStorage.ROOT_ID, true);
         subscribeRequest.addFolderId(Integer.toString(fuid), true);
-        /*final SubscribeResponse subscribeResponse = */getClient().execute(subscribeRequest);
+        /* final SubscribeResponse subscribeResponse = */getClient().execute(subscribeRequest);
 
-        final int[] columns = {
-            FolderObject.OBJECT_ID, FolderObject.FOLDER_ID, FolderObject.FOLDER_NAME, FolderObject.MODULE, FolderObject.SUBFOLDERS, FolderObject.STANDARD_FOLDER,
-            FolderObject.CREATED_BY, 3040 };
+        final int[] columns = { FolderObject.OBJECT_ID, FolderObject.FOLDER_ID, FolderObject.FOLDER_NAME, FolderObject.MODULE, FolderObject.SUBFOLDERS, FolderObject.STANDARD_FOLDER, FolderObject.CREATED_BY, 3040 };
         final ListRequest listRequest = new ListRequest(api, FolderStorage.ROOT_ID, columns, true);
-        final ListResponse listResponse = client.execute(listRequest);
+        final ListResponse listResponse = getClient().execute(listRequest);
 
         {
             boolean found = false;

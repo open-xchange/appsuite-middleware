@@ -101,8 +101,8 @@ public class RssActionTestReconfiguredPortsAndHosts {
     }
 
     // tests bug 45402: SSRF at RSS feeds
-    @Test
-    public void testGetAcceptedFeeds_emptyHostListAndEmptyPortConfigured_AllowAll() throws OXException, MalformedURLException {
+     @Test
+     public void testGetAcceptedFeeds_emptyHostListAndEmptyPortConfigured_AllowAll() throws OXException, MalformedURLException {
         Mockito.when(configurationService.getProperty("com.openexchange.messaging.rss.feed.blacklist", RssProperties.HOST_BLACKLIST_DEFAULT)).thenReturn("");
         Mockito.when(configurationService.getProperty("com.openexchange.messaging.rss.feed.whitelist.ports", RssProperties.PORT_WHITELIST_DEFAULT)).thenReturn("");
         Mockito.when(configurationService.getProperty(RssProperties.SCHEMES_KEY, RssProperties.SCHEMES_DEFAULT)).thenReturn(RssProperties.SCHEMES_DEFAULT);

@@ -49,8 +49,13 @@
 
 package com.openexchange.ajax.share.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.GetLinkRequest;
@@ -73,10 +78,11 @@ public class LinkUpdateTest extends ShareTest {
      *
      * @param name The test name
      */
-    public LinkUpdateTest(String name) {
-        super(name);
+    public LinkUpdateTest() {
+        super();
     }
 
+    @Test
     public void testLinkExpiryDateRandomly() throws Exception {
         testLinkExpiryDate(randomFolderAPI(), randomModule());
     }
@@ -99,7 +105,7 @@ public class LinkUpdateTest extends ShareTest {
          */
         FolderObject folder = insertPrivateFolder(api, module, parent);
         ShareTarget target = new ShareTarget(module, String.valueOf(folder.getObjectID()));
-        GetLinkResponse getResponse = client.execute(new GetLinkRequest(target, getTimeZone()));
+        GetLinkResponse getResponse = getClient().execute(new GetLinkRequest(target, getTimeZone()));
         assertFalse(getResponse.getErrorMessage(), getResponse.hasError());
         ShareLink link = getResponse.getShareLink();
         assertNotNull("got no link", link);
@@ -110,12 +116,12 @@ public class LinkUpdateTest extends ShareTest {
         Date expiryDate = new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1));
         UpdateLinkRequest updateRequest = new UpdateLinkRequest(target, getTimeZone(), getResponse.getTimestamp().getTime());
         updateRequest.setExpiryDate(expiryDate);
-        UpdateLinkResponse updateResponse = client.execute(updateRequest);
+        UpdateLinkResponse updateResponse = getClient().execute(updateRequest);
         assertFalse(updateResponse.getErrorMessage(), updateResponse.hasError());
         /*
          * verify updated link
          */
-        getResponse = client.execute(new GetLinkRequest(target, getTimeZone()));
+        getResponse = getClient().execute(new GetLinkRequest(target, getTimeZone()));
         assertFalse(getResponse.getErrorMessage(), getResponse.hasError());
         ShareLink updatedLink = getResponse.getShareLink();
         assertNotNull("got no updated link", updatedLink);
@@ -128,12 +134,12 @@ public class LinkUpdateTest extends ShareTest {
         expiryDate = new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(3));
         updateRequest = new UpdateLinkRequest(target, getTimeZone(), updateResponse.getTimestamp().getTime());
         updateRequest.setExpiryDate(expiryDate);
-        updateResponse = client.execute(updateRequest);
+        updateResponse = getClient().execute(updateRequest);
         assertFalse(updateResponse.getErrorMessage(), updateResponse.hasError());
         /*
          * verify updated link
          */
-        getResponse = client.execute(new GetLinkRequest(target, getTimeZone()));
+        getResponse = getClient().execute(new GetLinkRequest(target, getTimeZone()));
         assertFalse(getResponse.getErrorMessage(), getResponse.hasError());
         updatedLink = getResponse.getShareLink();
         assertNotNull("got no updated link", updatedLink);
@@ -145,12 +151,12 @@ public class LinkUpdateTest extends ShareTest {
          */
         updateRequest = new UpdateLinkRequest(target, getTimeZone(), updateResponse.getTimestamp().getTime());
         updateRequest.setExpiryDate(null);
-        updateResponse = client.execute(updateRequest);
+        updateResponse = getClient().execute(updateRequest);
         assertFalse(updateResponse.getErrorMessage(), updateResponse.hasError());
         /*
          * verify updated link
          */
-        getResponse = client.execute(new GetLinkRequest(target, getTimeZone()));
+        getResponse = getClient().execute(new GetLinkRequest(target, getTimeZone()));
         assertFalse(getResponse.getErrorMessage(), getResponse.hasError());
         updatedLink = getResponse.getShareLink();
         assertNotNull("got no updated link", updatedLink);
@@ -159,6 +165,7 @@ public class LinkUpdateTest extends ShareTest {
         assertEquals("expiry date wrong", null, updatedLink.getExpiry());
     }
 
+    @Test
     public void testLinkPasswordRandomly() throws Exception {
         testLinkPassword(randomFolderAPI(), randomModule());
     }
@@ -181,7 +188,7 @@ public class LinkUpdateTest extends ShareTest {
          */
         FolderObject folder = insertPrivateFolder(api, module, parent);
         ShareTarget target = new ShareTarget(module, String.valueOf(folder.getObjectID()));
-        GetLinkResponse getResponse = client.execute(new GetLinkRequest(target, getTimeZone()));
+        GetLinkResponse getResponse = getClient().execute(new GetLinkRequest(target, getTimeZone()));
         assertFalse(getResponse.getErrorMessage(), getResponse.hasError());
         ShareLink link = getResponse.getShareLink();
         assertNotNull("got no link", link);
@@ -192,12 +199,12 @@ public class LinkUpdateTest extends ShareTest {
         String password = randomUID();
         UpdateLinkRequest updateRequest = new UpdateLinkRequest(target, getTimeZone(), getResponse.getTimestamp().getTime());
         updateRequest.setPassword(password);
-        UpdateLinkResponse updateResponse = client.execute(updateRequest);
+        UpdateLinkResponse updateResponse = getClient().execute(updateRequest);
         assertFalse(updateResponse.getErrorMessage(), updateResponse.hasError());
         /*
          * verify updated link
          */
-        getResponse = client.execute(new GetLinkRequest(target, getTimeZone()));
+        getResponse = getClient().execute(new GetLinkRequest(target, getTimeZone()));
         assertFalse(getResponse.getErrorMessage(), getResponse.hasError());
         ShareLink updatedLink = getResponse.getShareLink();
         assertNotNull("got no updated link", updatedLink);
@@ -210,12 +217,12 @@ public class LinkUpdateTest extends ShareTest {
         password = randomUID();
         updateRequest = new UpdateLinkRequest(target, getTimeZone(), updateResponse.getTimestamp().getTime());
         updateRequest.setPassword(password);
-        updateResponse = client.execute(updateRequest);
+        updateResponse = getClient().execute(updateRequest);
         assertFalse(updateResponse.getErrorMessage(), updateResponse.hasError());
         /*
          * verify updated link
          */
-        getResponse = client.execute(new GetLinkRequest(target, getTimeZone()));
+        getResponse = getClient().execute(new GetLinkRequest(target, getTimeZone()));
         assertFalse(getResponse.getErrorMessage(), getResponse.hasError());
         updatedLink = getResponse.getShareLink();
         assertNotNull("got no updated link", updatedLink);
@@ -227,12 +234,12 @@ public class LinkUpdateTest extends ShareTest {
          */
         updateRequest = new UpdateLinkRequest(target, getTimeZone(), updateResponse.getTimestamp().getTime());
         updateRequest.setPassword(null);
-        updateResponse = client.execute(updateRequest);
+        updateResponse = getClient().execute(updateRequest);
         assertFalse(updateResponse.getErrorMessage(), updateResponse.hasError());
         /*
          * verify updated link
          */
-        getResponse = client.execute(new GetLinkRequest(target, getTimeZone()));
+        getResponse = getClient().execute(new GetLinkRequest(target, getTimeZone()));
         assertFalse(getResponse.getErrorMessage(), getResponse.hasError());
         updatedLink = getResponse.getShareLink();
         assertNotNull("got no updated link", updatedLink);

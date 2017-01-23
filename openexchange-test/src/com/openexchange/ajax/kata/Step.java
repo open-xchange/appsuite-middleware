@@ -51,13 +51,13 @@ package com.openexchange.ajax.kata;
 
 import com.openexchange.ajax.framework.AJAXClient;
 
-
 /**
  * {@link Step}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public interface Step extends Cleanable{
+public interface Step extends Cleanable {
+
     public void perform(AJAXClient client) throws Exception;
 }

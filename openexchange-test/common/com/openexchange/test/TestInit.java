@@ -1,3 +1,4 @@
+
 package com.openexchange.test;
 
 import java.io.FileInputStream;
@@ -5,6 +6,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 public class TestInit {
+
     private static boolean testPropertiesLoaded = false;
     public static Properties testProps = null;
 
@@ -17,8 +19,7 @@ public class TestInit {
                     propfile = "conf/test.properties";
                 }
                 testProps.load(new FileInputStream(propfile));
-            }
-            catch (final IOException e) {
+            } catch (final IOException e) {
                 throw new RuntimeException(e);
             }
             testPropertiesLoaded = true;

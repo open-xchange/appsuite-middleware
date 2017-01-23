@@ -49,9 +49,14 @@
 
 package com.openexchange.ajax.mail;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import javax.mail.internet.AddressException;
 import org.json.JSONException;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.actions.AllRequest;
@@ -67,75 +72,67 @@ import com.openexchange.exception.OXException;
  */
 public class ClearTest extends AbstractMailTest {
 
-	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ClearTest.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ClearTest.class);
 
-	public ClearTest(final String name) {
-		super(name);
-	}
+    public ClearTest() {
+        super();
+    }
 
-	@Override
-    public void setUp() throws Exception{
-		super.setUp();
-		/*
-		 * Clean everything
-		 */
-		clearFolder(getInboxFolder());
-		clearFolder(getSentFolder());
-		clearFolder(getTrashFolder());
-	}
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+        /*
+         * Clean everything
+         */
+        clearFolder(getInboxFolder());
+        clearFolder(getSentFolder());
+        clearFolder(getTrashFolder());
+    }
 
-	@Override
-    public void tearDown() throws Exception{
-		/*
-		 * Clean everything
-		 */
-		clearFolder(getInboxFolder());
-		clearFolder(getSentFolder());
-		clearFolder(getTrashFolder());
-		super.tearDown();
-	}
+    @After
+    public void tearDown() throws Exception {
+        try {
+            /*
+             * Clean everything
+             */
+            clearFolder(getInboxFolder());
+            clearFolder(getSentFolder());
+            clearFolder(getTrashFolder());
+        } finally {
+            super.tearDown();
+        }
+    }
 
-	public void testClearingOneFolder() throws OXException, IOException, SAXException, JSONException, AddressException, OXException {
-		/*
-		 * Insert <numOfMails> mails through a send request
-		 */
-		final int numOfMails = 5;
-		LOG.info("Appending " + numOfMails + " mails to fill emptied INBOX");
-		final String eml =
-            "Message-Id: <4A002517.4650.0059.1@foobar.com>\n" +
-            "Date: Tue, 05 May 2009 11:37:58 -0500\n" +
-            "From: " + getSendAddress() + "\n" +
-            "To: " + getSendAddress() + "\n" +
-            "Subject: Invitation for launch\n" +
-            "Mime-Version: 1.0\n" +
-            "Content-Type: text/plain; charset=\"US-ASCII\"\n" +
-            "Content-Transfer-Encoding: 7bit\n" +
-            "\n" +
-            "Blah blah blah blah blah blah";
-		for (int i = 0; i < numOfMails; i++) {
-	        getClient().execute(new NewMailRequest(getInboxFolder(), eml, -1, true));
-			LOG.info("Sent " + (i + 1) + ". mail of " + numOfMails);
-		}
+    @Test
+    public void testClearingOneFolder() throws OXException, IOException, SAXException, JSONException, AddressException, OXException {
+        /*
+         * Insert <numOfMails> mails through a send request
+         */
+        final int numOfMails = 5;
+        LOG.info("Appending " + numOfMails + " mails to fill emptied INBOX");
+        final String eml = "Message-Id: <4A002517.4650.0059.1@foobar.com>\n" + "Date: Tue, 05 May 2009 11:37:58 -0500\n" + "From: " + getSendAddress() + "\n" + "To: " + getSendAddress() + "\n" + "Subject: Invitation for launch\n" + "Mime-Version: 1.0\n" + "Content-Type: text/plain; charset=\"US-ASCII\"\n" + "Content-Transfer-Encoding: 7bit\n" + "\n" + "Blah blah blah blah blah blah";
+        for (int i = 0; i < numOfMails; i++) {
+            getClient().execute(new NewMailRequest(getInboxFolder(), eml, -1, true));
+            LOG.info("Sent " + (i + 1) + ". mail of " + numOfMails);
+        }
 
-		// Assert that there are 5 Mails in the folder
-		AllResponse allR = Executor.execute(getSession(), new AllRequest(
-				getInboxFolder(), COLUMNS_DEFAULT_LIST, 0, null, true));
+        // Assert that there are 5 Mails in the folder
+        AllResponse allR = Executor.execute(getSession(), new AllRequest(getInboxFolder(), COLUMNS_DEFAULT_LIST, 0, null, true));
         if (allR.hasError()) {
             fail(allR.getException().toString());
         }
         assertEquals("There should be 5 messages in the folder", allR.getMailMessages(COLUMNS_DEFAULT_LIST).length, 5);
 
         // Send the clear request
-        String [] array = {getInboxFolder()};
+        String[] array = { getInboxFolder() };
         getClient().execute(new ClearRequest(array));
 
         // Assert there are no messages in the folder
-        allR = Executor.execute(getSession(), new AllRequest(
-				getInboxFolder(), COLUMNS_DEFAULT_LIST, 0, null, true));
+        allR = Executor.execute(getSession(), new AllRequest(getInboxFolder(), COLUMNS_DEFAULT_LIST, 0, null, true));
         if (allR.hasError()) {
             fail(allR.getException().toString());
         }
         assertEquals("There should be no messages in the folder", allR.getMailMessages(COLUMNS_DEFAULT_LIST).length, 0);
-	}
+    }
 
 }

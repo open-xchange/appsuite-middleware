@@ -49,24 +49,20 @@
 
 package com.openexchange.groupware.contact.helpers;
 
+import static org.junit.Assert.assertEquals;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.groupware.container.Contact;
-import junit.framework.TestCase;
-
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class ContactMergerTest extends TestCase {
-
+public class ContactMergerTest {
 
     private Contact c1, c2;
 
-
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-
+    @Before
+    public void setUp() throws Exception {
         c1 = new Contact();
         c1.setGivenName("Given Name 1");
         c1.setCompany("Company 1");
@@ -76,30 +72,32 @@ public class ContactMergerTest extends TestCase {
         c2.setCompany("Company 2");
     }
 
-
-
-    public void testNonConflictingElementsShouldBeMergedAnyway(){
+    @Test
+    public void testNonConflictingElementsShouldBeMergedAnyway() {
         ContactMerger merger = new ContactMerger(true);
         Contact merged = merger.merge(c1, c2);
-        assertEquals("Given name should be retained", "Given Name 1" , merged.getGivenName());
-        assertEquals("Surname should be transferred", "Surname 2" , merged.getSurName());
+        assertEquals("Given name should be retained", "Given Name 1", merged.getGivenName());
+        assertEquals("Surname should be transferred", "Surname 2", merged.getSurName());
     }
 
-    public void testSecondElementShouldPrecedeWithOverwrite(){
+    @Test
+    public void testSecondElementShouldPrecedeWithOverwrite() {
         ContactMerger merger = new ContactMerger(true);
         Contact merged = merger.merge(c1, c2);
-        assertEquals("Company should be same of second", "Company 2" , merged.getCompany());
+        assertEquals("Company should be same of second", "Company 2", merged.getCompany());
     }
 
-    public void testEmptyElementShouldNotOverwriteEvenWithOverwriteEnabled(){
+    @Test
+    public void testEmptyElementShouldNotOverwriteEvenWithOverwriteEnabled() {
         ContactMerger merger = new ContactMerger(true);
         Contact merged = merger.merge(c1, c2);
-        assertEquals("Given name should be retained if second one's is null", "Given Name 1" , merged.getGivenName());
+        assertEquals("Given name should be retained if second one's is null", "Given Name 1", merged.getGivenName());
     }
 
-    public void testFirstElementShouldPrecedeWithoutOverwrite(){
+    @Test
+    public void testFirstElementShouldPrecedeWithoutOverwrite() {
         ContactMerger merger = new ContactMerger(false);
         Contact merged = merger.merge(c1, c2);
-        assertEquals("Company should be same of first, still", "Company 1" , merged.getCompany());
+        assertEquals("Company should be same of first, still", "Company 1", merged.getCompany());
     }
 }

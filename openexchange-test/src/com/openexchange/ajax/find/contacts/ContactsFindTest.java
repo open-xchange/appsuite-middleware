@@ -49,8 +49,8 @@
 
 package com.openexchange.ajax.find.contacts;
 
-import java.util.Date;
 import java.util.List;
+import org.junit.Before;
 import com.openexchange.ajax.find.AbstractFindTest;
 import com.openexchange.ajax.find.PropDocument;
 import com.openexchange.ajax.framework.UserValues;
@@ -58,9 +58,7 @@ import com.openexchange.find.Module;
 import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.test.ContactTestManager;
 import com.openexchange.tools.arrays.Arrays;
-
 
 /**
  * {@link ContactsFindTest}
@@ -69,94 +67,29 @@ import com.openexchange.tools.arrays.Arrays;
  */
 public abstract class ContactsFindTest extends AbstractFindTest {
 
-    static final int[] PHONE_COLUMNS = new int[] {
-        Contact.TELEPHONE_ASSISTANT,
-        Contact.TELEPHONE_BUSINESS1,
-        Contact.TELEPHONE_BUSINESS2,
-        Contact.TELEPHONE_CALLBACK,
-        Contact.TELEPHONE_CAR,
-        Contact.TELEPHONE_COMPANY,
-        Contact.TELEPHONE_HOME1,
-        Contact.TELEPHONE_HOME2,
-        Contact.TELEPHONE_IP,
-        Contact.TELEPHONE_ISDN,
-        Contact.TELEPHONE_OTHER,
-        Contact.TELEPHONE_PAGER,
-        Contact.TELEPHONE_PRIMARY,
-        Contact.TELEPHONE_RADIO,
-        Contact.TELEPHONE_TELEX,
-        Contact.TELEPHONE_TTYTDD
+    static final int[] PHONE_COLUMNS = new int[] { Contact.TELEPHONE_ASSISTANT, Contact.TELEPHONE_BUSINESS1, Contact.TELEPHONE_BUSINESS2, Contact.TELEPHONE_CALLBACK, Contact.TELEPHONE_CAR, Contact.TELEPHONE_COMPANY, Contact.TELEPHONE_HOME1, Contact.TELEPHONE_HOME2, Contact.TELEPHONE_IP, Contact.TELEPHONE_ISDN, Contact.TELEPHONE_OTHER, Contact.TELEPHONE_PAGER, Contact.TELEPHONE_PRIMARY, Contact.TELEPHONE_RADIO, Contact.TELEPHONE_TELEX, Contact.TELEPHONE_TTYTDD
     };
 
-    static final int[] NAME_COLUMNS = new int[] {
-        Contact.DISPLAY_NAME,
-        Contact.SUR_NAME,
-        Contact.MIDDLE_NAME,
-        Contact.GIVEN_NAME,
-        Contact.TITLE,
-        Contact.YOMI_FIRST_NAME,
-        Contact.YOMI_LAST_NAME,
-        Contact.SUFFIX
+    static final int[] NAME_COLUMNS = new int[] { Contact.DISPLAY_NAME, Contact.SUR_NAME, Contact.MIDDLE_NAME, Contact.GIVEN_NAME, Contact.TITLE, Contact.YOMI_FIRST_NAME, Contact.YOMI_LAST_NAME, Contact.SUFFIX
     };
 
-    static final int[] EMAIL_COLUMNS = new int[] {
-        Contact.EMAIL1,
-        Contact.EMAIL2,
-        Contact.EMAIL3,
+    static final int[] EMAIL_COLUMNS = new int[] { Contact.EMAIL1, Contact.EMAIL2, Contact.EMAIL3,
     };
 
-    static final int[] ADDRESS_COLUMNS = new int[] {
-        Contact.STREET_BUSINESS,
-        Contact.STREET_HOME,
-        Contact.STREET_OTHER,
-        Contact.POSTAL_CODE_BUSINESS,
-        Contact.POSTAL_CODE_HOME,
-        Contact.POSTAL_CODE_OTHER,
-        Contact.CITY_BUSINESS,
-        Contact.CITY_HOME,
-        Contact.CITY_OTHER,
-        Contact.STATE_BUSINESS,
-        Contact.STATE_HOME,
-        Contact.STATE_OTHER,
-        Contact.COUNTRY_BUSINESS,
-        Contact.COUNTRY_HOME,
-        Contact.COUNTRY_OTHER,
+    static final int[] ADDRESS_COLUMNS = new int[] { Contact.STREET_BUSINESS, Contact.STREET_HOME, Contact.STREET_OTHER, Contact.POSTAL_CODE_BUSINESS, Contact.POSTAL_CODE_HOME, Contact.POSTAL_CODE_OTHER, Contact.CITY_BUSINESS, Contact.CITY_HOME, Contact.CITY_OTHER, Contact.STATE_BUSINESS, Contact.STATE_HOME, Contact.STATE_OTHER, Contact.COUNTRY_BUSINESS, Contact.COUNTRY_HOME, Contact.COUNTRY_OTHER,
     };
 
-    static final int[] ADDRESSBOOK_COLUMNS =
-        Arrays.addUniquely(NAME_COLUMNS, Arrays.addUniquely(ADDRESS_COLUMNS, Arrays.addUniquely(PHONE_COLUMNS, EMAIL_COLUMNS)));
-
-    protected ContactTestManager manager;
+    static final int[] ADDRESSBOOK_COLUMNS = Arrays.addUniquely(NAME_COLUMNS, Arrays.addUniquely(ADDRESS_COLUMNS, Arrays.addUniquely(PHONE_COLUMNS, EMAIL_COLUMNS)));
 
     protected int folderID;
 
-    /**
-     * Initializes a new {@link ContactsFindTest}.
-     *
-     * @param name The test name
-     */
-    public ContactsFindTest(String name) {
-        super(name);
-    }
-
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
-        manager = new ContactTestManager(getClient());
         UserValues values = getClient().getValues();
-        FolderObject folder = folderManager.generatePublicFolder(
-                "ManagedContactTest_"+(new Date().getTime()),
-                com.openexchange.groupware.modules.Module.CONTACTS.getFolderConstant(),
-                values.getPrivateContactFolder(),
-                values.getUserId());
-        folder = folderManager.insertFolderOnServer(folder);
+        FolderObject folder = ftm.generatePublicFolder("ManagedContactTest_" + randomUID(), com.openexchange.groupware.modules.Module.CONTACTS.getFolderConstant(), values.getPrivateContactFolder(), values.getUserId());
+        folder = ftm.insertFolderOnServer(folder);
         folderID = folder.getObjectID();
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        manager.cleanUp();
-        super.tearDown();
     }
 
     /**

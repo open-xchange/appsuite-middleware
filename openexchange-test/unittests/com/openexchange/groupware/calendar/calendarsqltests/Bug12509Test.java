@@ -50,25 +50,25 @@
 package com.openexchange.groupware.calendar.calendarsqltests;
 
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import org.junit.Test;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.setuptools.TestContextToolkit;
 
-
 public class Bug12509Test extends CalendarSqlTest {
+
     /**
      * Test for <a href= "http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=12509">bug #12509</a><br>
      * <i>Appointment change exception located in wrong folder</i>
      */
+    @Test
     public void testChangeExcResidedInSameFolder() {
         try {
             // Create private folder
-            final FolderObject folder = folders.createPrivateFolderForSessionUser(
-                session,
-                ctx,
-                "A nice private folder_" + System.currentTimeMillis(),
-                appointments.getPrivateFolder());
+            final FolderObject folder = folders.createPrivateFolderForSessionUser(session, ctx, "A nice private folder_" + System.currentTimeMillis(), appointments.getPrivateFolder());
             cleanFolders.add(folder);
             // Share to second user
             folders.sharePrivateFolder(session, ctx, secondUserId, folder);
@@ -103,15 +103,9 @@ public class Bug12509Test extends CalendarSqlTest {
             final UserParticipant[] users = reloadedException.getUsers();
             for (int i = 0; i < users.length; i++) {
                 if (users[i].getIdentifier() == session.getUserId()) {
-                    assertEquals(
-                        "Change exception NOT located in same folder as recurring appointment",
-                        folder.getObjectID(),
-                        users[i].getPersonalFolderId());
+                    assertEquals("Change exception NOT located in same folder as recurring appointment", folder.getObjectID(), users[i].getPersonalFolderId());
                 } else {
-                    assertEquals(
-                        "Change exception NOT located in same folder as recurring appointment",
-                        secondParticipantDefaultFolder,
-                        users[i].getPersonalFolderId());
+                    assertEquals("Change exception NOT located in same folder as recurring appointment", secondParticipantDefaultFolder, users[i].getPersonalFolderId());
                 }
             }
         } catch (final Exception e) {

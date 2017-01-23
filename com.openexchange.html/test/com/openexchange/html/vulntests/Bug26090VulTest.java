@@ -60,8 +60,8 @@ import com.openexchange.html.AbstractSanitizing;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class Bug26090VulTest extends AbstractSanitizing {
-    @Test
-    public void testDoNotCreateLinkForUnsupportedProtocols() {
+     @Test
+     public void testDoNotCreateLinkForUnsupportedProtocols() {
         String content = getHtmlService().formatURLs("skype:097711178851337", "commentId");
         String content2 = getHtmlService().formatURLs("javascript:alert(1)", "commentId");
         String content3 = getHtmlService().formatURLs("about:config", "commentId");

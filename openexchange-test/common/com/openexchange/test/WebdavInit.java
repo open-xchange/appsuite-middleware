@@ -1,11 +1,12 @@
-package com.openexchange.test;
 
+package com.openexchange.test;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 
 public class WebdavInit {
+
     private static boolean webdavPropertiesLoaded = false;
     public static Properties webdavProps = null;
 
@@ -13,10 +14,8 @@ public class WebdavInit {
         TestInit.loadTestProperties();
         webdavProps = new Properties();
         try {
-            webdavProps.load(new FileInputStream(TestInit.getTestProperties()
-                    .getProperty("webdavPropertiesFile")));
-        }
-        catch (final IOException e) {
+            webdavProps.load(new FileInputStream(TestInit.getTestProperties().getProperty("webdavPropertiesFile")));
+        } catch (final IOException e) {
             throw new RuntimeException(e);
         }
         webdavPropertiesLoaded = true;

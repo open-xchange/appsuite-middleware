@@ -86,7 +86,7 @@ public class ContactUpdatesParser extends CommonUpdatesParser<ContactUpdatesResp
         List<Contact> contacts = new ArrayList<Contact>();
         for (int i = 0, size = rows.length(); i < size; i++) {
             Object arrayOrId = rows.get(i);
-            if(!JSONArray.class.isInstance(arrayOrId)) {
+            if (!JSONArray.class.isInstance(arrayOrId)) {
                 continue;
             }
             JSONArray row = rows.getJSONArray(i);
@@ -140,13 +140,13 @@ public class ContactUpdatesParser extends CommonUpdatesParser<ContactUpdatesResp
             }
             if (obj.has("mail")) {
                 try {
-                    entry.setEmailaddress( obj.getString("mail") );
+                    entry.setEmailaddress(obj.getString("mail"));
                 } catch (OXException e) {
                     // don't set E-Mail at all
                 }
             }
             if (obj.has("mail_field")) {
-                entry.setEmailfield( obj.getInt("mail_field"));
+                entry.setEmailfield(obj.getInt("mail_field"));
             }
         }
         return results;
