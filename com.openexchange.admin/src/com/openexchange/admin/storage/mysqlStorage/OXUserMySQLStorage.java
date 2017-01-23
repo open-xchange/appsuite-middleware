@@ -3658,12 +3658,14 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         try {
             FolderCacheManager cache = FolderCacheManager.getInstance();
             List<Pair<Integer, String>> folderIds = prepareFolders(contextId, userId, con);
-            StringBuilder sb = new StringBuilder("UPDATE oxfolder_tree SET default_flag = 0, type = 2, fname = ? WHERE cid = ? AND fuid = ?");
+            Date now = new Date();
+            StringBuilder sb = new StringBuilder("UPDATE oxfolder_tree SET default_flag = 0, type = 2, fname = ?, changing_date = ? WHERE cid = ? AND fuid = ?");
             stmt = con.prepareStatement(sb.toString());
             for (Pair<Integer, String> pair : folderIds) {
                 stmt.setString(1, pair.getSecond());
-                stmt.setInt(2, contextId);
-                stmt.setInt(3, pair.getFirst());
+                stmt.setLong(2, now.getTime());
+                stmt.setInt(3, contextId);
+                stmt.setInt(4, pair.getFirst());
                 stmt.addBatch();
                 cache.removeFolderObject(pair.getFirst().intValue(), ContextStorage.getStorageContext(contextId));
             }
