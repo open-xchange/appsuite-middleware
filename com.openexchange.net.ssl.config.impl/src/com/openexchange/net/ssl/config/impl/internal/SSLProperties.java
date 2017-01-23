@@ -222,10 +222,9 @@ public enum SSLProperties {
      * Creates a new <code>RestrictedConfig</code> instance reading configuration from specified service.
      *
      * @param service The service to use
-     * @param existingConfig The possible already existing <code>RestrictedConfig</code> instance
      * @return The created <code>RestrictedConfig</code> instance
      */
-    public static RestrictedConfig newConfig(ConfigurationService service, RestrictedConfig existingConfig) {
+    public static RestrictedConfig newConfig(ConfigurationService service) {
         String[] protocols;
         {
             String prop = service.getProperty(PROTOCOLS_KEY, PROTOCOLS_DEFAULT);

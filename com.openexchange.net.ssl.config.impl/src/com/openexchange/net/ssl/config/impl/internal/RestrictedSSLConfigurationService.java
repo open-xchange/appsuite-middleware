@@ -79,7 +79,7 @@ public class RestrictedSSLConfigurationService implements SSLConfigurationServic
     public RestrictedSSLConfigurationService(TrustLevel trustLevel, ConfigurationService configService) {
         super();
         this.trustLevel = trustLevel;
-        this.configReference = new AtomicReference<RestrictedConfig>(SSLProperties.newConfig(configService, null));
+        this.configReference = new AtomicReference<RestrictedConfig>(SSLProperties.newConfig(configService));
 
         // The immutable configuration properties
         this.hostnameVerificationEnabled = configService.getBoolProperty(SSLProperties.HOSTNAME_VERIFICATION_ENABLED.getName(), SSLProperties.HOSTNAME_VERIFICATION_ENABLED.getDefaultBoolean());
@@ -97,7 +97,7 @@ public class RestrictedSSLConfigurationService implements SSLConfigurationServic
         RestrictedConfig newConfig;
         do {
             existing = configReference.get();
-            newConfig = SSLProperties.newConfig(configService, existing);
+            newConfig = SSLProperties.newConfig(configService);
         } while (!configReference.compareAndSet(existing, newConfig));
     }
 
