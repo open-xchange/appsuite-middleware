@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -63,6 +64,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.ical.CalendarExport;
 import com.openexchange.chronos.ical.ICalParameters;
@@ -169,6 +171,17 @@ public class ICalExporter implements Exporter {
         Task.TRIP_METER,
         Task.COLOR_LABEL
     };
+
+    /**
+     * The event fields being exported by default.
+     */
+    private final static EventField[] EVENT_FIELDS;
+    static {
+        EnumSet<EventField> fields = EnumSet.allOf(EventField.class);
+        fields.remove(EventField.ATTACHMENTS);
+        fields.remove(EventField.ALARMS);
+        EVENT_FIELDS = fields.toArray(new EventField[fields.size()]);
+    }
 
     @Override
     public boolean canExport(final ServerSession sessObj, final Format format, final String folder, final Map<String, Object> optionalParams) throws OXException {
@@ -350,11 +363,17 @@ public class ICalExporter implements Exporter {
          */
         CalendarService calendarService = ImportExportServices.LOOKUP.get().getService(CalendarService.class);
         CalendarSession calendarSession = calendarService.init(session);
-        calendarSession.set(CalendarParameters.PARAMETER_RECURRENCE_MASTER, Boolean.TRUE);
+        calendarSession
+            .set(CalendarParameters.PARAMETER_ORDER_BY, EventField.START_DATE)
+            .set(CalendarParameters.PARAMETER_ORDER, "ASC")
+            .set(CalendarParameters.PARAMETER_FIELDS, EVENT_FIELDS)
+            .set(CalendarParameters.PARAMETER_RECURRENCE_MASTER, Boolean.TRUE)
+        ;
         ICalService iCalService = ImportExportServices.LOOKUP.get().getService(ICalService.class);
         ICalParameters iCalParameters = iCalService.initParameters();
         iCalParameters.set(ICalParameters.DEFAULT_TIMEZONE, TimeZone.getTimeZone(session.getUser().getTimeZone()));
         CalendarExport calendarExport = iCalService.exportICal(iCalParameters);
+        calendarExport.setMethod("PUBLISH");
         /*
          * perform export
          */
@@ -367,6 +386,7 @@ public class ICalExporter implements Exporter {
                 }
             }
         } else {
+            calendarExport.setName(getFolder(session, String.valueOf(folderID)).getFolderName());
             for (Event event : calendarService.getEventsInFolder(calendarSession, folderID)) {
                 calendarExport.add(event);
             }

@@ -135,7 +135,7 @@ public class ICalHandler extends HttpAuthShareHandler {
     };
 
     /**
-     * The appointment properties being exported
+     * The event fields being exported
      */
     private final static EventField[] EVENT_FIELDS;
     static {
