@@ -1468,9 +1468,7 @@ public final class MimeMessageConverter {
                         mailMessage.setHasAttachment(((ExtendedMimeMessage) msg).hasAttachment());
                     } else {
                         try {
-                            mailMessage.setHasAttachment(ct.startsWith(multipart) && (mixed.equalsIgnoreCase(ct.getSubType()) || hasAttachments(
-                                (Multipart) msg.getContent(),
-                                ct.getSubType())));
+                            mailMessage.setHasAttachment(ct.startsWith(multipart) && hasAttachments((Part) msg.getContent()));
                         } catch (final ClassCastException e) {
                             // Cast to javax.mail.Multipart failed
                             LOG1.debug(new StringBuilder(256).append(
@@ -1914,25 +1912,7 @@ public final class MimeMessageConverter {
             }
            {
                 ContentType ct = mail.getContentType();
-                if (ct.startsWith(MULTI_PRIMTYPE)) {
-                    if (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(ct.getSubType())) {
-                        // For convenience consider multipart/mixed to hold file attachments
-                        mail.setHasAttachment(true);
-                    } else if (MULTI_SUBTYPE_ALTERNATIVE.equalsIgnoreCase(ct.getSubType())) {
-                        // For convenience consider multipart/alternative to hold file attachments if it has more than 2 sub-parts
-                        if (mail.getEnclosedCount() > 2) {
-                            mail.setHasAttachment(true);
-                        } else {
-                            examineAttachmentPresence(mail, ct);
-                        }
-                    } else {
-                        // Examine...
-                        examineAttachmentPresence(mail, ct);
-                    }
-                } else {
-                    // No multipart/* at all
-                    mail.setHasAttachment(false);
-                }
+                examineAttachmentPresence(mail, ct);
             }
             {
                 final String[] tmp = mail.getHeader(MessageHeaders.HDR_CONTENT_ID);

@@ -311,6 +311,10 @@ public class LocalReportService extends AbstractReportService {
             } catch (SQLException e1) {
                 throw ReportExceptionCodes.UNABLE_TO_RETRIEVE_ALL_CONTEXT_IDS.create();
             }
+            
+            if (contextsInSameSchema.size() == 0) {
+                contextsInSameSchema.add(firstRemainingContext);
+            }
 
             LOG.debug("For {} contexts a new thread will be spawned. Contained contexts: {}", contextsInSameSchema.size(), Arrays.toString(contextsInSameSchema.toArray()));
             for (int i = 0; i < contextsInSameSchema.size(); i++) {
@@ -324,7 +328,6 @@ public class LocalReportService extends AbstractReportService {
             try {
                 if (finishedContexts.get() != 0) {
                     report.setTaskState(report.getNumberOfTasks(), report.getNumberOfPendingTasks() - finishedContexts.get());
-                    System.out.println(report.getNumberOfPendingTasks() + " : " + report.getNumberOfTasks());
                     if (report.getNumberOfPendingTasks() <= 0) {
                         finishUpReport(reportType, cache.asMap().get(PENDING_REPORTS_PRE_KEY + reportType), report);
                     }

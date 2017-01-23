@@ -61,6 +61,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -108,6 +109,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
     // private final UnifiedINBOXAccess access;
 
     private final int unifiedInboxId;
+    final UnifiedInboxAccess access;
     final Session session;
     private final Context ctx;
     private Locale locale;
@@ -123,6 +125,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
         super();
         // this.access = access;
         unifiedInboxId = access.getAccountId();
+        this.access = access;
         this.session = session;
         ctx = ContextStorage.getStorageContext(session.getContextId());
     }
@@ -844,6 +847,8 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                         mailFolder.setDefaultFolderType(DefaultFolderType.NONE);
                         return mailFolder;
                     } catch (final OXException e) {
+                        e.setCategory(Category.CATEGORY_WARNING);
+                        access.addWarnings(Collections.singleton(e));
                         getLogger().debug("", e);
                         return null;
                     } finally {

@@ -15,7 +15,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:        @OXVERSION@
-%define        ox_release 21
+%define        ox_release 22
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -60,6 +60,8 @@ ant -lib build/lib -Dbasedir=build -Dhtdoc=%{docroot} -DdestDir=%{buildroot} -Dp
 %doc com.openexchange.messaging.sms/ChangeLog
 
 %changelog
+* Thu Jan 19 2017 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2017-01-23 (3878)
 * Fri Jan 06 2017 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2017-01-18 (3867)
 * Wed Jan 04 2017 Marcus Klein <marcus.klein@open-xchange.com>

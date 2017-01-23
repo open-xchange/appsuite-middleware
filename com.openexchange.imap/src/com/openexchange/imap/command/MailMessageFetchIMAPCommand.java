@@ -71,6 +71,7 @@ import javax.mail.Message;
 import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
+import javax.mail.Part;
 import javax.mail.UIDFolder;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
@@ -1017,7 +1018,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             msg.setContentType(contentType);
             msg.addHeader("Content-Type", contentType.toString(true));
 
-            boolean hasAttachment = bs.isMulti() && (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(bs.subtype) || MimeMessageUtility.hasAttachments(bs));
+            boolean hasAttachment = MimeMessageUtility.hasAttachments(bs);
             if (hasAttachment) {
                 if (checkICal && hasICal(bs)) {
                     msg.addHeader("X-ICAL", "true");
@@ -1103,9 +1104,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             } else {
                 try {
                     final ContentType ct = new ContentType(contentType);
-                    msg.setHasAttachment(ct.startsWith("multipart/") && ("mixed".equalsIgnoreCase(ct.getSubType()) || MimeMessageUtility.hasAttachments(
-                        (Multipart) message.getContent(),
-                        ct.getSubType())));
+                    msg.setHasAttachment(MimeMessageUtility.hasAttachments((Part) message.getContent()));
                 } catch (final IOException e) {
                     throw new MessagingException(e.getMessage(), e);
                 }

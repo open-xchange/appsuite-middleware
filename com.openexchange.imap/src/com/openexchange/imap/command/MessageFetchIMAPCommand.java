@@ -728,7 +728,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
                 logger.warn("", e);
                 msg.setContentType(new ContentType(MimeTypes.MIME_DEFAULT));
             }
-            msg.setHasAttachment(bs.isMulti() && (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(bs.subtype) || MimeMessageUtility.hasAttachments(bs)));
+            msg.setHasAttachment(MimeMessageUtility.hasAttachments(bs));
         }
     };
 
