@@ -303,31 +303,15 @@ public class AppsLoadServlet extends SessionServlet {
                             }
                         }
                     } catch (OXException e) {
-                        int len = module.length() - 3;
-                        String moduleName = module;
-                        if (format == null && len > 0 && ".js".equals(module.substring(len))) {
-                            moduleName = module.substring(0, len);
-                        }
-                        name = escapeName(name);
-                        ew.error(("define('" + escapeName(moduleName) + "', function () {\n" +
-                                  "    if (ox.debug) console.log(\"Could not read '" + name + "': " + e.toString() + "\");\n" +
-                                  "    throw new Error(\"Could not read '" + name + "'\");\n" +
-                                  "});\n").getBytes(Charsets.UTF_8));
+                        LOG.debug("Error loading data for module '{}'", escapeName(module), e);
+                        ew.error(("console.error('Error loading data for supplied module');\n").getBytes("UTF-8"));
                     }
                 }
                 if (data != null) {
                     ew.write(data, options);
                 } else {
-                    int len = module.length() - 3;
-                    String moduleName = module;
-                    if (format == null && len > 0 && ".js".equals(module.substring(len))) {
-                        moduleName = module.substring(0, len);
-                    }
-                    name = escapeName(name);
-                    ew.error(("define('" + escapeName(moduleName) + "', function () {\n" +
-                              "    if (ox.debug) console.log(\"Could not read '" + name + "'\");\n" +
-                              "    throw new Error(\"Could not read '" + name + "'\");\n" +
-                              "});\n").getBytes(Charsets.UTF_8));
+                    LOG.debug("Could not read data for module '{}'", escapeName(module));
+                    ew.error(("console.error('Could not read data for supplied module');\n").getBytes("UTF-8"));
                 }
             }
         }
