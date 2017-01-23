@@ -47,44 +47,38 @@
  *
  */
 
-package com.openexchange.chronos.ical;
+package com.openexchange.chronos.ical.ical4j.mapping.calendar;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import com.openexchange.chronos.Event;
-import com.openexchange.exception.OXException;
+import com.openexchange.chronos.Calendar;
+import com.openexchange.chronos.ical.ical4j.VCalendar;
+import com.openexchange.chronos.ical.ical4j.mapping.ICalMapping;
 
 /**
- * {@link ImportedEvent}
+ * {@link CalendarMappings}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class ImportedEvent extends EventComponent implements ImportedComponent {
+public class CalendarMappings {
 
-    private final int index;
-    private final List<OXException> warnings;
+	/**
+	 * Holds a collection of all known alarm mappings.
+	 */
+    public static List<ICalMapping<VCalendar, Calendar>> ALL = Collections.<ICalMapping<VCalendar, Calendar>> unmodifiableList(Arrays.asList(
+		new MethodMapping(),
+		new NameMapping(),
+		new ProdIdMapping(),
+        new VersionMapping()
+	));
 
     /**
-     * Initializes a new {@link ImportedEvent}.
-     *
-     * @param index The component's index in the parent iCalendar structure.
-     * @param event The imported event object
-     * @param warnings A list of parser- and conversion warnings.
+     * Initializes a new {@link CalendarMappings}.
      */
-    public ImportedEvent(int index, Event event, List<OXException> warnings) {
-        super(event);
-        this.warnings = warnings;
-        this.index = index;
-    }
-
-    @Override
-    public List<OXException> getWarnings() {
-        return ComponentUtils.collectWarnings(warnings, getAlarms());
-    }
-
-    @Override
-    public int getIndex() {
-        return index;
-    }
+	private CalendarMappings() {
+		super();
+	}
 
 }

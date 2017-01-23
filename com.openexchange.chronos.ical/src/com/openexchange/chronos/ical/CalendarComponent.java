@@ -50,41 +50,67 @@
 package com.openexchange.chronos.ical;
 
 import java.util.List;
-import com.openexchange.chronos.Event;
-import com.openexchange.exception.OXException;
+import com.openexchange.chronos.Calendar;
+import com.openexchange.chronos.DelegatingCalendar;
 
 /**
- * {@link ImportedEvent}
+ * {@link CalendarComponent}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class ImportedEvent extends EventComponent implements ImportedComponent {
+public class CalendarComponent extends DelegatingCalendar implements ComponentData {
 
-    private final int index;
-    private final List<OXException> warnings;
+    private List<ICalProperty> properties;
 
     /**
-     * Initializes a new {@link ImportedEvent}.
-     *
-     * @param index The component's index in the parent iCalendar structure.
-     * @param event The imported event object
-     * @param warnings A list of parser- and conversion warnings.
+     * Initializes a new {@link CalendarComponent}.
      */
-    public ImportedEvent(int index, Event event, List<OXException> warnings) {
-        super(event);
-        this.warnings = warnings;
-        this.index = index;
+    public CalendarComponent() {
+        this(new Calendar());
+    }
+
+    /**
+     * Initializes a new {@link CalendarComponent}.
+     *
+     * @param delegate The underlying delegate
+     */
+    public CalendarComponent(Calendar delegate) {
+        super(delegate);
+    }
+
+    /**
+     * Gets the extended iCal properties matching the supplied name.
+     *
+     * @param propertyName The name of the properties to get
+     * @return The properties, or an empty list if not found
+     */
+    public List<ICalProperty> getProperties(String propertyName) {
+        return ComponentUtils.getProperties(this, propertyName);
+    }
+
+    /**
+     * Gets the first extended iCal property matching the supplied name.
+     *
+     * @param propertyName The name of the property to get
+     * @return The property, or <code>null</code> if not found
+     */
+    public ICalProperty getProperty(String propertyName) {
+        return ComponentUtils.getProperty(this, propertyName);
     }
 
     @Override
-    public List<OXException> getWarnings() {
-        return ComponentUtils.collectWarnings(warnings, getAlarms());
+    public List<ICalProperty> getProperties() {
+        return properties;
     }
 
-    @Override
-    public int getIndex() {
-        return index;
+    /**
+     * Sets the list of further arbitrary iCalendar properties associated with the component.
+     *
+     * @param properties The extra properties to set
+     */
+    public void setProperties(List<ICalProperty> properties) {
+        this.properties = properties;
     }
 
 }

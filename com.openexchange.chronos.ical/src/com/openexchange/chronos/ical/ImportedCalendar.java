@@ -50,41 +50,41 @@
 package com.openexchange.chronos.ical;
 
 import java.util.List;
-import com.openexchange.chronos.Event;
+import com.openexchange.chronos.Calendar;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link ImportedEvent}
+ * {@link ImportedCalendar}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class ImportedEvent extends EventComponent implements ImportedComponent {
+public class ImportedCalendar extends CalendarComponent implements ImportedComponent {
 
-    private final int index;
     private final List<OXException> warnings;
 
     /**
-     * Initializes a new {@link ImportedEvent}.
+     * Initializes a new {@link ImportedCalendar}.
      *
-     * @param index The component's index in the parent iCalendar structure.
-     * @param event The imported event object
+     * @param calendar The imported calendar object
      * @param warnings A list of parser- and conversion warnings.
      */
-    public ImportedEvent(int index, Event event, List<OXException> warnings) {
-        super(event);
+    public ImportedCalendar(Calendar calendar, List<OXException> warnings) {
+        super(calendar);
         this.warnings = warnings;
-        this.index = index;
     }
 
     @Override
     public List<OXException> getWarnings() {
-        return ComponentUtils.collectWarnings(warnings, getAlarms());
+        return ComponentUtils.collectWarnings(ComponentUtils.collectWarnings(warnings, getEvents()), getFreeBusyDatas());
     }
 
+    /**
+     * @return Always <code>0</code> for an imported <code>VCALENDAR</code> component.
+     */
     @Override
     public int getIndex() {
-        return index;
+        return 0;
     }
 
 }

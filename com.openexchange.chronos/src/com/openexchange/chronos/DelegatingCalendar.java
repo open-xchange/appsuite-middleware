@@ -47,44 +47,98 @@
  *
  */
 
-package com.openexchange.chronos.ical;
+package com.openexchange.chronos;
 
 import java.util.List;
-import com.openexchange.chronos.Event;
-import com.openexchange.exception.OXException;
 
 /**
- * {@link ImportedEvent}
+ * {@link DelegatingCalendar}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class ImportedEvent extends EventComponent implements ImportedComponent {
+public abstract class DelegatingCalendar extends Calendar {
 
-    private final int index;
-    private final List<OXException> warnings;
+    protected final Calendar delegate;
 
     /**
-     * Initializes a new {@link ImportedEvent}.
+     * Initializes a new {@link DelegatingCalendar}.
      *
-     * @param index The component's index in the parent iCalendar structure.
-     * @param event The imported event object
-     * @param warnings A list of parser- and conversion warnings.
+     * @param delegate The underlying calendar delegate
      */
-    public ImportedEvent(int index, Event event, List<OXException> warnings) {
-        super(event);
-        this.warnings = warnings;
-        this.index = index;
+    protected DelegatingCalendar(Calendar delegate) {
+        super();
+        this.delegate = delegate;
     }
 
     @Override
-    public List<OXException> getWarnings() {
-        return ComponentUtils.collectWarnings(warnings, getAlarms());
+    public String getProdId() {
+        return delegate.getProdId();
     }
 
     @Override
-    public int getIndex() {
-        return index;
+    public void setProdId(String prodId) {
+        delegate.setProdId(prodId);
+    }
+
+    @Override
+    public String getVersion() {
+        return delegate.getVersion();
+    }
+
+    @Override
+    public void setVersion(String version) {
+        delegate.setVersion(version);
+    }
+
+    @Override
+    public String getCalScale() {
+        return delegate.getCalScale();
+    }
+
+    @Override
+    public void setCalScale(String calScale) {
+        delegate.setCalScale(calScale);
+    }
+
+    @Override
+    public String getMethod() {
+        return delegate.getMethod();
+    }
+
+    @Override
+    public void setMethod(String method) {
+        delegate.setMethod(method);
+    }
+
+    @Override
+    public String getName() {
+        return delegate.getName();
+    }
+
+    @Override
+    public void setName(String name) {
+        delegate.setName(name);
+    }
+
+    @Override
+    public List<Event> getEvents() {
+        return delegate.getEvents();
+    }
+
+    @Override
+    public void setEvents(List<Event> events) {
+        delegate.setEvents(events);
+    }
+
+    @Override
+    public List<FreeBusyData> getFreeBusyDatas() {
+        return delegate.getFreeBusyDatas();
+    }
+
+    @Override
+    public void setFreeBusyDatas(List<FreeBusyData> freeBusyDatas) {
+        delegate.setFreeBusyDatas(freeBusyDatas);
     }
 
 }

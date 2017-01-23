@@ -47,44 +47,43 @@
  *
  */
 
-package com.openexchange.chronos.ical;
+package com.openexchange.chronos.ical.ical4j.mapping.calendar;
 
-import java.util.List;
-import com.openexchange.chronos.Event;
-import com.openexchange.exception.OXException;
+import com.openexchange.chronos.Calendar;
+import com.openexchange.chronos.ical.ical4j.VCalendar;
+import com.openexchange.chronos.ical.ical4j.mapping.ICalTextMapping;
+import net.fortuna.ical4j.extensions.property.WrCalName;
+import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.property.Name;
 
 /**
- * {@link ImportedEvent}
+ * {@link NameMapping}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class ImportedEvent extends EventComponent implements ImportedComponent {
-
-    private final int index;
-    private final List<OXException> warnings;
+public class NameMapping extends ICalTextMapping<VCalendar, Calendar> {
 
     /**
-     * Initializes a new {@link ImportedEvent}.
-     *
-     * @param index The component's index in the parent iCalendar structure.
-     * @param event The imported event object
-     * @param warnings A list of parser- and conversion warnings.
+     * Initializes a new {@link NameMapping}.
      */
-    public ImportedEvent(int index, Event event, List<OXException> warnings) {
-        super(event);
-        this.warnings = warnings;
-        this.index = index;
-    }
+	public NameMapping() {
+        super(WrCalName.PROPERTY_NAME);
+	}
 
-    @Override
-    public List<OXException> getWarnings() {
-        return ComponentUtils.collectWarnings(warnings, getAlarms());
-    }
+	@Override
+    protected String getValue(Calendar object) {
+        return object.getName();
+	}
 
-    @Override
-    public int getIndex() {
-        return index;
-    }
+	@Override
+    protected void setValue(Calendar object, String value) {
+        object.setName(value);
+	}
+
+	@Override
+	protected Property createProperty() {
+        return new Name();
+	}
 
 }

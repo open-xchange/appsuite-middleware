@@ -124,6 +124,31 @@ public class ComponentUtils {
     }
 
     /**
+     * Collects all warnings from multiple imported components.
+     *
+     * @param ownWarnings The component's own warnings
+     * @param subComponents The sub-components to add the warnings from
+     * @return The collected warnings, or an empty list if there are none
+     */
+    public static <T> List<OXException> collectWarnings(List<OXException> ownWarnings, List<T> subComponents) {
+        List<OXException> warnings = new ArrayList<OXException>();
+        if (null != ownWarnings) {
+            warnings.addAll(ownWarnings);
+        }
+        if (null != subComponents) {
+            for (T importedComponent : subComponents) {
+                if (ImportedComponent.class.isInstance(importedComponent)) {
+                    List<OXException> warningsList = ((ImportedComponent) importedComponent).getWarnings();
+                    if (null != warningsList) {
+                        warnings.addAll(warningsList);
+                    }
+                }
+            }
+        }
+        return warnings;
+    }
+
+    /**
      * Initializes a new {@link ComponentUtils}.
      */
     private ComponentUtils() {
