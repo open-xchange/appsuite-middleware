@@ -53,9 +53,6 @@ import gnu.trove.iterator.TIntObjectIterator;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PipedOutputStream;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
@@ -69,10 +66,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -82,8 +75,8 @@ import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.AsciiReader;
 import com.openexchange.java.AsciiWriter;
-import com.openexchange.java.ExceptionAwarePipedInputStream;
 import com.openexchange.java.Streams;
+import com.openexchange.java.util.Pair;
 import com.openexchange.jslob.DefaultJSlob;
 import com.openexchange.jslob.JSlob;
 import com.openexchange.jslob.JSlobExceptionCodes;
@@ -91,9 +84,6 @@ import com.openexchange.jslob.JSlobId;
 import com.openexchange.jslob.storage.JSlobStorage;
 import com.openexchange.jslob.storage.db.cache.CachingJSlobStorage;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.threadpool.ThreadPools;
-import com.openexchange.threadpool.behavior.AbortBehavior;
 
 /**
  * {@link DBJSlobStorage}
@@ -107,9 +97,6 @@ public final class DBJSlobStorage implements JSlobStorage {
     private static final String ID = "io.ox.wd.jslob.storage.db";
 
     private final ServiceLookup services;
-    private final Lock rlock;
-    private final Lock wlock;
-    private final Condition wlockCondition;
     private volatile Boolean streamBasedJDBC;
 
     /**
@@ -118,10 +105,6 @@ public final class DBJSlobStorage implements JSlobStorage {
     public DBJSlobStorage(final ServiceLookup services) {
         super();
         this.services = services;
-        final ReadWriteLock rwLock = new ReentrantReadWriteLock();
-        rlock = rwLock.readLock();
-        wlock = rwLock.writeLock();
-        wlockCondition = wlock.newCondition();
     }
 
     private boolean streamBasedJDBC() {
@@ -154,241 +137,74 @@ public final class DBJSlobStorage implements JSlobStorage {
      * @throws OXException If deleting all user entries fails
      */
     public void dropAllUserJSlobs(final int userId, final int contextId) throws OXException {
-        wlock.lock();
-        try {
-            {
-                final CachingJSlobStorage cachingJSlobStorage = CachingJSlobStorage.getInstance();
-                if (null != cachingJSlobStorage) {
-                    cachingJSlobStorage.dropAllUserJSlobs(userId, contextId);
-                }
+        {
+            final CachingJSlobStorage cachingJSlobStorage = CachingJSlobStorage.getInstance();
+            if (null != cachingJSlobStorage) {
+                cachingJSlobStorage.dropAllUserJSlobs(userId, contextId);
             }
-            final DatabaseService databaseService = getDatabaseService();
-            final Connection con = databaseService.getWritable(contextId);
-            boolean committed = true;
-            PreparedStatement stmt = null;
-            try {
-                /*
-                 * Now delete
-                 */
-                con.setAutoCommit(false); // BEGIN
-                committed = false;
-                stmt = con.prepareStatement(SQL_DELETE_ALL_USER);
-                stmt.setLong(1, contextId);
-                stmt.setLong(2, userId);
-                stmt.executeUpdate();
-                con.commit(); // COMMIT
-                committed = true;
-            } catch (final SQLException e) {
-                throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-            } finally {
-                if (!committed) {
-                    Databases.rollback(con);
-                }
-                Databases.closeSQLStuff(stmt);
-                Databases.autocommit(con);
-                databaseService.backWritable(contextId, con);
-            }
-        } finally {
-            wlock.unlock();
         }
-    }
-
-    @Override
-    public boolean lock(final JSlobId id) throws OXException {
-        wlock.lock();
-        try {
-            /*
-             * Check for existing lock
-             */
-            final DatabaseService databaseService = getDatabaseService();
-            final int contextId = id.getContext();
-            final Connection con = databaseService.getWritable(contextId);
-            boolean committed = true;
-            PreparedStatement stmt = null;
-            final ResultSet result = null;
-            try {
-                con.setAutoCommit(false); // BEGIN
-                committed = false;
-                final boolean locked = checkLocked(id, true, con);
-                if (locked) {
-                    /*
-                     * Already locked
-                     */
-                    con.commit();
-                    return false;
-                }
-                /*
-                 * Lock
-                 */
-                stmt = con.prepareStatement("UPDATE jsonStorage SET locked = ? WHERE cid = ? AND user = ? AND serviceId = ? AND id = ? AND locked = ?");
-                stmt.setInt(1, 1);
-                stmt.setLong(2, contextId);
-                stmt.setLong(3, id.getUser());
-                stmt.setString(4, id.getServiceId());
-                stmt.setString(5, id.getId());
-                stmt.setInt(6, 0);
-                final int res = stmt.executeUpdate();
-                con.commit(); // COMMIT
-                committed = true;
-                if (res == 0) {
-                    /*
-                     * Could not be locked
-                     */
-                    return false;
-                }
-                /*
-                 * Marked as locked.
-                 */
-                return true;
-            } catch (final SQLException e) {
-                throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-            } finally {
-                if (!committed) {
-                    Databases.rollback(con);
-                }
-                Databases.closeSQLStuff(result, stmt);
-                Databases.autocommit(con);
-                databaseService.backWritable(contextId, con);
-            }
-        } finally {
-            wlock.unlock();
-        }
-    }
-
-    @Override
-    public void unlock(final JSlobId id) throws OXException {
-        wlock.lock();
-        try {
-            /*
-             * Check for existing lock
-             */
-            final DatabaseService databaseService = getDatabaseService();
-            final int contextId = id.getContext();
-            final Connection con = databaseService.getWritable(contextId);
-            boolean committed = true;
-            PreparedStatement stmt = null;
-            final ResultSet result = null;
-            try {
-                con.setAutoCommit(false); // BEGIN
-                committed = false;
-                final boolean locked = checkLocked(id, true, con);
-                if (!locked) {
-                    /*
-                     * Already unlocked
-                     */
-                    con.commit();
-                    return;
-                }
-                /*
-                 * Unlock
-                 */
-                stmt = con.prepareStatement("UPDATE jsonStorage SET locked = ? WHERE cid = ? AND user = ? AND serviceId = ? AND id = ? AND locked = ?");
-                stmt.setInt(1, 0);
-                stmt.setLong(2, contextId);
-                stmt.setLong(3, id.getUser());
-                stmt.setString(4, id.getServiceId());
-                stmt.setString(5, id.getId());
-                stmt.setInt(6, 1);
-                final int res = stmt.executeUpdate();
-                con.commit(); // COMMIT
-                committed = true;
-                if (res == 0) {
-                    /*
-                     * Could not be locked
-                     */
-                    throw DBJSlobStorageExceptionCode.UNLOCK_FAILED.create(id);
-                }
-            } catch (final SQLException e) {
-                throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-            } finally {
-                if (!committed) {
-                    Databases.rollback(con);
-                }
-                Databases.closeSQLStuff(result, stmt);
-                Databases.autocommit(con);
-                databaseService.backWritable(contextId, con);
-            }
-        } finally {
-            wlock.unlock();
-        }
-    }
-
-    private static final String SQL_LOCKED_TRANSACTIONAL =
-        "SELECT locked FROM jsonStorage WHERE cid = ? AND user = ? AND serviceId = ? AND id = ? FOR UPDATE";
-
-    private static final String SQL_LOCKED = "SELECT locked FROM jsonStorage WHERE cid = ? AND user = ? AND serviceId = ? AND id = ?";
-
-    private boolean checkLocked(final JSlobId id, final boolean transactional, final Connection con) throws OXException {
+        final DatabaseService databaseService = getDatabaseService();
+        final Connection con = databaseService.getWritable(contextId);
+        boolean committed = true;
         PreparedStatement stmt = null;
-        ResultSet result = null;
         try {
-            stmt = con.prepareStatement(transactional ? SQL_LOCKED_TRANSACTIONAL : SQL_LOCKED);
-            stmt.setLong(1, id.getContext());
-            stmt.setLong(2, id.getUser());
-            stmt.setString(3, id.getServiceId());
-            stmt.setString(4, id.getId());
-            result = stmt.executeQuery();
-            if (!result.next()) {
-                throw DBJSlobStorageExceptionCode.NO_ENTRY.create(id);
-            }
-            return (result.getInt(1) > 0);
+            /*
+             * Now delete
+             */
+            con.setAutoCommit(false); // BEGIN
+            committed = false;
+            stmt = con.prepareStatement(SQL_DELETE_ALL_USER);
+            stmt.setLong(1, contextId);
+            stmt.setLong(2, userId);
+            stmt.executeUpdate();
+            con.commit(); // COMMIT
+            committed = true;
         } catch (final SQLException e) {
             throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            Databases.closeSQLStuff(result, stmt);
-        }
-    }
-
-    @Override
-    public JSlob load(final JSlobId id) throws OXException {
-        rlock.lock();
-        try {
-            final DatabaseService databaseService = getDatabaseService();
-            final int contextId = id.getContext();
-            final Connection con = databaseService.getReadOnly(contextId);
-            try {
-                final JSlob jslob = load(id, contextId, con);
-                if (null == jslob) {
-                    throw JSlobExceptionCodes.NOT_FOUND_EXT.create(
-                        id.getServiceId(),
-                        Integer.valueOf(id.getUser()),
-                        Integer.valueOf(contextId));
-                }
-                return jslob;
-            } finally {
-                databaseService.backReadOnly(contextId, con);
+            if (!committed) {
+                Databases.rollback(con);
             }
-        } finally {
-            rlock.unlock();
+            Databases.closeSQLStuff(stmt);
+            Databases.autocommit(con);
+            databaseService.backWritable(contextId, con);
         }
     }
 
     @Override
-    public void invalidate(final JSlobId id) {
+    public JSlob load(JSlobId id) throws OXException {
+        DatabaseService databaseService = getDatabaseService();
+        int contextId = id.getContext();
+        Connection con = databaseService.getReadOnly(contextId);
+        try {
+            JSlob jslob = load(id, contextId, con);
+            if (null == jslob) {
+                throw JSlobExceptionCodes.NOT_FOUND_EXT.create(id.getServiceId(), Integer.valueOf(id.getUser()), Integer.valueOf(contextId));
+            }
+            return jslob;
+        } finally {
+            databaseService.backReadOnly(contextId, con);
+        }
+    }
+
+    @Override
+    public void invalidate(JSlobId id) {
         // nothing to do
     }
 
     @Override
-    public JSlob opt(final JSlobId id) throws OXException {
-        rlock.lock();
+    public JSlob opt(JSlobId id) throws OXException {
+        DatabaseService databaseService = getDatabaseService();
+        int contextId = id.getContext();
+        Connection con = databaseService.getReadOnly(contextId);
         try {
-            final DatabaseService databaseService = getDatabaseService();
-            final int contextId = id.getContext();
-            final Connection con = databaseService.getReadOnly(contextId);
-            try {
-                return load(id, contextId, con);
-            } finally {
-                databaseService.backReadOnly(contextId, con);
-            }
+            return load(id, contextId, con);
         } finally {
-            rlock.unlock();
+            databaseService.backReadOnly(contextId, con);
         }
     }
 
-    private JSlob load(final JSlobId id, final int contextId, final Connection con) throws OXException {
-        if (false && checkLocked(id, false, con)) {
-            throw DBJSlobStorageExceptionCode.ALREADY_LOCKED.create(id);
-        }
+    private JSlob load(JSlobId id, int contextId, Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -414,43 +230,35 @@ public final class DBJSlobStorage implements JSlobStorage {
     }
 
     @Override
-    public List<JSlob> list(final List<JSlobId> ids) throws OXException {
+    public List<JSlob> list(List<JSlobId> ids) throws OXException {
         if (null == ids || ids.isEmpty()) {
             return Collections.emptyList();
         }
-        final List<String> failedOnes = new LinkedList<String>();
+
+        List<String> failedOnes = new LinkedList<String>();
         List<JSlob> loaded = null;
-        rlock.lock();
-        try {
-            final DatabaseService databaseService = getDatabaseService();
-            final int contextId = ids.get(0).getContext();
-            final Connection con;
-            try {
-                con = databaseService.getReadOnly(contextId);
-            } catch (final OXException e) {
-                throw DBJSlobStorageExceptionCode.CONNECTION_ERROR.create(e);
-            }
+        {
+            DatabaseService databaseService = getDatabaseService();
+            int contextId = ids.get(0).getContext();
+            Connection con = databaseService.getReadOnly(contextId);
             try {
                 loaded = loadThem(ids, contextId, con, failedOnes);
             } finally {
                 databaseService.backReadOnly(contextId, con);
             }
-        } finally {
-            rlock.unlock();
         }
+
         // Check for failed parse attempts
         if (!failedOnes.isEmpty()) {
             final JSlobId jSlobId = ids.get(0);
             deleteCorruptBlobsSafe(failedOnes, jSlobId.getServiceId(), jSlobId.getUser(), jSlobId.getContext());
         }
+
         // Return loaded ones
         return loaded;
     }
 
-    private List<JSlob> loadThem(final List<JSlobId> ids, final int contextId, final Connection con, final List<String> failedOnes) throws OXException {
-        if (false && checkLocked(ids.get(0), false, con)) {
-            throw DBJSlobStorageExceptionCode.ALREADY_LOCKED.create(ids.get(0));
-        }
+    private List<JSlob> loadThem(List<JSlobId> ids, int contextId, Connection con, List<String> failedOnes) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -473,9 +281,9 @@ public final class DBJSlobStorage implements JSlobStorage {
                 return Collections.emptyList();
             }
 
-            final Map<String, JSlob> map = new HashMap<String, JSlob>(size);
+            Map<String, JSlob> map = new HashMap<String, JSlob>(size);
             do {
-                final String sId = rs.getString(2);
+                String sId = rs.getString(2);
                 try {
                     map.put(sId, new DefaultJSlob(new JSONObject(new AsciiReader(rs.getBinaryStream(1)))).setId(new JSlobId(serviceId, sId, user, contextId)));
                 } catch (final JSONException e) {
@@ -490,9 +298,10 @@ public final class DBJSlobStorage implements JSlobStorage {
             Databases.closeSQLStuff(rs, stmt);
             rs = null;
             stmt = null;
+
             // Generate list
-            final List<JSlob> list = new ArrayList<JSlob>(size);
-            for (final JSlobId jSlobId : ids) {
+            List<JSlob> list = new ArrayList<JSlob>(size);
+            for (JSlobId jSlobId : ids) {
                 list.add(map.get(jSlobId.getId()));
             }
             return list;
@@ -517,66 +326,54 @@ public final class DBJSlobStorage implements JSlobStorage {
         if (null == ids || ids.isEmpty()) {
             return;
         }
-        wlock.lock();
+
+        DatabaseService databaseService = getDatabaseService();
+        Connection con = null;
+        boolean committed = true;
+        PreparedStatement stmt = null;
         try {
-            final DatabaseService databaseService = getDatabaseService();
-            Connection con = null;
-            boolean committed = true;
-            PreparedStatement stmt = null;
-            try {
-                con = databaseService.getWritable(contextId);
-                con.setAutoCommit(false);
-                committed = false;
-                stmt = con.prepareStatement("DELETE FROM jsonStorage WHERE cid = ? AND user = ? AND serviceId = ? AND id = ?");
-                stmt.setLong(1, contextId);
-                stmt.setLong(2, userId);
-                stmt.setString(3, serviceId);
-                for (final String id : ids) {
-                    stmt.setString(4, id);
-                    stmt.addBatch();
-                }
-                stmt.executeBatch();
-                con.commit();
-                committed = true;
-            } catch (final Exception e) {
-                final Logger logger = org.slf4j.LoggerFactory.getLogger(DBJSlobStorage.class);
-                logger.warn("Failed to delete corrupt JSlobs from service {} (user={}, context={}): {}", serviceId, userId, contextId, ids, e);
-            } finally {
-                if (!committed) {
-                    Databases.rollback(con);
-                }
-                Databases.closeSQLStuff(stmt);
-                Databases.autocommit(con);
-                if (null != con) {
-                    databaseService.backWritable(contextId, con);
-                }
+            con = databaseService.getWritable(contextId);
+            con.setAutoCommit(false);
+            committed = false;
+            stmt = con.prepareStatement("DELETE FROM jsonStorage WHERE cid = ? AND user = ? AND serviceId = ? AND id = ?");
+            stmt.setLong(1, contextId);
+            stmt.setLong(2, userId);
+            stmt.setString(3, serviceId);
+            for (final String id : ids) {
+                stmt.setString(4, id);
+                stmt.addBatch();
             }
+            stmt.executeBatch();
+            con.commit();
+            committed = true;
+        } catch (final Exception e) {
+            final Logger logger = org.slf4j.LoggerFactory.getLogger(DBJSlobStorage.class);
+            logger.warn("Failed to delete corrupt JSlobs from service {} (user={}, context={}): {}", serviceId, userId, contextId, ids, e);
         } finally {
-            wlock.unlock();
+            if (!committed) {
+                Databases.rollback(con);
+            }
+            Databases.closeSQLStuff(stmt);
+            Databases.autocommit(con);
+            if (null != con) {
+                databaseService.backWritable(contextId, con);
+            }
         }
     }
 
     @Override
     public Collection<JSlob> list(final JSlobId id) throws OXException {
-        rlock.lock();
+        DatabaseService databaseService = getDatabaseService();
+        int contextId = id.getContext();
+        Connection con = databaseService.getReadOnly(contextId);
         try {
-            final DatabaseService databaseService = getDatabaseService();
-            final int contextId = id.getContext();
-            final Connection con = databaseService.getReadOnly(contextId);
-            try {
-                return loadAll(id, contextId, con);
-            } finally {
-                databaseService.backReadOnly(contextId, con);
-            }
+            return loadAll(id, contextId, con);
         } finally {
-            rlock.unlock();
+            databaseService.backReadOnly(contextId, con);
         }
     }
 
     private Collection<JSlob> loadAll(final JSlobId id, final int contextId, final Connection con) throws OXException {
-        if (false && checkLocked(id, false, con)) {
-            throw DBJSlobStorageExceptionCode.ALREADY_LOCKED.create(id);
-        }
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -588,7 +385,8 @@ public final class DBJSlobStorage implements JSlobStorage {
             if (!rs.next()) {
                 return Collections.emptyList();
             }
-            final List<JSlob> list = new LinkedList<JSlob>();
+
+            List<JSlob> list = new LinkedList<JSlob>();
             do {
                 list.add(new DefaultJSlob(new JSONObject(new AsciiReader(rs.getBinaryStream(1)))).setId(new JSlobId(id.getServiceId(), rs.getString(2), id.getUser(), contextId)));
             } while (rs.next());
@@ -630,9 +428,6 @@ public final class DBJSlobStorage implements JSlobStorage {
      * @throws OXException  f operation fails
      */
     public Collection<String> getIDs(final JSlobId id, final int contextId, final Connection con) throws OXException {
-        if (false && checkLocked(id, false, con)) {
-            throw DBJSlobStorageExceptionCode.ALREADY_LOCKED.create(id);
-        }
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -658,64 +453,56 @@ public final class DBJSlobStorage implements JSlobStorage {
 
     @Override
     public JSlob remove(final JSlobId id) throws OXException {
-        wlock.lock();
+        DatabaseService databaseService = getDatabaseService();
+        int contextId = id.getContext();
+        Connection con = databaseService.getWritable(contextId);
+        boolean committed = true;
+        PreparedStatement stmt = null;
         try {
-            final DatabaseService databaseService = getDatabaseService();
-            final int contextId = id.getContext();
-            final Connection con = databaseService.getWritable(contextId);
-            boolean committed = true;
-            if (false && checkLocked(id, false, con)) {
-                throw DBJSlobStorageExceptionCode.ALREADY_LOCKED.create(id);
+            /*
+             * Load
+             */
+            final JSlob toDelete = load(id, contextId, con);
+            if (null == toDelete) {
+                throw JSlobExceptionCodes.NOT_FOUND_EXT.create(
+                    id.getServiceId(),
+                    Integer.valueOf(id.getUser()),
+                    Integer.valueOf(contextId));
             }
-            PreparedStatement stmt = null;
-            try {
-                /*
-                 * Load
-                 */
-                final JSlob toDelete = load(id, contextId, con);
-                if (null == toDelete) {
-                    throw JSlobExceptionCodes.NOT_FOUND_EXT.create(
-                        id.getServiceId(),
-                        Integer.valueOf(id.getUser()),
-                        Integer.valueOf(contextId));
-                }
-                /*
-                 * Now delete
-                 */
-                con.setAutoCommit(false);
-                committed = false;
-                stmt = con.prepareStatement("DELETE FROM jsonStorage WHERE cid = ? AND user = ? AND serviceId = ? AND id = ?");
-                stmt.setLong(1, contextId);
-                stmt.setLong(2, id.getUser());
-                stmt.setString(3, id.getServiceId());
-                stmt.setString(4, id.getId());
-                final int rows = stmt.executeUpdate();
-                if (rows < 1) {
-                    throw JSlobExceptionCodes.NOT_FOUND_EXT.create(
-                        id.getServiceId(),
-                        Integer.valueOf(id.getUser()),
-                        Integer.valueOf(contextId));
-                } else if (rows > 1) {
-                    throw JSlobExceptionCodes.CONFLICT.create(id.getServiceId(), Integer.valueOf(id.getUser()), Integer.valueOf(contextId));
-                }
-                /*
-                 * Return
-                 */
-                con.commit();
-                committed = true;
-                return toDelete;
-            } catch (final SQLException e) {
-                throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-            } finally {
-                if (!committed) {
-                    Databases.rollback(con);
-                }
-                Databases.closeSQLStuff(stmt);
-                Databases.autocommit(con);
-                databaseService.backWritable(contextId, con);
+            /*
+             * Now delete
+             */
+            con.setAutoCommit(false);
+            committed = false;
+            stmt = con.prepareStatement("DELETE FROM jsonStorage WHERE cid = ? AND user = ? AND serviceId = ? AND id = ?");
+            stmt.setLong(1, contextId);
+            stmt.setLong(2, id.getUser());
+            stmt.setString(3, id.getServiceId());
+            stmt.setString(4, id.getId());
+            final int rows = stmt.executeUpdate();
+            if (rows < 1) {
+                throw JSlobExceptionCodes.NOT_FOUND_EXT.create(
+                    id.getServiceId(),
+                    Integer.valueOf(id.getUser()),
+                    Integer.valueOf(contextId));
+            } else if (rows > 1) {
+                throw JSlobExceptionCodes.CONFLICT.create(id.getServiceId(), Integer.valueOf(id.getUser()), Integer.valueOf(contextId));
             }
+            /*
+             * Return
+             */
+            con.commit();
+            committed = true;
+            return toDelete;
+        } catch (final SQLException e) {
+            throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            wlock.unlock();
+            if (!committed) {
+                Databases.rollback(con);
+            }
+            Databases.closeSQLStuff(stmt);
+            Databases.autocommit(con);
+            databaseService.backWritable(contextId, con);
         }
     }
 
@@ -727,25 +514,17 @@ public final class DBJSlobStorage implements JSlobStorage {
      * @throws OXException If an error occurs
      */
     public boolean exists(final JSlobId id) throws OXException {
-        rlock.lock();
+        DatabaseService databaseService = getDatabaseService();
+        int contextId = id.getContext();
+        Connection con = databaseService.getReadOnly(contextId);
         try {
-            final DatabaseService databaseService = getDatabaseService();
-            final int contextId = id.getContext();
-            final Connection con = databaseService.getReadOnly(contextId);
-            try {
-                return exists(id, contextId, con);
-            } finally {
-                databaseService.backReadOnly(contextId, con);
-            }
+            return exists(id, contextId, con);
         } finally {
-            rlock.unlock();
+            databaseService.backReadOnly(contextId, con);
         }
     }
 
-    private boolean exists(final JSlobId id, final int contextId, final Connection con) throws OXException {
-        if (false && checkLocked(id, false, con)) {
-            throw DBJSlobStorageExceptionCode.ALREADY_LOCKED.create(id);
-        }
+    private boolean exists(JSlobId id, int contextId, Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -763,78 +542,33 @@ public final class DBJSlobStorage implements JSlobStorage {
         }
     }
 
-    private static final String SQL_INSERT = "INSERT INTO jsonStorage (cid, user, serviceId, id, data) VALUES (?, ?, ?, ?, ?)";
-
-    private static final String SQL_UPDATE = "UPDATE jsonStorage SET data = ? WHERE cid = ? AND user = ? AND serviceId = ? AND id = ?";
-
     @Override
     public boolean store(final JSlobId id, final JSlob jslob) throws OXException {
-        wlock.lock();
+        DatabaseService databaseService = getDatabaseService();
+        int contextId = id.getContext();
+        Connection con = databaseService.getWritable(contextId);
+        PreparedStatement stmt = null;
         try {
-            final DatabaseService databaseService = getDatabaseService();
-            final int contextId = id.getContext();
-            final Connection con = databaseService.getWritable(contextId);
-            final boolean insert;
-            boolean committed = true;
-            PreparedStatement stmt = null;
-            try {
-                /*
-                 * Load
-                 */
-                con.setAutoCommit(false);
-                committed = false;
-                if (exists(id, contextId, con)) {
-                    /*
-                     * Update
-                     */
-                    if (false && checkLocked(id, false, con)) {
-                        throw DBJSlobStorageExceptionCode.ALREADY_LOCKED.create(id);
-                    }
-                    stmt = con.prepareStatement(SQL_UPDATE);
-                    // Formerly: stmt.setBinaryStream(1, new JSONInputStream(jslob.getJsonObject(), "US-ASCII"));
-                    setBinaryStream(1, jslob.getJsonObject(), stmt);
-                    stmt.setLong(2, contextId);
-                    stmt.setLong(3, id.getUser());
-                    stmt.setString(4, id.getServiceId());
-                    stmt.setString(5, id.getId());
-                    stmt.executeUpdate();
-                    insert = true;
-                } else {
-                    /*
-                     * Insert
-                     */
-                    stmt = con.prepareStatement(SQL_INSERT);
-                    stmt.setLong(1, contextId);
-                    stmt.setLong(2, id.getUser());
-                    stmt.setString(3, id.getServiceId());
-                    stmt.setString(4, id.getId());
-                    // Formerly: stmt.setBinaryStream(5, new JSONInputStream(jslob.getJsonObject(), "US-ASCII"));
-                    setBinaryStream(5, jslob.getJsonObject(), stmt);
-                    stmt.executeUpdate();
-                    insert = false;
-                }
-                con.commit();
-                committed = true;
-                return insert;
-            } catch (final DataTruncation e) {
-                // A BLOB can be 65535 bytes maximum.
-                // If you need more consider using a MEDIUMBLOB for 16777215 bytes or a LONGBLOB for 4294967295
-                OXException x = JSlobExceptionCodes.JSLOB_TOO_BIG.create(
-                    e, id.getId(), Integer.valueOf(contextId), Integer.valueOf(id.getUser()));
-                LOG.debug("The following JSlob is too big:\n{}", jslob.getJsonObject());
-                throw x;
-            } catch (final SQLException e) {
-                throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-            } finally {
-                if (!committed) {
-                    Databases.rollback(con);
-                }
-                Databases.closeSQLStuff(stmt);
-                Databases.autocommit(con);
-                databaseService.backWritable(contextId, con);
-            }
+            stmt = con.prepareStatement("INSERT INTO jsonStorage (cid, user, serviceId, id, data) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE data=?");
+            stmt.setLong(1, contextId);
+            stmt.setLong(2, id.getUser());
+            stmt.setString(3, id.getServiceId());
+            stmt.setString(4, id.getId());
+            setBinaryStream(jslob.getJsonObject(), stmt, 5, 6);
+            int updated = stmt.executeUpdate();
+            return updated == 1;
+        } catch (final DataTruncation e) {
+            // A BLOB can be 65535 bytes maximum.
+            // If you need more consider using a MEDIUMBLOB for 16777215 bytes or a LONGBLOB for 4294967295
+            OXException x = JSlobExceptionCodes.JSLOB_TOO_BIG.create(
+                e, id.getId(), Integer.valueOf(contextId), Integer.valueOf(id.getUser()));
+            LOG.debug("The following JSlob is too big:\n{}", jslob.getJsonObject());
+            throw x;
+        } catch (final SQLException e) {
+            throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            wlock.unlock();
+            Databases.closeSQLStuff(stmt);
+            databaseService.backWritable(contextId, con);
         }
     }
 
@@ -848,110 +582,56 @@ public final class DBJSlobStorage implements JSlobStorage {
         if (null == jslobs || jslobs.isEmpty()) {
             return;
         }
-        wlock.lock();
-        try {
-            final TIntObjectMap<ListPair> pairs = new TIntObjectHashMap<ListPair>(8);
 
-            {
+        TIntObjectMap<List<Pair<JSlobId, JSlob>>> context2Pairs = new TIntObjectHashMap<>(8);
+        {
 
-                for (final Entry<JSlobId, JSlob> entry : jslobs.entrySet()) {
-                    final JSlobId jSlobId = entry.getKey();
-                    final int contextId = jSlobId.getContext();
-                    ListPair listPair = pairs.get(contextId);
-                    if (null == listPair) {
-                        listPair = new ListPair();
-                        pairs.put(contextId, listPair);
-                    }
-                    listPair.ids.add(jSlobId);
-                    listPair.jslobs.add(entry.getValue());
+            for (final Entry<JSlobId, JSlob> entry : jslobs.entrySet()) {
+                final JSlobId jSlobId = entry.getKey();
+                final int contextId = jSlobId.getContext();
+                List<Pair<JSlobId, JSlob>> pairs = context2Pairs.get(contextId);
+                if (null == pairs) {
+                    pairs = new LinkedList<>();
+                    context2Pairs.put(contextId, pairs);
                 }
+                pairs.add(new Pair<JSlobId, JSlob>(jSlobId, entry.getValue()));
             }
+        }
 
-            final TIntObjectIterator<ListPair> iterator = pairs.iterator();
-            for (int i = pairs.size(); i-- > 0;) {
-                iterator.advance();
-                final ListPair listPair = iterator.value();
-                storeMultiple(iterator.key(), listPair.ids, listPair.jslobs);
-            }
-
-        } finally {
-            wlock.unlock();
+        TIntObjectIterator<List<Pair<JSlobId, JSlob>>> iterator = context2Pairs.iterator();
+        for (int i = context2Pairs.size(); i-- > 0;) {
+            iterator.advance();
+            storeMultiple(iterator.key(), iterator.value());
         }
     }
 
     /**
      * Stores multiple JSlobs to database that share the same context.
      */
-    private void storeMultiple(final int contextId, final List<JSlobId> ids, final List<JSlob> jslobs) throws OXException {
-        final DatabaseService databaseService = getDatabaseService();
-        final Connection con = databaseService.getWritable(contextId);
-        boolean rollback = false;
-
+    private void storeMultiple(int contextId, List<Pair<JSlobId, JSlob>> pairs) throws OXException {
+        DatabaseService databaseService = getDatabaseService();
+        Connection con = databaseService.getWritable(contextId);
         PreparedStatement insertStmt = null;
-        PreparedStatement updateStmt = null;
-
         try {
-            /*
-             * Load
-             */
-            con.setAutoCommit(false);
-            rollback = true;
             /*
              * Iterate...
              */
-            int i = 0;
-            for (final JSlobId id : ids) {
-                final JSlob jslob = jslobs.get(i++);
-                if (exists(id, contextId, con)) {
-                    /*
-                     * Update
-                     */
-                    if (null == updateStmt) {
-                        updateStmt = con.prepareStatement(SQL_UPDATE);
-                    }
-                    // Formerly: updateStmt.setBinaryStream(1, new JSONInputStream(jslob.getJsonObject(), "US-ASCII"));
-                    setBinaryStream(1, jslob.getJsonObject(), updateStmt);
-                    updateStmt.setLong(2, contextId);
-                    updateStmt.setLong(3, id.getUser());
-                    updateStmt.setString(4, id.getServiceId());
-                    updateStmt.setString(5, id.getId());
-                    updateStmt.addBatch();
-                } else {
-                    /*
-                     * Insert
-                     */
-                    if (null == insertStmt) {
-                        insertStmt = con.prepareStatement(SQL_INSERT);
-                    }
-                    insertStmt.setLong(1, contextId);
-                    insertStmt.setLong(2, id.getUser());
-                    insertStmt.setString(3, id.getServiceId());
-                    insertStmt.setString(4, id.getId());
-                    // Formerly: insertStmt.setBinaryStream(5, new JSONInputStream(jslob.getJsonObject(), "US-ASCII"));
-                    setBinaryStream(5, jslob.getJsonObject(), insertStmt);
-                    insertStmt.addBatch();
-                }
+            insertStmt = con.prepareStatement("INSERT INTO jsonStorage (cid, user, serviceId, id, data) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE data=?");
+            for (Pair<JSlobId, JSlob> pair : pairs) {
+                JSlobId id = pair.getFirst();
+                insertStmt.setLong(1, contextId);
+                insertStmt.setLong(2, id.getUser());
+                insertStmt.setString(3, id.getServiceId());
+                insertStmt.setString(4, id.getId());
+                // Formerly: insertStmt.setBinaryStream(5, new JSONInputStream(jslob.getJsonObject(), "US-ASCII"));
+                setBinaryStream(pair.getSecond().getJsonObject(), insertStmt, 5, 6);
+                insertStmt.addBatch();
             }
-            if (null != insertStmt) {
-                insertStmt.executeBatch();
-            }
-            if (null != updateStmt) {
-                updateStmt.executeBatch();
-            }
-            /*
-             * Commit
-             */
-            con.commit();
-            rollback = false;
-        } catch (final SQLException e) {
+            insertStmt.executeBatch();
+        } catch (SQLException e) {
             throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
-            }
             Databases.closeSQLStuff(insertStmt);
-            Databases.closeSQLStuff(updateStmt);
-            Databases.autocommit(con);
             databaseService.backWritable(contextId, con);
         }
     }
@@ -960,71 +640,25 @@ public final class DBJSlobStorage implements JSlobStorage {
         return services.getService(DatabaseService.class);
     }
 
-    private static final class ListPair {
-
-        /** The list of identifiers */
-        final List<JSlobId> ids;
-
-        /** The list of JSlobs */
-        final List<JSlob> jslobs;
-
-        ListPair() {
-            super();
-            this.ids = new LinkedList<JSlobId>();
-            this.jslobs = new LinkedList<JSlob>();
-        }
-    } // End of class ListPair
-
-    private void setBinaryStream(final int pos, final JSONObject jObject, final PreparedStatement stmt) throws OXException {
-        setBinaryStream(pos, jObject, stmt, false);
-    }
-
-    private void setBinaryStream(final int pos, final JSONObject jObject, final PreparedStatement stmt, final boolean asyncJsonWrite) throws OXException {
+    private void setBinaryStream(JSONObject jObject, PreparedStatement stmt, int... positions) throws OXException {
         try {
-            if (asyncJsonWrite) {
-                stmt.setBinaryStream(pos, getStreamFrom(jObject));
+            JSONObject json = null != jObject ? jObject : new JSONObject(0);
+            ByteArrayOutputStream buf = Streams.newByteArrayOutputStream(65536);
+            json.write(new AsciiWriter(buf), true);
+
+            if (positions.length == 1) {
+                stmt.setBinaryStream(positions[0], Streams.asInputStream(buf));
             } else {
-                JSONObject json = null != jObject ? jObject : new JSONObject(0);
-                final ByteArrayOutputStream buf = Streams.newByteArrayOutputStream(65536);
-                json.write(new AsciiWriter(buf), true);
-                stmt.setBinaryStream(pos, Streams.asInputStream(buf));
+                byte[] data = buf.toByteArray();
+                buf = null; // might help GC
+                for (int pos : positions) {
+                    stmt.setBytes(pos, data);
+                }
             }
         } catch (final SQLException e) {
             throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final JSONException e) {
             throw JSlobExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    private InputStream getStreamFrom(final JSONObject jObject) throws OXException {
-        final JSONObject json = null != jObject ? jObject : new JSONObject(0);
-        try {
-            final PipedOutputStream pos = new PipedOutputStream();
-            final ExceptionAwarePipedInputStream pin = new ExceptionAwarePipedInputStream(pos, 32768);
-
-            final Runnable r = new Runnable() {
-
-                @Override
-                public void run() {
-                    try {
-                        json.write(new AsciiWriter(pos), true);
-                    } catch (final Exception e) {
-                        pin.setException(e);
-                    } finally {
-                        Streams.close(pos);
-                    }
-                }
-            };
-            final ThreadPoolService threadPool = ThreadPools.getThreadPool();
-            if (null == threadPool) {
-                new Thread(r, "DBJSlobStorage.getStreamFrom").start();
-            } else {
-                threadPool.submit(ThreadPools.task(r), AbortBehavior.getInstance());
-            }
-
-            return pin;
-        } catch (final IOException e) {
-            throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 

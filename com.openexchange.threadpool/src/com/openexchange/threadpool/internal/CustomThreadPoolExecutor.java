@@ -88,6 +88,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import org.slf4j.MDC;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.ExceptionUtils;
 import com.openexchange.log.LogProperties;
 import com.openexchange.startup.CloseableControlService;
 import com.openexchange.threadpool.AbstractTask;
@@ -423,6 +424,20 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     }
 
     /**
+     * Utility method that invokes {@link Thread#start() start()} on specified {@code Thread} instance.
+     *
+     * @param t The thread to start
+     */
+    private void startThread(Thread t) {
+        try {
+            t.start();
+        } catch (Throwable x) {
+            ExceptionUtils.handleThrowable(x);
+            throw x;
+        }
+    }
+
+    /**
      * Create and return a new thread running firstTask as its first task. Call only while holding mainLock
      *
      * @param firstTask the task the new thread should run first (or <code>null</code> if none)
@@ -483,7 +498,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         if (null == t) {
             return false;
         }
-        t.start();
+        startThread(t);
         return true;
     }
 
@@ -513,7 +528,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         if (null == t) {
             return null;
         }
-        t.start();
+        startThread(t);
         return next;
     }
 
@@ -628,7 +643,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                 if (!workQueue.isEmpty()) {
                     final Thread t = addThread(null);
                     if (null != t) {
-                        t.start();
+                        startThread(t);
                     }
                     return;
                 }
@@ -2107,7 +2122,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                 while (extra++ < 0 && n-- > 0 && poolSize < corePoolSize) {
                     final Thread t = addThread(null);
                     if (t != null) {
-                        t.start();
+                        startThread(t);
                     } else {
                         break;
                     }
