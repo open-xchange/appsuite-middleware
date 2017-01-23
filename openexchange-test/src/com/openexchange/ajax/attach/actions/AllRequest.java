@@ -66,26 +66,32 @@ import com.openexchange.groupware.search.Order;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class AllRequest extends AbstractAttachmentRequest<AllResponse> {
-    
+
     private final CommonObject obj;
     private final int[] columns;
     private final int sort;
     private final Order order;
-    
+    private final boolean failOnError;
+
     public AllRequest(final CommonObject obj, final int[] columns, final int sort, final Order order) {
+        this(obj, columns, sort, order, true);
+    }
+
+    public AllRequest(final CommonObject obj, final int[] columns, final int sort, final Order order, boolean failOnError) {
         super();
         this.obj = obj;
         this.columns = columns;
         this.sort = sort;
         this.order = order;
+        this.failOnError = failOnError;
     }
-    
+
     public AllRequest(final CommonObject obj, final int[] columns) {
-        super();
-        this.obj = obj;
-        this.columns = columns;
-        this.sort = -1;
-        this.order = null;
+        this(obj, columns, true);
+    }
+
+    public AllRequest(final CommonObject obj, final int[] columns, boolean failOnError) {
+        this(obj, columns, -1, null, failOnError);
     }
 
     @Override
@@ -106,13 +112,13 @@ public class AllRequest extends AbstractAttachmentRequest<AllResponse> {
             parameters.add(new Parameter(AJAXServlet.PARAMETER_SORT, sort));
             parameters.add(new Parameter(AJAXServlet.PARAMETER_ORDER, order.toString()));
         }
-        
+
         return parameters.toArray(new Parameter[parameters.size()]);
     }
 
     @Override
     public AbstractAJAXParser<? extends AllResponse> getParser() {
-        return new AllParser(true);
+        return new AllParser(failOnError);
     }
 
     @Override
