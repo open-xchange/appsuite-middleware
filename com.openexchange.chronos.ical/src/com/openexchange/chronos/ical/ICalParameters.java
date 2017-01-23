@@ -49,6 +49,8 @@
 
 package com.openexchange.chronos.ical;
 
+import java.util.TimeZone;
+
 /**
  * {@link ICalParameters}
  *
@@ -59,33 +61,35 @@ public interface ICalParameters {
 
     /**
      * {@link Boolean}
-     *
+     * <p/>
      * Configures whether iCal input should be pre-processed and sanitized so that known client quirks are corrected automatically.
      * <p/>
      * This currently includes all legacy workarounds, taken over from the previous parser implementation.
-     * 
+     *
      * @see com.openexchange.data.conversion.ical.ical4j.ICal4JParser.parse(BufferedReader, Collection<Exception>)
      */
     String SANITIZE_INPUT = "SANITIZE_INPUT";
 
     /**
-     * {@link String[]} array denoting the names of the extended arbitrary properties to consider during import. Such properties will be
+     * {@link String[]}
+     * <p/>
+     * Optional string array denoting the names of the extended arbitrary properties to consider during import. Such properties will be
      * made available via {@link ComponentData#getProperties()} of the imported component.
      * <p/>
-     * Wildcards are allowed in the names, e.g. <code>X-MOZ-SNOOZE-TIME*</code>, or, to track all iCal properties, <code>*</code> might
+     * Wildcards are allowed in the names, e.g. <code>X-MOZ-SNOOZE-TIME*</code>. Or, to track all iCal properties, <code>*</code> might
      * be used, too.
      * <p/>
      * During export, any property present in {@link ComponentData#getProperties()} will be considered implicitly.
      */
     String EXTRA_PROPERTIES = "EXTRA_PROPERTIES";
 
-
-
+    /**
+     * {@link TimeZone}
+     * <p/>
+     * Defines the default or fallback timezone to use in case of not parsable or mappable timezone references are encountered during
+     * import.
+     */
     String DEFAULT_TIMEZONE = "DEFAULT_TIMEZONE";
-
-    String TIMEZONE_REGISTRY = "TIMEZONE_REGISTRY";
-
-    String OUTLOOK_TIMEZONES = "OUTLOOK_TIMEZONES";
 
 
     /**

@@ -346,10 +346,10 @@ public class ICalUtils {
     static CalendarBuilder getCalendarBuilder(ICalParameters parameters) {
         ICalParameters iCalParameters = getParametersOrDefault(parameters);
         CalendarParser calendarParser = CalendarParserFactory.getInstance().createParser();
-        TimeZoneRegistry timeZoneRegistry = iCalParameters.get(ICalParameters.TIMEZONE_REGISTRY, TimeZoneRegistry.class);
+        TimeZoneRegistry timeZoneRegistry = iCalParameters.get(ICalParametersImpl.TIMEZONE_REGISTRY, TimeZoneRegistry.class);
         if (null == timeZoneRegistry) {
             timeZoneRegistry = TimeZoneRegistryFactory.getInstance().createRegistry();
-            iCalParameters.set(ICalParameters.TIMEZONE_REGISTRY, timeZoneRegistry);
+            iCalParameters.set(ICalParametersImpl.TIMEZONE_REGISTRY, timeZoneRegistry);
         }
         return new CalendarBuilder(calendarParser, PROPERTY_FACTORY, PARAMETER_FACTORY, timeZoneRegistry);
     }

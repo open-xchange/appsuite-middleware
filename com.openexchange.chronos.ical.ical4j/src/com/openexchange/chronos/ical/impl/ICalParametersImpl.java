@@ -51,8 +51,9 @@ package com.openexchange.chronos.ical.impl;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TimeZone;
+import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.ical.ICalParameters;
+import net.fortuna.ical4j.model.TimeZoneRegistry;
 import net.fortuna.ical4j.model.TimeZoneRegistryImpl;
 
 /**
@@ -63,46 +64,45 @@ import net.fortuna.ical4j.model.TimeZoneRegistryImpl;
  */
 public class ICalParametersImpl implements ICalParameters {
 
-    private Map<String, Object> parameters;
+    /**
+     * {@link TimeZoneRegistry}
+     * <p/>
+     * Holds a reference to the underlying timezone registry.
+     */
+    public static final String TIMEZONE_REGISTRY = TimeZoneRegistry.class.getName();
+
+    private final Map<String, Object> parameters;
 
     /**
      * Initializes a new, empty {@link ICalParametersImpl}.
      */
     public ICalParametersImpl() {
         super();
+        this.parameters = new HashMap<String, Object>();
         applyDefaults();
     }
 
     private void applyDefaults() {
         set(TIMEZONE_REGISTRY, new TimeZoneRegistryImpl("zoneinfo-outlook/"));
-//        set(SANITIZE_INPUT, Boolean.TRUE);
-        set(DEFAULT_TIMEZONE, TimeZone.getTimeZone("EST"));
-        //        set(DEFAULT_TIMEZONE, TimeZone.getDefault());
-        //        set(KEEP_COMPONENTS, Boolean.TRUE);
-
-        //        set(ATTENDEE_COMMENTS, Boolean.TRUE);
     }
 
     @Override
     public <T> T get(String name, Class<T> clazz) {
-        if (null == name || null == parameters) {
-            return null;
+        if (null != name) {
+            try {
+                return clazz.cast(parameters.get(name));
+            } catch (ClassCastException e) {
+                LoggerFactory.getLogger(ICalParametersImpl.class).warn("Error getting iCal parameter {}", name, e);
+            }
         }
-        try {
-            return clazz.cast(parameters.get(name));
-        } catch (ClassCastException e) {
-            return null;
-        }
+        return null;
     }
 
     @Override
     public <T> ICalParameters set(String name, T value) {
         if (null != name) {
-            if (null == parameters) {
-                parameters = new HashMap<String, Object>();
-            }
             parameters.put(name, value);
-        } else if (null != parameters) {
+        } else {
             parameters.remove(name);
         }
         return this;

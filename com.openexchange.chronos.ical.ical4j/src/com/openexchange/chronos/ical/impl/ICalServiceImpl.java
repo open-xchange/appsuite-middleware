@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.ical.impl;
 
+import static com.openexchange.chronos.ical.impl.ICalUtils.getParametersOrDefault;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -80,21 +81,21 @@ public class ICalServiceImpl implements ICalService {
 
     @Override
     public CalendarExport exportICal(ICalParameters parameters) {
-        ICalParameters iCalParameters = ICalUtils.getParametersOrDefault(parameters);
+        ICalParameters iCalParameters = getParametersOrDefault(parameters);
         List<OXException> warnings = new ArrayList<OXException>();
         return new CalendarExportImpl(mapper, iCalParameters, warnings);
     }
 
     @Override
     public CalendarImport importICal(InputStream iCalFile, ICalParameters parameters) throws OXException {
-        ICalParameters iCalParameters = ICalUtils.getParametersOrDefault(parameters);
+        ICalParameters iCalParameters = getParametersOrDefault(parameters);
         Calendar calendar = ICalUtils.importCalendar(iCalFile, iCalParameters);
         return new CalendarImportImpl(calendar, mapper, iCalParameters);
     }
 
     @Override
     public ICalParameters initParameters() {
-        return new ICalParametersImpl();
+        return getParametersOrDefault(null);
     }
 
 }

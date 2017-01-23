@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.TimeZone;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ical4j.ParserTools;
+import com.openexchange.chronos.ical.impl.ICalParametersImpl;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import net.fortuna.ical4j.model.Component;
@@ -108,7 +109,7 @@ public abstract class ICalDateMapping<T extends Component, U> extends AbstractIC
                 DateTime dateTime;
                 String timezoneID = getTimezone(object);
                 if (Strings.isNotEmpty(timezoneID) && false == "UTC".equals(timezoneID)) {
-                    TimeZoneRegistry timeZoneRegistry = parameters.get(ICalParameters.TIMEZONE_REGISTRY, TimeZoneRegistry.class);
+                    TimeZoneRegistry timeZoneRegistry = parameters.get(ICalParametersImpl.TIMEZONE_REGISTRY, TimeZoneRegistry.class);
                     net.fortuna.ical4j.model.TimeZone timeZone = timeZoneRegistry.getTimeZone(timezoneID);
                     if (null != timeZone) {
                         dateTime = new DateTime(false);

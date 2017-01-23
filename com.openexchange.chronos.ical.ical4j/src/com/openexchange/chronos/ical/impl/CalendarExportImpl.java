@@ -179,7 +179,7 @@ public class CalendarExportImpl implements CalendarExport {
          * add components for all contained timezones
          */
         for (String timezoneID : timezoneIDs) {
-            TimeZoneRegistry timeZoneRegistry = parameters.get(ICalParameters.TIMEZONE_REGISTRY, TimeZoneRegistry.class);
+            TimeZoneRegistry timeZoneRegistry = parameters.get(ICalParametersImpl.TIMEZONE_REGISTRY, TimeZoneRegistry.class);
             net.fortuna.ical4j.model.TimeZone timeZone = timeZoneRegistry.getTimeZone(timezoneID);
             if (null != timeZone) {
                 calendar.getComponents().add(0, timeZone.getVTimeZone());
