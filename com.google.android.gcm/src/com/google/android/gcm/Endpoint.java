@@ -62,7 +62,7 @@ public enum Endpoint {
      */
     GCM(Constants.GCM_SEND_ENDPOINT),
     /**
-     * The API end-point for FCM; <code>"https://fcm.googleapis.com/fcm/send"</code>
+     * The API end-point for <a href="https://firebase.google.com/docs/cloud-messaging/http-server-ref">FCM</a>; <code>"https://fcm.googleapis.com/fcm/send"</code>
      */
     FCM(Constants.FCM_SEND_ENDPOINT),
     ;
