@@ -101,9 +101,7 @@ public class ProvisioningSetup {
     private static final String RESOURCE_PARTICIPANT2 = "resource_participant2";
     private static final String RESOURCE_PARTICIPANT3 = "resource_participant3";
 
-    // should only be called once and be valid for all tests
     public static void init() throws OXException {
-
         synchronized (ProvisioningSetup.class) {
             if (!initialized.get()) {
                 AJAXConfig.init();

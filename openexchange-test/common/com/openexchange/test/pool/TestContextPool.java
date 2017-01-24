@@ -81,20 +81,18 @@ public class TestContextPool {
     }
 
     public static TestContext acquireContext(String acquiredBy) {
-        synchronized (TestContextPool.class) {
-            try {
-                TestContext context = contexts.poll(10L, TimeUnit.SECONDS);
-                Assert.assertNotNull("Unable to acquire test context due to an empty pool.", context);
-                context.setAcquiredBy(acquiredBy);
-                contextWatcher.get().contextInUse(context);
-                LOG.debug("Context '{}' with id {} has been acquired by {}.", context.getName(), context.getId(), acquiredBy, new Throwable());
-                return context;
-            } catch (InterruptedException e) {
-                // should not happen
-                LOG.error("", e);
-            }
-            return null;
+        try {
+            TestContext context = contexts.poll(10L, TimeUnit.SECONDS);
+            Assert.assertNotNull("Unable to acquire test context due to an empty pool.", context);
+            context.setAcquiredBy(acquiredBy);
+            contextWatcher.get().contextInUse(context);
+            LOG.debug("Context '{}' with id {} has been acquired by {}.", context.getName(), context.getId(), acquiredBy, new Throwable());
+            return context;
+        } catch (InterruptedException e) {
+            // should not happen
+            LOG.error("", e);
         }
+        return null;
     }
 
     public static void backContext(TestContext context) {
@@ -112,14 +110,6 @@ public class TestContextPool {
             // should not happen
             LOG.error("", e);
         }
-    }
-
-    public static List<Integer> getAvailableContexts() {
-        List<Integer> contextIds = new ArrayList<>();
-        for (TestContext context : contexts) {
-            contextIds.add(context.getId());
-        }
-        return contextIds;
     }
 
     // the admin is not handled to be acquired only by one party
