@@ -211,7 +211,8 @@ public final class SessionHandler {
      * @return The parameter names
      */
     public static List<String> getRemoteParameterNames(int userId, int contextId) {
-        return SessionStorageConfiguration.getInstance().getRemoteParameterNames(userId, contextId);
+        SessionStorageConfiguration configuration = SessionStorageConfiguration.getInstance();
+        return null == configuration ? Collections.<String>emptyList() : configuration.getRemoteParameterNames(userId, contextId);
     }
 
     /**
