@@ -200,8 +200,13 @@ public final class UpdateAction extends ChronosAction {
         if (false == result.getConflicts().isEmpty()) {
             return getAppointmentConflictResult(session, result.getConflicts());
         }
+        /*
+         * return result; preferring the identifier of a created change exception if present
+         */
         JSONObject resultObject = new JSONObject(1);
-        if (0 < result.getUpdates().size()) {
+        if (0 < result.getCreations().size()) {
+            resultObject.put(DataFields.ID, result.getCreations().get(0).getCreatedEvent().getId());
+        } else if (0 < result.getUpdates().size()) {
             resultObject.put(DataFields.ID, result.getUpdates().get(0).getUpdate().getId());
         }
         return new AJAXRequestResult(resultObject, result.getTimestamp(), "json");
