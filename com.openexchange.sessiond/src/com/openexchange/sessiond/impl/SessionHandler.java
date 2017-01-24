@@ -70,7 +70,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
@@ -137,9 +136,6 @@ public final class SessionHandler {
     /** The obfuscator */
     protected static volatile Obfuscator obfuscatr;
 
-    /** The initialized flag */
-    private static final AtomicBoolean initialized = new AtomicBoolean();
-
     /** Logger */
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessionHandler.class);
 
@@ -159,9 +155,9 @@ public final class SessionHandler {
     /**
      * Initializes the {@link SessionHandler session handler}
      *
-     * @param newConfig The appropriate configuration
+     * @param config The appropriate configuration
      */
-    public static void init(SessiondConfigInterface config) {
+    public static synchronized void init(SessiondConfigInterface config) {
         SessionHandler.config = config;
         SessionData sessionData = new SessionData(
             config.getNumberOfSessionContainers(),
@@ -170,19 +166,37 @@ public final class SessionHandler {
             config.getNumberOfLongTermSessionContainers(),
             config.isAutoLogin());
         SESSION_DATA_REF.set(sessionData);
-        if (initialized.compareAndSet(false, true)) {
-            try {
-                sessionIdGenerator = SessionIdGenerator.getInstance();
-            } catch (OXException exc) {
-                LOG.error("create instance of SessionIdGenerator", exc);
-            }
-            noLimit = (config.getMaxSessions() == 0);
-            asyncPutToSessionStorage = config.isAsyncPutToSessionStorage();
-            synchronized (SessionHandler.class) {
-                // Make it visible to other threads, too
-                obfuscatr = new Obfuscator(config.getObfuscationKey().toCharArray());
-            }
+        try {
+            sessionIdGenerator = SessionIdGenerator.getInstance();
+        } catch (OXException exc) {
+            LOG.error("create instance of SessionIdGenerator", exc);
         }
+        noLimit = (config.getMaxSessions() == 0);
+        asyncPutToSessionStorage = config.isAsyncPutToSessionStorage();
+
+        obfuscatr = new Obfuscator(config.getObfuscationKey().toCharArray());
+    }
+
+    /**
+     * Shuts-down session handling.
+     */
+    public static synchronized void close() {
+        SessionData sd = SESSION_DATA_REF.get();
+        if (null != sd) {
+            postContainerRemoval(sd.getShortTermSessions(), false);
+            sd.clear();
+            SESSION_DATA_REF.set(null);
+        } else {
+            LOG.warn("\tSessionData instance is null.");
+        }
+        Obfuscator o = obfuscatr;
+        if (null != o) {
+            obfuscatr = null;
+            o.destroy();
+        }
+        sessionIdGenerator = null;
+        config = null;
+        noLimit = false;
     }
 
     /**
@@ -766,9 +780,7 @@ public final class SessionHandler {
             return false;
         }
 
-        SessionImpl session = sessionControl.getSession();
-        Collection<String> remotes = getRemoteParameterNames(session.getUserId(), session.getContextId());
-        return putIntoSessionStorage(session, true, null == remotes || remotes.isEmpty());
+        return putIntoSessionStorage(sessionControl.getSession(), true, asyncPutToSessionStorage);
     }
 
 
@@ -809,8 +821,7 @@ public final class SessionHandler {
             addedSession = sessionData.addSession(newSession, noLimit).getSession();
 
             // Store session if not marked as transient and associated client is applicable
-            Collection<String> remotes = getRemoteParameterNames(addedSession.getUserId(), addedSession.getContextId());
-            putIntoSessionStorage(addedSession, null == remotes || remotes.isEmpty());
+            putIntoSessionStorage(addedSession);
 
             // Post event for created session
             postSessionCreation(addedSession);
@@ -1594,27 +1605,6 @@ public final class SessionHandler {
             LOG.info("Session timed out. ID: {}", control.getSession().getSessionID());
         }
         postContainerRemoval(controls, true);
-    }
-
-    public static void close() {
-        if (initialized.compareAndSet(true, false)) {
-            SessionData sd = SESSION_DATA_REF.get();
-            if (null != sd) {
-                postContainerRemoval(sd.getShortTermSessions(), false);
-                sd.clear();
-                SESSION_DATA_REF.set(null);
-            } else {
-                LOG.warn("\tSessionData instance is null.");
-            }
-            Obfuscator o = obfuscatr;
-            if (null != o) {
-                obfuscatr = null;
-                o.destroy();
-            }
-            sessionIdGenerator = null;
-            config = null;
-            noLimit = false;
-        }
     }
 
     public static int getNumberOfActiveSessions() {

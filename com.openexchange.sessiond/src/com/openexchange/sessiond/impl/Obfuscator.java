@@ -191,7 +191,6 @@ public class Obfuscator implements ObfuscatorService {
             return null;
         }
 
-        // Initialize its parameters
         Map<String, Object> parameters = new HashMap<String, Object>(2);
         for (String name : session.getParameterNames()) {
             parameters.put(name, session.getParameter(name));
