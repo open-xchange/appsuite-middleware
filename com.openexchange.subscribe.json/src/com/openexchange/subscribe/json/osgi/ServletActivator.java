@@ -127,6 +127,7 @@ public class ServletActivator extends AbstractSessionServletActivator {
     protected void stopBundle() throws Exception {
         discoverer.close();
         destroyMultipleHandler();
+        super.stopBundle();
     }
 
     private void destroyMultipleHandler() {

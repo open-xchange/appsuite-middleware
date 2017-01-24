@@ -121,9 +121,9 @@ public class ServletActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        cleanUp();
         activator.stop(context);
         unregisterServlet();
+        super.stopBundle();
     }
 
     private void registerServlet() {
