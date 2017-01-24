@@ -258,7 +258,7 @@ public class ScheduleOutboxCollection extends DAVCollection {
             inputStream = calendarExport.getClosingStream();
             return Streams.stream2string(inputStream, Charsets.UTF_8_NAME);
         } catch (IOException e) {
-            throw ICalExceptionCodes.IO_ERROR.create(e);
+            throw ICalExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             Streams.close(inputStream);
         }

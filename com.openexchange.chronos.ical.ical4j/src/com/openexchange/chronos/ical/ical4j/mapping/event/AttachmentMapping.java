@@ -59,7 +59,6 @@ import java.util.List;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.ical.ICalExceptionCodes;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ical4j.mapping.AbstractICalMapping;
 import com.openexchange.exception.OXException;
@@ -126,7 +125,7 @@ public class AttachmentMapping extends AbstractICalMapping<VEvent, Event> {
                 inputStream = attachment.getData().getStream();
                 property.setBinary(Streams.stream2bytes(inputStream));
             } catch (IOException e) {
-                throw ICalExceptionCodes.IO_ERROR.create(e);
+                addConversionWarning(warnings, e, Property.ATTACH, e.getMessage());
             } finally {
                 Streams.close(inputStream);
             }

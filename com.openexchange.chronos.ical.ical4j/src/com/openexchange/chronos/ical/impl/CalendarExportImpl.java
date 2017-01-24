@@ -65,6 +65,7 @@ import com.openexchange.chronos.ical.ical4j.mapping.ICalMapper;
 import com.openexchange.exception.OXException;
 import net.fortuna.ical4j.extensions.property.WrCalName;
 import net.fortuna.ical4j.model.Calendar;
+import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.PropertyFactoryImpl;
 import net.fortuna.ical4j.model.TimeZoneRegistry;
@@ -184,7 +185,7 @@ public class CalendarExportImpl implements CalendarExport {
             if (null != timeZone) {
                 calendar.getComponents().add(0, timeZone.getVTimeZone());
             } else {
-                warnings.add(ICalExceptionCodes.CONVERSION_FAILED.create("No timezone '" + timezoneID + "' registered."));
+                warnings.add(ICalExceptionCodes.CONVERSION_FAILED.create(Component.VTIMEZONE, "No timezone '" + timezoneID + "' registered."));
             }
         }
         /*

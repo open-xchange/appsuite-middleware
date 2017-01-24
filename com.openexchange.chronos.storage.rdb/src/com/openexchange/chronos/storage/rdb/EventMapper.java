@@ -728,6 +728,21 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
             public void remove(Event event) {
                 event.removeRecurrenceRule();
             }
+
+            @Override
+            public String getColumnLabel() {
+                return getColumnLabels()[0];
+            }
+
+            @Override
+            public String getColumnLabel(String prefix) {
+                return getColumnLabels(prefix)[0];
+            }
+
+            @Override
+            public int getSqlType() {
+                return Types.VARCHAR;
+            }
         });
         mappings.put(EventField.CHANGE_EXCEPTION_DATES, new VarCharMapping<Event>("field08", "Change exception dates") {
 

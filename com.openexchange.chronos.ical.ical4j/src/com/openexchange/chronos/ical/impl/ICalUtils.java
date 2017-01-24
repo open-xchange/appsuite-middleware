@@ -78,6 +78,7 @@ import com.openexchange.chronos.ical.ImportedEvent;
 import com.openexchange.chronos.ical.ical4j.ICal4JParser;
 import com.openexchange.chronos.ical.ical4j.mapping.ICalMapper;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
@@ -150,18 +151,23 @@ public class ICalUtils {
     }
 
     static Calendar importCalendar(InputStream iCalFile, ICalParameters parameters) throws OXException {
+        Calendar calendar = null;
         ICalParameters iCalParameters = getParametersOrDefault(parameters);
         CalendarBuilder calendarBuilder = getCalendarBuilder(iCalParameters);
         try {
             if (Boolean.TRUE.equals(parameters.get(ICalParameters.SANITIZE_INPUT, Boolean.class))) {
                 return new ICal4JParser().parse(calendarBuilder, iCalFile);
             }
-            return calendarBuilder.build(iCalFile);
+            calendar = calendarBuilder.build(iCalFile);
         } catch (IOException e) {
-            throw ICalExceptionCodes.IO_ERROR.create(e);
+            throw ICalExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (ParserException e) {
-            throw ICalExceptionCodes.CONVERSION_FAILED.create(e);
+            throw asOXException(e);
         }
+        if (null == calendar) {
+            throw ICalExceptionCodes.NO_CALENDAR.create();
+        }
+        return calendar;
     }
 
     static List<Event> importEvents(ComponentList eventComponents, ICalMapper mapper, ICalParameters parameters) throws OXException {
@@ -230,8 +236,10 @@ public class ICalUtils {
         CalendarOutputter outputter = new CalendarOutputter(false);
         try {
             outputter.output(calendar, outputStream);
-        } catch (IOException | ValidationException e) {
-            throw new OXException(e);
+        } catch (IOException e) {
+            throw ICalExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (ValidationException e) {
+            throw asOXException(e);
         }
     }
 
@@ -374,7 +382,7 @@ public class ICalUtils {
         } catch (IOException e) {
             throw new OXException(e);
         } catch (ParserException e) {
-            throw new OXException(e);
+            throw asOXException(e);
         } finally {
             Streams.close(sequenceStream);
         }
@@ -401,7 +409,7 @@ public class ICalUtils {
         } catch (IOException e) {
             throw new OXException(e);
         } catch (ParserException e) {
-            throw new OXException(e);
+            throw asOXException(e);
         } finally {
             Streams.close(sequenceStream);
         }
@@ -428,6 +436,18 @@ public class ICalUtils {
         factory.register(CalendarServerAttendeeRef.PARAMETER_NAME, ParameterFactoryImpl.getInstance());
         factory.register(CalendarServerDtStamp.PARAMETER_NAME, ParameterFactoryImpl.getInstance());
         return factory;
+    }
+
+    private static OXException asOXException(ValidationException e) {
+        return ICalExceptionCodes.VALIDATION_FAILED.create(e, e.getMessage());
+    }
+
+    private static OXException asOXException(ParserException e) {
+        String message = e.getMessage();
+        if (null != message) {
+            message = message.replaceFirst("Error at line \\d+:", ""); // net.fortuna.ical4j.data.ParserException.ERROR_MESSAGE_PATTERN
+        }
+        return ICalExceptionCodes.PARSER_ERROR.create(e, Autoboxing.I(e.getLineNo()), message);
     }
 
 }
