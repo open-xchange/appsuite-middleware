@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -172,7 +173,7 @@ public class PortableSession extends StoredSession implements CustomPortable {
             writer.writeUTF(PARAMETER_ALT_ID, null == altId ? null : altId.toString());
         }
         {
-            List<String> configuredRemoteParameterNames = SessionStorageConfiguration.getInstance().getRemoteParameterNames(userId, contextId);
+            Collection<String> configuredRemoteParameterNames = SessionStorageConfiguration.getInstance().getRemoteParameterNames(userId, contextId);
             Set<String> remoteParameterNames = new LinkedHashSet<>(configuredRemoteParameterNames.size() + 2); // Keep order
             // Add static remote parameters
             remoteParameterNames.add(PARAM_OAUTH_ACCESS_TOKEN);

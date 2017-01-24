@@ -210,7 +210,7 @@ public final class SessionHandler {
      * @param contextId The context identifier
      * @return The parameter names
      */
-    public static List<String> getRemoteParameterNames(int userId, int contextId) {
+    public static Collection<String> getRemoteParameterNames(int userId, int contextId) {
         SessionStorageConfiguration configuration = SessionStorageConfiguration.getInstance();
         return null == configuration ? Collections.<String>emptyList() : configuration.getRemoteParameterNames(userId, contextId);
     }
@@ -767,7 +767,7 @@ public final class SessionHandler {
         }
 
         SessionImpl session = sessionControl.getSession();
-        List<String> remotes = getRemoteParameterNames(session.getUserId(), session.getContextId());
+        Collection<String> remotes = getRemoteParameterNames(session.getUserId(), session.getContextId());
         return putIntoSessionStorage(session, true, null == remotes || remotes.isEmpty());
     }
 
@@ -809,7 +809,7 @@ public final class SessionHandler {
             addedSession = sessionData.addSession(newSession, noLimit).getSession();
 
             // Store session if not marked as transient and associated client is applicable
-            List<String> remotes = getRemoteParameterNames(addedSession.getUserId(), addedSession.getContextId());
+            Collection<String> remotes = getRemoteParameterNames(addedSession.getUserId(), addedSession.getContextId());
             putIntoSessionStorage(addedSession, null == remotes || remotes.isEmpty());
 
             // Post event for created session
