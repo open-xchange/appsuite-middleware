@@ -50,14 +50,12 @@
 package com.openexchange.test;
 
 import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import com.openexchange.ajax.framework.SmtpMockSetup;
 import com.openexchange.ajax.oauth.provider.OAuthProviderSmtpTests;
 import com.openexchange.ajax.onboarding.OnboardingAJAXSuite;
 import com.openexchange.ajax.share.ShareAJAXSuite;
-import com.openexchange.exception.OXException;
 import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
@@ -74,19 +72,11 @@ import com.openexchange.test.concurrent.ParallelSuite;
     ShareAJAXSuite.class,
 })
 public final class InterfaceSmtpMockTests {
-
-    @BeforeClass
-    public static void setUp() {
-        try {
-            SmtpMockSetup.init();
-        } catch (OXException e) {
-            e.printStackTrace();
-        }
-    }
-
+    
     @AfterClass
-    public static void tearDown() {
+    public static void after() throws Exception {
         SmtpMockSetup.restore();
     }
+
 
 }

@@ -51,6 +51,7 @@ package com.openexchange.ajax.framework;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.smtptest.actions.ClearMailsRequest;
 import com.openexchange.test.pool.TestUser;
@@ -59,6 +60,11 @@ public abstract class AbstractSmtpAJAXSession extends AbstractAJAXSession {
 
     protected TestUser noReplyUser;
     private AJAXClient noReplyClient;
+    
+    @BeforeClass
+    public static void before() throws Exception {
+        SmtpMockSetup.init();
+    }
 
     @Before
     public void setUp() throws Exception {
@@ -81,7 +87,7 @@ public abstract class AbstractSmtpAJAXSession extends AbstractAJAXSession {
             super.tearDown();
         }
     }
-
+    
     public AJAXClient getNoReplyClient() {
         return noReplyClient;
     }
