@@ -51,10 +51,13 @@ package com.openexchange.setuptools;
 
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
+import com.openexchange.test.pool.TestContextPool;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
+ * @deprecated - use contexts/user provided by {@link TestContextPool}
  */
+@Deprecated
 public class TestConfig {
 
     private String user;
