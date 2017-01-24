@@ -46,12 +46,14 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.test.fixtures;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class IntrospectionTools {
+
     public static String setterName(final String dasherizedName) {
         return "set" + toCamelCase(dasherizedName);
     }
@@ -61,17 +63,17 @@ public class IntrospectionTools {
     }
 
     public static String getterName(final String daherizedName) {
-        return "get"+ toCamelCase(daherizedName);
+        return "get" + toCamelCase(daherizedName);
     }
 
     public static String toCamelCase(final String attribute) {
-    	final StringBuilder builder = new StringBuilder();
+        final StringBuilder builder = new StringBuilder();
         boolean upperCase = true;
         for (char c : attribute.toCharArray()) {
-            if(upperCase) {
+            if (upperCase) {
                 upperCase = false;
                 builder.append(Character.toUpperCase(c));
-            } else if(c == '_') {
+            } else if (c == '_') {
                 upperCase = true;
             } else {
                 builder.append(c);

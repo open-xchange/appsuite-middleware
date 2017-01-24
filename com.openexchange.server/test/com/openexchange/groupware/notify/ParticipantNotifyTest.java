@@ -87,29 +87,29 @@ public class ParticipantNotifyTest {
      */
     private UserParticipant[] userParticipants = new UserParticipant[] { userParticipant1, userParticipant2, userParticipant3 };
 
-    @Test
-    public void testContains_toSearchNull_ReturnFalse() {
+     @Test
+     public void testContains_toSearchNull_ReturnFalse() {
         boolean containsUser = ParticipantNotify.contains(null, userParticipants);
 
         Assert.assertFalse(containsUser);
     }
 
-    @Test
-    public void testContains_ArrayToSearchWithinNull_ReturnFalse() {
+     @Test
+     public void testContains_ArrayToSearchWithinNull_ReturnFalse() {
         boolean containsUser = ParticipantNotify.contains(userParticipant1, null);
 
         Assert.assertFalse(containsUser);
     }
 
-    @Test
-    public void testContains_UserNotIncludedInSearchArray_ReturnTrue() {
+     @Test
+     public void testContains_UserNotIncludedInSearchArray_ReturnTrue() {
         boolean containsUser = ParticipantNotify.contains(notIncludedUser, userParticipants);
 
         Assert.assertFalse(containsUser);
     }
 
-    @Test
-    public void testContains_UserIncludedInSearchArray_ReturnTrue() {
+     @Test
+     public void testContains_UserIncludedInSearchArray_ReturnTrue() {
         boolean containsUser = ParticipantNotify.contains(userParticipant3, userParticipants);
 
         Assert.assertTrue(containsUser);

@@ -71,27 +71,20 @@ public class TimeZoneRegistryImpl implements TimeZoneRegistry {
 
     private static final Properties ALIASES = new Properties();
     static {
-        try {
-            ALIASES.load(ResourceLoader.getResourceAsStream("net/fortuna/ical4j/model/tz.alias"));
+        try (InputStream in = ResourceLoader.getResourceAsStream("net/fortuna/ical4j/model/tz.alias")) {
+            ALIASES.load(in);
         }
         catch (IOException ioe) {
             LogFactory.getLog(TimeZoneRegistryImpl.class).warn(
                     "Error loading timezone aliases: " + ioe.getMessage());
         }
 
-        InputStream resourceStream = null;
-        try {
-        	resourceStream = ResourceLoader.getResourceAsStream("tz.alias");
+        try (InputStream resourceStream = ResourceLoader.getResourceAsStream("tz.alias")) {
             ALIASES.load(resourceStream);
         }
         catch (Exception e) {
         	LogFactory.getLog(TimeZoneRegistryImpl.class).debug(
         			"Error loading custom timezone aliases: " + e.getMessage());
-        }
-        finally {
-            if (null != resourceStream) {
-                try { resourceStream.close(); } catch (Exception x) { /*ignore*/ }
-            }
         }
     }
 

@@ -49,8 +49,8 @@
 
 package com.openexchange.user.json;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 
 /**
@@ -58,13 +58,10 @@ import junit.framework.TestSuite;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    com.openexchange.user.json.filter.NoGlobalAddressBookUserCensorshipTest.class,
+    
+})
 public class UnitTests {
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-
-        tests.addTestSuite(com.openexchange.user.json.filter.NoGlobalAddressBookUserCensorshipTest.class);
-
-
-        return tests;
-    }
 }

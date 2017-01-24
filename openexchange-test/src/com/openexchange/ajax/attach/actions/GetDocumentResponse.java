@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.attach.actions;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
@@ -58,17 +60,21 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class GetDocumentResponse extends AbstractAJAXResponse {
-    
+
     private final int contentLength;
+    private HttpEntity entity;
+    private String respString;
 
     /**
      * Initializes a new {@link GetDocumentResponse}.
      * 
      * @param response
      */
-    public GetDocumentResponse(Response response, int cl) {
+    public GetDocumentResponse(HttpResponse httpResponse, Response response, int cl, String respString) {
         super(response);
-        contentLength = cl;
+        this.contentLength = cl;
+        this.respString = respString;
+        this.entity = httpResponse.getEntity();
     }
 
     /**
@@ -78,5 +84,18 @@ public class GetDocumentResponse extends AbstractAJAXResponse {
      */
     public int getContentLength() {
         return contentLength;
+    }
+
+    public String getContentType() {
+        return entity.getContentType().getValue();
+    }
+
+    public String getContentAsString() {
+        return respString;
+    }
+
+    @Override
+    public Object getData() {
+        return getContentAsString();
     }
 }

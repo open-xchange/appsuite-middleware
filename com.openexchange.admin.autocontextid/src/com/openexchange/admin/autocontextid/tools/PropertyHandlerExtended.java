@@ -61,10 +61,6 @@ public class PropertyHandlerExtended extends PropertyHandler {
     // The following lines define the property values for the database implementations
     public static final String AUTOCID_STORAGE = "AUTOCID_STORAGE";
 
-    private PropertyHandlerExtended() {
-        super(null);
-    }
-
     public PropertyHandlerExtended(final Properties sysprops) {
         super(sysprops);
         final StringBuilder configfile = new StringBuilder();

@@ -50,7 +50,13 @@
 package com.openexchange.ajax.folder.api2;
 
 import static com.openexchange.java.Autoboxing.I;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
@@ -60,7 +66,6 @@ import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.folder.actions.PathRequest;
 import com.openexchange.ajax.folder.actions.PathResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.groupware.container.FolderObject;
@@ -79,20 +84,11 @@ public class Bug16163Test extends AbstractAJAXSession {
     private AJAXClient client2;
     private int appointmentFolder;
 
-    /**
-     * Initializes a new {@link Bug16163Test}.
-     *
-     * @param name The name
-     */
-    public Bug16163Test(final String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
-        client2 = new AJAXClient(User.User2);
+        client2 = new AJAXClient(testContext.acquireUser());
         testFolder = new FolderObject();
         testFolder.setModule(FolderObject.CALENDAR);
         appointmentFolder = client.getValues().getPrivateAppointmentFolder();
@@ -106,12 +102,16 @@ public class Bug16163Test extends AbstractAJAXSession {
         testFolder.setLastModified(new Date());
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        client.execute(new DeleteRequest(EnumAPI.OUTLOOK, testFolder));
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
+        try {
+            client.execute(new DeleteRequest(EnumAPI.OUTLOOK, testFolder));
+        } finally {
+            super.tearDown();
+        }
     }
 
+    @Test
     public void testPathRequestWorks() throws Throwable {
         {
             // Fill cache with database folder.

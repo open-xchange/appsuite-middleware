@@ -74,7 +74,6 @@ import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.session.SimSession;
 
-
 /**
  * {@link FileEventTest}
  *
@@ -88,7 +87,6 @@ public class FileEventTest {
 
     private InMemoryAccess fileAccess;
 
-
     @Before
     public void setUp() throws Exception {
         fileAccess = new InMemoryAccess();
@@ -101,6 +99,7 @@ public class FileEventTest {
         final FolderID folder = new FolderID(SERVICE, ACCOUNT, "dasdb3424");
         file.setFolderId(folder.toUniqueID());
         fileAccess.setEventVerifier(new EventVerifier() {
+
             @Override
             public void verifyEvent(Event event) throws Exception {
                 assertTrue("Wrong topic.", event.getTopic().equals(FileStorageEventConstants.CREATE_TOPIC));
@@ -125,6 +124,7 @@ public class FileEventTest {
         final String folderID = fullID.substring(0, fullID.lastIndexOf("/"));
 
         fileAccess.setEventVerifier(new EventVerifier() {
+
             @Override
             public void verifyEvent(Event event) throws Exception {
                 assertTrue("Wrong topic.", event.getTopic().equals(FileStorageEventConstants.DELETE_TOPIC));
@@ -142,6 +142,7 @@ public class FileEventTest {
         assertTrue("Version not removed.", notRemoved.length == 0);
 
         fileAccess.setEventVerifier(new EventVerifier() {
+
             @Override
             public void verifyEvent(Event event) throws Exception {
                 assertTrue("Wrong topic.", event.getTopic().equals(FileStorageEventConstants.DELETE_TOPIC));
@@ -167,6 +168,7 @@ public class FileEventTest {
         moved.setFolderId(dstFolder.toUniqueID());
 
         fileAccess.setEventVerifier(new EventVerifier() {
+
             private int executionCount = 0;
 
             private boolean deleted = false;
@@ -212,6 +214,7 @@ public class FileEventTest {
 
         final FolderID dstFolder = new FolderID(SERVICE, ACCOUNT, "xsdgd7234");
         fileAccess.setEventVerifier(new EventVerifier() {
+
             @Override
             public void verifyEvent(Event event) throws Exception {
                 assertTrue("Wrong topic.", event.getTopic().equals(FileStorageEventConstants.CREATE_TOPIC));
@@ -237,6 +240,7 @@ public class FileEventTest {
 
         file.setTitle("Another title...");
         fileAccess.setEventVerifier(new EventVerifier() {
+
             @Override
             public void verifyEvent(Event event) throws Exception {
                 assertTrue("Wrong topic.", event.getTopic().equals(FileStorageEventConstants.UPDATE_TOPIC));
@@ -260,9 +264,9 @@ public class FileEventTest {
 
         private EventVerifier verifier;
 
-
         /**
          * Initializes a new {@link InMemoryAccess}.
+         * 
          * @param session
          */
         public InMemoryAccess() {
@@ -305,7 +309,9 @@ public class FileEventTest {
             this.verifier = verifier;
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see com.openexchange.file.storage.composition.IDBasedFileAccess#getDocumentAndMetadata(java.lang.String, java.lang.String)
          */
         @Override
@@ -322,6 +328,7 @@ public class FileEventTest {
     }
 
     private static interface EventVerifier {
+
         void verifyEvent(Event event) throws Exception;
     }
 

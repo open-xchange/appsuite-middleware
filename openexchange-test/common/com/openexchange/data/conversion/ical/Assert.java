@@ -67,12 +67,12 @@ public class Assert extends org.junit.Assert {
 
     public static void assertStandardAppFields(final ICalFile ical, final Date start, final Date end, TimeZone tz) {
         assertProperty(ical, "DTSTART", "TZID=" + tz.getID(), Tools.formatForICalWithoutTimezone(start));
-        assertProperty(ical, "DTEND",   "TZID=" + tz.getID(), Tools.formatForICalWithoutTimezone(end));
+        assertProperty(ical, "DTEND", "TZID=" + tz.getID(), Tools.formatForICalWithoutTimezone(end));
     }
 
     public static void assertStandardTaskFields(final ICalFile ical, final Date start, final Date end, TimeZone tz) {
         assertProperty(ical, "DTSTART", "TZID=" + tz.getID(), Tools.formatForICalWithoutTimezone(start));
-        assertProperty(ical, "DUE",     "TZID=" + tz.getID(), Tools.formatForICalWithoutTimezone(end));
+        assertProperty(ical, "DUE", "TZID=" + tz.getID(), Tools.formatForICalWithoutTimezone(end));
     }
 
     public static void assertStandardAppFields(final ICalFile ical, final Date start, final Date end) {
@@ -87,7 +87,7 @@ public class Assert extends org.junit.Assert {
 
     public static void assertProperty(final ICalFile ical, final String name, final String value) {
         String prop = name + (null == value ? "" : ":" + value);
-        assertTrue("\""+prop+"\" missing in: \n"+ical.toString(), ical.containsPair(name, value));
+        assertTrue("\"" + prop + "\" missing in: \n" + ical.toString(), ical.containsPair(name, value));
     }
 
     public static void assertProperty(ICalFile ical, String name, String parameter, String value) {
@@ -99,14 +99,14 @@ public class Assert extends org.junit.Assert {
         if (null != value) {
             prop.append(':').append(value);
         }
-        assertTrue("\""+prop.toString()+"\" missing in: \n"+ical.toString(), ical.containsEntry(name, parameter, value));
+        assertTrue("\"" + prop.toString() + "\" missing in: \n" + ical.toString(), ical.containsEntry(name, parameter, value));
     }
 
     public static void assertNoProperty(final ICalFile ical, final String name) {
-        assertFalse("Didn't expect to find "+name+" in: \n"+ical.toString(), ical.containsKey(name));
+        assertFalse("Didn't expect to find " + name + " in: \n" + ical.toString(), ical.containsKey(name));
     }
 
     public static void assertLine(final ICalFile ical, final String line) {
-        assertTrue(line+" missing in: \n"+ical.toString(), ical.containsLine(line));
+        assertTrue(line + " missing in: \n" + ical.toString(), ical.containsLine(line));
     }
 }

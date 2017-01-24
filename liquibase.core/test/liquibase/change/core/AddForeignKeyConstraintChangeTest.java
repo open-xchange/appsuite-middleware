@@ -1,5 +1,7 @@
 package liquibase.change.core;
 
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
 import liquibase.change.ChangeFactory;
 import liquibase.change.StandardChangeTest;
 import liquibase.database.Database;
@@ -7,14 +9,11 @@ import liquibase.database.core.MockDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddForeignKeyConstraintStatement;
-import static org.junit.Assert.*;
-import org.junit.Test;
 
 public class AddForeignKeyConstraintChangeTest  extends StandardChangeTest {
 
 
-    @Override
-    @Test
+     @Test
     public void generateStatement() throws Exception {
         AddForeignKeyConstraintChange change = new AddForeignKeyConstraintChange();
         change.setConstraintName("FK_NAME");
@@ -56,8 +55,7 @@ public class AddForeignKeyConstraintChangeTest  extends StandardChangeTest {
         assertEquals("addForeignKeyConstraint", ChangeFactory.getInstance().getChangeMetaData(new AddForeignKeyConstraintChange()).getName());
     }
 
-    @Override
-    @Test
+     @Test
     public void getConfirmationMessage() throws Exception {
         AddForeignKeyConstraintChange change = new AddForeignKeyConstraintChange();
         change.setConstraintName("FK_NAME");

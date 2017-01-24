@@ -60,8 +60,8 @@ import com.openexchange.html.AbstractSanitizing;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class Bug29892Test extends AbstractSanitizing {
-    @Test
-    public void testIgnoreHrefBaseTag() {
+     @Test
+     public void testIgnoreHrefBaseTag() {
         String content = getHtmlService().checkBaseTag("<html>\n" +
             "<head>" +
             "<base href=\"https://bugs.open-xchange.com/\" /> \n" +

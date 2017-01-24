@@ -49,6 +49,9 @@
 
 package com.openexchange.contact.storage;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -132,12 +135,7 @@ public class CreateTest extends ContactStorageTest {
         contact.setCreatedBy(getUserID());
         contact.setSurName("Distributionlist 77");
         contact.setUid(UUID.randomUUID().toString());
-        contact.setDistributionList(new DistributionListEntryObject[] {
-            new DistributionListEntryObject("Horst Otto", "horst.otto@example.com", 0),
-            new DistributionListEntryObject("Werner Otto", "werner.otto@example.com", 0),
-            new DistributionListEntryObject("Dieter Otto", "dieter.otto@example.com", 0),
-            new DistributionListEntryObject("Klaus Otto", "klaus.otto@example.com", 0),
-            new DistributionListEntryObject("Kurt Otto", "kurt.otto@example.com", 0),
+        contact.setDistributionList(new DistributionListEntryObject[] { new DistributionListEntryObject("Horst Otto", "horst.otto@example.com", 0), new DistributionListEntryObject("Werner Otto", "werner.otto@example.com", 0), new DistributionListEntryObject("Dieter Otto", "dieter.otto@example.com", 0), new DistributionListEntryObject("Klaus Otto", "klaus.otto@example.com", 0), new DistributionListEntryObject("Kurt Otto", "kurt.otto@example.com", 0),
         });
         getStorage().create(getSession(), folderId, contact);
         super.rememberForCleanUp(contact);

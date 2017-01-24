@@ -69,8 +69,10 @@ import com.openexchange.mail.api.MailConfig.PasswordSource;
 import com.openexchange.mail.api.MailConfig.ServerSource;
 import com.openexchange.mail.partmodifier.DummyPartModifier;
 import com.openexchange.mail.partmodifier.PartModifier;
+import com.openexchange.mail.utils.IpAddressRenderer;
 import com.openexchange.net.HostList;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.net.URIDefaults;
 
 /**
  * {@link MailProperties} - Global mail properties read from properties file.
@@ -128,9 +130,9 @@ public final class MailProperties implements IMailProperties {
 
     private ServerSource transportServerSource;
 
-    private String mailServer;
+    private ConfiguredServer mailServer;
 
-    private String transportServer;
+    private ConfiguredServer transportServer;
 
     private String masterPassword;
 
@@ -179,6 +181,8 @@ public final class MailProperties implements IMailProperties {
     private int mailAccessCacheIdleSeconds;
 
     private boolean addClientIPAddress;
+
+    private IpAddressRenderer ipAddressRenderer;
 
     private boolean rateLimitPrimaryOnly;
 
@@ -291,6 +295,7 @@ public final class MailProperties implements IMailProperties {
         mailAccessCacheShrinkerSeconds = 0;
         mailAccessCacheIdleSeconds = 0;
         addClientIPAddress = false;
+        ipAddressRenderer = IpAddressRenderer.simpleRenderer();
         rateLimitPrimaryOnly = true;
         rateLimit = 0;
         maxToCcBcc = 0;
@@ -367,16 +372,18 @@ public final class MailProperties implements IMailProperties {
         }
 
         {
-            mailServer = configuration.getProperty("com.openexchange.mail.mailServer");
+            String mailServer = configuration.getProperty("com.openexchange.mail.mailServer");
             if (mailServer != null) {
                 mailServer = mailServer.trim();
+                this.mailServer = ConfiguredServer.parseFrom(mailServer, URIDefaults.IMAP);
             }
         }
 
         {
-            transportServer = configuration.getProperty("com.openexchange.mail.transportServer");
+            String transportServer = configuration.getProperty("com.openexchange.mail.transportServer");
             if (transportServer != null) {
                 transportServer = transportServer.trim();
+                this.transportServer = ConfiguredServer.parseFrom(transportServer, URIDefaults.SMTP);
             }
         }
 
@@ -518,9 +525,24 @@ public final class MailProperties implements IMailProperties {
         }
 
         {
-            final String tmp = configuration.getProperty("com.openexchange.mail.addClientIPAddress", "false").trim();
+            String tmp = configuration.getProperty("com.openexchange.mail.addClientIPAddress", "false").trim();
             addClientIPAddress = Boolean.parseBoolean(tmp);
             logBuilder.append("\tAdd Client IP Address: ").append(addClientIPAddress).append('\n');
+
+            if (addClientIPAddress) {
+                tmp = configuration.getProperty("com.openexchange.mail.clientIPAddressPattern");
+                if (null == tmp) {
+                    ipAddressRenderer = IpAddressRenderer.simpleRenderer();
+                } else {
+                    tmp = tmp.trim();
+                    try {
+                        ipAddressRenderer = IpAddressRenderer.createRendererFor(tmp);
+                        logBuilder.append("\tIP Address Pattern: Pattern syntax \u0060\u0060").append(tmp).append("\u00b4\u00b4 accepted.").append('\n');
+                    } catch (Exception e) {
+                        logBuilder.append("\tIP Address Pattern: Unsupported pattern syntax \"").append(tmp).append("\". Using simple renderer.").append('\n');
+                    }
+                }
+            }
         }
 
         {
@@ -872,6 +894,17 @@ public final class MailProperties implements IMailProperties {
     }
 
     /**
+     * Gets the IP address renderer
+     * <p>
+     * <i>Note</i>: Returns <code>null</code> if {@link #isAddClientIPAddress()} signals <code>false</code>
+     *
+     * @return The renderer instance
+     */
+    public IpAddressRenderer getIpAddressRenderer() {
+        return ipAddressRenderer;
+    }
+
+    /**
      * Gets the JavaMail properties.
      *
      * @return The JavaMail properties
@@ -926,7 +959,7 @@ public final class MailProperties implements IMailProperties {
      *
      * @return The global mail server
      */
-    public String getMailServer() {
+    public ConfiguredServer getMailServer() {
         return mailServer;
     }
 
@@ -989,7 +1022,7 @@ public final class MailProperties implements IMailProperties {
      *
      * @return The global transport server
      */
-    public String getTransportServer() {
+    public ConfiguredServer getTransportServer() {
         return transportServer;
     }
 

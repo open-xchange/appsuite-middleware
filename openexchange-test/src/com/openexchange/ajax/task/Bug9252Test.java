@@ -50,6 +50,8 @@
 package com.openexchange.ajax.task;
 
 import java.util.Date;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -63,6 +65,7 @@ import com.openexchange.groupware.tasks.Task;
 
 /**
  * Tests problem described in bug #9295.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class Bug9252Test extends AbstractTaskTest {
@@ -74,46 +77,42 @@ public class Bug9252Test extends AbstractTaskTest {
     /**
      * @param name
      */
-    public Bug9252Test(final String name) {
-        super(name);
+    public Bug9252Test() {
+        super();
     }
 
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client1 = getClient();
-        client2 = new AJAXClient(AJAXClient.User.User2);
+        client2 = new AJAXClient(testContext.acquireUser());
     }
 
     /**
      * Tests if tasks in public folders created by other users can be read.
+     * 
      * @throws Throwable if this test fails.
      */
+    @Test
     public void testReadAccess() throws Throwable {
         // Create public folder.
-        final FolderObject folder = Create.setupPublicFolder(
-            "Bug9295TaskFolder", FolderObject.TASK, client1.getValues()
-            .getUserId());
+        final FolderObject folder = Create.setupPublicFolder("Bug9295TaskFolder", FolderObject.TASK, client1.getValues().getUserId());
         folder.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
-        final CommonInsertResponse fInsertR = client1.execute(
-            new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_OLD, folder));
+        final CommonInsertResponse fInsertR = client1.execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_OLD, folder));
         folder.setObjectID(fInsertR.getId());
         try {
             // Create a task in there.
-            final Task task = com.openexchange.groupware.tasks.Create
-                .createWithDefaults();
+            final Task task = com.openexchange.groupware.tasks.Create.createWithDefaults();
             task.setParentFolderID(folder.getObjectID());
             task.setTitle("Test bug #9295");
             final InsertResponse iResponse = client1.execute(new InsertRequest(task, client1.getValues().getTimeZone()));
             task.setObjectID(iResponse.getId());
             // Now second user tries to read the task.
-            final GetResponse gResponse = TaskTools.get(client2,
-                new GetRequest(folder.getObjectID(), task.getObjectID()));
-            final Task reload = gResponse.getTask(client2.getValues()
-                .getTimeZone());
+            final GetResponse gResponse = TaskTools.get(client2, new GetRequest(folder.getObjectID(), task.getObjectID()));
+            final Task reload = gResponse.getTask(client2.getValues().getTimeZone());
             TaskTools.compareAttributes(task, reload);
         } finally {
             client1.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder.getObjectID(), new Date()));

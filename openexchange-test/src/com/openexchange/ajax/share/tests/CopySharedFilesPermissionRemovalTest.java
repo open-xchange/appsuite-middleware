@@ -49,10 +49,12 @@
 
 package com.openexchange.ajax.share.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.infostore.actions.CopyInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.CopyInfostoreResponse;
 import com.openexchange.ajax.infostore.actions.GetInfostoreRequest;
@@ -73,19 +75,11 @@ import com.openexchange.share.recipient.GuestRecipient;
  */
 public class CopySharedFilesPermissionRemovalTest extends AbstractSharedFilesTest {
 
-    /**
-     * Initializes a new {@link CopySharedFilesPermissionRemovalTest}.
-     * 
-     * @param name
-     */
-    public CopySharedFilesPermissionRemovalTest(String name) {
-        super(name);
-    }
-
+    @Test
     public void testCopySharedFile_ownerCopiesFile_fileBecomesCopiedWithoutObjectPermissions() throws Exception {
         userDestFolder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), "dest_" + randomUID());
 
-        AJAXClient client2 = new AJAXClient(User.User2);
+        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
         try {
             addUserPermission(client2.getValues().getUserId());
             GuestRecipient recipient = new GuestRecipient();
@@ -94,27 +88,29 @@ public class CopySharedFilesPermissionRemovalTest extends AbstractSharedFilesTes
             file = updateFile(file, new Field[] { Field.OBJECT_PERMISSIONS });
 
             //pre assertions
-            File documentMetadata = client.execute(new GetInfostoreRequest(file.getId())).getDocumentMetadata();
+            File documentMetadata = getClient().execute(new GetInfostoreRequest(file.getId())).getDocumentMetadata();
             assertEquals("Wrong number of shares users/guests", 2, documentMetadata.getObjectPermissions().size());
 
             file.setFolderId(Integer.toString(userDestFolder.getObjectID())); // set new target folder
-            String newObjectId = infoMgr.copyAction(file.getId(), Integer.toString(userDestFolder.getObjectID()), file);
+            infoMgr.copyAction(file.getId(), Integer.toString(userDestFolder.getObjectID()), file);
+            String newObjectId = file.getId();
 
-            File copiedFile = client.execute(new GetInfostoreRequest(newObjectId)).getDocumentMetadata();
+            File copiedFile = getClient().execute(new GetInfostoreRequest(newObjectId)).getDocumentMetadata();
 
             assertEquals("Object permissions should not be available!", 0, copiedFile.getObjectPermissions().size());
-            assertEquals("File not created by main user", client.getValues().getUserId(), copiedFile.getCreatedBy());
+            assertEquals("File not created by main user", getClient().getValues().getUserId(), copiedFile.getCreatedBy());
             assertEquals("Wrong number of versions", 1, copiedFile.getNumberOfVersions());
         } finally {
             client2.logout();
         }
     }
 
+    @Test
     public void testCopySharedFile_guestCopiesFile_fileBecomesCopiedWithoutObjectPermissions() throws Exception {
         OCLGuestPermission lGuestPermission = createNamedAuthorPermission(randomUID() + "@example.com", "Test Guest", "secret");
         userDestFolder = insertSharedFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), "dest_" + randomUID(), lGuestPermission);
 
-        AJAXClient client2 = new AJAXClient(User.User2);
+        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
         GuestClient guestClient = null;
         try {
             addUserPermission(client2.getValues().getUserId());
@@ -123,7 +119,7 @@ public class CopySharedFilesPermissionRemovalTest extends AbstractSharedFilesTes
             String sharedFileId = sharedFileId(file.getId());
 
             //pre assertions
-            File documentMetadata = client.execute(new GetInfostoreRequest(sharedFileId)).getDocumentMetadata();
+            File documentMetadata = getClient().execute(new GetInfostoreRequest(sharedFileId)).getDocumentMetadata();
             assertEquals("Wrong number of shares users/guests", 2, documentMetadata.getObjectPermissions().size());
 
             file.setFolderId(Integer.toString(userDestFolder.getObjectID())); // set new target folder
@@ -133,7 +129,7 @@ public class CopySharedFilesPermissionRemovalTest extends AbstractSharedFilesTes
              */
             OCLPermission matchingPermission = null;
             for (OCLPermission permission : userDestFolder.getPermissions()) {
-                if (permission.getEntity() != client.getValues().getUserId()) {
+                if (permission.getEntity() != getClient().getValues().getUserId()) {
                     matchingPermission = permission;
                     break;
                 }
@@ -152,7 +148,7 @@ public class CopySharedFilesPermissionRemovalTest extends AbstractSharedFilesTes
             assertNull("No error should occur!", copyResponse.getErrorMessage());
             assertNull("No exception should occur!", copyResponse.getException());
 
-            File copiedFile = client.execute(new GetInfostoreRequest(copyResponse.getID())).getDocumentMetadata();
+            File copiedFile = getClient().execute(new GetInfostoreRequest(copyResponse.getID())).getDocumentMetadata();
 
             assertEquals("Object permissions should not be available!", 0, copiedFile.getObjectPermissions().size());
             assertEquals("File not created by guest", guestClient.getValues().getUserId(), copiedFile.getCreatedBy());
@@ -165,8 +161,9 @@ public class CopySharedFilesPermissionRemovalTest extends AbstractSharedFilesTes
         }
     }
 
+    @Test
     public void testCopySharedFile_internalUserCopiesFile_fileBecomesCopiedWithoutObjectPermissions() throws Exception {
-        AJAXClient client2 = new AJAXClient(User.User2);
+        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
         int userId = client2.getValues().getUserId();
 
         try {
@@ -182,7 +179,7 @@ public class CopySharedFilesPermissionRemovalTest extends AbstractSharedFilesTes
             String sharedFileId = sharedFileId(file.getId());
 
             //pre assertions
-            File documentMetadata = client.execute(new GetInfostoreRequest(file.getId())).getDocumentMetadata();
+            File documentMetadata = getClient().execute(new GetInfostoreRequest(file.getId())).getDocumentMetadata();
             assertEquals("Wrong number of shares users/guests", 2, documentMetadata.getObjectPermissions().size());
 
             file.setFolderId(Integer.toString(userDestFolder.getObjectID())); // set new target folder
@@ -191,7 +188,7 @@ public class CopySharedFilesPermissionRemovalTest extends AbstractSharedFilesTes
             copyRequest.setFailOnError(true);
             CopyInfostoreResponse copyResponse = client2.execute(copyRequest);
 
-            File copiedFile = client.execute(new GetInfostoreRequest(copyResponse.getID())).getDocumentMetadata();
+            File copiedFile = getClient().execute(new GetInfostoreRequest(copyResponse.getID())).getDocumentMetadata();
 
             assertEquals("Object permissions should not be available!", 0, copiedFile.getObjectPermissions().size());
             assertEquals("File not created by internal user", userId, copiedFile.getCreatedBy());

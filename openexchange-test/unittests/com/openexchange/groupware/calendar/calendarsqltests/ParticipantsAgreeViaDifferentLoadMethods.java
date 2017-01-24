@@ -51,14 +51,15 @@ package com.openexchange.groupware.calendar.calendarsqltests;
 
 import java.util.Arrays;
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.tools.iterator.SearchIterator;
 
-
 public class ParticipantsAgreeViaDifferentLoadMethods extends CalendarSqlTest {
 
+    @Test
     public void testParticipantsAgreeViaDifferentLoadMethods() throws Exception {
         final CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(participant1);
         appointments.save(appointment);
@@ -66,11 +67,11 @@ public class ParticipantsAgreeViaDifferentLoadMethods extends CalendarSqlTest {
 
         AppointmentSQLInterface appointmentSql = appointments.getCurrentAppointmentSQLInterface();
 
-        SearchIterator<Appointment> appointmentsBetweenInFolder = appointmentSql.getAppointmentsBetweenInFolder(appointment.getParentFolderID(), new int[]{Appointment.OBJECT_ID, Appointment.PARTICIPANTS}, new Date(0), new Date(appointment.getEndDate().getTime()+1000),-1, null);
+        SearchIterator<Appointment> appointmentsBetweenInFolder = appointmentSql.getAppointmentsBetweenInFolder(appointment.getParentFolderID(), new int[] { Appointment.OBJECT_ID, Appointment.PARTICIPANTS }, new Date(0), new Date(appointment.getEndDate().getTime() + 1000), -1, null);
         Appointment loadedViaFolderListing = null;
-        while(appointmentsBetweenInFolder.hasNext()) {
+        while (appointmentsBetweenInFolder.hasNext()) {
             Appointment temp = appointmentsBetweenInFolder.next();
-            if(temp.getObjectID() == appointment.getObjectID()) {
+            if (temp.getObjectID() == appointment.getObjectID()) {
                 loadedViaFolderListing = temp;
             }
         }

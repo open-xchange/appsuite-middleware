@@ -65,8 +65,8 @@ public class CombinedCharSequenceTest {
         super();
     }
 
-    @Test
-    public void testCombinedCharSequence() {
+     @Test
+     public void testCombinedCharSequence() {
         String s1 = "Hello Pet";
         String s2 = "er Park";
         String s3 = "er How";

@@ -54,6 +54,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import org.junit.Test;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
 import com.openexchange.ajax.mail.filter.api.dao.action.Action;
 import com.openexchange.ajax.mail.filter.api.dao.action.Keep;
@@ -74,13 +75,14 @@ public class ReorderTest extends AbstractMailFilterTest {
      * 
      * @param name
      */
-    public ReorderTest(String name) {
-        super(name);
+    public ReorderTest() {
+        super();
     }
 
     /**
      * Test the reorder API call
      */
+    @Test
     public void testReorder() throws Exception {
         Random r = new Random(System.currentTimeMillis());
 

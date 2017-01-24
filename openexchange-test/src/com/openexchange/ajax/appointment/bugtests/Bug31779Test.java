@@ -50,10 +50,14 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
@@ -67,29 +71,20 @@ import com.openexchange.test.CalendarTestManager;
  */
 public class Bug31779Test extends AbstractAJAXSession {
 
-    private AJAXClient client1;
-
-    private AJAXClient client2;
-
-    private CalendarTestManager ctm1;
-
     private int nextYear;
 
     private Appointment appointment;
 
     private CalendarTestManager ctm2;
 
-    public Bug31779Test(String name) {
-        super(name);
+    public Bug31779Test() {
+        super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
-        client1 = client;
-        client2 = new AJAXClient(User.User2);
-        ctm1 = new CalendarTestManager(client1);
-        ctm2 = new CalendarTestManager(client2);
+        ctm2 = new CalendarTestManager(getClient2());
 
         nextYear = Calendar.getInstance().get(Calendar.YEAR) + 1;
         appointment = new Appointment();
@@ -99,59 +94,63 @@ public class Bug31779Test extends AbstractAJAXSession {
         appointment.setRecurrenceType(Appointment.DAILY);
         appointment.setInterval(1);
         appointment.setIgnoreConflicts(true);
-        appointment.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
-        UserParticipant user1 = new UserParticipant(client1.getValues().getUserId());
-        UserParticipant user2 = new UserParticipant(client2.getValues().getUserId());
+        appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
+        UserParticipant user1 = new UserParticipant(getClient().getValues().getUserId());
+        UserParticipant user2 = new UserParticipant(getClient2().getValues().getUserId());
         appointment.setParticipants(new Participant[] { user1, user2 });
         appointment.setUsers(new UserParticipant[] { user1, user2 });
 
-        ctm1.insert(appointment);
+        catm.insert(appointment);
     }
 
     /**
      * Tests the bug as written in the report: If the creator deletes an exception, the whole exception should disappear.
+     * 
      * @throws Exception
      */
     @Test
     public void testBug31779() throws Exception {
         Appointment exception = ctm2.createIdentifyingCopy(appointment);
-        exception.setParentFolderID(client2.getValues().getPrivateAppointmentFolder());
+        exception.setParentFolderID(getClient2().getValues().getPrivateAppointmentFolder());
         exception.setNote("Hello World");
         exception.setRecurrencePosition(2);
         ctm2.update(exception);
-        exception.setParentFolderID(client1.getValues().getPrivateAppointmentFolder());
-        ctm1.delete(ctm1.createIdentifyingCopy(exception));
-        exception.setParentFolderID(client2.getValues().getPrivateAppointmentFolder());
+        exception.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
+        catm.delete(catm.createIdentifyingCopy(exception));
+        exception.setParentFolderID(getClient2().getValues().getPrivateAppointmentFolder());
         Appointment loadedException = ctm2.get(exception);
         assertNull("No object expected.", loadedException);
         assertTrue("Error expected.", ctm2.getLastResponse().hasError());
         assertTrue("No object expected.", ctm2.getLastResponse().getErrorMessage().contains("Object not found"));
     }
-    
+
     /**
      * Tests the case, that a participant deletes an exception: Only the participant should be removed.
+     * 
      * @throws Exception
      */
     @Test
     public void testDeleteByparticipant() throws Exception {
         Appointment exception = ctm2.createIdentifyingCopy(appointment);
-        exception.setParentFolderID(client2.getValues().getPrivateAppointmentFolder());
+        exception.setParentFolderID(getClient2().getValues().getPrivateAppointmentFolder());
         exception.setNote("Hello World");
         exception.setRecurrencePosition(2);
         ctm2.update(exception);
         ctm2.delete(ctm2.createIdentifyingCopy(exception));
-        exception.setParentFolderID(client1.getValues().getPrivateAppointmentFolder());
-        Appointment loadedException = ctm1.get(exception);
+        exception.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
+        Appointment loadedException = catm.get(exception);
         assertNotNull("Object expected.", loadedException);
-        assertEquals("Wrong creator.", client1.getValues().getUserId(), loadedException.getCreatedBy());
-        assertEquals("Wrong changer.", client2.getValues().getUserId(), loadedException.getModifiedBy());
+        assertEquals("Wrong creator.", getClient().getValues().getUserId(), loadedException.getCreatedBy());
+        assertEquals("Wrong changer.", getClient2().getValues().getUserId(), loadedException.getModifiedBy());
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        ctm1.cleanUp();
-        ctm2.cleanUp();
-        super.tearDown();
+        try {
+            ctm2.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
 }

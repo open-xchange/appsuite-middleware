@@ -60,22 +60,22 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
  */
 public final class SuggestionsResponse extends AbstractAJAXResponse {
 
-	private String[] suggestions;
+    private String[] suggestions;
 
-	/**
-	 * Initializes a new {@link SuggestionsResponse}
-	 *
-	 * @param response
-	 */
-	public SuggestionsResponse(final Response response) {
-		super(response);
-	}
+    /**
+     * Initializes a new {@link SuggestionsResponse}
+     *
+     * @param response
+     */
+    public SuggestionsResponse(final Response response) {
+        super(response);
+    }
 
-	public String[] getSuggestions() {
-		return suggestions;
-	}
+    public String[] getSuggestions() {
+        return suggestions;
+    }
 
-	void setSuggestions(final String[] suggestions) {
-		this.suggestions = suggestions;
-	}
+    void setSuggestions(final String[] suggestions) {
+        this.suggestions = suggestions;
+    }
 }

@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.user;
 
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.user.actions.ListRequest;
 import com.openexchange.ajax.user.actions.ListResponse;
@@ -63,17 +65,19 @@ public class ListTest extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link ListTest}.
+     * 
      * @param name
      */
-    public ListTest(String name) {
-        super(name);
+    public ListTest() {
+        super();
     }
 
+    @Test
     public void testListUser() throws Exception {
-        final int[] userIdArray = { client.getValues().getUserId() };
+        final int[] userIdArray = { getClient().getValues().getUserId() };
         final int[] cols = { Contact.OBJECT_ID, Contact.SUR_NAME, Contact.DISPLAY_NAME };
         final ListRequest request = new ListRequest(userIdArray, cols);
-        final ListResponse response = client.execute(request);
+        final ListResponse response = getClient().execute(request);
         final Contact[] contactArray = response.getUsers();
         assertEquals("check response array", userIdArray.length, contactArray.length);
     }

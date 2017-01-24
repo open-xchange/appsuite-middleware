@@ -77,8 +77,7 @@ public class DeleteParser extends AbstractAJAXParser<DeleteResponse> {
      * {@inheritDoc}
      */
     @Override
-    protected DeleteResponse createResponse(final Response response)
-        throws JSONException {
+    protected DeleteResponse createResponse(final Response response) throws JSONException {
         return new DeleteResponse(response);
     }
 }

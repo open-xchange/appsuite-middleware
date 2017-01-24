@@ -172,10 +172,10 @@ public class PortableSession extends StoredSession implements CustomPortable {
             writer.writeUTF(PARAMETER_ALT_ID, null == altId ? null : altId.toString());
         }
         {
-            List<String> configuredRemoteParameterNames = SessionStorageConfiguration.getInstance().getRemoteParameterNames();
+            List<String> configuredRemoteParameterNames = SessionStorageConfiguration.getInstance().getRemoteParameterNames(userId, contextId);
             Set<String> remoteParameterNames = new LinkedHashSet<>(configuredRemoteParameterNames.size() + 2); // Keep order
             // Add static remote parameters
-            remoteParameterNames.add(PARAM_OAUTH_TOKEN);
+            remoteParameterNames.add(PARAM_OAUTH_ACCESS_TOKEN);
             // Add configured remote parameters
             remoteParameterNames.addAll(configuredRemoteParameterNames);
             {

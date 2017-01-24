@@ -52,6 +52,7 @@ package com.openexchange.subscribe.crawler;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.Test;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.subscribe.crawler.internal.Step;
 
@@ -63,7 +64,8 @@ import com.openexchange.subscribe.crawler.internal.Step;
  */
 public class GenericSubscribeServiceForSunCalendarTest extends GenericSubscribeServiceTestHelpers {
 
-    public void testSunCalendar(){
+         @Test
+     public void testSunCalendar(){
         String username = "";
         String password = "";
 

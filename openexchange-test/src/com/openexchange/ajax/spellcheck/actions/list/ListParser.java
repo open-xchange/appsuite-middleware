@@ -62,33 +62,33 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  */
 public final class ListParser extends AbstractAJAXParser<ListResponse> {
 
-	/**
-	 * Initializes a new {@link ListParser}
-	 *
-	 * @param failOnError
-	 */
-	public ListParser(final boolean failOnError) {
-		super(failOnError);
-	}
+    /**
+     * Initializes a new {@link ListParser}
+     *
+     * @param failOnError
+     */
+    public ListParser(final boolean failOnError) {
+        super(failOnError);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AbstractAJAXParser#createResponse(com.openexchange.ajax.container.Response)
-	 */
-	@Override
-	protected ListResponse createResponse(final Response response) throws JSONException {
-		final ListResponse retval = new ListResponse(response);
-		if (isFailOnError()) {
-			final JSONArray ja = (JSONArray) response.getData();
-			final int len = ja.length();
-			final String[] sa = new String[len];
-			for (int i = 0; i < len; i++) {
-				sa[i] = ja.getString(i);
-			}
-			retval.setUserWords(sa);
-		}
-		return retval;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AbstractAJAXParser#createResponse(com.openexchange.ajax.container.Response)
+     */
+    @Override
+    protected ListResponse createResponse(final Response response) throws JSONException {
+        final ListResponse retval = new ListResponse(response);
+        if (isFailOnError()) {
+            final JSONArray ja = (JSONArray) response.getData();
+            final int len = ja.length();
+            final String[] sa = new String[len];
+            for (int i = 0; i < len; i++) {
+                sa[i] = ja.getString(i);
+            }
+            retval.setUserWords(sa);
+        }
+        return retval;
+    }
 
 }

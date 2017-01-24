@@ -83,11 +83,10 @@ public abstract class AbstractAppointmentRequest<T extends AbstractAJAXResponse>
         return NO_HEADER;
     }
 
-    protected JSONObject convert(final Appointment appointmentObj, final TimeZone timeZone)
-        throws JSONException {
-		final JSONObject jsonObj = new JSONObject();
+    protected JSONObject convert(final Appointment appointmentObj, final TimeZone timeZone) throws JSONException {
+        final JSONObject jsonObj = new JSONObject();
         final AppointmentWriter appointmentWriter = new AppointmentWriter(timeZone, true);
-		appointmentWriter.writeAppointment(appointmentObj, jsonObj);
+        appointmentWriter.writeAppointment(appointmentObj, jsonObj);
         return jsonObj;
     }
 }

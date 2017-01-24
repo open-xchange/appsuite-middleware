@@ -60,6 +60,7 @@ import com.openexchange.groupware.container.Contact;
 
 /**
  * Stores parameters for the delete request.
+ * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 public class DeleteRequest extends AbstractContactRequest<CommonDeleteResponse> {
@@ -67,7 +68,7 @@ public class DeleteRequest extends AbstractContactRequest<CommonDeleteResponse> 
     private final int folderId;
 
     private final int objectId;
-    
+
     private final int[] objectIds;
 
     private final Date lastModified;
@@ -82,7 +83,7 @@ public class DeleteRequest extends AbstractContactRequest<CommonDeleteResponse> 
         this.lastModified = lastModified;
         this.failOnError = failOnError;
     }
-    
+
     public DeleteRequest(final int folderId, final int[] objectIds, final Date lastModified, boolean failOnError) {
         super();
         this.folderId = folderId;
@@ -93,21 +94,19 @@ public class DeleteRequest extends AbstractContactRequest<CommonDeleteResponse> 
     }
 
     public DeleteRequest(final Contact contact, boolean failOnError) {
-        this(contact.getParentFolderID(), contact.getObjectID(),
-            contact.getLastModified(), failOnError);
+        this(contact.getParentFolderID(), contact.getObjectID(), contact.getLastModified(), failOnError);
     }
 
     public DeleteRequest(final int folderId, final int[] objectIds, final Date lastModified) {
         this(folderId, objectIds, lastModified, true);
-	}
-    
+    }
+
     public DeleteRequest(final int folderId, final int objectId, final Date lastModified) {
         this(folderId, objectId, lastModified, true);
     }
 
     public DeleteRequest(final Contact contact) {
-        this(contact.getParentFolderID(), contact.getObjectID(),
-            contact.getLastModified(), true);
+        this(contact.getParentFolderID(), contact.getObjectID(), contact.getLastModified(), true);
     }
 
     /**
@@ -144,10 +143,7 @@ public class DeleteRequest extends AbstractContactRequest<CommonDeleteResponse> 
      */
     @Override
     public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
-                .ACTION_DELETE),
-            new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, lastModified)
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE), new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, lastModified)
         };
     }
 

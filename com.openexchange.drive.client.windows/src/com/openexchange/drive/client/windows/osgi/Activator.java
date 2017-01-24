@@ -109,13 +109,13 @@ public class Activator extends HousekeepingActivator {
         Services.setServiceLookup(this);
         DriveUpdateService updateService = new DriveUpdateServiceImpl();
 
-        registerService(DriveUpdateService.class, updateService, null);
-
         //register files provider
         final ConfigurationService config = getService(ConfigurationService.class);
         String path = config.getProperty(Constants.BRANDINGS_PATH);
         UpdateFilesProvider fileProvider = UpdateFilesProviderImpl.getInstance().init(path);
         updateService.init(fileProvider);
+
+        registerService(DriveUpdateService.class, updateService, null);
 
         //register download servlet
         DownloadServlet downloadServlet = new DownloadServlet(updateService, fileProvider);

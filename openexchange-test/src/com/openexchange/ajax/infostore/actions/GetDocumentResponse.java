@@ -77,6 +77,10 @@ public class GetDocumentResponse extends AbstractAJAXResponse {
         return response.getStatusLine().getStatusCode();
     }
 
+    public String getContentType() {
+        return entity.getContentType().getValue();
+    }
+
     public InputStream getContent() throws IllegalStateException, IOException {
         return null != entity ? entity.getContent() : null;
     }

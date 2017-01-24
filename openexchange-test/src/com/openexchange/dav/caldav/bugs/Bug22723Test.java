@@ -49,7 +49,9 @@
 
 package com.openexchange.dav.caldav.bugs;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import org.junit.Test;
 import com.openexchange.dav.StatusCodes;
@@ -67,15 +69,15 @@ import com.openexchange.groupware.container.FolderObject;
  */
 public class Bug22723Test extends CalDAVTest {
 
-	@Test
-	public void testSynchronizeDeletion() throws Exception {
-	    /*
-	     * create a new folder on the server
-	     */
-	    String subFolderName = "testfolder_" + randomUID();
-	    FolderObject subFolder = super.createFolder(subFolderName);
-	    super.rememberForCleanUp(subFolder);
-	    String subFolderID = Integer.toString(subFolder.getObjectID());
+    @Test
+    public void testSynchronizeDeletion() throws Exception {
+        /*
+         * create a new folder on the server
+         */
+        String subFolderName = "testfolder_" + randomUID();
+        FolderObject subFolder = super.createFolder(subFolderName);
+        super.rememberForCleanUp(subFolder);
+        String subFolderID = Integer.toString(subFolder.getObjectID());
         /*
          * fetch initial sync token for later synchronization
          */
@@ -117,6 +119,6 @@ public class Bug22723Test extends CalDAVTest {
             }
         }
         assertTrue("appointment not reported as deleted", found);
-	}
+    }
 
 }

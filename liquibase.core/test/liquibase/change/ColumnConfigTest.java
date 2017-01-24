@@ -1,16 +1,24 @@
 package liquibase.change;
 
-import static org.junit.Assert.*;
-
-import liquibase.serializer.LiquibaseSerializable;
-import liquibase.statement.DatabaseFunction;
-import liquibase.statement.SequenceNextValueFunction;
-import liquibase.structure.core.*;
-import org.junit.Test;
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.math.BigInteger;
 import java.text.ParseException;
 import java.util.Date;
+import org.junit.Test;
+import liquibase.serializer.LiquibaseSerializable;
+import liquibase.statement.DatabaseFunction;
+import liquibase.statement.SequenceNextValueFunction;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.DataType;
+import liquibase.structure.core.ForeignKey;
+import liquibase.structure.core.PrimaryKey;
+import liquibase.structure.core.Table;
+import liquibase.structure.core.UniqueConstraint;
+import liquibase.structure.core.View;
 
 public class ColumnConfigTest {
 

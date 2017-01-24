@@ -49,25 +49,22 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
-import com.openexchange.exception.OXException;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.sql.SQLException;
 import java.util.Date;
+import org.junit.Test;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.UserParticipant;
 
-
 public class Bug11316Test extends CalendarSqlTest {
     // Bug 11316 Updating an appointment should leave it in private folder
 
+    @Test
     public void testUpdatePublicAppointmentTimeShouldUpdateParticipantStatus() throws OXException, SQLException {
-        final FolderObject folder = folders.createPublicFolderFor(
-            session,
-            ctx,
-            "A nice public folder",
-            FolderObject.SYSTEM_PUBLIC_FOLDER_ID,
-            userId,
-            secondUserId);
+        final FolderObject folder = folders.createPublicFolderFor(session, ctx, "A nice public folder", FolderObject.SYSTEM_PUBLIC_FOLDER_ID, userId, secondUserId);
         cleanFolders.add(folder);
 
         CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(user, secondUser);

@@ -49,8 +49,12 @@
 
 package com.openexchange.subscribe.mslive;
 
+import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import org.json.JSONException;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
@@ -70,26 +74,24 @@ public class SubscribeMSLiveContactsTest extends AbstractAJAXSession {
 
     private ContactTestManager contactMgr;
 
-    /**
-     * Initializes a new {@link SubscribeMSLiveContactsTest}.
-     * 
-     * @param name
-     */
-    public SubscribeMSLiveContactsTest(String name) {
-        super(name);
-    }
-
+    @Before
     public void setUp() throws Exception {
         super.setUp();
-        folderMgr = new FolderTestManager(client);
-        contactMgr = new ContactTestManager(client);
+        MSLiveSubscribeTestEnvironment.getInstance().init();
+        folderMgr = new FolderTestManager(getClient());
+        contactMgr = new ContactTestManager(getClient());
     }
 
+    @After
     public void tearDown() throws Exception {
-        if (folderMgr != null) {
-            folderMgr.cleanUp();
+        try {
+            if (folderMgr != null) {
+                folderMgr.cleanUp();
+            }
+            MSLiveSubscribeTestEnvironment.getInstance().cleanup();
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
     private int getContactTestFolderID() {
@@ -100,6 +102,7 @@ public class SubscribeMSLiveContactsTest extends AbstractAJAXSession {
         return MSLiveSubscribeTestEnvironment.getInstance().getTestFolders().get(id);
     }
 
+    @Test
     public void testSubscribe() throws OXException, IOException, JSONException, Exception {
         Contact[] contacts = contactMgr.allAction(getContactTestFolderID(), Contact.ALL_COLUMNS);
 

@@ -339,12 +339,23 @@ public abstract class AbstractJdbcDatabase implements Database {
         if (connection == null) {
             return null;
         }
+        
+        java.sql.CallableStatement statement = null;
+        ResultSet resultSet = null;
         try {
-            ResultSet resultSet = ((JdbcConnection) connection).prepareCall("call current_schema").executeQuery();
+            statement = ((JdbcConnection) connection).prepareCall("call current_schema");
+            resultSet = statement.executeQuery();
             resultSet.next();
             return resultSet.getString(1);
         } catch (Exception e) {
             LogFactory.getLogger().info("Error getting default schema", e);
+        } finally {
+            if (null != resultSet) {
+                try { resultSet.close(); } catch(Exception e) {/*ignore*/}
+            }
+            if (null != statement) {
+                try { statement.close(); } catch(Exception e) {/*ignore*/}
+            }
         }
         return null;
     }

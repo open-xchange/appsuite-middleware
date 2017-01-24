@@ -60,6 +60,7 @@ import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import com.openexchange.html.HtmlSanitizeOptions;
 import com.openexchange.html.HtmlSanitizeResult;
 import com.openexchange.html.HtmlService;
 import com.openexchange.mail.MailPath;
@@ -226,73 +227,74 @@ public class HtmlProcessingTest {
         PowerMockito.when(ServerServiceRegistry.getInstance()).thenReturn(serverServiceRegistry);
         PowerMockito.when(serverServiceRegistry.getService(HtmlService.class)).thenReturn(htmlService);
         PowerMockito.when(htmlService.sanitize(Matchers.anyString(), Matchers.anyString(), Matchers.anyBoolean(), (boolean[]) Matchers.any(), Matchers.anyString(), Matchers.anyInt())).thenReturn(new HtmlSanitizeResult(sanitizedHtmlContent));
+        PowerMockito.when(htmlService.sanitize(Matchers.anyString(), Matchers.any(HtmlSanitizeOptions.class))).thenReturn(new HtmlSanitizeResult(sanitizedHtmlContent));
     }
 
-    @Test
-    public void testFormatContentForDisplay_isHtmlNoInlineContentInUserSettingMail_onlyDroppedScriptTagsInHeader() {
+     @Test
+     public void testFormatContentForDisplay_isHtmlNoInlineContentInUserSettingMail_onlyDroppedScriptTagsInHeader() {
         Mockito.when(htmlService.dropScriptTagsInHeader(htmlContent)).thenReturn(htmlContent);
 
-        HtmlSanitizeResult formatTextForDisplay = HtmlProcessing.formatContentForDisplay(htmlContent, "UTF-8", true, session, mailPath, userSettingMail, modified, DisplayMode.DISPLAY, true, -1);
+        HtmlSanitizeResult formatTextForDisplay = HtmlProcessing.formatContentForDisplay(htmlContent, "UTF-8", true, session, mailPath, userSettingMail, modified, DisplayMode.DISPLAY, true, true, -1);
         Assert.assertEquals(htmlContent, formatTextForDisplay.getContent());
     }
 
     @Test
     public void testFormatContentForDisplay_isHtmlModeRaw_returnUnchanged() {
-        HtmlSanitizeResult formatTextForDisplay = HtmlProcessing.formatContentForDisplay(htmlContent, "UTF-8", true, session, mailPath, userSettingMail, modified, DisplayMode.RAW, true, -1);
+        HtmlSanitizeResult formatTextForDisplay = HtmlProcessing.formatContentForDisplay(htmlContent, "UTF-8", true, session, mailPath, userSettingMail, modified, DisplayMode.RAW, true, true, -1);
 
         Assert.assertEquals(htmlContent, formatTextForDisplay.getContent());
     }
 
-    @Test
-    public void testFormatContentForDisplay_isHtmlAllowedExternalImages_sanitizeCalled() {
+     @Test
+     public void testFormatContentForDisplay_isHtmlAllowedExternalImages_sanitizeCalled() {
         Mockito.when(htmlService.dropScriptTagsInHeader(htmlContent)).thenReturn(htmlContent);
         Mockito.when(userSettingMail.isAllowHTMLImages()).thenReturn(true);
         Mockito.when(userSettingMail.isDisplayHtmlInlineContent()).thenReturn(true);
 
-        HtmlProcessing.formatContentForDisplay(htmlContent, "UTF-8", true, session, mailPath, userSettingMail, modified, DisplayMode.DISPLAY, true, -1);
+        HtmlProcessing.formatContentForDisplay(htmlContent, "UTF-8", true, session, mailPath, userSettingMail, modified, DisplayMode.DISPLAY, true, true, -1);
 
-        Mockito.verify(htmlService, Mockito.times(1)).sanitize(Matchers.anyString(), Matchers.anyString(), Matchers.anyBoolean(), (boolean[]) Matchers.any(), Matchers.anyString(), Matchers.anyInt());
+        Mockito.verify(htmlService, Mockito.times(1)).sanitize(Matchers.anyString(), Matchers.any(HtmlSanitizeOptions.class));
     }
 
-    @Test
-    public void testFormatContentForDisplay_isHtmlAllowedExternalImagesMailPathNull_sanitizeCalled() {
+     @Test
+     public void testFormatContentForDisplay_isHtmlAllowedExternalImagesMailPathNull_sanitizeCalled() {
         Mockito.when(htmlService.dropScriptTagsInHeader(htmlContent)).thenReturn(htmlContent);
         Mockito.when(userSettingMail.isAllowHTMLImages()).thenReturn(true);
         Mockito.when(userSettingMail.isDisplayHtmlInlineContent()).thenReturn(true);
 
-        HtmlProcessing.formatContentForDisplay(htmlContent, "UTF-8", true, session, null, userSettingMail, modified, DisplayMode.DISPLAY, true, -1);
+        HtmlProcessing.formatContentForDisplay(htmlContent, "UTF-8", true, session, null, userSettingMail, modified, DisplayMode.DISPLAY, true, true, -1);
 
-        Mockito.verify(htmlService, Mockito.times(1)).sanitize(Matchers.anyString(), Matchers.anyString(), Matchers.anyBoolean(), (boolean[]) Matchers.any(), Matchers.anyString(), Matchers.anyInt());
+        Mockito.verify(htmlService, Mockito.times(1)).sanitize(Matchers.anyString(), Matchers.any(HtmlSanitizeOptions.class));
     }
 
-    @Test
-    public void testFormatContentForDisplay_isHtmlUseSanitize_sanitizeCalled() {
+     @Test
+     public void testFormatContentForDisplay_isHtmlUseSanitize_sanitizeCalled() {
         Mockito.when(userSettingMail.isDisplayHtmlInlineContent()).thenReturn(true);
         Mockito.when(htmlService.dropScriptTagsInHeader(htmlContent)).thenReturn(htmlContent);
 
-        HtmlSanitizeResult sanitizeResult = HtmlProcessing.formatContentForDisplay(htmlContent, "UTF-8", true, session, mailPath, userSettingMail, modified, DisplayMode.DISPLAY, false, -1);
+        HtmlSanitizeResult sanitizeResult = HtmlProcessing.formatContentForDisplay(htmlContent, "UTF-8", true, session, mailPath, userSettingMail, modified, DisplayMode.DISPLAY, false, true, -1);
 
         Assert.assertTrue(!sanitizeResult.getContent().contains("<br />"));
         Assert.assertTrue(!sanitizeResult.getContent().contains("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />"));
-        Mockito.verify(htmlService, Mockito.times(1)).sanitize(Matchers.anyString(), Matchers.anyString(), Matchers.anyBoolean(), (boolean[]) Matchers.any(), Matchers.anyString(), Matchers.anyInt());
+        Mockito.verify(htmlService, Mockito.times(1)).sanitize(Matchers.anyString(), Matchers.any(HtmlSanitizeOptions.class));
     }
 
     @Test
     public void testFormatContentForDisplay_noHtmlDisplayMode_formatCalled() {
-        HtmlProcessing.formatContentForDisplay(textContent, "UTF-8", false, session, mailPath, userSettingMail, modified, DisplayMode.DISPLAY, true, -1);
+        HtmlProcessing.formatContentForDisplay(textContent, "UTF-8", false, session, mailPath, userSettingMail, modified, DisplayMode.DISPLAY, true, true, -1);
 
         Mockito.verify(htmlService, Mockito.times(1)).htmlFormat(Matchers.anyString(), Matchers.anyBoolean(), Matchers.anyString(), Matchers.anyInt());
     }
 
     @Test
     public void testFormatContentForDisplay_noHtml_formatCalledOnce() {
-        HtmlProcessing.formatContentForDisplay(textContent, "UTF-8", false, session, mailPath, userSettingMail, modified, DisplayMode.MODIFYABLE, true, -1);
+        HtmlProcessing.formatContentForDisplay(textContent, "UTF-8", false, session, mailPath, userSettingMail, modified, DisplayMode.MODIFYABLE, true, true, -1);
 
         Mockito.verify(htmlService, Mockito.times(1)).htmlFormat(Matchers.anyString(), Matchers.anyBoolean(), Matchers.anyString(), Matchers.anyInt());
     }
 
-    @Test
-    public void testCheckTransferOfChildElements() {
+     @Test
+     public void testCheckTransferOfChildElements() {
         String htmlContent = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n" +
             "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n" +
             "   <head>\n" +
@@ -326,7 +328,6 @@ public class HtmlProcessingTest {
             "</head>\n" +
             "\n" +
             "<body>\n" +
-            "<!--ИЛЬИЧЕВ Афанасий Федорович-->\n" +
             "\n" +
             "gab\n" +
             "\n" +
@@ -383,5 +384,4 @@ public class HtmlProcessingTest {
         Assert.assertFalse(replacedBody.contains("<body>"));
 
     }
-
 }

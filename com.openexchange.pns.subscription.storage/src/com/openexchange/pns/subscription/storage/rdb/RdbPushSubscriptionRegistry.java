@@ -685,7 +685,7 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
             stmt.setInt(1, subscription.getContextId());
             stmt.setInt(2, subscription.getUserId());
             stmt.setString(3, subscription.getToken());
-            stmt.setString(3, subscription.getClient());
+            stmt.setString(4, subscription.getClient());
             rs = stmt.executeQuery();
             if (false == rs.next()) {
                 return false;

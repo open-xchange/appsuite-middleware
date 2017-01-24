@@ -49,43 +49,47 @@
 
 package com.openexchange.webdav;
 
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import com.openexchange.ajax.framework.ProvisioningSetup;
+import com.openexchange.test.pool.TestContext;
+import com.openexchange.test.pool.TestContextPool;
+import com.openexchange.test.pool.TestUser;
 import com.openexchange.webdav.xml.framework.WebDAVClient;
-import com.openexchange.webdav.xml.framework.WebDAVClient.User;
 
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class AbstractWebDAVSession extends TestCase {
+public abstract class AbstractWebDAVSession {
 
     private WebDAVClient client;
+    protected TestContext testContext;
+    protected TestUser testUser;
 
     /**
-     * Default constructor.
-     * @param name test name.
+     * {@inheritDoc}
      */
-    public AbstractWebDAVSession(final String name) {
-        super(name);
+    @Before
+    public void setUp() throws Exception {
+        ProvisioningSetup.init();
+
+        testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
+        testUser = testContext.acquireUser();
+        client = new WebDAVClient(testUser);
     }
 
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        client = new WebDAVClient(User.User1);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
+    @After
     protected void tearDown() throws Exception {
-        client.logout();
-        client = null;
-        super.tearDown();
+        try {
+            client.logout();
+            client = null;
+        } finally {
+            TestContextPool.backContext(testContext);
+        }
     }
 
     /**

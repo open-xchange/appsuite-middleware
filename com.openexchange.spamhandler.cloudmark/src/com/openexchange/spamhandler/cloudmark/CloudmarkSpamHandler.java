@@ -215,8 +215,12 @@ public final class CloudmarkSpamHandler extends SpamHandler {
 
                 if (null != targetSpamAddress) {
                     InternetAddress senderAddress = getSenderAddress(session);
-                    for (String mailId : mailIDs) {
-                        getAndTransport(mailId, targetSpamAddress, senderAddress, wrap, fullName, session, mailAccess);
+                    if(senderAddress==null){
+                        LOG.warn("Unable to transport spam mail. The sender address is missing.");
+                    } else {
+                        for (String mailId : mailIDs) {
+                            getAndTransport(mailId, targetSpamAddress, senderAddress, wrap, fullName, session, mailAccess);
+                        }
                     }
                 }
             }
@@ -275,8 +279,12 @@ public final class CloudmarkSpamHandler extends SpamHandler {
 
                 if (null != targetHamAddress) {
                     InternetAddress senderAddress = getSenderAddress(session);
-                    for (String mailId : mailIDs) {
-                        getAndTransport(mailId, targetHamAddress, senderAddress, wrap, fullName, session, mailAccess);
+                    if(senderAddress==null){
+                        LOG.warn("Unable to transport ham mail. The sender address is missing.");
+                    } else {
+                        for (String mailId : mailIDs) {
+                            getAndTransport(mailId, targetHamAddress, senderAddress, wrap, fullName, session, mailAccess);
+                        }
                     }
                 }
             }

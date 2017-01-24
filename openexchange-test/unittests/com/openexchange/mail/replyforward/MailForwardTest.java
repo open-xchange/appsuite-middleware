@@ -49,12 +49,15 @@
 
 package com.openexchange.mail.replyforward;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.ByteArrayOutputStream;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 import javax.mail.internet.InternetAddress;
+import org.junit.Test;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.i18n.MailStrings;
@@ -80,75 +83,11 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public final class MailForwardTest extends AbstractMailTest {
 
-    /**
-	 *
-	 */
-    public MailForwardTest() {
-        super();
-    }
+    private static final String RFC822_SRC = "Date: Wed, 2 Apr 2008 07:41:24 +0200 (CEST)\n" + "From: \"Kraft, Manuel\" <manuel.kraft@open-xchange.com>\n" + "To: \"Betten, Thorben\" <thorben.betten@open-xchange.com>\n" + "Message-ID: <32481287.4641207114884399.JavaMail.open-xchange@oxee>\n" + "Subject: Hello\n" + "MIME-Version: 1.0\n" + "Content-Type: multipart/mixed; \n" + "	boundary=\"----=_Part_298_27959028.1207114884271\"\n" + "X-Priority: 3\n" + "X-Mailer: OX Software GmbH;Development\n" + "\n" + "------=_Part_298_27959028.1207114884271\n" + "MIME-Version: 1.0\n" + "Content-Type: text/plain; charset=UTF-8\n" + "Content-Transfer-Encoding: 7bit\n" + "\n" + "Hello... This is the first message\n" + "------=_Part_298_27959028.1207114884271\n" + "MIME-Version: 1.0\n" + "Content-Type: text/vcard; charset=UTF-8; name=my.vcf\n" + "Content-Transfer-Encoding: quoted-printable\n" + "Content-Disposition: attachment; filename=my.vcf\n" + "\n" + "BEGIN:VCARD\n" + "VERSION:3.0\n" + "EMAIL;TYPE=3Dwork,pref:thorben.betten@open-xchange.com\n" + "FN:Thorben Betten\n" + "IMPP;TYPE=3Dwork,pref:x-apple:th0rb3nb\n" + "ORG:Open-Xchange GmbH;Engineering\n" + "PRODID:-//Open-Xchange//7.8.1-Rev5//EN\n" + "X-OX-ROOM-NUMBER:Development 3\n" + "REV:20160307T151919Z\n" + "ROLE:Software-Entwickler\n" + "N:Betten;Thorben;;;\n" + "TITLE:Leader Engineering\n" + "END:VCARD\n" + "\n" + "------=_Part_298_27959028.1207114884271--\n" + "\n";
 
-    /**
-     * @param name
-     */
-    public MailForwardTest(final String name) {
-        super(name);
-    }
+    private static final String RFC822_FORWARD = "Date: Mon, 31 Mar 2008 22:39:25 +0200\n" + "To: \"dream-team@open-xchange.com\" <dream-team@open-xchange.com>\n" + "From: jane.doe@open-xchange.com\n" + "Organization: http://open-xchange.com/\n" + "Content-Type: text/plain; charset=utf-8\n" + "MIME-Version: 1.0\n" + "Message-ID: <op.t8webzmnraenw4@edna>\n" + "User-Agent: Opera Mail/9.26 (Linux)\n" + "Subject: [dream-team] Good bye und macht's gut\n" + "Content-Transfer-Encoding: 7bit\n" + "\n" + "Hallo Dream-Team,\n" + "\n" + "This is the second message\n";
 
-    private static final String RFC822_SRC = "Date: Wed, 2 Apr 2008 07:41:24 +0200 (CEST)\n" +
-                                            "From: \"Kraft, Manuel\" <manuel.kraft@open-xchange.com>\n" +
-                                            "To: \"Betten, Thorben\" <thorben.betten@open-xchange.com>\n" +
-                                            "Message-ID: <32481287.4641207114884399.JavaMail.open-xchange@oxee>\n" +
-                                            "Subject: Hello\n" +
-                                            "MIME-Version: 1.0\n" +
-                                            "Content-Type: multipart/mixed; \n" +
-                                            "	boundary=\"----=_Part_298_27959028.1207114884271\"\n" +
-                                            "X-Priority: 3\n" +
-                                            "X-Mailer: OX Software GmbH;Development\n" +
-                                            "\n" +
-                                            "------=_Part_298_27959028.1207114884271\n" +
-                                            "MIME-Version: 1.0\n" +
-                                            "Content-Type: text/plain; charset=UTF-8\n" +
-                                            "Content-Transfer-Encoding: 7bit\n" +
-                                            "\n" +
-                                            "Hello... This is the first message\n" +
-                                            "------=_Part_298_27959028.1207114884271\n" +
-                                            "MIME-Version: 1.0\n" +
-                                            "Content-Type: text/vcard; charset=UTF-8; name=my.vcf\n" +
-                                            "Content-Transfer-Encoding: quoted-printable\n" +
-                                            "Content-Disposition: attachment; filename=my.vcf\n" +
-                                            "\n" +
-                                            "BEGIN:VCARD\n" +
-                                            "VERSION:3.0\n" +
-                                            "EMAIL;TYPE=3Dwork,pref:thorben.betten@open-xchange.com\n" +
-                                            "FN:Thorben Betten\n" +
-                                            "IMPP;TYPE=3Dwork,pref:x-apple:th0rb3nb\n" +
-                                            "ORG:Open-Xchange GmbH;Engineering\n" +
-                                            "PRODID:-//Open-Xchange//7.8.1-Rev5//EN\n" +
-                                            "X-OX-ROOM-NUMBER:Development 3\n" +
-                                            "REV:20160307T151919Z\n" +
-                                            "ROLE:Software-Entwickler\n" +
-                                            "N:Betten;Thorben;;;\n" +
-                                            "TITLE:Leader Engineering\n" +
-                                            "END:VCARD\n"+
-                                            "\n" +
-                                            "------=_Part_298_27959028.1207114884271--\n" +
-                                            "\n";
-
-    private static final String RFC822_FORWARD = "Date: Mon, 31 Mar 2008 22:39:25 +0200\n" +
-                                            "To: \"dream-team@open-xchange.com\" <dream-team@open-xchange.com>\n" +
-                                            "From: jane.doe@open-xchange.com\n" +
-                                            "Organization: http://open-xchange.com/\n" +
-                                            "Content-Type: text/plain; charset=utf-8\n" +
-                                            "MIME-Version: 1.0\n" +
-                                            "Message-ID: <op.t8webzmnraenw4@edna>\n" +
-                                            "User-Agent: Opera Mail/9.26 (Linux)\n" +
-                                            "Subject: [dream-team] Good bye und macht's gut\n" +
-                                            "Content-Transfer-Encoding: 7bit\n" +
-                                            "\n" +
-                                            "Hallo Dream-Team,\n" +
-                                            "\n" +
-                                            "This is the second message\n";
-
+    @Test
     public void testMailForward() {
         try {
             final MailMessage sourceMail = MimeMessageConverter.convertMessage(RFC822_SRC.getBytes(com.openexchange.java.Charsets.US_ASCII));
@@ -167,9 +106,7 @@ public final class MailForwardTest extends AbstractMailTest {
                      * Check the from header of the forward message which should contain the sender address of the user
                      */
                     final UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(getUser(), ctx.getContextId());
-                    assertTrue("Header 'From' does not carry expected value", forwardMail.getFrom()[0].equals(new InternetAddress(
-                        usm.getSendAddr(),
-                        true)));
+                    assertTrue("Header 'From' does not carry expected value", forwardMail.getFrom()[0].equals(new InternetAddress(usm.getSendAddr(), true)));
                 }
 
                 /*
@@ -188,8 +125,7 @@ public final class MailForwardTest extends AbstractMailTest {
                 /*
                  * Check if the content type "multipart/mixed"
                  */
-                assertTrue("Header 'Content-Type' does not carry expected value", forwardMail.getContentType().isMimeType(
-                    MimeTypes.MIME_MULTIPART_MIXED));
+                assertTrue("Header 'Content-Type' does not carry expected value", forwardMail.getContentType().isMimeType(MimeTypes.MIME_MULTIPART_MIXED));
 
                 /*
                  * Check if the number of the enclosed parts is 2
@@ -212,9 +148,7 @@ public final class MailForwardTest extends AbstractMailTest {
                             String forwardPrefix = stringHelper.getString(MailStrings.FORWARD_PREFIX);
                             {
                                 final InternetAddress[] from = sourceMail.getFrom();
-                                forwardPrefix = forwardPrefix.replaceFirst(
-                                    "#FROM#",
-                                    from == null || from.length == 0 ? "" : from[0].toUnicodeString());
+                                forwardPrefix = forwardPrefix.replaceFirst("#FROM#", from == null || from.length == 0 ? "" : from[0].toUnicodeString());
                             }
                             {
                                 final InternetAddress[] to = sourceMail.getTo();
@@ -222,9 +156,7 @@ public final class MailForwardTest extends AbstractMailTest {
                             }
                             {
                                 final InternetAddress[] cc = sourceMail.getCc();
-                                forwardPrefix = forwardPrefix.replaceFirst(
-                                    "#CC_LINE#",
-                                    cc == null || cc.length == 0 ? "" : new StringBuilder(64).append("\nCc: ").append(addrs2String(cc)).toString());
+                                forwardPrefix = forwardPrefix.replaceFirst("#CC_LINE#", cc == null || cc.length == 0 ? "" : new StringBuilder(64).append("\nCc: ").append(addrs2String(cc)).toString());
                             }
                             {
                                 final Date date = sourceMail.getSentDate();
@@ -232,11 +164,11 @@ public final class MailForwardTest extends AbstractMailTest {
                                     forwardPrefix = forwardPrefix.replaceFirst("#DATE#", "");
                                     forwardPrefix = forwardPrefix.replaceFirst("#TIME#", "");
                                 } else {
-                                    DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.LONG,locale);
+                                    DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.LONG, locale);
                                     dateFormat.setTimeZone(tz);
                                     forwardPrefix = forwardPrefix.replaceFirst("#DATE#", dateFormat.format(date));
 
-                                    dateFormat = DateFormat.getTimeInstance(DateFormat.SHORT,locale);
+                                    dateFormat = DateFormat.getTimeInstance(DateFormat.SHORT, locale);
                                     dateFormat.setTimeZone(tz);
                                     forwardPrefix = forwardPrefix.replaceFirst("#TIME#", dateFormat.format(date));
                                 }
@@ -251,11 +183,9 @@ public final class MailForwardTest extends AbstractMailTest {
 
                     } else {
                         if (!UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx).isForwardAsAttachment()) {
-                            assertTrue("Unexpected content type in file attachment", part.getContentType().isMimeType(
-                                MimeTypes.MIME_TEXT_ALL_CARD));
+                            assertTrue("Unexpected content type in file attachment", part.getContentType().isMimeType(MimeTypes.MIME_TEXT_ALL_CARD));
                         } else {
-                            assertTrue("Unexpected content type in file attachment", part.getContentType().isMimeType(
-                                MimeTypes.MIME_MESSAGE_RFC822));
+                            assertTrue("Unexpected content type in file attachment", part.getContentType().isMimeType(MimeTypes.MIME_MESSAGE_RFC822));
                         }
                     }
                 }
@@ -273,6 +203,7 @@ public final class MailForwardTest extends AbstractMailTest {
         }
     }
 
+    @Test
     public void testMailForwardAnother() {
         try {
             final MailMessage sourceMail = MimeMessageConverter.convertMessage(RFC822_FORWARD.getBytes(com.openexchange.java.Charsets.US_ASCII));
@@ -288,9 +219,7 @@ public final class MailForwardTest extends AbstractMailTest {
 
                 {
                     final UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(getUser(), ctx.getContextId());
-                    assertTrue("Header 'From' does not carry expected value", forwardMail.getFrom()[0].equals(new InternetAddress(
-                        usm.getSendAddr(),
-                        true)));
+                    assertTrue("Header 'From' does not carry expected value", forwardMail.getFrom()[0].equals(new InternetAddress(usm.getSendAddr(), true)));
                 }
 
                 final User user = UserStorage.getStorageUser(session.getUserId(), ctx);
@@ -306,11 +235,9 @@ public final class MailForwardTest extends AbstractMailTest {
                 final boolean isInlineForward = (!UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx).isForwardAsAttachment());
 
                 if (isInlineForward) {
-                    assertTrue("Header 'Content-Type' does not carry expected value", forwardMail.getContentType().isMimeType(
-                        MimeTypes.MIME_TEXT_PLAIN));
+                    assertTrue("Header 'Content-Type' does not carry expected value", forwardMail.getContentType().isMimeType(MimeTypes.MIME_TEXT_PLAIN));
                 } else {
-                    assertTrue("Header 'Content-Type' does not carry expected value", forwardMail.getContentType().isMimeType(
-                        MimeTypes.MIME_MULTIPART_ALL));
+                    assertTrue("Header 'Content-Type' does not carry expected value", forwardMail.getContentType().isMimeType(MimeTypes.MIME_MULTIPART_ALL));
                 }
 
                 final int count = forwardMail.getEnclosedCount();
@@ -329,9 +256,7 @@ public final class MailForwardTest extends AbstractMailTest {
                     String forwardPrefix = stringHelper.getString(MailStrings.FORWARD_PREFIX);
                     {
                         final InternetAddress[] from = sourceMail.getFrom();
-                        forwardPrefix = forwardPrefix.replaceFirst(
-                            "#FROM#",
-                            from == null || from.length == 0 ? "" : from[0].toUnicodeString());
+                        forwardPrefix = forwardPrefix.replaceFirst("#FROM#", from == null || from.length == 0 ? "" : from[0].toUnicodeString());
                     }
                     {
                         final InternetAddress[] to = sourceMail.getTo();
@@ -339,9 +264,7 @@ public final class MailForwardTest extends AbstractMailTest {
                     }
                     {
                         final InternetAddress[] cc = sourceMail.getCc();
-                        forwardPrefix = forwardPrefix.replaceFirst(
-                            "#CC_LINE#",
-                            cc == null || cc.length == 0 ? "" : new StringBuilder(64).append("\nCc: ").append(addrs2String(cc)).toString());
+                        forwardPrefix = forwardPrefix.replaceFirst("#CC_LINE#", cc == null || cc.length == 0 ? "" : new StringBuilder(64).append("\nCc: ").append(addrs2String(cc)).toString());
                     }
                     {
                         final Date date = sourceMail.getSentDate();
@@ -349,11 +272,11 @@ public final class MailForwardTest extends AbstractMailTest {
                             forwardPrefix = forwardPrefix.replaceFirst("#DATE#", "");
                             forwardPrefix = forwardPrefix.replaceFirst("#TIME#", "");
                         } else {
-                            DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.LONG,locale);
+                            DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.LONG, locale);
                             dateFormat.setTimeZone(tz);
                             forwardPrefix = forwardPrefix.replaceFirst("#DATE#", dateFormat.format(date));
 
-                            dateFormat = DateFormat.getTimeInstance(DateFormat.SHORT,locale);
+                            dateFormat = DateFormat.getTimeInstance(DateFormat.SHORT, locale);
                             dateFormat.setTimeZone(tz);
                             forwardPrefix = forwardPrefix.replaceFirst("#TIME#", dateFormat.format(date));
                         }
@@ -377,6 +300,7 @@ public final class MailForwardTest extends AbstractMailTest {
         }
     }
 
+    @Test
     public void testForwardMultiple() {
         try {
 
@@ -394,15 +318,11 @@ public final class MailForwardTest extends AbstractMailTest {
                     uids = mailAccess.getMessageStorage().appendMessages("INBOX", mails);
                 }
 
-                final MailMessage[] fetchedMails = mailAccess.getMessageStorage().getMessages(
-                    "INBOX",
-                    uids,
-                    new MailField[] { MailField.FULL });
+                final MailMessage[] fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids, new MailField[] { MailField.FULL });
 
                 final MailMessage forwardMail = mailAccess.getLogicTools().getFowardMessage(fetchedMails, false);
 
-                assertTrue("Unexpected content type: " + forwardMail.getContentType().toString(), forwardMail.getContentType().isMimeType(
-                    MimeTypes.MIME_MULTIPART_MIXED));
+                assertTrue("Unexpected content type: " + forwardMail.getContentType().toString(), forwardMail.getContentType().isMimeType(MimeTypes.MIME_MULTIPART_MIXED));
 
                 final int count = forwardMail.getEnclosedCount();
                 assertTrue("Unexpected number of attachments: " + count, count == 3);
@@ -413,11 +333,9 @@ public final class MailForwardTest extends AbstractMailTest {
                 for (int i = 0; i < count; i++) {
                     final MailPart part = forwardMail.getEnclosedMailPart(i);
                     if (i == 0) {
-                        assertTrue("Unexpected enclosed part's content type: " + part.getContentType(), part.getContentType().isMimeType(
-                            MimeTypes.MIME_TEXT_ALL));
+                        assertTrue("Unexpected enclosed part's content type: " + part.getContentType(), part.getContentType().isMimeType(MimeTypes.MIME_TEXT_ALL));
                     } else {
-                        assertTrue("Unexpected enclosed part's content type: " + part.getContentType(), part.getContentType().isMimeType(
-                            MimeTypes.MIME_MESSAGE_RFC822));
+                        assertTrue("Unexpected enclosed part's content type: " + part.getContentType(), part.getContentType().isMimeType(MimeTypes.MIME_MESSAGE_RFC822));
                     }
                     /*
                      * additional checks for bug 12420, where there is an amount of forwarded mails, yet their content is always that of the

@@ -49,13 +49,14 @@
 
 package com.openexchange.realtime.json.payload.converter;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.json.payload.converter.StackTraceElementToJSONConverter;
 
 
 /**
@@ -75,13 +76,13 @@ public class StackTraceElementToJSONConverterTest {
         stackTraceElementMissingFileName = new StackTraceElement("org.eclipse.osgi.baseadaptor.bundlefile.ZipBundleFile", "basicOpen", null, 87);
     }
 
-    @Test
-    public void testGetInputFormat() {
+     @Test
+     public void testGetInputFormat() {
         assertEquals(StackTraceElement.class.getSimpleName(), converter.getInputFormat());
     }
 
-    @Test
-    public void testConvert() throws OXException, JSONException {
+     @Test
+     public void testConvert() throws OXException, JSONException {
         Object converted = converter.convert(stackTraceElement, null, null);
         assertNotNull(converted);
         assertTrue(converted instanceof JSONObject);
@@ -92,8 +93,8 @@ public class StackTraceElementToJSONConverterTest {
         assertEquals(87,convertedJSON.getInt("lineNumber"));
     }
 
-    @Test
-    public void testConvertMissingFileName() throws OXException, JSONException {
+     @Test
+     public void testConvertMissingFileName() throws OXException, JSONException {
         Object converted = converter.convert(stackTraceElementMissingFileName, null, null);
         assertNotNull(converted);
         assertTrue(converted instanceof JSONObject);
@@ -104,8 +105,8 @@ public class StackTraceElementToJSONConverterTest {
         assertEquals(87,convertedJSON.getInt("lineNumber"));
     }
 
-    @Test
-    public void testGetOutputFormat() {
+     @Test
+     public void testGetOutputFormat() {
         assertEquals("json", converter.getOutputFormat());
     }
 

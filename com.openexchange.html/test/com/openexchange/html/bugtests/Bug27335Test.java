@@ -61,8 +61,8 @@ import com.openexchange.html.AbstractSanitizing;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class Bug27335Test extends AbstractSanitizing {
-    @Test
-    public void testFormatURL1() {
+     @Test
+     public void testFormatURL1() {
         String content = "blah http://www.ox.io/blub/blab.php?foo=bar&[showUid]=1275 blah";
 
         String test = getHtmlService().formatURLs(content, "aaa");
@@ -81,8 +81,8 @@ public class Bug27335Test extends AbstractSanitizing {
         Assert.assertEquals("Unexpected URL", "http://www.ox.io/blub/blab.php?foo=bar&[showUid]=1275", group2);
     }
 
-    @Test
-    public void testFormatURL2() {
+     @Test
+     public void testFormatURL2() {
         String content = "blah (http://www.ox.io/blub/blab.php?foo=bar&[showUid]=1275) blah";
 
         String test = getHtmlService().formatURLs(content, "aaa");
@@ -101,8 +101,8 @@ public class Bug27335Test extends AbstractSanitizing {
         Assert.assertEquals("Unexpected URL", "http://www.ox.io/blub/blab.php?foo=bar&[showUid]=1275", group2);
     }
 
-    @Test
-    public void testFormatURL3() {
+     @Test
+     public void testFormatURL3() {
         String content = "blah [http://www.ox.io/blub/blab.php?foo=bar&[showUid]=1275] blah";
 
         String test = getHtmlService().formatURLs(content, "aaa");
@@ -121,8 +121,8 @@ public class Bug27335Test extends AbstractSanitizing {
         Assert.assertEquals("Unexpected URL", "http://www.ox.io/blub/blab.php?foo=bar&[showUid]=1275", group2);
     }
 
-    @Test
-    public void testFormatURL4() {
+     @Test
+     public void testFormatURL4() {
         String content = "echo \"Re: http://support.open-xchange.com/~karl/hidden/itil/data/Page_1_1_1.htm (change Management)\"";
 
         String test = getHtmlService().formatURLs(content, "aaa");

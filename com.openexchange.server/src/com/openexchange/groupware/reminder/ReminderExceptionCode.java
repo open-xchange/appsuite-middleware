@@ -62,71 +62,75 @@ public enum ReminderExceptionCode implements DisplayableOXExceptionCode {
      */
     MANDATORY_FIELD_USER("User is missing for the reminder.", ReminderExceptionMessage.MANDATORY_FIELD_USER_DISPLAY, 1,
         CATEGORY_USER_INPUT),
-        
+
     /**
      * Identifier of the object is missing.
      */
     MANDATORY_FIELD_TARGET_ID("Object identifier is missing.", ReminderExceptionMessage.MANDATORY_FIELD_TARGET_ID_DISPLAY, 2,
         CATEGORY_USER_INPUT),
-        
+
     /**
      * Alarm date for the reminder is missing.
      */
     MANDATORY_FIELD_ALARM("Alarm date for the reminder is missing.", ReminderExceptionMessage.MANDATORY_FIELD_ALARM_DISPLAY, 3,
         CATEGORY_USER_INPUT),
-        
+
     INSERT_EXCEPTION("Unable to insert reminder", ReminderExceptionMessage.INSERT_EXCEPTION_DISPLAY, 4, CATEGORY_ERROR),
-    
+
     UPDATE_EXCEPTION("Unable to update reminder", ReminderExceptionMessage.UPDATE_EXCEPTION_DISPLAY, 5, CATEGORY_ERROR),
-    
+
     DELETE_EXCEPTION("Unable to delete reminder", ReminderExceptionMessage.DELETE_EXCEPTION_DISPLAY, 6, CATEGORY_ERROR),
-    
+
     LOAD_EXCEPTION("Unable to load reminder", ReminderExceptionMessage.LOAD_EXCEPTION_DISPLAY, 7, CATEGORY_ERROR),
-    
+
     LIST_EXCEPTION("Unable to list reminder", ReminderExceptionMessage.LIST_EXCEPTION_DISPLAY, 8, CATEGORY_ERROR),
-    
+
     /** Can not find reminder with identifier %1$d in context %2$d. */
     NOT_FOUND("Reminder with identifier %1$d can not be found in context %2$d.", ReminderExceptionMessage.NOT_FOUND_DISPLAY, 9,
         CATEGORY_ERROR),
-    
+
     /**
      * Folder of the object is missing.
      */
     MANDATORY_FIELD_FOLDER("Object folder is missing", ReminderExceptionMessage.MANDATORY_FIELD_FOLDER_DISPLAY, 10, CATEGORY_USER_INPUT),
-    
+
     /**
      * Module type of the object is missing.
      */
     MANDATORY_FIELD_MODULE("Object's module type is missing", ReminderExceptionMessage.MANDATORY_FIELD_MODULE_DISPLAY, 11,
         CATEGORY_USER_INPUT),
-    
+
     /**
      * Updated too many reminders.
      */
     TOO_MANY("Updated too many reminders.", ReminderExceptionMessage.TOO_MANY_DISPLAY, 12, CATEGORY_ERROR),
-    
+
     /** SQL Problem: %1$s. */
     SQL_ERROR("SQL Problem: \"%1$s\"", OXExceptionStrings.SQL_ERROR_MSG, 13, CATEGORY_ERROR),
-    
+
     /** No target service is registered for module %1$d. */
     NO_TARGET_SERVICE("No target service is registered for module %1$d.", ReminderExceptionMessage.NO_TARGET_SERVICE_DISPLAY, 14,
         CATEGORY_ERROR),
-    
+
     /**
      * Unexpected error: %1$s
      */
     UNEXPECTED_ERROR("Unexpected error: %1$s", null, 15, CATEGORY_ERROR),
-    
+
     /**
      * Reminder identifier is missing.
      */
-    MANDATORY_FIELD_ID("Reminder identifier is missing.", ReminderExceptionMessage.MANDATORY_FIELD_ID_DISPLAY, 16, CATEGORY_USER_INPUT);
+    MANDATORY_FIELD_ID("Reminder identifier is missing.", ReminderExceptionMessage.MANDATORY_FIELD_ID_DISPLAY, 16, CATEGORY_USER_INPUT),
+
+    NO_PERMISSION_READ(ReminderExceptionMessage.NO_PERMISSION_READ, ReminderExceptionMessage.NO_PERMISSION_READ, 17, Category.CATEGORY_PERMISSION_DENIED),
+
+    NO_PERMISSION_MODIFY(ReminderExceptionMessage.NO_PERMISSION_MODIFY, ReminderExceptionMessage.NO_PERMISSION_MODIFY, 18, Category.CATEGORY_PERMISSION_DENIED);
 
     /**
      * Message of the exception.
      */
     private final String message;
-    
+
     private final String displayMessage;
 
     /**
@@ -172,7 +176,7 @@ public enum ReminderExceptionCode implements DisplayableOXExceptionCode {
     public String getMessage() {
         return message;
     }
-    
+
     @Override
     public String getDisplayMessage() {
         return displayMessage;

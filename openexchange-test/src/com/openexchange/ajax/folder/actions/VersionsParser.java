@@ -93,12 +93,12 @@ public class VersionsParser extends AbstractAJAXParser<VersionsResponse> {
             JSONArray versions = (JSONArray) json.get(DATA);
             for (int i = 0; i < versions.length(); i++) {
                 DefaultFile metadata = new DefaultFile();
-                
+
                 int columncount = 0;
                 for (int column : columns) {
                     Field field = Field.get(column);
                     if (null != field) {
-                        Object orig = ((JSONArray)versions.get(i)).get(columncount);
+                        Object orig = ((JSONArray) versions.get(i)).get(columncount);
                         Object converted;
                         try {
                             converted = FileMetadataFieldParser.convert(field, orig);
@@ -110,15 +110,16 @@ public class VersionsParser extends AbstractAJAXParser<VersionsResponse> {
                         columncount++;
                     }
                 }
-                
+
                 versionsResponse.addVersion(metadata);
             }
         }
         return versionsResponse;
     }
-    
+
     private static FileFieldHandler getJsonHandler(final File file, final JsonFieldHandler fieldHandler) {
         return new AbstractFileFieldHandler() {
+
             @Override
             public Object handle(Field field, Object... args) {
                 JSONObject jsonObject = get(0, JSONObject.class, args);
@@ -126,7 +127,7 @@ public class VersionsParser extends AbstractAJAXParser<VersionsResponse> {
                     jsonObject.put(field.getName(), fieldHandler.handle(field, file));
                 } catch (JSONException e) {
                     org.slf4j.LoggerFactory.getLogger(VersionsParser.class);
-                    }
+                }
                 return jsonObject;
             }
         };

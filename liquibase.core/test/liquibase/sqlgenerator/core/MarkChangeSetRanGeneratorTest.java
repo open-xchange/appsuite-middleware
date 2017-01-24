@@ -2,13 +2,13 @@ package liquibase.sqlgenerator.core;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.core.MockDatabase;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
 import liquibase.sqlgenerator.MockSqlGeneratorChain;
 import liquibase.statement.core.MarkChangeSetRanStatement;
-import org.junit.Test;
 
 public class MarkChangeSetRanGeneratorTest extends AbstractSqlGeneratorTest<MarkChangeSetRanStatement> {
     public MarkChangeSetRanGeneratorTest() throws Exception {

@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.mail;
 
+import static org.junit.Assert.assertEquals;
+import org.junit.After;
+import org.junit.Test;
 import com.openexchange.ajax.mail.actions.NewMailRequest;
 
 /**
@@ -60,46 +63,33 @@ import com.openexchange.ajax.mail.actions.NewMailRequest;
  */
 public class CountMailTest extends AbstractMailTest {
 
-    public CountMailTest(final String name) {
-        super(name);
+    public CountMailTest() {
+        super();
     }
 
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-    }
-
-    @Override
+    @After
     public void tearDown() throws Exception {
-        clearFolder(getInboxFolder());
-        super.tearDown();
+        try {
+            clearFolder(getInboxFolder());
+        } finally {
+            super.tearDown();
+        }
     }
 
+    @Test
     public void testCounting() throws Exception {
         String inboxFolder = getInboxFolder();
         clearFolder(inboxFolder);
         assertEquals("Should be empty", 0, count(inboxFolder));
 
-        final String eml =
-            ("Message-Id: <4A002517.4650.0059.1@foobar.com>\n" +
-            "Date: Tue, 05 May 2009 11:37:58 -0500\n" +
-            "From: #ADDR#\n" +
-            "To: #ADDR#\n" +
-            "Subject: Invitation for launch\n" +
-            "Mime-Version: 1.0\n" +
-            "Content-Type: text/plain; charset=\"UTF-8\"\n" +
-            "Content-Transfer-Encoding: 8bit\n" +
-            "\n" +
-            "This is a MIME message. If you are reading this text, you may want to \n" +
-            "consider changing to a mail reader or gateway that understands how to \n" +
-            "properly handle MIME multipart messages.").replaceAll("#ADDR#", getSendAddress());
+        final String eml = ("Message-Id: <4A002517.4650.0059.1@foobar.com>\n" + "Date: Tue, 05 May 2009 11:37:58 -0500\n" + "From: #ADDR#\n" + "To: #ADDR#\n" + "Subject: Invitation for launch\n" + "Mime-Version: 1.0\n" + "Content-Type: text/plain; charset=\"UTF-8\"\n" + "Content-Transfer-Encoding: 8bit\n" + "\n" + "This is a MIME message. If you are reading this text, you may want to \n" + "consider changing to a mail reader or gateway that understands how to \n" + "properly handle MIME multipart messages.").replaceAll("#ADDR#", getSendAddress());
         for (int number = 1; number < 10; number++) {
             getClient().execute(new NewMailRequest(inboxFolder, eml, -1, true));
-            assertEquals("Does not contain the expected number of elements in folder "+inboxFolder, number, count(inboxFolder) );
+            assertEquals("Does not contain the expected number of elements in folder " + inboxFolder, number, count(inboxFolder));
         }
 
         clearFolder(inboxFolder);
-        assertEquals("Should be empty again", 0, count(inboxFolder) );
+        assertEquals("Should be empty again", 0, count(inboxFolder));
     }
 
 }

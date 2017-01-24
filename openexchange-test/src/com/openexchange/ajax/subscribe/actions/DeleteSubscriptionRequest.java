@@ -58,7 +58,6 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.java.JSON;
 
-
 /**
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
@@ -75,24 +74,24 @@ public class DeleteSubscriptionRequest extends AbstractSubscriptionRequest<Delet
         return IDs;
     }
 
-    public DeleteSubscriptionRequest(){
+    public DeleteSubscriptionRequest() {
         super();
     }
 
-    public DeleteSubscriptionRequest(int id){
+    public DeleteSubscriptionRequest(int id) {
         this();
         IDs = new LinkedList<Integer>();
         IDs.add(Autoboxing.I(id));
     }
 
-    public DeleteSubscriptionRequest(Collection<Integer> IDs){
+    public DeleteSubscriptionRequest(Collection<Integer> IDs) {
         this();
         setIDs(IDs);
     }
 
     @Override
     public Object getBody() throws JSONException {
-        if(IDs == null) {
+        if (IDs == null) {
             throw new JSONException("Cannot create DeleteRequest: No IDs given for deletion!");
         }
         return JSON.collection2jsonArray(getIDs());
@@ -105,7 +104,7 @@ public class DeleteSubscriptionRequest extends AbstractSubscriptionRequest<Delet
 
     @Override
     public Parameter[] getParameters() {
-        return new Parameter[]{new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE)};
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE) };
     }
 
     @Override

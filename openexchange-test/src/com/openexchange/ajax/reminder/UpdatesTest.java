@@ -49,31 +49,25 @@
 
 package com.openexchange.ajax.reminder;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
-import com.openexchange.ajax.AppointmentTest;
-import com.openexchange.ajax.FolderTest;
-import com.openexchange.ajax.appointment.action.DeleteRequest;
-import com.openexchange.ajax.appointment.action.GetRequest;
-import com.openexchange.ajax.appointment.action.GetResponse;
-import com.openexchange.ajax.config.ConfigTools;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXSession;
+import org.junit.Test;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.reminder.ReminderObject;
+import com.openexchange.test.CalendarTestManager;
 
 public class UpdatesTest extends ReminderTest {
 
-    public UpdatesTest(final String name) {
-        super(name);
-    }
-
+    @Test
     public void testRange() throws Exception {
-        final int userId = ConfigTools.getUserId(getWebConversation(), getHostName(), getSessionId());
-        final TimeZone timeZone = ConfigTools.getTimeZone(getWebConversation(), getHostName(), getSessionId());
+        final int userId = getClient().getValues().getUserId();
+        final TimeZone timeZone = getClient().getValues().getTimeZone();
 
         Calendar c = TimeTools.createCalendar(timeZone);
         c.add(Calendar.HOUR_OF_DAY, 2);
@@ -81,51 +75,32 @@ public class UpdatesTest extends ReminderTest {
         final long startTime = c.getTimeInMillis();
         final long endTime = startTime + 3600000;
 
-        final FolderObject folderObj = FolderTest.getStandardCalendarFolder(getWebConversation(), getHostName(), getSessionId());
-        final int folderId = folderObj.getObjectID();
+        final int parentFolderId = getClient().getValues().getPrivateAppointmentFolder();
 
-        final Appointment appointmentObj = new Appointment();
-        appointmentObj.setTitle("testRange");
-        appointmentObj.setStartDate(new Date(startTime));
-        appointmentObj.setEndDate(new Date(endTime));
-        appointmentObj.setShownAs(Appointment.ABSENT);
+        final Appointment appointmentObj = CalendarTestManager.createAppointmentObject(parentFolderId, "testRange", new Date(startTime), new Date(endTime));
         appointmentObj.setAlarm(45);
-        appointmentObj.setParentFolderID(folderId);
         appointmentObj.setIgnoreConflicts(true);
 
-        final int targetId = AppointmentTest.insertAppointment(
-            getWebConversation(),
-            appointmentObj,
-            timeZone,
-            getHostName(),
-            getSessionId());
-        final ReminderObject[] reminderObj = listUpdates(
-            getWebConversation(),
-            new Date(System.currentTimeMillis() - 5000),
-            getHostName(),
-            getSessionId(),
-            timeZone);
-
-        int pos = -1;
-        for (int a = 0; a < reminderObj.length; a++) {
-            if (reminderObj[a].getTargetId() == targetId) {
-                pos = a;
+        final int targetId = catm.insert(appointmentObj).getObjectID();
+        
+        List<ReminderObject> reminderObj = remTm.updates(new Date(System.currentTimeMillis() - 5000));
+       
+        ReminderObject selected = null;
+        for (ReminderObject current : reminderObj) {
+            if (current.getTargetId() == targetId) {
+                selected = current;
             }
         }
 
-        assertTrue("reminder not found in response", (pos > -1));
+        assertTrue("reminder not found in response", (selected.getTargetId() > -1));
 
-        assertTrue("object id not found", reminderObj[pos].getObjectId() > 0);
-        assertNotNull("last modified is null", reminderObj[pos].getLastModified());
-        assertEquals("target id is not equals", targetId, reminderObj[pos].getTargetId());
-        assertEquals("folder id is not equals", folderId, reminderObj[pos].getFolder());
-        assertEquals("user id is not equals", userId, reminderObj[pos].getUser());
+        assertTrue("object id not found", selected.getObjectId() > 0);
+        assertNotNull("last modified is null", selected.getLastModified());
+        assertEquals("target id is not equals", targetId, selected.getTargetId());
+        assertEquals("folder id is not equals", parentFolderId, selected.getFolder());
+        assertEquals("user id is not equals", userId, selected.getUser());
 
         final long expectedAlarm = startTime - (45 * 60 * 1000);
-        assertEquals("alarm is not equals", new Date(expectedAlarm), reminderObj[pos].getDate());
-
-        final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()), false);
-        final GetResponse aGetR = client.execute(new GetRequest(folderId, targetId));
-        client.execute(new DeleteRequest(targetId, folderId, aGetR.getTimestamp()));
+        assertEquals("alarm is not equals", new Date(expectedAlarm), selected.getDate());
     }
 }

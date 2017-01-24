@@ -67,6 +67,7 @@ import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.client.onboarding.AvailabilityResult;
 import com.openexchange.client.onboarding.BuiltInProvider;
+import com.openexchange.client.onboarding.ClientDevice;
 import com.openexchange.client.onboarding.CompositeId;
 import com.openexchange.client.onboarding.DefaultScenario;
 import com.openexchange.client.onboarding.Device;
@@ -248,7 +249,7 @@ public class OnboardingServiceImpl implements OnboardingService {
     }
 
     @Override
-    public DeviceAwareScenario getScenario(String scenarioId, Device device, Session session) throws OXException {
+    public DeviceAwareScenario getScenario(String scenarioId, ClientDevice clientDevice, Device device, Session session) throws OXException {
         if (null == scenarioId) {
             throw OnboardingExceptionCodes.NO_SUCH_SCENARIO.create("null");
         }
@@ -269,11 +270,11 @@ public class OnboardingServiceImpl implements OnboardingService {
             missingCapabilities.addAll(result.getMissingCapabilities());
         }
 
-        return new DeviceAwareScenarionImpl(scenario, enabled, missingCapabilities, device, Device.getActionsFor(device, scenario.getType(), session));
+        return new DeviceAwareScenarionImpl(scenario, enabled, missingCapabilities, device, Device.getActionsFor(clientDevice, device, scenario.getType(), session));
     }
 
     @Override
-    public DeviceAwareScenario getScenario(String scenarioId, Device device, int userId, int contextId) throws OXException {
+    public DeviceAwareScenario getScenario(String scenarioId, ClientDevice clientDevice, Device device, int userId, int contextId) throws OXException {
         if (null == scenarioId) {
             throw OnboardingExceptionCodes.NO_SUCH_SCENARIO.create("null");
         }
@@ -292,11 +293,11 @@ public class OnboardingServiceImpl implements OnboardingService {
             enabled &= result.isAvailable();
             missingCapabilities.addAll(result.getMissingCapabilities());
         }
-        return new DeviceAwareScenarionImpl(scenario, enabled, missingCapabilities, device, Device.getActionsFor(device, scenario.getType(), userId, contextId));
+        return new DeviceAwareScenarionImpl(scenario, enabled, missingCapabilities, device, Device.getActionsFor(clientDevice, device, scenario.getType(), userId, contextId));
     }
 
     @Override
-    public List<DeviceAwareScenario> getScenariosFor(Device device, Session session) throws OXException {
+    public List<DeviceAwareScenario> getScenariosFor(ClientDevice clientDevice, Device device, Session session) throws OXException {
         List<String> availableScenarios = device.getScenarios(session);
         if (null == availableScenarios || availableScenarios.isEmpty()) {
             return Collections.emptyList();
@@ -322,7 +323,7 @@ public class OnboardingServiceImpl implements OnboardingService {
                         enabled &= result.isAvailable();
                         missingCapabilities.addAll(result.getMissingCapabilities());
                     }
-                    scenarios.add(new DeviceAwareScenarionImpl(scenario, enabled, missingCapabilities, device, Device.getActionsFor(device, scenario.getType(), session)));
+                    scenarios.add(new DeviceAwareScenarionImpl(scenario, enabled, missingCapabilities, device, Device.getActionsFor(clientDevice, device, scenario.getType(), session)));
                 }
             }
         }
@@ -546,7 +547,7 @@ public class OnboardingServiceImpl implements OnboardingService {
     }
 
     @Override
-    public OnboardingView getViewFor(Session session) throws OXException {
+    public OnboardingView getViewFor(ClientDevice clientDevice, Session session) throws OXException {
         Map<Device, List<CompositeId>> availableDevices;
 
         {
@@ -575,7 +576,7 @@ public class OnboardingServiceImpl implements OnboardingService {
             }
         }
 
-        OnboardingViewImpl view = new OnboardingViewImpl();
+        OnboardingViewImpl view = new OnboardingViewImpl(clientDevice);
         view.add(availableDevices);
         return view;
     }

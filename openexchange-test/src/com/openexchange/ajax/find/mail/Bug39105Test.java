@@ -46,12 +46,17 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.ajax.find.mail;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.find.PropDocument;
 import com.openexchange.ajax.find.actions.QueryRequest;
 import com.openexchange.ajax.find.actions.QueryResponse;
@@ -74,63 +79,35 @@ public class Bug39105Test extends AbstractMailFindTest {
 
     private FolderObject testFolder;
 
-    public Bug39105Test(String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
-        String inboxFolder = client.getValues().getInboxFolder();
+        String inboxFolder = getClient().getValues().getInboxFolder();
         String folderName = "Bug39105Test_" + System.currentTimeMillis();
         testFolder = new FolderObject();
         testFolder.setModule(FolderObject.MAIL);
         testFolder.setFullName(inboxFolder + "/" + folderName);
         testFolder.setFolderName(folderName);
-        testFolder = folderManager.insertFolderOnServer(testFolder);
+        testFolder = ftm.insertFolderOnServer(testFolder);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
-
+    @Test
     public void testReturnCustomHeader() throws Exception {
-        String mail = "From: #FROM#\n" +
-            "To: #TO#\n" +
-            "CC: #TO#\n" +
-            "BCC: #TO#\n" +
-            "Received: from ox.open-xchange.com;#DATE#\n" +
-            "Date: #DATE#\n" +
-            "Subject: #SUBJECT#\n" +
-            "Disposition-Notification-To: #FROM#\n" +
-            "Mime-Version: 1.0\n" +
-            "Content-Type: text/plain; charset=\"UTF-8\"\n" +
-            "Content-Transfer-Encoding: 8bit\n" +
-            "X-OX-Test-Header: #HEADER_VALUE#\n" +
-            "\n" +
-            "Content\n" +
-            "#BODY#\n";
+        String mail = "From: #FROM#\n" + "To: #TO#\n" + "CC: #TO#\n" + "BCC: #TO#\n" + "Received: from ox.open-xchange.com;#DATE#\n" + "Date: #DATE#\n" + "Subject: #SUBJECT#\n" + "Disposition-Notification-To: #FROM#\n" + "Mime-Version: 1.0\n" + "Content-Type: text/plain; charset=\"UTF-8\"\n" + "Content-Transfer-Encoding: 8bit\n" + "X-OX-Test-Header: #HEADER_VALUE#\n" + "\n" + "Content\n" + "#BODY#\n";
 
         String header = randomUID();
         String subject = randomUID();
-        mail = mail
-            .replaceAll("#FROM#", defaultAddress)
-            .replaceAll("#TO#", defaultAddress)
-            .replaceAll("#DATE#", DateUtils.toStringRFC822(new Date(), TimeZones.UTC))
-            .replaceAll("#SUBJECT#", subject)
-            .replaceAll("#BODY#", randomUID())
-            .replaceAll("#HEADER_VALUE#", header);
+        mail = mail.replaceAll("#FROM#", defaultAddress).replaceAll("#TO#", defaultAddress).replaceAll("#DATE#", DateUtils.toStringRFC822(new Date(), TimeZones.UTC)).replaceAll("#SUBJECT#", subject).replaceAll("#BODY#", randomUID()).replaceAll("#HEADER_VALUE#", header);
         ByteArrayInputStream mailStream = new ByteArrayInputStream(mail.getBytes(com.openexchange.java.Charsets.UTF_8));
         ImportMailRequest request = new ImportMailRequest(testFolder.getFullName(), 0, true, true, new ByteArrayInputStream[] { mailStream });
-        ImportMailResponse response = client.execute(request);
+        ImportMailResponse response = getClient().execute(request);
         String[][] mailIds = response.getIds();
 
         String[] columns = new String[] { "601", "600", "X-OX-Test-Header" };
         List<ActiveFacet> facets = prepareFacets(testFolder.getFullName());
         facets.add(createQuery(subject));
         QueryRequest queryRequest = new QueryRequest(0, Integer.MAX_VALUE, facets, Module.MAIL.getIdentifier(), columns);
-        QueryResponse queryResponse = client.execute(queryRequest);
+        QueryResponse queryResponse = getClient().execute(queryRequest);
         SearchResult result = queryResponse.getSearchResult();
         List<PropDocument> propDocuments = new ArrayList<PropDocument>();
         List<Document> documents = result.getDocuments();
@@ -140,7 +117,7 @@ public class Bug39105Test extends AbstractMailFindTest {
 
         PropDocument foundMail = findByProperty(propDocuments, "id", mailIds[0][1]);
         assertNotNull("Mail not found", foundMail);
-        assertEquals("Header not set", header,  foundMail.getProps().get("X-OX-Test-Header"));
+        assertEquals("Header not set", header, foundMail.getProps().get("X-OX-Test-Header"));
     }
 
 }

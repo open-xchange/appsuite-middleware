@@ -50,6 +50,12 @@
 package com.openexchange.groupware;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -58,7 +64,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
 import java.util.TimeZone;
+import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.calendar.CalendarMySQL;
 import com.openexchange.calendar.CalendarOperation;
@@ -67,8 +75,6 @@ import com.openexchange.calendar.api.AppointmentSqlFactory;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.event.impl.EventConfigImpl;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.Init;
-import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
@@ -109,9 +115,8 @@ public class AppointmentBugTests extends CalendarTest {
     private static int userid = 11; // bishoph
     public static int contextid = 1;
 
-    @Override
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
         Init.startServer();
         final EventConfigImpl event = new EventConfigImpl();
@@ -126,12 +131,12 @@ public class AppointmentBugTests extends CalendarTest {
 
         contextid = ctx.getContextId();
         userid = user;
-        
+
         CalendarMySQL.setApppointmentSqlFactory(new AppointmentSqlFactory());
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         Init.stopServer();
         super.tearDown();
     }
@@ -164,12 +169,13 @@ public class AppointmentBugTests extends CalendarTest {
         }
     }
 
+    @Override
     void deleteAllAppointments() throws Exception  {
         final Connection readcon = DBPool.pickup(getContext());
         final Context context = new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "deleteAllApps");
         final CalendarSql csql = new CalendarSql(so);
-        final SearchIterator<Appointment> si = csql.getAppointmentsBetween(userid, new Date(0), new Date(SUPER_END), cols, 0,  null);
+        final SearchIterator<Appointment> si = csql.getAppointmentsBetween(userid, new Date(0), new Date(SUPER_END), cols, 0, null);
         while (si.hasNext()) {
             final Appointment cdao = si.next();
             testDelete(cdao);
@@ -232,7 +238,7 @@ public class AppointmentBugTests extends CalendarTest {
         DBPool.push(context, readcon);
         return privatefolder;
     }
-    
+
     /**
      * Test for <a href=
      * "https://bugs.open-xchange.com/show_bug.cgi?id=20972">bug
@@ -242,21 +248,22 @@ public class AppointmentBugTests extends CalendarTest {
      * @throws Exception
      *             If an error occurs
      */
+    @Test
     public void testBug20972() throws Exception {
         final int fid = getPrivateFolder(userid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "testIdentifierForBug20972");
-        
+
         final UserParticipant userParticipant = new UserParticipant(userid);
-        
+
         StringBuilder sb = new StringBuilder();
         int cap = 0;
         String locString = "0123456789";
-        while(cap < locString.length() * 25) {
+        while (cap < locString.length() * 25) {
             sb.append(locString);
             cap += locString.length();
         }
         sb.append("TRUNCATE ME");
-        
+
         final CalendarDataObject cdao = new CalendarDataObject();
         cdao.setLocation(sb.toString());
         cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
@@ -266,25 +273,25 @@ public class AppointmentBugTests extends CalendarTest {
         cdao.setTitle("Testing bug 20972");
         cdao.addParticipant(userParticipant);
         cdao.setExternalOrganizer(true);
-        
+
         final CalendarSql csql = new CalendarSql(so);
         csql.insertAppointmentObject(cdao);
-        
+
         final int oid = cdao.getObjectID();
         final CalendarDataObject expected = csql.getObjectById(oid, fid);
-        
+
         assertNotNull("Object not created", expected);
         assertNotSame("Location truncated: ", expected.getLocation(), cdao.getLocation());
     }
-    
 
     /*
-     1.  Create an appointment
-     2.  Click on apppointment series/recurring
-     3.  Set pattern to montly; every 2 weeks; 6 times
-     4.  Check the entries in the month view
-     5.  Check entries in OX6 Calendar
-    */
+     * 1. Create an appointment
+     * 2. Click on apppointment series/recurring
+     * 3. Set pattern to montly; every 2 weeks; 6 times
+     * 4. Check the entries in the month view
+     * 5. Check entries in OX6 Calendar
+     */
+    @Test
     public void testBug4467() throws Throwable {
 
         final int fid = getPrivateFolder(userid);
@@ -317,10 +324,11 @@ public class AppointmentBugTests extends CalendarTest {
     }
 
     /*
-     1. Create a recurring whole-day appointment in Outlook (with Outlook OXtender)
-     2. Set the recurrence to "every day, for 2 days" and save the appointment
-     3. Verify the appointment in OX6 GUI in the different appointment views
-    */
+     * 1. Create a recurring whole-day appointment in Outlook (with Outlook OXtender)
+     * 2. Set the recurrence to "every day, for 2 days" and save the appointment
+     * 3. Verify the appointment in OX6 GUI in the different appointment views
+     */
+    @Test
     public void testBug4377() throws Throwable {
         final CalendarDataObject cdao = new CalendarDataObject();
         cdao.setContext(getContext());
@@ -345,11 +353,12 @@ public class AppointmentBugTests extends CalendarTest {
     }
 
     /*
-     1. Create appointment with User A and add another participant (User B) in a private calendar folder
-     2. Login with User B and delete the app in
-     3. Check that User B does not have the appointment anymore in his own calendar
-     4. Check that original appointment has only one participant left (User A)
-    */
+     * 1. Create appointment with User A and add another participant (User B) in a private calendar folder
+     * 2. Login with User B and delete the app in
+     * 3. Check that User B does not have the appointment anymore in his own calendar
+     * 4. Check that original appointment has only one participant left (User A)
+     */
+    @Test
     public void testBug4497() throws Throwable {
         final String user2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");
         final int userid2 = resolveUser(user2);
@@ -385,7 +394,7 @@ public class AppointmentBugTests extends CalendarTest {
         boolean test_exists = false;
         try {
             csql2.getObjectById(object_id, fid2);
-        } catch(final OXException oxe) {
+        } catch (final OXException oxe) {
             test_exists = true;
         }
 
@@ -398,11 +407,12 @@ public class AppointmentBugTests extends CalendarTest {
     }
 
     /*
-     Create an appointment (Termin) with another participant (Teilnehmer). Save the
-     appointment. Select it and edit (bearbeiten) it. Modify it to occur weekly
-     (woechentlich). FYI: I did not change the defaults, so it was an the same day and
-     recurred every 4 weeks.
-    */
+     * Create an appointment (Termin) with another participant (Teilnehmer). Save the
+     * appointment. Select it and edit (bearbeiten) it. Modify it to occur weekly
+     * (woechentlich). FYI: I did not change the defaults, so it was an the same day and
+     * recurred every 4 weeks.
+     */
+    @Test
     public void testBug4276() throws Throwable {
         final String user2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");
         final int userid2 = resolveUser(user2);
@@ -443,9 +453,10 @@ public class AppointmentBugTests extends CalendarTest {
     }
 
     /*
-     when i open a multi participant appt and add one resource to the appt, the
-     following error is thrown:
-    */
+     * when i open a multi participant appt and add one resource to the appt, the
+     * following error is thrown:
+     */
+    @Test
     public void testBug4119() throws Throwable {
 
         // Clean up appointments
@@ -470,7 +481,6 @@ public class AppointmentBugTests extends CalendarTest {
         fo.setModule(FolderObject.CALENDAR);
         fo.setType(FolderObject.PRIVATE);
         new RdbFolderSQLInterface(ServerSessionAdapter.valueOf(so2)).clearFolder(fo, new Date());
-
 
         final CalendarDataObject cdao = new CalendarDataObject();
         cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
@@ -532,18 +542,19 @@ public class AppointmentBugTests extends CalendarTest {
     }
 
     /*
-    Steps:
-    1. Create an appointment
-       "Send customer invoices", 11:00 - 12:00
-    2. Series
-       Monthly, Each 30th of the month,
-       starting 30.12.2006, ending 30.12.2007
-    3. Save the appointment
-    4. Check the Calendar, Month view
-
-    Results:
-    Appointments initially get displayed, but always on the 1st of the following months
-    */
+     * Steps:
+     * 1. Create an appointment
+     * "Send customer invoices", 11:00 - 12:00
+     * 2. Series
+     * Monthly, Each 30th of the month,
+     * starting 30.12.2006, ending 30.12.2007
+     * 3. Save the appointment
+     * 4. Check the Calendar, Month view
+     * 
+     * Results:
+     * Appointments initially get displayed, but always on the 1st of the following months
+     */
+    @Test
     public void testBug4473() throws Throwable {
         RecurringResultsInterface m = null;
         final CalendarDataObject cdao = new CalendarDataObject();
@@ -572,18 +583,18 @@ public class AppointmentBugTests extends CalendarTest {
 
     }
 
-
     /*
-    1. Create a new appointment in the OX6 GUI (whole day, recurring every day for 2
-    days)
-    2. Save the appointment and verify the calendar views
-
-    -> The appointment is shown on every day starting at the given start date of the
-    recurring whole-day appointment. In the correct case this appointment should
-    only be shown on two days at all. I suppose this is a GUI bug because most
-    recurring whole-day appointments work with Outlook OXtender 6 and are
-    communicated correctly by the server.
-    */
+     * 1. Create a new appointment in the OX6 GUI (whole day, recurring every day for 2
+     * days)
+     * 2. Save the appointment and verify the calendar views
+     * 
+     * -> The appointment is shown on every day starting at the given start date of the
+     * recurring whole-day appointment. In the correct case this appointment should
+     * only be shown on two days at all. I suppose this is a GUI bug because most
+     * recurring whole-day appointments work with Outlook OXtender 6 and are
+     * communicated correctly by the server.
+     */
+    @Test
     public void testBug4766() throws Throwable {
         RecurringResultsInterface m = null;
         final int fid = getPrivateFolder(userid);
@@ -617,15 +628,16 @@ public class AppointmentBugTests extends CalendarTest {
     }
 
     /*
-    User A:
-    1. Share the personal calendar folder to User B with Level 6 permissions
-    User B:
-    2. Access the shared calendar via Outlook (with Outlook OXtender)
-    3. Create a new appointment in the shared calendar of User A
-    4. Select the appointment in the shared calendar and move it to another timefram
-    -> A Exception is shown in Outlook OXtenders debug log and occurs in
-    open-xchange.log (see attachment)
+     * User A:
+     * 1. Share the personal calendar folder to User B with Level 6 permissions
+     * User B:
+     * 2. Access the shared calendar via Outlook (with Outlook OXtender)
+     * 3. Create a new appointment in the shared calendar of User A
+     * 4. Select the appointment in the shared calendar and move it to another timefram
+     * -> A Exception is shown in Outlook OXtenders debug log and occurs in
+     * open-xchange.log (see attachment)
      */
+    @Test
     public void testBug4717() throws Throwable {
         final Context context = new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
@@ -666,7 +678,7 @@ public class AppointmentBugTests extends CalendarTest {
             cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
             cdao.setParentFolderID(shared_folder_id);
             CalendarTest.fillDatesInDao(cdao);
-            cdao.setTitle("testBug4717 - created by "+user2);
+            cdao.setTitle("testBug4717 - created by " + user2);
             cdao.setIgnoreConflicts(true);
 
             csql2.insertAppointmentObject(cdao);
@@ -677,11 +689,11 @@ public class AppointmentBugTests extends CalendarTest {
             final CalendarDataObject udao = new CalendarDataObject();
             udao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
             udao.setObjectID(object_id);
-            final Date check_start_date = new Date(cdao.getStartDate().getTime()+3600000); // move 1 h
-            final Date check_end_date = new Date(cdao.getEndDate().getTime()+3600000); // move 1 h
+            final Date check_start_date = new Date(cdao.getStartDate().getTime() + 3600000); // move 1 h
+            final Date check_end_date = new Date(cdao.getEndDate().getTime() + 3600000); // move 1 h
             udao.setStartDate(check_start_date);
             udao.setEndDate(check_end_date);
-            udao.setTitle("testBug4717 - updated by "+user2);
+            udao.setTitle("testBug4717 - updated by " + user2);
 
             final Participants participants = new Participants();
             final Participant p = new UserParticipant(userid);
@@ -699,22 +711,22 @@ public class AppointmentBugTests extends CalendarTest {
             final UserParticipant up[] = testobject.getUsers();
             assertTrue("UserParticipant not null", up != null);
             assertEquals("Check that we got two participants ", 2, up.length);
-            assertEquals("Check start date" , check_start_date, testobject.getStartDate());
-            assertEquals("Check end date" , check_end_date, testobject.getEndDate());
+            assertEquals("Check start date", check_start_date, testobject.getStartDate());
+            assertEquals("Check end date", check_end_date, testobject.getEndDate());
 
             final CalendarDataObject second_update = new CalendarDataObject();
             second_update.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
             second_update.setObjectID(object_id);
             second_update.setStartDate(original_object.getStartDate()); // back to origin time
             second_update.setEndDate(original_object.getEndDate()); // back to origin time
-            second_update.setTitle("testBug4717 - updated (2) by "+user2);
+            second_update.setTitle("testBug4717 - updated (2) by " + user2);
             second_update.setIgnoreConflicts(true);
 
             csql2.updateAppointmentObject(second_update, shared_folder_id, testobject.getLastModified());
 
             final CalendarDataObject testobject2 = csql2.getObjectById(object_id, shared_folder_id);
-            assertEquals("Check start date" , cdao.getStartDate(), testobject2.getStartDate());
-            assertEquals("Check end date" , cdao.getEndDate(), testobject2.getEndDate());
+            assertEquals("Check start date", cdao.getStartDate(), testobject2.getStartDate());
+            assertEquals("Check end date", cdao.getEndDate(), testobject2.getEndDate());
 
         } finally {
             try {
@@ -722,7 +734,7 @@ public class AppointmentBugTests extends CalendarTest {
                     //ofa.deleteFolder(shared_folder_id, so, true, SUPER_END);
                     oxma.deleteFolder(new FolderObject(shared_folder_id), true, System.currentTimeMillis());
                 }
-            } catch(final Exception e) {
+            } catch (final Exception e) {
                 e.printStackTrace();
                 fail("Error deleting folder object.");
             }
@@ -730,16 +742,17 @@ public class AppointmentBugTests extends CalendarTest {
         try {
             DBPool.push(context, readcon);
             DBPool.pushWrite(context, writecon);
-        } catch(final Exception ignore) {
+        } catch (final Exception ignore) {
             ignore.printStackTrace();
         }
     }
 
     /*
-    after creating a not ending series appointment every first Monday every month,
-    only the first appointment can be seen in the calendar.
+     * after creating a not ending series appointment every first Monday every month,
+     * only the first appointment can be seen in the calendar.
      */
 
+    @Test
     public void testBug4838() throws Throwable {
         RecurringResultsInterface m = null;
         final int fid = getPrivateFolder(userid);
@@ -774,7 +787,7 @@ public class AppointmentBugTests extends CalendarTest {
             final Date date = new Date(rr.getStart());
             test.setTime(date);
             if (a > 0 && last_month != 11) {
-                assertEquals("Compare month", last_month+1, test.get(Calendar.MONTH));
+                assertEquals("Compare month", last_month + 1, test.get(Calendar.MONTH));
             }
             assertEquals("Check day of month", Calendar.MONDAY, test.get(Calendar.DAY_OF_WEEK));
             last_month = test.get(Calendar.MONTH);
@@ -783,10 +796,11 @@ public class AppointmentBugTests extends CalendarTest {
     }
 
     /*
-    Changing the recurrence of a weekly appointment to daily appointment removes all
-    recurrence information.
+     * Changing the recurrence of a weekly appointment to daily appointment removes all
+     * recurrence information.
      */
 
+    @Test
     public void testBug5010() throws Throwable {
         final int fid = getPrivateFolder(userid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestIdentifier");
@@ -828,10 +842,11 @@ public class AppointmentBugTests extends CalendarTest {
     }
 
     /*
-    Create a new appointment and make it occur every 2 days. Save it. Go to
-    "bearbeiten" and change it to every 3 days. Save. See that it does not change.
+     * Create a new appointment and make it occur every 2 days. Save it. Go to
+     * "bearbeiten" and change it to every 3 days. Save. See that it does not change.
      */
 
+    @Test
     public void testBug5012() throws Throwable {
         final int fid = getPrivateFolder(userid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestIdentifier");
@@ -850,9 +865,7 @@ public class AppointmentBugTests extends CalendarTest {
         csql.insertAppointmentObject(cdao);
         final int object_id = cdao.getObjectID();
 
-
         final CalendarDataObject testobject = csql.getObjectById(object_id, fid);
-
 
         final CalendarDataObject update = new CalendarDataObject();
         update.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
@@ -871,7 +884,6 @@ public class AppointmentBugTests extends CalendarTest {
         assertEquals("Check that the sequence type is identical ", testobject.getRecurrenceType(), testobject2.getRecurrenceType());
         assertFalse("Check that the interval has been changed", testobject.getInterval() == testobject2.getInterval());
 
-
         final CalendarDataObject update2 = new CalendarDataObject();
         update2.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         update2.setObjectID(object_id);
@@ -880,7 +892,7 @@ public class AppointmentBugTests extends CalendarTest {
         update2.setRecurrenceType(CalendarDataObject.DAILY);
         update2.setInterval(1);
         update2.setIgnoreConflicts(true);
-        final Date check_until_date = new Date(cdao.getUntil().getTime()+new CalendarCollection().MILLI_DAY);
+        final Date check_until_date = new Date(cdao.getUntil().getTime() + new CalendarCollection().MILLI_DAY);
         update2.setUntil(check_until_date);
 
         csql.updateAppointmentObject(update2, fid, testobject2.getLastModified());
@@ -894,15 +906,16 @@ public class AppointmentBugTests extends CalendarTest {
     }
 
     /*
-    1. Login as user A
-    2. Share your private calendar folder to user B
-    3. Use rights: View Folder, Read all objects, Write all objects, no delete
-    permission.
-    4. Logout
-    5. Login as user B
-    6. Go to shared calendar folder of user A
-    7. Create appointment
-    */
+     * 1. Login as user A
+     * 2. Share your private calendar folder to user B
+     * 3. Use rights: View Folder, Read all objects, Write all objects, no delete
+     * permission.
+     * 4. Logout
+     * 5. Login as user B
+     * 6. Go to shared calendar folder of user A
+     * 7. Create appointment
+     */
+    @Test
     public void testBug5130() throws Throwable {
         final Context context = new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
@@ -943,14 +956,14 @@ public class AppointmentBugTests extends CalendarTest {
             cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
             cdao.setParentFolderID(shared_folder_id);
             CalendarTest.fillDatesInDao(cdao);
-            cdao.setTitle("testBug4717 - created by "+user2);
+            cdao.setTitle("testBug4717 - created by " + user2);
             cdao.setIgnoreConflicts(true);
 
             int object_id = 0;
             try {
                 csql2.insertAppointmentObject(cdao);
                 object_id = cdao.getObjectID();
-            } catch(final OXException ope) {
+            } catch (final OXException ope) {
                 // exzellent
                 ope.printStackTrace();
             }
@@ -963,7 +976,7 @@ public class AppointmentBugTests extends CalendarTest {
                     //ofa.deleteFolder(shared_folder_id, so, true, SUPER_END);
                     oxma.deleteFolder(new FolderObject(shared_folder_id), true, System.currentTimeMillis());
                 }
-            } catch(final Exception e) {
+            } catch (final Exception e) {
                 e.printStackTrace();
                 fail("Error deleting folder object.");
             }
@@ -971,18 +984,19 @@ public class AppointmentBugTests extends CalendarTest {
         try {
             DBPool.push(context, readcon);
             DBPool.pushWrite(context, writecon);
-        } catch(final Exception ignore) {
+        } catch (final Exception ignore) {
             ignore.printStackTrace();
         }
     }
 
     /*
-    1. As User A: Create a new appointment and invite User B
-    2. As User B: Verify the appointment in the calendar
-    -> The appointment is shown to User B, OK
-    3. As User B: Delete the appointment from the personal calendar
-    4. As User A: Verify the appointment participants.
-    */
+     * 1. As User A: Create a new appointment and invite User B
+     * 2. As User B: Verify the appointment in the calendar
+     * -> The appointment is shown to User B, OK
+     * 3. As User B: Delete the appointment from the personal calendar
+     * 4. As User A: Verify the appointment participants.
+     */
+    @Test
     public void testBug5144() throws Throwable {
         final String user2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");
         final int userid2 = resolveUser(user2);
@@ -1018,7 +1032,7 @@ public class AppointmentBugTests extends CalendarTest {
         try {
             csql2.getObjectById(object_id, fid2);
             fail("User should get an OXException ");
-        } catch(final OXException ope) {
+        } catch (final OXException ope) {
             // Excellent
         }
 
@@ -1029,13 +1043,14 @@ public class AppointmentBugTests extends CalendarTest {
         assertEquals("Check that only one userparticipant exists", 1, up.length);
         assertEquals("Check that only one participant exists", 1, p.length);
 
-     }
+    }
 
     /*
-    A yearly recurring event can be set to the "first Tuesday in january".
-    If so, it happens on the first Tuesday in february(!) in the year 2009 (!)
-    The date is ok in 2008 and 2010.
+     * A yearly recurring event can be set to the "first Tuesday in january".
+     * If so, it happens on the first Tuesday in february(!) in the year 2009 (!)
+     * The date is ok in 2008 and 2010.
      */
+    @Test
     public void testBug5202() throws Throwable {
         RecurringResultsInterface m = null;
         final int fid = getPrivateFolder(userid);
@@ -1076,33 +1091,33 @@ public class AppointmentBugTests extends CalendarTest {
 
     }
 
-
     /*
-    User A:
-    1. RMB the personal calendar -> "Properties"
-    2. Click "Rights" and add User B
-    3. Assign the following rights and save the folder permissions:
-
-    Rechtevergabe: None
-    Ordnerrechte: Objekte anlegen
-    Leserechte: Alle
-    Schreibrechte: Alle
-    Loeschrechte: Keine
-
-    4. Create a new appointment with title "foobar" in the personal calendar which
-    is now shared to User B
-
-    User B:
-    5. Select the shared calendar of User A
-    6. Select "foobar" in the shared calendar and click "Appointment" -> "Edit" in
-    the panel
-    7. Change the title to "foobar2" and save the appointment
-
-    8. Verify the calendar as User A and User B
-    -> "foobar" has been deleted from the personal folder of User A and now exists
-    in the personal folder of User B. This must not be possible because User B has
-    no delete rights to the shared calendar of User A.
+     * User A:
+     * 1. RMB the personal calendar -> "Properties"
+     * 2. Click "Rights" and add User B
+     * 3. Assign the following rights and save the folder permissions:
+     * 
+     * Rechtevergabe: None
+     * Ordnerrechte: Objekte anlegen
+     * Leserechte: Alle
+     * Schreibrechte: Alle
+     * Loeschrechte: Keine
+     * 
+     * 4. Create a new appointment with title "foobar" in the personal calendar which
+     * is now shared to User B
+     * 
+     * User B:
+     * 5. Select the shared calendar of User A
+     * 6. Select "foobar" in the shared calendar and click "Appointment" -> "Edit" in
+     * the panel
+     * 7. Change the title to "foobar2" and save the appointment
+     * 
+     * 8. Verify the calendar as User A and User B
+     * -> "foobar" has been deleted from the personal folder of User A and now exists
+     * in the personal folder of User B. This must not be possible because User B has
+     * no delete rights to the shared calendar of User A.
      */
+    @Test
     public void testBug5194() throws Throwable {
         final Context context = new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
@@ -1145,7 +1160,7 @@ public class AppointmentBugTests extends CalendarTest {
             cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
             cdao.setParentFolderID(shared_folder_id);
             CalendarTest.fillDatesInDao(cdao);
-            cdao.setTitle("testBug5194 - created by "+user2);
+            cdao.setTitle("testBug5194 - created by " + user2);
             cdao.setIgnoreConflicts(true);
             csql.insertAppointmentObject(cdao);
             final int object_id = cdao.getObjectID();
@@ -1159,20 +1174,17 @@ public class AppointmentBugTests extends CalendarTest {
             final CalendarDataObject update = new CalendarDataObject();
             update.setContext(ContextStorage.getInstance().getContext(so2.getContextId()));
             update.setObjectID(object_id);
-            update.setTitle("testBug5194 - updated by "+user2);
+            update.setTitle("testBug5194 - updated by " + user2);
 
             csql2.updateAppointmentObject(update, shared_folder_id, testobject.getLastModified());
 
-
             final CalendarDataObject testobject2 = csql.getObjectById(object_id, shared_folder_id);
             assertEquals("Check folder for user 1", shared_folder_id, testobject.getParentFolderID());
-
 
             up = testobject2.getUsers();
             assertEquals("Check that only user 1 is participant", 1, up.length);
             assertEquals("Check that only user 1 is participant", userid, up[0].getIdentifier());
             assertEquals("Check correct folder", shared_folder_id, testobject2.getParentFolderID());
-
 
             csql2.getObjectById(object_id, shared_folder_id);
             up = testobject2.getUsers();
@@ -1186,7 +1198,7 @@ public class AppointmentBugTests extends CalendarTest {
                     //ofa.deleteFolder(shared_folder_id, so, true, SUPER_END);
                     oxma.deleteFolder(new FolderObject(shared_folder_id), true, System.currentTimeMillis());
                 }
-            } catch(final Exception e) {
+            } catch (final Exception e) {
                 e.printStackTrace();
                 fail("Error deleting folder object.");
             }
@@ -1194,15 +1206,15 @@ public class AppointmentBugTests extends CalendarTest {
         try {
             DBPool.push(context, readcon);
             DBPool.pushWrite(context, writecon);
-        } catch(final Exception ignore) {
+        } catch (final Exception ignore) {
             ignore.printStackTrace();
         }
     }
 
-
     /*
-     Whole day apps should be visible in all views
-    */
+     * Whole day apps should be visible in all views
+     */
+    @Test
     public void testBug5222AND5171() throws Throwable {
         deleteAllAppointments();
         new ContextImpl(contextid);
@@ -1218,8 +1230,6 @@ public class AppointmentBugTests extends CalendarTest {
         cdao.setFullTime(true);
         cdao.setIgnoreConflicts(true);
 
-
-
         final CalendarSql csql = new CalendarSql(so);
         csql.insertAppointmentObject(cdao);
         final int object_id = cdao.getObjectID();
@@ -1227,14 +1237,13 @@ public class AppointmentBugTests extends CalendarTest {
         CalendarDataObject testobject = csql.getObjectById(object_id, fid);
         assertEquals("Check object_id", object_id, testobject.getObjectID());
 
-
         long range_start = 1168815600000L; // 15.01.2007 00:00
         long range_end = 1169420400000L; // 22.01.2007 00:00
 
         SearchIterator si = csql.getAppointmentsBetweenInFolder(fid, cols, new Date(range_start), new Date(range_end), 0, null);
         boolean found = false;
         while (si.hasNext()) {
-            final CalendarDataObject temp = (CalendarDataObject)si.next();
+            final CalendarDataObject temp = (CalendarDataObject) si.next();
             if (temp.getObjectID() == object_id) {
                 assertTrue("Fulltime is set to true", temp.getFullTime());
                 if (new CalendarCollection().inBetween(temp.getStartDate().getTime(), temp.getEndDate().getTime(), range_start, range_end)) {
@@ -1245,7 +1254,6 @@ public class AppointmentBugTests extends CalendarTest {
         }
         assertTrue("Found no appointment (testBug5141)", found);
 
-
         final CalendarDataObject cdao2 = new CalendarDataObject();
         cdao2.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         cdao2.setParentFolderID(fid);
@@ -1254,7 +1262,6 @@ public class AppointmentBugTests extends CalendarTest {
         cdao2.removeUntil();
         cdao2.setFullTime(true);
         cdao2.setIgnoreConflicts(true);
-
 
         csql.insertAppointmentObject(cdao2);
         final int object_id2 = cdao2.getObjectID();
@@ -1269,7 +1276,7 @@ public class AppointmentBugTests extends CalendarTest {
 
         found = false;
         while (si.hasNext()) {
-            final CalendarDataObject temp = (CalendarDataObject)si.next();
+            final CalendarDataObject temp = (CalendarDataObject) si.next();
             if (temp.getObjectID() == object_id2) {
                 assertTrue("Fulltime is set to true", temp.getFullTime());
                 if (new CalendarCollection().inBetween(temp.getStartDate().getTime(), temp.getEndDate().getTime(), range_start, range_end)) {
@@ -1284,9 +1291,10 @@ public class AppointmentBugTests extends CalendarTest {
     }
 
     /*
-    Recurring multi-whole-day appointments are shown only on one day
-    Create a new appointment, whole-day, spaning 2 days (22.01.2007 - 24.01.2007)
-    */
+     * Recurring multi-whole-day appointments are shown only on one day
+     * Create a new appointment, whole-day, spaning 2 days (22.01.2007 - 24.01.2007)
+     */
+    @Test
     public void testBug4987() throws Throwable {
         new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
@@ -1301,7 +1309,7 @@ public class AppointmentBugTests extends CalendarTest {
         start = new CalendarCollection().normalizeLong(start);
         final long end = (start + (new CalendarCollection().MILLI_DAY * 2));
 
-        final int calculator = (int)((end-start)/new CalendarCollection().MILLI_DAY);
+        final int calculator = (int) ((end - start) / new CalendarCollection().MILLI_DAY);
         assertEquals("Check Calculator result ", 2, calculator);
 
         cdao.setStartDate(new Date(start));
@@ -1327,12 +1335,13 @@ public class AppointmentBugTests extends CalendarTest {
             final RecurringResultInterface rr = m.getRecurringResult(a);
             final long check_start = rr.getStart();
             final long check_end = rr.getEnd();
-            final int check_calculator = (int)((check_end-check_start)/new CalendarCollection().MILLI_DAY);
+            final int check_calculator = (int) ((check_end - check_start) / new CalendarCollection().MILLI_DAY);
             assertEquals("Check calculated results", calculator, check_calculator);
         }
 
     }
 
+    @Test
     public void testBug5306() throws Throwable {
         new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
@@ -1353,7 +1362,7 @@ public class AppointmentBugTests extends CalendarTest {
         RecurringResultsInterface m = new CalendarCollection().calculateRecurring(cdao, 0, 0, 0);
         assertEquals("Calculated results is correct", OCCURRENCE_TEST, m.size());
 
-        long super_start_test = new CalendarCollection().normalizeLong(m.getRecurringResult(m.size()-1).getStart());
+        long super_start_test = new CalendarCollection().normalizeLong(m.getRecurringResult(m.size() - 1).getStart());
         long super_end_test = super_start_test + new CalendarCollection().MILLI_DAY;
 
         m = new CalendarCollection().calculateRecurring(cdao, super_start_test, super_end_test, 0);
@@ -1361,8 +1370,8 @@ public class AppointmentBugTests extends CalendarTest {
         assertEquals("Calculated results is correct", 1, m.size());
         assertTrue("Occurrence is set", cdao.containsOccurrence());
 
-        super_start_test = super_start_test+new CalendarCollection().MILLI_DAY;
-        super_end_test = super_end_test+new CalendarCollection().MILLI_DAY;
+        super_start_test = super_start_test + new CalendarCollection().MILLI_DAY;
+        super_end_test = super_end_test + new CalendarCollection().MILLI_DAY;
 
         new Date(super_start_test);
         new Date(super_end_test);
@@ -1395,25 +1404,25 @@ public class AppointmentBugTests extends CalendarTest {
         final RecurringResultsInterface m4 = new CalendarCollection().calculateRecurring(cdao, check_week_start, check_week_end, 0);
         final int rest_value = m4.size();
 
-        assertEquals("Calculated results is correct", OCCURRENCE_TEST, sub_value+rest_value);
+        assertEquals("Calculated results is correct", OCCURRENCE_TEST, sub_value + rest_value);
 
     }
 
-     /*
-     As User A:
-     1. Create a new appointment in your default private calendar
-     2. Edit the appointment, and change the folder to the shared folder of user B
-     3. Verify the shared folder of user B
-     4. Verify the private calendar folder of user A
-
-     Note: The server should not move such an appointment because the current user would be removed
-     and the shared folder owner must be added as participant.
+    /*
+     * As User A:
+     * 1. Create a new appointment in your default private calendar
+     * 2. Edit the appointment, and change the folder to the shared folder of user B
+     * 3. Verify the shared folder of user B
+     * 4. Verify the private calendar folder of user A
+     * 
+     * Note: The server should not move such an appointment because the current user would be removed
+     * and the shared folder owner must be added as participant.
      */
 
-     /*
-      * This test is no longer valid due to bug #12923
-      */
-     public void noTestBug6910() throws Throwable {
+    /*
+     * This test is no longer valid due to bug #12923
+     */
+    public void noTestBug6910() throws Throwable {
         final Context context = new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
 
@@ -1492,14 +1501,12 @@ public class AppointmentBugTests extends CalendarTest {
             assertTrue("User A is not in the participants", found_user1);
             assertTrue("User B is not in the participants", found_user2);
 
-
-
         } finally {
             try {
                 if (shared_folder_id > 0) {
                     oxma.deleteFolder(new FolderObject(shared_folder_id), true, System.currentTimeMillis());
                 }
-            } catch(final Exception e) {
+            } catch (final Exception e) {
                 e.printStackTrace();
                 fail("Error deleting folder object.");
             }
@@ -1507,39 +1514,38 @@ public class AppointmentBugTests extends CalendarTest {
         try {
             DBPool.push(context, readcon);
             DBPool.pushWrite(context, writecon);
-        } catch(final Exception ignore) {
+        } catch (final Exception ignore) {
             ignore.printStackTrace();
         }
-     }
+    }
 
-     /*
-
-      Precondition:
-       - A main-calendar, the users personal calendar folder
-       - A sub-calendar, a subfolder of the users calendar
-
-      1. Create a new appointment series in a sub-calendar of the personal calendar
-
-      2. Select one occurrence of the series and click "Edit" in the panel
-
-      3. Select "Single Appointment" in the dialog popup
-
-      4. Select another calendar folder in the edit contact window (e.g. the main
-      personal calendar)
-
-      5. Save the changes
-
-      6. Verify the appointment sequence in the sub-calendar and the main-calendar
-
-      -> The selected occurrence has been kept in the sub-calendar while the other
-      part of the occurrence has been moved to the main-calendar. This is exactly the
-      opposite of which is expected.
-      */
-     //TODO: check if this behaviour is still expected...
-     public void _testBug6400() throws Throwable {
+    /*
+     * 
+     * Precondition:
+     * - A main-calendar, the users personal calendar folder
+     * - A sub-calendar, a subfolder of the users calendar
+     * 
+     * 1. Create a new appointment series in a sub-calendar of the personal calendar
+     * 
+     * 2. Select one occurrence of the series and click "Edit" in the panel
+     * 
+     * 3. Select "Single Appointment" in the dialog popup
+     * 
+     * 4. Select another calendar folder in the edit contact window (e.g. the main
+     * personal calendar)
+     * 
+     * 5. Save the changes
+     * 
+     * 6. Verify the appointment sequence in the sub-calendar and the main-calendar
+     * 
+     * -> The selected occurrence has been kept in the sub-calendar while the other
+     * part of the occurrence has been moved to the main-calendar. This is exactly the
+     * opposite of which is expected.
+     */
+    //TODO: check if this behaviour is still expected...
+    public void _testBug6400() throws Throwable {
         final Context context = new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
-
 
         final Connection readcon = DBPool.pickup(context);
         final Connection writecon = DBPool.pickupWriteable(context);
@@ -1553,8 +1559,7 @@ public class AppointmentBugTests extends CalendarTest {
         oclp1.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         oclp1.setFolderAdmin(true);
 
-
-        fo.setFolderName("testBug6400 - "+System.currentTimeMillis());
+        fo.setFolderName("testBug6400 - " + System.currentTimeMillis());
         fo.setParentFolderID(fid);
         fo.setModule(FolderObject.CALENDAR);
         fo.setType(FolderObject.PRIVATE);
@@ -1566,7 +1571,6 @@ public class AppointmentBugTests extends CalendarTest {
             subfolder_id = fo.getObjectID();
 
             final CalendarSql csql = new CalendarSql(so);
-
 
             final CalendarDataObject cdao = new CalendarDataObject();
             cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
@@ -1582,10 +1586,8 @@ public class AppointmentBugTests extends CalendarTest {
 
             final CalendarDataObject testobject = csql.getObjectById(object_id, subfolder_id);
 
-
             testobject.getStartDate();
             testobject.getEndDate();
-
 
             final CalendarDataObject update = new CalendarDataObject();
             update.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
@@ -1599,18 +1601,17 @@ public class AppointmentBugTests extends CalendarTest {
                 csql.updateAppointmentObject(update, subfolder_id, new Date());
                 update.getObjectID();
                 fail("Test failed. An exception can not be moved into a different folder.");
-            } catch(final OXException e) {
+            } catch (final OXException e) {
                 // Must fail
                 assertEquals("Check correct error message", 66, e.getCode());
             }
-
 
         } finally {
             try {
                 if (subfolder_id > 0) {
                     oxma.deleteFolder(new FolderObject(subfolder_id), true, System.currentTimeMillis());
                 }
-            } catch(final Exception e) {
+            } catch (final Exception e) {
                 e.printStackTrace();
                 fail("Error deleting folder object.");
             }
@@ -1618,36 +1619,36 @@ public class AppointmentBugTests extends CalendarTest {
         try {
             DBPool.push(context, readcon);
             DBPool.pushWrite(context, writecon);
-        } catch(final Exception ignore) {
+        } catch (final Exception ignore) {
             ignore.printStackTrace();
         }
-     }
+    }
 
-     /*
-
-     Steps:
-     1. In your private calendar "Kalendar" create a new appointment:
-     Beschreibung: please don't remind me
-     Beginnt am: 9:00 (assuming it's 9:30 currently)
-     Endet am: 10:00
-     Ort: testort
-     Anmerkung: testanmerkung
-     Don't set a reminder
-
-     2. LMB-click to select the appointment "please don't remind me"
-     3. LMB-click on Panel --> Kalender --> Verschieben
-     4. In the popup-window select your calendar "subFol" to move it to your other
-     calendar
-
-
-     Result:
-     After some time you see a reminder popup for the appointment "please don't
-     remind me"
+    /*
+     * 
+     * Steps:
+     * 1. In your private calendar "Kalendar" create a new appointment:
+     * Beschreibung: please don't remind me
+     * Beginnt am: 9:00 (assuming it's 9:30 currently)
+     * Endet am: 10:00
+     * Ort: testort
+     * Anmerkung: testanmerkung
+     * Don't set a reminder
+     * 
+     * 2. LMB-click to select the appointment "please don't remind me"
+     * 3. LMB-click on Panel --> Kalender --> Verschieben
+     * 4. In the popup-window select your calendar "subFol" to move it to your other
+     * calendar
+     * 
+     * 
+     * Result:
+     * After some time you see a reminder popup for the appointment "please don't
+     * remind me"
      */
-     public void testBug6214() throws Throwable {
+    @Test
+    public void testBug6214() throws Throwable {
         final Context context = new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
-
 
         final Connection readcon = DBPool.pickup(context);
         final Connection writecon = DBPool.pickupWriteable(context);
@@ -1661,8 +1662,7 @@ public class AppointmentBugTests extends CalendarTest {
         oclp1.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         oclp1.setFolderAdmin(true);
 
-
-        fo.setFolderName("testBug6214 "+System.currentTimeMillis());
+        fo.setFolderName("testBug6214 " + System.currentTimeMillis());
         fo.setParentFolderID(fid);
         fo.setModule(FolderObject.CALENDAR);
         fo.setType(FolderObject.PRIVATE);
@@ -1675,14 +1675,12 @@ public class AppointmentBugTests extends CalendarTest {
 
             final CalendarSql csql = new CalendarSql(so);
 
-
             final CalendarDataObject cdao = new CalendarDataObject();
             cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
             cdao.setParentFolderID(fid);
             CalendarTest.fillDatesInDao(cdao);
             cdao.setTitle("testBug6214 - Step 1");
             cdao.setIgnoreConflicts(true);
-
 
             csql.insertAppointmentObject(cdao);
             final int object_id = cdao.getObjectID();
@@ -1714,7 +1712,7 @@ public class AppointmentBugTests extends CalendarTest {
                 if (subfolder_id > 0) {
                     oxma.deleteFolder(new FolderObject(subfolder_id), true, System.currentTimeMillis());
                 }
-            } catch(final Exception e) {
+            } catch (final Exception e) {
                 e.printStackTrace();
                 fail("Error deleting folder object.");
             }
@@ -1722,13 +1720,13 @@ public class AppointmentBugTests extends CalendarTest {
         try {
             DBPool.push(context, readcon);
             DBPool.pushWrite(context, writecon);
-        } catch(final Exception ignore) {
+        } catch (final Exception ignore) {
             ignore.printStackTrace();
         }
-     }
+    }
 
-
-     public void testBug6535() throws Throwable {
+    @Test
+    public void testBug6535() throws Throwable {
         final Context context = new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
         final int fid = CalendarTest.getCalendarDefaultFolderForUser(userid, context);
@@ -1781,17 +1779,17 @@ public class AppointmentBugTests extends CalendarTest {
         assertTrue("Check for null object", up3 != null);
         assertEquals("Check confirm status", CalendarObject.ACCEPT, up3[0].getConfirm());
 
+    }
 
-     }
-
-     /*
+    /*
      * Create a recurrence appointment
      * Create an exception
      * Delete this exception
      * The "recurrence_id" xmltag is missing, so there is no way for the OXtender to
-       reference the deleted item.
+     * reference the deleted item.
      */
-     public void testBug6960() throws Throwable {
+    @Test
+    public void testBug6960() throws Throwable {
         final Context context = new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
         final int folder_id = CalendarTest.getCalendarDefaultFolderForUser(userid, context);
@@ -1818,11 +1816,10 @@ public class AppointmentBugTests extends CalendarTest {
         update.setObjectID(object_id);
         update.setIgnoreConflicts(true);
 
-
         final RecurringResultsInterface rss = new CalendarCollection().calculateRecurring(cdao, 0, 0, 3);
         final RecurringResultInterface rs = rss.getRecurringResult(0);
-        final long new_start = rs.getStart()+3600000;
-        final long new_end = rs.getEnd()+3600000;
+        final long new_start = rs.getStart() + 3600000;
+        final long new_end = rs.getEnd() + 3600000;
 
         final Date test_new_start_date = new Date(new_start);
         final Date test_new_end_date = new Date(new_end);
@@ -1836,7 +1833,6 @@ public class AppointmentBugTests extends CalendarTest {
 
         update.setRecurrenceDatePosition(test_exception_date);
 
-
         csql.updateAppointmentObject(update, folder_id, new Date());
 
         final CalendarDataObject testdelete = new CalendarDataObject();
@@ -1847,23 +1843,19 @@ public class AppointmentBugTests extends CalendarTest {
         assertTrue("Check that we got the recurrence id back", testdelete.containsRecurrenceID());
         assertEquals("Check that we got the correct recurrence id", object_id, testdelete.getRecurrenceID());
 
-
-
-
-     }
-
-
+    }
 
     /*
-    1) User A creates a group appointment with User B & User C and a reminder 15 min
-    2) User B click on the calendar (outlook) and receives the appointment and a
-    reminder
-    3) User B clicks on the reminder (close)
-
-
-    This bug also test bug #8196
-
-    */
+     * 1) User A creates a group appointment with User B & User C and a reminder 15 min
+     * 2) User B click on the calendar (outlook) and receives the appointment and a
+     * reminder
+     * 3) User B clicks on the reminder (close)
+     * 
+     * 
+     * This bug also test bug #8196
+     * 
+     */
+    @Test
     public void testBug7883() throws Throwable {
         final String user2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");
         final int userid2 = resolveUser(user2);
@@ -1903,7 +1895,7 @@ public class AppointmentBugTests extends CalendarTest {
         SearchIterator si = csql.getModifiedAppointmentsInFolder(fid, cols, decrementDate(cdao.getLastModified()));
         boolean found = false;
         while (si.hasNext()) {
-            final CalendarDataObject tdao = (CalendarDataObject)si.next();
+            final CalendarDataObject tdao = (CalendarDataObject) si.next();
             if (tdao.getTitle().equals("testBug7883")) {
                 found = true;
                 assertTrue("Check that userA has an alarm set in the cdao", tdao.containsAlarm());
@@ -1915,7 +1907,7 @@ public class AppointmentBugTests extends CalendarTest {
         SearchIterator si2 = csql2.getModifiedAppointmentsInFolder(fid2, cols, decrementDate(cdao.getLastModified()));
         found = false;
         while (si2.hasNext()) {
-            final CalendarDataObject tdao = (CalendarDataObject)si2.next();
+            final CalendarDataObject tdao = (CalendarDataObject) si2.next();
             if (tdao.getTitle().equals("testBug7883")) {
                 found = true;
                 assertTrue("Check that userB has no alarm set in the cdao", !tdao.containsAlarm());
@@ -1944,7 +1936,7 @@ public class AppointmentBugTests extends CalendarTest {
         si = csql.getModifiedAppointmentsInFolder(fid, cols, decrementDate(cdao.getLastModified()));
         found = false;
         while (si.hasNext()) {
-            final CalendarDataObject tdao = (CalendarDataObject)si.next();
+            final CalendarDataObject tdao = (CalendarDataObject) si.next();
             if (tdao.getTitle().equals("testBug7883-update")) {
                 found = true;
                 assertTrue("Check that userA has no alarm set in the cdao", !tdao.containsAlarm());
@@ -1956,7 +1948,7 @@ public class AppointmentBugTests extends CalendarTest {
         si2 = csql2.getModifiedAppointmentsInFolder(fid2, cols, decrementDate(cdao.getLastModified()));
         found = false;
         while (si2.hasNext()) {
-            final CalendarDataObject tdao = (CalendarDataObject)si2.next();
+            final CalendarDataObject tdao = (CalendarDataObject) si2.next();
             if (tdao.getTitle().equals("testBug7883-update")) {
                 found = true;
                 assertTrue("Check that userB has no alarm set in the cdao", !tdao.containsAlarm());
@@ -1964,17 +1956,17 @@ public class AppointmentBugTests extends CalendarTest {
         }
         assertTrue("Found our object (userB)", found);
 
-
     }
 
     /*
-     1) Create an appointment from 2-4pm
-     2) Add a resource and save
-     3) Create an appointment from 1-2pm and save
-     4) Edit the appointment and add resource
-
-     --> Conflict is reported although the appointments do not overlap.
+     * 1) Create an appointment from 2-4pm
+     * 2) Add a resource and save
+     * 3) Create an appointment from 1-2pm and save
+     * 4) Edit the appointment and add resource
+     * 
+     * --> Conflict is reported although the appointments do not overlap.
      */
+    @Test
     public void testBug7646() throws Throwable {
 
         deleteAllAppointments();
@@ -1998,8 +1990,8 @@ public class AppointmentBugTests extends CalendarTest {
         cdao.setTitle("testBug7646 - #1");
         cdao.setParentFolderID(fid);
         CalendarTest.fillDatesInDao(cdao);
-        cdao.setStartDate(new Date(cdao.getStartDate().getTime()+ 3600000));
-        cdao.setEndDate(new Date(cdao.getEndDate().getTime()+ 7200000));
+        cdao.setStartDate(new Date(cdao.getStartDate().getTime() + 3600000));
+        cdao.setEndDate(new Date(cdao.getEndDate().getTime() + 7200000));
         final Participants p = new Participants();
         final Participant resource = new ResourceParticipant(100);
         p.add(resource);
@@ -2039,7 +2031,6 @@ public class AppointmentBugTests extends CalendarTest {
         testobject.setIgnoreConflicts(false);
         conflicts = csql.updateAppointmentObject(testobject, fid, cdao_conflict_test.getLastModified());
 
-
         found_object_1 = false;
         if (conflicts != null) {
             for (int a = 0; a < conflicts.length; a++) {
@@ -2055,20 +2046,21 @@ public class AppointmentBugTests extends CalendarTest {
     }
 
     /*
-     Steps to reproduce (informal):
-     1. Create a recurring yearly appointment "on third tuesday in april"
-     2. Verify the appointment series
-
-     Expected results:
-     - Step 2: The appointment occurs every year on the third tuesday in april
-
-     Result was:
-     The appointment occurs:
-     - 2008-04-15 (correct)
-     - 2009-04-14 (wrong, should be 2009-04-21)
-     - 2010-04-13 (wrong, should be 2010-04-20)
-     - ...
+     * Steps to reproduce (informal):
+     * 1. Create a recurring yearly appointment "on third tuesday in april"
+     * 2. Verify the appointment series
+     * 
+     * Expected results:
+     * - Step 2: The appointment occurs every year on the third tuesday in april
+     * 
+     * Result was:
+     * The appointment occurs:
+     * - 2008-04-15 (correct)
+     * - 2009-04-14 (wrong, should be 2009-04-21)
+     * - 2010-04-13 (wrong, should be 2010-04-20)
+     * - ...
      */
+    @Test
     public void testBug7064() throws Throwable {
         final Context context = new ContextImpl(contextid);
         SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
@@ -2103,28 +2095,28 @@ public class AppointmentBugTests extends CalendarTest {
         assertEquals("Check result size", testmatrix.length, rrs.size());
         for (int a = 0; a < rrs.size(); a++) {
             final RecurringResultInterface rs = rrs.getRecurringResult(a);
-            assertEquals("Check start time ("+a+")", new Date(testmatrix[a]), new Date(rs.getStart()));
+            assertEquals("Check start time (" + a + ")", new Date(testmatrix[a]), new Date(rs.getStart()));
         }
     }
 
-
     /*
-    Create the following appointment in your private calendar.
-    From 20.08.2007 Till 31.08.2007
-    Wholeday
-
-
-
-    Steps to Reproduce:
-    1. Login
-    2. On start page move to August on mini calendar
-    3. Verify that the days 20,21,22...31 are marked bold (correct)
-    4. Go to 'September' on minicalendar
-    5. Verify bold days
-
-    Actual Results:
-    The 1,23,4,5,6,7 are also marked bold.!! But there are no appointments
+     * Create the following appointment in your private calendar.
+     * From 20.08.2007 Till 31.08.2007
+     * Wholeday
+     * 
+     * 
+     * 
+     * Steps to Reproduce:
+     * 1. Login
+     * 2. On start page move to August on mini calendar
+     * 3. Verify that the days 20,21,22...31 are marked bold (correct)
+     * 4. Go to 'September' on minicalendar
+     * 5. Verify bold days
+     * 
+     * Actual Results:
+     * The 1,23,4,5,6,7 are also marked bold.!! But there are no appointments
      */
+    @Test
     public void testBug8290() throws Throwable {
         deleteAllAppointments();
 
@@ -2167,37 +2159,37 @@ public class AppointmentBugTests extends CalendarTest {
         csql.insertAppointmentObject(cdao);
 
         testarray = csql.hasAppointmentsBetween(teststartdate, testenddate);
-        final boolean checkarray[] = { true, true, true, true, false, false, false, false, false, false } ;
+        final boolean checkarray[] = { true, true, true, true, false, false, false, false, false, false };
 
         for (int a = 0; a < checkarray.length; a++) {
-            assertEquals("Check array position "+a+" failed!", checkarray[a], testarray[a]);
+            assertEquals("Check array position " + a + " failed!", checkarray[a], testarray[a]);
         }
 
     }
 
-
     /*
-     Steps to reproduce:
-     1. Go to the Calendar module
-     2. Click 'View' -> 'Calendar' in the panel
-     3. Click 'Time range' -> 'Month' in the panel
-     4. Navigate to the month 06-2007
-     5. Double LMB on the calendar cell for 2007-06-01
-     6. Enter a "3x mondays" as subject for the new appointment
-     7. LMB the 'Series' button
-     8. Click the 'Weekly' radio button
-     9. Check the checkbox next to 'Monday'
-     10. Click the 'after _ appointments' radio buttons and change the value to "3"
-     11. Save the appointment
-     12. Verify the appoinmtent in the calendar
-
-     Expected Results:
-     - Step 12: The appointment occurs on 2007-06-04, 2007-06-11 and 2007-06-18
-
-     Result was:
-     - Step 12: The appointment occurs on 2007-06-04 and 2007-06-11 (the last
-     occurence is missing)
-    */
+     * Steps to reproduce:
+     * 1. Go to the Calendar module
+     * 2. Click 'View' -> 'Calendar' in the panel
+     * 3. Click 'Time range' -> 'Month' in the panel
+     * 4. Navigate to the month 06-2007
+     * 5. Double LMB on the calendar cell for 2007-06-01
+     * 6. Enter a "3x mondays" as subject for the new appointment
+     * 7. LMB the 'Series' button
+     * 8. Click the 'Weekly' radio button
+     * 9. Check the checkbox next to 'Monday'
+     * 10. Click the 'after _ appointments' radio buttons and change the value to "3"
+     * 11. Save the appointment
+     * 12. Verify the appoinmtent in the calendar
+     * 
+     * Expected Results:
+     * - Step 12: The appointment occurs on 2007-06-04, 2007-06-11 and 2007-06-18
+     * 
+     * Result was:
+     * - Step 12: The appointment occurs on 2007-06-04 and 2007-06-11 (the last
+     * occurence is missing)
+     */
+    @Test
     public void testBug7134() throws Throwable {
         deleteAllAppointments();
 
@@ -2227,18 +2219,18 @@ public class AppointmentBugTests extends CalendarTest {
         final RecurringResultsInterface rrs = new CalendarCollection().calculateRecurring(cdao, 0, 0, 0);
         assertEquals("Check that we got 3 results", 3, rrs.size());
 
-
     }
 
     /*
-     Steps to Reproduce:
-     1. Login
-     2. Select 'Calendar' from OX-Module
-     3. From panel press 'New'
-     4. Create a whole-day appointment for current day
-     5. Press 'New' from panel again to create a second appointment
-     6. Select '00:30' for start and '01:00' for end time and save for current day
+     * Steps to Reproduce:
+     * 1. Login
+     * 2. Select 'Calendar' from OX-Module
+     * 3. From panel press 'New'
+     * 4. Create a whole-day appointment for current day
+     * 5. Press 'New' from panel again to create a second appointment
+     * 6. Select '00:30' for start and '01:00' for end time and save for current day
      */
+    @Test
     public void testBug8317() throws Throwable {
         deleteAllAppointments();
 
@@ -2301,28 +2293,29 @@ public class AppointmentBugTests extends CalendarTest {
     }
 
     /*
-     1. Create a new calendar subfolder and share it to user B with the following
-     access rights:
-       Admin: No
-       Folder rights: see
-       Read rights: all
-       Modify rights: none
-       Delete rights: none
-     2. Create a new appointment in the just created subfolder
-       Description: Test
-       Start: 2007-07-18 13:00
-       End: 2007-07-18 14:00
-       Participants: User A, User B
-
-     As User B:
-
-     3. Open the calendar subfolder shared by user A
-     4. Edit the appointment created by user A in this calendar
-     5. Change the start and end date to 2007-07-19 and save
-     6. Verify the calendar subfolder shared by user A
-
-     Expected result: OXException
-    */
+     * 1. Create a new calendar subfolder and share it to user B with the following
+     * access rights:
+     * Admin: No
+     * Folder rights: see
+     * Read rights: all
+     * Modify rights: none
+     * Delete rights: none
+     * 2. Create a new appointment in the just created subfolder
+     * Description: Test
+     * Start: 2007-07-18 13:00
+     * End: 2007-07-18 14:00
+     * Participants: User A, User B
+     * 
+     * As User B:
+     * 
+     * 3. Open the calendar subfolder shared by user A
+     * 4. Edit the appointment created by user A in this calendar
+     * 5. Change the start and end date to 2007-07-19 and save
+     * 6. Verify the calendar subfolder shared by user A
+     * 
+     * Expected result: OXException
+     */
+    @Test
     public void testBug8490() throws Throwable {
         final Context context = new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
@@ -2341,7 +2334,6 @@ public class AppointmentBugTests extends CalendarTest {
         final CalendarSql csql = new CalendarSql(so);
         final CalendarSql csql2 = new CalendarSql(so2);
 
-
         final OCLPermission oclp1 = new OCLPermission();
         oclp1.setEntity(userid);
         oclp1.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -2349,7 +2341,7 @@ public class AppointmentBugTests extends CalendarTest {
         final OCLPermission oclp2 = new OCLPermission();
         oclp2.setEntity(uid2);
         oclp2.setAllPermission(OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
-        fo.setFolderName("testSharedFolder8490 - "+System.currentTimeMillis());
+        fo.setFolderName("testSharedFolder8490 - " + System.currentTimeMillis());
         fo.setParentFolderID(fid);
         fo.setModule(FolderObject.CALENDAR);
         fo.setType(FolderObject.PRIVATE);
@@ -2385,29 +2377,27 @@ public class AppointmentBugTests extends CalendarTest {
 
             try {
                 csql2.updateAppointmentObject(update, shared_folder_id, new Date());
-            } catch(final OXException oxpe) {
+            } catch (final OXException oxpe) {
             }
 
             boolean found = false;
             final SearchIterator si = csql2.getModifiedAppointmentsInFolder(shared_folder_id, CalendarTest.cols, new Date(0));
             while (si.hasNext()) {
-                final CalendarDataObject tdao = (CalendarDataObject)si.next();
+                final CalendarDataObject tdao = (CalendarDataObject) si.next();
                 if (tdao.getObjectID() == object_id) {
                     found = true;
                     assertEquals("Check for correct folder id in response object", shared_folder_id, tdao.getParentFolderID());
                 }
             }
 
-
             assertTrue("Found object", found);
-
 
         } finally {
             try {
                 if (shared_folder_id > 0) {
                     oxma.deleteFolder(new FolderObject(shared_folder_id), true, System.currentTimeMillis());
                 }
-            } catch(final Exception e) {
+            } catch (final Exception e) {
                 e.printStackTrace();
                 fail("Error deleting folder object.");
             }
@@ -2415,27 +2405,27 @@ public class AppointmentBugTests extends CalendarTest {
         try {
             DBPool.push(context, readcon);
             DBPool.pushWrite(context, writecon);
-        } catch(final Exception ignore) {
+        } catch (final Exception ignore) {
             ignore.printStackTrace();
         }
 
     }
 
-
     /*
-     Steps to Reproduce:
-     1. Login to groupware
-     2. Navigate to your calendar
-     3. Create a new private appointment via LMB-click on "Panel -> New", check the
-     private checkbox, and save
-     4. Edit the appointment via Double-LMB-click and change the folder-path to the
-     shared calendar-folder
-     5. Save the appointment
-
-     Expected results:
-     Step 4: The folder cannot be chosen in the "Select Folder" dialogue, as long
-       as the appointment is a private one
-    */
+     * Steps to Reproduce:
+     * 1. Login to groupware
+     * 2. Navigate to your calendar
+     * 3. Create a new private appointment via LMB-click on "Panel -> New", check the
+     * private checkbox, and save
+     * 4. Edit the appointment via Double-LMB-click and change the folder-path to the
+     * shared calendar-folder
+     * 5. Save the appointment
+     * 
+     * Expected results:
+     * Step 4: The folder cannot be chosen in the "Select Folder" dialogue, as long
+     * as the appointment is a private one
+     */
+    @Test
     public void testBug8482() throws Throwable {
         final Context context = new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
@@ -2456,7 +2446,6 @@ public class AppointmentBugTests extends CalendarTest {
         final CalendarSql csql = new CalendarSql(so);
         new CalendarSql(so2);
 
-
         final OCLPermission oclp1 = new OCLPermission();
         oclp1.setEntity(uid2);
         oclp1.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -2465,7 +2454,7 @@ public class AppointmentBugTests extends CalendarTest {
 
         oclp2.setEntity(userid);
         oclp2.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
-        fo.setFolderName("testSharedFolder8482 - "+System.currentTimeMillis());
+        fo.setFolderName("testSharedFolder8482 - " + System.currentTimeMillis());
         fo.setParentFolderID(fid2);
         fo.setModule(FolderObject.CALENDAR);
         fo.setType(FolderObject.PRIVATE);
@@ -2496,9 +2485,9 @@ public class AppointmentBugTests extends CalendarTest {
             try {
                 csql.updateAppointmentObject(move, fid, new Date());
                 fail("Move not allowed");
-            } catch(final OXException oxce) {
-            } catch(final Exception e) {
-                fail("Noooo "+e.getMessage());
+            } catch (final OXException oxce) {
+            } catch (final Exception e) {
+                fail("Noooo " + e.getMessage());
             }
 
         } finally {
@@ -2506,7 +2495,7 @@ public class AppointmentBugTests extends CalendarTest {
                 if (shared_folder_id > 0) {
                     oxma.deleteFolder(new FolderObject(shared_folder_id), true, System.currentTimeMillis());
                 }
-            } catch(final Exception e) {
+            } catch (final Exception e) {
                 e.printStackTrace();
                 fail("Error deleting folder object.");
             }
@@ -2514,34 +2503,35 @@ public class AppointmentBugTests extends CalendarTest {
         try {
             DBPool.push(context, readcon);
             DBPool.pushWrite(context, writecon);
-        } catch(final Exception ignore) {
+        } catch (final Exception ignore) {
             ignore.printStackTrace();
         }
 
     }
 
     /*
-    Steps to Reproduce:
-    1. Login to Outlook (OXtender started green icon in taskbar)
-    2. Go to private calendar and set view to 'Week'
-    3. Select a day (e.g Friday) and create a new series appointment like:
-    Weekly on Friday and Saturday series ands after 10 appointments NOT whole day
-    only from 8:00 - 9:00
-    4. Set reminder to 'none' (DO NOT SET ANY REMINDER)
-    5. Save
-    6. DLMB on any appointment of the series (e.g on Saturday (the second
-    appointment)
-    7. Select WHOLE SERIES to edit
-    8. Set reminder to 1hour for the WHOLE Series and save
-    9. DLMB on any appointment of the series
-    10. Select ONLY this appointment (not the whole series)
-    11. Verify that 1hour is set and set the reminder to 30minutes do not change
-    anything else only the reminder from 1hour to 30minutes
-    12. DLMB again on any appointment of the series (NOT the exception)
-    13. Verify reminder
-    14. Select (DLMB) the exception where the 30minutes reminder is set and verify
-    reminder
-    */
+     * Steps to Reproduce:
+     * 1. Login to Outlook (OXtender started green icon in taskbar)
+     * 2. Go to private calendar and set view to 'Week'
+     * 3. Select a day (e.g Friday) and create a new series appointment like:
+     * Weekly on Friday and Saturday series ands after 10 appointments NOT whole day
+     * only from 8:00 - 9:00
+     * 4. Set reminder to 'none' (DO NOT SET ANY REMINDER)
+     * 5. Save
+     * 6. DLMB on any appointment of the series (e.g on Saturday (the second
+     * appointment)
+     * 7. Select WHOLE SERIES to edit
+     * 8. Set reminder to 1hour for the WHOLE Series and save
+     * 9. DLMB on any appointment of the series
+     * 10. Select ONLY this appointment (not the whole series)
+     * 11. Verify that 1hour is set and set the reminder to 30minutes do not change
+     * anything else only the reminder from 1hour to 30minutes
+     * 12. DLMB again on any appointment of the series (NOT the exception)
+     * 13. Verify reminder
+     * 14. Select (DLMB) the exception where the 30minutes reminder is set and verify
+     * reminder
+     */
+    @Test
     public void testBug8510() throws Throwable {
         final Context context = new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
@@ -2584,10 +2574,10 @@ public class AppointmentBugTests extends CalendarTest {
         int check_exc_reminder = -1;
 
         while (si.hasNext()) {
-            final CalendarDataObject tcdao = (CalendarDataObject)si.next();
+            final CalendarDataObject tcdao = (CalendarDataObject) si.next();
             if (tcdao.getObjectID() == object_id) {
                 check_rec_reminder = tcdao.getAlarm();
-            } else if (tcdao.getObjectID() == object_id2){
+            } else if (tcdao.getObjectID() == object_id2) {
                 check_exc_reminder = tcdao.getAlarm();
             }
         }
@@ -2598,40 +2588,41 @@ public class AppointmentBugTests extends CalendarTest {
     }
 
     /*
-    Steps to Reproduce:
-    As User A:
-
-    1.  Select your Calendar in the treeview
-    2.  RMB -> 'New subfolder' and enter "My public write folder" as 'Name'
-    3.  Select "calendar" from the 'Type' dropdown list
-    4.  Click the 'Rights' tab and select 'Users' -> 'Add'
-    5.  Search for "*" and add the group "sales" to the temporary user list
-    6.  Click 'OK' to add the selected users to the permission table
-    7.  On the permission table, select "sales" and grant the following rights:
-
-    Administrator: No
-    Ordnerrechte: Objekte anlegen
-    Leserechte: Alle
-    Schreibrechte: Alle
-    L\u00f6schrechte: Alle
-
-    8.  Click 'Save' on the panel to store the folder permissions
-    9.  Log out and log in as User B (member of "sales")
-    10.  Go to the calendar of User B in treeview and select a previously added
-    appointment
-    11.  Click 'Appointment' -> 'Move' on the panel and select the public folder
-    created by User A as destination
-    12.  Verify that the appointment is removed from the personal calendar
-    13.  Select 'My public write folder' and verify the appointments in it
-    14.  Drag & Drop an appointment from your calendar to the shared folder 'My
-    public write folder'
-
-    Actual Results:
-    12. The appointment isn't moved no error is shown
-    13. The app. wasn't moved to the folder
-    14. Fehlermeldung: com.openexchange.tools.iterator.SearchIterator$1
-    (FLD-9999,-215490580-513) is shown, the appointment isn't moved
-    */
+     * Steps to Reproduce:
+     * As User A:
+     * 
+     * 1. Select your Calendar in the treeview
+     * 2. RMB -> 'New subfolder' and enter "My public write folder" as 'Name'
+     * 3. Select "calendar" from the 'Type' dropdown list
+     * 4. Click the 'Rights' tab and select 'Users' -> 'Add'
+     * 5. Search for "*" and add the group "sales" to the temporary user list
+     * 6. Click 'OK' to add the selected users to the permission table
+     * 7. On the permission table, select "sales" and grant the following rights:
+     * 
+     * Administrator: No
+     * Ordnerrechte: Objekte anlegen
+     * Leserechte: Alle
+     * Schreibrechte: Alle
+     * L\u00f6schrechte: Alle
+     * 
+     * 8. Click 'Save' on the panel to store the folder permissions
+     * 9. Log out and log in as User B (member of "sales")
+     * 10. Go to the calendar of User B in treeview and select a previously added
+     * appointment
+     * 11. Click 'Appointment' -> 'Move' on the panel and select the public folder
+     * created by User A as destination
+     * 12. Verify that the appointment is removed from the personal calendar
+     * 13. Select 'My public write folder' and verify the appointments in it
+     * 14. Drag & Drop an appointment from your calendar to the shared folder 'My
+     * public write folder'
+     * 
+     * Actual Results:
+     * 12. The appointment isn't moved no error is shown
+     * 13. The app. wasn't moved to the folder
+     * 14. Fehlermeldung: com.openexchange.tools.iterator.SearchIterator$1
+     * (FLD-9999,-215490580-513) is shown, the appointment isn't moved
+     */
+    @Test
     public void testBug8495() throws Throwable {
         final Context context = new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
@@ -2652,7 +2643,6 @@ public class AppointmentBugTests extends CalendarTest {
         final CalendarSql csql = new CalendarSql(so);
         final CalendarSql csql2 = new CalendarSql(so2);
 
-
         final OCLPermission oclp1 = new OCLPermission();
         oclp1.setEntity(userid);
         oclp1.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -2663,7 +2653,7 @@ public class AppointmentBugTests extends CalendarTest {
         oclp2.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         oclp2.setFolderAdmin(false);
 
-        fo.setFolderName("testSharedFolder8495 - "+System.currentTimeMillis());
+        fo.setFolderName("testSharedFolder8495 - " + System.currentTimeMillis());
         fo.setParentFolderID(fid);
         fo.setModule(FolderObject.CALENDAR);
         fo.setType(FolderObject.PRIVATE);
@@ -2702,7 +2692,7 @@ public class AppointmentBugTests extends CalendarTest {
                 if (shared_folder_id > 0) {
                     oxma.deleteFolder(new FolderObject(shared_folder_id), true, System.currentTimeMillis());
                 }
-            } catch(final Exception e) {
+            } catch (final Exception e) {
                 e.printStackTrace();
                 fail("Error deleting folder object.");
             }
@@ -2710,19 +2700,20 @@ public class AppointmentBugTests extends CalendarTest {
         try {
             DBPool.push(context, readcon);
             DBPool.pushWrite(context, writecon);
-        } catch(final Exception ignore) {
+        } catch (final Exception ignore) {
             ignore.printStackTrace();
         }
 
     }
 
     /*
-    0. Assume the current time is 09:00
-    1. Create a new appointment on 22:00, set a 15 Minute reminder and save
-    2. Move the appointment to 09:30
-    3. Wait till the reminder occurs
-    -> The reminder does not pop up on 09:30
-    */
+     * 0. Assume the current time is 09:00
+     * 1. Create a new appointment on 22:00, set a 15 Minute reminder and save
+     * 2. Move the appointment to 09:30
+     * 3. Wait till the reminder occurs
+     * -> The reminder does not pop up on 09:30
+     */
+    @Test
     public void testBug7734() throws Throwable {
         final Context context = new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
@@ -2737,11 +2728,11 @@ public class AppointmentBugTests extends CalendarTest {
         cdao.setTitle("testBug7734");
 
         final int alarm = 60;
-        final long long_alarm = alarm*60*1000L;
+        final long long_alarm = alarm * 60 * 1000L;
 
-        final long start_long = cdao.getStartDate().getTime()+new CalendarCollection().MILLI_DAY;
+        final long start_long = cdao.getStartDate().getTime() + new CalendarCollection().MILLI_DAY;
         final Date start_date = new Date(start_long);
-        final long end_long = cdao.getEndDate().getTime()+new CalendarCollection().MILLI_DAY;
+        final long end_long = cdao.getEndDate().getTime() + new CalendarCollection().MILLI_DAY;
         final Date end_date = new Date(end_long);
         cdao.setStartDate(start_date);
         cdao.setEndDate(end_date);
@@ -2754,8 +2745,8 @@ public class AppointmentBugTests extends CalendarTest {
         final int object_id = cdao.getObjectID();
         assertTrue("Got object_id", object_id > 0);
 
-        final ReminderHandler rh = new ReminderHandler(getContext());
-        ReminderObject ro = rh.loadReminder(object_id, userid, Types.APPOINTMENT);
+        final ReminderHandler rh = ReminderHandler.getInstance();
+        ReminderObject ro = rh.loadReminder(object_id, userid, Types.APPOINTMENT, getContext());
         final Date check_date = ro.getDate();
         assertEquals("Check correct Alarm", check_alarm, check_date);
 
@@ -2766,7 +2757,7 @@ public class AppointmentBugTests extends CalendarTest {
         final long start_long_update = start_long - 3600000L;
         final Date update_start = new Date(start_long_update);
         final Date update_end = new Date(end_long - 3600000L);
-        final Date check_alarm_update =  new Date(start_long_update - 3600000L);
+        final Date check_alarm_update = new Date(start_long_update - 3600000L);
 
         update.setStartDate(update_start);
         update.setEndDate(update_end);
@@ -2774,7 +2765,7 @@ public class AppointmentBugTests extends CalendarTest {
 
         csql.updateAppointmentObject(update, fid, new Date());
 
-        ro = rh.loadReminder(object_id, userid, Types.APPOINTMENT);
+        ro = rh.loadReminder(object_id, userid, Types.APPOINTMENT, getContext());
         final Date check_date_update = ro.getDate();
 
         assertEquals("Check correct Alarm", check_alarm_update, check_date_update);
@@ -2782,19 +2773,20 @@ public class AppointmentBugTests extends CalendarTest {
     }
 
     /*
-    Steps to Reproduce:
-    1. Create a simple appointment in a public folder
-    2. Save the appointment
-    3. Open the appointment for editing
-    4. Activate the checkbox 'private' and save the appointment
-
-    Actual Results:
-    The appointment is saved and marked as private after editing it.
-
-    Expected Results:
-    It shouldn't be possible to save the appointment in the public folder with the
-    private flag set when creating or editing it.
-    */
+     * Steps to Reproduce:
+     * 1. Create a simple appointment in a public folder
+     * 2. Save the appointment
+     * 3. Open the appointment for editing
+     * 4. Activate the checkbox 'private' and save the appointment
+     * 
+     * Actual Results:
+     * The appointment is saved and marked as private after editing it.
+     * 
+     * Expected Results:
+     * It shouldn't be possible to save the appointment in the public folder with the
+     * private flag set when creating or editing it.
+     */
+    @Test
     public void testBug9089() throws Throwable {
         final Context context = new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
@@ -2809,7 +2801,7 @@ public class AppointmentBugTests extends CalendarTest {
         oclp1.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         oclp1.setFolderAdmin(true);
         new OCLPermission();
-        fo.setFolderName("testPublicFolder9089 - "+System.currentTimeMillis());
+        fo.setFolderName("testPublicFolder9089 - " + System.currentTimeMillis());
         fo.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
         fo.setModule(FolderObject.CALENDAR);
         fo.setType(FolderObject.PUBLIC);
@@ -2839,7 +2831,7 @@ public class AppointmentBugTests extends CalendarTest {
             try {
                 csql.updateAppointmentObject(update, public_folder_id, new Date());
                 fail("Set the private flag is not allowed in a public folder");
-            } catch(final OXException oxca) {
+            } catch (final OXException oxca) {
                 // this is what we want
                 assertTrue("Check correct error number ", oxca.similarTo(OXCalendarExceptionCodes.PIVATE_FLAG_ONLY_IN_PRIVATE_FOLDER));
             }
@@ -2850,7 +2842,7 @@ public class AppointmentBugTests extends CalendarTest {
                 } else {
                     fail("Public folder was not created");
                 }
-            } catch(final Exception e) {
+            } catch (final Exception e) {
                 e.printStackTrace();
                 fail("Error deleting folder object.");
             }
@@ -2858,26 +2850,27 @@ public class AppointmentBugTests extends CalendarTest {
         try {
             DBPool.push(context, readcon);
             DBPool.pushWrite(context, writecon);
-        } catch(final Exception ignore) {
+        } catch (final Exception ignore) {
             ignore.printStackTrace();
         }
     }
 
     /*
-    1. Login to OX
-    2. Create a new appointment and add at least 5 participants
-    3. Now let the participants accept or deny this appointment and they must add a
-    confirmation comment!
-    4. Verify that appointment and the confirmation comments in calendar detail
-    view of the appointment
-    5. Press 'Edit' from panel
-    6. Add 2 more (or at least one) new participant to this appointment
-    7. Press 'Save' and verify the 'Detail' -> 'Participant' tab
-
-    Expected Results:
-    After you have added new participants the confirmations comments are still
-    visible and not lost.
-    */
+     * 1. Login to OX
+     * 2. Create a new appointment and add at least 5 participants
+     * 3. Now let the participants accept or deny this appointment and they must add a
+     * confirmation comment!
+     * 4. Verify that appointment and the confirmation comments in calendar detail
+     * view of the appointment
+     * 5. Press 'Edit' from panel
+     * 6. Add 2 more (or at least one) new participant to this appointment
+     * 7. Press 'Save' and verify the 'Detail' -> 'Participant' tab
+     * 
+     * Expected Results:
+     * After you have added new participants the confirmations comments are still
+     * visible and not lost.
+     */
+    @Test
     public void testBug9599() throws Throwable {
         new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
@@ -2895,7 +2888,6 @@ public class AppointmentBugTests extends CalendarTest {
         final int userid2 = resolveUser(user2);
         final Participant p2 = new UserParticipant(userid2);
         participants.add(p2);
-
 
         final SessionObject so2 = SessionObjectWrapper.createSessionObject(userid2, getContext().getContextId(), "myTestSearch");
 
@@ -2934,26 +2926,27 @@ public class AppointmentBugTests extends CalendarTest {
 
         for (int a = 0; a < up.length; a++) {
             if (up[a].getIdentifier() == userid) {
-                assertEquals("Check confirm state for user "+up[a].getIdentifier(), Appointment.ACCEPT, up[a].getConfirm());
-                assertEquals("Check confirm message for user "+up[a].getIdentifier(), confirm_message, up[a].getConfirmMessage());
+                assertEquals("Check confirm state for user " + up[a].getIdentifier(), Appointment.ACCEPT, up[a].getConfirm());
+                assertEquals("Check confirm message for user " + up[a].getIdentifier(), confirm_message, up[a].getConfirmMessage());
             } else if (up[a].getIdentifier() == userid2) {
-                assertEquals("Check confirm state for user "+up[a].getIdentifier(), Appointment.ACCEPT, up[a].getConfirm());
-                assertEquals("Check confirm message for user "+up[a].getIdentifier(), confirm_message, up[a].getConfirmMessage());
+                assertEquals("Check confirm state for user " + up[a].getIdentifier(), Appointment.ACCEPT, up[a].getConfirm());
+                assertEquals("Check confirm message for user " + up[a].getIdentifier(), confirm_message, up[a].getConfirmMessage());
             }
         }
     }
 
     /*
-    Similar to bug #10061
-    Steps to Reproduce:
-    1. As User A, having the required access rights, create a new appointment in
-    User B's personal calendar
-    2. As User B, add one or more participants
-    3. As User A, access the shared calendar and shift the appointment one hour
-    earlier
-    Actual Results:
-    The participants are removed from the appointment!
-    */
+     * Similar to bug #10061
+     * Steps to Reproduce:
+     * 1. As User A, having the required access rights, create a new appointment in
+     * User B's personal calendar
+     * 2. As User B, add one or more participants
+     * 3. As User A, access the shared calendar and shift the appointment one hour
+     * earlier
+     * Actual Results:
+     * The participants are removed from the appointment!
+     */
+    @Test
     public void testBug10154() throws Throwable {
         final Context context = new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
@@ -2983,7 +2976,7 @@ public class AppointmentBugTests extends CalendarTest {
         final OCLPermission oclp2 = new OCLPermission();
         oclp2.setEntity(uid2);
         oclp2.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
-        fo.setFolderName("testSharedFolder10154 - "+System.currentTimeMillis());
+        fo.setFolderName("testSharedFolder10154 - " + System.currentTimeMillis());
         fo.setParentFolderID(fid);
         fo.setModule(FolderObject.CALENDAR);
         fo.setType(FolderObject.PRIVATE);
@@ -3021,12 +3014,11 @@ public class AppointmentBugTests extends CalendarTest {
 
             csql.updateAppointmentObject(update, shared_folder_id, new Date());
 
-
             final CalendarDataObject update2 = new CalendarDataObject();
             update2.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
             update2.setObjectID(object_id);
-            final Date check_start_date = new Date(cdao.getStartDate().getTime()+3600000); // move 1 h
-            final Date check_end_date = new Date(cdao.getEndDate().getTime()+3600000); // move 1 h
+            final Date check_start_date = new Date(cdao.getStartDate().getTime() + 3600000); // move 1 h
+            final Date check_end_date = new Date(cdao.getEndDate().getTime() + 3600000); // move 1 h
             update2.setStartDate(check_start_date);
             update2.setEndDate(check_end_date);
             update2.setTitle("testBug10154 - step 3");
@@ -3035,7 +3027,7 @@ public class AppointmentBugTests extends CalendarTest {
 
             final CalendarDataObject temp = csql.getObjectById(object_id, shared_folder_id);
             final UserParticipant up[] = temp.getUsers();
-            final int check[] = { userid, uid2, userid3 } ;
+            final int check[] = { userid, uid2, userid3 };
             assertEquals("Check participants", 3, check.length);
 
             Arrays.sort(up);
@@ -3044,7 +3036,7 @@ public class AppointmentBugTests extends CalendarTest {
             for (int a = 0; a < check.length; a++) {
                 final int x = Arrays.binarySearch(check, up[a].getIdentifier());
                 if (x < 0) {
-                    fail("User "+up[a].getIdentifier() + " not found!");
+                    fail("User " + up[a].getIdentifier() + " not found!");
                 }
             }
 
@@ -3053,7 +3045,7 @@ public class AppointmentBugTests extends CalendarTest {
                 if (shared_folder_id > 0) {
                     oxma.deleteFolder(new FolderObject(shared_folder_id), true, System.currentTimeMillis());
                 }
-            } catch(final Exception e) {
+            } catch (final Exception e) {
                 e.printStackTrace();
                 fail("Error deleting folder object.");
             }
@@ -3061,22 +3053,23 @@ public class AppointmentBugTests extends CalendarTest {
         try {
             DBPool.push(context, readcon);
             DBPool.pushWrite(context, writecon);
-        } catch(final Exception ignore) {
+        } catch (final Exception ignore) {
             ignore.printStackTrace();
         }
 
     }
 
     /*
-    When the notification subsystem creates a mail, mysteriously only the old
-    participants are listed in the mail.
-
-    1. Create an appointment with one participant.
-    2. Update the appointment and add one more participant.
-    3. Check if the cdao contains both participants
-    4. Delete on participant
-    5. Check if the cdao contains only one participant
-    */
+     * When the notification subsystem creates a mail, mysteriously only the old
+     * participants are listed in the mail.
+     * 
+     * 1. Create an appointment with one participant.
+     * 2. Update the appointment and add one more participant.
+     * 3. Check if the cdao contains both participants
+     * 4. Delete on participant
+     * 5. Check if the cdao contains only one participant
+     */
+    @Test
     public void testBug10717() throws Throwable {
         new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
@@ -3093,7 +3086,6 @@ public class AppointmentBugTests extends CalendarTest {
         csql.insertAppointmentObject(cdao);
         final int object_id = cdao.getObjectID();
         assertTrue("Object was created", object_id > 0);
-
 
         final CalendarDataObject update = new CalendarDataObject();
         update.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
@@ -3130,7 +3122,6 @@ public class AppointmentBugTests extends CalendarTest {
         csql.updateAppointmentObject(update_user_delete, fid, new Date());
         assertEquals("Check participants length", 1, update_user_delete.getParticipants().length);
 
-
     }
 
     /**
@@ -3147,10 +3138,10 @@ public class AppointmentBugTests extends CalendarTest {
      *
      * @throws Exception If an error occurs
      */
+    @Test
     public void testBug10663() throws Exception {
         new ContextImpl(contextid);
-        final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(),
-                "myTestSearch");
+        final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
         final int fid = AppointmentBugTests.getPrivateFolder(userid);
         // Create calendar data object
         final CalendarDataObject cdao = new CalendarDataObject();
@@ -3182,9 +3173,7 @@ public class AppointmentBugTests extends CalendarTest {
         assertTrue("Object was created", object_id > 0);
 
         // Check recurrence string
-        assertTrue("Unexpected recurrence string: " + cdao.getRecurrence()
-                + ". Should be: t|5|i|1|a|2|b|2|s|1198238400000|e|1211068800000|",
-                "t|5|i|1|a|2|b|2|s|1198238400000|e|1211068800000|".equals(cdao.getRecurrence()));
+        assertTrue("Unexpected recurrence string: " + cdao.getRecurrence() + ". Should be: t|5|i|1|a|2|b|2|s|1198238400000|e|1211068800000|", "t|5|i|1|a|2|b|2|s|1198238400000|e|1211068800000|".equals(cdao.getRecurrence()));
 
         final RecurringResultsInterface rss = new CalendarCollection().calculateRecurring(cdao, 0, 0, 0);
         assertEquals("Unexpected number of occurrences: " + rss.size() + ". Should be: " + 5, 5, rss.size());
@@ -3198,10 +3187,10 @@ public class AppointmentBugTests extends CalendarTest {
      *
      * @throws Exception If an error occurs
      */
+    @Test
     public void testBug8516() throws Exception {
         new ContextImpl(contextid);
-        final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(),
-                "myTestSearch");
+        final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
         final int fid = AppointmentBugTests.getPrivateFolder(userid);
         // Create calendar data object
         final CalendarDataObject cdao = new CalendarDataObject();
@@ -3240,10 +3229,10 @@ public class AppointmentBugTests extends CalendarTest {
      *
      * @throws Exception If an error occurs
      */
+    @Test
     public void testBug9823() throws Exception {
         new ContextImpl(contextid);
-        final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(),
-                "myTestSearch");
+        final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
         final int fid = AppointmentBugTests.getPrivateFolder(userid);
         // Create calendar data object
         final CalendarDataObject cdao = new CalendarDataObject();
@@ -3285,10 +3274,10 @@ public class AppointmentBugTests extends CalendarTest {
      *
      * @throws Exception If an error occurs
      */
+    @Test
     public void testBug11719() throws Exception {
         final Context context = new ContextImpl(contextid);
-        final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(),
-                "testBug11719");
+        final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "testBug11719");
         final int fid = AppointmentBugTests.getPrivateFolder(userid);
         // Create calendar data object
         final CalendarDataObject cdao = new CalendarDataObject();
@@ -3352,10 +3341,10 @@ public class AppointmentBugTests extends CalendarTest {
      *
      * @throws Exception If an error occurs
      */
+    @Test
     public void testBug11695() throws Exception {
         final Context context = new ContextImpl(contextid);
-        final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(),
-                "testBug11695");
+        final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "testBug11695");
         final int fid = AppointmentBugTests.getPrivateFolder(userid);
         // Create calendar data object
         final CalendarDataObject cdao = new CalendarDataObject();
@@ -3432,8 +3421,7 @@ public class AppointmentBugTests extends CalendarTest {
         final Context context = new ContextImpl(contextid);
         int object_id = -1;
         try {
-            final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(),
-                    "myTestSearch");
+            final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
             final int fid = AppointmentBugTests.getPrivateFolder(userid);
 
             final CalendarDataObject cdao = new CalendarDataObject();
@@ -3496,11 +3484,10 @@ public class AppointmentBugTests extends CalendarTest {
     public void _testBug12045() throws Exception {
         int object_id = -1;
         try {
-            final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(),
-                    "myTestSearch");
+            final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
 
-//            final int userid2 = resolveUser(AbstractConfigWrapper.parseProperty(getAJAXProperties(),
-//                    "user_participant3", ""));
+            //            final int userid2 = resolveUser(AbstractConfigWrapper.parseProperty(getAJAXProperties(),
+            //                    "user_participant3", ""));
 
             final int fid = AppointmentBugTests.getPrivateFolder(userid);
 
@@ -3512,7 +3499,6 @@ public class AppointmentBugTests extends CalendarTest {
                 start = l;
                 end = start + Constants.MILLI_HOUR;
             }
-
 
             final CalendarSql csql = new CalendarSql(so);
             {
@@ -3538,17 +3524,17 @@ public class AppointmentBugTests extends CalendarTest {
                 cdao.setInterval(1);
                 cdao.setOccurrence(3);
 
-//                {
-//                    final Participants participants = new Participants();
-//
-//                    final Participant p1 = new UserParticipant(userid);
-//                    participants.add(p1);
-//
-//                    final Participant p2 = new UserParticipant(userid2);
-//                    participants.add(p2);
-//
-//                    cdao.setParticipants(participants.getList());
-//                }
+                //                {
+                //                    final Participants participants = new Participants();
+                //
+                //                    final Participant p1 = new UserParticipant(userid);
+                //                    participants.add(p1);
+                //
+                //                    final Participant p2 = new UserParticipant(userid2);
+                //                    participants.add(p2);
+                //
+                //                    cdao.setParticipants(participants.getList());
+                //                }
 
                 csql.insertAppointmentObject(cdao);
                 object_id = cdao.getObjectID();
@@ -3560,8 +3546,7 @@ public class AppointmentBugTests extends CalendarTest {
              */
             final int reminderId;
             {
-                final ReminderObject ro = new ReminderHandler(getContext()).loadReminder(object_id, userid,
-                        Types.APPOINTMENT);
+                final ReminderObject ro =ReminderHandler.getInstance().loadReminder(object_id, userid,Types.APPOINTMENT, getContext());
                 assertTrue("Folder ID mismatch in reminder", ro.getFolder() == fid);
                 reminderId = ro.getObjectId();
             }
@@ -3578,8 +3563,7 @@ public class AppointmentBugTests extends CalendarTest {
             {
                 final OCLPermission p = new OCLPermission(userid, fid);
                 p.setFolderAdmin(true);
-                p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
-                        OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+                p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
                 fo.setPermissionsAsArray(new OCLPermission[] { p });
             }
             folderManager.createFolder(fo, true, System.currentTimeMillis());
@@ -3604,11 +3588,11 @@ public class AppointmentBugTests extends CalendarTest {
 
                 csql.updateAppointmentObject(update, fid, new Date());
 
-                final ReminderObject ro = new ReminderHandler(getContext()).loadReminder(reminderId);
+                final ReminderObject ro = ReminderHandler.getInstance().loadReminder(reminderId, getContext());
                 assertTrue("Reminder's folder ID not updated properly", ro.getFolder() == fo.getObjectID());
             } finally {
                 try {
-                    new ReminderHandler(getContext()).deleteReminder(object_id, userid, Types.APPOINTMENT);
+                    ReminderHandler.getInstance().deleteReminder(object_id, userid, Types.APPOINTMENT, getContext());
                 } catch (final Exception e) {
                     e.printStackTrace();
                 }

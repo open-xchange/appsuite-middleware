@@ -71,50 +71,39 @@ public class CommonListRequest implements AJAXRequest<CommonListResponse> {
 
     private final boolean failOnError;
 
-    public CommonListRequest(final String servletPath,
-        final int[][] folderAndObjectIds, final int[] columns) {
+    public CommonListRequest(final String servletPath, final int[][] folderAndObjectIds, final int[] columns) {
         this(servletPath, folderAndObjectIds, columns, true);
     }
 
-    public CommonListRequest(final String servletPath,
-        final int[][] folderAndObjectIds, final int[] columns,
-        final boolean failOnError) {
-        this(servletPath, createListIDs(folderAndObjectIds), columns,
-            failOnError);
+    public CommonListRequest(final String servletPath, final int[][] folderAndObjectIds, final int[] columns, final boolean failOnError) {
+        this(servletPath, createListIDs(folderAndObjectIds), columns, failOnError);
     }
 
     private static ListIDs createListIDs(final int[][] folderAndObjectIds) {
         final ListIDs retval = new ListIDs();
         for (int i = 0; i < folderAndObjectIds.length; i++) {
-            retval.add(new ListIDInt(folderAndObjectIds[i][0],
-                folderAndObjectIds[i][1]));
+            retval.add(new ListIDInt(folderAndObjectIds[i][0], folderAndObjectIds[i][1]));
         }
         return retval;
     }
 
-    public CommonListRequest(final String servletPath,
-        final String[][] folderAndObjectIds, final int[] columns) {
+    public CommonListRequest(final String servletPath, final String[][] folderAndObjectIds, final int[] columns) {
         this(servletPath, folderAndObjectIds, columns, true);
     }
 
-    public CommonListRequest(final String servletPath,
-        final String[][] folderAndObjectIds, final int[] columns,
-        final boolean failOnError) {
-        this(servletPath, createListIDs(folderAndObjectIds), columns,
-            failOnError);
+    public CommonListRequest(final String servletPath, final String[][] folderAndObjectIds, final int[] columns, final boolean failOnError) {
+        this(servletPath, createListIDs(folderAndObjectIds), columns, failOnError);
     }
 
     private static ListIDs createListIDs(final String[][] folderAndObjectIds) {
         final ListIDs retval = new ListIDs();
         for (int i = 0; i < folderAndObjectIds.length; i++) {
-            retval.add(new ListIDString(folderAndObjectIds[i][0],
-                folderAndObjectIds[i][1]));
+            retval.add(new ListIDString(folderAndObjectIds[i][0], folderAndObjectIds[i][1]));
         }
         return retval;
     }
 
-    public CommonListRequest(final String servletPath, final ListIDs identifier,
-        final int[] columns, final boolean failOnError) {
+    public CommonListRequest(final String servletPath, final ListIDs identifier, final int[] columns, final boolean failOnError) {
         super();
         this.servletPath = servletPath;
         this.identifier = identifier;
@@ -123,32 +112,23 @@ public class CommonListRequest implements AJAXRequest<CommonListResponse> {
         this.failOnError = failOnError;
     }
 
-    public CommonListRequest(final String servletPath,
-        final int[][] folderAndObjectIds, final String alias) {
+    public CommonListRequest(final String servletPath, final int[][] folderAndObjectIds, final String alias) {
         this(servletPath, folderAndObjectIds, alias, true);
     }
 
-    public CommonListRequest(final String servletPath,
-        final int[][] folderAndObjectIds, final String alias,
-        final boolean failOnError) {
-        this(servletPath, createListIDs(folderAndObjectIds), alias,
-            failOnError);
+    public CommonListRequest(final String servletPath, final int[][] folderAndObjectIds, final String alias, final boolean failOnError) {
+        this(servletPath, createListIDs(folderAndObjectIds), alias, failOnError);
     }
 
-    public CommonListRequest(final String servletPath,
-        final String[][] folderAndObjectIds, final String alias) {
+    public CommonListRequest(final String servletPath, final String[][] folderAndObjectIds, final String alias) {
         this(servletPath, folderAndObjectIds, alias, true);
     }
 
-    public CommonListRequest(final String servletPath,
-        final String[][] folderAndObjectIds, final String alias,
-        final boolean failOnError) {
-        this(servletPath, createListIDs(folderAndObjectIds), alias,
-            failOnError);
+    public CommonListRequest(final String servletPath, final String[][] folderAndObjectIds, final String alias, final boolean failOnError) {
+        this(servletPath, createListIDs(folderAndObjectIds), alias, failOnError);
     }
 
-    public CommonListRequest(final String servletPath, final ListIDs identifier,
-        final String alias, final boolean failOnError) {
+    public CommonListRequest(final String servletPath, final ListIDs identifier, final String alias, final boolean failOnError) {
         super();
         this.servletPath = servletPath;
         this.identifier = identifier;
@@ -183,15 +163,11 @@ public class CommonListRequest implements AJAXRequest<CommonListResponse> {
     @Override
     public Parameter[] getParameters() {
         if (columns != null) {
-            return new Parameter[] {
-                new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST),
-                new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns)
+            return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST), new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns)
             };
         }
         if (alias != null) {
-            return new Parameter[] {
-                new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST),
-                new Parameter(AJAXServlet.PARAMETER_COLUMNS, alias)
+            return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST), new Parameter(AJAXServlet.PARAMETER_COLUMNS, alias)
             };
         }
         return null;

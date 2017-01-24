@@ -50,7 +50,11 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertTrue;
 import java.util.TimeZone;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
@@ -68,17 +72,13 @@ public class Bug13788Test extends AbstractAJAXSession {
 
     private Appointment appointment, update;
 
-    public Bug13788Test(String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
 
         appointment = new Appointment();
         appointment.setTitle("Bug 13788 Test");
-        appointment.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         appointment.setStartDate(D("01.10.2009 00:00", TimeZone.getTimeZone("UTC")));
         appointment.setEndDate(D("02.10.2009 00:00", TimeZone.getTimeZone("UTC")));
         appointment.setFullTime(true);
@@ -97,24 +97,27 @@ public class Bug13788Test extends AbstractAJAXSession {
         update.setEndDate(D("04.10.2009 00:00", TimeZone.getTimeZone("UTC")));
     }
 
+    @Test
     public void testBug13788() throws Exception {
-        UpdateRequest updateRequest = new UpdateRequest(update, client.getValues().getTimeZone());
-        UpdateResponse updateResponse = client.execute(updateRequest);
+        UpdateRequest updateRequest = new UpdateRequest(update, getClient().getValues().getTimeZone());
+        UpdateResponse updateResponse = getClient().execute(updateRequest);
         appointment.setLastModified(updateResponse.getTimestamp());
 
         GetRequest getRequest = new GetRequest(appointment.getParentFolderID(), appointment.getObjectID());
-        GetResponse getResponse = client.execute(getRequest);
+        GetResponse getResponse = getClient().execute(getRequest);
 
-        Appointment loadedAppointment = getResponse.getAppointment(client.getValues().getTimeZone());
+        Appointment loadedAppointment = getResponse.getAppointment(getClient().getValues().getTimeZone());
         assertTrue("Lost fulltime flag.", loadedAppointment.getFullTime());
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        DeleteRequest appointmentDeleteRequest = new DeleteRequest(appointment);
-        getClient().execute(appointmentDeleteRequest);
-
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
+        try {
+            DeleteRequest appointmentDeleteRequest = new DeleteRequest(appointment);
+            getClient().execute(appointmentDeleteRequest);
+        } finally {
+            super.tearDown();
+        }
     }
 
 }

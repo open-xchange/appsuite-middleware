@@ -17,17 +17,19 @@
 package org.apache.tika.parser.executable;
 
 import java.io.InputStream;
-
-import junit.framework.TestCase;
-
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.sax.BodyContentHandler;
+import org.junit.Test;
 import org.xml.sax.ContentHandler;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
-public class ExecutableParserTest extends TestCase {
-
-    public void testWin32Parser() throws Exception {
+public class ExecutableParserTest {
+         @Test
+     public void testWin32Parser() throws Exception {
         InputStream input = ExecutableParserTest.class.getResourceAsStream(
                 "/test-documents/testWindows-x86-32.exe");
         try {
@@ -56,7 +58,8 @@ public class ExecutableParserTest extends TestCase {
         }
     }
     
-    public void testElfParser_x86_32() throws Exception {
+         @Test
+     public void testElfParser_x86_32() throws Exception {
        InputStream input = ExecutableParserTest.class.getResourceAsStream(
              "/test-documents/testLinux-x86-32");
      try {

@@ -1,18 +1,24 @@
 package liquibase.change.core;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.math.BigInteger;
-
-import liquibase.change.*;
+import org.junit.Test;
+import liquibase.change.Change;
+import liquibase.change.ChangeFactory;
+import liquibase.change.ColumnConfig;
+import liquibase.change.ConstraintsConfig;
+import liquibase.change.StandardChangeTest;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
-import liquibase.statement.SqlStatement;
 import liquibase.statement.ColumnConstraint;
 import liquibase.statement.ForeignKeyConstraint;
+import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddColumnStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.statement.core.UpdateStatement;
-import static org.junit.Assert.*;
-import org.junit.Test;
 
 /**
  * Tests for {@link AddColumnChange}
@@ -25,8 +31,7 @@ public class AddColumnChangeTest extends StandardChangeTest {
         super.validate();    //To change body of overridden methods use File | Settings | File Templates.
     }
 
-    @Override
-    @Test
+     @Test
     public void getRefactoringName() throws Exception {
         AddColumnChange refactoring = new AddColumnChange();
         assertEquals("addColumn", ChangeFactory.getInstance().getChangeMetaData(refactoring).getName());
@@ -65,8 +70,7 @@ public class AddColumnChangeTest extends StandardChangeTest {
         assertEquals(0, change.getColumns().size());
     }
 
-    @Override
-    @Test
+     @Test
     public void generateStatement() throws Exception {
         AddColumnChange refactoring = new AddColumnChange();
         refactoring.setSchemaName("SCHEMA");
@@ -468,8 +472,7 @@ public class AddColumnChangeTest extends StandardChangeTest {
         });
     }
 
-    @Override
-    @Test
+     @Test
     public void getConfirmationMessage() throws Exception {
         AddColumnChange refactoring = new AddColumnChange();
         refactoring.setTableName("TAB");

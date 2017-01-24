@@ -49,10 +49,14 @@
 
 package com.openexchange.ajax.mail;
 
+import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.mail.actions.MailSearchRequest;
 import com.openexchange.ajax.mail.actions.MailSearchResponse;
@@ -69,23 +73,27 @@ public class MailSearchTest extends AbstractMailTest {
 
     private String folder;
 
-    public MailSearchTest(final String name) {
-        super(name);
+    public MailSearchTest() {
+        super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         folder = getInboxFolder();
         clearFolder(folder);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        clearFolder(folder);
-        super.tearDown();
+        try {
+            clearFolder(folder);
+        } finally {
+            super.tearDown();
+        }
     }
 
+    @Test
     public void testSearch() throws Exception {
         final String searchText = "Your order";
         JSONArray search;
@@ -93,19 +101,7 @@ public class MailSearchTest extends AbstractMailTest {
         search = searchBySubject(searchText);
         assertEquals("Should not yield results in empty folder.", 0, search.length());
 
-        String eml =
-            "Message-Id: <4A002517.4650.0059.1>\n" +
-            "Date: Tue, 05 May 2009 11:37:58 -0500\n" +
-            "From: " + getSendAddress() + "\n" +
-            "To: " + getSendAddress() + "\n" +
-            "Subject: Your order\n" +
-            "Mime-Version: 1.0\n" +
-            "Content-Type: text/plain; charset=\"UTF-8\"\n" +
-            "Content-Transfer-Encoding: 8bit\n" +
-            "\n" +
-            "This is a MIME message. If you are reading this text, you may want to \n" +
-            "consider changing to a mail reader or gateway that understands how to \n" +
-            "properly handle MIME multipart messages.";
+        String eml = "Message-Id: <4A002517.4650.0059.1>\n" + "Date: Tue, 05 May 2009 11:37:58 -0500\n" + "From: " + getSendAddress() + "\n" + "To: " + getSendAddress() + "\n" + "Subject: Your order\n" + "Mime-Version: 1.0\n" + "Content-Type: text/plain; charset=\"UTF-8\"\n" + "Content-Transfer-Encoding: 8bit\n" + "\n" + "This is a MIME message. If you are reading this text, you may want to \n" + "consider changing to a mail reader or gateway that understands how to \n" + "properly handle MIME multipart messages.";
         getClient().execute(new NewMailRequest(folder, eml, -1, true));
         search = searchBySubject(searchText);
         assertEquals("Should yield one result.", 1, search.length());
@@ -114,19 +110,7 @@ public class MailSearchTest extends AbstractMailTest {
         search = searchBySubject(searchText);
         assertEquals("Should yield two results when facing two identical mails.", 2, search.length());
 
-        eml =
-            "Message-Id: <4A002517.4650.0059.1>\n" +
-            "Date: Tue, 05 May 2009 11:37:58 -0500\n" +
-            "From: " + getSendAddress() + "\n" +
-            "To: " + getSendAddress() + "\n" +
-            "Subject: Barfoo\n" +
-            "Mime-Version: 1.0\n" +
-            "Content-Type: text/plain; charset=\"UTF-8\"\n" +
-            "Content-Transfer-Encoding: 8bit\n" +
-            "\n" +
-            "This is a MIME message. If you are reading this text, you may want to \n" +
-            "consider changing to a mail reader or gateway that understands how to \n" +
-            "properly handle MIME multipart messages.";
+        eml = "Message-Id: <4A002517.4650.0059.1>\n" + "Date: Tue, 05 May 2009 11:37:58 -0500\n" + "From: " + getSendAddress() + "\n" + "To: " + getSendAddress() + "\n" + "Subject: Barfoo\n" + "Mime-Version: 1.0\n" + "Content-Type: text/plain; charset=\"UTF-8\"\n" + "Content-Transfer-Encoding: 8bit\n" + "\n" + "This is a MIME message. If you are reading this text, you may want to \n" + "consider changing to a mail reader or gateway that understands how to \n" + "properly handle MIME multipart messages.";
         getClient().execute(new NewMailRequest(folder, eml, -1, true));
         search = searchBySubject(searchText);
         assertEquals("Should still yield two results after being sent a different one", 2, search.length());

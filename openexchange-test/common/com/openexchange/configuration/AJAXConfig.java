@@ -106,6 +106,7 @@ public class AJAXConfig extends AbstractConfig {
 
     /**
      * Enumeration of all properties in the ajax.properties file.
+     * FIXME only required for unittests. do clean up their setup
      */
     public static enum Property {
         /**

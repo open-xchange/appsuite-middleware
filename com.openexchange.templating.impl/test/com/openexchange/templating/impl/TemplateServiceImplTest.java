@@ -72,10 +72,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.session.Session;
 import com.openexchange.templating.OXTemplate;
-import com.openexchange.templating.impl.OXFolderHelper;
-import com.openexchange.templating.impl.OXInfostoreHelper;
-import com.openexchange.templating.impl.OXTemplateImpl;
-import com.openexchange.templating.impl.TemplateServiceImpl;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 

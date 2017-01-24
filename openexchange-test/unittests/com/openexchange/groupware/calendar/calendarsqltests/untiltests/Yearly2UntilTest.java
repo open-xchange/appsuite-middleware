@@ -48,31 +48,40 @@
  */
 
 package com.openexchange.groupware.calendar.calendarsqltests.untiltests;
+
+import org.junit.Test;
+
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
 public class Yearly2UntilTest extends UntilTest {
 
+    @Test
     public void testWithout() throws Exception {
         withoutTest(YEARLY2, false);
     }
 
+    @Test
     public void testWithOccurrences() throws Exception {
         withOccurrencesTest(YEARLY2, false);
     }
 
+    @Test
     public void testWithUntil() throws Exception {
         withUntilTest(YEARLY2, false);
     }
 
+    @Test
     public void testFTWithout() throws Exception {
         withoutTest(YEARLY2, true);
     }
 
+    @Test
     public void testFTWithOccurrences() throws Exception {
         withOccurrencesTest(YEARLY2, true);
     }
 
+    @Test
     public void testFTWithUntil() throws Exception {
         withUntilTest(YEARLY2, true);
     }

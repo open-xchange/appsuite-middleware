@@ -110,7 +110,7 @@ public class TestServletTest {
     }
 
     @Test(timeout = 500)
-    public void testDoGet_ThreadSleepNotExecuted_ReturnedWithin2000ms() throws ServletException, IOException {
+     public void testDoGet_ThreadSleepNotExecuted_ReturnedWithin2000ms() throws ServletException, IOException {
         this.testServlet = new TestServlet() {
 
             @Override
@@ -123,7 +123,7 @@ public class TestServletTest {
     }
 
     @Test(timeout = 500)
-    public void testDoPut_ThreadSleepNotExecuted_ReturnedWithin2000ms() throws ServletException, IOException {
+     public void testDoPut_ThreadSleepNotExecuted_ReturnedWithin2000ms() throws ServletException, IOException {
         this.testServlet = new TestServlet() {
 
             @Override

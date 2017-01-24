@@ -65,6 +65,7 @@ import com.openexchange.mailfilter.json.ajax.json.mapper.ArgumentUtil;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserJSONUtil;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link BodyTestCommandParser}
@@ -86,7 +87,7 @@ public class BodyTestCommandParser implements CommandParser<TestCommand> {
      * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser#parse(org.json.JSONObject)
      */
     @Override
-    public TestCommand parse(JSONObject jsonObject) throws JSONException, SieveException, OXException {
+    public TestCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException {
         String commandName = Commands.BODY.getCommandName();
         final List<Object> argList = new ArrayList<Object>();
         argList.add(ArgumentUtil.createTagArgument(CommandParserJSONUtil.getString(jsonObject, BodyTestField.comparison.name(), commandName)));

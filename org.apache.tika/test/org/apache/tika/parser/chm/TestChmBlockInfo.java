@@ -17,10 +17,6 @@
 package org.apache.tika.parser.chm;
 
 import java.util.Iterator;
-
-import junit.framework.Assert;
-import junit.framework.TestCase;
-
 import org.apache.tika.parser.chm.accessor.ChmDirectoryListingSet;
 import org.apache.tika.parser.chm.accessor.ChmItsfHeader;
 import org.apache.tika.parser.chm.accessor.ChmItspHeader;
@@ -30,13 +26,15 @@ import org.apache.tika.parser.chm.accessor.DirectoryListingEntry;
 import org.apache.tika.parser.chm.core.ChmCommons;
 import org.apache.tika.parser.chm.core.ChmConstants;
 import org.apache.tika.parser.chm.lzx.ChmBlockInfo;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Test;
 
 /**
  * Tests major functionality of ChmBlockInfo
  * 
  */
-public class TestChmBlockInfo extends TestCase {
-    private byte[] data;
+public class TestChmBlockInfo {    private byte[] data;
     private ChmBlockInfo chmBlockInfo;
     private ChmDirectoryListingSet chmDirListCont = null;
     private ChmLzxcResetTable clrt = null;
@@ -95,13 +93,15 @@ public class TestChmBlockInfo extends TestCase {
         clrt.parse(dir_chunk, clrt);
     }
 
-    public void testToString() {
+         @Test
+     public void testToString() {
         if (chmBlockInfo == null)
             testGetChmBlockInfo();
         Assert.assertTrue(chmBlockInfo.toString().length() > 0);
     }
 
-    public void testGetChmBlockInfo() {
+         @Test
+     public void testGetChmBlockInfo() {
         for (Iterator<DirectoryListingEntry> it = chmDirListCont
                 .getDirectoryListingEntryList().iterator(); it.hasNext();) {
             DirectoryListingEntry directoryListingEntry = it.next();
@@ -115,7 +115,9 @@ public class TestChmBlockInfo extends TestCase {
         }
     }
 
-    public void tearDown() throws Exception {
+    @After
+    public void tearDown()
+ throws Exception {
         data = null;
         chmBlockInfo = null;
     }

@@ -182,6 +182,7 @@ public final class DownloadUtility {
                 contentType.setPrimaryType(ct.substring(0, pos));
                 contentType.setSubType(ct.substring(pos + 1));
             }
+            boolean harmful = false;
             String sContentDisposition = overridingDisposition;
             long sz = size;
             Readable in = inputStream;
@@ -228,9 +229,11 @@ public final class DownloadUtility {
                 }
             } else if (Strings.startsWithAny(toLowerCase(contentType.getSubType()), "javascript") || fileNameImpliesJavascript(fileName)) {
                 // Treat all JavaScript content as harmful
+                harmful = true;
                 sContentDisposition = "attachment";
             } else if (Strings.startsWithAny(toLowerCase(contentType.getSubType()), "svg") || fileNameImpliesSvg(fileName)) {
                 // Treat all SVG content as harmful
+                harmful = true;
                 sContentDisposition = "attachment";
             } else if (Strings.startsWithAny(toLowerCase(contentType.getSubType()), "xml") || fileNameImpliesXml(fileName)) {
                 /*
@@ -385,7 +388,7 @@ public final class DownloadUtility {
                          * Check for HTML since no corresponding file extension is known
                          */
                         if (HTMLDetector.containsHTMLTags(sink.getStream(), false)) {
-                            final CheckedDownload ret = asAttachment(sink.getClosingRandomAccess(), preparedFileName, sink.getLength());
+                            final CheckedDownload ret = asAttachment(sink.getClosingRandomAccess(), preparedFileName, sink.getLength(), true);
                             sink = null; // Set to null to avoid premature closing at the end of try-finally clause
                             return ret;
                         }
@@ -405,7 +408,7 @@ public final class DownloadUtility {
                                  * No content type known
                                  */
                                 if (HTMLDetector.containsHTMLTags(sink.getStream(), false)) {
-                                    final CheckedDownload ret = asAttachment(sink.getClosingRandomAccess(), preparedFileName, sink.getLength());
+                                    final CheckedDownload ret = asAttachment(sink.getClosingRandomAccess(), preparedFileName, sink.getLength(), true);
                                     sink = null; // Set to null to avoid premature closing at the end of try-finally clause
                                     return ret;
                                 }
@@ -427,7 +430,7 @@ public final class DownloadUtility {
                              * Unknown magic bytes. Check for HTML.
                              */
                             if (HTMLDetector.containsHTMLTags(sink.getStream(), false)) {
-                                final CheckedDownload ret = asAttachment(sink.getClosingRandomAccess(), preparedFileName, sink.getLength());
+                                final CheckedDownload ret = asAttachment(sink.getClosingRandomAccess(), preparedFileName, sink.getLength(), true);
                                 sink = null; // Set to null to avoid premature closing at the end of try-finally clause
                                 return ret;
                             }
@@ -498,15 +501,15 @@ public final class DownloadUtility {
                 final StringBuilder builder = new StringBuilder(32).append("inline");
                 appendFilenameParameter(fileName, contentType.isBaseType("application", "octet-stream") ? null : contentType.toString(), userAgent, builder);
                 contentType.removeParameter("name");
-                retval = new CheckedDownload(contentType.toString(), builder.toString(), in, sz);
+                retval = new CheckedDownload(contentType.toString(), builder.toString(), in, sz, harmful);
             } else if (sContentDisposition.indexOf(';') < 0) {
                 final StringBuilder builder = new StringBuilder(32).append(sContentDisposition);
                 appendFilenameParameter(fileName, contentType.isBaseType("application", "octet-stream") ? null : contentType.toString(), userAgent, builder);
                 contentType.removeParameter("name");
-                retval = new CheckedDownload(contentType.toString(), builder.toString(), in, sz);
+                retval = new CheckedDownload(contentType.toString(), builder.toString(), in, sz, harmful);
             } else {
                 contentType.removeParameter("name");
-                retval = new CheckedDownload(contentType.toString(), sContentDisposition, in, sz);
+                retval = new CheckedDownload(contentType.toString(), sContentDisposition, in, sz, harmful);
             }
             return retval;
         } catch (final UnsupportedEncodingException e) {
@@ -621,11 +624,11 @@ public final class DownloadUtility {
         return PAT_QUOTE.matcher(PAT_BSLASH.matcher(str).replaceAll("\\\\\\\\")).replaceAll("\\\\\\\"");
     }
 
-    private static CheckedDownload asAttachment(final RandomAccess randomAccess, final String preparedFileName, final long size) {
+    private static CheckedDownload asAttachment(RandomAccess randomAccess, String preparedFileName, long size, boolean harmful) {
         /*
          * We are supposed to offer attachment for download. Therefore enforce application/octet-stream and attachment disposition.
          */
-        return new CheckedDownload(MIME_APPL_OCTET, new StringBuilder(64).append("attachment; filename=\"").append(preparedFileName).append('"').toString(), randomAccess, size);
+        return new CheckedDownload(MIME_APPL_OCTET, new StringBuilder(64).append("attachment; filename=\"").append(preparedFileName).append('"').toString(), randomAccess, size, harmful);
     }
 
     // private static final Pattern P = Pattern.compile("^[\\w\\d\\:\\/\\.]+(\\.\\w{3,4})$");
@@ -710,13 +713,24 @@ public final class DownloadUtility {
         private final String contentDisposition;
         private final Readable inputStream;
         private final long size;
+        private final boolean consideredHarmful;
 
-        CheckedDownload(final String contentType, final String contentDisposition, final Readable inputStream, final long size) {
+        CheckedDownload(String contentType, String contentDisposition, Readable inputStream, long size, boolean consideredHarmful) {
             super();
             this.contentType = contentType;
             this.contentDisposition = contentDisposition;
             this.inputStream = inputStream;
             this.size = size;
+            this.consideredHarmful = consideredHarmful;
+        }
+
+        /**
+         * Whether the checked download's content is consired as harmful and no sanitizing could be applied.
+         *
+         * @return <code>true</code> if harmful; otherwise <code>false</code>
+         */
+        public boolean isConsideredHarmful() {
+            return consideredHarmful;
         }
 
         /**
@@ -817,7 +831,7 @@ public final class DownloadUtility {
      * @return <code>true</code> if specified uploaded file is an illegal image; otherwise <code>false</code>
      * @throws IOException If uploaded file cannot be checked
      */
-    private static boolean isIllegalImage(UploadFile file) throws IOException {
+    public static boolean isIllegalImage(UploadFile file) throws IOException {
         String contentType = file.getContentType();
         if (isImageContentType(contentType)) {
             return isIllegalImageData(file);

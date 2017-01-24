@@ -49,12 +49,12 @@
 
 package com.openexchange.ajax.attach;
 
-import static com.openexchange.ajax.framework.AJAXClient.User.User1;
 import static org.junit.Assert.assertEquals;
 import java.io.ByteArrayInputStream;
 import java.util.TimeZone;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import com.openexchange.ajax.attach.actions.AttachRequest;
 import com.openexchange.ajax.attach.actions.ListRequest;
@@ -64,9 +64,12 @@ import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.contact.action.InsertRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.MultipleRequest;
+import com.openexchange.ajax.framework.ProvisioningSetup;
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.util.TimeZones;
+import com.openexchange.test.pool.TestContext;
+import com.openexchange.test.pool.TestContextPool;
 
 /**
  * {@link Bug24876Test}
@@ -80,14 +83,14 @@ public final class Bug24876Test {
     private TimeZone tz;
     private long timestamp;
     private int attachmentId;
-
-    public Bug24876Test() {
-        super();
-    }
+    private TestContext testContext;
 
     @Before
     public void setUp() throws Exception {
-        client = new AJAXClient(User1);
+        ProvisioningSetup.init();
+
+        testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
+        client = new AJAXClient(testContext.acquireUser());
         tz = client.getValues().getTimeZone();
         int folderId = client.getValues().getPrivateContactFolder();
         contact = new Contact();
@@ -101,8 +104,12 @@ public final class Bug24876Test {
 
     @After
     public void tearDown() throws Exception {
-        client.execute(new DeleteRequest(contact));
-        client.logout();
+        try {
+            client.execute(new DeleteRequest(contact));
+            client.logout();
+        } finally {
+            TestContextPool.backContext(testContext);
+        }
     }
 
     @Test
@@ -119,6 +126,8 @@ public final class Bug24876Test {
     /**
      * Test is disabled. Multiple servlet needs parameter module which conflicts with module parameter of attachment list request.
      */
+    @Test
+    @Ignore
     public void testMultipleList() throws Exception {
         ListResponse response = client.execute(MultipleRequest.create(new ListRequest(contact, new int[] { attachmentId }, new int[] { AttachmentField.CREATION_DATE }, TimeZones.UTC))).getResponse(0);
         assertEquals("attachment listing did not return the only created attachment", 1, response.getArray().length);

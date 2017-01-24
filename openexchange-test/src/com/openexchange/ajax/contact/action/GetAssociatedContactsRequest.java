@@ -58,7 +58,6 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Params;
 import com.openexchange.groupware.container.Contact;
 
-
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
@@ -81,7 +80,7 @@ public class GetAssociatedContactsRequest extends AbstractContactRequest<GetAsso
     }
 
     @Override
-    public Object getBody(){
+    public Object getBody() {
         return null;
     }
 
@@ -92,26 +91,15 @@ public class GetAssociatedContactsRequest extends AbstractContactRequest<GetAsso
 
     @Override
     public Parameter[] getParameters() {
-        if(uuid != null) {
-            return new Params(
-                AJAXServlet.PARAMETER_ACTION,
-                FinalContactConstants.ACTION_GET_ASSOCIATED.getName(),
-                FinalContactConstants.PARAMETER_UUID.getName(),
-                String.valueOf(uuid)
-            ).toArray();
+        if (uuid != null) {
+            return new Params(AJAXServlet.PARAMETER_ACTION, FinalContactConstants.ACTION_GET_ASSOCIATED.getName(), FinalContactConstants.PARAMETER_UUID.getName(), String.valueOf(uuid)).toArray();
         }
 
-        Params params = new Params(
-            AJAXServlet.PARAMETER_ACTION,
-            FinalContactConstants.ACTION_GET_ASSOCIATED.getName());
-        if(contact.containsUserField20()){
+        Params params = new Params(AJAXServlet.PARAMETER_ACTION, FinalContactConstants.ACTION_GET_ASSOCIATED.getName());
+        if (contact.containsUserField20()) {
             params.add(FinalContactConstants.PARAMETER_UUID.getName(), contact.getUserField20());
         } else {
-            params.add(
-                AJAXServlet.PARAMETER_FOLDERID,
-                String.valueOf(contact.getParentFolderID()),
-                AJAXServlet.PARAMETER_ID,
-                String.valueOf(contact.getObjectID()));
+            params.add(AJAXServlet.PARAMETER_FOLDERID, String.valueOf(contact.getParentFolderID()), AJAXServlet.PARAMETER_ID, String.valueOf(contact.getObjectID()));
         }
 
         return params.toArray();
@@ -119,9 +107,10 @@ public class GetAssociatedContactsRequest extends AbstractContactRequest<GetAsso
 
     @Override
     public AbstractAJAXParser<GetAssociatedContactsResponse> getParser() {
-        return new AbstractAJAXParser<GetAssociatedContactsResponse>(true){
+        return new AbstractAJAXParser<GetAssociatedContactsResponse>(true) {
+
             @Override
-            public GetAssociatedContactsResponse createResponse(final Response response){
+            public GetAssociatedContactsResponse createResponse(final Response response) {
                 return new GetAssociatedContactsResponse(response, tz);
             }
         };

@@ -49,6 +49,9 @@
 
 package com.openexchange.contact.vcard;
 
+import static org.junit.Assert.assertNotNull;
+import org.junit.Assert;
+import org.junit.Test;
 import com.openexchange.groupware.container.Contact;
 
 /**
@@ -67,7 +70,8 @@ public class Bug21656Test extends VCardTest {
         super();
     }
 
-    public void testImportVCard() throws Exception {
+         @Test
+     public void testImportVCard() throws Exception {
         /*
          * import vCard
          */
@@ -93,19 +97,19 @@ public class Bug21656Test extends VCardTest {
          * verify imported contact
          */
         assertNotNull(contact);
-        assertEquals("Peschla & Rochmes GmbH", contact.getCompany());
-        assertEquals("mnickel@gpr.de", contact.getEmail1());
-//        assertEquals("069 36 60 87 09", contact.getFaxOther());
-        assertEquals("069 36 60 87 08", contact.getTelephoneBusiness1());
-        assertEquals("0172 670 11 57", contact.getCellularTelephone1());
-        assertEquals("Bereichsleiter Energie und Abfall", contact.getPosition());
-        assertEquals("Hintergasse 18", contact.getStreetBusiness());
-        assertEquals("Hochheim am Main", contact.getCityBusiness());
-        assertEquals("65239", contact.getPostalCodeBusiness());
-        assertEquals("Deutschland", contact.getCountryBusiness());
-        assertEquals("Marcus Nickel", contact.getDisplayName());
-        assertEquals("Nickel", contact.getSurName());
-        assertEquals("Marcus", contact.getGivenName());
+        Assert.assertEquals("Peschla & Rochmes GmbH", contact.getCompany());
+        Assert.assertEquals("mnickel@gpr.de", contact.getEmail1());
+//        Assert.assertEquals("069 36 60 87 09", contact.getFaxOther());
+        Assert.assertEquals("069 36 60 87 08", contact.getTelephoneBusiness1());
+        Assert.assertEquals("0172 670 11 57", contact.getCellularTelephone1());
+        Assert.assertEquals("Bereichsleiter Energie und Abfall", contact.getPosition());
+        Assert.assertEquals("Hintergasse 18", contact.getStreetBusiness());
+        Assert.assertEquals("Hochheim am Main", contact.getCityBusiness());
+        Assert.assertEquals("65239", contact.getPostalCodeBusiness());
+        Assert.assertEquals("Deutschland", contact.getCountryBusiness());
+        Assert.assertEquals("Marcus Nickel", contact.getDisplayName());
+        Assert.assertEquals("Nickel", contact.getSurName());
+        Assert.assertEquals("Marcus", contact.getGivenName());
     }
 
 }

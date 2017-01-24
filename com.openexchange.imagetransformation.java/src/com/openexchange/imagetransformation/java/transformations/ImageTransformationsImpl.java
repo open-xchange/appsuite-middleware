@@ -129,7 +129,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
             synchronized (ImageTransformationsTask.class) {
                 tmp = maxSize;
                 if (null == tmp) {
-                    int defaultValue = 5242880; // 5 MB
+                    int defaultValue = 10485760; // 10 MB
                     ConfigurationService configService = Services.getService(ConfigurationService.class);
                     if (null == configService) {
                         return defaultValue;
@@ -149,7 +149,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
             synchronized (ImageTransformationsTask.class) {
                 tmp = maxResolution;
                 if (null == tmp) {
-                    int defaultValue = 12087962; // 4064 x 2704 (11.1 megapixels) + 10%
+                    int defaultValue = 26824090; // ~ 6048x4032 (24 megapixels) + 10%
                     ConfigurationService configService = Services.getService(ConfigurationService.class);
                     if (null == configService) {
                         return defaultValue;

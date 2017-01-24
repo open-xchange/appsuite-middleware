@@ -51,6 +51,9 @@ package com.openexchange.ajax.folder.api2;
 
 import java.io.ByteArrayInputStream;
 import java.util.Date;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
@@ -76,12 +79,12 @@ public class Bug15752Test extends AbstractAJAXSession {
     private String[] mailIds;
     private FolderObject testFolder;
 
-    public Bug15752Test(String name) {
-        super(name);
+    public Bug15752Test() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         inboxFolder = client.getValues().getInboxFolder();
@@ -103,31 +106,26 @@ public class Bug15752Test extends AbstractAJAXSession {
         mailIds = new String[] { uResp.getFolder(), uResp.getID() };
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        if (null != mailIds) {
-            client.execute(new DeleteRequest(mailIds, true));
+    @After
+    public void tearDown() throws Exception {
+        try {
+            if (null != mailIds) {
+                client.execute(new DeleteRequest(mailIds, true));
+            }
+            if (null != testFolder) {
+                client.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OUTLOOK, testFolder));
+            }
+        } finally {
+            super.tearDown();
         }
-        if (null != testFolder) {
-            client.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OUTLOOK, testFolder));
-        }
-        super.tearDown();
     }
 
+    @Test
     public void testGetMailwithUnseen() throws Throwable {
         GetRequest request = new com.openexchange.ajax.mail.actions.GetRequest(mailIds[0], mailIds[1], true, true);
         request.setUnseen(true);
         client.execute(request);
     }
 
-    private static final String MAIL =
-        "From: #ADDR#\n" +
-        "To: #ADDR#\n" +
-        "Subject: Test for bug 15572\n" +
-        "Mime-Version: 1.0\n" +
-        "Content-Type: text/plain; charset=\"UTF-8\"\n" +
-        "Content-Transfer-Encoding: 8bit\n" +
-        "\n" +
-        "Test for bug 15572\n" +
-        "\u00e4\u00f6\u00fc\u00c4\u00d6\u00dc\u00df\n";
+    private static final String MAIL = "From: #ADDR#\n" + "To: #ADDR#\n" + "Subject: Test for bug 15572\n" + "Mime-Version: 1.0\n" + "Content-Type: text/plain; charset=\"UTF-8\"\n" + "Content-Transfer-Encoding: 8bit\n" + "\n" + "Test for bug 15572\n" + "\u00e4\u00f6\u00fc\u00c4\u00d6\u00dc\u00df\n";
 }

@@ -52,7 +52,6 @@ package com.openexchange.ajax.share.actions;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
-
 /**
  * {@link DeleteLinkResponse}
  *
@@ -63,6 +62,7 @@ public class DeleteLinkResponse extends AbstractAJAXResponse {
 
     /**
      * Initializes a new {@link DeleteLinkResponse}.
+     * 
      * @param response
      */
     protected DeleteLinkResponse(Response response) {

@@ -117,15 +117,10 @@ public final class SystemPrivateFolder {
             /*
              * The system private folder
              */
-            final List<FolderObject> list =
-                ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleSubfoldersIterator(
-                    FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
-                    user.getId(),
-                    user.getGroups(),
-                    ctx,
-                    userPerm,
-                    null,
-                    con)).asList();
+            List<FolderObject> list;
+            try (FolderObjectIterator foi = (FolderObjectIterator) OXFolderIteratorSQL.getVisibleSubfoldersIterator(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, user.getId(), user.getGroups(), ctx, userPerm, null, con)) {
+                list = foi.asList();
+            }
             StringHelper stringHelper = null;
             for (final FolderObject folderObject : list) {
                 /*
@@ -186,15 +181,10 @@ public final class SystemPrivateFolder {
             /*
              * The system private folder
              */
-            final List<FolderObject> list =
-                ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleSubfoldersIterator(
-                    FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
-                    user.getId(),
-                    user.getGroups(),
-                    ctx,
-                    userPerm,
-                    null,
-                    con)).asList();
+            List<FolderObject> list;
+            try (FolderObjectIterator foi = (FolderObjectIterator) OXFolderIteratorSQL.getVisibleSubfoldersIterator(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, user.getId(), user.getGroups(), ctx, userPerm, null, con)) {
+                list = foi.asList();
+            }
             StringHelper stringHelper = null;
             for (final FolderObject folderObject : list) {
                 /*

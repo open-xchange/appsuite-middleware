@@ -69,7 +69,6 @@ import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.textxtraction.DelegateTextXtraction;
 import com.openexchange.textxtraction.TestData;
-import com.openexchange.textxtraction.internal.TikaTextXtractService;
 
 /**
  * {@link TikaTextXtractServiceTest}
@@ -134,8 +133,8 @@ public class TikaTextXtractServiceTest {
         };
     }
 
-    @Test
-    public void testParserConfig() throws Exception {
+     @Test
+     public void testParserConfig() throws Exception {
         Assert.assertNotNull("Tika was null", textXtraction.tika);
         Tika tika = textXtraction.tika;
         AutoDetectParser autoDetectParser = (AutoDetectParser) tika.getParser();
@@ -151,8 +150,8 @@ public class TikaTextXtractServiceTest {
         }
     }
 
-    @Test
-    public void testWithDelegateAndMimeType() throws OXException {
+     @Test
+     public void testWithDelegateAndMimeType() throws OXException {
         textXtraction.addDelegateTextXtraction(delegate);
         InputStream is = new ByteArrayInputStream(TestData.TEST_PDF);
         try {
@@ -163,8 +162,8 @@ public class TikaTextXtractServiceTest {
         }
     }
 
-    @Test
-    public void testWithDestructiveDelegateAndMimeType() throws OXException {
+     @Test
+     public void testWithDestructiveDelegateAndMimeType() throws OXException {
         textXtraction.addDelegateTextXtraction(destructiveDelegate);
         InputStream is = new ByteArrayInputStream(TestData.TEST_PDF);
         try {
@@ -175,8 +174,8 @@ public class TikaTextXtractServiceTest {
         }
     }
 
-    @Test
-    public void testWithDelegate() throws OXException {
+     @Test
+     public void testWithDelegate() throws OXException {
         textXtraction.addDelegateTextXtraction(delegate);
         InputStream is = new ByteArrayInputStream(TestData.TEST_PDF);
         try {
@@ -187,20 +186,20 @@ public class TikaTextXtractServiceTest {
         }
     }
 
-    @Test
-    public void testWithDoubleDelegate() throws OXException {
+     @Test
+     public void testWithDoubleDelegate() throws OXException {
         assertTrue(textXtraction.addDelegateTextXtraction(delegate));
         assertFalse(textXtraction.addDelegateTextXtraction(delegate));
     }
 
-    @Test
-    public void testremoveDelegate() throws OXException {
+     @Test
+     public void testremoveDelegate() throws OXException {
         assertTrue(textXtraction.addDelegateTextXtraction(delegate));
         textXtraction.removeDelegateTextXtraction(delegate);
     }
 
-    @Test
-    public void testWithDestructiveDelegate() throws OXException {
+     @Test
+     public void testWithDestructiveDelegate() throws OXException {
         textXtraction.addDelegateTextXtraction(destructiveDelegate);
         InputStream is = new ByteArrayInputStream(TestData.TEST_PDF);
         try {
@@ -211,14 +210,14 @@ public class TikaTextXtractServiceTest {
         }
     }
 
-    @Test
-    public void testExtractContentNull() throws OXException {
+     @Test
+     public void testExtractContentNull() throws OXException {
         String tmpString = null;
         textXtraction.extractFrom(tmpString, null);
     }
 
-    @Test
-    public void testExtractContentNotNull() throws OXException {
+     @Test
+     public void testExtractContentNotNull() throws OXException {
         textXtraction.addDelegateTextXtraction(delegate);
         InputStream is = new ByteArrayInputStream(TestData.TEST_PDF);
         String text = null;

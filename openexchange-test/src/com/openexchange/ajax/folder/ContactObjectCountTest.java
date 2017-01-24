@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.folder;
 
+import static org.junit.Assert.assertEquals;
 import java.util.Random;
 import org.junit.Test;
 import com.openexchange.folderstorage.Folder;
@@ -65,10 +66,6 @@ import com.openexchange.test.FolderTestManager;
 public final class ContactObjectCountTest extends AbstractObjectCountTest {
 
     private static final Random rand = new Random(System.currentTimeMillis());
-
-    public ContactObjectCountTest(String name) {
-        super(name);
-    }
 
     @Test
     public void testCountInPrivateFolder() throws Exception {

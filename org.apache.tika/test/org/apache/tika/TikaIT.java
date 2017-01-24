@@ -16,10 +16,10 @@
  */
 package org.apache.tika;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
-public class TikaIT extends TestCase {
-
+public class TikaIT {
     public void testToString() {
         String version = new Tika().toString();
         assertNotNull(version);

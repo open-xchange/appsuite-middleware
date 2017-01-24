@@ -49,36 +49,34 @@
 
 package com.openexchange.ajax.mail;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import org.apache.commons.codec.binary.Base64;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.MultipleRequest;
 import com.openexchange.ajax.framework.MultipleResponse;
 import com.openexchange.ajax.framework.UserValues;
-import com.openexchange.ajax.mail.actions.AttachmentRequest;
-import com.openexchange.ajax.mail.actions.AttachmentResponse;
 import com.openexchange.ajax.mail.actions.DeleteRequest;
-import com.openexchange.ajax.mail.actions.DeleteResponse;
 import com.openexchange.ajax.mail.actions.GetRequest;
 import com.openexchange.ajax.mail.actions.GetResponse;
 import com.openexchange.ajax.mail.actions.ImportMailRequest;
 import com.openexchange.ajax.mail.actions.ImportMailResponse;
 import com.openexchange.configuration.MailConfig;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 
 /**
  * {@link MultipleGetTest}
@@ -90,26 +88,29 @@ public class MultipleGetTest extends AbstractMailTest {
     private UserValues values;
     private List<String[][]> fmids = new LinkedList<String[][]>();
 
-    public MultipleGetTest(final String name) {
-        super(name);
+    public MultipleGetTest() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         values = getClient().getValues();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        for (String[][] fmid : fmids) {
-            client.execute(new DeleteRequest(fmid, true).ignoreError());
+    @After
+    public void tearDown() throws Exception {
+        try {
+            for (String[][] fmid : fmids) {
+                getClient().execute(new DeleteRequest(fmid, true).ignoreError());
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
     private void importMail(String emlName) throws OXException, IOException, JSONException {
-        InputStreamReader streamReader = new InputStreamReader(new FileInputStream(new File(MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR),emlName)), com.openexchange.java.Charsets.UTF_8);
+        InputStreamReader streamReader = new InputStreamReader(new FileInputStream(new File(MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR), emlName)), com.openexchange.java.Charsets.UTF_8);
         char[] buf = new char[512];
         int length;
         StringBuilder sb = new StringBuilder();
@@ -117,9 +118,9 @@ public class MultipleGetTest extends AbstractMailTest {
             sb.append(buf, 0, length);
         }
         streamReader.close();
-        InputStream inputStream = new ByteArrayInputStream(TestMails.replaceAddresses(sb.toString(), client.getValues().getSendAddress()).getBytes(com.openexchange.java.Charsets.UTF_8));
+        InputStream inputStream = new ByteArrayInputStream(TestMails.replaceAddresses(sb.toString(), getClient().getValues().getSendAddress()).getBytes(com.openexchange.java.Charsets.UTF_8));
         ImportMailRequest importMailRequest = new ImportMailRequest(values.getInboxFolder(), MailFlag.SEEN.getValue(), inputStream);
-        ImportMailResponse importResp = client.execute(importMailRequest);
+        ImportMailResponse importResp = getClient().execute(importMailRequest);
         JSONArray json = (JSONArray) importResp.getData();
         fmids.add(importResp.getIds());
 
@@ -136,6 +137,7 @@ public class MultipleGetTest extends AbstractMailTest {
         }
     }
 
+    @Test
     public void testMultipleGet() throws OXException, IOException, JSONException {
         importMail("bug36333.eml");
         importMail("bug36333_2.eml");

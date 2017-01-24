@@ -49,10 +49,12 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
+import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.Constants;
@@ -64,6 +66,7 @@ public class Bug12072Test extends CalendarSqlTest {
      *
      * @throws OXException If an OX error occurs
      */
+    @Test
     public void testShouldNotIndicateConflictingResources() throws OXException {
         final long today = getTools().normalizeLong(System.currentTimeMillis());
         final int weekDayOfToday, weekDayOfTomorrow;

@@ -53,6 +53,7 @@ import com.openexchange.ajax.container.Response;
 
 /**
  * Common parser for delete responses.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class CommonDeleteParser extends AbstractDeleteParser<CommonDeleteResponse> {
@@ -63,6 +64,7 @@ public class CommonDeleteParser extends AbstractDeleteParser<CommonDeleteRespons
 
     /**
      * Override this method to create your own response class.
+     * 
      * @param response the json response container.
      * @return a {@link CommonDeleteResponse}
      */

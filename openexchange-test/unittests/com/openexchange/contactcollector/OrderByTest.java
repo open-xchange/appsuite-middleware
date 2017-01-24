@@ -49,9 +49,11 @@
 
 package com.openexchange.contactcollector;
 
+import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.List;
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.context.ContextService;
@@ -77,7 +79,7 @@ import com.openexchange.userconf.UserConfigurationService;
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class OrderByTest extends TestCase {
+public class OrderByTest {
 
     private SimpleServiceLookup services;
 
@@ -91,7 +93,7 @@ public class OrderByTest extends TestCase {
 
     private FolderObject contactFolder;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         Init.startServer();
 
@@ -124,6 +126,7 @@ public class OrderByTest extends TestCase {
         contactFolder = getStandardContactFolder();
     }
 
+    @Test
     public void testOrderByUserfield20() throws Throwable {
         ContactService contactService = services.getService(ContactService.class);
 
@@ -148,14 +151,12 @@ public class OrderByTest extends TestCase {
             contactService.createContact(session, String.valueOf(contactFolder.getObjectID()), contact2);
             contactService.createContact(session, String.valueOf(contactFolder.getObjectID()), contact3);
 
-            ContactField[] fields = new ContactField[] { ContactField.FOLDER_ID, ContactField.LAST_MODIFIED,
-                ContactField.OBJECT_ID, ContactField.SUR_NAME };
+            ContactField[] fields = new ContactField[] { ContactField.FOLDER_ID, ContactField.LAST_MODIFIED, ContactField.OBJECT_ID, ContactField.SUR_NAME };
             ContactSearchObject searchObject = new ContactSearchObject();
             searchObject.addFolder(contactFolder.getObjectID());
             searchObject.setEmailAutoComplete(true);
             searchObject.setEmail1("orderbyTest");
-            SearchIterator<Contact> iterator = contactService.searchContacts(session, searchObject, fields,
-                new SortOptions(ContactField.USERFIELD20, Order.ASCENDING));
+            SearchIterator<Contact> iterator = contactService.searchContacts(session, searchObject, fields, new SortOptions(ContactField.USERFIELD20, Order.ASCENDING));
             List<String> surnames = new ArrayList<String>();
             while (iterator.hasNext()) {
                 Contact foundContact;
@@ -171,12 +172,9 @@ public class OrderByTest extends TestCase {
             assertEquals("Contact on wrong position", "orderbyTest_contact1", surnames.get(2));
 
         } finally {
-            contactService.deleteContact(session, String.valueOf(contactFolder.getObjectID()), String.valueOf(contact1.getObjectID()),
-                contact1.getLastModified());
-            contactService.deleteContact(session, String.valueOf(contactFolder.getObjectID()), String.valueOf(contact2.getObjectID()),
-                contact2.getLastModified());
-            contactService.deleteContact(session, String.valueOf(contactFolder.getObjectID()), String.valueOf(contact3.getObjectID()),
-                contact3.getLastModified());
+            contactService.deleteContact(session, String.valueOf(contactFolder.getObjectID()), String.valueOf(contact1.getObjectID()), contact1.getLastModified());
+            contactService.deleteContact(session, String.valueOf(contactFolder.getObjectID()), String.valueOf(contact2.getObjectID()), contact2.getLastModified());
+            contactService.deleteContact(session, String.valueOf(contactFolder.getObjectID()), String.valueOf(contact3.getObjectID()), contact3.getLastModified());
         }
 
     }

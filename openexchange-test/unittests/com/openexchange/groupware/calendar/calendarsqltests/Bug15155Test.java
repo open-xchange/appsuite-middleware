@@ -49,10 +49,14 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
+import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
 import java.util.Date;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
-import static com.openexchange.groupware.calendar.TimeTools.D;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -63,7 +67,7 @@ public class Bug15155Test extends CalendarSqlTest {
 
     private Date newStart, newEnd;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
@@ -84,6 +88,7 @@ public class Bug15155Test extends CalendarSqlTest {
         changeAppointment.setInterval(1);
     }
 
+    @Test
     public void testBugStartChange() throws Exception {
         appointments.save(changeAppointment);
         CalendarDataObject loadAppointment = appointments.load(appointment.getObjectID(), appointment.getParentFolderID());
@@ -91,7 +96,7 @@ public class Bug15155Test extends CalendarSqlTest {
         assertEquals("Wrong end date.", newEnd.getTime(), loadAppointment.getEndDate().getTime());
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         super.tearDown();
     }

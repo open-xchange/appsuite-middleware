@@ -88,8 +88,7 @@ public class OCLGuestPermission extends OCLPermission {
     }
 
     public int getPermissionBits() {
-        return Permissions.createPermissionBits(
-            getFolderPermission(), getReadPermission(), getWritePermission(), getDeletePermission(), isFolderAdmin());
+        return Permissions.createPermissionBits(getFolderPermission(), getReadPermission(), getWritePermission(), getDeletePermission(), isFolderAdmin());
     }
 
 }

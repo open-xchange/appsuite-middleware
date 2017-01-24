@@ -1,13 +1,14 @@
+
 package com.openexchange.webdav.xml.writer;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    LockWriterTest.class, 
+    PropertiesWriterTest.class,
+    
+})
 public class WriterSuite {
-	public static Test suite(){
-		final TestSuite tests = new TestSuite();
-		tests.addTestSuite(LockWriterTest.class);
-		tests.addTestSuite(PropertiesWriterTest.class);
-		return tests;
-	}
 }

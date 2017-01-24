@@ -3577,7 +3577,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
      * since that will result in violating the locking hierarchy.
      */
     @Override
-    public void handleResponse(Response r) {
+    public synchronized void handleResponse(Response r) {
 	assert Thread.holdsLock(messageCacheLock);
 
 	/*

@@ -105,7 +105,7 @@ public class PhishingHeaders implements PreferencesItemService {
                 if (null == phishingHeaders || phishingHeaders.length == 0) {
                     setting.setSingleValue(null);
                 } else {
-                    final JSONArray jArray = new JSONArray();
+                    final JSONArray jArray = new JSONArray(phishingHeaders.length);
                     for (final String phishingHeader : phishingHeaders) {
                         jArray.put(phishingHeader);
                     }

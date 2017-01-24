@@ -361,8 +361,17 @@ public class SocketFetcher {
 		ssf = (SSLSocketFactory)sf;
 	    else
 		ssf = (SSLSocketFactory)SSLSocketFactory.getDefault();
-	    socket = ssf.createSocket(socket, host, port, true);
+	    boolean error = true;
+	    try {
+	    Socket newSocket = ssf.createSocket(socket, host, port, true);
+	    error = false;
+	    socket = newSocket;
 	    sf = ssf;
+	    } finally {
+	        if (error) {
+	            socket.close();
+	        }
+	    }
 	}
 
 	/*

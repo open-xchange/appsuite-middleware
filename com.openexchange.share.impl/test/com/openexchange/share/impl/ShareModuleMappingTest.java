@@ -93,8 +93,8 @@ public class ShareModuleMappingTest {
         ShareModuleMapping.init(configService);
     }
 
-    @Test
-    public void testShareModuleMappingToInteger() throws Exception {
+     @Test
+     public void testShareModuleMappingToInteger() throws Exception {
         int test1 = ShareModuleMapping.moduleMapping2int("test1");
         int test2 = ShareModuleMapping.moduleMapping2int("test2");
         int test3 = ShareModuleMapping.moduleMapping2int("test3");
@@ -105,8 +105,8 @@ public class ShareModuleMappingTest {
         assertEquals("Unexpected value for unbound.", -1, unbound);
     }
 
-    @Test
-    public void testShareModuleMappingToString() throws Exception {
+     @Test
+     public void testShareModuleMappingToString() throws Exception {
         String test1 = ShareModuleMapping.moduleMapping2String(100);
         String test2 = ShareModuleMapping.moduleMapping2String(101);
         String test3 = ShareModuleMapping.moduleMapping2String(999);

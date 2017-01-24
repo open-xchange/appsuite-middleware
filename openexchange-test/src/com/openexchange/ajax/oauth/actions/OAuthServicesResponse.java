@@ -54,7 +54,6 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.oauth.types.OAuthService;
 
-
 /**
  * {@link OAuthServicesResponse}
  *
@@ -66,6 +65,7 @@ public class OAuthServicesResponse extends AbstractAJAXResponse {
 
     /**
      * Initializes a new {@link OAuthServicesResponse}.
+     * 
      * @param response
      */
     protected OAuthServicesResponse(Response response, List<OAuthService> services) {

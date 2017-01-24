@@ -49,8 +49,8 @@
 
 package com.openexchange.messaging.json.actions.accounts;
 
-import junit.framework.TestCase;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
@@ -63,16 +63,20 @@ import com.openexchange.messaging.SimMessagingAccount;
 import com.openexchange.messaging.SimMessagingService;
 import com.openexchange.messaging.registry.SimMessagingServiceRegistry;
 import com.openexchange.tools.session.SimServerSession;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * {@link GetTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class GetTest extends TestCase {
-
+public class GetTest {
     // Success Case
-    public void testGet() throws OXException {
+         @Test
+     public void testGet() throws OXException {
         final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
 
         final SimAccountManager accManager = new SimAccountManager();
@@ -114,7 +118,8 @@ public class GetTest extends TestCase {
 
     // Error Cases
 
-    public void testMissingParameterID() throws OXException {
+         @Test
+     public void testMissingParameterID() throws OXException {
 
         final AJAXRequestData requestData = new AJAXRequestData();
         requestData.putParameter("messagingService", "com.openexchange.twitter");
@@ -131,7 +136,8 @@ public class GetTest extends TestCase {
         }
     }
 
-    public void testMissingParameterMessagingService() throws OXException {
+         @Test
+     public void testMissingParameterMessagingService() throws OXException {
         final AJAXRequestData requestData = new AJAXRequestData();
         requestData.putParameter("id", "12");
 
@@ -147,7 +153,8 @@ public class GetTest extends TestCase {
         }
     }
 
-    public void testNumberFormatExceptionInID() throws OXException {
+         @Test
+     public void testNumberFormatExceptionInID() throws OXException {
         final AJAXRequestData requestData = new AJAXRequestData();
         requestData.putParameter("id", "I'm not a number");
         requestData.putParameter("messagingService", "com.openexchange.twitter");
@@ -165,7 +172,8 @@ public class GetTest extends TestCase {
 
     }
 
-    public void testOXExceptionInRegistry() throws OXException {
+         @Test
+     public void testOXExceptionInRegistry() throws OXException {
         final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
         registry.setException(new OXException());
 
@@ -192,7 +200,8 @@ public class GetTest extends TestCase {
 
     }
 
-    public void testOXExceptionInAccountManager() throws OXException {
+         @Test
+     public void testOXExceptionInAccountManager() throws OXException {
         final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
 
         final SimAccountManager accManager = new SimAccountManager();

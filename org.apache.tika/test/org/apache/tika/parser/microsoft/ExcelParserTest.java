@@ -18,9 +18,6 @@ package org.apache.tika.parser.microsoft;
 
 import java.io.InputStream;
 import java.util.Locale;
-
-import junit.framework.TestCase;
-
 import org.apache.tika.detect.DefaultDetector;
 import org.apache.tika.detect.Detector;
 import org.apache.tika.metadata.Metadata;
@@ -31,10 +28,15 @@ import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.microsoft.ooxml.OOXMLParser;
 import org.apache.tika.sax.BodyContentHandler;
+import org.junit.Test;
 import org.xml.sax.ContentHandler;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
-public class ExcelParserTest extends TestCase {
-    public void testExcelParser() throws Exception {
+public class ExcelParserTest {         @Test
+     public void testExcelParser() throws Exception {
         InputStream input = ExcelParserTest.class.getResourceAsStream(
                 "/test-documents/testEXCEL.xls");
         try {
@@ -72,7 +74,8 @@ public class ExcelParserTest extends TestCase {
         }
     }
 
-    public void testExcelParserFormatting() throws Exception {
+         @Test
+     public void testExcelParserFormatting() throws Exception {
         InputStream input = ExcelParserTest.class.getResourceAsStream(
                 "/test-documents/testEXCEL-formats.xls");
         try {
@@ -147,7 +150,8 @@ public class ExcelParserTest extends TestCase {
     /**
      * TIKA-214 - Ensure we extract labels etc from Charts
      */
-    public void testExcelParserCharts() throws Exception {
+         @Test
+     public void testExcelParserCharts() throws Exception {
         InputStream input = ExcelParserTest.class.getResourceAsStream(
                   "/test-documents/testEXCEL-charts.xls");
         try {
@@ -184,7 +188,8 @@ public class ExcelParserTest extends TestCase {
         }
     }
 
-    public void testJXL() throws Exception {
+         @Test
+     public void testJXL() throws Exception {
         InputStream input = ExcelParserTest.class.getResourceAsStream(
                 "/test-documents/jxl.xls");
         try {
@@ -204,7 +209,8 @@ public class ExcelParserTest extends TestCase {
         }
     }
     
-    public void testWorksSpreadsheet70() throws Exception {
+         @Test
+     public void testWorksSpreadsheet70() throws Exception {
         InputStream input = ExcelParserTest.class.getResourceAsStream(
                 "/test-documents/testWORKSSpreadsheet7.0.xlr");
         try {
@@ -226,7 +232,8 @@ public class ExcelParserTest extends TestCase {
      *  (an OOXML container with binary blobs), but we 
      *  shouldn't break on these files either (TIKA-826)  
      */
-    public void testExcelXLSB() throws Exception {
+         @Test
+     public void testExcelXLSB() throws Exception {
        Detector detector = new DefaultDetector();
        AutoDetectParser parser = new AutoDetectParser();
        
@@ -270,7 +277,8 @@ public class ExcelParserTest extends TestCase {
      * We don't currently support the old Excel 95 .xls file format, 
      *  but we shouldn't break on these files either (TIKA-976)  
      */
-    public void testExcel95() throws Exception {
+         @Test
+     public void testExcel95() throws Exception {
        Detector detector = new DefaultDetector();
        AutoDetectParser parser = new AutoDetectParser();
        
@@ -313,7 +321,8 @@ public class ExcelParserTest extends TestCase {
     /**
      * Ensures that custom OLE2 (HPSF) properties are extracted
      */
-    public void testCustomProperties() throws Exception {
+         @Test
+     public void testCustomProperties() throws Exception {
        InputStream input = ExcelParserTest.class.getResourceAsStream(
              "/test-documents/testEXCEL_custom_props.xls");
        Metadata metadata = new Metadata();

@@ -18,23 +18,25 @@ package org.apache.tika.parser.txt;
 
 import java.io.ByteArrayInputStream;
 import java.io.StringWriter;
-
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
 import org.apache.tika.sax.BodyContentHandler;
 import org.apache.tika.sax.WriteOutContentHandler;
+import org.junit.Test;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.helpers.DefaultHandler;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
-import junit.framework.TestCase;
-
-public class TXTParserTest extends TestCase {
-
+public class TXTParserTest {
     private Parser parser = new TXTParser();
 
-    public void testEnglishText() throws Exception {
+         @Test
+     public void testEnglishText() throws Exception {
         String text =
             "Hello, World! This is simple UTF-8 text content written"
             + " in English to test autodetection of both the character"
@@ -61,7 +63,8 @@ public class TXTParserTest extends TestCase {
         assertTrue(content.contains("stream"));
     }
     
-    public void testUTF8Text() throws Exception {
+         @Test
+     public void testUTF8Text() throws Exception {
         String text = "I\u00F1t\u00EBrn\u00E2ti\u00F4n\u00E0liz\u00E6ti\u00F8n";
 
         ContentHandler handler = new BodyContentHandler();
@@ -75,7 +78,8 @@ public class TXTParserTest extends TestCase {
         assertTrue(handler.toString().contains(text));
     }
 
-    public void testEmptyText() throws Exception {
+         @Test
+     public void testEmptyText() throws Exception {
         ContentHandler handler = new BodyContentHandler();
         Metadata metadata = new Metadata();
         parser.parse(
@@ -91,7 +95,8 @@ public class TXTParserTest extends TestCase {
      * otherwise ISO-8859-1, except if it contains the currency/euro symbol
      * (byte 0xa4) in which case it's more likely to be ISO-8859-15.
      */
-    public void testLatinDetectionHeuristics() throws Exception {
+         @Test
+     public void testLatinDetectionHeuristics() throws Exception {
         String windows = "test\r\n";
         String unix = "test\n";
         String euro = "test \u20ac\n";
@@ -128,7 +133,8 @@ public class TXTParserTest extends TestCase {
      *
      * @see <a href="https://issues.apache.org/jira/browse/TIKA-240">TIKA-240</a> 
      */
-    public void testDropByteOrderMark() throws Exception {
+         @Test
+     public void testDropByteOrderMark() throws Exception {
         assertExtractText("UTF-8 BOM", "test", new byte[] {
                 (byte) 0xEF, (byte) 0xBB, (byte) 0xBF, 't', 'e', 's', 't' });
         assertExtractText("UTF-16 BE BOM", "test", new byte[] {
@@ -142,7 +148,8 @@ public class TXTParserTest extends TestCase {
      *
      * @see <a href="https://issues.apache.org/jira/browse/TIKA-335">TIKA-335</a> 
      */
-    public void testUseIncomingCharsetAsHint() throws Exception {
+         @Test
+     public void testUseIncomingCharsetAsHint() throws Exception {
         // Could be ISO 8859-1 or ISO 8859-15 or ...
         // u00e1 is latin small letter a with acute
         final String test2 = "the name is \u00e1ndre";
@@ -167,7 +174,8 @@ public class TXTParserTest extends TestCase {
      *
      * @see <a href="https://issues.apache.org/jira/browse/TIKA-341">TIKA-341</a> 
      */
-    public void testUsingCharsetInContentTypeHeader() throws Exception {
+         @Test
+     public void testUsingCharsetInContentTypeHeader() throws Exception {
         // Could be ISO 8859-1 or ISO 8859-15 or ...
         // u00e1 is latin small letter a with acute
         final String test2 = "the name is \u00e1ndre";
@@ -205,7 +213,8 @@ public class TXTParserTest extends TestCase {
      *
      * @see <a href="https://issues.apache.org/jira/browse/TIKA-335">TIKA-335</a> 
      */
-    public void testRetainIncomingLanguage() throws Exception {
+         @Test
+     public void testRetainIncomingLanguage() throws Exception {
         final String test = "Simple Content";
 
         Metadata metadata = new Metadata();
@@ -218,7 +227,8 @@ public class TXTParserTest extends TestCase {
         assertEquals("en", metadata.get(TikaCoreProperties.LANGUAGE));
     }
 
-    public void testCP866() throws Exception {
+         @Test
+     public void testCP866() throws Exception {
         Metadata metadata = new Metadata();
         StringWriter writer = new StringWriter();
         parser.parse(
@@ -230,7 +240,8 @@ public class TXTParserTest extends TestCase {
         assertEquals("text/plain; charset=IBM866", metadata.get(Metadata.CONTENT_TYPE));
     }
 
-    public void testEBCDIC_CP500() throws Exception {
+         @Test
+     public void testEBCDIC_CP500() throws Exception {
         Metadata metadata = new Metadata();
         StringWriter writer = new StringWriter();
         parser.parse(
@@ -258,7 +269,8 @@ public class TXTParserTest extends TestCase {
      *
      * @see <a href="https://issues.apache.org/jira/browse/TIKA-771">TIKA-771</a> 
      */
-    public void testCharsetDetectionWithShortSnipet() throws Exception {
+         @Test
+     public void testCharsetDetectionWithShortSnipet() throws Exception {
         final String text = "Hello, World!";
 
         Metadata metadata = new Metadata();

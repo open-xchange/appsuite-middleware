@@ -49,11 +49,15 @@
 
 package com.openexchange.publish.microformats;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.microformats.tools.ContactTemplateUtils;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 
 /**
@@ -62,8 +66,8 @@ import com.openexchange.publish.microformats.tools.ContactTemplateUtils;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class ContactTemplateUtilsTest extends TestCase {
-    public void testImageURL() {
+public class ContactTemplateUtilsTest {         @Test
+     public void testImageURL() {
         Contact contactObject = new Contact();
         contactObject.setObjectID(12);
 
@@ -80,7 +84,8 @@ public class ContactTemplateUtilsTest extends TestCase {
         assertEquals("/publications/contactPictures/1337/my/nice/site/12/image", url);
     }
 
-    public void testImageURLWithSecret() {
+         @Test
+     public void testImageURLWithSecret() {
         Contact contactObject = new Contact();
         contactObject.setObjectID(12);
 

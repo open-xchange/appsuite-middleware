@@ -68,8 +68,8 @@ import com.openexchange.groupware.container.CalendarObject;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class AppointmentDiffTest {
-    @Test
-    public void testDifferentDates() {
+     @Test
+     public void testDifferentDates() {
         int[] fieldsToTest = new int[]{CalendarObject.START_DATE, CalendarObject.END_DATE};
         Date oldValue = D("8:00 PM");
         Date newValue = D("10:00 PM");
@@ -77,16 +77,16 @@ public class AppointmentDiffTest {
        expectDifference(fieldsToTest, oldValue, newValue);
     }
 
-    @Test
-    public void testSameDates() {
+     @Test
+     public void testSameDates() {
         int[] fieldsToTest = new int[]{CalendarObject.START_DATE, CalendarObject.END_DATE};
         Date value = D("8:00 PM");
 
         expectSame(fieldsToTest, value);
     }
 
-    @Test
-    public void testOneDateDiffers() {
+     @Test
+     public void testOneDateDiffers() {
         Appointment original = new Appointment();
         Appointment update = new Appointment();
 

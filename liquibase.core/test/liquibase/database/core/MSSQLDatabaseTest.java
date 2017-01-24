@@ -1,11 +1,13 @@
 package liquibase.database.core;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import org.junit.Assert;
+import org.junit.Test;
 import liquibase.database.AbstractJdbcDatabaseTest;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
-import org.junit.Assert;
-import static org.junit.Assert.*;
-import org.junit.Test;
 
 /**
  * Tests for {@link MSSQLDatabase}
@@ -22,14 +24,12 @@ public class MSSQLDatabaseTest extends AbstractJdbcDatabaseTest {
     }
 
 
-    @Override
-    @Test
+     @Test
     public void supportsInitiallyDeferrableColumns() {
         assertFalse(getDatabase().supportsInitiallyDeferrableColumns());
     }
 
-    @Override
-    @Test
+     @Test
     public void getCurrentDateTimeFunction() {
         Assert.assertEquals("GETDATE()", getDatabase().getCurrentDateTimeFunction());
     }
@@ -43,15 +43,13 @@ public class MSSQLDatabaseTest extends AbstractJdbcDatabaseTest {
         assertNull(database.getDefaultDriver("jdbc:oracle:thin://localhost;databaseName=liquibase"));
     }
 
-    @Override
-    @Test
+     @Test
     public void escapeTableName_noSchema() {
         Database database = new MSSQLDatabase();
         assertEquals("[tableName]", database.escapeTableName(null, null, "tableName"));
     }
 
-    @Override
-    @Test
+     @Test
     public void escapeTableName_withSchema() {
         Database database = new MSSQLDatabase();
         assertEquals("[schemaName].[tableName]", database.escapeTableName("catalogName", "schemaName", "tableName"));

@@ -54,7 +54,6 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.writer.ResponseWriter;
 
-
 /**
  * {@link OAuthTestResponse}
  *
@@ -65,6 +64,7 @@ public class OAuthTestResponse extends AbstractAJAXResponse {
 
     /**
      * Initializes a new {@link OAuthTestResponse}.
+     * 
      * @param response
      */
     protected OAuthTestResponse(Response response) {

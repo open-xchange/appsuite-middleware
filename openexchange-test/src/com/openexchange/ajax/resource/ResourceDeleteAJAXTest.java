@@ -51,6 +51,7 @@ package com.openexchange.ajax.resource;
 
 import java.io.IOException;
 import org.json.JSONException;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.resource.actions.ResourceDeleteRequest;
@@ -66,46 +67,46 @@ import com.openexchange.resource.Resource;
  */
 public final class ResourceDeleteAJAXTest extends AbstractResourceTest {
 
-	/**
-	 * Initializes a new {@link ResourceDeleteAJAXTest}
-	 *
-	 * @param name
-	 *            The test name
-	 */
-	public ResourceDeleteAJAXTest(final String name) {
-		super(name);
-	}
+    /**
+     * Initializes a new {@link ResourceDeleteAJAXTest}
+     *
+     * @param name
+     *            The test name
+     */
+    public ResourceDeleteAJAXTest() {
+        super();
+    }
 
-	/**
-	 * Tests the <code>action=delete</code> request
-	 */
-	public void testDelete() throws OXException, JSONException, IOException, SAXException {
-		int id = -1;
-		try {
-			/*
-			 * Create resource
-			 */
-			final Resource resource = new Resource();
-			resource.setAvailable(true);
-			resource.setMail("my.resource@domain.tdl");
-			resource.setSimpleName(ResourceDeleteAJAXTest.class.getName());
-			resource.setDisplayName(ResourceDeleteAJAXTest.class.getName());
-			resource.setDescription(ResourceDeleteAJAXTest.class.getName());
-			id = createResource(resource);
-			/*
-			 * Obtain timestamp
-			 */
-			final long clientLastModified = Executor.execute(getSession(), new ResourceGetRequest(id, true))
-					.getTimestamp().getTime();
-			/*
-			 * Perform update request
-			 */
-			resource.setIdentifier(id);
-			Executor.execute(getSession(), new ResourceDeleteRequest(resource, clientLastModified, true));
+    /**
+     * Tests the <code>action=delete</code> request
+     */
+    @Test
+    public void testDelete() throws OXException, JSONException, IOException, SAXException {
+        int id = -1;
+        try {
+            /*
+             * Create resource
+             */
+            final Resource resource = new Resource();
+            resource.setAvailable(true);
+            resource.setMail("my.resource@domain.tdl");
+            resource.setSimpleName(ResourceDeleteAJAXTest.class.getName());
+            resource.setDisplayName(ResourceDeleteAJAXTest.class.getName());
+            resource.setDescription(ResourceDeleteAJAXTest.class.getName());
+            id = createResource(resource);
+            /*
+             * Obtain timestamp
+             */
+            final long clientLastModified = Executor.execute(getSession(), new ResourceGetRequest(id, true)).getTimestamp().getTime();
+            /*
+             * Perform update request
+             */
+            resource.setIdentifier(id);
+            Executor.execute(getSession(), new ResourceDeleteRequest(resource, clientLastModified, true));
 
-			id = -1;
-		} finally {
-		    deleteResource(id);
-		}
-	}
+            id = -1;
+        } finally {
+            deleteResource(id);
+        }
+    }
 }

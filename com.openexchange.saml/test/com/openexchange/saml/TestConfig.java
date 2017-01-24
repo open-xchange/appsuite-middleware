@@ -49,6 +49,8 @@
 
 package com.openexchange.saml;
 
+import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 
 public class TestConfig implements SAMLConfig {
 
@@ -125,5 +127,10 @@ public class TestConfig implements SAMLConfig {
     @Override
     public boolean isSessionIndexAutoLoginEnabled() {
         return true;
+    }
+
+    @Override
+    public Set<String> getHosts() {
+        return ImmutableSet.of("all");
     }
 }

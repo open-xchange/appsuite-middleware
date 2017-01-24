@@ -60,10 +60,12 @@ import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.ajax.writer.ResponseWriter;
@@ -87,7 +89,7 @@ public class APIResponseRenderer implements ResponseRenderer {
 
     private static final String CALLBACK = "callback";
 
-    private static final String PLAIN_JSON = "plainJson";
+    private static final String PLAIN_JSON = AJAXServlet.PARAM_PLAIN_JSON;
 
     private static final String INCLUDE_STACK_TRACE_ON_ERROR = com.openexchange.ajax.AJAXServlet.PARAMETER_INCLUDE_STACK_TRACE_ON_ERROR;
 
@@ -112,8 +114,13 @@ public class APIResponseRenderer implements ResponseRenderer {
 
     @Override
     public void write(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-        final Boolean plainJson = (Boolean) result.getParameter(PLAIN_JSON);
-        final Response response = (Response) result.getResultObject();
+        Boolean plainJson = (Boolean) result.getParameter(PLAIN_JSON);
+        if (null == plainJson) {
+            boolean b = AJAXRequestDataTools.parseBoolParameter(PLAIN_JSON, request);
+            plainJson = b ? Boolean.TRUE : null;
+        }
+
+        Response response = (Response) result.getResultObject();
         response.setContinuationUUID(result.getContinuationUuid());
         if (parseBoolParameter(INCLUDE_STACK_TRACE_ON_ERROR, request) ) {
             response.setIncludeStackTraceOnError(true);

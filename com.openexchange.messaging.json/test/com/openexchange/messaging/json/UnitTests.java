@@ -49,8 +49,8 @@
 
 package com.openexchange.messaging.json;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 
 /**
@@ -59,38 +59,34 @@ import junit.framework.TestSuite;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    MessagingAccountParserTest.class,
+    MessagingAccountWriterTest.class,
+    MessagingServiceWriterTest.class,
+    MessagingMessageWriterTest.class,
+    MessagingMessageParserTest.class,
+
+    ContentTypeWriterTest.class,
+    ContentTypeParserTest.class,
+    AddressHeaderWriterTest.class,
+    AddressHeaderParserTest.class,
+
+    com.openexchange.messaging.json.actions.accounts.AllTest.class,
+    com.openexchange.messaging.json.actions.accounts.DeleteTest.class,
+    com.openexchange.messaging.json.actions.accounts.GetTest.class,
+    com.openexchange.messaging.json.actions.accounts.NewTest.class,
+    com.openexchange.messaging.json.actions.accounts.UpdateTest.class,
+
+    com.openexchange.messaging.json.actions.services.AllActionTest.class,
+    com.openexchange.messaging.json.actions.services.GetActionTest.class,
+
+    com.openexchange.messaging.json.actions.messages.AllTest.class,
+    com.openexchange.messaging.json.actions.messages.GetTest.class,
+    com.openexchange.messaging.json.actions.messages.ListTest.class,
+    com.openexchange.messaging.json.actions.messages.PerformTest.class,
+    com.openexchange.messaging.json.actions.messages.SendTest.class,
+    com.openexchange.messaging.json.actions.messages.MessagingRequestDataTest.class,
+})
 public class UnitTests {
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(MessagingAccountParserTest.class);
-        tests.addTestSuite(MessagingAccountWriterTest.class);
-        tests.addTestSuite(MessagingServiceWriterTest.class);
-        tests.addTestSuite(MessagingMessageWriterTest.class);
-        tests.addTestSuite(MessagingMessageParserTest.class);
-
-        tests.addTestSuite(ContentTypeWriterTest.class);
-        tests.addTestSuite(ContentTypeParserTest.class);
-        tests.addTestSuite(AddressHeaderWriterTest.class);
-        tests.addTestSuite(AddressHeaderParserTest.class);
-
-
-        tests.addTestSuite(com.openexchange.messaging.json.actions.accounts.AllTest.class);
-        tests.addTestSuite(com.openexchange.messaging.json.actions.accounts.DeleteTest.class);
-        tests.addTestSuite(com.openexchange.messaging.json.actions.accounts.GetTest.class);
-        tests.addTestSuite(com.openexchange.messaging.json.actions.accounts.NewTest.class);
-        tests.addTestSuite(com.openexchange.messaging.json.actions.accounts.UpdateTest.class);
-
-        tests.addTestSuite(com.openexchange.messaging.json.actions.services.AllActionTest.class);
-        tests.addTestSuite(com.openexchange.messaging.json.actions.services.GetActionTest.class);
-
-        tests.addTestSuite(com.openexchange.messaging.json.actions.messages.AllTest.class);
-        tests.addTestSuite(com.openexchange.messaging.json.actions.messages.GetTest.class);
-        tests.addTestSuite(com.openexchange.messaging.json.actions.messages.ListTest.class);
-        tests.addTestSuite(com.openexchange.messaging.json.actions.messages.PerformTest.class);
-        tests.addTestSuite(com.openexchange.messaging.json.actions.messages.SendTest.class);
-        tests.addTestSuite(com.openexchange.messaging.json.actions.messages.MessagingRequestDataTest.class);
-
-
-        return tests;
-    }
 }

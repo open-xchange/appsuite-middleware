@@ -49,50 +49,46 @@
 
 package com.openexchange.ajax.importexport;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 /**
  * Test suite for iCal tests.
  */
-public final class ICalTestSuite {
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    ICalImportTest.class,
+    ICalTaskExportTest.class,
+    ICalAppointmentExportTest.class,
+    ICalSeriesTests.class,
+    Bug9840Test.class,
+    Bug11724Test.class,
+    Bug11868Test.class,
+    Bug11871Test.class,
+    Bug11920Test.class,
+    Bug11996Test.class,
+    Bug12414Test.class,
+    Bug12470Test.class,
+    Bug17393Test.class,
+    Bug17963Test_DateWithoutTime.class,
+    Bug19046Test_SeriesWithExtraneousStartDate.class,
+    Bug19089Test.class,
+    Bug19463Test_TimezoneOffsetsWith4Digits.class,
+    Bug19681_TimezoneForUtcProperties.class,
+    Bug19915Test.class,
+    Bug20132Test_WrongRecurrenceDatePosition.class,
+    Bug20405Test_TaskWithoutDueDate.class,
+    Bug20413Test_CompletelyWrongDTStart.class,
+    Bug20453Test_emptyDTEND.class,
+    Bug20498Test_ReminderJumpsAnHour.class,
+    Bug20715Test_UidIsNotcaseSensitive.class,
+    Bug20718Test_JumpDuringDstCrossing.class,
+    Bug20896Test_AlarmsChange.class,
+    Bug20945Test_UnexpectedError26.class,
+    Bug22059Test.class,
+    Bug27474Test.class,
+    Bug28071Test.class,
 
-	/**
-	 * @return the suite.
-	 */
-	public static Test suite() {
-		final TestSuite tests = new TestSuite();
-		tests.addTestSuite(ICalImportTest.class);
-		tests.addTestSuite(ICalTaskExportTest.class);
-		tests.addTestSuite(ICalAppointmentExportTest.class);
-		tests.addTestSuite(ICalSeriesTests.class);
-		tests.addTestSuite(Bug9840Test.class);
-		tests.addTestSuite(Bug11724Test.class);
-		tests.addTestSuite(Bug11868Test.class);
-		tests.addTestSuite(Bug11871Test.class);
-		tests.addTestSuite(Bug11920Test.class);
-		tests.addTestSuite(Bug11996Test.class);
-		tests.addTestSuite(Bug12414Test.class);
-		tests.addTestSuite(Bug12470Test.class);
-		tests.addTestSuite(Bug17393Test.class);
-		tests.addTestSuite(Bug17963Test_DateWithoutTime.class);
-		tests.addTestSuite(Bug19046Test_SeriesWithExtraneousStartDate.class);
-		tests.addTestSuite(Bug19089Test.class);
-		tests.addTestSuite(Bug19463Test_TimezoneOffsetsWith4Digits.class);
-		tests.addTestSuite(Bug19681_TimezoneForUtcProperties.class);
-		tests.addTestSuite(Bug19915Test.class);
-		tests.addTestSuite(Bug20132Test_WrongRecurrenceDatePosition.class);
-		tests.addTestSuite(Bug20405Test_TaskWithoutDueDate.class);
-		tests.addTestSuite(Bug20413Test_CompletelyWrongDTStart.class);
-		tests.addTestSuite(Bug20453Test_emptyDTEND.class);
-		tests.addTestSuite(Bug20498Test_ReminderJumpsAnHour.class);
-		tests.addTestSuite(Bug20715Test_UidIsNotcaseSensitive.class);
-		tests.addTestSuite(Bug20718Test_JumpDuringDstCrossing.class);
-		tests.addTestSuite(Bug20896Test_AlarmsChange.class);
-		tests.addTestSuite(Bug20945Test_UnexpectedError26.class);
-		tests.addTestSuite(Bug22059Test.class);
-        tests.addTestSuite(Bug27474Test.class);
-        tests.addTestSuite(Bug28071Test.class);
-		return tests;
-	}
+})
+public final class ICalTestSuite {
 }

@@ -1,12 +1,16 @@
 
 package com.openexchange.groupware.update;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.SortedSet;
+import org.junit.After;
+import org.junit.Before;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
@@ -21,9 +25,8 @@ import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.setuptools.TestConfig;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
-import junit.framework.TestCase;
 
-public abstract class UpdateTest extends TestCase {
+public abstract class UpdateTest {
 
     protected Schema schema = null;
 
@@ -39,7 +42,7 @@ public abstract class UpdateTest extends TestCase {
 
     private DBProvider provider;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         Init.startServer();
 
@@ -54,7 +57,7 @@ public abstract class UpdateTest extends TestCase {
         session = SessionObjectWrapper.createSessionObject(user_id, ctx.getContextId(), String.valueOf(System.currentTimeMillis()));
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         Init.stopServer();
     }

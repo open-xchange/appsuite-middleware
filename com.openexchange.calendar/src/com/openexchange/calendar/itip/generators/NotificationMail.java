@@ -332,7 +332,7 @@ public class NotificationMail {
     }
 
     public boolean shouldBeSent() {
-        if (endsInPast(appointment)) {
+        if (appointment != null && endsInPast(appointment)) {
             return false;
         }
         if (recipient.getConfiguration().forceCancelMails() && isCancelMail()) {

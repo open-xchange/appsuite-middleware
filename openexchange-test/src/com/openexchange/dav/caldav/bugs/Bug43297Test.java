@@ -60,8 +60,6 @@ import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertResponse;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.caldav.CalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
@@ -93,10 +91,10 @@ public class Bug43297Test extends CalDAVTest {
 
     @Before
     public void setUp() throws Exception {
-        manager2 = new CalendarTestManager(new AJAXClient(User.User2));
+        super.setUp();
+        manager2 = new CalendarTestManager(getClient2());
         manager2.setFailOnError(true);
-        FolderObject calendarFolder = manager2.getClient().execute(
-            new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, manager2.getPrivateFolder())).getFolder();
+        FolderObject calendarFolder = manager2.getClient().execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, manager2.getPrivateFolder())).getFolder();
         String subFolderName = "testfolder_" + randomUID();
         FolderObject folder = new FolderObject();
         folder.setFolderName(subFolderName);
@@ -119,15 +117,20 @@ public class Bug43297Test extends CalDAVTest {
 
     @After
     public void tearDown() throws Exception {
-        if (null != this.manager2) {
-            if (null != subfolder) {
-                manager2.getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_NEW, subfolder));
+        try {
+            if (null != this.manager2) {
+                if (null != subfolder) {
+                    manager2.getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_NEW, subfolder));
+                }
+                this.manager2.cleanUp();
+                if (null != manager2.getClient()) {
+                    manager2.getClient().logout();
+                }
             }
-            this.manager2.cleanUp();
-            if (null != manager2.getClient()) {
-                manager2.getClient().logout();
-            }
+        } finally {
+            super.tearDown();
         }
+
     }
 
     @Test

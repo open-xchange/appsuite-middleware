@@ -52,6 +52,8 @@ package com.openexchange.ajax.task;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.task.actions.DeleteRequest;
@@ -64,6 +66,7 @@ import com.openexchange.groupware.tasks.Task;
 
 /**
  * Checks if the problem described in bug 8935 appears again.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class Bug8935Test extends AbstractTaskTest {
@@ -72,44 +75,46 @@ public class Bug8935Test extends AbstractTaskTest {
 
     /**
      * Default constructor.
+     * 
      * @param name name of the test.
      */
-    public Bug8935Test(final String name) {
-        super(name);
+    public Bug8935Test() {
+        super();
     }
 
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
     }
 
     /**
      * Checks if a task can be created with a title of "null";
+     * 
      * @throws Throwable if an exception occurs.
      */
+    @Test
     public void testNull() throws Throwable {
         final Task task = Create.createWithDefaults();
         task.setTitle("null");
         task.setParentFolderID(client.getValues().getPrivateTaskFolder());
         final InsertResponse iResponse = client.execute(new InsertRequest(task, client.getValues().getTimeZone()));
-        final GetResponse gResponse = TaskTools.get(client,
-            new GetRequest(iResponse));
+        final GetResponse gResponse = TaskTools.get(client, new GetRequest(iResponse));
         final Task reload = gResponse.getTask(client.getValues().getTimeZone());
         TaskTools.compareAttributes(task, reload);
         client.execute(new DeleteRequest(reload));
     }
 
+    @Test
     public void testRealNull() throws Throwable {
         final Task task = Create.createWithDefaults();
         task.removeTitle();
         task.setParentFolderID(client.getValues().getPrivateTaskFolder());
         final InsertResponse iResponse = client.execute(new SpecialInsertRequest(task, client.getValues().getTimeZone()));
-        final GetResponse gResponse = TaskTools.get(client,
-            new GetRequest(iResponse));
+        final GetResponse gResponse = TaskTools.get(client, new GetRequest(iResponse));
         final Task reload = gResponse.getTask(client.getValues().getTimeZone());
         TaskTools.compareAttributes(task, reload);
         client.execute(new DeleteRequest(reload));
@@ -132,6 +137,7 @@ public class Bug8935Test extends AbstractTaskTest {
         }
     }
 
+    @Test
     public void testEmptyString() throws Throwable {
         final Task task = Create.createWithDefaults();
         // Empty string must be interpreted as null.
@@ -140,8 +146,7 @@ public class Bug8935Test extends AbstractTaskTest {
         final InsertResponse iResponse = client.execute(new SpecialInsertRequest(task, client.getValues().getTimeZone()));
         // remove it because server won't sent empty fields.
         task.removeTitle();
-        final GetResponse gResponse = TaskTools.get(client,
-            new GetRequest(iResponse));
+        final GetResponse gResponse = TaskTools.get(client, new GetRequest(iResponse));
         final Task reload = gResponse.getTask(client.getValues().getTimeZone());
         TaskTools.compareAttributes(task, reload);
         client.execute(new DeleteRequest(reload));

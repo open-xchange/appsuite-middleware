@@ -60,8 +60,8 @@ import com.openexchange.html.AbstractSanitizing;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class Bug19466Test extends AbstractSanitizing {
-    @Test
-    public void testHtmlEntities2Plaintext() {
+     @Test
+     public void testHtmlEntities2Plaintext() {
         assertEquals("Unexpected return value", "Hi, das war's", getHtmlService().html2text("Hi, das war&apos;s", false));
         assertEquals("Unexpected return value", "Hi, das war's", getHtmlService().html2text("Hi, das war's", false));
     }

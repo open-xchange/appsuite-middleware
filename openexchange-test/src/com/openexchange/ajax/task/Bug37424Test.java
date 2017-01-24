@@ -51,6 +51,7 @@ package com.openexchange.ajax.task;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import static com.openexchange.java.Autoboxing.I2i;
+import static org.junit.Assert.assertFalse;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -86,13 +87,12 @@ public class Bug37424Test extends AbstractAJAXSession {
      *
      * @param name The test name
      */
-    public Bug37424Test(String name) {
-        super(name);
+    public Bug37424Test() {
+        super();
     }
 
     @Before
-    @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         timeZone = client.getValues().getTimeZone();
@@ -100,23 +100,25 @@ public class Bug37424Test extends AbstractAJAXSession {
     }
 
     @After
-    @Override
-    protected void tearDown() throws Exception {
-        if (null != client && null != tasksToDelete) {
-            int folderID = client.getValues().getPrivateTaskFolder();
-            Set<Integer> ids = new HashSet<Integer>();
-            for (Task task : tasksToDelete) {
-                if (folderID != task.getParentFolderID()) {
-                    client.execute(new DeleteRequest(task));
-                } else {
-                    ids.add(Integer.valueOf(task.getObjectID()));
+    public void tearDown() throws Exception {
+        try {
+            if (null != client && null != tasksToDelete) {
+                int folderID = client.getValues().getPrivateTaskFolder();
+                Set<Integer> ids = new HashSet<Integer>();
+                for (Task task : tasksToDelete) {
+                    if (folderID != task.getParentFolderID()) {
+                        client.execute(new DeleteRequest(task));
+                    } else {
+                        ids.add(Integer.valueOf(task.getObjectID()));
+                    }
+                }
+                if (0 < ids.size()) {
+                    client.execute(new DeleteRequest(folderID, I2i(ids), new Date(Long.MAX_VALUE), false));
                 }
             }
-            if (0 < ids.size()) {
-                client.execute(new DeleteRequest(folderID, I2i(ids), new Date(Long.MAX_VALUE), false));
-            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
     @Test

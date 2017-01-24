@@ -85,12 +85,13 @@ public class Bug36412Test {
     }
 
     @After
-    public void tearDown() {
+    public void tearDown()
+ {
         service = null;
     }
 
-    @Test
-    public void testKeepUnicode() {
+     @Test
+     public void testKeepUnicode() {
         String content = "              <tr>\n" +
             "                            <td border=\"1\" class=\"webseminare\"\n" +
             "                              font-size:14px;=\"\" line-height:=\"\"\n" +

@@ -66,19 +66,18 @@ import com.openexchange.dav.carddav.CardDAVTest;
  */
 public class CookieTest extends CardDAVTest {
 
-	public CookieTest() {
-		super();
-	}
+    public CookieTest() {
+        super();
+    }
 
-	@Test
+    @Test
     public void testNoSessionCookieForCalDAV() throws Exception {
         /*
          * execute simple propfind
          */
         DavPropertyNameSet props = new DavPropertyNameSet();
         props.add(PropertyNames.PRINCIPAL_URL);
-        PropFindMethod propFind = new PropFindMethod(getWebDAVClient().getBaseURI() + "/",
-                DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
+        PropFindMethod propFind = new PropFindMethod(getWebDAVClient().getBaseURI() + "/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
         try {
             Assert.assertEquals("unexpected http status", StatusCodes.SC_MULTISTATUS, getWebDAVClient().executeMethod(propFind));
         } finally {

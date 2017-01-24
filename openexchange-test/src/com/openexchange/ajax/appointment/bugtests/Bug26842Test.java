@@ -50,13 +50,15 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
+import java.util.UUID;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.test.CalendarTestManager;
-import com.openexchange.test.FolderTestManager;
 
 /**
  * {@link Bug26842Test}
@@ -67,57 +69,38 @@ public class Bug26842Test extends AbstractAJAXSession {
 
     private FolderObject folder;
 
-    private FolderTestManager ftm;
-
-    private CalendarTestManager ctm;
-
-    public Bug26842Test(String name) {
-        super(name);
+    public Bug26842Test() {
+        super();
     }
 
+    @Before
     public void setUp() throws Exception {
         super.setUp();
-        ftm = new FolderTestManager(client);
-        ctm = new CalendarTestManager(client);
-        ctm.setFailOnError(true);
-        folder = ftm.generatePublicFolder(
-            "26842-" + System.currentTimeMillis(),
-            FolderObject.CALENDAR,
-            FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
+        folder = ftm.generatePublicFolder("26842-" + UUID.randomUUID().toString(), FolderObject.CALENDAR, FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
 
         OCLPermission permission = new OCLPermission();
-        permission.setEntity(client.getValues().getUserId());
+        permission.setEntity(getClient().getValues().getUserId());
         permission.setGroupPermission(false);
         permission.setFolderAdmin(true);
-        permission.setAllPermission(
-            OCLPermission.CREATE_OBJECTS_IN_FOLDER,
-            OCLPermission.READ_ALL_OBJECTS,
-            OCLPermission.WRITE_ALL_OBJECTS,
-            OCLPermission.DELETE_ALL_OBJECTS);
+        permission.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
         folder.addPermission(permission);
 
         ftm.insertFolderOnServer(folder);
     }
 
+    @Test
     public void testBug() throws Exception {
         Appointment app = new Appointment();
         app.setTitle("Bug 26842 Test");
         app.setStartDate(D("29.05.2013 08:00"));
         app.setEndDate(D("29.05.2013 08:00"));
-        app.setParticipants(new Participant[]{});
+        app.setParticipants(new Participant[] {});
         app.setParentFolderID(folder.getObjectID());
         app.setIgnoreConflicts(true);
 
-        ctm.insert(app);
-        Appointment appointment = ctm.get(app.getParentFolderID(), app.getObjectID());
-        assertEquals("Wrong participants.", client.getValues().getUserId(), appointment.getParticipants()[0].getIdentifier());
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        ctm.cleanUp();
-        ftm.cleanUp();
-        super.tearDown();
+        catm.insert(app);
+        Appointment appointment = catm.get(app.getParentFolderID(), app.getObjectID());
+        assertEquals("Wrong participants.", getClient().getValues().getUserId(), appointment.getParticipants()[0].getIdentifier());
     }
 
 }

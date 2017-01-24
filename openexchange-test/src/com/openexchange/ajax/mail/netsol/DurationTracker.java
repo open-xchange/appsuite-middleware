@@ -58,77 +58,77 @@ package com.openexchange.ajax.mail.netsol;
  */
 public final class DurationTracker {
 
-	private final long[] durations;
+    private final long[] durations;
 
-	private boolean full;
+    private boolean full;
 
-	private int pointer;
+    private int pointer;
 
-	private long maxDuration = Long.MIN_VALUE;
+    private long maxDuration = Long.MIN_VALUE;
 
-	private long minDuration = Long.MAX_VALUE;
+    private long minDuration = Long.MAX_VALUE;
 
-	/**
-	 * Initializes a new {@link DurationTracker}
-	 */
-	public DurationTracker(final int length) {
-		super();
-		durations = new long[length];
-	}
+    /**
+     * Initializes a new {@link DurationTracker}
+     */
+    public DurationTracker(final int length) {
+        super();
+        durations = new long[length];
+    }
 
-	/**
-	 * Adds a duration time to this duration tracker
-	 *
-	 * @param duration
-	 *            The duration time
-	 */
-	public void addDuration(final long duration) {
-		maxDuration = Math.max(duration, maxDuration);
-		minDuration = Math.min(duration, minDuration);
-		durations[pointer++] = duration;
-		pointer %= durations.length;
-		if (!full && (pointer == 0)) {
-			full = true;
-		}
-	}
+    /**
+     * Adds a duration time to this duration tracker
+     *
+     * @param duration
+     *            The duration time
+     */
+    public void addDuration(final long duration) {
+        maxDuration = Math.max(duration, maxDuration);
+        minDuration = Math.min(duration, minDuration);
+        durations[pointer++] = duration;
+        pointer %= durations.length;
+        if (!full && (pointer == 0)) {
+            full = true;
+        }
+    }
 
-	/**
-	 * Get max. duration
-	 *
-	 * @return Max. duration
-	 */
-	public long getMaxDuration() {
-		return maxDuration;
-	}
+    /**
+     * Get max. duration
+     *
+     * @return Max. duration
+     */
+    public long getMaxDuration() {
+        return maxDuration;
+    }
 
-	/**
-	 * Get min. duration
-	 *
-	 * @return Min. duration
-	 */
-	public long getMinDuration() {
-		return minDuration;
-	}
+    /**
+     * Get min. duration
+     *
+     * @return Min. duration
+     */
+    public long getMinDuration() {
+        return minDuration;
+    }
 
-	/**
-	 * Compute the average duration
-	 *
-	 * @return The average duration
-	 */
-	public double computeAvgDuration() {
-		long avgDuration = 0;
-		final int len = full ? durations.length : pointer;
-		for (int i = 0; i < len; i++) {
-			avgDuration += durations[i];
-		}
-		return (avgDuration / (double) len);
-	}
+    /**
+     * Compute the average duration
+     *
+     * @return The average duration
+     */
+    public double computeAvgDuration() {
+        long avgDuration = 0;
+        final int len = full ? durations.length : pointer;
+        for (int i = 0; i < len; i++) {
+            avgDuration += durations[i];
+        }
+        return (avgDuration / (double) len);
+    }
 
-	@Override
-	public String toString() {
-		final StringBuilder sb = new StringBuilder(64);
-		sb.append("Max. duration=").append(maxDuration).append("msec, Min. duration=").append(minDuration);
-		sb.append("msec, Avg. duration=").append(computeAvgDuration()).append("msec");
-		return sb.toString();
-	}
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder(64);
+        sb.append("Max. duration=").append(maxDuration).append("msec, Min. duration=").append(minDuration);
+        sb.append("msec, Avg. duration=").append(computeAvgDuration()).append("msec");
+        return sb.toString();
+    }
 }

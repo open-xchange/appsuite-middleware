@@ -46,16 +46,19 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.test.fixtures.transformators;
 
 import com.openexchange.exception.OXException;
+
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class LongTransformator implements Transformator{
+public class LongTransformator implements Transformator {
+
     @Override
     public Object transform(final String value) throws OXException {
-        if(value == null) {
+        if (value == null) {
             return 0;
         }
         try {

@@ -53,14 +53,13 @@ import java.io.IOException;
 import org.json.JSONException;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
-
 /**
  * {@link SpotlightRequest}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SpotlightRequest extends AbstractIndexRequest<GeneralIndexResponse> {
-    
+
     private String searchTerm;
     private int maxPersons;
     private int maxTopics;

@@ -49,7 +49,11 @@
 
 package com.openexchange.webdav.xml.appointment;
 
+import static org.junit.Assert.fail;
 import java.util.Date;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.webdav.xml.AppointmentTest;
@@ -65,15 +69,11 @@ public class Bug12050Test extends AppointmentTest {
     private Appointment exception;
     private Appointment exceptionUpdate;
 
-    public Bug12050Test(String name) {
-        super(name);
-    }
-
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
-        FolderTest.clearFolder(webCon, new int[] {appointmentFolderId}, new String[] {"calendar"}, new Date(), PROTOCOL + hostName, login, password, context);
+        FolderTest.clearFolder(webCon, new int[] { appointmentFolderId }, new String[] { "calendar" }, new Date(), PROTOCOL + hostName, login, password, context);
 
         appointment = new Appointment();
         appointment.setTitle("testBug12050");
@@ -98,19 +98,18 @@ public class Bug12050Test extends AppointmentTest {
         exceptionUpdate.setEndDate(exceptionEnd);
     }
 
+    @Test
     public void testBug12050() throws Exception {
         createAppointment();
         createException();
         updateException();
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        if (objectId  != -1) {
+        if (objectId != -1) {
             deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
         }
-
-        super.tearDown();
     }
 
     private void createAppointment() throws Exception {

@@ -50,15 +50,18 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.List;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
@@ -79,17 +82,17 @@ public class Bug21620Test extends AbstractAJAXSession {
 
     private AJAXClient clientC;
 
-    public Bug21620Test(String name) {
-        super(name);
+    public Bug21620Test() {
+        super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
         clientA = getClient();
-        clientB = new AJAXClient(User.User2);
-        clientC = new AJAXClient(User.User3);
+        clientB = new AJAXClient(testContext.acquireUser());
+        clientC = new AJAXClient(testContext.acquireUser());
 
         List<UserParticipant> users = new ArrayList<UserParticipant>();
         UserParticipant userB = new UserParticipant(clientB.getValues().getUserId());
@@ -125,6 +128,7 @@ public class Bug21620Test extends AbstractAJAXSession {
         appointment.setParticipants(participants);
     }
 
+    @Test
     public void testBug21620() throws Exception {
         InsertRequest insertRequest = new InsertRequest(appointment, clientA.getValues().getTimeZone());
         AppointmentInsertResponse insertResponse = clientA.execute(insertRequest);
@@ -137,10 +141,13 @@ public class Bug21620Test extends AbstractAJAXSession {
         assertEquals("Wrong organizer ID", clientA.getValues().getUserId(), loadedAppointment.getOrganizerId());
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        getClient().execute(new DeleteRequest(appointment));
-        super.tearDown();
+        try {
+            getClient().execute(new DeleteRequest(appointment));
+        } finally {
+            super.tearDown();
+        }
     }
 
 }

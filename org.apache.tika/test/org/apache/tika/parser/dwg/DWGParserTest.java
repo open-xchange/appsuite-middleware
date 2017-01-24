@@ -17,46 +17,53 @@
 package org.apache.tika.parser.dwg;
 
 import java.io.InputStream;
-
-import junit.framework.TestCase;
-
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.sax.BodyContentHandler;
+import org.junit.Test;
 import org.xml.sax.ContentHandler;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
-public class DWGParserTest extends TestCase {
-    public void testDWG2000Parser() throws Exception {
+public class DWGParserTest {         @Test
+     public void testDWG2000Parser() throws Exception {
         InputStream input = DWGParserTest.class.getResourceAsStream(
                 "/test-documents/testDWG2000.dwg");
         testParserAlt(input);
     }
 
-    public void testDWG2004Parser() throws Exception {
+         @Test
+     public void testDWG2004Parser() throws Exception {
         InputStream input = DWGParserTest.class.getResourceAsStream(
                 "/test-documents/testDWG2004.dwg");
         testParser(input);
     }
 
-    public void testDWG2004ParserNoHeaderAddress() throws Exception {
+         @Test
+     public void testDWG2004ParserNoHeaderAddress() throws Exception {
         InputStream input = DWGParserTest.class.getResourceAsStream(
                 "/test-documents/testDWG2004_no_header.dwg");
         testParserNoHeader(input);
     }
 
-    public void testDWG2007Parser() throws Exception {
+         @Test
+     public void testDWG2007Parser() throws Exception {
         InputStream input = DWGParserTest.class.getResourceAsStream(
                 "/test-documents/testDWG2007.dwg");
         testParser(input);
     }
 
-    public void testDWG2010Parser() throws Exception {
+         @Test
+     public void testDWG2010Parser() throws Exception {
         InputStream input = DWGParserTest.class.getResourceAsStream(
                 "/test-documents/testDWG2010.dwg");
         testParser(input);
     }
     
-    public void testDWG2010CustomPropertiesParser() throws Exception {
+         @Test
+     public void testDWG2010CustomPropertiesParser() throws Exception {
         // Check that standard parsing works
         InputStream input = DWGParserTest.class.getResourceAsStream(
                 "/test-documents/testDWG2010_custom_props.dwg");
@@ -79,7 +86,8 @@ public class DWGParserTest extends TestCase {
         }
     }
 
-    public void testDWGMechParser() throws Exception {
+         @Test
+     public void testDWGMechParser() throws Exception {
         String[] types = new String[] {
               "6", "2004", "2004DX", "2005", "2006",
               "2007", "2008", "2009", "2010", "2011"

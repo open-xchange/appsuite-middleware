@@ -59,7 +59,6 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.HashSet;
-import junit.framework.JUnit4TestAdapter;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -80,14 +79,6 @@ public class Bug19379Test extends AbstractTest {
     private String url;
     private OXContextInterface contextIface;
 
-    public Bug19379Test() {
-        super();
-    }
-
-    public static junit.framework.Test suite() {
-        return new JUnit4TestAdapter(Bug19379Test.class);
-    }
-
     @Before
     public void setup() throws MalformedURLException, RemoteException, NotBoundException {
         superAdmin = DummyMasterCredentials();
@@ -96,7 +87,7 @@ public class Bug19379Test extends AbstractTest {
     }
 
     @After
-    public void teardown() {
+    public void tearDown() {
         contextIface = null;
         url = null;
         superAdmin = null;
@@ -190,7 +181,7 @@ public class Bug19379Test extends AbstractTest {
     }
 
     private HashSet<String> createMappings(final String... mappings) {
-        HashSet <String> result = new HashSet <String>();
+        HashSet<String> result = new HashSet<String>();
         for (final String mapping : mappings) {
             result.add(mapping);
         }

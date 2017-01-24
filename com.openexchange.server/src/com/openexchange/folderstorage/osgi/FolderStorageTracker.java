@@ -49,10 +49,15 @@
 
 package com.openexchange.folderstorage.osgi;
 
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.folderstorage.FolderModifier;
 import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.FolderStorageFolderModifier;
 import com.openexchange.folderstorage.internal.FolderStorageRegistry;
 
 /**
@@ -65,6 +70,7 @@ public final class FolderStorageTracker implements ServiceTrackerCustomizer<Fold
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FolderStorageTracker.class);
 
     private final BundleContext context;
+    private final ConcurrentMap<FolderStorage, ServiceTracker<FolderModifier, FolderModifier>> modifierTrackers;
 
     /**
      * Initializes a new {@link FolderStorageTracker}.
@@ -72,53 +78,69 @@ public final class FolderStorageTracker implements ServiceTrackerCustomizer<Fold
     public FolderStorageTracker(final BundleContext context) {
         super();
         this.context = context;
+        modifierTrackers = new ConcurrentHashMap<>(8, 0.9F, 1);
     }
 
     @Override
     public FolderStorage addingService(final ServiceReference<FolderStorage> reference) {
-        final FolderStorage addedService = context.getService(reference);
+        FolderStorage folderStorage = context.getService(reference);
+
         // Get tree identifier
         final String treeId;
         {
             final Object obj = reference.getProperty("tree");
             if (null == obj) {
-                LOG.error("Missing tree identifier property \"tree\" for {}", addedService.getClass().getName());
+                LOG.error("Missing tree identifier property \"tree\" for {}", folderStorage.getClass().getName());
                 // Nothing to track, return null
                 context.ungetService(reference);
                 return null;
             }
             treeId = obj.toString();
         }
+
         // Add to registry
-        if (FolderStorageRegistry.getInstance().addFolderStorage(treeId, addedService)) {
-            return addedService;
+        if (FolderStorageRegistry.getInstance().addFolderStorage(treeId, folderStorage)) {
+            if (folderStorage instanceof FolderStorageFolderModifier) {
+                ServiceTracker<FolderModifier, FolderModifier> tracker = new ServiceTracker<>(context, FolderModifier.class, new FolderModifierTracker((FolderStorageFolderModifier) folderStorage, context));
+                modifierTrackers.put(folderStorage, tracker);
+                tracker.open();
+            }
+            return folderStorage;
         }
-        LOG.error("Failed registration to tree identifier \"{}\" for {}", treeId, addedService.getClass().getName());
+
+        LOG.error("Failed registration to tree identifier \"{}\" for {}", treeId, folderStorage.getClass().getName());
         // Nothing to track, return null
         context.ungetService(reference);
         return null;
     }
 
     @Override
-    public void modifiedService(final ServiceReference<FolderStorage> reference, final FolderStorage service) {
+    public void modifiedService(ServiceReference<FolderStorage> reference, FolderStorage folderStorage) {
         // Nothing to do
     }
 
     @Override
-    public void removedService(final ServiceReference<FolderStorage> reference, final FolderStorage service) {
-        if (null != service) {
+    public void removedService(ServiceReference<FolderStorage> reference, FolderStorage folderStorage) {
+        if (null != folderStorage) {
             try {
                 // Get tree identifier
                 final String treeId;
                 {
                     final Object obj = reference.getProperty("tree");
                     if (null == obj) {
-                        LOG.error("Missing tree identifier property \"tree\" for {}", service.getClass().getName());
+                        LOG.error("Missing tree identifier property \"tree\" for {}", folderStorage.getClass().getName());
                         return;
                     }
                     treeId = obj.toString();
                 }
-                FolderStorageRegistry.getInstance().removeFolderStorage(treeId, service);
+
+                FolderStorageRegistry.getInstance().removeFolderStorage(treeId, folderStorage);
+                if (folderStorage instanceof FolderStorageFolderModifier) {
+                    ServiceTracker<FolderModifier, FolderModifier> tracker = modifierTrackers.remove(folderStorage);
+                    if (null != tracker) {
+                        tracker.close();
+                    }
+                }
             } finally {
                 context.ungetService(reference);
             }

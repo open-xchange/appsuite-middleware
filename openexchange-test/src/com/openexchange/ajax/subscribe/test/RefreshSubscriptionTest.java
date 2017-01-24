@@ -49,8 +49,10 @@
 
 package com.openexchange.ajax.subscribe.test;
 
+import static org.junit.Assert.assertFalse;
 import java.io.IOException;
 import org.json.JSONException;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.subscribe.actions.NewSubscriptionResponse;
 import com.openexchange.ajax.subscribe.actions.RefreshSubscriptionResponse;
@@ -60,7 +62,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.subscribe.SimSubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.Subscription;
 
-
 /**
  * This is rather boring. Refresh needs a lot a pre-requisites, so expect
  * it to be tested in roundtrip tests.
@@ -69,19 +70,12 @@ import com.openexchange.subscribe.Subscription;
  */
 public class RefreshSubscriptionTest extends AbstractSubscriptionTest {
 
-    public RefreshSubscriptionTest(String name) {
-        super(name);
-    }
-
-    public void testShouldFailOnNonExistingSubscription() throws OXException, IOException, SAXException, JSONException{
-    }
-
-    public void testShouldNotFailOnExistingSubscription() throws OXException, IOException, SAXException, JSONException{
+    @Test
+    public void testShouldNotFailOnExistingSubscription() throws OXException, IOException, SAXException, JSONException {
         FolderObject folder = createDefaultContactFolder();
 
-
         DynamicFormDescription formDescription = generateFormDescription();
-        Subscription subscription = generateOXMFSubscription(formDescription, String.valueOf(folder.getObjectID() ));
+        Subscription subscription = generateOXMFSubscription(formDescription, String.valueOf(folder.getObjectID()));
 
         SimSubscriptionSourceDiscoveryService discovery = new SimSubscriptionSourceDiscoveryService();
         discovery.addSource(subscription.getSource());
@@ -90,14 +84,14 @@ public class RefreshSubscriptionTest extends AbstractSubscriptionTest {
 
         subMgr.setSubscriptionSourceDiscoveryService(discovery);
 
-        subMgr.newAction(subscription );
+        subMgr.newAction(subscription);
 
         assertFalse("Insert failed!", ((NewSubscriptionResponse) subMgr.getLastResponse()).hasError());
 
-        subMgr.refreshAction( subscription.getId() );
+        subMgr.refreshAction(subscription.getId());
 
         RefreshSubscriptionResponse response = (RefreshSubscriptionResponse) subMgr.getLastResponse();
-        assertFalse("Should have been successful, but got: " + response.getErrorMessage(), response.hasError() );
+        assertFalse("Should have been successful, but got: " + response.getErrorMessage(), response.hasError());
 
     }
 }

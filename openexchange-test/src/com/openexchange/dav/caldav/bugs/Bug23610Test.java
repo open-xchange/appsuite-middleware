@@ -76,7 +76,7 @@ import com.openexchange.groupware.container.UserParticipant;
  */
 public class Bug23610Test extends CalDAVTest {
 
-	@Test
+    @Test
     public void testConfirmAppointment() throws Exception {
         for (int shownAs : new int[] { Appointment.FREE, Appointment.TEMPORARY, Appointment.RESERVED, Appointment.ABSENT }) {
             for (int confirmation : new int[] { Appointment.ACCEPT, Appointment.DECLINE, Appointment.TENTATIVE }) {
@@ -85,7 +85,7 @@ public class Bug23610Test extends CalDAVTest {
         }
     }
 
-	private void confirmAppointment(int appointmentShownAs, int confirmationStatus) throws Exception {
+    private void confirmAppointment(int appointmentShownAs, int confirmationStatus) throws Exception {
         /*
          * fetch sync token for later synchronization
          */
@@ -117,14 +117,12 @@ public class Bug23610Test extends CalDAVTest {
         assertEquals("SUMMARY wrong", summary, iCalResource.getVEvent().getSummary());
         assertEquals("LOCATION wrong", location, iCalResource.getVEvent().getLocation());
         if (null != iCalResource.getVEvent().getTransp()) {
-            assertEquals("TRANSP wrong", Appointment.FREE == appointmentShownAs ? "TRANSPARENT" : "OPAQUE",
-                iCalResource.getVEvent().getTransp());
+            assertEquals("TRANSP wrong", Appointment.FREE == appointmentShownAs ? "TRANSPARENT" : "OPAQUE", iCalResource.getVEvent().getTransp());
         }
         /*
          * confirm appointment on client
          */
-        String partstat = Appointment.TENTATIVE == confirmationStatus ? "TENTATIVE" :
-            Appointment.DECLINE == confirmationStatus ? "DECLINED" : "ACCEPTED";
+        String partstat = Appointment.TENTATIVE == confirmationStatus ? "TENTATIVE" : Appointment.DECLINE == confirmationStatus ? "DECLINED" : "ACCEPTED";
         List<Property> attendees = iCalResource.getVEvent().getProperties("ATTENDEE");
         for (Property property : attendees) {
             if (property.getValue().contains(super.getAJAXClient().getValues().getDefaultAddress())) {
@@ -172,9 +170,8 @@ public class Bug23610Test extends CalDAVTest {
         assertNotNull("confirming attendee not found", attendee);
         assertEquals("partstat status wrong", partstat, attendee.getAttribute("PARTSTAT"));
         if (null != iCalResource.getVEvent().getTransp()) {
-            assertEquals("TRANSP wrong", Appointment.FREE == appointmentShownAs ? "TRANSPARENT" : "OPAQUE",
-                iCalResource.getVEvent().getTransp());
+            assertEquals("TRANSP wrong", Appointment.FREE == appointmentShownAs ? "TRANSPARENT" : "OPAQUE", iCalResource.getVEvent().getTransp());
         }
-	}
+    }
 
 }

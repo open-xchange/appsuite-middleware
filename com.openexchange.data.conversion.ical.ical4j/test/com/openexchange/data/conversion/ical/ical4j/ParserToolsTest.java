@@ -1,15 +1,17 @@
 package com.openexchange.data.conversion.ical.ical4j;
 import java.util.TimeZone;
-
-import junit.framework.TestCase;
-
+import org.junit.Test;
 import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 
-public class ParserToolsTest extends TestCase {
-	
+public class ParserToolsTest {	
 
-	public void testFindingOutlookTimezone(){
+	     @Test
+     public void testFindingOutlookTimezone(){
 		String outlookTZID = "Amsterdam, Berlin, Bern, Rom, Stockholm, Wien";
 		TimeZone actual = ParserTools.findTzidBySimilarity(outlookTZID);
 		String id = actual.getID();
@@ -17,17 +19,20 @@ public class ParserToolsTest extends TestCase {
 		assertEquals(60*60*1000, actual.getRawOffset());
 	}
 	
-	public void testAmbivalentTerm(){
+	     @Test
+     public void testAmbivalentTerm(){
 		String outlookTZID = "Europe";
 		TimeZone actual = ParserTools.findTzidBySimilarity(outlookTZID);
 		assertTrue(actual.getID().startsWith("Europe/"));
 	}
 	
-	public void testEuropeBerlin(){
+	     @Test
+     public void testEuropeBerlin(){
 		assertEquals("Europe/Berlin", ParserTools.findTzidBySimilarity("Europe/Berlin").getID());
 	}
 	
-	public void testStandards(){
+	     @Test
+     public void testStandards(){
 		assertEquals("GMT", ParserTools.findTzidBySimilarity("GMT").getID());
 		assertEquals("Zulu", ParserTools.findTzidBySimilarity("Zulu").getID());
 		assertEquals("Zulu", ParserTools.findTzidBySimilarity("Z").getID());
@@ -35,7 +40,8 @@ public class ParserToolsTest extends TestCase {
 	}
 	
 	
-	public void testNotMatchingOne(){
+	     @Test
+     public void testNotMatchingOne(){
 		String outlookTZID = "doesntexistatall";
 		TimeZone actual = ParserTools.findTzidBySimilarity(outlookTZID);
 		assertNull(actual);

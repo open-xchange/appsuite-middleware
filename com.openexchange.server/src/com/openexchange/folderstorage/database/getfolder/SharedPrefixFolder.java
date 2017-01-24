@@ -213,17 +213,12 @@ public final class SharedPrefixFolder {
         } catch (final NumberFormatException exc) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(exc, exc.getMessage());
         }
-        final Queue<FolderObject> q =
-                ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleSharedFolders(
-                    user.getId(),
-                    user.getGroups(),
-                    userPerm.getAccessibleModules(),
-                    sharedOwner,
-                    ctx,
-                    null,
-                    con)).asQueue();
-        if (q.isEmpty()) {
-            return new int[0];
+        Queue<FolderObject> q;
+        try (FolderObjectIterator foi = (FolderObjectIterator) OXFolderIteratorSQL.getVisibleSharedFolders(user.getId(), user.getGroups(), userPerm.getAccessibleModules(), sharedOwner, ctx, null, con)) {
+            q = foi.asQueue();
+            if (q.isEmpty()) {
+                return new int[0];
+            }
         }
         /*
          * Get first level shared folders
@@ -261,17 +256,12 @@ public final class SharedPrefixFolder {
         } catch (final NumberFormatException exc) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(exc, exc.getMessage());
         }
-        final Queue<FolderObject> q =
-                ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleSharedFolders(
-                    user.getId(),
-                    user.getGroups(),
-                    userPermissionBits.getAccessibleModules(),
-                    sharedOwner,
-                    ctx,
-                    null,
-                    con)).asQueue();
-        if (q.isEmpty()) {
-            return Collections.<FolderIdNamePair> emptyList();
+        Queue<FolderObject> q;
+        try (FolderObjectIterator foi = (FolderObjectIterator) OXFolderIteratorSQL.getVisibleSharedFolders(user.getId(), user.getGroups(), userPermissionBits.getAccessibleModules(), sharedOwner, ctx, null, con)) {
+            q = foi.asQueue();
+            if (q.isEmpty()) {
+                return Collections.<FolderIdNamePair> emptyList();
+            }
         }
         /*
          * Get first level shared folders

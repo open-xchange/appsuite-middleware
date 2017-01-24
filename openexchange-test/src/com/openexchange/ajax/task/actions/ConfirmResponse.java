@@ -64,7 +64,6 @@ public class ConfirmResponse extends AbstractAJAXResponse {
         super(response);
     }
 
-
     public void fillTask(Task... tasks) {
         for (Task task : tasks) {
             task.setLastModified(getTimestamp());

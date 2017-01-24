@@ -56,6 +56,7 @@ import com.openexchange.groupware.tasks.Task;
 /**
  * Stores the reponse values of a task insert request and provides methods for
  * working with them.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class InsertResponse extends CommonInsertResponse {

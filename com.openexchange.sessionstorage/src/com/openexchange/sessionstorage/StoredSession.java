@@ -50,9 +50,8 @@
 package com.openexchange.sessionstorage;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -129,13 +128,12 @@ public class StoredSession implements PutIfAbsent, Serializable {
             if (null != parameter) {
                 this.parameters.put(PARAM_ALTERNATIVE_ID, parameter);
             }
-            parameter = parameters.get(PARAM_OAUTH_TOKEN);
+            parameter = parameters.get(PARAM_OAUTH_ACCESS_TOKEN);
             if (null != parameter) {
-                this.parameters.put(PARAM_OAUTH_TOKEN, parameter);
+                this.parameters.put(PARAM_OAUTH_ACCESS_TOKEN, parameter);
             }
             this.parameters.putAll(parameters);
-            List<String> remoteParameterNames = new ArrayList<String>();
-            remoteParameterNames.addAll(SessionStorageConfiguration.getInstance().getRemoteParameterNames());
+            Set<String> remoteParameterNames = new LinkedHashSet<String>(SessionStorageConfiguration.getInstance().getRemoteParameterNames(userId, contextId));
             remoteParameterNames.addAll(Arrays.asList(PORTABLE_PARAMETERS));
             for (String parameterName : remoteParameterNames) {
                 Object value = parameters.get(parameterName);
@@ -164,13 +162,12 @@ public class StoredSession implements PutIfAbsent, Serializable {
             if (null != parameter) {
                 this.parameters.put(PARAM_ALTERNATIVE_ID, parameter);
             }
-            parameter = session.getParameter(PARAM_OAUTH_TOKEN);
+            parameter = session.getParameter(PARAM_OAUTH_ACCESS_TOKEN);
             if (null != parameter) {
-                this.parameters.put(PARAM_OAUTH_TOKEN, parameter);
+                this.parameters.put(PARAM_OAUTH_ACCESS_TOKEN, parameter);
             }
             this.parameters.putAll(parameters);
-            List<String> remoteParameterNames = new ArrayList<String>();
-            remoteParameterNames.addAll(SessionStorageConfiguration.getInstance().getRemoteParameterNames());
+            Set<String> remoteParameterNames = new LinkedHashSet<String>(SessionStorageConfiguration.getInstance().getRemoteParameterNames(userId, contextId));
             remoteParameterNames.addAll(Arrays.asList(PORTABLE_PARAMETERS));
             for (String parameterName : remoteParameterNames) {
                 Object value = session.getParameter(parameterName);

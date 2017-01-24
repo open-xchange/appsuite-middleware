@@ -73,8 +73,7 @@ public abstract class AbstractSearchParser<T extends CommonSearchResponse> exten
      * {@inheritDoc}
      */
     @Override
-    protected T createResponse(final Response response)
-        throws JSONException {
+    protected T createResponse(final Response response) throws JSONException {
         final T retval = instanciateResponse(response);
         retval.setColumns(columns);
         if (isFailOnError()) {

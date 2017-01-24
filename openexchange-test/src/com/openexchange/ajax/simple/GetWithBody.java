@@ -52,7 +52,6 @@ package com.openexchange.ajax.simple;
 import org.apache.commons.httpclient.methods.EntityEnclosingMethod;
 import org.apache.http.client.methods.HttpGet;
 
-
 /**
  * {@link GetWithBody}
  * 
@@ -73,6 +72,5 @@ public class GetWithBody extends EntityEnclosingMethod {
     public String getName() {
         return HttpGet.METHOD_NAME;
     }
-
 
 }

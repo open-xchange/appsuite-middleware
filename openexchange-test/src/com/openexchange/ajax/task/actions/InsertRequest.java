@@ -59,6 +59,7 @@ import com.openexchange.groupware.tasks.Task;
 
 /**
  * Stores the parameters for inserting the task.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class InsertRequest extends AbstractTaskRequest<InsertResponse> {
@@ -77,7 +78,7 @@ public class InsertRequest extends AbstractTaskRequest<InsertResponse> {
      * @param timeZoneParam <code>true</code> to add the timezone as request parameter, <code>false</code>, otherwise
      * @param failOnError <code>true</code> to fail on errors, <code>false</code>, otherwise
      * @param useLegacyDates <code>true</code> to convert the start- and end-date in legacy mode with <code>Date</code>-types,
-     *                       <code>false</code> to write start- and end-time properties along with the full-time flag
+     *            <code>false</code> to write start- and end-time properties along with the full-time flag
      */
     public InsertRequest(Task task, TimeZone timeZone, boolean timeZoneParam, boolean failOnError, boolean useLegacyDates) {
         super();

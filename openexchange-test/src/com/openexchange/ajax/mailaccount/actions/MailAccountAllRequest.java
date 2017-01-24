@@ -65,18 +65,18 @@ public class MailAccountAllRequest implements AJAXRequest<MailAccountAllResponse
     private final boolean failOnError;
     private final int[] cols;
 
-    public MailAccountAllRequest(boolean failOnError, int...cols) {
+    public MailAccountAllRequest(boolean failOnError, int... cols) {
         StringBuilder bob = new StringBuilder();
-        for(int colId : cols) {
+        for (int colId : cols) {
             bob.append(colId).append(',');
         }
-        bob.setLength(bob.length()-1);
+        bob.setLength(bob.length() - 1);
         this.columns = bob.toString();
         this.failOnError = failOnError;
         this.cols = cols;
     }
 
-    public MailAccountAllRequest(int...cols) {
+    public MailAccountAllRequest(int... cols) {
         this(true, cols);
     }
 
@@ -97,9 +97,7 @@ public class MailAccountAllRequest implements AJAXRequest<MailAccountAllResponse
 
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
-        return new Parameter[]{
-            new Parameter("action" , "all"),
-            new Parameter("columns", columns)
+        return new Parameter[] { new Parameter("action", "all"), new Parameter("columns", columns)
         };
     }
 

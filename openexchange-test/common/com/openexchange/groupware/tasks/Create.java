@@ -104,6 +104,7 @@ public class Create {
 
     /**
      * Creates a task for a given folder and with a given title.
+     * 
      * @param folder pre-fill parent folder field.
      * @param title title of the task.
      */
@@ -116,6 +117,7 @@ public class Create {
 
     /**
      * Creates a task with the specified title, description status and folder
+     * 
      * @param title task's title
      * @param description task's description
      * @param status task's status

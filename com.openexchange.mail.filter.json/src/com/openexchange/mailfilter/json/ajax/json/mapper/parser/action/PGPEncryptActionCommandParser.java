@@ -63,6 +63,7 @@ import com.openexchange.mailfilter.json.ajax.json.fields.PGPEncryptActionField;
 import com.openexchange.mailfilter.json.ajax.json.mapper.ArgumentUtil;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserJSONUtil;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link PGPEncryptActionCommandParser}
@@ -80,11 +81,11 @@ public class PGPEncryptActionCommandParser implements CommandParser<ActionComman
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser#parse(org.json.JSONObject)
      */
     @Override
-    public ActionCommand parse(JSONObject jsonObject) throws JSONException, SieveException, OXException {
+    public ActionCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException {
         final ArrayList<Object> arrayList = new ArrayList<Object>();
         final JSONArray keys = jsonObject.optJSONArray(PGPEncryptActionField.keys.getFieldName());
         if (null != keys) {
@@ -100,7 +101,7 @@ public class PGPEncryptActionCommandParser implements CommandParser<ActionComman
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser#parse(org.json.JSONObject, com.openexchange.jsieve.commands.ActionCommand)
      */
     @Override

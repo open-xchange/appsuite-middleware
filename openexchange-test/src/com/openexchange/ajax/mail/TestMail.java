@@ -95,8 +95,7 @@ public class TestMail implements IdentitySource<TestMail> {
 
     private List<String> userFlags;
 
-    private final List<MailTypeStrategy> strategies = Arrays.asList(new MailTypeStrategy[] {
-        new PlainTextStrategy(), new AlternativeStrategy(), new FallbackStrategy() });
+    private final List<MailTypeStrategy> strategies = Arrays.asList(new MailTypeStrategy[] { new PlainTextStrategy(), new AlternativeStrategy(), new FallbackStrategy() });
 
     public int getFlags() {
         return flags;
@@ -235,8 +234,7 @@ public class TestMail implements IdentitySource<TestMail> {
         this.attachment = attachment;
     }
 
-    public TestMail() {
-    }
+    public TestMail() {}
 
     public TestMail(final JSONObject obj) throws JSONException {
         this();
@@ -391,16 +389,16 @@ public class TestMail implements IdentitySource<TestMail> {
                 setColor(values.getInt(index));
             }
             if (field == MailListField.FLAGS) {
-                try{
+                try {
                     final int flags = values.getInt(index);
                     setFlags(flags);
-                } catch (final JSONException e){
+                } catch (final JSONException e) {
                     final String flagString = values.getString(index);
                     final String[] flags = flagString.split(",");
                     int bitmask = 0;
-                    for(final String flagName : flags){
+                    for (final String flagName : flags) {
                         final MailFlag flag = MailFlag.getByName(flagName);
-                        if(flag != null) {
+                        if (flag != null) {
                             bitmask += flag.getValue();
                         }
                     }
@@ -506,9 +504,9 @@ public class TestMail implements IdentitySource<TestMail> {
             } catch (final NumberFormatException e) {
                 final String[] flags = myValue.split(",");
                 int bitmask = 0;
-                for(final String flagName : flags){
+                for (final String flagName : flags) {
                     final MailFlag flag = MailFlag.getByName(flagName);
-                    if(flag != null) {
+                    if (flag != null) {
                         bitmask += flag.getValue();
                     }
                 }

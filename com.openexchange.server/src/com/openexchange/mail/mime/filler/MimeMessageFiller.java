@@ -142,6 +142,7 @@ import com.openexchange.mail.mime.utils.sourcedimage.SourcedImage;
 import com.openexchange.mail.mime.utils.sourcedimage.SourcedImageUtility;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import com.openexchange.mail.utils.IpAddressRenderer;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -301,13 +302,14 @@ public class MimeMessageFiller {
         /*
          * Set organization to context-admin's company field setting
          */
+        MailProperties mailProperties = MailProperties.getInstance();
         if (accountId <= 0) {
             try {
                 final String organization = compositionParameters.getOrganization();
                 if (null != organization && 0 < organization.length()) {
                     final String encoded = MimeUtility.fold(
                         14,
-                        MimeUtility.encodeText(organization, MailProperties.getInstance().getDefaultMimeCharset(), null));
+                        MimeUtility.encodeText(organization, mailProperties.getDefaultMimeCharset(), null));
                     mimeMessage.setHeader(HDR_ORGANIZATION, encoded);
                 }
             } catch (final Exception e) {
@@ -317,14 +319,14 @@ public class MimeMessageFiller {
         /*
          * Add header X-Originating-IP containing the IP address of the client
          */
-        if (MailProperties.getInstance().isAddClientIPAddress()) {
-            addClientIPAddress(mimeMessage);
+        if (mailProperties.isAddClientIPAddress()) {
+            addClientIPAddress(mimeMessage, mailProperties.getIpAddressRenderer());
         }
         {
             String client = compositionParameters.getClient();
             if (!Strings.isEmpty(client)) {
                 try {
-                    final String encoded = MimeUtility.fold(20, MimeUtility.encodeText(client, MailProperties.getInstance().getDefaultMimeCharset(), null));
+                    final String encoded = MimeUtility.fold(20, MimeUtility.encodeText(client, mailProperties.getDefaultMimeCharset(), null));
                     mimeMessage.setHeader(HDR_X_ORIGINATING_CLIENT, encoded);
                 } catch (final Exception e) {
                     LOG.warn("Header \"X-Originating-Client\" could not be set", e);
@@ -337,12 +339,13 @@ public class MimeMessageFiller {
      * Add "X-Originating-IP" header.
      *
      * @param mimeMessage The MIME message
+     * @param renderer The renderer to use
      * @throws MessagingException If an error occurs
      */
-    private void addClientIPAddress(final MimeMessage mimeMessage) throws OXException, MessagingException {
+    private void addClientIPAddress(MimeMessage mimeMessage, IpAddressRenderer renderer) throws OXException, MessagingException {
         String originatingIP = compositionParameters.getOriginatingIP();
         if (originatingIP != null) {
-            mimeMessage.setHeader("X-Originating-IP", originatingIP);
+            mimeMessage.setHeader("X-Originating-IP", null == renderer ? originatingIP : renderer.render(originatingIP));
         }
     }
 
@@ -354,17 +357,19 @@ public class MimeMessageFiller {
      * @throws MessagingException If an error occurs
      */
     public static void addClientIPAddress(final MimeMessage mimeMessage, final Session session) throws MessagingException {
+        IpAddressRenderer renderer = MailProperties.getInstance().getIpAddressRenderer();
         /*
          * Get IP from session
          */
-        final String localIp = session.getLocalIp();
+        String localIp = session.getLocalIp();
         if (isLocalhost(localIp)) {
             LOG.debug("Session provides localhost as client IP address: {}", localIp);
             // Prefer request's remote address if local IP seems to denote local host
             String clientIp = LogProperties.getLogProperty(LogProperties.Name.GRIZZLY_REMOTE_ADDRESS);
-            mimeMessage.setHeader("X-Originating-IP", clientIp == null ? localIp : clientIp);
+            clientIp = clientIp == null ? localIp : clientIp;
+            mimeMessage.setHeader("X-Originating-IP", null == renderer ? clientIp : renderer.render(clientIp));
         } else {
-            mimeMessage.setHeader("X-Originating-IP", localIp);
+            mimeMessage.setHeader("X-Originating-IP", null == renderer ? localIp : renderer.render(localIp));
         }
     }
 

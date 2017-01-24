@@ -49,31 +49,22 @@
 
 package com.openexchange.pubsub;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 /**
  * {@link TemplateTestSuite}
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class TemplateTestSuite extends TestSuite {
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    DefaultTemplateTest.class,
+    CensoredHCardTemplateTest.class,
+    CensoredOXMFContactTemplateTest.class,
+    FullHCardTemplateTest.class,
+    FullOXMFContactTemplateTest.class,
+})
+public class TemplateTestSuite {
 
-        public TemplateTestSuite() {
-            super();
-        }
-
-        /**
-         * @return a test suite containing smoke tests.
-         */
-        public static Test suite() {
-            final TestSuite suite = new TestSuite();
-            suite.addTestSuite(DefaultTemplateTest.class);
-            suite.addTestSuite(CensoredHCardTemplateTest.class);
-            suite.addTestSuite(CensoredOXMFContactTemplateTest.class);
-            suite.addTestSuite(FullHCardTemplateTest.class);
-            suite.addTestSuite(FullOXMFContactTemplateTest.class);
-            return suite;
-        }
 }

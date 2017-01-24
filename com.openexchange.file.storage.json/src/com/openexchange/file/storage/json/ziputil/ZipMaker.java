@@ -224,6 +224,7 @@ public class ZipMaker {
                         }
                     }
                     entry = new ZipArchiveEntry(pathPrefix + entryName);
+                    entry.setTime(file.getLastModified().getTime());
                     zipOutput.putArchiveEntry(entry);
                     break;
                 } catch (final java.util.zip.ZipException e) {

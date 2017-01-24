@@ -1,26 +1,25 @@
 package liquibase.change.core;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 import liquibase.change.ChangeFactory;
 import liquibase.change.StandardChangeTest;
 import liquibase.database.core.MockDatabase;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropIndexStatement;
-import static org.junit.Assert.*;
-import org.junit.Test;
 
 /**
  * Tests for {@link liquibase.change.core.DropIndexChange}
  */
 public class DropIndexChangeTest extends StandardChangeTest {
 
-    @Override
-    @Test
+     @Test
     public void getRefactoringName() throws Exception {
         assertEquals("dropIndex", ChangeFactory.getInstance().getChangeMetaData(new DropIndexChange()).getName());
     }
 
-    @Override
-    @Test
+     @Test
     public void generateStatement() throws Exception {
         DropIndexChange refactoring = new DropIndexChange();
         refactoring.setIndexName("IDX_NAME");
@@ -35,8 +34,7 @@ public class DropIndexChangeTest extends StandardChangeTest {
         assertEquals("IDX_NAME", ((DropIndexStatement) sqlStatements[0]).getIndexName());
     }
 
-    @Override
-    @Test
+     @Test
     public void getConfirmationMessage() throws Exception {
         DropIndexChange refactoring = new DropIndexChange();
         refactoring.setIndexName("IDX_NAME");

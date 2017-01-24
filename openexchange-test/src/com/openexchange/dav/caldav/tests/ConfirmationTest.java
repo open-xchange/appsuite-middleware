@@ -61,7 +61,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.caldav.CalDAVTest;
@@ -86,17 +85,22 @@ public class ConfirmationTest extends CalDAVTest {
 
     @Before
     public void setUp() throws Exception {
-        manager2 = new CalendarTestManager(new AJAXClient(User.User2));
+        super.setUp();
+        manager2 = new CalendarTestManager(new AJAXClient(testContext.acquireUser()));
         manager2.setFailOnError(true);
     }
 
     @After
     public void tearDown() throws Exception {
-        if (null != this.manager2) {
-            this.manager2.cleanUp();
-            if (null != manager2.getClient()) {
-                manager2.getClient().logout();
+        try {
+            if (null != this.manager2) {
+                this.manager2.cleanUp();
+                if (null != manager2.getClient()) {
+                    manager2.getClient().logout();
+                }
             }
+        } finally {
+            super.tearDown();
         }
     }
 
@@ -148,7 +152,7 @@ public class ConfirmationTest extends CalDAVTest {
         assertNotNull("no users found in apointment", appointment.getUsers());
         UserParticipant user = null;
         for (UserParticipant participant : appointment.getUsers()) {
-            if (client.getValues().getUserId() == participant.getIdentifier()) {
+            if (getClient().getValues().getUserId() == participant.getIdentifier()) {
                 user = participant;
                 break;
             }
@@ -215,7 +219,7 @@ public class ConfirmationTest extends CalDAVTest {
         assertNotNull("no users found in apointment", appointment.getUsers());
         UserParticipant user = null;
         for (UserParticipant participant : appointment.getUsers()) {
-            if (client.getValues().getUserId() == participant.getIdentifier()) {
+            if (getClient().getValues().getUserId() == participant.getIdentifier()) {
                 user = participant;
                 break;
             }
@@ -287,8 +291,7 @@ public class ConfirmationTest extends CalDAVTest {
         calendar.setTime(appointment.getEndDate());
         calendar.add(Calendar.DAY_OF_YEAR, 5);
         Date exceptionEndDate = calendar.getTime();
-        exception.getProperties().add(new Property(
-            "RECURRENCE-ID;TZID=" + appointment.getTimezone() + ":" + format(exceptionStartDate, appointment.getTimezone())));
+        exception.getProperties().add(new Property("RECURRENCE-ID;TZID=" + appointment.getTimezone() + ":" + format(exceptionStartDate, appointment.getTimezone())));
         iCalResource.addComponent(exception);
         exception.setDTStart(exceptionStartDate);
         exception.setDTEnd(exceptionEndDate);
@@ -301,7 +304,7 @@ public class ConfirmationTest extends CalDAVTest {
         assertNotNull("no users found in apointment", appointment.getUsers());
         UserParticipant user = null;
         for (UserParticipant participant : appointment.getUsers()) {
-            if (client.getValues().getUserId() == participant.getIdentifier()) {
+            if (getClient().getValues().getUserId() == participant.getIdentifier()) {
                 user = participant;
                 break;
             }
@@ -310,8 +313,7 @@ public class ConfirmationTest extends CalDAVTest {
         assertEquals("Confirm status of series wrong", Appointment.NONE, user.getConfirm());
         assertNotNull("No change exceptions found", appointment.getChangeException());
         assertEquals("Invalid number of change exceptions found", 1, appointment.getChangeException().length);
-        List<Appointment> changeExceptions = getManager().getChangeExceptions(
-            appointment.getParentFolderID(), appointment.getObjectID(), Appointment.ALL_COLUMNS);
+        List<Appointment> changeExceptions = getManager().getChangeExceptions(appointment.getParentFolderID(), appointment.getObjectID(), Appointment.ALL_COLUMNS);
         assertNotNull("no change exceptions found", changeExceptions);
         assertEquals("Invalid number of change exceptions found", 1, changeExceptions.size());
         Appointment changeException = getManager().get(appointment.getParentFolderID(), changeExceptions.get(0).getObjectID());
@@ -320,7 +322,7 @@ public class ConfirmationTest extends CalDAVTest {
         assertNotNull("no users found in apointment", changeException.getUsers());
         user = null;
         for (UserParticipant participant : changeException.getUsers()) {
-            if (client.getValues().getUserId() == participant.getIdentifier()) {
+            if (getClient().getValues().getUserId() == participant.getIdentifier()) {
                 user = participant;
                 break;
             }
@@ -405,7 +407,7 @@ public class ConfirmationTest extends CalDAVTest {
         assertNotNull("no users found in apointment", appointment.getUsers());
         UserParticipant user = null;
         for (UserParticipant participant : appointment.getUsers()) {
-            if (client.getValues().getUserId() == participant.getIdentifier()) {
+            if (getClient().getValues().getUserId() == participant.getIdentifier()) {
                 user = participant;
                 break;
             }
@@ -414,8 +416,7 @@ public class ConfirmationTest extends CalDAVTest {
         assertEquals("Confirm status of series wrong", Appointment.NONE, user.getConfirm());
         assertNotNull("No change exceptions found", appointment.getChangeException());
         assertEquals("Invalid number of change exceptions found", 1, appointment.getChangeException().length);
-        List<Appointment> changeExceptions = getManager().getChangeExceptions(
-            appointment.getParentFolderID(), appointment.getObjectID(), Appointment.ALL_COLUMNS);
+        List<Appointment> changeExceptions = getManager().getChangeExceptions(appointment.getParentFolderID(), appointment.getObjectID(), Appointment.ALL_COLUMNS);
         assertNotNull("no change exceptions found", changeExceptions);
         assertEquals("Invalid number of change exceptions found", 1, changeExceptions.size());
         Appointment changeException = getManager().get(appointment.getParentFolderID(), changeExceptions.get(0).getObjectID());
@@ -424,7 +425,7 @@ public class ConfirmationTest extends CalDAVTest {
         assertNotNull("no users found in apointment", changeException.getUsers());
         user = null;
         for (UserParticipant participant : changeException.getUsers()) {
-            if (client.getValues().getUserId() == participant.getIdentifier()) {
+            if (getClient().getValues().getUserId() == participant.getIdentifier()) {
                 user = participant;
                 break;
             }

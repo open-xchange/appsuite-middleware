@@ -1,9 +1,9 @@
 package liquibase.database.core;
 
-import liquibase.database.AbstractJdbcDatabaseTest;
+import static org.junit.Assert.assertFalse;
 import org.junit.Assert;
-import static org.junit.Assert.*;
 import org.junit.Test;
+import liquibase.database.AbstractJdbcDatabaseTest;
 
 public class CacheDatabaseTest extends AbstractJdbcDatabaseTest {
 
@@ -40,14 +40,12 @@ public class CacheDatabaseTest extends AbstractJdbcDatabaseTest {
 
 
 
-	@Override
-    @Test
+     @Test
 	public void getCurrentDateTimeFunction() {
 		Assert.assertEquals("SYSDATE", database.getCurrentDateTimeFunction());
 	}
 
-	@Override
-    @Test
+     @Test
 	public void supportsInitiallyDeferrableColumns() {
 		assertFalse(database.supportsInitiallyDeferrableColumns());
 	}

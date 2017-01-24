@@ -21,9 +21,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
-
-import junit.framework.TestCase;
-
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.detect.Detector;
 import org.apache.tika.exception.TikaException;
@@ -31,10 +28,14 @@ import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.XMPDM;
 import org.apache.tika.mime.MediaType;
 import org.apache.tika.sax.BodyContentHandler;
+import org.junit.Test;
 import org.xml.sax.ContentHandler;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
-public class AutoDetectParserTest extends TestCase {
-    private TikaConfig tika = TikaConfig.getDefaultConfig();
+public class AutoDetectParserTest {    private TikaConfig tika = TikaConfig.getDefaultConfig();
 
     // Easy to read constants for the MIME types:
     private static final String RAW        = "application/octet-stream";
@@ -145,75 +146,92 @@ public class AutoDetectParserTest extends TestCase {
         assertAutoDetect(resource, badResource, type, wrongMimeType, content);
     }
 
-    public void testKeynote() throws Exception {
+         @Test
+     public void testKeynote() throws Exception {
         assertAutoDetect("testKeynote.key", KEYNOTE, "A sample presentation");
     }
 
-    public void testPages() throws Exception {
+         @Test
+     public void testPages() throws Exception {
         assertAutoDetect("testPages.pages", PAGES, "Sample pages document");
     }
 
-    public void testNumbers() throws Exception {
+         @Test
+     public void testNumbers() throws Exception {
         assertAutoDetect("testNumbers.numbers", NUMBERS, "Checking Account: 300545668");
     }
 
-    public void testEpub() throws Exception {
+         @Test
+     public void testEpub() throws Exception {
         assertAutoDetect(
                 "testEPUB.epub", "application/epub+zip",
                 "The previous headings were subchapters");
     }
 
-    public void testExcel() throws Exception {
+         @Test
+     public void testExcel() throws Exception {
         assertAutoDetect("testEXCEL.xls", EXCEL, "Sample Excel Worksheet");
     }
 
-    public void testHTML() throws Exception {
+         @Test
+     public void testHTML() throws Exception {
         assertAutoDetect("testHTML.html", HTML, "Test Indexation Html");
     }
 
-    public void testOpenOffice() throws Exception {
+         @Test
+     public void testOpenOffice() throws Exception {
         assertAutoDetect("testOpenOffice2.odt", OPENOFFICE,
                 "This is a sample Open Office document");
     }
 
-    public void testPDF() throws Exception {
+         @Test
+     public void testPDF() throws Exception {
         assertAutoDetect("testPDF.pdf", PDF, "Content Analysis Toolkit");
 
     }
 
-    public void testPowerpoint() throws Exception {
+         @Test
+     public void testPowerpoint() throws Exception {
         assertAutoDetect("testPPT.ppt", POWERPOINT, "Sample Powerpoint Slide");
     }
 
-    public void testRdfXml() throws Exception {
+         @Test
+     public void testRdfXml() throws Exception {
         assertAutoDetect("testRDF.rdf", "application/rdf+xml", "");
     }
 
-    public void testRTF() throws Exception {
+         @Test
+     public void testRTF() throws Exception {
         assertAutoDetect("testRTF.rtf", RTF, "indexation Word");
     }
 
-    public void testText() throws Exception {
+         @Test
+     public void testText() throws Exception {
         assertAutoDetect("testTXT.txt", PLAINTEXT, "indexation de Txt");
     }
     
-    public void testTextNonASCIIUTF8() throws Exception {
+         @Test
+     public void testTextNonASCIIUTF8() throws Exception {
         assertAutoDetect("testTXTNonASCIIUTF8.txt", UTF8TEXT, "The quick brown fox jumps over the lazy dog");
     }
 
-    public void testWord() throws Exception {
+         @Test
+     public void testWord() throws Exception {
         assertAutoDetect("testWORD.doc", WORD, "Sample Word Document");
     }
 
-    public void testXML() throws Exception {
+         @Test
+     public void testXML() throws Exception {
         assertAutoDetect("testXML.xml", XML, "Lius");
     }
 
-    public void testRss() throws Exception {
+         @Test
+     public void testRss() throws Exception {
         assertAutoDetect("/test-documents/rsstest.rss", "feed", RSS, "application/rss+xml", "Sample RSS File for Junit test");
     }
     
-    public void testImages() throws Exception {
+         @Test
+     public void testImages() throws Exception {
        assertAutoDetect("testBMP.bmp", BMP, null);
        assertAutoDetect("testGIF.gif", GIF, null);
        assertAutoDetect("testJPEG.jpg", JPEG, null);
@@ -225,7 +243,8 @@ public class AutoDetectParserTest extends TestCase {
      *
      * @see <a href="https://issues.apache.org/jira/browse/TIKA-216">TIKA-216</a>
      */
-    public void testZipBombPrevention() throws Exception {
+         @Test
+     public void testZipBombPrevention() throws Exception {
         InputStream tgz = AutoDetectParserTest.class.getResourceAsStream(
                 "/test-documents/TIKA-216.tgz");
         try {
@@ -246,7 +265,8 @@ public class AutoDetectParserTest extends TestCase {
      *  included, and are available
      */
     @SuppressWarnings("deprecation")
-    public void testVorbisFlac() throws Exception {
+         @Test
+     public void testVorbisFlac() throws Exception {
        // The three test files should all have similar test data
        String[] testFiles = new String[] {
              "testVORBIS.ogg", "testFLAC.oga", "testFLAC.flac"
@@ -307,7 +327,8 @@ public class AutoDetectParserTest extends TestCase {
      * list of supported parsers.
      * @see <a href="https://issues.apache.org/jira/browse/TIKA-514">TIKA-514</a>
      */
-    public void testSpecificParserList() throws Exception {
+         @Test
+     public void testSpecificParserList() throws Exception {
         AutoDetectParser parser = new AutoDetectParser(new MyDetector(), new MyParser());
         
         InputStream is = new ByteArrayInputStream("test".getBytes());

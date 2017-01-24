@@ -1,16 +1,15 @@
 package liquibase.parser.core.yaml;
 
-import liquibase.changelog.ChangeLogParameters;
-import liquibase.changelog.DatabaseChangeLog;
-import liquibase.exception.ChangeLogParseException;
-import liquibase.resource.ResourceAccessor;
-import org.junit.Test;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Enumeration;
+import org.junit.Test;
+import liquibase.changelog.ChangeLogParameters;
+import liquibase.changelog.DatabaseChangeLog;
+import liquibase.exception.ChangeLogParseException;
+import liquibase.resource.ResourceAccessor;
 
 public class YamlChangeLogParserTest {
 

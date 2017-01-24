@@ -49,18 +49,15 @@
 
 package com.openexchange.groupware.importexport;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
-public class Bug8681Suite extends TestSuite {
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    Bug8681forICAL.class,
+    Bug8681forVCard.class,
+    Bug8681forCSV.class
+})
+public class Bug8681Suite {
 
-	public static Test suite(){
-		final TestSuite tests = new TestSuite();
-		//basics
-		tests.addTest( Bug8681forICAL.suite() );
-		tests.addTest( Bug8681forVCard.suite() );
-		tests.addTest( Bug8681forCSV.suite() );
-
-		return tests;
-	}
 }

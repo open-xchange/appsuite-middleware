@@ -49,6 +49,9 @@
 
 package com.openexchange.contact.vcard;
 
+import static org.junit.Assert.assertNotNull;
+import org.junit.Assert;
+import org.junit.Test;
 import com.openexchange.groupware.container.Contact;
 
 /**
@@ -67,7 +70,8 @@ public class Bug14350Test extends VCardTest {
         super();
     }
 
-    public void testImportVCard() throws Exception {
+         @Test
+     public void testImportVCard() throws Exception {
         /*
          * import vCard
          */
@@ -91,16 +95,16 @@ public class Bug14350Test extends VCardTest {
          * verify imported contact
          */
         assertNotNull(contact);
-        assertEquals("Broadway 3131 / 5th Ave", contact.getStreetBusiness());
-        assertEquals("T\u00fcbingen", contact.getCityBusiness());
-        assertEquals("Baden-W\u00fcrttemberg", contact.getStateBusiness());
-        assertEquals("57621", contact.getPostalCodeBusiness());
-        assertEquals("Germany", contact.getCountryBusiness());
-        assertEquals("Testroad 4711", contact.getStreetHome());
-        assertEquals("Port de la V\u00e9rde", contact.getCityHome());
-        assertEquals("Skol-upon-sea", contact.getStateHome());
-        assertEquals("37542", contact.getPostalCodeHome());
-        assertEquals("France", contact.getCountryHome());
+        Assert.assertEquals("Broadway 3131 / 5th Ave", contact.getStreetBusiness());
+        Assert.assertEquals("T\u00fcbingen", contact.getCityBusiness());
+        Assert.assertEquals("Baden-W\u00fcrttemberg", contact.getStateBusiness());
+        Assert.assertEquals("57621", contact.getPostalCodeBusiness());
+        Assert.assertEquals("Germany", contact.getCountryBusiness());
+        Assert.assertEquals("Testroad 4711", contact.getStreetHome());
+        Assert.assertEquals("Port de la V\u00e9rde", contact.getCityHome());
+        Assert.assertEquals("Skol-upon-sea", contact.getStateHome());
+        Assert.assertEquals("37542", contact.getPostalCodeHome());
+        Assert.assertEquals("France", contact.getCountryHome());
 
     }
 

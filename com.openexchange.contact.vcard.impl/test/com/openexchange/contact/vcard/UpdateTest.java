@@ -50,6 +50,8 @@
 package com.openexchange.contact.vcard;
 
 import java.util.regex.Pattern;
+import org.junit.Assert;
+import org.junit.Test;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.util.UUIDs;
 import ezvcard.VCard;
@@ -68,7 +70,8 @@ public class UpdateTest extends VCardTest {
         super();
     }
 
-    public void testSetPropertyInContact() throws Exception {
+         @Test
+     public void testSetPropertyInContact() throws Exception {
         for (int field : getMappedStringFields()) {
             /*
              * export original, empty contact as vCard
@@ -86,16 +89,17 @@ public class UpdateTest extends VCardTest {
              * import the updated vCard as new contact & check the property
              */
             Contact importedContact = getMapper().importVCard(updatedVCard, null, null, null);
-            assertEquals("Field " + field + " not set", setValue, importedContact.get(field));
+            Assert.assertEquals("Field " + field + " not set", setValue, importedContact.get(field));
             /*
              * import the updated contact as update of the original contact & check the property
              */
             importedContact = getMapper().importVCard(updatedVCard, originalContact, null, null);
-            assertEquals("Field " + field + " not set", setValue, importedContact.get(field));
+            Assert.assertEquals("Field " + field + " not set", setValue, importedContact.get(field));
         }
     }
 
-    public void testUpdatePropertyInContact() throws Exception {
+         @Test
+     public void testUpdatePropertyInContact() throws Exception {
         for (int field : getMappedStringFields()) {
             /*
              * export original contact as vCard
@@ -115,16 +119,17 @@ public class UpdateTest extends VCardTest {
              * import the updated vCard as new contact & check the property
              */
             Contact importedContact = getMapper().importVCard(updatedVCard, null, null, null);
-            assertEquals("Field " + field + " not updated", updatedValue, importedContact.get(field));
+            Assert.assertEquals("Field " + field + " not updated", updatedValue, importedContact.get(field));
             /*
              * import the updated contact as update of the original contact & check the property
              */
             importedContact = getMapper().importVCard(updatedVCard, originalContact, null, null);
-            assertEquals("Field " + field + " not updated", updatedValue, importedContact.get(field));
+            Assert.assertEquals("Field " + field + " not updated", updatedValue, importedContact.get(field));
         }
     }
 
-    public void testUpdatePropertyInVCard() throws Exception {
+         @Test
+     public void testUpdatePropertyInVCard() throws Exception {
         for (int field : getMappedStringFields()) {
             /*
              * export original contact as vCard
@@ -144,16 +149,17 @@ public class UpdateTest extends VCardTest {
              * import the updated vCard as new contact & check the property
              */
             Contact importedContact = getMapper().importVCard(updatedVCard, null, null, null);
-            assertEquals("Field " + field + " not updated", updatedValue, importedContact.get(field));
+            Assert.assertEquals("Field " + field + " not updated", updatedValue, importedContact.get(field));
             /*
              * import the updated contact as update of the original contact & check the property
              */
             importedContact = getMapper().importVCard(updatedVCard, originalContact, null, null);
-            assertEquals("Field " + field + " not updated", updatedValue, importedContact.get(field));
+            Assert.assertEquals("Field " + field + " not updated", updatedValue, importedContact.get(field));
         }
     }
 
-    public void testRemovePropertyInContact() throws Exception {
+         @Test
+     public void testRemovePropertyInContact() throws Exception {
         for (int field : getMappedStringFields()) {
             /*
              * export original contact as vCard
@@ -172,16 +178,17 @@ public class UpdateTest extends VCardTest {
              * import the updated vCard as new contact & check the property
              */
             Contact importedContact = getMapper().importVCard(updatedVCard, null, null, null);
-            assertEquals("Field " + field + " not removed", null, importedContact.get(field));
+            Assert.assertEquals("Field " + field + " not removed", null, importedContact.get(field));
             /*
              * import the updated contact as update of the original contact & check the property
              */
             importedContact = getMapper().importVCard(updatedVCard, originalContact, null, null);
-            assertEquals("Field " + field + " not removed", null, importedContact.get(field));
+            Assert.assertEquals("Field " + field + " not removed", null, importedContact.get(field));
         }
     }
 
-    public void testRemovePropertyInVCard() throws Exception {
+         @Test
+     public void testRemovePropertyInVCard() throws Exception {
         for (int field : getMappedStringFields()) {
             /*
              * export original contact as vCard
@@ -201,12 +208,12 @@ public class UpdateTest extends VCardTest {
              * import the updated vCard as new contact & check the property
              */
             Contact importedContact = getMapper().importVCard(updatedVCard, null, null, null);
-            assertEquals("Field " + field + " not removed", null, importedContact.get(field));
+            Assert.assertEquals("Field " + field + " not removed", null, importedContact.get(field));
             /*
              * import the updated contact as update of the original contact & check the property
              */
             importedContact = getMapper().importVCard(updatedVCard, originalContact, null, null);
-            assertEquals("Field " + field + " not removed", null, importedContact.get(field));
+            Assert.assertEquals("Field " + field + " not removed", null, importedContact.get(field));
         }
     }
 

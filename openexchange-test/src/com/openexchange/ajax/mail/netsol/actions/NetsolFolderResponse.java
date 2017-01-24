@@ -62,32 +62,33 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
  */
 public final class NetsolFolderResponse extends AbstractAJAXResponse {
 
-	private Object[][] array;
+    private Object[][] array;
 
-	/**
-	 * Initializes a new {@link NetsolFolderResponse}
-	 * @param response
-	 */
-	public NetsolFolderResponse(final Response response) {
-		super(response);
-	}
+    /**
+     * Initializes a new {@link NetsolFolderResponse}
+     * 
+     * @param response
+     */
+    public NetsolFolderResponse(final Response response) {
+        super(response);
+    }
 
-	public Object[][] getArray() throws JSONException {
-		if (null == array) {
-			final JSONArray array = (JSONArray) getData();
-			final int len = array.length();
-			final Object[][] retval = new Object[len][];
-			for (int i = 0; i < len; i++) {
-				final JSONArray iArray = array.getJSONArray(i);
-				final int iLen = iArray.length();
-				retval[i] = new Object[iLen];
-				for (int k = 0; k < iLen; k++) {
-					retval[i][k] = iArray.get(k);
-				}
-			}
-			this.array = retval;
-		}
-		return array;
-	}
+    public Object[][] getArray() throws JSONException {
+        if (null == array) {
+            final JSONArray array = (JSONArray) getData();
+            final int len = array.length();
+            final Object[][] retval = new Object[len][];
+            for (int i = 0; i < len; i++) {
+                final JSONArray iArray = array.getJSONArray(i);
+                final int iLen = iArray.length();
+                retval[i] = new Object[iLen];
+                for (int k = 0; k < iLen; k++) {
+                    retval[i][k] = iArray.get(k);
+                }
+            }
+            this.array = retval;
+        }
+        return array;
+    }
 
 }

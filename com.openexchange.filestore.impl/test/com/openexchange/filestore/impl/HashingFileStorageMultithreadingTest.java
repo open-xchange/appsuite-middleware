@@ -49,6 +49,8 @@
 
 package com.openexchange.filestore.impl;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -56,6 +58,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 
 /**
@@ -68,7 +71,8 @@ public class HashingFileStorageMultithreadingTest extends AbstractHashingFileSto
     private final int NUM_FILES = 10000;
     private final int NUM_THREADS = 10;
 
-    public void testManyThreads() throws InterruptedException, OXException, IOException {
+         @Test
+     public void testManyThreads() throws InterruptedException, OXException, IOException {
         List<FileSaverThread> fsThreads = new ArrayList<FileSaverThread>(10);
         for(int i = 0; i < NUM_THREADS; i++) {
             FileSaverThread thread = new FileSaverThread("Thread "+i);

@@ -85,8 +85,8 @@ public class RssActionTestReconfiguredPorts {
     List<OXException> warnings = new ArrayList<>();
 
     // tests bug 45402: SSRF at RSS feeds
-    @Test
-    public void testGetAcceptedFeeds_emptyPortListConfigured_allowAllPorts() throws OXException, MalformedURLException {
+     @Test
+     public void testGetAcceptedFeeds_emptyPortListConfigured_allowAllPorts() throws OXException, MalformedURLException {
         PowerMockito.mockStatic(Services.class);
         Mockito.when(Services.optService(ConfigurationService.class)).thenReturn(configurationService);
         Mockito.when(Services.getService(ConfigurationService.class)).thenReturn(configurationService);

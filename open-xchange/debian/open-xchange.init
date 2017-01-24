@@ -51,7 +51,10 @@ if [ "$ENABLED" = "0" ]; then
     exit 0
 fi
 
-ulimit -n $NRFILES
+NRFILES=${NRFILES:-65536}
+NPROC=${NPROC:-65536}
+ulimit -n ${NRFILES}
+ulimit -u ${NPROC}
 
 if ox_is_running open-xchange-admin "/opt/open-xchange/etc/admindaemon"; then
    echo -n "old 6.20 admin daemon still running, shutting down..."

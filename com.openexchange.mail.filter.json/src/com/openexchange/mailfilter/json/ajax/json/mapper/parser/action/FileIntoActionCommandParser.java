@@ -65,6 +65,7 @@ import com.openexchange.mailfilter.json.ajax.json.fields.MoveActionField;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserJSONUtil;
 import com.openexchange.mailfilter.json.osgi.Services;
+import com.openexchange.tools.session.ServerSession;
 import com.sun.mail.imap.protocol.BASE64MailboxDecoder;
 import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
 
@@ -84,11 +85,11 @@ public class FileIntoActionCommandParser implements CommandParser<ActionCommand>
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser#parse(org.json.JSONObject)
      */
     @Override
-    public ActionCommand parse(JSONObject jsonObject) throws JSONException, SieveException, OXException {
+    public ActionCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException {
         String stringParam = CommandParserJSONUtil.getString(jsonObject, MoveActionField.into.name(), Commands.FILEINTO.getJsonName());
 
         final String folderName;
@@ -103,7 +104,7 @@ public class FileIntoActionCommandParser implements CommandParser<ActionCommand>
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser#parse(org.json.JSONObject, com.openexchange.jsieve.commands.ActionCommand)
      */
     @SuppressWarnings("unchecked")
@@ -125,7 +126,7 @@ public class FileIntoActionCommandParser implements CommandParser<ActionCommand>
 
     /**
      * Helper method to fetch the value of the 'com.openexchange.mail.filter.useUTF7FolderEncoding' property
-     * 
+     *
      * @return The value of the 'com.openexchange.mail.filter.useUTF7FolderEncoding' property
      */
     private boolean useUTF7Encoding() {

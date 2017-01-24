@@ -49,11 +49,17 @@
 
 package com.openexchange.ajax.mail;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.UserValues;
@@ -79,20 +85,23 @@ public final class SendTest extends AbstractMailTest {
      *
      * @param name Name of this test.
      */
-    public SendTest(final String name) {
-        super(name);
+    public SendTest() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
-        manager = new MailTestManager(client, false);
+        manager = new MailTestManager(getClient(), false);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        manager.cleanUp();
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
+        try {
+            manager.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
     /**
@@ -100,6 +109,7 @@ public final class SendTest extends AbstractMailTest {
      *
      * @throws Throwable
      */
+    @Test
     public void testSend() throws Throwable {
 
         /*
@@ -125,8 +135,9 @@ public final class SendTest extends AbstractMailTest {
         clearFolder(getTrashFolder());
     }
 
+    @Test
     public void testSendWithManager() throws OXException, IOException, SAXException, JSONException {
-        UserValues values = client.getValues();
+        UserValues values = getClient().getValues();
 
         TestMail mail = new TestMail();
         mail.setSubject("Test sending with manager");
@@ -146,6 +157,7 @@ public final class SendTest extends AbstractMailTest {
      *
      * @throws Throwable
      */
+    @Test
     public void testSendUnicode() throws Throwable {
 
         /*
@@ -158,7 +170,6 @@ public final class SendTest extends AbstractMailTest {
          * Create JSON mail object
          */
         final String mailObject_25kb = createSelfAddressed25KBMailObject().toString();
-
 
         JSONObject jMail = new JSONObject(mailObject_25kb);
         JSONObject jAttach = jMail.getJSONArray("attachments").getJSONObject(0);

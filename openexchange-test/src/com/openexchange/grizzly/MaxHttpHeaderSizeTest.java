@@ -49,6 +49,7 @@
 
 package com.openexchange.grizzly;
 
+import static org.junit.Assert.assertEquals;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
@@ -56,7 +57,6 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.junit.Test;
 import com.openexchange.ajax.simple.AbstractSimpleClientTest;
 import com.openexchange.ajax.simple.SimpleOXClient;
-
 
 /**
  * {@link MaxHttpHeaderSizeTest} - Check that we can add a header of around 10kB to our simple get request. This will fail unless Apache and
@@ -152,7 +152,7 @@ public class MaxHttpHeaderSizeTest extends AbstractSimpleClientTest {
     public void test() throws Exception {
         SimpleOXClient oxClient = createClient();
         HttpClient httpClient = oxClient.getClient();
-        Header bigHeader= new Header("bigheader", bigValue);
+        Header bigHeader = new Header("bigheader", bigValue);
         HttpMethod getPing = new GetMethod("/servlet/Ping");
         getPing.addRequestHeader(bigHeader);
         int status = httpClient.executeMethod(getPing);

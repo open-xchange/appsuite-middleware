@@ -68,8 +68,7 @@ public final class DeleteRequest extends AbstractGroupRequest<DeleteResponse> {
 
     private final boolean failOnError;
 
-    public DeleteRequest(final int groupId, final Date lastModified,
-        final boolean failOnError) {
+    public DeleteRequest(final int groupId, final Date lastModified, final boolean failOnError) {
         super();
         this.groupId = groupId;
         this.lastModified = lastModified;
@@ -102,9 +101,7 @@ public final class DeleteRequest extends AbstractGroupRequest<DeleteResponse> {
 
     @Override
     public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE),
-            new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, lastModified)
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE), new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, lastModified)
         };
     }
 

@@ -55,7 +55,6 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.writer.ResponseWriter;
 
-
 /**
  * {@link ConfigurationResponse}
  *

@@ -74,6 +74,7 @@ import com.openexchange.mailfilter.json.ajax.actions.AbstractRequest.Parameters;
 import com.openexchange.mailfilter.json.ajax.json.RuleParser;
 import com.openexchange.mailfilter.json.osgi.Services;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * @author <a href="mailto:dennis.sieben@open-xchange.org">Dennis Sieben</a>
@@ -169,7 +170,7 @@ public class MailFilterAction extends AbstractAction<Rule, MailFilterRequest> {
         final MailFilterService mailFilterService = Services.getService(MailFilterService.class);
         try {
             final Credentials credentials = request.getCredentials();
-            final Rule rule = CONVERTER.parse(getJsonBody(request));
+            final Rule rule = CONVERTER.parse(getJsonBody(request), ServerSessionAdapter.valueOf(request.getSession()));
             return mailFilterService.createFilterRule(credentials, rule);
         } catch (final SieveException e) {
             throw MailFilterExceptionCode.handleSieveException(e);
@@ -247,7 +248,7 @@ public class MailFilterAction extends AbstractAction<Rule, MailFilterRequest> {
             if (rule == null) {
                 throw MailFilterExceptionCode.NO_SUCH_ID.create(uid, credentials.getRightUsername(), credentials.getContextString());
             }
-            CONVERTER.parse(rule, json);
+            CONVERTER.parse(rule, json, ServerSessionAdapter.valueOf(request.getSession()));
             mailFilterService.updateFilterRule(credentials, rule, uid);
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e);

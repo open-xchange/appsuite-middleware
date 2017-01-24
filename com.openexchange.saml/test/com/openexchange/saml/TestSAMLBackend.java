@@ -71,9 +71,11 @@ import com.openexchange.saml.spi.LogoutInfo;
 public class TestSAMLBackend extends AbstractSAMLBackend {
 
     private final CredentialProvider credentialProvider;
+    private SAMLConfig config;
 
-    public TestSAMLBackend(CredentialProvider credentialProvider) {
+    public TestSAMLBackend(CredentialProvider credentialProvider, SAMLConfig config) {
         this.credentialProvider = credentialProvider;
+        this.config = config;
     }
 
     @Override
@@ -98,4 +100,8 @@ public class TestSAMLBackend extends AbstractSAMLBackend {
 
     }
 
+    @Override
+    public SAMLConfig getConfig() {
+        return config;
+    }
 }

@@ -49,16 +49,19 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
-import com.openexchange.exception.OXException;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.sql.SQLException;
 import java.util.Date;
+import org.junit.Test;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.UserParticipant;
-
 
 public class Bug11424Test extends CalendarSqlTest {
     // Bug 11424
 
+    @Test
     public void testUpdateInSharedFolderShouldAutoAcceptTimeChange() throws OXException, SQLException {
 
         folders.sharePrivateFolder(session, ctx, secondUserId);

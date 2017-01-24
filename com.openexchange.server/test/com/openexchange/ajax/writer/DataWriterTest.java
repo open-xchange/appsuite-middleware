@@ -72,8 +72,8 @@ public class DataWriterTest {
      * Test method for {@link com.openexchange.ajax.writer.DataWriter#writeParameter(java.lang.String, java.lang.Integer, org.json.JSONObject, boolean)}.
      * @throws JSONException
      */
-    @Test
-    public void testWriteParameterInteger() throws JSONException {
+     @Test
+     public void testWriteParameterInteger() throws JSONException {
         JSONObject json = new JSONObject();
         DataWriter.writeParameter("testInteger", Integer.valueOf(0), json, true);
         Assert.assertTrue("JSON attribute was not written.", json.has("testInteger"));
@@ -86,8 +86,8 @@ public class DataWriterTest {
      * Test method for {@link com.openexchange.ajax.writer.DataWriter#writeParameter(java.lang.String, java.lang.Integer, org.json.JSONObject, boolean)}.
      * @throws JSONException
      */
-    @Test
-    public void testWriteParameterIntegerNull() throws JSONException {
+     @Test
+     public void testWriteParameterIntegerNull() throws JSONException {
         JSONObject json = new JSONObject();
         DataWriter.writeParameter("testInteger", (Integer) null, json, true);
         Assert.assertTrue("JSON attribute was not written.", json.has("testInteger"));

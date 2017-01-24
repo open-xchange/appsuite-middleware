@@ -16,15 +16,17 @@
  */
 package org.apache.tika;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
+import org.junit.Test;
 import org.xml.sax.helpers.DefaultHandler;
 
 /**
@@ -41,7 +43,8 @@ public class TestParsers extends TikaTest {
         tika = new Tika(tc);
     }
 
-    public void testWORDxtraction() throws Exception {
+         @Test
+     public void testWORDxtraction() throws Exception {
         File file = getResourceAsFile("/test-documents/testWORD.doc");
         Parser parser = tika.getParser();
         Metadata metadata = new Metadata();
@@ -55,7 +58,8 @@ public class TestParsers extends TikaTest {
         assertEquals("Sample Word Document", metadata.get(TikaCoreProperties.TITLE));
     }
 
-    public void testEXCELExtraction() throws Exception {
+         @Test
+     public void testEXCELExtraction() throws Exception {
         final String expected = "Numbers and their Squares";
         File file = getResourceAsFile("/test-documents/testEXCEL.xls");
         String s1 = tika.parseToString(file);
@@ -73,7 +77,8 @@ public class TestParsers extends TikaTest {
         assertEquals("Simple Excel document", metadata.get(TikaCoreProperties.TITLE));
     }
 
-    public void testOptionalHyphen() throws Exception {
+         @Test
+     public void testOptionalHyphen() throws Exception {
         String[] extensions =
                 new String[] { "ppt", "pptx", "doc", "docx", "rtf", "pdf"};
         for (String extension : extensions) {
@@ -97,7 +102,8 @@ public class TestParsers extends TikaTest {
                    content.contains("Here is a comment"));
     }
 
-    public void testComment() throws Exception {
+         @Test
+     public void testComment() throws Exception {
         final String[] extensions = new String[] {"ppt", "pptx", "doc", "docx", "pdf", "rtf"};
         for(String extension : extensions) {
             verifyComment(extension, "testComment");

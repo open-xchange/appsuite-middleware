@@ -88,15 +88,19 @@ public abstract class AbstractColumnsResponse extends AbstractAJAXResponse imple
     public Iterator<Object> iterator(final int attributeId) {
         final int columnPos = getColumnPos(attributeId);
         return new Iterator<Object>() {
+
             int pos = 0;
+
             @Override
             public boolean hasNext() {
                 return pos < getArray().length;
             }
+
             @Override
             public Object next() {
                 return getArray()[pos++][columnPos];
             }
+
             @Override
             public void remove() {
                 throw new UnsupportedOperationException();
@@ -106,6 +110,7 @@ public abstract class AbstractColumnsResponse extends AbstractAJAXResponse imple
 
     /**
      * Get the column position of a specific attribute
+     * 
      * @param attributeId the attribute whose position you want to lookup
      * @return -1 if the attribute can't be found, the position of the attribute otherwise
      */

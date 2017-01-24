@@ -49,6 +49,12 @@
 
 package com.openexchange.halo.internal;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.argThat;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import java.util.List;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
@@ -65,17 +71,11 @@ import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.halo.HaloContactImageSource;
 import com.openexchange.halo.HaloContactQuery;
 import com.openexchange.halo.Picture;
-import com.openexchange.halo.internal.ContactHaloImpl;
 import com.openexchange.server.MockingServiceLookup;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.SimServerSession;
 import com.openexchange.user.UserService;
-import static org.mockito.Matchers.argThat;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.junit.Assert.*;
 
 /**
  * {@link ContactHaloImplTest}

@@ -49,7 +49,9 @@
 
 package com.openexchange.ajax.config;
 
+import static org.junit.Assert.assertTrue;
 import java.util.regex.Pattern;
+import org.junit.Test;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.GetResponse;
 import com.openexchange.ajax.config.actions.Tree;
@@ -66,13 +68,10 @@ public class Bug22389Test extends AbstractAJAXSession {
     private static final String EXPRESSION = "[67]\\.[0-9]+\\.[0-9]-Rev[0-9]+";
     private static final Pattern PATTERN = Pattern.compile(EXPRESSION);
 
-    public Bug22389Test(String name) {
-        super(name);
-    }
-
+    @Test
     public void testVersion() throws Exception {
         GetRequest request = new GetRequest(Tree.ServerVersion);
-        GetResponse response = client.execute(request);
+        GetResponse response = getClient().execute(request);
         String version = response.getString();
         LOG.trace("Server reported version: \"" + version + "\".");
         assertTrue("Server version does not match required pattern: \"" + version + "\"", PATTERN.matcher(version).matches());

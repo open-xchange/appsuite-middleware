@@ -143,8 +143,8 @@ public class PortableResourceTest {
         matchingPortableResource2 = new PortableResource(new DefaultResource(onlinePresence, currentDate), localMember);
     }
 
-    @Test
-    public void testPortableHazelcastResource() throws OXException {
+     @Test
+     public void testPortableHazelcastResource() throws OXException {
         PortableResource portableResource = new PortableResource(localMember);
         assertNull(portableResource.getPresence());
         RoutingInfo routingInfo = portableResource.getRoutingInfo();
@@ -157,8 +157,8 @@ public class PortableResourceTest {
         assertEquals(portableResource, deserializedPortableResource);
     }
 
-    @Test
-    public void testPortableHazelcastResourcePresence() throws OXException {
+     @Test
+     public void testPortableHazelcastResourcePresence() throws OXException {
         PortableResource portableResource = new PortableResource(defaultResource, localMember);
         assertEquals(onlinePresence, portableResource.getPresence());
         RoutingInfo routingInfo = portableResource.getRoutingInfo();
@@ -172,14 +172,14 @@ public class PortableResourceTest {
 
     }
 
-    @Test
-    public void testEqualsObject() throws OXException, InterruptedException {
+     @Test
+     public void testEqualsObject() throws OXException, InterruptedException {
         assertFalse(differingPortableResource1.equals(differingPortableResource2));
         assertTrue(matchingPortableResource1.equals(matchingPortableResource2));
     }
 
-    @Test
-    public void testHashCode() throws OXException {
+     @Test
+     public void testHashCode() throws OXException {
         assertFalse(differingPortableResource1.hashCode() == (differingPortableResource2.hashCode()));
         assertTrue(matchingPortableResource1.hashCode() == matchingPortableResource2.hashCode());
     }

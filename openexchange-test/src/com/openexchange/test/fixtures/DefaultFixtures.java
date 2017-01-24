@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.test.fixtures;
 
 import java.util.Date;
@@ -59,7 +60,7 @@ import com.openexchange.test.fixtures.transformators.LongTransformator;
  */
 public abstract class DefaultFixtures<T> extends AbstractFixtures<T> {
 
-	public DefaultFixtures(final Class<T> klass, final Map<String, Map<String, String>> values, FixtureLoader fixtureLoader) {
+    public DefaultFixtures(final Class<T> klass, final Map<String, Map<String, String>> values, FixtureLoader fixtureLoader) {
         super(klass, values);
         addTransformator(new JChronicDateTransformator(fixtureLoader), Date.class);
         addTransformator(new IntegerTransformator(), Integer.class);

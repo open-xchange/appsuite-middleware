@@ -50,9 +50,12 @@
 package com.openexchange.ajax.contact;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import java.util.Date;
 import java.util.List;
 import org.json.JSONArray;
+import org.junit.Test;
 import com.openexchange.ajax.contact.action.SearchByBirthdayRequest;
 import com.openexchange.ajax.framework.CommonSearchResponse;
 import com.openexchange.groupware.container.Contact;
@@ -66,31 +69,23 @@ import com.openexchange.groupware.container.Contact;
  */
 public class Bug31993Test extends AbstractManagedContactTest {
 
-    public Bug31993Test(String name) {
-        super(name);
-    }
-
-	@Override
-	public void setUp() throws Exception {
-	    super.setUp();
-	}
-
+    @Test
     public void testSortOrder() throws Exception {
-    	/*
-    	 * create contacts
-    	 */
+        /*
+         * create contacts
+         */
         Contact contact1 = super.generateContact("Mike");
         contact1.setBirthday(D("1969-04-11 00:00:00"));
-        contact1 = manager.newAction(contact1);
+        contact1 = cotm.newAction(contact1);
         Contact contact2 = super.generateContact("Frank");
         contact2.setBirthday(D("1980-04-10 00:00:00"));
-        contact2 = manager.newAction(contact2);
+        contact2 = cotm.newAction(contact2);
         Contact contact3 = super.generateContact("Oliver");
         contact3.setBirthday(D("1988-04-11 00:00:00"));
-        contact3 = manager.newAction(contact3);
-    	/*
-    	 * search birthdays
-    	 */
+        contact3 = cotm.newAction(contact3);
+        /*
+         * search birthdays
+         */
         String parentFolderID = String.valueOf(contact1.getParentFolderID());
         int[] columns = { Contact.OBJECT_ID, Contact.SUR_NAME, Contact.BIRTHDAY, Contact.FOLDER_ID };
         SearchByBirthdayRequest request;
@@ -98,8 +93,8 @@ public class Bug31993Test extends AbstractManagedContactTest {
         List<Contact> contacts;
 
         request = new SearchByBirthdayRequest(new Date(1397088000000L), new Date(1404345600000L), parentFolderID, columns, true);
-        response = client.execute(request);
-        contacts = manager.transform((JSONArray) response.getResponse().getData(), columns);
+        response = getClient().execute(request);
+        contacts = cotm.transform((JSONArray) response.getResponse().getData(), columns);
         assertNotNull(contacts);
         assertEquals("wrong number of results", 3, contacts.size());
 

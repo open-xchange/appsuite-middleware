@@ -81,6 +81,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.json.cache.JsonCacheService;
 import com.openexchange.json.cache.JsonCaches;
+import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
@@ -89,6 +90,7 @@ import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mail.config.MaliciousFolders;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailThread;
 import com.openexchange.mail.dataobjects.MailThreads;
@@ -105,6 +107,7 @@ import com.openexchange.mail.mime.MimeFilter;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
+import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.MailMessageComparator;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -657,20 +660,20 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         }
         tmp = paramContainer.getStringParam("embedded");
         final boolean embedded = (tmp != null && ("1".equals(tmp) || Boolean.parseBoolean(tmp)));
+        tmp = paramContainer.getStringParam("process_plain_text");
+        boolean asMarkup = (tmp == null || (!"0".equals(tmp) && Boolean.parseBoolean(tmp)));
         tmp = paramContainer.getStringParam("includePlainText");
         final boolean includePlainText = (tmp != null && ("1".equals(tmp) || Boolean.parseBoolean(tmp)));
         tmp = paramContainer.getStringParam("ignorable");
-        final MimeFilter mimeFilter;
-        if (com.openexchange.java.Strings.isEmpty(tmp)) {
-            mimeFilter = null;
-        } else {
-            final String[] strings = SPLIT.split(tmp, 0);
-            final int length = strings.length;
+        MimeFilter mimeFilter = null;
+        if (false == com.openexchange.java.Strings.isEmpty(tmp)) {
+            String[] strings = SPLIT.split(tmp, 0);
+            int length = strings.length;
             MimeFilter mf;
             if (1 == length && (mf = MimeFilter.filterFor(strings[0])) != null) {
                 mimeFilter = mf;
             } else {
-                final List<String> ignorableContentTypes = new ArrayList<String>(length);
+                List<String> ignorableContentTypes = new ArrayList<String>(length);
                 for (int i = 0; i < length; i++) {
                     final String cts = strings[i];
                     if ("ics".equalsIgnoreCase(cts)) {
@@ -695,6 +698,15 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         final DisplayMode displayMode = AbstractMailAction.detectDisplayMode(editDraft, view, usmNoSave);
         final String folderPath = paramContainer.checkStringParam(AJAXServlet.PARAMETER_FOLDERID);
         /*
+         * Check for malicious folder
+         */
+        {
+            FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(folderPath);
+            if (MaliciousFolders.instanceFor(session).isMalicious(fa.getFullName(), fa.getAccountId(), mailInterface)) {
+                usmNoSave.setSuppressLinks(true);
+            }
+        }
+        /*
          * Check for possible unseen action
          */
         final boolean wasUnseen = (mail.containsPrevSeen() && !mail.isPrevSeen());
@@ -717,6 +729,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
             MessageWriterParams params = MessageWriterParams.builder(mail.getAccountId(), mail, session)
                                                             .setDisplayMode(displayMode)
                                                             .setEmbedded(embedded)
+                                                            .setAsMarkup(asMarkup)
                                                             .setExactLength(exactLength)
                                                             .setIncludePlainText(includePlainText)
                                                             .setMaxContentSize(maxContentSize)
@@ -801,7 +814,9 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         String view = requestData.getParameter(Mail.PARAMETER_VIEW);
         view = null == view ? null : view.toLowerCase(Locale.US);
         String tmp = requestData.getParameter("embedded");
-        final boolean embedded = (tmp != null && ("1".equals(tmp) || Boolean.parseBoolean(tmp)));
+        boolean embedded = (tmp != null && ("1".equals(tmp) || Boolean.parseBoolean(tmp)));
+        tmp = requestData.getParameter("process_plain_text");
+        boolean asMarkup = (tmp == null || (!"0".equals(tmp) && Boolean.parseBoolean(tmp)));
         tmp = null;
         final UserSettingMail usmNoSave = session.getUserSettingMail().clone();
         /*
@@ -813,9 +828,21 @@ public final class MailConverter implements ResultConverter, MailActionConstants
          */
         DisplayMode displayMode = AbstractMailAction.detectDisplayMode(true, view, usmNoSave);
         int maxContentSize = AJAXRequestDataTools.parseIntParameter(requestData.getParameter(Mail.PARAMETER_MAX_SIZE), -1);
+        /*
+         * Check for malicious folder
+         */
+        {
+            String folderPath = requestData.getParameter(AJAXServlet.PARAMETER_FOLDERID);
+            if (null != folderPath) {
+                FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(folderPath);
+                if (MaliciousFolders.instanceFor(session).isMalicious(fa.getFullName(), fa.getAccountId(), getMailInterface(requestData, session))) {
+                    usmNoSave.setSuppressLinks(true);
+                }
+            }
+        }
         boolean allowNestedMessages = AJAXRequestDataTools.parseBoolParameter(Mail.PARAMETER_ALLOW_NESTED_MESSAGES, requestData, true);
         List<OXException> warnings = new ArrayList<OXException>(2);
-        JSONObject jsonObject = MessageWriter.writeMailMessage(mail.getAccountId(), mail, displayMode, embedded, session, usmNoSave, warnings, false, -1, null, null, false, maxContentSize, allowNestedMessages ? -1 : 1);
+        JSONObject jsonObject = MessageWriter.writeMailMessage(mail.getAccountId(), mail, displayMode, embedded, asMarkup, session, usmNoSave, warnings, false, -1, null, null, false, maxContentSize, allowNestedMessages ? -1 : 1);
 
         {
             String csid = (String) result.getParameter("csid");

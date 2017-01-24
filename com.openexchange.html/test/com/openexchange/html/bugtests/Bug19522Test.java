@@ -61,8 +61,8 @@ import com.openexchange.html.HtmlService;
  */
 public class Bug19522Test extends AbstractSanitizing {
 
-    @Test
-    public void testReplaceHtmlEntities() {
+     @Test
+     public void testReplaceHtmlEntities() {
         HtmlService html = getHtmlService();
         assertEquals("Unexpected return value", "durchgef\u00fchrt" ,html.replaceHTMLEntities("durchgef&#xfc;hrt"));
         assertEquals("Unexpected return value", "durchgef\u00fchrt" ,html.replaceHTMLEntities("durchgef&#252;hrt"));

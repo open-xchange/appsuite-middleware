@@ -1,3 +1,4 @@
+
 package com.openexchange.tools.events;
 
 import java.util.ArrayList;
@@ -15,14 +16,14 @@ public class TestEventAdmin implements EventAdmin {
 
     @Override
     public void postEvent(final Event event) {
-        events.add( event );
-	}
+        events.add(event);
+    }
 
-	@Override
+    @Override
     public void sendEvent(final Event event) {
         Thread.dumpStack();
-        events.add( event );
-	}
+        events.add(event);
+    }
 
     public List<Event> getEvents() {
         return new ArrayList<Event>(events);
@@ -33,7 +34,7 @@ public class TestEventAdmin implements EventAdmin {
     }
 
     public static TestEventAdmin getInstance() {
-       return INSTANCE;
+        return INSTANCE;
     }
 
     public int size() {
@@ -41,16 +42,16 @@ public class TestEventAdmin implements EventAdmin {
     }
 
     public CommonEvent getNewest() {
-        if(events.isEmpty()) {
+        if (events.isEmpty()) {
             throw new IndexOutOfBoundsException("No newest element, I'm afraid");
         }
-        return (CommonEvent) events.get(events.size()-1).getProperty(CommonEvent.EVENT_KEY);
+        return (CommonEvent) events.get(events.size() - 1).getProperty(CommonEvent.EVENT_KEY);
     }
 
     public Event getNewestEvent() {
-        if(events.isEmpty()) {
+        if (events.isEmpty()) {
             throw new IndexOutOfBoundsException("No newest element, I'm afraid");
         }
-        return events.get(events.size()-1);
+        return events.get(events.size() - 1);
     }
 }

@@ -180,7 +180,7 @@ public class ISPDB extends AbstractProxyAwareConfigSource {
             // When HttpClient instance is no longer needed,
             // shut down the connection manager to ensure
             // immediate deallocation of all system resources
-            httpclient.getConnectionManager().shutdown();
+            httpclient.close(); // <-- Performs 'getConnectionManager().shutdown();'
         }
     }
 

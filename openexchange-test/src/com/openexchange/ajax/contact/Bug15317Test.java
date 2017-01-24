@@ -49,7 +49,10 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.assertTrue;
 import java.util.TimeZone;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.GetRequest;
@@ -72,22 +75,23 @@ public class Bug15317Test extends AbstractAJAXSession {
     private Contact userContact;
     private int contactId;
 
-    public Bug15317Test(String name) {
-        super(name);
+    public Bug15317Test() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
-        tz = client.getValues().getTimeZone();
-        contactId = client.execute(new com.openexchange.ajax.config.actions.GetRequest(Tree.ContactID)).getInteger();
-        GetResponse response = client.execute(new GetRequest(FolderObject.SYSTEM_LDAP_FOLDER_ID, contactId, tz));
+        tz = getClient().getValues().getTimeZone();
+        contactId = getClient().execute(new com.openexchange.ajax.config.actions.GetRequest(Tree.ContactID)).getInteger();
+        GetResponse response = getClient().execute(new GetRequest(FolderObject.SYSTEM_LDAP_FOLDER_ID, contactId, tz));
         userContact = response.getContact();
     }
 
+    @Test
     public void testDeleteUserContact() throws Throwable {
-        CommonDeleteResponse response = client.execute(new DeleteRequest(userContact, false));
+        CommonDeleteResponse response = getClient().execute(new DeleteRequest(userContact, false));
         assertTrue("Delete was not denied.", response.hasError());
     }
 }

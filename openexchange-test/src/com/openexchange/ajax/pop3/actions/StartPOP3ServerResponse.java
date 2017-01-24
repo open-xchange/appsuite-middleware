@@ -55,7 +55,6 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.writer.ResponseWriter;
 
-
 /**
  * Depends on bundle com.openexchange.test.pop3, contained in backend-test.
  *
@@ -69,6 +68,7 @@ public class StartPOP3ServerResponse extends AbstractAJAXResponse {
 
     /**
      * Initializes a new {@link StartPOP3ServerResponse}.
+     * 
      * @param response
      * @throws JSONException
      */

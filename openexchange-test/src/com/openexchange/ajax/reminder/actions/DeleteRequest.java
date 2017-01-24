@@ -1,3 +1,4 @@
+
 package com.openexchange.ajax.reminder.actions;
 
 import java.io.IOException;
@@ -10,8 +11,8 @@ import com.openexchange.ajax.fields.ReminderFields;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.groupware.reminder.ReminderObject;
 
-
 public class DeleteRequest extends AbstractReminderRequest<CommonDeleteResponse> {
+
     private final ReminderObject reminder;
     private final ReminderObject[] reminders;
     private final boolean failOnError;
@@ -22,7 +23,7 @@ public class DeleteRequest extends AbstractReminderRequest<CommonDeleteResponse>
         this.reminders = null;
         this.failOnError = failOnError;
     }
-    
+
     public DeleteRequest(ReminderObject[] reminders, boolean failOnError) {
         super();
         this.reminder = null;
@@ -57,15 +58,10 @@ public class DeleteRequest extends AbstractReminderRequest<CommonDeleteResponse>
     @Override
     public Parameter[] getParameters() throws IOException, JSONException {
         if (reminders == null) {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
-                .ACTION_DELETE),
-            new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(reminder.getLastModified().getTime()))
-        };
+            return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE), new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(reminder.getLastModified().getTime()))
+            };
         } else {
-            return new Parameter[] {
-                new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE),
-                new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(reminders[0].getLastModified().getTime()))
+            return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE), new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(reminders[0].getLastModified().getTime()))
             };
         }
     }

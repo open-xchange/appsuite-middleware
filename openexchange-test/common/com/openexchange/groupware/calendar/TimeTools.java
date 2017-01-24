@@ -148,7 +148,6 @@ public final class TimeTools {
         return D(date, TimeZone.getTimeZone("UTC"));
     }
 
-
     public static Date applyTimeZone(final TimeZone timeZone, final Date date) {
         final SimpleDateFormat sdf = new SimpleDateFormat();
         final String dateString = sdf.format(date);

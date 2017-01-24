@@ -63,9 +63,7 @@ import com.openexchange.groupware.container.FolderObject;
  */
 public class PathRequest extends AbstractFolderRequest<PathResponse> {
 
-    private static final int[] DEFAULT_COLUMNS = {
-        FolderObject.OBJECT_ID, FolderObject.MODULE, FolderObject.FOLDER_NAME, FolderObject.SUBFOLDERS, FolderObject.STANDARD_FOLDER,
-        FolderObject.CREATED_BY, FolderObject.PERMISSIONS_BITS };
+    private static final int[] DEFAULT_COLUMNS = { FolderObject.OBJECT_ID, FolderObject.MODULE, FolderObject.FOLDER_NAME, FolderObject.SUBFOLDERS, FolderObject.STANDARD_FOLDER, FolderObject.CREATED_BY, FolderObject.PERMISSIONS_BITS };
 
     private final String folder;
     private final int[] columns;

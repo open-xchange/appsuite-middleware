@@ -60,8 +60,8 @@ import com.openexchange.html.AssertionHelper;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class Bug30357VulTest extends AbstractSanitizing {
-    @Test
-    public void testReplacingTagAttributesForIE9() {
+     @Test
+     public void testReplacingTagAttributesForIE9() {
         String content = " <%tag onmouseover=\"alert(window.opener.ox.session)\" style=\"position:fixed;left:0;top:0;width:100%;height:100%;z-index:32767\" /> ";
         AssertionHelper.assertSanitizedEmpty(getHtmlService(), content);
     }

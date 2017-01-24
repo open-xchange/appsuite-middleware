@@ -102,11 +102,12 @@ public final class TrashAction extends AbstractMailAction {
             MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = mailInterface.getMailAccess();
 
             IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-            if (!IMailMessageStorageEnhancedDeletion.class.isInstance(messageStorage)) {
+
+            IMailMessageStorageEnhancedDeletion enhancedDeletionMessageStorage = messageStorage.supports(IMailMessageStorageEnhancedDeletion.class);
+            if (null == enhancedDeletionMessageStorage) {
                 throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
             }
 
-            IMailMessageStorageEnhancedDeletion enhancedDeletionMessageStorage = (IMailMessageStorageEnhancedDeletion) messageStorage;
             if (!enhancedDeletionMessageStorage.isEnhancedDeletionSupported()) {
                 throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
             }

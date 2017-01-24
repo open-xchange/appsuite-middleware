@@ -73,15 +73,19 @@ public class ImportMailResponse extends AbstractAJAXResponse implements Iterable
     @Override
     public Iterator<String[]> iterator() {
         return new Iterator<String[]>() {
+
             int pos = 0;
+
             @Override
             public boolean hasNext() {
                 return pos < ids.length;
             }
+
             @Override
             public String[] next() {
                 return ids[pos++];
             }
+
             @Override
             public void remove() {
                 throw new UnsupportedOperationException();

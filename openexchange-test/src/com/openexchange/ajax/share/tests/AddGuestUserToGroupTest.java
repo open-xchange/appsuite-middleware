@@ -49,6 +49,10 @@
 
 package com.openexchange.ajax.share.tests;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.group.actions.CreateRequest;
@@ -60,7 +64,6 @@ import com.openexchange.group.GroupExceptionCodes;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 
-
 /**
  * {@link AddGuestUserToGroupTest}
  *
@@ -71,28 +74,24 @@ public class AddGuestUserToGroupTest extends ShareTest {
 
     //    private AJAXClient adminClient;
 
-    public AddGuestUserToGroupTest(String name) {
-        super(name);
+    public AddGuestUserToGroupTest() {
+        super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         //        adminClient = new AJAXClient(User.OXAdmin);
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
-
+    @Test
     public void testAddGuestToGroup() throws Exception {
         OCLGuestPermission perm = randomGuestPermission(FolderObject.INFOSTORE);
-        FolderObject folder = insertSharedFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, client.getValues().getPrivateInfostoreFolder(), perm);
+        FolderObject folder = insertSharedFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), perm);
         remember(folder);
         OCLPermission matchingPermission = null;
         for (OCLPermission permission : folder.getPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
                 break;
             }
@@ -105,7 +104,7 @@ public class AddGuestUserToGroupTest extends ShareTest {
         group.setSimpleName("testAddGuest");
         group.setMember(new int[] { userId });
         CreateRequest req = new CreateRequest(group, false);
-        CreateResponse resp = client.execute(req);
+        CreateResponse resp = getClient().execute(req);
         assertTrue(resp.hasError());
         OXException e = resp.getException();
         assertTrue(GroupExceptionCodes.NO_GUEST_USER_IN_GROUP.equals(e));

@@ -49,16 +49,18 @@
 
 package com.openexchange.webdav.xml.contact;
 
+import static org.junit.Assert.assertTrue;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.webdav.AbstractWebDAVSession;
 import com.openexchange.webdav.xml.contact.actions.InsertRequest;
 import com.openexchange.webdav.xml.contact.actions.InsertResponse;
 import com.openexchange.webdav.xml.framework.WebDAVClient;
-
 
 /**
  * {@link Bug15051Test}
@@ -72,16 +74,12 @@ public class Bug15051Test extends AbstractWebDAVSession {
     private AJAXClient client2;
     private Contact contact;
 
-    public Bug15051Test(String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         folder = client.getFolderTools().getDefaultContactFolder();
-        client2 = new AJAXClient(User.User1);
+        client2 = new AJAXClient(testContext.acquireUser());
         contact = new Contact();
         contact.setParentFolderID(folder.getObjectID());
         contact.setDisplayName("Test for bug 15051");
@@ -90,12 +88,16 @@ public class Bug15051Test extends AbstractWebDAVSession {
         response.fillObject(contact);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        client2.execute(new DeleteRequest(contact));
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
+        try {
+            client2.execute(new DeleteRequest(contact));
+        } finally {
+            super.tearDown();
+        }
     }
 
+    @Test
     public void testNewLine() throws Throwable {
         assertTrue(true);
     }

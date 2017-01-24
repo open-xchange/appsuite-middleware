@@ -49,7 +49,12 @@
 
 package com.openexchange.ajax.folder;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.FolderObject;
@@ -71,18 +76,18 @@ public class ExemplaryFolderTestManagerTest extends AbstractAJAXSession {
 
     FolderObject folderObject2;
 
-    public ExemplaryFolderTestManagerTest(final String name) {
-        super(name);
+    public ExemplaryFolderTestManagerTest() {
+        super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         manager = new FolderTestManager(getClient());
         // create a folder
         folderObject1 = new FolderObject();
-        folderObject1.setFolderName("ExemplaryFolderTestManagerTest-folder1"+System.currentTimeMillis());
+        folderObject1.setFolderName("ExemplaryFolderTestManagerTest-folder1" + System.currentTimeMillis());
         folderObject1.setType(FolderObject.PUBLIC);
         folderObject1.setParentFolderID(client.getValues().getPrivateInfostoreFolder());
         folderObject1.setModule(FolderObject.INFOSTORE);
@@ -91,17 +96,13 @@ public class ExemplaryFolderTestManagerTest extends AbstractAJAXSession {
         perm1.setEntity(client.getValues().getUserId());
         perm1.setGroupPermission(false);
         perm1.setFolderAdmin(true);
-        perm1.setAllPermission(
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION);
+        perm1.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         folderObject1.setPermissionsAsArray(new OCLPermission[] { perm1 });
         manager.insertFolderOnServer(folderObject1);
 
         // create another folder
         folderObject2 = new FolderObject();
-        folderObject2.setFolderName("ExemplaryFolderTestManagerTest-folder2"+System.currentTimeMillis());
+        folderObject2.setFolderName("ExemplaryFolderTestManagerTest-folder2" + System.currentTimeMillis());
         folderObject2.setType(FolderObject.PUBLIC);
         folderObject2.setParentFolderID(client.getValues().getPrivateInfostoreFolder());
         folderObject2.setModule(FolderObject.INFOSTORE);
@@ -110,25 +111,27 @@ public class ExemplaryFolderTestManagerTest extends AbstractAJAXSession {
         perm2.setEntity(client.getValues().getUserId());
         perm2.setGroupPermission(false);
         perm2.setFolderAdmin(true);
-        perm2.setAllPermission(
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION);
+        perm2.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         folderObject2.setPermissionsAsArray(new OCLPermission[] { perm2 });
         manager.insertFolderOnServer(folderObject2);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        manager.cleanUp();
+        try {
+            manager.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
+    @Test
     public void testCreatedFoldersAreReturnedByGetRequest() throws Exception {
         final FolderObject fo = manager.getFolderFromServer(folderObject1.getObjectID());
         assertEquals("The folder was not returned.", fo.getFolderName(), folderObject1.getFolderName());
     }
 
+    @Test
     public void testCreatedFoldersAppearInListRequest() throws Exception {
         boolean found1 = false;
         boolean found2 = false;
@@ -146,6 +149,7 @@ public class ExemplaryFolderTestManagerTest extends AbstractAJAXSession {
         assertTrue("Second folder was not found.", found2);
     }
 
+    @Test
     public void testCreatedFoldersAppearAsUpdatedSinceYesterday() throws Exception {
         boolean found1 = false;
         boolean found2 = false;

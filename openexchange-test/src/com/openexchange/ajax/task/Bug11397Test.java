@@ -49,8 +49,10 @@
 
 package com.openexchange.ajax.task;
 
+import static org.junit.Assert.assertFalse;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.fields.ParticipantsFields;
 import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -66,27 +68,30 @@ import com.openexchange.groupware.tasks.Task;
 
 /**
  * Checks if external participants contain identifier 0 in JSON.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Bug11397Test extends AbstractTaskTest {
 
     /**
      * Default constructor.
+     * 
      * @param name test name
      */
-    public Bug11397Test(final String name) {
-        super(name);
+    public Bug11397Test() {
+        super();
     }
 
     /**
      * Checks if external participant does not contain identifier 0.
+     * 
      * @throws Throwable if some problem occurs.
      */
+    @Test
     public void testExternalParticipant() throws Throwable {
         final AJAXClient client = getClient();
         Task task = Create.createWithDefaults(getPrivateFolder(), "Bug 11397 test");
-        task.setParticipants(new Participant[] {
-            new ExternalUserParticipant("test@example.org")
+        task.setParticipants(new Participant[] { new ExternalUserParticipant("test@example.org")
         });
         final InsertResponse insertR = client.execute(new InsertRequest(task, getTimeZone()));
         try {

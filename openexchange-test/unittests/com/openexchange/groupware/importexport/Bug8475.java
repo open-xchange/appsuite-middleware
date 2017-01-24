@@ -49,19 +49,14 @@
 
 package com.openexchange.groupware.importexport;
 
-import com.openexchange.exception.OXException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
-
-import junit.framework.JUnit4TestAdapter;
-
 import org.junit.Test;
-
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.ldap.User;
@@ -69,70 +64,41 @@ import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.importexport.formats.Format;
 
-public class Bug8475 extends AbstractICalImportTest{
+public class Bug8475 extends AbstractICalImportTest {
 
-	//workaround for JUnit 3 runner
-	public static junit.framework.Test suite() {
-		return new JUnit4TestAdapter(Bug8475.class);
-	}
+    @Test
+    public void testAttendeeNotFound() throws OXException, UnsupportedEncodingException, SQLException, OXException, NumberFormatException, OXException, OXException {
+        final String ical = "BEGIN:VCALENDAR\n" + "VERSION:2.0\n" + "PRODID:-//Apple Computer\\, Inc//iCal 1.5//EN\n" + "BEGIN:VTODO\n" + "ORGANIZER:MAILTO:tobias.friedrich@open-xchange.com\n" + "ATTENDEE:MAILTO:tobias.prinz@open-xchange.com\n" + "DTSTART:20070608T080000Z\n" + "STATUS:COMPLETED\n" + "SUMMARY:Test todo\n" + "UID:8D4FFA7A-ABC0-11D7-8200-00306571349C-RID\n" + "DUE:20070618T080000Z\n" + "END:VTODO\n" + "END:VCALENDAR";
+        final ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.TASK, "8475", ctx, false);
 
-	@Test public void testAttendeeNotFound() throws OXException, UnsupportedEncodingException, SQLException, OXException, NumberFormatException, OXException, OXException {
-		final String ical =
-			"BEGIN:VCALENDAR\n" +
-			"VERSION:2.0\n" +
-			"PRODID:-//Apple Computer\\, Inc//iCal 1.5//EN\n" +
-			"BEGIN:VTODO\n" +
-			"ORGANIZER:MAILTO:tobias.friedrich@open-xchange.com\n" +
-			"ATTENDEE:MAILTO:tobias.prinz@open-xchange.com\n" +
-			"DTSTART:20070608T080000Z\n" +
-			"STATUS:COMPLETED\n" +
-			"SUMMARY:Test todo\n" +
-			"UID:8D4FFA7A-ABC0-11D7-8200-00306571349C-RID\n" +
-			"DUE:20070618T080000Z\n" +
-			"END:VTODO\n" +
-			"END:VCALENDAR";
-		final ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.TASK, "8475", ctx, false);
+        final TasksSQLInterface tasks = new TasksSQLImpl(sessObj);
+        final Task task = tasks.getTaskById(Integer.valueOf(res.getObjectId()), Integer.valueOf(res.getFolder()));
 
-		final TasksSQLInterface tasks = new TasksSQLImpl(sessObj);
-		final Task task = tasks.getTaskById(Integer.valueOf( res.getObjectId()), Integer.valueOf(res.getFolder()) );
+        final Participant[] participants = task.getParticipants();
+        assertEquals("One participant?", 1, participants.length);
+        boolean found = false;
+        for (final Participant p : participants) {
+            if ("tobias.prinz@open-xchange.com".equals(p.getEmailAddress())) {
+                found = true;
+            }
+        }
+        assertTrue("Found attendee?", found);
+    }
 
-		final Participant[] participants = task.getParticipants();
-		assertEquals("One participant?" , 1, participants.length);
-		boolean found = false;
-		for(final Participant p : participants){
-			if("tobias.prinz@open-xchange.com".equals( p.getEmailAddress() ) ){
-				found = true;
-			}
-		}
-		assertTrue("Found attendee?" , found);
-	}
+    @Test
+    public void testInternalAttendee() throws Exception {
+        final User testUser = getUserParticipant();
+        final String ical = "BEGIN:VCALENDAR\n" + "VERSION:2.0\n" + "PRODID:-//Apple Computer\\, Inc//iCal 1.5//EN\n" + "BEGIN:VTODO\n" + "ORGANIZER:MAILTO:tobias.friedrich@open-xchange.com\n" + "ATTENDEE:MAILTO:" + testUser.getMail() + "\n" + "DTSTART:20070608T080000Z\n" + "STATUS:COMPLETED\n" + "SUMMARY:Test todo\n" + "UID:8D4FFA7A-ABC0-11D7-8200-00306571349C-RID\n" + "DUE:20070618T080000Z\n" + "END:VTODO\n" + "END:VCALENDAR";
+        final ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.TASK, "8475", ctx, false);
 
-	@Test public void testInternalAttendee() throws Exception{
-		final User testUser = getUserParticipant();
-		final String ical =
-			"BEGIN:VCALENDAR\n" +
-			"VERSION:2.0\n" +
-			"PRODID:-//Apple Computer\\, Inc//iCal 1.5//EN\n" +
-			"BEGIN:VTODO\n" +
-			"ORGANIZER:MAILTO:tobias.friedrich@open-xchange.com\n" +
-			"ATTENDEE:MAILTO:"+testUser.getMail()+"\n" +
-			"DTSTART:20070608T080000Z\n" +
-			"STATUS:COMPLETED\n" +
-			"SUMMARY:Test todo\n" +
-			"UID:8D4FFA7A-ABC0-11D7-8200-00306571349C-RID\n" +
-			"DUE:20070618T080000Z\n" +
-			"END:VTODO\n" +
-			"END:VCALENDAR";
-		final ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.TASK, "8475", ctx, false);
+        final TasksSQLInterface tasks = new TasksSQLImpl(sessObj);
+        final Task task = tasks.getTaskById(Integer.valueOf(res.getObjectId()), Integer.valueOf(res.getFolder()));
 
-		final TasksSQLInterface tasks = new TasksSQLImpl(sessObj);
-		final Task task = tasks.getTaskById(Integer.valueOf( res.getObjectId()), Integer.valueOf(res.getFolder()) );
-
-		final Participant[] participants = task.getParticipants();
-		assertEquals("One participant?" , 1, participants.length);
-		final Participant p =  participants[0];
-		final User user = Participants.userResolver.loadUser(testUser.getId(), ctx);
-		assertEquals("User \"" + testUser.getMail() + "\"" + testUser.getMail().length() + " gets participant \"" + p + "\"" + p.toString().length() + ". using resolver "+ Participants.userResolver + "\"" + user + "\"", testUser.getId() , p.getIdentifier());
+        final Participant[] participants = task.getParticipants();
+        assertEquals("One participant?", 1, participants.length);
+        final Participant p = participants[0];
+        final User user = Participants.userResolver.loadUser(testUser.getId(), ctx);
+        assertEquals("User \"" + testUser.getMail() + "\"" + testUser.getMail().length() + " gets participant \"" + p + "\"" + p.toString().length() + ". using resolver " + Participants.userResolver + "\"" + user + "\"", testUser.getId(), p.getIdentifier());
         // FIXME: Grossly violates encapsulation
 
     }

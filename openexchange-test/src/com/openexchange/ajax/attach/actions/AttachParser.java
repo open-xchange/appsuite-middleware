@@ -54,7 +54,6 @@ import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractUploadParser;
 
-
 /**
  * {@link AttachParser}
  *
@@ -69,6 +68,9 @@ public class AttachParser extends AbstractUploadParser<AttachResponse> {
     @Override
     protected AttachResponse createResponse(Response response) throws JSONException {
         final AttachResponse retval = new AttachResponse(response);
+        if (retval.hasError()) {
+            return retval;
+        }
         final JSONArray data = (JSONArray) response.getData();
         final int objectId = data.getInt(0);
         if (isFailOnError()) {

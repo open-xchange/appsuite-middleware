@@ -49,10 +49,14 @@
 
 package com.openexchange.realtime.util;
 
-import static org.junit.Assert.*;
-import static java.util.concurrent.TimeUnit.SECONDS;
+import static com.openexchange.realtime.util.Duration.NONE;
+import static com.openexchange.realtime.util.Duration.TEN_SECONDS;
+import static com.openexchange.realtime.util.Duration.THIRTY_MINUTES;
+import static com.openexchange.realtime.util.Duration.THIRTY_SECONDS;
+import static com.openexchange.realtime.util.Duration.TWENTYFIVE_MINUTES;
 import static java.util.concurrent.TimeUnit.MINUTES;
-import static com.openexchange.realtime.util.Duration.*;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -69,11 +73,8 @@ public class DurationTest {
      * @throws java.lang.Exception
      */
     @Before
-    public void setUp() throws Exception {
-    }
-
-    @Test
-    public void test() {
+     @Test
+     public void test() {
         Duration dur = Duration.roundDownTo(1, SECONDS);
         assertEquals(NONE, dur);
         dur = Duration.roundDownTo(9, SECONDS);

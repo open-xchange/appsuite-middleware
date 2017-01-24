@@ -57,7 +57,6 @@ import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Header;
 
-
 /**
  * {@link RevokeRequest}
  *
@@ -85,15 +84,14 @@ public class RevokeRequest implements AJAXRequest<RevokeResponse> {
 
     @Override
     public Parameter[] getParameters() throws IOException, JSONException {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, "revoke"),
-            new Parameter("client", clientId)
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, "revoke"), new Parameter("client", clientId)
         };
     }
 
     @Override
     public AbstractAJAXParser<RevokeResponse> getParser() {
         return new AbstractAJAXParser<RevokeResponse>(true) {
+
             @Override
             protected RevokeResponse createResponse(Response response) throws JSONException {
                 return new RevokeResponse(response);

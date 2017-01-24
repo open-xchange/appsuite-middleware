@@ -49,6 +49,9 @@
 
 package com.openexchange.contact.vcard;
 
+import static org.junit.Assert.assertNotNull;
+import org.junit.Assert;
+import org.junit.Test;
 import com.openexchange.groupware.container.Contact;
 import ezvcard.VCard;
 import ezvcard.parameter.AddressType;
@@ -68,7 +71,8 @@ public class AddressTest extends VCardTest {
         super();
     }
 
-    public void testExportToBlank() {
+         @Test
+     public void testExportToBlank() {
         /*
          * create test contact
          */
@@ -87,10 +91,11 @@ public class AddressTest extends VCardTest {
          */
         assertNotNull("no vCard exported", vCard);
         assertNotNull("no addresses exported", vCard.getAddresses());
-        assertEquals("unexpected number of addresses exported", 1, vCard.getAddresses().size());
+        Assert.assertEquals("unexpected number of addresses exported", 1, vCard.getAddresses().size());
     }
 
-    public void testMergeIntoExisting() {
+         @Test
+     public void testMergeIntoExisting() {
         /*
          * create test contact
          */
@@ -119,13 +124,14 @@ public class AddressTest extends VCardTest {
          */
         assertNotNull("no vCard exported", vCard);
         assertNotNull("no addresses exported", vCard.getAddresses());
-        assertEquals("unexpected number of addresses exported", 1, vCard.getAddresses().size());
-        assertEquals("street wrong", "street", vCard.getAddresses().get(0).getStreetAddress());
-        assertEquals("po box wrong", "existing po box", vCard.getAddresses().get(0).getPoBox());
+        Assert.assertEquals("unexpected number of addresses exported", 1, vCard.getAddresses().size());
+        Assert.assertEquals("street wrong", "street", vCard.getAddresses().get(0).getStreetAddress());
+        Assert.assertEquals("po box wrong", "existing po box", vCard.getAddresses().get(0).getPoBox());
 
     }
 
-    public void testRemoveFromExisting() {
+         @Test
+     public void testRemoveFromExisting() {
         /*
          * create test contact
          */
@@ -149,7 +155,7 @@ public class AddressTest extends VCardTest {
          */
         assertNotNull("no vCard exported", vCard);
         assertNotNull("no addresses exported", vCard.getAddresses());
-        assertEquals("unexpected number of addresses exported", 0, vCard.getAddresses().size());
+        Assert.assertEquals("unexpected number of addresses exported", 0, vCard.getAddresses().size());
 
     }
 

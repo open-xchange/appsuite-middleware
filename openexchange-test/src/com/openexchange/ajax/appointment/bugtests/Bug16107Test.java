@@ -49,7 +49,10 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.assertEquals;
 import java.util.Date;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.groupware.container.Appointment;
 
@@ -65,12 +68,12 @@ public class Bug16107Test extends ManagedAppointmentTest {
 
     private Appointment updateAppointment;
 
-    public Bug16107Test(String name) throws Exception {
-        super(name);
+    public Bug16107Test() throws Exception {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         startAppointment = new Appointment();
         startAppointment.setParentFolderID(folder.getObjectID());
@@ -81,7 +84,6 @@ public class Bug16107Test extends ManagedAppointmentTest {
         startAppointment.setUntil(D("11.06.2010 07:30"));
         startAppointment.setFullTime(true);
         startAppointment.setInterval(1);
-
 
         updateAppointment = new Appointment();
         updateAppointment.setTitle("Bug 16107 (updated)");
@@ -94,40 +96,36 @@ public class Bug16107Test extends ManagedAppointmentTest {
         updateAppointment.setRecurringStart(D("24.05.2010 00:00").getTime());
         updateAppointment.setUntil(D("11.06.2010 07:30"));
 
-        calendarManager.insert(startAppointment);
+        catm.insert(startAppointment);
         link(startAppointment, updateAppointment);
         updateAppointment.setRecurrenceID(startAppointment.getObjectID());
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
-
-
-
-    public void testFirstMonthView(){
+    @Test
+    public void testFirstMonthView() {
         Date start = D("26.04.2010 00:00");
         Date end = D("07.06.2010 00:00");
         int occurences = 14;
         check("month view", start, end, occurences);
     }
 
-    public void testLastMonthView(){
+    @Test
+    public void testLastMonthView() {
         Date start = D("31.05.2010 00:00");
         Date end = D("05.07.2010 00:00");
         int occurences = 12;
         check("month view", start, end, occurences);
     }
 
-    public void testNextToLastWorkWeekView(){
+    @Test
+    public void testNextToLastWorkWeekView() {
         Date start = D("31.05.2010 00:00");
         Date end = D("05.06.2010 00:00");
         int occurences = 5;
         check("work week view (next-to-last week)", start, end, occurences);
     }
 
-
+    @Test
     public void testLastWorkWeekView() {
         Date start = D("07.06.2010 00:00");
         Date end = D("12.06.2010 00:00");
@@ -140,30 +138,30 @@ public class Bug16107Test extends ManagedAppointmentTest {
         Appointment[] all;
         int count = 0;
 
-//        all = calendarManager.all(folder.getObjectID(), start, end, new int[]{1,20,207,206,2});
-//        assertEquals("AllRequest should find starting appointment in "+name, 1, all.length);
-//
-//        has = calendarManager.has(start, end);
-//        count = 0;
-//        for(boolean b : has)
-//            if(b) count++;
-//
-//        assertEquals("HasRequest should find the right amount of occurences "+name, occurences, count);
-//
+        //        all = catm.all(folder.getObjectID(), start, end, new int[]{1,20,207,206,2});
+        //        assertEquals("AllRequest should find starting appointment in "+name, 1, all.length);
+        //
+        //        has = catm.has(start, end);
+        //        count = 0;
+        //        for(boolean b : has)
+        //            if(b) count++;
+        //
+        //        assertEquals("HasRequest should find the right amount of occurences "+name, occurences, count);
+        //
 
-        calendarManager.update(updateAppointment);
+        catm.update(updateAppointment);
 
-        all = calendarManager.all(folder.getObjectID(), start, end, new int[]{1,20,207,206,2});
-        assertEquals("AllRequest should find updated appointment in "+name, 1, all.length);
+        all = catm.all(folder.getObjectID(), start, end, new int[] { 1, 20, 207, 206, 2 });
+        assertEquals("AllRequest should find updated appointment in " + name, 1, all.length);
 
-        has = calendarManager.has(start, end);
+        has = catm.has(start, end);
         count = 0;
-        for(boolean b: has) {
-            if(b) {
+        for (boolean b : has) {
+            if (b) {
                 count++;
             }
         }
 
-        assertEquals("HasRequest should find the right amount of occurences in updated "+ name, occurences, count);
+        assertEquals("HasRequest should find the right amount of occurences in updated " + name, occurences, count);
     }
 }

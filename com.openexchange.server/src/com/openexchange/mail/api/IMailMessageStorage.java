@@ -66,7 +66,7 @@ import com.openexchange.spamhandler.SpamHandler;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface IMailMessageStorage {
+public interface IMailMessageStorage extends IMailStorage {
 
     /**
      * The empty return value; e.g. may be used to indicate no result on
@@ -364,11 +364,11 @@ public interface IMailMessageStorage {
      * @throws OXException If system flags cannot be updated
      */
     public void updateMessageFlags(String folder, String[] mailIds, int flags, boolean set) throws OXException;
-    
+
     /**
-     * 
+     *
      * Like {@link #updateMessageFlags(String, String[], int, boolean)} but also updates user flags
-     * 
+     *
      * @param folder The folder full name
      * @param mailIds The mail ids
      * @param flags The bit pattern for the system flags to alter
@@ -400,7 +400,7 @@ public interface IMailMessageStorage {
 
     /**
      * Gets the number of unread messages in the given folder which match the given search term.
-     * 
+     *
      * @param folder The folder full name
      * @param searchTerm The search term to filter messages; may be <code>null</code> to obtain all messages
      * @return The number of unread messages.

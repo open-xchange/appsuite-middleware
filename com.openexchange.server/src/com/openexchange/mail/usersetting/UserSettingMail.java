@@ -226,6 +226,11 @@ public final class UserSettingMail implements Cloneable, Serializable {
      */
     public static final int INT_REPLY_ALL_CC = 1 << 19;
 
+    /**
+     * If this bit is set, hyper-links in mark-up text are suppressed.
+     */
+    public static final int INT_SUPPRESS_LINKS = 1 << 20;
+
     /*-
      * Other constants
      */
@@ -285,6 +290,8 @@ public final class UserSettingMail implements Cloneable, Serializable {
     private boolean allowHTMLImages;
 
     private boolean replyAllCc;
+
+    private boolean suppressLinks;
 
     private Signature[] signatures;
 
@@ -416,6 +423,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
         retval = allowHTMLImages ? (retval | INT_ALLOW_HTML_IMAGES) : retval;
 
         retval = replyAllCc ? (retval | INT_REPLY_ALL_CC) : retval;
+        retval = suppressLinks ? (retval | INT_SUPPRESS_LINKS) : retval;
         return retval;
     }
 
@@ -789,6 +797,15 @@ public final class UserSettingMail implements Cloneable, Serializable {
     }
 
     /**
+     * Checks whether hyper-links in mark-up text are supposed to be suppressed.
+     *
+     * @return <code>true</code> to suppress links in mark-up text; otherwise <code>false</code>
+     */
+    public boolean isSuppressLinks() {
+        return suppressLinks;
+    }
+
+    /**
      * Indicates if user wants to see reply quotes inside a message's content indented in a color dependent on quote level.
      *
      * @return <code>true</code> to indent in color; otherwise <code>false</code>
@@ -837,6 +854,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
         allowHTMLImages = ((onOffOptions & INT_ALLOW_HTML_IMAGES) > 0);
 
         replyAllCc = ((onOffOptions & INT_REPLY_ALL_CC) > 0);
+        suppressLinks = ((onOffOptions & INT_SUPPRESS_LINKS) > 0);
     }
 
     public void setAppendVCard(final boolean appendVCard) {
@@ -1009,6 +1027,15 @@ public final class UserSettingMail implements Cloneable, Serializable {
      */
     public void setReplyAllCc(final boolean replyAllCc) {
         this.replyAllCc = replyAllCc;
+    }
+
+    /**
+     * Sets whether hyper-links in mark-up text are supposed to be suppressed.
+     *
+     * @param suppressLinks <code>true</code> to suppress links; otherwise <code>false</code>
+     */
+    public void setSuppressLinks(boolean suppressLinks) {
+        this.suppressLinks = suppressLinks;
     }
 
     public void setUploadQuota(final long uploadQuota) {

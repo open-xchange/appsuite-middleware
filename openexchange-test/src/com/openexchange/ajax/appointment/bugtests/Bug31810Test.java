@@ -50,12 +50,14 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertFalse;
 import java.util.Calendar;
 import java.util.List;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.ConflictObject;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.test.CalendarTestManager;
 
 /**
  * {@link Bug31810Test}
@@ -64,50 +66,43 @@ import com.openexchange.test.CalendarTestManager;
  */
 public class Bug31810Test extends AbstractAJAXSession {
 
-    private CalendarTestManager ctm;
     private int nextYear;
     private Appointment single;
     private Appointment conflict;
 
-    public Bug31810Test(String name) {
-        super(name);
+    public Bug31810Test() {
+        super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
-        
-        ctm = new CalendarTestManager(client);
+
         nextYear = Calendar.getInstance().get(Calendar.YEAR) + 1;
         single = new Appointment();
         single.setTitle("Bug 31810 appointment.");
         single.setStartDate(D("03.03." + nextYear + " 08:00"));
         single.setEndDate(D("03.03." + nextYear + " 09:00"));
         single.setIgnoreConflicts(true);
-        single.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
-        ctm.insert(single);
-        
+        single.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
+        catm.insert(single);
+
         conflict = new Appointment();
         conflict.setTitle("Bug 31810 appointment.");
         conflict.setStartDate(D("03.03." + nextYear + " 08:00"));
         conflict.setEndDate(D("03.03." + nextYear + " 09:00"));
         conflict.setIgnoreConflicts(false);
         conflict.setShownAs(Appointment.FREE);
-        conflict.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
-        ctm.insert(conflict);
+        conflict.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
+        catm.insert(conflict);
     }
-    
+
+    @Test
     public void testBug31810() throws Exception {
         conflict.setFullTime(true);
         conflict.removeShownAs();
-        ctm.update(conflict);
-        List<ConflictObject> conflicts = ctm.getLastResponse().getConflicts();
+        catm.update(conflict);
+        List<ConflictObject> conflicts = catm.getLastResponse().getConflicts();
         assertFalse("No conflict expected.", conflicts != null && conflicts.size() > 1);
     }
-
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
-
 }

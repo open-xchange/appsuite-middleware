@@ -238,6 +238,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private final boolean token;
     private final int ttlMillis;
     private final boolean embedded;
+    private final boolean asMarkup;
     private boolean attachHTMLAlternativePart;
     private boolean includePlainText;
     private boolean exactLength;
@@ -252,13 +253,14 @@ public final class JsonMessageHandler implements MailMessageHandler {
      * @param accountId The account ID
      * @param mailPath The unique mail path
      * @param displayMode The display mode
+     * @param embedded <code>true</code> for embedded display (CSS prefixed, &lt;body&gt; replaced with &lt;div&gt;); otherwise <code>false</code>
+     * @param asMarkup <code>true</code> if the content is supposed to be rendered as HTML (be it HTML or plain text); otherwise <code>false</code> to keep content as-is (plain text is left as such)
      * @param session The session providing needed user data
-     * @param usm The mail settings used for preparing message content if <code>displayVersion</code> is set to <code>true</code>; otherwise
-     *            it is ignored.
+     * @param usm The mail settings used for preparing message content if <code>displayVersion</code> is set to <code>true</code>; otherwise it is ignored.
      * @throws OXException If JSON message handler cannot be initialized
      */
-    public JsonMessageHandler(final int accountId, final String mailPath, final DisplayMode displayMode, final boolean embedded, final Session session, final UserSettingMail usm, final boolean token, final int ttlMillis) throws OXException {
-        this(accountId, new MailPath(mailPath), null, displayMode, embedded, session, usm, getContext(session), token, ttlMillis, -1, -1);
+    public JsonMessageHandler(int accountId, String mailPath, DisplayMode displayMode, boolean embedded, boolean asMarkup, Session session, UserSettingMail usm, boolean token, int ttlMillis) throws OXException {
+        this(accountId, new MailPath(mailPath), null, displayMode, embedded, asMarkup, session, usm, getContext(session), token, ttlMillis, -1, -1);
     }
 
     /**
@@ -268,15 +270,16 @@ public final class JsonMessageHandler implements MailMessageHandler {
      * @param mailPath The unique mail path
      * @param mail The mail message to add JSON fields not set by message parser traversal
      * @param displayMode The display mode
+     * @param embedded <code>true</code> for embedded display (CSS prefixed, &lt;body&gt; replaced with &lt;div&gt;); otherwise <code>false</code>
+     * @param asMarkup <code>true</code> if the content is supposed to be rendered as HTML (be it HTML or plain text); otherwise <code>false</code> to keep content as-is (plain text is left as such)
      * @param session The session providing needed user data
-     * @param usm The mail settings used for preparing message content if <code>displayVersion</code> is set to <code>true</code>; otherwise
-     *            it is ignored.
+     * @param usm The mail settings used for preparing message content if <code>displayVersion</code> is set to <code>true</code>; otherwise it is ignored.
      * @param token <code>true</code> to add attachment tokens
      * @param ttlMillis The tokens' timeout
      * @throws OXException If JSON message handler cannot be initialized
      */
-    public JsonMessageHandler(final int accountId, final MailPath mailPath, final MailMessage mail, final DisplayMode displayMode, final boolean embedded, final Session session, final UserSettingMail usm, final boolean token, final int ttlMillis) throws OXException {
-        this(accountId, mailPath, mail, displayMode, embedded, session, usm, getContext(session), token, ttlMillis, -1, -1);
+    public JsonMessageHandler(int accountId, MailPath mailPath, MailMessage mail, DisplayMode displayMode, boolean embedded, boolean asMarkup, Session session, UserSettingMail usm, boolean token, int ttlMillis) throws OXException {
+        this(accountId, mailPath, mail, displayMode, embedded, asMarkup, session, usm, getContext(session), token, ttlMillis, -1, -1);
     }
 
     /**
@@ -286,17 +289,18 @@ public final class JsonMessageHandler implements MailMessageHandler {
      * @param mailPath The unique mail path
      * @param mail The mail message to add JSON fields not set by message parser traversal
      * @param displayMode The display mode
+     * @param embedded <code>true</code> for embedded display (CSS prefixed, &lt;body&gt; replaced with &lt;div&gt;); otherwise <code>false</code>
+     * @param asMarkup <code>true</code> if the content is supposed to be rendered as HTML (be it HTML or plain text); otherwise <code>false</code> to keep content as-is (plain text is left as such)
      * @param session The session providing needed user data
-     * @param usm The mail settings used for preparing message content if <code>displayVersion</code> is set to <code>true</code>; otherwise
-     *            it is ignored.
+     * @param usm The mail settings used for preparing message content if <code>displayVersion</code> is set to <code>true</code>; otherwise it is ignored.
      * @param token <code>true</code> to add attachment tokens
      * @param ttlMillis The tokens' timeout
      * @param maxContentSize maximum number of bytes that is will be returned for content. '<=0' means unlimited.
      * @param maxNestedMessageLevels The number of levels in which deep-parsing of nested messages takes place; otherwise only ID information is set; '<=0' falls back to default value (10)
      * @throws OXException If JSON message handler cannot be initialized
      */
-    public JsonMessageHandler(int accountId, MailPath mailPath, MailMessage mail, DisplayMode displayMode, boolean embedded, Session session, UserSettingMail usm, boolean token, int ttlMillis, int maxContentSize, int maxNestedMessageLevels) throws OXException {
-        this(accountId, mailPath, mail, displayMode, embedded, session, usm, getContext(session), token, ttlMillis, maxContentSize, maxNestedMessageLevels);
+    public JsonMessageHandler(int accountId, MailPath mailPath, MailMessage mail, DisplayMode displayMode, boolean embedded, boolean asMarkup, Session session, UserSettingMail usm, boolean token, int ttlMillis, int maxContentSize, int maxNestedMessageLevels) throws OXException {
+        this(accountId, mailPath, mail, displayMode, embedded, asMarkup, session, usm, getContext(session), token, ttlMillis, maxContentSize, maxNestedMessageLevels);
     }
 
     private static Context getContext(final Session session) throws OXException {
@@ -309,10 +313,11 @@ public final class JsonMessageHandler implements MailMessageHandler {
     /**
      * Initializes a new {@link JsonMessageHandler} for internal usage
      */
-    private JsonMessageHandler(int accountId, MailPath mailPath, MailMessage mail, DisplayMode displayMode, boolean embedded, Session session, UserSettingMail usm, Context ctx, boolean token, int ttlMillis, int maxContentSize, int maxNestedMessageLevels) throws OXException {
+    private JsonMessageHandler(int accountId, MailPath mailPath, MailMessage mail, DisplayMode displayMode, boolean embedded, boolean asMarkup, Session session, UserSettingMail usm, Context ctx, boolean token, int ttlMillis, int maxContentSize, int maxNestedMessageLevels) throws OXException {
         super();
         this.multiparts = new LinkedList<MultipartInfo>();
         this.embedded = DisplayMode.DOCUMENT.equals(displayMode) ? false : embedded;
+        this.asMarkup = asMarkup;
         this.attachHTMLAlternativePart = !usm.isSuppressHTMLAlternativePart();
         this.ttlMillis = ttlMillis;
         this.token = token;
@@ -705,7 +710,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
         boolean considerAsInline = isInline || (!part.getContentDisposition().isAttachment() && part.containsHeader("Content-Id"));
 
         // Handle it...
-        if (considerAsInline && (DisplayMode.MODIFYABLE.getMode() < displayMode.getMode())) {
+        if (asMarkup && considerAsInline && (DisplayMode.MODIFYABLE.getMode() < displayMode.getMode())) {
             final MultipartInfo mpInfo = multiparts.peek();
             if (null != mpInfo && textAppended && id.startsWith(mpInfo.mpId) && mpInfo.isSubType("mixed")) {
                 try {
@@ -776,6 +781,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 }
             }
         }
+
         return handleAttachment0(part, considerAsInline, considerAsInline ? Part.INLINE : Part.ATTACHMENT, baseContentType, fileName, id, considerAsInline);
     }
 
@@ -826,7 +832,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                                 String content = jAttachment.optString(CONTENT, "null");
                                 if (!"null".equals(content) && null != mailPath) {
                                     // Append to first one
-                                    HtmlSanitizeResult sanitizeResult = HtmlProcessing.formatHTMLForDisplay(htmlContent, contentType.getCharsetParameter(), session, mailPath, originalMailPath, usm, modified, displayMode, embedded, maxContentSize);
+                                    HtmlSanitizeResult sanitizeResult = HtmlProcessing.formatHTMLForDisplay(htmlContent, contentType.getCharsetParameter(), session, mailPath, originalMailPath, usm, modified, displayMode, embedded, asMarkup, maxContentSize);
                                     content = new StringBuilder(content).append(sanitizeResult.getContent()).toString();
                                     jAttachment.put(CONTENT, content);
                                     return true;
@@ -870,7 +876,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                             String content = jAttachment.optString(CONTENT, "null");
                             if (!"null".equals(content) && null != mailPath) {
                                 // Append to first one
-                                HtmlSanitizeResult sanitizeResult = HtmlProcessing.formatHTMLForDisplay(htmlContent, contentType.getCharsetParameter(), session, mailPath, originalMailPath, usm, modified, displayMode, embedded, maxContentSize);
+                                HtmlSanitizeResult sanitizeResult = HtmlProcessing.formatHTMLForDisplay(htmlContent, contentType.getCharsetParameter(), session, mailPath, originalMailPath, usm, modified, displayMode, embedded, asMarkup, maxContentSize);
                                 content = new StringBuilder(content).append(sanitizeResult.getContent()).toString();
                                 jAttachment.put(CONTENT, content);
                                 return true;
@@ -957,7 +963,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 /*
                  * Remember plain-text content
                  */
-                HtmlSanitizeResult sanitizeResult = HtmlProcessing.formatTextForDisplay(plainTextContentArg, usm, displayMode, maxContentSize);
+                HtmlSanitizeResult sanitizeResult = HtmlProcessing.formatTextForDisplay(plainTextContentArg, usm, displayMode, asMarkup, maxContentSize);
                 plainText = new PlainTextContent(identifier, contentType.getBaseType(), sanitizeResult.getContent());
             }
             return true;
@@ -1031,7 +1037,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
              */
             if (textAppended) {
                 if (textWasEmpty) {
-                    final HtmlSanitizeResult content = HtmlProcessing.formatTextForDisplay(plainTextContentArg, usm, displayMode, maxContentSize);
+                    final HtmlSanitizeResult content = HtmlProcessing.formatTextForDisplay(plainTextContentArg, usm, displayMode, asMarkup, maxContentSize);
                     final JSONObject textObject = asPlainText(identifier, contentType.getBaseType(), content);
                     if (includePlainText) {
                         textObject.put("plain_text", plainTextContentArg);
@@ -1063,7 +1069,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                     }
 
                     // A plain text message body has already been detected
-                    final HtmlSanitizeResult sanitizeResult = HtmlProcessing.formatTextForDisplay(plainTextContentArg, usm, displayMode, maxContentSize);
+                    final HtmlSanitizeResult sanitizeResult = HtmlProcessing.formatTextForDisplay(plainTextContentArg, usm, displayMode, asMarkup, maxContentSize);
                     final MultipartInfo mpInfo = multiparts.peek();
                     if (null != mpInfo && (DisplayMode.RAW.getMode() < displayMode.getMode()) && identifier.startsWith(mpInfo.mpId) && mpInfo.isSubType("mixed")) {
                         List<JSONObject> attachments = getAttachmentListing().getAttachments();
@@ -1096,7 +1102,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                     }
                 }
             } else {
-                HtmlSanitizeResult sanitizeResult = HtmlProcessing.formatTextForDisplay(plainTextContentArg, usm, displayMode, maxContentSize);
+                HtmlSanitizeResult sanitizeResult = HtmlProcessing.formatTextForDisplay(plainTextContentArg, usm, displayMode, asMarkup, maxContentSize);
                 final JSONObject textObject = asPlainText(identifier, contentType.getBaseType(), sanitizeResult);
                 if (includePlainText) {
                     textObject.put("plain_text", plainTextContentArg);
@@ -1122,7 +1128,8 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 usm,
                 modified,
                 displayMode,
-                embedded);
+                embedded,
+                asMarkup);
         }
         return HtmlProcessing.formatTextForDisplay(src, usm, displayMode);
     }
@@ -1291,7 +1298,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 }
 
                 // Generate a dedicated JsonMessageHandler instance to parse the nested message
-                JsonMessageHandler msgHandler = new JsonMessageHandler(accountId, null, null, displayMode, embedded, session, usm, ctx, token, ttlMillis, maxContentSize, maxNestedMessageLevels);
+                JsonMessageHandler msgHandler = new JsonMessageHandler(accountId, null, null, displayMode, embedded, asMarkup, session, usm, ctx, token, ttlMillis, maxContentSize, maxNestedMessageLevels);
                 msgHandler.setTimeZone(timeZone);
                 msgHandler.includePlainText = includePlainText;
                 msgHandler.attachHTMLAlternativePart = attachHTMLAlternativePart;
@@ -1580,7 +1587,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
         try {
             final JSONObject jsonObject = new JSONObject(6);
             jsonObject.put(ID, id);
-            HtmlSanitizeResult sanitizeResult = HtmlProcessing.formatHTMLForDisplay(htmlContent, charset, session, mailPath, originalMailPath, usm, modified, displayMode, embedded, maxContentSize);
+            HtmlSanitizeResult sanitizeResult = HtmlProcessing.formatHTMLForDisplay(htmlContent, charset, session, mailPath, originalMailPath, usm, modified, displayMode, embedded, asMarkup, maxContentSize);
             final String content = sanitizeResult.getContent();
 
             jsonObject.put(TRUNCATED, sanitizeResult.isTruncated());
@@ -1609,7 +1616,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
             if (includePlainText) {
                 jsonObject.put("plain_text", plainText);
             }
-            HtmlSanitizeResult sanitizeResult = HtmlProcessing.formatTextForDisplay(plainText, usm, displayMode, maxContentSize);
+            HtmlSanitizeResult sanitizeResult = HtmlProcessing.formatTextForDisplay(plainText, usm, displayMode, asMarkup, maxContentSize);
             final String content = sanitizeResult.getContent();
             jsonObject.put(TRUNCATED, sanitizeResult.isTruncated());
             jsonObject.put(DISPOSITION, Part.INLINE);

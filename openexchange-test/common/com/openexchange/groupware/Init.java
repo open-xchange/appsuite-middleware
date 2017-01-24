@@ -167,8 +167,8 @@ import com.openexchange.mailaccount.internal.MailAccountStorageInit;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.TrustedSSLSocketFactory;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
-import com.openexchange.net.ssl.config.impl.internal.SSLConfigurationServiceImpl;
 import com.openexchange.net.ssl.config.impl.internal.SSLProperties;
+import com.openexchange.net.ssl.config.impl.internal.TrustAllSSLConfigurationService;
 import com.openexchange.net.ssl.internal.DefaultSSLSocketFactoryProvider;
 import com.openexchange.osgi.util.ServiceCallWrapperModifier;
 import com.openexchange.passwordmechs.PasswordMechFactoryImpl;
@@ -315,7 +315,9 @@ public final class Init {
 
         SessiondInit.getInstance(),
 
-        new GroupInit() };
+        new GroupInit(),
+    
+    };
 
     private static boolean databaseUpdateinitialized = false;
 
@@ -571,20 +573,21 @@ public final class Init {
     }
 
     private static void startAndInjectNetSSLBundle() {
+        SSLProperties.initJvmDefaults();
+
         SimpleServiceLookup myServices = new SimpleServiceLookup();
         Object configurationService = services.get(ConfigurationService.class);
         myServices.add(ConfigurationService.class, configurationService);
-        myServices.add(SSLConfigurationService.class, new SSLConfigurationServiceImpl((ConfigurationService) configurationService));
+        myServices.add(SSLConfigurationService.class, new TrustAllSSLConfigurationService());
         com.openexchange.net.ssl.osgi.Services.setServiceLookup(myServices);
 
         services.put(SSLSocketFactoryProvider.class, DefaultSSLSocketFactoryProvider.getInstance());
-        services.put(SSLConfigurationService.class, new SSLConfigurationServiceImpl((ConfigurationService) configurationService));
+        services.put(SSLConfigurationService.class, new TrustAllSSLConfigurationService());
 
         TestServiceRegistry.getInstance().addService(SSLSocketFactoryProvider.class, DefaultSSLSocketFactoryProvider.getInstance());
-        TestServiceRegistry.getInstance().addService(SSLConfigurationService.class, new SSLConfigurationServiceImpl((ConfigurationService) configurationService));
+        TestServiceRegistry.getInstance().addService(SSLConfigurationService.class, new TrustAllSSLConfigurationService());
 
         TrustedSSLSocketFactory.init();
-        SSLProperties.initJvmDefaultCipherSuites();
     }
 
     private static void startAndInjectThreadPoolBundle() {

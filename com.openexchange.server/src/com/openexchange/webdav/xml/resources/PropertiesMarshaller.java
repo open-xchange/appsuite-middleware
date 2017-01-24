@@ -109,11 +109,12 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 				for(final WebdavStatus<Iterable<WebdavProperty>> status : multistatus.toIterable(statusCode)) {
 					final Element propstat = new Element("propstat",DAV_NS);
 					final Element prop = new Element("prop", DAV_NS);
-
-					for(final WebdavProperty p : status.getAdditional()) {
-						if(p != null) {
-							prop.addContent(marshalProperty(p, resource.getProtocol()));
-						}
+                    if (status.getAdditional() != null) {
+                        for (final WebdavProperty p : status.getAdditional()) {
+                            if (p != null) {
+                                prop.addContent(marshalProperty(p, resource.getProtocol()));
+                            }
+                        }
 					}
 					propstat.addContent(prop);
 					propstat.addContent(marshalStatus(statusCode));

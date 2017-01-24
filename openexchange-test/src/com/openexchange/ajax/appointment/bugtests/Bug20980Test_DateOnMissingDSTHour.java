@@ -46,39 +46,43 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.assertNull;
 import java.util.Date;
-
+import org.junit.Test;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.groupware.container.Appointment;
 
 public class Bug20980Test_DateOnMissingDSTHour extends ManagedAppointmentTest {
-	public Bug20980Test_DateOnMissingDSTHour(String name) {
-		super(name);
-	}
 
-	public void testBugWithDST() throws Exception{
-		int fid = folder.getObjectID();
-		Appointment series = generateDailyAppointment();
-		series.setStartDate(D("30/3/2008 01:00",utc));
-		series.setEndDate(D("30/3/2008 02:00", utc));
-		series.setTitle("A daily series");
-		series.setParentFolderID(fid);
-		calendarManager.insert(series);
+    public Bug20980Test_DateOnMissingDSTHour() {
+        super();
+    }
 
-		Date lastMod = series.getLastModified();
-		for(int i = 1; i < 3; i++){
-			Appointment changeEx = new Appointment();
-			changeEx.setParentFolderID(series.getParentFolderID());
-			changeEx.setObjectID(series.getObjectID());
-			changeEx.setLastModified(lastMod);
-			changeEx.setRecurrencePosition(i);
-			changeEx.setTitle("Element # "+i+" of series that has different name");
-			calendarManager.update(changeEx);
-			assertNull("Problem with update #"+i, calendarManager.getLastException());
-			lastMod = new Date(calendarManager.getLastModification().getTime() +1);
-		}
-	}
+    @Test
+    public void testBugWithDST() throws Exception {
+        int fid = folder.getObjectID();
+        Appointment series = generateDailyAppointment();
+        series.setStartDate(D("30/3/2008 01:00", utc));
+        series.setEndDate(D("30/3/2008 02:00", utc));
+        series.setTitle("A daily series");
+        series.setParentFolderID(fid);
+        catm.insert(series);
+
+        Date lastMod = series.getLastModified();
+        for (int i = 1; i < 3; i++) {
+            Appointment changeEx = new Appointment();
+            changeEx.setParentFolderID(series.getParentFolderID());
+            changeEx.setObjectID(series.getObjectID());
+            changeEx.setLastModified(lastMod);
+            changeEx.setRecurrencePosition(i);
+            changeEx.setTitle("Element # " + i + " of series that has different name");
+            catm.update(changeEx);
+            assertNull("Problem with update #" + i, catm.getLastException());
+            lastMod = new Date(catm.getLastModification().getTime() + 1);
+        }
+    }
 
 }

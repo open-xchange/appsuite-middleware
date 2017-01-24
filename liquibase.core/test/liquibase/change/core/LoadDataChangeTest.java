@@ -1,24 +1,22 @@
 package liquibase.change.core;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 import liquibase.change.ChangeFactory;
 import liquibase.change.StandardChangeTest;
 import liquibase.database.core.MockDatabase;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertStatement;
-
-import static org.junit.Assert.*;
-
 import liquibase.test.JUnitResourceAccessor;
-import org.junit.Test;
 
 /**
  * Tests for {@link liquibase.change.core.AlterSequenceChange}
  */
 public class LoadDataChangeTest extends StandardChangeTest {
 
-    @Override
-    @Test
+     @Test
     public void getRefactoringName() throws Exception {
         assertEquals("loadData", ChangeFactory.getInstance().getChangeMetaData(new LoadDataChange()).getName());
     }
@@ -89,8 +87,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
 	}
     
     
-    @Override
-    @Test
+     @Test
     public void generateStatement() throws Exception {
         LoadDataChange refactoring = new LoadDataChange();
         refactoring.setSchemaName("SCHEMA_NAME");
@@ -144,8 +141,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
         assertEquals(Boolean.FALSE, ((InsertStatement) sqlStatements[1]).getColumnValue("active"));
     }
 
-    @Override
-    @Test
+     @Test
     public void getConfirmationMessage() throws Exception {
         LoadDataChange refactoring = new LoadDataChange();
         refactoring.setTableName("TABLE_NAME");
@@ -154,8 +150,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
         assertEquals("Data loaded from FILE_NAME into TABLE_NAME", refactoring.getConfirmationMessage());
     }
 
-    @Override
-    @Test
+     @Test
     public void generateCheckSum() throws Exception {
         LoadDataChange refactoring = new LoadDataChange();
         refactoring.setSchemaName("SCHEMA_NAME");

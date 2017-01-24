@@ -79,8 +79,7 @@ public final class RequestTools {
         super();
     }
 
-    public static Document addElement2PropFind(final Element e,
-        final Date modified) {
+    public static Document addElement2PropFind(final Element e, final Date modified) {
         final Element ePropfind = new Element(PROPFIND, NS_DAV);
         final Element eProp = new Element(PROP, NS_DAV);
         ePropfind.addContent(eProp);

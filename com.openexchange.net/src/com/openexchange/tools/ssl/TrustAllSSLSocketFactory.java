@@ -151,7 +151,9 @@ public final class TrustAllSSLSocketFactory extends SSLSocketFactory {
         tryAddProtocol("SSLv3", sslSocket);
         tryAddProtocol("SSLv2", sslSocket);
         tryAddProtocol("TLSv1", sslSocket);
-        tryAddProtocol("SSLv23", sslSocket);
+        tryAddProtocol("TLSv1.1", sslSocket);
+        tryAddProtocol("TLSv1.2", sslSocket);
+        tryAddProtocol("SSLv2.3", sslSocket);
         return new DelegatingSSLSocket(sslSocket);
     }
 

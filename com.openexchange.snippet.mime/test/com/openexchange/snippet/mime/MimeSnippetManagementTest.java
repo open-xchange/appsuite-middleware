@@ -50,14 +50,17 @@
 package com.openexchange.snippet.mime;
 
 import java.util.Set;
-import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 
 /**
  * {@link MimeSnippetManagementTest}
  */
-public class MimeSnippetManagementTest extends TestCase {
-
+public class MimeSnippetManagementTest {
     /**
      * Initializes a new {@link MimeSnippetManagementTest}.
      */
@@ -65,7 +68,8 @@ public class MimeSnippetManagementTest extends TestCase {
         super();
     }
 
-    public void testForBug38201() {
+         @Test
+     public void testForBug38201() {
         String htmlContent = "<p style=\"font-family: Helvetica,Arial,sans-serif; font-size: 10px; line-height: 12px;\">\n" +
             "<a style=\"text-decoration:none\" href=\"http://www.testfirma.test\" >\n" +
             "<img src=\"https://my.cool.image/as34/foo.png\" alt=\"TESTfirma\" height=\"73\" width=\"360\" border=\"0\">\n" +

@@ -60,8 +60,8 @@ import com.openexchange.html.AbstractSanitizing;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class Bug29229Test extends AbstractSanitizing {
-    @Test
-    public void testDropNonBreakableSpaceFromStylesheets() {
+     @Test
+     public void testDropNonBreakableSpaceFromStylesheets() {
         String content = getHtmlService().replaceHTMLEntities("<span style=\"color:&nbsp;#0000ff;\">");
         assertEquals("Unexpected return value", "<span style=\"color:\u00A0#0000ff;\">", content);
     }

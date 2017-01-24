@@ -50,9 +50,13 @@
 package com.openexchange.ajax.appointment.recurrence;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.Date;
 import org.json.JSONException;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -72,17 +76,17 @@ public class DeleteExceptionTimestampTest extends AbstractAJAXSession {
     private CalendarTestManager manager;
     private Appointment appointment;
 
-    public DeleteExceptionTimestampTest(String name) {
-        super(name);
+    public DeleteExceptionTimestampTest() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         // Create series
         manager = new CalendarTestManager(getClient());
         appointment = new Appointment();
-        appointment.setTitle(getName());
+        appointment.setTitle(this.getClass().getCanonicalName());
         appointment.setStartDate(D("24/02/2007 10:00"));
         appointment.setEndDate(D("24/02/2007 12:00"));
         appointment.setRecurrenceType(Appointment.DAILY);
@@ -92,12 +96,16 @@ public class DeleteExceptionTimestampTest extends AbstractAJAXSession {
         manager.insert(appointment);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        manager.cleanUp();
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
+        try {
+            manager.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
+    @Test
     public void testTimestampShouldBeDifferentAfterCreatingDeleteException() throws OXException, IOException, SAXException, JSONException {
         Date oldTimestamp = appointment.getLastModified();
 
@@ -105,7 +113,6 @@ public class DeleteExceptionTimestampTest extends AbstractAJAXSession {
         CommonDeleteResponse response = getClient().execute(deleteRequest);
 
         assertTrue("Timestamp should be later", oldTimestamp.before(response.getTimestamp()));
-
     }
 
 }

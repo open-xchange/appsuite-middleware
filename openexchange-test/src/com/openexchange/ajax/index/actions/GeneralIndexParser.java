@@ -53,7 +53,6 @@ import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
-
 /**
  * {@link GeneralIndexParser}
  *
@@ -63,6 +62,7 @@ public class GeneralIndexParser extends AbstractAJAXParser<GeneralIndexResponse>
 
     /**
      * Initializes a new {@link GeneralIndexParser}.
+     * 
      * @param failOnError
      */
     protected GeneralIndexParser(boolean failOnError) {

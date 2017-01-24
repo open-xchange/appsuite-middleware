@@ -60,7 +60,7 @@ import com.openexchange.groupware.container.Contact;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  *
  */
-public class ContactUpdateStep extends NeedExistingStep<Contact>{
+public class ContactUpdateStep extends NeedExistingStep<Contact> {
 
     private final Contact entry;
 
@@ -70,8 +70,7 @@ public class ContactUpdateStep extends NeedExistingStep<Contact>{
     }
 
     @Override
-    public void cleanUp() throws Exception {
-    }
+    public void cleanUp() throws Exception {}
 
     @Override
     public void perform(AJAXClient client) throws Exception {
@@ -80,7 +79,7 @@ public class ContactUpdateStep extends NeedExistingStep<Contact>{
         UpdateRequest updateRequest = new UpdateRequest(entry, false);
         UpdateResponse updateResponse = execute(updateRequest);
 
-        if(!updateResponse.hasError()) {
+        if (!updateResponse.hasError()) {
             entry.setLastModified(updateResponse.getTimestamp());
             rememberIdentityValues(entry);
         }

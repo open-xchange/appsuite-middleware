@@ -1,14 +1,23 @@
 package liquibase.change.core;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import org.junit.Before;
+import org.junit.Test;
 import liquibase.change.ChangeFactory;
 import liquibase.change.StandardChangeTest;
 import liquibase.database.Database;
-import liquibase.database.core.*;
+import liquibase.database.core.CacheDatabase;
+import liquibase.database.core.DB2Database;
+import liquibase.database.core.DerbyDatabase;
+import liquibase.database.core.FirebirdDatabase;
+import liquibase.database.core.H2Database;
+import liquibase.database.core.HsqlDatabase;
+import liquibase.database.core.InformixDatabase;
+import liquibase.database.core.MockDatabase;
+import liquibase.database.core.SybaseASADatabase;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RenameViewStatement;
-import static org.junit.Assert.*;
-import org.junit.Before;
-import org.junit.Test;
 
 public class RenameViewChangeTest extends StandardChangeTest {
 
@@ -19,14 +28,12 @@ public class RenameViewChangeTest extends StandardChangeTest {
         refactoring = new RenameViewChange();
     }
 
-    @Override
-    @Test
+     @Test
     public void getRefactoringName() throws Exception {
         assertEquals("renameView", ChangeFactory.getInstance().getChangeMetaData(refactoring).getName());
     }
 
-    @Override
-    @Test
+     @Test
     public void generateStatement() throws Exception {
         RenameViewChange refactoring = new RenameViewChange();
         refactoring.setSchemaName("SCHEMA_NAME");
@@ -42,8 +49,7 @@ public class RenameViewChangeTest extends StandardChangeTest {
         assertEquals("NEW_NAME", ((RenameViewStatement) sqlStatements[0]).getNewViewName());
     }
 
-    @Override
-    @Test
+     @Test
     public void getConfirmationMessage() throws Exception {
         refactoring.setOldViewName("OLD_NAME");
         refactoring.setNewViewName("NEW_NAME");

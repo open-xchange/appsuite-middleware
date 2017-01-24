@@ -83,6 +83,13 @@ public class SpamExpertsConfig {
     }
 
     /**
+     * Clears the URI cache.
+     */
+    public void clearCache() {
+        uriCache.invalidateAll();
+    }
+
+    /**
      * Gets the user-sensitive property.
      *
      * @param session The session providing user data

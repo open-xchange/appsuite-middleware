@@ -50,7 +50,9 @@
 package com.openexchange.ajax.folder;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
 import java.util.UUID;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -75,16 +77,6 @@ public class AppointmentObjectCountTest extends AbstractObjectCountTest {
 
     private CalendarTestManager ctm2;
 
-    /**
-     * Initializes a new {@link AppointmentObjectCountTest}.
-     * 
-     * @param name
-     */
-    public AppointmentObjectCountTest(String name) {
-        super(name);
-    }
-
-    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -157,12 +149,15 @@ public class AppointmentObjectCountTest extends AbstractObjectCountTest {
         assertEquals("Wrong amount.", 6, getCount(client2, folder));
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        ctm1.cleanUp();
-        ctm2.cleanUp();
-        ftm.cleanUp();
-        super.tearDown();
+        try {
+            ctm1.cleanUp();
+            ctm2.cleanUp();
+            ftm.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
     /*
@@ -173,10 +168,8 @@ public class AppointmentObjectCountTest extends AbstractObjectCountTest {
         single.setTitle("Single Appoinment " + System.currentTimeMillis());
         single.setStartDate(D("01.05.2013 08:00"));
         single.setEndDate(D("01.05.2013 09:00"));
-        single.setUsers(new UserParticipant[] {
-            new UserParticipant(client1.getValues().getUserId()), new UserParticipant(client2.getValues().getUserId()) });
-        single.setParticipants(new Participant[] {
-            new UserParticipant(client1.getValues().getUserId()), new UserParticipant(client2.getValues().getUserId()) });
+        single.setUsers(new UserParticipant[] { new UserParticipant(client1.getValues().getUserId()), new UserParticipant(client2.getValues().getUserId()) });
+        single.setParticipants(new Participant[] { new UserParticipant(client1.getValues().getUserId()), new UserParticipant(client2.getValues().getUserId()) });
         single.setIgnoreConflicts(true);
         single.setParentFolderID(folder.getObjectID());
         ctm.insert(single);
@@ -188,10 +181,8 @@ public class AppointmentObjectCountTest extends AbstractObjectCountTest {
         series.setRecurrenceType(Appointment.DAILY);
         series.setInterval(1);
         series.setOccurrence(5);
-        series.setUsers(new UserParticipant[] {
-            new UserParticipant(client1.getValues().getUserId()), new UserParticipant(client2.getValues().getUserId()) });
-        series.setParticipants(new Participant[] {
-            new UserParticipant(client1.getValues().getUserId()), new UserParticipant(client2.getValues().getUserId()) });
+        series.setUsers(new UserParticipant[] { new UserParticipant(client1.getValues().getUserId()), new UserParticipant(client2.getValues().getUserId()) });
+        series.setParticipants(new Participant[] { new UserParticipant(client1.getValues().getUserId()), new UserParticipant(client2.getValues().getUserId()) });
         series.setIgnoreConflicts(true);
         series.setParentFolderID(folder.getObjectID());
         ctm.insert(series);
@@ -213,22 +204,14 @@ public class AppointmentObjectCountTest extends AbstractObjectCountTest {
     }
 
     private FolderObject createPublic(OCLPermission permission) throws Exception {
-        FolderObject folder = ftm.generatePublicFolder(
-            UUID.randomUUID().toString(),
-            FolderObject.CALENDAR,
-            FolderObject.SYSTEM_PUBLIC_FOLDER_ID,
-            client1.getValues().getUserId());
+        FolderObject folder = ftm.generatePublicFolder(UUID.randomUUID().toString(), FolderObject.CALENDAR, FolderObject.SYSTEM_PUBLIC_FOLDER_ID, client1.getValues().getUserId());
         folder.addPermission(permission);
 
         return ftm.insertFolderOnServer(folder);
     }
 
     private FolderObject createShared(OCLPermission permission) throws Exception {
-        FolderObject folder = ftm.generatePublicFolder(
-            UUID.randomUUID().toString(),
-            FolderObject.CALENDAR,
-            client1.getValues().getPrivateAppointmentFolder(),
-            client1.getValues().getUserId());
+        FolderObject folder = ftm.generatePublicFolder(UUID.randomUUID().toString(), FolderObject.CALENDAR, client1.getValues().getPrivateAppointmentFolder(), client1.getValues().getUserId());
         folder.addPermission(permission);
 
         return ftm.insertFolderOnServer(folder);
@@ -239,11 +222,7 @@ public class AppointmentObjectCountTest extends AbstractObjectCountTest {
         permission.setEntity(client2.getValues().getUserId());
         permission.setGroupPermission(false);
         permission.setFolderAdmin(false);
-        permission.setAllPermission(
-            OCLPermission.CREATE_OBJECTS_IN_FOLDER,
-            OCLPermission.READ_OWN_OBJECTS,
-            OCLPermission.WRITE_ALL_OBJECTS,
-            OCLPermission.DELETE_ALL_OBJECTS);
+        permission.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_OWN_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
 
         return permission;
     }
@@ -253,11 +232,7 @@ public class AppointmentObjectCountTest extends AbstractObjectCountTest {
         permission.setEntity(client2.getValues().getUserId());
         permission.setGroupPermission(false);
         permission.setFolderAdmin(false);
-        permission.setAllPermission(
-            OCLPermission.CREATE_OBJECTS_IN_FOLDER,
-            OCLPermission.READ_ALL_OBJECTS,
-            OCLPermission.WRITE_ALL_OBJECTS,
-            OCLPermission.DELETE_ALL_OBJECTS);
+        permission.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
 
         return permission;
     }

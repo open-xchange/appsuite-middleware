@@ -108,6 +108,7 @@ import com.openexchange.admin.storage.sqlStorage.OXUserSQLStorage;
 import com.openexchange.admin.storage.utils.Filestore2UserUtil;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
+import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
@@ -686,9 +687,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
             // #################################################################
 
-            if (!isEmpty(usrdata.getPrimaryEmail())) {
+            String primaryEmail = usrdata.getPrimaryEmail();
+            if (!isEmpty(primaryEmail)) {
                 stmt = con.prepareStatement("UPDATE user SET mail = ? WHERE cid = ? AND id = ?");
-                stmt.setString(1, usrdata.getPrimaryEmail());
+                stmt.setString(1, primaryEmail);
                 stmt.setInt(2, contextId);
                 stmt.setInt(3, userId);
                 stmt.executeUpdate();
@@ -1007,6 +1009,17 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                             final boolean test = ((Boolean) methodbool.invoke(usrdata, (Object[]) null)).booleanValue();
                             if (test) {
                                 stmt.setNull(db, java.sql.Types.DATE);
+                            }
+                        }
+                    } else if (returntype.equalsIgnoreCase("java.lang.Long")) {
+                        final long result = ((Long) method.invoke(usrdata, (Object[]) null)).longValue();
+                        if (-1 != result) {
+                            stmt.setLong(db, result);
+                        } else {
+                            final Method methodbool = getMethodforbooleanparameter(method);
+                            final boolean test = ((Boolean) methodbool.invoke(usrdata, (Object[]) null)).booleanValue();
+                            if (test) {
+                                stmt.setNull(db, java.sql.Types.BIGINT);
                             }
                         }
                     }
@@ -1842,6 +1855,14 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                             placeHolders.append("?,");
                             methodlist2.add(method);
                         }
+                    } else if (Long.class.equals(returnType)) {
+                        final long result = ((Long) method.invoke(usrdata, (Object[]) null)).longValue();
+                        if (-1 != result) {
+                            contactInsert.append(Mapper.method2field.get(methodName));
+                            contactInsert.append(",");
+                            placeHolders.append("?,");
+                            methodlist2.add(method);
+                        }
                     }
                 }
                 placeHolders.deleteCharAt(placeHolders.length() - 1);
@@ -1888,6 +1909,13 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                             stmt.setTimestamp(pos++, new Timestamp(result.getTime()));
                         } else {
                             stmt.setNull(pos++, java.sql.Types.VARCHAR);
+                        }
+                    } else if (Long.class.equals(returntype)) {
+                        final long result = ((Integer) method.invoke(usrdata, (Object[]) null)).longValue();
+                        if (-1 != result) {
+                            stmt.setLong(pos++, result);
+                        } else {
+                            stmt.setNull(pos++, java.sql.Types.BIGINT);
                         }
                     }
                 }
@@ -3655,17 +3683,18 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         int userId = user.getId().intValue();
         PreparedStatement stmt = null;
         try {
-            CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
-            Cache cache = cacheService.getCache("OXFolderCache");
+            FolderCacheManager cache = FolderCacheManager.getInstance();
             List<Pair<Integer, String>> folderIds = prepareFolders(contextId, userId, con);
-            StringBuilder sb = new StringBuilder("UPDATE oxfolder_tree SET default_flag = 0, type = 2, fname = ? WHERE cid = ? AND fuid = ?");
+            Date now = new Date();
+            StringBuilder sb = new StringBuilder("UPDATE oxfolder_tree SET default_flag = 0, type = 2, fname = ?, changing_date = ? WHERE cid = ? AND fuid = ?");
             stmt = con.prepareStatement(sb.toString());
             for (Pair<Integer, String> pair : folderIds) {
                 stmt.setString(1, pair.getSecond());
-                stmt.setInt(2, contextId);
-                stmt.setInt(3, pair.getFirst());
+                stmt.setLong(2, now.getTime());
+                stmt.setInt(3, contextId);
+                stmt.setInt(4, pair.getFirst());
                 stmt.addBatch();
-                cache.remove(cacheService.newCacheKey(contextId, pair.getFirst().intValue()));
+                cache.removeFolderObject(pair.getFirst().intValue(), ContextStorage.getStorageContext(contextId));
             }
             stmt.executeBatch();
         } catch (SQLException e) {

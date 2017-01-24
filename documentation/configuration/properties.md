@@ -462,7 +462,7 @@ If you would like to add a reference to another property use the following appro
 
 | Key | <span style="font-weight:normal">com.openexchange.folderstorage.defaultPermissions</span> |
 |:----------------|:--------|
-| __Description__ | Specifies default permission to use in case folder is supposed to be created below a certain parent folder.<br>The value is a pipe ('|') separated listing of expressions; each expression defines the default permissions<br>for a denoted parent folder. Currently the reserved folder identifiers "2" and "15" are considered as "2"<br>denoted the public PIM folder whereas "15" denotes the public Drive folder.<br><br>An expression starts with the parent folder identifier followed by '=' character; e.g. "2=".<br>Then there is a comma-separated list of permissions to assume per entity (user or group).<br><br>Each permission either starts with "user_", "admin_user_", "group_" or "admin_group_" (the prefix "admin_" controls<br>whether the entity is supposed to be set as folder administrator) followed by the numeric entity identifier.<br><br>Then an '@' character is supposed to occur and finally followed by rights expression. The rights may be dot-separated<br>listing (<folder-permission> + "." + <read-permission> + "." + <write-permission> + "." + <delete-permission>) or one<br>of the tokens  "viewer", "writer" or "author".<br><br>More formally<br>expressions = expression ("|" expression)*<br>expression = folder "=" permission ("," permission)*<br>permission = ("admin_")? ("group_" | "user_") entity(int) "@" rights<br>rights = (folder-permission(int) "." read-permission(int) "." write-permission(int) "." delete-permission(int)) | ("viewer" | "writer" | "author")<br><br>Example<br>2=group_2@2.4.0.0,admin_user_5@8.4.4.4|15=admin_group_2@8.8.8.8<br>2=group_2@viewer,admin_user_5@author|15=admin_group_2@writer<br> |
+| __Description__ | Specifies default permission to use in case folder is supposed to be created below a certain parent folder.<br>The value is a pipe ("&#124;") separated listing of expressions; each expression defines the default permissions<br>for a denoted parent folder. Currently the reserved folder identifiers "2" and "15" are considered as "2"<br>denoted the public PIM folder whereas "15" denotes the public Drive folder.<br><br>An expression starts with the parent folder identifier followed by '=' character; e.g. "2=".<br>Then there is a comma-separated list of permissions to assume per entity (user or group).<br><br>Each permission either starts with "user_", "admin_user_", "group_" or "admin_group_" (the prefix "admin_" controls<br>whether the entity is supposed to be set as folder administrator) followed by the numeric entity identifier.<br><br>Then an '@' character is supposed to occur and finally followed by rights expression. The rights may be dot-separated<br>listing (<folder-permission> + "." + <read-permission> + "." + <write-permission> + "." + <delete-permission>) or one<br>of the tokens  "viewer", "writer" or "author".<br><br>More formally<br>expressions = expression ("&#124;" expression)*<br>expression = folder "=" permission ("," permission)*<br>permission = ("admin_")? ("group_" &#124; "user_") entity(int) "@" rights<br>rights = (folder-permission(int) "." read-permission(int) "." write-permission(int) "." delete-permission(int)) &#124; ("viewer" &#124; "writer" &#124; "author")<br><br>Example<br>2=group_2@2.4.0.0,admin_user_5@8.4.4.4&#124;15=admin_group_2@8.8.8.8<br>2=group_2@viewer,admin_user_5@author&#124;15=admin_group_2@writer<br> |
 | __Default__ | No defaut value  |
 | __Version__ | 7.8.4  |
 | __Reloadable__ | true  |
@@ -572,6 +572,50 @@ If you would like to add a reference to another property use the following appro
 | __Version__ | 7.8.4  |
 | __Reloadable__ | true  |
 | __Configcascade Aware__ | true  |
+| __File__ | mail.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexchange.mail.flagging.mode</span> |
+|:----------------|:--------|
+| __Description__ | Specifies how color labels and special \Flagged system flag are connected (or not). Possible values:<br>-<code>colorOnly</code> Only color flags are available. The special \Flagged system flag is not touched.<br>-<code>flaggedOnly</code> Only special \Flagged system flag is used. Color labels are not published.<br>-<code>flaggedAndColor</code> Both - color flags and special \Flagged system flag - are available and set independently.<br>-<code>flaggedImplicit</code>Both - color flags and special \Flagged system flag - are available. A certain color label is linked with the \Flagged system flag. That is to add a color to colorless flagged mails and to add flagged to unflagged but colored mails.<br> |
+| __Default__ | colorOnly  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | true  |
+| __Configcascade Aware__ | true  |
+| __Related__ | com.openexchange.mail.flagging.color  |
+| __File__ | mail.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexchange.mail.flagging.color</span> |
+|:----------------|:--------|
+| __Description__ | Specifies the color which should be added to colorless flagged mails in case the flagging mode is "flaggedImplicit". Only values from 1 to 10 are allowed.<br> |
+| __Default__ | 1  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | true  |
+| __Configcascade Aware__ | true  |
+| __Related__ | com.openexchange.mail.flagging.mode  |
+| __File__ | mail.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexchange.mail.maliciousFolders.enabled</span> |
+|:----------------|:--------|
+| __Description__ | Enables/disables support for malicious folders<br> |
+| __Default__ | true  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | true  |
+| __Configcascade Aware__ | true  |
+| __Related__ | com.openexchange.mail.maliciousFolders.listing  |
+| __File__ | mail.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexchange.mail.maliciousFolders.listing</span> |
+|:----------------|:--------|
+| __Description__ | Specifies the full paths for such mail folders in the primary account's folder tree that are supposed being considered as malicious<br>and therefore a special treatment happens; e.g. hyper-links that occur in mail content are not displayed and/or are not clickable.<br><br>The value is supposed to be comma-separated list of folder paths.<br>Such tokens starting with the '$' character refer to a standard folder. Currently supported: $Spam, $Drafts, $Inbox, $Sent, $Trash, $Confirmed-Spam, $Confirmed-Ham<br><br> Example $Spam, INBOX/Malware<br>Special treatment happens for standard Spam folder and for the "INBOX/Malware" folder in primary account's folder tree hierarchy.<br> |
+| __Default__ | $Spam  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | true  |
+| __Configcascade Aware__ | true  |
+| __Related__ | com.openexchange.mail.maliciousFolders.enabled  |
 | __File__ | mail.properties  |
 
 ---
@@ -873,7 +917,7 @@ If you would like to add a reference to another property use the following appro
 | __Description__ |         Defines which level of trust should be considered for potentially secure connections (e. g. https). The default value 'all' means that all certificates will be trusted and a SSLSocketFactory that does not check certificates (and host names) will be used. You can switch this setting to 'restricted' so that every certificate provided by the defined endpoint will be validated trusted.<br> |
 | __Default__ | all  |
 | __Version__ | 7.8.3  |
-| __Reloadable__ | true  |
+| __Reloadable__ | false  |
 | __Configcascade Aware__ | false  |
 | __File__ | ssl.properties  |
 

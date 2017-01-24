@@ -51,13 +51,13 @@ package com.openexchange.ajax.infostore.thirdparty;
 
 import com.openexchange.ajax.oauth.client.actions.OAuthService;
 
-
 /**
  * {@link ProviderIdMapper}
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class ProviderIdMapper {
+
     private OAuthService authProvider;
     private String infostoreId;
 
@@ -99,6 +99,5 @@ public class ProviderIdMapper {
         }
         return true;
     }
-
 
 }

@@ -64,8 +64,8 @@ public class Bug48083VulTest extends AbstractSanitizing {
         super();
     }
 
-    @Test
-    public void testBug47781() {
+     @Test
+     public void testBug47781() {
         String content = "<!DOCTYPE html>\n" + 
             "<html>\n" + 
             "%3Ciframe src=\"https://html5sec.org/xss.html\"/>\n" + 

@@ -49,7 +49,9 @@
 
 package com.openexchange.ajax.task;
 
+import static org.junit.Assert.assertEquals;
 import java.math.BigDecimal;
+import org.junit.Test;
 import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.GetRequest;
 import com.openexchange.ajax.task.actions.GetResponse;
@@ -66,14 +68,16 @@ public class FloatTest extends AbstractTaskTest {
     /**
      * @param name
      */
-    public FloatTest(String name) {
-        super(name);
+    public FloatTest() {
+        super();
     }
 
     /**
      * Tests if floats can be stored correctly.
+     * 
      * @throws Throwable if an error occurs.
      */
+    @Test
     public void testFloats() throws Throwable {
         final Task task = new Task();
         task.setActualCosts(new BigDecimal("1"));

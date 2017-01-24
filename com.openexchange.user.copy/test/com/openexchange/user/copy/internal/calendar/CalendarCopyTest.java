@@ -103,7 +103,8 @@ public class CalendarCopyTest extends AbstractUserCopyTest {
         dstCtxId = getDestinationContext().getContextId(); 
     }
     
-    public void testCalendarCopy() throws Exception {
+         @Test
+     public void testCalendarCopy() throws Exception {
         final CalendarCopyTask copyTask = new CalendarCopyTask();
         final List<Integer> originFolderIds = loadFolderIdsFromDB(srcCon, srcCtxId, srcUsrId);        
         final List<Integer> originAppointmentsIds = copyTask.loadAppointmentIdsFromDB(new HashSet<Integer>(originFolderIds), srcUsrId, srcCtxId, srcCon);
@@ -210,8 +211,9 @@ public class CalendarCopyTest extends AbstractUserCopyTest {
         assertEquals(origin.getSequence(), target.getSequence());
     }
     
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown()
+ throws Exception {
         DBUtils.autocommit(dstCon);
         deleteAllFromTablesForCid(dstCtxId, "cid", dstCon, "prg_dates", "prg_dates_members", "prg_date_rights", "dateExternal");
         super.tearDown();

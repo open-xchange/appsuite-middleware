@@ -53,15 +53,15 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractColumnsParser;
 
 /**
-* @author <a href="karsten.will@open-xchange.com">Karsten Will</a>
-*/
+ * @author <a href="karsten.will@open-xchange.com">Karsten Will</a>
+ */
 public class AllParser extends AbstractColumnsParser<AllResponse> {
 
     /**
      * Default constructor.
      */
     protected AllParser(final boolean failOnError, final int[] columns) {
-        super(failOnError,columns);
+        super(failOnError, columns);
     }
 
     @Override

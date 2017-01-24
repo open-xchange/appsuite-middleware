@@ -49,9 +49,9 @@
 
 package com.openexchange.global;
 
-import junit.framework.JUnit4TestAdapter;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import com.openexchange.exception.interception.Bug50893Test;
 import com.openexchange.exception.interception.OXExceptionInterceptorRegistrationTest;
 import com.openexchange.global.tools.id.IDManglerTest;
 import com.openexchange.global.tools.iterator.MergingSearchIteratorTest;
@@ -62,18 +62,13 @@ import com.openexchange.sessiond.SessionFilterTest;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    IDManglerTest.class,
+    MergingSearchIteratorTest.class,
+    OXExceptionInterceptorRegistrationTest.class,
+    SessionFilterTest.class,
+    Bug50893Test.class,
+})
 public class UnitTests {
-
-    public UnitTests() {
-        super();
-    }
-
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(IDManglerTest.class);
-        tests.addTestSuite(MergingSearchIteratorTest.class);
-        tests.addTestSuite(OXExceptionInterceptorRegistrationTest.class);
-        tests.addTest(new JUnit4TestAdapter(SessionFilterTest.class));
-        return tests;
-    }
 }

@@ -49,8 +49,10 @@
 
 package com.openexchange.ajax.resource;
 
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import org.json.JSONException;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.resource.actions.ResourceAllRequest;
@@ -66,48 +68,47 @@ import com.openexchange.resource.Resource;
  */
 public final class ResourceAllAJAXTest extends AbstractResourceTest {
 
-	/**
-	 * Initializes a new {@link ResourceAllAJAXTest}
-	 *
-	 * @param name
-	 *            The test name
-	 */
-	public ResourceAllAJAXTest(final String name) {
-		super(name);
-	}
+    /**
+     * Initializes a new {@link ResourceAllAJAXTest}
+     *
+     * @param name
+     *            The test name
+     */
+    public ResourceAllAJAXTest() {
+        super();
+    }
 
-	/**
-	 * Tests the <code>action=all</code>
-	 */
-	public void testAll() throws OXException, JSONException, IOException, SAXException {
-		int id = -1;
-		try {
-			/*
-			 * Create a resource
-			 */
-			final Resource resource = new Resource();
-			resource.setAvailable(true);
-			resource.setMail("my.resource@dom"+System.currentTimeMillis()+"ain.tdl");
-			resource.setSimpleName(ResourceAllAJAXTest.class.getName());
-			resource.setDisplayName(ResourceAllAJAXTest.class.getName());
-			resource.setDescription(ResourceAllAJAXTest.class.getName());
-			id = createResource(resource);
+    /**
+     * Tests the <code>action=all</code>
+     */
+    @Test
+    public void testAll() throws OXException, JSONException, IOException, SAXException {
+        int id = -1;
+        try {
+            /*
+             * Create a resource
+             */
+            final Resource resource = new Resource();
+            resource.setAvailable(true);
+            resource.setMail("my.resource@dom" + System.currentTimeMillis() + "ain.tdl");
+            resource.setSimpleName(ResourceAllAJAXTest.class.getName());
+            resource.setDisplayName(ResourceAllAJAXTest.class.getName());
+            resource.setDescription(ResourceAllAJAXTest.class.getName());
+            id = createResource(resource);
 
-			/*
-			 * Perform all request
-			 */
-			final ResourceAllResponse allResponse = Executor.execute(getSession(),
-					new ResourceAllRequest(true));
-			final int[] ids = allResponse.getIDs();
-			assertTrue("All request failed", ids != null && ids.length >= 1);
+            /*
+             * Perform all request
+             */
+            final ResourceAllResponse allResponse = Executor.execute(getSession(), new ResourceAllRequest(true));
+            final int[] ids = allResponse.getIDs();
+            assertTrue("All request failed", ids != null && ids.length >= 1);
 
-		} finally {
-			try {
-				deleteResource(id);
-			} catch (final Exception e) {
-				System.err.println("Temporary created resource with ID " + id + " could not be deleted: "
-						+ e.getMessage());
-			}
-		}
-	}
+        } finally {
+            try {
+                deleteResource(id);
+            } catch (final Exception e) {
+                System.err.println("Temporary created resource with ID " + id + " could not be deleted: " + e.getMessage());
+            }
+        }
+    }
 }

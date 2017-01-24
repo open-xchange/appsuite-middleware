@@ -84,7 +84,6 @@ import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.extensions.OXCommonExtension;
 import com.openexchange.java.util.TimeZones;
-import junit.framework.JUnit4TestAdapter;
 
 /**
  *
@@ -105,12 +104,8 @@ public class UserTest extends AbstractTest {
         return (OXUserInterface) Naming.lookup(getRMIHostUrl() + OXUserInterface.RMI_NAME);
     }
     
-    private static List<User> toDeleteUsers = new ArrayList<>();
+    private static List<User> toDeleteUsers = new ArrayList<User>();
 
-    public static junit.framework.Test suite() {
-        return new JUnit4TestAdapter(UserTest.class);
-    }
-    
     @AfterClass
     public static void tearDown() throws Exception {
         final OXUserInterface oxu = getUserClient();

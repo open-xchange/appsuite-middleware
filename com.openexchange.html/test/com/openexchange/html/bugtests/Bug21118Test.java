@@ -60,8 +60,8 @@ import com.openexchange.html.AbstractSanitizing;
  */
 public class Bug21118Test extends AbstractSanitizing {
 
-    @Test
-    public void testEmptyLines() {
+     @Test
+     public void testEmptyLines() {
         StringBuilder htmlContentBuilder = new StringBuilder();
         htmlContentBuilder.append("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\">");
         htmlContentBuilder.append(" <head>");

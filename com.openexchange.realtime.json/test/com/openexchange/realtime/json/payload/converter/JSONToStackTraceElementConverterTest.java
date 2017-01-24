@@ -49,13 +49,14 @@
 
 package com.openexchange.realtime.json.payload.converter;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.json.payload.converter.JSONToStackTraceElementConverter;
 
 
 /**
@@ -78,13 +79,13 @@ public class JSONToStackTraceElementConverterTest {
          stackTraceElementMissingFileNameJSON = new JSONObject("{'className':'org.eclipse.osgi.baseadaptor.bundlefile.ZipBundleFile','methodName':'basicOpen'}");
     }
 
-    @Test
-    public void testGetInputFormat() {
+     @Test
+     public void testGetInputFormat() {
         assertEquals("json", converter.getInputFormat());
     }
 
-    @Test
-    public void testConvert() throws OXException, JSONException {
+     @Test
+     public void testConvert() throws OXException, JSONException {
         Object converted = converter.convert(stackTraceElementJSON, null, null);
         assertNotNull(converted);
         assertTrue(converted instanceof StackTraceElement);
@@ -92,8 +93,8 @@ public class JSONToStackTraceElementConverterTest {
         assertEquals(stackTraceElementString, element.toString());
     }
 
-    @Test
-    public void testConvertMissingFileName() throws OXException, JSONException {
+     @Test
+     public void testConvertMissingFileName() throws OXException, JSONException {
         Object converted = converter.convert(stackTraceElementMissingFileNameJSON, null, null);
         assertNotNull(converted);
         assertTrue(converted instanceof StackTraceElement);
@@ -101,8 +102,8 @@ public class JSONToStackTraceElementConverterTest {
         assertEquals(stackTraceElementMissingFileNameString, element.toString());
     }
 
-    @Test
-    public void testGetOutputFormat() {
+     @Test
+     public void testGetOutputFormat() {
         assertEquals(StackTraceElement.class.getSimpleName(), converter.getOutputFormat());
     }
 }

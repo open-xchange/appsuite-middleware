@@ -128,7 +128,7 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess, MediaFold
 
     @Override
     public String deleteFolder(String folderId, boolean hardDelete) throws OXException {
-        getFolderService().deleteFolder(TREE_ID, folderId, null, session, initDecorator().put("hardDelete", String.valueOf(hardDelete))).getResponse();
+        getFolderService().deleteFolder(TREE_ID, folderId, null, session, initDecorator().put("hardDelete", String.valueOf(hardDelete)));
         return folderId;
     }
 
@@ -268,7 +268,7 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess, MediaFold
     public String updateFolder(String identifier, FileStorageFolder toUpdate) throws OXException {
         Folder parsedFolder = FolderParser.parseFolder(toUpdate);
         parsedFolder.setID(identifier);
-        getFolderService().updateFolder(parsedFolder, null, session, initDecorator()).getResponse();
+        getFolderService().updateFolder(parsedFolder, null, session, initDecorator());
         return null != parsedFolder.getNewID() ? parsedFolder.getNewID() : identifier;
     }
 

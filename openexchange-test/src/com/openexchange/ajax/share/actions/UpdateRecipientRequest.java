@@ -65,7 +65,7 @@ import com.openexchange.share.recipient.AnonymousRecipient;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class UpdateRecipientRequest implements AJAXRequest<AbstractAJAXResponse>{
+public class UpdateRecipientRequest implements AJAXRequest<AbstractAJAXResponse> {
 
     private final boolean failOnError;
     private final AnonymousRecipient recipient;
@@ -107,10 +107,7 @@ public class UpdateRecipientRequest implements AJAXRequest<AbstractAJAXResponse>
 
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
-        return new Params(
-            AJAXServlet.PARAMETER_ACTION, "updateRecipient",
-            "entity", String.valueOf(entity)
-        ).toArray();
+        return new Params(AJAXServlet.PARAMETER_ACTION, "updateRecipient", "entity", String.valueOf(entity)).toArray();
     }
 
     @Override

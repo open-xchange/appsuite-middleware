@@ -80,12 +80,13 @@ public class IDManagerTest extends IDManager {
     }
     
     @After
-    public void tearDown() {
+    public void tearDown()
+ {
         ID.ID_MANAGER_REF.set(null);
     }
 
-    @Test
-    public void testGetLock() {
+     @Test
+     public void testGetLock() {
         Set<Lock> locksM = new HashSet<Lock>();
         Set<Lock> locksC = new HashSet<Lock>();
         locksM.add(getLock(marens, scope1));
@@ -99,8 +100,8 @@ public class IDManagerTest extends IDManager {
         assertNotEquals(locksM, locksC);
     }
 
-    @Test
-    public void testCleanup() throws RealtimeException {
+     @Test
+     public void testCleanup() throws RealtimeException {
         getLock(marens, scope1);
         getLock(marens, scope2);
         getLock(marens, scope3);

@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.test.fixtures.transformators;
 
 import java.util.ArrayList;
@@ -62,36 +63,36 @@ import com.openexchange.test.fixtures.FixtureLoader;
  */
 public class DocumentsTransformator implements Transformator {
 
-	private final FixtureLoader fixtureLoader;
+    private final FixtureLoader fixtureLoader;
 
-	public DocumentsTransformator(FixtureLoader fixtureLoader) {
-		super();
-		this.fixtureLoader = fixtureLoader;
-	}
-
-	@Override
-    public Document[] transform(final String value) throws OXException {
-		if (null == value || 1 > value.length()) {
-			return null;
-		}
-		String fixtureName = "documents";
-		String fixtureEntry = "";
-		final String[] splitted = value.split(",");
-		final List<Document> documents = new ArrayList<Document>(splitted.length);
-		for (int i = 0; i < splitted.length; i++) {
-			final int idx = splitted[i].indexOf(':');
-			if (0 < idx && splitted[i].length() > idx) {
-				fixtureName = splitted[i].substring(0, idx);
-				fixtureEntry = splitted[i].substring(idx + 1);
-			} else {
-				fixtureEntry = splitted[i];
-			}
-			documents.add(getDocument(fixtureName, fixtureEntry));
-		}
-		return documents.toArray(new Document[documents.size()]);
+    public DocumentsTransformator(FixtureLoader fixtureLoader) {
+        super();
+        this.fixtureLoader = fixtureLoader;
     }
 
-	private final Document getDocument(final String fixtureName, final String fixtureEntry) throws OXException {
-		return fixtureLoader.getFixtures(fixtureName, Document.class).getEntry(fixtureEntry).getEntry();
-	}
+    @Override
+    public Document[] transform(final String value) throws OXException {
+        if (null == value || 1 > value.length()) {
+            return null;
+        }
+        String fixtureName = "documents";
+        String fixtureEntry = "";
+        final String[] splitted = value.split(",");
+        final List<Document> documents = new ArrayList<Document>(splitted.length);
+        for (int i = 0; i < splitted.length; i++) {
+            final int idx = splitted[i].indexOf(':');
+            if (0 < idx && splitted[i].length() > idx) {
+                fixtureName = splitted[i].substring(0, idx);
+                fixtureEntry = splitted[i].substring(idx + 1);
+            } else {
+                fixtureEntry = splitted[i];
+            }
+            documents.add(getDocument(fixtureName, fixtureEntry));
+        }
+        return documents.toArray(new Document[documents.size()]);
+    }
+
+    private final Document getDocument(final String fixtureName, final String fixtureEntry) throws OXException {
+        return fixtureLoader.getFixtures(fixtureName, Document.class).getEntry(fixtureEntry).getEntry();
+    }
 }

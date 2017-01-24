@@ -1,18 +1,17 @@
+
 package com.openexchange.ajax.kata;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    AppointmentRunner.class,
+    ContactRunner.class,
+    TaskRunner.class,
+    FolderRunner.class,
 
-public class KataSuite extends TestSuite {
-    public static Test suite() {
-        TestSuite testSuiteForKatas = new TestSuite();
-        testSuiteForKatas.addTestSuite(AppointmentRunner.class);
-        testSuiteForKatas.addTestSuite(ContactRunner.class);
-        testSuiteForKatas.addTestSuite(TaskRunner.class);
+})
+public class KataSuite  {
 
-        testSuiteForKatas.addTestSuite(FolderRunner.class);
-
-        return testSuiteForKatas;
-    }
 }

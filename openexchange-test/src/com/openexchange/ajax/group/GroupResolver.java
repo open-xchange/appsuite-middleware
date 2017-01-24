@@ -60,7 +60,6 @@ import com.openexchange.ajax.group.actions.SearchResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 
-
 /**
  * {@link GroupResolver}
  *
@@ -68,6 +67,7 @@ import com.openexchange.group.Group;
  *
  */
 public class GroupResolver {
+
     private final AJAXClient client;
 
     public GroupResolver(AJAXClient client) {
@@ -80,8 +80,8 @@ public class GroupResolver {
         return response.getGroups();
     }
 
-    public Group[] loadGroups(int...groupIds) throws OXException, IOException, SAXException, JSONException, OXException {
-        if(groupIds == null) {
+    public Group[] loadGroups(int... groupIds) throws OXException, IOException, SAXException, JSONException, OXException {
+        if (groupIds == null) {
             return new Group[0];
         }
         ListRequest req = new ListRequest(groupIds, true);

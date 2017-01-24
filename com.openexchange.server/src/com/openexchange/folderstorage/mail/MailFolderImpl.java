@@ -169,9 +169,11 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
     private int m_total = -1;
     private int m_unread = -1;
 
-    private static final int BIT_USER_FLAG = (1 << 29);
+    /** The special bit for user flag support */
+    public static final int BIT_USER_FLAG = (1 << 29);
 
-    private static final int BIT_RENAME_FLAG = (1 << 30);
+    /** The special bit for rename grant */
+    public static final int BIT_RENAME_FLAG = (1 << 30);
 
     /**
      * Initializes a new {@link MailFolderImpl} from given mail folder.
@@ -335,19 +337,22 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
         }
         // Since not cached we can obtain total/unread counter here
         if (!cache) {
-            final IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
-            if (folderStorage instanceof IMailFolderStorageEnhanced2) {
-                final IMailFolderStorageEnhanced2 storageEnhanced2 = (IMailFolderStorageEnhanced2) folderStorage;
-                final int[] tu = storageEnhanced2.getTotalAndUnreadCounter(ensureFullName(fullName));
+            IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
+
+            IMailFolderStorageEnhanced2 storageEnhanced2 = folderStorage.supports(IMailFolderStorageEnhanced2.class);
+            if (null != storageEnhanced2) {
+                int[] tu = storageEnhanced2.getTotalAndUnreadCounter(ensureFullName(fullName));
                 m_total = null == tu ? -1 : tu[0];
                 m_unread = null == tu ? -1 : tu[1];
-            } else if (folderStorage instanceof IMailFolderStorageEnhanced) {
-                final IMailFolderStorageEnhanced storageEnhanced = (IMailFolderStorageEnhanced) folderStorage;
-                m_total = storageEnhanced.getTotalCounter(ensureFullName(fullName));
-                m_unread = storageEnhanced.getUnreadCounter(ensureFullName(fullName));
             } else {
-                m_total = mailAccess.getMessageStorage().searchMessages(ensureFullName(fullName), IndexRange.NULL, MailSortField.RECEIVED_DATE, OrderDirection.ASC, null, FIELDS_ID).length;
-                m_unread = mailAccess.getMessageStorage().getUnreadMessages(ensureFullName(fullName), MailSortField.RECEIVED_DATE, OrderDirection.DESC, FIELDS_ID, -1).length;
+                IMailFolderStorageEnhanced storageEnhanced = folderStorage.supports(IMailFolderStorageEnhanced.class);
+                if (null != storageEnhanced) {
+                    m_total = storageEnhanced.getTotalCounter(ensureFullName(fullName));
+                    m_unread = storageEnhanced.getUnreadCounter(ensureFullName(fullName));
+                } else {
+                    m_total = mailAccess.getMessageStorage().searchMessages(ensureFullName(fullName), IndexRange.NULL, MailSortField.RECEIVED_DATE, OrderDirection.ASC, null, FIELDS_ID).length;
+                    m_unread = mailAccess.getMessageStorage().getUnreadMessages(ensureFullName(fullName), MailSortField.RECEIVED_DATE, OrderDirection.DESC, FIELDS_ID, -1).length;
+                }
             }
         }
         cacheable = cache;
@@ -520,10 +525,13 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
         try {
             mailAccess = MailAccess.getInstance(userId, contextId, mailAccountId);
             mailAccess.connect(false);
-            final IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
-            if (folderStorage instanceof IMailFolderStorageEnhanced) {
-                return ((IMailFolderStorageEnhanced) folderStorage).getUnreadCounter(ensureFullName(fullName));
+            IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
+
+            IMailFolderStorageEnhanced storageEnhanced = folderStorage.supports(IMailFolderStorageEnhanced.class);
+            if (null != storageEnhanced) {
+                return storageEnhanced.getUnreadCounter(ensureFullName(fullName));
             }
+
             return mailAccess.getMessageStorage().getUnreadMessages(ensureFullName(fullName), MailSortField.RECEIVED_DATE, OrderDirection.DESC, FIELDS_ID, -1).length;
         } catch (final OXException e) {
             LOG.debug("Cannot return up-to-date unread counter.", e);
@@ -547,10 +555,13 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
         try {
             mailAccess = MailAccess.getInstance(userId, contextId, mailAccountId);
             mailAccess.connect(false);
-            final IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
-            if (folderStorage instanceof IMailFolderStorageEnhanced) {
-                return ((IMailFolderStorageEnhanced) folderStorage).getTotalCounter(ensureFullName(fullName));
+            IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
+
+            IMailFolderStorageEnhanced storageEnhanced = folderStorage.supports(IMailFolderStorageEnhanced.class);
+            if (null != storageEnhanced) {
+                return storageEnhanced.getTotalCounter(ensureFullName(fullName));
             }
+
             return mailAccess.getMessageStorage().searchMessages(ensureFullName(fullName), IndexRange.NULL, MailSortField.RECEIVED_DATE, OrderDirection.ASC, null, FIELDS_ID).length;
         } catch (final OXException e) {
             LOG.debug("Cannot return up-to-date total counter.", e);
@@ -601,25 +612,26 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
     }
 
     private int[] totalAndUnread(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
-        final IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
-        if (folderStorage instanceof IMailFolderStorageEnhanced2) {
-            return ((IMailFolderStorageEnhanced2) folderStorage).getTotalAndUnreadCounter(ensureFullName(fullName));
+        IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
+        String ensuredFullName = ensureFullName(fullName);
+
+        IMailFolderStorageEnhanced2 storageEnhanced2 = folderStorage.supports(IMailFolderStorageEnhanced2.class);
+        if (null != storageEnhanced2) {
+            return storageEnhanced2.getTotalAndUnreadCounter(ensuredFullName);
         }
-        final String ensuredFullName = ensureFullName(fullName);
+
         int unread, total;
-        if (folderStorage instanceof IMailFolderStorageEnhanced2) {
-            final IMailFolderStorageEnhanced2 storageEnhanced2 = (IMailFolderStorageEnhanced2) folderStorage;
-            final int[] tu = storageEnhanced2.getTotalAndUnreadCounter(ensureFullName(fullName));
-            total = null == tu ? -1 : tu[0];
-            unread = null == tu ? -1 : tu[1];
-        } else if (folderStorage instanceof IMailFolderStorageEnhanced) {
-            final IMailFolderStorageEnhanced storageEnhanced = (IMailFolderStorageEnhanced) folderStorage;
-            unread = storageEnhanced.getUnreadCounter(ensuredFullName);
-            total = storageEnhanced.getTotalCounter(ensuredFullName);
-        } else {
-            unread = mailAccess.getMessageStorage().getUnreadMessages(ensuredFullName, MailSortField.RECEIVED_DATE, OrderDirection.DESC, FIELDS_ID, -1).length;
-            total = mailAccess.getMessageStorage().searchMessages(ensuredFullName, IndexRange.NULL, MailSortField.RECEIVED_DATE, OrderDirection.ASC, null, FIELDS_ID).length;
+        {
+            IMailFolderStorageEnhanced storageEnhanced = folderStorage.supports(IMailFolderStorageEnhanced.class);
+            if (null != storageEnhanced) {
+                unread = storageEnhanced.getUnreadCounter(ensuredFullName);
+                total = storageEnhanced.getTotalCounter(ensuredFullName);
+            } else {
+                unread = mailAccess.getMessageStorage().getUnreadMessages(ensuredFullName, MailSortField.RECEIVED_DATE, OrderDirection.DESC, FIELDS_ID, -1).length;
+                total = mailAccess.getMessageStorage().searchMessages(ensuredFullName, IndexRange.NULL, MailSortField.RECEIVED_DATE, OrderDirection.ASC, null, FIELDS_ID).length;
+            }
         }
+
         return new int[] { total, unread };
     }
 

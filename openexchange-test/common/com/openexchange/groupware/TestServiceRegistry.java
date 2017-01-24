@@ -53,7 +53,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 
-
 /**
  * {@link TestServiceRegistry}
  *
@@ -62,7 +61,6 @@ import com.openexchange.server.services.ServerServiceRegistry;
 public class TestServiceRegistry implements ServiceLookup {
 
     private static final TestServiceRegistry REGISTRY = new TestServiceRegistry();
-
 
     private TestServiceRegistry() {
         super();

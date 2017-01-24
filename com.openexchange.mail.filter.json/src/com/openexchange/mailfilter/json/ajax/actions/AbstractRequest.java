@@ -138,7 +138,7 @@ public abstract class AbstractRequest {
         final int userId = session.getUserId();
         final int contextId = session.getContextId();
         final Subject subject = (Subject) session.getParameter(KERBEROS_SESSION_SUBJECT);
-        final String oauthToken = (String) session.getParameter(Session.PARAM_OAUTH_TOKEN);
+        final String oauthToken = (String) session.getParameter(Session.PARAM_OAUTH_ACCESS_TOKEN);
 
         try {
             final String username = getUsername();

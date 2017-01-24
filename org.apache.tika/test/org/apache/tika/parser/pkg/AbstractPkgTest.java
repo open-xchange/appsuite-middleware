@@ -21,7 +21,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
 import org.apache.tika.TikaTest;
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.Metadata;
@@ -30,6 +29,7 @@ import org.apache.tika.parser.AbstractParser;
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
+import org.junit.Before;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 
@@ -43,8 +43,8 @@ public abstract class AbstractPkgTest extends TikaTest {
    protected Parser autoDetectParser;
    protected EmbeddedTrackingParser tracker;
 
-   protected void setUp() throws Exception {
-      super.setUp();
+   @Before
+   public void setUp() throws Exception {
       
       tracker = new EmbeddedTrackingParser();
       trackingContext = new ParseContext();

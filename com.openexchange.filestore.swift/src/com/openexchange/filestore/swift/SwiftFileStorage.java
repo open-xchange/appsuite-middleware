@@ -53,6 +53,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
@@ -145,7 +146,11 @@ public class SwiftFileStorage implements FileStorage {
     public String saveNewFile(InputStream file) throws OXException {
         try {
             UUID documentId = UUID.randomUUID();
-            upload(documentId, file, 0);
+            long length = upload(documentId, file, 0);
+            if (length <= 0) {
+                // Received an empty input stream
+                throw SwiftExceptionCode.UNEXPECTED_ERROR.create("Swift storage cannot save an empty file");
+            }
             return UUIDs.getUnformattedString(documentId);
         } finally {
             Streams.close(file);
@@ -362,27 +367,56 @@ public class SwiftFileStorage implements FileStorage {
     private long upload(UUID documentId, InputStream data, long offset) throws OXException {
         boolean deleteUploadedChunks = true;
         DefaultChunkedUpload chunkedUpload = null;
-        List<UUID> swiftIds = new ArrayList<UUID>();
+        List<UUID> swiftIds = new LinkedList<UUID>();
         try {
             chunkedUpload = new DefaultChunkedUpload(data);
             long off = offset;
             if (!chunkedUpload.hasNext()) {
+                deleteUploadedChunks = false;
                 return off;
             }
 
-            // Chunks available for upload...
-            checkOrCreateContainer();
-            do {
+            // Handle first chunk especially
+            {
                 UploadChunk chunk = chunkedUpload.next();
                 try {
-                    UUID swiftId = client.put(chunk.getData(), chunk.getSize());
+                    long chunkSize = chunk.getSize();
+                    if (chunkSize <= 0) {
+                        // Received an empty input stream
+                        deleteUploadedChunks = false;
+                        return off;
+                    }
+
+                    // Check container...
+                    checkOrCreateContainer();
+
+                    // ... and upload first chunk
+                    UUID swiftId = client.put(chunk.getData(), chunkSize);
                     swiftIds.add(swiftId);
-                    chunkStorage.storeChunk(new Chunk(documentId, swiftId, off, chunk.getSize()));
-                    off += chunk.getSize();
+                    chunkStorage.storeChunk(new Chunk(documentId, swiftId, off, chunkSize));
+                    off += chunkSize;
                 } finally {
                     Streams.close(chunk);
                 }
-            } while (chunkedUpload.hasNext());
+            }
+
+            // Handle remaining chunks
+            while (chunkedUpload.hasNext()) {
+                UploadChunk chunk = chunkedUpload.next();
+                try {
+                    long chunkSize = chunk.getSize();
+                    if (chunkSize > 0) {
+                        UUID swiftId = client.put(chunk.getData(), chunkSize);
+                        swiftIds.add(swiftId);
+                        chunkStorage.storeChunk(new Chunk(documentId, swiftId, off, chunkSize));
+                        off += chunkSize;
+                    }
+                } finally {
+                    Streams.close(chunk);
+                }
+            }
+
+            // All fine, no error occurred
             deleteUploadedChunks = false;
             return off;
         } catch (OXException e) {

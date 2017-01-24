@@ -49,8 +49,12 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.assertNotNull;
 import java.util.Date;
 import java.util.TimeZone;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.contact.action.AllRequest;
 import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.InsertRequest;
@@ -83,13 +87,13 @@ public class Bug16618Test extends AbstractAJAXSession {
 
     private int folderId;
 
-    public Bug16618Test(final String name) {
-        super(name);
+    public Bug16618Test() {
+        super();
     }
 
     private Contact createContactWithImage() throws Exception {
         final Contact contact = new Contact();
-        contextId = client.getValues().getContextId();
+        contextId = getClient().getValues().getContextId();
         // contact.setContextId(contextId);
         contact.setTitle("Herr");
         contact.setSurName("Abba");
@@ -103,13 +107,13 @@ public class Bug16618Test extends AbstractAJAXSession {
         contact.setCompany("Internal Test AG");
         contact.setEmail1("baab.abba@open-foobar.com");
 
-        folderId = client.getValues().getPrivateContactFolder();
+        folderId = getClient().getValues().getPrivateContactFolder();
         contact.setParentFolderID(folderId);
 
         contact.setImage1(Data.image);
 
         final InsertRequest insertContactReq = new InsertRequest(contact);
-        final InsertResponse insertContactResp = client.execute(insertContactReq);
+        final InsertResponse insertContactResp = getClient().execute(insertContactReq);
         insertContactResp.fillObject(contact);
 
         contactId = contact.getObjectID();
@@ -117,28 +121,31 @@ public class Bug16618Test extends AbstractAJAXSession {
         return contact;
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
-        tz = client.getValues().getTimeZone();
+        tz = getClient().getValues().getTimeZone();
         contact = createContactWithImage();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        client.execute(new DeleteRequest(contact));
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
+        try {
+            getClient().execute(new DeleteRequest(contact));
+        } finally {
+            super.tearDown();
+        }
     }
 
+    @Test
     public void testContactImageWithAllRequest() throws Throwable {
         /*
          * Check presence of image URL via action=list
          */
         {
-            final ListRequest listRequest =
-                new ListRequest(new ListIDs(folderId, contact.getObjectID()), new int[] { Contact.OBJECT_ID, Contact.IMAGE1_URL, Contact.LAST_MODIFIED });
-            final CommonListResponse response = client.execute(listRequest);
+            final ListRequest listRequest = new ListRequest(new ListIDs(folderId, contact.getObjectID()), new int[] { Contact.OBJECT_ID, Contact.IMAGE1_URL, Contact.LAST_MODIFIED });
+            final CommonListResponse response = getClient().execute(listRequest);
             final int objectIdPos = response.getColumnPos(Contact.OBJECT_ID);
             final int imageURLPos = response.getColumnPos(Contact.IMAGE1_URL);
             for (final Object[] objA : response) {
@@ -153,7 +160,7 @@ public class Bug16618Test extends AbstractAJAXSession {
          */
         {
             final AllRequest allRequest = new AllRequest(folderId, new int[] { Contact.OBJECT_ID, Contact.IMAGE1_URL, Contact.LAST_MODIFIED });
-            final CommonAllResponse allResponse = client.execute(allRequest);
+            final CommonAllResponse allResponse = getClient().execute(allRequest);
 
             final int objectIdPos = allResponse.getColumnPos(Contact.OBJECT_ID);
             final int imageURLPos = allResponse.getColumnPos(Contact.IMAGE1_URL);

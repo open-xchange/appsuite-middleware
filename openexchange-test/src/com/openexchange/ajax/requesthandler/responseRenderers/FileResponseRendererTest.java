@@ -49,6 +49,11 @@
 
 package com.openexchange.ajax.requesthandler.responseRenderers;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -59,6 +64,9 @@ import javax.servlet.http.sim.SimHttpServletRequest;
 import javax.servlet.http.sim.SimHttpServletResponse;
 import javax.servlet.sim.ByteArrayServletOutputStream;
 import org.apache.commons.io.IOUtils;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
@@ -89,14 +97,13 @@ import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.SimServerSession;
 import com.openexchange.tools.strings.BasicTypesStringParser;
 import com.openexchange.tools.strings.StringParser;
-import junit.framework.TestCase;
 
 /**
  * {@link FileResponseRendererTest}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class FileResponseRendererTest extends TestCase {
+public class FileResponseRendererTest {
 
     /**
      * Initializes a new {@link FileResponseRendererTest}.
@@ -105,21 +112,20 @@ public class FileResponseRendererTest extends TestCase {
         super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         ServerServiceRegistry.getInstance().addService(HtmlService.class, new SimHtmlService());
         final SimConfigurationService simConfigurationService = new SimConfigurationService();
         simConfigurationService.stringProperties.put("UPLOAD_DIRECTORY", "/tmp/");
         ServerServiceRegistry.getInstance().addService(ConfigurationService.class, simConfigurationService);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         ServerServiceRegistry.getInstance().removeService(HtmlService.class);
-        super.tearDown();
     }
 
+    @Test
     public void testProperContentLength() {
         try {
             final String html = "foo\n" + "<object/data=\"data:text/html;base64,PHNjcmlwdD5hbGVydCgiWFNTIFNjaHdhY2hzdGVsbGUiKTwvc2NyaXB0Pg==\"></object>\n" + "bar";
@@ -148,6 +154,7 @@ public class FileResponseRendererTest extends TestCase {
         }
     }
 
+    @Test
     public void testApplicationHtml_Bug35512() {
         try {
             String html = "foo\n" + "<object/data=\"data:text/html;base64,PHNjcmlwdD5hbGVydCgiWFNTIFNjaHdhY2hzdGVsbGUiKTwvc2NyaXB0Pg==\"></object>\n" + "bar";
@@ -176,6 +183,7 @@ public class FileResponseRendererTest extends TestCase {
         }
     }
 
+    @Test
     public void testMaxAgeHeader_Bug33441() {
         try {
             ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder("28082.jpg", "image/jpeg", Delivery.view, Disposition.inline, "28082.jpg");
@@ -207,6 +215,7 @@ public class FileResponseRendererTest extends TestCase {
         }
     }
 
+    @Test
     public void testZeroByteTransformation_Bug28429() {
         try {
             ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder("28429.jpg", "image/jpeg", Delivery.view, Disposition.inline, "28429.jpg");
@@ -233,6 +242,7 @@ public class FileResponseRendererTest extends TestCase {
         }
     }
 
+    @Test
     public void testContentTypeByFileName_Bug31648() {
         try {
             ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder("31648.png", "application/binary", Delivery.view, Disposition.inline, "31648.png");
@@ -262,6 +272,7 @@ public class FileResponseRendererTest extends TestCase {
         }
     }
 
+    @Test
     public void testRangeHeader_Bug27394() {
         try {
             ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder("26926_27394.pdf", "application/pdf", Delivery.view, Disposition.inline, "26926_27394.pdf");
@@ -292,6 +303,7 @@ public class FileResponseRendererTest extends TestCase {
         }
     }
 
+    @Test
     public void test404_Bug26848() {
         final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
 
@@ -328,14 +340,10 @@ public class FileResponseRendererTest extends TestCase {
         assertEquals("Wrong status code", 404, resp.getStatus());
     }
 
+    @Test
     public void testShouldDetectVulnerableHtmlTags_Bug28637() {
         try {
-            final ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder(
-                "28637.htm",
-                "text/html",
-                Delivery.view,
-                Disposition.inline,
-                "28637.htm");
+            final ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder("28637.htm", "text/html", Delivery.view, Disposition.inline, "28637.htm");
             AJAXRequestData requestData = new AJAXRequestData();
             AJAXRequestResult result = new AJAXRequestResult();
             SimHttpServletRequest req = new SimHttpServletRequest();
@@ -353,6 +361,7 @@ public class FileResponseRendererTest extends TestCase {
         }
     }
 
+    @Test
     public void testXSSVuln_Bug26244() throws IOException {
         final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
 
@@ -371,6 +380,7 @@ public class FileResponseRendererTest extends TestCase {
         assertEquals("Wrong Content-Type", expectedCT, resp.getContentType());
     }
 
+    @Test
     public void testXSSVuln_Bug29147() throws IOException {
         final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
         ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder("29147.svg", "image/svg+xml", Delivery.view, Disposition.inline, "29147.svg");
@@ -385,6 +395,7 @@ public class FileResponseRendererTest extends TestCase {
         assertTrue("Wrong Content-Disposition: " + resp.getHeader("Content-Disposition") + "; expected: " + expectedCD, resp.getHeader("Content-Disposition").startsWith(expectedCD));
     }
 
+    @Test
     public void testXSSVuln_Bug26373_view() throws IOException {
         final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
 
@@ -402,6 +413,7 @@ public class FileResponseRendererTest extends TestCase {
         assertEquals("Wrong Content-Type", "application/octet-stream", resp.getContentType());
     }
 
+    @Test
     public void testXSSVuln_Bug26237_inline() throws IOException {
         final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
 
@@ -419,6 +431,7 @@ public class FileResponseRendererTest extends TestCase {
         assertEquals("Wrong Content-Type", "application/octet-stream", resp.getContentType());
     }
 
+    @Test
     public void testXSSVuln_Bug26243() throws IOException {
         final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
 
@@ -437,6 +450,7 @@ public class FileResponseRendererTest extends TestCase {
         assertEquals("Wrong Content-Type", "image/jpeg", resp.getContentType());
     }
 
+    @Test
     public void testBug31714() throws IOException {
         ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder("31714.jpg", "image/jpeg", Delivery.view, Disposition.inline, "31714.jpg");
 
@@ -454,6 +468,7 @@ public class FileResponseRendererTest extends TestCase {
         assertEquals("Unexpected status code.", 500, resp.getStatus());
     }
 
+    @Test
     public void testBug26995() throws IOException {
         ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder("26995", "application/octet-stream", Delivery.view, Disposition.attachment, "26995");
 
@@ -472,13 +487,9 @@ public class FileResponseRendererTest extends TestCase {
         assertEquals("Wrong Content-Type", "image/jpeg", resp.getContentType());
     }
 
+    @Test
     public void testBug25133() throws IOException {
-        ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder(
-            "25133.eml",
-            null,
-            Delivery.download,
-            Disposition.attachment,
-            "25133.eml");
+        ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder("25133.eml", null, Delivery.download, Disposition.attachment, "25133.eml");
 
         final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
         final AJAXRequestData requestData = new AJAXRequestData();
@@ -496,13 +507,9 @@ public class FileResponseRendererTest extends TestCase {
         assertEquals("Wrong Content-Type", "application/octet-stream", resp.getContentType());
     }
 
+    @Test
     public void testBug48559() throws IOException {
-        ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder(
-            "48559.svg",
-            "application/xml",
-            Delivery.view,
-            Disposition.inline,
-            "fake.pdf");
+        ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder("48559.svg", "application/xml", Delivery.view, Disposition.inline, "fake.pdf");
 
         final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
         final AJAXRequestData requestData = new AJAXRequestData();
@@ -526,13 +533,9 @@ public class FileResponseRendererTest extends TestCase {
         assertTrue("Processed XML/SVG content contains unsanitized JavaScript content, but shouldn't:\n" + content, content.indexOf("&lt;/script&gt;") > 0);
     }
 
+    @Test
     public void testTikaShouldDetectCorrectContenType_Bug26153() throws IOException, OXException {
-        ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder(
-            "Rotate_90CW.jpg",
-            "application/octet-stream",
-            Delivery.view,
-            Disposition.inline,
-            "Rotate");
+        ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder("Rotate_90CW.jpg", "application/octet-stream", Delivery.view, Disposition.inline, "Rotate");
 
         final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
         final AJAXRequestData requestData = new AJAXRequestData();
@@ -549,13 +552,9 @@ public class FileResponseRendererTest extends TestCase {
         assertEquals("Wrong Content-Type", "image/jpeg", resp.getContentType());
     }
 
+    @Test
     public void testUnquoteContentTypeAndDisposition_Bug26153() throws IOException, OXException {
-        ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder(
-            "Rotate_90CW.jpg",
-            "\"image/jpeg\"",
-            Delivery.view,
-            Disposition.inline,
-            "Rotate_90CW.jpg");
+        ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder("Rotate_90CW.jpg", "\"image/jpeg\"", Delivery.view, Disposition.inline, "Rotate_90CW.jpg");
         fileHolder.setDisposition("\"inline\"");
         fileHolder.setDelivery("\"view\"");
         final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
@@ -577,13 +576,9 @@ public class FileResponseRendererTest extends TestCase {
         assertEquals("Wrong Content-Disposition", "inline", contentDisposition);
     }
 
+    @Test
     public void testSanitizingUrlParameter() throws IOException, OXException {
-        ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder(
-            "XSSFile.html",
-            null,
-            Delivery.view,
-            Disposition.inline,
-            "XSSFile.html");
+        ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder("XSSFile.html", null, Delivery.view, Disposition.inline, "XSSFile.html");
         final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
         final AJAXRequestData requestData = new AJAXRequestData();
         requestData.setSession(new SimServerSession(1, 1));
@@ -599,8 +594,9 @@ public class FileResponseRendererTest extends TestCase {
         assertTrue("Wrong Content-Type", resp.getContentType().startsWith("text/html"));
     }
 
+    @Test
     public void testSanitizingFileArguments() throws Exception {
-        ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(new byte[] {1,1,1,1});
+        ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(new byte[] { 1, 1, 1, 1 });
         fileHolder.setContentType("<pwn/ny");
         fileHolder.setDelivery(Delivery.view.name());
         fileHolder.setDisposition(Disposition.inline.name());
@@ -621,6 +617,7 @@ public class FileResponseRendererTest extends TestCase {
         assertFalse("Response contains malicious content", response.indexOf("<svg onload=alert") >= 0);
     }
 
+    @Test
     public void testContentLengthMailAttachments_Bug26926() {
         String testDataDir = MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR);
         try {
@@ -651,17 +648,13 @@ public class FileResponseRendererTest extends TestCase {
         }
     }
 
+    @Test
     public void testChunkRead() {
         try {
             byte[] bytes = FileResponseRendererTools.newByteArray(2048);
             bytes[256] = 120;
 
-            ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder(
-                bytes,
-                "application/octet-stream",
-                Delivery.download,
-                Disposition.attachment,
-                "bin.data");
+            ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder(bytes, "application/octet-stream", Delivery.download, Disposition.attachment, "bin.data");
 
             final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
 
@@ -701,16 +694,12 @@ public class FileResponseRendererTest extends TestCase {
         }
     }
 
+    @Test
     public void testChunkReadOutOfRange() {
         try {
             byte[] bytes = FileResponseRendererTools.newByteArray(2048);
 
-            ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder(
-                bytes,
-                "application/octet-stream",
-                Delivery.download,
-                Disposition.attachment,
-                "bin.data");
+            ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder(bytes, "application/octet-stream", Delivery.download, Disposition.attachment, "bin.data");
 
             final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
 
@@ -732,15 +721,11 @@ public class FileResponseRendererTest extends TestCase {
         }
     }
 
+    @Test
     public void testResourceCacheIsDisabled() throws Exception {
         byte[] bytes = FileResponseRendererTools.newByteArray(2048);
 
-        ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder(
-            bytes,
-            "image/jpeg",
-            Delivery.view,
-            Disposition.inline,
-            "someimage.jpg");
+        ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder(bytes, "image/jpeg", Delivery.view, Disposition.inline, "someimage.jpg");
 
         final TestableResourceCache resourceCache = new TestableResourceCache(false);
         ResourceCaches.setResourceCache(resourceCache);
@@ -762,15 +747,11 @@ public class FileResponseRendererTest extends TestCase {
         assertEquals("save() called", 0, resourceCache.callsToSave);
     }
 
+    @Test
     public void testResourceCacheIsDisabled2() throws Exception {
         byte[] bytes = FileResponseRendererTools.newByteArray(2048);
 
-        ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder(
-            bytes,
-            "image/jpeg",
-            Delivery.view,
-            Disposition.inline,
-            "someimage.jpg");
+        ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder(bytes, "image/jpeg", Delivery.view, Disposition.inline, "someimage.jpg");
 
         ServerServiceRegistry.getInstance().addService(StringParser.class, new BasicTypesStringParser());
         final TestableResourceCache resourceCache = new TestableResourceCache(true);
@@ -792,15 +773,11 @@ public class FileResponseRendererTest extends TestCase {
         assertEquals("save() called", 0, resourceCache.callsToSave);
     }
 
+    @Test
     public void testNoCachingOnCheapTransformations() throws Exception {
         byte[] bytes = FileResponseRendererTools.newByteArray(2048);
 
-        ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder(
-            bytes,
-            "image/jpeg",
-            Delivery.view,
-            Disposition.inline,
-            "someimage.jpg");
+        ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder(bytes, "image/jpeg", Delivery.view, Disposition.inline, "someimage.jpg");
 
         final TestableResourceCache resourceCache = new TestableResourceCache(true);
         ResourceCaches.setResourceCache(resourceCache);
@@ -821,15 +798,11 @@ public class FileResponseRendererTest extends TestCase {
         assertEquals("save() called", 0, resourceCache.callsToSave);
     }
 
+    @Test
     public void testCachingOnExpensiveTransformations() throws Exception {
         byte[] bytes = FileResponseRendererTools.newByteArray(2048);
 
-        ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder(
-            bytes,
-            "image/jpeg",
-            Delivery.view,
-            Disposition.inline,
-            "someimage.jpg");
+        ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder(bytes, "image/jpeg", Delivery.view, Disposition.inline, "someimage.jpg");
 
         ServerServiceRegistry.getInstance().addService(StringParser.class, new BasicTypesStringParser());
         final TestableResourceCache resourceCache = new TestableResourceCache(true);
@@ -851,6 +824,7 @@ public class FileResponseRendererTest extends TestCase {
         assertEquals("save() called", 1, resourceCache.callsToSave);
     }
 
+    @Test
     public void testXSSVuln_Bug49159() throws IOException {
         final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
         ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder("ox.html.txt", "text/plain", Delivery.view, Disposition.inline, "ox.html.txt");

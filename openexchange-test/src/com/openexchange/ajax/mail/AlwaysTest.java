@@ -49,35 +49,36 @@
 
 package com.openexchange.ajax.mail;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
+import org.junit.Test;
 import org.xml.sax.SAXException;
-import com.openexchange.ajax.AbstractAJAXTest;
-import com.openexchange.ajax.MailTest;
-import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.ListRequest;
 import com.openexchange.ajax.folder.actions.ListResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXSession;
-import com.openexchange.ajax.parser.ResponseParser;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
  * @author marcus
  */
-public class AlwaysTest extends AbstractAJAXTest {
+public class AlwaysTest extends AbstractAJAXSession {
 
     /**
      * Logger.
@@ -101,30 +102,21 @@ public class AlwaysTest extends AbstractAJAXTest {
     /**
      * This attributes of mails are requested when a mail folder is listed.
      */
-    private static final int[] listAttributes = new int[] {
-        MailListField.ID.getField(), MailListField.FOLDER_ID.getField(), MailListField.THREAD_LEVEL.getField(),
-        MailListField.ATTACHMENT.getField(), MailListField.FROM.getField(), MailListField.SUBJECT.getField(),
-        MailListField.RECEIVED_DATE.getField(), MailListField.SIZE.getField(), MailListField.FLAGS.getField(),
-        MailListField.PRIORITY.getField(), CommonObject.COLOR_LABEL };
+    private static final int[] listAttributes = new int[] { MailListField.ID.getField(), MailListField.FOLDER_ID.getField(), MailListField.THREAD_LEVEL.getField(), MailListField.ATTACHMENT.getField(), MailListField.FROM.getField(), MailListField.SUBJECT.getField(), MailListField.RECEIVED_DATE.getField(), MailListField.SIZE.getField(), MailListField.FLAGS.getField(), MailListField.PRIORITY.getField(), CommonObject.COLOR_LABEL };
 
     private AJAXClient client;
 
-    public AlwaysTest(final String name) {
-        super(name);
+    public AlwaysTest() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()), false);
-    }
-
+    @Test
     public void testFolderListing() throws Throwable {
         final FolderObject imapRoot = getIMAPRootFolder();
         recListFolder(imapRoot.getFullName(), "");
     }
 
-    public void recListFolder(final String folderId, final String rights) throws IOException, SAXException, JSONException, OXException, OXException {
+    public void recListFolder(final String folderId, final String rights) throws Exception {
         LOG.trace("Listing {}", folderId);
         if (rights.length() > 0) {
             listMails(folderId, MAX);
@@ -138,29 +130,20 @@ public class AlwaysTest extends AbstractAJAXTest {
     /**
      * @param folder
      * @param max
-     * @throws IOException
-     * @throws SAXException
-     * @throws JSONException
+     * @throws Exception 
      */
-    private void listMails(final String folderId, final int max) throws IOException, SAXException, JSONException, OXException {
-        final JSONObject json = MailTest.getAllMails(getWebConversation(), getHostName(), getSessionId(), folderId, listAttributes, false);
-        final Response response = ResponseParser.parse(json.toString());
-        assertFalse(response.getErrorMessage(), response.hasError());
-        final JSONArray array = (JSONArray) response.getData();
-        final int count = max == -1 ? array.length() : Math.min(max, array.length());
-        for (int i = 0; i < count; i++) {
-            final int pos = max == -1 ? i : rand.nextInt(array.length());
-            final JSONArray mailInfo = array.getJSONArray(pos);
-            final String mailId = mailInfo.getString(0);
-            LOG.info("Getting mail: " + mailId);
-            final Response mailResponse = MailTest.getMail(getWebConversation(), getHostName(), getSessionId(), mailId);
-            assertFalse(mailResponse.getErrorMessage(), mailResponse.hasError());
+    private void listMails(final String folderId, final int max) throws Exception {
+        MailMessage[] mails = mtm.listMails(folderId, MailListField.ID.getAllFields(), MailListField.ID.getField(), Order.DESCENDING, true, Collections.EMPTY_LIST);
+        assertFalse(mtm.getLastResponse().hasError());
+        for (MailMessage mail : mails) {
+            TestMail mailObj = mtm.get(mail.getFolder(), mail.getMailId());
+            assertNotNull(mailObj);
+            assertFalse(mtm.getLastResponse().hasError());
         }
     }
 
     public static Map<String, String> getIMAPRights(final AJAXClient client, final String parent) throws IOException, SAXException, JSONException, OXException {
-        final ListResponse listR = client.execute(new ListRequest(EnumAPI.OX_OLD, parent, new int[] {
-            FolderObject.OBJECT_ID, FolderObject.OWN_RIGHTS }, false));
+        final ListResponse listR = client.execute(new ListRequest(EnumAPI.OX_OLD, parent, new int[] { FolderObject.OBJECT_ID, FolderObject.OWN_RIGHTS }, false));
         final Map<String, String> retval = new HashMap<String, String>();
         for (final Object[] row : listR) {
             retval.put(row[0].toString(), row[1].toString());
@@ -169,7 +152,7 @@ public class AlwaysTest extends AbstractAJAXTest {
     }
 
     public FolderObject getIMAPRootFolder() throws OXException, IOException, SAXException, JSONException, OXException {
-        final ListResponse listR = client.execute(new ListRequest(EnumAPI.OX_OLD, String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID)));
+        final ListResponse listR = getClient().execute(new ListRequest(EnumAPI.OX_OLD, String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID)));
         FolderObject defaultIMAPFolder = null;
         final Iterator<FolderObject> iter = listR.getFolder();
         while (iter.hasNext()) {

@@ -79,11 +79,11 @@ public class TestTask extends Task {
         this.timezone = timezone;
     }
 
-    public Calendar getCalendar(){
+    public Calendar getCalendar() {
         return calendar;
     }
 
-    public TestTask(){
+    public TestTask() {
         super();
 
         calendar.clear();
@@ -93,56 +93,51 @@ public class TestTask extends Task {
         this.date = calendar.getTime();
     }
 
-    public TestTask checkConsistencyOf(int... switches){
-        for(int currentSwitch : switches) {
+    public TestTask checkConsistencyOf(int... switches) {
+        for (int currentSwitch : switches) {
             switch (currentSwitch) {
-            case DATES:
-                //appointments without start dates do not work
-                if( ! containsStartDate() ) {
-                    setStartDate(this.date);
-                }
-                //appointments without end dates do not work
-                if( containsStartDate() && ! containsEndDate() ) {
-                    setEndDate(this.getStartDate());
-                }
-                //appointments with end dates before start dates do not work
-                if( containsStartDate() && containsEndDate() ) {
-                    if( getEndDate().compareTo(getStartDate()) < 0) {
-                        setEndDate( getStartDate() );
+                case DATES:
+                    //appointments without start dates do not work
+                    if (!containsStartDate()) {
+                        setStartDate(this.date);
                     }
-                }
-                break;
-
-            case RECURRENCES:
-                if( containsRecurrenceType()
-                    || containsDays()
-                    || containsDayInMonth()
-                    || containsInterval()
-                    ){
-                    //if there is a recurrence, but no interval is set, set it to 1
-                    if( ! containsInterval() )
-                    {
-                        setInterval(1);
-                        //if there is no start date, set it to the start of the recurrence
+                    //appointments without end dates do not work
+                    if (containsStartDate() && !containsEndDate()) {
+                        setEndDate(this.getStartDate());
                     }
+                    //appointments with end dates before start dates do not work
+                    if (containsStartDate() && containsEndDate()) {
+                        if (getEndDate().compareTo(getStartDate()) < 0) {
+                            setEndDate(getStartDate());
+                        }
+                    }
+                    break;
 
-                }
-            default:
-                break;
+                case RECURRENCES:
+                    if (containsRecurrenceType() || containsDays() || containsDayInMonth() || containsInterval()) {
+                        //if there is a recurrence, but no interval is set, set it to 1
+                        if (!containsInterval()) {
+                            setInterval(1);
+                            //if there is no start date, set it to the start of the recurrence
+                        }
+
+                    }
+                default:
+                    break;
             }
         }
         return this;
     }
 
     //set the day
-    protected Date dateAtDayOfTheMonth(Date date, int dayOfTheMonth){
+    protected Date dateAtDayOfTheMonth(Date date, int dayOfTheMonth) {
         Calendar time = getCalendar();
         time.setTime(date);
         time.set(Calendar.DAY_OF_MONTH, dayOfTheMonth);
         return time.getTime();
     }
 
-    protected Date shiftDateByDays(Date date, int daysToShift){
+    protected Date shiftDateByDays(Date date, int daysToShift) {
         Calendar time = getCalendar();
         time.setTime(date);
         time.add(Calendar.DAY_OF_MONTH, daysToShift);
@@ -229,7 +224,8 @@ public class TestTask extends Task {
         setEndDate(setWeekDay(getEndDate(), dayOfWeek));
         return this;
     }
-    public TestTask startsToday(){
+
+    public TestTask startsToday() {
         this.setStartDate(this.date);
         return this;
     }
@@ -237,9 +233,10 @@ public class TestTask extends Task {
     /**
      * Moves the date one day into the future.
      * Can be used more than once.
+     * 
      * @return
      */
-    public TestTask startsTheFollowingDay(){
+    public TestTask startsTheFollowingDay() {
         if (!containsStartDate()) {
             setStartDate(this.date);
         }
@@ -247,31 +244,31 @@ public class TestTask extends Task {
         return this;
     }
 
-    public TestTask endsTheFollowingDay(){
-        if(! containsEndDate() ) {
+    public TestTask endsTheFollowingDay() {
+        if (!containsEndDate()) {
             setEndDate(this.date);
         }
-        setEndDate( shiftDateByDays(getEndDate(), 1));
+        setEndDate(shiftDateByDays(getEndDate(), 1));
         return this;
     }
 
-    public TestTask startsTheDayBefore(){
-        if(! containsStartDate() ) {
+    public TestTask startsTheDayBefore() {
+        if (!containsStartDate()) {
             setStartDate(this.date);
         }
-        setStartDate( shiftDateByDays(getStartDate(), -1));
+        setStartDate(shiftDateByDays(getStartDate(), -1));
         return this;
     }
 
-    public TestTask endsTheDayBefore(){
-        if(! containsEndDate() ) {
+    public TestTask endsTheDayBefore() {
+        if (!containsEndDate()) {
             setEndDate(this.date);
         }
-        setEndDate( shiftDateByDays(getEndDate(), -1));
+        setEndDate(shiftDateByDays(getEndDate(), -1));
         return this;
     }
 
-    protected Date setDayToToday(Date date){
+    protected Date setDayToToday(Date date) {
         Calendar now = getCalendar();
 
         Calendar newDate = getCalendar();
@@ -283,13 +280,15 @@ public class TestTask extends Task {
 
         return newDate.getTime();
     }
+
     /**
      * sets the task to start tomorrow. The time of day is
      * either that set before or, if none was set, it is the
      * current time of day.
+     * 
      * @return
      */
-    public TestTask startsTomorrow(){
+    public TestTask startsTomorrow() {
         if (!containsStartDate()) {
             setStartDate(this.date);
         }
@@ -297,27 +296,27 @@ public class TestTask extends Task {
         return startsTheFollowingDay();
     }
 
-    public TestTask endsTomorrow(){
-        if(! containsEndDate() ) {
+    public TestTask endsTomorrow() {
+        if (!containsEndDate()) {
             setEndDate(this.date);
         }
-        setEndDate( setDayToToday( getEndDate() ) );
+        setEndDate(setDayToToday(getEndDate()));
         return endsTheFollowingDay();
     }
 
-    public TestTask startsYesterday(){
-        if(! containsStartDate() ) {
+    public TestTask startsYesterday() {
+        if (!containsStartDate()) {
             setStartDate(this.date);
         }
-        setStartDate( setDayToToday( getStartDate() ) );
+        setStartDate(setDayToToday(getStartDate()));
         return startsTheDayBefore();
     }
 
-    public TestTask endsYesterday(){
-        if(! containsEndDate() ) {
+    public TestTask endsYesterday() {
+        if (!containsEndDate()) {
             setEndDate(this.date);
         }
-        setEndDate( setDayToToday( getEndDate() ) );
+        setEndDate(setDayToToday(getEndDate()));
         return endsTheDayBefore();
     }
 
@@ -346,23 +345,23 @@ public class TestTask extends Task {
         return this;
     }
 
-    public TestTask startsAtNoon(){
+    public TestTask startsAtNoon() {
         return startsAt(12);
     }
 
-    public TestTask startsInTheMorning(){
+    public TestTask startsInTheMorning() {
         return startsAt(6);
     }
 
-    public TestTask startsInTheEvening(){
+    public TestTask startsInTheEvening() {
         return startsAt(18);
     }
 
-    public TestTask endsInTheMorning(){
+    public TestTask endsInTheMorning() {
         return endsAt(6);
     }
 
-    public TestTask endsAtNoon(){
+    public TestTask endsAtNoon() {
         return endsAt(12);
     }
 
@@ -370,20 +369,20 @@ public class TestTask extends Task {
         return endsAt(18);
     }
 
-    public TestTask forOneHour(){
+    public TestTask forOneHour() {
         return this;
     }
 
     //set recurrence
     public TestTask everyDay() {
-        if(! containsStartDate()){
+        if (!containsStartDate()) {
             setStartDate(this.date);
         }
         setInterval(1);
         return this;
     }
 
-    public TestTask everyWeek(){
+    public TestTask everyWeek() {
         if (!containsStartDate()) {
             setStartDate(this.date);
         }
@@ -398,20 +397,20 @@ public class TestTask extends Task {
 
     private int ox2CalDay(int oxDayOfWeek) {
         switch (oxDayOfWeek) {
-        case SUNDAY:
-            return Calendar.SUNDAY;
-        case MONDAY:
-            return Calendar.MONDAY;
-        case TUESDAY:
-            return Calendar.TUESDAY;
-        case WEDNESDAY:
-            return Calendar.WEDNESDAY;
-        case THURSDAY:
-            return Calendar.THURSDAY;
-        case FRIDAY:
-            return Calendar.FRIDAY;
-        case SATURDAY:
-            return Calendar.SATURDAY;
+            case SUNDAY:
+                return Calendar.SUNDAY;
+            case MONDAY:
+                return Calendar.MONDAY;
+            case TUESDAY:
+                return Calendar.TUESDAY;
+            case WEDNESDAY:
+                return Calendar.WEDNESDAY;
+            case THURSDAY:
+                return Calendar.THURSDAY;
+            case FRIDAY:
+                return Calendar.FRIDAY;
+            case SATURDAY:
+                return Calendar.SATURDAY;
         }
         throw new IllegalArgumentException();
     }
@@ -431,47 +430,48 @@ public class TestTask extends Task {
         return this;
     }
 
-    public TestTask onDay(int day){
+    public TestTask onDay(int day) {
         setDayInMonth(day);
         return this;
     }
 
-    public TestTask onWeekDays(int days){
+    public TestTask onWeekDays(int days) {
         setDays(days);
         return this;
     }
 
-    public TestTask inMonth(int month){
+    public TestTask inMonth(int month) {
         setMonth(month);
         return this;
     }
 
-    public TestTask everyMonth(){
+    public TestTask everyMonth() {
         setRecurrenceType(MONTHLY);
         return this;
     }
 
-    public TestTask everyMonthOnDay(int dayOfMonth){
+    public TestTask everyMonthOnDay(int dayOfMonth) {
         //this is ugly but compatible to the HTTP_API description as of 2008-11-20
         return everyMonthOnNthWeekday(dayOfMonth, MONDAY | TUESDAY | WEDNESDAY | THURSDAY | FRIDAY | SATURDAY | SUNDAY);
     }
 
-    public TestTask everyMonthOnNthWeekday(int n, int weekDay){
+    public TestTask everyMonthOnNthWeekday(int n, int weekDay) {
         everyMonth();
         onDay(n);
         onWeekDays(weekDay);
-        if(! containsInterval()){
+        if (!containsInterval()) {
             setInterval(1);
         }
         return this;
     }
 
-    public TestTask everyOtherMonth(){
+    public TestTask everyOtherMonth() {
         setRecurrenceType(MONTHLY);
         setInterval(2);
         return this;
     }
-    public TestTask everyYear(){
+
+    public TestTask everyYear() {
         return this;
     }
 
@@ -490,14 +490,15 @@ public class TestTask extends Task {
         this.setParentFolderID(originalTask.getParentFolderID());
         return this;
     }
+
     @Override
-    public TestTask clone(){
+    public TestTask clone() {
         TestTask newTask = new TestTask();
         //copy all fields of Task
-        for(int field : Task.ALL_COLUMNS){
+        for (int field : Task.ALL_COLUMNS) {
             Mapper mapper = Mapping.getMapping(field);
-            if(mapper != null &&  mapper.isSet(this) ) {
-                mapper.set(newTask, mapper.get(this) );
+            if (mapper != null && mapper.isSet(this)) {
+                mapper.set(newTask, mapper.get(this));
             }
         }
         //copy additional TestTask fields

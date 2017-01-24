@@ -49,13 +49,14 @@
 
 package com.openexchange.subscribe;
 
+import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.List;
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.subscribe.internal.SimFolderUpdaterStrategy;
 import com.openexchange.subscribe.internal.StrategyFolderUpdaterService;
 import com.openexchange.tools.iterator.SearchIteratorDelegator;
-
 
 /**
  * {@link ContactFolderUpdater}
@@ -63,18 +64,19 @@ import com.openexchange.tools.iterator.SearchIteratorDelegator;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class StrategyFolderUpdaterTest extends TestCase {
+public class StrategyFolderUpdaterTest {
 
     private SimFolderUpdaterStrategy simStrategy;
     private StrategyFolderUpdaterService<String> updater;
 
-    @Override
+    @Before
     public void setUp() {
         simStrategy = new SimFolderUpdaterStrategy();
         simStrategy.setDataSet("aaaac", "baaaa");
         updater = new StrategyFolderUpdaterService<String>(simStrategy);
     }
 
+    @Test
     public void testMerging() throws Exception {
         List<String> list = Arrays.asList("aaaab", "baaaa", "new");
         updater.save(new SearchIteratorDelegator<String>(list), null);

@@ -83,13 +83,12 @@ public final class Bug28089Test extends AbstractTaskTest {
     private Task task;
     private FolderObject folder;
 
-    public Bug28089Test(String name) {
-        super(name);
+    public Bug28089Test() {
+        super();
     }
 
     @Before
-    @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
         client1 = getClient();
         tz = getTimeZone();
@@ -106,15 +105,17 @@ public final class Bug28089Test extends AbstractTaskTest {
     }
 
     @After
-    @Override
-    protected void tearDown() throws Exception {
-        GetResponse response = client1.execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_OLD, folder.getObjectID(), false));
-        if (!response.hasError()) {
-            client1.execute(new DeleteRequest(task));
-            folder.setLastModified(response.getTimestamp());
-            client1.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder));
+    public void tearDown() throws Exception {
+        try {
+            GetResponse response = client1.execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_OLD, folder.getObjectID(), false));
+            if (!response.hasError()) {
+                client1.execute(new DeleteRequest(task));
+                folder.setLastModified(response.getTimestamp());
+                client1.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder));
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
     @Test

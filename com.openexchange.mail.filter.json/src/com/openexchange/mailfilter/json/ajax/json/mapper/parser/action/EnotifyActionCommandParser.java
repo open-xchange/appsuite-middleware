@@ -62,6 +62,7 @@ import com.openexchange.mailfilter.json.ajax.json.fields.GeneralField;
 import com.openexchange.mailfilter.json.ajax.json.mapper.ArgumentUtil;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserJSONUtil;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link EnotifyActionCommandParser}
@@ -79,11 +80,11 @@ public class EnotifyActionCommandParser implements CommandParser<ActionCommand> 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser#parse(org.json.JSONObject)
      */
     @Override
-    public ActionCommand parse(JSONObject jsonObject) throws JSONException, SieveException, OXException {
+    public ActionCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException {
         final ArrayList<Object> arrayList = new ArrayList<Object>();
         final String messageFieldName = EnotifyActionField.message.getFieldName();
         if (jsonObject.has(messageFieldName)) {
@@ -102,7 +103,7 @@ public class EnotifyActionCommandParser implements CommandParser<ActionCommand> 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser#parse(org.json.JSONObject, com.openexchange.jsieve.commands.ActionCommand)
      */
     @SuppressWarnings("unchecked")

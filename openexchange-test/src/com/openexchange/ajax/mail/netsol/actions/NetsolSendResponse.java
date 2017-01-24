@@ -64,40 +64,40 @@ import com.openexchange.mail.MailPath;
  */
 public final class NetsolSendResponse extends AbstractAJAXResponse {
 
-	private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(NetsolSendResponse.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(NetsolSendResponse.class);
 
-	private String[] folderAndID;
+    private String[] folderAndID;
 
-	/**
-	 * @param response
-	 */
-	public NetsolSendResponse(final Response response) {
-		super(response);
-	}
+    /**
+     * @param response
+     */
+    public NetsolSendResponse(final Response response) {
+        super(response);
+    }
 
-	/**
-	 * @return Folder and ID of sent mail which is located in default "Sent"
-	 *         folder
-	 */
-	public String[] getFolderAndID() {
-		if (null == folderAndID) {
-			final String str;
-			if (getData() == null || (str = getData().toString()).length() == 0) {
-				return null;
-			}
-			try {
-				final MailPath mp = new MailPath(str);
-				if (Boolean.parseBoolean(AJAXConfig.getProperty(AJAXConfig.Property.IS_SP3))) {
-					return new String[] { mp.getFolder(), mp.toString() };
-				}
-				return new String[] { mp.getFolder(), String.valueOf(mp.getMailID()) };
-			} catch (final OXException e) {
-				LOG.error("", e);
-				return null;
-			}
+    /**
+     * @return Folder and ID of sent mail which is located in default "Sent"
+     *         folder
+     */
+    public String[] getFolderAndID() {
+        if (null == folderAndID) {
+            final String str;
+            if (getData() == null || (str = getData().toString()).length() == 0) {
+                return null;
+            }
+            try {
+                final MailPath mp = new MailPath(str);
+                if (Boolean.parseBoolean(AJAXConfig.getProperty(AJAXConfig.Property.IS_SP3))) {
+                    return new String[] { mp.getFolder(), mp.toString() };
+                }
+                return new String[] { mp.getFolder(), String.valueOf(mp.getMailID()) };
+            } catch (final OXException e) {
+                LOG.error("", e);
+                return null;
+            }
 
-		}
-		return folderAndID;
-	}
+        }
+        return folderAndID;
+    }
 
 }

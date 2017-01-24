@@ -82,7 +82,6 @@ import com.openexchange.setuptools.TestConfig;
 import com.openexchange.test.TestInit;
 import com.openexchange.tools.sql.DBUtils;
 
-
 /**
  * {@link ReplicationMonitorPerformanceTest}
  *
@@ -130,12 +129,7 @@ public class ReplicationMonitorPerformanceTest {
             stmt.executeUpdate("DROP TABLE IF EXISTS replicationMonitorPerformanceTest;");
             DBUtils.closeSQLStuff(stmt);
             stmt = writeCon.createStatement();
-            stmt.executeUpdate("CREATE TABLE `replicationMonitorPerformanceTest` ("
-                + "`id` int(10) unsigned NOT NULL, "
-                + "`key` varchar(128) COLLATE utf8_unicode_ci NOT NULL, "
-                + "`value` varchar(128) COLLATE utf8_unicode_ci NOT NULL, "
-                + "PRIMARY KEY (`id`)"
-                + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci");
+            stmt.executeUpdate("CREATE TABLE `replicationMonitorPerformanceTest` (" + "`id` int(10) unsigned NOT NULL, " + "`key` varchar(128) COLLATE utf8_unicode_ci NOT NULL, " + "`value` varchar(128) COLLATE utf8_unicode_ci NOT NULL, " + "PRIMARY KEY (`id`)" + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci");
         } catch (SQLException e) {
             LOG.error("", e);
         } finally {

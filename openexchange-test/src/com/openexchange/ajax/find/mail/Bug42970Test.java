@@ -49,8 +49,13 @@
 
 package com.openexchange.ajax.find.mail;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
+import org.junit.Test;
 import com.openexchange.ajax.find.actions.AutocompleteRequest;
 import com.openexchange.ajax.find.actions.AutocompleteResponse;
 import com.openexchange.find.Module;
@@ -69,8 +74,8 @@ public class Bug42970Test extends AbstractMailFindTest {
      * 
      * @param name The test case's name
      */
-    public Bug42970Test(String name) {
-        super(name);
+    public Bug42970Test() {
+        super();
     }
 
     /**
@@ -78,12 +83,13 @@ public class Bug42970Test extends AbstractMailFindTest {
      * 
      * @throws Exception
      */
+    @Test
     public void testBccFieldIsIncludedInContacts() throws Exception {
         List<String> folders = new ArrayList<String>(4);
-        folders.add(client.getValues().getInboxFolder());
-        folders.add(client.getValues().getSentFolder());
-        folders.add(client.getValues().getDraftsFolder());
-        folders.add(client.getValues().getTrashFolder());
+        folders.add(getClient().getValues().getInboxFolder());
+        folders.add(getClient().getValues().getSentFolder());
+        folders.add(getClient().getValues().getDraftsFolder());
+        folders.add(getClient().getValues().getTrashFolder());
 
         for (String folder : folders) {
             assertBccFieldInFolder(folder);
@@ -99,7 +105,7 @@ public class Bug42970Test extends AbstractMailFindTest {
     private void assertBccFieldInFolder(String folder) throws Exception {
         String prefix = defaultAddress.substring(0, 3);
         AutocompleteRequest autocompleteRequest = new AutocompleteRequest(prefix, Module.MAIL.getIdentifier(), prepareFacets(folder));
-        AutocompleteResponse autocompleteResponse = client.execute(autocompleteRequest);
+        AutocompleteResponse autocompleteResponse = getClient().execute(autocompleteRequest);
         List<Facet> facets = autocompleteResponse.getFacets();
         DefaultFacet contactFacet = (DefaultFacet) findByType(MailFacetType.CONTACTS, facets);
         assertNotNull(contactFacet);

@@ -73,7 +73,7 @@ public final class GETResponse extends AbstractResponse {
         POSTRequest postRequest = new POSTRequest().setHostname(request.hostname);
         for (String param : hiddenFormFields.keySet()) {
             String value = hiddenFormFields.get(param);
-            if (param != null  && value != null) {
+            if (param != null && value != null) {
                 postRequest.setParameter(param, value);
             }
         }

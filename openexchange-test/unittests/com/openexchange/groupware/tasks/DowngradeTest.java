@@ -49,10 +49,13 @@
 
 package com.openexchange.groupware.tasks;
 
+import static org.junit.Assert.fail;
 import java.sql.Connection;
 import java.util.Iterator;
-import junit.framework.AssertionFailedError;
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import com.mysql.jdbc.AssertionFailedException;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.configuration.AJAXConfig;
@@ -83,7 +86,7 @@ import com.openexchange.tools.oxfolder.OXFolderManager;
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class DowngradeTest extends TestCase {
+public class DowngradeTest {
 
     private Context ctx;
     private User user;
@@ -91,7 +94,7 @@ public class DowngradeTest extends TestCase {
     private Session session;
 
     public DowngradeTest(final String name) {
-        super(name);
+        super();
     }
 
     private static String getUsername(final String un) {
@@ -99,9 +102,8 @@ public class DowngradeTest extends TestCase {
         return pos == -1 ? un : un.substring(0, pos);
     }
 
-    @Override
+    @Before
     protected void setUp() throws Exception {
-        super.setUp();
         Init.startServer();
         AJAXConfig.init();
 
@@ -119,18 +121,16 @@ public class DowngradeTest extends TestCase {
         session = SessionObjectWrapper.createSessionObject(user.getId(), ctx, "DowngradeTest");
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         Init.stopServer();
-        super.tearDown();
     }
 
+    @Test
     public void testRemovePrivateParticipants() throws Throwable {
         final int folderId = FolderToolkit.getStandardTaskFolder(user.getId(), ctx);
         final Task task = Create.createWithDefaults(folderId, "DowngradeTest");
-        task.setParticipants(new Participant[] {
-            new UserParticipant(user.getId()),
-            new UserParticipant(secondUser.getId())
+        task.setParticipants(new Participant[] { new UserParticipant(user.getId()), new UserParticipant(secondUser.getId())
         });
         final TasksSQLInterface taskSQL = new TasksSQLImpl(session);
         taskSQL.insertTaskObject(task);
@@ -142,13 +142,12 @@ public class DowngradeTest extends TestCase {
         }
     }
 
+    @Test
     public void testRemovePublicParticipants() throws Throwable {
         final FolderObject folder = createPublicFolder();
         final int folderId = folder.getObjectID();
         final Task task = Create.createWithDefaults(folderId, "DowngradeTest");
-        task.setParticipants(new Participant[] {
-            new UserParticipant(user.getId()),
-            new UserParticipant(secondUser.getId())
+        task.setParticipants(new Participant[] { new UserParticipant(user.getId()), new UserParticipant(secondUser.getId())
         });
         final TasksSQLInterface taskSQL = new TasksSQLImpl(session);
         taskSQL.insertTaskObject(task);
@@ -159,16 +158,14 @@ public class DowngradeTest extends TestCase {
             downgradeDelegate();
             assertNoParticipants(folderId, task.getObjectID());
         } finally {
-            TaskLogic.deleteTask(session, ctx, user.getId(), task, task
-                .getLastModified());
+            TaskLogic.deleteTask(session, ctx, user.getId(), task, task.getLastModified());
             deletePublicFolder(folder);
         }
     }
 
-    public void testRemovePrivateTasks() throws OXException, OXException,
-    OXException {
-        final int folderId = FolderToolkit.getStandardTaskFolder(user.getId(),
-            ctx);
+    @Test
+    public void testRemovePrivateTasks() throws OXException, OXException, OXException {
+        final int folderId = FolderToolkit.getStandardTaskFolder(user.getId(), ctx);
         final Task task = Create.createWithDefaults(folderId, "DowngradeTest");
         final TasksSQLInterface taskSQL = new TasksSQLImpl(session);
         taskSQL.insertTaskObject(task);
@@ -177,14 +174,12 @@ public class DowngradeTest extends TestCase {
         // Task should be gone by downgrade. No delete necessary.
     }
 
-    public void testRemovePublicTask() throws OXException, OXException,
-    OXException {
+    @Test
+    public void testRemovePublicTask() throws OXException, OXException, OXException {
         final FolderObject folder = createPublicFolder();
         final int folderId = folder.getObjectID();
         final Task task = Create.createWithDefaults(folderId, "DowngradeTest");
-        task.setParticipants(new Participant[] {
-            new UserParticipant(user.getId()),
-            new UserParticipant(secondUser.getId())
+        task.setParticipants(new Participant[] { new UserParticipant(user.getId()), new UserParticipant(secondUser.getId())
         });
         final TasksSQLInterface taskSQL = new TasksSQLImpl(session);
         taskSQL.insertTaskObject(task);
@@ -199,16 +194,18 @@ public class DowngradeTest extends TestCase {
         }
     }
 
-    /* ----------------- Test help methods ---------------------*/
+    /* ----------------- Test help methods --------------------- */
 
     private void downgradeDelegate() throws OXException, OXException {
 
         final UserConfiguration userConfig = new AllowAllUserConfiguration(user.getId(), user.getGroups(), ctx) {
+
             private static final long serialVersionUID = -6133954203762209965L;
 
             @Override
             public UserPermissionBits getUserPermissionBits() {
                 return new AllowAllUserPermissionBits(userId, groups, ctx) {
+
                     private static final long serialVersionUID = 8557097436407742416L;
 
                     @Override
@@ -233,11 +230,13 @@ public class DowngradeTest extends TestCase {
 
     private void downgradeNoTasks() throws OXException, OXException {
         final UserConfiguration userConfig = new AllowAllUserConfiguration(user.getId(), user.getGroups(), ctx) {
+
             private static final long serialVersionUID = 400233948268970280L;
 
             @Override
             public UserPermissionBits getUserPermissionBits() {
                 return new AllowAllUserPermissionBits(userId, groups, ctx) {
+
                     private static final long serialVersionUID = -1380938924019873373L;
 
                     @Override
@@ -263,9 +262,7 @@ public class DowngradeTest extends TestCase {
         try {
             final Task task = GetTask.load(ctx, folderId, objectId, StorageType.ACTIVE);
             final Participant[] parts = task.getParticipants();
-            if (null != parts && parts.length > 0) {
-                throw new AssertionFailedError("Task has participants.");
-            }
+            Assert.assertTrue("Task has participants.", parts.length == 0);
         } catch (final OXException e) {
             throw new AssertionFailedException(e);
         }
@@ -275,9 +272,7 @@ public class DowngradeTest extends TestCase {
         try {
             final Task task = GetTask.load(ctx, folderId, objectId, StorageType.ACTIVE);
             final Participant[] parts = task.getParticipants();
-            if (null == parts || parts.length == 0) {
-                throw new AssertionFailedError("Task has no participants.");
-            }
+            Assert.assertTrue("Task has no participants.", parts.length > 0);
         } catch (final OXException e) {
             throw new AssertionFailedException(e);
         }
@@ -293,7 +288,7 @@ public class DowngradeTest extends TestCase {
         }
     }
 
-    /* ---------------------- Special tests help methods -----------------*/
+    /* ---------------------- Special tests help methods ----------------- */
 
     private FolderObject createPublicFolder() throws OXException, OXException {
         final Connection con = DBPool.pickupWriteable(ctx);
@@ -301,19 +296,11 @@ public class DowngradeTest extends TestCase {
             final OXFolderManager oxma = OXFolderManager.getInstance(session, con, con);
             final OCLPermission oclp1 = new OCLPermission();
             oclp1.setEntity(user.getId());
-            oclp1.setAllPermission(
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION);
+            oclp1.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
             oclp1.setFolderAdmin(true);
             final OCLPermission oclp2 = new OCLPermission();
             oclp2.setEntity(secondUser.getId());
-            oclp2.setAllPermission(
-                OCLPermission.CREATE_OBJECTS_IN_FOLDER,
-                OCLPermission.READ_ALL_OBJECTS,
-                OCLPermission.WRITE_ALL_OBJECTS,
-                OCLPermission.DELETE_ALL_OBJECTS);
+            oclp2.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
             oclp2.setFolderAdmin(false);
             FolderObject fo = new FolderObject();
             fo.setFolderName("DowngradeTest");
@@ -328,8 +315,7 @@ public class DowngradeTest extends TestCase {
         }
     }
 
-    private void updatePublicFolder(final FolderObject folder)
-        throws OXException, OXException {
+    private void updatePublicFolder(final FolderObject folder) throws OXException, OXException {
         final Connection con = DBPool.pickupWriteable(ctx);
         try {
             final OXFolderManager oxma = OXFolderManager.getInstance(session, con, con);
@@ -345,8 +331,7 @@ public class DowngradeTest extends TestCase {
         }
     }
 
-    private void deletePublicFolder(final FolderObject folder)
-        throws OXException, OXException {
+    private void deletePublicFolder(final FolderObject folder) throws OXException, OXException {
         final Connection con = DBPool.pickupWriteable(ctx);
         try {
             final OXFolderManager oxma = OXFolderManager.getInstance(session, con, con);

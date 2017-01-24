@@ -98,9 +98,7 @@ public class ListInfostoreRequest extends AbstractInfostoreRequest<ListInfostore
 
     @Override
     public Parameter[] getParameters() throws IOException, JSONException {
-        return new Parameter[] {
-            new URLParameter(AJAXServlet.PARAMETER_COLUMNS, columns),
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST)
+        return new Parameter[] { new URLParameter(AJAXServlet.PARAMETER_COLUMNS, columns), new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST)
         };
     }
 

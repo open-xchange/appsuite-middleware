@@ -60,15 +60,15 @@ import org.junit.Test;
  */
 public class SimpleTokenizerTest extends SimpleTokenizer {
 
-    @Test
-    public void testBasicPhraseQuery() {
+     @Test
+     public void testBasicPhraseQuery() {
         List<String> tokens = tokenize("\"Only one token\"");
         Assert.assertEquals("Wrong number of tokens", 1, tokens.size());
         Assert.assertEquals("Wrong token", "Only one token", tokens.get(0));
     }
 
-    @Test
-    public void testBasicQuery() {
+     @Test
+     public void testBasicQuery() {
         List<String> tokens = tokenize("These are four tokens");
         Assert.assertEquals("Wrong number of tokens", 4, tokens.size());
         Assert.assertEquals("Wrong token", "These", tokens.get(0));
@@ -77,8 +77,8 @@ public class SimpleTokenizerTest extends SimpleTokenizer {
         Assert.assertEquals("Wrong token", "tokens", tokens.get(3));
     }
 
-    @Test
-    public void testComplexQuery() {
+     @Test
+     public void testComplexQuery() {
         List<String> tokens = tokenize(" Expect \"two strings\" as \"not tokenized\" and\nfive\rothers ");
         Assert.assertEquals("Wrong number of tokens", 7, tokens.size());
         Assert.assertEquals("Wrong token", "Expect", tokens.get(0));
@@ -90,8 +90,8 @@ public class SimpleTokenizerTest extends SimpleTokenizer {
         Assert.assertEquals("Wrong token", "others", tokens.get(6));
     }
 
-    @Test
-    public void testBrokenQuery() {
+     @Test
+     public void testBrokenQuery() {
         List<String> tokens = tokenize("Something \" went wrong here");
         Assert.assertEquals("Wrong number of tokens", 4, tokens.size());
         Assert.assertEquals("Wrong token", "Something", tokens.get(0));
@@ -100,8 +100,8 @@ public class SimpleTokenizerTest extends SimpleTokenizer {
         Assert.assertEquals("Wrong token", "here", tokens.get(3));
     }
 
-    @Test
-    public void testBrokenQuery2() {
+     @Test
+     public void testBrokenQuery2() {
         List<String> tokens = tokenize("Something \"went wrong\" here \"");
         Assert.assertEquals("Wrong number of tokens", 3, tokens.size());
         Assert.assertEquals("Wrong token", "Something", tokens.get(0));
@@ -109,8 +109,8 @@ public class SimpleTokenizerTest extends SimpleTokenizer {
         Assert.assertEquals("Wrong token", "here", tokens.get(2));
     }
 
-    @Test
-    public void testBrokenQuery3() {
+     @Test
+     public void testBrokenQuery3() {
         List<String> tokens = tokenize("\" Something went wrong here ");
         Assert.assertEquals("Wrong number of tokens", 4, tokens.size());
         Assert.assertEquals("Wrong token", "Something", tokens.get(0));
@@ -119,14 +119,14 @@ public class SimpleTokenizerTest extends SimpleTokenizer {
         Assert.assertEquals("Wrong token", "here", tokens.get(3));
     }
 
-    @Test
-    public void testEmptyQuery() {
+     @Test
+     public void testEmptyQuery() {
         List<String> tokens = tokenize("");
         Assert.assertEquals("Wrong number of tokens", 0, tokens.size());
     }
 
-    @Test
-    public void testWhitespaceQuery() {
+     @Test
+     public void testWhitespaceQuery() {
         List<String> tokens = tokenize("  \" \" ");
         Assert.assertEquals("Wrong number of tokens", 0, tokens.size());
     }

@@ -61,8 +61,4 @@ import org.junit.runners.Suite.SuiteClasses;
 @RunWith(Suite.class)
 @SuiteClasses({ SimpleAttachmentTest.class, TaskAttachmentTest.class, Bug24876Test.class, Bug26544Test.class, Bug30701Test.class })
 public final class AttachmentTests {
-
-    private AttachmentTests() {
-        super();
-    }
 }

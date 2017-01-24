@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests.untiltests;
 
+import org.junit.Test;
 import com.openexchange.groupware.container.Appointment;
 
 /**
@@ -56,26 +57,32 @@ import com.openexchange.groupware.container.Appointment;
  */
 public class WeeklyUntilTest extends UntilTest {
 
+    @Test
     public void testWithout() throws Exception {
         withoutTest(Appointment.WEEKLY, false);
     }
 
+    @Test
     public void testWithOccurrences() throws Exception {
         withOccurrencesTest(Appointment.WEEKLY, false);
     }
 
+    @Test
     public void testWithUntil() throws Exception {
         withUntilTest(Appointment.WEEKLY, false);
     }
 
+    @Test
     public void testFTWithout() throws Exception {
         withoutTest(Appointment.WEEKLY, true);
     }
 
+    @Test
     public void testFTWithOccurrences() throws Exception {
         withOccurrencesTest(Appointment.WEEKLY, true);
     }
 
+    @Test
     public void testFTWithUntil() throws Exception {
         withUntilTest(Appointment.WEEKLY, true);
     }

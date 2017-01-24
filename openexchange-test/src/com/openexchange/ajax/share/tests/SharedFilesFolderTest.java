@@ -49,18 +49,20 @@
 
 package com.openexchange.ajax.share.tests;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.infostore.actions.GetInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.UpdateInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.UpdateInfostoreResponse;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
-import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.DefaultFileStorageObjectPermission;
 import com.openexchange.file.storage.File;
@@ -69,7 +71,6 @@ import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
-
 
 /**
  * {@link SharedFilesFolderTest}
@@ -86,22 +87,24 @@ public class SharedFilesFolderTest extends ShareTest {
 
     /**
      * Initializes a new {@link SharedFilesFolderTest}.
+     * 
      * @param name
      */
-    public SharedFilesFolderTest(String name) {
-        super(name);
+    public SharedFilesFolderTest() {
+        super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
-        folder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, client.getValues().getPrivateInfostoreFolder());
+        folder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder());
         file = insertFile(folder.getObjectID(), randomUID());
     }
 
+    @Test
     public void testReShareNotPossibleForInternals() throws Exception {
-        AJAXClient client2 = new AJAXClient(User.User2);
-        AJAXClient client3 = new AJAXClient(User.User3);
+        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
+        AJAXClient client3 = new AJAXClient(testContext.acquireUser());
         try {
             List<FileStorageObjectPermission> permissions = new ArrayList<FileStorageObjectPermission>(1);
             permissions.add(new DefaultFileStorageObjectPermission(client2.getValues().getUserId(), false, FileStorageObjectPermission.WRITE));
@@ -130,6 +133,7 @@ public class SharedFilesFolderTest extends ShareTest {
         }
     }
 
+    @Test
     public void testReShareNotPossibleForInvitedGuests() throws Exception {
         List<FileStorageObjectPermission> permissions = new ArrayList<FileStorageObjectPermission>(1);
         String guestEmail = randomUID() + "@example.com";
@@ -139,7 +143,7 @@ public class SharedFilesFolderTest extends ShareTest {
         file = updateFile(file, new Field[] { Field.OBJECT_PERMISSIONS });
         String sharedFileId = sharedFileId(file.getId());
 
-        String invitationLink = discoverInvitationLink(client, guestEmail);
+        String invitationLink = discoverInvitationLink(getNoReplyClient(), guestEmail);
         GuestClient guestClient = resolveShare(invitationLink);
         guestPermission.setEntity(guestClient.getValues().getUserId());
         guestClient.checkFileAccessible(sharedFileId, guestPermission);

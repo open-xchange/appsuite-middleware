@@ -50,8 +50,11 @@
 package com.openexchange.ajax.contact;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import java.util.List;
 import org.json.JSONArray;
+import org.junit.Test;
 import com.openexchange.ajax.contact.action.SearchByBirthdayRequest;
 import com.openexchange.ajax.framework.CommonSearchResponse;
 import com.openexchange.groupware.container.Contact;
@@ -64,68 +67,60 @@ import com.openexchange.groupware.container.Contact;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class BirthdayAndAnniversaryTest extends AbstractManagedContactTest {
-	
-    public BirthdayAndAnniversaryTest(String name) {
-        super(name);
-    }
-    
-	@Override
-	public void setUp() throws Exception {
-	    super.setUp();
-	}
-	
+
+    @Test
     public void testSearchByBirthday() throws Exception {
-    	/*
-    	 * create contacts
-    	 */
+        /*
+         * create contacts
+         */
         Contact contact1 = super.generateContact("M\u00e4rz");
         contact1.setBirthday(D("1988-03-03 00:00"));
-        contact1 = manager.newAction(contact1);
+        contact1 = cotm.newAction(contact1);
         Contact contact2 = super.generateContact("Juli");
         contact2.setBirthday(D("1977-07-07 00:00:00"));
-        contact2 = manager.newAction(contact2);
+        contact2 = cotm.newAction(contact2);
         Contact contact3 = super.generateContact("Oktober");
         contact3.setBirthday(D("1910-10-10 00:00:00"));
-        contact3 = manager.newAction(contact3);
-    	/*
-    	 * search birthdays in different timeframes
-    	 */
+        contact3 = cotm.newAction(contact3);
+        /*
+         * search birthdays in different timeframes
+         */
         String parentFolderID = String.valueOf(contact1.getParentFolderID());
         int[] columns = { Contact.OBJECT_ID, Contact.BIRTHDAY, Contact.FOLDER_ID };
         SearchByBirthdayRequest request;
         CommonSearchResponse response;
         List<Contact> contacts;
-        
+
         request = new SearchByBirthdayRequest(D("2013-01-01 00:00:00"), D("2013-09-01 00:00:00"), parentFolderID, columns, true);
-        response = client.execute(request);
-        contacts = manager.transform((JSONArray) response.getResponse().getData(), columns);
+        response = getClient().execute(request);
+        contacts = cotm.transform((JSONArray) response.getResponse().getData(), columns);
         assertNotNull(contacts);
         assertEquals("wrong number of results", 2, contacts.size());
-        
+
         request = new SearchByBirthdayRequest(D("2013-01-01 00:00:00"), D("2014-01-01 00:00:00"), parentFolderID, columns, true);
-        response = client.execute(request);
-        contacts = manager.transform((JSONArray) response.getResponse().getData(), columns);
+        response = getClient().execute(request);
+        contacts = cotm.transform((JSONArray) response.getResponse().getData(), columns);
         assertNotNull(contacts);
         assertEquals("wrong number of results", 3, contacts.size());
-        
+
         request = new SearchByBirthdayRequest(D("2013-06-01 00:00:00"), D("2014-01-01 00:00:00"), parentFolderID, columns, true);
-        response = client.execute(request);
-        contacts = manager.transform((JSONArray) response.getResponse().getData(), columns);
+        response = getClient().execute(request);
+        contacts = cotm.transform((JSONArray) response.getResponse().getData(), columns);
         assertNotNull(contacts);
         assertEquals("wrong number of results", 2, contacts.size());
-        
+
         request = new SearchByBirthdayRequest(D("2013-03-04 00:00:00"), D("2013-07-06 00:00:00"), parentFolderID, columns, true);
-        response = client.execute(request);
-        contacts = manager.transform((JSONArray) response.getResponse().getData(), columns);
+        response = getClient().execute(request);
+        contacts = cotm.transform((JSONArray) response.getResponse().getData(), columns);
         assertNotNull(contacts);
         assertEquals("wrong number of results", 0, contacts.size());
-        
+
         request = new SearchByBirthdayRequest(D("2085-03-03 00:00:00"), D("2085-03-03 01:01:00"), parentFolderID, columns, true);
-        response = client.execute(request);
-        contacts = manager.transform((JSONArray) response.getResponse().getData(), columns);
+        response = getClient().execute(request);
+        contacts = cotm.transform((JSONArray) response.getResponse().getData(), columns);
         assertNotNull(contacts);
         assertEquals("wrong number of results", 1, contacts.size());
-        
+
     }
 
 }

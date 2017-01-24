@@ -49,13 +49,14 @@
 
 package com.openexchange.ajax.appointment;
 
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentUpdatesResponse;
 import com.openexchange.ajax.framework.AbstractUpdatesRequest.Ignore;
 import com.openexchange.groupware.container.Appointment;
-
 
 /**
  * {@link UpdatesForModifiedAndDeletedTest}
@@ -66,17 +67,20 @@ public class UpdatesForModifiedAndDeletedTest extends AbstractAppointmentTest {
 
     /**
      * Initializes a new {@link UpdatesForModifiedAndDeletedTest}.
+     * 
      * @param name
      */
-    public UpdatesForModifiedAndDeletedTest(String name) {
-        super(name);
+    public UpdatesForModifiedAndDeletedTest() {
+        super();
     }
-    
+
     /**
      * Test http://oxpedia.org/wiki/index.php?title=HTTP_API#Get_updated_appointments
+     * 
      * @throws Exception
      */
-    public void testUpdatesForModifiedAndDeleted() throws Exception{
+    @Test
+    public void testUpdatesForModifiedAndDeleted() throws Exception {
         // insert some
         final int numberOfAppointments = 8;
         List<Appointment> newAppointments = createAndPersistSeveral("testAppointment", numberOfAppointments);
@@ -100,8 +104,8 @@ public class UpdatesForModifiedAndDeletedTest extends AbstractAppointmentTest {
         deleteAppointments(deletedAppointments);
 
         // check modified with timestamp from last 
-        Date lastModified = newAppointments.get(numberOfAppointments-1).getLastModified();
-        int[] cols = new int[]{ Appointment.OBJECT_ID, Appointment.TITLE};
+        Date lastModified = newAppointments.get(numberOfAppointments - 1).getLastModified();
+        int[] cols = new int[] { Appointment.OBJECT_ID, Appointment.TITLE };
         AppointmentUpdatesResponse modifiedAppointmentsResponse = listModifiedAppointments(appointmentFolderId, cols, lastModified, Ignore.NONE, false);
         assertTrue(modifiedAppointmentsResponse.getNewOrModifiedIds().containsAll(expectUpdatedAppointmentIds));
         assertTrue(modifiedAppointmentsResponse.getDeletedIds().containsAll(expectDeletedAppointmentIds));

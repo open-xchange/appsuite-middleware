@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -153,6 +154,7 @@ public class PreviewImageGenerator extends FutureTask<PreviewDocument> {
      */
     public static PreviewDocument getPreviewDocument(AJAXRequestResult result, AJAXRequestData requestData, ServerSession session, PreviewService previewService, long threshold, boolean respectLanguage, String cacheKey) throws OXException {
         // Prevent multiple caching requests/allow multiple blocking
+        ExecutorService executorService = ThreadPools.getExecutorService();
         if (cacheKey != null) {
             boolean removeFromRunning = false;
             try {
@@ -162,7 +164,7 @@ public class PreviewImageGenerator extends FutureTask<PreviewDocument> {
                     previewFuture = RUNNING.putIfAbsent(cacheKey, newFuture);
                     if (null == previewFuture) {
                         previewFuture = newFuture;
-                        ThreadPools.getExecutorService().execute(previewFuture);
+                        executorService.execute(previewFuture);
                         removeFromRunning = true;
                     }
                 }
@@ -176,7 +178,10 @@ public class PreviewImageGenerator extends FutureTask<PreviewDocument> {
 
         // Just do it...
         PreviewImageGenerator previewFuture = new PreviewImageGenerator(new PreviewDocumentCallable(result, requestData, PreviewOutput.IMAGE, session, previewService, respectLanguage));
-        ThreadPools.getExecutorService().execute(previewFuture);
+        if (null == executorService) {
+            return null;
+        }
+        executorService.execute(previewFuture);
         return getFrom(previewFuture, threshold);
     }
 

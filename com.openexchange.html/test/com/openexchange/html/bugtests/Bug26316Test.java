@@ -60,8 +60,8 @@ import com.openexchange.html.AbstractSanitizing;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class Bug26316Test extends AbstractSanitizing {
-    @Test
-    public void testConvertNonBreakablesToWhitespaces() {
+     @Test
+     public void testConvertNonBreakablesToWhitespaces() {
         String content = getHtmlService().html2text("<br>\ntab<br>\nfoo<br>\nbar", false);
         assertEquals("Unexpected return value ", "\r\ntab\r\nfoo\r\nbar", content);
     }

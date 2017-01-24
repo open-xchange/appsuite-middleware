@@ -49,10 +49,13 @@
 
 package com.openexchange.ajax.find.contacts;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.junit.Test;
 import com.openexchange.ajax.find.PropDocument;
 import com.openexchange.ajax.find.actions.AutocompleteRequest;
 import com.openexchange.ajax.find.actions.AutocompleteResponse;
@@ -72,22 +75,14 @@ import com.openexchange.groupware.container.Contact;
  */
 public class Bug33447Test extends ContactsFindTest {
 
-    /**
-     * Initializes a new {@link Bug33447Test}.
-     *
-     * @param name The test name
-     */
-    public Bug33447Test(String name) {
-        super(name);
-    }
-
+    @Test
     public void testSearchContactFromPersonalContactsFolder() throws Exception {
         Map<String, String> options = new HashMap<String, String>();
         options.put("admin", Boolean.FALSE.toString());
-        Contact contact = manager.newAction(randomContact());
+        Contact contact = cotm.newAction(randomContact());
         String prefix = contact.getEmail1().substring(0, 8);
         AutocompleteRequest autocompleteRequest = new AutocompleteRequest(prefix, Module.CONTACTS.getIdentifier(), options);
-        AutocompleteResponse autocompleteResponse = client.execute(autocompleteRequest);
+        AutocompleteResponse autocompleteResponse = getClient().execute(autocompleteRequest);
 
         FacetValue foundFacetValue = findByDisplayName(autocompleteResponse.getFacets(), DisplayItems.convert(contact).getDisplayName());
         assertNotNull("no facet value found for: " + contact.getEmail1(), foundFacetValue);

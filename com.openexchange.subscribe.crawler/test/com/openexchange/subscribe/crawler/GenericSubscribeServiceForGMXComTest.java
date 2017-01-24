@@ -52,6 +52,7 @@ package com.openexchange.subscribe.crawler;
 import java.util.ArrayList;
 import java.util.HashMap;
 import org.apache.commons.httpclient.NameValuePair;
+import org.junit.Test;
 import com.openexchange.subscribe.crawler.internal.Step;
 
 
@@ -62,7 +63,8 @@ import com.openexchange.subscribe.crawler.internal.Step;
  */
 public class GenericSubscribeServiceForGMXComTest extends GenericSubscribeServiceTestHelpers {
 
-    public void testGenericSubscribeServiceForGMXComTest() {
+         @Test
+     public void testGenericSubscribeServiceForGMXComTest() {
         // insert valid credentials here
         String username = "";
         String password = "";

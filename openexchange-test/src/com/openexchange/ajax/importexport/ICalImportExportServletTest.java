@@ -51,7 +51,10 @@ package com.openexchange.ajax.importexport;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.UUID;
 import org.json.JSONObject;
+import org.junit.Assert;
+import org.junit.Test;
 import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
@@ -67,25 +70,21 @@ import com.openexchange.importexport.formats.Format;
  */
 public class ICalImportExportServletTest extends AbstractImportExportServletTest {
 
-	public ICalImportExportServletTest(final String name) {
-		super(name);
-	}
-
-	public void testIcalMessage() throws Exception{
-		final InputStream is = new ByteArrayInputStream("BEGIN:VCALENDAR".getBytes());
-		final WebConversation webconv = getWebConversation();
-		final Format format = Format.ICAL;
-		final int folderId = createFolder("ical-empty-file-" + System.currentTimeMillis(),FolderObject.CONTACT);
-		try {
-			final WebRequest req = new PostMethodWebRequest(
-					getCSVColumnUrl(IMPORT_SERVLET, folderId, format), true);
-			req.selectFile("file", "empty.ics", is, format.getMimeType());
-			final WebResponse webRes = webconv.getResource(req);
-			final JSONObject response = extractFromCallback( webRes.getText() );
-			assertEquals("Must contain error ", "I_E-1100", response.optString("code"));
-		} finally {
-			removeFolder(folderId);
-		}
-	}
+    @Test
+    public void testIcalMessage() throws Exception {
+        final InputStream is = new ByteArrayInputStream("BEGIN:VCALENDAR".getBytes());
+        final WebConversation webconv = getClient().getSession().getConversation();
+        final Format format = Format.ICAL;
+        final int folderId = createFolder("ical-empty-file-" + UUID.randomUUID().toString(), FolderObject.CONTACT);
+        try {
+            final WebRequest req = new PostMethodWebRequest(getCSVColumnUrl(IMPORT_SERVLET, folderId, format), true);
+            req.selectFile("file", "empty.ics", is, format.getMimeType());
+            final WebResponse webRes = webconv.getResource(req);
+            final JSONObject response = extractFromCallback(webRes.getText());
+            Assert.assertEquals("Must contain error ", "I_E-1100", response.optString("code"));
+        } finally {
+            removeFolder(folderId);
+        }
+    }
 
 }

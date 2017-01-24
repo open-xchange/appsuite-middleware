@@ -49,27 +49,18 @@
 
 package com.openexchange.data.conversion.ical.bugs;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 /**
  * {@link UnitTests}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class UnitTests extends TestSuite {
-
-    /**
-     * Initializes a new {@link UnitTests}.
-     */
-    public UnitTests() {
-        super();
-    }
-
-    public static Test suite() {
-        TestSuite tests = new TestSuite();
-        tests.addTestSuite(Bug39098Test.class);
-        return tests;
-    }
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    Bug39098Test.class
+})
+public class UnitTests  {
 
 }

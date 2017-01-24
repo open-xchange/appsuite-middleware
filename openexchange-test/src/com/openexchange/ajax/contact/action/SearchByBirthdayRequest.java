@@ -68,7 +68,7 @@ public class SearchByBirthdayRequest extends AbstractContactRequest<CommonSearch
     public SearchByBirthdayRequest(Date start, Date end, String inFolder, int[] columns, boolean failOnError) {
         this(start, end, inFolder, columns, -1, null, null, failOnError);
     }
-    
+
     public SearchByBirthdayRequest(Date start, Date end, String inFolder, int[] columns, int orderBy, String orderDir, String collation, boolean failOnError) {
         super();
         this.searchParser = new SearchParser(failOnError, columns);
@@ -87,7 +87,7 @@ public class SearchByBirthdayRequest extends AbstractContactRequest<CommonSearch
         if (null != collation) {
             params.add(new AJAXRequest.Parameter(AJAXServlet.PARAMETER_COLLATION, collation));
         }
-        if (null !=  inFolder) {
+        if (null != inFolder) {
             params.add(new AJAXRequest.Parameter(AJAXServlet.PARAMETER_INFOLDER, inFolder));
         }
     }

@@ -49,16 +49,19 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.Date;
+import org.junit.Test;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
-
 
 public class Bug11051Test extends CalendarSqlTest {
     // Bug 11051
 
+    @Test
     public void testShouldSurviveInvalidDaysValueInWeeklyRecurrenceWithOccurrence() throws OXException {
         final Date start = D("24/02/1981 10:00");
         final Date end = D("24/02/1981 12:00");

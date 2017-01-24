@@ -49,19 +49,20 @@
 
 package com.openexchange.groupware.importexport.importers;
 
+import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.SimICalParser;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.server.services.ServerServiceRegistry;
-import junit.framework.TestCase;
-
-import static com.openexchange.groupware.calendar.TimeTools.D;
-
 
 /**
  * {@link Bug12380RecoveryParserTest}
@@ -69,21 +70,22 @@ import static com.openexchange.groupware.calendar.TimeTools.D;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class Bug12380RecoveryParserTest extends TestCase {
+public class Bug12380RecoveryParserTest {
 
     private SimICalParser parser;
     private ExtraneousSeriesMasterRecoveryParser bugParser;
 
-    @Override
+    @Before
     public void setUp() {
         parser = new SimICalParser();
         ServerServiceRegistry registry = ServerServiceRegistry.getInstance();
         bugParser = new ExtraneousSeriesMasterRecoveryParser(parser, registry);
-        if(null == registry.getService(CalendarCollectionService.class)) {
+        if (null == registry.getService(CalendarCollectionService.class)) {
             registry.addService(CalendarCollectionService.class, new CalendarCollection());
         }
     }
 
+    @Test
     public void testMultiplexes() throws ConversionError {
         CalendarDataObject appointment = new CalendarDataObject();
         appointment.setTitle("I start on a different date than my series settings suggest");
@@ -95,7 +97,7 @@ public class Bug12380RecoveryParserTest extends TestCase {
 
         parser.setAppointments(Arrays.asList(appointment));
 
-        List<CalendarDataObject> parsed = bugParser.parseAppointments((String)null, null, null, null, null);
+        List<CalendarDataObject> parsed = bugParser.parseAppointments((String) null, null, null, null, null);
 
         assertEquals("Expected appointment to be split into two", 2, parsed.size());
         CalendarDataObject app1 = parsed.get(0);
@@ -114,6 +116,7 @@ public class Bug12380RecoveryParserTest extends TestCase {
 
     }
 
+    @Test
     public void testDoesntMultiplexWhenSeriesMasterIsOnStart() throws ConversionError {
         CalendarDataObject appointment = new CalendarDataObject();
         appointment.setTitle("I start on a date inside my series parameters");
@@ -125,24 +128,25 @@ public class Bug12380RecoveryParserTest extends TestCase {
 
         parser.setAppointments(Arrays.asList(appointment));
 
-        List<CalendarDataObject> parsed = bugParser.parseAppointments((String)null, null, null, null, null);
+        List<CalendarDataObject> parsed = bugParser.parseAppointments((String) null, null, null, null, null);
 
         assertEquals("Expected appointment to be left as one", 1, parsed.size());
 
     }
 
+    @Test
     public void testDoesntMultiplexWhenSeriesMasterIsOccurrence() throws ConversionError {
         CalendarDataObject appointment = new CalendarDataObject();
         appointment.setTitle("I start on a date inside my series parameters");
-        appointment.setStartDate(new Date(D("Tuesday at 8 am ").getTime()+7*24*3600));
-        appointment.setEndDate(new Date(D("Tuesday at 10 am ").getTime()+7*24*3600));
+        appointment.setStartDate(new Date(D("Tuesday at 8 am ").getTime() + 7 * 24 * 3600));
+        appointment.setEndDate(new Date(D("Tuesday at 10 am ").getTime() + 7 * 24 * 3600));
         appointment.setRecurrenceType(CalendarDataObject.WEEKLY);
         appointment.setInterval(1);
         appointment.setDays(CalendarDataObject.TUESDAY);
 
         parser.setAppointments(Arrays.asList(appointment));
 
-        List<CalendarDataObject> parsed = bugParser.parseAppointments((String)null, null, null, null, null);
+        List<CalendarDataObject> parsed = bugParser.parseAppointments((String) null, null, null, null, null);
 
         assertEquals("Expected appointment to be left as one", 1, parsed.size());
     }

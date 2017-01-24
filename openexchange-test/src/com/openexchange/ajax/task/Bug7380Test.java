@@ -50,6 +50,7 @@
 package com.openexchange.ajax.task;
 
 import java.util.List;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.participant.ParticipantTools;
@@ -60,12 +61,12 @@ import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.InsertResponse;
 import com.openexchange.ajax.task.actions.UpdateRequest;
 import com.openexchange.ajax.task.actions.UpdateResponse;
-import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.tasks.Task;
 
 /**
  * Tests problem described in bug #7380.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class Bug7380Test extends AbstractTaskTest {
@@ -73,33 +74,30 @@ public class Bug7380Test extends AbstractTaskTest {
     /**
      * @param name
      */
-    public Bug7380Test(final String name) {
-        super(name);
+    public Bug7380Test() {
+        super();
     }
 
     /**
      * Tests if bug #7380 appears again.
+     * 
      * @throws Throwable if this test fails.
      */
+    @Test
     public void testBug() throws Throwable {
         final AJAXClient client = getClient();
         final Task task = new Task();
         task.setTitle("Test bug #7380");
         task.setParentFolderID(getPrivateFolder());
         final AJAXSession session = getSession();
-        final List<Participant> participants = ParticipantTools.getParticipants(
-            session.getConversation(), AJAXConfig.getProperty(AJAXConfig
-            .Property.HOSTNAME), session.getId(), 1, true, client.getValues()
-            .getUserId());
+        final List<Participant> participants = ParticipantTools.getParticipants(getClient(), 1, true, client.getValues().getUserId());
         task.setParticipants(participants);
         final InsertResponse iResponse = client.execute(new InsertRequest(task, client.getValues().getTimeZone()));
         task.setObjectID(iResponse.getId());
-        final GetResponse gResponse = TaskTools.get(client,
-            new GetRequest(getPrivateFolder(), task.getObjectID()));
+        final GetResponse gResponse = TaskTools.get(client, new GetRequest(getPrivateFolder(), task.getObjectID()));
         task.setLastModified(gResponse.getTimestamp());
         task.setParticipants((Participant[]) null);
-        final UpdateResponse uResponse = TaskTools.update(client,
-            new UpdateRequest(task, client.getValues().getTimeZone()));
+        final UpdateResponse uResponse = TaskTools.update(client, new UpdateRequest(task, client.getValues().getTimeZone()));
         task.setLastModified(uResponse.getTimestamp());
         client.execute(new DeleteRequest(task));
     }

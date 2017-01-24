@@ -118,6 +118,7 @@ import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.saml.OpenSAML;
 import com.openexchange.saml.SAMLConfig;
@@ -187,12 +188,12 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
 
     private final ServiceLookup services;
 
-    public WebSSOProviderImpl(SAMLConfig config, OpenSAML openSAML, StateManagement stateManagement, ServiceLookup services) {
+    public WebSSOProviderImpl(SAMLConfig config, OpenSAML openSAML, StateManagement stateManagement, ServiceLookup services, SAMLBackend backend) {
         super();
         this.config = config;
         this.openSAML = openSAML;
         this.stateManagement = stateManagement;
-        this.backend = services.getService(SAMLBackend.class);
+        this.backend = backend;
         this.sessionReservationService = services.getService(SessionReservationService.class);
         this.services = services;
     }
@@ -298,7 +299,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
                 .setScheme(getRedirectScheme(httpRequest))
                 .setHost(requestInfo.getDomainName())
                 .setPath(getRedirectPathPrefix() + "login")
-                .setParameter(LoginServlet.PARAMETER_ACTION, SAMLLoginTools.ACTION_SAML_LOGIN)
+                .setParameter(LoginServlet.PARAMETER_ACTION, SAMLLoginTools.ACTION_SAML_LOGIN + getPathString(backend.getPath()))
                 .setParameter(SAMLLoginTools.PARAM_TOKEN, sessionToken);
 
             String loginPath = requestInfo.getLoginPath();
@@ -364,7 +365,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
                 .setScheme(getRedirectScheme(httpRequest))
                 .setHost(requestInfo.getDomainName())
                 .setPath(getRedirectPathPrefix() + "login")
-                .setParameter(LoginServlet.PARAMETER_ACTION, SAMLLoginTools.ACTION_SAML_LOGOUT)
+                .setParameter(LoginServlet.PARAMETER_ACTION, SAMLLoginTools.ACTION_SAML_LOGOUT + getPathString(backend.getPath()))
                 .setParameter(LoginServlet.PARAMETER_SESSION, requestInfo.getSessionId())
                 .build();
 
@@ -755,6 +756,19 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
         }
 
         /*
+         * The samlPath to be added to the session. Helps on resolving redirect and relogin situations in a multi-saml single host environment
+         */
+        String samlPath = backend.getPath();
+        if (!Strings.isEmpty(samlPath)) {
+            properties.put(SAMLSessionParameters.SAML_PATH, samlPath);
+        }
+
+        /*
+         * The singleLogut SAMLBackend parameter to be added to the session. Helps on resolving single logout situations in a multi-saml single host environment
+         */
+        properties.put(SAMLSessionParameters.SINGLE_LOGOUT, Boolean.toString(backend.getConfig().singleLogoutEnabled()));
+
+        /*
          * This parameter must be checked within the AuthenticationService implementation. If not set, the login request is triggered
          * by any other authentication mechanism (e.g. HTTP Basic Auth) and its credentials must be checked.
          */
@@ -1094,4 +1108,15 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
         return UUIDs.getUnformattedString(UUID.randomUUID());
     }
 
+    private String getPathString(String path) {
+        if (Strings.isEmpty(path)) {
+            return "";
+        }
+        return path;
+    }
+
+    @Override
+    public String getStaticLoginRedirectLocation(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+        return backend.getStaticLoginRedirectLocation(httpRequest, httpResponse);
+    }
 }

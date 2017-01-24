@@ -50,11 +50,11 @@
 package com.openexchange.webdav.xml.framework;
 
 import java.io.IOException;
-import org.junit.Assert;
 import org.apache.commons.httpclient.HttpMethodBase;
 import org.jdom2.Document;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
+import org.junit.Assert;
 import com.openexchange.exception.OXException;
 import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.parser.ResponseParser;

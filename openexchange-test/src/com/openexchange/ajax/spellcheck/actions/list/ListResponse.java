@@ -60,22 +60,22 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
  */
 public final class ListResponse extends AbstractAJAXResponse {
 
-	private String[] userWords;
+    private String[] userWords;
 
-	/**
-	 * Initializes a new {@link ListResponse}
-	 *
-	 * @param response
-	 */
-	public ListResponse(final Response response) {
-		super(response);
-	}
+    /**
+     * Initializes a new {@link ListResponse}
+     *
+     * @param response
+     */
+    public ListResponse(final Response response) {
+        super(response);
+    }
 
-	public String[] getUserWords() {
-		return userWords;
-	}
+    public String[] getUserWords() {
+        return userWords;
+    }
 
-	void setUserWords(final String[] userWords) {
-		this.userWords = userWords;
-	}
+    void setUserWords(final String[] userWords) {
+        this.userWords = userWords;
+    }
 }

@@ -62,79 +62,79 @@ import org.junit.Test;
  */
 public class IDNATest {
 
-    @Test
-    public void testToACE_ParamNull_ReturnNull() throws AddressException {
+     @Test
+     public void testToACE_ParamNull_ReturnNull() throws AddressException {
         String aceText = IDNA.toACE(null);
 
         Assert.assertNull(aceText);
     }
 
-    @Test
-    public void testToACE_ParamIsEmptyString_ReturnEmptyString() throws AddressException {
+     @Test
+     public void testToACE_ParamIsEmptyString_ReturnEmptyString() throws AddressException {
         String aceText = IDNA.toACE("");
 
         Assert.assertNotNull(aceText);
         Assert.assertEquals(0, aceText.length());
     }
 
-    @Test
-    public void testToACE_OnlyMailAdressWithUmlaute_ConvertToAscii() throws AddressException {
+     @Test
+     public void testToACE_OnlyMailAdressWithUmlaute_ConvertToAscii() throws AddressException {
         String testString = "someone@m\u00fcller.de";
 
         String aceText = IDNA.toACE(testString);
         Assert.assertEquals("someone@xn--mller-kva.de", aceText);
     }
 
-    @Test
-    public void testToACE_MailAdressWithUmlauteAndContent_ReturnParamString() throws AddressException {
+     @Test
+     public void testToACE_MailAdressWithUmlauteAndContent_ReturnParamString() throws AddressException {
         String testString = "\"Sch\u00f6nmackers Umweltdienste - Abrechnung \" <zentrale.abrechnung@schoenmackers.de>";
 
         String aceText = IDNA.toACE(testString);
         Assert.assertEquals(testString, aceText);
     }
 
-    @Test
-    public void testToACE_MailAdressWithUmlauteAndUtfPrefix_ReturnParamString() throws AddressException {
+     @Test
+     public void testToACE_MailAdressWithUmlauteAndUtfPrefix_ReturnParamString() throws AddressException {
         String testString = "=?UTF-8?B?w5xiZXJ3ZWlzdW5n? =\" <\u00fcberweisung@aftrapp.com>";
 
         String aceText = IDNA.toACE(testString);
         Assert.assertEquals(testString, aceText);
     }
 
-    @Test
-    public void testToACE_WithoutUmlaute_ReturnParamString() throws AddressException {
+     @Test
+     public void testToACE_WithoutUmlaute_ReturnParamString() throws AddressException {
         String testString = "martin.schneider@open-xchange.com";
 
         String aceText = IDNA.toACE(testString);
         Assert.assertEquals(testString, aceText);
     }
 
-    @Test
-    public void testToACE_WithoutUmlauteButLessAndGreaterSigns_ReturnParamString() throws AddressException {
+     @Test
+     public void testToACE_WithoutUmlauteButLessAndGreaterSigns_ReturnParamString() throws AddressException {
         String testString = "<martin.schneider@open-xchange.com>";
 
         String aceText = IDNA.toACE(testString);
         Assert.assertEquals(testString, aceText);
     }
 
-    @Test
-    public void testToACE_WithUmlauteAndLessAndGreaterSigns_ConvertToAscii() throws AddressException {
+     @Test
+     public void testToACE_WithUmlauteAndLessAndGreaterSigns_ConvertToAscii() throws AddressException {
         String testString = "<martin.schneider@\u00f6pen-xch\u00e4nge.com>";
 
         String aceText = IDNA.toACE(testString);
         Assert.assertEquals("<martin.schneider@xn--pen-xchnge-w5a2s.com>", aceText);
     }
 
-    @Test
-    public void testToACE_WithUmlauteWithoutLessAndGreaterSigns_ConvertToAscii() throws AddressException {
+     @Test
+     public void testToACE_WithUmlauteWithoutLessAndGreaterSigns_ConvertToAscii() throws AddressException {
         String testString = "martin.schneider@\u00f6pen-xch\u00e4nge.com";
 
         String aceText = IDNA.toACE(testString);
         Assert.assertEquals("martin.schneider@xn--pen-xchnge-w5a2s.com", aceText);
     }
 
-    @Test
-    public void testToACE_NotValidEmail_ReturnParamString() throws AddressException {
+     @Test
+     public void testToACE_NotValidEmail_ReturnParamString() throws AddressException {
         String testString = "<m\u00e4rtin.schneider";
 
         String aceText = IDNA.toACE(testString);

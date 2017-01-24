@@ -49,26 +49,29 @@
 
 package com.openexchange.groupware;
 
+import static org.junit.Assert.fail;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Random;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.setuptools.TestConfig;
-import junit.framework.TestCase;
 
 /**
  * Checks if {@link IDGenerator} works as expected and how fast it is.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class IDGeneratorTest extends TestCase {
+public class IDGeneratorTest {
 
     private static final String TEST_TABLE = "CREATE TABLE idGeneratorTest (cid INT4 UNSIGNED NOT NULL, id INT4 UNSIGNED NOT NULL, PRIMARY KEY (cid,id))";
 
@@ -86,24 +89,23 @@ public class IDGeneratorTest extends TestCase {
 
     Context context;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         Init.startServer();
         final ContextStorage cs = ContextStorage.getInstance();
         final TestConfig config = new TestConfig();
         context = cs.getContext(cs.getContextId(config.getContextName()));
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         Init.stopServer();
-        super.tearDown();
     }
 
     /**
      * Test method for {@link IDGenerator#getId(Context, int)}
      */
+    @Test
     public void testGetId() throws Throwable {
         Connection con = DBPool.pickupWriteable(context);
         try {

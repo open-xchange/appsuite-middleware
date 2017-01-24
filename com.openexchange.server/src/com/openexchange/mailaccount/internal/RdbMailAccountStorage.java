@@ -104,6 +104,7 @@ import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig.PasswordSource;
 import com.openexchange.mail.cache.IMailAccessCache;
+import com.openexchange.mail.config.ConfiguredServer;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.MailPasswordUtil;
@@ -1195,14 +1196,24 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
     @Override
     public char getDefaultSeparator(Session session) throws OXException {
-        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
-        try {
-            mailAccess = MailAccess.getInstance(session);
-            mailAccess.connect(false);
-            return mailAccess.getFolderStorage().getFolder("INBOX").getSeparator();
-        } finally {
-            MailAccess.closeInstance(mailAccess, false);
+        return getSeparator(MailAccount.DEFAULT_ID, session).charValue();
+    }
+
+    private Character getSeparator(int accountId, Session session) throws OXException {
+        final MailSessionCache sessionCache = MailSessionCache.getInstance(session);
+        Character sep = (Character) sessionCache.getParameter(accountId, MailSessionParameterNames.getParamSeparator());
+        if (null == sep) {
+            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> ma = null;
+            try {
+                ma = MailAccess.getInstance(session, accountId);
+                ma.connect(false);
+                sep = Character.valueOf(ma.getFolderStorage().getFolder("INBOX").getSeparator());
+                sessionCache.putParameter(accountId, MailSessionParameterNames.getParamSeparator(), sep);
+            } finally {
+                MailAccess.closeInstance(ma, false);
+            }
         }
+        return sep;
     }
 
     public MailAccount getDefaultMailAccount(final int userId, final int contextId, final Connection con) throws OXException {
@@ -1222,8 +1233,13 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         AbstractMailAccount retval = MailAccount.DEFAULT_ID == id ? new DefaultMailAccount() : new CustomMailAccount(id);
         fillMailAccount(retval, id, userId, contextId, false, con);
         fillTransportAccount(retval, id, userId, contextId, con);
-        if(MailAccount.DEFAULT_ID==id){
+        if (MailAccount.DEFAULT_ID == id){
             checkDefaultAccountConfiguration(retval, userId, contextId);
+        } else {
+            int oauthId = retval.getTransportOAuthId();
+            if (oauthId < 0 && TransportAuth.MAIL.equals(retval.getTransportAuth()) && retval.getMailOAuthId() >= 0) {
+                retval.setTransportOAuthId(retval.getMailOAuthId());
+            }
         }
         return retval;
     }
@@ -1257,7 +1273,21 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
         switch(MailProperties.getInstance().getMailServerSource()){
             case GLOBAL:
-                retval.setMailServer(MailProperties.getInstance().getMailServer());
+                {
+                    ConfiguredServer server = MailProperties.getInstance().getMailServer();
+                    retval.setMailServer(server.getHostName());
+                    String protocol = server.getProtocol();
+                    if (null != protocol) {
+                        retval.setMailProtocol(protocol);
+                    }
+                    int port = server.getPort();
+                    if (port > 0) {
+                        retval.setMailPort(port);
+                    }
+                    if (server.isSecure()) {
+                        retval.setMailSecure(true);
+                    }
+                }
                 break;
             case USER:
             default:
@@ -1267,7 +1297,21 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
         switch(MailProperties.getInstance().getTransportServerSource()){
             case GLOBAL:
-                retval.setTransportServer(MailProperties.getInstance().getTransportServer());
+                {
+                    ConfiguredServer server = MailProperties.getInstance().getTransportServer();
+                    retval.setTransportServer(server.getHostName());
+                    String protocol = server.getProtocol();
+                    if (null != protocol) {
+                        retval.setTransportProtocol(protocol);
+                    }
+                    int port = server.getPort();
+                    if (port > 0) {
+                        retval.setTransportPort(port);
+                    }
+                    if (server.isSecure()) {
+                        retval.setTransportSecure(true);
+                    }
+                }
                 break;
             case USER:
             default:
@@ -2773,7 +2817,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement("SELECT name, id, url, login, password, personal, replyTo, starttls, send_addr, oauth FROM user_transport_account WHERE cid = ? AND id = ? AND user = ?");
+            stmt = con.prepareStatement("SELECT t.name, t.url, t.login, t.password, t.personal, t.replyTo, t.starttls, t.send_addr, t.oauth, m.login, m.password, m.oauth FROM user_transport_account AS t JOIN user_mail_account AS m ON t.cid=m.cid AND t.id=m.id AND t.user=m.user WHERE t.cid=? and t.id=? and t.user=?");
             stmt.setLong(1, contextId);
             stmt.setLong(2, accountId);
             stmt.setLong(3, userId);
@@ -2784,10 +2828,10 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
             TransportAccountImpl transportAccount = new TransportAccountImpl();
             transportAccount.setName(result.getString(1));
-            transportAccount.setId(result.getInt(2));
-            transportAccount.parseTransportServerURL(result.getString(3));
+            transportAccount.setId(accountId);
+            transportAccount.parseTransportServerURL(result.getString(2));
             {
-                final String transportLogin = result.getString(4);
+                final String transportLogin = result.getString(3);
                 if (result.wasNull()) {
                     transportAccount.setTransportLogin(null);
                 } else {
@@ -2795,25 +2839,25 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 }
             }
             {
-                final String transportPassword = result.getString(5);
+                final String transportPassword = result.getString(4);
                 if (result.wasNull()) {
                     transportAccount.setTransportPassword(null);
                 } else {
                     transportAccount.setTransportPassword(transportPassword);
                 }
             }
-            final String pers = result.getString(6);
+            final String pers = result.getString(5);
             if (!result.wasNull()) {
                 transportAccount.setPersonal(pers);
             }
-            final String replyTo = result.getString(7);
+            final String replyTo = result.getString(6);
             if (!result.wasNull()) {
                 transportAccount.setReplyTo(replyTo);
             }
-            transportAccount.setTransportStartTls(result.getBoolean(8));
-            transportAccount.setSendAddress(result.getString(9));
+            transportAccount.setTransportStartTls(result.getBoolean(7));
+            transportAccount.setSendAddress(result.getString(8));
 
-            int oauthAccountId = result.getInt(10);
+            int oauthAccountId = result.getInt(9);
             if (result.wasNull()) {
                 transportAccount.setTransportOAuthId(-1);
             } else {
@@ -2823,62 +2867,50 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
              * Fill properties
              */
             fillTransportProperties(transportAccount, contextId, userId, accountId, con);
+            /*
+             * Check credentials
+             */
             if (transportAccount.getTransportAuth() == null) {
                 if (Strings.isEmpty(transportAccount.getTransportLogin()) || Strings.isEmpty(transportAccount.getTransportPassword())) {
-                    loadLoginAndPasswordFromMailAccount(con, contextId, accountId, userId, transportAccount);
+                    String login = result.getString(10);
+                    if (!result.wasNull()) {
+                        transportAccount.setTransportLogin(login);
+                    }
+
+                    String password = result.getString(11);
+                    if (!result.wasNull()) {
+                        transportAccount.setTransportPassword(password);
+                    }
+
+                    int oauthId = result.getInt(12);
+                    if (result.wasNull()) {
+                        transportAccount.setTransportOAuthId(-1);
+                    } else {
+                        transportAccount.setTransportOAuthId(oauthId < 0 ? -1 : oauthId);
+                    }
                 }
             } else {
                 if (transportAccount.getTransportAuth().equals(TransportAuth.MAIL)) {
-                    loadLoginAndPasswordFromMailAccount(con, contextId, accountId, userId, transportAccount);
+                    String login = result.getString(10);
+                    if (!result.wasNull()) {
+                        transportAccount.setTransportLogin(login);
+                    }
+
+                    String password = result.getString(11);
+                    if (!result.wasNull()) {
+                        transportAccount.setTransportPassword(password);
+                    }
+
+                    int oauthId = result.getInt(12);
+                    if (result.wasNull()) {
+                        transportAccount.setTransportOAuthId(-1);
+                    } else {
+                        transportAccount.setTransportOAuthId(oauthId < 0 ? -1 : oauthId);
+                    }
                 }
             }
 
             return transportAccount;
-        } catch (final SQLException e) {
-            if (null != stmt) {
-                final String sql = stmt.toString();
-                LOG.debug("\n\tFailed mail account statement:\n\t{}", new Object() {
-
-                    @Override
-                    public String toString() {
-                        return sql.substring(sql.indexOf(": ") + 2);
-                    }
-                });
-            }
-            throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            closeSQLStuff(result, stmt);
-        }
-    }
-
-    private void loadLoginAndPasswordFromMailAccount(Connection con, int contextId, int accountId, int userId, TransportAccountImpl transportAccount) throws OXException {
-        // load login and secret from mail_account
-        PreparedStatement stmt = null;
-        ResultSet result = null;
-        try {
-            stmt = con.prepareStatement("SELECT login, password, oauth FROM user_mail_account WHERE cid = ? AND id = ? AND user = ?");
-            stmt.setLong(1, contextId);
-            stmt.setLong(2, accountId);
-            stmt.setLong(3, userId);
-            result = stmt.executeQuery();
-            if (result.next()) {
-                final String login = result.getString(1);
-                if (!result.wasNull()) {
-                    transportAccount.setTransportLogin(login);
-                }
-
-                final String password = result.getString(2);
-                if (!result.wasNull()) {
-                    transportAccount.setTransportPassword(password);
-                }
-
-                final int oauthId = result.getInt(3);
-                if (result.wasNull()) {
-                    transportAccount.setTransportOAuthId(-1);
-                } else {
-                    transportAccount.setTransportOAuthId(oauthId < 0 ? -1 : oauthId);
-                }
-            }
         } catch (final SQLException e) {
             if (null != stmt) {
                 final String sql = stmt.toString();

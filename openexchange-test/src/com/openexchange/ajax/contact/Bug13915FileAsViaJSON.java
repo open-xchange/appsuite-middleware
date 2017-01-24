@@ -49,69 +49,63 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.assertEquals;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.test.ContactTestManager;
 
-public class Bug13915FileAsViaJSON extends AbstractManagedContactTest{
+public class Bug13915FileAsViaJSON extends AbstractManagedContactTest {
 
-	private Contact contact;
+    private Contact contact;
 
-	public Bug13915FileAsViaJSON(String name) {
-		super(name);
-	}
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+        contact = ContactTestManager.generateContact(folderID);
+        contact.removeFileAs();
+    }
 
-	@Override
-	public void setUp() throws Exception {
-		super.setUp();
-		contact = ContactTestManager.generateContact(folderID);
-		contact.removeFileAs();
-	}
+    @Test
+    public void testFileAsViaCreate() {
+        contact.setFileAs("filed as");
+        cotm.newAction(contact);
 
-	@Override
-	public void tearDown() throws Exception {
-		super.tearDown();
-	}
+        Contact actual = cotm.getAction(contact);
 
-	public void testFileAsViaCreate(){
-		contact.setFileAs("filed as");
-		manager.newAction(contact);
+        assertEquals("filed as", actual.getFileAs());
+    }
 
-		Contact actual = manager.getAction(contact);
+    @Test
+    public void testFileAsViaUpdate() {
+        cotm.newAction(contact);
 
-		assertEquals("filed as", actual.getFileAs());
-	}
+        Contact update = new Contact();
+        update.setParentFolderID(contact.getParentFolderID());
+        update.setObjectID(contact.getObjectID());
+        update.setLastModified(contact.getLastModified());
+        update.setFileAs("filed as");
+        cotm.updateAction(update);
 
+        Contact actual = cotm.getAction(contact);
 
-	public void testFileAsViaUpdate(){
-		manager.newAction(contact);
+        assertEquals("filed as", actual.getFileAs());
+    }
 
-		Contact update = new Contact();
-		update.setParentFolderID(contact.getParentFolderID());
-		update.setObjectID(contact.getObjectID());
-		update.setLastModified(contact.getLastModified());
-		update.setFileAs("filed as");
-		manager.updateAction(update);
+    @Test
+    public void testFileAsViaUpdate2() {
+        contact.setFileAs("filed as something else");
+        cotm.newAction(contact);
 
-		Contact actual = manager.getAction(contact);
+        Contact update = new Contact();
+        update.setParentFolderID(contact.getParentFolderID());
+        update.setObjectID(contact.getObjectID());
+        update.setLastModified(contact.getLastModified());
+        update.setFileAs("filed as");
+        cotm.updateAction(update);
 
-		assertEquals("filed as", actual.getFileAs());
-	}
+        Contact actual = cotm.getAction(contact);
 
-
-	public void testFileAsViaUpdate2(){
-		contact.setFileAs("filed as something else");
-		manager.newAction(contact);
-
-
-		Contact update = new Contact();
-		update.setParentFolderID(contact.getParentFolderID());
-		update.setObjectID(contact.getObjectID());
-		update.setLastModified(contact.getLastModified());
-		update.setFileAs("filed as");
-		manager.updateAction(update);
-
-		Contact actual = manager.getAction(contact);
-
-		assertEquals("filed as", actual.getFileAs());
-	}
+        assertEquals("filed as", actual.getFileAs());
+    }
 }

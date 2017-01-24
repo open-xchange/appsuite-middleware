@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.mail.filter.tests.api;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -83,13 +86,14 @@ public class NewTest extends AbstractMailFilterTest {
      * 
      * @param name The test case's name
      */
-    public NewTest(String name) {
-        super(name);
+    public NewTest() {
+        super();
     }
 
     /**
      * Test a simple creation of a rule
      */
+    @org.junit.Test
     public void testNew() throws Exception {
         // Create the rule
         final Rule expected;
@@ -111,6 +115,7 @@ public class NewTest extends AbstractMailFilterTest {
     /**
      * Test the 'allof' test command
      */
+    @org.junit.Test
     public void testNewAllOf() throws Exception {
         Rule expected;
         {
@@ -141,6 +146,7 @@ public class NewTest extends AbstractMailFilterTest {
     /**
      * Test the 'size' test command
      */
+    @org.junit.Test
     public void testNewSize() throws Exception {
         Rule expected;
         {
@@ -163,6 +169,7 @@ public class NewTest extends AbstractMailFilterTest {
     /**
      * Test the error case of missing headers
      */
+    @org.junit.Test
     public void testNewMissingHeaders() throws Exception {
         Rule expected = new Rule();
         expected.setName("");
@@ -199,6 +206,7 @@ public class NewTest extends AbstractMailFilterTest {
     /**
      * Test adding multiple filters
      */
+    @org.junit.Test
     public void testNewWithTwoEntries() throws Exception {
         // Create first rule
         final Rule rule1;
@@ -239,6 +247,7 @@ public class NewTest extends AbstractMailFilterTest {
     /**
      * Test adding a filter with multiple headers and redirect action command
      */
+    @org.junit.Test
     public void testNewWithHeadersAndRedirect() throws Exception {
         final Rule expected;
         {

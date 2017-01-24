@@ -54,6 +54,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
@@ -83,13 +84,14 @@ public class NewListTest extends AbstractAJAXSession {
     /**
      * Default constructor.
      */
-    public NewListTest(final String name) {
-        super(name);
+    public NewListTest() {
+        super();
     }
 
     /**
      * This method tests the new handling of not more available objects for LIST requests.
      */
+    @Test
     public void testRemovedObjectHandling() throws Throwable {
         final AJAXClient clientA = getClient();
         final TimeZone tzA = clientA.getValues().getTimeZone();
@@ -127,7 +129,7 @@ public class NewListTest extends AbstractAJAXSession {
         // Now B deletes some of them.
         final DeleteRequest[] deletes1 = new DeleteRequest[DELETES];
         for (int i = 0; i < deletes1.length; i++) {
-            final CommonInsertResponse insertR = toDelete.remove((NUMBER - DELETES)/2 + i);
+            final CommonInsertResponse insertR = toDelete.remove((NUMBER - DELETES) / 2 + i);
             deletes1[i] = new DeleteRequest(insertR.getId(), folderA, allR.getTimestamp());
         }
         clientA.execute(MultipleRequest.create(deletes1));
@@ -139,8 +141,7 @@ public class NewListTest extends AbstractAJAXSession {
         final DeleteRequest[] deletes2 = new DeleteRequest[toDelete.size()];
         for (int i = 0; i < deletes2.length; i++) {
             final CommonInsertResponse insertR = toDelete.get(i);
-            deletes2[i] = new DeleteRequest(insertR.getId(), folderA,
-            listR.getTimestamp());
+            deletes2[i] = new DeleteRequest(insertR.getId(), folderA, listR.getTimestamp());
         }
         clientA.execute(MultipleRequest.create(deletes2));
     }

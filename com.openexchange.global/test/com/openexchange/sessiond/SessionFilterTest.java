@@ -76,20 +76,20 @@ public class SessionFilterTest {
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
-    @Test
-    public void testParser1() throws Exception {
+     @Test
+     public void testParser1() throws Exception {
         thrown.expect(IllegalArgumentException.class);
         new SessionFilter.Parser("").parse();
     }
 
-    @Test
-    public void testParser2() throws Exception {
+     @Test
+     public void testParser2() throws Exception {
         thrown.expect(IllegalArgumentException.class);
         new SessionFilter.Parser("       ").parse();
     }
 
-    @Test
-    public void testParser3() throws Exception {
+     @Test
+     public void testParser3() throws Exception {
         Matcher matcher = new SessionFilter.Parser("(a=b)").parse();
         Assert.assertTrue(matcher.matches(new Matchee() {
             @Override
@@ -99,8 +99,8 @@ public class SessionFilterTest {
         }));
     }
 
-    @Test
-    public void testParser4() throws Exception {
+     @Test
+     public void testParser4() throws Exception {
         Matcher matcher = new SessionFilter.Parser("(|(com.openexchange.attr.A=Ich bin lustiger Text)(com.openexchange.attr.B=Ich auch))").parse();
         Assert.assertTrue(matcher.matches(new Matchee() {
             @Override
@@ -118,8 +118,8 @@ public class SessionFilterTest {
         }));
     }
 
-    @Test
-    public void testParser5() throws Exception {
+     @Test
+     public void testParser5() throws Exception {
         final Map<String, String> values = new HashMap<String, String>();
         Matchee mapMatchee = new Matchee() {
             @Override
@@ -154,38 +154,38 @@ public class SessionFilterTest {
         assertFalse(matches("(!(&(!(com.openexchange.attr.A=mumpitz))(com.openexchange.attr.B=sdfsdfsdfsdfd)(com.openexchange.attr.C=asdasfasdf)))", mapMatchee));
     }
 
-    @Test
-    public void testParser6() throws Exception {
+     @Test
+     public void testParser6() throws Exception {
         thrown.expect(IllegalArgumentException.class);
         new SessionFilter.Parser("(!(&(!(com.openexchange.attr.A=mumpitz))(com.openexchange.attr.B=sdfsdfsdfsdfd)(com.openexchange.attr.C=asdasfasdf))))").parse(); // one closing parenthesis too much
     }
 
-    @Test
-    public void testParser7() throws Exception {
+     @Test
+     public void testParser7() throws Exception {
         thrown.expect(IllegalArgumentException.class);
         new SessionFilter.Parser("(!(&(!(com.openexchange.attr.A=mumpitz))(com.openexchange.attr.B=sdfsdfsdfsdfd)(com.openexchange.attr.C=asdasfasdf))").parse(); // one closing parenthesis too less
     }
 
-    @Test
-    public void testParser8() throws Exception {
+     @Test
+     public void testParser8() throws Exception {
         thrown.expect(IllegalArgumentException.class);
         new SessionFilter.Parser("(!(&(!(com.openexchange.attr.A=mumpitz))(com.openexchange.attr.B=sdfsdfsdfsdfd)(com.openexchange.attr.C=asdasfasdf)))  )").parse(); // one closing parenthesis too much
     }
 
-    @Test
-    public void testParser9() throws Exception {
+     @Test
+     public void testParser9() throws Exception {
         thrown.expect(IllegalArgumentException.class);
         new SessionFilter.Parser("(!(&(!(com.openexchange.attr.A=mumpitz))(com.openexchange.attr.B=sdfsdfsdfsdfd)(com.openexchange.attr.C=asdasfasdf)))asd").parse(); // illegal end sequence
     }
 
-    @Test
-    public void testParser10() throws Exception {
+     @Test
+     public void testParser10() throws Exception {
         thrown.expect(IllegalArgumentException.class);
         new SessionFilter.Parser("(!(&(!(com.openexchange.attr.A=mumpitz))(com.openexchange.attr.B=sdfsdfsdfsdfd))(com.openexchange.attr.C=asdasfasdf)))asd").parse(); // illegal parenthesis in the middle
     }
 
-    @Test
-    public void testFilter1() throws Exception {
+     @Test
+     public void testFilter1() throws Exception {
         String sessionId = UUIDs.getUnformattedString(UUID.randomUUID());
         String secret = UUIDs.getUnformattedString(UUID.randomUUID());
         String hash = UUIDs.getUnformattedString(UUID.randomUUID());
@@ -211,8 +211,8 @@ public class SessionFilterTest {
         Assert.assertTrue(filter.apply(simSession));
     }
 
-    @Test
-    public void testFilterSecret() throws Exception {
+     @Test
+     public void testFilterSecret() throws Exception {
         String sessionId = UUIDs.getUnformattedString(UUID.randomUUID());
         String secret = UUIDs.getUnformattedString(UUID.randomUUID());
         String hash = UUIDs.getUnformattedString(UUID.randomUUID());

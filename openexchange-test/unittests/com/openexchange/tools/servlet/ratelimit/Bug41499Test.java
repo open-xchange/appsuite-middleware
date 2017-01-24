@@ -49,8 +49,10 @@
 
 package com.openexchange.tools.servlet.ratelimit;
 
+import static org.junit.Assert.assertEquals;
 import java.util.Random;
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.SimConfigurationService;
 import com.openexchange.java.ConcurrentHashSet;
@@ -65,16 +67,15 @@ import com.openexchange.timer.internal.CustomThreadPoolExecutorTimerService;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class Bug41499Test extends TestCase {
+public class Bug41499Test {
 
     private static final int MAX_RATE = 1500;
     private static final int MAX_RATE_TIME_WINDOW = 5000;
     private static final int THREAD_COUNT = 10;
     private static final int REQUESTS_PER_THREAD = 10;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
-        super.setUp();
         ServerServiceRegistry services = ServerServiceRegistry.getInstance();
         SimConfigurationService configService = new SimConfigurationService();
         configService.stringProperties.put("com.openexchange.servlet.maxRate", String.valueOf(MAX_RATE));
@@ -85,11 +86,7 @@ public class Bug41499Test extends TestCase {
         services.addService(TimerService.class, timerService);
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
-
+    @Test
     public void testRateLimiterEviction() throws Exception {
         final ConcurrentHashSet<Key> expectedSlots = new ConcurrentHashSet<Key>();
         final Random random = new Random();

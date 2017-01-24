@@ -60,6 +60,7 @@ import com.openexchange.groupware.tasks.Task;
  * Implements creating the necessary values for a task update request. All
  * necessary values are read from the task. The task must contain the folder and
  * object identifier and the last modification timestamp.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class UpdateRequest extends AbstractTaskRequest<UpdateResponse> {
@@ -78,9 +79,10 @@ public class UpdateRequest extends AbstractTaskRequest<UpdateResponse> {
 
     /**
      * Constructor if the task should not be moved.
+     * 
      * @param task Task object with updated attributes. This task must contain
-     * the attributes parent folder identifier, object identifier and last
-     * modification timestamp.
+     *            the attributes parent folder identifier, object identifier and last
+     *            modification timestamp.
      */
     public UpdateRequest(final Task task, final TimeZone timeZone) {
         this(task.getParentFolderID(), true, task, timeZone);
@@ -97,7 +99,7 @@ public class UpdateRequest extends AbstractTaskRequest<UpdateResponse> {
      * @param timeZone The timezone to use
      * @param failOnError <code>true</code> to fail on errors, <code>false</code>, otherwise
      * @param useLegacyDates <code>true</code> to convert the start- and end-date in legacy mode with <code>Date</code>-types,
-     *                       <code>false</code> to write start- and end-time properties along with the full-time flag
+     *            <code>false</code> to write start- and end-time properties along with the full-time flag
      */
     public UpdateRequest(final Task task, final TimeZone timeZone, boolean failOnError, boolean useLegacyDates) {
         this(task.getParentFolderID(), true, task, timeZone, failOnError, useLegacyDates);
@@ -105,34 +107,30 @@ public class UpdateRequest extends AbstractTaskRequest<UpdateResponse> {
 
     /**
      * Constructor if the task should be moved into another folder.
+     * 
      * @param folderId source folder of the task.
      * @param task Task object with updated attributes. This task must contain
-     * the attributes destination folder identifier, object identifier and last
-     * modification timestamp.
+     *            the attributes destination folder identifier, object identifier and last
+     *            modification timestamp.
      * @param timeZone timeZone for converting time stamps.
      */
-    public UpdateRequest(final int folderId, final Task task,
-        final TimeZone timeZone) {
+    public UpdateRequest(final int folderId, final Task task, final TimeZone timeZone) {
         this(folderId, false, task, timeZone);
     }
 
-    public UpdateRequest(final int folderId, final Task task,
-        final TimeZone timeZone, boolean failOnError) {
+    public UpdateRequest(final int folderId, final Task task, final TimeZone timeZone, boolean failOnError) {
         this(folderId, false, task, timeZone, failOnError);
     }
 
-    private UpdateRequest(final int folderId, final boolean removeFolderId,
-        final Task task, final TimeZone timeZone) {
+    private UpdateRequest(final int folderId, final boolean removeFolderId, final Task task, final TimeZone timeZone) {
         this(folderId, removeFolderId, task, timeZone, true);
     }
 
-    private UpdateRequest(final int folderId, final boolean removeFolderId,
-        final Task task, final TimeZone timeZone, boolean failOnError) {
+    private UpdateRequest(final int folderId, final boolean removeFolderId, final Task task, final TimeZone timeZone, boolean failOnError) {
         this(folderId, removeFolderId, task, timeZone, failOnError, true);
     }
 
-    private UpdateRequest(final int folderId, final boolean removeFolderId,
-        final Task task, final TimeZone timeZone, boolean failOnError, boolean useLegacyDates) {
+    private UpdateRequest(final int folderId, final boolean removeFolderId, final Task task, final TimeZone timeZone, boolean failOnError, boolean useLegacyDates) {
         super();
         this.folderId = folderId;
         this.removeFolderId = removeFolderId;
@@ -164,13 +162,7 @@ public class UpdateRequest extends AbstractTaskRequest<UpdateResponse> {
      */
     @Override
     public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
-                .ACTION_UPDATE),
-            new Parameter(AJAXServlet.PARAMETER_INFOLDER, folderId),
-            new Parameter(AJAXServlet.PARAMETER_ID, task.getObjectID()),
-            new Parameter(AJAXServlet.PARAMETER_TIMESTAMP,
-                task.getLastModified().getTime())
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE), new Parameter(AJAXServlet.PARAMETER_INFOLDER, folderId), new Parameter(AJAXServlet.PARAMETER_ID, task.getObjectID()), new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, task.getLastModified().getTime())
         };
     }
 

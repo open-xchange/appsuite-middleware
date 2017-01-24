@@ -60,7 +60,6 @@ import com.openexchange.ajax.framework.Header;
 import com.openexchange.ajax.framework.Params;
 import com.openexchange.share.ShareTarget;
 
-
 /**
  * {@link DeleteLinkRequest}
  *
@@ -92,10 +91,7 @@ public class DeleteLinkRequest implements AJAXRequest<DeleteLinkResponse> {
 
     @Override
     public Parameter[] getParameters() throws IOException, JSONException {
-        return new Params(
-            AJAXServlet.PARAMETER_ACTION, "deleteLink",
-            AJAXServlet.PARAMETER_TIMESTAMP, Long.toString(timestamp)
-        ).toArray();
+        return new Params(AJAXServlet.PARAMETER_ACTION, "deleteLink", AJAXServlet.PARAMETER_TIMESTAMP, Long.toString(timestamp)).toArray();
     }
 
     @Override
@@ -112,6 +108,7 @@ public class DeleteLinkRequest implements AJAXRequest<DeleteLinkResponse> {
     @Override
     public AbstractAJAXParser<DeleteLinkResponse> getParser() {
         return new AbstractAJAXParser<DeleteLinkResponse>(failOnError) {
+
             @Override
             protected DeleteLinkResponse createResponse(Response response) throws JSONException {
                 return new DeleteLinkResponse(response);

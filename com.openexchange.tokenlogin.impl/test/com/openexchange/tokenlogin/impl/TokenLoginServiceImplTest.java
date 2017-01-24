@@ -82,7 +82,6 @@ import com.openexchange.test.mock.MockUtils;
 import com.openexchange.tokenlogin.DefaultTokenLoginSecret;
 import com.openexchange.tokenlogin.TokenLoginSecret;
 
-
 /**
  * Unit tests for {@link TokenLoginServiceImpl}
  *
@@ -265,6 +264,7 @@ public class TokenLoginServiceImplTest {
         PowerMockito.when(Services.getService(ContextService.class)).thenReturn(this.contextService);
 
         this.tokenLoginServiceImpl = new TokenLoginServiceImpl(this.maxIdleTime, this.configService) {
+
             @Override
             public TokenLoginSecret getTokenLoginSecret(String secret) {
                 return new DefaultTokenLoginSecret();
@@ -284,6 +284,7 @@ public class TokenLoginServiceImplTest {
         PowerMockito.when(Services.getService(ContextService.class)).thenReturn(this.contextService);
 
         this.tokenLoginServiceImpl = new TokenLoginServiceImpl(this.maxIdleTime, this.configService) {
+
             @Override
             public TokenLoginSecret getTokenLoginSecret(String secret) {
                 return new DefaultTokenLoginSecret();
@@ -388,9 +389,7 @@ public class TokenLoginServiceImplTest {
         this.tokenLoginServiceImpl.removeTokenFor(this.session);
 
         Mockito.verify(this.session, Mockito.times(1)).getSessionID();
-        Cache<String, String> token2sessionMap = (Cache<String, String>) MockUtils.getValueFromField(
-            this.tokenLoginServiceImpl,
-            "token2sessionId");
+        Cache<String, String> token2sessionMap = (Cache<String, String>) MockUtils.getValueFromField(this.tokenLoginServiceImpl, "token2sessionId");
         Assert.assertNotNull(token2sessionMap);
         Assert.assertEquals(1, token2sessionMap.size());
     }
@@ -403,19 +402,13 @@ public class TokenLoginServiceImplTest {
 
         this.tokenLoginServiceImpl.removeTokenFor(this.session);
 
-        Cache<String, String> token2sessionMap = (Cache<String, String>) MockUtils.getValueFromField(
-            this.tokenLoginServiceImpl,
-            "token2sessionId");
+        Cache<String, String> token2sessionMap = (Cache<String, String>) MockUtils.getValueFromField(this.tokenLoginServiceImpl, "token2sessionId");
         Assert.assertNotNull(token2sessionMap);
         Assert.assertEquals(0, token2sessionMap.size());
     }
 
     private Cache<String, String> buildCache() {
-        CacheBuilder<Object, Object> builder = CacheBuilder.newBuilder()
-            .concurrencyLevel(4)
-            .maximumSize(Integer.MAX_VALUE)
-            .initialCapacity(1024)
-            .expireAfterAccess(maxIdleTime, TimeUnit.MILLISECONDS);
+        CacheBuilder<Object, Object> builder = CacheBuilder.newBuilder().concurrencyLevel(4).maximumSize(Integer.MAX_VALUE).initialCapacity(1024).expireAfterAccess(maxIdleTime, TimeUnit.MILLISECONDS);
         Cache<String, String> cache = builder.build();
         return cache;
     }
@@ -484,6 +477,7 @@ public class TokenLoginServiceImplTest {
      * An exception is thrown if the file object exists but is a directory.
      * An exception is thrown if the file exists but cannot be written to.
      * An exception is thrown if the parent directory cannot be created.
+     * 
      * @param append
      */
     private static FileOutputStream openOutputStream(File file, boolean append) throws IOException {

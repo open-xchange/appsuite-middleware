@@ -51,6 +51,9 @@ package com.openexchange.ajax.appointment.recurrence;
 
 import java.util.Calendar;
 import java.util.TimeZone;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
@@ -63,6 +66,7 @@ import com.openexchange.groupware.container.Appointment;
 
 /**
  * Verifies the until date of a full time daily series appointment.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Bug12280Test extends AbstractAJAXSession {
@@ -75,17 +79,18 @@ public final class Bug12280Test extends AbstractAJAXSession {
 
     /**
      * Default constructor.
+     * 
      * @param name test name.
      */
-    public Bug12280Test(final String name) {
-        super(name);
+    public Bug12280Test() {
+        super();
     }
 
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         final AJAXClient client = getClient();
         tz = client.getValues().getTimeZone();
@@ -99,13 +104,17 @@ public final class Bug12280Test extends AbstractAJAXSession {
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected void tearDown() throws Exception {
-        final DeleteRequest request = new DeleteRequest(appointment);
-        getClient().execute(request);
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
+        try {
+            final DeleteRequest request = new DeleteRequest(appointment);
+            getClient().execute(request);
+        } finally {
+            super.tearDown();
+        }
     }
 
+    @Test
     public void testDailyFullTimeUntil() throws Throwable {
         final AJAXClient client = getClient();
         final GetRequest request = new GetRequest(appointment);
@@ -115,8 +124,7 @@ public final class Bug12280Test extends AbstractAJAXSession {
     }
 
     private final Appointment createAppointment() {
-        final Calendar calendar = TimeTools.createCalendar(TimeZone
-            .getTimeZone("UTC"));
+        final Calendar calendar = TimeTools.createCalendar(TimeZone.getTimeZone("UTC"));
         final Appointment appointment = new Appointment();
         appointment.setTitle("test for bug 12280");
         appointment.setParentFolderID(folderId);

@@ -85,12 +85,13 @@ public class Bug31826Test {
     }
 
     @After
-    public void tearDown() {
+    public void tearDown()
+ {
         service = null;
     }
 
-    @Test
-    public void testKeepUnicode() {
+     @Test
+     public void testKeepUnicode() {
         String content = "dfg &hearts;&diams;&spades;&clubs;&copy;&reg;&trade; dfg";
         String test = service.sanitize(content, null, true, null, null);
 

@@ -49,7 +49,10 @@
 
 package com.openexchange.contact.vcard;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.List;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 
@@ -69,7 +72,8 @@ public class Bug6962Test extends VCardTest {
         super();
     }
 
-    public void testImportVCard_1() throws Exception {
+         @Test
+     public void testImportVCard_1() throws Exception {
         /*
          * import vCard
          */
@@ -100,7 +104,8 @@ public class Bug6962Test extends VCardTest {
         assertTrue("no warning", null != warnings && 0 < warnings.size());
     }
 
-    public void testImportVCard_2() throws Exception {
+         @Test
+     public void testImportVCard_2() throws Exception {
         /*
          * import vCard
          */
@@ -124,7 +129,8 @@ public class Bug6962Test extends VCardTest {
         assertTrue("no warning", null != warnings && 0 < warnings.size());
     }
 
-    public void testImportVCard_3() throws Exception {
+         @Test
+     public void testImportVCard_3() throws Exception {
         /*
          * import vCard
          */
@@ -155,7 +161,8 @@ public class Bug6962Test extends VCardTest {
         assertTrue("warnings", null == warnings || 0 == warnings.size());
     }
 
-    public void testImportVCard_4() throws Exception {
+         @Test
+     public void testImportVCard_4() throws Exception {
         /*
          * import vCard
          */
@@ -179,7 +186,8 @@ public class Bug6962Test extends VCardTest {
         assertTrue("warnings", null == warnings || 0 == warnings.size());
     }
 
-    public void testImportVCard_5() throws Exception {
+         @Test
+     public void testImportVCard_5() throws Exception {
         /*
          * import vCard
          */

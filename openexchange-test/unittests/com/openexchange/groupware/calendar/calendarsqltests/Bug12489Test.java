@@ -49,15 +49,18 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
+import static org.junit.Assert.assertEquals;
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 
-
 public class Bug12489Test extends CalendarSqlTest {
+
     /**
      * Test for <a href="http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=12489">bug #12489</a>:<br>
      * <b>Error message thrown during change of recurring appointment</b>
      */
+    @Test
     public void testTitleUpdateOfRecAppWithException() throws Exception {
         // create monthly recurring appointment
         /*-

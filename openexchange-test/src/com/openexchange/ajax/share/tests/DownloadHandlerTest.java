@@ -49,17 +49,21 @@
 
 package com.openexchange.ajax.share.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.params.ClientPNames;
-import org.apache.http.client.params.CookiePolicy;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.junit.Assert;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
@@ -81,10 +85,11 @@ public class DownloadHandlerTest extends ShareTest {
      *
      * @param name The test name
      */
-    public DownloadHandlerTest(String name) {
-        super(name);
+    public DownloadHandlerTest() {
+        super();
     }
 
+    @Test
     public void testDownloadSharedFileRandomly() throws Exception {
         testDownloadSharedFile(randomFolderAPI(), randomGuestObjectPermission());
     }
@@ -113,7 +118,7 @@ public class DownloadHandlerTest extends ShareTest {
          */
         FileStorageObjectPermission matchingPermission = null;
         for (FileStorageObjectPermission permission : file.getObjectPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
                 break;
             }
@@ -140,8 +145,7 @@ public class DownloadHandlerTest extends ShareTest {
         String password = getPassword(guestPermission.getRecipient());
         if (null != password) {
             BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-            UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(
-                getUsername(guestPermission.getRecipient()), getPassword(guestPermission.getRecipient()));
+            UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(getUsername(guestPermission.getRecipient()), getPassword(guestPermission.getRecipient()));
             credentialsProvider.setCredentials(org.apache.http.auth.AuthScope.ANY, credentials);
             httpClient.setCredentialsProvider(credentialsProvider);
         }
@@ -153,8 +157,7 @@ public class DownloadHandlerTest extends ShareTest {
             HttpResponse httpResponse = httpClient.execute(httpGet);
             assertEquals("Wrong HTTP status", 200, httpResponse.getStatusLine().getStatusCode());
             Header disposition = httpResponse.getFirstHeader("Content-Disposition");
-            assertTrue("Wrong content disposition",
-                null != disposition && null != disposition.getValue() && disposition.getValue().startsWith("attachment"));
+            assertTrue("Wrong content disposition", null != disposition && null != disposition.getValue() && disposition.getValue().startsWith("attachment"));
             HttpEntity entity = httpResponse.getEntity();
             assertNotNull("No file downloaded", entity);
             byte[] downloadedFile = EntityUtils.toByteArray(entity);
@@ -168,8 +171,7 @@ public class DownloadHandlerTest extends ShareTest {
             HttpResponse httpResponse = httpClient.execute(httpGet);
             assertEquals("Wrong HTTP status", 200, httpResponse.getStatusLine().getStatusCode());
             Header disposition = httpResponse.getFirstHeader("Content-Disposition");
-            assertTrue("Wrong content disposition",
-                null != disposition && null != disposition.getValue() && disposition.getValue().startsWith("inline"));
+            assertTrue("Wrong content disposition", null != disposition && null != disposition.getValue() && disposition.getValue().startsWith("inline"));
             HttpEntity entity = httpResponse.getEntity();
             assertNotNull("No file downloaded", entity);
             byte[] downloadedFile = EntityUtils.toByteArray(entity);

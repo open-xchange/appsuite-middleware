@@ -101,7 +101,8 @@ public class MessagingCopyTest extends AbstractUserCopyTest {
         dstCtxId = getDestinationContext().getContextId(); 
     }
     
-    public void testMessagingAccountCopy() throws Exception {
+         @Test
+     public void testMessagingAccountCopy() throws Exception {
         final MessagingCopyTask copyTask = new MessagingCopyTask();
         final List<MessagingAccount> originAccounts = copyTask.loadMessagingAccountsFromDB(srcCon, srcCtxId, srcUsrId);
         copyTask.fillMessagingAccountsWithConfig(originAccounts, srcCon, srcCtxId);
@@ -167,8 +168,9 @@ public class MessagingCopyTest extends AbstractUserCopyTest {
         return null;
     }
     
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown()
+ throws Exception {
         DBUtils.autocommit(dstCon);
         deleteAllFromTablesForCid(dstCtxId, "cid", dstCon, "messagingAccount");
         super.tearDown();

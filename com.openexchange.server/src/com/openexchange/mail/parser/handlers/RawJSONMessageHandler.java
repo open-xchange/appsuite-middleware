@@ -527,9 +527,11 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
                 discardJSONObject();
                 return false;
             }
-            asRawContent(id, contentType.getBaseType(), plainTextContentArg, fileName);
-            textWasEmpty = (null == plainTextContentArg || 0 == plainTextContentArg.length());
-            bodyAdded = true;
+            if (null != plainTextContentArg) {
+                asRawContent(id, contentType.getBaseType(), plainTextContentArg, fileName);
+                textWasEmpty = plainTextContentArg.isEmpty();
+                bodyAdded = true;
+            }
         }
         return true;
     }

@@ -66,69 +66,69 @@ import com.openexchange.ajax.mail.actions.AbstractMailRequest;
  */
 public final class NetsolClearRequest implements AJAXRequest {
 
-	private final String folderId;
+    private final String folderId;
 
-	public NetsolClearRequest(final String folderId) {
-		super();
-		this.folderId = folderId;
-	}
+    public NetsolClearRequest(final String folderId) {
+        super();
+        this.folderId = folderId;
+    }
 
-	@Override
+    @Override
     public Object getBody() {
-		final JSONArray array = new JSONArray();
-		array.put(folderId);
-		return array;
-	}
+        final JSONArray array = new JSONArray();
+        array.put(folderId);
+        return array;
+    }
 
-	@Override
+    @Override
     public Method getMethod() {
-		return Method.PUT;
-	}
+        return Method.PUT;
+    }
 
     @Override
     public Header[] getHeaders() {
         return NO_HEADER;
     }
 
-	@Override
+    @Override
     public Parameter[] getParameters() {
-		return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_CLEAR) };
-	}
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_CLEAR) };
+    }
 
-	@Override
+    @Override
     public AbstractAJAXParser<NetsolClearResponse> getParser() {
-		return new ClearParser(true);
-	}
+        return new ClearParser(true);
+    }
 
-	@Override
+    @Override
     public String getServletPath() {
-		return AbstractMailRequest.MAIL_URL;
-	}
+        return AbstractMailRequest.MAIL_URL;
+    }
 
-	final static class ClearParser extends AbstractAJAXParser<NetsolClearResponse> {
+    final static class ClearParser extends AbstractAJAXParser<NetsolClearResponse> {
 
-		ClearParser(final boolean failOnError) {
-			super(failOnError);
-		}
+        ClearParser(final boolean failOnError) {
+            super(failOnError);
+        }
 
-		@Override
-		protected NetsolClearResponse createResponse(final Response response) {
-			return new NetsolClearResponse(response);
-		}
+        @Override
+        protected NetsolClearResponse createResponse(final Response response) {
+            return new NetsolClearResponse(response);
+        }
 
-	}
+    }
 
-	public final static class NetsolClearResponse extends AbstractAJAXResponse {
+    public final static class NetsolClearResponse extends AbstractAJAXResponse {
 
-		public NetsolClearResponse(final Response response) {
-			super(response);
-		}
+        public NetsolClearResponse(final Response response) {
+            super(response);
+        }
 
-		/**
-		 * @return JSON array containing failed
-		 */
-		public JSONArray getFailed() {
-			return (JSONArray) getData();
-		}
-	}
+        /**
+         * @return JSON array containing failed
+         */
+        public JSONArray getFailed() {
+            return (JSONArray) getData();
+        }
+    }
 }

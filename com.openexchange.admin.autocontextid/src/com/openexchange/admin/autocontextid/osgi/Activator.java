@@ -90,12 +90,6 @@ public class Activator extends HousekeepingActivator {
         }
     }
 
-    @Override
-    public void stopBundle() {
-        unregisterServices();
-        closeTrackers();
-    }
-
     private void initCache(final ConfigurationService service) throws SQLException, OXGenericException {
         final AdminCacheExtended cache = new AdminCacheExtended();
         cache.initCache(service);

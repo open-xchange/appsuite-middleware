@@ -49,15 +49,14 @@
 
 package com.openexchange.ajax.kata;
 
-
-
 /**
  * {@link NeedExistingStep}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public abstract class NeedExistingStep<T> extends AbstractStep{
+public abstract class NeedExistingStep<T> extends AbstractStep {
+
     public NeedExistingStep(String name, String expectedError) {
         super(name, expectedError);
     }
@@ -76,7 +75,7 @@ public abstract class NeedExistingStep<T> extends AbstractStep{
         idSource.rememberIdentityValues(thing);
     }
 
-    protected void forgetIdentity(T thing){
+    protected void forgetIdentity(T thing) {
         idSource.forgetIdentity(thing);
     }
 }

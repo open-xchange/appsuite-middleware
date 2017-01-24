@@ -59,10 +59,14 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import junit.framework.TestCase;
+import org.junit.Test;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.user.json.field.UserField;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 
 /**
@@ -70,8 +74,8 @@ import com.openexchange.user.json.field.UserField;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class NoGlobalAddressBookUserCensorshipTest extends TestCase {
-    public void testCensorsData() throws Exception {
+public class NoGlobalAddressBookUserCensorshipTest {         @Test
+     public void testCensorsData() throws Exception {
         User user = getFilledUser();
 
         final UserCensorship censorship = new NoGlobalAdressBookUserCensorship();

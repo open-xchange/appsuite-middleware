@@ -115,15 +115,15 @@ public class BasicTests {
 
     //@formatter:on
 
-    @Test
-    public void testSimple() throws Exception {
+     @Test
+     public void testSimple() throws Exception {
         Translations translations = new POParser().parse(new ByteArrayInputStream(SIMPLE.getBytes("UTF-8")), "SimpleTest");
         String actual = translations.translate("Hello World");
         assertEquals("Translation is wrong.", "Hallo Welt", actual);
     }
 
-    @Test
-    public void testPlural() throws Exception {
+     @Test
+     public void testPlural() throws Exception {
         Translations translations = new POParser().parse(new ByteArrayInputStream(PLURAL.getBytes("UTF-8")), "SimpleTest");
         assertEquals("Translation is wrong.", "Hallo Welt", translations.translate("Hello World"));
         assertEquals("Translation is wrong.", "Hallo Welten", translations.translate("Hello World", 1));
@@ -132,15 +132,15 @@ public class BasicTests {
         assertEquals("Translation is wrong.", "Hallo Weltens", translations.translate("Hello Worlds", 2));
     }
 
-    @Test
-    public void testContext() throws Exception {
+     @Test
+     public void testContext() throws Exception {
         Translations translations = new POParser().parse(new ByteArrayInputStream(CONTEXT.getBytes("UTF-8")), "SimpleTest");
         assertEquals("Translation is wrong.", "Hallo Welt", translations.translate("first", "Hello World"));
         assertEquals("Translation is wrong.", "Hallo Welt!!!", translations.translate("second", "Hello World"));
     }
 
-    @Test
-    public void testComplex() throws Exception {
+     @Test
+     public void testComplex() throws Exception {
         Translations translations = new POParser().parse(new ByteArrayInputStream(COMPLEX.getBytes("UTF-8")), "SimpleTest");
         assertEquals("Translation is wrong.", "Hallo Welt", translations.translate("first", "Hello World"));
         assertEquals("Translation is wrong.", "Hallo Welten", translations.translate("first", "Hello World", 1));

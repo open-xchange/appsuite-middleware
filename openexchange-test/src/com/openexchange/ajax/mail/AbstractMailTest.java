@@ -82,21 +82,6 @@ import com.openexchange.mail.MailListField;
 public abstract class AbstractMailTest extends AbstractAJAXSession {
 
     /**
-     * Default constructor.
-     *
-     * @param name
-     *            name of the test.
-     */
-    protected AbstractMailTest(final String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
-    /**
      * Gets the message count of specified mail folder.
      *
      * @param folder The mail folder identifier
@@ -105,10 +90,8 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
      * @throws IOException If an I/O error occurs
      * @throws JSONException If a JSON error occurs
      */
-    protected int count(final String folder) throws OXException, IOException, JSONException {
-        final JSONObject data =
-            (JSONObject) client.execute(
-                new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, folder, new int[] { FolderField.TOTAL.getColumn() })).getData();
+    public int count(final String folder) throws OXException, IOException, JSONException {
+        final JSONObject data = (JSONObject) getClient().execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, folder, new int[] { FolderField.TOTAL.getColumn() })).getData();
         return data.getInt(FolderField.TOTAL.getName());
     }
 
@@ -134,24 +117,9 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
     /**
      * Random mail text body
      */
-    protected static final String MAIL_TEXT_BODY = "Mail text.<br /><br />People have been asking for support for the IMAP IDLE com"
-            + "mand for quite<br />a few years and I think I've finally figured out how to provide such<br />support safely.  The difficulty isn't in "
-            + "executing the command, which<br />is quite straightforward, the difficulty is in deciding how to expose<br />it to applications, and in"
-            + "handling the multithreading issues that<br />arise.<br /><br />After three attempts, I've got a version that seems to work.  It passes"
-            + "<br />all my tests, including a multithreading test I wrote just for this<br />purpose.  So now it's time for others to try it out as w"
-            + "ell.  Below is<br />my writeup on how to use the IDLE command.  You can find the test<br />version of JavaMail (essentially an early ve"
-            + "rsion of JavaMail 1.4.1)<br />in the java.net Maven repository (you want the 1.4.1ea version):<br /><br />https://maven-repository.dev."
-            + "java.net/nonav/repository/javax.mail/<br /><br />Note that this version is built with JDK 1.5 and thus requires JDK 1.5.<br /><br />Oh,"
-            + "and here's the entire list of what's fixed in this version so far:<br /><br />4107594 IMAP implementation should use the IDLE extensio"
-            + "n if available<br />6423701 Problem with using OrTerm when the protocol is IMAP<br />6431207 SMTP is adding extra CRLF to message conte"
-            + "nt<br />6447295 IMAPMessage fails to return Content-Language from bodystructure<br />6447799 encoded text not decoded even when mail.mi"
-            + "me.decodetext.strict is false<br />6447801 MimeBodyPart.writeTo reencodes data unnecessarily<br />6456422 NullPointerException in smtpt"
-            + "ransport when sending MimeMessages<br />        with no encoding<br />6456444 MimeMessages created from stream are not correctly handle"
-            + "d<br />        with allow8bitmime<br />&lt;no id&gt; fix performance bug in base64 encoder; now even faster!";
+    protected static final String MAIL_TEXT_BODY = "Mail text.<br /><br />People have been asking for support for the IMAP IDLE com" + "mand for quite<br />a few years and I think I've finally figured out how to provide such<br />support safely.  The difficulty isn't in " + "executing the command, which<br />is quite straightforward, the difficulty is in deciding how to expose<br />it to applications, and in" + "handling the multithreading issues that<br />arise.<br /><br />After three attempts, I've got a version that seems to work.  It passes" + "<br />all my tests, including a multithreading test I wrote just for this<br />purpose.  So now it's time for others to try it out as w" + "ell.  Below is<br />my writeup on how to use the IDLE command.  You can find the test<br />version of JavaMail (essentially an early ve" + "rsion of JavaMail 1.4.1)<br />in the java.net Maven repository (you want the 1.4.1ea version):<br /><br />https://maven-repository.dev." + "java.net/nonav/repository/javax.mail/<br /><br />Note that this version is built with JDK 1.5 and thus requires JDK 1.5.<br /><br />Oh," + "and here's the entire list of what's fixed in this version so far:<br /><br />4107594 IMAP implementation should use the IDLE extensio" + "n if available<br />6423701 Problem with using OrTerm when the protocol is IMAP<br />6431207 SMTP is adding extra CRLF to message conte" + "nt<br />6447295 IMAPMessage fails to return Content-Language from bodystructure<br />6447799 encoded text not decoded even when mail.mi" + "me.decodetext.strict is false<br />6447801 MimeBodyPart.writeTo reencodes data unnecessarily<br />6456422 NullPointerException in smtpt" + "ransport when sending MimeMessages<br />        with no encoding<br />6456444 MimeMessages created from stream are not correctly handle" + "d<br />        with allow8bitmime<br />&lt;no id&gt; fix performance bug in base64 encoder; now even faster!";
 
-    protected static final String LARGE_MAIL_TEXT_BODY              = MAIL_TEXT_BODY + "<br />"
-            + MAIL_TEXT_BODY + "<br />" + MAIL_TEXT_BODY + "<br />" + MAIL_TEXT_BODY + "<br />"
-            + MAIL_TEXT_BODY + "<br />" + MAIL_TEXT_BODY + "<br />" + MAIL_TEXT_BODY + "<br />";
+    protected static final String LARGE_MAIL_TEXT_BODY = MAIL_TEXT_BODY + "<br />" + MAIL_TEXT_BODY + "<br />" + MAIL_TEXT_BODY + "<br />" + MAIL_TEXT_BODY + "<br />" + MAIL_TEXT_BODY + "<br />" + MAIL_TEXT_BODY + "<br />" + MAIL_TEXT_BODY + "<br />";
 
     public static final String MAIL_SUBJECT = "The mail subject";
 
@@ -183,8 +151,7 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
 
     }
 
-    protected final JSONObject createSelfAddressed25KBMailObject() throws OXException, JSONException, IOException,
-            SAXException {
+    protected final JSONObject createSelfAddressed25KBMailObject() throws OXException, JSONException, IOException, SAXException {
         return createSelfAddressed25KBMailObject(MAIL_SUBJECT);
     }
 
@@ -196,11 +163,9 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
         return Boolean.parseBoolean(AJAXConfig.getProperty(AJAXConfig.Property.IS_SP3));
     }
 
-    public static final int[] COLUMNS_DEFAULT_LIST = { 600, 601, 612, 602, 603, 607, 610, 608, 611, 614, 102, 604,
-            609 };
+    public static final int[] COLUMNS_DEFAULT_LIST = { 600, 601, 612, 602, 603, 607, 610, 608, 611, 614, 102, 604, 609 };
 
-    protected static final int[] COLUMNS_FOLDER_ID = new int[] { MailListField.FOLDER_ID.getField(),
-            MailListField.ID.getField() };
+    protected static final int[] COLUMNS_FOLDER_ID = new int[] { MailListField.FOLDER_ID.getField(), MailListField.ID.getField() };
 
     /**
      * Performs a hard delete on specified folder
@@ -208,8 +173,7 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
      * @param folder
      *            The folder
      */
-    protected final void clearFolder(final String folder) throws OXException, IOException, SAXException,
-            JSONException {
+    protected final void clearFolder(final String folder) throws OXException, IOException, JSONException {
         Executor.execute(getSession(), new com.openexchange.ajax.mail.actions.ClearRequest(folder).setHardDelete(true));
     }
 
@@ -221,10 +185,8 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
      * @return All folder and IDs as a two-dimensional array whereby the second
      *         dimension's array is always of length <code>2</code>.
      */
-    protected final String[][] getFolderAndIDs(final String folder) throws OXException, IOException, SAXException,
-            JSONException {
-        final CommonAllResponse allR = Executor.execute(getSession(), new AllRequest(folder,
-                COLUMNS_FOLDER_ID, 0, null, true));
+    protected final String[][] getFolderAndIDs(final String folder) throws OXException, IOException, JSONException {
+        final CommonAllResponse allR = Executor.execute(getSession(), new AllRequest(folder, COLUMNS_FOLDER_ID, 0, null, true));
         final Object[][] array = allR.getArray();
         final String[][] folderAndIDs = new String[array.length][];
         for (int i = 0; i < array.length; i++) {
@@ -233,19 +195,19 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
         return folderAndIDs;
     }
 
-    protected String getInboxFolder() throws OXException, IOException, SAXException, JSONException {
+    protected String getInboxFolder() throws OXException, IOException, JSONException {
         return getClient().getValues().getInboxFolder();
     }
 
-    protected String getSentFolder() throws OXException, IOException, SAXException, JSONException {
+    protected String getSentFolder() throws OXException, IOException, JSONException {
         return getClient().getValues().getSentFolder();
     }
 
-    protected String getTrashFolder() throws OXException, IOException, SAXException, JSONException {
+    protected String getTrashFolder() throws OXException, IOException, JSONException {
         return getClient().getValues().getTrashFolder();
     }
 
-    protected String getDraftsFolder() throws OXException, IOException, SAXException, JSONException {
+    protected String getDraftsFolder() throws OXException, IOException, JSONException {
         return getClient().getValues().getDraftsFolder();
     }
 
@@ -263,16 +225,16 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
     /**
      * @return the private task folder of the user.
      */
-    protected int getPrivateFolder() throws OXException, IOException, SAXException, JSONException {
+    protected int getPrivateFolder() throws OXException, IOException, JSONException {
         return getClient().getValues().getPrivateTaskFolder();
     }
 
-    protected TimeZone getTimeZone() throws OXException, IOException, SAXException, JSONException {
+    protected TimeZone getTimeZone() throws OXException, IOException, JSONException {
         return getClient().getValues().getTimeZone();
     }
 
     protected String[] sendMail(final String mail) throws OXException, IOException, JSONException {
-        return sendMail(client, mail);
+        return sendMail(getClient(), mail);
     }
 
     protected static String[] sendMail(final AJAXClient client, final String mail) throws OXException, IOException, JSONException {
@@ -282,16 +244,15 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
 
     protected String generateMail() throws Exception {
         final JSONObject mailObject = createSelfAddressed25KBMailObject();
-       return mailObject.toString();
+        return mailObject.toString();
     }
 
     protected String generateMail(final String subject) throws Exception {
         final JSONObject mailObject = createSelfAddressed25KBMailObject(subject);
-       return mailObject.toString();
+        return mailObject.toString();
     }
 
-
-    protected JSONObject getFirstMailInFolder(final String inboxFolder) throws OXException, IOException, SAXException, JSONException {
+    protected JSONObject getFirstMailInFolder(final String inboxFolder) throws OXException, IOException, JSONException {
         final CommonAllResponse response = getClient().execute(new AllRequest(inboxFolder, new int[] { 600 }, -1, null, true));
         final JSONArray arr = (JSONArray) response.getData();
         final JSONArray mailFields = arr.getJSONArray(0);
@@ -300,11 +261,11 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
         return (JSONObject) response2.getData();
     }
 
-    public TestMail getMail(final String folder, final String id) throws OXException, IOException, SAXException, JSONException {
+    public TestMail getMail(final String folder, final String id) throws OXException, IOException, JSONException {
         final GetRequest getRequest = new GetRequest(folder, id);
         final GetResponse getResponse = getClient().execute(getRequest);
         final JSONObject jsonMail = (JSONObject) getResponse.getData();
-        return new TestMail( jsonMail );
+        return new TestMail(jsonMail);
     }
 
 }

@@ -51,6 +51,7 @@ package com.openexchange.client.onboarding.service;
 
 import java.util.Collection;
 import java.util.List;
+import com.openexchange.client.onboarding.ClientDevice;
 import com.openexchange.client.onboarding.Device;
 import com.openexchange.client.onboarding.DeviceAwareScenario;
 import com.openexchange.client.onboarding.OnboardingProvider;
@@ -98,11 +99,12 @@ public interface OnboardingService {
     /**
      * Gets the on-boarding view for specified session
      *
+     * @param clientDevice The target device
      * @param session The session
      * @return The on-boarding view
      * @throws OXException If view cannot be returned
      */
-    OnboardingView getViewFor(Session session) throws OXException;
+    OnboardingView getViewFor(ClientDevice clientDevice, Session session) throws OXException;
 
     /**
      * Gets the scenario by specified identifier
@@ -128,34 +130,37 @@ public interface OnboardingService {
      * Gets the device-aware scenario by specified identifier
      *
      * @param scenarioId The scenario identifier
+     * @param clientDevice The client device, which is the target for the on-boarding action
      * @param device The associated device
      * @param session The session
      * @return The device-aware scenario
      * @throws OXException If scenario cannot be returned
      */
-    DeviceAwareScenario getScenario(String scenarioId, Device device, Session session) throws OXException;
+    DeviceAwareScenario getScenario(String scenarioId, ClientDevice clientDevice, Device device, Session session) throws OXException;
 
     /**
      * Gets the device-aware scenario by specified identifier
      *
      * @param scenarioId The scenario identifier
+     * @param clientDevice The client device, which is the target for the on-boarding action
      * @param device The associated device
      * @param userId The user id
      * @param contextId The context id
      * @return The device-aware scenario
      * @throws OXException If scenario cannot be returned
      */
-    DeviceAwareScenario getScenario(String scenarioId, Device device, int userId, int contextId) throws OXException;
+    DeviceAwareScenario getScenario(String scenarioId, ClientDevice clientDevice, Device device, int userId, int contextId) throws OXException;
 
     /**
      * Gets the device-aware scenarios for specified device.
      *
+     * @param clientDevice The client device, which is the target for the on-boarding action
      * @param device The device
      * @param session The session
      * @return The scenarios for specified device
      * @throws OXException If scenarios cannot be returned
      */
-    List<DeviceAwareScenario> getScenariosFor(Device device, Session session) throws OXException;
+    List<DeviceAwareScenario> getScenariosFor(ClientDevice clientDevice, Device device, Session session) throws OXException;
 
     /**
      * Executes the denoted scenario

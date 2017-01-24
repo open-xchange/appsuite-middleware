@@ -49,8 +49,9 @@
 
 package com.openexchange.ajax;
 
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
 import com.openexchange.ajax.login.LoginTools;
-import junit.framework.TestCase;
 
 
 /**
@@ -58,25 +59,24 @@ import junit.framework.TestCase;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class LoginAddFragmentTest extends TestCase {
-
-    public LoginAddFragmentTest(String name) {
-        super(name);
-    }
+public class LoginAddFragmentTest {
 
     public void assertFragment(String original, String expected) {
         assertEquals(expected, new TestLogin().addFragmentParam(original, "session", "abcd"));
     }
 
-    public void testSimple() {
+         @Test
+     public void testSimple() {
         assertFragment("http://www.open-xchange.com/index.html", "http://www.open-xchange.com/index.html#session=abcd");
     }
 
-    public void testEnhanceExistingFragment() {
+         @Test
+     public void testEnhanceExistingFragment() {
         assertFragment("http://www.open-xchange.com/index.html#f=12&i=23", "http://www.open-xchange.com/index.html#f=12&i=23&session=abcd");
     }
 
-    public void testDelimitedByQuestionMark() {
+         @Test
+     public void testDelimitedByQuestionMark() {
         assertFragment("http://www.open-xchange.com/index.html#f=12&i=23?someParam=someValue", "http://www.open-xchange.com/index.html#f=12&i=23&session=abcd?someParam=someValue");
     }
 

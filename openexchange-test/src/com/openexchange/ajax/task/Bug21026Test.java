@@ -51,12 +51,18 @@ package com.openexchange.ajax.task;
 
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.java.Autoboxing.l;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 import org.json.JSONException;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonAllResponse;
@@ -84,12 +90,12 @@ public class Bug21026Test extends AbstractAJAXSession {
     private Task third;
     private TimeZone timeZone;
 
-    public Bug21026Test(String name) {
-        super(name);
+    public Bug21026Test() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         timeZone = client.getValues().getTimeZone();
@@ -114,16 +120,20 @@ public class Bug21026Test extends AbstractAJAXSession {
         second = findNextOccurrence(client, task);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        if (null != third) {
-            client.execute(new DeleteRequest(third));
+    @After
+    public void tearDown() throws Exception {
+        try {
+            if (null != third) {
+                client.execute(new DeleteRequest(third));
+            }
+            client.execute(new DeleteRequest(second));
+            client.execute(new DeleteRequest(first));
+        } finally {
+            super.tearDown();
         }
-        client.execute(new DeleteRequest(second));
-        client.execute(new DeleteRequest(first));
-        super.tearDown();
     }
 
+    @Test
     public void testNoFurtherOccurrence() throws Exception {
         assertNotNull("Second occurrence not found.", second);
         assertEquals("Occurrences of first task is wrong.", 2, client.execute(new GetRequest(first.getParentFolderID(), first.getObjectID())).getTask(timeZone).getOccurrence());
@@ -163,9 +173,7 @@ public class Bug21026Test extends AbstractAJAXSession {
         cal.setTime(previous.getEndDate());
         cal.add(Calendar.DATE, 1);
         for (Object[] data : response) {
-            if (previous.getTitle().equals(data[response.getColumnPos(Task.TITLE)])
-                && previous.getObjectID() != i((Integer) data[response.getColumnPos(Task.OBJECT_ID)])
-                && cal.getTimeInMillis() == l((Long) data[response.getColumnPos(Task.END_DATE)])) {
+            if (previous.getTitle().equals(data[response.getColumnPos(Task.TITLE)]) && previous.getObjectID() != i((Integer) data[response.getColumnPos(Task.OBJECT_ID)]) && cal.getTimeInMillis() == l((Long) data[response.getColumnPos(Task.END_DATE)])) {
                 retval = new Task();
                 retval.setObjectID(i((Integer) data[response.getColumnPos(Task.OBJECT_ID)]));
                 retval.setParentFolderID(previous.getParentFolderID());

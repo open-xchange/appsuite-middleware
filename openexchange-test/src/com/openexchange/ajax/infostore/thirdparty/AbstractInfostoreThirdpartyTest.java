@@ -54,11 +54,12 @@ import java.util.List;
 import java.util.Random;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.oauth.client.actions.OAuthService;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.test.FolderTestManager;
-
 
 /**
  * {@link AbstractInfostoreThirdpartyTest}
@@ -66,26 +67,31 @@ import com.openexchange.test.FolderTestManager;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class AbstractInfostoreThirdpartyTest extends AbstractAJAXSession {
+
     /**
      * Initializes a new {@link AbstractInfostoreThirdpartyTest}.
+     * 
      * @param name
      */
-    public AbstractInfostoreThirdpartyTest(String name) {
-        super(name);
+    public AbstractInfostoreThirdpartyTest() {
+        super();
     }
 
     public FolderTestManager fMgr;
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         fMgr = new FolderTestManager(getClient());
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        fMgr.cleanUp();
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
+        try {
+            fMgr.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
     /**
@@ -96,17 +102,17 @@ public class AbstractInfostoreThirdpartyTest extends AbstractAJAXSession {
      * @throws Exception if folder id was not found
      */
     protected List<ProviderIdMapper> getConnectedInfostoreId() throws Exception {
-        int[] columns = new int[] {  1, 20 };
+        int[] columns = new int[] { 1, 20 };
 
         List<ProviderIdMapper> providerIds = new ArrayList<ProviderIdMapper>();
 
         String folderId = null;
 
         FolderObject[] fObjs = fMgr.listFoldersOnServer(1, columns);
-        for(FolderObject fObj : fObjs) {
-            if(fObj.getFullName() != null) {
-                for(OAuthService authProvider : OAuthService.values()) {
-                    if(fObj.getFullName().startsWith(authProvider.getFilestorageService())) {
+        for (FolderObject fObj : fObjs) {
+            if (fObj.getFullName() != null) {
+                for (OAuthService authProvider : OAuthService.values()) {
+                    if (fObj.getFullName().startsWith(authProvider.getFilestorageService())) {
                         folderId = fObj.getFullName();
                         ProviderIdMapper pidm = new ProviderIdMapper();
                         pidm.setAuthProvider(authProvider);
@@ -117,7 +123,7 @@ public class AbstractInfostoreThirdpartyTest extends AbstractAJAXSession {
             }
         }
 
-        if(providerIds == null || providerIds.isEmpty()) {
+        if (providerIds == null || providerIds.isEmpty()) {
             throw new Exception("Could not find file storage for provider: ");
         }
 

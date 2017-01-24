@@ -60,7 +60,7 @@ import com.openexchange.mail.dataobjects.MailFolderDescription;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface IMailFolderStorage {
+public interface IMailFolderStorage extends IMailStorage {
 
     /**
      * The constant to return or represent an empty path.

@@ -3360,7 +3360,7 @@ msgid "Conversion to vCard failed."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:71
-msgid "Can not import the format %2$s into folder %1$s."
+msgid "Cannot import the format %2$s into selected folder."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:73
@@ -5020,6 +5020,7 @@ msgstr ""
 #. * You do not have the appropriate permissions to modify this object.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:153
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:121
 msgid "You do not have the appropriate permissions to modify this object."
 msgstr ""
 
@@ -5034,6 +5035,7 @@ msgstr ""
 #. * You do not have the appropriate permissions to read this object.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:163
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:119
 msgid "You do not have the appropriate permissions to read this object."
 msgstr ""
 
@@ -7386,7 +7388,8 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:114
 msgid ""
 "Default folders cannot be created as mail system denies to create more "
-"folders. Please delete other folders first"
+"folders. Consequently, the mail module is not usable at the moment. Please "
+"delete other folders first in order to re-use the mail module again"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:116
@@ -7919,6 +7922,11 @@ msgstr ""
 msgid ""
 "The entered credential or authentication information does not work or are no "
 "longer accepted by provider. Please change them."
+msgstr ""
+
+#. The message advertising that affected account is broken and needs to be re-created
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/KnownStatusMessage.java:77
+msgid "Account is broken and needs to be re-created"
 msgstr ""
 
 #. Cannot find mail account for user "%2$s".
@@ -9158,6 +9166,11 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:77
 msgid ""
 "The maximum allowed number of '%1$s' images in the signature is reached."
+msgstr ""
+
+#. Thrown if a user must not modify a snippet/signature. Neither shared nor owned by that user.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:80
+msgid "You are not allowed to modify the signature"
 msgstr ""
 
 #. The message displayed if the requested subscription cannot be found from the server.

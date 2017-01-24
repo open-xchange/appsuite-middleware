@@ -1,16 +1,15 @@
 package liquibase.changelog;
 
+import static org.junit.Assert.assertEquals;
+import java.util.ArrayList;
+import java.util.List;
+import org.junit.Before;
+import org.junit.Test;
 import liquibase.changelog.filter.ContextChangeSetFilter;
 import liquibase.changelog.filter.DbmsChangeSetFilter;
 import liquibase.changelog.visitor.ChangeSetVisitor;
 import liquibase.database.Database;
 import liquibase.database.core.MySQLDatabase;
-import static org.junit.Assert.*;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class ChangeLogIteratorTest {
     private DatabaseChangeLog changeLog;

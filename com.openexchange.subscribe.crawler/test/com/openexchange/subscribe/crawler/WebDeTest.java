@@ -49,6 +49,7 @@
 
 package com.openexchange.subscribe.crawler;
 
+import org.junit.Test;
 
 /**
  * {@link WebDeTest}
@@ -57,7 +58,8 @@ package com.openexchange.subscribe.crawler;
  */
 public class WebDeTest extends GenericSubscribeServiceTestHelpers {
 
-    public void testWebDe(){
+         @Test
+     public void testWebDe(){
         checkSingleCrawler("web.de");
     }
 }

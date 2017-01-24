@@ -917,6 +917,7 @@ public class Mail extends PermissionServlet {
                     mailInterface.getReplyMessageForDisplay(folderPath, uid, reply2all, usmNoSave, false),
                     displayMode,
                     false,
+                    true,
                     session,
                     usmNoSave,
                     warnings,
@@ -1016,6 +1017,7 @@ public class Mail extends PermissionServlet {
                     mailInterface.getForwardMessageForDisplay(new String[] { folderPath }, new String[] { uid }, usmNoSave, setFrom),
                     displayMode,
                     false,
+                    true,
                     session,
                     usmNoSave,
                     warnings,
@@ -2480,6 +2482,7 @@ public class Mail extends PermissionServlet {
                     mailInterface.getForwardMessageForDisplay(folders, ids, usmNoSave, setFrom),
                     DisplayMode.MODIFYABLE,
                     false,
+                    true,
                     session,
                     usmNoSave,
                     warnings,
@@ -4114,7 +4117,8 @@ public class Mail extends PermissionServlet {
                 /*
                  * Manually detect&set \Answered flag
                  */
-                if (mailAccess.getMessageStorage() instanceof IMailMessageStorageExt) {
+                IMailMessageStorageExt messageStorageExt = mailAccess.getMessageStorage().supports(IMailMessageStorageExt.class);
+                if (null != messageStorageExt) {
                     final List<String> lst = new ArrayList<String>(2);
                     {
                         final String inReplyTo = sentMail.getFirstHeader("In-Reply-To");
@@ -4130,7 +4134,6 @@ public class Mail extends PermissionServlet {
                         }
                     }
                     if (!lst.isEmpty()) {
-                        final IMailMessageStorageExt messageStorageExt = (IMailMessageStorageExt) mailAccess.getMessageStorage();
                         final MailMessage[] mails = messageStorageExt.getMessagesByMessageID(lst.toArray(new String[lst.size()]));
                         for (final MailMessage mail : mails) {
                             if (null != mail) {

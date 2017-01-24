@@ -61,8 +61,8 @@ import com.openexchange.html.AbstractSanitizing;
  */
 public class Bug25923Test extends AbstractSanitizing {
 
-    @Test
-    public void testCheckValidBaseTag() {
+     @Test
+     public void testCheckValidBaseTag() {
         String htmlContent = "<html><head><title>Foo Bar</title><base href=\"http://www.foobar.invalid\"></head><body><img src=\"image.png\"></body></html>";
         String actual = getHtmlService().checkBaseTag(htmlContent, true);
         String expected = "<html><head><title>Foo Bar</title></head><body><img src=\"http://www.foobar.invalid/image.png\"\"></body></html>";

@@ -59,13 +59,8 @@ import java.util.Date;
 public class RegisterObject extends AbstractPushObject {
 
     private final int userId;
-
     private final String hostAddress;
-
     private final int port;
-
-    private String userHash;
-
     private final Date timestamp;
 
     public RegisterObject(final int userId, final int contextId, final String hostAddress, final int port, final boolean isSync) {
@@ -86,10 +81,6 @@ public class RegisterObject extends AbstractPushObject {
 
     public int getPort() {
         return port;
-    }
-
-    public String getUserHash() {
-        return userHash;
     }
 
     public Date getTimestamp() {

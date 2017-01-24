@@ -57,6 +57,7 @@ public class ClientDetailsParser extends AbstractAJAXParser<ClientDetailsRespons
 
     /**
      * Default constructor.
+     * 
      * @param userId
      */
     public ClientDetailsParser(final boolean failOnError) {

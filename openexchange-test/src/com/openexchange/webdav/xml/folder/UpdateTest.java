@@ -50,6 +50,7 @@
 package com.openexchange.webdav.xml.folder;
 
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.webdav.xml.FolderTest;
@@ -57,10 +58,7 @@ import com.openexchange.webdav.xml.GroupUserTest;
 
 public class UpdateTest extends FolderTest {
 
-    public UpdateTest(final String name) {
-        super(name);
-    }
-
+    @Test
     public void testRenameFolder() throws Throwable {
         FolderObject folderObj = createFolderObject(userId, "testInsertRenameFolder", FolderObject.TASK, true);
         int objectId = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password, context);
@@ -75,6 +73,7 @@ public class UpdateTest extends FolderTest {
         compareFolder(folderObj, loadFolder);
     }
 
+    @Test
     public void testMoveFolder() throws Exception {
         FolderObject folderObj = createFolderObject(userId, "testMoveFolder1", FolderObject.TASK, true);
         final int parentFolderId = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password, context);
@@ -89,6 +88,7 @@ public class UpdateTest extends FolderTest {
         compareFolder(folderObj, loadFolder);
     }
 
+    @Test
     public void testChangePermissionsOfPrivateFolder() throws Exception {
         final int userParticipantId = GroupUserTest.searchUser(webCon, userParticipant2, new Date(0), PROTOCOL + hostName, login, password, context)[0].getInternalUserId();
         final int groupParticipantId = GroupUserTest.searchGroup(webCon, groupParticipant, new Date(0), PROTOCOL + hostName, login, password, context)[0].getIdentifier();
@@ -98,11 +98,11 @@ public class UpdateTest extends FolderTest {
         folderObj.setObjectID(objectId);
 
         final OCLPermission oclp[] = new OCLPermission[3];
-        oclp[0] = createPermission( userId, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, true);
-        oclp[1] = createPermission( userParticipantId, false, OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_OWN_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, false);
-        oclp[2] = createPermission( groupParticipantId, true, OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, false);
+        oclp[0] = createPermission(userId, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, true);
+        oclp[1] = createPermission(userParticipantId, false, OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_OWN_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, false);
+        oclp[2] = createPermission(groupParticipantId, true, OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, false);
 
-        folderObj.setPermissionsAsArray( oclp );
+        folderObj.setPermissionsAsArray(oclp);
 
         updateFolder(webCon, folderObj, PROTOCOL + hostName, login, password, context);
 
@@ -110,6 +110,7 @@ public class UpdateTest extends FolderTest {
         compareFolder(folderObj, loadFolder);
     }
 
+    @Test
     public void testChangePermissionsOfPublicFolder() throws Exception {
         final int userParticipantId = GroupUserTest.searchUser(webCon, userParticipant2, new Date(0), PROTOCOL + hostName, login, password, context)[0].getInternalUserId();
         final int groupParticipantId = GroupUserTest.searchGroup(webCon, groupParticipant, new Date(0), PROTOCOL + hostName, login, password, context)[0].getIdentifier();
@@ -119,11 +120,11 @@ public class UpdateTest extends FolderTest {
         folderObj.setObjectID(objectId);
 
         final OCLPermission oclp[] = new OCLPermission[3];
-        oclp[0] = createPermission( userId, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
-        oclp[1] = createPermission( userParticipantId, false, OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_OWN_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS);
-        oclp[2] = createPermission( groupParticipantId, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+        oclp[0] = createPermission(userId, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+        oclp[1] = createPermission(userParticipantId, false, OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_OWN_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS);
+        oclp[2] = createPermission(groupParticipantId, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
 
-        folderObj.setPermissionsAsArray( oclp );
+        folderObj.setPermissionsAsArray(oclp);
 
         updateFolder(webCon, folderObj, PROTOCOL + hostName, login, password, context);
 

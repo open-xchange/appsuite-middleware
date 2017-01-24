@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.folder;
 
+import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.util.Random;
 import org.json.JSONException;
@@ -70,10 +71,6 @@ import com.openexchange.test.FolderTestManager;
 public final class TaskObjectCountTest extends AbstractObjectCountTest {
 
     private static final Random rand = new Random(System.currentTimeMillis());
-
-    public TaskObjectCountTest(String name) {
-        super(name);
-    }
 
     @Test
     public void testCountInPrivateFolder() throws Exception {

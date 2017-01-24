@@ -161,8 +161,8 @@ public abstract class ContextAbstraction extends UserAbstraction {
     protected String schema;
     protected String schemaStrategy;
 
-    protected final String SCHEMA_NAME_AND_SCHEMA_STRATEGY_ERROR = "You can not specify \"schema\" and \"schema-strategy\" at the same time.";
-    protected final String SCHEMA_NAME_ERROR = "Invalid value for \"schema\". Available values: \"automatic\", \"in-memory\"";
+    protected static final String SCHEMA_NAME_AND_SCHEMA_STRATEGY_ERROR = "You can not specify \"schema\" and \"schema-strategy\" at the same time.";
+    protected static final String SCHEMA_NAME_ERROR = "Invalid value for \"schema\". Available values: \"automatic\", \"in-memory\"";
 
     protected Integer filestoreid = null;
 

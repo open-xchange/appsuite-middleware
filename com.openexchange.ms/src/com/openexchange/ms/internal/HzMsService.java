@@ -85,6 +85,20 @@ public final class HzMsService extends AbstractHzResource implements MsService {
         topics = new NonBlockingHashMap<String, Topic<?>>(16);
     }
 
+    /**
+     * Shuts-down this Hazelcast-backed messaging service.
+     */
+    public void shutDown() {
+        for (Queue<?> queue : queues.values()) {
+            queue.destroy();
+        }
+        queues.clear();
+        for (Topic<?> topic : topics.values()) {
+            topic.destroy();
+        }
+        topics.clear();
+    }
+
     @Override
     public Set<Member> getMembers() {
         final Set<com.hazelcast.core.Member> hzMembers = hz.getCluster().getMembers();

@@ -1,12 +1,11 @@
 package liquibase.diff;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 import liquibase.database.core.H2Database;
 import liquibase.diff.core.StandardDiffGenerator;
 import liquibase.exception.DatabaseException;
-import org.junit.Test;
-
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 public class DiffGeneratorFactoryTest {
 	@Test

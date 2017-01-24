@@ -49,9 +49,13 @@
 
 package com.openexchange.ajax.reminder;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.Executor;
@@ -68,24 +72,7 @@ import com.openexchange.groupware.tasks.Task;
  */
 public class RemindAgainTest extends AbstractAJAXSession {
 
-    /**
-     * Default constructor.
-     * @param name Test name.
-     */
-    public RemindAgainTest(final String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
-
+    @Test
     public void testRemindAgain() throws Exception {
         final AJAXClient client = getClient();
         final int userId = client.getValues().getUserId();

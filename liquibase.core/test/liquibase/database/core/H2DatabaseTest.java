@@ -1,10 +1,12 @@
 package liquibase.database.core;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import org.junit.Assert;
+import org.junit.Test;
 import liquibase.database.AbstractJdbcDatabaseTest;
 import liquibase.database.Database;
-import org.junit.Assert;
-import static org.junit.Assert.*;
-import org.junit.Test;
 
 public class H2DatabaseTest extends AbstractJdbcDatabaseTest {
 
@@ -18,20 +20,18 @@ public class H2DatabaseTest extends AbstractJdbcDatabaseTest {
     }
 
 
-    @Override
-    @Test
+     @Test
     public void supportsInitiallyDeferrableColumns() {
         assertFalse(getDatabase().supportsInitiallyDeferrableColumns());
     }
 
-    @Override
-    @Test
+     @Test
     public void getCurrentDateTimeFunction() {
         Assert.assertEquals("NOW()", getDatabase().getCurrentDateTimeFunction());
     }
 
-    @Test
-    public void testGetDefaultDriver() {
+     @Test
+     public void testGetDefaultDriver() {
         Database database = getDatabase();
 
         assertEquals("org.h2.Driver", database.getDefaultDriver("jdbc:h2:mem:liquibase"));
@@ -39,15 +39,13 @@ public class H2DatabaseTest extends AbstractJdbcDatabaseTest {
         assertNull(database.getDefaultDriver("jdbc:db2://localhost;databaseName=liquibase"));
     }
 
-    @Override
-    @Test
+     @Test
     public void escapeTableName_noSchema() {
         Database database = getDatabase();
         assertEquals("tableName", database.escapeTableName(null, null, "tableName"));
     }
 
-    @Override
-    @Test
+     @Test
     public void escapeTableName_withSchema() {
         Database database = getDatabase();
         assertEquals("schemaName.tableName", database.escapeTableName("catalogName", "schemaName", "tableName"));

@@ -83,10 +83,11 @@ public class InfostoreDocumentPublicationService extends AbstractPublicationServ
     private static final String URL = "url";
 
     private final Random random = new Random();
-
-    private volatile IDBasedFileAccessFactory fileAccessFactory;
+    private final IDBasedFileAccessFactory fileAccessFactory;
+    private volatile PublicationTarget target;
 
     public InfostoreDocumentPublicationService(IDBasedFileAccessFactory fileAccessFactory) {
+        super();
         this.fileAccessFactory = fileAccessFactory;
     }
 
@@ -105,12 +106,17 @@ public class InfostoreDocumentPublicationService extends AbstractPublicationServ
         return target;
     }
 
-    private PublicationTarget target;
-
     @Override
     public PublicationTarget getTarget() throws OXException {
-        if(target == null) {
-            return target = buildTarget();
+        PublicationTarget target = this.target;
+        if (null == target) {
+            synchronized (this) {
+                target = this.target;
+                if (null == target) {
+                    target = buildTarget();
+                    this.target = target;
+                }
+            }
         }
         return target;
     }

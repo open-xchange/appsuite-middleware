@@ -92,7 +92,7 @@ public class OverridingUserConfigurationStorage extends UserConfigurationStorage
         }
         return retval.toArray(new UserConfiguration[retval.size()]);
     }
-    
+
     @Override
     public UserConfiguration[] getUserConfigurations(Context ctx, int[] userIds, int[][] groups) throws OXException {
         final List<UserConfiguration> retval = new ArrayList<UserConfiguration>();
@@ -101,7 +101,7 @@ public class OverridingUserConfigurationStorage extends UserConfigurationStorage
         }
         return retval.toArray(new UserConfiguration[retval.size()]);
     }
-    
+
     @Override
     public void clearStorage() throws OXException {
         delegate.clearStorage();
@@ -109,7 +109,7 @@ public class OverridingUserConfigurationStorage extends UserConfigurationStorage
 
     @Override
     public void invalidateCache(final int userId, final Context ctx) throws OXException {
-        delegate.invalidateCache(userId,ctx);
+        delegate.invalidateCache(userId, ctx);
     }
 
     public UserConfiguration getOverride(final int userId, final int[] groups, final Context ctx) throws OXException {

@@ -93,13 +93,6 @@ public class ConfiguredDefaultPermissions {
 
     private static final String PROP_DEFAULT_PERMISSIONS = "com.openexchange.folderstorage.defaultPermissions";
 
-//    public static void main(String[] args) throws Exception {
-//        Map<String, List<Permission>> map = new ConfiguredDefaultPermissions().parseExpressionsLine("2=group_2@2.4.0.0,admin_user_5@8.4.4.4|15=admin_group_2@8.8.8.8|3=user_6@viewer,group_7@author");
-//        for (Map.Entry<String,List<Permission>> entry : map.entrySet()) {
-//            System.out.println("Folder=" + entry.getKey() + " Permissions=" + entry.getValue());
-//        }
-//    }
-
     private static final ConfiguredDefaultPermissions INSTANCE = new ConfiguredDefaultPermissions();
 
     /**
@@ -148,7 +141,8 @@ public class ConfiguredDefaultPermissions {
                 return null;
             }
 
-            ref = new ImmutableReference<Map<String, List<Permission>>>(getConfiguredDefaultPermissionsFor(userId, contextId, viewFactory));
+            Map<String, List<Permission>> configuredDefaultPermissions = getConfiguredDefaultPermissionsFor(userId, contextId, viewFactory);
+            ref = new ImmutableReference<Map<String, List<Permission>>>(configuredDefaultPermissions);
             cache.put(key, ref);
         }
 
@@ -183,93 +177,99 @@ public class ConfiguredDefaultPermissions {
         ImmutablePermission.Builder permissionBuilder = ImmutablePermission.builder();
         for (String expression : expressions) {
             // E.g. 2=group_2@2.4.0.0,admin_user_5@8.4.4.4
-            int pos = expression.indexOf('=');
-            if (pos < 1) {
-                throw OXException.general("Invalid value for property \"" + PROP_DEFAULT_PERMISSIONS + "\". Missing '=' character in expression: " + expression);
-            }
-
-            String folderId = expression.substring(0, pos).trim();
-            ImmutableList.Builder<Permission> listBuilder = ImmutableList.builder();
-            int off;
-            for (String permExpression : Strings.splitByComma(expression.substring(pos + 1).trim())) {
-                // E.g. group_2@2.4.0.0
-                boolean admin = false;
-                boolean group = false;
-                off = 0;
-
-                if (permExpression.startsWith("admin_", off)) {
-                    admin = true;
-                    off += 6;
-                }
-
-                if (permExpression.startsWith("group_", off)) {
-                    group = true;
-                    off += 6;
-                } else if (permExpression.startsWith("user_", off)) {
-                    off += 5;
-                } else {
-                    throw OXException.general("Invalid value for property \"" + PROP_DEFAULT_PERMISSIONS + "\". Permission expression is required to start with either \"admin_user_\", \"user_\", \"admin_group_\" or \"group_\" prefix: " + expression);
-                }
-
-                pos = permExpression.indexOf('@', off);
-                if (pos < 0) {
-                    throw OXException.general("Invalid value for property \"" + PROP_DEFAULT_PERMISSIONS + "\". Missing '@' character in expression: " + expression);
-                }
-                int entityId = Integer.parseInt(permExpression.substring(off, pos));
-                off = pos + 1;
-
-                permissionBuilder.reset();
-                permissionBuilder.setAdmin(admin).setGroup(group).setEntity(entityId);
-
-                int fp, rp, wp, dp;
-                if (permExpression.startsWith("viewer", off)) {
-                    fp = Permission.READ_FOLDER;
-                    rp = Permission.READ_ALL_OBJECTS;
-                    wp = Permission.NO_PERMISSIONS;
-                    dp = Permission.NO_PERMISSIONS;
-                } else if (permExpression.startsWith("writer", off)) {
-                    fp = Permission.READ_FOLDER;
-                    rp = Permission.READ_ALL_OBJECTS;
-                    wp = Permission.WRITE_ALL_OBJECTS;
-                    dp = Permission.NO_PERMISSIONS;
-                } else if (permExpression.startsWith("author", off)) {
-                    fp = Permission.CREATE_SUB_FOLDERS;
-                    rp = Permission.READ_ALL_OBJECTS;
-                    wp = Permission.WRITE_ALL_OBJECTS;
-                    dp = Permission.DELETE_ALL_OBJECTS;
-                } else {
-                    pos = permExpression.indexOf('.', off);
-                    if (pos < 0) {
-                        throw OXException.general("Invalid value for property \"" + PROP_DEFAULT_PERMISSIONS + "\". Expected a '.' delimiter in rights expression: " + expression);
-                    }
-                    fp = Integer.parseInt(permExpression.substring(off, pos));
-                    off = pos + 1;
-
-                    pos = permExpression.indexOf('.', off);
-                    if (pos < 0) {
-                        throw OXException.general("Invalid value for property \"" + PROP_DEFAULT_PERMISSIONS + "\". Expected a '.' delimiter in rights expression: " + expression);
-                    }
-                    rp = Integer.parseInt(permExpression.substring(off, pos));
-                    off = pos + 1;
-
-                    pos = permExpression.indexOf('.', off);
-                    if (pos < 0) {
-                        throw OXException.general("Invalid value for property \"" + PROP_DEFAULT_PERMISSIONS + "\". Expected a '.' delimiter in rights expression: " + expression);
-                    }
-                    wp = Integer.parseInt(permExpression.substring(off, pos));
-                    off = pos + 1;
-
-                    dp = Integer.parseInt(permExpression.substring(off));
-                    off = pos + 1;
-                }
-
-                permissionBuilder.setFolderPermission(fp).setReadPermission(rp).setWritePermission(wp).setDeletePermission(dp).setSystem(0);
-                listBuilder.add(permissionBuilder.build());
-            }
-            mapBuilder.put(folderId, listBuilder.build());
+            parseExpression(expression, permissionBuilder, mapBuilder);
         }
 
         return mapBuilder.build();
+    }
+
+    private void parseExpression(String expression, ImmutablePermission.Builder permissionBuilder, ImmutableMap.Builder<String, List<Permission>> mapBuilder) throws OXException {
+        // E.g. 2=group_2@2.4.0.0,admin_user_5@8.4.4.4
+        int pos = expression.indexOf('=');
+        if (pos < 1) {
+            throw OXException.general("Invalid value for property \"" + PROP_DEFAULT_PERMISSIONS + "\". Missing '=' character in expression: " + expression);
+        }
+
+        String folderId = expression.substring(0, pos).trim();
+        ImmutableList.Builder<Permission> listBuilder = ImmutableList.builder();
+        int off;
+        for (String permExpression : Strings.splitByComma(expression.substring(pos + 1).trim())) {
+            // E.g. group_2@2.4.0.0
+            boolean admin = false;
+            boolean group = false;
+            off = 0;
+
+            if (permExpression.startsWith("admin_", off)) {
+                admin = true;
+                off += 6;
+            }
+
+            if (permExpression.startsWith("group_", off)) {
+                group = true;
+                off += 6;
+            } else if (permExpression.startsWith("user_", off)) {
+                off += 5;
+            } else {
+                throw OXException.general("Invalid value for property \"" + PROP_DEFAULT_PERMISSIONS + "\". Permission expression is required to start with either \"admin_user_\", \"user_\", \"admin_group_\" or \"group_\" prefix: " + expression);
+            }
+
+            pos = permExpression.indexOf('@', off);
+            if (pos < 0) {
+                throw OXException.general("Invalid value for property \"" + PROP_DEFAULT_PERMISSIONS + "\". Missing '@' character in expression: " + expression);
+            }
+            int entityId = Integer.parseInt(permExpression.substring(off, pos));
+            off = pos + 1;
+
+            permissionBuilder.reset();
+            permissionBuilder.setAdmin(admin).setGroup(group).setEntity(entityId);
+
+            int fp, rp, wp, dp;
+            if (permExpression.startsWith("viewer", off)) {
+                fp = Permission.READ_FOLDER;
+                rp = Permission.READ_ALL_OBJECTS;
+                wp = Permission.NO_PERMISSIONS;
+                dp = Permission.NO_PERMISSIONS;
+            } else if (permExpression.startsWith("writer", off)) {
+                fp = Permission.READ_FOLDER;
+                rp = Permission.READ_ALL_OBJECTS;
+                wp = Permission.WRITE_ALL_OBJECTS;
+                dp = Permission.NO_PERMISSIONS;
+            } else if (permExpression.startsWith("author", off)) {
+                fp = Permission.CREATE_SUB_FOLDERS;
+                rp = Permission.READ_ALL_OBJECTS;
+                wp = Permission.WRITE_ALL_OBJECTS;
+                dp = Permission.DELETE_ALL_OBJECTS;
+            } else {
+                pos = permExpression.indexOf('.', off);
+                if (pos < 0) {
+                    throw OXException.general("Invalid value for property \"" + PROP_DEFAULT_PERMISSIONS + "\". Expected a '.' delimiter in rights expression: " + expression);
+                }
+                fp = Integer.parseInt(permExpression.substring(off, pos));
+                off = pos + 1;
+
+                pos = permExpression.indexOf('.', off);
+                if (pos < 0) {
+                    throw OXException.general("Invalid value for property \"" + PROP_DEFAULT_PERMISSIONS + "\". Expected a '.' delimiter in rights expression: " + expression);
+                }
+                rp = Integer.parseInt(permExpression.substring(off, pos));
+                off = pos + 1;
+
+                pos = permExpression.indexOf('.', off);
+                if (pos < 0) {
+                    throw OXException.general("Invalid value for property \"" + PROP_DEFAULT_PERMISSIONS + "\". Expected a '.' delimiter in rights expression: " + expression);
+                }
+                wp = Integer.parseInt(permExpression.substring(off, pos));
+                off = pos + 1;
+
+                dp = Integer.parseInt(permExpression.substring(off));
+                //off = pos + 1;
+            }
+
+            permissionBuilder.setFolderPermission(fp).setReadPermission(rp).setWritePermission(wp).setDeletePermission(dp).setSystem(0);
+            listBuilder.add(permissionBuilder.build());
+        }
+
+        mapBuilder.put(folderId, listBuilder.build());
     }
 
 }

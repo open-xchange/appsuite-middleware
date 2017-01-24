@@ -1,3 +1,4 @@
+
 package com.openexchange.test.fixtures.ajax;
 
 import java.io.File;
@@ -26,15 +27,16 @@ import com.openexchange.test.fixtures.TaskFixtureFactory;
 import com.openexchange.test.fixtures.YAMLFixtureLoader;
 
 public class FixtureLoaderFactory {
-	public static FixtureLoader getLoader(AJAXClient client, File datapath) {//TODO add datapath to method signature
-    	final YAMLFixtureLoader loader = new YAMLFixtureLoader();
 
-    	AJAXGroupResolver groupResolver = new AJAXGroupResolver(client);
-    	AJAXContactFinder contactFinder = new AJAXContactFinder(client);
-    	AJAXUserConfigFactory userConfigFactory = new AJAXUserConfigFactory();
+    public static FixtureLoader getLoader(AJAXClient client, File datapath) {//TODO add datapath to method signature
+        final YAMLFixtureLoader loader = new YAMLFixtureLoader();
 
-    	loader.addFixtureFactory(new TaskFixtureFactory(groupResolver, loader), Task.class);
-    	loader.addFixtureFactory(new AppointmentFixtureFactory(groupResolver, loader), Appointment.class);
+        AJAXGroupResolver groupResolver = new AJAXGroupResolver(client);
+        AJAXContactFinder contactFinder = new AJAXContactFinder(client);
+        AJAXUserConfigFactory userConfigFactory = new AJAXUserConfigFactory();
+
+        loader.addFixtureFactory(new TaskFixtureFactory(groupResolver, loader), Task.class);
+        loader.addFixtureFactory(new AppointmentFixtureFactory(groupResolver, loader), Appointment.class);
         loader.addFixtureFactory(new ContactFixtureFactory(loader), Contact.class);
         loader.addFixtureFactory(new InfoItemFixtureFactory(loader), InfoItem.class);
         loader.addFixtureFactory(new CredentialFixtureFactory(userConfigFactory, contactFinder, loader), SimpleCredentials.class);

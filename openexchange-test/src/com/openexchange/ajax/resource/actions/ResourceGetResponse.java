@@ -64,24 +64,24 @@ import com.openexchange.resource.json.ResourceParser;
  */
 public final class ResourceGetResponse extends AbstractAJAXResponse {
 
-	/**
-	 * Initializes a new {@link ResourceGetResponse}
-	 *
-	 * @param response
-	 *            The JSON response container
-	 */
-	ResourceGetResponse(final Response response) {
-		super(response);
-	}
+    /**
+     * Initializes a new {@link ResourceGetResponse}
+     *
+     * @param response
+     *            The JSON response container
+     */
+    ResourceGetResponse(final Response response) {
+        super(response);
+    }
 
-	/**
-	 * Gets the resource received through GET request
-	 *
-	 * @return The resource received through GET request
-	 * @throws JSONException
-	 *             If a JSON error occurs
-	 */
-	public Resource getResource() throws JSONException {
-		return ResourceParser.parseResource(new JSONObject(getResponse().getData().toString()));
-	}
+    /**
+     * Gets the resource received through GET request
+     *
+     * @return The resource received through GET request
+     * @throws JSONException
+     *             If a JSON error occurs
+     */
+    public Resource getResource() throws JSONException {
+        return ResourceParser.parseResource(new JSONObject(getResponse().getData().toString()));
+    }
 }

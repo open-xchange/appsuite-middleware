@@ -51,7 +51,6 @@ package com.openexchange.ajax.subscribe.actions;
 
 import com.openexchange.ajax.container.Response;
 
-
 /**
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
@@ -62,10 +61,10 @@ public class UpdateSubscriptionResponse extends AbstractSubscriptionResponse {
         super(response);
     }
 
-    public boolean wasSuccessful(){
+    public boolean wasSuccessful() {
         try {
-            return (((Integer)getData()).intValue() == 1);
-        } catch(Exception e){
+            return (((Integer) getData()).intValue() == 1);
+        } catch (Exception e) {
             return false;
         }
     }

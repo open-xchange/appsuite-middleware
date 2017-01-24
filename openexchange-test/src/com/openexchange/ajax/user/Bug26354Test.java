@@ -50,21 +50,20 @@
 package com.openexchange.ajax.user;
 
 import static com.openexchange.java.Autoboxing.B;
-
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Random;
 import java.util.TimeZone;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
 import com.openexchange.ajax.config.AttributeWriter;
 import com.openexchange.ajax.config.BetaWriter;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.user.actions.SetAttributeRequest;
 import com.openexchange.ajax.user.actions.SetAttributeResponse;
@@ -82,12 +81,12 @@ public final class Bug26354Test extends AbstractAJAXSession {
     private static final String ATTRIBUTE_NAME = "testForBug26354";
 
     private static final int ITERATIONS = 100;
-    
+
     private static final TimeZone[] TIME_ZONES = new TimeZone[3];
     static {
-    	TIME_ZONES[0] = TimeZones.PST;
-    	TIME_ZONES[1] = TimeZones.UTC;
-    	TIME_ZONES[2] = TimeZones.EET;
+        TIME_ZONES[0] = TimeZones.PST;
+        TIME_ZONES[1] = TimeZones.UTC;
+        TIME_ZONES[2] = TimeZones.EET;
     }
 
     private final AttributeWriter[] writer = new AttributeWriter[2];
@@ -96,10 +95,10 @@ public final class Bug26354Test extends AbstractAJAXSession {
     private AJAXClient client;
     private int userId;
     private boolean origBetaValue;
-	private String origTimeZoneValue;
+    private String origTimeZoneValue;
 
-    public Bug26354Test(String name) {
-        super(name);
+    public Bug26354Test() {
+        super();
     }
 
     @Override
@@ -110,18 +109,20 @@ public final class Bug26354Test extends AbstractAJAXSession {
         userId = client.getValues().getUserId();
         origBetaValue = client.execute(new GetRequest(Tree.Beta)).getBoolean();
         origTimeZoneValue = client.execute(new GetRequest(Tree.TimeZone)).getString();
-        
-        writer[0] = new BetaWriter(User.User1);
+
+        writer[0] = new BetaWriter(testUser);
         thread[0] = new Thread(writer[0]);
-        writer[1] = new AttributeWriter(Tree.TimeZone, User.User1) {	
-        	private final Random r = new Random();
-			@Override
-			protected Object getValue() {
-				return TIME_ZONES[r.nextInt(3)].getID();
-			}
-		};
-		thread[1] = new Thread(writer[1]);
-        
+        writer[1] = new AttributeWriter(Tree.TimeZone, testUser) {
+
+            private final Random r = new Random();
+
+            @Override
+            protected Object getValue() {
+                return TIME_ZONES[r.nextInt(3)].getID();
+            }
+        };
+        thread[1] = new Thread(writer[1]);
+
         for (int i = 0; i < thread.length; i++) {
             thread[i].start();
         }
@@ -130,20 +131,23 @@ public final class Bug26354Test extends AbstractAJAXSession {
     @Override
     @After
     public void tearDown() throws Exception {
-        for (int i = 0; i < writer.length; i++) {
-            writer[i].stop();
+        try {
+            for (int i = 0; i < writer.length; i++) {
+                writer[i].stop();
+            }
+            for (int i = 0; i < thread.length; i++) {
+                thread[i].join();
+            }
+            for (int i = 0; i < writer.length; i++) {
+                final Throwable throwable = writer[i].getThrowable();
+                assertNull("Expected no Throwable, but there is one: " + throwable, throwable);
+            }
+            client.execute(new SetRequest(Tree.Beta, B(origBetaValue)));
+            client.execute(new SetRequest(Tree.TimeZone, origTimeZoneValue));
+            assertTrue("Deleting the test attribute failed.", client.execute(new SetAttributeRequest(userId, ATTRIBUTE_NAME, null, false)).isSuccess());
+        } finally {
+            super.tearDown();
         }
-        for (int i = 0; i < thread.length; i++) {
-            thread[i].join();
-        }
-        for (int i = 0; i < writer.length; i++) {
-            final Throwable throwable = writer[i].getThrowable();
-            assertNull("Expected no Throwable, but there is one: " + throwable, throwable);
-        }
-        client.execute(new SetRequest(Tree.Beta, B(origBetaValue)));
-        client.execute(new SetRequest(Tree.TimeZone, origTimeZoneValue));
-        assertTrue("Deleting the test attribute failed.", client.execute(new SetAttributeRequest(userId, ATTRIBUTE_NAME, null, false)).isSuccess());
-        super.tearDown();
     }
 
     @Test

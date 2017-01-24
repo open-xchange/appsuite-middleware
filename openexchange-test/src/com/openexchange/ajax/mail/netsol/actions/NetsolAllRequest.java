@@ -62,9 +62,7 @@ import com.openexchange.mail.MailListField;
  */
 public class NetsolAllRequest extends CommonAllRequest {
 
-    public static final int[] GUI_COLUMNS = new int[] {
-    	MailListField.ID.getField(),
-        MailListField.FOLDER_ID.getField()
+    public static final int[] GUI_COLUMNS = new int[] { MailListField.ID.getField(), MailListField.FOLDER_ID.getField()
     };
 
     public static final int GUI_SORT = MailListField.RECEIVED_DATE.getField();
@@ -74,9 +72,7 @@ public class NetsolAllRequest extends CommonAllRequest {
     /**
      * Default constructor.
      */
-    public NetsolAllRequest(final String folderPath, final int[] columns, final int sort,
-        final Order order) {
-        super(AbstractMailRequest.MAIL_URL, folderPath, columns, sort, order,
-            true);
+    public NetsolAllRequest(final String folderPath, final int[] columns, final int sort, final Order order) {
+        super(AbstractMailRequest.MAIL_URL, folderPath, columns, sort, order, true);
     }
 }

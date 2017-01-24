@@ -49,14 +49,17 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.groupware.calendar.tools.CalendarAssertions.assertUserParticipants;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import org.junit.Test;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-
 
 public class Bug12269Test extends CalendarSqlTest {
     // Bug 11269
 
+    @Test
     public void testShouldIncludeCurrentUserInConflictsWithCurrentUserOnly() throws OXException {
         final CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(user);
         appointments.save(appointment);

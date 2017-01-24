@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.ExternalUserParticipant;
@@ -58,15 +59,7 @@ public class Bug6055Test extends AppointmentTest {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug6055Test.class);
 
-    public Bug6055Test(final String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
+    @Test
     public void testBug6055() throws Exception {
         final Appointment appointmentObj = createAppointmentObject("testBug6055");
         appointmentObj.setParentFolderID(appointmentFolderId);
@@ -79,10 +72,10 @@ public class Bug6055Test extends AppointmentTest {
         participants[3] = new ExternalUserParticipant("externaluser3@ox6-test.tux");
         appointmentObj.setParticipants(participants);
 
-        final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
+        final int objectId = catm.insert(appointmentObj).getObjectID();
         appointmentObj.setObjectID(objectId);
 
-        Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, getHostName(), getSessionId());
+        Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
         compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
 
         participants = new com.openexchange.groupware.container.Participant[3];
@@ -92,11 +85,9 @@ public class Bug6055Test extends AppointmentTest {
 
         appointmentObj.setParticipants(participants);
 
-        updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, timeZone, getHostName(), getSessionId());
+        catm.update(appointmentFolderId, appointmentObj);
 
-        loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, getHostName(), getSessionId());
+        loadAppointment = catm.get(appointmentFolderId, objectId);
         compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
-
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId(), false);
     }
 }

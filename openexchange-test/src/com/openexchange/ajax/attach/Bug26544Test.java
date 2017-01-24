@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.attach;
 
-import static com.openexchange.ajax.framework.AJAXClient.User.User1;
 import static org.junit.Assert.assertEquals;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -66,10 +65,13 @@ import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.contact.action.InsertRequest;
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.ProvisioningSetup;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.test.pool.TestContext;
+import com.openexchange.test.pool.TestContextPool;
 
 /**
  * {@link Bug26544Test}
@@ -84,9 +86,14 @@ public class Bug26544Test {
 
     private TimeZone tz;
 
+    private TestContext testContext;
+
     @Before
     public void setUp() throws Exception {
-        client = new AJAXClient(User1);
+        ProvisioningSetup.init();
+
+        testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
+        client = new AJAXClient(testContext.acquireUser());
         tz = client.getValues().getTimeZone();
         int folderId = client.getValues().getPrivateContactFolder();
         contactA = new Contact();
@@ -102,14 +109,17 @@ public class Bug26544Test {
 
     @After
     public void tearDown() throws Exception {
-        client.execute(new DeleteRequest(contactA));
-        client.logout();
+        try {
+            client.execute(new DeleteRequest(contactA));
+            client.logout();
+        } finally {
+            TestContextPool.backContext(testContext);
+        }
     }
 
     @Test
     public void testAllRequestWithSortOrder() throws OXException, IOException, JSONException {
-        AJAXClient client = new AJAXClient(User1);
-        int cols[] = {800, 801, 802, 803, 804, 805, 806 };
+        int cols[] = { 800, 801, 802, 803, 804, 805, 806 };
 
         // test sort by id
         AllRequest allRequest = new AllRequest(contactA, cols, 1, Order.ASCENDING);
@@ -119,7 +129,7 @@ public class Bug26544Test {
         assertEquals("Wrong sort order", "C.txt", attachmentMetadata.get(0).getFilename());
         assertEquals("Wrong sort order", "A.txt", attachmentMetadata.get(1).getFilename());
         assertEquals("Wrong sort order", "B.txt", attachmentMetadata.get(2).getFilename());
-        
+
         // test sort by filename
         allRequest = new AllRequest(contactA, cols, 803, Order.ASCENDING);
         allResponse = client.execute(allRequest);
@@ -132,8 +142,7 @@ public class Bug26544Test {
 
     @Test
     public void testAllRequestWithoutSortOrder() throws OXException, IOException, JSONException {
-        AJAXClient client = new AJAXClient(User1);
-        int cols[] = {800, 801, 802, 803, 804, 805, 806 };
+        int cols[] = { 800, 801, 802, 803, 804, 805, 806 };
         AllRequest allRequest = new AllRequest(contactA, cols);
         AllResponse allResponse = client.execute(allRequest);
         List<AttachmentMetadata> attachmentMetadata = allResponse.getAttachments();

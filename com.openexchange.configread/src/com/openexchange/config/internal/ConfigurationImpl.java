@@ -87,6 +87,8 @@ import com.openexchange.config.internal.filewatcher.FileWatcher;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.startup.StaticSignalStartedService;
+import com.openexchange.startup.StaticSignalStartedService.State;
 
 /**
  * {@link ConfigurationImpl}
@@ -297,8 +299,15 @@ public final class ConfigurationImpl implements ConfigurationService {
 
             @Override
             public void processFile(File file) {
-                byte[] hash = ConfigurationServices.getHash(file);
-                xmlFiles.put(file, hash);
+                try {
+                    byte[] hash = ConfigurationServices.getHash(file);
+                    xmlFiles.put(file, hash);
+                } catch (IllegalStateException e) {
+                    Throwable cause = e.getCause();
+                    String message = "Failed to load XML file '" + file + "'. Reason: " + (null == cause ? e.getMessage() : cause.getMessage());
+                    StaticSignalStartedService.getInstance().setState(State.INVALID_CONFIGURATION, e, message);
+                    throw e;
+                }
             }
         };
 

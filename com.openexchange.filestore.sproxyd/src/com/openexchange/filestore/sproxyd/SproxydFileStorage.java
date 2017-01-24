@@ -52,6 +52,7 @@ package com.openexchange.filestore.sproxyd;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
@@ -95,7 +96,11 @@ public class SproxydFileStorage implements FileStorage {
     public String saveNewFile(InputStream file) throws OXException {
         try {
             UUID documentId = UUID.randomUUID();
-            upload(documentId, file, 0);
+            long length = upload(documentId, file, 0);
+            if (length <= 0) {
+                // Received an empty input stream
+                throw SproxydExceptionCode.UNEXPECTED_ERROR.create("Sproxyd storage cannot save an empty file");
+            }
             return UUIDs.getUnformattedString(documentId);
         } finally {
             Streams.close(file);
@@ -286,13 +291,27 @@ public class SproxydFileStorage implements FileStorage {
     private long upload(UUID documentId, InputStream data, long offset) throws OXException {
         boolean success = false;
         DefaultChunkedUpload chunkedUpload = null;
-        List<UUID> scalityIds = new ArrayList<UUID>();
+        List<UUID> scalityIds = new LinkedList<UUID>();
         try {
             chunkedUpload = new DefaultChunkedUpload(data);
             long off = offset;
-            while (chunkedUpload.hasNext()) {
+            if (!chunkedUpload.hasNext()) {
+                success = true;
+                return off;
+            }
+
+            // Handle first chunk especially
+            {
                 UploadChunk chunk = chunkedUpload.next();
                 try {
+                    long chunkSize = chunk.getSize();
+                    if (chunkSize <= 0) {
+                        // Received an empty input stream
+                        success = true;
+                        return off;
+                    }
+
+                    // ... and upload first chunk
                     UUID scalityId = client.put(chunk.getData(), chunk.getSize());
                     scalityIds.add(scalityId);
                     chunkStorage.storeChunk(new Chunk(documentId, scalityId, off, chunk.getSize()));
@@ -301,6 +320,24 @@ public class SproxydFileStorage implements FileStorage {
                     Streams.close(chunk);
                 }
             }
+
+            // Handle remaining chunks
+            while (chunkedUpload.hasNext()) {
+                UploadChunk chunk = chunkedUpload.next();
+                try {
+                    long chunkSize = chunk.getSize();
+                    if (chunkSize > 0) {
+                        UUID scalityId = client.put(chunk.getData(), chunk.getSize());
+                        scalityIds.add(scalityId);
+                        chunkStorage.storeChunk(new Chunk(documentId, scalityId, off, chunk.getSize()));
+                        off += chunk.getSize();
+                    }
+                } finally {
+                    Streams.close(chunk);
+                }
+            }
+
+            // All fine, no error occurred
             success = true;
             return off;
         } finally {

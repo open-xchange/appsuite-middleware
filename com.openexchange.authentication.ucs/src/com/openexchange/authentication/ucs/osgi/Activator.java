@@ -56,34 +56,32 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.ucs.impl.UCSAuthentication;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.osgi.HousekeepingActivator;
 
-public class Activator implements BundleActivator {
-
-    private static transient final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Activator.class);
-
-    /**
-     * Reference to the service registration.
-     */
-    private ServiceRegistration<AuthenticationService> registration;
+public class Activator extends HousekeepingActivator {
 
     /**
-     * {@inheritDoc}
+     * Initializes a new {@link Activator}.
      */
-    @Override
-    public void start(final BundleContext context) throws Exception {
-        LOG.info("starting bundle: com.openexchange.authentication.ucs");
-
-        registration = context.registerService(AuthenticationService.class,
-            new UCSAuthentication(), null);
+    public Activator() {
+        super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void stop(final BundleContext context) throws Exception {
-        LOG.info("stopping bundle: com.openexchange.authentication.ucs");
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ConfigurationService.class };
+    }
 
-        registration.unregister();
+    @Override
+    protected void startBundle() throws Exception {
+        org.slf4j.LoggerFactory.getLogger(Activator.class).info("starting bundle: com.openexchange.authentication.ucs");
+        registerService(AuthenticationService.class, new UCSAuthentication(getService(ConfigurationService.class)));
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        org.slf4j.LoggerFactory.getLogger(Activator.class).info("stopping bundle: com.openexchange.authentication.ucs");
+        super.stopBundle();
     }
 }

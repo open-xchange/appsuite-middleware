@@ -59,8 +59,10 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  **/
 public class AllFileaccountParser extends AbstractAJAXParser<AllFileaccountResponse> {
+
     /**
      * Initializes a new {@link AllFileaccountParser}.
+     * 
      * @param failOnError
      */
     protected AllFileaccountParser(boolean failOnError) {

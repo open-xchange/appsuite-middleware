@@ -67,12 +67,12 @@ import com.openexchange.groupware.container.Appointment;
  */
 public class Bug27309Test extends CalDAVTest {
 
-	@Test
-	public void testChangeToDaily() throws Exception {
-		/*
-		 * create appointment series on server
-		 */
-		String uid = randomUID();
+    @Test
+    public void testChangeToDaily() throws Exception {
+        /*
+         * create appointment series on server
+         */
+        String uid = randomUID();
         Appointment appointment = new Appointment();
         appointment.setUid(uid);
         appointment.setTitle(getClass().getCanonicalName());
@@ -103,6 +103,6 @@ public class Bug27309Test extends CalDAVTest {
         assertEquals("recurrence type wrong", Appointment.DAILY, appointment.getRecurrenceType());
         assertEquals("interval wrong", 1, appointment.getInterval());
         assertEquals("recurrence count wrong", 3, appointment.getOccurrence());
-	}
+    }
 
 }

@@ -60,8 +60,8 @@ import com.openexchange.html.AbstractSanitizing;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class Bug29695Test extends AbstractSanitizing {
-    @Test
-    public void testDontReplaceCopyRegEntities() {
+     @Test
+     public void testDontReplaceCopyRegEntities() {
         String content = getHtmlService().getConformHTML("<b>&copy; by &reg;</b>", "UTF-8");
         assertEquals("Unexpected return value ", "<!DOCTYPE html>\n" +
             "<html><head>\n" +

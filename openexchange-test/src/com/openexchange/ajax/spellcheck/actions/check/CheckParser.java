@@ -62,33 +62,33 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  */
 public final class CheckParser extends AbstractAJAXParser<CheckResponse> {
 
-	/**
-	 * Initializes a new {@link CheckParser}
-	 *
-	 * @param failOnError
-	 */
-	public CheckParser(final boolean failOnError) {
-		super(failOnError);
-	}
+    /**
+     * Initializes a new {@link CheckParser}
+     *
+     * @param failOnError
+     */
+    public CheckParser(final boolean failOnError) {
+        super(failOnError);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AbstractAJAXParser#createResponse(com.openexchange.ajax.container.Response)
-	 */
-	@Override
-	protected CheckResponse createResponse(final Response response) throws JSONException {
-		final CheckResponse retval = new CheckResponse(response);
-		if (isFailOnError()) {
-			final JSONArray ja = (JSONArray) response.getData();
-			final int len = ja.length();
-			final String[] sa = new String[len];
-			for (int i = 0; i < len; i++) {
-				sa[i] = ja.getString(i);
-			}
-			retval.setMisspeltWords(sa);
-		}
-		return retval;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AbstractAJAXParser#createResponse(com.openexchange.ajax.container.Response)
+     */
+    @Override
+    protected CheckResponse createResponse(final Response response) throws JSONException {
+        final CheckResponse retval = new CheckResponse(response);
+        if (isFailOnError()) {
+            final JSONArray ja = (JSONArray) response.getData();
+            final int len = ja.length();
+            final String[] sa = new String[len];
+            for (int i = 0; i < len; i++) {
+                sa[i] = ja.getString(i);
+            }
+            retval.setMisspeltWords(sa);
+        }
+        return retval;
+    }
 
 }

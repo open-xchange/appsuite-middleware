@@ -72,11 +72,12 @@ import com.openexchange.ajax.advertisement.actions.GetConfigResponse;
 import com.openexchange.ajax.advertisement.actions.SetConfigRequest;
 import com.openexchange.ajax.advertisement.actions.SetConfigResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractConfigAwareAjaxSession;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.exception.OXException;
+import com.openexchange.test.pool.TestContextPool;
+import com.openexchange.test.pool.TestUser;
 
 /**
  * {@link AdvertisementTest}
@@ -120,9 +121,9 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
     }
 
     @Before
-    public void before() throws Exception {
-        setUp();
-        setUpConfiguration(client, false);
+    public void setUp() throws Exception {
+        super.setUp();
+        setUpConfiguration(getClient(), false);
 
         switch (packageScheme) {
             case "Global":
@@ -133,9 +134,10 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
                 break;
             case "TaxonomyTypes":
                 // Add taxonomy types
-                Context ctx = new Context(client.getValues().getContextId());
+                Context ctx = new Context(getClient().getValues().getContextId());
                 ctx.setUserAttribute("taxonomy", "types", taxonomyTypes);
-                Credentials credentials = new Credentials(AJAXConfig.getProperty(Property.OX_ADMIN_MASTER), AJAXConfig.getProperty(Property.OX_ADMIN_MASTER_PWD));
+                TestUser oxAdminMaster = TestContextPool.getOxAdminMaster();
+                Credentials credentials = new Credentials(oxAdminMaster.getUser(), oxAdminMaster.getPassword());
                 OXContextInterface ctxInterface = (OXContextInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXContextInterface.RMI_NAME);
                 old = ctxInterface.getData(ctx, credentials);
                 ctxInterface.change(ctx, credentials);
@@ -147,56 +149,50 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
 
     @After
     public void after() throws Exception {
-
-        switch (packageScheme) {
-            case "Global":
-                //nothing to do
-                break;
-            case "AccessCombinations":
-                //nothing to do
-                break;
-            case "TaxonomyTypes":
-                // Change to old taxonomy types
-                if (old != null) {
-                    Credentials credentials = new Credentials(AJAXConfig.getProperty(Property.OX_ADMIN_MASTER), AJAXConfig.getProperty(Property.OX_ADMIN_MASTER_PWD));
-                    OXContextInterface ctxInterface = (OXContextInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXContextInterface.RMI_NAME);
-                    ctxInterface.change(old, credentials);
-                }
-                break;
+        try {
+            switch (packageScheme) {
+                case "Global":
+                    //nothing to do
+                    break;
+                case "AccessCombinations":
+                    //nothing to do
+                    break;
+                case "TaxonomyTypes":
+                    // Change to old taxonomy types
+                    if (old != null) {
+                        TestUser oxAdminMaster = TestContextPool.getOxAdminMaster();
+                        Credentials credentials = new Credentials(oxAdminMaster.getUser(), oxAdminMaster.getPassword());
+                        OXContextInterface ctxInterface = (OXContextInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXContextInterface.RMI_NAME);
+                        ctxInterface.change(old, credentials);
+                    }
+                    break;
+            }
+        } finally {
+            super.tearDown();
         }
     }
 
     @Test
     public void configByUserIdTest() throws OXException, IOException, JSONException {
         String data = "{\"data\":\"Preview\"}";
-        try{
-            SetConfigRequest set = SetConfigRequest.createPreview(  null, 
-                                                                    String.valueOf(client.getValues().getUserId()), 
-                                                                    String.valueOf(client.getValues().getContextId()), 
-                                                                    data, 
-                                                                    BASIC_AUTH_LOGIN, 
-                                                                    BASIC_AUTH_PASSWORD);
-            SetConfigResponse setResponse = client.execute(set);
+        try {
+            SetConfigRequest set = SetConfigRequest.createPreview(null, String.valueOf(getClient().getValues().getUserId()), String.valueOf(getClient().getValues().getContextId()), data, BASIC_AUTH_LOGIN, BASIC_AUTH_PASSWORD);
+            SetConfigResponse setResponse = getClient().execute(set);
             assertTrue("Setting failed: " + setResponse.getErrorMessage(), !setResponse.hasError());
             GetConfigRequest req = new GetConfigRequest();
-            GetConfigResponse response = client.execute(req);
+            GetConfigResponse response = getClient().execute(req);
             assertTrue("Response has errors: " + response.getErrorMessage(), !response.hasError());
             assertTrue("The server returned the wrong configuration.", response.getData().toString().equals(data));
 
-            AJAXClient client2 = new AJAXClient(User.User2);
+            AJAXClient client2 = new AJAXClient(testContext.acquireUser());
             GetConfigResponse response2 = client2.execute(req);
             assertTrue("Expecting a response with an error.", response2.hasError());
         } finally {
-            SetConfigRequest set = SetConfigRequest.createPreview(  null, 
-                String.valueOf(client.getValues().getUserId()), 
-                String.valueOf(client.getValues().getContextId()), 
-                null, 
-                BASIC_AUTH_LOGIN, 
-                BASIC_AUTH_PASSWORD);
-            client.execute(set);
+            SetConfigRequest set = SetConfigRequest.createPreview(null, String.valueOf(getClient().getValues().getUserId()), String.valueOf(getClient().getValues().getContextId()), null, BASIC_AUTH_LOGIN, BASIC_AUTH_PASSWORD);
+            getClient().execute(set);
         }
     }
-    
+
     @Test
     public void configByResellerAndPackageTest() throws OXException, IOException, JSONException {
         String data = "{\"data\":\"Package\"}";
@@ -210,17 +206,17 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
                 pack = "groupware_premium";
                 break;
         }
-        try{
+        try {
             SetConfigRequest set = SetConfigRequest.create(DEFAULT, pack, data, BASIC_AUTH_LOGIN, BASIC_AUTH_PASSWORD);
-            SetConfigResponse setResponse = client.execute(set);
+            SetConfigResponse setResponse = getClient().execute(set);
             assertTrue("Setting failed: " + setResponse.getErrorMessage(), !setResponse.hasError());
             GetConfigRequest req = new GetConfigRequest();
-            GetConfigResponse response = client.execute(req);
+            GetConfigResponse response = getClient().execute(req);
             assertTrue("Response has errors: " + response.getErrorMessage(), !response.hasError());
             assertTrue("The server returned the wrong configuration.", response.getData().toString().equals(data));
         } finally {
             SetConfigRequest set = SetConfigRequest.create(DEFAULT, pack, null, BASIC_AUTH_LOGIN, BASIC_AUTH_PASSWORD);
-            client.execute(set);
+            getClient().execute(set);
         }
     }
 
@@ -239,18 +235,18 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
         }
         // create configuration
         SetConfigRequest set = SetConfigRequest.create(DEFAULT, pack, data, BASIC_AUTH_LOGIN, BASIC_AUTH_PASSWORD);
-        SetConfigResponse setResponse = client.execute(set);
+        SetConfigResponse setResponse = getClient().execute(set);
         assertTrue("Setting failed: " + setResponse.getErrorMessage(), !setResponse.hasError());
         // Check if configuration is available
         GetConfigRequest req = new GetConfigRequest();
-        GetConfigResponse response = client.execute(req);
+        GetConfigResponse response = getClient().execute(req);
         assertTrue("Response has errors: " + response.getErrorMessage(), !response.hasError());
         assertTrue("The server returned the wrong configuration.", response.getData().toString().equals(data));
         // Remove configuration again
         set = SetConfigRequest.create(DEFAULT, pack, null, BASIC_AUTH_LOGIN, BASIC_AUTH_PASSWORD);
-        client.execute(set);
+        getClient().execute(set);
         // Check if configuration is gone
-        GetConfigResponse response2 = client.execute(req);
+        GetConfigResponse response2 = getClient().execute(req);
         assertTrue("Expecting a response with an error.", response2.hasError());
     }
 
@@ -270,38 +266,38 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
         }
         try {
             SetConfigRequest set = SetConfigRequest.create(DEFAULT, pack, data, BASIC_AUTH_LOGIN, BASIC_AUTH_PASSWORD);
-            SetConfigResponse setResponse = client.execute(set);
+            SetConfigResponse setResponse = getClient().execute(set);
             assertTrue("Setting failed: " + setResponse.getErrorMessage(), !setResponse.hasError());
             GetConfigRequest req = new GetConfigRequest();
-            GetConfigResponse response = client.execute(req);
+            GetConfigResponse response = getClient().execute(req);
             assertTrue("Response has errors: " + response.getErrorMessage(), !response.hasError());
             assertTrue("The server returned the wrong configuration.", response.getData().toString().equals(data));
 
             // Create Preview 
             String dataPreview = "{\"data\":\"Preview\"}";
-            set = SetConfigRequest.createPreview(null, String.valueOf(client.getValues().getUserId()), String.valueOf(client.getValues().getContextId()), dataPreview, BASIC_AUTH_LOGIN, BASIC_AUTH_PASSWORD);
-            setResponse = client.execute(set);
+            set = SetConfigRequest.createPreview(null, String.valueOf(getClient().getValues().getUserId()), String.valueOf(getClient().getValues().getContextId()), dataPreview, BASIC_AUTH_LOGIN, BASIC_AUTH_PASSWORD);
+            setResponse = getClient().execute(set);
             assertTrue("Setting failed: " + setResponse.getErrorMessage(), !setResponse.hasError());
 
             // Check if preview configuration is available
             req = new GetConfigRequest();
-            response = client.execute(req);
+            response = getClient().execute(req);
             assertTrue("Response has errors: " + response.getErrorMessage(), !response.hasError());
             assertTrue("The server returned the wrong configuration.", response.getData().toString().equals(dataPreview));
 
             // Remove preview configuration
-            set = SetConfigRequest.createPreview(null, String.valueOf(client.getValues().getUserId()), String.valueOf(client.getValues().getContextId()), null, BASIC_AUTH_LOGIN, BASIC_AUTH_PASSWORD);
-            setResponse = client.execute(set);
+            set = SetConfigRequest.createPreview(null, String.valueOf(getClient().getValues().getUserId()), String.valueOf(getClient().getValues().getContextId()), null, BASIC_AUTH_LOGIN, BASIC_AUTH_PASSWORD);
+            setResponse = getClient().execute(set);
             assertTrue("Setting failed: " + setResponse.getErrorMessage(), !setResponse.hasError());
 
             // Check if configuration is back to the old one again
-            response = client.execute(req);
+            response = getClient().execute(req);
             assertTrue("Response has errors: " + response.getErrorMessage(), !response.hasError());
             assertTrue("The server returned the wrong configuration.", response.getData().toString().equals(data));
 
         } finally {
             SetConfigRequest set = SetConfigRequest.create(DEFAULT, pack, null, BASIC_AUTH_LOGIN, BASIC_AUTH_PASSWORD);
-            client.execute(set);
+            getClient().execute(set);
         }
     }
 

@@ -49,14 +49,18 @@
 
 package com.openexchange.ajax.folder;
 
+import static org.junit.Assert.assertTrue;
 import java.util.List;
+import java.util.UUID;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.groupware.container.FolderObject;
@@ -76,64 +80,52 @@ public class ShareFolderTest extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link ShareFolderTest}.
+     * 
      * @param name name of the test.
      */
-    public ShareFolderTest(String name) {
-        super(name);
+    public ShareFolderTest() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         // Create 2. User
-        secondClient = new AJAXClient(User.User2);
+        secondClient = new AJAXClient(testContext.acquireUser());
         secondUserValues = secondClient.getValues();
 
         // Create folder
-        final OCLPermission perm1 =
-            Create.ocl(
-                client.getValues().getUserId(),
-                false,
-                true,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION);
-        final OCLPermission perm2 =
-            Create.ocl(
-                secondUserValues.getUserId(),
-                false,
-                false,
-                OCLPermission.CREATE_OBJECTS_IN_FOLDER,
-                OCLPermission.READ_ALL_OBJECTS,
-                OCLPermission.NO_PERMISSIONS,
-                OCLPermission.NO_PERMISSIONS);
-        parentId = client.getValues().getPrivateAppointmentFolder();
-        testFolder = Create.folder(parentId, "TestShared" + System.currentTimeMillis(), FolderObject.CALENDAR, FolderObject.PRIVATE, perm1, perm2);
+        final OCLPermission perm1 = Create.ocl(getClient().getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+        final OCLPermission perm2 = Create.ocl(secondUserValues.getUserId(), false, false, OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+        parentId = getClient().getValues().getPrivateAppointmentFolder();
+        testFolder = Create.folder(parentId, "TestShared" + UUID.randomUUID().toString(), FolderObject.CALENDAR, FolderObject.PRIVATE, perm1, perm2);
         InsertRequest insFolder = new InsertRequest(EnumAPI.OX_OLD, testFolder);
-        InsertResponse folderInsertResponse = client.execute(insFolder);
+        InsertResponse folderInsertResponse = getClient().execute(insFolder);
         testFolder.setObjectID(folderInsertResponse.getId());
-        testFolder.setLastModified(client.execute(new GetRequest(EnumAPI.OX_OLD, testFolder.getObjectID())).getTimestamp());
+        testFolder.setLastModified(getClient().execute(new GetRequest(EnumAPI.OX_OLD, testFolder.getObjectID())).getTimestamp());
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        if (secondClient != null) {
-            secondClient.logout();
-            secondClient = null;
-            secondUserValues = null;
-        }
+        try {
+            if (secondClient != null) {
+                secondClient.logout();
+                secondClient = null;
+                secondUserValues = null;
+            }
 
-        // Delete testFolder
-        if (testFolder != null) {
-            client.execute(new DeleteRequest(EnumAPI.OX_OLD, testFolder));
-            testFolder = null;
-            parentId = -1;
+            // Delete testFolder
+            if (testFolder != null) {
+                getClient().execute(new DeleteRequest(EnumAPI.OX_OLD, testFolder));
+                testFolder = null;
+                parentId = -1;
+            }
+        } finally {
+            super.tearDown();
         }
-
-        super.tearDown();
     }
 
+    @Test
     public void testShareFolder() throws Throwable {
         final int folderId = testFolder.getObjectID();
 

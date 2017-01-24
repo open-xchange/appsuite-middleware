@@ -404,7 +404,12 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
     public void removedService(ServiceReference<HazelcastInstance> reference, HazelcastInstance hzInstance) {
         String registrationId = registrationIdRef.get();
         if (null != registrationId) {
-            hzInstance.getCluster().removeMembershipListener(registrationId);
+            try {
+                hzInstance.getCluster().removeMembershipListener(registrationId);
+            } catch (Exception e) {
+                // Ignore
+                LOG.debug("Failed to remove membership listener", e);
+            }
             registrationIdRef.set(null);
         }
 

@@ -49,10 +49,13 @@
 
 package com.openexchange.webdav.xml.appointment;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.webdav.xml.AppointmentTest;
 
@@ -61,22 +64,26 @@ import com.openexchange.webdav.xml.AppointmentTest;
  */
 public class Bug13260Test extends AppointmentTest {
 
-    public Bug13260Test(String name) {
-        super(name);
+    public Bug13260Test() {
+        super();
     }
 
+    @Test
     public void testBugAsWritten() throws Exception {
         test(true, false);
     }
 
+    @Test
     public void testBugWithEnd() throws Exception {
         test(false, false);
     }
 
+    @Test
     public void testBugAsWrittenInComment6() throws Exception {
         test(true, true);
     }
 
+    @Test
     public void testBugWithEndAndFullTime() throws Exception {
         test(false, true);
     }
@@ -111,13 +118,7 @@ public class Bug13260Test extends AppointmentTest {
             updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, getHostName(), getLogin(), getPassword(), context);
 
             // Load Appointment
-            Appointment loadApointment = loadAppointment(
-                getWebConversation(),
-                objectId,
-                appointmentFolderId,
-                getHostName(),
-                getLogin(),
-                getPassword(), context);
+            Appointment loadApointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getLogin(), getPassword(), context);
 
             // Checks
             assertNotNull("DeleteException expected.", loadApointment.getDeleteException());

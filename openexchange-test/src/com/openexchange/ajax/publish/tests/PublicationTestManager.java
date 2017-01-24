@@ -84,165 +84,162 @@ import com.openexchange.publish.PublicationTargetDiscoveryService;
  */
 public class PublicationTestManager {
 
-        private AbstractPublicationResponse lastResponse;
+    private AbstractPublicationResponse lastResponse;
 
-        private final Set<Integer> createdItems;
+    private final Set<Integer> createdItems;
 
-        private boolean failOnError = true;
+    private boolean failOnError = true;
 
-        private AJAXClient client;
+    private AJAXClient client;
 
-        private DynamicFormDescription formDescription;
+    private DynamicFormDescription formDescription;
 
-        private PublicationTargetDiscoveryService publicationTargetDiscoveryService;
+    private PublicationTargetDiscoveryService publicationTargetDiscoveryService;
 
-        public AbstractPublicationResponse getLastResponse() {
-            return lastResponse;
+    public AbstractPublicationResponse getLastResponse() {
+        return lastResponse;
+    }
+
+    public void setFailOnError(boolean failOnError) {
+        this.failOnError = failOnError;
+    }
+
+    public boolean getFailOnError() {
+        return failOnError;
+    }
+
+    public void setClient(AJAXClient client) {
+        this.client = client;
+    }
+
+    public AJAXClient getClient() {
+        return client;
+    }
+
+    public void setFormDescription(DynamicFormDescription formDescription) {
+        this.formDescription = formDescription;
+    }
+
+    public DynamicFormDescription getFormDescription() {
+        return formDescription;
+    }
+
+    public void setPublicationTargetDiscoveryService(PublicationTargetDiscoveryService service) {
+        this.publicationTargetDiscoveryService = service;
+    }
+
+    public PublicationTargetDiscoveryService getPublicationTargetDiscoveryService() {
+        return this.publicationTargetDiscoveryService;
+    }
+
+    public PublicationTestManager() {
+        createdItems = new HashSet<Integer>();
+    }
+
+    public PublicationTestManager(AJAXClient client) {
+        this();
+        setClient(client);
+    }
+
+    public Publication newAction(Publication publication) throws OXException, IOException, SAXException, JSONException, OXException, OXException {
+        NewPublicationRequest newReq = new NewPublicationRequest(publication);
+        newReq.setFailOnError(getFailOnError());
+        NewPublicationResponse newResp = getClient().execute(newReq);
+        createdItems.add(I(newResp.getId()));
+        Publication updatedPublication = getAction(newResp.getId());
+        publication.setConfiguration(updatedPublication.getConfiguration());
+        publication.setId(updatedPublication.getId());
+        lastResponse = newResp;
+        return publication;
+    }
+
+    public Publication getAction(int id) throws OXException, IOException, SAXException, JSONException, OXException, OXException {
+        GetPublicationRequest getReq = new GetPublicationRequest(id);
+        getReq.setFailOnError(getFailOnError());
+        GetPublicationResponse getResp = getClient().execute(getReq);
+        lastResponse = getResp;
+        return getResp.getPublication(getPublicationTargetDiscoveryService());
+    }
+
+    public void deleteAction(Publication publication) throws OXException, IOException, SAXException, JSONException {
+        int id = publication.getId();
+        DeletePublicationRequest delReq = new DeletePublicationRequest(id);
+        delReq.setFailOnError(getFailOnError());
+        DeletePublicationResponse delResp = getClient().execute(delReq);
+        createdItems.remove(I(id));
+        lastResponse = delResp;
+    }
+
+    public void deleteAction(Collection<Integer> ids) throws OXException, IOException, SAXException, JSONException {
+        DeletePublicationRequest delReq = new DeletePublicationRequest(ids);
+        delReq.setFailOnError(getFailOnError());
+        DeletePublicationResponse delResp = getClient().execute(delReq);
+        createdItems.removeAll(ids);
+        lastResponse = delResp;
+    }
+
+    public List<JSONArray> listAction(List<Integer> ids, List<String> columns) throws OXException, IOException, SAXException, JSONException, OXException, OXException {
+        ListPublicationsRequest listReq = new ListPublicationsRequest(ids, columns);
+        listReq.setFailOnError(getFailOnError());
+        ListPublicationsResponse listResp = getClient().execute(listReq);
+        lastResponse = listResp;
+        return listResp.getList();
+    }
+
+    public List<JSONArray> listAction(List<Integer> ids, List<String> columns, Map<String, List<String>> dynamicColumns) throws OXException, IOException, SAXException, JSONException, OXException, OXException {
+        ListPublicationsRequest listReq = new ListPublicationsRequest(ids, columns, dynamicColumns);
+        listReq.setFailOnError(getFailOnError());
+        ListPublicationsResponse listResp = getClient().execute(listReq);
+        lastResponse = listResp;
+        return listResp.getList();
+    }
+
+    public List<JSONArray> allAction(String folder, int id, String entityModule, List<String> columns) throws OXException, IOException, SAXException, JSONException, OXException, OXException {
+        AllPublicationsRequest allReq = new AllPublicationsRequest(folder, id, entityModule, columns);
+        allReq.setFailOnError(getFailOnError());
+        AllPublicationsResponse allResp = getClient().execute(allReq);
+        lastResponse = allResp;
+        return allResp.getAll();
+    }
+
+    public List<JSONArray> allAction(String entityModule, int id, List<String> columns) throws OXException, IOException, SAXException, JSONException, OXException, OXException {
+        AllPublicationsRequest allReq = new AllPublicationsRequest(id, entityModule, columns);
+        allReq.setFailOnError(getFailOnError());
+        AllPublicationsResponse allResp = getClient().execute(allReq);
+        lastResponse = allResp;
+        return allResp.getAll();
+    }
+
+    public List<JSONArray> allAction(List<String> columns) throws OXException, IOException, SAXException, JSONException, OXException, OXException {
+        AllPublicationsRequest allReq = new AllPublicationsRequest(columns);
+        allReq.setFailOnError(getFailOnError());
+        AllPublicationsResponse allResp = getClient().execute(allReq);
+        lastResponse = allResp;
+        return allResp.getAll();
+    }
+
+    public List<JSONArray> allAction(String folder, int id, String entityModule, List<String> columns, Map<String, List<String>> dynamicColumns) throws OXException, IOException, SAXException, JSONException, OXException, OXException {
+        AllPublicationsRequest allReq = new AllPublicationsRequest(folder, id, entityModule, columns, dynamicColumns);
+        allReq.setFailOnError(getFailOnError());
+        AllPublicationsResponse allResp = getClient().execute(allReq);
+        lastResponse = allResp;
+        return allResp.getAll();
+    }
+
+    public void updateAction(Publication publication) throws OXException, IOException, SAXException, JSONException {
+        UpdatePublicationRequest updReq = new UpdatePublicationRequest(publication);
+        updReq.setFailOnError(getFailOnError());
+        UpdatePublicationResponse updResp = getClient().execute(updReq);
+        lastResponse = updResp;
+    }
+
+    public void cleanUp() throws OXException, IOException, SAXException, JSONException {
+        boolean failOnError2 = getFailOnError();
+        setFailOnError(false);
+        if (createdItems.size() > 0) {
+            deleteAction(createdItems);
         }
-
-        public void setFailOnError(boolean failOnError) {
-            this.failOnError = failOnError;
-        }
-
-        public boolean getFailOnError() {
-            return failOnError;
-        }
-
-        public void setClient(AJAXClient client) {
-            this.client = client;
-        }
-
-        public AJAXClient getClient() {
-            return client;
-        }
-
-        public void setFormDescription(DynamicFormDescription formDescription) {
-            this.formDescription = formDescription;
-        }
-
-        public DynamicFormDescription getFormDescription() {
-            return formDescription;
-        }
-
-        public void setPublicationTargetDiscoveryService(PublicationTargetDiscoveryService service) {
-            this.publicationTargetDiscoveryService = service;
-        }
-
-        public PublicationTargetDiscoveryService getPublicationTargetDiscoveryService() {
-            return this.publicationTargetDiscoveryService;
-        }
-
-        public PublicationTestManager() {
-            createdItems = new HashSet<Integer>();
-        }
-
-        public PublicationTestManager(AJAXClient client) {
-            this();
-            setClient(client);
-        }
-
-        public Publication newAction(Publication publication) throws OXException, IOException, SAXException, JSONException, OXException, OXException {
-            NewPublicationRequest newReq = new NewPublicationRequest(publication);
-            newReq.setFailOnError(getFailOnError());
-            NewPublicationResponse newResp = getClient().execute(newReq);
-            createdItems.add(I(newResp.getId()));
-            Publication updatedPublication = getAction(newResp.getId());
-            publication.setConfiguration(updatedPublication.getConfiguration());
-            publication.setId(updatedPublication.getId());
-            lastResponse = newResp;
-            return publication;
-        }
-
-        public Publication getAction(int id) throws OXException, IOException, SAXException, JSONException, OXException, OXException {
-            GetPublicationRequest getReq = new GetPublicationRequest(id);
-            getReq.setFailOnError(getFailOnError());
-            GetPublicationResponse getResp = getClient().execute(getReq);
-            lastResponse = getResp;
-            return getResp.getPublication(getPublicationTargetDiscoveryService());
-        }
-
-        public void deleteAction(Publication publication) throws OXException, IOException, SAXException, JSONException {
-            int id = publication.getId();
-            DeletePublicationRequest delReq = new DeletePublicationRequest(id);
-            delReq.setFailOnError(getFailOnError());
-            DeletePublicationResponse delResp = getClient().execute(delReq);
-            createdItems.remove(I(id));
-            lastResponse = delResp;
-        }
-
-        public void deleteAction(Collection<Integer> ids) throws OXException, IOException, SAXException, JSONException {
-            DeletePublicationRequest delReq = new DeletePublicationRequest(ids);
-            delReq.setFailOnError(getFailOnError());
-            DeletePublicationResponse delResp = getClient().execute(delReq);
-            createdItems.removeAll(ids);
-            lastResponse = delResp;
-        }
-
-        public List<JSONArray> listAction(List<Integer> ids, List<String> columns) throws OXException, IOException, SAXException, JSONException, OXException, OXException {
-            ListPublicationsRequest listReq = new ListPublicationsRequest(ids,columns);
-            listReq.setFailOnError(getFailOnError());
-            ListPublicationsResponse listResp = getClient().execute(listReq);
-            lastResponse = listResp;
-            return listResp.getList();
-        }
-
-        public List<JSONArray> listAction(List<Integer> ids, List<String> columns, Map<String,List<String>> dynamicColumns) throws OXException, IOException, SAXException, JSONException, OXException, OXException {
-            ListPublicationsRequest listReq = new ListPublicationsRequest(ids,columns,dynamicColumns);
-            listReq.setFailOnError(getFailOnError());
-            ListPublicationsResponse listResp = getClient().execute(listReq);
-            lastResponse = listResp;
-            return listResp.getList();
-        }
-
-        public List<JSONArray> allAction(String folder, int id, String entityModule, List<String> columns) throws OXException, IOException, SAXException, JSONException, OXException, OXException{
-            AllPublicationsRequest allReq = new AllPublicationsRequest(folder, id, entityModule, columns);
-            allReq.setFailOnError(getFailOnError());
-            AllPublicationsResponse allResp = getClient().execute(allReq);
-            lastResponse = allResp;
-            return allResp.getAll();
-        }
-
-        public List<JSONArray> allAction(String entityModule, int id, List<String> columns) throws OXException, IOException, SAXException, JSONException, OXException, OXException{
-            AllPublicationsRequest allReq = new AllPublicationsRequest(id, entityModule, columns);
-            allReq.setFailOnError(getFailOnError());
-            AllPublicationsResponse allResp = getClient().execute(allReq);
-            lastResponse = allResp;
-            return allResp.getAll();
-        }
-
-        public List<JSONArray> allAction(List<String> columns) throws OXException, IOException, SAXException, JSONException, OXException, OXException{
-            AllPublicationsRequest allReq = new AllPublicationsRequest(columns);
-            allReq.setFailOnError(getFailOnError());
-            AllPublicationsResponse allResp = getClient().execute(allReq);
-            lastResponse = allResp;
-            return allResp.getAll();
-        }
-
-
-        public List<JSONArray> allAction(String folder, int id, String entityModule, List<String> columns, Map<String,List<String>> dynamicColumns) throws OXException, IOException, SAXException, JSONException, OXException, OXException{
-            AllPublicationsRequest allReq = new AllPublicationsRequest(folder, id, entityModule, columns, dynamicColumns);
-            allReq.setFailOnError(getFailOnError());
-            AllPublicationsResponse allResp = getClient().execute(allReq);
-            lastResponse = allResp;
-            return allResp.getAll();
-        }
-
-
-        public void updateAction(Publication publication) throws OXException, IOException, SAXException, JSONException {
-            UpdatePublicationRequest updReq = new UpdatePublicationRequest(publication);
-            updReq.setFailOnError(getFailOnError());
-            UpdatePublicationResponse updResp = getClient().execute(updReq);
-            lastResponse = updResp;
-        }
-
-
-        public void cleanUp() throws OXException, IOException, SAXException, JSONException {
-            boolean failOnError2 = getFailOnError();
-            setFailOnError(false);
-            if(createdItems.size() > 0) {
-                deleteAction(createdItems);
-            }
-            setFailOnError(failOnError2);
-        }
+        setFailOnError(failOnError2);
+    }
 
 }

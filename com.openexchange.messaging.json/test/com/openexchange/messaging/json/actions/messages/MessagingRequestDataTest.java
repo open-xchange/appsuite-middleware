@@ -49,9 +49,13 @@
 
 package com.openexchange.messaging.json.actions.messages;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 
 /**
@@ -59,9 +63,9 @@ import com.openexchange.exception.OXException;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class MessagingRequestDataTest extends TestCase {
-
-    public void testParsesLongFolderForm() throws OXException {
+public class MessagingRequestDataTest {
+         @Test
+     public void testParsesLongFolderForm() throws OXException {
         final String messagingService = "com.openexchange.test1";
         final String account = "735";
         final String folder="some/folder";
@@ -82,7 +86,8 @@ public class MessagingRequestDataTest extends TestCase {
         assertEquals(folder, addr.getFolder());
     }
 
-    public void testNumberFormatExceptionInAccount() {
+         @Test
+     public void testNumberFormatExceptionInAccount() {
         final String messagingService = "com.openexchange.test1";
         final String account = "735abc";
         final String folder="some/folder";
@@ -103,7 +108,8 @@ public class MessagingRequestDataTest extends TestCase {
 
     }
 
-    public void testFallsBackToFolderForMissingMessagingServiceAndAccountIDAndFolderAndID() throws OXException {
+         @Test
+     public void testFallsBackToFolderForMissingMessagingServiceAndAccountIDAndFolderAndID() throws OXException {
         final String messagingService = "com.openexchange.test1";
         final String account = "735";
         final String folder="some/folder";
@@ -121,7 +127,8 @@ public class MessagingRequestDataTest extends TestCase {
 
     }
 
-    public void testAssemblesLongFolder() throws OXException {
+         @Test
+     public void testAssemblesLongFolder() throws OXException {
         final String messagingService = "com.openexchange.test1";
         final String account = "735";
         final String folder="some/folder";

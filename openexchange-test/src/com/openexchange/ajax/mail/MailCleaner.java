@@ -53,7 +53,6 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.kata.Cleanable;
 import com.openexchange.ajax.mail.actions.DeleteRequest;
 
-
 /**
  * {@link MailCleaner}
  *
@@ -66,21 +65,17 @@ public class MailCleaner implements Cleanable {
     private TestMail mail;
     private AJAXClient client;
 
-
     public TestMail getMail() {
         return mail;
     }
-
 
     public void setMail(TestMail mail) {
         this.mail = mail;
     }
 
-
     public AJAXClient getClient() {
         return client;
     }
-
 
     public void setClient(AJAXClient client) {
         this.client = client;
@@ -88,6 +83,7 @@ public class MailCleaner implements Cleanable {
 
     /**
      * Initializes a new {@link MailCleaner}.
+     * 
      * @param mail
      * @param client
      */
@@ -99,9 +95,9 @@ public class MailCleaner implements Cleanable {
     @Override
     public void cleanUp() throws Exception {
         if (null != mail) {
-            DeleteRequest request = new DeleteRequest( mail, true );
+            DeleteRequest request = new DeleteRequest(mail, true);
             request.ignoreError();
-            client.execute(request);
+            getClient().execute(request);
         }
     }
 

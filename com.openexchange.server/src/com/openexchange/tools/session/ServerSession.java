@@ -76,6 +76,7 @@ public interface ServerSession extends Session {
      * Gets the user object
      *
      * @return The user object
+     * @throws IllegalStateException If user object could not be loaded
      */
     User getUser();
 
@@ -83,6 +84,7 @@ public interface ServerSession extends Session {
      * Gets the user configuration object.
      *
      * @return The user configuration object.
+     * @throws IllegalStateException If user configuration object could not be loaded
      */
     UserConfiguration getUserConfiguration();
 
@@ -104,6 +106,7 @@ public interface ServerSession extends Session {
      * Gets the user permission bits.
      *
      * @return The user permission bits
+     * @throws IllegalStateException If user permission bits could not be loaded
      */
     UserPermissionBits getUserPermissionBits();
 }

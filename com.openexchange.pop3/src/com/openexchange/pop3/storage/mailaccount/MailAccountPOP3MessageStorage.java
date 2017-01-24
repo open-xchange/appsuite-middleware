@@ -132,28 +132,30 @@ public class MailAccountPOP3MessageStorage implements ISimplifiedThreadStructure
     }
 
     @Override
+    public <T> T supports(Class<T> iface) throws OXException {
+        return delegatee.supports(iface);
+    }
+
+    @Override
     public boolean isMimeSupported() throws OXException {
-        return ((delegatee instanceof IMailMessageStorageMimeSupport) && ((IMailMessageStorageMimeSupport) delegatee).isMimeSupported());
+        IMailMessageStorageMimeSupport mimeSupport = delegatee.supports(IMailMessageStorageMimeSupport.class);
+        return null != mimeSupport && mimeSupport.isMimeSupported();
     }
 
     @Override
     public String[] appendMimeMessages(String destFolder, Message[] msgs) throws OXException {
-        if (delegatee instanceof IMailMessageStorageMimeSupport) {
-            final IMailMessageStorageMimeSupport streamSupport = (IMailMessageStorageMimeSupport) delegatee;
-            if (streamSupport.isMimeSupported()) {
-                return streamSupport.appendMimeMessages(destFolder, msgs);
-            }
+        IMailMessageStorageMimeSupport mimeSupport = delegatee.supports(IMailMessageStorageMimeSupport.class);
+        if (null != mimeSupport && mimeSupport.isMimeSupported()) {
+            return mimeSupport.appendMimeMessages(destFolder, msgs);
         }
         throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
     }
 
     @Override
     public Message getMimeMessage(String fullName, String id, boolean markSeen) throws OXException {
-        if (delegatee instanceof IMailMessageStorageMimeSupport) {
-            final IMailMessageStorageMimeSupport streamSupport = (IMailMessageStorageMimeSupport) delegatee;
-            if (streamSupport.isMimeSupported()) {
-                return streamSupport.getMimeMessage(fullName, id, markSeen);
-            }
+        IMailMessageStorageMimeSupport streamSupport = delegatee.supports(IMailMessageStorageMimeSupport.class);
+        if (null != streamSupport && streamSupport.isMimeSupported()) {
+            return streamSupport.getMimeMessage(fullName, id, markSeen);
         }
         throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
     }
@@ -185,17 +187,14 @@ public class MailAccountPOP3MessageStorage implements ISimplifiedThreadStructure
                 uidls[i] = seqnum2uidl.get(msg.getMessageNumber());
             }
         }
-        final String[] uids;
-        if ((delegatee instanceof IMailMessageStorageMimeSupport)) {
-            final IMailMessageStorageMimeSupport streamSupport = (IMailMessageStorageMimeSupport) delegatee;
-            if (streamSupport.isMimeSupported()) {
-                uids = streamSupport.appendMimeMessages(getRealFullname("INBOX"), pop3Messages);
-            } else {
-                throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
-            }
-        } else {
+        IMailMessageStorageMimeSupport streamSupport = delegatee.supports(IMailMessageStorageMimeSupport.class);
+        if (null == streamSupport) {
             throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
         }
+        if (!streamSupport.isMimeSupported()) {
+            throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
+        }
+        String[] uids = streamSupport.appendMimeMessages(getRealFullname("INBOX"), pop3Messages);
         /*
          * Add mappings
          */
@@ -253,14 +252,18 @@ public class MailAccountPOP3MessageStorage implements ISimplifiedThreadStructure
          * Append to mail account storage
          */
         final String[] uids;
-        if ((pop3Msgs[0] instanceof MimeRawSource) && (delegatee instanceof IMailMessageStorageMimeSupport)) {
-            final IMailMessageStorageMimeSupport streamSupport = (IMailMessageStorageMimeSupport) delegatee;
-            if (streamSupport.isMimeSupported()) {
-                final List<Message> tmp = new LinkedList<>();
-                for (final MailMessage pop3Message : pop3Msgs) {
-                    tmp.add((Message) ((MimeRawSource) pop3Message).getPart());
+        if (pop3Msgs[0] instanceof MimeRawSource) {
+            IMailMessageStorageMimeSupport streamSupport = delegatee.supports(IMailMessageStorageMimeSupport.class);
+            if (null != streamSupport) {
+                if (streamSupport.isMimeSupported()) {
+                    final List<Message> tmp = new LinkedList<>();
+                    for (final MailMessage pop3Message : pop3Msgs) {
+                        tmp.add((Message) ((MimeRawSource) pop3Message).getPart());
+                    }
+                    uids = streamSupport.appendMimeMessages(getRealFullname("INBOX"), tmp.toArray(new Message[0]));
+                } else {
+                    uids = delegatee.appendMessages(getRealFullname("INBOX"), pop3Msgs);
                 }
-                uids = streamSupport.appendMimeMessages(getRealFullname("INBOX"), tmp.toArray(new Message[0]));
             } else {
                 uids = delegatee.appendMessages(getRealFullname("INBOX"), pop3Msgs);
             }
@@ -440,9 +443,11 @@ public class MailAccountPOP3MessageStorage implements ISimplifiedThreadStructure
 
     @Override
     public List<List<MailMessage>> getThreadSortedMessages(final String folder, final boolean includeSent, final boolean cache, final IndexRange indexRange, final long max, final MailSortField sortField, final OrderDirection order, final MailField[] fields, SearchTerm<?> searchTerm) throws OXException {
-        if (!(delegatee instanceof ISimplifiedThreadStructure)) {
+        ISimplifiedThreadStructure threadStructure = delegatee.supports(ISimplifiedThreadStructure.class);
+        if (null == threadStructure) {
             throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
         }
+
         final List<List<MailMessage>> messagesList = ((ISimplifiedThreadStructure) delegatee).getThreadSortedMessages(getRealFullname(folder), includeSent, cache, indexRange, max, sortField, order, fields, searchTerm);
         for (final List<MailMessage> messages : messagesList) {
             for (final MailMessage mailMessage : messages) {

@@ -60,37 +60,37 @@ import com.openexchange.webdav.xml.fields.DataFields;
 
 public abstract class DataParser {
 
-	protected void parseElement(final DataObject dataobject, final Element eProp) {
-		if (hasElement(eProp.getChild(DataFields.OBJECT_ID, XmlServlet.NS))) {
-			dataobject.setObjectID(getValueAsInt(eProp.getChild(DataFields.OBJECT_ID, XmlServlet.NS)));
-		}
+    protected void parseElement(final DataObject dataobject, final Element eProp) {
+        if (hasElement(eProp.getChild(DataFields.OBJECT_ID, XmlServlet.NS))) {
+            dataobject.setObjectID(getValueAsInt(eProp.getChild(DataFields.OBJECT_ID, XmlServlet.NS)));
+        }
 
-		if (hasElement(eProp.getChild(DataFields.CREATED_BY, XmlServlet.NS))) {
-			dataobject.setCreatedBy(getValueAsInt(eProp.getChild(DataFields.CREATED_BY, XmlServlet.NS)));
-		}
+        if (hasElement(eProp.getChild(DataFields.CREATED_BY, XmlServlet.NS))) {
+            dataobject.setCreatedBy(getValueAsInt(eProp.getChild(DataFields.CREATED_BY, XmlServlet.NS)));
+        }
 
-		if (hasElement(eProp.getChild(DataFields.CREATION_TIME, XmlServlet.NS))) {
-			dataobject.setCreationDate(getValueAsDate(eProp.getChild(DataFields.CREATION_TIME, XmlServlet.NS)));
-		}
+        if (hasElement(eProp.getChild(DataFields.CREATION_TIME, XmlServlet.NS))) {
+            dataobject.setCreationDate(getValueAsDate(eProp.getChild(DataFields.CREATION_TIME, XmlServlet.NS)));
+        }
 
-		if (hasElement(eProp.getChild(DataFields.LAST_MODIFIED, XmlServlet.NS))) {
-			dataobject.setLastModified(getValueAsDate(eProp.getChild(DataFields.LAST_MODIFIED, XmlServlet.NS)));
-		}
-	}
+        if (hasElement(eProp.getChild(DataFields.LAST_MODIFIED, XmlServlet.NS))) {
+            dataobject.setLastModified(getValueAsDate(eProp.getChild(DataFields.LAST_MODIFIED, XmlServlet.NS)));
+        }
+    }
 
-	public static int getValueAsInt(final Element e) {
-		if (e == null) {
-			return 0;
-		}
+    public static int getValueAsInt(final Element e) {
+        if (e == null) {
+            return 0;
+        }
 
-		String s = null;
+        String s = null;
 
-		if ((s = e.getValue()) != null && s.length() > 0) {
-			return Integer.parseInt(s);
-		} else {
-			return 0;
-		}
-	}
+        if ((s = e.getValue()) != null && s.length() > 0) {
+            return Integer.parseInt(s);
+        } else {
+            return 0;
+        }
+    }
 
     public static BigDecimal getValueAsBigDecimal(final Element e) {
         if (e == null) {
@@ -103,65 +103,61 @@ public abstract class DataParser {
         return new BigDecimal(0);
     }
 
-	public static long getValueAsLong(final Element e) {
-		if (e == null) {
-			return 0;
-		}
+    public static long getValueAsLong(final Element e) {
+        if (e == null) {
+            return 0;
+        }
 
-		String s = null;
+        String s = null;
 
-		if ((s = e.getValue()) != null && s.length() > 0) {
-			return Long.parseLong(s);
-		} else {
-			return 0;
-		}
-	}
+        if ((s = e.getValue()) != null && s.length() > 0) {
+            return Long.parseLong(s);
+        } else {
+            return 0;
+        }
+    }
 
-	public static Date getValueAsDate(final Element e) {
-		if (e == null) {
-			return null;
-		}
+    public static Date getValueAsDate(final Element e) {
+        if (e == null) {
+            return null;
+        }
 
-		String s = null;
+        String s = null;
 
-		if ((s = e.getValue()) != null && s.length() > 0) {
-			return new Date(Long.parseLong(s));
-		} else {
-			return null;
-		}
-	}
+        if ((s = e.getValue()) != null && s.length() > 0) {
+            return new Date(Long.parseLong(s));
+        } else {
+            return null;
+        }
+    }
 
-	public static boolean getValueAsBoolean(final Element e) {
-		if (e == null) {
-			return false;
-		}
+    public static boolean getValueAsBoolean(final Element e) {
+        if (e == null) {
+            return false;
+        }
 
-		String s = null;
+        String s = null;
 
-		if ((s = e.getValue()) != null && s.equalsIgnoreCase("true")) {
-			return true;
-		}
-		return false;
-	}
+        if ((s = e.getValue()) != null && s.equalsIgnoreCase("true")) {
+            return true;
+        }
+        return false;
+    }
 
-	public static String getValue(final Element e) {
-		if (e == null) {
-			return null;
-		}
+    public static String getValue(final Element e) {
+        if (e == null) {
+            return null;
+        }
 
-		final String s = e.getValue();
+        final String s = e.getValue();
 
-		if (s != null && s.length() == 0) {
-			return null;
-		}
-		return s;
-	}
+        if (s != null && s.length() == 0) {
+            return null;
+        }
+        return s;
+    }
 
-	public static boolean hasElement(final Element e) {
-		return (e != null);
-	}
+    public static boolean hasElement(final Element e) {
+        return (e != null);
+    }
 }
-
-
-
-

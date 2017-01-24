@@ -49,13 +49,18 @@
 
 package com.openexchange.groupware.calendar;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.groupware.calendar.tools.CalendarAssertions.assertResourceParticipants;
 import static com.openexchange.groupware.calendar.tools.CalendarAssertions.assertUserParticipants;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import java.util.ArrayList;
 import java.util.List;
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.calendar.ConflictHandler;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.calendar.tools.CommonAppointments;
 import com.openexchange.groupware.contexts.Context;
@@ -67,12 +72,12 @@ import com.openexchange.setuptools.TestFolderToolkit;
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class ConflictHandlerTest extends TestCase {
+public class ConflictHandlerTest {
 
     private String participant1, participant2, participant3;
     private String resource1, resource2, resource3;
 
-    private String group,member;
+    private String group, member;
 
     private String user;
     private String secondUser;
@@ -82,8 +87,8 @@ public class ConflictHandlerTest extends TestCase {
 
     List<CalendarDataObject> clean = new ArrayList<CalendarDataObject>();
 
-    @Override
-	public void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         Init.startServer();
 
         final TestConfig config = new TestConfig();
@@ -114,19 +119,21 @@ public class ConflictHandlerTest extends TestCase {
         folders = new TestFolderToolkit();
     }
 
-    @Override
-	public void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         Init.stopServer();
         appointments.removeAll(user, clean);
     }
 
-     // Node 1077
+    // Node 1077
+    @Test
     public void testShouldSupplyConflictingUserParticipants() throws OXException {
-        final CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants( user, participant1, participant2);  // User is added in private folder anyway
-        appointments.save( appointment ); clean.add( appointment );
-        final CalendarDataObject conflictingAppointment = appointments.buildAppointmentWithUserParticipants( user, participant1, participant3);
+        final CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(user, participant1, participant2);  // User is added in private folder anyway
+        appointments.save(appointment);
+        clean.add(appointment);
+        final CalendarDataObject conflictingAppointment = appointments.buildAppointmentWithUserParticipants(user, participant1, participant3);
         conflictingAppointment.setIgnoreConflicts(false);
-        final CalendarDataObject[] conflicts = getConflicts( conflictingAppointment );
+        final CalendarDataObject[] conflicts = getConflicts(conflictingAppointment);
 
         assertNotNull(conflicts);
         assertEquals(1, conflicts.length);
@@ -137,12 +144,14 @@ public class ConflictHandlerTest extends TestCase {
     }
 
     // Node 1077
+    @Test
     public void testShouldSupplyConflictingResourceParticipants() throws OXException {
         final CalendarDataObject appointment = appointments.buildAppointmentWithResourceParticipants(resource1, resource2);
-        appointments.save( appointment );  clean.add( appointment );
+        appointments.save(appointment);
+        clean.add(appointment);
         final CalendarDataObject conflictingAppointment = appointments.buildAppointmentWithResourceParticipants(resource1, resource3);
         conflictingAppointment.setIgnoreConflicts(false);
-        final CalendarDataObject[] conflicts = getConflicts( conflictingAppointment );
+        final CalendarDataObject[] conflicts = getConflicts(conflictingAppointment);
 
         assertNotNull(conflicts);
         assertEquals(1, conflicts.length);
@@ -152,31 +161,35 @@ public class ConflictHandlerTest extends TestCase {
     }
 
     // Node 1077
+    @Test
     public void testShouldSupplyConflictingUserParticipantsInGroup() throws OXException {
         final CalendarDataObject appointment = appointments.buildAppointmentWithGroupParticipants(group);
-        appointments.save( appointment ); clean.add( appointment );
+        appointments.save(appointment);
+        clean.add(appointment);
 
-        final CalendarDataObject conflictingAppointment = appointments.buildAppointmentWithUserParticipants( member );
-        conflictingAppointment.setIgnoreConflicts( false );
+        final CalendarDataObject conflictingAppointment = appointments.buildAppointmentWithUserParticipants(member);
+        conflictingAppointment.setIgnoreConflicts(false);
 
-        final CalendarDataObject[] conflicts = getConflicts( conflictingAppointment );
+        final CalendarDataObject[] conflicts = getConflicts(conflictingAppointment);
 
         assertNotNull(conflicts);
         assertEquals(1, conflicts.length);
         final CalendarDataObject conflict = conflicts[0];
         assertEquals(appointment.getObjectID(), conflict.getObjectID());
-        assertUserParticipants(conflict, member );
+        assertUserParticipants(conflict, member);
     }
 
     // Node 1077
+    @Test
     public void testShouldSupplyTitleIfPermissionsAllowIt() throws OXException {
         // Permissions of the current user are only relevant if he is also a participant.
         // Can someone create a private appointment where she is not a participant? Where is this rule enforced?
         final CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(user, participant1, participant2);
-        appointments.save( appointment ); clean.add( appointment );
+        appointments.save(appointment);
+        clean.add(appointment);
         final CalendarDataObject conflictingAppointment = appointments.buildAppointmentWithUserParticipants(user, participant1, participant3);
         conflictingAppointment.setIgnoreConflicts(false);
-        final CalendarDataObject[] conflicts = getConflicts( conflictingAppointment );
+        final CalendarDataObject[] conflicts = getConflicts(conflictingAppointment);
 
         assertNotNull(conflicts);
         assertEquals(1, conflicts.length);
@@ -185,15 +198,17 @@ public class ConflictHandlerTest extends TestCase {
     }
 
     // Node 1077
+    @Test
     public void testShouldSuppressTitleIfPermissionsDenyIt() throws OXException {
         final CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(user, participant1, participant2);
-        appointments.save( appointment ); clean.add( appointment );
+        appointments.save(appointment);
+        clean.add(appointment);
 
-        appointments.switchUser( secondUser );
+        appointments.switchUser(secondUser);
 
         final CalendarDataObject conflictingAppointment = appointments.buildAppointmentWithUserParticipants(user, participant1, participant3);
         conflictingAppointment.setIgnoreConflicts(false);
-        final CalendarDataObject[] conflicts = getConflicts( conflictingAppointment );
+        final CalendarDataObject[] conflicts = getConflicts(conflictingAppointment);
 
         assertNotNull(conflicts);
         assertEquals(1, conflicts.length);
@@ -203,37 +218,41 @@ public class ConflictHandlerTest extends TestCase {
 
     //Bug 11269
 
+    @Test
     public void testShouldIncludeCurrentUserInConflictsWithCurrentUserOnly() throws OXException {
         final CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(user);
-        appointments.save( appointment ); clean.add( appointment );
+        appointments.save(appointment);
+        clean.add(appointment);
 
         final CalendarDataObject conflictingAppointment = appointments.buildAppointmentWithUserParticipants(user);
         conflictingAppointment.setIgnoreConflicts(false);
-        final CalendarDataObject[] conflicts = getConflicts( conflictingAppointment );
+        final CalendarDataObject[] conflicts = getConflicts(conflictingAppointment);
 
         assertNotNull(conflicts);
         assertEquals(1, conflicts.length);
         final CalendarDataObject conflict = conflicts[0];
         assertEquals(appointment.getTitle(), conflict.getTitle());
-        assertUserParticipants(conflict, user );
+        assertUserParticipants(conflict, user);
 
     }
 
     // Bug #11349
 
+    @Test
     public void testShouldShowTitleIfReadPermissionsInPrivateFolderAllowIt() throws OXException {
         final Session session = appointments.getSession();
         final int secondUserId = new TestContextToolkit().resolveUser(secondUser);
         folders.sharePrivateFolder(session, ctx, secondUserId);
         try {
             final CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(user, participant1, participant2);
-            appointments.save( appointment ); clean.add( appointment );
+            appointments.save(appointment);
+            clean.add(appointment);
 
-            appointments.switchUser( secondUser );
+            appointments.switchUser(secondUser);
 
             final CalendarDataObject conflictingAppointment = appointments.buildAppointmentWithUserParticipants(user, participant1, participant3);
             conflictingAppointment.setIgnoreConflicts(false);
-            final CalendarDataObject[] conflicts = getConflicts( conflictingAppointment );
+            final CalendarDataObject[] conflicts = getConflicts(conflictingAppointment);
 
             assertNotNull(conflicts);
             assertEquals(1, conflicts.length);
@@ -248,7 +267,7 @@ public class ConflictHandlerTest extends TestCase {
     private CalendarDataObject[] getConflicts(final CalendarDataObject conflictingAppointment) throws OXException {
         final ConflictHandler ch = new ConflictHandler(conflictingAppointment, null, appointments.getSession(), false);
         final CalendarDataObject[] conflicts = ch.getConflicts();
-        for(final CalendarDataObject conflict : conflicts) {
+        for (final CalendarDataObject conflict : conflicts) {
             conflict.setContext(ctx);
         }
         return conflicts;

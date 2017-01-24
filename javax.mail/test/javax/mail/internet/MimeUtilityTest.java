@@ -72,8 +72,8 @@ public class MimeUtilityTest {
         super();
     }
 
-    @Test
-    public void testImprovedDetectionOfTransferEncoding() throws MessagingException, IOException {
+     @Test
+     public void testImprovedDetectionOfTransferEncoding() throws MessagingException, IOException {
         ByteArrayInputStream in = new ByteArrayInputStream("U29tZSB0ZXN0IHRleHQ=".getBytes());
         InputStream decodedStream = MimeUtility.decode(in, "base64 ");
 

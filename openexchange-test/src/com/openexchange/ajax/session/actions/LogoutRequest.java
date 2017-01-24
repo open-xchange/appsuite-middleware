@@ -58,8 +58,7 @@ import com.openexchange.ajax.AJAXServlet;
 public class LogoutRequest extends AbstractRequest<LogoutResponse> {
 
     public LogoutRequest() {
-        super(new Parameter[] {
-            new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LOGOUT)
+        super(new Parameter[] { new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LOGOUT)
         });
     }
 

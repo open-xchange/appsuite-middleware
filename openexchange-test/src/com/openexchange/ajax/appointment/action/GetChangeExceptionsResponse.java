@@ -54,11 +54,11 @@ import java.util.List;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
-import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractColumnsResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.test.CTMUtils;
 
 /**
  * {@link GetChangeExceptionsResponse}
@@ -72,7 +72,7 @@ public class GetChangeExceptionsResponse extends AbstractColumnsResponse {
     }
 
     public List<Appointment> getAppointments(final TimeZone timeZone) throws OXException, JSONException {
-        Appointment[] objects = AppointmentTest.jsonArray2AppointmentArray((JSONArray) getData(), getColumns(), timeZone);
+        Appointment[] objects = CTMUtils.jsonArray2AppointmentArray((JSONArray) getData(), getColumns(), timeZone);
         return Arrays.asList(objects);
     }
 

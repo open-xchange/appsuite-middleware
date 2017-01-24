@@ -51,25 +51,30 @@ package com.openexchange.config.cascade.context.matching;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * {@link ContextSetTermParserTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class ContextSetTermParserTest extends TestCase {
-
+public class ContextSetTermParserTest {
     private final ContextSetTermParser parser = new ContextSetTermParser();
 
-    public void testParseSingleTag() {
+         @Test
+     public void testParseSingleTag() {
         String term = "green";
         assertMatches(term, "green", "fluffy", "vegetarian");
         assertNoMatch(term, "blue", "fluffy", "vegetarian");
 
     }
 
-    public void testAnd() {
+         @Test
+     public void testAnd() {
         String term = "fluffy & vegetarian";
 
         assertMatches(term, "green", "fluffy", "vegetarian");
@@ -77,7 +82,8 @@ public class ContextSetTermParserTest extends TestCase {
 
     }
 
-    public void testThreeAnds() {
+         @Test
+     public void testThreeAnds() {
         String term ="fluffy & vegetarian & green";
 
         assertMatches(term, "green", "fluffy", "vegetarian");
@@ -85,7 +91,8 @@ public class ContextSetTermParserTest extends TestCase {
 
     }
 
-    public void testOr() {
+         @Test
+     public void testOr() {
         String term ="green | blue";
 
         assertMatches(term, "green", "fluffy", "vegetarian");
@@ -94,7 +101,8 @@ public class ContextSetTermParserTest extends TestCase {
 
     }
 
-    public void testNot() {
+         @Test
+     public void testNot() {
         String term ="!blue";
 
         assertMatches(term, "green", "fluffy", "vegetarian");
@@ -102,7 +110,8 @@ public class ContextSetTermParserTest extends TestCase {
 
     }
 
-    public void testBrackets() {
+         @Test
+     public void testBrackets() {
         String term ="(blue | green) & !breatharian";
 
         assertMatches(term, "green", "fluffy", "vegetarian");
@@ -110,7 +119,8 @@ public class ContextSetTermParserTest extends TestCase {
         assertMatches(term, "blue", "fluffy", "omnivore");
     }
 
-    public void testBrackets2() {
+         @Test
+     public void testBrackets2() {
         String term ="blue | (green & !breatharian)";
 
         assertMatches(term, "green", "fluffy", "vegetarian");
@@ -118,7 +128,8 @@ public class ContextSetTermParserTest extends TestCase {
         assertNoMatch(term, "green", "fluffy", "breatharian");
     }
 
-    public void testComplex() {
+         @Test
+     public void testComplex() {
         String term ="!(blue | green) & (breatharian | ( fluffy & vegetarian ))";
 
         assertNoMatch(term, "green", "fluffy", "vegetarian");
