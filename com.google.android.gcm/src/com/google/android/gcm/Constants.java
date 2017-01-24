@@ -24,9 +24,14 @@ package com.google.android.gcm;
 public final class Constants {
 
     /**
-     * Endpoint for sending messages.
+     * Endpoint for sending messages via GCM.
      */
     public static final String GCM_SEND_ENDPOINT = "https://gcm-http.googleapis.com/gcm/send";
+
+    /**
+     * Endpoint for sending messages via FCM.
+     */
+    public static final String FCM_SEND_ENDPOINT = "https://fcm.googleapis.com/fcm/send";
 
     /**
      * Parameter for to field.
