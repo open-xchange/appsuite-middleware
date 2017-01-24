@@ -318,11 +318,13 @@ public abstract class AbstractCapabilityService implements CapabilityService {
     private boolean isAutologinEnabledForHost(String hostname, boolean defaultValue) {
         boolean isEnabled = defaultValue;
         final ConfigurationService configurationService = services.getService(ConfigurationService.class);
-        try {
-            LinkedList<Map<String, Object>> applicableConfigs = configurationService.getCustomHostConfigurations(hostname, -1, -1, services.getService(ConfigViewFactory.class));
-            isEnabled = getBooleanPropertyFromMap(applicableConfigs, "com.openexchange.sessiond.autologin", isEnabled);
-        } catch (OXException e) {
-            LOG.error("", e);
+        if (configurationService != null) {
+            try {
+                LinkedList<Map<String, Object>> applicableConfigs = configurationService.getCustomHostConfigurations(hostname, -1, -1, services.getService(ConfigViewFactory.class));
+                isEnabled = getBooleanPropertyFromMap(applicableConfigs, "com.openexchange.sessiond.autologin", isEnabled);
+            } catch (OXException e) {
+                LOG.error("", e);
+            }
         }
         return isEnabled;
     }

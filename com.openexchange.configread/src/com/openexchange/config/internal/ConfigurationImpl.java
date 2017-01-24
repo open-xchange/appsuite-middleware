@@ -839,10 +839,7 @@ public final class ConfigurationImpl implements ConfigurationService {
                    }
                }
 
-               /*
-                * Add key/value pairs that start with SERVER_PREFIX or SERVERCONFIG_PREFIX to the serverconfig. The mentioned prefix is
-                * stripped from resulting name and entries are only added if the session is not anonymous.
-                */
+               // Add key/value pairs that start with SERVER_PREFIX or SERVERCONFIG_PREFIX to the applicableConfigs.
                Map<String, Object> ccValues = new HashMap<String, Object>();
                ConfigView configView = configViewFactory.getView(userID, contextID);
 

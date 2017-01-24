@@ -18,6 +18,9 @@ Import-Package: com.openexchange.annotation,
  com.openexchange.tools.strings,
  javax.management,
  org.apache.commons.logging,
+ org.junit,
+ org.junit.runner,
+ org.junit.runners,
  org.osgi.framework,
  org.osgi.service.cm,
  org.osgi.util.tracker,
@@ -41,4 +44,3 @@ Import-Package: com.openexchange.annotation,
 Export-Package: com.openexchange.config
 Bundle-Activator: com.openexchange.config.osgi.ConfigActivator
 Bundle-ClassPath: .
-Require-Bundle: com.openexchange.test

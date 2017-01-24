@@ -6,11 +6,8 @@ import java.io.IOException;
 import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.config.ConfigurationServices;
 
-@RunWith(PowerMockRunner.class)
 @SuppressWarnings("unchecked")
 public class ConfigurationImplTest {
     
