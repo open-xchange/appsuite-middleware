@@ -233,11 +233,29 @@ public class AttendeeHelper {
         /*
          * delete removed attendees
          */
-        for (Attendee removedAttendee : attendeeDiff.getRemovedItems()) {
+        List<Attendee> removedAttendees = attendeeDiff.getRemovedItems();
+        for (Attendee removedAttendee : removedAttendees) {
             if (false == PublicType.getInstance().equals(folder.getType()) && removedAttendee.getEntity() == folder.getCreatedBy()) {
                 // preserve calendar user in personal folders
                 LOG.info("Implicitly preserving default calendar user {} in personal folder {}.", I(removedAttendee.getEntity()), folder);
                 continue;
+            }
+            if (CalendarUserType.GROUP.equals(removedAttendee.getCuType())) {
+                /*
+                 * only remove group attendee in case all originally participating members are also removed
+                 */
+                String groupURI = removedAttendee.getUri();
+                boolean attendingMembers = false;
+                for (int memberID : session.getEntityResolver().getGroupMembers(removedAttendee.getEntity())) {
+                    if (null != findMember(originalAttendees, memberID, groupURI) && null != findMember(removedAttendees, memberID, groupURI)) {
+                        attendingMembers = true;
+                    }
+                }
+                if (attendingMembers) {
+                    // preserve group attendee
+                    LOG.debug("Ignoring removal of group {} as long as there are attending members.", I(removedAttendee.getEntity()));
+                    continue;
+                }
             }
             attendeeList.remove(removedAttendee);
             attendeesToDelete.add(removedAttendee);
@@ -378,6 +396,23 @@ public class AttendeeHelper {
 
     private static List<Attendee> emptyForNull(List<Attendee> attendees) {
         return null == attendees ? Collections.<Attendee> emptyList() : attendees;
+    }
+
+
+    /**
+     * Looks up an internal user attendee who attends as member of a specific group.
+     *
+     * @param attendees The attendees to search
+     * @param memberID The identifier of the user to lookup as group member
+     * @param groupURI The group's URI
+     * @return The member attendee, or <code>null</code> if not found
+     */
+    private Attendee findMember(List<Attendee> attendees, int memberID, String groupURI) {
+        Attendee attendee = find(attendees, memberID);
+        if (null != attendee && null != attendee.getMember() && attendee.getMember().equals(groupURI)) {
+            return attendee;
+        }
+        return null;
     }
 
 }
