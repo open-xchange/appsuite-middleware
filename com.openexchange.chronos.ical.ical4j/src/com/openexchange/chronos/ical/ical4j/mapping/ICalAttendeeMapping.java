@@ -65,6 +65,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Enums;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import net.fortuna.ical4j.model.AddressList;
 import net.fortuna.ical4j.model.Parameter;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.PropertyList;
@@ -249,9 +250,14 @@ public abstract class ICalAttendeeMapping<T extends CalendarComponent, U> extend
         if (null != rsvp) {
             attendee.setRsvp(Boolean.valueOf(rsvp));
         }
-        String member = optParameterValue(property, Parameter.MEMBER);
-        if (null != member) {
-            attendee.setMember(member);
+        Parameter memberParameter = property.getParameter(Parameter.MEMBER);
+
+        if (null != memberParameter && Member.class.isInstance(memberParameter)) {
+            Member member = (Member) memberParameter;
+            AddressList groupAddresses = member.getGroups();
+            if (null != groupAddresses && 0 < groupAddresses.size()) {
+                attendee.setMember(String.valueOf(groupAddresses.iterator().next()));
+            }
         }
         return attendee;
     }
