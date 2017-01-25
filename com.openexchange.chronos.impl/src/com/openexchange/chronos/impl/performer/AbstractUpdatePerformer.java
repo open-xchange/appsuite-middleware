@@ -207,7 +207,7 @@ public abstract class AbstractUpdatePerformer {
         storage.getAlarmStorage().deleteAlarms(id);
         storage.getAttachmentStorage().deleteAttachments(session.getSession(), i(folder), id, originalEvent.getAttachments());
         storage.getEventStorage().deleteEvent(id);
-        storage.getAttendeeStorage().deleteAttendees(id);
+        storage.getAttendeeStorage().deleteAttendees(id, originalEvent.getAttendees());
         result.addDeletion(new DeleteResultImpl(originalEvent));
     }
 
