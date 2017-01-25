@@ -54,6 +54,7 @@ import com.openexchange.capabilities.Capability;
 import com.openexchange.configuration.ClientWhitelist;
 import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogProperties;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.serverconfig.ServerConfig;
 import com.openexchange.serverconfig.ServerConfigService;
@@ -112,6 +113,10 @@ public final class LoginConfiguration {
     }
 
     public boolean isSessiondAutoLogin() {
+        String hostname = LogProperties.get(LogProperties.Name.HOSTNAME);
+        if (hostname != null) {
+            return isSessiondAutoLogin(hostname);
+        }
         return sessiondAutoLogin;
     }
 

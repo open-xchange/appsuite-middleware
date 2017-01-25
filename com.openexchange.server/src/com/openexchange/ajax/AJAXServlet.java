@@ -536,7 +536,13 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             // Set 200 OK status code and JSON content by default
             resp.setStatus(HttpServletResponse.SC_OK);
             resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-
+            
+            // set hostname, for custom host handling in other features.
+            String hostname = req.getServerName();
+            if (!Strings.isEmpty(hostname)) {
+                LogProperties.put(LogProperties.Name.HOSTNAME, hostname);
+            }
+            
             if (checkRateLimit) {
                 // Enable rate limit on request instance
                 super.service(enableRateLimitCheckFor(req), resp);
