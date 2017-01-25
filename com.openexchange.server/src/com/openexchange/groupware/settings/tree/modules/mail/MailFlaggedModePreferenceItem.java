@@ -73,7 +73,7 @@ public class MailFlaggedModePreferenceItem implements PreferencesItemService, Co
 
     @Override
     public String[] getPath() {
-        return new String[] { "modules", "mail", "features", "flag" };
+        return new String[] { "modules", "mail", "features", "flag", "flag" };
     }
 
     @Override
@@ -116,12 +116,12 @@ public class MailFlaggedModePreferenceItem implements PreferencesItemService, Co
 
     @Override
     public String getConfigTreePath() {
-        return "modules/mail/features/flag";
+        return "modules/mail/features/flag/flag";
     }
 
     @Override
     public String getJslobPath() {
-        return "io.ox/mail//features/flag";
+        return "io.ox/mail//features/flag/star";
     }
 
 }
