@@ -76,7 +76,6 @@ import com.openexchange.chronos.CalendarStrings;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.Period;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
@@ -279,14 +278,27 @@ public class Utils {
      * @return The passed search term reference
      */
     public static CompositeSearchTerm appendCommonTerms(CompositeSearchTerm searchTerm, Date from, Date until, Date updatedSince) {
+        if (null != updatedSince) {
+            searchTerm.addSearchTerm(getSearchTerm(EventField.LAST_MODIFIED, SingleOperation.GREATER_THAN, updatedSince));
+        }
         if (null != from) {
-            searchTerm.addSearchTerm(getSearchTerm(EventField.END_DATE, SingleOperation.GREATER_OR_EQUAL, from));
+            boolean includeOldSeries = true;
+            if (includeOldSeries) {
+                searchTerm.addSearchTerm(new CompositeSearchTerm(CompositeOperation.OR)
+                    .addSearchTerm(getSearchTerm(EventField.END_DATE, SingleOperation.GREATER_OR_EQUAL, from))
+                    .addSearchTerm(new CompositeSearchTerm(CompositeOperation.AND)
+                        .addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID)))
+                        .addSearchTerm(new CompositeSearchTerm(CompositeOperation.NOT)
+                            .addSearchTerm(getSearchTerm(EventField.RECURRENCE_RULE, SingleOperation.EQUALS, "*e|*"))
+                        )
+                    )
+                );
+            } else {
+                searchTerm.addSearchTerm(getSearchTerm(EventField.END_DATE, SingleOperation.GREATER_OR_EQUAL, from));
+            }
         }
         if (null != until) {
             searchTerm.addSearchTerm(getSearchTerm(EventField.START_DATE, SingleOperation.LESS_THAN, until));
-        }
-        if (null != updatedSince) {
-            searchTerm.addSearchTerm(getSearchTerm(EventField.LAST_MODIFIED, SingleOperation.GREATER_THAN, updatedSince));
         }
         return searchTerm;
     }
@@ -418,20 +430,31 @@ public class Utils {
      * @return <code>true</code> if the event should be excluded, <code>false</code>, otherwise
      */
     public static boolean isExcluded(Event event, CalendarSession session, boolean includePrivate) throws OXException {
+        /*
+         * excluded if "classified" for user (and such events are requested to be excluded)
+         */
         if (false == includePrivate && isClassifiedFor(event, session.getUser().getId())) {
             return true;
         }
         Date from = getFrom(session);
         Date until = getUntil(session);
         if (null != from || null != until) {
-            Period period = new Period(event);
+            TimeZone timeZone = getTimeZone(session);
             if (isSeriesMaster(event)) {
-                //TODO: really consider "implicit" series period also if isResolveOccurrences(session) == false?
-                //      (needed for com.openexchange.ajax.appointment.bugtests.Bug16107Test)
-                period = Recurrence.getImplicitSeriesPeriod(new DefaultRecurrenceData(event), period);
-            }
-            if (false == isInRange(period, from, until, getTimeZone(session))) {
-                return true;
+                /*
+                 * excluded if last occurrence ends before "from", or first occurrence starts after "until"
+                 */
+                if (null != from && Recurrence.isInPast(new DefaultRecurrenceData(event), from, timeZone) ||
+                    null != until && false == isInRange(event, null, until, timeZone)) {
+                    return true;
+                }
+            } else {
+                /*
+                 * excluded if event period not in range
+                 */
+                if (false == isInRange(event, from, until, timeZone)) {
+                    return true;
+                }
             }
         }
         return false;
