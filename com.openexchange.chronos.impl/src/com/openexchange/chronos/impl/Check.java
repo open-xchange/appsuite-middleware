@@ -141,13 +141,15 @@ public class Check {
      * Checks that the supplied client timestamp is equal to or greater than the last modification time of the event.
      *
      * @param event The event to check the timestamp against
-     * @param clientTimestampp The client timestamp
+     * @param clientTimestamp The client timestamp
+     * @return The passed event, after the timestamp was checked
      * @throws OXException {@link CalendarExceptionCodes#CONCURRENT_MODIFICATION}
      */
-    public static void requireUpToDateTimestamp(Event event, long clientTimestampp) throws OXException {
-        if (event.getLastModified().getTime() > clientTimestampp) {
-            throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(I(event.getId()), L(clientTimestampp), L(event.getLastModified().getTime()));
+    public static Event requireUpToDateTimestamp(Event event, long clientTimestamp) throws OXException {
+        if (null != event.getLastModified() && event.getLastModified().getTime() > clientTimestamp) {
+            throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(I(event.getId()), L(clientTimestamp), L(event.getLastModified().getTime()));
         }
+        return event;
     }
 
     /**

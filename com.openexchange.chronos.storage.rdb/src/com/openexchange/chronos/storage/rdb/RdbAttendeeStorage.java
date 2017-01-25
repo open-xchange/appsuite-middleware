@@ -502,10 +502,15 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
 
     private static Map<Integer, List<Attendee>> selectInternalAttendeeData(Connection connection, int contextID, int objectIDs[]) throws SQLException, OXException {
         Map<Integer, List<Attendee>> attendeesByObjectId = new HashMap<Integer, List<Attendee>>(objectIDs.length);
-        String sql = new StringBuilder()
-            .append("SELECT object_id,id,type,ma,dn FROM prg_date_rights ")
-            .append("WHERE cid=? AND object_id IN (").append(getParameters(objectIDs.length)).append(") AND type IN (1,2,3);")
-        .toString();
+        String sql;
+        if (1 == objectIDs.length) {
+            sql = "SELECT object_id,id,type,ma,dn FROM prg_date_rights WHERE cid=? AND object_id=? AND type IN (1,2,3);";
+        } else {
+            sql = new StringBuilder()
+                .append("SELECT object_id,id,type,ma,dn FROM prg_date_rights ")
+                .append("WHERE cid=? AND object_id IN (").append(getParameters(objectIDs.length)).append(") AND type IN (1,2,3);")
+            .toString();
+        }
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, contextID);
@@ -528,10 +533,15 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
 
     private static Map<Integer, List<Attendee>> selectUserAttendeeData(Connection connection, int contextID, int objectIDs[]) throws SQLException, OXException {
         Map<Integer, List<Attendee>> attendeesByObjectId = new HashMap<Integer, List<Attendee>>(objectIDs.length);
-        String sql = new StringBuilder()
-            .append("SELECT object_id,member_uid,confirm,reason,pfid FROM prg_dates_members ")
-            .append("WHERE cid=? AND object_id IN (").append(getParameters(objectIDs.length)).append(");")
-        .toString();
+        String sql;
+        if (1 == objectIDs.length) {
+            sql = "SELECT object_id,member_uid,confirm,reason,pfid FROM prg_dates_members WHERE cid=? AND object_id=?;";
+        } else {
+            sql = new StringBuilder()
+                .append("SELECT object_id,member_uid,confirm,reason,pfid FROM prg_dates_members ")
+                .append("WHERE cid=? AND object_id IN (").append(getParameters(objectIDs.length)).append(");")
+            .toString();
+        }
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, contextID);
@@ -555,10 +565,15 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
 
     private static Map<Integer, List<Attendee>> selectExternalAttendeeData(Connection connection, int contextID, int objectIDs[]) throws SQLException, OXException {
         Map<Integer, List<Attendee>> attendeesByObjectId = new HashMap<Integer, List<Attendee>>(objectIDs.length);
-        String sql = new StringBuilder()
-            .append("SELECT objectId,mailAddress,displayName,confirm,reason FROM dateExternal ")
-            .append("WHERE cid=? AND objectId IN (").append(getParameters(objectIDs.length)).append(");")
-        .toString();
+        String sql;
+        if (1 == objectIDs.length) {
+            sql = "SELECT objectId,mailAddress,displayName,confirm,reason FROM dateExternal WHERE cid=? AND objectId=?;";
+        } else {
+            sql = new StringBuilder()
+                .append("SELECT objectId,mailAddress,displayName,confirm,reason FROM dateExternal ")
+                .append("WHERE cid=? AND objectId IN (").append(getParameters(objectIDs.length)).append(");")
+            .toString();
+        }
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, contextID);
@@ -591,7 +606,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
      */
     private static int determineEntity(Attendee attendee, Set<Integer> usedEntities) {
         if (isInternal(attendee)) {
-            usedEntities.add((attendee.getEntity()));
+            usedEntities.add(I(attendee.getEntity()));
             return attendee.getEntity();
         } else {
             String uri = attendee.getUri();

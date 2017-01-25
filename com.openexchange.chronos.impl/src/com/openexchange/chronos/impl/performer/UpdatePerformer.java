@@ -108,9 +108,11 @@ import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.service.SimpleCollectionUpdate;
 import com.openexchange.chronos.storage.CalendarStorage;
+import com.openexchange.chronos.storage.EventStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.tools.arrays.Arrays;
 
 /**
  * {@link UpdatePerformer}
@@ -119,6 +121,12 @@ import com.openexchange.groupware.ldap.User;
  * @since v7.10.0
  */
 public class UpdatePerformer extends AbstractUpdatePerformer {
+
+    /** Event fields that are always skipped when applying updated event data */
+    private static final EventField[] SKIPPED_FIELDS = {
+        EventField.CREATED, EventField.CREATED_BY, EventField.LAST_MODIFIED, EventField.MODIFIED_BY, EventField.SEQUENCE,
+        EventField.ALARMS, EventField.ATTENDEES, EventField.ATTACHMENTS
+    };
 
     /**
      * Initializes a new {@link UpdatePerformer}.
@@ -131,12 +139,19 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         super(storage, session, folder);
     }
 
+    /**
+     * Performs the update operation.
+     *
+     * @param objectID The identifier of the event to update
+     * @param updatedEvent The updated event data
+     * @param clientTimestamp The client timestamp to catch concurrent modifications
+     * @return The update result
+     */
     public CalendarResultImpl perform(int objectID, Event updatedEvent, long clientTimestamp) throws OXException {
         /*
          * load original event data
          */
-        Event originalEvent = loadEventData(objectID);
-        requireUpToDateTimestamp(originalEvent, clientTimestamp);
+        Event originalEvent = requireUpToDateTimestamp(loadEventData(objectID), clientTimestamp);
         /*
          * update event or event occurrence
          */
@@ -199,51 +214,51 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
     }
 
     private void updateEvent(Event originalEvent, Event updatedEvent, EventField... ignoredFields) throws OXException {
+        boolean wasUpdated = false;
         /*
-         * check current session user's permissions
+         * check if folder view on event is allowed as needed
          */
         if (needsExistenceCheckInTargetFolder(originalEvent, updatedEvent)) {
             Check.eventIsInFolder(originalEvent, folder);
         }
-        if (session.getUser().getId() == originalEvent.getCreatedBy()) {
-            requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, WRITE_OWN_OBJECTS, NO_PERMISSIONS);
-        } else {
-            requireCalendarPermission(folder, READ_FOLDER, READ_ALL_OBJECTS, WRITE_ALL_OBJECTS, NO_PERMISSIONS);
-        }
-        boolean wasUpdated = false;
         /*
-         * handle new delete exceptions
+         * handle new delete exceptions from the calendar user's point of view beforehand
          */
-        if (isSeriesMaster(originalEvent) && updatedEvent.containsDeleteExceptionDates()) {
-            if (updateDeleteExceptions(originalEvent, updatedEvent)) {
-                wasUpdated = true;
-                originalEvent = loadEventData(originalEvent.getId());
-            }
+        if (isSeriesMaster(originalEvent) && updatedEvent.containsDeleteExceptionDates() && updateDeleteExceptions(originalEvent, updatedEvent)) {
+            wasUpdated |= true;
+            originalEvent = loadEventData(originalEvent.getId());
         }
         /*
          * update event data
          */
+        if (null != updatedEvent.getAttendees()) {
+            session.getEntityResolver().prepare(updatedEvent.getAttendees());
+        }
         ItemUpdate<Event, EventField> eventUpdate = prepareEventUpdate(originalEvent, updatedEvent, ignoredFields);
-        if (null != eventUpdate) {
+        if (null != eventUpdate && 0 < eventUpdate.getUpdatedFields().size()) {
             /*
-             * check for conflicts
+             * check permissions & conflicts
              */
+            requireWritePermissions(originalEvent);
             if (needsConflictCheck(eventUpdate)) {
-                Event newEvent = originalEvent.clone();
-                EventMapper.getInstance().copy(eventUpdate.getUpdate(), newEvent, EventField.values());
-                List<Attendee> newAttendees;
+                Event changedEvent = originalEvent.clone();
+                EventMapper.getInstance().copy(eventUpdate.getUpdate(), changedEvent, EventField.values());
+                List<Attendee> changedAttendees;
                 if (updatedEvent.containsAttendees()) {
-                    newAttendees = AttendeeHelper.onUpdatedEvent(session, folder, originalEvent.getAttendees(), updatedEvent.getAttendees()).apply(originalEvent.getAttendees());
+                    changedAttendees = AttendeeHelper.onUpdatedEvent(session, folder, originalEvent.getAttendees(), updatedEvent.getAttendees()).previewChanges();
                 } else {
-                    newAttendees = originalEvent.getAttendees();
+                    changedAttendees = originalEvent.getAttendees();
                 }
-                List<EventConflict> conflicts = new ConflictCheckPerformer(session, storage).perform(newEvent, newAttendees);
+                List<EventConflict> conflicts = new ConflictCheckPerformer(session, storage).perform(changedEvent, changedAttendees);
                 if (null != conflicts && 0 < conflicts.size()) {
                     result.addConflicts(conflicts);
                     return;
                 }
             }
             if (needsSequenceNumberIncrement(eventUpdate)) {
+                /*
+                 * increment sequence number
+                 */
                 eventUpdate.getUpdate().setSequence(originalEvent.getSequence() + 1);
             }
             if (isSeriesMaster(originalEvent) && needsChangeExceptionsReset(eventUpdate)) {
@@ -259,14 +274,13 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
              */
             Consistency.setModified(timestamp, eventUpdate.getUpdate(), session.getUser().getId());
             storage.getEventStorage().updateEvent(eventUpdate.getUpdate());
-            wasUpdated = true;
+            wasUpdated |= true;
         }
         /*
          * process any attendee updates
          */
         if (updatedEvent.containsAttendees()) {
-            updateAttendees(originalEvent, updatedEvent);
-            wasUpdated |= true;
+            wasUpdated |= updateAttendees(originalEvent, updatedEvent);
         } else if (null != eventUpdate && needsParticipationStatusReset(eventUpdate)) {
             wasUpdated |= resetParticipationStatus(originalEvent.getId(), originalEvent.getAttendees());
         }
@@ -274,15 +288,15 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
          * process any attachment updates
          */
         if (updatedEvent.containsAttachments()) {
-            wasUpdated |= updateAttachments(originalEvent.getId(), originalEvent.getAttachments(), updatedEvent.getAttachments());
+            wasUpdated |= updateAttachments(originalEvent, originalEvent.getAttachments(), updatedEvent.getAttachments());
         }
         /*
          * process any alarm updates for the calendar user
          */
-        CollectionUpdate<Alarm, AlarmField> alarmUpdate = null;
         if (updatedEvent.containsAlarms()) {
-            alarmUpdate = updateAlarms(originalEvent, calendarUser, updatedEvent.getAlarms());
-            wasUpdated |= false == alarmUpdate.isEmpty();
+            //TODO: update alarms for session user or calendar user?
+            //            alarmUpdate = updateAlarms(originalEvent, session.getUser(), updatedEvent.getAlarms());
+            wasUpdated |= updateAlarms(originalEvent, calendarUser, updatedEvent.getAlarms());
         }
         /*
          * update any stored alarm triggers of all users if required
@@ -290,7 +304,8 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         if (null != eventUpdate && needsAlarmTriggerUpdate(eventUpdate)) {
             Map<Integer, List<Alarm>> alarmsByUserID = storage.getAlarmStorage().loadAlarms(originalEvent);
             if (null != alarmsByUserID && 0 < alarmsByUserID.size()) {
-                Event changedEvent = storage.getEventStorage().loadEvent(originalEvent.getId(), null);
+                Event changedEvent = originalEvent.clone();
+                EventMapper.getInstance().copy(eventUpdate.getUpdate(), changedEvent, EventField.values());
                 for (Attendee attendee : filter(originalEvent.getAttendees(), Boolean.TRUE, CalendarUserType.INDIVIDUAL)) {
                     List<Alarm> alarms = alarmsByUserID.get(I(attendee.getEntity()));
                     if (null != alarms && 0 < alarms.size()) {
@@ -300,7 +315,13 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                 }
             }
         }
+        /*
+         * ensure to 'touch' original event in case not already done & track update result
+         */
         if (wasUpdated) {
+            if (null == eventUpdate) {
+                touch(originalEvent.getId());
+            }
             result.addUpdate(new UpdateResultImpl(originalEvent, loadEventData(originalEvent.getId())));
         }
     }
@@ -322,8 +343,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * @see <a href="https://bugs.open-xchange.com/show_bug.cgi?id=29566#c12">Bug 29566</a>, <a href="https://bugs.open-xchange.com/show_bug.cgi?id=23181"/>Bug 23181</a>
      */
     public boolean needsExistenceCheckInTargetFolder(Event originalEvent, Event updatedEvent) {
-        if (hasExternalOrganizer(originalEvent) && matches(originalEvent.getOrganizer(), updatedEvent.getOrganizer()) &&
-            originalEvent.getUid().equals(updatedEvent.getUid()) && updatedEvent.getSequence() >= originalEvent.getSequence()) {
+        if (hasExternalOrganizer(originalEvent) && matches(originalEvent.getOrganizer(), updatedEvent.getOrganizer()) && originalEvent.getUid().equals(updatedEvent.getUid()) && updatedEvent.getSequence() >= originalEvent.getSequence()) {
             return false;
         }
         return true;
@@ -401,6 +421,12 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         return false;
     }
 
+    /**
+     * Gets a value indicating whether date-time-related properties of the event have changed so that an alarm trigger update is required.
+     *
+     * @param eventUpdate The event update to evaluate
+     * @return <code>true</code> if alarm trigger updates should take place, <code>false</code>, otherwise
+     */
     private boolean needsAlarmTriggerUpdate(ItemUpdate<Event, EventField> eventUpdate) throws OXException {
         return eventUpdate.containsAnyChangeOf(new EventField[] {
             EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY
@@ -449,14 +475,17 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         return false;
     }
 
-    private void updateAttendees(Event originalEvent, Event updatedEvent) throws OXException {
+    private boolean updateAttendees(Event originalEvent, Event updatedEvent) throws OXException {
         AttendeeHelper attendeeHelper = AttendeeHelper.onUpdatedEvent(session, folder, originalEvent.getAttendees(), updatedEvent.getAttendees());
+        if (false == attendeeHelper.hasChanges()) {
+            return false;
+        }
         /*
          * perform attendee deletions
          */
         List<Attendee> attendeesToDelete = attendeeHelper.getAttendeesToDelete();
         if (0 < attendeesToDelete.size()) {
-            //TODO: any checks prior removal? user a must not delete user b?
+            requireWritePermissions(originalEvent, attendeesToDelete);
             storage.getEventStorage().insertTombstoneEvent(EventMapper.getInstance().getTombstone(originalEvent, timestamp, calendarUser.getId()));
             storage.getAttendeeStorage().insertTombstoneAttendees(originalEvent.getId(), AttendeeMapper.getInstance().getTombstones(attendeesToDelete));
             storage.getAttendeeStorage().deleteAttendees(originalEvent.getId(), attendeesToDelete);
@@ -467,19 +496,20 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
          */
         List<Attendee> attendeesToUpdate = attendeeHelper.getAttendeesToUpdate();
         if (0 < attendeesToUpdate.size()) {
-            //TODO: any checks prior removal? user a must not update user b?
+            requireWritePermissions(originalEvent, attendeesToUpdate);
             storage.getAttendeeStorage().updateAttendees(originalEvent.getId(), attendeesToUpdate);
         }
         /*
          * perform attendee inserts
          */
         if (0 < attendeeHelper.getAttendeesToInsert().size()) {
-            //TODO: any checks prior removal? user a must not add user b if not organizer?
+            requireWritePermissions(originalEvent);
             storage.getAttendeeStorage().insertAttendees(originalEvent.getId(), attendeeHelper.getAttendeesToInsert());
         }
+        return true;
     }
 
-    private boolean updateAttachments(int eventID, List<Attachment> originalAttachments, List<Attachment> newAttachments) throws OXException {
+    private boolean updateAttachments(Event originalEvent, List<Attachment> originalAttachments, List<Attachment> newAttachments) throws OXException {
         List<Attachment> attachmentsToInsert = new ArrayList<Attachment>();
         List<Attachment> attachmentsToDelete = new ArrayList<Attachment>();
         if (null == originalAttachments) {
@@ -505,11 +535,12 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         if (attachmentsToDelete.isEmpty() && attachmentsToInsert.isEmpty()) {
             return false;
         }
+        requireWritePermissions(originalEvent);
         if (0 < attachmentsToDelete.size()) {
-            storage.getAttachmentStorage().deleteAttachments(session.getSession(), i(folder), eventID, attachmentsToDelete);
+            storage.getAttachmentStorage().deleteAttachments(session.getSession(), i(folder), originalEvent.getId(), attachmentsToDelete);
         }
         if (0 < attachmentsToInsert.size()) {
-            storage.getAttachmentStorage().insertAttachments(session.getSession(), i(folder), eventID, attachmentsToInsert);
+            storage.getAttachmentStorage().insertAttachments(session.getSession(), i(folder), originalEvent.getId(), attachmentsToInsert);
         }
         return true;
     }
@@ -520,17 +551,19 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * @param event The event to update the alarms in
      * @param calendarUser The calendar user whose alarms are updated
      * @param updatedAlarms The updated alarms
-     * @return A corresponding collection update
+     * @return <code>true</code> if there were any updates, <code>false</code>, otherwise
      */
-    private CollectionUpdate<Alarm, AlarmField> updateAlarms(Event event, User calendarUser, List<Alarm> updatedAlarms) throws OXException {
+    private boolean updateAlarms(Event event, User calendarUser, List<Alarm> updatedAlarms) throws OXException {
         List<Alarm> originalAlarms = storage.getAlarmStorage().loadAlarms(event, calendarUser.getId());
         CollectionUpdate<Alarm, AlarmField> alarmUpdates = AlarmMapper.getInstance().getAlarmUpdate(originalAlarms, updatedAlarms);
         if (false == alarmUpdates.isEmpty()) {
+            if (session.getUser().getId() != calendarUser.getId()) {
+                requireWritePermissions(event);
+            }
             storage.getAlarmStorage().updateAlarms(event, calendarUser.getId(), updatedAlarms);
-            List<Alarm> newAlarms = storage.getAlarmStorage().loadAlarms(event, calendarUser.getId());
-            return AlarmMapper.getInstance().getAlarmUpdate(originalAlarms, newAlarms);
+            return true;
         }
-        return alarmUpdates;
+        return false;
     }
 
     /**
@@ -559,24 +592,29 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         return false;
     }
 
+    /**
+     * Prepares the event update by generating a delta event object where all changed properties are <i>set</i>. The last modification
+     * timestamp, the modified by field and the event identifier are assigned implicitly. Only changeable properties targeting the
+     * {@link EventStorage} are considered, while other adjacent event data like alarms, attendees and attachments (as set in
+     * {@link UpdatePerformer#SKIPPED_FIELDS} is left out.
+     *
+     * @param originalEvent The original event
+     * @param updatedEvent The updated event
+     * @param ignoredFields Additional fields to ignore when determining the differences; {@link UpdatePerformer#SKIPPED_FIELDS} are always skipped
+     * @return The event update, or <code>null</code> if no changes of the event data were detected
+     */
     private ItemUpdate<Event, EventField> prepareEventUpdate(Event originalEvent, Event updatedEvent, EventField... ignoredFields) throws OXException {
         /*
          * determine & check modified fields
          */
-        Event eventUpdate = EventMapper.getInstance().getDifferences(originalEvent, updatedEvent, true, ignoredFields);
-        EventField[] updatedFields = EventMapper.getInstance().getAssignedFields(eventUpdate);
-        if (0 == updatedFields.length) {
-            // TODO or throw?
-            return null;
-        }
+        Event eventUpdate = EventMapper.getInstance().getDifferences(originalEvent, updatedEvent, true, Arrays.add(SKIPPED_FIELDS, ignoredFields));
         for (EventField field : EventMapper.getInstance().getAssignedFields(eventUpdate)) {
             switch (field) {
                 case CLASSIFICATION:
                     Check.mandatoryFields(eventUpdate, EventField.CLASSIFICATION);
                     Check.classificationIsValid(eventUpdate.getClassification(), folder);
                     if (isSeriesException(originalEvent)) {
-                        throw CalendarExceptionCodes.UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE.create(
-                            String.valueOf(eventUpdate.getClassification()), I(originalEvent.getSeriesId()), String.valueOf(originalEvent.getRecurrenceId()));
+                        throw CalendarExceptionCodes.UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE.create(String.valueOf(eventUpdate.getClassification()), I(originalEvent.getSeriesId()), String.valueOf(originalEvent.getRecurrenceId()));
                     }
                     break;
                 case ALL_DAY:
@@ -626,8 +664,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                     /*
                      * ensure all necessary recurrence related data is present in passed event update & check rule validity & re-validate start- and end date
                      */
-                    EventMapper.getInstance().copyIfNotSet(originalEvent, eventUpdate, EventField.RECURRENCE_RULE, EventField.SERIES_ID,
-                        EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY);
+                    EventMapper.getInstance().copyIfNotSet(originalEvent, eventUpdate, EventField.RECURRENCE_RULE, EventField.SERIES_ID, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY);
                     Check.startAndEndDate(eventUpdate);
                     break;
                 case RECURRENCE_ID:
@@ -646,10 +683,9 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                     }
                     if (null != eventUpdate.getDeleteExceptionDates()) {
                         Check.recurrenceIdsExist(originalEvent, eventUpdate.getDeleteExceptionDates());
-                        SimpleCollectionUpdate<Date> exceptionDateUpdates = Utils.getExceptionDateUpdates(
-                            originalEvent.getDeleteExceptionDates(), eventUpdate.getDeleteExceptionDates());
+                        SimpleCollectionUpdate<Date> exceptionDateUpdates = Utils.getExceptionDateUpdates(originalEvent.getDeleteExceptionDates(), eventUpdate.getDeleteExceptionDates());
                         if (0 < exceptionDateUpdates.getRemovedItems().size()) {
-                            throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(I(originalEvent.getId()), field );
+                            throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(I(originalEvent.getId()), field);
                         }
                     }
                     break;
@@ -700,9 +736,26 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                     break;
             }
         }
+        if (0 == EventMapper.getInstance().getAssignedFields(eventUpdate).length) {
+            return null;
+        }
         EventMapper.getInstance().copy(originalEvent, eventUpdate, EventField.ID);
         Consistency.setModified(timestamp, eventUpdate, session.getUser().getId());
         return new DefaultItemUpdate<Event, EventField>(EventMapper.getInstance(), originalEvent, eventUpdate);
+    }
+
+    private void requireWritePermissions(Event originalEvent) throws OXException {
+        if (session.getUser().getId() == originalEvent.getCreatedBy()) {
+            requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, WRITE_OWN_OBJECTS, NO_PERMISSIONS);
+        } else {
+            requireCalendarPermission(folder, READ_FOLDER, READ_ALL_OBJECTS, WRITE_ALL_OBJECTS, NO_PERMISSIONS);
+        }
+    }
+
+    private void requireWritePermissions(Event originalEvent, List<Attendee> updatedAttendees) throws OXException {
+        if (null != updatedAttendees && (1 < updatedAttendees.size() || session.getUser().getId() != updatedAttendees.get(0).getEntity())) {
+            requireWritePermissions(originalEvent);
+        }
     }
 
 }

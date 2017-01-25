@@ -88,6 +88,7 @@ public class AttendeeHelper {
 
     private final CalendarSession session;
     private final UserizedFolder folder;
+    private final List<Attendee> originalAttendees;
     private final List<Attendee> attendeesToInsert;
     private final List<Attendee> attendeesToDelete;
     private final List<Attendee> attendeesToUpdate;
@@ -100,7 +101,7 @@ public class AttendeeHelper {
      * @param requestedAttendees The list of attendees, as supplied by the client
      */
     public static AttendeeHelper onNewEvent(CalendarSession session, UserizedFolder folder, List<Attendee> requestedAttendees) throws OXException {
-        AttendeeHelper attendeeHelper = new AttendeeHelper(session, folder);
+        AttendeeHelper attendeeHelper = new AttendeeHelper(session, folder, null);
         attendeeHelper.processNewEvent(emptyForNull(requestedAttendees));
         return attendeeHelper;
     }
@@ -114,8 +115,8 @@ public class AttendeeHelper {
      * @param updatedAttendees The new/updated list of attendees, as supplied by the client
      */
     public static AttendeeHelper onUpdatedEvent(CalendarSession session, UserizedFolder folder, List<Attendee> originalAttendees, List<Attendee> updatedAttendees) throws OXException {
-        AttendeeHelper attendeeHelper = new AttendeeHelper(session, folder);
-        attendeeHelper.processUpdatedEvent(emptyForNull(originalAttendees), emptyForNull(updatedAttendees));
+        AttendeeHelper attendeeHelper = new AttendeeHelper(session, folder, originalAttendees);
+        attendeeHelper.processUpdatedEvent(emptyForNull(updatedAttendees));
         return attendeeHelper;
     }
 
@@ -127,8 +128,8 @@ public class AttendeeHelper {
      * @param originalAttendees The original list of attendees
      */
     public static AttendeeHelper onDeletedEvent(CalendarSession session, UserizedFolder folder, List<Attendee> originalAttendees) throws OXException {
-        AttendeeHelper attendeeHelper = new AttendeeHelper(session, folder);
-        attendeeHelper.processDeletedEvent(emptyForNull(originalAttendees));
+        AttendeeHelper attendeeHelper = new AttendeeHelper(session, folder, originalAttendees);
+        attendeeHelper.processDeletedEvent();
         return attendeeHelper;
     }
 
@@ -137,10 +138,12 @@ public class AttendeeHelper {
      *
      * @param session The calendar session
      * @param folder The parent folder of the event being processed
+     * @param originalAttendees The original attendees of the event, or <code>null</code> for new event creations
      */
-    private AttendeeHelper(CalendarSession session, UserizedFolder folder) throws OXException {
+    private AttendeeHelper(CalendarSession session, UserizedFolder folder, List<Attendee> originalAttendees) throws OXException {
         this.session = session;
         this.folder = folder;
+        this.originalAttendees = emptyForNull(originalAttendees);
         this.attendeesToInsert = new ArrayList<Attendee>();
         this.attendeesToDelete = new ArrayList<Attendee>();
         this.attendeesToUpdate = new ArrayList<Attendee>();
@@ -173,7 +176,22 @@ public class AttendeeHelper {
         return attendeesToUpdate;
     }
 
-    public List<Attendee> apply(List<Attendee> originalAttendees) throws OXException {
+    /**
+     * Gets a value indicating if there are any attendee-related changes.
+     *
+     * @return <code>true</code> if there are any changes, <code>false</code>, otherwise
+     */
+    public boolean hasChanges() {
+        return 0 < attendeesToInsert.size() || 0 < attendeesToDelete.size() || 0 < attendeesToUpdate.size();
+    }
+
+    /**
+     * Gets the resulting attendee list after all changes are applied to the original list of attendees. No data is actually changed,
+     * i.e. the internal list of attendees to insert, update and delete are still intact.
+     *
+     * @return The changed list of attendees
+     */
+    public List<Attendee> previewChanges() throws OXException {
         List<Attendee> newAttendees = new ArrayList<Attendee>(originalAttendees);
         newAttendees.removeAll(attendeesToDelete);
         for (Attendee attendeeToUpdate : attendeesToUpdate) {
@@ -207,7 +225,7 @@ public class AttendeeHelper {
         attendeesToInsert.addAll(prepareNewAttendees(attendeeList, requestedAttendees));
     }
 
-    private void processUpdatedEvent(List<Attendee> originalAttendees, List<Attendee> updatedAttendees) throws OXException {
+    private void processUpdatedEvent(List<Attendee> updatedAttendees) throws OXException {
         session.getEntityResolver().prefetch(updatedAttendees);
         updatedAttendees = session.getEntityResolver().prepare(updatedAttendees);
         AbstractCollectionUpdate<Attendee, AttendeeField> attendeeDiff = AttendeeMapper.getInstance().getAttendeeUpdate(originalAttendees, updatedAttendees);
@@ -239,7 +257,7 @@ public class AttendeeHelper {
         attendeesToInsert.addAll(prepareNewAttendees(attendeeList, attendeeDiff.getAddedItems()));
     }
 
-    private void processDeletedEvent(List<Attendee> originalAttendees) {
+    private void processDeletedEvent() {
         attendeesToDelete.addAll(originalAttendees);
     }
 
