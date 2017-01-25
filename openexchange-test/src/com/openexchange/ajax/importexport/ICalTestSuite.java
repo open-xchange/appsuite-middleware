@@ -51,11 +51,12 @@ package com.openexchange.ajax.importexport;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * Test suite for iCal tests.
  */
-@RunWith(Suite.class)
+@RunWith(ParallelSuite.class)
 @Suite.SuiteClasses({
     ICalImportTest.class,
     ICalTaskExportTest.class,
