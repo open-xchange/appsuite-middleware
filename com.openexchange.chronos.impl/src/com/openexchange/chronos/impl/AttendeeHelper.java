@@ -247,7 +247,7 @@ public class AttendeeHelper {
                 String groupURI = removedAttendee.getUri();
                 boolean attendingMembers = false;
                 for (int memberID : session.getEntityResolver().getGroupMembers(removedAttendee.getEntity())) {
-                    if (null != findMember(originalAttendees, memberID, groupURI) && null != findMember(removedAttendees, memberID, groupURI)) {
+                    if (null != findMember(originalAttendees, memberID, groupURI) && null == findMember(removedAttendees, memberID, groupURI)) {
                         attendingMembers = true;
                     }
                 }
@@ -300,13 +300,16 @@ public class AttendeeHelper {
         /*
          * resolve & add any internal group attendees
          */
+        boolean resolveGroupAttendees = false;
         for (Attendee groupAttendee : filter(newAttendees, Boolean.TRUE, CalendarUserType.GROUP)) {
             if (contains(existingAttendees, groupAttendee) || contains(attendees, groupAttendee)) {
                 LOG.debug("Skipping duplicate group attendee {}", groupAttendee);
                 continue;
             }
             groupAttendee = session.getEntityResolver().applyEntityData(groupAttendee);
-            attendees.add(groupAttendee);
+            if (false == resolveGroupAttendees) {
+                attendees.add(groupAttendee);
+            }
             for (int memberID : session.getEntityResolver().getGroupMembers(groupAttendee.getEntity())) {
                 if (contains(existingAttendees, memberID) || contains(attendees, memberID)) {
                     LOG.debug("Skipping explicitly added group member {}", I(memberID));
@@ -316,7 +319,9 @@ public class AttendeeHelper {
                 memberAttendee.setFolderID(PublicType.getInstance().equals(folder.getType()) ?
                     ATTENDEE_PUBLIC_FOLDER_ID : session.getEntityResolver().getDefaultCalendarID(memberID));
                 memberAttendee.setPartStat(getInitialPartStat(session.getContext().getContextId(), memberID, folder.getType()));
-                memberAttendee.setMember(groupAttendee.getUri());
+                if (false == resolveGroupAttendees) {
+                    memberAttendee.setMember(groupAttendee.getUri());
+                }
                 attendees.add(memberAttendee);
             }
         }
