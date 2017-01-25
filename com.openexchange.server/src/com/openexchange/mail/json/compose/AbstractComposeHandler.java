@@ -84,7 +84,6 @@ import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.DataSource;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.outlook.osgi.Services;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.html.HtmlService;
@@ -107,6 +106,7 @@ import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.DataMailPart;
 import com.openexchange.mail.dataobjects.compose.ReferencedMailPart;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
+import com.openexchange.mail.json.osgi.MailJSONActivator;
 import com.openexchange.mail.mime.HeaderCollection;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeTypes;
@@ -830,7 +830,7 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
              */
             {
                 final CryptographicServiceAuthenticationFactory authenticationFactory =
-                    Services.getServiceLookup().getOptionalService(CryptographicServiceAuthenticationFactory.class);
+                    MailJSONActivator.SERVICES.get().getOptionalService(CryptographicServiceAuthenticationFactory.class);
                 String authentication = null;
                 if(authenticationFactory != null) {
                     if(composeRequest.getRequest() != null) {
