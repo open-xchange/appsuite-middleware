@@ -646,6 +646,9 @@ public final class MimeReply extends AbstractMimeProcessing {
             if (null != msgref) {
                 replyMail.setMsgref(msgref);
             }
+            // Copy security setting
+            replyMail.setDecrypted(originalMsg.isDecrypted());
+
             return replyMail;
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);

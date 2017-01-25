@@ -504,7 +504,12 @@ public abstract class MailMessage extends MailPart {
     /**
      * Email is encrypted
      */
-    public boolean encrypted = false;
+    private boolean encrypted = false;
+
+    /**
+     * Email is decoded
+     */
+    private boolean decrypted = false;
 
     /**
      * Default constructor
@@ -2019,5 +2024,13 @@ public abstract class MailMessage extends MailPart {
 
     public boolean isEncrypted () {
         return this.encrypted;
+    }
+
+    public void setDecrypted (boolean decrypted) {
+        this.decrypted = decrypted;
+    }
+
+    public boolean isDecrypted () {
+        return this.decrypted;
     }
 }

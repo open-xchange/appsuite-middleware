@@ -248,7 +248,11 @@ public enum MailJSONField {
     /**
      * If the email is a Guard Encrypted Email
      */
-    ENCRYPTED("encrypted")
+    ENCRYPTED("encrypted"),
+    /**
+     * If the email is a Guard Decrypted Email
+     */
+    DECRYPTED("decrypted")
     ;
 
 
