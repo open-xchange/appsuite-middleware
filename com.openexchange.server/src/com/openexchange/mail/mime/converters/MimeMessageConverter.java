@@ -112,6 +112,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.json.osgi.MailJSONActivator;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.ExtendedMimeMessage;
 import com.openexchange.mail.mime.HeaderCollection;
@@ -123,6 +124,7 @@ import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.mail.mime.crypto.PGPMailRecognizer;
 import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
 import com.openexchange.mail.mime.dataobjects.MimeMailPart;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
@@ -2047,24 +2049,9 @@ public final class MimeMessageConverter {
      * @throws OXException
      */
     private static boolean isEncrypted (MimeMailMessage mail) throws OXException {
-        // First check if PGP Mime email by checking content-type
-        if (mail.getContentType().toString().contains("application/pgp-encrypted")) return true;
-        InputStream in = mail.getInputStream();
-        // Now check if PGP Inline message.  Will only check first 2k of message
-        try {
-            byte[] data = new byte[2000];
-            // TODO
-            // This is only going to check messages sent in plaintext, though should be most PGP Inline messages
-            // Consider adding more in depth check
-            if (in == null) return false;
-            in.read(data, 0, 2000);
-            String message = new String(data, "UTF-8");
-            if (message.contains("----BEGIN PGP MESSAGE")) return true;
-
-        } catch (IOException e) {
-            return false;
-        } finally {
-            Streams.close(in);
+        PGPMailRecognizer recognizer = MailJSONActivator.SERVICES.get().getOptionalService(PGPMailRecognizer.class);
+        if (recognizer != null) {
+            return recognizer.isPGPMessage(mail);
         }
         return false;
     }

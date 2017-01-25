@@ -116,6 +116,7 @@ import com.openexchange.mail.json.compose.internal.ComposeHandlerRegistryImpl;
 import com.openexchange.mail.json.converters.MailConverter;
 import com.openexchange.mail.json.converters.MailJSONConverter;
 import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.crypto.PGPMailRecognizer;
 import com.openexchange.mail.service.EncryptedMailService;
 import com.openexchange.mail.transport.config.TransportReloadable;
 import com.openexchange.oauth.provider.resourceserver.scope.AbstractScopeProvider;
@@ -159,7 +160,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getOptionalServices() {
-        return new Class<?>[] { MailCategoriesConfigService.class, CapabilityService.class, CryptographicServiceAuthenticationFactory.class, EncryptedMailService.class };
+        return new Class<?>[] { MailCategoriesConfigService.class, CapabilityService.class, CryptographicServiceAuthenticationFactory.class, EncryptedMailService.class, PGPMailRecognizer.class };
     }
 
     @Override
