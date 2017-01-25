@@ -319,6 +319,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
             .hash(hash)
             .iface(HTTP_JSON)
             .headers(Tools.copyHeaders(request))
+            .requestParameter(request.getParameterMap())
             .cookies(Tools.getCookieFromHeader(request))
             .secure(Tools.considerSecure(request, true))
             .serverName(serverName)
