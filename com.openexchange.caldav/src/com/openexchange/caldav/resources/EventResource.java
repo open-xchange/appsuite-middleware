@@ -63,7 +63,6 @@ import com.openexchange.caldav.EventPatches;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.PhantomMaster;
 import com.openexchange.caldav.Tools;
-import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.ical.CalendarExport;
@@ -72,6 +71,7 @@ import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.DAVUserAgent;
@@ -81,8 +81,6 @@ import com.openexchange.dav.resources.DAVObjectResource;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.hostname.HostData;
-import com.openexchange.groupware.tools.mappings.MappedIncorrectString;
-import com.openexchange.groupware.tools.mappings.MappedTruncation;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.user.UserService;
@@ -563,33 +561,12 @@ public class EventResource extends DAVObjectResource<Event> {
          * replace mapped incorrect strings, indicate "try again" if replacements were possible
          */
         LOG.info("Incorrect string detected, replacing problematic characters and trying again.");
-        boolean hasReplaced = handleIncorrectString(e, caldavImport.getEvent());
+        CalendarUtilities calendarUtilities = getCalendarSession().getUtilities();
+        boolean hasReplaced = calendarUtilities.handleIncorrectString(e, caldavImport.getEvent());
         for (Event changeException : caldavImport.getChangeExceptions()) {
-            hasReplaced |= handleIncorrectString(e, changeException);
+            hasReplaced |= calendarUtilities.handleIncorrectString(e, changeException);
         }
         return hasReplaced ? Boolean.TRUE : null;
-    }
-
-    private Boolean handleIncorrectString(OXException e, Event event) throws Exception {
-        boolean hasReplaced = false;
-        if (null != event) {
-            try {
-                hasReplaced |= MappedIncorrectString.replace(e.getProblematics(), event, "");
-            } catch (ClassCastException x1) {
-                // also try attendees
-                List<Attendee> attendees = event.getAttendees();
-                if (null != attendees) {
-                    for (Attendee attendee : attendees) {
-                        try {
-                            hasReplaced |= MappedIncorrectString.replace(e.getProblematics(), attendee, "");
-                        } catch (ClassCastException x2) {
-                            // ignore
-                        }
-                    }
-                }
-            }
-        }
-        return hasReplaced;
     }
 
     private Boolean handleDataTruncation(CalDAVImport caldavImport, OXException e) throws Exception {
@@ -597,12 +574,10 @@ public class EventResource extends DAVObjectResource<Event> {
          * trim mapped data truncations, indicate "try again" if possible
          */
         LOG.info("Data truncation detected, trimming problematic fields and trying again.");
-        boolean hasTrimmed = false;
-        if (null != caldavImport.getEvent()) {
-            hasTrimmed |= MappedTruncation.truncate(e.getProblematics(), caldavImport.getEvent());
-        }
+        CalendarUtilities calendarUtilities = getCalendarSession().getUtilities();
+        boolean hasTrimmed = calendarUtilities.handleDataTruncation(e, caldavImport.getEvent());
         for (Event changeException : caldavImport.getChangeExceptions()) {
-            hasTrimmed |= MappedTruncation.truncate(e.getProblematics(), changeException);
+            hasTrimmed |= calendarUtilities.handleDataTruncation(e, changeException);
         }
         return hasTrimmed ? Boolean.TRUE : null;
     }
