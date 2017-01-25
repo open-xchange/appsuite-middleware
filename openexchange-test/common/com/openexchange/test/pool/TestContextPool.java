@@ -82,7 +82,7 @@ public class TestContextPool {
 
     public static TestContext acquireContext(String acquiredBy) {
         try {
-            TestContext context = contexts.poll(10L, TimeUnit.SECONDS);
+            TestContext context = contexts.poll(30L, TimeUnit.SECONDS);
             Assert.assertNotNull("Unable to acquire test context due to an empty pool.", context);
             context.setAcquiredBy(acquiredBy);
             contextWatcher.get().contextInUse(context);
