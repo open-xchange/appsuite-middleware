@@ -51,12 +51,12 @@ package com.openexchange.ajax.appointment.recurrence;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
+import com.openexchange.test.concurrent.ParallelSuite;
 
-@RunWith(Suite.class)
+@RunWith(ParallelSuite.class)
 @Suite.SuiteClasses({
     DailyRecurrenceTest.class,
     ConfirmationsSeriesTest.class,
-
     Bug9497Test.class,
     Bug9742Test.class,
     Bug10760Test.class,

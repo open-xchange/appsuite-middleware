@@ -64,6 +64,7 @@ import com.openexchange.ajax.find.mail.Bug42970Test;
 import com.openexchange.ajax.find.tasks.FindTasksAutocompleteTests;
 import com.openexchange.ajax.find.tasks.FindTasksQueryTests;
 import com.openexchange.ajax.find.tasks.FindTasksTestsFilterCombinations;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * {@link FindTestSuite}
@@ -71,7 +72,7 @@ import com.openexchange.ajax.find.tasks.FindTasksTestsFilterCombinations;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since 7.6.0
  */
-@RunWith(Suite.class)
+@RunWith(ParallelSuite.class)
 @Suite.SuiteClasses({
     com.openexchange.ajax.find.calendar.QueryTest.class,
     //disable AutoCompleteTest for now

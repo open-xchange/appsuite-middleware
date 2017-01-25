@@ -3,8 +3,9 @@ package com.openexchange.webdav.xml.contact;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
+import com.openexchange.test.concurrent.ParallelSuite;
 
-@RunWith(Suite.class)
+@RunWith(ParallelSuite.class)
 @Suite.SuiteClasses({
     DeleteTest.class,
     ListTest.class,

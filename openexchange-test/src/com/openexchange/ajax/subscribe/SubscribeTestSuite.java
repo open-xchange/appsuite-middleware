@@ -58,13 +58,14 @@ import com.openexchange.ajax.subscribe.test.NewSubscriptionTest;
 import com.openexchange.ajax.subscribe.test.RefreshSubscriptionTest;
 import com.openexchange.ajax.subscribe.test.SubscriptionFolderIconTest;
 import com.openexchange.ajax.subscribe.test.UpdateSubscriptionTest;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * {@link SubscribeTestSuite}
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-@RunWith(Suite.class)
+@RunWith(ParallelSuite.class)
 @Suite.SuiteClasses({
     NewSubscriptionTest.class,
     DeleteSubscriptionTest.class,

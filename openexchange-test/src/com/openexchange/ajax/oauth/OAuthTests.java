@@ -50,15 +50,15 @@
 package com.openexchange.ajax.oauth;
 
 import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * {@link OAuthTests}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-@RunWith(Suite.class)
+@RunWith(ParallelSuite.class)
 @SuiteClasses({ OAuthServiceTest.class })
 public class OAuthTests {
 

@@ -50,10 +50,10 @@
 package com.openexchange.ajax.redirect;
 
 import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.test.concurrent.ParallelSuite;
 
-@RunWith(Suite.class)
+@RunWith(ParallelSuite.class)
 @SuiteClasses({ Bug25140Test.class })
 public class RedirectTests {
 

@@ -100,13 +100,14 @@ import com.openexchange.ajax.share.tests.RemoveGuestPermissionTest;
 import com.openexchange.ajax.share.tests.ResolveLegacyLinkTest;
 import com.openexchange.ajax.share.tests.SharedFilesFolderTest;
 import com.openexchange.ajax.share.tests.ShowSharedFilesFolderTest;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * {@link ShareAJAXSuite}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-@RunWith(Suite.class)
+@RunWith(ParallelSuite.class)
 @Suite.SuiteClasses({
     CreateWithGuestPermissionTest.class,
     AddGuestPermissionTest.class,

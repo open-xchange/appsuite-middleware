@@ -51,6 +51,7 @@ package com.openexchange.ajax.mailaccount;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * {@link MailAccountSuite}
@@ -58,7 +59,7 @@ import org.junit.runners.Suite;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-@RunWith(Suite.class)
+@RunWith(ParallelSuite.class)
 @Suite.SuiteClasses({
     MailAccountLifecycleTest.class,
     MailAccountAllTest.class,
