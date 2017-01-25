@@ -610,6 +610,21 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         Event eventUpdate = EventMapper.getInstance().getDifferences(originalEvent, updatedEvent, true, Arrays.add(SKIPPED_FIELDS, ignoredFields));
         for (EventField field : EventMapper.getInstance().getAssignedFields(eventUpdate)) {
             switch (field) {
+                case TRANSP:
+                    /*
+                     * ignore OPAQUE to TRANSPARENT transition when attendee's participation status is declined
+                     */
+                    if (null != updatedEvent.getTransp() && Transp.TRANSPARENT.equals(updatedEvent.getTransp().getValue()) && 
+                        false == isOrganizer(originalEvent, calendarUser.getId())) {
+                        Attendee originalAttendee = find(originalEvent.getAttendees(), calendarUser.getId());
+                        if (null != originalAttendee && false == ParticipationStatus.DECLINED.equals(originalAttendee.getPartStat())) {
+                            Attendee updatedAttendee = find(updatedEvent.getAttendees(), calendarUser.getId());
+                            if (null == updatedAttendee || ParticipationStatus.DECLINED.equals(updatedAttendee.getPartStat())) {
+                                eventUpdate.removeTransp();
+                            }
+                        }
+                    }
+                    break;
                 case CLASSIFICATION:
                     Check.mandatoryFields(eventUpdate, EventField.CLASSIFICATION);
                     Check.classificationIsValid(eventUpdate.getClassification(), folder);
