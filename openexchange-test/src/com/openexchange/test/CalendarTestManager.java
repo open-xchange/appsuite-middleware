@@ -210,6 +210,9 @@ public class CalendarTestManager implements TestManager {
         // exceptions
         for (Appointment appointment : new ArrayList<Appointment>(createdEntities)) {
             delete(appointment, true);
+            if (getLastResponse().hasError()) {
+                org.slf4j.LoggerFactory.getLogger(CalendarTestManager.class).warn("Unable to delete the appointment with id {} in folder {} with name '{}': {}", appointment.getObjectID(), appointment.getParentFolderID(), appointment.getTitle(), getLastResponse().getException().getMessage());
+            }
         }
         setFailOnError(old);
     }
@@ -427,7 +430,9 @@ public class CalendarTestManager implements TestManager {
         NewAppointmentSearchResponse resp = execute(req);
         extractInfo(resp);
         try {
-            return Arrays.asList(resp.getAppointments());
+            Appointment[] appointments = resp.getAppointments();
+            createdEntities.addAll(Arrays.asList(appointments));
+            return Arrays.asList(appointments);
         } catch (Exception e) {
             lastException = e;
             return null;
