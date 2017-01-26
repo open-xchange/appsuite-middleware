@@ -63,7 +63,7 @@ public class Bug31826Test extends AbstractSanitizing {
         super();
     }
      @Test
-     public void testKeepUnicode() {
+     public void testKeepUnicode() throws Exception {
         String content = "dfg &hearts;&diams;&spades;&clubs;&copy;&reg;&trade; dfg";
         String test = getHtmlService().sanitize(content, null, true, null, null);
 

@@ -61,7 +61,7 @@ import com.openexchange.html.AbstractSanitizing;
  */
 public class Bug22304Test extends AbstractSanitizing {
      @Test
-     public void testDropUnnecessaryEndifs() {
+     public void testDropUnnecessaryEndifs() throws Exception{
         String content = "<![endif]--><!--[if gte mso 9]><xml>\n" +
             "<o:shapelayout v:ext=\"edit\">\n" +
             "<o:idmap v:ext=\"edit\" data=\"1\" />\n" +

@@ -91,7 +91,7 @@ public class Bug36412Test {
     }
 
      @Test
-     public void testKeepUnicode() {
+     public void testKeepUnicode() throws Exception {
         String content = "              <tr>\n" +
             "                            <td border=\"1\" class=\"webseminare\"\n" +
             "                              font-size:14px;=\"\" line-height:=\"\"\n" +

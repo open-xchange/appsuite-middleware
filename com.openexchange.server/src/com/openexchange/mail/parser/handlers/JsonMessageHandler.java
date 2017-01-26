@@ -1116,7 +1116,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
         }
     }
 
-    private String getHtmlDisplayVersion(final ContentType contentType, final String src) {
+    private String getHtmlDisplayVersion(final ContentType contentType, final String src) throws OXException {
         final String baseType = contentType.getBaseType().toLowerCase(Locale.ENGLISH);
         if (baseType.startsWith(MimeTypes.MIME_TEXT_ENRICHED) || baseType.startsWith(MimeTypes.MIME_TEXT_RICHTEXT)) {
             return HtmlProcessing.formatHTMLForDisplay(
