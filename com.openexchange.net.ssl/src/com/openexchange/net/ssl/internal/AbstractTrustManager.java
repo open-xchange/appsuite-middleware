@@ -146,7 +146,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
     @Override
     public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
         Set<String> hosts = new HashSet<String>();
-        String host = getHostFromPrincipal(chain);
+        String host = getHostFromPrincipal(chain[0]);
         hosts.add(host);
 
         Collection<List<?>> subjectAltNames = chain[0].getSubjectAlternativeNames();
@@ -182,13 +182,12 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
     }
 
     /**
-     * Returns the hostname fro the specified chain
+     * Returns the hostname from the specified {@link X509Certificate}
      * 
-     * @param chain the {@link X509Certificate} chain
+     * @param x509Certificate the {@link X509Certificate}
      * @return The hostname or <code>null</code> if none could be found
      */
-    private String getHostFromPrincipal(X509Certificate[] chain) {
-        X509Certificate x509Certificate = chain[0];
+    private String getHostFromPrincipal(X509Certificate x509Certificate) {
         String dn = x509Certificate.getSubjectDN().getName();
         try {
             LdapName ln = new LdapName(dn);
