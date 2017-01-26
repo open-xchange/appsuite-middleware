@@ -52,6 +52,7 @@ package com.openexchange.ajax.appointment.bugtests;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import static org.junit.Assert.assertEquals;
 import java.util.Date;
+import java.util.TimeZone;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -94,8 +95,10 @@ public class Bug41995Test extends AbstractAJAXSession {
 
         SetRequest setRequest = new SetRequest(Tree.TimeZone, "America/New_York");
         getClient().execute(setRequest);
+        catm.setTimezone(TimeZone.getTimeZone("America/New_York"));
         setRequest = new SetRequest(Tree.TimeZone, "Europe/Berlin");
         getClient2().execute(setRequest);
+        ctm2.setTimezone(TimeZone.getTimeZone("Europe/Berlin"));
 
         appointment = new Appointment();
         appointment.setTitle("Bug 41995 Test");
