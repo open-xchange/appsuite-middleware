@@ -437,6 +437,7 @@ public class HttpDoveAdmClient implements DoveAdmClient {
                     String separator = Strings.getLineSeparator();
                     traceBuilder.append(separator).append(separator).append("Response:").append(separator);
                     traceBuilder.append("Encountered an I/O error: ").append(e.getMessage());
+                    LOG.trace(traceBuilder.toString());
                 }
                 throw handleIOError(e, callProperties.endpoint, call);
             }
