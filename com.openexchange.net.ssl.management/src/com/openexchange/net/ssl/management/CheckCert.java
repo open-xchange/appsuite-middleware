@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.MessageDigest;
+import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import javax.net.ssl.SSLContext;
@@ -35,7 +36,7 @@ public class CheckCert {
             passphrase = p.toCharArray();
         } else {
             System.out.println("Usage: java CheckCert <host>[:port] [passphrase]");
-            host = "localhost";
+            host = "www.open-xchange.com";
             port = 443;
             passphrase = "changeit".toCharArray();
             //return;
@@ -88,17 +89,29 @@ public class CheckCert {
         System.out.println("Server sent " + chain.length + " certificate(s):");
         System.out.println();
         MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
+        MessageDigest sha1 = MessageDigest.getInstance("SHA1");
         MessageDigest md5 = MessageDigest.getInstance("MD5");
         for (int i = 0; i < chain.length; i++) {
             X509Certificate cert = chain[i];
-            System.out.println(" " + (i + 1) + " Subject " + cert.getSubjectDN());
-            System.out.println("   Issuer  " + cert.getIssuerDN());
-            System.out.println("Expiration Date: " + cert.getNotAfter());
-            System.out.println("Serial Number: " + cert.getSerialNumber().toString(16));
+            System.out.println("Certificate " + (i + 1));
+            System.out.println("     Common Name......: " + cert.getSubjectDN());
+            System.out.println("     Issued by........: " + cert.getIssuerDN());
+            System.out.println("     Issued on........: " + cert.getNotBefore());
+            System.out.println("     Expiration Date..: " + cert.getNotAfter());
+            System.out.println("     Serial Number....: " + cert.getSerialNumber().toString(16));
+            System.out.println("     Signature........: " + toHexString(cert.getSignature()));
+            System.out.println("  Public Key Info");
+            PublicKey pk = cert.getPublicKey();
+            System.out.println("     Algorithm........: " + pk.getAlgorithm());
+            System.out.println("     Format...........: " + pk.getFormat());
+            System.out.println("   " + pk);
             sha256.update(cert.getEncoded());
-            System.out.println("[   sha-256    ]: " + toHexString(sha256.digest()));
+            sha1.update(cert.getEncoded());
             md5.update(cert.getEncoded());
-            System.out.println("[     md5      ]: " + toHexString(md5.digest()));
+            System.out.println("  Fingerprints");
+            System.out.println("     MD5..............: " + toHexString(md5.digest()));
+            System.out.println("     SHA1.............: " + toHexString(sha1.digest()));
+            System.out.println("     SHA-256..........: " + toHexString(sha256.digest()));
             System.out.println();
         }
     }
