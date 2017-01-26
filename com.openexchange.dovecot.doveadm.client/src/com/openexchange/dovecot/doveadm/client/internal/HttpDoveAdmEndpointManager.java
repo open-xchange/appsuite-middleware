@@ -152,12 +152,14 @@ public class HttpDoveAdmEndpointManager {
         int readTimeout = configService.getIntProperty(propPrefix.append("readTimeout").toString(), 2500);
         propPrefix.setLength(resetLen);
         int connectTimeout = configService.getIntProperty(propPrefix.append("connectTimeout").toString(), 1500);
+        propPrefix.setLength(resetLen);
+        int checkInterval = configService.getIntProperty(propPrefix.append("checkInterval").toString(), 60000);
 
         // Initialize HTTP client for the listing
         DefaultHttpClient httpClient = newHttpClient(totalConnections, maxConnectionsPerRoute, readTimeout, connectTimeout);
 
         // Setup end-point manager for the listing
-        EndpointManager endpointManager = factory.createEndpointManager(l, httpClient, availableStrategy, 60, TimeUnit.SECONDS);
+        EndpointManager endpointManager = factory.createEndpointManager(l, httpClient, availableStrategy, checkInterval, TimeUnit.MILLISECONDS);
 
         // Return listing for bundled HTTP client & end-point manager
         return new EndpointListing(httpClient, endpointManager);
@@ -228,27 +230,33 @@ public class HttpDoveAdmEndpointManager {
     }
 
     /**
-     * Black-lists specified end-point for given call.
+     * Black-lists specified end-point for given call (only if there other alternative ones).
      *
      * @param call The call
      * @param endpoint The end-point to black-list
+     * @return <code>true</code> if end-point has been added to black-list; otherwise <code>false</code>
      */
-    public void blacklist(HttpDoveAdmCall call, Endpoint endpoint) {
+    public boolean blacklist(HttpDoveAdmCall call, Endpoint endpoint) {
         if (null == call) {
-            return;
+            return false;
         }
 
         EnumMap<HttpDoveAdmCall, EndpointListing> endpoints = endpointsReference.get();
         if (null == endpoints) {
-            return;
+            return false;
         }
 
         EndpointListing entry = endpoints.get(call);
         if (null == entry) {
-            return;
+            return false;
+        }
+
+        if (entry.endpointManager.getNumberOfEndpoints() <= 1) {
+            return false;
         }
 
         entry.endpointManager.blacklist(endpoint);
+        return true;
     }
 
     /**

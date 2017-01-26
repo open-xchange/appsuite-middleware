@@ -20,6 +20,7 @@ com.openexchange.dovecot.doveadm.endpoints.totalConnections        The number of
 com.openexchange.dovecot.doveadm.endpoints.maxConnectionsPerRoute  The number of connections per route held in HTTP connection pool; or less than/equal to 0 (zero) for auto-determining
 com.openexchange.dovecot.doveadm.endpoints.readTimeout             The read time-out in milliseconds
 com.openexchange.dovecot.doveadm.endpoints.connectTimeout          The connect time-out in milliseconds
+com.openexchange.dovecot.doveadm.endpoints.checkInterval           The time interval in milliseconds when to check if a previously black-listed end-point is re-available again
 
 Full example :
 com.openexchange.dovecot.doveadm.endpoints=http://dovecot1.host.invalid:8081, http://dovecot2.host.invalid:8081
@@ -27,6 +28,7 @@ com.openexchange.dovecot.doveadm.endpoints.totalConnections=100
 com.openexchange.dovecot.doveadm.endpoints.maxConnectionsPerRoute=0 (max. connections per route is then determined automatically by specified end-points)
 com.openexchange.dovecot.doveadm.endpoints.readTimeout=2500
 com.openexchange.dovecot.doveadm.endpoints.connectTimeout=1500
+com.openexchange.dovecot.doveadm.endpoints.checkInterval=60000
 
 The values can be configured within a dedicated .properties file; e.g. 'doveadm.properties'.
       Default: 
