@@ -150,7 +150,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             return;
         }
 
-        this.trustManager.checkClientTrusted(chain, authType, engine);
+        this.trustManager.checkServerTrusted(chain, authType, engine);
     }
 
     @Override
