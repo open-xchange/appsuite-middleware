@@ -50,6 +50,9 @@
 package com.openexchange.net.ssl.internal;
 
 import java.net.Socket;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
@@ -61,7 +64,10 @@ import javax.naming.ldap.LdapName;
 import javax.naming.ldap.Rdn;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.X509ExtendedTrustManager;
+import com.openexchange.java.util.Tools;
+import com.openexchange.log.LogProperties;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
+import com.openexchange.net.ssl.management.SSLCertificateManagementService;
 import com.openexchange.net.ssl.osgi.Services;
 
 /**
@@ -95,14 +101,47 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         return this.trustManager.getAcceptedIssuers();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.net.ssl.X509ExtendedTrustManager#checkServerTrusted(java.security.cert.X509Certificate[], java.lang.String, java.net.Socket)
+     */
     @Override
     public void checkServerTrusted(X509Certificate[] chain, String authType, Socket socket) throws CertificateException {
         if (Services.getService(SSLConfigurationService.class).isWhitelisted(socket.getInetAddress().getHostName())) {
             return;
         }
-        this.trustManager.checkServerTrusted(chain, authType, socket);
+
+        /*
+         * MW-445: Main Concept
+         * - Check if the server is to be trusted; if yes return
+         * - Check if the user is allowed to accept untrusted certificates; if not throw an exception
+         * - Retrieve the fingerprint(s) of the certificate
+         * - Search if the user already accepted the certificate; if yes return
+         * |_ Throw an exception in case the user previously denied the certificate
+         * |_ Throw an exception with the indication that the server is untrusted (the user can then choose what to do)
+         */
+
+        // Check if the server is to be trusted; if yes return
+        try {
+            this.trustManager.checkServerTrusted(chain, authType, socket);
+            return;
+        } catch (Exception e) {
+            //TODO: try to determine the reason of failure
+            if (e.getMessage().contains("unable to find valid certification path to requested target")) {
+                LOG.warn("All good it's just an invalid certificate");
+                // All good, it's just an invalid certificate
+            }
+            // re-throw if we can not handle the exception
+        }
+        checkUserTrustsServer(chain);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.net.ssl.X509TrustManager#checkServerTrusted(java.security.cert.X509Certificate[], java.lang.String)
+     */
     @Override
     public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
         Set<String> hosts = new HashSet<String>();
@@ -125,9 +164,28 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             }
         }
 
-        this.trustManager.checkServerTrusted(chain, authType);
+        //this.trustManager.checkServerTrusted(chain, authType);
+        // Check if the server is to be trusted; if yes return
+        try {
+            this.trustManager.checkServerTrusted(chain, authType);
+            return;
+        } catch (Exception e) {
+            //TODO: try to determine the reason of failure
+            if (e.getMessage().contains("unable to find valid certification path to requested target")) {
+                LOG.warn("All good it's just an invalid certificate");
+                // All good, it's just an invalid certificate
+            }
+            // re-throw if we can not handle the exception
+        }
+        checkUserTrustsServer(chain);
     }
 
+    /**
+     * Returns the hostname fro the specified chain
+     * 
+     * @param chain the {@link X509Certificate} chain
+     * @return The hostname or <code>null</code> if none could be found
+     */
     private String getHostFromPrincipal(X509Certificate[] chain) {
         X509Certificate x509Certificate = chain[0];
         String dn = x509Certificate.getSubjectDN().getName();
@@ -144,13 +202,30 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         return null;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.net.ssl.X509ExtendedTrustManager#checkServerTrusted(java.security.cert.X509Certificate[], java.lang.String, javax.net.ssl.SSLEngine)
+     */
     @Override
     public void checkServerTrusted(X509Certificate[] chain, String authType, SSLEngine engine) throws CertificateException {
         if (Services.getService(SSLConfigurationService.class).isWhitelisted(engine.getSession().getPeerHost())) {
             return;
         }
 
-        this.trustManager.checkServerTrusted(chain, authType, engine);
+        // Check if the server is to be trusted; if yes return
+        try {
+            this.trustManager.checkServerTrusted(chain, authType, engine);
+            return;
+        } catch (Exception e) {
+            //TODO: try to determine the reason of failure
+            if (e.getMessage().contains("unable to find valid certification path to requested target")) {
+                LOG.warn("All good it's just an invalid certificate");
+                // All good, it's just an invalid certificate
+            }
+            // re-throw if we can not handle the exception
+        }
+        checkUserTrustsServer(chain);
     }
 
     @Override
@@ -166,5 +241,77 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
     @Override
     public void checkClientTrusted(X509Certificate[] chain, String authType, SSLEngine engine) throws CertificateException {
         // do not check client
+    }
+
+    /**
+     * Checks whether the user trusts the specified {@link X509Certificate}
+     * 
+     * @param chain The certificate to check
+     */
+    private void checkUserTrustsServer(X509Certificate[] chain) {
+        int user = Tools.getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_USER_ID));
+        int context = Tools.getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_CONTEXT_ID));
+
+        // TODO: Check if the user is allowed to accept untrusted certificates
+        // via config
+
+        if (chain == null) {
+            LOG.error("Could not obtain server certificate chain");
+            //TODO: throw exception
+            throw new IllegalArgumentException("The server certificate chain cannot be null");
+        }
+
+        try {
+            Set<String> untrustedFingerprints = new HashSet<String>();
+            for (X509Certificate cert : chain) {
+                String fingerprint = getFingerprint(cert);
+                SSLCertificateManagementService certificateManagement = Services.getService(SSLCertificateManagementService.class);
+                if (!certificateManagement.isTrusted(user, context, fingerprint)) {
+                    untrustedFingerprints.add(fingerprint);
+                }
+            }
+            if (!untrustedFingerprints.isEmpty()) {
+                //TODO: Throw an exception with the indication that the server is untrusted (the user can then choose what to do)
+            }
+        } catch (NoSuchAlgorithmException | CertificateEncodingException e) {
+            // TODO: throw
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Retrieves the SHA-256 fingerprint from the specified {@link X509Certificate}
+     * 
+     * @param certificate The certificate from which to retrieve the fingerprint
+     * @return The SHA-256 fingerprint of the specified {@link X509Certificate}
+     * @throws NoSuchAlgorithmException
+     * @throws CertificateEncodingException
+     */
+    private String getFingerprint(X509Certificate certificate) throws NoSuchAlgorithmException, CertificateEncodingException {
+        MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
+        sha256.update(certificate.getEncoded());
+        return toHex(sha256.digest());
+    }
+
+    final protected static char[] hexArray = "0123456789abcdef".toCharArray();
+
+    /**
+     * Converts the specified byte array to a hexadecimal string
+     * 
+     * @param bytes The byte array to convert
+     * @return The hexadecimal representation of the byte array
+     * @throws IllegalArgumentException if the specified byte array is empty
+     */
+    private String toHex(byte[] bytes) {
+        if (bytes.length == 0) {
+            throw new IllegalArgumentException("The specified byte array cannot be empty");
+        }
+        char[] hexChars = new char[bytes.length * 2];
+        for (int j = 0; j < bytes.length; j++) {
+            int v = bytes[j] & 0xFF;
+            hexChars[j * 2] = hexArray[v >>> 4];
+            hexChars[j * 2 + 1] = hexArray[v & 0x0F];
+        }
+        return new String(hexChars);
     }
 }
