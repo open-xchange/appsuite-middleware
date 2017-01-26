@@ -420,20 +420,27 @@ public class HttpDoveAdmClient implements DoveAdmClient {
                 traceBuilder.append(Strings.getLineSeparator()).append(jBody);
             }
 
-            R response = handleHttpResponse(execute(post, callProperties.targetHost, callProperties.httpClient), resultType, traceBuilder);
-            if (null != traceBuilder) {
-                LOG.trace(traceBuilder.toString());
+            try {
+                R response = handleHttpResponse(execute(post, callProperties.targetHost, callProperties.httpClient), resultType, traceBuilder);
+                if (null != traceBuilder) {
+                    LOG.trace(traceBuilder.toString());
+                }
+                return response;
+            } catch (final HttpResponseException e) {
+                if (400 == e.getStatusCode() || 401 == e.getStatusCode()) {
+                    // Authentication failed
+                    throw DoveAdmClientExceptionCodes.AUTH_ERROR.create(e, e.getMessage());
+                }
+                throw handleHttpResponseError(null, e);
+            } catch (final IOException e) {
+                if (null != traceBuilder) {
+                    String separator = Strings.getLineSeparator();
+                    traceBuilder.append(separator).append(separator).append("Response:").append(separator);
+                    traceBuilder.append("Encountered an I/O error: ").append(e.getMessage());
+                }
+                throw handleIOError(e, callProperties.endpoint, call);
             }
-            return response;
-        } catch (final HttpResponseException e) {
-            if (400 == e.getStatusCode() || 401 == e.getStatusCode()) {
-                // Authentication failed
-                throw DoveAdmClientExceptionCodes.AUTH_ERROR.create(e, e.getMessage());
-            }
-            throw handleHttpResponseError(null, e);
-        } catch (final IOException e) {
-            throw handleIOError(e, callProperties.endpoint, call);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw DoveAdmClientExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             reset(post);
