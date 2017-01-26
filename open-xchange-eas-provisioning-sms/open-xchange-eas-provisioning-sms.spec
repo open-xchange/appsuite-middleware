@@ -15,7 +15,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 11
+%define        ox_release 12
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -64,6 +64,8 @@ ox_update_permissions /opt/open-xchange/etc/eas-provisioning-sms.properties root
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/eas-provisioning-sms.properties
 
 %changelog
+* Thu Jan 26 2017 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2017-01-26 (3925)
 * Wed Jan 18 2017 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2017-01-23 (3879)
 * Wed Jan 04 2017 Marcus Klein <marcus.klein@open-xchange.com>

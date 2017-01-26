@@ -15,7 +15,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:        @OXVERSION@
-%define        ox_release 11
+%define        ox_release 12
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -59,6 +59,8 @@ ant -lib build/lib -Dbasedir=build -Dhtdoc=%{docroot} -DdestDir=%{buildroot} -Dp
 /opt/open-xchange/bundles/*
 
 %changelog
+* Thu Jan 26 2017 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2017-01-26 (3925)
 * Wed Jan 18 2017 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2017-01-23 (3879)
 * Wed Jan 04 2017 Carsten Hoeger <choeger@open-xchange.com>
