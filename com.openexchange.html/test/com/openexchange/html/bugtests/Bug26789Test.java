@@ -51,6 +51,7 @@ package com.openexchange.html.bugtests;
 
 import static org.junit.Assert.assertNotNull;
 import org.junit.Test;
+import com.openexchange.exception.OXException;
 import com.openexchange.html.AbstractSanitizing;
 
 /**
@@ -62,7 +63,7 @@ import com.openexchange.html.AbstractSanitizing;
  */
 public class Bug26789Test extends AbstractSanitizing {
     @Test
-    public void testForNullPointerException() {
+    public void testForNullPointerException() throws OXException {
         String content = content1;
         String test = getHtmlService().getConformHTML(content, "UTF-8");
         assertNotNull(test);
@@ -162,7 +163,7 @@ public class Bug26789Test extends AbstractSanitizing {
         + " P.MsoAcetate {  MARGIN: 0cm 0cm 0pt; FONT-FAMILY: \"Tahoma\",\"sans-serif\"; FONT-SIZE: 8pt;  }\r\n";
 
     @Test
-    public void testForNullPointerException2() {
+    public void testForNullPointerException2() throws OXException {
         StringBuilder sb = new StringBuilder(190000);
         sb.append("<html><head>");
         sb.append("<style type=\"text/css\">.mceResizeHandle {position: absolute;border: 1px soli");

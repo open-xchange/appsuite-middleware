@@ -51,6 +51,7 @@ package com.openexchange.html.bugtests;
 
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
+import com.openexchange.exception.OXException;
 import com.openexchange.html.AbstractSanitizing;
 
 
@@ -61,7 +62,7 @@ import com.openexchange.html.AbstractSanitizing;
  */
 public class Bug21532Test extends AbstractSanitizing {
     @Test
-    public void testConvertConditionalCommentsWihoutWhitespaces() {
+    public void testConvertConditionalCommentsWihoutWhitespaces() throws OXException {
         String content = getHtmlService().getConformHTML("</head><body><![if !supportLists]><p>You should see this</p><![endif]></body></html>", "UTF-8");
 
         String expected = "<!DOCTYPE html>\n" +

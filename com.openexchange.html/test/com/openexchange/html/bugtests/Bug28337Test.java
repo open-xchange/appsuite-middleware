@@ -51,6 +51,7 @@ package com.openexchange.html.bugtests;
 
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
+import com.openexchange.exception.OXException;
 import com.openexchange.html.AbstractSanitizing;
 
 
@@ -61,7 +62,7 @@ import com.openexchange.html.AbstractSanitizing;
  */
 public class Bug28337Test extends AbstractSanitizing {
     @Test
-    public void testGetConformHtml() {
+    public void testGetConformHtml() throws OXException {
         String content = getHtmlService().getConformHTML("<strong>Very important information</strong><ul><li>Point 1</li><li>Oh forgot the /li</ul>", "UTF-8");
 
         assertEquals("<!DOCTYPE html>\n" +

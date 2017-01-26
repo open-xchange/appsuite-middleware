@@ -105,7 +105,7 @@ public final class TwitterMessagingMessage implements MessagingMessage {
      *
      * @param status The twitter status
      */
-    public TwitterMessagingMessage(final Status status, final Session session) {
+    public TwitterMessagingMessage(final Status status, final Session session) throws OXException {
         super();
         this.status = status;
 
