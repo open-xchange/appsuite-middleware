@@ -49,6 +49,7 @@
 
 package com.openexchange.rss.preprocessors;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.rss.RssResult;
 
 /**
@@ -61,7 +62,7 @@ public abstract class AbstractPreprocessor implements RssPreprocessor {
     private RssPreprocessor nextProcessor;
 
     @Override
-    public String process(final String payload, RssResult rssResult) {
+    public String process(final String payload, RssResult rssResult) throws OXException {
         String retval = innerProcess(payload, rssResult);
         if (nextProcessor != null) {
             retval = nextProcessor.process(retval, rssResult);
@@ -78,6 +79,6 @@ public abstract class AbstractPreprocessor implements RssPreprocessor {
     /**
      * Processes given payload.
      */
-    protected abstract String innerProcess(String payload, RssResult rssResult);
+    protected abstract String innerProcess(String payload, RssResult rssResult) throws OXException;
 
 }
