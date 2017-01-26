@@ -193,7 +193,7 @@ public final class CloudmarkSpamHandler extends SpamHandler {
         ConfigViewFactory factory = services.getService(ConfigViewFactory.class);
         ConfigView view = factory.getView(session.getUserId(), session.getContextId());
 
-        String sTargetSpamEmailAddress = getPropertyFromView(view, "com.openexchange.spamhandler.name", "", String.class).trim();
+        String sTargetSpamEmailAddress = getPropertyFromView(view, "com.openexchange.spamhandler.cloudmark.targetSpamEmailAddress", "", String.class).trim();
 
         MailAccess<?, ?> mailAccess = null;
         try {
