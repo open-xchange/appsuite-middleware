@@ -50,9 +50,7 @@
 package com.openexchange.ajax.appointment;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -78,10 +76,11 @@ public class UpdateTest extends AppointmentTest {
 
     @Test
     public void testSimple() throws Exception {
-        final Appointment appointmentObj = createAppointmentObject("testSimple");
+        Appointment appointmentObj = createAppointmentObject("testSimple");
         appointmentObj.setIgnoreConflicts(true);
         final int objectId = catm.insert(appointmentObj).getObjectID();
 
+        appointmentObj = catm.get(appointmentObj.getParentFolderID(), objectId);
         appointmentObj.setShownAs(Appointment.RESERVED);
         appointmentObj.setFullTime(true);
         appointmentObj.setLocation(null);
@@ -93,9 +92,10 @@ public class UpdateTest extends AppointmentTest {
 
     @Test
     public void testUpdateAppointmentWithParticipant() throws Exception {
-        final Appointment appointmentObj = createAppointmentObject("testUpdateAppointmentWithParticipants");
+        Appointment appointmentObj = createAppointmentObject("testUpdateAppointmentWithParticipants");
         appointmentObj.setIgnoreConflicts(true);
         final int objectId = catm.insert(appointmentObj).getObjectID();
+        appointmentObj = catm.get(appointmentObj.getParentFolderID(), objectId);
 
         appointmentObj.setShownAs(Appointment.RESERVED);
         appointmentObj.setFullTime(true);
@@ -136,7 +136,7 @@ public class UpdateTest extends AppointmentTest {
         appointmentObj.setOrganizer(testUser.getUser());
         appointmentObj.setUntil(until);
         appointmentObj.setIgnoreConflicts(true);
-        
+
         final int objectId = catm.insert(appointmentObj).getObjectID();
 
         Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
@@ -233,15 +233,15 @@ public class UpdateTest extends AppointmentTest {
         appointmentObj.setStartDate(D("04/01/2008 12:00"));
         appointmentObj.setEndDate(D("04/01/2008 14:00"));
         appointmentObj.setIgnoreConflicts(true);
-        
+
         final int objectId = catm.insert(appointmentObj).getObjectID();
 
         Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
-        
+
         final Date modified = new Date(Long.MAX_VALUE);
         loadAppointment.setLastModified(modified);
         loadAppointment.setFullTime(true);
-        
+
         catm.update(appointmentFolderId, loadAppointment);
 
         loadAppointment = catm.get(appointmentFolderId, objectId);

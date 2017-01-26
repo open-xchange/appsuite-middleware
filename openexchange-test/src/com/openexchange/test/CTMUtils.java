@@ -50,6 +50,7 @@
 package com.openexchange.test;
 
 import static org.junit.Assert.assertEquals;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -58,6 +59,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.parser.AppointmentParser;
+import com.openexchange.ajax.parser.ParticipantParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.ExternalUserParticipant;
@@ -66,6 +68,7 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.ResourceGroupParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 
 /**
  * {@link CTMUtils}
@@ -74,7 +77,7 @@ import com.openexchange.groupware.container.UserParticipant;
  * @since v7.8.3
  */
 public class CTMUtils {
-    
+
     public static Appointment[] jsonArray2AppointmentArray(final JSONArray jsonArray, final TimeZone userTimeZone) throws Exception {
         final Appointment[] appointmentArray = new Appointment[jsonArray.length()];
         final AppointmentParser appointmentParser = new AppointmentParser(userTimeZone);
@@ -251,6 +254,9 @@ public class CTMUtils {
             case Appointment.SEQUENCE:
                 appointmentObj.setSequence(jsonArray.getInt(pos));
                 break;
+            case Appointment.CONFIRMATIONS:
+                appointmentObj.setConfirmations(parseConfirmableParticipants(jsonArray.getJSONArray(pos)));
+                break;
         }
     }
 
@@ -277,6 +283,16 @@ public class CTMUtils {
             userParticipants.add(userParticipant);
         }
         return userParticipants.toArray(new UserParticipant[userParticipants.size()]);
+    }
+
+    public static ConfirmableParticipant[] parseConfirmableParticipants(JSONArray jsonArray) throws JSONException {
+        ParticipantParser parser = new ParticipantParser();
+        List<ConfirmableParticipant> confirmations = new ArrayList<ConfirmableParticipant>(jsonArray.length());
+        for (int i = 0; i < jsonArray.length(); i++) {
+            JSONObject jsonConfirmation = jsonArray.getJSONObject(i);
+            confirmations.add(parser.parseConfirmation(true, jsonConfirmation));
+        }
+        return confirmations.toArray(new ConfirmableParticipant[confirmations.size()]);
     }
 
     public static Participant[] parseParticipants(final JSONArray jsonArray) throws JSONException, OXException {

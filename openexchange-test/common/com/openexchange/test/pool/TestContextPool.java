@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.Assert;
@@ -82,7 +81,7 @@ public class TestContextPool {
 
     public static TestContext acquireContext(String acquiredBy) {
         try {
-            TestContext context = contexts.poll(30L, TimeUnit.SECONDS);
+            TestContext context = contexts.take();
             Assert.assertNotNull("Unable to acquire test context due to an empty pool.", context);
             context.setAcquiredBy(acquiredBy);
             contextWatcher.get().contextInUse(context);
