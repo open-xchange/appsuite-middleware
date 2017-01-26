@@ -55,6 +55,7 @@ import com.openexchange.ajax.drive.test.DeleteLinkTest;
 import com.openexchange.ajax.drive.test.GetLinkTest;
 import com.openexchange.ajax.drive.test.UpdateLinkTest;
 import com.openexchange.ajax.drive.updater.UpdaterXMLTest;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * {@link DriveAJAXSuite}
@@ -62,7 +63,7 @@ import com.openexchange.ajax.drive.updater.UpdaterXMLTest;
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.8.0
  */
-@RunWith(Suite.class)
+@RunWith(ParallelSuite.class)
 @Suite.SuiteClasses({
     GetLinkTest.class,
     UpdateLinkTest.class,

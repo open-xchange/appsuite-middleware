@@ -74,13 +74,14 @@ import com.openexchange.ajax.folder.api2.UpdatesTest;
 import com.openexchange.ajax.folder.api2.VisibleFoldersTest;
 import com.openexchange.ajax.infostore.test.Bug37211Test;
 import com.openexchange.ajax.infostore.test.InfostoreObjectCountTest;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * Suite for all folder tests.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-@RunWith(Suite.class)
+@RunWith(ParallelSuite.class)
 @Suite.SuiteClasses({
     FunctionTests.class,
     com.openexchange.ajax.folder.ShareFolderTest.class,

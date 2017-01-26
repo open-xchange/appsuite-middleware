@@ -60,6 +60,7 @@ import com.openexchange.ajax.publish.tests.ListPublicationsTest;
 import com.openexchange.ajax.publish.tests.OXMFInfostoreTest;
 import com.openexchange.ajax.publish.tests.PublishFolderIconTest;
 import com.openexchange.ajax.publish.tests.UpdatePublicationTest;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * {@link MailTestSuite}
@@ -67,7 +68,7 @@ import com.openexchange.ajax.publish.tests.UpdatePublicationTest;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  *
  */
-@RunWith(Suite.class)
+@RunWith(ParallelSuite.class)
 @Suite.SuiteClasses({
     AllPublicationsTest.class,
     CreatePublicationTest.class,

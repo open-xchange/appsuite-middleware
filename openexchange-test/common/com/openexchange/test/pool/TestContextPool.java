@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.Assert;
@@ -81,18 +80,12 @@ public class TestContextPool {
     }
 
     public static TestContext acquireContext(String acquiredBy) {
-        try {
-            TestContext context = contexts.poll(30L, TimeUnit.SECONDS);
-            Assert.assertNotNull("Unable to acquire test context due to an empty pool.", context);
-            context.setAcquiredBy(acquiredBy);
-            contextWatcher.get().contextInUse(context);
-            LOG.debug("Context '{}' with id {} has been acquired by {}.", context.getName(), context.getId(), acquiredBy, new Throwable());
-            return context;
-        } catch (InterruptedException e) {
-            // should not happen
-            LOG.error("", e);
-        }
-        return null;
+        TestContext context = contexts.poll();
+        Assert.assertNotNull("Unable to acquire test context due to an empty pool.", context);
+        context.setAcquiredBy(acquiredBy);
+        contextWatcher.get().contextInUse(context);
+        LOG.debug("Context '{}' with id {} has been acquired by {}.", context.getName(), context.getId(), acquiredBy, new Throwable());
+        return context;
     }
 
     public static void backContext(TestContext context) {

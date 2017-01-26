@@ -51,13 +51,14 @@ package com.openexchange.test;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * A collection of interface tests that have been found by find_tests_without_suites.rb
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-@RunWith(Suite.class)
+@RunWith(ParallelSuite.class)
 @Suite.SuiteClasses({
     com.openexchange.ajax.MailTest.class,
     com.openexchange.ajax.appointment.bugtests.Bug19500Test_NewAppointmentRequestWeirdBehaviour.class,

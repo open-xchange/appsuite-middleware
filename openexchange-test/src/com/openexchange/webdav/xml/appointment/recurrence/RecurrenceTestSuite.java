@@ -51,8 +51,9 @@ package com.openexchange.webdav.xml.appointment.recurrence;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
+import com.openexchange.test.concurrent.ParallelSuite;
 
-@RunWith(Suite.class)
+@RunWith(ParallelSuite.class)
 @Suite.SuiteClasses({
     DailyRecurrenceTest.class,
     Bug6960Test.class,

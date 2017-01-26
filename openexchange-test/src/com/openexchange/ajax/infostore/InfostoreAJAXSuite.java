@@ -17,8 +17,9 @@ import com.openexchange.ajax.infostore.test.InfostoreObjectCountTest;
 import com.openexchange.ajax.infostore.test.TrashTest;
 import com.openexchange.ajax.infostore.test.TryAddVersionTest;
 import com.openexchange.ajax.infostore.test.ZipDocumentsTest;
+import com.openexchange.test.concurrent.ParallelSuite;
 
-@RunWith(Suite.class)
+@RunWith(ParallelSuite.class)
 @Suite.SuiteClasses({
     AllTest.class,
     GetTest.class,

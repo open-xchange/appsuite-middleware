@@ -59,6 +59,7 @@ import com.openexchange.ajax.appointment.recurrence.TestsForDifferentWaysOfEndin
 import com.openexchange.ajax.appointment.recurrence.TestsForModifyingChangeExceptions;
 import com.openexchange.ajax.appointment.recurrence.TestsForUsingRecurrencePositionToGetChangeExceptions;
 import com.openexchange.ajax.appointment.recurrence.TestsToCreateMinimalAppointmentSeries;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * Suite for systematic tests to check the expected behaviour
@@ -66,7 +67,7 @@ import com.openexchange.ajax.appointment.recurrence.TestsToCreateMinimalAppointm
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-@RunWith(Suite.class)
+@RunWith(ParallelSuite.class)
 @Suite.SuiteClasses({
     TestsToCreateMinimalAppointmentSeries.class,
     TestsForChangingAmongMonthlyRecurrences.class,

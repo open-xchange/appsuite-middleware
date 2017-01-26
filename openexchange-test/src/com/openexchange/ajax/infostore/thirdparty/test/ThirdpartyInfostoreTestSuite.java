@@ -52,13 +52,14 @@ package com.openexchange.ajax.infostore.thirdparty.test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import com.openexchange.ajax.infostore.thirdparty.AbstractInfostoreThirdpartyEnvironments;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * {@link AbstractInfostoreThirdpartyEnvironments}
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-@RunWith(Suite.class)
+@RunWith(ParallelSuite.class)
 @Suite.SuiteClasses({
     ThirdpartyLifecycleTest.class
 })

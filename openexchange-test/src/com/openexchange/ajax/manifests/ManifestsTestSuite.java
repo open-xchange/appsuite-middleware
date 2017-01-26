@@ -51,6 +51,7 @@ package com.openexchange.ajax.manifests;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * {@link ManifestsTestSuite}
@@ -58,7 +59,7 @@ import org.junit.runners.Suite;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since 7.6.0
  */
-@RunWith(Suite.class)
+@RunWith(ParallelSuite.class)
 @Suite.SuiteClasses({
     Bug30835Test.class
 })

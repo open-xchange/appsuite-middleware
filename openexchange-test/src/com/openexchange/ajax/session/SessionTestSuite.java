@@ -51,13 +51,14 @@ package com.openexchange.ajax.session;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * Test suite collecting the tests for the login servlet.
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-@RunWith(Suite.class)
+@RunWith(ParallelSuite.class)
 @Suite.SuiteClasses({
     LoginTest.class,
     StoreTest.class,

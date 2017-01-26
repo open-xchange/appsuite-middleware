@@ -51,8 +51,9 @@ package com.openexchange.ajax.reminder;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
+import com.openexchange.test.concurrent.ParallelSuite;
 
-@RunWith(Suite.class)
+@RunWith(ParallelSuite.class)
 @Suite.SuiteClasses({
     RangeTest.class,
     UpdatesTest.class,

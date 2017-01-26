@@ -64,6 +64,7 @@ import com.openexchange.ajax.mail.filter.tests.bug.Bug31253Test;
 import com.openexchange.ajax.mail.filter.tests.bug.Bug44363Test;
 import com.openexchange.ajax.mail.filter.tests.bug.Bug46589Test;
 import com.openexchange.ajax.mail.filter.tests.bug.Bug46714Test;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * {@link MailFilterTestSuite}
@@ -71,7 +72,7 @@ import com.openexchange.ajax.mail.filter.tests.bug.Bug46714Test;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  *
  */
-@RunWith(Suite.class)
+@RunWith(ParallelSuite.class)
 @Suite.SuiteClasses({
     AdminListTest.class,
     Bug11519Test.class,

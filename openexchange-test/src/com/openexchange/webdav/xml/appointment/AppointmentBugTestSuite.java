@@ -51,8 +51,9 @@ package com.openexchange.webdav.xml.appointment;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
+import com.openexchange.test.concurrent.ParallelSuite;
 
-@RunWith(Suite.class)
+@RunWith(ParallelSuite.class)
 @Suite.SuiteClasses({
     Bug4395Test.class,
     Bug5933Test.class,

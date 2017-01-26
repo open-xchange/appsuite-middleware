@@ -3,8 +3,9 @@ package com.openexchange.webdav.xml.task;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
+import com.openexchange.test.concurrent.ParallelSuite;
 
-@RunWith(Suite.class)
+@RunWith(ParallelSuite.class)
 @Suite.SuiteClasses({
     ConfirmTest.class,
     DeleteTest.class,

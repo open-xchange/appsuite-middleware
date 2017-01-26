@@ -51,7 +51,7 @@ package com.openexchange.ajax.attach.actions;
 
 import java.util.List;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 
 /**
@@ -59,7 +59,7 @@ import com.openexchange.groupware.attach.AttachmentMetadata;
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class AllResponse extends AbstractAJAXResponse {
+public class AllResponse extends CommonAllResponse {
 
     private List<AttachmentMetadata> attachments;
 

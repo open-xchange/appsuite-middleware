@@ -51,6 +51,7 @@ package com.openexchange.ajax.mail.categories;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * {@link MailCategoriesTestSuite}
@@ -58,7 +59,7 @@ import org.junit.runners.Suite;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.2
  */
-@RunWith(Suite.class)
+@RunWith(ParallelSuite.class)
 @Suite.SuiteClasses({
     AllRequestCategoryParameterTest.class,
     TrainTest.class,
