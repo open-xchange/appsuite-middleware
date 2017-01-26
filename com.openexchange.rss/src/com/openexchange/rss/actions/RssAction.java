@@ -335,7 +335,7 @@ public class RssAction implements AJAXActionService {
      * @param string The string to sanitise
      * @return The sanitised string if the {@link HtmlService} is available
      */
-    private static String sanitiseString(String string) {
+    private static String sanitiseString(String string) throws OXException {
         final HtmlService htmlService = Services.getService(HtmlService.class);
         if (htmlService == null) {
             LOG.warn("The HTMLService is unavailable at the moment, thus the RSS string '{}' might not be sanitised", string);

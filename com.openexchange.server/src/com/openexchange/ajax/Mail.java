@@ -2245,7 +2245,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         }
     }
 
-    private static String sanitizeHtml(final String htmlContent, final HtmlService htmlService) {
+    private static String sanitizeHtml(final String htmlContent, final HtmlService htmlService) throws OXException {
         return htmlService.sanitize(htmlContent, null, false, null, null);
     }
 

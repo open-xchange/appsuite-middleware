@@ -48,11 +48,12 @@
  */
 package com.openexchange.rss.preprocessors;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.rss.RssResult;
 
 public interface RssPreprocessor {
 
-	public String process(String payload, RssResult rssResult);
+	public String process(String payload, RssResult rssResult) throws OXException;
 
 	public RssPreprocessor chain(RssPreprocessor nextInLine);
 
