@@ -52,7 +52,18 @@ package com.openexchange.spamhandler.cloudmark;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import javax.mail.internet.InternetAddress;
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 
 /**
  * {@link CloudmarkSpamHandlerTest}
@@ -66,20 +77,64 @@ public class CloudmarkSpamHandlerTest {
 
     private static final String ASCII_ADDRESS = "mschneider@open-xchange.com";
 
-     @Test
-     public void testGetAddress_isUmlautAdress_returnAddress() {
+    @InjectMocks
+    private CloudmarkSpamHandler cloudMarkSpamHandler;
+
+    @Mock
+    private Session session;
+
+    @Mock
+    private ServiceLookup services;
+
+    @Mock
+    private ConfigViewFactory configViewFactory;
+
+    @Mock
+    private ConfigView configView;
+
+    @Mock
+    private ComposedConfigProperty property;
+
+    @Before
+    public void setUp() throws OXException {
+        MockitoAnnotations.initMocks(this);
+
+        Mockito.when(services.getService(ConfigViewFactory.class)).thenReturn(configViewFactory);
+        Mockito.when(configViewFactory.getView(session.getUserId(), session.getContextId())).thenReturn(configView);
+        Mockito.when(configView.property(CloudmarkSpamHandler.TARGET_SPAM_ADDRESS, String.class)).thenReturn(property);
+        Mockito.when(property.get()).thenReturn(ASCII_ADDRESS);
+    }
+
+    @Test
+    public void testGetAddress_isUmlautAdress_returnAddress() {
         InternetAddress senderAddress = CloudmarkSpamHandler.getAddress(UMLAUT_ADDRESS);
 
         assertNotNull(senderAddress);
         assertEquals(UMLAUT_ADDRESS, senderAddress.getAddress());
     }
 
-     @Test
-     public void testGetAddress_isAsciiAdress_returnAddress() {
+    @Test
+    public void testGetAddress_isAsciiAdress_returnAddress() {
         InternetAddress senderAddress = CloudmarkSpamHandler.getAddress(ASCII_ADDRESS);
 
         assertNotNull(senderAddress);
         assertEquals(ASCII_ADDRESS, senderAddress.getAddress());
+    }
+
+    private static final int DEFAULT_ID = 0;
+
+    @Test
+    public void testHandleSpam_ensureCorrectParameterBecomesRead() throws OXException {
+        String[] mailIds = new String[] { "1", "2" };
+        try {
+            cloudMarkSpamHandler.handleSpam(DEFAULT_ID, "INBOX", mailIds, false, session);
+        } catch (Exception e) {
+            // expected, as the complete method isn't mocked
+        }
+
+        Mockito.verify(configView, Mockito.times(1)).property(CloudmarkSpamHandler.TARGET_SPAM_ADDRESS, String.class);
+        Mockito.verify(configView, Mockito.never()).property("com.openexchange.spamhandler.name", String.class);
+        Mockito.verify(configView, Mockito.never()).get("com.openexchange.spamhandler.name", String.class);
     }
 
 }
