@@ -60,6 +60,7 @@ import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlSanitizeResult;
 import com.openexchange.html.HtmlService;
 import com.openexchange.mail.MailPath;
@@ -229,7 +230,7 @@ public class HtmlProcessingTest {
     }
 
     @Test
-    public void testFormatContentForDisplay_isHtmlNoInlineContentInUserSettingMail_onlyDroppedScriptTagsInHeader() {
+    public void testFormatContentForDisplay_isHtmlNoInlineContentInUserSettingMail_onlyDroppedScriptTagsInHeader() throws OXException {
         Mockito.when(htmlService.dropScriptTagsInHeader(htmlContent)).thenReturn(htmlContent);
 
         HtmlSanitizeResult formatTextForDisplay = HtmlProcessing.formatContentForDisplay(htmlContent, "UTF-8", true, session, mailPath, userSettingMail, modified, DisplayMode.DISPLAY, true, -1);
@@ -237,14 +238,14 @@ public class HtmlProcessingTest {
     }
 
     @Test
-    public void testFormatContentForDisplay_isHtmlModeRaw_returnUnchanged() {
+    public void testFormatContentForDisplay_isHtmlModeRaw_returnUnchanged() throws OXException {
         HtmlSanitizeResult formatTextForDisplay = HtmlProcessing.formatContentForDisplay(htmlContent, "UTF-8", true, session, mailPath, userSettingMail, modified, DisplayMode.RAW, true, -1);
 
         Assert.assertEquals(htmlContent, formatTextForDisplay.getContent());
     }
 
     @Test
-    public void testFormatContentForDisplay_isHtmlAllowedExternalImages_sanitizeCalled() {
+    public void testFormatContentForDisplay_isHtmlAllowedExternalImages_sanitizeCalled() throws OXException {
         Mockito.when(htmlService.dropScriptTagsInHeader(htmlContent)).thenReturn(htmlContent);
         Mockito.when(userSettingMail.isAllowHTMLImages()).thenReturn(true);
         Mockito.when(userSettingMail.isDisplayHtmlInlineContent()).thenReturn(true);
@@ -255,7 +256,7 @@ public class HtmlProcessingTest {
     }
 
     @Test
-    public void testFormatContentForDisplay_isHtmlAllowedExternalImagesMailPathNull_sanitizeCalled() {
+    public void testFormatContentForDisplay_isHtmlAllowedExternalImagesMailPathNull_sanitizeCalled() throws OXException {
         Mockito.when(htmlService.dropScriptTagsInHeader(htmlContent)).thenReturn(htmlContent);
         Mockito.when(userSettingMail.isAllowHTMLImages()).thenReturn(true);
         Mockito.when(userSettingMail.isDisplayHtmlInlineContent()).thenReturn(true);
@@ -266,7 +267,7 @@ public class HtmlProcessingTest {
     }
 
     @Test
-    public void testFormatContentForDisplay_isHtmlUseSanitize_sanitizeCalled() {
+    public void testFormatContentForDisplay_isHtmlUseSanitize_sanitizeCalled() throws OXException {
         Mockito.when(userSettingMail.isDisplayHtmlInlineContent()).thenReturn(true);
         Mockito.when(htmlService.dropScriptTagsInHeader(htmlContent)).thenReturn(htmlContent);
 
@@ -278,14 +279,14 @@ public class HtmlProcessingTest {
     }
 
     @Test
-    public void testFormatContentForDisplay_noHtmlDisplayMode_formatCalled() {
+    public void testFormatContentForDisplay_noHtmlDisplayMode_formatCalled() throws OXException {
         HtmlProcessing.formatContentForDisplay(textContent, "UTF-8", false, session, mailPath, userSettingMail, modified, DisplayMode.DISPLAY, true, -1);
 
         Mockito.verify(htmlService, Mockito.times(1)).htmlFormat(Matchers.anyString(), Matchers.anyBoolean(), Matchers.anyString(), Matchers.anyInt());
     }
 
     @Test
-    public void testFormatContentForDisplay_noHtml_formatCalledOnce() {
+    public void testFormatContentForDisplay_noHtml_formatCalledOnce() throws OXException {
         HtmlProcessing.formatContentForDisplay(textContent, "UTF-8", false, session, mailPath, userSettingMail, modified, DisplayMode.MODIFYABLE, true, -1);
 
         Mockito.verify(htmlService, Mockito.times(1)).htmlFormat(Matchers.anyString(), Matchers.anyBoolean(), Matchers.anyString(), Matchers.anyInt());

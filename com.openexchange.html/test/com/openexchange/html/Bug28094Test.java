@@ -54,6 +54,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import com.openexchange.exception.OXException;
 import com.openexchange.html.internal.HtmlServiceImpl;
 import com.openexchange.html.osgi.HTMLServiceActivator;
 
@@ -90,7 +91,7 @@ public class Bug28094Test {
     }
 
     @Test
-    public void testInsecureHref() {
+    public void testInsecureHref() throws OXException {
         String content = "<a href=\"http://www.raumausstatter-innung-schwalm-eder.de/"
             + "index.php?eID=tx_cms_showpic&amp;file=uploads%2Fpics%2F13-06-Raumausstatter-JHV.jpg"
             + "&amp;width=500m&amp;height=500&amp;bodyTag=%3Cbody%20bgColor%3D%22%23ffffff%22%3E"

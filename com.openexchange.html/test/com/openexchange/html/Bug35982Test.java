@@ -54,6 +54,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import com.openexchange.exception.OXException;
 import com.openexchange.html.internal.HtmlServiceImpl;
 import com.openexchange.html.osgi.HTMLServiceActivator;
 
@@ -90,7 +91,7 @@ public class Bug35982Test {
     }
 
     @Test
-    public void testScriptTagSanitizing() {
+    public void testScriptTagSanitizing() throws OXException {
         String content = "<!DOCTYPE html>\n" +
             "<html>\n" +
             "<head>\n" +

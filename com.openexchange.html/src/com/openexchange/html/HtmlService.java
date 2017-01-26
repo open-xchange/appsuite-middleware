@@ -49,6 +49,7 @@
 
 package com.openexchange.html;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
 
 
@@ -138,7 +139,7 @@ public interface HtmlService {
      * @param maxContentSize maximum number of bytes that is will be returned for content. '<=0' means unlimited. Below 10000 will be ignor
      * @return {@link HtmlSanitizeResult} with the content and additional information, e. g. if the content was truncated
      */
-    HtmlSanitizeResult sanitize(String htmlContent, String optConfigName, boolean dropExternalImages, boolean[] modified, String cssPrefix, int maxContentSize);
+    HtmlSanitizeResult sanitize(String htmlContent, String optConfigName, boolean dropExternalImages, boolean[] modified, String cssPrefix, int maxContentSize) throws OXException;
 
     /**
      * Sanitizes specified HTML content.
@@ -150,7 +151,7 @@ public interface HtmlService {
      * @param cssPrefix The optional CSS prefix
      * @return The sanitized HTML content
      */
-    String sanitize(String htmlContent, String optConfigName, boolean dropExternalImages, boolean[] modified, String cssPrefix);
+    String sanitize(String htmlContent, String optConfigName, boolean dropExternalImages, boolean[] modified, String cssPrefix) throws OXException;
 
     /**
      * Converts specified HTML content to plain text.
@@ -228,8 +229,9 @@ public interface HtmlService {
      * @param htmlContent The HTML content
      * @param charset The charset parameter
      * @return The HTML content conform to W3C standards
+     * @throws OXException
      */
-    String getConformHTML(String htmlContent, String charset);
+    String getConformHTML(String htmlContent, String charset) throws OXException;
 
     /**
      * Creates valid HTML from specified HTML content conform to W3C standards.
@@ -238,8 +240,9 @@ public interface HtmlService {
      * @param charset The charset parameter
      * @param checkUrls Define if non-ascii-URLs shell be replaced with puny-code-encoded URLs
      * @return The HTML content conform to W3C standards
+     * @throws OXException
      */
-    String getConformHTML(String htmlContent, String charset, boolean replaceUrls);
+    String getConformHTML(String htmlContent, String charset, boolean replaceUrls) throws OXException;
 
     /**
      * Drops <code>&lt;script&gt;</code> tags in HTML content's header.
