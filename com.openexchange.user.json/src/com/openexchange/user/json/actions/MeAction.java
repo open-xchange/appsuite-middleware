@@ -57,9 +57,6 @@ import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.mail.api.IMailFolderStorage;
-import com.openexchange.mail.api.IMailMessageStorage;
-import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
@@ -100,18 +97,7 @@ public final class MeAction extends AbstractUserAction {
             {
                 MailService mailService = services.getOptionalService(MailService.class);
                 if (null != mailService) {
-                    MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
-                    try {
-                        mailAccess = mailService.getMailAccess(session, 0);
-                        mailLogin = mailAccess.getMailConfig().getLogin();
-                    } catch (Exception e) {
-                        // Ignore
-                    } finally {
-                        if (null != mailAccess) {
-                            mailAccess.close();
-                        }
-                    }
-
+                    mailLogin = mailService.getMailLoginFor(session.getUserId(), session.getContextId(), 0);
                 }
             }
 
