@@ -1,3 +1,9 @@
+open-xchange-realtime-json (7.8.0-43) stable; urgency=medium
+
+  * Build for patch 2017-01-26 (3926)
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Thu, 26 Jan 2017 12:58:19 +0100
+
 open-xchange-realtime-json (7.8.0-42) stable; urgency=medium
 
   * Build for patch 2017-01-23 (3876)
