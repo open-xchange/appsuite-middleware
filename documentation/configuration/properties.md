@@ -459,7 +459,7 @@ If you would like to add a reference to another property use the following appro
 | __Description__ |         Defines which level of trust should be considered for potentially secure connections (e. g. https). The default value 'all' means that all certificates will be trusted and a SSLSocketFactory that does not check certificates (and host names) will be used. You can switch this setting to 'restricted' so that every certificate provided by the defined endpoint will be validated trusted.<br> |
 | __Default__ | all  |
 | __Version__ | 7.8.3  |
-| __Reloadable__ | true  |
+| __Reloadable__ | false  |
 | __Configcascade Aware__ | false  |
 | __File__ | ssl.properties  |
 
