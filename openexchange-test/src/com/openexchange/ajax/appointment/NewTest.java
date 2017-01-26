@@ -348,8 +348,10 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setParticipants(participants);
 
         int objectId = catm.insert(appointmentObj).getObjectID();
+        assertFalse(catm.getLastResponse().hasConflicts());
         appointmentObj.setObjectID(objectId);
         final Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
+        assertFalse(catm.getLastResponse().hasConflicts());
         compareObject(appointmentObj, loadAppointment, startTime, endTime);
     }
 
@@ -377,6 +379,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setObjectID(objectId);
 
         final Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
+        assertFalse(catm.getLastResponse().hasConflicts());
         compareObject(appointmentObj, loadAppointment, startTime, endTime);
     }
 
