@@ -57,6 +57,10 @@ import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.service.MailService;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -91,6 +95,26 @@ public final class MeAction extends AbstractUserAction {
             // Obtain user's contact
             Contact contact = services.getService(ContactService.class).getUser(session, userId);
 
+            // Obtain mail login
+            String mailLogin = null;
+            {
+                MailService mailService = services.getOptionalService(MailService.class);
+                if (null != mailService) {
+                    MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+                    try {
+                        mailAccess = mailService.getMailAccess(session, 0);
+                        mailLogin = mailAccess.getMailConfig().getLogin();
+                    } catch (Exception e) {
+                        // Ignore
+                    } finally {
+                        if (null != mailAccess) {
+                            mailAccess.close();
+                        }
+                    }
+
+                }
+            }
+
             // Craft JSON result
             JSONObject jReturn = new JSONObject(8);
             jReturn.put("context_id", session.getContextId());
@@ -100,6 +124,10 @@ public final class MeAction extends AbstractUserAction {
             jReturn.put("login_name", str == null ? "<unknown>" : str);
             str = contact.getDisplayName();
             jReturn.put("display_name", str == null ? "<unknown>" : str);
+            if (null != mailLogin) {
+                jReturn.put("mail_login", mailLogin);
+            }
+
 
             // Return appropriate result
             return new AJAXRequestResult(jReturn, contact.getLastModified(), "json");
