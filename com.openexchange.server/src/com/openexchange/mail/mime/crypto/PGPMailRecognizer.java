@@ -56,7 +56,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
  * {@link EncryptedMailRecognizer}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v2.8.0
+ * @since v7.8.4
  */
 public interface PGPMailRecognizer {
 
