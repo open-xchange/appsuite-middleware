@@ -77,6 +77,7 @@ public class EndpointManagerImpl implements EndpointManager {
     private final List<Endpoint> available;
     private final List<Endpoint> blacklist;
     private final AtomicInteger counter;
+    private final int total;
     private volatile ScheduledTimerTask heartbeat;
 
     /**
@@ -95,6 +96,7 @@ public class EndpointManagerImpl implements EndpointManager {
             throw new IllegalArgumentException("End-points must not be empty");
         }
 
+        total = size;
         available = new ArrayList<Endpoint>(size);
         for (URI uri : endpointUris) {
             available.add(new EndpointImpl(uri));
@@ -102,6 +104,11 @@ public class EndpointManagerImpl implements EndpointManager {
         blacklist = new ArrayList<Endpoint>(size);
         counter = new AtomicInteger(size);
         heartbeat = timerService.scheduleWithFixedDelay(new Heartbeat(httpClient, availableStrategy), heartbeatIntervalMillis, heartbeatIntervalMillis);
+    }
+
+    @Override
+    public int getNumberOfEndpoints() {
+        return total;
     }
 
     @Override
