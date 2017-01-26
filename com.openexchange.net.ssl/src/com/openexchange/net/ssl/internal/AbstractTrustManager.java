@@ -64,6 +64,7 @@ import javax.naming.ldap.LdapName;
 import javax.naming.ldap.Rdn;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.X509ExtendedTrustManager;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.util.Tools;
 import com.openexchange.log.LogProperties;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
@@ -273,7 +274,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             if (!untrustedFingerprints.isEmpty()) {
                 //TODO: Throw an exception with the indication that the server is untrusted (the user can then choose what to do)
             }
-        } catch (NoSuchAlgorithmException | CertificateEncodingException e) {
+        } catch (NoSuchAlgorithmException | CertificateEncodingException | OXException e) {
             // TODO: throw
             e.printStackTrace();
         }
