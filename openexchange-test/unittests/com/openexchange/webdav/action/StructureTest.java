@@ -49,10 +49,15 @@
 
 package com.openexchange.webdav.action;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import javax.servlet.http.HttpServletResponse;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavPath;
@@ -68,7 +73,7 @@ public abstract class StructureTest extends ActionTestCase {
     private WebdavPath DEVELOPMENT_URL = null;
     private WebdavPath PM_URL = null;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         INDEX_HTML_URL = testCollection.dup().append("index.html");
@@ -78,6 +83,7 @@ public abstract class StructureTest extends ActionTestCase {
         PM_URL = testCollection.dup().append("pm");
     }
 
+    @Test
     public void testResource() throws Exception {
 
         final String content = getContent(INDEX_HTML_URL);
@@ -102,6 +108,7 @@ public abstract class StructureTest extends ActionTestCase {
         assertEquals(content, getContent(COPIED_INDEX_HTML_URL));
     }
 
+    @Test
     public void testOverwrite() throws Exception {
 
         final MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
@@ -120,6 +127,7 @@ public abstract class StructureTest extends ActionTestCase {
         }
     }
 
+    @Test
     public void testSuccessfulOverwrite() throws Exception {
 
         final MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
@@ -136,6 +144,7 @@ public abstract class StructureTest extends ActionTestCase {
 
     }
 
+    @Test
     public void testOverwriteCollection() throws Exception {
 
         factory.resolveCollection(DEVELOPMENT_URL).resolveResource(new WebdavPath("test.html")).create();
@@ -158,6 +167,7 @@ public abstract class StructureTest extends ActionTestCase {
 
     }
 
+    @Test
     public void testMergeCollection() throws Exception {
         WebdavResource r = factory.resolveCollection(DEVELOPMENT_URL).resolveResource(new WebdavPath("test.html"));
         r.putBodyAndGuessLength(new ByteArrayInputStream(new byte[2]));
@@ -178,9 +188,10 @@ public abstract class StructureTest extends ActionTestCase {
         action.perform(req, res);
 
         //assertEquals(HttpServletResponse.SC_CREATED, res.getStatus());
-        assertTrue(factory.resolveResource(PM_URL+"/test.html").exists());
+        assertTrue(factory.resolveResource(PM_URL + "/test.html").exists());
     }
 
+    @Test
     public void testSame() throws Exception {
 
         final MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
@@ -198,6 +209,7 @@ public abstract class StructureTest extends ActionTestCase {
         }
     }
 
+    @Test
     public void testConflict() throws Exception {
 
         final MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
@@ -213,14 +225,9 @@ public abstract class StructureTest extends ActionTestCase {
         } catch (final WebdavProtocolException x) {
             StringWriter sw = new StringWriter();
             x.printStackTrace(new PrintWriter(sw));
-            assertTrue(x.getStatus() + " - " + x.getMessage() + "\n" + sw.toString(), HttpServletResponse.SC_CONFLICT == x.getStatus()
-                    || Protocol.SC_MULTISTATUS == x.getStatus()
-                    || HttpServletResponse.SC_PRECONDITION_FAILED == x.getStatus()
-            );
+            assertTrue(x.getStatus() + " - " + x.getMessage() + "\n" + sw.toString(), HttpServletResponse.SC_CONFLICT == x.getStatus() || Protocol.SC_MULTISTATUS == x.getStatus() || HttpServletResponse.SC_PRECONDITION_FAILED == x.getStatus());
         }
     }
-
-
 
     public abstract WebdavAction getAction(WebdavFactory factory);
 }

@@ -58,11 +58,16 @@ import org.json.JSONException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.resource.actions.ResourceGetRequest;
+import com.openexchange.ajax.resource.actions.ResourceGetResponse;
+import com.openexchange.ajax.resource.actions.ResourceListRequest;
+import com.openexchange.ajax.resource.actions.ResourceListResponse;
 import com.openexchange.ajax.resource.actions.ResourceNewResponse;
 import com.openexchange.ajax.resource.actions.ResourceSearchRequest;
 import com.openexchange.ajax.resource.actions.ResourceSearchResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.resource.Resource;
+import edu.emory.mathcs.backport.java.util.Arrays;
 
 /**
  * This was just a quick&dirty implementation to get other tests running that use resources.
@@ -164,6 +169,18 @@ public class ResourceTestManager implements TestManager {
         ResourceSearchResponse response = execute(new ResourceSearchRequest(pattern, getFailOnError()));
         extractInfo(response);
         return response.getResources();
+    }
+
+    public List<Resource> list(int[] ids) throws JSONException {
+        ResourceListResponse response = execute(new ResourceListRequest(ids));
+        extractInfo(response);
+        return Arrays.asList(response.getResources());
+    }
+
+    public Resource get(int id) throws JSONException {
+        ResourceGetResponse response = execute(new ResourceGetRequest(id, false));
+        extractInfo(response);
+        return response.getResource();
     }
 
     protected <T extends AbstractAJAXResponse> T execute(final AJAXRequest<T> request) {

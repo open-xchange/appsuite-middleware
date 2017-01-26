@@ -48,8 +48,8 @@
  */
 
 package com.openexchange.subscribe.crawler;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 
 /**
@@ -57,15 +57,10 @@ import junit.framework.TestSuite;
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    GMXTest.class,
+    WebDeTest.class
+})
 public class AllCrawlersTestSuite{
-    public AllCrawlersTestSuite() {
-        super();
-    }
-
-    public static Test suite() {
-        final TestSuite testSuite = new TestSuite();
-        testSuite.addTestSuite(GMXTest.class);
-        testSuite.addTestSuite(WebDeTest.class);
-        return testSuite;
-    }
 }

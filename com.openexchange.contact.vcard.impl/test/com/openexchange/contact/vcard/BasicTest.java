@@ -49,8 +49,12 @@
 
 package com.openexchange.contact.vcard;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.awt.image.BufferedImage;
 import java.util.List;
+import org.junit.Assert;
+import org.junit.Test;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Streams;
 import com.openexchange.java.util.TimeZones;
@@ -74,7 +78,8 @@ public class BasicTest extends VCardTest {
         super();
     }
 
-    public void testImportVCard1() throws Exception {
+         @Test
+     public void testImportVCard1() throws Exception {
         /*
          * http://de.wikipedia.org/wiki/VCard#vCard_2.1
          */
@@ -99,26 +104,27 @@ public class BasicTest extends VCardTest {
          * verify imported contact
          */
         assertNotNull(contact);
-        assertEquals("Erika Mustermann", contact.getDisplayName());
-        assertEquals("Mustermann", contact.getSurName());
-        assertEquals("Erika", contact.getGivenName());
-        assertEquals("Wikipedia", contact.getCompany());
-        assertEquals("Oberleutnant", contact.getPosition());
-        assertEquals("image/jpeg", contact.getImageContentType());
+        Assert.assertEquals("Erika Mustermann", contact.getDisplayName());
+        Assert.assertEquals("Mustermann", contact.getSurName());
+        Assert.assertEquals("Erika", contact.getGivenName());
+        Assert.assertEquals("Wikipedia", contact.getCompany());
+        Assert.assertEquals("Oberleutnant", contact.getPosition());
+        Assert.assertEquals("image/jpeg", contact.getImageContentType());
         assertNotNull(contact.getImage1());
         BufferedImage bufferedImage = javax.imageio.ImageIO.read(Streams.newByteArrayInputStream(contact.getImage1()));
         assertNotNull(bufferedImage);
         assertTrue(0 < bufferedImage.getWidth() && 0 < bufferedImage.getHeight());
-        assertEquals("(0221) 9999123", contact.getTelephoneBusiness1());
-        assertEquals("(0221) 1234567", contact.getTelephoneHome1());
-        assertEquals("Heidestrasse 17", contact.getStreetHome());
-        assertEquals("Koeln", contact.getCityHome());
-        assertEquals("51147", contact.getPostalCodeHome());
-        assertEquals("Deutschland", contact.getCountryHome());
-        assertEquals("erika@mustermann.de", contact.getEmail1());
+        Assert.assertEquals("(0221) 9999123", contact.getTelephoneBusiness1());
+        Assert.assertEquals("(0221) 1234567", contact.getTelephoneHome1());
+        Assert.assertEquals("Heidestrasse 17", contact.getStreetHome());
+        Assert.assertEquals("Koeln", contact.getCityHome());
+        Assert.assertEquals("51147", contact.getPostalCodeHome());
+        Assert.assertEquals("Deutschland", contact.getCountryHome());
+        Assert.assertEquals("erika@mustermann.de", contact.getEmail1());
     }
 
-    public void testImportVCard2() throws Exception {
+         @Test
+     public void testImportVCard2() throws Exception {
         /*
          * http://de.wikipedia.org/wiki/VCard#vCard_3.0
          */
@@ -144,27 +150,28 @@ public class BasicTest extends VCardTest {
          * verify imported contact
          */
         assertNotNull(contact);
-        assertEquals("Erika Mustermann", contact.getDisplayName());
-        assertEquals("Mustermann", contact.getSurName());
-        assertEquals("Erika", contact.getGivenName());
-        assertEquals("Wikipedia", contact.getCompany());
-        assertEquals("Oberleutnant", contact.getPosition());
-        assertEquals("image/jpeg", contact.getImageContentType());
+        Assert.assertEquals("Erika Mustermann", contact.getDisplayName());
+        Assert.assertEquals("Mustermann", contact.getSurName());
+        Assert.assertEquals("Erika", contact.getGivenName());
+        Assert.assertEquals("Wikipedia", contact.getCompany());
+        Assert.assertEquals("Oberleutnant", contact.getPosition());
+        Assert.assertEquals("image/jpeg", contact.getImageContentType());
         assertNotNull(contact.getImage1());
         BufferedImage bufferedImage = javax.imageio.ImageIO.read(Streams.newByteArrayInputStream(contact.getImage1()));
         assertNotNull(bufferedImage);
         assertTrue(0 < bufferedImage.getWidth() && 0 < bufferedImage.getHeight());
-        assertEquals("+49 221 9999123", contact.getTelephoneBusiness1());
-        assertEquals("+49 221 1234567", contact.getTelephoneHome1());
-        assertEquals("Heidestra\u00dfe 17", contact.getStreetHome());
-        assertEquals("K\u00f6ln", contact.getCityHome());
-        assertEquals("51147", contact.getPostalCodeHome());
-        assertEquals("Germany", contact.getCountryHome());
-        assertEquals("erika@mustermann.de", contact.getEmail1());
-        assertEquals("http://de.wikipedia.org/", contact.getURL());
+        Assert.assertEquals("+49 221 9999123", contact.getTelephoneBusiness1());
+        Assert.assertEquals("+49 221 1234567", contact.getTelephoneHome1());
+        Assert.assertEquals("Heidestra\u00dfe 17", contact.getStreetHome());
+        Assert.assertEquals("K\u00f6ln", contact.getCityHome());
+        Assert.assertEquals("51147", contact.getPostalCodeHome());
+        Assert.assertEquals("Germany", contact.getCountryHome());
+        Assert.assertEquals("erika@mustermann.de", contact.getEmail1());
+        Assert.assertEquals("http://de.wikipedia.org/", contact.getURL());
     }
 
-    public void testImportVCard3() throws Exception {
+         @Test
+     public void testImportVCard3() throws Exception {
         /*
          * http://de.wikipedia.org/wiki/VCard#vCard_4.0
          */
@@ -190,27 +197,28 @@ public class BasicTest extends VCardTest {
          * verify imported contact
          */
         assertNotNull(contact);
-        assertEquals("Erika Mustermann", contact.getDisplayName());
-        assertEquals("Mustermann", contact.getSurName());
-        assertEquals("Erika", contact.getGivenName());
-        assertEquals("Wikipedia", contact.getCompany());
-        assertEquals("Oberleutnant", contact.getPosition());
-        assertEquals("image/jpeg", contact.getImageContentType());
+        Assert.assertEquals("Erika Mustermann", contact.getDisplayName());
+        Assert.assertEquals("Mustermann", contact.getSurName());
+        Assert.assertEquals("Erika", contact.getGivenName());
+        Assert.assertEquals("Wikipedia", contact.getCompany());
+        Assert.assertEquals("Oberleutnant", contact.getPosition());
+        Assert.assertEquals("image/jpeg", contact.getImageContentType());
         assertNotNull(contact.getImage1());
         BufferedImage bufferedImage = javax.imageio.ImageIO.read(Streams.newByteArrayInputStream(contact.getImage1()));
         assertNotNull(bufferedImage);
         assertTrue(0 < bufferedImage.getWidth() && 0 < bufferedImage.getHeight());
-        assertEquals("+49-221-9999123", contact.getTelephoneBusiness1());
-        assertEquals("+49-221-1234567", contact.getTelephoneHome1());
-        assertEquals("Heidestra\u00dfe 17" + NEWLINE + "51147 K\u00f6ln" + NEWLINE + "Deutschland", contact.getAddressHome());
-        assertEquals("Heidestra\u00dfe 17", contact.getStreetHome());
-        assertEquals("K\u00f6ln", contact.getCityHome());
-        assertEquals("51147", contact.getPostalCodeHome());
-        assertEquals("Germany", contact.getCountryHome());
-        assertEquals("erika@mustermann.de", contact.getEmail1());
+        Assert.assertEquals("+49-221-9999123", contact.getTelephoneBusiness1());
+        Assert.assertEquals("+49-221-1234567", contact.getTelephoneHome1());
+        Assert.assertEquals("Heidestra\u00dfe 17" + NEWLINE + "51147 K\u00f6ln" + NEWLINE + "Deutschland", contact.getAddressHome());
+        Assert.assertEquals("Heidestra\u00dfe 17", contact.getStreetHome());
+        Assert.assertEquals("K\u00f6ln", contact.getCityHome());
+        Assert.assertEquals("51147", contact.getPostalCodeHome());
+        Assert.assertEquals("Germany", contact.getCountryHome());
+        Assert.assertEquals("erika@mustermann.de", contact.getEmail1());
     }
 
-    public void testImportVCard4() throws Exception {
+         @Test
+     public void testImportVCard4() throws Exception {
         /*
          * http://www.w3.org/2002/12/cal/vcard-examples/john-doe.vcf
          */
@@ -247,31 +255,32 @@ public class BasicTest extends VCardTest {
          * verify imported contact
          */
         assertNotNull(contact);
-        assertEquals("John Doe", contact.getDisplayName());
-        assertEquals("Doe", contact.getSurName());
-        assertEquals("John", contact.getGivenName());
-        assertEquals("Example.com Inc.", contact.getCompany());
-        assertEquals("Imaginary test person", contact.getPosition());
-        assertEquals("+1 617 555 1212", contact.getTelephoneBusiness1());
-        assertEquals("+1 (617) 555-1234", contact.getTelephoneBusiness2());
-        assertEquals("+1 781 555 1212", contact.getCellularTelephone1());
-        assertEquals("+1 202 555 1212", contact.getTelephoneHome1());
-        assertEquals("2 Enterprise Avenue", contact.getStreetBusiness());
-        assertEquals("Worktown", contact.getCityBusiness());
-        assertEquals("NY", contact.getStateBusiness());
-        assertEquals("01111", contact.getPostalCodeBusiness());
-        assertEquals("USA", contact.getCountryBusiness());
-        assertEquals("3 Acacia Avenue", contact.getStreetHome());
-        assertEquals("Hoemtown", contact.getCityHome());
-        assertEquals("MA", contact.getStateHome());
-        assertEquals("02222", contact.getPostalCodeHome());
-        assertEquals("USA", contact.getCountryHome());
-        assertEquals("John Doe has a long and varied history, being documented on more police files that anyone else. Reports of his death are alas numerous.", contact.getNote());
-        assertEquals("http://www.example/com/doe", contact.getURL());
-        assertEquals("Work,Test group", contact.getCategories());
+        Assert.assertEquals("John Doe", contact.getDisplayName());
+        Assert.assertEquals("Doe", contact.getSurName());
+        Assert.assertEquals("John", contact.getGivenName());
+        Assert.assertEquals("Example.com Inc.", contact.getCompany());
+        Assert.assertEquals("Imaginary test person", contact.getPosition());
+        Assert.assertEquals("+1 617 555 1212", contact.getTelephoneBusiness1());
+        Assert.assertEquals("+1 (617) 555-1234", contact.getTelephoneBusiness2());
+        Assert.assertEquals("+1 781 555 1212", contact.getCellularTelephone1());
+        Assert.assertEquals("+1 202 555 1212", contact.getTelephoneHome1());
+        Assert.assertEquals("2 Enterprise Avenue", contact.getStreetBusiness());
+        Assert.assertEquals("Worktown", contact.getCityBusiness());
+        Assert.assertEquals("NY", contact.getStateBusiness());
+        Assert.assertEquals("01111", contact.getPostalCodeBusiness());
+        Assert.assertEquals("USA", contact.getCountryBusiness());
+        Assert.assertEquals("3 Acacia Avenue", contact.getStreetHome());
+        Assert.assertEquals("Hoemtown", contact.getCityHome());
+        Assert.assertEquals("MA", contact.getStateHome());
+        Assert.assertEquals("02222", contact.getPostalCodeHome());
+        Assert.assertEquals("USA", contact.getCountryHome());
+        Assert.assertEquals("John Doe has a long and varied history, being documented on more police files that anyone else. Reports of his death are alas numerous.", contact.getNote());
+        Assert.assertEquals("http://www.example/com/doe", contact.getURL());
+        Assert.assertEquals("Work,Test group", contact.getCategories());
     }
 
-    public void testImportVCard5() throws Exception {
+         @Test
+     public void testImportVCard5() throws Exception {
         /*
          * https://github.com/nuovo/vCard-parser/blob/master/Example.vcf
          */
@@ -307,27 +316,28 @@ public class BasicTest extends VCardTest {
          * verify imported contact
          */
         assertNotNull(contact);
-        assertEquals("John Doe", contact.getDisplayName());
-        assertEquals("Doe", contact.getSurName());
-        assertEquals("John", contact.getGivenName());
-        assertEquals("Q. Public", contact.getMiddleName());
-        assertEquals("(111) 555-1212", contact.getTelephoneBusiness1());
-        assertEquals("(404) 555-1212", contact.getTelephoneHome1());
-        assertEquals("(404) 555-1213", contact.getTelephoneHome2());
-        assertEquals("forrestgump@example.com", contact.getEmail1());
-        assertEquals("42 Plantation St.", contact.getStreetHome());
-        assertEquals("Baytown", contact.getCityHome());
-        assertEquals("LA", contact.getStateHome());
-        assertEquals("30314", contact.getPostalCodeHome());
-        assertEquals("United States of America", contact.getCountryHome());
-        assertEquals("https://www.google.com/", contact.getURL());
-        assertEquals("image/png", contact.getImageContentType());
+        Assert.assertEquals("John Doe", contact.getDisplayName());
+        Assert.assertEquals("Doe", contact.getSurName());
+        Assert.assertEquals("John", contact.getGivenName());
+        Assert.assertEquals("Q. Public", contact.getMiddleName());
+        Assert.assertEquals("(111) 555-1212", contact.getTelephoneBusiness1());
+        Assert.assertEquals("(404) 555-1212", contact.getTelephoneHome1());
+        Assert.assertEquals("(404) 555-1213", contact.getTelephoneHome2());
+        Assert.assertEquals("forrestgump@example.com", contact.getEmail1());
+        Assert.assertEquals("42 Plantation St.", contact.getStreetHome());
+        Assert.assertEquals("Baytown", contact.getCityHome());
+        Assert.assertEquals("LA", contact.getStateHome());
+        Assert.assertEquals("30314", contact.getPostalCodeHome());
+        Assert.assertEquals("United States of America", contact.getCountryHome());
+        Assert.assertEquals("https://www.google.com/", contact.getURL());
+        Assert.assertEquals("image/png", contact.getImageContentType());
         BufferedImage bufferedImage = javax.imageio.ImageIO.read(Streams.newByteArrayInputStream(contact.getImage1()));
         assertNotNull(bufferedImage);
         assertTrue(0 < bufferedImage.getWidth() && 0 < bufferedImage.getHeight());
     }
 
-    public void testImportVCard6() throws Exception {
+         @Test
+     public void testImportVCard6() throws Exception {
         /*
          * https://github.com/mangstadt/ez-vcard/blob/master/src/test/resources/ezvcard/io/text/John_Doe_ANDROID.vcf
          */
@@ -432,52 +442,52 @@ public class BasicTest extends VCardTest {
          */
         Contact contact = getMapper().importVCard(vCards.get(0), null, null, null);
         assertNotNull(contact);
-        assertEquals("john.doe@company.com", contact.getEmail1());
-        assertEquals("My Contacts", contact.getCategories());
+        Assert.assertEquals("john.doe@company.com", contact.getEmail1());
+        Assert.assertEquals("My Contacts", contact.getCategories());
         /*
          * verify 2nd imported contact
          */
         contact = getMapper().importVCard(vCards.get(1), null, null, null);
         assertNotNull(contact);
-        assertEquals("jane.doe@company.com", contact.getEmail1());
-        assertEquals("My Contacts", contact.getCategories());
+        Assert.assertEquals("jane.doe@company.com", contact.getEmail1());
+        Assert.assertEquals("My Contacts", contact.getCategories());
         /*
          * verify 3rd imported contact
          */
         contact = getMapper().importVCard(vCards.get(2), null, null, null);
         assertNotNull(contact);
-        assertEquals("\u00d1 \u00d1 \u00d1 \u00d1 \u00d1 ", contact.getDisplayName());
-        assertEquals("\u00d1 \u00d1 \u00d1 \u00d1", contact.getSurName());
-        assertEquals("123456789", contact.getCellularTelephone1());
-        assertEquals("My Contacts", contact.getCategories());
+        Assert.assertEquals("\u00d1 \u00d1 \u00d1 \u00d1 \u00d1 ", contact.getDisplayName());
+        Assert.assertEquals("\u00d1 \u00d1 \u00d1 \u00d1", contact.getSurName());
+        Assert.assertEquals("123456789", contact.getCellularTelephone1());
+        Assert.assertEquals("My Contacts", contact.getCategories());
         /*
          * verify 4th imported contact
          */
         contact = getMapper().importVCard(vCards.get(3), null, null, null);
         assertNotNull(contact);
-        assertEquals("\u00d1 \u00d1 \u00d1 \u00d1 \u00d1 \u00d1 \u00d1 \u00d1 \u00d1 \u00d1 \u00d1", contact.getDisplayName());
-        assertEquals("\u00d1 \u00d1 \u00d1 \u00d1 \u00d1 \u00d1 \u00d1 \u00d1 \u00d1 \u00d1 \u00d1", contact.getSurName());
-        assertEquals("123456", contact.getCellularTelephone1());
-        assertEquals("234567", contact.getTelephoneHome1());
-        assertEquals("3456789", contact.getCellularTelephone2());
-        assertEquals("45678901", contact.getTelephoneHome2());
-        assertEquals("My Contacts", contact.getCategories());
-        assertEquals("\u00d1 \u00d1 \u00d1 \u00d1 \u00d1 \u00d1 \u00d1 \u00d1\u00d1 \u00d1 \u00d1 \u00d1 \u00d1 \u00d1 \u00d1 \u00d1\u00d1 \u00d1 \u00d1 \u00d1 \u00d1 ", contact.getNote());
+        Assert.assertEquals("\u00d1 \u00d1 \u00d1 \u00d1 \u00d1 \u00d1 \u00d1 \u00d1 \u00d1 \u00d1 \u00d1", contact.getDisplayName());
+        Assert.assertEquals("\u00d1 \u00d1 \u00d1 \u00d1 \u00d1 \u00d1 \u00d1 \u00d1 \u00d1 \u00d1 \u00d1", contact.getSurName());
+        Assert.assertEquals("123456", contact.getCellularTelephone1());
+        Assert.assertEquals("234567", contact.getTelephoneHome1());
+        Assert.assertEquals("3456789", contact.getCellularTelephone2());
+        Assert.assertEquals("45678901", contact.getTelephoneHome2());
+        Assert.assertEquals("My Contacts", contact.getCategories());
+        Assert.assertEquals("\u00d1 \u00d1 \u00d1 \u00d1 \u00d1 \u00d1 \u00d1 \u00d1\u00d1 \u00d1 \u00d1 \u00d1 \u00d1 \u00d1 \u00d1 \u00d1\u00d1 \u00d1 \u00d1 \u00d1 \u00d1 ", contact.getNote());
         /*
          * verify 5th imported contact
          */
         contact = getMapper().importVCard(vCards.get(4), null, null, null);
         assertNotNull(contact);
-        assertEquals("\u00d1 \u00d1 \u00d1 \u00d1 ", contact.getDisplayName());
-        assertEquals("\u00d1 \u00d1", contact.getSurName());
-        assertEquals("\u00d1 \u00d1 \u00d1", contact.getGivenName());
-        assertEquals("123456", contact.getCellularTelephone1());
-        assertEquals("123456", contact.getTelephoneBusiness1());
-        assertEquals("123456", contact.getFaxBusiness());
-        assertEquals("bob@company.com", contact.getEmail1());
-        assertEquals("\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1", contact.getCompany());
-        assertEquals("www.company.com", contact.getURL());
-        assertEquals("image/jpeg", contact.getImageContentType());
+        Assert.assertEquals("\u00d1 \u00d1 \u00d1 \u00d1 ", contact.getDisplayName());
+        Assert.assertEquals("\u00d1 \u00d1", contact.getSurName());
+        Assert.assertEquals("\u00d1 \u00d1 \u00d1", contact.getGivenName());
+        Assert.assertEquals("123456", contact.getCellularTelephone1());
+        Assert.assertEquals("123456", contact.getTelephoneBusiness1());
+        Assert.assertEquals("123456", contact.getFaxBusiness());
+        Assert.assertEquals("bob@company.com", contact.getEmail1());
+        Assert.assertEquals("\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1", contact.getCompany());
+        Assert.assertEquals("www.company.com", contact.getURL());
+        Assert.assertEquals("image/jpeg", contact.getImageContentType());
         assertNotNull(contact.getImage1());
 //        BufferedImage bufferedImage = javax.imageio.ImageIO.read(Streams.newByteArrayInputStream(contact.getImage1()));
 //        assertNotNull(bufferedImage);
@@ -487,15 +497,16 @@ public class BasicTest extends VCardTest {
          */
         contact = getMapper().importVCard(vCards.get(5), null, null, null);
         assertNotNull(contact);
-        assertEquals("\u00d1\u00d1\u00d1\u00d1", contact.getDisplayName());
-        assertEquals("\u00d1\u00d1\u00d1\u00d1", contact.getSurName());
-        assertEquals("55556666", contact.getCellularTelephone1());
-        assertEquals("henry@company.com", contact.getEmail1());
-        assertEquals("\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1", contact.getCompany());
-        assertEquals("My Contacts", contact.getCategories());
+        Assert.assertEquals("\u00d1\u00d1\u00d1\u00d1", contact.getDisplayName());
+        Assert.assertEquals("\u00d1\u00d1\u00d1\u00d1", contact.getSurName());
+        Assert.assertEquals("55556666", contact.getCellularTelephone1());
+        Assert.assertEquals("henry@company.com", contact.getEmail1());
+        Assert.assertEquals("\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1", contact.getCompany());
+        Assert.assertEquals("My Contacts", contact.getCategories());
     }
 
-    public void testImportVCard7() throws Exception {
+         @Test
+     public void testImportVCard7() throws Exception {
         /*
          * https://github.com/mangstadt/ez-vcard/blob/master/src/test/resources/ezvcard/io/text/John_Doe_BLACK_BERRY.vcf
          */
@@ -515,19 +526,20 @@ public class BasicTest extends VCardTest {
          * verify imported contact
          */
         assertNotNull(contact);
-        assertEquals("John Doe", contact.getDisplayName());
-        assertEquals("Doe", contact.getSurName());
-        assertEquals("john", contact.getGivenName());
-        assertEquals("Acme Solutions", contact.getCompany());
-        assertEquals("+96123456789", contact.getCellularTelephone1());
-        assertEquals("image/jpeg", contact.getImageContentType());
+        Assert.assertEquals("John Doe", contact.getDisplayName());
+        Assert.assertEquals("Doe", contact.getSurName());
+        Assert.assertEquals("john", contact.getGivenName());
+        Assert.assertEquals("Acme Solutions", contact.getCompany());
+        Assert.assertEquals("+96123456789", contact.getCellularTelephone1());
+        Assert.assertEquals("image/jpeg", contact.getImageContentType());
         assertNotNull(contact.getImage1());
 //        BufferedImage bufferedImage = javax.imageio.ImageIO.read(Streams.newByteArrayInputStream(contact.getImage1()));
 //        assertNotNull(bufferedImage);
 //        assertTrue(0 < bufferedImage.getWidth() && 0 < bufferedImage.getHeight());
     }
 
-    public void testImportVCard8() throws Exception {
+         @Test
+     public void testImportVCard8() throws Exception {
         /*
          * https://github.com/mangstadt/ez-vcard/blob/master/src/test/resources/ezvcard/io/text/John_Doe_EVOLUTION.vcf
          */
@@ -580,25 +592,25 @@ public class BasicTest extends VCardTest {
          * verify imported contact
          */
         assertNotNull(contact);
-        assertEquals("http://www.ibm.com", contact.getURL());
-        assertEquals("905-666-1234", contact.getCellularTelephone1());
-        assertEquals("905-555-1234", contact.getTelephoneBusiness1());
-        assertEquals("477343c8e6bf375a9bac1f96a5000837", contact.getUid());
-        assertEquals("Doe", contact.getSurName());
-        assertEquals("John", contact.getGivenName());
-        assertEquals("Richter, James", contact.getMiddleName());
-        assertEquals("Mr.", contact.getTitle());
-        assertEquals("Sr.", contact.getSuffix());
-        assertEquals("Mr. John Richter, James Doe Sr.", contact.getDisplayName());
-        assertEquals("Johny", contact.getNickname());
-        assertEquals("Maria", contact.getSpouseName());
-        assertEquals("IBM", contact.getCompany());
-        assertEquals("Accounting", contact.getDepartment());
-        assertEquals("Dungeon", contact.getBranches());
-        assertEquals("Money Counter", contact.getPosition());
-        assertEquals("Big Blue", contact.getManagerName());
-        assertEquals("Little Red", contact.getAssistantName());
-        assertEquals("VIP", contact.getCategories());
+        Assert.assertEquals("http://www.ibm.com", contact.getURL());
+        Assert.assertEquals("905-666-1234", contact.getCellularTelephone1());
+        Assert.assertEquals("905-555-1234", contact.getTelephoneBusiness1());
+        Assert.assertEquals("477343c8e6bf375a9bac1f96a5000837", contact.getUid());
+        Assert.assertEquals("Doe", contact.getSurName());
+        Assert.assertEquals("John", contact.getGivenName());
+        Assert.assertEquals("Richter, James", contact.getMiddleName());
+        Assert.assertEquals("Mr.", contact.getTitle());
+        Assert.assertEquals("Sr.", contact.getSuffix());
+        Assert.assertEquals("Mr. John Richter, James Doe Sr.", contact.getDisplayName());
+        Assert.assertEquals("Johny", contact.getNickname());
+        Assert.assertEquals("Maria", contact.getSpouseName());
+        Assert.assertEquals("IBM", contact.getCompany());
+        Assert.assertEquals("Accounting", contact.getDepartment());
+        Assert.assertEquals("Dungeon", contact.getBranches());
+        Assert.assertEquals("Money Counter", contact.getPosition());
+        Assert.assertEquals("Big Blue", contact.getManagerName());
+        Assert.assertEquals("Little Red", contact.getAssistantName());
+        Assert.assertEquals("VIP", contact.getCategories());
         String expectedNote =
             "THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\" AND ANY EXPRESS OR IMPLIED WARRANTIES, " +
             "INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE " +
@@ -608,18 +620,19 @@ public class BasicTest extends VCardTest {
             "CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS " +
             "SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
         ;
-        assertEquals(expectedNote, contact.getNote());
-        assertEquals("john.doe@ibm.com", contact.getEmail1());
-        assertEquals("15 Crescent moon drive", contact.getStreetHome());
-        assertEquals("Albaney", contact.getCityHome());
-        assertEquals("New York", contact.getStateHome());
-        assertEquals("12345", contact.getPostalCodeHome());
-        assertEquals("UnitedStates of America", contact.getCountryHome());
-        assertEquals(TimeTools.D("1980-03-22 00:00:00", TimeZones.UTC), contact.getBirthday());
-//        assertEquals(TimeTools.D("1980-03-22 00:00:00", TimeZones.UTC), contact.getAnniversary());
+        Assert.assertEquals(expectedNote, contact.getNote());
+        Assert.assertEquals("john.doe@ibm.com", contact.getEmail1());
+        Assert.assertEquals("15 Crescent moon drive", contact.getStreetHome());
+        Assert.assertEquals("Albaney", contact.getCityHome());
+        Assert.assertEquals("New York", contact.getStateHome());
+        Assert.assertEquals("12345", contact.getPostalCodeHome());
+        Assert.assertEquals("UnitedStates of America", contact.getCountryHome());
+        Assert.assertEquals(TimeTools.D("1980-03-22 00:00:00", TimeZones.UTC), contact.getBirthday());
+//        Assert.assertEquals(TimeTools.D("1980-03-22 00:00:00", TimeZones.UTC), contact.getAnniversary());
     }
 
-    public void testImportVCard9() throws Exception {
+         @Test
+     public void testImportVCard9() throws Exception {
         /*
          * https://github.com/mangstadt/ez-vcard/blob/master/src/test/resources/ezvcard/io/text/John_Doe_GMAIL.vcf
          */
@@ -661,21 +674,21 @@ public class BasicTest extends VCardTest {
          * verify imported contact
          */
         assertNotNull(contact);
-        assertEquals("Doe", contact.getSurName());
-        assertEquals("John", contact.getGivenName());
-        assertEquals("Richter, James", contact.getMiddleName());
-        assertEquals("Mr.", contact.getTitle());
-        assertEquals("Sr.", contact.getSuffix());
-        assertEquals("Mr. John Richter, James Doe Sr.", contact.getDisplayName());
-        assertEquals("Jon", contact.getYomiFirstName());
-        assertEquals("Dow", contact.getYomiLastName());
-        assertEquals("john.doe@ibm.com", contact.getEmail2());
-        assertEquals("905-555-1234", contact.getCellularTelephone1());
-        assertEquals("905-666-1234", contact.getTelephoneHome1());
-        assertEquals("IBM", contact.getCompany());
-        assertEquals("Money Counter", contact.getPosition());
-        assertEquals("john.doe@ibm.com", contact.getEmail2());
-        assertEquals("http://www.ibm.com", contact.getURL());
+        Assert.assertEquals("Doe", contact.getSurName());
+        Assert.assertEquals("John", contact.getGivenName());
+        Assert.assertEquals("Richter, James", contact.getMiddleName());
+        Assert.assertEquals("Mr.", contact.getTitle());
+        Assert.assertEquals("Sr.", contact.getSuffix());
+        Assert.assertEquals("Mr. John Richter, James Doe Sr.", contact.getDisplayName());
+        Assert.assertEquals("Jon", contact.getYomiFirstName());
+        Assert.assertEquals("Dow", contact.getYomiLastName());
+        Assert.assertEquals("john.doe@ibm.com", contact.getEmail2());
+        Assert.assertEquals("905-555-1234", contact.getCellularTelephone1());
+        Assert.assertEquals("905-666-1234", contact.getTelephoneHome1());
+        Assert.assertEquals("IBM", contact.getCompany());
+        Assert.assertEquals("Money Counter", contact.getPosition());
+        Assert.assertEquals("john.doe@ibm.com", contact.getEmail2());
+        Assert.assertEquals("http://www.ibm.com", contact.getURL());
         String expectedNote =
             "THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\" AND ANY EXPRESS OR IMPLIED WARRANTIES, " +
             "INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE " +
@@ -685,10 +698,11 @@ public class BasicTest extends VCardTest {
             "CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS " +
             "SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE." + NEWLINE + "Favotire Color: Blue"
         ;
-        assertEquals(expectedNote, contact.getNote());
+        Assert.assertEquals(expectedNote, contact.getNote());
     }
 
-    public void testImportVCard10() throws Exception {
+         @Test
+     public void testImportVCard10() throws Exception {
         /*
          * https://github.com/mangstadt/ez-vcard/blob/master/src/test/resources/ezvcard/io/text/John_Doe_IPHONE.vcf
          */
@@ -1311,42 +1325,43 @@ public class BasicTest extends VCardTest {
          * verify imported contact
          */
         assertNotNull(contact);
-        assertEquals("Doe", contact.getSurName());
-        assertEquals("John", contact.getGivenName());
-        assertEquals("Richter James", contact.getMiddleName());
-        assertEquals("Mr.", contact.getTitle());
-        assertEquals("Sr.", contact.getSuffix());
-        assertEquals("Mr. John Richter James Doe Sr.", contact.getDisplayName());
-        assertEquals("Johny", contact.getNickname());
-        assertEquals("IBM", contact.getCompany());
-        assertEquals("Accounting", contact.getDepartment());
-        assertEquals("Money Counter", contact.getPosition());
-        assertEquals("john.doe@ibm.com", contact.getEmail1());
-        assertEquals("905-555-1234", contact.getCellularTelephone1());
-        assertEquals("905-666-1234", contact.getTelephoneHome1());
-        assertEquals("905-777-1234", contact.getTelephoneBusiness1());
-        assertEquals("905-888-1234", contact.getFaxHome());
-        assertEquals("905-999-1234", contact.getFaxBusiness());
-        assertEquals("905-111-1234", contact.getTelephonePager());
-        assertEquals("Silicon Alley 5", contact.getStreetHome());
-        assertEquals("New York", contact.getCityHome());
-        assertEquals("New York", contact.getStateHome());
-        assertEquals("12345", contact.getPostalCodeHome());
-        assertEquals("United States of America", contact.getCountryHome());
-        assertEquals("Street4" + NEWLINE + "Building 6" + NEWLINE + "Floor 8", contact.getStreetBusiness());
-        assertEquals("New York", contact.getCityBusiness());
-        assertEquals("12345", contact.getPostalCodeBusiness());
-        assertEquals("USA", contact.getCountryBusiness());
-        assertEquals("http://www.ibm.com", contact.getURL());
-        assertEquals(TimeTools.D("2012-06-06 00:00:00", TimeZones.UTC), contact.getBirthday());
-        assertEquals("image/jpeg", contact.getImageContentType());
+        Assert.assertEquals("Doe", contact.getSurName());
+        Assert.assertEquals("John", contact.getGivenName());
+        Assert.assertEquals("Richter James", contact.getMiddleName());
+        Assert.assertEquals("Mr.", contact.getTitle());
+        Assert.assertEquals("Sr.", contact.getSuffix());
+        Assert.assertEquals("Mr. John Richter James Doe Sr.", contact.getDisplayName());
+        Assert.assertEquals("Johny", contact.getNickname());
+        Assert.assertEquals("IBM", contact.getCompany());
+        Assert.assertEquals("Accounting", contact.getDepartment());
+        Assert.assertEquals("Money Counter", contact.getPosition());
+        Assert.assertEquals("john.doe@ibm.com", contact.getEmail1());
+        Assert.assertEquals("905-555-1234", contact.getCellularTelephone1());
+        Assert.assertEquals("905-666-1234", contact.getTelephoneHome1());
+        Assert.assertEquals("905-777-1234", contact.getTelephoneBusiness1());
+        Assert.assertEquals("905-888-1234", contact.getFaxHome());
+        Assert.assertEquals("905-999-1234", contact.getFaxBusiness());
+        Assert.assertEquals("905-111-1234", contact.getTelephonePager());
+        Assert.assertEquals("Silicon Alley 5", contact.getStreetHome());
+        Assert.assertEquals("New York", contact.getCityHome());
+        Assert.assertEquals("New York", contact.getStateHome());
+        Assert.assertEquals("12345", contact.getPostalCodeHome());
+        Assert.assertEquals("United States of America", contact.getCountryHome());
+        Assert.assertEquals("Street4" + NEWLINE + "Building 6" + NEWLINE + "Floor 8", contact.getStreetBusiness());
+        Assert.assertEquals("New York", contact.getCityBusiness());
+        Assert.assertEquals("12345", contact.getPostalCodeBusiness());
+        Assert.assertEquals("USA", contact.getCountryBusiness());
+        Assert.assertEquals("http://www.ibm.com", contact.getURL());
+        Assert.assertEquals(TimeTools.D("2012-06-06 00:00:00", TimeZones.UTC), contact.getBirthday());
+        Assert.assertEquals("image/jpeg", contact.getImageContentType());
         assertNotNull(contact.getImage1());
         BufferedImage bufferedImage = javax.imageio.ImageIO.read(Streams.newByteArrayInputStream(contact.getImage1()));
         assertNotNull(bufferedImage);
         assertTrue(0 < bufferedImage.getWidth() && 0 < bufferedImage.getHeight());
     }
 
-    public void testImportVCard11() throws Exception {
+         @Test
+     public void testImportVCard11() throws Exception {
         /*
          * https://github.com/mangstadt/ez-vcard/blob/master/src/test/resources/ezvcard/io/text/John_Doe_LOTUS_NOTES.vcf
          */
@@ -1535,24 +1550,24 @@ public class BasicTest extends VCardTest {
          * verify imported contact
          */
         assertNotNull(contact);
-        assertEquals("Doe", contact.getSurName());
-        assertEquals("John", contact.getGivenName());
-        assertEquals("Johny", contact.getMiddleName());
-        assertEquals("Mr.", contact.getTitle());
-        assertEquals("I", contact.getSuffix());
-        assertEquals("Mr. Doe John I Johny", contact.getDisplayName());
-        assertEquals("Johny,JayJay", contact.getNickname());
-        assertEquals("IBM", contact.getCompany());
-        assertEquals("SUN", contact.getDepartment());
-        assertEquals("Generic Accountant", contact.getPosition());
-        assertEquals("john.doe@ibm.com", contact.getEmail1());
-        assertEquals("+1 (212) 204-34456", contact.getCellularTelephone1());
-        assertEquals("00-1-212-555-7777", contact.getFaxBusiness());
-        assertEquals("25334" + NEWLINE + "South cresent drive, Building 5, 3rd floo r", contact.getStreetHome());
-        assertEquals("New York", contact.getCityHome());
-        assertEquals("New York", contact.getStateHome());
-        assertEquals("NYC887", contact.getPostalCodeHome());
-        assertEquals("U.S.A.", contact.getCountryHome());
+        Assert.assertEquals("Doe", contact.getSurName());
+        Assert.assertEquals("John", contact.getGivenName());
+        Assert.assertEquals("Johny", contact.getMiddleName());
+        Assert.assertEquals("Mr.", contact.getTitle());
+        Assert.assertEquals("I", contact.getSuffix());
+        Assert.assertEquals("Mr. Doe John I Johny", contact.getDisplayName());
+        Assert.assertEquals("Johny,JayJay", contact.getNickname());
+        Assert.assertEquals("IBM", contact.getCompany());
+        Assert.assertEquals("SUN", contact.getDepartment());
+        Assert.assertEquals("Generic Accountant", contact.getPosition());
+        Assert.assertEquals("john.doe@ibm.com", contact.getEmail1());
+        Assert.assertEquals("+1 (212) 204-34456", contact.getCellularTelephone1());
+        Assert.assertEquals("00-1-212-555-7777", contact.getFaxBusiness());
+        Assert.assertEquals("25334" + NEWLINE + "South cresent drive, Building 5, 3rd floo r", contact.getStreetHome());
+        Assert.assertEquals("New York", contact.getCityHome());
+        Assert.assertEquals("New York", contact.getStateHome());
+        Assert.assertEquals("NYC887", contact.getPostalCodeHome());
+        Assert.assertEquals("U.S.A.", contact.getCountryHome());
         String expectedNote =
             "THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\"" + NEWLINE +
             "AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO , THE" + NEWLINE +
@@ -1565,19 +1580,20 @@ public class BasicTest extends VCardTest {
             " CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)" + NEWLINE +
             "A RISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE" + NEWLINE + " " +
             "POSSIBILITY OF SUCH DAMAGE.";
-        assertEquals(expectedNote, contact.getNote());
-        assertEquals("http://www.sun.com", contact.getURL());
-        assertEquals(TimeTools.D("1980-05-21 00:00:00", TimeZones.UTC), contact.getBirthday());
-        assertEquals("image/jpeg", contact.getImageContentType());
+        Assert.assertEquals(expectedNote, contact.getNote());
+        Assert.assertEquals("http://www.sun.com", contact.getURL());
+        Assert.assertEquals(TimeTools.D("1980-05-21 00:00:00", TimeZones.UTC), contact.getBirthday());
+        Assert.assertEquals("image/jpeg", contact.getImageContentType());
         assertNotNull(contact.getImage1());
         BufferedImage bufferedImage = javax.imageio.ImageIO.read(Streams.newByteArrayInputStream(contact.getImage1()));
         assertNotNull(bufferedImage);
         assertTrue(0 < bufferedImage.getWidth() && 0 < bufferedImage.getHeight());
-        assertEquals("0e7602cc-443e-4b82-b4b1-90f62f99a199", contact.getUid());
-        assertEquals("Counting Money", contact.getProfession());
+        Assert.assertEquals("0e7602cc-443e-4b82-b4b1-90f62f99a199", contact.getUid());
+        Assert.assertEquals("Counting Money", contact.getProfession());
     }
 
-    public void testImportVCard12() throws Exception {
+         @Test
+     public void testImportVCard12() throws Exception {
         /*
          * https://github.com/mangstadt/ez-vcard/blob/master/src/test/resources/ezvcard/io/text/John_Doe_MAC_ADDRESS_BOOK.vcf
          */
@@ -1940,34 +1956,34 @@ public class BasicTest extends VCardTest {
          * verify imported contact
          */
         assertNotNull(contact);
-        assertEquals("Doe", contact.getSurName());
-        assertEquals("John", contact.getGivenName());
-        assertEquals("Richter,James", contact.getMiddleName());
-        assertEquals("Mr.", contact.getTitle());
-        assertEquals("Sr.", contact.getSuffix());
-        assertEquals("Mr. John Richter,James Doe Sr.", contact.getDisplayName());
-        assertEquals("Johny", contact.getNickname());
-        assertEquals("Jon", contact.getYomiFirstName());
-        assertEquals("Dow", contact.getYomiLastName());
-        assertEquals("IBM", contact.getCompany());
-        assertEquals("Accounting", contact.getDepartment());
-        assertEquals("Money Counter", contact.getPosition());
-        assertEquals("john.doe@ibm.com", contact.getEmail1());
-        assertEquals("905-777-1234", contact.getTelephoneBusiness1());
-        assertEquals("905-666-1234", contact.getTelephoneHome1());
-        assertEquals("905-555-1234", contact.getCellularTelephone1());
-        assertEquals("905-888-1234", contact.getFaxHome());
-        assertEquals("905-999-1234", contact.getFaxBusiness());
-        assertEquals("905-111-1234", contact.getTelephonePager());
-        assertEquals("Silicon Alley 5,", contact.getStreetHome());
-        assertEquals("New York", contact.getCityHome());
-        assertEquals("New York", contact.getStateHome());
-        assertEquals("12345", contact.getPostalCodeHome());
-        assertEquals("United States of America", contact.getCountryHome());
-        assertEquals("Street4" + NEWLINE + "Building 6" + NEWLINE + "Floor 8", contact.getStreetBusiness());
-        assertEquals("New York", contact.getCityBusiness());
-        assertEquals("12345", contact.getPostalCodeBusiness());
-        assertEquals("USA", contact.getCountryBusiness());
+        Assert.assertEquals("Doe", contact.getSurName());
+        Assert.assertEquals("John", contact.getGivenName());
+        Assert.assertEquals("Richter,James", contact.getMiddleName());
+        Assert.assertEquals("Mr.", contact.getTitle());
+        Assert.assertEquals("Sr.", contact.getSuffix());
+        Assert.assertEquals("Mr. John Richter,James Doe Sr.", contact.getDisplayName());
+        Assert.assertEquals("Johny", contact.getNickname());
+        Assert.assertEquals("Jon", contact.getYomiFirstName());
+        Assert.assertEquals("Dow", contact.getYomiLastName());
+        Assert.assertEquals("IBM", contact.getCompany());
+        Assert.assertEquals("Accounting", contact.getDepartment());
+        Assert.assertEquals("Money Counter", contact.getPosition());
+        Assert.assertEquals("john.doe@ibm.com", contact.getEmail1());
+        Assert.assertEquals("905-777-1234", contact.getTelephoneBusiness1());
+        Assert.assertEquals("905-666-1234", contact.getTelephoneHome1());
+        Assert.assertEquals("905-555-1234", contact.getCellularTelephone1());
+        Assert.assertEquals("905-888-1234", contact.getFaxHome());
+        Assert.assertEquals("905-999-1234", contact.getFaxBusiness());
+        Assert.assertEquals("905-111-1234", contact.getTelephonePager());
+        Assert.assertEquals("Silicon Alley 5,", contact.getStreetHome());
+        Assert.assertEquals("New York", contact.getCityHome());
+        Assert.assertEquals("New York", contact.getStateHome());
+        Assert.assertEquals("12345", contact.getPostalCodeHome());
+        Assert.assertEquals("United States of America", contact.getCountryHome());
+        Assert.assertEquals("Street4" + NEWLINE + "Building 6" + NEWLINE + "Floor 8", contact.getStreetBusiness());
+        Assert.assertEquals("New York", contact.getCityBusiness());
+        Assert.assertEquals("12345", contact.getPostalCodeBusiness());
+        Assert.assertEquals("USA", contact.getCountryBusiness());
         String expectedNote =
             "THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\" AND ANY EXPRESS OR IMPLIED WARRANTIES, " +
             "INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE " +
@@ -1977,17 +1993,18 @@ public class BasicTest extends VCardTest {
             "WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE " +
             "OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE." + NEWLINE + "Favotire Color: Blue"
         ;
-        assertEquals(expectedNote, contact.getNote());
-        assertEquals("http://www.ibm.com", contact.getURL());
-        assertEquals(TimeTools.D("2012-06-06 00:00:00", TimeZones.UTC), contact.getBirthday());
-        assertEquals("image/jpeg", contact.getImageContentType());
+        Assert.assertEquals(expectedNote, contact.getNote());
+        Assert.assertEquals("http://www.ibm.com", contact.getURL());
+        Assert.assertEquals(TimeTools.D("2012-06-06 00:00:00", TimeZones.UTC), contact.getBirthday());
+        Assert.assertEquals("image/jpeg", contact.getImageContentType());
         assertNotNull(contact.getImage1());
         BufferedImage bufferedImage = javax.imageio.ImageIO.read(Streams.newByteArrayInputStream(contact.getImage1()));
         assertNotNull(bufferedImage);
         assertTrue(0 < bufferedImage.getWidth() && 0 < bufferedImage.getHeight());
     }
 
-    public void testImportVCard13() throws Exception {
+         @Test
+     public void testImportVCard13() throws Exception {
         /*
          * https://github.com/mangstadt/ez-vcard/blob/master/src/test/resources/ezvcard/io/text/John_Doe_MS_OUTLOOK.vcf
          */
@@ -2044,16 +2061,16 @@ public class BasicTest extends VCardTest {
          * verify imported contact
          */
         assertNotNull(contact);
-        assertEquals("Doe", contact.getSurName());
-        assertEquals("John", contact.getGivenName());
-        assertEquals("Richter James", contact.getMiddleName());
-        assertEquals("Mr.", contact.getTitle());
-        assertEquals("Sr.", contact.getSuffix());
-        assertEquals("Mr. John Richter James Doe Sr.", contact.getDisplayName());
-        assertEquals("Johny", contact.getNickname());
-        assertEquals("IBM", contact.getCompany());
-        assertEquals("Accounting", contact.getDepartment());
-        assertEquals("Money Counter", contact.getPosition());
+        Assert.assertEquals("Doe", contact.getSurName());
+        Assert.assertEquals("John", contact.getGivenName());
+        Assert.assertEquals("Richter James", contact.getMiddleName());
+        Assert.assertEquals("Mr.", contact.getTitle());
+        Assert.assertEquals("Sr.", contact.getSuffix());
+        Assert.assertEquals("Mr. John Richter James Doe Sr.", contact.getDisplayName());
+        Assert.assertEquals("Johny", contact.getNickname());
+        Assert.assertEquals("IBM", contact.getCompany());
+        Assert.assertEquals("Accounting", contact.getDepartment());
+        Assert.assertEquals("Money Counter", contact.getPosition());
         String expectedNote =
             "THIS SOFTWARE IS PROVIDED BY GEORGE EL-HADDAD ''AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED " +
             "TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL " +
@@ -2063,33 +2080,33 @@ public class BasicTest extends VCardTest {
             "(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE " +
             "POSSIBILITY OF SUCH DAMAGE."
         ;
-        assertEquals(expectedNote, contact.getNote());
-        assertEquals("(905) 555-1234", contact.getTelephoneBusiness1());
-        assertEquals("(905) 666-1234", contact.getTelephoneHome1());
-        assertEquals("Cresent moon drive", contact.getStreetBusiness());
-        assertEquals("Albaney", contact.getCityBusiness());
-        assertEquals("New York", contact.getStateBusiness());
-        assertEquals("12345", contact.getPostalCodeBusiness());
-        assertEquals("United States of America", contact.getCountryBusiness());
-        assertEquals("Cresent moon drive\r\nAlbaney, New York 12345", contact.getAddressBusiness());
-        assertEquals("Silicon Alley 5", contact.getStreetHome());
-        assertEquals("New York", contact.getCityHome());
-        assertEquals("New York", contact.getStateHome());
-        assertEquals("12345", contact.getPostalCodeHome());
-        assertEquals("United States of America", contact.getCountryHome());
-        assertEquals("Silicon Alley 5,\r\nNew York, New York 12345", contact.getAddressHome());
-        assertEquals("http://www.ibm.com", contact.getURL());
-        assertEquals("Counting Money", contact.getProfession());
-        assertEquals(TimeTools.D("1980-03-22 00:00:00", TimeZones.UTC), contact.getBirthday());
-//        assertEquals(TimeTools.D("2011-01-13 00:00:00", TimeZones.UTC), contact.getAnniversary());
-        assertEquals("john.doe@ibm.cm", contact.getEmail1());
-        assertEquals("image/jpeg", contact.getImageContentType());
+        Assert.assertEquals(expectedNote, contact.getNote());
+        Assert.assertEquals("(905) 555-1234", contact.getTelephoneBusiness1());
+        Assert.assertEquals("(905) 666-1234", contact.getTelephoneHome1());
+        Assert.assertEquals("Cresent moon drive", contact.getStreetBusiness());
+        Assert.assertEquals("Albaney", contact.getCityBusiness());
+        Assert.assertEquals("New York", contact.getStateBusiness());
+        Assert.assertEquals("12345", contact.getPostalCodeBusiness());
+        Assert.assertEquals("United States of America", contact.getCountryBusiness());
+        Assert.assertEquals("Cresent moon drive\r\nAlbaney, New York 12345", contact.getAddressBusiness());
+        Assert.assertEquals("Silicon Alley 5", contact.getStreetHome());
+        Assert.assertEquals("New York", contact.getCityHome());
+        Assert.assertEquals("New York", contact.getStateHome());
+        Assert.assertEquals("12345", contact.getPostalCodeHome());
+        Assert.assertEquals("United States of America", contact.getCountryHome());
+        Assert.assertEquals("Silicon Alley 5,\r\nNew York, New York 12345", contact.getAddressHome());
+        Assert.assertEquals("http://www.ibm.com", contact.getURL());
+        Assert.assertEquals("Counting Money", contact.getProfession());
+        Assert.assertEquals(TimeTools.D("1980-03-22 00:00:00", TimeZones.UTC), contact.getBirthday());
+//        Assert.assertEquals(TimeTools.D("2011-01-13 00:00:00", TimeZones.UTC), contact.getAnniversary());
+        Assert.assertEquals("john.doe@ibm.cm", contact.getEmail1());
+        Assert.assertEquals("image/jpeg", contact.getImageContentType());
         assertNotNull(contact.getImage1());
         BufferedImage bufferedImage = javax.imageio.ImageIO.read(Streams.newByteArrayInputStream(contact.getImage1()));
         assertNotNull(bufferedImage);
         assertTrue(0 < bufferedImage.getWidth() && 0 < bufferedImage.getHeight());
-        assertEquals("Big Blue", contact.getManagerName());
-        assertEquals("Jenny", contact.getAssistantName());
+        Assert.assertEquals("Big Blue", contact.getManagerName());
+        Assert.assertEquals("Jenny", contact.getAssistantName());
     }
 
 }

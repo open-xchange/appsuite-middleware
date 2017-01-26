@@ -55,14 +55,13 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.kata.NeedExistingStep;
 import com.openexchange.groupware.container.Contact;
 
-
 /**
  * {@link ContactMoveStep}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class ContactMoveStep extends NeedExistingStep<Contact>{
+public class ContactMoveStep extends NeedExistingStep<Contact> {
 
     private final int destinationFolder;
 
@@ -72,8 +71,7 @@ public class ContactMoveStep extends NeedExistingStep<Contact>{
     }
 
     @Override
-    public void cleanUp() throws Exception {
-    }
+    public void cleanUp() throws Exception {}
 
     @Override
     public void perform(AJAXClient client) throws Exception {
@@ -87,7 +85,7 @@ public class ContactMoveStep extends NeedExistingStep<Contact>{
         UpdateRequest updateRequest = new UpdateRequest(inFolder, entry, false);
         UpdateResponse updateResponse = execute(updateRequest);
 
-        if(!updateResponse.hasError()) {
+        if (!updateResponse.hasError()) {
             entry.setLastModified(updateResponse.getTimestamp());
             rememberIdentityValues(entry);
         }

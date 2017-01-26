@@ -100,8 +100,7 @@ public class MailAccountInsertRequest implements AJAXRequest<MailAccountInsertRe
 
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter("action", "new")
+        return new Parameter[] { new Parameter("action", "new")
         };
     }
 

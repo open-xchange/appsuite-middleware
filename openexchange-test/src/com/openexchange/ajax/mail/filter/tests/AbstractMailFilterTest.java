@@ -50,7 +50,10 @@
 package com.openexchange.ajax.mail.filter.tests;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 import java.util.List;
+import org.junit.After;
+import org.junit.Before;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.mail.filter.api.MailFilterAPI;
 import com.openexchange.ajax.mail.filter.api.conversion.parser.action.ActionParserFactory;
@@ -134,15 +137,15 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
      * 
      * @param name The name of the test case
      */
-    public AbstractMailFilterTest(String name) {
-        super(name);
+    public AbstractMailFilterTest() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
 
-        mailFilterAPI = new MailFilterAPI(client);
+        mailFilterAPI = new MailFilterAPI(getClient());
 
         hostname = AjaxInit.getAJAXProperty(HOSTNAME);
 
@@ -208,12 +211,13 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
         mailFilterAPI.purge();
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        // cleanup
-        mailFilterAPI.purge();
-
-        super.tearDown();
+        try {
+            mailFilterAPI.purge();
+        } finally {
+            super.tearDown();
+        }
     }
 
     /**

@@ -49,12 +49,12 @@
 
 package com.openexchange.ajax.find.tasks;
 
+import static org.junit.Assert.assertNotNull;
 import org.junit.Test;
 import com.openexchange.ajax.find.actions.AutocompleteRequest;
 import com.openexchange.ajax.find.actions.AutocompleteResponse;
 import com.openexchange.find.Module;
 import com.openexchange.find.tasks.TasksStrings;
-
 
 /**
  * {@link FindTasksAutocompleteTests}
@@ -64,21 +64,14 @@ import com.openexchange.find.tasks.TasksStrings;
 public class FindTasksAutocompleteTests extends AbstractFindTasksTest {
 
     /**
-     * Initializes a new {@link FindTasksAutocompleteTests}.
-     */
-    public FindTasksAutocompleteTests(String n) {
-        super(n);
-    }
-
-    /**
      *
      * @throws Exception
      */
     @Test
     public void testAutocompleteFieldFacets() throws Exception {
-        String prefix = client.getValues().getDefaultAddress().substring(0, 3);
+        String prefix = getClient().getValues().getDefaultAddress().substring(0, 3);
         AutocompleteRequest request = new AutocompleteRequest(prefix, Module.TASKS.getIdentifier());
-        AutocompleteResponse response = client.execute(request);
+        AutocompleteResponse response = getClient().execute(request);
 
         assertNotNull(findByDisplayName(response.getFacets(), prefix));
         assertNotNull(findByDisplayName(response.getFacets(), prefix, TasksStrings.FACET_TASK_TITLE));

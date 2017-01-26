@@ -18,26 +18,27 @@ package org.apache.tika.parser.hdf;
 
 //JDK imports
 import java.io.InputStream;
-
 //TIKA imports
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
-import org.apache.tika.parser.hdf.HDFParser;
 import org.apache.tika.sax.BodyContentHandler;
+import org.junit.Test;
 import org.xml.sax.ContentHandler;
-
 //Junit imports
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * 
  * Test suite for the {@link HDFParser}.
  * 
  */
-public class HDFParserTest extends TestCase {
-
-    public void testParseGlobalMetadata() throws Exception {
+public class HDFParserTest {
+         @Test
+     public void testParseGlobalMetadata() throws Exception {
         if(System.getProperty("java.version").startsWith("1.5")) {
             return;
         }
@@ -64,7 +65,8 @@ public class HDFParserTest extends TestCase {
         assertEquals("5", metadata.get("GranuleMonth"));
     }
 
-    public void testHDF4() throws Exception {
+         @Test
+     public void testHDF4() throws Exception {
        if(System.getProperty("java.version").startsWith("1.5")) {
           return;
       }

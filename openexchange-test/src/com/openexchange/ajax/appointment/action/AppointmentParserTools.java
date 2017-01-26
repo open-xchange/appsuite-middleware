@@ -1,3 +1,4 @@
+
 package com.openexchange.ajax.appointment.action;
 
 import java.util.ArrayList;
@@ -9,10 +10,11 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
  * Provides functionality for appointment parsing.
+ * 
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  *
  */
-public class AppointmentParserTools{
+public class AppointmentParserTools {
 
     public static void parseConflicts(JSONObject data, AbstractAJAXResponse response) throws JSONException {
         if (!data.has("conflicts")) {

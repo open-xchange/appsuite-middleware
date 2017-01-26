@@ -51,6 +51,10 @@ package com.openexchange.ajax.mail;
 
 import static com.openexchange.mail.MailListField.FLAGS;
 import static com.openexchange.mail.MailListField.ID;
+import static org.junit.Assert.assertEquals;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonListResponse;
@@ -74,39 +78,43 @@ public class Bug16087Test extends AbstractAJAXSession {
     private String address;
     private String[] ids;
 
-    public Bug16087Test(final String name) {
-        super(name);
+    public Bug16087Test() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
-        folder = client.getValues().getInboxFolder();
-        address = client.getValues().getSendAddress();
+        folder = getClient().getValues().getInboxFolder();
+        address = getClient().getValues().getSendAddress();
         final String mail = TestMails.replaceAddresses(TestMails.UMLAUT_MAIL, address);
         final ImportMailRequest request = new ImportMailRequest(folder, 0, Charsets.UTF_8, mail);
-        final ImportMailResponse response = client.execute(request);
+        final ImportMailResponse response = getClient().execute(request);
         ids = response.getIds()[0];
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        client.execute(new DeleteRequest(ids, true));
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
+        try {
+            getClient().execute(new DeleteRequest(ids, true));
+        } finally {
+            super.tearDown();
+        }
     }
 
+    @Test
     public void testGetRawWithUnseen() throws Throwable {
         {
             final GetRequest request = new GetRequest(folder, ids[1]);
             request.setUnseen(true);
             request.setSource(true);
             request.setSave(true);
-            client.execute(request);
+            getClient().execute(request);
         }
         {
             final ListRequest request = new ListRequest(new String[][] { ids }, ATTRIBUTES);
-            final CommonListResponse response = client.execute(request);
+            final CommonListResponse response = getClient().execute(request);
             final int flagsPos = response.getColumnPos(FLAGS.getField());
             for (final Object[] mail : response) {
                 final int testFlags = ((Integer) mail[flagsPos]).intValue();

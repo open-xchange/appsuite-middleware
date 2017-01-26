@@ -65,15 +65,15 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.slf4j.LoggerFactory;
+import com.openexchange.logging.filter.RankingAwareTurboFilterList;
+import com.openexchange.logging.mbean.IncludeStackTraceServiceImpl;
+import com.openexchange.test.mock.MockUtils;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.jul.LevelChangePropagator;
 import ch.qos.logback.classic.spi.LoggerContextListener;
 import ch.qos.logback.classic.spi.TurboFilterList;
-import com.openexchange.logging.filter.RankingAwareTurboFilterList;
-import com.openexchange.logging.mbean.IncludeStackTraceServiceImpl;
-import com.openexchange.test.mock.MockUtils;
 
 /**
  * Unit tests for {@link com.openexchange.logging.osgi.Activator}
@@ -109,8 +109,8 @@ public class ActivatorTest {
         MockUtils.injectValueIntoPrivateField(Activator.class, "LOGGER", activatorLogger);
     }
 
-    @Test
-    public void testOverrideLoggerLevels_loggerNotAvailable_logWarning() {
+     @Test
+     public void testOverrideLoggerLevels_loggerNotAvailable_logWarning() {
         PowerMockito.when(loggerContext.getLogger(Matchers.anyString())).thenReturn(null);
 
         Mockito.mock(LoggerContext.class);
@@ -121,8 +121,8 @@ public class ActivatorTest {
         Mockito.verify(activatorLogger, Mockito.atLeast(1)).warn(Matchers.anyString(), Matchers.any());
     }
 
-    @Test
-    public void testOverrideLoggerLevels_configuredLevelWARNTooCoarse_setNewLogLevel() {
+     @Test
+     public void testOverrideLoggerLevels_configuredLevelWARNTooCoarse_setNewLogLevel() {
         Mockito.when(logger.getLevel()).thenReturn(Level.WARN);
 
         activator.overrideLoggerLevels(loggerContext);
@@ -132,8 +132,8 @@ public class ActivatorTest {
         Mockito.verify(activatorLogger, Mockito.never()).warn(Matchers.anyString());
     }
 
-    @Test
-    public void testOverrideLoggerLevels_configuredLevelNull_setNewLogLevel() {
+     @Test
+     public void testOverrideLoggerLevels_configuredLevelNull_setNewLogLevel() {
         Mockito.when(logger.getLevel()).thenReturn(null);
 
         activator.overrideLoggerLevels(loggerContext);
@@ -143,8 +143,8 @@ public class ActivatorTest {
         Mockito.verify(activatorLogger, Mockito.never()).warn(Matchers.anyString());
     }
 
-    @Test
-    public void testOverrideLoggerLevels_configuredLevelOFFTooCoarse_setNewLogLevel() {
+     @Test
+     public void testOverrideLoggerLevels_configuredLevelOFFTooCoarse_setNewLogLevel() {
         Mockito.when(logger.getLevel()).thenReturn(Level.OFF);
 
         activator.overrideLoggerLevels(loggerContext);
@@ -154,8 +154,8 @@ public class ActivatorTest {
         Mockito.verify(activatorLogger, Mockito.never()).warn(Matchers.anyString());
     }
 
-    @Test
-    public void testOverrideLoggerLevels_configuredLevelINFOAdequate_doNotSetNewLogLevel() {
+     @Test
+     public void testOverrideLoggerLevels_configuredLevelINFOAdequate_doNotSetNewLogLevel() {
         Mockito.when(logger.getLevel()).thenReturn(Level.INFO);
 
         activator.overrideLoggerLevels(loggerContext);
@@ -165,8 +165,8 @@ public class ActivatorTest {
         Mockito.verify(activatorLogger, Mockito.never()).warn(Matchers.anyString());
     }
 
-    @Test
-    public void testOverrideLoggerLevels_configuredLevelALLAdequate_doNotSetNewLogLevel() {
+     @Test
+     public void testOverrideLoggerLevels_configuredLevelALLAdequate_doNotSetNewLogLevel() {
         Mockito.when(logger.getLevel()).thenReturn(Level.ALL);
 
         activator.overrideLoggerLevels(loggerContext);
@@ -176,8 +176,8 @@ public class ActivatorTest {
         Mockito.verify(activatorLogger, Mockito.never()).warn(Matchers.anyString());
     }
 
-    @Test
-    public void testOverrideLoggerLevels_disableOverrideLogLevels_returnWithOverriding() {
+     @Test
+     public void testOverrideLoggerLevels_disableOverrideLogLevels_returnWithOverriding() {
         Mockito.when(logger.getLevel()).thenReturn(Level.OFF);
         PowerMockito.when(loggerContext.getProperty(Matchers.anyString())).thenReturn("true");
 
@@ -188,8 +188,8 @@ public class ActivatorTest {
         Mockito.verify(activatorLogger, Mockito.never()).warn(Matchers.anyString());
     }
 
-    @Test
-    public void testStartBundle_ensureOverrideLoggerLevelsCalled_successfull() throws Exception {
+     @Test
+     public void testStartBundle_ensureOverrideLoggerLevelsCalled_successfull() throws Exception {
         BundleContext bundleContext = PowerMockito.mock(BundleContext.class);
         Bundle bundle = PowerMockito.mock(Bundle.class);
         Mockito.when(bundleContext.getBundle()).thenReturn(bundle);
@@ -206,8 +206,8 @@ public class ActivatorTest {
         Mockito.verify(activatorSpy, Mockito.times(1)).overrideLoggerLevels(loggerContext);
     }
 
-    @Test
-    public void testStartBundle_ensureInstallJulLevelChangePropagatorCalled_successfull() throws Exception {
+     @Test
+     public void testStartBundle_ensureInstallJulLevelChangePropagatorCalled_successfull() throws Exception {
         BundleContext bundleContext = PowerMockito.mock(BundleContext.class);
         Bundle bundle = PowerMockito.mock(Bundle.class);
         Mockito.when(bundleContext.getBundle()).thenReturn(bundle);
@@ -224,8 +224,8 @@ public class ActivatorTest {
         Mockito.verify(activatorSpy, Mockito.times(1)).installJulLevelChangePropagator(loggerContext);
     }
 
-    @Test
-    public void testInstallJulLevelChangePropagator_propagatorNotAvailable_addPropagator() {
+     @Test
+     public void testInstallJulLevelChangePropagator_propagatorNotAvailable_addPropagator() {
         Activator activatorSpy = Mockito.spy(activator);
         Mockito.doReturn(false).when(activatorSpy).hasInstanceOf(Matchers.anyCollection(), Matchers.any(Class.class));
 
@@ -234,8 +234,8 @@ public class ActivatorTest {
         Mockito.verify(loggerContext, Mockito.atLeast(1)).addListener((LoggerContextListener) Matchers.any());
     }
 
-    @Test
-    public void testInstallJulLevelChangePropagator_propagatorAvailable_DoNothing() {
+     @Test
+     public void testInstallJulLevelChangePropagator_propagatorAvailable_DoNothing() {
         Activator activatorSpy = Mockito.spy(activator);
         Mockito.doReturn(true).when(activatorSpy).hasInstanceOf(Matchers.anyCollection(), Matchers.any(Class.class));
 
@@ -245,19 +245,19 @@ public class ActivatorTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testInstallJulLevelChangePropagator_collectionNull_throwException() {
+     public void testInstallJulLevelChangePropagator_collectionNull_throwException() {
         activator.hasInstanceOf(null, LevelChangePropagator.class);
     }
 
-    @Test
-    public void testInstallJulLevelChangePropagator_classNullCollectionEmpty_returnFalse() {
+     @Test
+     public void testInstallJulLevelChangePropagator_classNullCollectionEmpty_returnFalse() {
         boolean hasInstanceOf = activator.hasInstanceOf(new ArrayList<LoggerContextListener>(), null);
 
         Assert.assertFalse(hasInstanceOf);
     }
 
-    @Test
-    public void testInstallJulLevelChangePropagator_classNullCollectionIncludesLogger_returnFalse() {
+     @Test
+     public void testInstallJulLevelChangePropagator_classNullCollectionIncludesLogger_returnFalse() {
         LoggerContextListener listener = new LevelChangePropagator();
         List<LoggerContextListener> collection = new ArrayList<LoggerContextListener>();
         collection.add(listener);
@@ -267,8 +267,8 @@ public class ActivatorTest {
         Assert.assertFalse(hasInstanceOf);
     }
 
-    @Test
-    public void testInstallJulLevelChangePropagator_everythingFine_returnTrue() {
+     @Test
+     public void testInstallJulLevelChangePropagator_everythingFine_returnTrue() {
         LoggerContextListener listener = new LevelChangePropagator();
         List<LoggerContextListener> collection = new ArrayList<LoggerContextListener>();
         collection.add(listener);

@@ -58,8 +58,8 @@ import com.openexchange.html.AbstractSanitizing;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class Bug21014Test extends AbstractSanitizing {
-    @Test
-    public void testHtmlBlockquotesToPlaintext() {
+     @Test
+     public void testHtmlBlockquotesToPlaintext() {
         String content = "<blockquote>Testmail<br />Test</blockquote>";
         System.out.println(getHtmlService().html2text(content, false));
     }

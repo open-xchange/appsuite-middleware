@@ -994,8 +994,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     }
 
     public static String substituteJS(String json, String action) {
-        return JS_FRAGMENT.replace("**json**", json.replaceAll(Pattern.quote("</") , "<\\/")).replace("**action**",
-            action);
+        return JS_FRAGMENT.replace("**json**", json.replaceAll(Pattern.quote("</") , "<\\/")).replace("**action**", sanitizeParam(action));
     }
 
     /* --------------------- STUFF FOR UPLOAD --------------------- */

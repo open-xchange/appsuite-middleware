@@ -1,5 +1,9 @@
 package liquibase.change.core;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import org.junit.Before;
+import org.junit.Test;
 import liquibase.change.ChangeFactory;
 import liquibase.change.StandardChangeTest;
 import liquibase.database.Database;
@@ -7,9 +11,6 @@ import liquibase.database.core.MockDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropUniqueConstraintStatement;
-import static org.junit.Assert.*;
-import org.junit.Before;
-import org.junit.Test;
 
 public class DropUniqueConstraintChangeTest  extends StandardChangeTest {
     private DropUniqueConstraintChange change;
@@ -22,14 +23,12 @@ public class DropUniqueConstraintChangeTest  extends StandardChangeTest {
         change.setConstraintName("UQ_CONSTRAINT");
     }
 
-    @Override
-    @Test
+     @Test
     public void getRefactoringName() throws Exception {
         assertEquals("dropUniqueConstraint", ChangeFactory.getInstance().getChangeMetaData(change).getName());
     }
 
-    @Override
-    @Test
+     @Test
     public void generateStatement() throws Exception {
         SqlStatement[] sqlStatements = change.generateStatements(new MockDatabase());
         assertEquals(1, sqlStatements.length);
@@ -39,8 +38,7 @@ public class DropUniqueConstraintChangeTest  extends StandardChangeTest {
         assertEquals("UQ_CONSTRAINT", ((DropUniqueConstraintStatement) sqlStatements[0]).getConstraintName());
     }
 
-    @Override
-    @Test
+     @Test
     public void getConfirmationMessage() throws Exception {
         assertEquals("Unique constraint UQ_CONSTRAINT dropped from TAB_NAME", change.getConfirmationMessage());
     }

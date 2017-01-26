@@ -49,7 +49,13 @@
 
 package com.openexchange.ajax.folder;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.Iterator;
+import java.util.UUID;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
@@ -60,7 +66,6 @@ import com.openexchange.ajax.folder.actions.ListRequest;
 import com.openexchange.ajax.folder.actions.ListResponse;
 import com.openexchange.ajax.folder.actions.UpdateRequest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.task.actions.SearchRequest;
 import com.openexchange.ajax.task.actions.SearchResponse;
@@ -81,38 +86,35 @@ public final class Bug16724Test extends AbstractAJAXSession {
     private FolderObject folder;
     private int userId1;
 
-    public Bug16724Test(String name) {
-        super(name);
+    public Bug16724Test() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         userId1 = client.getValues().getUserId();
-        folder = Create.createPrivateFolder("test for bug 16724_" + System.currentTimeMillis(), FolderObject.TASK, client.getValues().getUserId());
+        folder = Create.createPrivateFolder("test for bug 16724_" + UUID.randomUUID().toString(), FolderObject.TASK, client.getValues().getUserId());
         folder.setParentFolderID(client.getValues().getPrivateTaskFolder());
-        client2 = new AJAXClient(User.User2);
-        folder.addPermission(Create.ocl(
-            client2.getValues().getUserId(),
-            false,
-            false,
-            OCLPermission.READ_FOLDER,
-            OCLPermission.READ_OWN_OBJECTS,
-            OCLPermission.NO_PERMISSIONS,
-            OCLPermission.NO_PERMISSIONS));
+        client2 = new AJAXClient(testContext.acquireUser());
+        folder.addPermission(Create.ocl(client2.getValues().getUserId(), false, false, OCLPermission.READ_FOLDER, OCLPermission.READ_OWN_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS));
         InsertResponse response = client.execute(new InsertRequest(EnumAPI.OUTLOOK, folder));
         response.fillObject(folder);
         GetResponse response2 = client.execute(new GetRequest(EnumAPI.OUTLOOK, folder.getObjectID()));
         folder.setLastModified(response2.getTimestamp());
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        client.execute(new DeleteRequest(EnumAPI.OUTLOOK, folder));
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
+        try {
+            client.execute(new DeleteRequest(EnumAPI.OUTLOOK, folder));
+        } finally {
+            super.tearDown();
+        }
     }
 
+    @Test
     public void testCachedAccess() throws Throwable {
         ListResponse listResponse1 = client2.execute(new ListRequest(EnumAPI.OUTLOOK, FolderObject.SHARED_PREFIX + userId1));
         Iterator<FolderObject> iter = listResponse1.getFolder();
@@ -126,14 +128,7 @@ public final class Bug16724Test extends AbstractAJAXSession {
         GetResponse getResponse1 = client2.execute(new GetRequest(EnumAPI.OUTLOOK, folder.getObjectID()));
 
         folder.setLastModified(getResponse1.getTimestamp());
-        folder.setPermissionsAsArray(new OCLPermission[] { Create.ocl(
-            userId1,
-            false,
-            true,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION) });
+        folder.setPermissionsAsArray(new OCLPermission[] { Create.ocl(userId1, false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION) });
         InsertResponse updateResponse = client.execute(new UpdateRequest(EnumAPI.OUTLOOK, folder));
         folder.setLastModified(updateResponse.getTimestamp());
 

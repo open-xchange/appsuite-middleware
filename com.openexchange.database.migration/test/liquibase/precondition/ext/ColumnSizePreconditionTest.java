@@ -53,10 +53,6 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import liquibase.database.Database;
-import liquibase.database.jvm.JdbcConnection;
-import liquibase.exception.CustomPreconditionErrorException;
-import liquibase.exception.CustomPreconditionFailedException;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -64,6 +60,10 @@ import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import liquibase.database.Database;
+import liquibase.database.jvm.JdbcConnection;
+import liquibase.exception.CustomPreconditionErrorException;
+import liquibase.exception.CustomPreconditionFailedException;
 
 /**
  * {@link ColumnSizePreconditionTest}

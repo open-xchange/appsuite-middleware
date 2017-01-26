@@ -67,8 +67,8 @@ public class ChangeFilestoreTest extends AbstractTest {
     protected int returnCodeEditFilestoreWithunknownOption;
     protected int returnCodeEditFilestoreWithMissingOption;
 
-    @Test
-    public void testEditFilestore() {
+     @Test
+     public void testEditFilestore() {
 
         resetBuffers();
         String store = "file:/tmp/"+System.currentTimeMillis();
@@ -95,8 +95,8 @@ public class ChangeFilestoreTest extends AbstractTest {
 
     }
 
-    @Test
-    public void testEditFilestoreWithInvalidCredentials() {
+     @Test
+     public void testEditFilestoreWithInvalidCredentials() {
 
         resetBuffers();
         String store = "file:/tmp/"+System.currentTimeMillis();
@@ -125,8 +125,8 @@ public class ChangeFilestoreTest extends AbstractTest {
 
     }
 
-    @Test
-    public void testEditFilestoreWithunknownOption() {
+     @Test
+     public void testEditFilestoreWithunknownOption() {
 
         resetBuffers();
 
@@ -144,8 +144,8 @@ public class ChangeFilestoreTest extends AbstractTest {
 
     }
 
-    @Test
-    public void testEditFilestoreWithMissingOption() {
+     @Test
+     public void testEditFilestoreWithMissingOption() {
 
         resetBuffers();
 

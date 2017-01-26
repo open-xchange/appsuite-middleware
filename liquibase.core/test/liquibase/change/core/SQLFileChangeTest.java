@@ -2,24 +2,20 @@ package liquibase.change.core;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
-
 import java.lang.reflect.Field;
 import java.util.Map;
-
-import liquibase.change.*;
+import org.junit.Before;
+import org.junit.Test;
+import liquibase.change.AbstractSQLChange;
+import liquibase.change.Change;
+import liquibase.change.ChangeFactory;
+import liquibase.change.StandardChangeTest;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.core.MockDatabase;
-import liquibase.database.core.OracleDatabase;
-import liquibase.exception.SetupException;
 import liquibase.resource.ClassLoaderResourceAccessor;
-import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.statement.SqlStatement;
-
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * Tests the SQL File with a simple text file. No real SQL is used with the
@@ -165,22 +161,20 @@ public class SQLFileChangeTest extends StandardChangeTest {
 //        assertEquals("SELECT * from gogo",statements[1].getSqlStatement(database));
 //    }
 
-    @Override
-    @Test
+     @Test
 	public void getConfirmationMessage() throws Exception {
     	change.setPath(fileName);
 		assertEquals("SQL in file " + fileName + " executed", change.getConfirmationMessage());
 	}
 
-    @Override
-    @Test
+     @Test
 	public void getRefactoringName() throws Exception {
 		assertEquals("sqlFile", ChangeFactory.getInstance().getChangeMetaData(change).getName());
 
 	}
 
-    @Test
-    public void testStatementsWithSemicolons() {
+     @Test
+     public void testStatementsWithSemicolons() {
         AbstractSQLChange change2 = new SQLFileChange();
         String insertWithSemicolon = "insert into table ( col ) values (' value with; semicolon ');";
         change2.setSql(insertWithSemicolon);

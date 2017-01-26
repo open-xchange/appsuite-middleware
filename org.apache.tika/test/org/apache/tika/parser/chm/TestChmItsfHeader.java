@@ -16,19 +16,18 @@
  */
 package org.apache.tika.parser.chm;
 
-import junit.framework.Assert;
-import junit.framework.TestCase;
-
 import org.apache.tika.parser.chm.accessor.ChmItsfHeader;
 import org.apache.tika.parser.chm.core.ChmCommons;
 import org.apache.tika.parser.chm.core.ChmConstants;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Test;
 
 /**
  * Tests all public functions of ChmItsfHeader
  * 
  */
-public class TestChmItsfHeader extends TestCase {
-    private ChmItsfHeader chmItsfHeader = null;
+public class TestChmItsfHeader {    private ChmItsfHeader chmItsfHeader = null;
 
     public void setUp() throws Exception {
         chmItsfHeader = new ChmItsfHeader();
@@ -93,12 +92,15 @@ public class TestChmItsfHeader extends TestCase {
                 chmItsfHeader.getVersion());
     }
 
-    public void testToString() {
+         @Test
+     public void testToString() {
         Assert.assertTrue(chmItsfHeader.toString().contains(
                 TestParameters.VP_ISTF_SIGNATURE));
     }
 
-    public void tearDown() throws Exception {
+    @After
+    public void tearDown()
+ throws Exception {
         chmItsfHeader = null;
     }
 }

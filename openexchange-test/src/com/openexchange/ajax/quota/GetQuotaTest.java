@@ -49,10 +49,13 @@
 
 package com.openexchange.ajax.quota;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Random;
 import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 
 /**
@@ -67,16 +70,17 @@ public class GetQuotaTest extends AbstractAJAXSession {
      *
      * @param name The test name
      */
-    public GetQuotaTest(String name) {
-        super(name);
+    public GetQuotaTest() {
+        super();
     }
 
+    @Test
     public void testGetQuota() throws Exception {
         /*
          * get quota from all available modules
          */
         GetQuotaRequest request = new GetQuotaRequest(null, null);
-        GetQuotaResponse response = client.execute(request);
+        GetQuotaResponse response = getClient().execute(request);
         JSONObject jsonModules = (JSONObject) response.getData();
         assertNotNull("No response data", jsonModules);
         Set<String> modules = jsonModules.keySet();
@@ -90,7 +94,7 @@ public class GetQuotaTest extends AbstractAJAXSession {
             assertTrue("No display_name found", jsonModule.hasAndNotNull("display_name"));
             assertTrue("No accounts array found", jsonModule.hasAndNotNull("accounts"));
             request = new GetQuotaRequest(randomModule, null);
-            response = client.execute(request);
+            response = getClient().execute(request);
             JSONArray jsonAccounts = (JSONArray) response.getData();
             assertNotNull("No response data", jsonAccounts);
             if (0 < jsonAccounts.length()) {
@@ -102,8 +106,8 @@ public class GetQuotaTest extends AbstractAJAXSession {
                 assertTrue("No account_name found", randomAccount.hasAndNotNull("account_name"));
                 assertTrue("No quota or countquota found", randomAccount.hasAndNotNull("quota") || randomAccount.hasAndNotNull("countquota"));
                 request = new GetQuotaRequest(randomModule, randomAccount.getString("account_id"));
-                response = client.execute(request);
-                JSONObject jsonAccount = (JSONObject)response.getData();
+                response = getClient().execute(request);
+                JSONObject jsonAccount = (JSONObject) response.getData();
                 assertTrue("No account_id found", jsonAccount.hasAndNotNull("account_id"));
                 assertTrue("No account_name found", jsonAccount.hasAndNotNull("account_name"));
                 assertTrue("No quota or countquota found", jsonAccount.hasAndNotNull("quota") || randomAccount.hasAndNotNull("countquota"));

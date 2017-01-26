@@ -49,10 +49,13 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.ConflictObject;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
@@ -75,18 +78,18 @@ public class Bug48165Test extends AbstractAJAXSession {
     private Appointment series;
     private int nextYear;
 
-    public Bug48165Test(String name) {
-        super(name);
+    public Bug48165Test() {
+        super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
         nextYear = Calendar.getInstance().get(Calendar.YEAR) + 1;
 
-        client2 = new AJAXClient(User.User2);
-        ctm1 = new CalendarTestManager(client);
+        client2 = new AJAXClient(testContext.acquireUser());
+        ctm1 = new CalendarTestManager(getClient());
         ctm2 = new CalendarTestManager(client2);
 
         conflict = new Appointment();
@@ -103,10 +106,11 @@ public class Bug48165Test extends AbstractAJAXSession {
         series.setRecurrenceType(Appointment.DAILY);
         series.setInterval(1);
         series.setIgnoreConflicts(true);
-        series.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
-        series.setParticipants(new Participant[] { new UserParticipant(client.getValues().getUserId()), new UserParticipant(client2.getValues().getUserId()) });
+        series.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
+        series.setParticipants(new Participant[] { new UserParticipant(getClient().getValues().getUserId()), new UserParticipant(client2.getValues().getUserId()) });
     }
 
+    @Test
     public void testBug48165() throws Exception {
         ctm2.insert(conflict);
         ctm1.insert(series);
@@ -134,11 +138,14 @@ public class Bug48165Test extends AbstractAJAXSession {
         assertTrue("Expect conflict.", found);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        ctm1.cleanUp();
-        ctm2.cleanUp();
-        super.tearDown();
+        try {
+            ctm1.cleanUp();
+            ctm2.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
 }

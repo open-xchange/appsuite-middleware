@@ -1,3 +1,4 @@
+
 package com.openexchange.ajax.kata;
 
 import com.openexchange.groupware.container.FolderObject;
@@ -9,7 +10,8 @@ import com.openexchange.groupware.container.FolderObject;
  *
  */
 public class FolderRunner extends AbstractDirectoryRunner {
+
     public FolderRunner(String name) {
-        super(name, "folderKatas" , FolderObject.class);
+        super(name, "folderKatas", FolderObject.class);
     }
 }

@@ -49,6 +49,8 @@
 
 package com.openexchange.webdav.xml.appointment;
 
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.webdav.xml.AppointmentTest;
@@ -60,10 +62,7 @@ import com.openexchange.webdav.xml.AppointmentTest;
  */
 public class Bug11835Test extends AppointmentTest {
 
-    public Bug11835Test(String name) {
-        super(name);
-    }
-
+    @Test
     public void testBug() throws Throwable {
         int objectId = -1;
 

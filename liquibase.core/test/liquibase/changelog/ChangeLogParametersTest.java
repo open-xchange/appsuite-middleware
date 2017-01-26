@@ -1,11 +1,10 @@
 package liquibase.changelog;
 
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
-import liquibase.database.core.H2Database;
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import java.util.Arrays;
+import org.junit.Test;
+import liquibase.database.core.H2Database;
 
 
 public class ChangeLogParametersTest {

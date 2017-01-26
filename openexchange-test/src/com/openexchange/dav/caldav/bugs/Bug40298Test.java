@@ -68,9 +68,9 @@ import com.openexchange.dav.caldav.CalDAVTest;
  */
 public class Bug40298Test extends CalDAVTest {
 
-	@Test
-	public void testResourceProperties() throws Exception {
-	    /*
+    @Test
+    public void testResourceProperties() throws Exception {
+        /*
          * discover current user principal & owner
          */
         DavPropertyNameSet props = new DavPropertyNameSet();
@@ -80,14 +80,13 @@ public class Bug40298Test extends CalDAVTest {
         props.add(PropertyNames.SUPPORTED_REPORT_SET);
         props.add(PropertyNames.SUPPORTED_CALENDAR_COMPONENT_SET);
         props.add(PropertyNames.GETCTAG);
-        PropFindMethod propFind = new PropFindMethod(getWebDAVClient().getBaseURI() + "/caldav/" + getDefaultFolderID(),
-                DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
+        PropFindMethod propFind = new PropFindMethod(getWebDAVClient().getBaseURI() + "/caldav/" + getDefaultFolderID(), DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
         MultiStatusResponse[] responses = getWebDAVClient().doPropFind(propFind);
         assertNotNull("got no response", responses);
         MultiStatusResponse response = assertSingleResponse(responses);
         String currentUserPrincipal = extractHref(PropertyNames.CURRENT_USER_PRINCIPAL, response);
         assertNotNull(currentUserPrincipal);
         assertTrue(currentUserPrincipal.contains("/" + getClient().getValues().getUserId()));
-	}
+    }
 
 }

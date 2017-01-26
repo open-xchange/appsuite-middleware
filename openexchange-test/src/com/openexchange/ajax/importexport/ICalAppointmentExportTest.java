@@ -49,7 +49,9 @@
 
 package com.openexchange.ajax.importexport;
 
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.ajax.importexport.actions.ICalExportRequest;
 import com.openexchange.ajax.importexport.actions.ICalExportResponse;
@@ -57,34 +59,25 @@ import com.openexchange.groupware.container.Appointment;
 
 public class ICalAppointmentExportTest extends ManagedAppointmentTest {
 
-	public ICalAppointmentExportTest(final String name) {
-		super(name);
-	}
+    @Test
+    public void testExportICalAppointment() throws Exception {
+        final String title = "testExportICalAppointment" + System.currentTimeMillis();
+        int folderID = folder.getObjectID();
+        final Appointment appointmentObj = new Appointment();
+        appointmentObj.setTitle(title);
+        appointmentObj.setStartDate(new Date());
+        appointmentObj.setEndDate(new Date());
+        appointmentObj.setShownAs(Appointment.RESERVED);
+        appointmentObj.setParentFolderID(folderID);
+        appointmentObj.setIgnoreConflicts(true);
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-	}
+        catm.insert(appointmentObj);
+        ICalExportRequest exportRequest = new ICalExportRequest(folderID);
+        ICalExportResponse response = getClient().execute(exportRequest);
 
-	public void testExportICalAppointment() throws Exception {
-		final String title = "testExportICalAppointment" + System.currentTimeMillis();
-		int folderID = folder.getObjectID();
-		final Appointment appointmentObj = new Appointment();
-		appointmentObj.setTitle(title);
-		appointmentObj.setStartDate(new Date());
-		appointmentObj.setEndDate(new Date());
-		appointmentObj.setShownAs(Appointment.RESERVED);
-		appointmentObj.setParentFolderID(folderID);
-		appointmentObj.setIgnoreConflicts(true);
+        String iCal = response.getICal();
 
-		calendarManager.insert(appointmentObj);
-		ICalExportRequest exportRequest = new ICalExportRequest(folderID);
-		ICalExportResponse response = getClient().execute(exportRequest);
-
-
-		String iCal = response.getICal();
-
-		assertTrue(iCal.contains(title));
-	}
+        assertTrue(iCal.contains(title));
+    }
 
 }

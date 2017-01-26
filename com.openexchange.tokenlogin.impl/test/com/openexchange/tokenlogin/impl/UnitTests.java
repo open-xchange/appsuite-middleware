@@ -53,7 +53,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 import com.openexchange.tokenlogin.impl.osgi.TokenLoginActivatorTest;
-import com.openexchange.tokenlogin.impl.Bug32698Test;
 
 /**
  * Unit tests for the bundle com.openexchange.tokenlogin.impl

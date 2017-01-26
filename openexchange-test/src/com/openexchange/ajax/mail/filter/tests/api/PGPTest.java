@@ -52,6 +52,7 @@ package com.openexchange.ajax.mail.filter.tests.api;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.junit.Test;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
 import com.openexchange.ajax.mail.filter.api.dao.action.PGP;
 import com.openexchange.ajax.mail.filter.api.dao.test.TrueTest;
@@ -69,13 +70,14 @@ public class PGPTest extends AbstractMailFilterTest {
      * 
      * @param name test case's name
      */
-    public PGPTest(String name) {
-        super(name);
+    public PGPTest() {
+        super();
     }
 
     /**
      * Test new PGP filter without key
      */
+    @Test
     public void testNewPGPWithoutKey() throws Exception {
         Rule expected = new Rule();
         expected.setName("PGP without key");
@@ -92,6 +94,7 @@ public class PGPTest extends AbstractMailFilterTest {
     /**
      * Test new PGP filter with a single key
      */
+    @Test
     public void testNewPGP() throws Exception {
         Rule expected = new Rule();
         expected.setName("PGP with key");
@@ -110,6 +113,7 @@ public class PGPTest extends AbstractMailFilterTest {
     /**
      * Test new PGP filter with multiple keys
      */
+    @Test
     public void testNewPGPWithMultipleKeys() throws Exception {
         Rule expected = new Rule();
         expected.setName("PGP with multiple keys");

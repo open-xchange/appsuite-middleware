@@ -66,16 +66,16 @@ public class CloudmarkSpamHandlerTest {
 
     private static final String ASCII_ADDRESS = "mschneider@open-xchange.com";
 
-    @Test
-    public void testGetAddress_isUmlautAdress_returnAddress() {
+     @Test
+     public void testGetAddress_isUmlautAdress_returnAddress() {
         InternetAddress senderAddress = CloudmarkSpamHandler.getAddress(UMLAUT_ADDRESS);
 
         assertNotNull(senderAddress);
         assertEquals(UMLAUT_ADDRESS, senderAddress.getAddress());
     }
 
-    @Test
-    public void testGetAddress_isAsciiAdress_returnAddress() {
+     @Test
+     public void testGetAddress_isAsciiAdress_returnAddress() {
         InternetAddress senderAddress = CloudmarkSpamHandler.getAddress(ASCII_ADDRESS);
 
         assertNotNull(senderAddress);

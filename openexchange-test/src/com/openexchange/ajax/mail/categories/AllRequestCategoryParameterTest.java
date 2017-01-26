@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.mail.categories;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import org.json.JSONException;
 import org.junit.Test;
@@ -68,8 +68,6 @@ import com.openexchange.mail.dataobjects.MailMessage;
  */
 public class AllRequestCategoryParameterTest extends AbstractMailCategoriesTest {
 
-    private static final int[] COLUMNS = new int[] { 102, 600, 601, 602, 603, 604, 605, 606, 607, 608, 610, 611, 614, 652 };
-
     /**
      * Initializes a new {@link AllRequestCategoryParameterTest}.
      * 
@@ -78,13 +76,11 @@ public class AllRequestCategoryParameterTest extends AbstractMailCategoriesTest 
      * @throws IOException
      * @throws OXException
      */
-    public AllRequestCategoryParameterTest() {
-    }
+    public AllRequestCategoryParameterTest() {}
 
     @Test
     public void testAllRequest() throws Exception {
-
-        MailTestManager manager = new MailTestManager(client, false);
+        MailTestManager manager = new MailTestManager(getClient(), false);
         getClient().execute(new NewMailRequest(getInboxFolder(), EML, -1, true));
         String origin = values.getInboxFolder();
         MailMessage[] messages = manager.listMails(origin, COLUMNS, 610, Order.DESCENDING, true, CAT_GENERAL);

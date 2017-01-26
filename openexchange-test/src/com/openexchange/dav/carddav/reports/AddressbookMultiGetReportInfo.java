@@ -72,14 +72,16 @@ public class AddressbookMultiGetReportInfo extends ReportInfo {
 
     /**
      * Creates a new {@link AddressbookMultiGetReportInfo}.
+     * 
      * @param hrefs The contact data references to include in the request
      */
     public AddressbookMultiGetReportInfo(final String[] hrefs) {
-    	this(hrefs, null);
+        this(hrefs, null);
     }
 
     /**
      * Creates a new {@link AddressbookMultiGetReportInfo}.
+     * 
      * @param hrefs The contact data references to include in the request
      * @param propertyNames the properties to include in the request
      */
@@ -91,26 +93,23 @@ public class AddressbookMultiGetReportInfo extends ReportInfo {
 
     @Override
     public Element toXml(final Document document) {
-    	/*
-    	 * create addressbook-multi-get element
-    	 */
-    	final Element addressbookMultiGetElement = DomUtil.createElement(document,
-    			AddressbookMultiGetReport.ADDRESSBOOK_MULTI_GET.getLocalName(),
-    			AddressbookMultiGetReport.ADDRESSBOOK_MULTI_GET.getNamespace());
-    	addressbookMultiGetElement.setAttributeNS(Namespace.XMLNS_NAMESPACE.getURI(),
-    			Namespace.XMLNS_NAMESPACE.getPrefix() + ":" + DavConstants.NAMESPACE.getPrefix(), DavConstants.NAMESPACE.getURI());
-    	/*
-    	 * append properties element
-    	 */
+        /*
+         * create addressbook-multi-get element
+         */
+        final Element addressbookMultiGetElement = DomUtil.createElement(document, AddressbookMultiGetReport.ADDRESSBOOK_MULTI_GET.getLocalName(), AddressbookMultiGetReport.ADDRESSBOOK_MULTI_GET.getNamespace());
+        addressbookMultiGetElement.setAttributeNS(Namespace.XMLNS_NAMESPACE.getURI(), Namespace.XMLNS_NAMESPACE.getPrefix() + ":" + DavConstants.NAMESPACE.getPrefix(), DavConstants.NAMESPACE.getURI());
+        /*
+         * append properties element
+         */
         if (null != propertyNames) {
             addressbookMultiGetElement.appendChild(propertyNames.toXml(document));
         }
-    	/*
-    	 * append hrefs
-    	 */
-    	for (final String href : hrefs) {
+        /*
+         * append hrefs
+         */
+        for (final String href : hrefs) {
             addressbookMultiGetElement.appendChild(DomUtil.createElement(document, DavConstants.XML_HREF, DavConstants.NAMESPACE, href));
-    	}
+        }
         return addressbookMultiGetElement;
     }
 }

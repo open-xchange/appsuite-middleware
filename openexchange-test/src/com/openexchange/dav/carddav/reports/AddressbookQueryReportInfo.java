@@ -80,7 +80,7 @@ public class AddressbookQueryReportInfo extends ReportInfo {
      * @param filters The property filters
      */
     public AddressbookQueryReportInfo(List<PropFilter> filters) {
-    	this(filters, null, null);
+        this(filters, null, null);
     }
 
     /**
@@ -99,7 +99,7 @@ public class AddressbookQueryReportInfo extends ReportInfo {
      * @param filters The property filters
      * @param propertyNames the properties to include in the request
      * @param filterTest <code>allof</code> to combine the filters with a logical <code>AND</code>, <code>anyof</code>
-     *        for a logical <code>OR</code>, or <code>null</code> for the default behavior
+     *            for a logical <code>OR</code>, or <code>null</code> for the default behavior
      */
     public AddressbookQueryReportInfo(List<PropFilter> filters, PropContainer propertyNames, String filterTest) {
         super(AddressbookMultiGetReport.ADDRESSBOOK_MULTI_GET, DavConstants.DEPTH_0, null);
@@ -110,37 +110,34 @@ public class AddressbookQueryReportInfo extends ReportInfo {
 
     @Override
     public Element toXml(final Document document) {
-    	/*
-    	 * create addressbook-query element
-    	 */
-    	Element addressbookQueryElement = DomUtil.createElement(document,
-			AddressbookQueryReport.ADDRESSBOOK_QUERY.getLocalName(),
-			AddressbookQueryReport.ADDRESSBOOK_QUERY.getNamespace());
-    	addressbookQueryElement.setAttributeNS(Namespace.XMLNS_NAMESPACE.getURI(),
-    			Namespace.XMLNS_NAMESPACE.getPrefix() + ":" + DavConstants.NAMESPACE.getPrefix(), DavConstants.NAMESPACE.getURI());
-    	/*
-    	 * append properties element
-    	 */
-    	if (null != propertyNames) {
+        /*
+         * create addressbook-query element
+         */
+        Element addressbookQueryElement = DomUtil.createElement(document, AddressbookQueryReport.ADDRESSBOOK_QUERY.getLocalName(), AddressbookQueryReport.ADDRESSBOOK_QUERY.getNamespace());
+        addressbookQueryElement.setAttributeNS(Namespace.XMLNS_NAMESPACE.getURI(), Namespace.XMLNS_NAMESPACE.getPrefix() + ":" + DavConstants.NAMESPACE.getPrefix(), DavConstants.NAMESPACE.getURI());
+        /*
+         * append properties element
+         */
+        if (null != propertyNames) {
             addressbookQueryElement.appendChild(propertyNames.toXml(document));
-    	}
-    	/*
-    	 * append filters
-    	 */
+        }
+        /*
+         * append filters
+         */
         Element filterElement = DomUtil.createElement(document, "filter", PropertyNames.NS_CARDDAV);
         if (null != filterTest) {
             filterElement.setAttribute("test", filterTest);
         }
-    	for (PropFilter filter : filters) {
-    	    Element propfilterElement = DomUtil.createElement(document, "prop-filter", PropertyNames.NS_CARDDAV);
-    	    propfilterElement.setAttribute("name", filter.getName());
-    	    Element textMatchElement = DomUtil.createElement(document, "text-match", PropertyNames.NS_CARDDAV, filter.getTextMatch());
-    	    if (null != filter.getMatchType()) {
-    	        textMatchElement.setAttribute("match-type", filter.getMatchType());
-    	    }
-    	    propfilterElement.appendChild(textMatchElement);
-    	    filterElement.appendChild(propfilterElement);
-    	}
+        for (PropFilter filter : filters) {
+            Element propfilterElement = DomUtil.createElement(document, "prop-filter", PropertyNames.NS_CARDDAV);
+            propfilterElement.setAttribute("name", filter.getName());
+            Element textMatchElement = DomUtil.createElement(document, "text-match", PropertyNames.NS_CARDDAV, filter.getTextMatch());
+            if (null != filter.getMatchType()) {
+                textMatchElement.setAttribute("match-type", filter.getMatchType());
+            }
+            propfilterElement.appendChild(textMatchElement);
+            filterElement.appendChild(propfilterElement);
+        }
         addressbookQueryElement.appendChild(filterElement);
         return addressbookQueryElement;
     }

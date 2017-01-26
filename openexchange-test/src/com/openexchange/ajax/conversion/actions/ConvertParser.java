@@ -61,18 +61,18 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  */
 public final class ConvertParser extends AbstractAJAXParser<ConvertResponse> {
 
-	/**
-	 * Initializes a new {@link ConvertParser}
-	 *
-	 * @param failOnError
-	 */
-	public ConvertParser(final boolean failOnError) {
-		super(failOnError);
-	}
+    /**
+     * Initializes a new {@link ConvertParser}
+     *
+     * @param failOnError
+     */
+    public ConvertParser(final boolean failOnError) {
+        super(failOnError);
+    }
 
-	@Override
-	protected ConvertResponse createResponse(final Response response) throws JSONException {
-		return new ConvertResponse(response);
-	}
+    @Override
+    protected ConvertResponse createResponse(final Response response) throws JSONException {
+        return new ConvertResponse(response);
+    }
 
 }

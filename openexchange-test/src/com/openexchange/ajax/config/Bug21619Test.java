@@ -49,13 +49,17 @@
 
 package com.openexchange.ajax.config;
 
+import static org.junit.Assert.fail;
 import org.apache.http.params.HttpConnectionParams;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.test.pool.TestUser;
 
 /**
  * If 2 threads have been writing the same configuration value the internal compare and set method failed and entered an endless loop. This
@@ -71,26 +75,30 @@ public final class Bug21619Test extends AbstractAJAXSession {
     private final ValueWriter[] writers = new ValueWriter[2];
     private final Thread[] threads = new Thread[writers.length];
 
-    public Bug21619Test(final String name) {
-        super(name);
+    public Bug21619Test() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         origValue = client.execute(new GetRequest(Tree.TaskUIConfiguration)).getString();
         for (int i = 0; i < writers.length; i++) {
-            writers[i] = new ValueWriter();
+            writers[i] = new ValueWriter(testUser);
         }
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        client.execute(new SetRequest(Tree.TaskUIConfiguration, origValue));
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
+        try {
+            client.execute(new SetRequest(Tree.TaskUIConfiguration, origValue));
+        } finally {
+            super.tearDown();
+        }
     }
 
+    @Test
     public void testForBug() throws InterruptedException {
         for (int i = 0; i < writers.length; i++) {
             threads[i] = new Thread(writers[i]);
@@ -111,22 +119,29 @@ public final class Bug21619Test extends AbstractAJAXSession {
     }
 
     private static class ValueWriter implements Runnable {
+
         private boolean run = true;
         private Throwable t;
-        ValueWriter() {
+        private TestUser testUser;
+
+        ValueWriter(TestUser testUser) {
             super();
+            this.testUser = testUser;
         }
+
         public void stop() {
             run = false;
         }
+
         public Throwable getThrowable() {
             return t;
         }
+
         @Override
         public void run() {
             AJAXClient client = null;
             try {
-                client = new AJAXClient(User.User1);
+                client = new AJAXClient(testUser);
                 HttpConnectionParams.setConnectionTimeout(client.getSession().getHttpClient().getParams(), 10000);
                 int value = 1;
                 while (run) {

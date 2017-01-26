@@ -82,11 +82,7 @@ public class CheckNameRequest extends AbstractInfostoreRequest<CheckNameResponse
 
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
-        return new Params(
-            AJAXServlet.PARAMETER_ACTION,
-            "checkname",
-            "name",
-            name).toArray();
+        return new Params(AJAXServlet.PARAMETER_ACTION, "checkname", "name", name).toArray();
     }
 
     @Override
@@ -111,6 +107,5 @@ public class CheckNameRequest extends AbstractInfostoreRequest<CheckNameResponse
         }
 
     }
-
 
 }

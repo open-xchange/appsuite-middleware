@@ -60,7 +60,6 @@ import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
-
 /**
  * {@link DownloadResponseParser}
  *
@@ -75,7 +74,7 @@ public class DownloadResponseParser extends AbstractAJAXParser<DownloadResponse>
     }
 
     @Override
-    public String checkResponse(HttpResponse resp, HttpRequest request) throws ParseException ,IOException {
+    public String checkResponse(HttpResponse resp, HttpRequest request) throws ParseException, IOException {
         assertEquals("Response code is not okay.", HttpStatus.SC_OK, resp.getStatusLine().getStatusCode());
         HttpEntity entity = resp.getEntity();
         if (entity.getContentType().getValue().startsWith("text/javascript")) {

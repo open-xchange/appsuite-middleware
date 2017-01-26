@@ -52,9 +52,13 @@ package com.openexchange.publish.sql;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.sql.grammar.Constant.ASTERISK;
 import static com.openexchange.sql.schema.Tables.publications;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
+import org.junit.Assert;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationErrorMessage;
@@ -71,7 +75,8 @@ import com.openexchange.sql.grammar.SELECT;
  */
 public class PublicationSQLTest extends AbstractPublicationSQLStorageTest {
 
-    public void testRemember() throws Exception {
+         @Test
+     public void testRemember() throws Exception {
         storage.rememberPublication(pub1);
         assertTrue("Id should be greater 0", pub1.getId() > 0);
         publicationsToDelete.add(I(pub1.getId()));
@@ -88,7 +93,8 @@ public class PublicationSQLTest extends AbstractPublicationSQLStorageTest {
         assertResult(new StatementBuilder().buildCommand(select));
     }
 
-    public void testForget() throws Exception {
+         @Test
+     public void testForget() throws Exception {
         storage.rememberPublication(pub1);
         assertTrue("Id should be greater 0", pub1.getId() > 0);
         publicationsToDelete.add(I(pub1.getId()));
@@ -107,7 +113,8 @@ public class PublicationSQLTest extends AbstractPublicationSQLStorageTest {
         assertNoResult(new StatementBuilder().buildCommand(select));
     }
 
-    public void testListGet1() throws Exception {
+         @Test
+     public void testListGet1() throws Exception {
         removePublicationsForTarget(pub1.getTarget().getId());
 
         storage.rememberPublication(pub1);
@@ -119,7 +126,7 @@ public class PublicationSQLTest extends AbstractPublicationSQLStorageTest {
 
         final List<Publication> publications = storage.getPublications(ctx, pub1.getTarget().getId());
 
-        assertEquals("Number of publications for this target is not correct.", 2, publications.size());
+        Assert.assertEquals("Number of publications for this target is not correct.", 2, publications.size());
 
         for (final Publication publication : publications) {
             if (publication.getId() == pub1.getId()) {
@@ -132,7 +139,8 @@ public class PublicationSQLTest extends AbstractPublicationSQLStorageTest {
         }
     }
 
-    public void testListGet2() throws Exception {
+         @Test
+     public void testListGet2() throws Exception {
         removePublicationsForEntity(entityId1, module1);
 
         storage.rememberPublication(pub1);
@@ -144,7 +152,7 @@ public class PublicationSQLTest extends AbstractPublicationSQLStorageTest {
 
         final List<Publication> publications = storage.getPublications(ctx, module1, entityId1);
 
-        assertEquals("Number of publications for this entity is not correct.", 2, publications.size());
+        Assert.assertEquals("Number of publications for this entity is not correct.", 2, publications.size());
 
         for (final Publication publication : publications) {
             if (publication.getId() == pub1.getId()) {
@@ -157,7 +165,8 @@ public class PublicationSQLTest extends AbstractPublicationSQLStorageTest {
         }
     }
 
-    public void testGet() throws Exception {
+         @Test
+     public void testGet() throws Exception {
         storage.rememberPublication(pub1);
         assertTrue("Id should be greater 0", pub1.getId() > 0);
         publicationsToDelete.add(I(pub1.getId()));
@@ -167,7 +176,8 @@ public class PublicationSQLTest extends AbstractPublicationSQLStorageTest {
         assertEquals(pub1, publication);
     }
 
-    public void testSearch() throws Exception {
+         @Test
+     public void testSearch() throws Exception {
         storage.rememberPublication(pub1);
         assertTrue("Id should be greater 0", pub1.getId() > 0);
         publicationsToDelete.add(I(pub1.getId()));
@@ -176,12 +186,13 @@ public class PublicationSQLTest extends AbstractPublicationSQLStorageTest {
         publicationsToDelete.add(I(pub2.getId()));
 
         final Collection<Publication> publications = storage.search(ctx, pub1.getTarget().getId(), pub1.getConfiguration());
-        assertEquals("Number of expected publications is not correct.", 1, publications.size());
+        Assert.assertEquals("Number of expected publications is not correct.", 1, publications.size());
         final Publication foundPublication = publications.iterator().next();
-        assertEquals(pub1, foundPublication);
+        Assert.assertEquals(pub1, foundPublication);
     }
 
-    public void testUpdate() throws Exception {
+         @Test
+     public void testUpdate() throws Exception {
         storage.rememberPublication(pub1);
         assertTrue("Id should be greater 0", pub1.getId() > 0);
         publicationsToDelete.add(I(pub1.getId()));
@@ -189,7 +200,7 @@ public class PublicationSQLTest extends AbstractPublicationSQLStorageTest {
         pub2.setModule("newModule");
         pub2.setEntityId("3546");
         storage.updatePublication(pub2);
-        assertEquals("Id should not changed", pub1.getId(), pub2.getId());
+        Assert.assertEquals("Id should not changed", pub1.getId(), pub2.getId());
 
         final SELECT select = new SELECT(ASTERISK).
             FROM(publications).
@@ -203,7 +214,8 @@ public class PublicationSQLTest extends AbstractPublicationSQLStorageTest {
         assertResult(new StatementBuilder().buildCommand(select));
     }
 
-    public void testIDCheckDuringRemember() throws Exception {
+         @Test
+     public void testIDCheckDuringRemember() throws Exception {
         pub1.setId(123);
         try {
             storage.rememberPublication(pub1);
@@ -214,30 +226,34 @@ public class PublicationSQLTest extends AbstractPublicationSQLStorageTest {
         }
     }
 
-    public void testDeleteAllPublicationsOfOneUser() throws OXException, SQLException{
+         @Test
+     public void testDeleteAllPublicationsOfOneUser() throws OXException, SQLException{
         storage.rememberPublication(pub1);
         storage.deletePublicationsOfUser(userId, ctx);
         final SELECT select = new SELECT(ASTERISK).FROM(publications).WHERE( new EQUALS("user_id", I(userId)).AND( new EQUALS("cid", I(ctx.getContextId()) ) )  );
         assertNoResult(new StatementBuilder().buildCommand(select));
     }
 
-    public void testDeleteAllPublicationsOfAContext() throws OXException, SQLException{
+         @Test
+     public void testDeleteAllPublicationsOfAContext() throws OXException, SQLException{
         storage.rememberPublication(pub1);
         storage.deletePublicationsInContext(ctx.getContextId(), ctx);
         final SELECT select = new SELECT(ASTERISK).FROM(publications).WHERE( new EQUALS("cid", I(ctx.getContextId()) ) ) ;
         assertNoResult(new StatementBuilder().buildCommand(select));
     }
 
-    public void testGetAllPublicationsOfAUser() throws OXException{
+         @Test
+     public void testGetAllPublicationsOfAUser() throws OXException{
         storage.rememberPublication(pub1);
         storage.rememberPublication(pub2);
         final List<Publication> publications = storage.getPublicationsOfUser(ctx, userId);
-        assertEquals("Should have two publications" , 2,  publications.size());
+        Assert.assertEquals("Should have two publications" , 2,  publications.size());
     }
 
     // Enabled
 
-    public void testChangeEnabled() throws Exception{
+         @Test
+     public void testChangeEnabled() throws Exception{
         storage.rememberPublication(pub1);
         assertTrue("Id should be greater 0", pub1.getId() > 0);
         publicationsToDelete.add(I(pub1.getId()));
@@ -246,7 +262,7 @@ public class PublicationSQLTest extends AbstractPublicationSQLStorageTest {
         pub2.setEntityId("3546");
         pub2.setEnabled(false);
         storage.updatePublication(pub2);
-        assertEquals("Id should not changed", pub1.getId(), pub2.getId());
+        Assert.assertEquals("Id should not changed", pub1.getId(), pub2.getId());
 
         final SELECT select = new SELECT(ASTERISK).
             FROM(publications).
@@ -262,7 +278,8 @@ public class PublicationSQLTest extends AbstractPublicationSQLStorageTest {
 
     }
 
-    public void testLeaveEnabledUnchanged() throws Exception {
+         @Test
+     public void testLeaveEnabledUnchanged() throws Exception {
         storage.rememberPublication(pub1);
         assertTrue("Id should be greater 0", pub1.getId() > 0);
         publicationsToDelete.add(I(pub1.getId()));
@@ -270,7 +287,7 @@ public class PublicationSQLTest extends AbstractPublicationSQLStorageTest {
         pub2.setModule("newModule");
         pub2.setEntityId("3546");
         storage.updatePublication(pub2);
-        assertEquals("Id should not changed", pub1.getId(), pub2.getId());
+        Assert.assertEquals("Id should not changed", pub1.getId(), pub2.getId());
 
         final SELECT select = new SELECT(ASTERISK).
             FROM(publications).
@@ -286,7 +303,8 @@ public class PublicationSQLTest extends AbstractPublicationSQLStorageTest {
 
     }
 
-    public void testEnabledDefaultsToTrue() throws OXException {
+         @Test
+     public void testEnabledDefaultsToTrue() throws OXException {
         storage.rememberPublication(pub2);
         assertTrue("Id should be greater 0", pub2.getId() > 0);
         publicationsToDelete.add(I(pub2.getId()));

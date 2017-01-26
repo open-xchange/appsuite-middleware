@@ -1,12 +1,14 @@
 
 package com.openexchange.groupware.attach.actions;
 
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.junit.Before;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.groupware.attach.AttachmentListener;
 import com.openexchange.groupware.attach.AttachmentMetadata;
@@ -19,7 +21,7 @@ public class FireAttachedEventActionTest extends AbstractAttachmentEventActionTe
 
     private MockDBProvider provider = null;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         provider = new MockDBProvider(new DBPoolProvider());

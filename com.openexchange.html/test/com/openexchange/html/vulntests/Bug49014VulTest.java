@@ -64,8 +64,8 @@ public class Bug49014VulTest extends AbstractSanitizing {
         super();
     }
 
-    @Test
-    public void testStartTagSanitizing1() {
+     @Test
+     public void testStartTagSanitizing1() {
         String content = "<!DOCTYPE html>\n" +
             "<html><head>\n" +
             "    <meta charset=\"UTF-8\">\n" +
@@ -73,8 +73,8 @@ public class Bug49014VulTest extends AbstractSanitizing {
         AssertionHelper.assertSanitizedDoesNotContain(getHtmlService(), content, "onmouseover");
     }
 
-    @Test
-    public void testStartTagSanitizing2() {
+     @Test
+     public void testStartTagSanitizing2() {
         String content = "<!DOCTYPE html>\n" +
             "<html><head>\n" +
             "    <meta charset=\"UTF-8\">\n" +
@@ -82,8 +82,8 @@ public class Bug49014VulTest extends AbstractSanitizing {
         AssertionHelper.assertSanitizedDoesNotContain(getHtmlService(), content, "onmouseover");
     }
 
-    @Test
-    public void testStartTagSanitizing3() {
+     @Test
+     public void testStartTagSanitizing3() {
         String content = "<!DOCTYPE html>\n" +
             "<html><head>\n" +
             "    <meta charset=\"UTF-8\">\n" +

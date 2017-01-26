@@ -171,8 +171,8 @@ public class SMSBucketHZTest {
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
-    @Test
-    public void testSMSBucket() throws OXException {
+     @Test
+     public void testSMSBucket() throws OXException {
 
         IMap<String, SMSBucket> map = hz2.getMap("SMS_Bucket");
         for (int x = 3; x > 0; x--) {

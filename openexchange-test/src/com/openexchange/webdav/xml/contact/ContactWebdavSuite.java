@@ -1,19 +1,20 @@
+
 package com.openexchange.webdav.xml.contact;
 
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import com.openexchange.test.concurrent.ParallelSuite;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+@RunWith(ParallelSuite.class)
+@Suite.SuiteClasses({
+    DeleteTest.class,
+    ListTest.class,
+    NewTest.class,
+    UpdateTest.class,
+    Bug8182Test.class,
 
-public class ContactWebdavSuite extends TestSuite{
+})
+public class ContactWebdavSuite  {
 
-    public static Test suite(){
-        final TestSuite tests = new TestSuite("com.openexchange.webdav.xml.contact.ContactWebdavSuite");
-        tests.addTestSuite( DeleteTest.class );
-        tests.addTestSuite( ListTest.class );
-        tests.addTestSuite( NewTest.class );
-        tests.addTestSuite( UpdateTest.class );
-        tests.addTestSuite( Bug8182Test.class );
 
-        return tests;
-    }
 }

@@ -49,7 +49,9 @@
 
 package com.openexchange.dav.caldav.bugs;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -73,38 +75,38 @@ import com.openexchange.groupware.container.Appointment;
  */
 public class Bug23167Test extends CalDAVTest {
 
-	@Test
-	public void testUpdateOldChangeException() throws Exception {
-		/*
-		 * fetch sync token for later synchronization
-		 */
-		SyncToken syncToken = new SyncToken(super.fetchSyncToken());
-		/*
-		 * create appointment series on server
-		 */
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(TimeTools.D("One year ago in the morning", TimeZone.getTimeZone("Europe/Berlin")));
-	    Appointment appointment = new Appointment();
-	    appointment.setUid(randomUID());
-	    appointment.setTitle("Bug23167Test");
-	    appointment.setIgnoreConflicts(true);
+    @Test
+    public void testUpdateOldChangeException() throws Exception {
+        /*
+         * fetch sync token for later synchronization
+         */
+        SyncToken syncToken = new SyncToken(super.fetchSyncToken());
+        /*
+         * create appointment series on server
+         */
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(TimeTools.D("One year ago in the morning", TimeZone.getTimeZone("Europe/Berlin")));
+        Appointment appointment = new Appointment();
+        appointment.setUid(randomUID());
+        appointment.setTitle("Bug23167Test");
+        appointment.setIgnoreConflicts(true);
         appointment.setRecurrenceType(Appointment.WEEKLY);
         appointment.setDays(1 << (calendar.get(Calendar.DAY_OF_WEEK) - 1));
         appointment.setInterval(1);
-	    appointment.setStartDate(calendar.getTime());
-	    calendar.add(Calendar.HOUR_OF_DAY, 2);
+        appointment.setStartDate(calendar.getTime());
+        calendar.add(Calendar.HOUR_OF_DAY, 2);
         appointment.setEndDate(calendar.getTime());
         super.create(appointment);
-		Date clientLastModified = getManager().getLastModification();
+        Date clientLastModified = getManager().getLastModification();
         /*
          * create appointment exception on server
          */
-		Appointment exception = new Appointment();
-		exception.setTitle("Bug23167Test_edit");
-		exception.setObjectID(appointment.getObjectID());
-		exception.setRecurrencePosition(2);
-		exception.setLastModified(clientLastModified);
-		exception.setParentFolderID(appointment.getParentFolderID());
+        Appointment exception = new Appointment();
+        exception.setTitle("Bug23167Test_edit");
+        exception.setObjectID(appointment.getObjectID());
+        exception.setRecurrencePosition(2);
+        exception.setLastModified(clientLastModified);
+        exception.setParentFolderID(appointment.getParentFolderID());
         super.getManager().update(exception);
         clientLastModified = getManager().getLastModification();
         /*
@@ -149,8 +151,6 @@ public class Bug23167Test extends CalDAVTest {
         }
         assertNotNull("Exception not found", exception);
         assertEquals("Title wrong", vEventException.getSummary(), exception.getTitle());
-	}
+    }
 
 }
-
-

@@ -66,6 +66,7 @@ import com.openexchange.exception.OXException;
  * Abstract implementation of an AJAX response parser. This parser also does
  * some standard check of the response that can be overwritten, if the server
  * does not provide a standard response.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public abstract class AbstractAJAXParser<T extends AbstractAJAXResponse> extends Assert {
@@ -77,8 +78,9 @@ public abstract class AbstractAJAXParser<T extends AbstractAJAXResponse> extends
 
     /**
      * Default constructor.
+     * 
      * @param failOnError <code>true</code> and this parser checks the server
-     * response for containing error messages and lets the test fail.
+     *            response for containing error messages and lets the test fail.
      */
     protected AbstractAJAXParser(final boolean failOnError) {
         super();
@@ -119,7 +121,7 @@ public abstract class AbstractAJAXParser<T extends AbstractAJAXResponse> extends
             }
             StringBuilder stringBuilder = new StringBuilder("Response code is not okay");
             if (null != request) {
-                stringBuilder.append(" for [") .append(request.getRequestLine()).append(']');
+                stringBuilder.append(" for [").append(request.getRequestLine()).append(']');
             }
             stringBuilder.append(": ").append(resp.getStatusLine()).append(". ");
             if (null != entity) {
@@ -137,6 +139,7 @@ public abstract class AbstractAJAXParser<T extends AbstractAJAXResponse> extends
 
     /**
      * This method must either return the detailed response object or fail with a JSONException.
+     * 
      * @param response simple response data object providing some method for handling the general JSON response object.
      * @return the detailed response object corresponding to the request and NEVER <code>null</code>.
      * @throws JSONException if creating the detailed response object fails.

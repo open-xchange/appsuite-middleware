@@ -65,10 +65,7 @@ public class FileSharesRequest extends AbstractInfostoreRequest<FileSharesRespon
     /**
      * The default columns for the <code>shares</code> action
      */
-    public static final int[] DEFAULT_COLUMNS = {
-        Field.FOLDER_ID.getNumber(), Field.ID.getNumber(), Field.FILENAME.getNumber(), Field.TITLE.getNumber(),
-        Field.VERSION.getNumber(), Field.CREATED_BY.getNumber(), Field.MODIFIED_BY.getNumber(),
-        Field.OBJECT_PERMISSIONS.getNumber(), 7010
+    public static final int[] DEFAULT_COLUMNS = { Field.FOLDER_ID.getNumber(), Field.ID.getNumber(), Field.FILENAME.getNumber(), Field.TITLE.getNumber(), Field.VERSION.getNumber(), Field.CREATED_BY.getNumber(), Field.MODIFIED_BY.getNumber(), Field.OBJECT_PERMISSIONS.getNumber(), 7010
     };
 
     private final int[] columns;
@@ -114,9 +111,7 @@ public class FileSharesRequest extends AbstractInfostoreRequest<FileSharesRespon
 
     @Override
     public Parameter[] getParameters() throws IOException, JSONException {
-        return new Parameter[] {
-            new URLParameter(AJAXServlet.PARAMETER_COLUMNS, columns),
-            new URLParameter(AJAXServlet.PARAMETER_ACTION, "shares")
+        return new Parameter[] { new URLParameter(AJAXServlet.PARAMETER_COLUMNS, columns), new URLParameter(AJAXServlet.PARAMETER_ACTION, "shares")
         };
     }
 

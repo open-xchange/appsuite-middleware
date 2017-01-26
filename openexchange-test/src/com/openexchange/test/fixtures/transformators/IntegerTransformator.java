@@ -46,20 +46,23 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.test.fixtures.transformators;
 
 import com.openexchange.exception.OXException;
+
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  * @author Markus Wagner <markus.wagner@open-xchange.com>
  */
-public class IntegerTransformator implements Transformator{
+public class IntegerTransformator implements Transformator {
+
     @Override
     public Object transform(final String value) throws OXException {
-        if(null == value) {
-        	return 0;
+        if (null == value) {
+            return 0;
         }
-    	try {
+        try {
             return Integer.parseInt(value);
         } catch (NumberFormatException x) {
             throw new OXException(x);

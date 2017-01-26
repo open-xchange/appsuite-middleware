@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.test.fixtures;
 
 import java.util.Calendar;
@@ -130,14 +131,14 @@ public class SimpleCredentials implements Cloneable {
     }
 
     public int getUserId() {
-        if(0 == userId) {
+        if (0 == userId) {
             userId = getConfig().getInt(Tree.Identifier);
         }
         return userId;
     }
 
     public int getContactId() {
-        if(0 == contactId) {
+        if (0 == contactId) {
             contactId = getConfig().getInt(Tree.Identifier);
         }
         return contactId;
@@ -214,7 +215,7 @@ public class SimpleCredentials implements Cloneable {
     }
 
     public TimeZone getTimeZone() {
-        if(null == timezone) {
+        if (null == timezone) {
             timezone = TimeZone.getTimeZone(getConfig().getString(Tree.TimeZone));
         }
         return timezone;
@@ -247,14 +248,13 @@ public class SimpleCredentials implements Cloneable {
     @Override
     public boolean equals(final Object o) {
         if (this == o) {
-        	return true;
+            return true;
         }
         if (o == null || getClass() != o.getClass()) {
-        	return false;
+            return false;
         }
         final SimpleCredentials that = (SimpleCredentials) o;
-        return (null != this.login ? this.login.equals(that.login) : null == that.login) &&
-	    	(null != this.password ? this.password.equals(that.password) : null == that.password);
+        return (null != this.login ? this.login.equals(that.login) : null == that.login) && (null != this.password ? this.password.equals(that.password) : null == that.password);
     }
 
     @Override

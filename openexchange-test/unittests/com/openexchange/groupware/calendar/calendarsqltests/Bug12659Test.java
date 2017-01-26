@@ -49,13 +49,16 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
+import static org.junit.Assert.fail;
+import org.junit.Test;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 
-
 public class Bug12659Test extends CalendarSqlTest {
+
     /**
      * Test for <a href="http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=12659">bug #12659</a>
      */
+    @Test
     public void testMoveAppointmentToSharedFolder() {
         try {
             folders.sharePrivateFolder(session2, ctx, userId);

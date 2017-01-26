@@ -49,6 +49,9 @@
 
 package com.openexchange.contact.vcard;
 
+import static org.junit.Assert.assertNotNull;
+import org.junit.Assert;
+import org.junit.Test;
 import com.openexchange.groupware.container.Contact;
 import ezvcard.VCard;
 
@@ -66,7 +69,8 @@ public class ColorLabelTest extends VCardTest {
         super();
     }
 
-    public void testExportColorLabel() {
+         @Test
+     public void testExportColorLabel() {
         /*
          * create test contact
          */
@@ -82,10 +86,11 @@ public class ColorLabelTest extends VCardTest {
          */
         assertNotNull("no vCard exported", vCard);
         assertNotNull("no color label exported", vCard.getExtendedProperty("X-OX-COLOR-LABEL"));
-        assertEquals("wrong value for color label", String.valueOf(Contact.LABEL_4), vCard.getExtendedProperty("X-OX-COLOR-LABEL").getValue());
+        Assert.assertEquals("wrong value for color label", String.valueOf(Contact.LABEL_4), vCard.getExtendedProperty("X-OX-COLOR-LABEL").getValue());
     }
 
-    public void testImportColorLabel() {
+         @Test
+     public void testImportColorLabel() {
         /*
          * create test vCard
          */
@@ -97,7 +102,7 @@ public class ColorLabelTest extends VCardTest {
          */
         Contact contact = getMapper().importVCard(vCard, null, null, null);
         assertNotNull("no contact imported", contact);
-        assertEquals("wrong value for color label", Contact.LABEL_7, contact.getLabel());
+        Assert.assertEquals("wrong value for color label", Contact.LABEL_7, contact.getLabel());
     }
 
 }

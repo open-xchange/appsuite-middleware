@@ -94,7 +94,7 @@ public abstract class AbstractImportRequest<T extends AbstractAJAXResponse> impl
      * @param upload The input stream to upload
      * @param additionalParameters Additional parameters to include in the request
      */
-    public AbstractImportRequest(Action action, int folderId, InputStream upload, Parameter...additionalParameters) {
+    public AbstractImportRequest(Action action, int folderId, InputStream upload, Parameter... additionalParameters) {
         super();
         this.action = action;
         this.folderId = folderId;
@@ -137,12 +137,13 @@ public abstract class AbstractImportRequest<T extends AbstractAJAXResponse> impl
 
         private final String name, fileName;
         private final Format format;
-        private Action(final String name, final String fileName,
-            final Format format) {
+
+        private Action(final String name, final String fileName, final Format format) {
             this.name = name;
             this.fileName = fileName;
             this.format = format;
         }
+
         /**
          * @return the name
          */

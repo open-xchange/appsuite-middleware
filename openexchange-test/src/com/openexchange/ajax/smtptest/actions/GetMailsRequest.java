@@ -58,7 +58,6 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Header;
 import com.openexchange.ajax.framework.Params;
 
-
 /**
  * {@link GetMailsRequest}
  *
@@ -96,15 +95,13 @@ public class GetMailsRequest implements AJAXRequest<GetMailsResponse> {
 
     @Override
     public Parameter[] getParameters() throws IOException, JSONException {
-        return new Params(
-            AJAXServlet.PARAMETER_ACTION, "getMails",
-            "clearMails", Boolean.toString(clearMails)
-            ).toArray();
+        return new Params(AJAXServlet.PARAMETER_ACTION, "getMails", "clearMails", Boolean.toString(clearMails)).toArray();
     }
 
     @Override
     public AbstractAJAXParser<? extends GetMailsResponse> getParser() {
         return new AbstractAJAXParser<GetMailsResponse>(failOnError) {
+
             @Override
             protected GetMailsResponse createResponse(Response response) throws JSONException {
                 return new GetMailsResponse(response);

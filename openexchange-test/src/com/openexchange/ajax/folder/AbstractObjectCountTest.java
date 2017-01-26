@@ -57,7 +57,6 @@ import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequestNew;
 import com.openexchange.ajax.folder.actions.GetResponseNew;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.services.ServiceRegistry;
@@ -80,16 +79,15 @@ public abstract class AbstractObjectCountTest extends AbstractAJAXSession {
 
     protected AJAXClient client2;
 
-    protected AbstractObjectCountTest(String name) {
-        super(name);
+    protected AbstractObjectCountTest() {
+        super();
     }
 
-    @Override
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
         client1 = getClient();
-        client2 = new AJAXClient(User.User2);
+        client2 = new AJAXClient(testContext.acquireUser());
 
         ContentTypeRegistry ctr = ContentTypeRegistry.getInstance();
         ServiceRegistry.getInstance().addService(ContentTypeRegistry.class, ctr);
@@ -106,11 +104,7 @@ public abstract class AbstractObjectCountTest extends AbstractAJAXSession {
      * Client1 will be the folder owner.
      */
     protected static FolderObject createPrivateFolder(AJAXClient client, FolderTestManager ftm, int module) throws OXException, IOException, JSONException {
-        FolderObject folder = ftm.generatePrivateFolder(
-            UUID.randomUUID().toString(),
-            module,
-            getParentFolderForModule(client, module),
-            client.getValues().getUserId());
+        FolderObject folder = ftm.generatePrivateFolder(UUID.randomUUID().toString(), module, getParentFolderForModule(client, module), client.getValues().getUserId());
         return ftm.insertFolderOnServer(folder);
     }
 
@@ -123,21 +117,13 @@ public abstract class AbstractObjectCountTest extends AbstractAJAXSession {
      * @param ftm TODO
      */
     protected static FolderObject createSharedFolder(AJAXClient client, int module, int userId2, FolderTestManager ftm) throws OXException, IOException, JSONException {
-        FolderObject folder = ftm.generateSharedFolder(
-            UUID.randomUUID().toString(),
-            module,
-            getParentFolderForModule(client, module),
-            client.getValues().getUserId());
+        FolderObject folder = ftm.generateSharedFolder(UUID.randomUUID().toString(), module, getParentFolderForModule(client, module), client.getValues().getUserId());
 
         OCLPermission permissions = new OCLPermission();
         permissions.setEntity(userId2);
         permissions.setGroupPermission(false);
         permissions.setFolderAdmin(false);
-        permissions.setAllPermission(
-            OCLPermission.CREATE_OBJECTS_IN_FOLDER,
-            OCLPermission.READ_ALL_OBJECTS,
-            OCLPermission.WRITE_ALL_OBJECTS,
-            OCLPermission.DELETE_ALL_OBJECTS);
+        permissions.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
         folder.addPermission(permissions);
         return ftm.insertFolderOnServer(folder);
     }
@@ -151,12 +137,8 @@ public abstract class AbstractObjectCountTest extends AbstractAJAXSession {
      * @param ftm TODO
      */
     protected static FolderObject createSharedFolder(AJAXClient client, int module, FolderTestManager ftm, OCLPermission... permissions) throws OXException, IOException, JSONException {
-        FolderObject folder = ftm.generateSharedFolder(
-            UUID.randomUUID().toString(),
-            module,
-            getParentFolderForModule(client, module),
-            client.getValues().getUserId());
-        
+        FolderObject folder = ftm.generateSharedFolder(UUID.randomUUID().toString(), module, getParentFolderForModule(client, module), client.getValues().getUserId());
+
         folder.removePermissions();
 
         for (OCLPermission permission : permissions) {
@@ -174,21 +156,13 @@ public abstract class AbstractObjectCountTest extends AbstractAJAXSession {
      * @param ftm TODO
      */
     protected static FolderObject createPublicFolder(AJAXClient client, int module, int userId2, FolderTestManager ftm) throws OXException, IOException, JSONException {
-        FolderObject folder = ftm.generatePublicFolder(
-            UUID.randomUUID().toString(),
-            module,
-            FolderObject.SYSTEM_PUBLIC_FOLDER_ID,
-            client.getValues().getUserId());
+        FolderObject folder = ftm.generatePublicFolder(UUID.randomUUID().toString(), module, FolderObject.SYSTEM_PUBLIC_FOLDER_ID, client.getValues().getUserId());
 
         OCLPermission permissions = new OCLPermission();
         permissions.setEntity(userId2);
         permissions.setGroupPermission(false);
         permissions.setFolderAdmin(false);
-        permissions.setAllPermission(
-            OCLPermission.CREATE_OBJECTS_IN_FOLDER,
-            OCLPermission.READ_OWN_OBJECTS,
-            OCLPermission.WRITE_ALL_OBJECTS,
-            OCLPermission.DELETE_ALL_OBJECTS);
+        permissions.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_OWN_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
         folder.addPermission(permissions);
         return ftm.insertFolderOnServer(folder);
     }

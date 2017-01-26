@@ -108,9 +108,7 @@ public class MailAccountValidateRequest implements AJAXRequest<MailAccountValida
 
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter("action", "validate"),
-            new Parameter("tree", String.valueOf(tree))
+        return new Parameter[] { new Parameter("action", "validate"), new Parameter("tree", String.valueOf(tree))
         };
     }
 

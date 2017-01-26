@@ -16,12 +16,14 @@
  */
 package org.apache.tika.parser.pkg;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.io.InputStream;
-
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.Parser;
 import org.apache.tika.sax.BodyContentHandler;
+import org.junit.Test;
 import org.xml.sax.ContentHandler;
 
 /**
@@ -29,7 +31,8 @@ import org.xml.sax.ContentHandler;
  */
 public class GzipParserTest extends AbstractPkgTest {
 
-    public void testGzipParsing() throws Exception {
+         @Test
+     public void testGzipParsing() throws Exception {
         Parser parser = new AutoDetectParser(); // Should auto-detect!
         ContentHandler handler = new BodyContentHandler();
         Metadata metadata = new Metadata();
@@ -68,7 +71,8 @@ public class GzipParserTest extends AbstractPkgTest {
      * Tests that the ParseContext parser is correctly
      *  fired for all the embedded entries.
      */
-    public void testEmbedded() throws Exception {
+         @Test
+     public void testEmbedded() throws Exception {
        Parser parser = new AutoDetectParser(); // Should auto-detect!
        ContentHandler handler = new BodyContentHandler();
        Metadata metadata = new Metadata();
@@ -92,7 +96,8 @@ public class GzipParserTest extends AbstractPkgTest {
        assertEquals("test-documents/", new String(tracker.lastSeenStart, 0, 15, "ASCII"));
     }
     
-    public void testSvgzParsing() throws Exception {
+         @Test
+     public void testSvgzParsing() throws Exception {
         Parser parser = new AutoDetectParser(); // Should auto-detect!
         ContentHandler handler = new BodyContentHandler();
         Metadata metadata = new Metadata();

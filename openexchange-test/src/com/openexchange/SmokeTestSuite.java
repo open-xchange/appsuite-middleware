@@ -49,28 +49,18 @@
 
 package com.openexchange;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
+@RunWith(ParallelSuite.class)
+@Suite.SuiteClasses({
+    com.openexchange.ajax.task.SmokeTest.class
+})
 public final class SmokeTestSuite {
 
-    /**
-     * Prevent instantiation
-     */
-    private SmokeTestSuite() {
-        super();
-    }
-
-    /**
-     * @return a test suite containing smoke tests.
-     */
-    public static Test suite() {
-        final TestSuite smoke = new TestSuite();
-        smoke.addTestSuite(com.openexchange.ajax.task.SmokeTest.class);
-        return smoke;
-    }
 }

@@ -57,5 +57,5 @@ import com.openexchange.ajax.mail.filter.api.dao.Argument;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public interface ActionArgument extends Argument {
-    
+
 }

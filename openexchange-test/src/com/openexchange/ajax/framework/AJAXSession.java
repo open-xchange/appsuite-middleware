@@ -81,10 +81,6 @@ public class AJAXSession {
         this(newWebConversation(), newHttpClient(), null);
     }
 
-    public AJAXSession(final WebConversation conversation, String hostname, final String id) {
-        this(conversation, newHttpClient(conversation, hostname), id);
-    }
-
     public AJAXSession(WebConversation conversation, DefaultHttpClient httpClient, String id) {
         super();
         this.conversation = conversation;
@@ -123,7 +119,10 @@ public class AJAXSession {
     }
 
     public static DefaultHttpClient newHttpClient() {
-        DefaultHttpClient retval = new DefaultHttpClient(new ThreadSafeClientConnManager());
+        ThreadSafeClientConnManager connManager = new ThreadSafeClientConnManager();
+        connManager.setDefaultMaxPerRoute(5000);
+        connManager.setMaxTotal(10000);
+        DefaultHttpClient retval = new DefaultHttpClient(connManager);
 
         HttpParams params = retval.getParams();
         int minute = 1 * 60 * 1000 * 1000;
@@ -131,9 +130,9 @@ public class AJAXSession {
         HttpConnectionParams.setSoTimeout(params, minute);
 
         retval.getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.BROWSER_COMPATIBILITY); // OX cookies work with all
-                                                                                                         // browsers, meaning they are a mix
-                                                                                                         // of the Netscape draft and the
-                                                                                                         // RFC
+                                                                                                        // browsers, meaning they are a mix
+                                                                                                        // of the Netscape draft and the
+                                                                                                        // RFC
         retval.getParams().setParameter("User-Agent", USER_AGENT); // needs to be consistent
         retval.getParams().setParameter("http.useragent", USER_AGENT); // needs to be consistent
         return retval;

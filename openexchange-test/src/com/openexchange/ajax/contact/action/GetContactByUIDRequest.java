@@ -57,11 +57,11 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Params;
 
-
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class GetContactByUIDRequest extends AbstractContactRequest<GetResponse> {
+
     protected UUID uid;
     protected TimeZone tz;
 
@@ -72,7 +72,7 @@ public class GetContactByUIDRequest extends AbstractContactRequest<GetResponse> 
     }
 
     @Override
-    public Object getBody(){
+    public Object getBody() {
         return null;
     }
 
@@ -82,18 +82,14 @@ public class GetContactByUIDRequest extends AbstractContactRequest<GetResponse> 
     }
 
     @Override
-    public Parameter[] getParameters(){
-        return new Params(
-            AJAXServlet.PARAMETER_ACTION,
-            FinalContactConstants.ACTION_GET_BY_UUID.getName(),
-            FinalContactConstants.PARAMETER_UUID.getName(),
-            String.valueOf(uid)
-        ).toArray();
+    public Parameter[] getParameters() {
+        return new Params(AJAXServlet.PARAMETER_ACTION, FinalContactConstants.ACTION_GET_BY_UUID.getName(), FinalContactConstants.PARAMETER_UUID.getName(), String.valueOf(uid)).toArray();
     }
 
     @Override
     public AbstractAJAXParser<? extends GetResponse> getParser() {
-        return new AbstractAJAXParser<GetResponse>(false){
+        return new AbstractAJAXParser<GetResponse>(false) {
+
             @Override
             protected GetResponse createResponse(Response response) {
                 return new GetResponse(response, tz);

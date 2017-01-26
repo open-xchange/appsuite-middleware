@@ -72,7 +72,7 @@ import com.openexchange.groupware.container.Appointment;
  */
 public class Bug27224Test extends CalDAVTest {
 
-	@Test
+    @Test
     public void testChangetransparency() throws Exception {
         /*
          * fetch sync token for later synchronization

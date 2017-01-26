@@ -49,9 +49,10 @@
 
 package com.openexchange.webdav.action.ifheader;
 
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
-
 
 /**
  * {@link IgnoreLocksIfHeaderApplyTest}
@@ -60,7 +61,8 @@ import com.openexchange.webdav.protocol.WebdavResource;
  *
  */
 public class IgnoreLocksIfHeaderApplyTest extends StandardIfHeaderApplyTest {
-    @Override
+
+    @Test
     public void testLockMustMatch() throws WebdavProtocolException {
         IfHeaderApply apply = getApply();
 
@@ -76,7 +78,7 @@ public class IgnoreLocksIfHeaderApplyTest extends StandardIfHeaderApplyTest {
         assertTrue(apply.matches(entity, resource));
     }
 
-    @Override
+    @Test
     public void testLockMustNotMatch() throws WebdavProtocolException {
         IfHeaderApply apply = getApply();
 

@@ -50,13 +50,16 @@
 package com.openexchange.ajax.session;
 
 import static com.openexchange.java.Autoboxing.I;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.session.actions.FormLoginRequest;
 import com.openexchange.ajax.session.actions.FormLoginResponse;
-import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.configuration.AJAXConfig.Property;
+import com.openexchange.test.pool.TestUser;
 
 /**
  * Tests the action formLogin of the login servlet.
@@ -69,24 +72,15 @@ public class FormLoginTest extends AbstractAJAXSession {
 
     private String password;
 
-    public FormLoginTest(String name) {
-        super(name);
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+        TestUser testUser3 = testContext.acquireUser();
+        login = testUser3.getLogin();
+        password = testUser3.getPassword();
     }
 
-    @Override
-    protected void setUp() throws Exception {
-        AJAXConfig.init();
-        login = AJAXConfig.getProperty(Property.LOGIN) + "@" + AJAXConfig.getProperty(Property.CONTEXTNAME);
-        password = AJAXConfig.getProperty(Property.PASSWORD);
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        login = null;
-        password = null;
-        super.tearDown();
-    }
-
+    @Test
     public void testFormLogin() throws Exception {
         final AJAXSession session = new AJAXSession();
         final AJAXClient myClient = new AJAXClient(session, false);

@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.appointment.recurrence;
 
+import static org.junit.Assert.assertFalse;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.Appointment;
@@ -64,11 +66,11 @@ import com.openexchange.groupware.container.Expectations;
  */
 public class TestsForDeleteExceptionsAndFixedEndsOfSeries extends ManagedAppointmentTest {
 
-    public TestsForDeleteExceptionsAndFixedEndsOfSeries(String name) {
-        super(name);
+    public TestsForDeleteExceptionsAndFixedEndsOfSeries() {
+        super();
     }
 
-
+    @Test
     public void testShouldNotReduceNumberOfOccurrencesWhenDeletingOneInYearlySeries() throws Exception {
         Appointment app = generateYearlyAppointment();
         app.setOccurrence(5);
@@ -83,6 +85,7 @@ public class TestsForDeleteExceptionsAndFixedEndsOfSeries extends ManagedAppoint
         positiveAssertionOnDeleteException.check(app, changes, expectations);
     }
 
+    @Test
     public void testShouldFailWhenDeletingBeyondScopeOfSeriesInYearlySeries() throws Exception {
         Appointment app = generateYearlyAppointment();
         app.setOccurrence(5);
@@ -97,6 +100,7 @@ public class TestsForDeleteExceptionsAndFixedEndsOfSeries extends ManagedAppoint
         }
     }
 
+    @Test
     public void testShouldNotReduceNumberOfOccurrencesWhenDeletingOneInMonthlySeries() throws Exception {
         Appointment app = generateMonthlyAppointment();
         app.setOccurrence(6);
@@ -110,16 +114,17 @@ public class TestsForDeleteExceptionsAndFixedEndsOfSeries extends ManagedAppoint
         positiveAssertionOnDeleteException.check(app, changes, expectations);
     }
 
-    public void testShouldRemoveWholeSeriesIfEverySingleOccurrenceIsDeleted(){
+    @Test
+    public void testShouldRemoveWholeSeriesIfEverySingleOccurrenceIsDeleted() {
         Appointment app = generateMonthlyAppointment();
         int numberOfOccurences = 3;
-        app.setOccurrence(numberOfOccurences );
+        app.setOccurrence(numberOfOccurences);
 
-        calendarManager.insert(app);
+        catm.insert(app);
 
-        for(int i = 0; i < numberOfOccurences; i++){
-            calendarManager.createDeleteException(app, i+1);
-            assertFalse("Should not fail while creating delete exception #"+i, calendarManager.hasLastException());
+        for (int i = 0; i < numberOfOccurences; i++) {
+            catm.createDeleteException(app, i + 1);
+            assertFalse("Should not fail while creating delete exception #" + i, catm.hasLastException());
         }
     }
 

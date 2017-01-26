@@ -52,7 +52,6 @@ package com.openexchange.ajax.infostore.actions;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
-
 /**
  * {@link CheckNameResponse}
  *
@@ -63,6 +62,7 @@ public class CheckNameResponse extends AbstractAJAXResponse {
 
     /**
      * Initializes a new {@link CheckNameResponse}.
+     * 
      * @param response
      */
     public CheckNameResponse(Response response) {

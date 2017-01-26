@@ -49,8 +49,10 @@
 
 package com.openexchange.webdav.xml.appointment.recurrence;
 
+import static org.junit.Assert.fail;
 import java.util.Calendar;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.webdav.xml.AppointmentTest;
@@ -63,12 +65,14 @@ public final class Bug10859Test extends AppointmentTest {
 
     /**
      * Default constructor.
+     * 
      * @param name test name
      */
-    public Bug10859Test(final String name) {
-        super(name);
+    public Bug10859Test() {
+        super();
     }
 
+    @Test
     public void testYearly() throws Throwable {
         final TimeZone tz = TimeZone.getTimeZone("UTC");
         final Calendar calendar = Calendar.getInstance(tz);

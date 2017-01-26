@@ -50,6 +50,8 @@
 package com.openexchange.ajax.task;
 
 import java.util.Date;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.MultipleRequest;
 import com.openexchange.ajax.framework.MultipleResponse;
@@ -70,16 +72,17 @@ public final class AllTest extends AbstractTaskTest {
     private static final int NUMBER = 10;
     private AJAXClient client;
 
-    public AllTest(final String name) {
-        super(name);
+    public AllTest() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
     }
 
+    @Test
     public void testAll() throws Throwable {
         final InsertRequest[] inserts = new InsertRequest[NUMBER];
         for (int i = 0; i < inserts.length; i++) {

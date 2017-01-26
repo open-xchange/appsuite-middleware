@@ -49,12 +49,17 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.TimeZone;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 
@@ -71,7 +76,7 @@ public class Bug11210Test extends CalendarSqlTest {
 
     private int THIS_YEAR, THIS_MONTH;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         THIS_YEAR = Calendar.getInstance().get(Calendar.YEAR);
@@ -94,11 +99,7 @@ public class Bug11210Test extends CalendarSqlTest {
         setIgnoreConflicts(false);
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
-
+    @Test
     public void testConflict() throws Exception {
         appointments.save(single);
         CalendarDataObject[] conflicts = appointments.save(sequenceMonthly);
@@ -107,12 +108,14 @@ public class Bug11210Test extends CalendarSqlTest {
         assertEquals("Wrong conflict", single.getObjectID(), conflicts[0].getObjectID());
     }
 
+    @Test
     public void testNoConflictAfterOneYear() throws Exception {
         appointments.save(single3);
         CalendarDataObject[] conflicts = appointments.save(sequenceMonthly);
         assertTrue("Conflict occurred", conflicts == null);
     }
 
+    @Test
     public void testOnlyOneConflict() throws Exception {
         appointments.save(single);
         appointments.save(single2);

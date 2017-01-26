@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.importexport;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.Executor;
@@ -66,37 +69,25 @@ public final class Bug9840Test extends AbstractAJAXSession {
 
     /**
      * Default constructor.
+     * 
      * @param name test name
      */
-    public Bug9840Test(final String name) {
-        super(name);
+    public Bug9840Test() {
+        super();
     }
 
+    @Test
     public void testConversionErrorOnBYMONTH() throws Throwable {
         final AJAXClient client = getClient();
         final int folderId = client.getValues().getPrivateAppointmentFolder();
-        final ICalImportResponse iResponse = Executor.execute(client,
-            new ICalImportRequest(folderId, ICAL, false));
+        final ICalImportResponse iResponse = Executor.execute(client, new ICalImportRequest(folderId, ICAL, false));
         final ImportResult result = iResponse.getImports()[0];
-        assertTrue("BYMONTH recurrence pattern not detected as error.",
-            result.hasError());
+        assertTrue("BYMONTH recurrence pattern not detected as error.", result.hasError());
         final OXException exception = result.getException();
         final Code code = Code.BYMONTH_NOT_SUPPORTED;
         assertTrue(code.getNumber() == exception.getCode() || exception.getCode() == 4229);
         assertEquals(code.getCategory(), exception.getCategory());
     }
 
-    private static final String ICAL =
-        "BEGIN:VCALENDAR\n" +
-        "VERSION:2.0\n" +
-        "BEGIN:VEVENT\n" +
-        "SUMMARY:Everyday in January, for 3 years\n" +
-        "DTSTART:20070101T090000\n" +
-        "DURATION:PT30M\n" +
-        "RRULE:FREQ=DAILY;UNTIL=20100131T090000Z;BYMONTH=1\n" +
-        "DESCRIPTION:==> (2007 9:00 AM)January 1-31\n" +
-        " (2008 9:00 AM)January 1-31\n" +
-        "  (2009 9:00 AM)January 1-31\n" +
-        "END:VEVENT\n" +
-        "END:VCALENDAR\n";
+    private static final String ICAL = "BEGIN:VCALENDAR\n" + "VERSION:2.0\n" + "BEGIN:VEVENT\n" + "SUMMARY:Everyday in January, for 3 years\n" + "DTSTART:20070101T090000\n" + "DURATION:PT30M\n" + "RRULE:FREQ=DAILY;UNTIL=20100131T090000Z;BYMONTH=1\n" + "DESCRIPTION:==> (2007 9:00 AM)January 1-31\n" + " (2008 9:00 AM)January 1-31\n" + "  (2009 9:00 AM)January 1-31\n" + "END:VEVENT\n" + "END:VCALENDAR\n";
 }

@@ -70,12 +70,14 @@ public class UpdatesRequest extends AbstractAppointmentRequest<AppointmentUpdate
     private final boolean recurrenceMaster;
     private final boolean showPrivates;
     private final Ignore ignore;
+    private Date end;
+    private Date start;
 
     /**
-     * Initializes a new {@link UpdatesRequest} that doesn't show private appointments and ignores updates for deleted. 
+     * Initializes a new {@link UpdatesRequest} that doesn't show private appointments and ignores updates for deleted.
      * 
      * @param folderId Folder id to use for the request
-     * @param columns  Columns to use for the request
+     * @param columns Columns to use for the request
      * @param timestamp Timestamp to use for the request
      * @param recurrenceMaster if true a recurring appointment isn't split into single occurrances but kept as one object
      */
@@ -87,7 +89,7 @@ public class UpdatesRequest extends AbstractAppointmentRequest<AppointmentUpdate
      * Initializes a new {@link UpdatesRequest} that ignores updates for deleted.
      * 
      * @param folderId Folder id to use for the request
-     * @param columns  Columns to use for the request
+     * @param columns Columns to use for the request
      * @param timestamp Timestamp to use for the request
      * @param recurrenceMaster if true a recurring appointment isn't split into single occurrances but kept as one object
      * @param showPrivates When true, shows private appointments of the folder owner (Only works in shared folders)
@@ -100,7 +102,7 @@ public class UpdatesRequest extends AbstractAppointmentRequest<AppointmentUpdate
      * Initializes a new {@link UpdatesRequest}. Ignores private appointments by default.
      * 
      * @param folderId Folder id to use for the request
-     * @param columns  Columns to use for the request
+     * @param columns Columns to use for the request
      * @param timestamp Timestamp to use for the request
      * @param recurrenceMaster if true a recurring appointment isn't split into single occurrances but kept as one object
      * @param ignore What kind of updates should be ignored
@@ -113,19 +115,25 @@ public class UpdatesRequest extends AbstractAppointmentRequest<AppointmentUpdate
      * Initializes a new {@link UpdatesRequest}.
      * 
      * @param folderId Folder id to use for the request
-     * @param columns  Columns to use for the request
+     * @param columns Columns to use for the request
      * @param timestamp Timestamp to use for the request
      * @param recurrenceMaster if true a recurring appointment isn't split into single occurrances but kept as one object
      * @param showPrivates When true, shows private appointments of the folder owner (Only works in shared folders)
      * @param ignore What kind of updates should be ignored
      */
     public UpdatesRequest(final int folderId, final int[] columns, final Date timestamp, final boolean recurrenceMaster, final boolean showPrivates, Ignore ignore) {
+        this(folderId, columns, timestamp, recurrenceMaster, showPrivates, ignore, null, null);
+    }
+
+    public UpdatesRequest(final int folderId, final int[] columns, final Date timestamp, final boolean recurrenceMaster, final boolean showPrivates, Ignore ignore, Date start, Date end) {
         this.folderId = folderId;
         this.columns = columns;
         this.timestamp = timestamp;
         this.recurrenceMaster = recurrenceMaster;
         this.showPrivates = showPrivates;
         this.ignore = ignore;
+        this.start = start;
+        this.end = end;
     }
 
     @Override
@@ -142,12 +150,20 @@ public class UpdatesRequest extends AbstractAppointmentRequest<AppointmentUpdate
     public Parameter[] getParameters() {
         final List<Parameter> parameterList = new ArrayList<Parameter>();
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATES));
-        parameterList.add(new Parameter(AJAXServlet.PARAMETER_INFOLDER, String.valueOf(folderId)));
+        if (folderId != 0) {
+            parameterList.add(new Parameter(AJAXServlet.PARAMETER_INFOLDER, folderId));
+        }
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, timestamp));
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_IGNORE, ignore.getValue()));
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_RECURRENCE_MASTER, recurrenceMaster));
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_SHOW_PRIVATE_APPOINTMENTS, showPrivates));
+        if (start != null) {
+            parameterList.add(new Parameter(AJAXServlet.PARAMETER_START, start));
+        }
+        if (end != null) {
+            parameterList.add(new Parameter(AJAXServlet.PARAMETER_END, end));
+        }
         return parameterList.toArray(new Parameter[parameterList.size()]);
     }
 

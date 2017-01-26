@@ -49,8 +49,8 @@
 
 package com.openexchange.ajax.onboarding.tests;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -62,7 +62,6 @@ import com.google.common.io.BaseEncoding;
 import com.openexchange.ajax.onboarding.actions.ExecuteRequest;
 import com.openexchange.ajax.onboarding.actions.OnboardingTestResponse;
 import com.openexchange.client.onboarding.OnboardingExceptionCodes;
-import com.openexchange.exception.OXException;
 import com.openexchange.sms.SMSExceptionCode;
 
 /**
@@ -75,8 +74,6 @@ public class PlistSMSTest extends AbstractPlistSMSTest {
 
     private static final String SLASH = "/";
 
-    public PlistSMSTest() {
-    }
 
     @Test
     public void testExecute() throws Exception {
@@ -85,7 +82,7 @@ public class PlistSMSTest extends AbstractPlistSMSTest {
 
         for (String id : SCENARIOS) {
             ExecuteRequest req = new ExecuteRequest(id, "sms", body, false);
-            OnboardingTestResponse response = client.execute(req);
+            OnboardingTestResponse response = getClient().execute(req);
             assertNotNull("Response is empty!", response);
             // Expecting an sipgate authorization exception
             assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
@@ -95,7 +92,7 @@ public class PlistSMSTest extends AbstractPlistSMSTest {
                 continue;
             }
 
-            assertEquals("Unexpected response from the server! Response does contain a wrong exception: " + response.getException().getMessage(), SMSExceptionCode.NOT_SENT.create().getErrorCode(), response.getException().getErrorCode());
+            assertTrue("Unexpected response from the server! Response does contain a wrong exception: " + response.getException().getMessage(), SMSExceptionCode.NOT_SENT.equals(response.getException()));
         }
     }
 
@@ -106,11 +103,11 @@ public class PlistSMSTest extends AbstractPlistSMSTest {
 
         String id = SCENARIOS[0];
         ExecuteRequest req = new ExecuteRequest(id, "sms", body, false);
-        OnboardingTestResponse response = client.execute(req);
+        OnboardingTestResponse response = getClient().execute(req);
         assertNotNull("Response is empty!", response);
         // Expecting an invalid number exception
         assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
-        assertEquals("Unexpected response from the server! Response does contain a wrong exception: " + response.getException().getMessage(), OnboardingExceptionCodes.INVALID_PHONE_NUMBER.create().getErrorCode(), response.getException().getErrorCode());
+        assertTrue("Unexpected response from the server! Response does contain a wrong exception: " + response.getException().getMessage(), OnboardingExceptionCodes.INVALID_PHONE_NUMBER.equals(response.getException()));
     }
 
     @Test
@@ -120,37 +117,37 @@ public class PlistSMSTest extends AbstractPlistSMSTest {
 
         String id = SCENARIOS[0];
         ExecuteRequest req = new ExecuteRequest(id, "sms", body, false);
-        OnboardingTestResponse response = client.execute(req);
+        OnboardingTestResponse response = getClient().execute(req);
         assertNotNull("Response is empty!", response);
         // Expecting an invalid number exception
         assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
-        assertEquals("Unexpected response from the server! Response does contain a wrong exception: " + response.getException().getMessage(), OnboardingExceptionCodes.INVALID_PHONE_NUMBER.create().getErrorCode(), response.getException().getErrorCode());
+        assertTrue("Unexpected response from the server! Response does contain a wrong exception: " + response.getException().getMessage(), OnboardingExceptionCodes.INVALID_PHONE_NUMBER.equals(response.getException()));
 
         jsonString = "{\"sms\":\"abcde\"}";
         body = new JSONObject(jsonString);
         req = new ExecuteRequest(id, "sms", body, false);
-        response = client.execute(req);
+        response = getClient().execute(req);
         assertNotNull("Response is empty!", response);
         // Expecting an invalid number exception
         assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
-        assertEquals("Unexpected response from the server! Response does contain a wrong exception.", OnboardingExceptionCodes.INVALID_PHONE_NUMBER.create().getErrorCode(), response.getException().getErrorCode());
+        assertTrue("Unexpected response from the server! Response does contain a wrong exception.", OnboardingExceptionCodes.INVALID_PHONE_NUMBER.equals(response.getException()));
     }
 
     @Test
     public void testDownload() throws Exception {
         PListDownloadTestHelper helper = new PListDownloadTestHelper(PlistSMSTest.class.getName());
 
-        String url = getURL(client.getValues().getUserId(), client.getValues().getContextId(), "mailsync", "apple.iphone");
-        helper.testMailDownload(url, client.getHostname());
+        String url = getURL(getClient().getValues().getUserId(), getClient().getValues().getContextId(), "mailsync", "apple.iphone");
+        helper.testMailDownload(url, getClient().getHostname());
 
-        url = getURL(client.getValues().getUserId(), client.getValues().getContextId(), "eassync", "apple.iphone");
-        helper.testEASDownload(url, client.getHostname());
+        url = getURL(getClient().getValues().getUserId(), getClient().getValues().getContextId(), "eassync", "apple.iphone");
+        helper.testEASDownload(url, getClient().getHostname());
 
-        url = getURL(client.getValues().getUserId(), client.getValues().getContextId(), "davsync", "apple.iphone");
-        helper.testDavDownload(url, client.getHostname());
+        url = getURL(getClient().getValues().getUserId(), getClient().getValues().getContextId(), "davsync", "apple.iphone");
+        helper.testDavDownload(url, getClient().getHostname());
     }
 
-    public String getURL(int userId, int contextId, String scenario, String device) throws OXException, NoSuchAlgorithmException, UnsupportedEncodingException {
+    public String getURL(int userId, int contextId, String scenario, String device) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         BaseEncoding encoder = BaseEncoding.base64().omitPadding();
         StringBuilder url = new StringBuilder();
 

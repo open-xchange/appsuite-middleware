@@ -49,12 +49,18 @@
 
 package com.openexchange.subscribe.json;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.List;
-import junit.framework.TestCase;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.datatypes.genericonf.FormElement.Widget;
@@ -66,18 +72,15 @@ import com.openexchange.subscribe.SubscriptionSource;
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class BasicSubscriptionSourceJSONWriterTest extends TestCase {
-
+public class BasicSubscriptionSourceJSONWriterTest {
     private SubscriptionSource subscriptionSource;
 
     private List<SubscriptionSource> sourceList;
 
     private SubscriptionSource subscriptionSource2;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
-        super.setUp();
-
         Tools.initExceptionFactory();
 
         FormElement formElementLogin = new FormElement();
@@ -127,42 +130,42 @@ public class BasicSubscriptionSourceJSONWriterTest extends TestCase {
         subscriptionSource2.setFormDescription(formDescription2);
         subscriptionSource2.setFolderModule(FolderObject.CONTACT);
 
-
         sourceList = new ArrayList<SubscriptionSource>();
         sourceList.add(subscriptionSource);
         sourceList.add(subscriptionSource2);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         subscriptionSource = null;
         sourceList = null;
-        super.tearDown();
     }
 
+    @Test
     public void testBasicSubscriptionSourceParsing() throws Exception {
         SubscriptionSourceJSONWriterInterface parser = new SubscriptionSourceJSONWriter(Translator.EMPTY);
         JSONObject json = parser.writeJSON(subscriptionSource);
         checkJson(json);
     }
 
+    @Test
     public void testListSubscriptionSourceParsing() throws Exception {
         SubscriptionSourceJSONWriterInterface parser = new SubscriptionSourceJSONWriter(Translator.EMPTY);
-        JSONArray rows = parser.writeJSONArray(sourceList, new String[]{"id", "displayName", "icon", "module"});
+        JSONArray rows = parser.writeJSONArray(sourceList, new String[] { "id", "displayName", "icon", "module" });
         assertEquals(2, rows.length());
 
         boolean foundFirst = false, foundSecond = false;
 
-        for(int i = 0; i < 2; i++) {
+        for (int i = 0; i < 2; i++) {
             JSONArray row = rows.getJSONArray(i);
             String id = row.getString(0);
-            if(id.equals(subscriptionSource.getId())) {
+            if (id.equals(subscriptionSource.getId())) {
                 foundFirst = true;
                 assertRow(row, subscriptionSource.getId(), subscriptionSource.getDisplayName(), subscriptionSource.getIcon(), "contacts");
             } else if (id.equals(subscriptionSource2.getId())) {
                 foundSecond = true;
             } else {
-                fail("Got unexpected subscription id: "+id);
+                fail("Got unexpected subscription id: " + id);
             }
         }
 
@@ -170,23 +173,25 @@ public class BasicSubscriptionSourceJSONWriterTest extends TestCase {
 
     }
 
+    @Test
     public void testUnknownColumn() {
         SubscriptionSourceJSONWriterInterface parser = new SubscriptionSourceJSONWriter(Translator.EMPTY);
         try {
-            parser.writeJSONArray(sourceList, new String[]{"id", "unkownColumn"});
+            parser.writeJSONArray(sourceList, new String[] { "id", "unkownColumn" });
             fail("Unknown column was accepted");
         } catch (OXException x) {
             // Exception is expected
         }
     }
 
-    public static final void assertRow(JSONArray array, Object...values) throws JSONException {
+    public static final void assertRow(JSONArray array, Object... values) throws JSONException {
         assertEquals(array.length(), values.length);
-        for(int i = 0; i < values.length; i++) {
+        for (int i = 0; i < values.length; i++) {
             assertEquals(values[i], array.get(i));
         }
     }
 
+    @Test
     public void testMandatoryFieldCheck() throws Exception {
         SubscriptionSourceJSONWriterInterface parser = new SubscriptionSourceJSONWriter(Translator.EMPTY);
 

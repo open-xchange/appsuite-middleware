@@ -53,6 +53,8 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -120,11 +122,16 @@ public class PortableSession extends StoredSession implements CustomPortable {
     public static final String PARAMETER_REMOTE_PARAMETER_VALUES = "remoteParameterValues";
     public static final String PARAMETER_NAME_XOAUTH2_TOKEN = "xoauth2";
 
+    // -------------------------------------------------------------------------------------------------
+
+    private final Set<String> remoteParameterNames;
+
     /**
      * Initializes a new {@link PortableSession}.
      */
     public PortableSession() {
         super();
+        remoteParameterNames = Collections.emptySet();
     }
 
     /**
@@ -134,6 +141,13 @@ public class PortableSession extends StoredSession implements CustomPortable {
      */
     public PortableSession(final Session session) {
         super(session);
+        Collection<String> configuredRemoteParameterNames = SessionStorageConfiguration.getInstance().getRemoteParameterNames(userId, contextId);
+        Set<String> remoteParameterNames = new LinkedHashSet<>(configuredRemoteParameterNames.size() + 2); // Keep order
+        // Add static remote parameters
+        remoteParameterNames.add(PARAM_OAUTH_ACCESS_TOKEN);
+        // Add configured remote parameters
+        remoteParameterNames.addAll(configuredRemoteParameterNames);
+        this.remoteParameterNames = remoteParameterNames;
     }
 
     @Override
@@ -172,40 +186,33 @@ public class PortableSession extends StoredSession implements CustomPortable {
             writer.writeUTF(PARAMETER_ALT_ID, null == altId ? null : altId.toString());
         }
         {
-            List<String> configuredRemoteParameterNames = SessionStorageConfiguration.getInstance().getRemoteParameterNames();
-            Set<String> remoteParameterNames = new LinkedHashSet<>(configuredRemoteParameterNames.size() + 2); // Keep order
-            // Add static remote parameters
-            remoteParameterNames.add(PARAM_OAUTH_ACCESS_TOKEN);
-            // Add configured remote parameters
-            remoteParameterNames.addAll(configuredRemoteParameterNames);
-            {
-                StringAppender names = null;
-                StringAppender values = null;
-                for (String parameterName : remoteParameterNames) {
-                    Object value = parameters.get(parameterName);
-                    if (null != value) {
-                        if (isSerializablePojo(value)) {
-                            String sValue = value.toString();
-                            if (null == names) {
-                                int capacity = remoteParameterNames.size() << 4;
-                                names = new StringAppender(':', capacity);
-                                values = new StringAppender(':', capacity);
-                            }
-                            names.append(parameterName);
-                            values.append(getSafeValue(sValue));
-                        } else {
-                            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PortableSession.class);
-                            logger.warn("Denied remote parameter for name {}. Seems to be no ordinary Java object.", value.getClass().getName());
+            Set<String> remoteParameterNames = this.remoteParameterNames;
+            StringAppender names = null;
+            StringAppender values = null;
+            for (String parameterName : remoteParameterNames) {
+                Object value = parameters.get(parameterName);
+                if (null != value) {
+                    if (isSerializablePojo(value)) {
+                        String sValue = value.toString();
+                        if (null == names) {
+                            int capacity = remoteParameterNames.size() << 4;
+                            names = new StringAppender(':', capacity);
+                            values = new StringAppender(':', capacity);
                         }
+                        names.append(parameterName);
+                        values.append(getSafeValue(sValue));
+                    } else {
+                        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PortableSession.class);
+                        logger.warn("Denied remote parameter for name {}. Seems to be no ordinary Java object.", value.getClass().getName());
                     }
                 }
-                if (null == names || null == values) {
-                    writer.writeUTF(PARAMETER_REMOTE_PARAMETER_NAMES, null);
-                    writer.writeUTF(PARAMETER_REMOTE_PARAMETER_VALUES, null);
-                } else {
-                    writer.writeUTF(PARAMETER_REMOTE_PARAMETER_NAMES, names.toString());
-                    writer.writeUTF(PARAMETER_REMOTE_PARAMETER_VALUES, values.toString());
-                }
+            }
+            if (null == names || null == values) {
+                writer.writeUTF(PARAMETER_REMOTE_PARAMETER_NAMES, null);
+                writer.writeUTF(PARAMETER_REMOTE_PARAMETER_VALUES, null);
+            } else {
+                writer.writeUTF(PARAMETER_REMOTE_PARAMETER_NAMES, names.toString());
+                writer.writeUTF(PARAMETER_REMOTE_PARAMETER_VALUES, values.toString());
             }
         }
     }

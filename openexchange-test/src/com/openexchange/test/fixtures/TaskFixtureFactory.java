@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.test.fixtures;
 
 import java.util.ArrayList;
@@ -69,26 +70,28 @@ import com.openexchange.test.fixtures.transformators.StatusTransformator;
  * @author Martin Braun <martin.braun@open-xchange.com>
  */
 public class TaskFixtureFactory implements FixtureFactory<Task> {
+
     private final FixtureLoader fixtureLoader;
-	private final GroupResolver groupResolver;
+    private final GroupResolver groupResolver;
 
-	public TaskFixtureFactory(GroupResolver groupResolver , FixtureLoader fixtureLoader) {
-		super();
-		this.fixtureLoader = fixtureLoader;
-		this.groupResolver = groupResolver;
-	}
+    public TaskFixtureFactory(GroupResolver groupResolver, FixtureLoader fixtureLoader) {
+        super();
+        this.fixtureLoader = fixtureLoader;
+        this.groupResolver = groupResolver;
+    }
 
-	@Override
+    @Override
     public Fixtures<Task> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
         return new TaskFixtures(fixtureName, entries, fixtureLoader, groupResolver);
     }
 
     private class TaskFixtures extends DefaultFixtures<Task> implements Fixtures<Task> {
+
         private final Map<String, Map<String, String>> entries;
 
         private final Map<String, Fixture<Task>> tasks = new HashMap<String, Fixture<Task>>();
 
-		private final GroupResolver groupResolver;
+        private final GroupResolver groupResolver;
 
         public TaskFixtures(final String fixtureName, final Map<String, Map<String, String>> entries, FixtureLoader fixtureLoader, GroupResolver groupResolver) {
             super(Task.class, entries, fixtureLoader);
@@ -121,29 +124,29 @@ public class TaskFixtureFactory implements FixtureFactory<Task> {
         }
 
         private void applyUsers(final Task task, GroupResolver groupResolver) {
-        	if (null != task) {
-        		final Participant[] participants = task.getParticipants();
-        		if (null != participants) {
-        			final List<UserParticipant> users = new ArrayList<UserParticipant>();
-        			for (Participant participant : participants) {
-						if (Participant.USER == participant.getType()) {
-							users.add((UserParticipant)participant);
-						} else if (Participant.GROUP == participant.getType()) {
-							final GroupParticipant group = (GroupParticipant)participant;
-							final Contact[] groupMembers = groupResolver.resolveGroup(group.getIdentifier());
-							if (null != groupMembers) {
-								for (Contact groupMember : groupMembers) {
-									final UserParticipant userParticipant = new UserParticipant(groupMember.getInternalUserId());
-									userParticipant.setDisplayName(groupMember.getDisplayName());
-									userParticipant.setEmailAddress(groupMember.getEmail1());
-									users.add(userParticipant);
-								}
-							}
-						}
-					}
-        			task.setUsers(users);
-        		}
-        	}
+            if (null != task) {
+                final Participant[] participants = task.getParticipants();
+                if (null != participants) {
+                    final List<UserParticipant> users = new ArrayList<UserParticipant>();
+                    for (Participant participant : participants) {
+                        if (Participant.USER == participant.getType()) {
+                            users.add((UserParticipant) participant);
+                        } else if (Participant.GROUP == participant.getType()) {
+                            final GroupParticipant group = (GroupParticipant) participant;
+                            final Contact[] groupMembers = groupResolver.resolveGroup(group.getIdentifier());
+                            if (null != groupMembers) {
+                                for (Contact groupMember : groupMembers) {
+                                    final UserParticipant userParticipant = new UserParticipant(groupMember.getInternalUserId());
+                                    userParticipant.setDisplayName(groupMember.getDisplayName());
+                                    userParticipant.setEmailAddress(groupMember.getEmail1());
+                                    users.add(userParticipant);
+                                }
+                            }
+                        }
+                    }
+                    task.setUsers(users);
+                }
+            }
         }
     }
 }

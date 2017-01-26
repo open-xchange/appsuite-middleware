@@ -59,63 +59,63 @@ import com.openexchange.webdav.xml.fields.TaskFields;
 
 public class TaskParser extends CalendarParser {
 
-	public TaskParser() {
+    public TaskParser() {
 
-	}
+    }
 
-	protected void parse(final Task taskObj, final Element eProp) throws OXException {
-		if (hasElement(eProp.getChild(TaskFields.STATUS, XmlServlet.NS))) {
-			taskObj.setStatus(getValueAsInt(eProp.getChild(TaskFields.STATUS, XmlServlet.NS)));
-		}
+    protected void parse(final Task taskObj, final Element eProp) throws OXException {
+        if (hasElement(eProp.getChild(TaskFields.STATUS, XmlServlet.NS))) {
+            taskObj.setStatus(getValueAsInt(eProp.getChild(TaskFields.STATUS, XmlServlet.NS)));
+        }
 
-		if (hasElement(eProp.getChild(TaskFields.PERCENT_COMPLETED, XmlServlet.NS))) {
-			taskObj.setPercentComplete(getValueAsInt(eProp.getChild(TaskFields.PERCENT_COMPLETED, XmlServlet.NS)));
-		}
+        if (hasElement(eProp.getChild(TaskFields.PERCENT_COMPLETED, XmlServlet.NS))) {
+            taskObj.setPercentComplete(getValueAsInt(eProp.getChild(TaskFields.PERCENT_COMPLETED, XmlServlet.NS)));
+        }
 
-		if (hasElement(eProp.getChild(TaskFields.PRIORITY, XmlServlet.NS))) {
-			taskObj.setPriority(getValueAsInt(eProp.getChild(TaskFields.PRIORITY, XmlServlet.NS)));
-		}
+        if (hasElement(eProp.getChild(TaskFields.PRIORITY, XmlServlet.NS))) {
+            taskObj.setPriority(getValueAsInt(eProp.getChild(TaskFields.PRIORITY, XmlServlet.NS)));
+        }
 
-		if (hasElement(eProp.getChild(TaskFields.TARGET_DURATION, XmlServlet.NS))) {
-			taskObj.setTargetDuration(getValueAsLong(eProp.getChild(TaskFields.TARGET_DURATION, XmlServlet.NS)));
-		}
+        if (hasElement(eProp.getChild(TaskFields.TARGET_DURATION, XmlServlet.NS))) {
+            taskObj.setTargetDuration(getValueAsLong(eProp.getChild(TaskFields.TARGET_DURATION, XmlServlet.NS)));
+        }
 
-		if (hasElement(eProp.getChild(TaskFields.TARGET_COSTS, XmlServlet.NS))) {
+        if (hasElement(eProp.getChild(TaskFields.TARGET_COSTS, XmlServlet.NS))) {
             taskObj.setTargetCosts(getValueAsBigDecimal(eProp.getChild(TaskFields.TARGET_COSTS, XmlServlet.NS)));
-		}
+        }
 
-		if (hasElement(eProp.getChild(TaskFields.ACTUAL_DURATION, XmlServlet.NS))) {
-			taskObj.setActualDuration(getValueAsLong(eProp.getChild(TaskFields.ACTUAL_DURATION, XmlServlet.NS)));
-		}
+        if (hasElement(eProp.getChild(TaskFields.ACTUAL_DURATION, XmlServlet.NS))) {
+            taskObj.setActualDuration(getValueAsLong(eProp.getChild(TaskFields.ACTUAL_DURATION, XmlServlet.NS)));
+        }
 
-		if (hasElement(eProp.getChild(TaskFields.ACTUAL_COSTS, XmlServlet.NS))) {
+        if (hasElement(eProp.getChild(TaskFields.ACTUAL_COSTS, XmlServlet.NS))) {
             taskObj.setActualCosts(getValueAsBigDecimal(eProp.getChild(TaskFields.ACTUAL_COSTS, XmlServlet.NS)));
-		}
+        }
 
-		if (hasElement(eProp.getChild(TaskFields.DATE_COMPLETED, XmlServlet.NS))) {
-			taskObj.setDateCompleted(getValueAsDate(eProp.getChild(TaskFields.DATE_COMPLETED, XmlServlet.NS)));
-		}
+        if (hasElement(eProp.getChild(TaskFields.DATE_COMPLETED, XmlServlet.NS))) {
+            taskObj.setDateCompleted(getValueAsDate(eProp.getChild(TaskFields.DATE_COMPLETED, XmlServlet.NS)));
+        }
 
-		if (hasElement(eProp.getChild(TaskFields.ALARM, XmlServlet.NS))) {
-			taskObj.setAlarm(getValueAsDate(eProp.getChild(TaskFields.ALARM, XmlServlet.NS)));
-		}
+        if (hasElement(eProp.getChild(TaskFields.ALARM, XmlServlet.NS))) {
+            taskObj.setAlarm(getValueAsDate(eProp.getChild(TaskFields.ALARM, XmlServlet.NS)));
+        }
 
-		if (hasElement(eProp.getChild(TaskFields.CURRENCY, XmlServlet.NS))) {
-			taskObj.setCurrency(getValue(eProp.getChild(TaskFields.CURRENCY, XmlServlet.NS)));
-		}
+        if (hasElement(eProp.getChild(TaskFields.CURRENCY, XmlServlet.NS))) {
+            taskObj.setCurrency(getValue(eProp.getChild(TaskFields.CURRENCY, XmlServlet.NS)));
+        }
 
-		if (hasElement(eProp.getChild(TaskFields.BILLING_INFORMATION, XmlServlet.NS))) {
-			taskObj.setBillingInformation(getValue(eProp.getChild(TaskFields.BILLING_INFORMATION, XmlServlet.NS)));
-		}
+        if (hasElement(eProp.getChild(TaskFields.BILLING_INFORMATION, XmlServlet.NS))) {
+            taskObj.setBillingInformation(getValue(eProp.getChild(TaskFields.BILLING_INFORMATION, XmlServlet.NS)));
+        }
 
-		if (hasElement(eProp.getChild(TaskFields.COMPANIES, XmlServlet.NS))) {
-			taskObj.setCompanies(getValue(eProp.getChild(TaskFields.COMPANIES, XmlServlet.NS)));
-		}
+        if (hasElement(eProp.getChild(TaskFields.COMPANIES, XmlServlet.NS))) {
+            taskObj.setCompanies(getValue(eProp.getChild(TaskFields.COMPANIES, XmlServlet.NS)));
+        }
 
-		if (hasElement(eProp.getChild(TaskFields.TRIP_METER, XmlServlet.NS))) {
-			taskObj.setTripMeter(getValue(eProp.getChild(TaskFields.TRIP_METER, XmlServlet.NS)));
-		}
+        if (hasElement(eProp.getChild(TaskFields.TRIP_METER, XmlServlet.NS))) {
+            taskObj.setTripMeter(getValue(eProp.getChild(TaskFields.TRIP_METER, XmlServlet.NS)));
+        }
 
-		parseElementCalendar(taskObj, eProp);
-	}
+        parseElementCalendar(taskObj, eProp);
+    }
 }

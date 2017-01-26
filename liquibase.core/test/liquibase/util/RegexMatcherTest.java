@@ -1,9 +1,10 @@
 package liquibase.util;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.regex.PatternSyntaxException;
 import org.junit.After;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  *
@@ -16,17 +17,18 @@ public class RegexMatcherTest {
                 "Kill Bill\n";
 
     @After
-    public void tearDown() {
+    public void tearDown()
+ {
         matcher=null;
     }
 
     @Test(expected=PatternSyntaxException.class)
-    public void testBadPatternFails() {
+     public void testBadPatternFails() {
         matcher=new RegexMatcher(text,new String[]{"a(j"});
     }
 
-    @Test
-    public void testMatchingInSequentialOrder() {
+     @Test
+     public void testMatchingInSequentialOrder() {
         matcher=new RegexMatcher(text,new String[]{"Pulp","Reservoir","Kill"});
         assertTrue("All matched",matcher.allMatchedInSequentialOrder());
 

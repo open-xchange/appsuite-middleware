@@ -49,8 +49,13 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.TimeZone;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
@@ -72,17 +77,17 @@ public class Bug15937Test extends AbstractAJAXSession {
     private Appointment appointment;
     private TimeZone timeZone;
 
-    public Bug15937Test(String name) {
-        super(name);
+    public Bug15937Test() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
-        timeZone = client.getValues().getTimeZone();
+        timeZone = getClient().getValues().getTimeZone();
         appointment = new Appointment();
-        appointment.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         appointment.setTitle("Test for bug 15937");
         appointment.setIgnoreConflicts(true);
         final Calendar calendar = TimeTools.createCalendar(timeZone);
@@ -91,19 +96,23 @@ public class Bug15937Test extends AbstractAJAXSession {
         appointment.setEndDate(calendar.getTime());
         appointment.setNumberOfAttachments(42);
         InsertRequest request = new InsertRequest(appointment, timeZone);
-        AppointmentInsertResponse response = client.execute(request);
+        AppointmentInsertResponse response = getClient().execute(request);
         response.fillAppointment(appointment);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        client.execute(new DeleteRequest(appointment));
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
+        try {
+            getClient().execute(new DeleteRequest(appointment));
+        } finally {
+            super.tearDown();
+        }
     }
 
+    @Test
     public void testNumberOfAttachments() throws Throwable {
         GetRequest request = new GetRequest(appointment);
-        GetResponse response = client.execute(request);
+        GetResponse response = getClient().execute(request);
         Appointment testAppointment = response.getAppointment(timeZone);
         assertTrue("Number of attachments should be send.", testAppointment.containsNumberOfAttachments());
         assertEquals("Number of attachments must be zero.", 0, testAppointment.getNumberOfAttachments());

@@ -49,20 +49,21 @@
 
 package com.openexchange.ajax.importexport;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 import com.openexchange.ajax.conversion.VCardMailPartAttachTest;
+import com.openexchange.test.concurrent.ParallelSuite;
 
-public class VCardTestSuite extends TestSuite{
+@RunWith(ParallelSuite.class)
+@Suite.SuiteClasses({
+    Bug18094Test_VCardRoundtrip.class,
+    VCardMailPartAttachTest.class,
+    Bug27151Test_RoundtripOfYomiFields.class,
+    Bug25701Test.class,
+    Bug15400Test.class,
+    VCardImportExportServletTest.class,
 
-	public static Test suite(){
-		TestSuite tests = new TestSuite();
-		tests.addTestSuite(Bug18094Test_VCardRoundtrip.class);
-		tests.addTestSuite(VCardMailPartAttachTest.class);
-		tests.addTestSuite(Bug27151Test_RoundtripOfYomiFields.class);
-        tests.addTestSuite(Bug25701Test.class);
-        tests.addTestSuite(Bug15400Test.class);
-        tests.addTestSuite(VCardImportExportServletTest.class);
-		return tests;
-	}
+})
+public class VCardTestSuite  {
+
 }

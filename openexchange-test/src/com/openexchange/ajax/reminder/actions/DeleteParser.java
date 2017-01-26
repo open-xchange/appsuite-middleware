@@ -1,10 +1,10 @@
+
 package com.openexchange.ajax.reminder.actions;
 
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
-
 
 public class DeleteParser extends AbstractAJAXParser<CommonDeleteResponse> {
 

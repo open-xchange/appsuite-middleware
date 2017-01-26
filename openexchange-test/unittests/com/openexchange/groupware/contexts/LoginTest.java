@@ -37,15 +37,17 @@
 
 package com.openexchange.groupware.contexts;
 
-import junit.framework.TestCase;
-
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.groupware.Init;
 
 /**
  * This test case tests the login process.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class LoginTest extends TestCase {
+public class LoginTest {
 
     /**
      * Logger.
@@ -60,37 +62,38 @@ public class LoginTest extends TestCase {
     /**
      * {@inheritDoc}
      */
-    @Override
-	protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         Init.startServer();
     }
 
-    @Override
-	protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         Init.stopServer();
-        super.tearDown();
     }
 
+    @Test
     public void testLogin() throws Throwable {
-        /*final LoginInfo login = LoginInfo.getInstance();
-        final String user = AjaxInit.getAJAXProperty("login");
-        final String password = AjaxInit.getAJAXProperty("password");
-        for (int i = 0; i < TRIES; i++) {
-            final long start = System.currentTimeMillis();
-            final String[] result = login.handleLoginInfo(user, password);
-            LOG.info("Login time: " + ((System.currentTimeMillis() - start) / 1000f)
-                + "s");
-            assertNotNull("Can't get context identifier.", result[0]);
-            assertNotNull("Can't get user identifier.", result[1]);
-            assertNotSame("Can't get context identifier.", result[0].length(), 0);
-            assertNotSame("Can't get user identifier.", result[1].length(), 0);
-            LOG.info("Context identifier: " + result[0]);
-            LOG.info("User identifier: " + result[1]);
-            if (result.length > 2) {
-                LOG.info("1and1 Token: " + result[2]);
-            }
-        }*/
+        /*
+         * final LoginInfo login = LoginInfo.getInstance();
+         * final String user = AjaxInit.getAJAXProperty("login");
+         * final String password = AjaxInit.getAJAXProperty("password");
+         * for (int i = 0; i < TRIES; i++) {
+         * final long start = System.currentTimeMillis();
+         * final String[] result = login.handleLoginInfo(user, password);
+         * LOG.info("Login time: " + ((System.currentTimeMillis() - start) / 1000f)
+         * + "s");
+         * assertNotNull("Can't get context identifier.", result[0]);
+         * assertNotNull("Can't get user identifier.", result[1]);
+         * assertNotSame("Can't get context identifier.", result[0].length(), 0);
+         * assertNotSame("Can't get user identifier.", result[1].length(), 0);
+         * LOG.info("Context identifier: " + result[0]);
+         * LOG.info("User identifier: " + result[1]);
+         * if (result.length > 2) {
+         * LOG.info("1and1 Token: " + result[2]);
+         * }
+         * }
+         */
         //TODO: Fix this, please-with-sugar-on-top
     }
 }

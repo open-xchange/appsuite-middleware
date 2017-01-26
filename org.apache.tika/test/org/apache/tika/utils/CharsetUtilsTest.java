@@ -16,11 +16,15 @@
  */
 package org.apache.tika.utils;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
-public class CharsetUtilsTest extends TestCase {
-
-    public void testInvalidCharset() {
+public class CharsetUtilsTest {
+         @Test
+     public void testInvalidCharset() {
         assertFalse(CharsetUtils.isSupported(" utf-8"));
         assertFalse(CharsetUtils.isSupported("my charset name"));
         assertFalse(CharsetUtils.isSupported("charset1; charset2"));
@@ -28,12 +32,14 @@ public class CharsetUtilsTest extends TestCase {
         assertFalse(CharsetUtils.isSupported(""));
     }
     
-    public void testValidCharset() {
+         @Test
+     public void testValidCharset() {
         assertTrue(CharsetUtils.isSupported("UTF-8"));
         assertFalse(CharsetUtils.isSupported("bogus"));
     }
     
-    public void testCleaningCharsetName() {
+         @Test
+     public void testCleaningCharsetName() {
         assertEquals("UTF-8", CharsetUtils.clean("utf-8"));
         assertEquals(null, CharsetUtils.clean(""));
         assertEquals(null, CharsetUtils.clean(null));
@@ -42,7 +48,8 @@ public class CharsetUtilsTest extends TestCase {
         assertEquals("ISO-8859-1", CharsetUtils.clean("ISO-8859-1, latin1"));
     }
     
-    public void testFunkyNames() {
+         @Test
+     public void testFunkyNames() {
         assertEquals(null, CharsetUtils.clean("none"));
         assertEquals(null, CharsetUtils.clean("no"));
         

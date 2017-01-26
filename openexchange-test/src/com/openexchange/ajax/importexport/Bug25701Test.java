@@ -46,13 +46,18 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.ajax.importexport;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.util.Arrays;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.contact.AbstractManagedContactTest;
 import com.openexchange.ajax.importexport.actions.VCardExportRequest;
 import com.openexchange.ajax.importexport.actions.VCardExportResponse;
@@ -70,222 +75,159 @@ import com.openexchange.java.Charsets;
  */
 public class Bug25701Test extends AbstractManagedContactTest {
 
-	/**
-	 * Initializes a new {@link Bug25701Test}.
-	 *
-	 * @param name The test name
-	 */
-	public Bug25701Test(String name) {
-		super(name);
-	}
-
+    @Test
     public void testCombinedTypes() throws Exception {
         /*
          * check import
          */
-        String vCard =
-            "BEGIN:VCARD\r\n" +
-            "VERSION:3.0\n\n" +
-            "N:test;heinz;;;\r\n" +
-            "TEL;TYPE=voice,home:43643634634\r\n" +
-            "END:VCARD\r\n"
-        ;
+        String vCard = "BEGIN:VCARD\r\n" + "VERSION:3.0\n\n" + "N:test;heinz;;;\r\n" + "TEL;TYPE=voice,home:43643634634\r\n" + "END:VCARD\r\n";
         Contact importedContact = importAndFetch(vCard);
         assertEquals("43643634634", importedContact.getTelephoneHome1());
         /*
          * check roundtrip
          */
         vCard = export();
-        manager.deleteAction(importedContact);
+        cotm.deleteAction(importedContact);
         importedContact = importAndFetch(vCard);
         assertEquals("43643634634", importedContact.getTelephoneHome1());
-        manager.deleteAction(importedContact);
+        cotm.deleteAction(importedContact);
     }
 
+    @Test
     public void testPreferredTelephoneHomeType() throws Exception {
         /*
          * check import
          */
-        String vCard =
-            "BEGIN:VCARD\r\n" +
-            "VERSION:3.0\n\n" +
-            "N:test;heinz;;;\r\n" +
-            "TEL;TYPE=voice,home:17858358734\r\n" +
-            "TEL;TYPE=voice,home:23455464534\r\n" +
-            "TEL;TYPE=pref,voice,home:33465472555\r\n" +
-            "TEL;TYPE=pref,voice,home:47574573624\r\n" +
-            "END:VCARD\r\n"
-        ;
+        String vCard = "BEGIN:VCARD\r\n" + "VERSION:3.0\n\n" + "N:test;heinz;;;\r\n" + "TEL;TYPE=voice,home:17858358734\r\n" + "TEL;TYPE=voice,home:23455464534\r\n" + "TEL;TYPE=pref,voice,home:33465472555\r\n" + "TEL;TYPE=pref,voice,home:47574573624\r\n" + "END:VCARD\r\n";
         Contact importedContact = importAndFetch(vCard);
-        List<String> homeTelephoneNumbers = Arrays.asList(
-            new String[] { importedContact.getTelephoneHome1(), importedContact.getTelephoneHome2()  });
+        List<String> homeTelephoneNumbers = Arrays.asList(new String[] { importedContact.getTelephoneHome1(), importedContact.getTelephoneHome2() });
         assertTrue("33465472555 not found", homeTelephoneNumbers.contains("33465472555"));
         assertTrue("47574573624 not found", homeTelephoneNumbers.contains("47574573624"));
         /*
          * check roundtrip
          */
         vCard = export();
-        manager.deleteAction(importedContact);
+        cotm.deleteAction(importedContact);
         importedContact = importAndFetch(vCard);
-        homeTelephoneNumbers = Arrays.asList(
-            new String[] { importedContact.getTelephoneHome1(), importedContact.getTelephoneHome2()  });
+        homeTelephoneNumbers = Arrays.asList(new String[] { importedContact.getTelephoneHome1(), importedContact.getTelephoneHome2() });
         assertTrue("33465472555 not found", homeTelephoneNumbers.contains("33465472555"));
         assertTrue("47574573624 not found", homeTelephoneNumbers.contains("47574573624"));
-        manager.deleteAction(importedContact);
+        cotm.deleteAction(importedContact);
     }
 
+    @Test
     public void testPreferredTelephoneBusinessType() throws Exception {
         /*
          * check import
          */
-        String vCard =
-            "BEGIN:VCARD\r\n" +
-            "VERSION:3.0\n\n" +
-            "N:test;heinz;;;\r\n" +
-            "TEL;TYPE=voice,work:17858358734\r\n" +
-            "TEL;TYPE=voice,work:23455464534\r\n" +
-            "TEL;TYPE=pref,voice,work:33465472555\r\n" +
-            "TEL;TYPE=pref,voice,work:47574573624\r\n" +
-            "END:VCARD\r\n"
-        ;
+        String vCard = "BEGIN:VCARD\r\n" + "VERSION:3.0\n\n" + "N:test;heinz;;;\r\n" + "TEL;TYPE=voice,work:17858358734\r\n" + "TEL;TYPE=voice,work:23455464534\r\n" + "TEL;TYPE=pref,voice,work:33465472555\r\n" + "TEL;TYPE=pref,voice,work:47574573624\r\n" + "END:VCARD\r\n";
         Contact importedContact = importAndFetch(vCard);
-        List<String> businessTelephoneNumbers = Arrays.asList(
-            new String[] { importedContact.getTelephoneBusiness1(), importedContact.getTelephoneBusiness2()  });
+        List<String> businessTelephoneNumbers = Arrays.asList(new String[] { importedContact.getTelephoneBusiness1(), importedContact.getTelephoneBusiness2() });
         assertTrue("33465472555 not found", businessTelephoneNumbers.contains("33465472555"));
         assertTrue("47574573624 not found", businessTelephoneNumbers.contains("47574573624"));
         /*
          * check roundtrip
          */
         vCard = export();
-        manager.deleteAction(importedContact);
+        cotm.deleteAction(importedContact);
         importedContact = importAndFetch(vCard);
-        businessTelephoneNumbers = Arrays.asList(
-            new String[] { importedContact.getTelephoneBusiness1(), importedContact.getTelephoneBusiness2()  });
+        businessTelephoneNumbers = Arrays.asList(new String[] { importedContact.getTelephoneBusiness1(), importedContact.getTelephoneBusiness2() });
         assertTrue("33465472555 not found", businessTelephoneNumbers.contains("33465472555"));
         assertTrue("47574573624 not found", businessTelephoneNumbers.contains("47574573624"));
-        manager.deleteAction(importedContact);
+        cotm.deleteAction(importedContact);
     }
 
+    @Test
     public void testPreferredFaxHomeType() throws Exception {
         /*
          * check import
          */
-        String vCard =
-            "BEGIN:VCARD\r\n" +
-            "VERSION:3.0\n\n" +
-            "N:test;heinz;;;\r\n" +
-            "TEL;TYPE=fax,home:17858358734\r\n" +
-            "TEL;TYPE=fax,home:23455464534\r\n" +
-            "TEL;TYPE=pref,fax,home:33465472555\r\n" +
-            "END:VCARD\r\n"
-        ;
+        String vCard = "BEGIN:VCARD\r\n" + "VERSION:3.0\n\n" + "N:test;heinz;;;\r\n" + "TEL;TYPE=fax,home:17858358734\r\n" + "TEL;TYPE=fax,home:23455464534\r\n" + "TEL;TYPE=pref,fax,home:33465472555\r\n" + "END:VCARD\r\n";
         Contact importedContact = importAndFetch(vCard);
         assertEquals("33465472555 not found", "33465472555", importedContact.getFaxHome());
         /*
          * check roundtrip
          */
         vCard = export();
-        manager.deleteAction(importedContact);
+        cotm.deleteAction(importedContact);
         importedContact = importAndFetch(vCard);
         assertEquals("33465472555 not found", "33465472555", importedContact.getFaxHome());
-        manager.deleteAction(importedContact);
+        cotm.deleteAction(importedContact);
     }
 
+    @Test
     public void testPreferredFaxBusinessType() throws Exception {
         /*
          * check import
          */
-        String vCard =
-            "BEGIN:VCARD\r\n" +
-            "VERSION:3.0\n\n" +
-            "N:test;heinz;;;\r\n" +
-            "TEL;TYPE=fax,work:17858358734\r\n" +
-            "TEL;TYPE=fax,work:23455464534\r\n" +
-            "TEL;TYPE=pref,fax,work:33465472555\r\n" +
-            "END:VCARD\r\n"
-        ;
+        String vCard = "BEGIN:VCARD\r\n" + "VERSION:3.0\n\n" + "N:test;heinz;;;\r\n" + "TEL;TYPE=fax,work:17858358734\r\n" + "TEL;TYPE=fax,work:23455464534\r\n" + "TEL;TYPE=pref,fax,work:33465472555\r\n" + "END:VCARD\r\n";
         Contact importedContact = importAndFetch(vCard);
         assertEquals("33465472555 not found", "33465472555", importedContact.getFaxBusiness());
         /*
          * check roundtrip
          */
         vCard = export();
-        manager.deleteAction(importedContact);
+        cotm.deleteAction(importedContact);
         importedContact = importAndFetch(vCard);
         assertEquals("33465472555 not found", "33465472555", importedContact.getFaxBusiness());
-        manager.deleteAction(importedContact);
+        cotm.deleteAction(importedContact);
     }
 
+    @Test
     public void testTextphoneType() throws Exception {
         /*
          * check import
          */
-        String vCard =
-            "BEGIN:VCARD\r\n" +
-            "VERSION:3.0\n\n" +
-            "N:test;heinz;;;\r\n" +
-            "TEL;TYPE=textphone:43643634634\r\n" +
-            "END:VCARD\r\n"
-        ;
+        String vCard = "BEGIN:VCARD\r\n" + "VERSION:3.0\n\n" + "N:test;heinz;;;\r\n" + "TEL;TYPE=textphone:43643634634\r\n" + "END:VCARD\r\n";
         Contact importedContact = importAndFetch(vCard);
         assertEquals("43643634634", importedContact.getTelephoneTTYTTD());
         /*
          * check roundtrip
          */
         vCard = export();
-        manager.deleteAction(importedContact);
+        cotm.deleteAction(importedContact);
         importedContact = importAndFetch(vCard);
         assertEquals("43643634634", importedContact.getTelephoneTTYTTD());
-        manager.deleteAction(importedContact);
+        cotm.deleteAction(importedContact);
     }
 
+    @Test
     public void testPagerType() throws Exception {
         /*
          * check import
          */
-        String vCard =
-            "BEGIN:VCARD\r\n" +
-            "VERSION:3.0\n\n" +
-            "N:test;heinz;;;\r\n" +
-            "TEL;TYPE=pager:43643634634\r\n" +
-            "END:VCARD\r\n"
-        ;
+        String vCard = "BEGIN:VCARD\r\n" + "VERSION:3.0\n\n" + "N:test;heinz;;;\r\n" + "TEL;TYPE=pager:43643634634\r\n" + "END:VCARD\r\n";
         Contact importedContact = importAndFetch(vCard);
         assertEquals("43643634634", importedContact.getTelephonePager());
         /*
          * check roundtrip
          */
         vCard = export();
-        manager.deleteAction(importedContact);
+        cotm.deleteAction(importedContact);
         importedContact = importAndFetch(vCard);
         assertEquals("43643634634", importedContact.getTelephonePager());
-        manager.deleteAction(importedContact);
+        cotm.deleteAction(importedContact);
     }
 
+    @Test
     public void testCarType() throws Exception {
         /*
          * check import
          */
-        String vCard =
-            "BEGIN:VCARD\r\n" +
-            "VERSION:3.0\n\n" +
-            "N:test;heinz;;;\r\n" +
-            "TEL;TYPE=car:43643634634\r\n" +
-            "END:VCARD\r\n"
-        ;
+        String vCard = "BEGIN:VCARD\r\n" + "VERSION:3.0\n\n" + "N:test;heinz;;;\r\n" + "TEL;TYPE=car:43643634634\r\n" + "END:VCARD\r\n";
         Contact importedContact = importAndFetch(vCard);
         assertEquals("43643634634", importedContact.getTelephoneCar());
         /*
          * check roundtrip
          */
         vCard = export();
-        manager.deleteAction(importedContact);
+        cotm.deleteAction(importedContact);
         importedContact = importAndFetch(vCard);
         assertEquals("43643634634", importedContact.getTelephoneCar());
-        manager.deleteAction(importedContact);
+        cotm.deleteAction(importedContact);
     }
 
-	private Contact importAndFetch(String vCard) throws Exception {
+    private Contact importAndFetch(String vCard) throws Exception {
         VCardImportRequest importRequest = new VCardImportRequest(folderID, new ByteArrayInputStream(vCard.getBytes(Charsets.UTF_8)));
         VCardImportResponse importResponse = getClient().execute(importRequest);
         JSONArray data = (JSONArray) importResponse.getData();
@@ -294,13 +236,13 @@ public class Bug25701Test extends AbstractManagedContactTest {
         assertNotNull("got no data from import request", jsonObject);
         int objectID = jsonObject.optInt("id");
         assertTrue("got no object id from import request", 0 < objectID);
-        return manager.getAction(folderID, objectID);
-	}
+        return cotm.getAction(folderID, objectID);
+    }
 
-	private String export() throws Exception {
+    private String export() throws Exception {
         VCardExportRequest exportRequest = new VCardExportRequest(folderID, false);
-        VCardExportResponse exportResponse = manager.getClient().execute(exportRequest);
+        VCardExportResponse exportResponse = cotm.getClient().execute(exportRequest);
         return exportResponse.getVCard();
-	}
+    }
 
 }

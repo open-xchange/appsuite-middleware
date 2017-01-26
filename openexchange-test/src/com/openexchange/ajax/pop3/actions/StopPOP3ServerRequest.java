@@ -56,7 +56,6 @@ import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Header;
 
-
 /**
  * Depends on bundle com.openexchange.test.pop3, contained in backend-test.
  *
@@ -96,8 +95,10 @@ public class StopPOP3ServerRequest implements AJAXRequest<StopPOP3ServerResponse
     }
 
     private static final class Parser extends AbstractAJAXParser<StopPOP3ServerResponse> {
+
         /**
          * Initializes a new {@link Parser}.
+         * 
          * @param failOnError
          */
         protected Parser(boolean failOnError) {

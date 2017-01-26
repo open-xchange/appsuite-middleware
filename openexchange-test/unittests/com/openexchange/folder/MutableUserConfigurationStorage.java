@@ -76,12 +76,10 @@ public class MutableUserConfigurationStorage extends UserConfigurationStorage {
     }
 
     @Override
-    protected void startInternal() throws OXException {
-    }
+    protected void startInternal() throws OXException {}
 
     @Override
-    protected void stopInternal() throws OXException {
-    }
+    protected void stopInternal() throws OXException {}
 
     @Override
     public UserConfiguration getUserConfiguration(int userId, int[] groups, Context ctx) throws OXException {
@@ -131,7 +129,7 @@ public class MutableUserConfigurationStorage extends UserConfigurationStorage {
 
         List<Integer> toLoad = new ArrayList<Integer>(userIds.length);
         List<int[]> groupArr = new ArrayList<int[]>(userIds.length);
-        
+
         for (int i = 0; i < userIds.length; i++) {
             int userId = userIds[i];
             UserConfiguration configuration = overrides.get(userId);
@@ -146,7 +144,7 @@ public class MutableUserConfigurationStorage extends UserConfigurationStorage {
         if (!toLoad.isEmpty()) {
             int[] ids = new int[toLoad.size()];
             int[][] groups2 = new int[toLoad.size()][];
-            for(int i = 0; i < toLoad.size(); i++) {
+            for (int i = 0; i < toLoad.size(); i++) {
                 ids[i] = toLoad.get(i);
                 groups2[i] = groupArr.get(i);
             }

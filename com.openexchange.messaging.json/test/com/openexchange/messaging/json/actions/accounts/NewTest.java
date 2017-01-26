@@ -49,9 +49,9 @@
 
 package com.openexchange.messaging.json.actions.accounts;
 
-import junit.framework.TestCase;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
@@ -63,6 +63,10 @@ import com.openexchange.messaging.SimAccountManager;
 import com.openexchange.messaging.SimMessagingService;
 import com.openexchange.messaging.registry.SimMessagingServiceRegistry;
 import com.openexchange.tools.session.SimServerSession;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 
 /**
@@ -70,10 +74,10 @@ import com.openexchange.tools.session.SimServerSession;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class NewTest extends TestCase {
-    // Success Case
+public class NewTest {    // Success Case
 
-    public void testCreate() throws JSONException, OXException {
+         @Test
+     public void testCreate() throws JSONException, OXException {
         final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
 
         final SimAccountManager accManager = new SimAccountManager();
@@ -112,7 +116,8 @@ public class NewTest extends TestCase {
 
     // Error Cases
 
-    public void testOXExceptionFromRegistry() throws JSONException, OXException {
+         @Test
+     public void testOXExceptionFromRegistry() throws JSONException, OXException {
         final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
         registry.setException(new OXException());
 
@@ -145,7 +150,8 @@ public class NewTest extends TestCase {
 
     }
 
-    public void testOXExceptionFromAccManager() throws JSONException, OXException {
+         @Test
+     public void testOXExceptionFromAccManager() throws JSONException, OXException {
         final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
 
         final SimAccountManager accManager = new SimAccountManager();

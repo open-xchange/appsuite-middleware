@@ -87,10 +87,7 @@ public final class SetAttributeRequest extends AbstractUserRequest<SetAttributeR
 
     @Override
     public Parameter[] getParameters() {
-        return new Parameter[] {
-            new URLParameter(AJAXServlet.PARAMETER_ACTION, SetAttributeAction.ACTION),
-            new URLParameter(AJAXServlet.PARAMETER_ID, userId),
-            new URLParameter("setIfAbsent", setIfAbsent)
+        return new Parameter[] { new URLParameter(AJAXServlet.PARAMETER_ACTION, SetAttributeAction.ACTION), new URLParameter(AJAXServlet.PARAMETER_ID, userId), new URLParameter("setIfAbsent", setIfAbsent)
         };
     }
 

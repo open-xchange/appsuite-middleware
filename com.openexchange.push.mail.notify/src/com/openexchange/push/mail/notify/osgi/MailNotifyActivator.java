@@ -163,7 +163,7 @@ public final class MailNotifyActivator extends HousekeepingActivator {
             stopUdpListener();
 
             // Unregister push manager
-            cleanUp();
+            super.stopBundle();
 
             // Shut down
             MailNotifyPushListenerRegistry registry = this.registry;

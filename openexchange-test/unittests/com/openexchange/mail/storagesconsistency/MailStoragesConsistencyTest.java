@@ -49,8 +49,14 @@
 
 package com.openexchange.mail.storagesconsistency;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.HashSet;
 import java.util.Set;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.IndexRange;
@@ -81,20 +87,7 @@ public final class MailStoragesConsistencyTest extends AbstractMailTest {
 
     private static final MailField[] FIELDS_ID = { MailField.ID };
 
-    /**
-	 *
-	 */
-    public MailStoragesConsistencyTest() {
-        super();
-    }
-
-    /**
-     * @param name
-     */
-    public MailStoragesConsistencyTest(final String name) {
-        super(name);
-    }
-
+    @Test
     public void testMailStoragesConsistency1() {
         try {
             final SessionObject session = getSession();
@@ -124,11 +117,7 @@ public final class MailStoragesConsistencyTest extends AbstractMailTest {
 
                     final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID).createNewMailPermission(session, MailAccount.DEFAULT_ID);
                     p.setEntity(getUser());
-                    p.setAllPermission(
-                        OCLPermission.ADMIN_PERMISSION,
-                        OCLPermission.ADMIN_PERMISSION,
-                        OCLPermission.ADMIN_PERMISSION,
-                        OCLPermission.ADMIN_PERMISSION);
+                    p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
                     p.setFolderAdmin(true);
                     p.setGroupPermission(false);
                     mfd.addPermission(p);
@@ -176,6 +165,7 @@ public final class MailStoragesConsistencyTest extends AbstractMailTest {
         }
     }
 
+    @Test
     public void testMailStoragesConsistency2() {
         try {
             final SessionObject session = getSession();
@@ -206,11 +196,7 @@ public final class MailStoragesConsistencyTest extends AbstractMailTest {
 
                     final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID).createNewMailPermission(session, MailAccount.DEFAULT_ID);
                     p.setEntity(getUser());
-                    p.setAllPermission(
-                        OCLPermission.ADMIN_PERMISSION,
-                        OCLPermission.ADMIN_PERMISSION,
-                        OCLPermission.ADMIN_PERMISSION,
-                        OCLPermission.ADMIN_PERMISSION);
+                    p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
                     p.setFolderAdmin(true);
                     p.setGroupPermission(false);
                     mfd.addPermission(p);
@@ -225,13 +211,7 @@ public final class MailStoragesConsistencyTest extends AbstractMailTest {
 
                 final int numTrashedMails = getMessageCount(mailAccess, trashFullname);
                 if (numTrashedMails >= 0) {
-                    MailMessage[] trashed =
-                        mailAccess.getMessageStorage().getAllMessages(
-                            trashFullname,
-                            IndexRange.NULL,
-                            MailSortField.RECEIVED_DATE,
-                            OrderDirection.ASC,
-                            FIELDS_ID);
+                    MailMessage[] trashed = mailAccess.getMessageStorage().getAllMessages(trashFullname, IndexRange.NULL, MailSortField.RECEIVED_DATE, OrderDirection.ASC, FIELDS_ID);
                     assertTrue("Size mismatch: " + trashed.length + " but should be " + numTrashedMails, trashed.length == numTrashedMails);
                     final Set<String> oldIds = new HashSet<String>(numTrashedMails);
                     for (int i = 0; i < trashed.length; i++) {
@@ -247,16 +227,8 @@ public final class MailStoragesConsistencyTest extends AbstractMailTest {
                     if (!getUserSettingMail().isHardDeleteMsgs()) {
                         final int expectedMsgCount = numTrashedMails + uids.length;
                         assertEquals("Mails not completely moved to trash", expectedMsgCount, getMessageCount(mailAccess, trashFullname));
-                        trashed =
-                            mailAccess.getMessageStorage().getAllMessages(
-                                trashFullname,
-                                IndexRange.NULL,
-                                MailSortField.RECEIVED_DATE,
-                                OrderDirection.ASC,
-                                FIELDS_ID);
-                        assertTrue(
-                            "Size mismatch: " + trashed.length + " but should be " + expectedMsgCount,
-                            trashed.length == expectedMsgCount);
+                        trashed = mailAccess.getMessageStorage().getAllMessages(trashFullname, IndexRange.NULL, MailSortField.RECEIVED_DATE, OrderDirection.ASC, FIELDS_ID);
+                        assertTrue("Size mismatch: " + trashed.length + " but should be " + expectedMsgCount, trashed.length == expectedMsgCount);
 
                         final Set<String> newIds = new HashSet<String>(numTrashedMails);
                         for (int i = 0; i < trashed.length; i++) {
@@ -290,6 +262,7 @@ public final class MailStoragesConsistencyTest extends AbstractMailTest {
         }
     }
 
+    @Test
     public void testMailStoragesConsistency3() {
         try {
             final SessionObject session = getSession();
@@ -320,11 +293,7 @@ public final class MailStoragesConsistencyTest extends AbstractMailTest {
 
                     final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID).createNewMailPermission(session, MailAccount.DEFAULT_ID);
                     p.setEntity(getUser());
-                    p.setAllPermission(
-                        OCLPermission.ADMIN_PERMISSION,
-                        OCLPermission.ADMIN_PERMISSION,
-                        OCLPermission.ADMIN_PERMISSION,
-                        OCLPermission.ADMIN_PERMISSION);
+                    p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
                     p.setFolderAdmin(true);
                     p.setGroupPermission(false);
                     mfd.addPermission(p);
@@ -334,10 +303,7 @@ public final class MailStoragesConsistencyTest extends AbstractMailTest {
                 final String uid = mailAccess.getMessageStorage().appendMessages(fullname, new MailMessage[] { appendMe })[0];
 
                 // Check that UID is valid
-                assertNotSame(
-                    "ID returned by MailMessageStorage.appendMessages() is invalid: " + Long.valueOf(uid),
-                    Long.valueOf(-1),
-                    Long.valueOf(uid));
+                assertNotSame("ID returned by MailMessageStorage.appendMessages() is invalid: " + Long.valueOf(uid), Long.valueOf(-1), Long.valueOf(uid));
 
                 // Get that message by UID from folder
                 final MailMessage mm = mailAccess.getMessageStorage().getMessage(fullname, uid, true);

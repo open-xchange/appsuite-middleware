@@ -55,7 +55,6 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Changes;
 import com.openexchange.test.CalendarTestManager;
 
-
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
@@ -68,7 +67,7 @@ public class NegativeAssertionOnChangeException extends AbstractNegativeAssertio
     @Override
     public void check(Appointment startWith, Changes changes, OXException expectedError) {
         Appointment copy = startWith.clone();
-        if(! startWith.containsObjectID()) {
+        if (!startWith.containsObjectID()) {
             manager.insert(copy);
         }
 
@@ -79,9 +78,9 @@ public class NegativeAssertionOnChangeException extends AbstractNegativeAssertio
         changes.update(update);
 
         manager.update(update);
-        assertTrue("Expected error " + expectedError +" but got nothing", manager.hasLastException());
+        assertTrue("Expected error " + expectedError + " but got nothing", manager.hasLastException());
         OXException actual = (OXException) manager.getLastException();
-        assertTrue("Actual error" + actual + " should match expected error " + expectedError , expectedError.similarTo(actual));
+        assertTrue("Actual error" + actual + " should match expected error " + expectedError, expectedError.similarTo(actual));
     }
 
 }

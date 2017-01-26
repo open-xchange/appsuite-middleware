@@ -16,19 +16,22 @@
  */
 package org.apache.tika.sax;
 
-import junit.framework.TestCase;
-
+import org.junit.Test;
 import org.xml.sax.helpers.AttributesImpl;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * Test cases for the {@link LinkContentHandler} class.
  */
-public class LinkContentHandlerTest extends TestCase {
-
+public class LinkContentHandlerTest {
     /**
      * @see <a href="https://issues.apache.org/jira/browse/TIKA-975">TIKA-975</a>
      */
-    public void testWhitespaceCollapsing() throws Exception {
+         @Test
+     public void testWhitespaceCollapsing() throws Exception {
         LinkContentHandler linkContentHandler = new LinkContentHandler(true);
         
         linkContentHandler.startElement(XHTMLContentHandler.XHTML, "a", "", new AttributesImpl());
@@ -42,7 +45,8 @@ public class LinkContentHandlerTest extends TestCase {
     /**
      * @see <a href="https://issues.apache.org/jira/browse/TIKA-975">TIKA-975</a>
      */
-    public void testDefaultBehavior() throws Exception {
+         @Test
+     public void testDefaultBehavior() throws Exception {
         LinkContentHandler linkContentHandler = new LinkContentHandler();
         
         linkContentHandler.startElement(XHTMLContentHandler.XHTML, "a", "", new AttributesImpl());

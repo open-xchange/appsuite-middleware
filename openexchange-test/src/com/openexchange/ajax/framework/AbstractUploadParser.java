@@ -57,6 +57,7 @@ import com.openexchange.ajax.container.Response;
 /**
  * This parser extracts the JSON object from the web site returned by the server
  * if an upload has been made.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public abstract class AbstractUploadParser<T extends AbstractAJAXResponse> extends AbstractAJAXParser<T> {

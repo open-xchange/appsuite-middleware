@@ -49,9 +49,11 @@
 
 package com.openexchange.webdav.xml.folder;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.Date;
 import java.util.Locale;
-
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
@@ -60,10 +62,7 @@ import com.openexchange.webdav.xml.XmlServlet;
 
 public class ListTest extends FolderTest {
 
-    public ListTest(final String name) {
-        super(name);
-    }
-
+    @Test
     public void testPropFindWithModified() throws Exception {
         FolderObject folderObj = createFolderObject(userId, "testPropFindWithModified1", FolderObject.CONTACT, false);
         final int objectId1 = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password, context);
@@ -78,6 +77,7 @@ public class ListTest extends FolderTest {
         assertTrue("expected response size is >= 2", folderArray.length >= 2);
     }
 
+    @Test
     public void testPropFindWithDeleted() throws Exception {
         FolderObject folderObj = createFolderObject(userId, "testPropFindWithDeleted1", FolderObject.CALENDAR, false);
         final int objectId1 = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password, context);
@@ -99,6 +99,7 @@ public class ListTest extends FolderTest {
         assertTrue("expected response size is < 2", folderArray.length >= 2);
     }
 
+    @Test
     public void testPropFindWithObjectIdOnPrivateFolder() throws Exception {
         final FolderObject folderObj = new FolderObject();
         folderObj.setFolderName("testPropFindWithObjectIdOnPrivateFolder" + System.currentTimeMillis());
@@ -106,11 +107,10 @@ public class ListTest extends FolderTest {
         folderObj.setType(FolderObject.PRIVATE);
         folderObj.setParentFolderID(1);
 
-        final OCLPermission[] permission = new OCLPermission[] {
-            createPermission( userId, false, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS)
+        final OCLPermission[] permission = new OCLPermission[] { createPermission(userId, false, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS)
         };
 
-        folderObj.setPermissionsAsArray( permission );
+        folderObj.setPermissionsAsArray(permission);
 
         final int objectId = insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 
@@ -119,6 +119,7 @@ public class ListTest extends FolderTest {
         deleteFolder(getWebConversation(), new int[] { objectId }, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
     }
 
+    @Test
     public void testPropFindWithObjectIdOnPublicFolder() throws Exception {
         final FolderObject folderObj = new FolderObject();
         folderObj.setFolderName("testPropFindWithObjectIdOnPublicFolder" + System.currentTimeMillis());
@@ -126,11 +127,10 @@ public class ListTest extends FolderTest {
         folderObj.setType(FolderObject.PRIVATE);
         folderObj.setParentFolderID(1);
 
-        final OCLPermission[] permission = new OCLPermission[] {
-            createPermission( userId, false, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS)
+        final OCLPermission[] permission = new OCLPermission[] { createPermission(userId, false, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS)
         };
 
-        folderObj.setPermissionsAsArray( permission );
+        folderObj.setPermissionsAsArray(permission);
 
         final int objectId = insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 
@@ -139,6 +139,7 @@ public class ListTest extends FolderTest {
         deleteFolder(getWebConversation(), new int[] { objectId }, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
     }
 
+    @Test
     public void testObjectNotFound() throws Exception {
         final FolderObject folderObj = new FolderObject();
         folderObj.setFolderName("testObjectNotFound" + System.currentTimeMillis());
@@ -146,16 +147,15 @@ public class ListTest extends FolderTest {
         folderObj.setType(FolderObject.PRIVATE);
         folderObj.setParentFolderID(1);
 
-        final OCLPermission[] permission = new OCLPermission[] {
-            createPermission( userId, false, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS)
+        final OCLPermission[] permission = new OCLPermission[] { createPermission(userId, false, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS)
         };
 
-        folderObj.setPermissionsAsArray( permission );
+        folderObj.setPermissionsAsArray(permission);
 
         final int objectId = insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 
         try {
-            loadFolder(getWebConversation(), (objectId+10000), PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+            loadFolder(getWebConversation(), (objectId + 10000), PROTOCOL + getHostName(), getLogin(), getPassword(), context);
             fail("object not found exception expected!");
         } catch (final OXException exc) {
             assertExceptionMessage(exc.getDisplayMessage(Locale.ENGLISH), XmlServlet.OBJECT_NOT_FOUND_STATUS);
@@ -164,6 +164,7 @@ public class ListTest extends FolderTest {
         deleteFolder(getWebConversation(), new int[] { objectId }, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
     }
 
+    @Test
     public void testList() throws Exception {
         final FolderObject folderObj = new FolderObject();
         folderObj.setFolderName("testList" + System.currentTimeMillis());
@@ -171,14 +172,13 @@ public class ListTest extends FolderTest {
         folderObj.setType(FolderObject.PRIVATE);
         folderObj.setParentFolderID(1);
 
-        final OCLPermission[] permission = new OCLPermission[] {
-            createPermission(userId, false, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS)
+        final OCLPermission[] permission = new OCLPermission[] { createPermission(userId, false, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS)
         };
         folderObj.setPermissionsAsArray(permission);
 
         final int objectId = insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 
-        final int[] idArray = listFolder(getWebConversation(), getHostName(), getLogin(), getPassword(),context);
+        final int[] idArray = listFolder(getWebConversation(), getHostName(), getLogin(), getPassword(), context);
 
         boolean found = false;
         for (int a = 0; a < idArray.length; a++) {

@@ -105,20 +105,20 @@ public class ResponseParser {
             response.setDataObject(parseList(eProp));
         } else {
             switch (module) {
-            case Types.APPOINTMENT:
-                response.setDataObject(parseAppointmentResponse(eProp));
-                break;
-            case Types.CONTACT:
-                response.setDataObject(parseContactResponse(eProp));
-                break;
-            case Types.FOLDER:
-                response.setDataObject(parseFolderResponse(eProp));
-                break;
-            case Types.TASK:
-                response.setDataObject(parseTaskResponse(eProp));
-                break;
-            default:
-                throw new TestException("invalid module!");
+                case Types.APPOINTMENT:
+                    response.setDataObject(parseAppointmentResponse(eProp));
+                    break;
+                case Types.CONTACT:
+                    response.setDataObject(parseContactResponse(eProp));
+                    break;
+                case Types.FOLDER:
+                    response.setDataObject(parseFolderResponse(eProp));
+                    break;
+                case Types.TASK:
+                    response.setDataObject(parseTaskResponse(eProp));
+                    break;
+                default:
+                    throw new TestException("invalid module!");
             }
         }
 

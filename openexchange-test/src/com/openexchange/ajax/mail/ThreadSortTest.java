@@ -49,6 +49,13 @@
 
 package com.openexchange.ajax.mail;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.actions.AllRequest;
 import com.openexchange.ajax.mail.actions.AllResponse;
@@ -72,11 +79,11 @@ public final class ThreadSortTest extends AbstractMailTest {
      *
      * @param name Name of this test.
      */
-    public ThreadSortTest(final String name) {
-        super(name);
+    public ThreadSortTest() {
+        super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         /*
@@ -92,15 +99,18 @@ public final class ThreadSortTest extends AbstractMailTest {
         mailObject_25kb = createSelfAddressed25KBMailObject().toString();
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        /*
-         * Clean everything
-         */
-        clearFolder(getInboxFolder());
-        clearFolder(getSentFolder());
-        clearFolder(getTrashFolder());
-        super.tearDown();
+        try {
+            /*
+             * Clean everything
+             */
+            clearFolder(getInboxFolder());
+            clearFolder(getSentFolder());
+            clearFolder(getTrashFolder());
+        } finally {
+            super.tearDown();
+        }
     }
 
     /**
@@ -108,38 +118,22 @@ public final class ThreadSortTest extends AbstractMailTest {
      *
      * @throws Throwable
      */
+    @Test
     public void testAllThreadSort() throws Throwable {
         /*
          * Insert <numOfMails> mails through a send request
          */
         final int numOfMails = 25;
         LOG.info("Sending " + numOfMails + " mails to fill emptied INBOX");
-        final String eml =
-            "Message-Id: <4A002517.4650.0059.1@foobar.com>\n" +
-            "Date: Tue, 05 May 2009 11:37:58 -0500\n" +
-            "From: " + getSendAddress() + "\n" +
-            "To: " + getSendAddress() + "\n" +
-            "Subject: Invitation for launch\n" +
-            "Mime-Version: 1.0\n" +
-            "Content-Type: text/plain; charset=\"UTF-8\"\n" +
-            "Content-Transfer-Encoding: 8bit\n" +
-            "\n" +
-            "This is a MIME message. If you are reading this text, you may want to \n" +
-            "consider changing to a mail reader or gateway that understands how to \n" +
-            "properly handle MIME multipart messages.";
+        final String eml = "Message-Id: <4A002517.4650.0059.1@foobar.com>\n" + "Date: Tue, 05 May 2009 11:37:58 -0500\n" + "From: " + getSendAddress() + "\n" + "To: " + getSendAddress() + "\n" + "Subject: Invitation for launch\n" + "Mime-Version: 1.0\n" + "Content-Type: text/plain; charset=\"UTF-8\"\n" + "Content-Transfer-Encoding: 8bit\n" + "\n" + "This is a MIME message. If you are reading this text, you may want to \n" + "consider changing to a mail reader or gateway that understands how to \n" + "properly handle MIME multipart messages.";
         for (int i = 0; i < numOfMails; i++) {
-            getClient().execute(new NewMailRequest(client.getValues().getInboxFolder(), eml, -1, true));
+            getClient().execute(new NewMailRequest(getClient().getValues().getInboxFolder(), eml, -1, true));
             LOG.info("Appended " + (i + 1) + ". mail of " + numOfMails);
         }
         /*
          * Perform all request with thread-sort enabled
          */
-        final AllResponse allR = Executor.execute(getSession(), new AllRequest(
-            getInboxFolder(),
-            COLUMNS_DEFAULT_LIST,
-            0,
-            Order.DESCENDING,
-            true).setThreadSort(true));
+        final AllResponse allR = Executor.execute(getSession(), new AllRequest(getInboxFolder(), COLUMNS_DEFAULT_LIST, 0, Order.DESCENDING, true).setThreadSort(true));
         if (allR.hasError()) {
             fail(allR.getException().toString());
         }

@@ -49,7 +49,9 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
+import static org.junit.Assert.assertEquals;
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.CalendarSql;
 import com.openexchange.groupware.calendar.CalendarDataObject;
@@ -58,12 +60,13 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.tools.iterator.SearchIterator;
 
-
 public class Bug12413Test extends CalendarSqlTest {
+
     /**
      * Test for <a href= "http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=12413">bug #12413</a><br>
      * <i>Calendar: Month list view hides appointments on 2008-10-31</i>
      */
+    @Test
     public void testProperAllRequest() throws Exception {
         // create appointment on 31.10.2008 from 23:00h until 24:00h
         final CalendarDataObject octoberApp = appointments.buildBasicAppointment(new Date(1225494000000L), new Date(1225497600000L));
@@ -84,13 +87,7 @@ public class Bug12413Test extends CalendarSqlTest {
             final Date octQueryStart = new Date(1222819200000L);
             // 1. November 2008 00:00:00 UTC
             final Date octQueryEnd = new Date(1225497600000L);
-            final SearchIterator<Appointment> octListIterator = appointmentsql.getAppointmentsBetweenInFolder(
-                appointments.getPrivateFolder(),
-                ACTION_ALL_FIELDS,
-                octQueryStart,
-                octQueryEnd,
-                CalendarObject.START_DATE,
-                Order.ASCENDING);
+            final SearchIterator<Appointment> octListIterator = appointmentsql.getAppointmentsBetweenInFolder(appointments.getPrivateFolder(), ACTION_ALL_FIELDS, octQueryStart, octQueryEnd, CalendarObject.START_DATE, Order.ASCENDING);
             try {
                 int count = 0;
                 while (octListIterator.hasNext()) {
@@ -109,13 +106,7 @@ public class Bug12413Test extends CalendarSqlTest {
             final Date novQueryStart = new Date(1225497600000L);
             // 1. December 2008 00:00:00 UTC
             final Date novQueryEnd = new Date(1228089600000L);
-            final SearchIterator<Appointment> novListIterator = appointmentsql.getAppointmentsBetweenInFolder(
-                appointments.getPrivateFolder(),
-                ACTION_ALL_FIELDS,
-                novQueryStart,
-                novQueryEnd,
-                CalendarObject.START_DATE,
-                Order.ASCENDING);
+            final SearchIterator<Appointment> novListIterator = appointmentsql.getAppointmentsBetweenInFolder(appointments.getPrivateFolder(), ACTION_ALL_FIELDS, novQueryStart, novQueryEnd, CalendarObject.START_DATE, Order.ASCENDING);
             try {
                 int count = 0;
                 while (novListIterator.hasNext()) {

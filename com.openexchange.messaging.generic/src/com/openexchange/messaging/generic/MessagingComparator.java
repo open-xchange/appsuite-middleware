@@ -128,8 +128,9 @@ public class MessagingComparator implements Comparator<MessagingMessage> {
         checkField(field);
         this.field = field;
         this.descending = descending;
-        this.locale = locale;
-        collator = Collators.getSecondaryInstance(locale);
+        Locale localeToUse = null == locale ? Locale.US : locale;
+        this.locale = localeToUse;
+        collator = Collators.getSecondaryInstance(localeToUse);
         get = new MessagingMessageGetSwitch();
     }
 

@@ -49,16 +49,18 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
+import static org.junit.Assert.fail;
 import java.util.Date;
+import org.junit.Test;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
-
 
 public class Bug11865Test extends CalendarSqlTest {
     // Bug 11865
 
+    @Test
     public void testShouldDisallowTurningAnExceptionIntoASeries() throws OXException {
         final Date start = D("07/02/2008 10:00");
         final Date end = D("07/02/2008 12:00");

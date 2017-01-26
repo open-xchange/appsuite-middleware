@@ -58,7 +58,9 @@ import java.io.InputStreamReader;
 import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
-
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
@@ -77,11 +79,7 @@ public class ExamineTest extends AbstractMailTest {
 
     FolderObject subFolder;
 
-	public ExamineTest(String name) {
-        super(name);
-    }
-
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         clearFolder(getInboxFolder());
@@ -89,30 +87,34 @@ public class ExamineTest extends AbstractMailTest {
         clearFolder(getTrashFolder());
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        if(subFolder!=null){
-            com.openexchange.ajax.folder.actions.DeleteRequest fDel = new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_NEW, subFolder);
-            client.execute(fDel);
+        try {
+            if (subFolder != null) {
+                com.openexchange.ajax.folder.actions.DeleteRequest fDel = new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_NEW, subFolder);
+                getClient().execute(fDel);
+            }
+            clearFolder(getInboxFolder());
+            clearFolder(getSentFolder());
+            clearFolder(getTrashFolder());
+        } finally {
+            super.tearDown();
         }
-        clearFolder(getInboxFolder());
-        clearFolder(getSentFolder());
-        clearFolder(getTrashFolder());
-        super.tearDown();
     }
 
+    @Test
     public void testExamineTest() throws OXException, IOException, JSONException {
 
-		AJAXClient client = getClient();
-		UserValues values = client.getValues();
-		String folder = values.getInboxFolder();
+        AJAXClient client = getClient();
+        UserValues values = getClient().getValues();
+        String folder = values.getInboxFolder();
 
-		String name = "examineTest"+System.currentTimeMillis();
-        String fullName = folder + "/"+ name;
-		subFolder = Create.createPrivateFolder(name, FolderObject.MAIL, values.getUserId());
+        String name = "examineTest" + System.currentTimeMillis();
+        String fullName = folder + "/" + name;
+        subFolder = Create.createPrivateFolder(name, FolderObject.MAIL, values.getUserId());
         subFolder.setFullName(fullName);
-		InsertRequest subFolderReq = new InsertRequest(EnumAPI.OX_NEW, subFolder, true);
-        client.execute(subFolderReq);
+        InsertRequest subFolderReq = new InsertRequest(EnumAPI.OX_NEW, subFolder, true);
+        getClient().execute(subFolderReq);
         subFolder.setLastModified(new Date(0));
 
         StringBuilder sb = new StringBuilder(8192);
@@ -129,36 +131,32 @@ public class ExamineTest extends AbstractMailTest {
             }
         }
 
-        InputStream inputStream = Streams.newByteArrayInputStream(TestMails.replaceAddresses(sb.toString(), client.getValues().getSendAddress()).getBytes(com.openexchange.java.Charsets.UTF_8));
+        InputStream inputStream = Streams.newByteArrayInputStream(TestMails.replaceAddresses(sb.toString(), getClient().getValues().getSendAddress()).getBytes(com.openexchange.java.Charsets.UTF_8));
         ImportMailRequest importMailRequest = new ImportMailRequest(subFolder.getFullName(), MailFlag.SEEN.getValue(), inputStream);
-        ImportMailResponse importResp = client.execute(importMailRequest);
+        ImportMailResponse importResp = getClient().execute(importMailRequest);
         String[] id1 = importResp.getIds()[0];
 
-		ExamineRequest examineReq = new ExamineRequest(subFolder.getFullName(), true);
-		ExamineResponse examineRes = client.execute(examineReq);
-		JSONObject jValidity = (JSONObject) examineRes.getData();
-		String validity1 = jValidity.getString("validity");
+        ExamineRequest examineReq = new ExamineRequest(subFolder.getFullName(), true);
+        ExamineResponse examineRes = getClient().execute(examineReq);
+        JSONObject jValidity = (JSONObject) examineRes.getData();
+        String validity1 = jValidity.getString("validity");
 
-        com.openexchange.ajax.folder.actions.DeleteRequest fDel = new com.openexchange.ajax.folder.actions.DeleteRequest(
-                EnumAPI.OX_NEW,
-                subFolder);
-            client.execute(fDel);
+        com.openexchange.ajax.folder.actions.DeleteRequest fDel = new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_NEW, subFolder);
+        getClient().execute(fDel);
 
-
-		subFolder = Create.createPrivateFolder(name, FolderObject.MAIL, values.getUserId());
-		subFolder.setFullName(fullName);
-		subFolderReq = new InsertRequest(EnumAPI.OX_NEW, subFolder, true);
-        client.execute(subFolderReq);
+        subFolder = Create.createPrivateFolder(name, FolderObject.MAIL, values.getUserId());
+        subFolder.setFullName(fullName);
+        subFolderReq = new InsertRequest(EnumAPI.OX_NEW, subFolder, true);
+        getClient().execute(subFolderReq);
         subFolder.setLastModified(new Date(0));
 
-        inputStream = Streams.newByteArrayInputStream(TestMails.replaceAddresses(sb.toString(), client.getValues().getSendAddress()).getBytes(com.openexchange.java.Charsets.UTF_8));
+        inputStream = Streams.newByteArrayInputStream(TestMails.replaceAddresses(sb.toString(), getClient().getValues().getSendAddress()).getBytes(com.openexchange.java.Charsets.UTF_8));
         importMailRequest = new ImportMailRequest(subFolder.getFullName(), MailFlag.SEEN.getValue(), inputStream);
-        importResp = client.execute(importMailRequest);
+        importResp = getClient().execute(importMailRequest);
         String[] id2 = importResp.getIds()[0];
 
-
-		examineReq = new ExamineRequest(subFolder.getFullName(), true);
-		examineRes = client.execute(examineReq);
+        examineReq = new ExamineRequest(subFolder.getFullName(), true);
+        examineRes = getClient().execute(examineReq);
         jValidity = (JSONObject) examineRes.getData();
         String validity2 = jValidity.getString("validity");
         if (validity1.equals(validity2)) {
@@ -166,7 +164,6 @@ public class ExamineTest extends AbstractMailTest {
         } else {
             assertNotEquals("Expected diffent validity than " + validity1, validity1, validity2);
         }
-
-	}
+    }
 
 }

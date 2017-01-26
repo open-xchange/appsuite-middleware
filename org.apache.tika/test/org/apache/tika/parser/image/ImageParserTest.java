@@ -17,20 +17,22 @@
 package org.apache.tika.parser.image;
 
 import java.io.InputStream;
-
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
+import org.junit.Test;
 import org.xml.sax.helpers.DefaultHandler;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
-import junit.framework.TestCase;
-
-public class ImageParserTest extends TestCase {
-
+public class ImageParserTest {
     private final Parser parser = new ImageParser();
 
-    public void testBMP() throws Exception {
+         @Test
+     public void testBMP() throws Exception {
         Metadata metadata = new Metadata();
         metadata.set(Metadata.CONTENT_TYPE, "image/bmp");
         InputStream stream =
@@ -51,7 +53,8 @@ public class ImageParserTest extends TestCase {
         assertEquals("8 8 8", metadata.get(Metadata.BITS_PER_SAMPLE));
     }
 
-    public void testGIF() throws Exception {
+         @Test
+     public void testGIF() throws Exception {
         Metadata metadata = new Metadata();
         metadata.set(Metadata.CONTENT_TYPE, "image/gif");
         InputStream stream =
@@ -81,7 +84,8 @@ public class ImageParserTest extends TestCase {
         assertEquals("Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements.  See the NOTICE file distributed with this work for additional information regarding copyright ownership.", metadata.get(TikaCoreProperties.COMMENTS));
     }
 
-    public void testJPEG() throws Exception {
+         @Test
+     public void testJPEG() throws Exception {
         Metadata metadata = new Metadata();
         metadata.set(Metadata.CONTENT_TYPE, "image/jpeg");
         InputStream stream =
@@ -116,7 +120,8 @@ public class ImageParserTest extends TestCase {
         assertEquals("Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements.  See the NOTICE file distributed with this work for additional information regarding copyright ownership.", metadata.get(TikaCoreProperties.COMMENTS));
     }
 
-    public void testPNG() throws Exception {
+         @Test
+     public void testPNG() throws Exception {
         Metadata metadata = new Metadata();
         metadata.set(Metadata.CONTENT_TYPE, "image/png");
         InputStream stream =

@@ -49,11 +49,14 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.CalendarTestManagerTest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
@@ -70,21 +73,22 @@ import com.openexchange.test.CalendarTestManager;
  */
 public class Bug15903Test extends CalendarTestManagerTest {
 
-    public Bug15903Test(String name) {
-        super(name);
+    public Bug15903Test() {
+        super();
     }
 
-    // Tests Bug 15903
+    // Tests Bug 15903    @Test
+    @Test
     public void testUpdatedParticipants() throws Exception {
 
         // create appointment with 2 participants
         Appointment appointment = generateAppointment();
         appointment.setIgnoreConflicts(true);
-        AJAXClient client2 = new AJAXClient(User.User2);
+        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
         int firstUserId = getClient().getValues().getUserId();
         int secondUserId = client2.getValues().getUserId();
         appointment.addParticipant(new UserParticipant(secondUserId));
-        appointment = calendarMgr.insert(appointment);
+        appointment = catm.insert(appointment);
 
         boolean firstUserParticipantInInitialAppointment = false;
         boolean secondUserParticipantInInitialAppointment = false;
@@ -97,7 +101,7 @@ public class Bug15903Test extends CalendarTestManagerTest {
         boolean secondUserUserInUpdatedAppointment = false;
 
         // Verify that both users are in the initial appointment
-        Appointment reload = calendarMgr.get(appointment);
+        Appointment reload = catm.get(appointment);
         for (Participant participant : reload.getParticipants()) {
             if (participant.getIdentifier() == firstUserId) {
                 firstUserParticipantInInitialAppointment = true;
@@ -123,8 +127,8 @@ public class Bug15903Test extends CalendarTestManagerTest {
         assertTrue("Second should be User in the initial appointment", secondUserUserInInitialAppointment);
 
         // Verify the that the second user sees the appointment initally
-        CalendarTestManager calendarMgr2 = new CalendarTestManager(client2);
-        Appointment appForSeconduser = calendarMgr2.get(client2.getValues().getPrivateAppointmentFolder(), appointment.getObjectID());
+        CalendarTestManager catm2 = new CalendarTestManager(client2);
+        Appointment appForSeconduser = catm2.get(client2.getValues().getPrivateAppointmentFolder(), appointment.getObjectID());
         assertEquals("second user should see the appointment initially", appointment.getTitle(), appForSeconduser.getTitle());
 
         // remove the second user from the appointment
@@ -137,8 +141,8 @@ public class Bug15903Test extends CalendarTestManagerTest {
         reload.setParticipants(participants);
         //reload.setUsers(userParticipants);
         reload.setIgnoreConflicts(true);
-        calendarMgr.update(reload);
-        Appointment reloadAgain = calendarMgr.get(appointment);
+        catm.update(reload);
+        Appointment reloadAgain = catm.get(appointment);
 
         // verify that the second user is removed
         for (Participant participant : reloadAgain.getParticipants()) {
@@ -168,7 +172,7 @@ public class Bug15903Test extends CalendarTestManagerTest {
         // Verify the that the second user does no longer see the appointment
         boolean gotException = false;
         try {
-            appForSeconduser = calendarMgr2.get(client2.getValues().getPrivateAppointmentFolder(), appointment.getObjectID());
+            appForSeconduser = catm2.get(client2.getValues().getPrivateAppointmentFolder(), appointment.getObjectID());
         } catch (OXException e) {
             gotException = true;
         }

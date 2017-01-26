@@ -49,10 +49,14 @@
 
 package com.openexchange.ajax.task;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import java.util.TimeZone;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -86,16 +90,15 @@ public class Bug7377Test extends AbstractTaskTest {
     private int folder1;
     private int folder2;
 
-    public Bug7377Test(String name) {
-        super(name);
+    public Bug7377Test() {
+        super();
     }
 
     @Before
-    @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
         client1 = getClient();
-        client2 = new AJAXClient(AJAXClient.User.User2);
+        client2 = new AJAXClient(testContext.acquireUser());
         tz1 = client1.getValues().getTimeZone();
         tz2 = client2.getValues().getTimeZone();
         folder1 = client1.getValues().getPrivateTaskFolder();
@@ -103,18 +106,22 @@ public class Bug7377Test extends AbstractTaskTest {
     }
 
     @After
-    @Override
-    protected void tearDown() throws Exception {
-        if (null != client2) {
-            client2.logout();
+    public void tearDown() throws Exception {
+        try {
+            if (null != client2) {
+                client2.logout();
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
     /**
      * Tests if on updating tasks the folder for the reminder gets lost.
+     * 
      * @throws Throwable if this test fails.
      */
+    @Test
     public void testLostFolderInfo() throws Throwable {
         // Create a task.
         final Task task = new Task();
@@ -134,20 +141,19 @@ public class Bug7377Test extends AbstractTaskTest {
             task.setLastModified(uResponse.getTimestamp());
             // Check reminder
             final RangeResponse rResponse = client1.execute(new RangeRequest(remindDate));
-            
+
             if (rResponse.hasConflicts()) {
                 System.out.println("Response has got " + rResponse.getConflicts().size() + " conflicts");
             }
             if (rResponse.getResponse() != null) {
-            	System.out.println("There is a response!");
-            	System.out.println("Response is " + rResponse.getResponse().getJSON());
+                System.out.println("There is a response!");
+                System.out.println("Response is " + rResponse.getResponse().getJSON());
                 if (rResponse.hasError()) {
                     System.out.println("Response has got " + rResponse.getProblematics().length + " problematics");
                 }
-            	System.out.println("Response has got " + rResponse.getException() + " exceptions");
+                System.out.println("Response has got " + rResponse.getException() + " exceptions");
             }
-            	
-            
+
             ReminderObject[] reminder2 = rResponse.getReminder(tz1);
             assertTrue("Found no reminders for given timezone", 0 < reminder2.length);
 
@@ -159,6 +165,7 @@ public class Bug7377Test extends AbstractTaskTest {
         }
     }
 
+    @Test
     public void testPublicFolderMove() throws Throwable {
         // Create task with 2 participants and reminder
         final Task task = new Task();
@@ -166,9 +173,7 @@ public class Bug7377Test extends AbstractTaskTest {
         task.setTitle("Test bug #7377");
         final Date remindDate = new Date();
         task.setAlarm(remindDate);
-        final Participant[] parts = new Participant[] {
-            new UserParticipant(client1.getValues().getUserId()),
-            new UserParticipant(client2.getValues().getUserId())
+        final Participant[] parts = new Participant[] { new UserParticipant(client1.getValues().getUserId()), new UserParticipant(client2.getValues().getUserId())
         };
         task.setParticipants(parts);
         {

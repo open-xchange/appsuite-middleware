@@ -71,19 +71,19 @@ public class ICalResource {
     public static final String VTIMEZONE = "VTIMEZONE";
 
     private String eTag;
-	private String href;
+    private String href;
     private final Component vCalendar;
 
-	public ICalResource(String iCalString, String href, String eTag) throws IOException, SimpleICalException {
-		super();
-		this.href = href;
-		this.eTag = eTag;
-		this.vCalendar = SimpleICal.parse(iCalString);
-	}
+    public ICalResource(String iCalString, String href, String eTag) throws IOException, SimpleICalException {
+        super();
+        this.href = href;
+        this.eTag = eTag;
+        this.vCalendar = SimpleICal.parse(iCalString);
+    }
 
-	public ICalResource(String iCalString) throws IOException, com.openexchange.dav.caldav.ical.SimpleICal.SimpleICalException {
-		this(iCalString, null, null);
-	}
+    public ICalResource(String iCalString) throws IOException, com.openexchange.dav.caldav.ical.SimpleICal.SimpleICalException {
+        this(iCalString, null, null);
+    }
 
     public Component getVCalendar() {
         return vCalendar;
@@ -99,48 +99,48 @@ public class ICalResource {
         return 0 < components.size() ? components.get(0) : null;
     }
 
-	public Component getVFreeBusy() {
-	    List<Component> components = vCalendar.getComponents(VFREEBUSY);
-	    return 0 < components.size() ? components.get(0) : null;
+    public Component getVFreeBusy() {
+        List<Component> components = vCalendar.getComponents(VFREEBUSY);
+        return 0 < components.size() ? components.get(0) : null;
     }
 
-	public List<Component> getVEvents() {
-	    return vCalendar.getComponents(VEVENT);
+    public List<Component> getVEvents() {
+        return vCalendar.getComponents(VEVENT);
     }
 
-	public List<Component> getVFreeBusys() {
-	    return vCalendar.getComponents(VFREEBUSY);
-	}
+    public List<Component> getVFreeBusys() {
+        return vCalendar.getComponents(VFREEBUSY);
+    }
 
-	public void addComponent(Component component) {
-	    vCalendar.getComponents().add(component);
-	}
+    public void addComponent(Component component) {
+        vCalendar.getComponents().add(component);
+    }
 
-	@Override
-	public String toString() {
-	    return ICalUtils.fold(this.vCalendar.toString());
-	}
+    @Override
+    public String toString() {
+        return ICalUtils.fold(this.vCalendar.toString());
+    }
 
-	/**
-	 * @return the eTag
-	 */
-	public String getETag() {
-		return eTag;
-	}
+    /**
+     * @return the eTag
+     */
+    public String getETag() {
+        return eTag;
+    }
 
-	public void setEtag(String eTag) {
-		this.eTag = eTag;
-	}
+    public void setEtag(String eTag) {
+        this.eTag = eTag;
+    }
 
-	/**
-	 * @return the href
-	 */
-	public String getHref() {
-		return href;
-	}
+    /**
+     * @return the href
+     */
+    public String getHref() {
+        return href;
+    }
 
-	public void setHref(String href) {
-		this.href = href;
-	}
+    public void setHref(String href) {
+        this.href = href;
+    }
 
 }

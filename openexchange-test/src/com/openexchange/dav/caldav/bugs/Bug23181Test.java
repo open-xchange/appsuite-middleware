@@ -60,8 +60,6 @@ import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.Tree;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.caldav.CalDAVTest;
@@ -72,6 +70,7 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.test.CalendarTestManager;
+import com.openexchange.test.pool.TestUser;
 
 /**
  * {@link Bug23181Test}
@@ -83,20 +82,28 @@ import com.openexchange.test.CalendarTestManager;
 public class Bug23181Test extends CalDAVTest {
 
     private CalendarTestManager manager2;
+    private TestUser testUser2;
 
     @Before
     public void setUp() throws Exception {
-        manager2 = new CalendarTestManager(new AJAXClient(User.User2));
+        super.setUp();
+        manager2 = new CalendarTestManager(getClient2());
         manager2.setFailOnError(true);
+        testUser2 = testContext.acquireUser();
+
     }
 
     @After
     public void tearDown() throws Exception {
-        if (null != this.manager2) {
-            this.manager2.cleanUp();
-            if (null != manager2.getClient()) {
-                manager2.getClient().logout();
+        try {
+            if (null != this.manager2) {
+                this.manager2.cleanUp();
+                if (null != manager2.getClient()) {
+                    manager2.getClient().logout();
+                }
             }
+        } finally {
+            super.tearDown();
         }
     }
 
@@ -109,7 +116,7 @@ public class Bug23181Test extends CalDAVTest {
         /*
          * Create appointment in user B's calendar on server
          */
-        String userA = client.execute(new GetRequest(Tree.DefaultAddress)).getString();
+        String userA = getClient().execute(new GetRequest(Tree.DefaultAddress)).getString();
         String userB = manager2.getClient().execute(new GetRequest(Tree.DefaultAddress)).getString();
         String uid = randomUID();
         String summary = "Bug23181Test";
@@ -128,31 +135,7 @@ public class Bug23181Test extends CalDAVTest {
         /*
          * confirm updated appointment as user A in client
          */
-        String iCal =
-            "BEGIN:VCALENDAR" + "\r\n" +
-            "METHOD:REQUEST" + "\r\n" +
-            "PRODID:Microsoft Exchange Server 2007" + "\r\n" +
-            "VERSION:2.0" + "\r\n" +
-            "CALSCALE:GREGORIAN" + "\r\n" +
-            "BEGIN:VEVENT" + "\r\n" +
-            "ORGANIZER;CN=Extern 1:MAILTO:extern1@example.com" + "\r\n" +
-            "ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE;CN=Extern 2:MAILTO:extern2@example.com" + "\r\n" +
-            "ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE;CN=Extern 3:MAILTO:extern3@example.com" + "\r\n" +
-            "ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE;CN=" + userB + ":MAILTO:" + userB + "\r\n" +
-            "ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;RSVP=TRUE;CN=" + userA + ":MAILTO:" + userA + "\r\n" +
-            "CREATED:" + formatAsUTC(new Date()) + "\r\n" +
-            "UID:" + uid + "\r\n" +
-            "DTEND:" + formatAsUTC(end) + "\r\n" +
-            "TRANSP:OPAQUE" + "\r\n" +
-            "CLASS:PUBLIC" + "\r\n" +
-            "SUMMARY:" + summary + "\r\n" +
-            "LOCATION:" + location + "\r\n" +
-            "DTSTAMP:" + formatAsUTC(new Date()) + "\r\n" +
-            "DTSTART:" + formatAsUTC(start) + "\r\n" +
-            "SEQUENCE:1" + "\r\n" +
-            "END:VEVENT" + "\r\n" +
-            "END:VCALENDAR"
-        ;
+        String iCal = "BEGIN:VCALENDAR" + "\r\n" + "METHOD:REQUEST" + "\r\n" + "PRODID:Microsoft Exchange Server 2007" + "\r\n" + "VERSION:2.0" + "\r\n" + "CALSCALE:GREGORIAN" + "\r\n" + "BEGIN:VEVENT" + "\r\n" + "ORGANIZER;CN=Extern 1:MAILTO:extern1@example.com" + "\r\n" + "ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE;CN=Extern 2:MAILTO:extern2@example.com" + "\r\n" + "ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE;CN=Extern 3:MAILTO:extern3@example.com" + "\r\n" + "ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE;CN=" + userB + ":MAILTO:" + userB + "\r\n" + "ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;RSVP=TRUE;CN=" + userA + ":MAILTO:" + userA + "\r\n" + "CREATED:" + formatAsUTC(new Date()) + "\r\n" + "UID:" + uid + "\r\n" + "DTEND:" + formatAsUTC(end) + "\r\n" + "TRANSP:OPAQUE" + "\r\n" + "CLASS:PUBLIC" + "\r\n" + "SUMMARY:" + summary + "\r\n" + "LOCATION:" + location + "\r\n" + "DTSTAMP:" + formatAsUTC(new Date()) + "\r\n" + "DTSTART:" + formatAsUTC(start) + "\r\n" + "SEQUENCE:1" + "\r\n" + "END:VEVENT" + "\r\n" + "END:VCALENDAR";
         assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putICal(uid, iCal));
         /*
          * verify appointment as user A on server
@@ -221,8 +204,8 @@ public class Bug23181Test extends CalDAVTest {
         /*
          * Create appointment in user B's calendar on server
          */
-        String userA = super.getLogin(User.User1);
-        String userB = super.getLogin(User.User2);
+        String userA = testUser.getLogin();
+        String userB = testUser2.getLogin();
         String uid = randomUID();
         String summary = "Bug23181Test2";
         String location = "tbd";
@@ -245,31 +228,7 @@ public class Bug23181Test extends CalDAVTest {
         /*
          * try to confirm updated appointment as user A in client
          */
-        String iCal =
-            "BEGIN:VCALENDAR" + "\r\n" +
-            "METHOD:REQUEST" + "\r\n" +
-            "PRODID:Microsoft Exchange Server 2007" + "\r\n" +
-            "VERSION:2.0" + "\r\n" +
-            "CALSCALE:GREGORIAN" + "\r\n" +
-            "BEGIN:VEVENT" + "\r\n" +
-            "ORGANIZER;CN=Extern 1:MAILTO:extern1@example.com" + "\r\n" +
-            "ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE;CN=Extern 2:MAILTO:extern2@example.com" + "\r\n" +
-            "ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE;CN=Extern 3:MAILTO:extern3@example.com" + "\r\n" +
-            "ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE;CN=" + userB + ":MAILTO:" + userB + "\r\n" +
-            "ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;RSVP=TRUE;CN=" + userA + ":MAILTO:" + userA + "\r\n" +
-            "CREATED:" + formatAsUTC(new Date()) + "\r\n" +
-            "UID:" + uid + "\r\n" +
-            "DTEND:" + formatAsUTC(end) + "\r\n" +
-            "TRANSP:OPAQUE" + "\r\n" +
-            "CLASS:PUBLIC" + "\r\n" +
-            "SUMMARY:" + summary + "\r\n" +
-            "LOCATION:abcdefg" + "\r\n" +
-            "DTSTAMP:" + formatAsUTC(new Date()) + "\r\n" +
-            "DTSTART:" + formatAsUTC(start) + "\r\n" +
-            "SEQUENCE:0" + "\r\n" +
-            "END:VEVENT" + "\r\n" +
-            "END:VCALENDAR"
-        ;
+        String iCal = "BEGIN:VCALENDAR" + "\r\n" + "METHOD:REQUEST" + "\r\n" + "PRODID:Microsoft Exchange Server 2007" + "\r\n" + "VERSION:2.0" + "\r\n" + "CALSCALE:GREGORIAN" + "\r\n" + "BEGIN:VEVENT" + "\r\n" + "ORGANIZER;CN=Extern 1:MAILTO:extern1@example.com" + "\r\n" + "ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE;CN=Extern 2:MAILTO:extern2@example.com" + "\r\n" + "ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE;CN=Extern 3:MAILTO:extern3@example.com" + "\r\n" + "ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE;CN=" + userB + ":MAILTO:" + userB + "\r\n" + "ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;RSVP=TRUE;CN=" + userA + ":MAILTO:" + userA + "\r\n" + "CREATED:" + formatAsUTC(new Date()) + "\r\n" + "UID:" + uid + "\r\n" + "DTEND:" + formatAsUTC(end) + "\r\n" + "TRANSP:OPAQUE" + "\r\n" + "CLASS:PUBLIC" + "\r\n" + "SUMMARY:" + summary + "\r\n" + "LOCATION:abcdefg" + "\r\n" + "DTSTAMP:" + formatAsUTC(new Date()) + "\r\n" + "DTSTART:" + formatAsUTC(start) + "\r\n" + "SEQUENCE:0" + "\r\n" + "END:VEVENT" + "\r\n" + "END:VCALENDAR";
         assertEquals("response code wrong", StatusCodes.SC_CONFLICT, super.putICal(uid, iCal));
     }
 
@@ -278,8 +237,8 @@ public class Bug23181Test extends CalDAVTest {
         /*
          * Create appointment in user B's calendar on server
          */
-        String userA = super.getLogin(User.User1);
-        String userB = super.getLogin(User.User2);
+        String userA = testUser.getLogin();
+        String userB = testUser2.getLogin();
         String uid = randomUID();
         String summary = "Bug23181Test3";
         String location = "tbd";
@@ -297,31 +256,7 @@ public class Bug23181Test extends CalDAVTest {
         /*
          * try to confirm updated appointment as user A in client
          */
-        String iCal =
-            "BEGIN:VCALENDAR" + "\r\n" +
-            "METHOD:REQUEST" + "\r\n" +
-            "PRODID:Microsoft Exchange Server 2007" + "\r\n" +
-            "VERSION:2.0" + "\r\n" +
-            "CALSCALE:GREGORIAN" + "\r\n" +
-            "BEGIN:VEVENT" + "\r\n" +
-            "ORGANIZER;CN=Extern 1:MAILTO:extern4@example.com" + "\r\n" +
-            "ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE;CN=Extern 2:MAILTO:extern2@example.com" + "\r\n" +
-            "ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE;CN=Extern 3:MAILTO:extern3@example.com" + "\r\n" +
-            "ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE;CN=" + userB + ":MAILTO:" + userB + "\r\n" +
-            "ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;RSVP=TRUE;CN=" + userA + ":MAILTO:" + userA + "\r\n" +
-            "CREATED:" + formatAsUTC(new Date()) + "\r\n" +
-            "UID:" + uid + "\r\n" +
-            "DTEND:" + formatAsUTC(end) + "\r\n" +
-            "TRANSP:OPAQUE" + "\r\n" +
-            "CLASS:PUBLIC" + "\r\n" +
-            "SUMMARY:" + summary + "\r\n" +
-            "LOCATION:abcdefg" + "\r\n" +
-            "DTSTAMP:" + formatAsUTC(new Date()) + "\r\n" +
-            "DTSTART:" + formatAsUTC(start) + "\r\n" +
-            "SEQUENCE:1" + "\r\n" +
-            "END:VEVENT" + "\r\n" +
-            "END:VCALENDAR"
-        ;
+        String iCal = "BEGIN:VCALENDAR" + "\r\n" + "METHOD:REQUEST" + "\r\n" + "PRODID:Microsoft Exchange Server 2007" + "\r\n" + "VERSION:2.0" + "\r\n" + "CALSCALE:GREGORIAN" + "\r\n" + "BEGIN:VEVENT" + "\r\n" + "ORGANIZER;CN=Extern 1:MAILTO:extern4@example.com" + "\r\n" + "ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE;CN=Extern 2:MAILTO:extern2@example.com" + "\r\n" + "ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE;CN=Extern 3:MAILTO:extern3@example.com" + "\r\n" + "ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE;CN=" + userB + ":MAILTO:" + userB + "\r\n" + "ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;RSVP=TRUE;CN=" + userA + ":MAILTO:" + userA + "\r\n" + "CREATED:" + formatAsUTC(new Date()) + "\r\n" + "UID:" + uid + "\r\n" + "DTEND:" + formatAsUTC(end) + "\r\n" + "TRANSP:OPAQUE" + "\r\n" + "CLASS:PUBLIC" + "\r\n" + "SUMMARY:" + summary + "\r\n" + "LOCATION:abcdefg" + "\r\n" + "DTSTAMP:" + formatAsUTC(new Date()) + "\r\n" + "DTSTART:" + formatAsUTC(start) + "\r\n" + "SEQUENCE:1" + "\r\n" + "END:VEVENT" + "\r\n" + "END:VCALENDAR";
         assertEquals("response code wrong", StatusCodes.SC_CONFLICT, super.putICal(uid, iCal));
     }
 

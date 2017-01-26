@@ -1,15 +1,12 @@
 package com.openexchange.ajax.importexport;
 
+import static org.junit.Assert.assertFalse;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.ajax.importexport.actions.ICalImportRequest;
 import com.openexchange.ajax.importexport.actions.ICalImportResponse;
 
 /** @author Tobias Prinz */
 public class Bug17393Test extends ManagedAppointmentTest {
-
-	public Bug17393Test(String name) {
-		super(name);
-	}
 
 	public static String CULPRIT = "BEGIN:VCALENDAR\n"
 		+ "PRODID:Open-Xchange\n"
@@ -73,10 +70,10 @@ public class Bug17393Test extends ManagedAppointmentTest {
 		+ "END:VEVENT\n"
 		+ "END:VCALENDAR\n";
 
-	public void testChangeException() throws Exception{
-		ICalImportRequest request = new ICalImportRequest(folder.getObjectID(), CULPRIT);
-		ICalImportResponse response = getClient().execute(request);
-		assertFalse(response.hasConflicts());
-		assertFalse(response.hasError());
-	}
+    public void testChangeException() throws Exception {
+        ICalImportRequest request = new ICalImportRequest(folder.getObjectID(), CULPRIT);
+        ICalImportResponse response = getClient().execute(request);
+        assertFalse(response.hasConflicts());
+        assertFalse(response.hasError());
+    }
 }

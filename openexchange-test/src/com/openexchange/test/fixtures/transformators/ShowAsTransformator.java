@@ -46,20 +46,26 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.test.fixtures.transformators;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 
 public class ShowAsTransformator implements Transformator {
+
     @Override
     public Object transform(final String value) throws OXException {
-        if("RESERVED".equalsIgnoreCase(value)) { return Appointment.RESERVED; }
-        else if("TEMPORARY".equalsIgnoreCase(value)) { return Appointment.TEMPORARY; }
-        else if("ABSENT".equalsIgnoreCase(value)) { return Appointment.ABSENT; }
-        else if("FREE".equalsIgnoreCase(value)) { return Appointment.FREE; }
-        else {
-            throw OXException.general("Don't know how to show appointments as : "+value);
+        if ("RESERVED".equalsIgnoreCase(value)) {
+            return Appointment.RESERVED;
+        } else if ("TEMPORARY".equalsIgnoreCase(value)) {
+            return Appointment.TEMPORARY;
+        } else if ("ABSENT".equalsIgnoreCase(value)) {
+            return Appointment.ABSENT;
+        } else if ("FREE".equalsIgnoreCase(value)) {
+            return Appointment.FREE;
+        } else {
+            throw OXException.general("Don't know how to show appointments as : " + value);
         }
     }
 }

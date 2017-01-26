@@ -58,6 +58,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.lang3.StringEscapeUtils;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.java.Streams;
@@ -200,7 +201,8 @@ public class TestServlet extends HttpServlet {
             }
             page.append("<br>");
         }
-        page.append("</p><p>The content: ").append(saneScriptTags(this.getBody(req)));
+        
+        page.append("</p><p>The content: ").append(StringEscapeUtils.escapeHtml4(saneScriptTags(this.getBody(req))));
         page.append("</p></body>\n</html>");
         resp.setContentType("text/html; charset=UTF-8");
         final byte[] output = page.toString().getBytes(com.openexchange.java.Charsets.UTF_8);

@@ -73,24 +73,34 @@ public class DefaultTrustManager extends AbstractTrustManager {
     }
 
     private static X509ExtendedTrustManager initDefaultTrustManager() {
-        boolean useDefaultTruststore = Services.getService(SSLConfigurationService.class).isDefaultTruststoreEnabled();
-
-        if (useDefaultTruststore) {
-            try {
-                TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-                tmf.init((KeyStore) null); // Using null here initializes the TMF with the default trust store.
-
-                for (TrustManager tm : tmf.getTrustManagers()) {
-                    if (tm instanceof X509ExtendedTrustManager) {
-                        return (X509ExtendedTrustManager) tm;
-                    }
-                }
-            } catch (KeyStoreException | NoSuchAlgorithmException e) {
-                LOG.error("Unable to initialize default truststore.", e);
-                //TODO re-throw or OXException?
+        boolean useDefaultTruststore;
+        {
+            SSLConfigurationService sslConfigService = Services.getService(SSLConfigurationService.class);
+            if (null == sslConfigService) {
+                LOG.warn("Absent service " + SSLConfigurationService.class.getName() + ". Assuming default JVM truststore is supposed to be used.");
+                useDefaultTruststore = true;
+            } else {
+                useDefaultTruststore = sslConfigService.isDefaultTruststoreEnabled();
             }
-        } else {
-            LOG.info("Using default JVM truststore is disabled by configuration.");
+        }
+
+        if (false == useDefaultTruststore) {
+            LOG.info("Using default JVM truststore is disabled.");
+            return null;
+        }
+
+        try {
+            TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            tmf.init((KeyStore) null); // Using null here initializes the TMF with the default trust store.
+
+            for (TrustManager tm : tmf.getTrustManagers()) {
+                if (tm instanceof X509ExtendedTrustManager) {
+                    return (X509ExtendedTrustManager) tm;
+                }
+            }
+        } catch (KeyStoreException | NoSuchAlgorithmException e) {
+            LOG.error("Unable to initialize default truststore.", e);
+            //TODO re-throw or OXException?
         }
 
         return null;

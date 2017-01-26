@@ -58,7 +58,6 @@ import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import com.openexchange.java.util.UUIDs;
 
-
 /**
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */

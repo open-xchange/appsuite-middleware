@@ -1,6 +1,7 @@
 /**
  *
  */
+
 package com.openexchange.configuration;
 
 import com.openexchange.exception.OXException;
@@ -37,13 +38,14 @@ public class TestConfig extends AbstractConfig {
     protected String getPropertyFileName() throws OXException {
         String fileName = System.getProperty(KEY);
         if (null == fileName) {
-        	fileName = "conf/test.properties";
+            fileName = "conf/test.properties";
         }
-    	return fileName;
+        return fileName;
     }
 
     /**
      * Reads the configuration.
+     * 
      * @throws OXException if reading configuration fails.
      */
     public static void init() throws OXException {
@@ -70,6 +72,10 @@ public class TestConfig extends AbstractConfig {
          */
         AJAX_PROPS("ajaxPropertiesFile"),
         /**
+         * provisioning.properties
+         */
+        PROV_PROPS("provisioningFile"),
+        /**
          * mail.properties
          */
         MAIL_PROPS("mailPropertiesFile"),
@@ -95,8 +101,9 @@ public class TestConfig extends AbstractConfig {
 
         /**
          * Default constructor.
+         * 
          * @param propertyName Name of the property in the test.properties
-         * file.
+         *            file.
          */
         private Property(final String propertyName) {
             this.propertyName = propertyName;

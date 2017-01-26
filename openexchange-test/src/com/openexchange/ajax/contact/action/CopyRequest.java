@@ -54,7 +54,6 @@ import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-
 /**
  * {@link CopyRequest}
  *

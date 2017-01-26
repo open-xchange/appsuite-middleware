@@ -49,8 +49,9 @@
 
 package com.openexchange.ajax.spellcheck;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * {@link SpellCheckTestSuite}
@@ -58,24 +59,14 @@ import junit.framework.TestSuite;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  *
  */
-public final class SpellCheckTestSuite extends TestSuite {
+@RunWith(ParallelSuite.class)
+@Suite.SuiteClasses({
+    com.openexchange.ajax.spellcheck.CheckTest.class,
+    com.openexchange.ajax.spellcheck.SuggestionsTest.class,
+    com.openexchange.ajax.spellcheck.UserWordTest.class,
+    com.openexchange.ajax.spellcheck.ListTest.class,
 
-	/**
-	 * Initializes a new {@link SpellCheckTestSuite}
-	 */
-	private SpellCheckTestSuite() {
-		super();
-	}
+})
+public final class SpellCheckTestSuite  {
 
-	/**
-	 * @return a test suite containing smoke tests.
-	 */
-	public static Test suite() {
-		final TestSuite suite = new TestSuite();
-		suite.addTestSuite(com.openexchange.ajax.spellcheck.CheckTest.class);
-		suite.addTestSuite(com.openexchange.ajax.spellcheck.SuggestionsTest.class);
-		suite.addTestSuite(com.openexchange.ajax.spellcheck.UserWordTest.class);
-		suite.addTestSuite(com.openexchange.ajax.spellcheck.ListTest.class);
-		return suite;
-	}
 }

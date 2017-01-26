@@ -16,9 +16,6 @@
  */
 package org.apache.tika.parser.chm;
 
-import junit.framework.Assert;
-import junit.framework.TestCase;
-
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.parser.chm.accessor.ChmDirectoryListingSet;
 import org.apache.tika.parser.chm.accessor.ChmItsfHeader;
@@ -27,9 +24,10 @@ import org.apache.tika.parser.chm.accessor.ChmLzxcControlData;
 import org.apache.tika.parser.chm.core.ChmCommons;
 import org.apache.tika.parser.chm.core.ChmConstants;
 import org.apache.tika.parser.chm.lzx.ChmLzxState;
+import org.junit.Assert;
+import org.junit.Test;
 
-public class TestChmLzxState extends TestCase {
-    private ChmLzxState chmLzxState;
+public class TestChmLzxState {    private ChmLzxState chmLzxState;
     private int windowSize;
 
     public void setUp() throws Exception {
@@ -78,20 +76,19 @@ public class TestChmLzxState extends TestCase {
         windowSize = (int) clcd.getWindowSize();
     }
 
-    public void testChmLzxStateConstructor() throws TikaException {
+         @Test
+     public void testChmLzxStateConstructor() throws TikaException {
         chmLzxState = new ChmLzxState(windowSize);
         Assert.assertNotNull(chmLzxState);
     }
 
-    public void testToString() throws TikaException {
+         @Test
+     public void testToString() throws TikaException {
         if (chmLzxState == null)
             testChmLzxStateConstructor();
         Assert.assertTrue(chmLzxState.toString().length() > 20);
     }
 
     // TODO add more tests
-
-    public void tearDown() throws Exception {
-    }
 
 }

@@ -66,14 +66,8 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.setuptools.TestConfig;
-import junit.framework.JUnit4TestAdapter;
 
 public class Bug8681forCSV extends AbstractContactTest {
-
-    // workaround for JUnit 3 runner
-    public static junit.framework.Test suite() {
-        return new JUnit4TestAdapter(Bug8681forCSV.class);
-    }
 
     @BeforeClass
     public static void initialize() throws Exception {

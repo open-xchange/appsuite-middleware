@@ -49,11 +49,11 @@
 
 package com.openexchange.groupware.contact;
 
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 import com.openexchange.groupware.contact.helpers.UseCountGlobalFirstComparator;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
-import junit.framework.TestCase;
-
 
 /**
  * {@link UseCountGlobalFirstComparatorTest}
@@ -61,8 +61,9 @@ import junit.framework.TestCase;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class UseCountGlobalFirstComparatorTest extends TestCase {
+public class UseCountGlobalFirstComparatorTest {
 
+    @Test
     public void testGlobalUserFolderBeforeRegularFolder() {
         Contact inGlobalFolder = new Contact();
         inGlobalFolder.setObjectID(1);
@@ -77,6 +78,7 @@ public class UseCountGlobalFirstComparatorTest extends TestCase {
         assertBigger(inGlobalFolder, notInGlobalFolder);
     }
 
+    @Test
     public void testGlobalUserFoldersByUseCount() {
         Contact lowUseCount = new Contact();
         lowUseCount.setObjectID(1);
@@ -91,6 +93,7 @@ public class UseCountGlobalFirstComparatorTest extends TestCase {
         assertBigger(highUseCount, lowUseCount);
     }
 
+    @Test
     public void testRegularFoldersByUseCount() {
         Contact lowUseCount = new Contact();
         lowUseCount.setObjectID(1);
@@ -104,7 +107,6 @@ public class UseCountGlobalFirstComparatorTest extends TestCase {
 
         assertBigger(highUseCount, lowUseCount);
     }
-
 
     private void assertBigger(Contact c1, Contact c2) {
         assertTrue("c1 was lower or equal than c2", 0 < new UseCountGlobalFirstComparator().compare(c1, c2));

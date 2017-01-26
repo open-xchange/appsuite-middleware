@@ -52,6 +52,7 @@ package com.openexchange.subscribe.crawler;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import org.junit.Test;
 import org.yaml.snakeyaml.Yaml;
 import com.openexchange.subscribe.crawler.internal.Step;
 
@@ -62,7 +63,8 @@ import com.openexchange.subscribe.crawler.internal.Step;
  */
 public class GenericSubscribeServiceForGMXTest extends GenericSubscribeServiceTestHelpers {
 
-    public void testGenericSubscribeServiceForGMX() {
+         @Test
+     public void testGenericSubscribeServiceForGMX() {
         // insert valid credentials here
         String username = "";
         String password = "";

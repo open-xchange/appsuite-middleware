@@ -69,6 +69,7 @@ public class CommonUpdatesParser<T extends CommonUpdatesResponse> extends Abstra
 
     /**
      * This method must be overwritten if some more detailed response class should be used instead of the common updates response class.
+     * 
      * @param response the general response object containing methods and data for handling the general JSON response object.
      * @return a detailed response object corresponding to the request and NEVER <code>null</code>.
      */
@@ -91,20 +92,20 @@ public class CommonUpdatesParser<T extends CommonUpdatesResponse> extends Abstra
      *
      * New or modified Objects are represented as array on the toplevel of the response array
      * [
-     *  31279,
-     *  35,
-     *  "UpdatedTask 4",
-     *  null,
-     *  null,
-     *  null,
-     *  null,
-     *  [
-     *    {
-     *      "type": 1,
-     *      "confirmation": 0,
-     *      "id": 5
-     *    }
-     *  ]
+     * 31279,
+     * 35,
+     * "UpdatedTask 4",
+     * null,
+     * null,
+     * null,
+     * null,
+     * [
+     * {
+     * "type": 1,
+     * "confirmation": 0,
+     * "id": 5
+     * }
+     * ]
      * ]
      */
     protected void initUpdatedIds(T updatesResponse) {

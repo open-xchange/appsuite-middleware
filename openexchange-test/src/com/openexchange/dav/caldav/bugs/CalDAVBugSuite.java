@@ -50,15 +50,15 @@
 package com.openexchange.dav.caldav.bugs;
 
 import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * {@link CalDAVBugSuite}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-@RunWith(Suite.class)
+@RunWith(ParallelSuite.class)
 @SuiteClasses({
     Bug21794Test.class,
     Bug22094Test.class,

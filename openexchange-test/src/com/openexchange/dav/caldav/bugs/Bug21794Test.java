@@ -70,56 +70,18 @@ import com.openexchange.groupware.container.UserParticipant;
  */
 public class Bug21794Test extends CalDAVTest {
 
-	@Test
-	public void testDeclineImportedAppointment() throws Exception {
-		/*
-		 * create appointment
-		 */
-		String uid = "WEBEX-MEETING CENTER-6.0292133-" + new Date().getTime();
-		String resourceName = uid.replace(".", "");
-    	Date start = TimeTools.D("next monday at 15:30");
-    	Date end = TimeTools.D("next monday at 16:30");
-		String iCal =
-				"BEGIN:VCALENDAR" + "\r\n" +
-				"VERSION:2.0" + "\r\n" +
-				"PRODID:-//Apple Inc.//iCal 5.0.2//EN" + "\r\n" +
-				"CALSCALE:GREGORIAN" + "\r\n" +
-				"BEGIN:VTIMEZONE" + "\r\n" +
-				"TZID:Europe/Amsterdam" + "\r\n" +
-				"BEGIN:DAYLIGHT" + "\r\n" +
-				"TZOFFSETFROM:+0100" + "\r\n" +
-				"RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU" + "\r\n" +
-				"DTSTART:19810329T020000" + "\r\n" +
-				"TZNAME:CEST" + "\r\n" +
-				"TZOFFSETTO:+0200" + "\r\n" +
-				"END:DAYLIGHT" + "\r\n" +
-				"BEGIN:STANDARD" + "\r\n" +
-				"TZOFFSETFROM:+0200" + "\r\n" +
-				"RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU" + "\r\n" +
-				"DTSTART:19961027T030000" + "\r\n" +
-				"TZNAME:CET" + "\r\n" +
-				"TZOFFSETTO:+0100" + "\r\n" +
-				"END:STANDARD" + "\r\n" +
-				"END:VTIMEZONE" + "\r\n" +
-				"BEGIN:VEVENT" + "\r\n" +
-				"DTEND;TZID=Europe/Amsterdam:" + format(end, "Europe/Amsterdam") + "\r\n" +
-				"TRANSP:OPAQUE" + "\r\n" +
-				"ORGANIZER;CN=\"webex\":MAILTO:messenger@example.com" + "\r\n" +
-				"UID:" + uid + "\r\n" +
-				"DTSTAMP:" + formatAsUTC(new Date()) + "\r\n" +
-				"LOCATION:https://open-xchange.webex.com/open-xchange-en" + "\r\n" +
-				"DESCRIPTION:stripped" + "\r\n" +
-				"SEQUENCE:2" + "\r\n" +
-				"SUMMARY:Agorum Integration" + "\r\n" +
-				"DTSTART;TZID=Europe/Amsterdam:" + format(start, "Europe/Amsterdam") + "\r\n" +
-				"CREATED:" + formatAsUTC(TimeTools.D("yesterday noon")) + "\r\n" +
-				"ATTENDEE;CN=\"Open-Xchange Presenter\";CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIP" + "\r\n" +
-				" ANT:MAILTO:webmeeting1@example.com" + "\r\n" +
-				"END:VEVENT" + "\r\n" +
-				"END:VCALENDAR"
-		;
+    @Test
+    public void testDeclineImportedAppointment() throws Exception {
+        /*
+         * create appointment
+         */
+        String uid = "WEBEX-MEETING CENTER-6.0292133-" + new Date().getTime();
+        String resourceName = uid.replace(".", "");
+        Date start = TimeTools.D("next monday at 15:30");
+        Date end = TimeTools.D("next monday at 16:30");
+        String iCal = "BEGIN:VCALENDAR" + "\r\n" + "VERSION:2.0" + "\r\n" + "PRODID:-//Apple Inc.//iCal 5.0.2//EN" + "\r\n" + "CALSCALE:GREGORIAN" + "\r\n" + "BEGIN:VTIMEZONE" + "\r\n" + "TZID:Europe/Amsterdam" + "\r\n" + "BEGIN:DAYLIGHT" + "\r\n" + "TZOFFSETFROM:+0100" + "\r\n" + "RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU" + "\r\n" + "DTSTART:19810329T020000" + "\r\n" + "TZNAME:CEST" + "\r\n" + "TZOFFSETTO:+0200" + "\r\n" + "END:DAYLIGHT" + "\r\n" + "BEGIN:STANDARD" + "\r\n" + "TZOFFSETFROM:+0200" + "\r\n" + "RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU" + "\r\n" + "DTSTART:19961027T030000" + "\r\n" + "TZNAME:CET" + "\r\n" + "TZOFFSETTO:+0100" + "\r\n" + "END:STANDARD" + "\r\n" + "END:VTIMEZONE" + "\r\n" + "BEGIN:VEVENT" + "\r\n" + "DTEND;TZID=Europe/Amsterdam:" + format(end, "Europe/Amsterdam") + "\r\n" + "TRANSP:OPAQUE" + "\r\n" + "ORGANIZER;CN=\"webex\":MAILTO:messenger@example.com" + "\r\n" + "UID:" + uid + "\r\n" + "DTSTAMP:" + formatAsUTC(new Date()) + "\r\n" + "LOCATION:https://open-xchange.webex.com/open-xchange-en" + "\r\n" + "DESCRIPTION:stripped" + "\r\n" + "SEQUENCE:2" + "\r\n" + "SUMMARY:Agorum Integration" + "\r\n" + "DTSTART;TZID=Europe/Amsterdam:" + format(start, "Europe/Amsterdam") + "\r\n" + "CREATED:" + formatAsUTC(TimeTools.D("yesterday noon")) + "\r\n" + "ATTENDEE;CN=\"Open-Xchange Presenter\";CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIP" + "\r\n" + " ANT:MAILTO:webmeeting1@example.com" + "\r\n" + "END:VEVENT" + "\r\n" + "END:VCALENDAR";
 
-		assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putICal(resourceName, iCal));
+        assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putICal(resourceName, iCal));
         /*
          * verify appointment on server
          */
@@ -137,16 +99,16 @@ public class Bug21794Test extends CalDAVTest {
          */
         List<Property> attendees = iCalResource.getVEvent().getProperties("ATTENDEE");
         for (Property property : attendees) {
-			if (property.getValue().contains(super.getAJAXClient().getValues().getDefaultAddress())) {
-				for (Entry<String, String> attribute : property.getAttributes().entrySet()) {
-					if (attribute.getKey().equals("PARTSTAT")) {
-						attribute.setValue("DECLINED");
-						break;
-					}
-				}
-				break;
-			}
-		}
+            if (property.getValue().contains(super.getAJAXClient().getValues().getDefaultAddress())) {
+                for (Entry<String, String> attribute : property.getAttributes().entrySet()) {
+                    if (attribute.getKey().equals("PARTSTAT")) {
+                        attribute.setValue("DECLINED");
+                        break;
+                    }
+                }
+                break;
+            }
+        }
         assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putICalUpdate(iCalResource));
         /*
          * verify appointment on server
@@ -157,11 +119,11 @@ public class Bug21794Test extends CalDAVTest {
         assertNotNull("appointment has no users", users);
         UserParticipant declinedPartipant = null;
         for (UserParticipant user : users) {
-			if (getAJAXClient().getValues().getUserId() == user.getIdentifier()) {
-				declinedPartipant = user;
-				break;
-			}
-		}
+            if (getAJAXClient().getValues().getUserId() == user.getIdentifier()) {
+                declinedPartipant = user;
+                break;
+            }
+        }
         assertNotNull("declining participant not found", declinedPartipant);
         assertEquals("confirmation status wrong", Appointment.DECLINE, declinedPartipant.getConfirm());
         /*
@@ -173,13 +135,13 @@ public class Bug21794Test extends CalDAVTest {
         Property attendee = null;
         attendees = iCalResource.getVEvent().getProperties("ATTENDEE");
         for (Property property : attendees) {
-			if (property.getValue().contains(super.getAJAXClient().getValues().getDefaultAddress())) {
-				attendee = property;
-				break;
-			}
-		}
+            if (property.getValue().contains(super.getAJAXClient().getValues().getDefaultAddress())) {
+                attendee = property;
+                break;
+            }
+        }
         assertNotNull("declining attendee not found", attendee);
         assertEquals("partstat status wrong", "DECLINED", attendee.getAttribute("PARTSTAT"));
-	}
+    }
 
 }

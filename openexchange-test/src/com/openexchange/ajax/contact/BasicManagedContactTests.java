@@ -49,9 +49,14 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import org.junit.Test;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.Order;
@@ -63,59 +68,58 @@ import com.openexchange.test.ContactTestManager;
  */
 public class BasicManagedContactTests extends AbstractManagedContactTest {
 
-    public BasicManagedContactTests(String name) {
-        super(name);
-    }
-
+    @Test
     public void testCreateAndGetContact() {
         Contact expected = generateContact();
 
-        manager.newAction(expected);
+        cotm.newAction(expected);
 
-        Contact actual = manager.getAction(folderID, expected.getObjectID());
+        Contact actual = cotm.getAction(folderID, expected.getObjectID());
 
         assertEquals("Surname should match", expected.getSurName(), actual.getSurName());
         assertEquals("Given name should match", expected.getGivenName(), actual.getGivenName());
     }
 
+    @Test
     public void testDeleteContact() {
         Contact expected = generateContact();
 
-        manager.newAction(expected);
+        cotm.newAction(expected);
 
-        manager.deleteAction(expected);
+        cotm.deleteAction(expected);
 
-        Contact found = manager.getAction(folderID, expected.getObjectID());
+        Contact found = cotm.getAction(folderID, expected.getObjectID());
         assertNull("Should not find a contact after deletion", found);
     }
 
+    @Test
     public void testGetAllContacts() {
-        int numberBefore = manager.allAction(folderID).length;
+        int numberBefore = cotm.allAction(folderID).length;
 
         Contact expected = generateContact();
 
-        manager.newAction(expected);
+        cotm.newAction(expected);
 
-        Contact[] allContactsOnServer = manager.allAction(folderID);
+        Contact[] allContactsOnServer = cotm.allAction(folderID);
 
         assertEquals("Should find exactly one more contact", numberBefore + 1, allContactsOnServer.length);
     }
 
+    @Test
     public void testGetAllContactsWithColumns() {
-        int numberBefore = manager.allAction(folderID).length;
+        int numberBefore = cotm.allAction(folderID).length;
 
         Contact expected = generateContact();
 
-        manager.newAction(expected);
+        cotm.newAction(expected);
 
-        Contact[] allContactsOnServer = manager.allAction(folderID, new int[] { 1, 4, 5, 20 });
+        Contact[] allContactsOnServer = cotm.allAction(folderID, new int[] { 1, 4, 5, 20 });
 
         assertEquals("Should find exactly one more contact", numberBefore + 1, allContactsOnServer.length);
 
-
         Contact actual = null;
-        for(Contact temp: allContactsOnServer){
-            if(temp.getObjectID() == expected.getObjectID()) {
+        for (Contact temp : allContactsOnServer) {
+            if (temp.getObjectID() == expected.getObjectID()) {
                 actual = temp;
             }
         }
@@ -126,86 +130,89 @@ public class BasicManagedContactTests extends AbstractManagedContactTest {
         assertTrue("Should contain field #20", actual.contains(20));
     }
 
+    @Test
     public void testGetAllContactsOrderedByCollationAscending() {
-		List<String> sinograph = Arrays.asList( "\u963f", "\u6ce2","\u6b21","\u7684","\u9e45","\u5bcc","\u54e5","\u6cb3","\u6d01","\u79d1","\u4e86","\u4e48","\u5462","\u54e6","\u6279","\u4e03","\u5982","\u56db","\u8e22","\u5c4b","\u897f","\u8863","\u5b50");
+        List<String> sinograph = Arrays.asList("\u963f", "\u6ce2", "\u6b21", "\u7684", "\u9e45", "\u5bcc", "\u54e5", "\u6cb3", "\u6d01", "\u79d1", "\u4e86", "\u4e48", "\u5462", "\u54e6", "\u6279", "\u4e03", "\u5982", "\u56db", "\u8e22", "\u5c4b", "\u897f", "\u8863", "\u5b50");
 
-		for(String graphem: sinograph){
-			manager.newAction( ContactTestManager.generateContact(folderID, graphem) );
-		}
+        for (String graphem : sinograph) {
+            cotm.newAction(ContactTestManager.generateContact(folderID, graphem));
+        }
 
-		int fieldNum = ContactField.SUR_NAME.getNumber();
-        Contact[] allContacts = manager.allAction(folderID, new int[] { 1, 4, 5, 20, fieldNum }, fieldNum, Order.ASCENDING, "gb2312" );
+        int fieldNum = ContactField.SUR_NAME.getNumber();
+        Contact[] allContacts = cotm.allAction(folderID, new int[] { 1, 4, 5, 20, fieldNum }, fieldNum, Order.ASCENDING, "gb2312");
 
-        for(int i = 0, len = sinograph.size(); i < len; i++){
-        	String expected = sinograph.get(i);
-        	assertEquals("Element #"+i, expected, allContacts[i].getSurName());
+        for (int i = 0, len = sinograph.size(); i < len; i++) {
+            String expected = sinograph.get(i);
+            assertEquals("Element #" + i, expected, allContacts[i].getSurName());
         }
     }
 
+    @Test
     public void testGetAllContactsOrderedByCollationDescending() {
-		List<String> sinograph = Arrays.asList( "\u963f", "\u6ce2","\u6b21","\u7684","\u9e45","\u5bcc","\u54e5","\u6cb3","\u6d01","\u79d1","\u4e86","\u4e48","\u5462","\u54e6","\u6279","\u4e03","\u5982","\u56db","\u8e22","\u5c4b","\u897f","\u8863","\u5b50");
+        List<String> sinograph = Arrays.asList("\u963f", "\u6ce2", "\u6b21", "\u7684", "\u9e45", "\u5bcc", "\u54e5", "\u6cb3", "\u6d01", "\u79d1", "\u4e86", "\u4e48", "\u5462", "\u54e6", "\u6279", "\u4e03", "\u5982", "\u56db", "\u8e22", "\u5c4b", "\u897f", "\u8863", "\u5b50");
 
-		for(String graphem: sinograph){
-			manager.newAction( ContactTestManager.generateContact(folderID, graphem) );
-		}
+        for (String graphem : sinograph) {
+            cotm.newAction(ContactTestManager.generateContact(folderID, graphem));
+        }
 
-		int fieldNum = ContactField.SUR_NAME.getNumber();
-        Contact[] allContacts = manager.allAction(folderID, new int[] { 1, 4, 5, 20, fieldNum }, fieldNum, Order.DESCENDING, "gb2312" );
+        int fieldNum = ContactField.SUR_NAME.getNumber();
+        Contact[] allContacts = cotm.allAction(folderID, new int[] { 1, 4, 5, 20, fieldNum }, fieldNum, Order.DESCENDING, "gb2312");
 
-        for(int i = 0, len = sinograph.size(); i < len; i++){
-        	String expected = sinograph.get(len-i-1);
-        	assertEquals("Element #"+i, expected, allContacts[i].getSurName());
+        for (int i = 0, len = sinograph.size(); i < len; i++) {
+            String expected = sinograph.get(len - i - 1);
+            assertEquals("Element #" + i, expected, allContacts[i].getSurName());
         }
     }
-
 
     /**
      * The "wonder field" is 607, which implies sorting by last name, company name, email1, email2 and display name.
      * Currently not testing e-mail since it is not supported yet.
      */
-	public void testGetAllContactsOrderedByCollationOrderedByWonderField() {
-		List<String> sinograph = Arrays.asList( "\u963f", "\u6ce2","\u6b21","\u7684","\u9e45","\u5bcc","\u54e5","\u6cb3","\u6d01"); //,"\u79d1","\u4e86","\u4e48","\u5462","\u54e6","\u6279","\u4e03","\u5982","\u56db","\u8e22","\u5c4b","\u897f","\u8863","\u5b50");
+    @Test
+    public void testGetAllContactsOrderedByCollationOrderedByWonderField() {
+        List<String> sinograph = Arrays.asList("\u963f", "\u6ce2", "\u6b21", "\u7684", "\u9e45", "\u5bcc", "\u54e5", "\u6cb3", "\u6d01"); //,"\u79d1","\u4e86","\u4e48","\u5462","\u54e6","\u6279","\u4e03","\u5982","\u56db","\u8e22","\u5c4b","\u897f","\u8863","\u5b50");
 
-    	List<String> lastNames = Arrays.asList( "\u963f", "\u6ce2","\u6b21","\u7684");
-    	List<String> displayNames = Arrays.asList( "\u9e45", "\u5bcc");
-    	List<String> companyNames = Arrays.asList( "\u54e5","\u6cb3","\u6d01");
-    	//List<String> email1s = Arrays.asList( "\u79d1@somewhere.invalid","\u4e86@somewhere.invalid","\u4e48@somewhere.invalid");
-    	//List<String> email2s = Arrays.asList( "\u5462@somewhere.invalid","\u54e6@somewhere.invalid","\u6279@somewhere.invalid","\u4e03@somewhere.invalid");
+        List<String> lastNames = Arrays.asList("\u963f", "\u6ce2", "\u6b21", "\u7684");
+        List<String> displayNames = Arrays.asList("\u9e45", "\u5bcc");
+        List<String> companyNames = Arrays.asList("\u54e5", "\u6cb3", "\u6d01");
+        //List<String> email1s = Arrays.asList( "\u79d1@somewhere.invalid","\u4e86@somewhere.invalid","\u4e48@somewhere.invalid");
+        //List<String> email2s = Arrays.asList( "\u5462@somewhere.invalid","\u54e6@somewhere.invalid","\u6279@somewhere.invalid","\u4e03@somewhere.invalid");
 
-    	List<List<String>> values = Arrays.asList(lastNames, displayNames, companyNames); //,email1s, email2s);
-    	List<ContactField> fields = Arrays.asList( ContactField.SUR_NAME, ContactField.DISPLAY_NAME, ContactField.COMPANY); //ContactField.EMAIL1, ContactField.EMAIL2 );
+        List<List<String>> values = Arrays.asList(lastNames, displayNames, companyNames); //,email1s, email2s);
+        List<ContactField> fields = Arrays.asList(ContactField.SUR_NAME, ContactField.DISPLAY_NAME, ContactField.COMPANY); //ContactField.EMAIL1, ContactField.EMAIL2 );
 
-    	int valPos = 0;
-		for(ContactField field: fields) {
-			List<String> values2 = values.get(valPos++);
-			for(String value: values2){
-				Contact tmp = new Contact();
-				tmp.setParentFolderID(folderID);
-				tmp.set(field.getNumber(), value);
-				tmp.setInfo(value); //we'll use this field to compare afterwards
-				manager.newAction(tmp);
-			}
-		}
+        int valPos = 0;
+        for (ContactField field : fields) {
+            List<String> values2 = values.get(valPos++);
+            for (String value : values2) {
+                Contact tmp = new Contact();
+                tmp.setParentFolderID(folderID);
+                tmp.set(field.getNumber(), value);
+                tmp.setInfo(value); //we'll use this field to compare afterwards
+                cotm.newAction(tmp);
+            }
+        }
 
-		int fieldNum = ContactField.SUR_NAME.getNumber();
-        Contact[] allContacts = manager.allAction(folderID, new int[] { 1, 4, 5, 20, fieldNum, ContactField.INFO.getNumber() }, -1, Order.ASCENDING, "gb2312" );
+        int fieldNum = ContactField.SUR_NAME.getNumber();
+        Contact[] allContacts = cotm.allAction(folderID, new int[] { 1, 4, 5, 20, fieldNum, ContactField.INFO.getNumber() }, -1, Order.ASCENDING, "gb2312");
 
-        for(int i = 0, len = sinograph.size(); i < len; i++){
-        	String expected = sinograph.get(i);
-        	assertEquals("Element #"+i, expected, allContacts[i].getInfo());
+        for (int i = 0, len = sinograph.size(); i < len; i++) {
+            String expected = sinograph.get(i);
+            assertEquals("Element #" + i, expected, allContacts[i].getInfo());
         }
     }
 
+    @Test
     public void testUpdateContactAndGetUpdates() {
         Contact expected = generateContact();
 
-        manager.newAction(expected);
+        cotm.newAction(expected);
 
         expected.setDisplayName("Display name");
 
-        Contact update = manager.updateAction(expected);
+        Contact update = cotm.updateAction(expected);
 
-        Contact[] updated = manager.updatesAction(folderID, new Date(update.getLastModified().getTime() - 1));
+        Contact[] updated = cotm.updatesAction(folderID, new Date(update.getLastModified().getTime() - 1));
 
         assertEquals("Only one contact should have been updated", 1, updated.length);
 
@@ -213,9 +220,10 @@ public class BasicManagedContactTests extends AbstractManagedContactTest {
         assertEquals("Display name should have been updated", expected.getDisplayName(), actual.getDisplayName());
     }
 
+    @Test
     public void testAllWithGBK() throws Exception {
-    	//{"action":"all","module":"contacts","columns":"20,1,5,2,602","folder":"66","collation":"gbk","sort":"502","order":"asc"}
-    	Contact[] allAction = manager.allAction(getClient().getValues().getPrivateContactFolder(), new int[]{20,1,5,2,602}, 502, Order.ASCENDING, "gbk");
-    	assertTrue("Should find more than 0 contacts in the private contact folder", allAction.length > 0);
+        //{"action":"all","module":"contacts","columns":"20,1,5,2,602","folder":"66","collation":"gbk","sort":"502","order":"asc"}
+        Contact[] allAction = cotm.allAction(getClient().getValues().getPrivateContactFolder(), new int[] { 20, 1, 5, 2, 602 }, 502, Order.ASCENDING, "gbk");
+        assertTrue("Should find more than 0 contacts in the private contact folder", allAction.length > 0);
     }
 }

@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.test.fixtures.transformators;
 
 import java.util.Date;
@@ -60,63 +61,62 @@ import com.openexchange.test.fixtures.SimpleCredentials;
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class JChronicDateTransformator implements Transformator{
+public class JChronicDateTransformator implements Transformator {
 
-	private static final Pattern parenthesesRegex = Pattern.compile("(\\{|\\[|\\(.+\\)|\\]|\\})");
-	private static final String fallbackPattern = "dd.MM.yy HH:mm";
-	private final FixtureLoader fixtureLoader;
+    private static final Pattern parenthesesRegex = Pattern.compile("(\\{|\\[|\\(.+\\)|\\]|\\})");
+    private static final String fallbackPattern = "dd.MM.yy HH:mm";
+    private final FixtureLoader fixtureLoader;
 
     public JChronicDateTransformator(FixtureLoader fixtureLoader) {
-		super();
-		this.fixtureLoader = fixtureLoader;
-	}
-
-	@Override
-    public Object transform(String value) throws OXException {
-    	if (null == value) {
-    		return null;
-    	}
-
-    	TimeZone timeZone = null;
-    	final Matcher matcher = parenthesesRegex.matcher(value);
-    	if (matcher.find()) {
-    		String match = matcher.group();
-    		if (null != match) {
-    			match = match.substring(1, match.length() - 1);
-    			if (match.startsWith("users:") && 6 < match.length()) {
-	    			final String user = match.substring(6);
-	    			final SimpleCredentials credentials = fixtureLoader.getFixtures("users", SimpleCredentials.class).getEntry(user).getEntry();
-	    			timeZone = credentials.getTimeZone();
-        		} else {
-        			final String tzID = match.replace(' ', '_');
-        			if (isAvailable(tzID)) {
-        				timeZone = TimeZone.getTimeZone(match);
-        			}
-        		}
-    		}
-    		if (null == timeZone) {
-    			throw OXException.general("unable to parse user / timezone from '" + match.toString() + "'.");
-    		}
-    		value = matcher.replaceFirst("").trim();
-    	}
-
-    	Date date = TimeTools.D(value, timeZone);
-
-    	if(date == null) {
-    	    throw OXException.general("Can't parse date '"+value+"'");
-    	}
-
-    	return date;
+        super();
+        this.fixtureLoader = fixtureLoader;
     }
 
+    @Override
+    public Object transform(String value) throws OXException {
+        if (null == value) {
+            return null;
+        }
+
+        TimeZone timeZone = null;
+        final Matcher matcher = parenthesesRegex.matcher(value);
+        if (matcher.find()) {
+            String match = matcher.group();
+            if (null != match) {
+                match = match.substring(1, match.length() - 1);
+                if (match.startsWith("users:") && 6 < match.length()) {
+                    final String user = match.substring(6);
+                    final SimpleCredentials credentials = fixtureLoader.getFixtures("users", SimpleCredentials.class).getEntry(user).getEntry();
+                    timeZone = credentials.getTimeZone();
+                } else {
+                    final String tzID = match.replace(' ', '_');
+                    if (isAvailable(tzID)) {
+                        timeZone = TimeZone.getTimeZone(match);
+                    }
+                }
+            }
+            if (null == timeZone) {
+                throw OXException.general("unable to parse user / timezone from '" + match.toString() + "'.");
+            }
+            value = matcher.replaceFirst("").trim();
+        }
+
+        Date date = TimeTools.D(value, timeZone);
+
+        if (date == null) {
+            throw OXException.general("Can't parse date '" + value + "'");
+        }
+
+        return date;
+    }
 
     private static boolean isAvailable(final String timeZoneID) {
-		final String[] availableIDs = TimeZone.getAvailableIDs();
-		for (int i = 0; i < availableIDs.length; i++) {
-			if (availableIDs[i].equals(timeZoneID)) {
-				return true;
-			}
-		}
-		return false;
-	}
+        final String[] availableIDs = TimeZone.getAvailableIDs();
+        for (int i = 0; i < availableIDs.length; i++) {
+            if (availableIDs[i].equals(timeZoneID)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

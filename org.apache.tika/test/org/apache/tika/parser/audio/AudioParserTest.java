@@ -16,14 +16,17 @@
  */
 package org.apache.tika.parser.audio;
 
-import junit.framework.TestCase;
-
 import org.apache.tika.Tika;
 import org.apache.tika.metadata.Metadata;
+import org.junit.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
-public class AudioParserTest extends TestCase {
-
-    public void testWAV() throws Exception {
+public class AudioParserTest {
+         @Test
+     public void testWAV() throws Exception {
         String path = "/test-documents/testWAV.wav";
         Metadata metadata = new Metadata();
         String content = new Tika().parseToString(
@@ -38,7 +41,8 @@ public class AudioParserTest extends TestCase {
         assertEquals("", content);
     }
 
-    public void testAIFF() throws Exception {
+         @Test
+     public void testAIFF() throws Exception {
         String path = "/test-documents/testAIFF.aif";
         Metadata metadata = new Metadata();
         String content = new Tika().parseToString(
@@ -53,7 +57,8 @@ public class AudioParserTest extends TestCase {
         assertEquals("", content);
     }
 
-    public void testAU() throws Exception {
+         @Test
+     public void testAU() throws Exception {
         String path = "/test-documents/testAU.au";
         Metadata metadata = new Metadata();
         String content = new Tika().parseToString(

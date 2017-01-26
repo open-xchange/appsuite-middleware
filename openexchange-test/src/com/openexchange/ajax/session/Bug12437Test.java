@@ -49,7 +49,11 @@
 
 package com.openexchange.ajax.session;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.session.actions.LoginRequest;
@@ -61,7 +65,7 @@ import com.openexchange.exception.OXException;
 /**
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class Bug12437Test extends TestCase {
+public final class Bug12437Test {
 
     private AJAXClient client;
 
@@ -69,13 +73,12 @@ public final class Bug12437Test extends TestCase {
 
     private String password;
 
-    public Bug12437Test(final String name) {
-        super(name);
+    public Bug12437Test() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         AJAXConfig.init();
         final AJAXSession session = new AJAXSession();
         client = new AJAXClient(session, true);
@@ -83,15 +86,15 @@ public final class Bug12437Test extends TestCase {
         password = "some invalid password";
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         client.getSession().getConversation().clearContents();
-        super.tearDown();
     }
 
     /**
      * Checks if login with wrong credentials gives LGI-0006.
      */
+    @Test
     public void testWrongErrorCode() throws Throwable {
         LoginRequest request = new LoginRequest(login, password, LoginTools.generateAuthId(), Bug12437Test.class.getName(), "6,15.0", false);
         final LoginResponse response = client.execute(request);

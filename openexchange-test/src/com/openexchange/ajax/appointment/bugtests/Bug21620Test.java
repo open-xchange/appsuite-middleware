@@ -50,9 +50,13 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
@@ -63,7 +67,6 @@ import com.openexchange.ajax.folder.FolderTools;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
@@ -79,29 +82,25 @@ import com.openexchange.server.impl.OCLPermission;
 public class Bug21620Test extends AbstractAJAXSession {
 
     private FolderObject sharedFolder;
-    private Appointment appointment2;
+    private Appointment appointment;
     private AJAXClient clientA;
     private AJAXClient clientB;
     private AJAXClient clientC;
 
-    public Bug21620Test(String name) {
-        super(name);
-    }
-
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         clientA = getClient();
-        clientB = new AJAXClient(User.User2);
-        clientC = new AJAXClient(User.User3);
+        clientB = new AJAXClient(testContext.acquireUser());
+        clientC = new AJAXClient(testContext.acquireUser());
 
         // as user A, create folder shared to user B
-        sharedFolder = Create.createPrivateFolder("shared_" + System.currentTimeMillis(), FolderObject.CALENDAR, client.getValues().getUserId());
-        sharedFolder.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
-        InsertResponse folderInsertResponse = client.execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_NEW, sharedFolder));
+        sharedFolder = Create.createPrivateFolder("shared_" + System.currentTimeMillis(), FolderObject.CALENDAR, clientA.getValues().getUserId());
+        sharedFolder.setParentFolderID(clientA.getValues().getPrivateAppointmentFolder());
+        InsertResponse folderInsertResponse = clientA.execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_NEW, sharedFolder));
         sharedFolder.setObjectID(folderInsertResponse.getId());
-        sharedFolder.setLastModified(client.execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, sharedFolder.getObjectID())).getTimestamp());
-        FolderTools.shareFolder(client, EnumAPI.OX_NEW, sharedFolder.getObjectID(), clientB.getValues().getUserId(), OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+        sharedFolder.setLastModified(clientA.execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, sharedFolder.getObjectID())).getTimestamp());
+        FolderTools.shareFolder(clientA, EnumAPI.OX_NEW, sharedFolder.getObjectID(), clientB.getValues().getUserId(), OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
 
         // prepare appointment
         List<UserParticipant> users = new ArrayList<UserParticipant>();
@@ -115,38 +114,38 @@ public class Bug21620Test extends AbstractAJAXSession {
         participants.add(participantB);
         participants.add(participantC);
 
-        appointment2 = new Appointment();
-        appointment2.setIgnoreConflicts(true);
-        appointment2.setUid(UUID.randomUUID().toString());
-        appointment2.setParentFolderID(sharedFolder.getObjectID());
-        appointment2.setTitle("Bug 21620");
-        appointment2.setStartDate(D("14.04.2012 04:00"));
-        appointment2.setEndDate(D("14.04.2012 04:30"));
-        appointment2.setNumberOfAttachments(0);
-        appointment2.setModifiedBy(clientA.getValues().getUserId());
-        appointment2.setCreatedBy(clientA.getValues().getUserId());
-        appointment2.setFullTime(false);
-        appointment2.setPrivateFlag(false);
-        appointment2.setTimezone("Europe/Berlin");
-        appointment2.setUsers(users);
-        appointment2.setParticipants(participants);
-        appointment2.setOrganizer(clientB.getValues().getDefaultAddress());
-        appointment2.setOrganizerId(clientB.getValues().getUserId());
-        appointment2.setPrincipal(clientA.getValues().getDefaultAddress());
-        appointment2.setPrincipalId(clientA.getValues().getUserId());
+        appointment = new Appointment();
+        appointment.setIgnoreConflicts(true);
+        appointment.setUid(UUID.randomUUID().toString());
+        appointment.setParentFolderID(sharedFolder.getObjectID());
+        appointment.setTitle("Bug 21620");
+        appointment.setStartDate(D("14.04.2012 04:00"));
+        appointment.setEndDate(D("14.04.2012 04:30"));
+        appointment.setNumberOfAttachments(0);
+        appointment.setModifiedBy(clientA.getValues().getUserId());
+        appointment.setCreatedBy(clientA.getValues().getUserId());
+        appointment.setFullTime(false);
+        appointment.setPrivateFlag(false);
+        appointment.setTimezone("Europe/Berlin");
+        appointment.setUsers(users);
+        appointment.setParticipants(participants);
+        appointment.setOrganizer(clientB.getValues().getDefaultAddress());
+        appointment.setOrganizerId(clientB.getValues().getUserId());
+        appointment.setPrincipal(clientA.getValues().getDefaultAddress());
+        appointment.setPrincipalId(clientA.getValues().getUserId());
     }
 
     public void testBug21620() throws Exception {
         /*
          * insert appointment in user a's calendar as user B ("on behalf of user a")
          */
-        InsertRequest insertRequest = new InsertRequest(appointment2, clientB.getValues().getTimeZone());
+        InsertRequest insertRequest = new InsertRequest(appointment, clientB.getValues().getTimeZone());
         AppointmentInsertResponse insertResponse = clientB.execute(insertRequest);
-        insertResponse.fillObject(appointment2);
+        insertResponse.fillObject(appointment);
         /*
          * verify organizer & principal as user B
          */
-        GetRequest getRequest = new GetRequest(appointment2);
+        GetRequest getRequest = new GetRequest(appointment);
         GetResponse getResponse = clientB.execute(getRequest);
         Appointment loadedAppointment = getResponse.getAppointment(clientB.getValues().getTimeZone());
         assertEquals("Wrong organizer ID", clientB.getValues().getUserId(), loadedAppointment.getOrganizerId());
@@ -154,28 +153,20 @@ public class Bug21620Test extends AbstractAJAXSession {
         /*
          * verify organizer & principal as user A
          */
-        getRequest = new GetRequest(appointment2);
+        getRequest = new GetRequest(appointment);
         getResponse = clientB.execute(getRequest);
         loadedAppointment = getResponse.getAppointment(clientA.getValues().getTimeZone());
         assertEquals("Wrong organizer ID", clientB.getValues().getUserId(), loadedAppointment.getOrganizerId());
         assertEquals("Wrong principal ID", clientA.getValues().getUserId(), loadedAppointment.getPrincipalId());
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        if (null != appointment2 && 0 < appointment2.getObjectID()) {
-            getClient().execute(new DeleteRequest(appointment2));
+        try {
+            getClient().execute(new DeleteRequest(appointment));
+        } finally {
+            super.tearDown();
         }
-        if (null != sharedFolder && 0 < sharedFolder.getObjectID()) {
-            client.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_NEW, sharedFolder));
-        }
-        if (null != clientB) {
-            clientB.logout();
-        }
-        if (null != clientC) {
-            clientC.logout();
-        }
-        super.tearDown();
     }
 
 }

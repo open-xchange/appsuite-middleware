@@ -71,7 +71,4 @@ import org.junit.runners.Suite.SuiteClasses;
     RegisterFilestoreTest.class
 })
 public class AdminConsoleUtilTestSuite {
-
-    private AdminConsoleUtilTestSuite() {
-    }
 }

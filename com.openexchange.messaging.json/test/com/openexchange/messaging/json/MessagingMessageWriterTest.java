@@ -58,10 +58,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import junit.framework.TestCase;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.groupware.ldap.SimUser;
@@ -77,15 +77,19 @@ import com.openexchange.messaging.StringContent;
 import com.openexchange.tools.encoding.Base64;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.SimServerSession;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * {@link MessagingMessageWriterTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class MessagingMessageWriterTest extends TestCase {
-
-    public void testWriteSimpleFields() throws JSONException, OXException {
+public class MessagingMessageWriterTest {
+         @Test
+     public void testWriteSimpleFields() throws JSONException, OXException {
 
         final SimpleMessagingMessage message = new SimpleMessagingMessage();
         message.setColorLabel(2);
@@ -110,7 +114,8 @@ public class MessagingMessageWriterTest extends TestCase {
         assertValidates(assertion, messageJSON);
     }
 
-    public void testHeaders() throws JSONException, OXException {
+         @Test
+     public void testHeaders() throws JSONException, OXException {
         final SimpleMessagingMessage message = new SimpleMessagingMessage();
         final Map<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
 
@@ -127,7 +132,8 @@ public class MessagingMessageWriterTest extends TestCase {
         assertValidates(assertion, messageJSON);
     }
 
-    public void testMirrorHeadersInAttributesIfTheyAreMessagingFields() throws OXException, JSONException {
+         @Test
+     public void testMirrorHeadersInAttributesIfTheyAreMessagingFields() throws OXException, JSONException {
         final SimpleMessagingMessage message = new SimpleMessagingMessage();
         final Map<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
 
@@ -178,7 +184,8 @@ public class MessagingMessageWriterTest extends TestCase {
 
     }
 
-    public void testSpecialHeader() throws OXException, JSONException {
+         @Test
+     public void testSpecialHeader() throws OXException, JSONException {
         final SimpleMessagingMessage message = new SimpleMessagingMessage();
         final Map<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
 
@@ -199,7 +206,8 @@ public class MessagingMessageWriterTest extends TestCase {
 
     }
 
-    public void testPlainMessage() throws OXException, JSONException {
+         @Test
+     public void testPlainMessage() throws OXException, JSONException {
         final SimpleMessagingMessage message = new SimpleMessagingMessage();
         message.setContent("content");
 
@@ -211,7 +219,8 @@ public class MessagingMessageWriterTest extends TestCase {
 
     }
 
-    public void testReferenceContent() throws OXException, JSONException {
+         @Test
+     public void testReferenceContent() throws OXException, JSONException {
         final SimpleMessagingMessage message = new SimpleMessagingMessage();
         message.setContentReference("coolReferenceId");
 
@@ -223,7 +232,8 @@ public class MessagingMessageWriterTest extends TestCase {
 
     }
 
-    public void testBinaryMessage() throws OXException, JSONException, UnsupportedEncodingException {
+         @Test
+     public void testBinaryMessage() throws OXException, JSONException, UnsupportedEncodingException {
         final SimpleMessagingMessage message = new SimpleMessagingMessage();
         message.setContent("content".getBytes("UTF-8"));
 
@@ -235,7 +245,8 @@ public class MessagingMessageWriterTest extends TestCase {
 
     }
 
-    public void testMultipartMessage() throws UnsupportedEncodingException, OXException, JSONException {
+         @Test
+     public void testMultipartMessage() throws UnsupportedEncodingException, OXException, JSONException {
         final SimpleMessagingMessage binMessage = new SimpleMessagingMessage();
         binMessage.setSectionId("1");
         binMessage.setContent("content".getBytes("UTF-8"));
@@ -295,7 +306,8 @@ public class MessagingMessageWriterTest extends TestCase {
 
     }
 
-    public void testCustomContentWriter() throws OXException, JSONException {
+         @Test
+     public void testCustomContentWriter() throws OXException, JSONException {
         final SimpleMessagingMessage message = new SimpleMessagingMessage();
         message.setContent("content");
 
@@ -309,7 +321,8 @@ public class MessagingMessageWriterTest extends TestCase {
         assertValidates(assertion, messageJSON);
     }
 
-    public void testWriteSimpleArrayFields() throws OXException, JSONException {
+         @Test
+     public void testWriteSimpleArrayFields() throws OXException, JSONException {
         // Test with one header equivalent field and all non-header fields
         final MessagingField[] fields = new MessagingField[] {
             MessagingField.ID, MessagingField.FOLDER_ID, MessagingField.SUBJECT, MessagingField.SIZE, MessagingField.RECEIVED_DATE,
@@ -340,7 +353,8 @@ public class MessagingMessageWriterTest extends TestCase {
         assertValidates(assertion, fieldsJSON);
     }
 
-    public void testWritePostiveNumbersAsNullIfNegative() throws OXException, JSONException {
+         @Test
+     public void testWritePostiveNumbersAsNullIfNegative() throws OXException, JSONException {
      // Test with one header equivalent field and all non-header fields
         final MessagingField[] fields = new MessagingField[] {
            MessagingField.SIZE, MessagingField.RECEIVED_DATE, MessagingField.THREAD_LEVEL};
@@ -367,7 +381,8 @@ public class MessagingMessageWriterTest extends TestCase {
 
     }
 
-    public void testWriteHeaderArrayField() throws OXException, JSONException {
+         @Test
+     public void testWriteHeaderArrayField() throws OXException, JSONException {
         final MessagingField[] fields = new MessagingField[] {
             MessagingField.HEADERS};
 

@@ -68,13 +68,22 @@ public class SessionStorageActivator extends HousekeepingActivator {
     }
 
     @Override
+    protected boolean stopOnServiceUnavailability() {
+        return true;
+    }
+
+    @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ConfigurationService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        SessionStorageConfiguration.initInstance(getService(ConfigurationService.class));
+        SessionStorageParameterNamesTracker parameterNamesTracker = new SessionStorageParameterNamesTracker(context);
+        rememberTracker(parameterNamesTracker);
+        openTrackers();
+
+        SessionStorageConfiguration.initInstance(getService(ConfigurationService.class), parameterNamesTracker);
     }
 
     @Override

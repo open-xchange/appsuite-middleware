@@ -56,6 +56,7 @@ import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -69,7 +70,11 @@ import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.AppointmentUpdatesResponse;
 import com.openexchange.ajax.appointment.action.ConfirmRequest;
 import com.openexchange.ajax.appointment.action.ConfirmResponse;
+import com.openexchange.ajax.appointment.action.CopyRequest;
+import com.openexchange.ajax.appointment.action.CopyResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
+import com.openexchange.ajax.appointment.action.FreeBusyRequest;
+import com.openexchange.ajax.appointment.action.FreeBusyResponse;
 import com.openexchange.ajax.appointment.action.GetChangeExceptionsRequest;
 import com.openexchange.ajax.appointment.action.GetChangeExceptionsResponse;
 import com.openexchange.ajax.appointment.action.GetRequest;
@@ -80,6 +85,8 @@ import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.ListRequest;
 import com.openexchange.ajax.appointment.action.NewAppointmentSearchRequest;
 import com.openexchange.ajax.appointment.action.NewAppointmentSearchResponse;
+import com.openexchange.ajax.appointment.action.SearchRequest;
+import com.openexchange.ajax.appointment.action.SearchResponse;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.appointment.action.UpdatesRequest;
@@ -88,6 +95,7 @@ import com.openexchange.ajax.fields.ParticipantsFields;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.AbstractUpdatesRequest.Ignore;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
@@ -134,11 +142,7 @@ public class CalendarTestManager implements TestManager {
 
         try {
             timezone = client.getValues().getTimeZone();
-        } catch (OXException e) {
-            // wait for finally block
-        } catch (IOException e) {
-            // wait for finally block
-        } catch (JSONException e) {
+        } catch (OXException | IOException | JSONException e) {
             // wait for finally block
         } finally {
             if (timezone == null) {
@@ -260,6 +264,17 @@ public class CalendarTestManager implements TestManager {
         return response.getAppointment(timezone);
     }
 
+    public Appointment copy(int parentFolderID, int objectID, JSONObject body) throws OXException {
+        return this.copy(parentFolderID, objectID, body, false);
+    }
+
+    public Appointment copy(int parentFolderID, int objectID, JSONObject body, boolean ignoreConflicts) throws OXException {
+        CopyRequest request = new CopyRequest(parentFolderID, objectID, body, ignoreConflicts);
+        CopyResponse response = execute(request);
+        extractInfo(response);
+        return response.getAppointment(timezone);
+    }
+
     public Appointment get(Appointment appointment) throws OXException {
         try {
             GetRequest get = new GetRequest(appointment, getFailOnError());
@@ -373,6 +388,18 @@ public class CalendarTestManager implements TestManager {
         }
     }
 
+    public List<Appointment> updates(final int folderId, final int[] columns, final Date timestamp, final boolean recurrenceMaster, boolean showPrivates, Ignore ignore, Date start, Date end) {
+        UpdatesRequest req = new UpdatesRequest(folderId, columns, timestamp, recurrenceMaster, showPrivates, ignore, start, end);
+        AppointmentUpdatesResponse resp = execute(req);
+        extractInfo(resp);
+        try {
+            return resp.getAppointments(timezone);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public List<Appointment> getChangeExceptions(int folderId, int objectId, int[] columns) {
         GetChangeExceptionsRequest request = new GetChangeExceptionsRequest(folderId, objectId, columns);
         GetChangeExceptionsResponse response = execute(request);
@@ -408,71 +435,30 @@ public class CalendarTestManager implements TestManager {
     }
 
     public List<Appointment> list(ListIDs foldersAndIds, int[] columns) {
-        ListRequest req = new ListRequest(foldersAndIds, addNecessaryColumns(columns), getFailOnError());
+        int[] enhancedColumns = addNecessaryColumns(columns);
+        ListRequest req = new ListRequest(foldersAndIds, enhancedColumns, getFailOnError());
         CommonListResponse resp = execute(req);
         extractInfo(resp);
-        return extractAppointments(resp);
-    }
 
-	public List<Appointment> extractAppointments(CommonListResponse resp) {
-		List<Appointment> list = new LinkedList<Appointment>();
-        int[] cols = resp.getColumns();
-        Object[][] arr = resp.getArray();
-        for (Object[] values : arr) {
-            Appointment temp = new Appointment();
-            list.add(temp);
-            for (int i = 0; i < cols.length; i++) {
-                if (values[i] != null) {
-                    temp.set(cols[i], conv(cols[i], values[i]));
-                } else {
-                    temp.remove(cols[i]);
-                }
-            }
-            fixDates(temp);
+        try {
+            Appointment[] appointmentArray = CTMUtils.jsonArray2AppointmentArray((JSONArray) resp.getData(), enhancedColumns, timezone);
+            return Arrays.asList(appointmentArray);
+        } catch (Exception e) {
+            // TODO: handle exception
         }
-        return list;
-	}
+        return Collections.emptyList();
+    }
 
     public List<Appointment> newappointments(Date start, Date end, int limit, int[] columns) {
         NewAppointmentSearchRequest req = new NewAppointmentSearchRequest(start, end, limit, timezone, columns);
         NewAppointmentSearchResponse resp = execute(req);
         extractInfo(resp);
         try {
-			return Arrays.asList(resp.getAppointments());
-		} catch (Exception e) {
-			lastException = e;
-			return null;
-		}
-    }
-
-    private void fixDates(Appointment temp) {
-        if (temp.getFullTime()) {
-            return;
+            return Arrays.asList(resp.getAppointments());
+        } catch (Exception e) {
+            lastException = e;
+            return null;
         }
-        if (temp.containsStartDate()) {
-            temp.setStartDate(moveOffset(temp.getStartDate()));
-        }
-        if (temp.containsEndDate()) {
-            temp.setEndDate(moveOffset(temp.getEndDate()));
-        }
-    }
-
-    private Date moveOffset(Date value) {
-        int offset = timezone.getOffset(value.getTime());
-        return new Date(value.getTime() - offset);
-    }
-
-    private Object conv(int i, Object object) {
-        Object value = object;
-        switch (i) {
-        case Appointment.START_DATE:
-        case Appointment.END_DATE:
-        case Appointment.UNTIL:
-            if (!(object instanceof Date)) {
-                value = new Date((Long) object);
-            }
-        }
-        return value;
     }
 
     private int[] addNecessaryColumns(int[] columns) {
@@ -487,7 +473,14 @@ public class CalendarTestManager implements TestManager {
     }
 
     public Appointment[] all(int parentFolderID, Date start, Date end, int[] columns, boolean recurrenceMaster) {
+        return this.all(parentFolderID, start, end, columns, recurrenceMaster, null);
+    }
+
+    public Appointment[] all(int parentFolderID, Date start, Date end, int[] columns, boolean recurrenceMaster, String timeZoneId) {
         AllRequest request = new AllRequest(parentFolderID, columns, start, end, timezone, recurrenceMaster);
+        if (timeZoneId != null) {
+            request.setTimeZoneId(timeZoneId);
+        }
         CommonAllResponse response = execute(request);
         extractInfo(response);
         List<Appointment> appointments = new ArrayList<Appointment>();
@@ -516,7 +509,7 @@ public class CalendarTestManager implements TestManager {
                                 tryInteger(app, actualColumns[i], (Long) row[i]);
                             }
                         } else if (x.getMessage().equals("java.lang.Long cannot be cast to java.util.Date")) {
-                            app.set(actualColumns[i], new Date((Long)row[i]));
+                            app.set(actualColumns[i], new Date((Long) row[i]));
                         } else if (x.getMessage().equals("java.lang.String cannot be cast to java.lang.Long")) {
                             app.set(actualColumns[i], Long.parseLong((String) row[i]));
                         } else if (x.getMessage().equals("org.json.JSONArray cannot be cast to [Ljava.util.Date;")) {
@@ -576,7 +569,6 @@ public class CalendarTestManager implements TestManager {
         return all(parentFolderID, start, end, columns, true);
     }
 
-
     public Appointment[] all(int parentFolderID, Date start, Date end) {
         AllRequest request = new AllRequest(parentFolderID, Appointment.ALL_COLUMNS, start, end, timezone);
         CommonAllResponse response = execute(request);
@@ -608,27 +600,28 @@ public class CalendarTestManager implements TestManager {
         return appointments.toArray(new Appointment[appointments.size()]);
     }
 
+    public void delete(Appointment appointment, Date recurrenceDatePosition) {
+        final DeleteRequest deleteRequest = new DeleteRequest(appointment.getObjectID(), appointment.getParentFolderID(), recurrenceDatePosition, new Date(Long.MAX_VALUE));
+        deleteRequest.setFailOnError(false);
+        CommonDeleteResponse response = execute(deleteRequest);
+
+        if (response != null) {
+            extractInfo(response);
+        }
+    }
+
     public void delete(Appointment appointment, boolean failOnErrorOverride, boolean deleteFromCreatedEntities) {
         if (deleteFromCreatedEntities) {
             createdEntities.remove(appointment); // TODO: Does this remove the right object or does equals() suck?
         }
         DeleteRequest deleteRequest;
-        if(appointment.containsRecurrencePosition()){
-            deleteRequest = new DeleteRequest(
-                appointment.getObjectID(),
-                appointment.getParentFolderID(),
-                appointment.getRecurrencePosition(),
-                new Date(Long.MAX_VALUE),
-                failOnErrorOverride);
+        if (appointment.containsRecurrencePosition()) {
+            deleteRequest = new DeleteRequest(appointment.getObjectID(), appointment.getParentFolderID(), appointment.getRecurrencePosition(), new Date(Long.MAX_VALUE), failOnErrorOverride);
         } else {
-            deleteRequest = new DeleteRequest(
-                appointment.getObjectID(),
-                appointment.getParentFolderID(),
-                new Date(Long.MAX_VALUE),
-                failOnErrorOverride);
+            deleteRequest = new DeleteRequest(appointment.getObjectID(), appointment.getParentFolderID(), new Date(Long.MAX_VALUE), failOnErrorOverride);
         }
         CommonDeleteResponse response = execute(deleteRequest);
-        if(response != null) {
+        if (response != null) {
             extractInfo(response);
         }
     }
@@ -651,8 +644,8 @@ public class CalendarTestManager implements TestManager {
         master.setLastModified(getLastModification());
     }
 
-    public boolean[] has(Date startInclusive, Date endExclusive){
-        HasResponse response = execute( new HasRequest(startInclusive, endExclusive, getTimezone()));
+    public boolean[] has(Date startInclusive, Date endExclusive) {
+        HasResponse response = execute(new HasRequest(startInclusive, endExclusive, getTimezone()));
         lastResponse = response;
         try {
             return response.getValues();
@@ -663,7 +656,7 @@ public class CalendarTestManager implements TestManager {
     }
 
     public List<Appointment> getCreatedEntities() {
-    	return this.createdEntities;
+        return this.createdEntities;
     }
 
     /*
@@ -709,4 +702,28 @@ public class CalendarTestManager implements TestManager {
         }
     }
 
+    public Appointment[] searchAppointment(String pattern, int folderId, Date start, Date end, int[] cols) throws OXException, IOException, JSONException {
+        SearchRequest searchRequest = new SearchRequest(pattern, folderId, start, end, cols, -1, null, false, failOnError);
+        SearchResponse response = client.execute(searchRequest);
+        final JSONArray arr = (JSONArray) response.getResponse().getData();
+        return CTMUtils.jsonArray2AppointmentArray(arr, cols, client.getValues().getTimeZone());
+    }
+
+    public Appointment[] freeBusy(int userId, int type, Date start, Date end) throws Exception {
+        FreeBusyRequest freeBusyRequest = new FreeBusyRequest(userId, type, start, end);
+        FreeBusyResponse response = client.execute(freeBusyRequest);
+
+        final JSONArray arr = (JSONArray) response.getResponse().getData();
+        return CTMUtils.jsonArray2AppointmentArray(arr, client.getValues().getTimeZone());
+    }
+
+    public static Appointment createAppointmentObject(int parentFolderId, String title, Date start, Date end) {
+        Appointment obj = new Appointment();
+        obj.setTitle(title);
+        obj.setStartDate(start);
+        obj.setEndDate(end);
+        obj.setParentFolderID(parentFolderId);
+        obj.setShownAs(Appointment.ABSENT);
+        return obj;
+    }
 }

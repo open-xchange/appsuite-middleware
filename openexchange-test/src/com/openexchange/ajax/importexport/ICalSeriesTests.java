@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.importexport;
 
+import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.util.Date;
 import java.util.TimeZone;
@@ -68,10 +69,6 @@ import com.openexchange.groupware.container.Appointment;
  * @author tobiasp
  */
 public class ICalSeriesTests extends ManagedAppointmentTest {
-
-	public ICalSeriesTests(String name) {
-		super(name);
-	}
 
 	public void testDeleteException() throws OXException, IOException, JSONException{
 		String ical =

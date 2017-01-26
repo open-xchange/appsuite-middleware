@@ -72,13 +72,14 @@ public class VacationTest extends AbstractMailFilterTest {
      * 
      * @param name The test case's name
      */
-    public VacationTest(String name) {
-        super(name);
+    public VacationTest() {
+        super();
     }
 
     /**
      * Test a basic vacation notice with multiple addresses
      */
+    @org.junit.Test
     public void testNewVacationWithMultipleAddresses() throws Exception {
         Rule expected;
         {
@@ -104,6 +105,7 @@ public class VacationTest extends AbstractMailFilterTest {
     /**
      * Test a basic vacation notice with single address
      */
+    @org.junit.Test
     public void testNewVacationWithSingleAddress() throws Exception {
         Rule expected;
         {
@@ -127,6 +129,7 @@ public class VacationTest extends AbstractMailFilterTest {
     /**
      * Test a vacation notice without subject
      */
+    @org.junit.Test
     public void testNewVacationWithoutSubject() throws Exception {
         Rule expected;
         {
@@ -150,6 +153,7 @@ public class VacationTest extends AbstractMailFilterTest {
     /**
      * Test a vacation notice that has plain text and sieve keywords in the 'text' tag
      */
+    @org.junit.Test
     public void testNewVacationPlainAtTheEnd() throws Exception {
         Rule expected;
         {
@@ -173,6 +177,7 @@ public class VacationTest extends AbstractMailFilterTest {
     /**
      * Tests the week day field for the vacation rule
      */
+    @org.junit.Test
     public void testWeekDayField() throws Exception {
         Rule expected;
         {
@@ -198,6 +203,7 @@ public class VacationTest extends AbstractMailFilterTest {
     /**
      * Tests the time field for the vacation rule
      */
+    @org.junit.Test
     public void testTimeField() throws Exception {
         Rule expected;
         {

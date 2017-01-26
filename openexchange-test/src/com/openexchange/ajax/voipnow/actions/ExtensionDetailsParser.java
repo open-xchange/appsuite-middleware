@@ -57,6 +57,7 @@ public class ExtensionDetailsParser extends AbstractAJAXParser<ExtensionDetailsR
 
     /**
      * Default constructor.
+     * 
      * @param userId
      */
     public ExtensionDetailsParser(final boolean failOnError) {

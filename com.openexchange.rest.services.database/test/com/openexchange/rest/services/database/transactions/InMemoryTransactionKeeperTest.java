@@ -55,8 +55,6 @@ import static org.mockito.Mockito.verify;
 import java.sql.Connection;
 import java.sql.SQLException;
 import org.junit.Test;
-import com.openexchange.rest.services.database.transactions.InMemoryTransactionKeeper;
-import com.openexchange.rest.services.database.transactions.Transaction;
 
 /**
  * {@link InMemoryTransactionKeeperTest}
@@ -68,8 +66,8 @@ public class InMemoryTransactionKeeperTest {
     private InMemoryTransactionKeeper keeper = new InMemoryTransactionKeeper();
     private Connection con = mock(Connection.class);
 
-    @Test
-    public void testLifecycle() throws Exception {
+     @Test
+     public void testLifecycle() throws Exception {
         String txId = begin();
         doOperations(txId);
         commit(txId);

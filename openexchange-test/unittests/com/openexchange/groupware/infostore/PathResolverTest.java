@@ -1,10 +1,17 @@
+
 package com.openexchange.groupware.infostore;
 
 import static com.openexchange.webdav.protocol.WebdavPathTest.assertComponents;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
@@ -26,59 +33,59 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionFactory;
 import com.openexchange.webdav.protocol.WebdavPath;
 
-public class PathResolverTest extends TestCase {
+public class PathResolverTest {
 
-	private final DBProvider provider = new DBPoolProvider();
-	private final InfostoreFacade database = new InfostoreFacadeImpl(provider);
-	private final PathResolverImpl pathResolver = new PathResolverImpl(provider, database);
+    private final DBProvider provider = new DBPoolProvider();
+    private final InfostoreFacade database = new InfostoreFacadeImpl(provider);
+    private final PathResolverImpl pathResolver = new PathResolverImpl(provider, database);
 
-	private int root;
+    private int root;
 
-	private int id9;
+    private int id9;
     private int id8;
-	private int id7;
-	private int id6;
-	private int id5;
-	private int id4;
-	private int id3;
-	private int id2;
-	private int id;
+    private int id7;
+    private int id6;
+    private int id5;
+    private int id4;
+    private int id3;
+    private int id2;
+    private int id;
 
-	private final int type = FolderObject.PUBLIC;
+    private final int type = FolderObject.PUBLIC;
 
-	ServerSession session;
-	private Context ctx = null;
-	private User user;
+    ServerSession session;
+    private Context ctx = null;
+    private User user;
 
-    @Override
-	public void setUp() throws Exception {
-		Init.startServer();
-		database.setTransactional(true);
-		ctx = getContext();
+    @Before
+    public void setUp() throws Exception {
+        Init.startServer();
+        database.setTransactional(true);
+        ctx = getContext();
 
         final UserStorage userStorage = UserStorage.getInstance();
 
         session = ServerSessionFactory.createServerSession(userStorage.getUserId(getUsername(), ctx), ctx, "gnitzelgnatzel");
-		user = userStorage.getUser(session.getUserId(), ctx);
+        user = userStorage.getUser(session.getUserId(), ctx);
 
-		findRoot();
+        findRoot();
 
-		pathResolver.startTransaction();
-        root = mkdir(root, "folder-"+System.currentTimeMillis());
+        pathResolver.startTransaction();
+        root = mkdir(root, "folder-" + System.currentTimeMillis());
         id = mkdir(root, "this");
-		id2 = mkdir(id, "is");
-		id3 = mkdir(id2, "a");
-		id4 = mkdir(id3, "nice");
-		id5 = mkdir(id4, "path");
-		id6 = touch(id5,"document.txt");
-		id7 = mkdir(id5,"path");
-		id8 = mkdir(id7,"path");
-		id9 = mkdir(id8,"path");
+        id2 = mkdir(id, "is");
+        id3 = mkdir(id2, "a");
+        id4 = mkdir(id3, "nice");
+        id5 = mkdir(id4, "path");
+        id6 = touch(id5, "document.txt");
+        id7 = mkdir(id5, "path");
+        id8 = mkdir(id7, "path");
+        id9 = mkdir(id8, "path");
 
-	}
+    }
 
-	private Context getContext() throws OXException {
-	    try {
+    private Context getContext() throws OXException {
+        try {
             final TestConfig config = new TestConfig();
             final TestContextToolkit tools = new TestContextToolkit();
             final String ctxName = config.getContextName();
@@ -87,30 +94,30 @@ public class PathResolverTest extends TestCase {
             e.printStackTrace();
             return null;
         }
-	}
+    }
 
-	@Override
-	public void tearDown() throws Exception {
-		pathResolver.finish();
+    @After
+    public void tearDown() throws Exception {
+        pathResolver.finish();
         rmdir(id9);
         rmdir(id8);
-		rmdir(id7);
-		rmdir(id5);
-		rmdir(id4);
-		rmdir(id3);
-		rmdir(id2);
-		rmdir(id);
+        rmdir(id7);
+        rmdir(id5);
+        rmdir(id4);
+        rmdir(id3);
+        rmdir(id2);
+        rmdir(id);
         rmdir(root);
         Init.stopServer();
-	}
+    }
 
-	private void findRoot() throws Exception {
-		final OXFolderAccess oxfa = new OXFolderAccess(ctx);
-		root = oxfa.getDefaultFolder(session.getUserId(), FolderObject.INFOSTORE).getObjectID();
-	}
+    private void findRoot() throws Exception {
+        final OXFolderAccess oxfa = new OXFolderAccess(ctx);
+        root = oxfa.getDefaultFolder(session.getUserId(), FolderObject.INFOSTORE).getObjectID();
+    }
 
-	private String getUsername() {
-	    try {
+    private String getUsername() {
+        try {
             final TestConfig config = new TestConfig();
             final String userName = config.getUser();
             final int pos = userName.indexOf('@');
@@ -119,60 +126,66 @@ public class PathResolverTest extends TestCase {
             e.printStackTrace();
             return null;
         }
-	}
+    }
 
-	public void testResolvePathDocument() throws Exception {
-		Resolved resolved = pathResolver.resolve(root, new WebdavPath("/this/is/a/nice/path/document.txt"), session);
-		assertTrue(resolved.isDocument());
-		assertFalse(resolved.isFolder());
-		assertEquals(id6, resolved.getId());
+    @Test
+    public void testResolvePathDocument() throws Exception {
+        Resolved resolved = pathResolver.resolve(root, new WebdavPath("/this/is/a/nice/path/document.txt"), session);
+        assertTrue(resolved.isDocument());
+        assertFalse(resolved.isFolder());
+        assertEquals(id6, resolved.getId());
 
-		resolved = pathResolver.resolve(id2, new WebdavPath("a/nice/path/document.txt"), session);
-		assertTrue(resolved.isDocument());
-		assertFalse(resolved.isFolder());
-		assertEquals(id6, resolved.getId());
-	}
+        resolved = pathResolver.resolve(id2, new WebdavPath("a/nice/path/document.txt"), session);
+        assertTrue(resolved.isDocument());
+        assertFalse(resolved.isFolder());
+        assertEquals(id6, resolved.getId());
+    }
 
-	public void testResolvePathFolder() throws Exception {
-		Resolved resolved = pathResolver.resolve(root, new WebdavPath("/this/is/a/nice/path"), session);
-		assertFalse(resolved.isDocument());
-		assertTrue(resolved.isFolder());
-		assertEquals(id5, resolved.getId());
+    @Test
+    public void testResolvePathFolder() throws Exception {
+        Resolved resolved = pathResolver.resolve(root, new WebdavPath("/this/is/a/nice/path"), session);
+        assertFalse(resolved.isDocument());
+        assertTrue(resolved.isFolder());
+        assertEquals(id5, resolved.getId());
 
-		resolved = pathResolver.resolve(id2, new WebdavPath("a/nice/path"), session);
-		assertFalse(resolved.isDocument());
-		assertTrue(resolved.isFolder());
-		assertEquals(id5, resolved.getId());
-	}
+        resolved = pathResolver.resolve(id2, new WebdavPath("a/nice/path"), session);
+        assertFalse(resolved.isDocument());
+        assertTrue(resolved.isFolder());
+        assertEquals(id5, resolved.getId());
+    }
 
-	public void testGetPathDocument() throws Exception {
-		final WebdavPath path = pathResolver.getPathForDocument(root, id6, session);
-        assertComponents(path, "this", "is", "a","nice","path","document.txt");
-	}
+    @Test
+    public void testGetPathDocument() throws Exception {
+        final WebdavPath path = pathResolver.getPathForDocument(root, id6, session);
+        assertComponents(path, "this", "is", "a", "nice", "path", "document.txt");
+    }
 
-	public void testGetPathFolder() throws Exception {
-		final WebdavPath path = pathResolver.getPathForFolder(root, id5, session);
-        assertComponents(path, "this","is","a","nice","path");
+    @Test
+    public void testGetPathFolder() throws Exception {
+        final WebdavPath path = pathResolver.getPathForFolder(root, id5, session);
+        assertComponents(path, "this", "is", "a", "nice", "path");
 
-	}
+    }
 
-	public void testNotExists() throws Exception {
-		try {
-			pathResolver.resolve(root, new WebdavPath("/i/dont/exist"), session);
-			fail("Expected OXObjectNotFoundException");
-		} catch (final OXException x) {
-			assertTrue(true);
-		}
-	}
+    @Test
+    public void testNotExists() throws Exception {
+        try {
+            pathResolver.resolve(root, new WebdavPath("/i/dont/exist"), session);
+            fail("Expected OXObjectNotFoundException");
+        } catch (final OXException x) {
+            assertTrue(true);
+        }
+    }
 
     // Bug 12279
+    @Test
     public void testCaseSensitive() throws Exception {
         try {
-			pathResolver.resolve(root, new WebdavPath("/this/is/a/nice/path/DoCuMeNt.txt"), session);
-			fail("Expected OXObjectNotFoundException");
-		} catch (final OXException x) {
-			assertTrue(true);
-		}
+            pathResolver.resolve(root, new WebdavPath("/this/is/a/nice/path/DoCuMeNt.txt"), session);
+            fail("Expected OXObjectNotFoundException");
+        } catch (final OXException x) {
+            assertTrue(true);
+        }
         try {
             pathResolver.resolve(root, new WebdavPath("/this/is/a/nice/PaTh"), session);
             fail("Expected OXObjectNotFoundException");
@@ -182,6 +195,7 @@ public class PathResolverTest extends TestCase {
     }
 
     // Bug 12618
+    @Test
     public void testRespectsAliases() throws OXException {
         final WebdavFolderAliases aliases = new InMemoryAliases();
         aliases.registerNameWithIDAndParent("ALIAS!", id5, id4);
@@ -195,7 +209,7 @@ public class PathResolverTest extends TestCase {
         pathResolver.clearCache();
 
         final WebdavPath path = pathResolver.getPathForFolder(root, id5, session);
-        assertComponents(path, "this","is","a","nice","ALIAS!");
+        assertComponents(path, "this", "is", "a", "nice", "ALIAS!");
 
         pathResolver.clearCache();
 
@@ -209,73 +223,73 @@ public class PathResolverTest extends TestCase {
 
     private int mkdir(final int parent, final String name) throws SQLException, OXException, Exception {
 
-		//OXFolderAction oxfa = new OXFolderAction(session);
-		final FolderObject folder = new FolderObject();
-		folder.setFolderName(name);
-		folder.setParentFolderID(parent);
-		folder.setType(type);
-		folder.setModule(FolderObject.INFOSTORE);
+        //OXFolderAction oxfa = new OXFolderAction(session);
+        final FolderObject folder = new FolderObject();
+        folder.setFolderName(name);
+        folder.setParentFolderID(parent);
+        folder.setType(type);
+        folder.setModule(FolderObject.INFOSTORE);
 
-		final OCLPermission perm = new OCLPermission();
-		perm.setEntity(user.getId());
-		perm.setFolderAdmin(true);
-		perm.setFolderPermission(OCLPermission.ADMIN_PERMISSION);
-		perm.setReadObjectPermission(OCLPermission.ADMIN_PERMISSION);
-		perm.setWriteObjectPermission(OCLPermission.ADMIN_PERMISSION);
-		perm.setDeleteObjectPermission(OCLPermission.ADMIN_PERMISSION);
-		perm.setGroupPermission(false);
+        final OCLPermission perm = new OCLPermission();
+        perm.setEntity(user.getId());
+        perm.setFolderAdmin(true);
+        perm.setFolderPermission(OCLPermission.ADMIN_PERMISSION);
+        perm.setReadObjectPermission(OCLPermission.ADMIN_PERMISSION);
+        perm.setWriteObjectPermission(OCLPermission.ADMIN_PERMISSION);
+        perm.setDeleteObjectPermission(OCLPermission.ADMIN_PERMISSION);
+        perm.setGroupPermission(false);
 
-		// All others may read and write
+        // All others may read and write
 
-		final OCLPermission perm2 = new OCLPermission();
-		perm2.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
-		perm2.setGroupPermission(true);
-		perm2.setFolderPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER);
-		perm2.setReadObjectPermission(OCLPermission.READ_ALL_OBJECTS);
-		perm2.setWriteObjectPermission(OCLPermission.WRITE_ALL_OBJECTS);
-		perm2.setDeleteObjectPermission(OCLPermission.DELETE_ALL_OBJECTS);
+        final OCLPermission perm2 = new OCLPermission();
+        perm2.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
+        perm2.setGroupPermission(true);
+        perm2.setFolderPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER);
+        perm2.setReadObjectPermission(OCLPermission.READ_ALL_OBJECTS);
+        perm2.setWriteObjectPermission(OCLPermission.WRITE_ALL_OBJECTS);
+        perm2.setDeleteObjectPermission(OCLPermission.DELETE_ALL_OBJECTS);
 
-		folder.setPermissionsAsArray(new OCLPermission[]{perm, perm2});
+        folder.setPermissionsAsArray(new OCLPermission[] { perm, perm2 });
 
-		Connection writeCon = null;
-		try {
-			writeCon = provider.getWriteConnection(ctx);
+        Connection writeCon = null;
+        try {
+            writeCon = provider.getWriteConnection(ctx);
             final OXFolderManager oxma = OXFolderManager.getInstance(session, writeCon, writeCon);
             oxma.createFolder(folder, true, System.currentTimeMillis());
         } finally {
             if (writeCon != null) {
                 provider.releaseWriteConnection(ctx, writeCon);
-			}
-		}
+            }
+        }
 
         //oxfa.createFolder(folder, session, true, writeCon, writeCon, false);
-		return folder.getObjectID();
-	}
+        return folder.getObjectID();
+    }
 
-	private int touch(final int parent, final String filename) throws Exception {
-		final DocumentMetadata m = new DocumentMetadataImpl();
-		m.setFolderId(parent);
-		m.setFileName(filename);
-		m.setId(InfostoreFacade.NEW);
-		database.startTransaction();
+    private int touch(final int parent, final String filename) throws Exception {
+        final DocumentMetadata m = new DocumentMetadataImpl();
+        m.setFolderId(parent);
+        m.setFileName(filename);
+        m.setId(InfostoreFacade.NEW);
+        database.startTransaction();
 
-		try {
-			database.saveDocument(m, new ByteArrayInputStream(new byte[10]), Long.MAX_VALUE, session);
-			database.commit();
-		} catch (final Exception x) {
-			database.rollback();
-			throw x;
-		} finally {
-			database.finish();
-		}
-		return m.getId();
-	}
+        try {
+            database.saveDocument(m, new ByteArrayInputStream(new byte[10]), Long.MAX_VALUE, session);
+            database.commit();
+        } catch (final Exception x) {
+            database.rollback();
+            throw x;
+        } finally {
+            database.finish();
+        }
+        return m.getId();
+    }
 
-	private void rmdir(final int id) throws SQLException, OXException, OXException, Exception {
-//		OXFolderAction oxfa = new OXFolderAction(session);
-//		oxfa.deleteFolder(id, session, true, Long.MAX_VALUE);
-		final OXFolderManager oxma = OXFolderManager.getInstance(session);
-		oxma.deleteFolder(new FolderObject(id), true, System.currentTimeMillis());
-	}
+    private void rmdir(final int id) throws SQLException, OXException, OXException, Exception {
+        //		OXFolderAction oxfa = new OXFolderAction(session);
+        //		oxfa.deleteFolder(id, session, true, Long.MAX_VALUE);
+        final OXFolderManager oxma = OXFolderManager.getInstance(session);
+        oxma.deleteFolder(new FolderObject(id), true, System.currentTimeMillis());
+    }
 
 }

@@ -203,7 +203,7 @@ public class ReminderServiceImpl implements ReminderService{
             checkPermission(session, oldReminder, true);
             return true;
         } catch (OXException e) {
-            if (e.equals(ReminderExceptionCode.NOT_FOUND)) {
+            if (ReminderExceptionCode.NOT_FOUND.equals(e)) {
                 return false;
             }
             throw e;

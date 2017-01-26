@@ -54,10 +54,10 @@ import java.util.List;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.groupware.container.FolderObject;
 
-
 /**
  * {@link RootNode}
  * Represents the root of the oxfolder tree.
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
@@ -70,12 +70,11 @@ public class RootNode extends AbstractFolderNode {
     @Override
     public List<FolderNode> getChildren() {
         List<FolderNode> folders = new ArrayList<FolderNode>();
-        for(FolderObject folder : getManager().listRootFoldersOnServer()) {
+        for (FolderObject folder : getManager().listRootFoldersOnServer()) {
             folders.add(load(folder));
         }
         return folders;
     }
-
 
     @Override
     public FolderNode getParent() {

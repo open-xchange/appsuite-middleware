@@ -75,11 +75,13 @@ public class LoginRequest extends AbstractRequest<LoginResponse> {
     private final boolean failOnError;
 
     public static final class GuestCredentials {
+
         private final String login;
         private final String password;
 
         /**
          * Use the given guest login but omit the password and skip setting one
+         * 
          * @param login
          */
         public GuestCredentials(String login) {
@@ -90,6 +92,7 @@ public class LoginRequest extends AbstractRequest<LoginResponse> {
 
         /**
          * Use the given guest login and password
+         * 
          * @param login
          * @param password
          */
@@ -157,13 +160,7 @@ public class LoginRequest extends AbstractRequest<LoginResponse> {
      * Constructor for Login with token. Initializes a new {@link LoginRequest}.
      */
     public LoginRequest(TokenLoginParameters parameters, boolean failOnError) {
-        this(new Parameter[] {
-            new URLParameter(AJAXServlet.PARAMETER_ACTION, LoginServlet.ACTION_REDEEM_TOKEN),
-            new URLParameter(LoginFields.AUTHID_PARAM, parameters.getAuthId()),
-            new URLParameter(LoginFields.CLIENT_PARAM, parameters.getClient()),
-            new URLParameter(LoginFields.VERSION_PARAM, parameters.getVersion()),
-            new FieldParameter(PARAM_TOKEN, parameters.getToken()),
-            new FieldParameter(PARAM_SECRET, parameters.getSecret())
+        this(new Parameter[] { new URLParameter(AJAXServlet.PARAMETER_ACTION, LoginServlet.ACTION_REDEEM_TOKEN), new URLParameter(LoginFields.AUTHID_PARAM, parameters.getAuthId()), new URLParameter(LoginFields.CLIENT_PARAM, parameters.getClient()), new URLParameter(LoginFields.VERSION_PARAM, parameters.getVersion()), new FieldParameter(PARAM_TOKEN, parameters.getToken()), new FieldParameter(PARAM_SECRET, parameters.getSecret())
         }, failOnError);
     }
 
@@ -176,50 +173,22 @@ public class LoginRequest extends AbstractRequest<LoginResponse> {
     }
 
     public LoginRequest(String login, String password, String authId, String client, String version, boolean failOnError) {
-        this(new Parameter[] {
-            new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LOGIN),
-            new URLParameter(LoginFields.AUTHID_PARAM, authId),
-            new URLParameter(LoginFields.CLIENT_PARAM, client),
-            new URLParameter(LoginFields.VERSION_PARAM, version),
-            new FieldParameter(PARAM_NAME, login),
-            new FieldParameter(PARAM_PASSWORD, password)
+        this(new Parameter[] { new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LOGIN), new URLParameter(LoginFields.AUTHID_PARAM, authId), new URLParameter(LoginFields.CLIENT_PARAM, client), new URLParameter(LoginFields.VERSION_PARAM, version), new FieldParameter(PARAM_NAME, login), new FieldParameter(PARAM_PASSWORD, password)
         }, failOnError);
     }
 
     public LoginRequest(String login, String password, String authId, String client, String version, boolean failOnError, boolean passwordInURL) {
-        this(new Parameter[] {
-            new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LOGIN),
-            new URLParameter(LoginFields.AUTHID_PARAM, authId),
-            new URLParameter(LoginFields.CLIENT_PARAM, client),
-            new URLParameter(LoginFields.VERSION_PARAM, version),
-            new URLParameter(LoginFields.PASSWORD_PARAM, password),
-            new FieldParameter(PARAM_NAME, login),
-            new FieldParameter(PARAM_PASSWORD, password)
+        this(new Parameter[] { new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LOGIN), new URLParameter(LoginFields.AUTHID_PARAM, authId), new URLParameter(LoginFields.CLIENT_PARAM, client), new URLParameter(LoginFields.VERSION_PARAM, version), new URLParameter(LoginFields.PASSWORD_PARAM, password), new FieldParameter(PARAM_NAME, login), new FieldParameter(PARAM_PASSWORD, password)
         }, failOnError);
     }
 
     public LoginRequest(String login, String password, String authId, String client, String version, String language, boolean failOnError) {
-        this(new Parameter[] {
-            new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LOGIN),
-            new URLParameter(LoginFields.AUTHID_PARAM, authId),
-            new URLParameter(LoginFields.CLIENT_PARAM, client),
-            new URLParameter(LoginFields.VERSION_PARAM, version),
-            new FieldParameter(PARAM_NAME, login),
-            new FieldParameter(PARAM_PASSWORD, password),
-            new FieldParameter(PARAM_LANGUAGE, language)
+        this(new Parameter[] { new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LOGIN), new URLParameter(LoginFields.AUTHID_PARAM, authId), new URLParameter(LoginFields.CLIENT_PARAM, client), new URLParameter(LoginFields.VERSION_PARAM, version), new FieldParameter(PARAM_NAME, login), new FieldParameter(PARAM_PASSWORD, password), new FieldParameter(PARAM_LANGUAGE, language)
         }, failOnError);
     }
 
     public LoginRequest(String login, String password, String authId, String client, String version, String language, boolean storeLanguage, boolean failOnError) {
-        this(new Parameter[] {
-            new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LOGIN),
-            new URLParameter(LoginFields.AUTHID_PARAM, authId),
-            new URLParameter(LoginFields.CLIENT_PARAM, client),
-            new URLParameter(LoginFields.VERSION_PARAM, version),
-            new FieldParameter(PARAM_NAME, login),
-            new FieldParameter(PARAM_PASSWORD, password),
-            new FieldParameter(PARAM_LANGUAGE, language),
-            new FieldParameter(LoginFields.STORE_LANGUAGE, String.valueOf(storeLanguage))
+        this(new Parameter[] { new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LOGIN), new URLParameter(LoginFields.AUTHID_PARAM, authId), new URLParameter(LoginFields.CLIENT_PARAM, client), new URLParameter(LoginFields.VERSION_PARAM, version), new FieldParameter(PARAM_NAME, login), new FieldParameter(PARAM_PASSWORD, password), new FieldParameter(PARAM_LANGUAGE, language), new FieldParameter(LoginFields.STORE_LANGUAGE, String.valueOf(storeLanguage))
         }, failOnError);
     }
 

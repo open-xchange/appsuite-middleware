@@ -52,6 +52,8 @@ package com.openexchange.ajax.appointment.recurrence;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.UUID;
+import org.junit.Before;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.appointment.helper.AbstractAssertion;
 import com.openexchange.ajax.appointment.helper.AbstractPositiveAssertion;
@@ -66,20 +68,11 @@ import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.test.CalendarTestManager;
-import com.openexchange.test.FolderTestManager;
-import com.openexchange.test.ResourceTestManager;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public abstract class ManagedAppointmentTest extends AppointmentTest {
-
-    protected CalendarTestManager calendarManager;
-
-    protected FolderTestManager folderManager;
-
-    protected ResourceTestManager resourceManager;
 
     protected FolderObject folder;
 
@@ -105,53 +98,24 @@ public abstract class ManagedAppointmentTest extends AppointmentTest {
 
     protected PositiveAssertionOnDeleteException positiveAssertionOnDeleteException;
 
-    public ManagedAppointmentTest(String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
-        calendarManager = new CalendarTestManager(getClient());
-        folderManager = new FolderTestManager(getClient());
-        resourceManager = new ResourceTestManager(getClient());
         UserValues values = getClient().getValues();
         userTimeZone = values.getTimeZone();
-        this.folder = folderManager.generatePublicFolder(
-            "MAT_"+ (new Date()).getTime(),
-            Module.CALENDAR.getFolderConstant(),
-            values.getPrivateAppointmentFolder(),
-            values.getUserId());
-        folder = folderManager.insertFolderOnServer(folder);
+        this.folder = ftm.generatePublicFolder("MAT_" + UUID.randomUUID().toString(), Module.CALENDAR.getFolderConstant(), values.getPrivateAppointmentFolder(), values.getUserId());
+        this.folder = ftm.insertFolderOnServer(folder);
 
-        this.negativeAssertionOnUpdate = new NegativeAssertionOnUpdate(calendarManager, folder.getObjectID());
-        this.negativeAssertionOnCreate = new NegativeAssertionOnCreate(calendarManager, folder.getObjectID());
-        this.negativeAssertionOnChangeException = new NegativeAssertionOnChangeException(calendarManager, folder.getObjectID());
-        this.negativeAssertionOnDeleteException = new NegativeAssertionOnDeleteException(calendarManager, folder.getObjectID());
-        this.positiveAssertionOnCreateAndUpdate = new PositiveAssertionOnCreateAndUpdate(calendarManager, folder.getObjectID());
-        this.positiveAssertionOnCreate = new PositiveAssertionOnCreate(calendarManager, folder.getObjectID());
-        this.positiveAssertionOnUpdate = new PositiveAssertionOnUpdateOnly(calendarManager, folder.getObjectID());
-        this.positiveAssertionOnChangeException = new PositiveAssertionOnChangeException(calendarManager, folder.getObjectID());
-        this.positiveAssertionOnDeleteException = new PositiveAssertionOnDeleteException(calendarManager, folder.getObjectID());
-
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        try {
-            calendarManager.cleanUp();
-        } finally {
-            try {
-                folderManager.cleanUp();
-            } finally {
-                try {
-                    resourceManager.cleanUp();
-                } finally {
-                    super.tearDown();
-                }
-            }
-        }
-
+        int objectID = folder.getObjectID();
+        this.negativeAssertionOnUpdate = new NegativeAssertionOnUpdate(catm, objectID);
+        this.negativeAssertionOnCreate = new NegativeAssertionOnCreate(catm, objectID);
+        this.negativeAssertionOnChangeException = new NegativeAssertionOnChangeException(catm, objectID);
+        this.negativeAssertionOnDeleteException = new NegativeAssertionOnDeleteException(catm, objectID);
+        this.positiveAssertionOnCreateAndUpdate = new PositiveAssertionOnCreateAndUpdate(catm, objectID);
+        this.positiveAssertionOnCreate = new PositiveAssertionOnCreate(catm, objectID);
+        this.positiveAssertionOnUpdate = new PositiveAssertionOnUpdateOnly(catm, objectID);
+        this.positiveAssertionOnChangeException = new PositiveAssertionOnChangeException(catm, objectID);
+        this.positiveAssertionOnDeleteException = new PositiveAssertionOnDeleteException(catm, objectID);
     }
 
     protected Appointment generateDailyAppointment() {
@@ -178,11 +142,11 @@ public abstract class ManagedAppointmentTest extends AppointmentTest {
         return app;
     }
 
-    protected Date D(String dateString){
-    	return TimeTools.D(dateString);
+    protected Date D(String dateString) {
+        return TimeTools.D(dateString);
     }
 
-    protected Date D(String dateString, TimeZone tz){
-    	return TimeTools.D(dateString,tz);
+    protected Date D(String dateString, TimeZone tz) {
+        return TimeTools.D(dateString, tz);
     }
 }

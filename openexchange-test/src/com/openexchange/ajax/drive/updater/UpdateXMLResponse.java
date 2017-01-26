@@ -54,7 +54,6 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.ProblematicAttribute;
 
-
 /**
  * {@link UpdateXMLResponse}
  *
@@ -66,6 +65,7 @@ public class UpdateXMLResponse extends AbstractAJAXResponse {
 
     /**
      * Initializes a new {@link UpdateXMLResponse}.
+     * 
      * @param response
      */
     protected UpdateXMLResponse(String xml) {

@@ -57,7 +57,6 @@ import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Header;
 
-
 /**
  * {@link AllRequest}
  *
@@ -78,12 +77,13 @@ public class AllRequest implements AJAXRequest<AllResponse> {
 
     @Override
     public Parameter[] getParameters() throws IOException, JSONException {
-        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION , "all") };
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, "all") };
     }
 
     @Override
     public AbstractAJAXParser<? extends AllResponse> getParser() {
         return new AbstractAJAXParser<AllResponse>(true) {
+
             @Override
             protected AllResponse createResponse(Response response) throws JSONException {
                 return new AllResponse(response);

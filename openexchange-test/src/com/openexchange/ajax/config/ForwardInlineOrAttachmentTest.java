@@ -49,21 +49,30 @@
 
 package com.openexchange.ajax.config;
 
-import static com.openexchange.ajax.config.ConfigTools.readSetting;
-import static com.openexchange.ajax.config.ConfigTools.storeSetting;
-import com.openexchange.ajax.AbstractAJAXTest;
+import static org.junit.Assert.assertEquals;
+import java.io.IOException;
+import org.json.JSONException;
+import org.junit.Test;
+import org.xml.sax.SAXException;
+import com.openexchange.ajax.config.actions.GetRequest;
+import com.openexchange.ajax.config.actions.GetResponse;
+import com.openexchange.ajax.config.actions.SetRequest;
+import com.openexchange.ajax.config.actions.Tree;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.exception.OXException;
 
 /**
  * Tests if forwarding configuration parameter correctly stores the values
  * "Inline" or "Attachment".
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class ForwardInlineOrAttachmentTest extends AbstractAJAXTest {
+public class ForwardInlineOrAttachmentTest extends AbstractAJAXSession {
 
     /**
      * Path to the configuration parameter.
      */
-    private static final String PATH = "mail/forwardmessage";
+    private static final String PATH = "/mail/forwardmessage";
 
     /**
      * Inline value.
@@ -76,25 +85,19 @@ public class ForwardInlineOrAttachmentTest extends AbstractAJAXTest {
     private static final String ATTACHMENT = "Attachment";
 
     /**
-     * Default constructor.
-     * @param name Name of the test.
-     */
-    public ForwardInlineOrAttachmentTest(final String name) {
-        super(name);
-    }
-
-    /**
      * Tests if the forward configuration parameter is stored correctly.
+     * @throws JSONException 
+     * @throws SAXException 
+     * @throws IOException 
+     * @throws OXException 
      */
-    public void testForwardParameter() throws Throwable {
-        final String forward = readSetting(getWebConversation(), getHostName(),
-            getSessionId(), PATH);
-        for (final String testString : new String[] { INLINE, ATTACHMENT, forward }) {
-            storeSetting(getWebConversation(), getHostName(), getSessionId(),
-                PATH, testString);
-            assertEquals("Written setting isn't returned from server.",
-                testString, readSetting(getWebConversation(), getHostName(),
-                    getSessionId(), PATH));
+    @Test
+    public void testForwardParameter() throws OXException, IOException, SAXException, JSONException {
+        GetRequest getRequest = new GetRequest(PATH);
+        GetResponse repsonse = getClient().execute(getRequest);
+        for (final String testString : new String[] { INLINE, ATTACHMENT, repsonse.getData().toString() }) {
+            getClient().execute(new SetRequest(Tree.ForwardMessage, testString));
+            assertEquals("Written setting isn't returned from server.", testString, getClient().execute(getRequest).getData().toString());
         }
     }
 }

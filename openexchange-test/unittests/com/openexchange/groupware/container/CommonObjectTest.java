@@ -1,13 +1,18 @@
+
 package com.openexchange.groupware.container;
 
 import static com.openexchange.groupware.container.CommonObject.CATEGORIES;
 import static com.openexchange.groupware.container.CommonObject.COLOR_LABEL;
 import static com.openexchange.groupware.container.CommonObject.NUMBER_OF_ATTACHMENTS;
 import static com.openexchange.groupware.container.CommonObject.PRIVATE_FLAG;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 
 public class CommonObjectTest extends FolderChildObjectTest {
 
-    @Override
+    @Test
     public void testAttrAccessors() {
 
         CommonObject object = new CommonObject() {};
@@ -21,14 +26,12 @@ public class CommonObjectTest extends FolderChildObjectTest {
         assertTrue(object.containsLabel());
         assertEquals(-12, object.get(COLOR_LABEL));
 
-        object.set(COLOR_LABEL,12);
+        object.set(COLOR_LABEL, 12);
         assertEquals(12, object.getLabel());
 
         object.remove(COLOR_LABEL);
         assertFalse(object.contains(COLOR_LABEL));
         assertFalse(object.containsLabel());
-
-
 
         // CATEGORIES
         assertFalse(object.contains(CATEGORIES));
@@ -39,13 +42,12 @@ public class CommonObjectTest extends FolderChildObjectTest {
         assertTrue(object.containsCategories());
         assertEquals("Bla", object.get(CATEGORIES));
 
-        object.set(CATEGORIES,"Blupp");
+        object.set(CATEGORIES, "Blupp");
         assertEquals("Blupp", object.getCategories());
 
         object.remove(CATEGORIES);
         assertFalse(object.contains(CATEGORIES));
         assertFalse(object.containsCategories());
-
 
         // NUMBER_OF_ATTACHMENTS
         assertFalse(object.contains(NUMBER_OF_ATTACHMENTS));
@@ -56,7 +58,7 @@ public class CommonObjectTest extends FolderChildObjectTest {
         assertTrue(object.containsNumberOfAttachments());
         assertEquals(-12, object.get(NUMBER_OF_ATTACHMENTS));
 
-        object.set(NUMBER_OF_ATTACHMENTS,12);
+        object.set(NUMBER_OF_ATTACHMENTS, 12);
         assertEquals(12, object.getNumberOfAttachments());
 
         object.remove(NUMBER_OF_ATTACHMENTS);
@@ -72,7 +74,7 @@ public class CommonObjectTest extends FolderChildObjectTest {
         assertTrue(object.containsPrivateFlag());
         assertEquals(false, object.get(PRIVATE_FLAG));
 
-        object.set(PRIVATE_FLAG,true);
+        object.set(PRIVATE_FLAG, true);
         assertEquals(true, object.getPrivateFlag());
 
         object.remove(PRIVATE_FLAG);

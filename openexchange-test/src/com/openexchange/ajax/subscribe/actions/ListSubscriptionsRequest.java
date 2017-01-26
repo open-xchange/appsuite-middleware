@@ -59,7 +59,6 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.java.JSON;
 import com.openexchange.java.Strings;
 
-
 /**
  * {@link ListSubscriptionsRequest}
  *
@@ -97,13 +96,13 @@ public class ListSubscriptionsRequest extends AbstractSubscriptionRequest<ListSu
         return dynamicColumns;
     }
 
-    public ListSubscriptionsRequest(List<Integer> ids, List<String> columns){
+    public ListSubscriptionsRequest(List<Integer> ids, List<String> columns) {
         super();
         setIDs(ids);
         setColumns(columns);
     }
 
-    public ListSubscriptionsRequest(List<Integer> ids, List<String> columns, Map<String,List<String>> dynamicColumns){
+    public ListSubscriptionsRequest(List<Integer> ids, List<String> columns, Map<String, List<String>> dynamicColumns) {
         this(ids, columns);
         setDynamicColumns(dynamicColumns);
     }
@@ -112,7 +111,6 @@ public class ListSubscriptionsRequest extends AbstractSubscriptionRequest<ListSu
     public Object getBody() throws JSONException {
         return JSON.collection2jsonArray(getIDs());
     }
-
 
     @Override
     public Method getMethod() {

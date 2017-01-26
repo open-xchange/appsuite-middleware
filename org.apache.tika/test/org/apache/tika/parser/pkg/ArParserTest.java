@@ -17,16 +17,20 @@
 
 package org.apache.tika.parser.pkg;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.io.InputStream;
-
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.Parser;
 import org.apache.tika.sax.BodyContentHandler;
+import org.junit.Test;
 import org.xml.sax.ContentHandler;
 
 public class ArParserTest extends AbstractPkgTest {
-	public void testArParsing() throws Exception {
+	     @Test
+     public void testArParsing() throws Exception {
 		Parser parser = new AutoDetectParser();
 
 		ContentHandler handler = new BodyContentHandler();
@@ -65,7 +69,8 @@ public class ArParserTest extends AbstractPkgTest {
 	 * Tests that the ParseContext parser is correctly fired for all the
 	 * embedded entries.
 	 */
-	public void testEmbedded() throws Exception {
+	     @Test
+     public void testEmbedded() throws Exception {
 		Parser parser = new AutoDetectParser(); // Should auto-detect!
 		ContentHandler handler = new BodyContentHandler();
 		Metadata metadata = new Metadata();

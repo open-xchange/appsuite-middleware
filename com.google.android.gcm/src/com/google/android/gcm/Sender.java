@@ -163,11 +163,26 @@ public class Sender {
    * @throws IllegalArgumentException if to is {@literal null}.
    */
   public Result sendNoRetry(Message message, String to) throws IOException {
+      return sendNoRetry(message, to, Endpoint.GCM);
+  }
+
+  /**
+   * Sends a message without retrying in case of service unavailability. See
+   * {@link #send(Message, String, int)} for more info.
+   *
+   * @return result of the post, or {@literal null} if the GCM service was
+   *         unavailable or any network exception caused the request to fail,
+   *         or if the response contains more than one result.
+   *
+   * @throws InvalidRequestException if GCM didn't returned a 200 status.
+   * @throws IllegalArgumentException if to is {@literal null}.
+   */
+  public Result sendNoRetry(Message message, String to, Endpoint endpoint) throws IOException {
     nonNull(to);
     Map<Object, Object> jsonRequest = new HashMap<Object, Object>();
     messageToMap(message, jsonRequest);
     jsonRequest.put(JSON_TO, to);
-    String responseBody = makeGcmHttpRequest(jsonRequest);
+    String responseBody = makeGcmHttpRequest(jsonRequest, endpoint);
     if (responseBody == null) {
       return null;
     }
@@ -368,13 +383,30 @@ public class Sender {
    */
   public MulticastResult sendNoRetry(Message message,
       List<String> registrationIds) throws IOException {
+      return sendNoRetry(message, registrationIds, Endpoint.GCM);
+  }
+
+  /**
+   * Sends a message without retrying in case of service unavailability. See
+   * {@link #send(Message, List, int)} for more info.
+   *
+   * @return multicast results if the message was sent successfully,
+   *         {@literal null} if it failed but could be retried.
+   *
+   * @throws IllegalArgumentException if registrationIds is {@literal null} or
+   *         empty.
+   * @throws InvalidRequestException if GCM didn't returned a 200 status.
+   * @throws IOException if there was a JSON parsing error
+   */
+  public MulticastResult sendNoRetry(Message message,
+      List<String> registrationIds, Endpoint endpoint) throws IOException {
     if (nonNull(registrationIds).isEmpty()) {
       throw new IllegalArgumentException("registrationIds cannot be empty");
     }
     Map<Object, Object> jsonRequest = new HashMap<Object, Object>();
     messageToMap(message, jsonRequest);
     jsonRequest.put(JSON_REGISTRATION_IDS, registrationIds);
-    String responseBody = makeGcmHttpRequest(jsonRequest);
+    String responseBody = makeGcmHttpRequest(jsonRequest, endpoint);
     if (responseBody == null) {
       return null;
     }
@@ -413,13 +445,13 @@ public class Sender {
     }
   }
 
-  private String makeGcmHttpRequest(Map<Object, Object> jsonRequest) throws InvalidRequestException {
+  private String makeGcmHttpRequest(Map<Object, Object> jsonRequest, Endpoint endpoint) throws InvalidRequestException {
     String requestBody = JSONValue.toJSONString(jsonRequest);
     logger.finest("JSON request: " + requestBody);
     HttpURLConnection conn;
     int status;
     try {
-      conn = post(GCM_SEND_ENDPOINT, "application/json", requestBody);
+      conn = post(endpoint.getEndpoint(), "application/json", requestBody);
       status = conn.getResponseCode();
     } catch (IOException e) {
       logger.log(Level.FINE, "IOException posting to GCM", e);

@@ -78,7 +78,7 @@ public final class CSVImportRequest extends AbstractImportRequest<CSVImportRespo
      * @param failOnError <code>true</code> to fail the testcase in case of error in the response, <code>false</code>, otherwise
      * @param additionalParameters Additional parameters to include in the request
      */
-    public CSVImportRequest(int folderId, InputStream csv, boolean failOnError, Parameter...additionalParameters) {
+    public CSVImportRequest(int folderId, InputStream csv, boolean failOnError, Parameter... additionalParameters) {
         super(Action.CSV, folderId, csv, additionalParameters);
         this.failOnError = failOnError;
     }

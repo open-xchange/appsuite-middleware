@@ -1,14 +1,15 @@
 package liquibase.change.core;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import org.junit.Before;
+import org.junit.Test;
 import liquibase.change.ChangeFactory;
-import liquibase.change.StandardChangeTest;
 import liquibase.change.ColumnConfig;
+import liquibase.change.StandardChangeTest;
 import liquibase.database.core.MockDatabase;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertStatement;
-import static org.junit.Assert.*;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * Tests for {@link InsertDataChange}
@@ -44,14 +45,12 @@ public class InsertDataChangeTest extends StandardChangeTest {
         refactoring.addColumn(col4);
     }
 
-    @Override
-    @Test
+     @Test
     public void getRefactoringName() throws Exception {
         assertEquals("insert", ChangeFactory.getInstance().getChangeMetaData(refactoring).getName());
     }
 
-    @Override
-    @Test
+     @Test
     public void generateStatement() throws Exception {
         SqlStatement[] sqlStatements = refactoring.generateStatements(new MockDatabase());
         assertEquals(1, sqlStatements.length);
@@ -62,8 +61,7 @@ public class InsertDataChangeTest extends StandardChangeTest {
         assertEquals("1.78", ((InsertStatement) sqlStatements[0]).getColumnValue("height").toString());
     }
 
-    @Override
-    @Test
+     @Test
     public void getConfirmationMessage() throws Exception {
         assertEquals("New row inserted into TABLE_NAME", refactoring.getConfirmationMessage());
     }

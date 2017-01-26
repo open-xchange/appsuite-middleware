@@ -1,22 +1,20 @@
 package liquibase.change.core;
 
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
 import liquibase.change.ChangeFactory;
 import liquibase.change.StandardChangeTest;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
-import static org.junit.Assert.*;
-import org.junit.Test;
 
 public class AddPrimaryKeyChangeTest extends StandardChangeTest {
 
-    @Override
-    @Test
+     @Test
     public void getRefactoringName() throws Exception {
         assertEquals("addPrimaryKey", ChangeFactory.getInstance().getChangeMetaData(new AddPrimaryKeyChange()).getName());
     }
 
-    @Override
-    @Test
+     @Test
     public void generateStatement() throws Exception {
 
 //        new DatabaseTestTemplate().testOnAllDatabases(new DatabaseTest() {
@@ -50,8 +48,7 @@ public class AddPrimaryKeyChangeTest extends StandardChangeTest {
 //        });
     }
 
-    @Override
-    @Test
+     @Test
     public void getConfirmationMessage() throws Exception {
         AddPrimaryKeyChange change = new AddPrimaryKeyChange();
         change.setTableName("TABLE_NAME");

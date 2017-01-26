@@ -49,9 +49,10 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.assertFalse;
+import org.junit.Test;
 import com.openexchange.ajax.contact.action.AutocompleteRequest;
 import com.openexchange.ajax.framework.CommonSearchResponse;
-
 
 /**
  * {@link Bug42225Test} - Empty query string leads to SQLException
@@ -63,26 +64,17 @@ public class Bug42225Test extends AbstractManagedContactTest {
 
     /**
      * Initializes a new {@link Bug42225Test}.
+     * 
      * @param name
      */
-    public Bug42225Test(String name) {
-        super(name);
+    public Bug42225Test() {
+        super();
     }
 
+    @Test
     public void testBug42225() throws Exception {
-        AutocompleteRequest req = new AutocompleteRequest("", false, String.valueOf(client.getValues().getPrivateContactFolder()), new int[] { 500 }, false);
-        CommonSearchResponse resp = client.execute(req);
+        AutocompleteRequest req = new AutocompleteRequest("", false, String.valueOf(getClient().getValues().getPrivateContactFolder()), new int[] { 500 }, false);
+        CommonSearchResponse resp = getClient().execute(req);
         assertFalse("Response has error.", resp.hasError());
     }
-
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
-
 }

@@ -50,8 +50,12 @@
 package com.openexchange.mail.mime;
 
 import javax.mail.internet.InternetAddress;
-import junit.framework.TestCase;
+import org.junit.Test;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * {@link QuotedInternetAddressTest}
@@ -59,8 +63,7 @@ import com.openexchange.mail.mime.converters.MimeMessageConverter;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  * @since v7.6.1
  */
-public class QuotedInternetAddressTest extends TestCase {
-
+public class QuotedInternetAddressTest {
     /**
      * Initializes a new {@link QuotedInternetAddressTest}.
      */
@@ -68,7 +71,8 @@ public class QuotedInternetAddressTest extends TestCase {
         super();
     }
 
-    public void testBug33552() throws Exception {
+         @Test
+     public void testBug33552() throws Exception {
         String s = "Foo \u00e0 Bar <foo@bar.info>, =?UTF-8?Q?Foo_=C3=A0_Bar_=3Cfoo=40bar=2Einfo=3E?=, \"Foo, Bar\" <foo@bar.info>";
         InternetAddress[] parsed = QuotedInternetAddress.parse(s);
 
@@ -82,7 +86,8 @@ public class QuotedInternetAddressTest extends TestCase {
         assertEquals("Address does not equals \"foo@bar.info\"", "foo@bar.info", parsed[2].getAddress());
     }
 
-    public void testBug33305() throws Exception {
+         @Test
+     public void testBug33305() throws Exception {
         QuotedInternetAddress a = new QuotedInternetAddress("\u00d6tt\u00f6 <stark@wie-die-wutz.de>");
         assertEquals("Unexpected personal", "\u00d6tt\u00f6", a.getPersonal());
         assertEquals("Unexpected mail-safe form", "=?UTF-8?B?w5Z0dMO2?= <stark@wie-die-wutz.de>", a.toString());
@@ -98,7 +103,8 @@ public class QuotedInternetAddressTest extends TestCase {
         assertEquals("Unexpected unicode form", "Foo \u00e0 Bar <foo@bar.info>", parsed[1].toUnicodeString());
     }
 
-    public void testBug34070() throws Exception {
+         @Test
+     public void testBug34070() throws Exception {
         String s = "=?windows-1252?Q?Betz=2C_C=E4cilia?= <caecilia.betz@invalid.org>";
         QuotedInternetAddress addr = new QuotedInternetAddress(s);
 
@@ -107,7 +113,8 @@ public class QuotedInternetAddressTest extends TestCase {
 
     }
 
-    public void testBug34755() throws Exception {
+         @Test
+     public void testBug34755() throws Exception {
         String s = "=?windows-1252?Q?Kr=F6ning=2C_User?= <user4@ox.microdoc.de>";
         QuotedInternetAddress addr = new QuotedInternetAddress(s);
 
@@ -116,7 +123,8 @@ public class QuotedInternetAddressTest extends TestCase {
 
     }
 
-    public void testBug36095() throws Exception {
+         @Test
+     public void testBug36095() throws Exception {
         String s = "=?UTF-8?Q?F=C3=B6oooo=2C_Bar?= <s.foeoooobar@foobar.org>";
         InternetAddress[] parsed = MimeMessageConverter.getAddressHeader(s);
         assertEquals("Unexpected amount of addresses", 1, parsed.length);
@@ -125,7 +133,8 @@ public class QuotedInternetAddressTest extends TestCase {
         assertEquals("Address does not equals \"s.foeoooobar@foobar.org\"", "s.foeoooobar@foobar.org", parsed[0].getAddress());
     }
 
-    public void testBug36866() throws Exception {
+         @Test
+     public void testBug36866() throws Exception {
         String s = "=?iso-8859-1?Q?Mustermann=2C_J=F6rg?= <Joerg.Mustermann@musterfirma.org>";
         InternetAddress[] parsed = QuotedInternetAddress.parseHeader(s, true);
         assertEquals("Unexpected amount of addresses", 1, parsed.length);
@@ -134,7 +143,8 @@ public class QuotedInternetAddressTest extends TestCase {
         assertEquals("Address does not equals \"Joerg.Mustermann@musterfirma.org\"", "Joerg.Mustermann@musterfirma.org", parsed[0].getAddress());
     }
 
-    public void testBug38365() throws Exception {
+         @Test
+     public void testBug38365() throws Exception {
         QuotedInternetAddress addr = new QuotedInternetAddress("\"Peter \\\" Lustig\" <bar@foo.org>");
         assertEquals("Display name does not equals \"Peter \" Lustig\"", "Peter \" Lustig", addr.getPersonal());
 
@@ -142,7 +152,8 @@ public class QuotedInternetAddressTest extends TestCase {
         assertEquals("Display name does not equals \"Peter Lustig \\\"", "Peter Lustig \\", addr.getPersonal());
     }
 
-    public void testBug43709() throws Exception {
+         @Test
+     public void testBug43709() throws Exception {
         String addresses = "\"pere6@20101027.de\" <pere6@20101027.de>, =?iso-8859-1?Q?'Jochum=2C_Christel;_Sch=F6ndorf=2C_Werner'?= <boeser.recipient@example.com>, \"pere20@20101027.de\" <pere20@20101027.de>";
         InternetAddress[] addrs = QuotedInternetAddress.parseHeader(addresses, true);
 

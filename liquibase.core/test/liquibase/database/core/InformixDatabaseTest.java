@@ -1,6 +1,6 @@
 package liquibase.database.core;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -13,8 +13,8 @@ public class InformixDatabaseTest {
 		database = new InformixDatabase();
 	}
 
-    @Test
-	public void testGetDateLiteral() {
+     @Test
+     public void testGetDateLiteral() {
 		String d;
 
 		d = database.getDateLiteral("2010-11-12 13:14:15");
@@ -28,8 +28,8 @@ public class InformixDatabaseTest {
 	}
 
 
-    @Test
-	public void testGetDefaultDriver() {
+     @Test
+     public void testGetDefaultDriver() {
 		assertEquals("com.informix.jdbc.IfxDriver",
 				database.getDefaultDriver("jdbc:informix-sqli://localhost:9088/liquibase:informixserver=ol_ids_1150_1"));
 	}

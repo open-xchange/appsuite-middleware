@@ -1,16 +1,14 @@
+
 package com.openexchange.ajax.mail.addresscollector;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import com.openexchange.test.concurrent.ParallelSuite;
 
-public class AddressCollectorTestSuite extends TestSuite {
+@RunWith(ParallelSuite.class)
+@Suite.SuiteClasses({
+    ConfigurationTest.class,
+})
+public class AddressCollectorTestSuite  {
 
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-
-        tests.addTestSuite(ConfigurationTest.class);
-        //tests.addTestSuite(MailTest.class);
-
-        return tests;
-    }
 }

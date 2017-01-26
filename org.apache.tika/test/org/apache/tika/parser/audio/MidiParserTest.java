@@ -16,14 +16,17 @@
  */
 package org.apache.tika.parser.audio;
 
-import junit.framework.TestCase;
-
 import org.apache.tika.Tika;
 import org.apache.tika.metadata.Metadata;
+import org.junit.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
-public class MidiParserTest extends TestCase {
-
-    public void testMID() throws Exception {
+public class MidiParserTest {
+         @Test
+     public void testMID() throws Exception {
         String path = "/test-documents/testMID.mid";
         Metadata metadata = new Metadata();
         String content = new Tika().parseToString(

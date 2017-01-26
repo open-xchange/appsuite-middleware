@@ -49,8 +49,12 @@
 
 package com.openexchange.ajax.task;
 
+import static org.junit.Assert.assertFalse;
 import java.util.Calendar;
 import java.util.TimeZone;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.task.actions.DeleteRequest;
@@ -76,11 +80,11 @@ public class Bug18204Test extends AbstractAJAXSession {
     Calendar due;
     Task task;
 
-    public Bug18204Test(String name) throws Exception {
-        super(name);
+    public Bug18204Test() throws Exception {
+        super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         client = getClient();
@@ -91,6 +95,7 @@ public class Bug18204Test extends AbstractAJAXSession {
         task = createTask();
     }
 
+    @Test
     public void testBug18204() throws Exception {
         // Insert new recurring task with end of series set to _after_
         InsertResponse insertResponse = client.execute(new InsertRequest(task, tz, true));
@@ -110,11 +115,14 @@ public class Bug18204Test extends AbstractAJAXSession {
         assertFalse("Task contains Occurrences although it should not.", toCompare.containsOccurrence());
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        client.execute(new DeleteRequest(task, true));
+        try {
+            client.execute(new DeleteRequest(task, true));
+        } finally {
+            super.tearDown();
+        }
 
-        super.tearDown();
     }
 
     private Task createTask() throws Exception {

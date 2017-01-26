@@ -73,13 +73,13 @@ public final class Create {
     /**
      * This method creates a public folder object. Everyone gets full object
      * permissions on this folder.
+     * 
      * @param name name of the folder.
      * @param type PIM type of the folder.
      * @param admin user identifier of the admin.
      * @return a ready to insert folder.
      */
-    public static FolderObject setupPublicFolder(final String name,
-        final int type, final int admin) {
+    public static FolderObject setupPublicFolder(final String name, final int type, final int admin) {
         final FolderObject folder = new FolderObject();
         folder.setFolderName(name);
         folder.setModule(type);
@@ -88,26 +88,19 @@ public final class Create {
         perm1.setEntity(admin);
         perm1.setGroupPermission(false);
         perm1.setFolderAdmin(true);
-        perm1.setAllPermission(
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION);
+        perm1.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         final OCLPermission perm2 = new OCLPermission();
         perm2.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
         perm2.setGroupPermission(true);
         perm2.setFolderAdmin(false);
-        perm2.setAllPermission(
-            OCLPermission.CREATE_OBJECTS_IN_FOLDER,
-            OCLPermission.READ_ALL_OBJECTS,
-            OCLPermission.WRITE_ALL_OBJECTS,
-            OCLPermission.DELETE_ALL_OBJECTS);
+        perm2.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
         folder.setPermissionsAsArray(new OCLPermission[] { perm1, perm2 });
         return folder;
     }
 
     /**
      * This method creates a public folder
+     * 
      * @param client
      * @param name
      * @param module the module (e.g. CONTACT) from FolderObject.java
@@ -117,14 +110,13 @@ public final class Create {
      * @throws SAXException
      * @throws JSONException
      */
-    public static FolderObject createPublicFolder(final AJAXClient client,
-        final String name, final int module) throws OXException, IOException,
-        SAXException, JSONException {
+    public static FolderObject createPublicFolder(final AJAXClient client, final String name, final int module) throws OXException, IOException, SAXException, JSONException {
         return createPublicFolder(client, name, module, true);
     }
 
     /**
      * This method creates a public folder
+     * 
      * @param client
      * @param name
      * @param module the module (e.g. CONTACT) from FolderObject.java
@@ -147,6 +139,7 @@ public final class Create {
     /**
      * This method creates a private folder object. Admin user gets full access
      * permissions.
+     * 
      * @param name name of the folder.
      * @param module PIM module of the folder.
      * @param admin user identifier of the admin.
@@ -157,14 +150,7 @@ public final class Create {
         folder.setFolderName(name);
         folder.setModule(module);
         folder.setType(FolderObject.PRIVATE);
-        final OCLPermission perm = ocl(
-            admin,
-            false,
-            true,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION);
+        final OCLPermission perm = ocl(admin, false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         folder.addPermission(perm);
         for (OCLPermission permission : shared) {
             folder.addPermission(permission);

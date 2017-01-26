@@ -50,7 +50,11 @@
 package com.openexchange.ajax.task;
 
 import static com.openexchange.groupware.calendar.TimeTools.removeMilliseconds;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.groupware.tasks.Task;
 
 /**
@@ -58,14 +62,11 @@ import com.openexchange.groupware.tasks.Task;
  */
 public class BasicManagedTaskTests extends ManagedTaskTest {
 
-    public BasicManagedTaskTests(String name) {
-        super(name);
-    }
-
+    @Test
     public void testCreateAndGet() {
         Task expected = generateTask("Create test");
-        manager.insertTaskOnServer(expected);
-        actual = manager.getTaskFromServer(expected);
+        ttm.insertTaskOnServer(expected);
+        actual = ttm.getTaskFromServer(expected);
         assertEquals("Should have the same title", expected.getTitle(), actual.getTitle());
         assertEquals("Should have the same folder", expected.getParentFolderID(), actual.getParentFolderID());
         assertEquals("Should have the same start date", removeMilliseconds(expected.getStartDate()), actual.getStartDate());
@@ -73,14 +74,15 @@ public class BasicManagedTaskTests extends ManagedTaskTest {
         assertEquals("Should have the same last modified", expected.getLastModified(), actual.getLastModified());
     }
 
+    @Test
     public void testAll() {
-        int numberBefore = manager.getAllTasksOnServer(folderID, new int[] { 1, 4, 5, 20, 209 }).length;
+        int numberBefore = ttm.getAllTasksOnServer(folderID, new int[] { 1, 4, 5, 20, 209 }).length;
         Task expected = generateTask("Create test");
-        manager.insertTaskOnServer(expected);
-        Task[] allTasksOnServer = manager.getAllTasksOnServer(folderID, new int[] { 1, 4, 5, 20, 209 });
+        ttm.insertTaskOnServer(expected);
+        Task[] allTasksOnServer = ttm.getAllTasksOnServer(folderID, new int[] { 1, 4, 5, 20, 209 });
         actual = null;
-        for(Task temp: allTasksOnServer){
-            if(expected.getObjectID() == temp.getObjectID()) {
+        for (Task temp : allTasksOnServer) {
+            if (expected.getObjectID() == temp.getObjectID()) {
                 actual = temp;
             }
         }
@@ -93,19 +95,20 @@ public class BasicManagedTaskTests extends ManagedTaskTest {
         assertEquals("Should have the same field #209", expected.get(209), actual.get(209));
     }
 
+    @Test
     public void testUpdateAndReceiveUpdates() {
         Task expected = generateTask("Create test");
-        manager.insertTaskOnServer(expected);
+        ttm.insertTaskOnServer(expected);
 
         Task updated = generateTask("Updates Test");
         updated.setParentFolderID(expected.getParentFolderID());
         updated.setObjectID(expected.getObjectID());
         updated.setLastModified(expected.getLastModified());
 
-        manager.updateTaskOnServer(updated);
+        ttm.updateTaskOnServer(updated);
 
-        Date aMillisecondEarlier = new Date(expected.getLastModified().getTime()-1);
-        Task[] updates = manager.getUpdatedTasksOnServer(folderID, new int[] { 1, 4, 5, 209 }, aMillisecondEarlier);
+        Date aMillisecondEarlier = new Date(expected.getLastModified().getTime() - 1);
+        Task[] updates = ttm.getUpdatedTasksOnServer(folderID, new int[] { 1, 4, 5, 209 }, aMillisecondEarlier);
         assertEquals("Should find one update only", 1, updates.length);
 
         actual = updates[0];
@@ -116,14 +119,15 @@ public class BasicManagedTaskTests extends ManagedTaskTest {
         assertEquals("Should have the same field #209", expected.get(209), actual.get(209));
     }
 
+    @Test
     public void testCreateAndDelete() {
         Task task = generateTask("Create test");
-        manager.insertTaskOnServer(task);
+        ttm.insertTaskOnServer(task);
 
-        manager.deleteTaskOnServer(task);
+        ttm.deleteTaskOnServer(task);
         boolean fail = false;
         try {
-            manager.getTaskFromServer(task);
+            ttm.getTaskFromServer(task);
             fail = true;
         } catch (AssertionError e) {
 

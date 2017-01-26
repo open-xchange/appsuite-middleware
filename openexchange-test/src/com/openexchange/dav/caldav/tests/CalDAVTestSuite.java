@@ -50,15 +50,15 @@
 package com.openexchange.dav.caldav.tests;
 
 import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * {@link CalDAVTestSuite} - Testsuite for the CalDAV interface.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-@RunWith(Suite.class)
+@RunWith(ParallelSuite.class)
 @SuiteClasses({
     NewTest.class,
     FreeBusyTest.class,

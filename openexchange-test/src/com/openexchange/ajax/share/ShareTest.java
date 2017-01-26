@@ -49,6 +49,11 @@
 
 package com.openexchange.ajax.share;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -64,7 +69,9 @@ import java.util.UUID;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.json.JSONException;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
@@ -76,7 +83,7 @@ import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.folder.actions.UpdateRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXRequest;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.AbstractSmtpAJAXSession;
 import com.openexchange.ajax.infostore.actions.DeleteInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.GetInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.GetInfostoreResponse;
@@ -93,8 +100,6 @@ import com.openexchange.ajax.share.actions.FolderSharesRequest;
 import com.openexchange.ajax.share.actions.GetLinkRequest;
 import com.openexchange.ajax.share.actions.GetLinkResponse;
 import com.openexchange.ajax.share.actions.ShareLink;
-import com.openexchange.ajax.share.actions.StartSMTPRequest;
-import com.openexchange.ajax.share.actions.StopSMTPRequest;
 import com.openexchange.ajax.smtptest.actions.GetMailsRequest;
 import com.openexchange.ajax.smtptest.actions.GetMailsResponse.Message;
 import com.openexchange.exception.OXException;
@@ -123,26 +128,17 @@ import com.openexchange.share.recipient.ShareRecipient;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class ShareTest extends AbstractAJAXSession {
+public abstract class ShareTest extends AbstractSmtpAJAXSession {
 
-    protected static final OCLGuestPermission[] TESTED_PERMISSIONS = new OCLGuestPermission[] {
-        createNamedAuthorPermission("otto@example.com", "Otto Example", "secret"),
-        createNamedGuestPermission("horst@example.com", "Horst Example", "secret"),
-        createAnonymousGuestPermission("secret"),
-        createAnonymousGuestPermission()
+    protected static final OCLGuestPermission[] TESTED_PERMISSIONS = new OCLGuestPermission[] { createNamedAuthorPermission("otto@example.com", "Otto Example", "secret"), createNamedGuestPermission("horst@example.com", "Horst Example", "secret"), createAnonymousGuestPermission("secret"), createAnonymousGuestPermission()
     };
 
-    protected static final FileStorageGuestObjectPermission[] TESTED_OBJECT_PERMISSIONS = new FileStorageGuestObjectPermission[] {
-        asObjectPermission(TESTED_PERMISSIONS[0]),
-        asObjectPermission(TESTED_PERMISSIONS[1]),
-        asObjectPermission(TESTED_PERMISSIONS[2]),
-        asObjectPermission(TESTED_PERMISSIONS[3])
+    protected static final FileStorageGuestObjectPermission[] TESTED_OBJECT_PERMISSIONS = new FileStorageGuestObjectPermission[] { asObjectPermission(TESTED_PERMISSIONS[0]), asObjectPermission(TESTED_PERMISSIONS[1]), asObjectPermission(TESTED_PERMISSIONS[2]), asObjectPermission(TESTED_PERMISSIONS[3])
     };
 
     protected static final EnumAPI[] TESTED_FOLDER_APIS = new EnumAPI[] { EnumAPI.OX_OLD, EnumAPI.OX_NEW, EnumAPI.OUTLOOK };
 
-    protected static final int[] TESTED_MODULES = new int[] {
-        FolderObject.CONTACT, FolderObject.INFOSTORE, FolderObject.TASK, FolderObject.CALENDAR
+    protected static final int[] TESTED_MODULES = new int[] { FolderObject.CONTACT, FolderObject.INFOSTORE, FolderObject.TASK, FolderObject.CALENDAR
     };
 
     protected static final Random random = new Random();
@@ -151,33 +147,23 @@ public abstract class ShareTest extends AbstractAJAXSession {
     private Map<Integer, FolderObject> foldersToDelete;
     private Map<String, File> filesToDelete;
 
-    /**
-     * Initializes a new {@link ShareTest}.
-     *
-     * @param name The test name
-     */
-    protected ShareTest(String name) {
-        super(name);
-    }
-
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         foldersToDelete = new HashMap<Integer, FolderObject>();
         filesToDelete = new HashMap<String, File>();
-        StartSMTPRequest startSMTPRequest = new StartSMTPRequest();
-        startSMTPRequest.setUpdateNoReplyForContext(client.getValues().getContextId());
-        client.execute(startSMTPRequest);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        if (null != client) {
-            client.execute(new StopSMTPRequest());
-            deleteFoldersSilently(client, foldersToDelete);
-            deleteFilesSilently(client, filesToDelete.values());
+    @After
+    public void tearDown() throws Exception {
+        try {
+            if (null != getClient()) {
+                deleteFoldersSilently(getClient(), foldersToDelete);
+                deleteFilesSilently(getClient(), filesToDelete.values());
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
     /**
@@ -186,7 +172,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @return The client timezone
      */
     protected TimeZone getTimeZone() throws OXException, IOException, JSONException {
-        return client.getValues().getTimeZone();
+        return getClient().getValues().getTimeZone();
     }
 
     /**
@@ -196,7 +182,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @return The share link
      */
     protected ShareLink getLink(ShareTarget target) throws OXException, IOException, JSONException {
-        GetLinkResponse response = client.execute(new GetLinkRequest(target, getTimeZone()));
+        GetLinkResponse response = getClient().execute(new GetLinkRequest(target, getTimeZone()));
         assertFalse(response.getErrorMessage(), response.hasError());
         return response.getShareLink();
     }
@@ -227,7 +213,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @throws Exception
      */
     protected FolderObject insertSharedFolder(EnumAPI api, int module, int parent, String name, OCLPermission permission) throws Exception {
-        FolderObject sharedFolder = Create.createPrivateFolder(name, module, client.getValues().getUserId(), permission);
+        FolderObject sharedFolder = Create.createPrivateFolder(name, module, getClient().getValues().getUserId(), permission);
         sharedFolder.setParentFolderID(parent);
         return insertFolder(api, sharedFolder);
     }
@@ -244,7 +230,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @throws Exception
      */
     protected FolderObject insertSharedFolder(EnumAPI api, int module, int parent, String name, OCLPermission[] permissions) throws Exception {
-        FolderObject sharedFolder = Create.createPrivateFolder(name, module, client.getValues().getUserId(), permissions);
+        FolderObject sharedFolder = Create.createPrivateFolder(name, module, getClient().getValues().getUserId(), permissions);
         sharedFolder.setParentFolderID(parent);
         return insertFolder(api, sharedFolder);
     }
@@ -260,7 +246,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @throws Exception
      */
     protected FolderObject insertPrivateFolder(EnumAPI api, int module, int parent, String name) throws Exception {
-        FolderObject createdFolder = insertPrivateFolder(client, api, module, parent, name);
+        FolderObject createdFolder = insertPrivateFolder(getClient(), api, module, parent, name);
         assertNotNull(createdFolder);
         remember(createdFolder);
         assertEquals("Folder name wrong", name, createdFolder.getFolderName());
@@ -315,20 +301,16 @@ public abstract class ShareTest extends AbstractAJAXSession {
         folder.setModule(module);
         folder.setType(FolderObject.PUBLIC);
         OCLPermission perm1 = new OCLPermission();
-        perm1.setEntity(client.getValues().getUserId());
+        perm1.setEntity(getClient().getValues().getUserId());
         perm1.setGroupPermission(false);
         perm1.setFolderAdmin(true);
-        perm1.setAllPermission(
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION);
+        perm1.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         folder.setPermissionsAsArray(new OCLPermission[] { perm1 });
         folder.setParentFolderID(getPublicRoot(module));
 
         InsertRequest request = new InsertRequest(EnumAPI.OX_OLD, folder, true);
         request.setNotifyPermissionEntities(Transport.MAIL);
-        InsertResponse response = client.execute(request);
+        InsertResponse response = getClient().execute(request);
         response.fillObject(folder);
         return folder;
     }
@@ -347,11 +329,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
         perm1.setEntity(client.getValues().getUserId());
         perm1.setGroupPermission(false);
         perm1.setFolderAdmin(true);
-        perm1.setAllPermission(
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION);
+        perm1.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         folder.setPermissionsAsArray(new OCLPermission[] { perm1 });
         return insertFolder(client, api, folder);
     }
@@ -509,9 +487,9 @@ public abstract class ShareTest extends AbstractAJAXSession {
     }
 
     protected interface RequestCustomizer<R extends AJAXRequest<?>> {
+
         void customize(R request);
     }
-
 
     /**
      * Updates and remembers a folder without cascading permission.
@@ -524,9 +502,10 @@ public abstract class ShareTest extends AbstractAJAXSession {
     protected FolderObject updateFolder(EnumAPI api, FolderObject folder) throws Exception {
         return updateFolder(api, folder, false);
     }
-    
+
     protected FolderObject updateFolder(EnumAPI api, FolderObject folder, final Transport transport) throws Exception {
         return updateFolder(api, folder, new RequestCustomizer<UpdateRequest>() {
+
             @Override
             public void customize(UpdateRequest request) {
                 request.setNotifyPermissionEntities(transport);
@@ -545,6 +524,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
      */
     protected FolderObject updateFolder(EnumAPI api, FolderObject folder, final boolean cascadePermissions) throws Exception {
         return updateFolder(api, folder, new RequestCustomizer<UpdateRequest>() {
+
             @Override
             public void customize(UpdateRequest request) {
                 request.setCascadePermissions(cascadePermissions);
@@ -567,7 +547,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
         if (customizer != null) {
             customizer.customize(request);
         }
-        InsertResponse insertResponse = client.execute(request);
+        InsertResponse insertResponse = getClient().execute(request);
         insertResponse.fillObject(folder);
         remember(folder);
         FolderObject updatedFolder = getFolder(api, folder.getObjectID());
@@ -635,11 +615,11 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @throws Exception
      */
     protected FolderObject getFolder(EnumAPI api, int objectID) throws Exception {
-        return getFolder(api, objectID, client);
+        return getFolder(api, objectID, getClient());
     }
 
     /**
-     * Gets a folder by ID with the given client.
+     * Gets a folder by ID with the given getClient().
      *
      * @param api The folder API to use
      * @param objectID The ID of the folder to get
@@ -654,7 +634,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
     }
 
     protected FolderObject insertFolder(EnumAPI api, FolderObject folder) throws Exception {
-        FolderObject createdFolder = insertFolder(client, api, folder);
+        FolderObject createdFolder = insertFolder(getClient(), api, folder);
         assertNotNull(createdFolder);
         remember(createdFolder);
         assertEquals("Folder name wrong", folder.getFolderName(), createdFolder.getFolderName());
@@ -699,7 +679,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @return The folder shares
      */
     protected List<FolderShare> getFolderShares(EnumAPI api, int module) throws Exception {
-        return getFolderShares(client, api, module);
+        return getFolderShares(getClient(), api, module);
     }
 
     /**
@@ -722,7 +702,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @return The folder shares
      */
     protected List<FileShare> getFileShares() throws Exception {
-        return getFileShares(client);
+        return getFileShares(getClient());
     }
 
     /**
@@ -746,11 +726,8 @@ public abstract class ShareTest extends AbstractAJAXSession {
     protected OCLPermission findFirstGuestPermission(FolderObject folder) throws Exception {
         OCLPermission matchingPermission = null;
         for (OCLPermission permission : folder.getPermissions()) {
-            if (!permission.isGroupPermission() && permission.getEntity() != client.getValues().getUserId()) {
-                com.openexchange.ajax.user.actions.GetResponse getResponse = client.execute(new com.openexchange.ajax.user.actions.GetRequest(
-                    permission.getEntity(),
-                    client.getValues().getTimeZone(),
-                    true));
+            if (!permission.isGroupPermission() && permission.getEntity() != getClient().getValues().getUserId()) {
+                com.openexchange.ajax.user.actions.GetResponse getResponse = getClient().execute(new com.openexchange.ajax.user.actions.GetRequest(permission.getEntity(), getClient().getValues().getTimeZone(), true));
                 if (getResponse.getUser().isGuest()) {
                     matchingPermission = permission;
                     break;
@@ -770,7 +747,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @return The share URL, or <code>null</code> if not found
      */
     protected String discoverShareURL(ExtendedPermissionEntity guestEntity) throws Exception {
-        return discoverShareURL(client, guestEntity);
+        return discoverShareURL(getNoReplyClient(), guestEntity);
     }
 
     /**
@@ -855,7 +832,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @return The guest permission entity, or <code>null</code> if not found
      */
     protected ExtendedPermissionEntity discoverGuestEntity(EnumAPI api, int module, int folderID, int guest) throws Exception {
-        return discoverGuestEntity(client, api, module, folderID, guest);
+        return discoverGuestEntity(getClient(), api, module, folderID, guest);
     }
 
     /**
@@ -885,7 +862,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @return The guest permission entity, or <code>null</code> if not found
      */
     protected ExtendedPermissionEntity discoverGuestEntity(String folder, String item, int guest) throws Exception {
-        return discoverGuestEntity(client, folder, item, guest);
+        return discoverGuestEntity(getClient(), folder, item, guest);
     }
 
     /**
@@ -947,8 +924,10 @@ public abstract class ShareTest extends AbstractAJAXSession {
             List<String> folderIDs = new ArrayList<String>();
             List<String> fileIDs = new ArrayList<String>();
             for (File file : files) {
-                folderIDs.add(file.getFolderId());
-                fileIDs.add(file.getId());
+                if (file != null) {
+                    folderIDs.add(file.getFolderId());
+                    fileIDs.add(file.getId());
+                }
             }
             DeleteInfostoreRequest deleteInfostoreRequest = new DeleteInfostoreRequest(fileIDs, folderIDs, futureTimestamp());
             deleteInfostoreRequest.setHardDelete(Boolean.TRUE);
@@ -1017,8 +996,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
     protected boolean awaitGuestCleanup(int guestID, long timeout) throws Exception {
         long until = System.currentTimeMillis() + timeout;
         do {
-            com.openexchange.ajax.user.actions.GetResponse response = getClient().execute(
-                new com.openexchange.ajax.user.actions.GetRequest(guestID, TimeZones.UTC, false));
+            com.openexchange.ajax.user.actions.GetResponse response = getClient().execute(new com.openexchange.ajax.user.actions.GetRequest(guestID, TimeZones.UTC, false));
             if (response.hasError() && null != response.getException()) {
                 OXException e = response.getException();
                 if ("USR-0010".equals(e.getErrorCode())) {
@@ -1113,32 +1091,28 @@ public abstract class ShareTest extends AbstractAJAXSession {
 
     protected static OCLGuestPermission createNamedGuestPermission(String emailAddress, String displayName, String password) {
         OCLGuestPermission guestPermission = createNamedPermission(emailAddress, displayName, password);
-        guestPermission.setAllPermission(
-            OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+        guestPermission.setAllPermission(OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
         guestPermission.getRecipient().setBits(guestPermission.getPermissionBits());
         return guestPermission;
     }
 
     protected static OCLGuestPermission createNamedGuestPermission(String emailAddress, String displayName) {
         OCLGuestPermission guestPermission = createNamedPermission(emailAddress, displayName);
-        guestPermission.setAllPermission(
-            OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+        guestPermission.setAllPermission(OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
         guestPermission.getRecipient().setBits(guestPermission.getPermissionBits());
         return guestPermission;
     }
 
     protected static OCLGuestPermission createNamedAuthorPermission(String emailAddress, String displayName, String password) {
         OCLGuestPermission guestPermission = createNamedPermission(emailAddress, displayName, password);
-        guestPermission.setAllPermission(
-            OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS);
+        guestPermission.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS);
         guestPermission.getRecipient().setBits(guestPermission.getPermissionBits());
         return guestPermission;
     }
 
     protected static OCLGuestPermission createNamedAuthorPermission(String emailAddress, String displayName) {
         OCLGuestPermission guestPermission = createNamedPermission(emailAddress, displayName);
-        guestPermission.setAllPermission(
-            OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS);
+        guestPermission.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS);
         guestPermission.getRecipient().setBits(guestPermission.getPermissionBits());
         return guestPermission;
     }
@@ -1170,11 +1144,11 @@ public abstract class ShareTest extends AbstractAJAXSession {
 
     protected static OCLGuestPermission createAnonymousGuestPermission(String password) {
         OCLGuestPermission guestPermission = createAnonymousPermission(password);
-        guestPermission.setAllPermission(
-            OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+        guestPermission.setAllPermission(OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
         guestPermission.getRecipient().setBits(guestPermission.getPermissionBits());
         return guestPermission;
     }
+
     protected static OCLGuestPermission createAnonymousGuestPermission() {
         return createAnonymousGuestPermission(null);
     }
@@ -1197,7 +1171,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
         objectPermission.setEntity(guestPermission.getEntity());
         objectPermission.setGroup(guestPermission.isGroupPermission());
         if (guestPermission instanceof OCLGuestPermission) {
-            objectPermission.setRecipient(((OCLGuestPermission)guestPermission).getRecipient());
+            objectPermission.setRecipient(((OCLGuestPermission) guestPermission).getRecipient());
         }
         if (guestPermission.canWriteAllObjects()) {
             objectPermission.setPermissions(FileStorageObjectPermission.WRITE);
@@ -1209,22 +1183,22 @@ public abstract class ShareTest extends AbstractAJAXSession {
     }
 
     protected int getDefaultFolder(int module) throws Exception {
-        return getDefaultFolder(client, module);
+        return getDefaultFolder(getClient(), module);
     }
 
     protected static int getDefaultFolder(AJAXClient client, int module) throws Exception {
         switch (module) {
-        case FolderObject.CONTACT:
-            return client.getValues().getPrivateContactFolder();
-        case FolderObject.CALENDAR:
-            return client.getValues().getPrivateAppointmentFolder();
-        case FolderObject.INFOSTORE:
-            return client.getValues().getPrivateInfostoreFolder();
-        case FolderObject.TASK:
-            return client.getValues().getPrivateTaskFolder();
-        default:
-            Assert.fail("No default folder for moduel: " + module);
-            return 0;
+            case FolderObject.CONTACT:
+                return client.getValues().getPrivateContactFolder();
+            case FolderObject.CALENDAR:
+                return client.getValues().getPrivateAppointmentFolder();
+            case FolderObject.INFOSTORE:
+                return client.getValues().getPrivateInfostoreFolder();
+            case FolderObject.TASK:
+                return client.getValues().getPrivateTaskFolder();
+            default:
+                Assert.fail("No default folder for moduel: " + module);
+                return 0;
         }
     }
 
@@ -1306,13 +1280,13 @@ public abstract class ShareTest extends AbstractAJAXSession {
      */
     public static String getUsername(ShareRecipient recipient) {
         switch (recipient.getType()) {
-        case ANONYMOUS:
-            return recipient.getType().toString().toLowerCase();
-        case GUEST:
-            return ((GuestRecipient) recipient).getEmailAddress();
-        default:
-            Assert.fail("Unknown recipient: " + recipient.getType());
-            return null;
+            case ANONYMOUS:
+                return recipient.getType().toString().toLowerCase();
+            case GUEST:
+                return ((GuestRecipient) recipient).getEmailAddress();
+            default:
+                Assert.fail("Unknown recipient: " + recipient.getType());
+                return null;
         }
     }
 
@@ -1324,13 +1298,13 @@ public abstract class ShareTest extends AbstractAJAXSession {
      */
     public static String getPassword(ShareRecipient recipient) {
         switch (recipient.getType()) {
-        case ANONYMOUS:
-            return ((AnonymousRecipient) recipient).getPassword();
-        case GUEST:
-            return ((GuestRecipient) recipient).getPassword();
-        default:
-            Assert.fail("Unknown recipient: " + recipient.getType());
-            return null;
+            case ANONYMOUS:
+                return ((AnonymousRecipient) recipient).getPassword();
+            case GUEST:
+                return ((GuestRecipient) recipient).getPassword();
+            default:
+                Assert.fail("Unknown recipient: " + recipient.getType());
+                return null;
         }
     }
 

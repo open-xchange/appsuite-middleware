@@ -49,6 +49,8 @@
 
 package com.openexchange.subscribe.crawler;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -57,6 +59,7 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+import org.junit.Before;
 import org.yaml.snakeyaml.Yaml;
 import com.openexchange.config.SimConfigurationService;
 import com.openexchange.exception.OXException;
@@ -65,13 +68,11 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.subscribe.crawler.internal.GenericSubscribeService;
 import com.openexchange.subscribe.crawler.osgi.CrawlersActivator;
-import junit.framework.TestCase;
 
 /**
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
-
+public abstract class GenericSubscribeServiceTestHelpers {
     public static final String VALID_EMAIL_REGEX = "([a-z@A-Z0-9\\.\\-\\{\\}\\#\\|\\^\\$\\*\\+\\?\\'\\/!%&=_`~]*)";
     public static final String VALID_NAME = "([a-zA-Z\\s\u00e4\u00f6\u00fc\u00df-\u00e9\u00e8]*)";
     public static final String VALID_PHONE_REGEX = "([0-9\\s\\+\\-\\/\\(\\)]*)";
@@ -81,18 +82,10 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
     List<CrawlerDescription> crawlers;
     private CrawlersActivator activator;
 
-    public GenericSubscribeServiceTestHelpers() {
-        super();
-    }
-
-    public GenericSubscribeServiceTestHelpers(final String name) {
-        super(name);
-    }
-
     /**
      * Get all yml-files in the config directory and create crawlers out of them.
      */
-    @Override
+    @Before
     public void setUp() {
         try {
             // insert path to credentials-file here (switch for automated tests (Hudson) / local tests)

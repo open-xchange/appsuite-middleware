@@ -50,7 +50,14 @@
 package com.openexchange.webdav.xml.appointment;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.webdav.xml.AppointmentTest;
 
@@ -64,17 +71,8 @@ public class Bug15491Test extends AppointmentTest {
     private Appointment appointment;
     private int objectId;
 
-    /**
-     * Initializes a new {@link Bug15491Test}.
-     *
-     * @param name
-     */
-    public Bug15491Test(String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
 
         appointment = new Appointment();
@@ -85,16 +83,15 @@ public class Bug15491Test extends AppointmentTest {
         appointment.setIgnoreConflicts(true);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         if (objectId != -1) {
             deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
         }
-        super.tearDown();
     }
 
+    @Test
     public void testRead() throws Exception {
-        System.currentTimeMillis();
         objectId = insertAppointment(getWebConversation(), appointment, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 
         Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getLogin(), getPassword(), context);
@@ -116,8 +113,8 @@ public class Bug15491Test extends AppointmentTest {
         assertTrue("Did not find appointment", found);
     }
 
+    @Test
     public void testWrite() throws Exception {
-        System.currentTimeMillis();
         appointment.setUid("ichbineineuid");
         objectId = insertAppointment(getWebConversation(), appointment, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 

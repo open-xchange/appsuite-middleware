@@ -98,8 +98,8 @@ public class SetConfigRequest implements AJAXRequest<SetConfigResponse> {
         this.reseller = reseller;
         this.pack = pack;
         this.config = config;
-        this.login=login;
-        this.password=password;
+        this.login = login;
+        this.password = password;
     }
 
     /**

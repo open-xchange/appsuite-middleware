@@ -68,8 +68,8 @@ import com.openexchange.oauth.provider.tools.URIValidator;
  */
 public class URIValidatorTest {
 
-    @Test
-    public void testValidURIs() throws Exception {
+     @Test
+     public void testValidURIs() throws Exception {
         List<String> uris = new LinkedList<>();
         uris.add("myapp://handle-oauth-redirect");
         uris.add("myapp://?no-authority=true");
@@ -85,8 +85,8 @@ public class URIValidatorTest {
         }
     }
 
-    @Test
-    public void testInvalidURIs() throws Exception {
+     @Test
+     public void testInvalidURIs() throws Exception {
         List<String> uris = new LinkedList<>();
         uris.add("myapp://handle-oauth-redirect?with=path#and-disallowed-fragment");
         uris.add("http://appsuite-dev.open-xchange.com/appsuite/api/oauth?action=create");
@@ -99,8 +99,8 @@ public class URIValidatorTest {
         }
     }
 
-    @Test
-    public void testEqualURIs() throws Exception {
+     @Test
+     public void testEqualURIs() throws Exception {
         Map<String, String> uris = new HashMap<>();
         uris.put("https://appsuite-dev.open-xchange.com/appsuite/api/oauth?action=create", "https://appsuite-dev.open-xchange.com/appsuite/api/oauth?action=create");
         uris.put("http://localhost/path?query=true", "http://localhost:80/path?query=true");
@@ -112,8 +112,8 @@ public class URIValidatorTest {
         }
     }
 
-    @Test
-    public void testUnequalURIs() throws Exception {
+     @Test
+     public void testUnequalURIs() throws Exception {
         Map<String, String> uris = new HashMap<>();
         uris.put("https://appsuite-dev.open-xchange.com/appsuite/api/oauth?action=create", "http://appsuite-dev.open-xchange.com/appsuite/api/oauth?action=create");
         uris.put("http://localhost/path?query=true", "http://localhost:80/Path?query=true");

@@ -49,8 +49,13 @@
 
 package com.openexchange.ajax.folder;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Iterator;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
@@ -74,16 +79,17 @@ public class Bug16899Test extends AbstractAJAXSession {
      *
      * @param name name of the test.
      */
-    public Bug16899Test(String name) {
-        super(name);
+    public Bug16899Test() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
     }
 
+    @Test
     public void testBug16899() throws Exception {
         FolderObject folder = Create.createPrivateFolder("Bug 16899 Test", FolderObject.MAIL, client.getValues().getUserId());
         folder.setFullName("default0/INBOX/Bug 16899 Test");
@@ -97,10 +103,10 @@ public class Bug16899Test extends AbstractAJAXSession {
         ArrayList<FolderObject> folders = performListRequest(inbox);
         boolean firstMatch = false;
         for (FolderObject f : folders) {
-        	if (f.getFullName().equals(folder.getFullName())) {
-        		firstMatch = true;
-        		break;
-        	}
+            if (f.getFullName().equals(folder.getFullName())) {
+                firstMatch = true;
+                break;
+            }
         }
 
         assertTrue("Testfolder not found in inbox.", firstMatch);
@@ -114,20 +120,20 @@ public class Bug16899Test extends AbstractAJAXSession {
         folders = performListRequest(inbox);
         boolean secondMatch = false;
         for (FolderObject f : folders) {
-        	// System.out.println(f.getFullName());
-        	if (f.getFullName().equals(folder.getFullName())) {
-        		secondMatch = true;
-        		break;
-        	}
+            // System.out.println(f.getFullName());
+            if (f.getFullName().equals(folder.getFullName())) {
+                secondMatch = true;
+                break;
+            }
         }
 
         assertFalse("Testfolder was not deleted.", secondMatch);
     }
 
     private ArrayList<FolderObject> performListRequest(String inFolder) throws Exception {
-    	ArrayList<FolderObject> folderList = new ArrayList<FolderObject>();
+        ArrayList<FolderObject> folderList = new ArrayList<FolderObject>();
 
-    	ListRequest request = new ListRequest(EnumAPI.OUTLOOK, inFolder, FolderObject.ALL_COLUMNS, false, false);
+        ListRequest request = new ListRequest(EnumAPI.OUTLOOK, inFolder, FolderObject.ALL_COLUMNS, false, false);
         ListResponse response = client.execute(request);
         assertNull("Error during ListRequest.", response.getException());
 
@@ -138,7 +144,7 @@ public class Bug16899Test extends AbstractAJAXSession {
             folderList.add(fo);
         }
 
-    	return folderList;
+        return folderList;
     }
 
 }

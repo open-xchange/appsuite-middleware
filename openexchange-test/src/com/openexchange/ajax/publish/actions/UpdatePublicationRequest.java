@@ -58,11 +58,11 @@ import com.openexchange.exception.OXException;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.json.PublicationWriter;
 
-
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class UpdatePublicationRequest extends AbstractPublicationRequest<UpdatePublicationResponse> {
+
     private Publication publication;
 
     public void setPublication(Publication publication) {
@@ -73,11 +73,11 @@ public class UpdatePublicationRequest extends AbstractPublicationRequest<UpdateP
         return publication;
     }
 
-    public UpdatePublicationRequest(){
+    public UpdatePublicationRequest() {
         super();
     }
 
-    public UpdatePublicationRequest(Publication pub){
+    public UpdatePublicationRequest(Publication pub) {
         this();
         setPublication(pub);
     }
@@ -98,7 +98,7 @@ public class UpdatePublicationRequest extends AbstractPublicationRequest<UpdateP
 
     @Override
     public Parameter[] getParameters() {
-        return new Parameter[]{ new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE)};
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE) };
     }
 
     @Override

@@ -49,11 +49,12 @@
 
 package com.openexchange.ajax.task;
 
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.MultipleRequest;
@@ -75,18 +76,8 @@ public class ListTest extends AbstractTaskTest {
 
     private static final int NUMBER = 10;
     private static final int DELETES = 2;
-    private AJAXClient client;
 
-    public ListTest(final String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        client = getClient();
-    }
-
+    @Test
     public void testTaskList() throws Throwable {
         final InsertRequest[] inserts = new InsertRequest[NUMBER];
         for (int i = 0; i < inserts.length; i++) {
@@ -95,7 +86,7 @@ public class ListTest extends AbstractTaskTest {
             task.setParentFolderID(getPrivateFolder());
             inserts[i] = new InsertRequest(task, getTimeZone());
         }
-        final MultipleResponse<InsertResponse> mInsert = client.execute(MultipleRequest.create(inserts));
+        final MultipleResponse<InsertResponse> mInsert = getClient().execute(MultipleRequest.create(inserts));
 
         final int[][] tasks = new int[NUMBER][2];
         for (int i = 0; i < tasks.length; i++) {
@@ -103,23 +94,24 @@ public class ListTest extends AbstractTaskTest {
             tasks[i] = new int[] { insertR.getFolderId(), insertR.getId() };
         }
         final int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID, Task.LAST_MODIFIED };
-        final CommonListResponse listR = client.execute(new ListRequest(tasks, columns));
+        final CommonListResponse listR = getClient().execute(new ListRequest(tasks, columns));
         final DeleteRequest[] deletes = new DeleteRequest[inserts.length];
         for (int i = 0; i < inserts.length; i++) {
             deletes[i] = new DeleteRequest(tasks[i][0], tasks[i][1], listR.getTimestamp());
         }
-        client.execute(MultipleRequest.create(deletes));
+        getClient().execute(MultipleRequest.create(deletes));
     }
 
     public void oldRemovedObjectHandling() throws Throwable {
         final int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID, Task.LAST_MODIFIED };
-        final CommonListResponse listR = client.execute(new ListRequest(new int[][] { { getPrivateFolder(), Integer.MAX_VALUE } }, columns, false));
+        final CommonListResponse listR = getClient().execute(new ListRequest(new int[][] { { getPrivateFolder(), Integer.MAX_VALUE } }, columns, false));
         assertTrue("No error when listing not existing object.", listR.hasError());
     }
 
+    @Test
     public void testRemovedObjectHandling() throws Throwable {
-        final int folderA = client.getValues().getPrivateTaskFolder();
-        final AJAXClient clientB = new AJAXClient(User.User2);
+        final int folderA = getClient().getValues().getPrivateTaskFolder();
+        final AJAXClient clientB = new AJAXClient(testContext.acquireUser());
         final int folderB = clientB.getValues().getPrivateTaskFolder();
         // Create some tasks.
         final InsertRequest[] inserts = new InsertRequest[NUMBER];
@@ -127,11 +119,11 @@ public class ListTest extends AbstractTaskTest {
             final Task task = new Task();
             task.setTitle("Task " + (i + 1));
             task.setParentFolderID(folderA);
-            task.addParticipant(new UserParticipant(client.getValues().getUserId()));
+            task.addParticipant(new UserParticipant(getClient().getValues().getUserId()));
             task.addParticipant(new UserParticipant(clientB.getValues().getUserId()));
             inserts[i] = new InsertRequest(task, getTimeZone());
         }
-        final MultipleResponse<InsertResponse> mInsert = client.execute(MultipleRequest.create(inserts));
+        final MultipleResponse<InsertResponse> mInsert = getClient().execute(MultipleRequest.create(inserts));
         final List<InsertResponse> toDelete = new ArrayList<InsertResponse>(NUMBER);
         final Iterator<InsertResponse> iter = mInsert.iterator();
         while (iter.hasNext()) {
@@ -139,25 +131,25 @@ public class ListTest extends AbstractTaskTest {
         }
         // A now gets all of the folder.
         final int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID, Task.FOLDER_ID };
-        final CommonAllResponse allR = client.execute(new AllRequest(folderA, columns, Task.TITLE, Order.ASCENDING));
+        final CommonAllResponse allR = getClient().execute(new AllRequest(folderA, columns, Task.TITLE, Order.ASCENDING));
 
         // Now B deletes some of them.
         final DeleteRequest[] deletes1 = new DeleteRequest[DELETES];
         for (int i = 0; i < deletes1.length; i++) {
-            final InsertResponse insertR = toDelete.remove((NUMBER - DELETES)/2 + i);
+            final InsertResponse insertR = toDelete.remove((NUMBER - DELETES) / 2 + i);
             deletes1[i] = new DeleteRequest(folderB, insertR.getId(), insertR.getTimestamp());
         }
         clientB.execute(MultipleRequest.create(deletes1));
 
         // List request of A must now not contain the deleted objects and give
         // no error.
-        final CommonListResponse listR = client.execute(new ListRequest(allR.getListIDs(), columns, true));
+        final CommonListResponse listR = getClient().execute(new ListRequest(allR.getListIDs(), columns, true));
 
         final DeleteRequest[] deletes2 = new DeleteRequest[toDelete.size()];
         for (int i = 0; i < deletes2.length; i++) {
             final InsertResponse insertR = toDelete.get(i);
             deletes2[i] = new DeleteRequest(insertR.getFolderId(), insertR.getId(), listR.getTimestamp());
         }
-        client.execute(MultipleRequest.create(deletes2));
+        getClient().execute(MultipleRequest.create(deletes2));
     }
 }

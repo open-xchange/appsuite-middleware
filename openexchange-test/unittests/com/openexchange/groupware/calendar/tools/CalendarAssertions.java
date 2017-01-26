@@ -46,15 +46,14 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.groupware.calendar.tools;
 
-import com.openexchange.exception.OXException;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
-
 import java.util.HashSet;
 import java.util.Set;
-
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
@@ -62,17 +61,16 @@ import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.setuptools.TestContextToolkit;
 
-
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class CalendarAssertions {
 
-    public static void assertUserParticipants(final CalendarDataObject cdao, final String...users) {
+    public static void assertUserParticipants(final CalendarDataObject cdao, final String... users) {
         assertParticipants(cdao, users, new String[0]);
     }
 
-    public static void assertResourceParticipants(final CalendarDataObject cdao, final String...resources) {
+    public static void assertResourceParticipants(final CalendarDataObject cdao, final String... resources) {
         assertParticipants(cdao, new String[0], resources);
     }
 
@@ -84,41 +82,42 @@ public class CalendarAssertions {
         final Set<UserParticipant> userParticipants = new HashSet<UserParticipant>(tools.users(cdao.getContext(), users));
         final Set<ResourceParticipant> resourceParticipants = new HashSet<ResourceParticipant>(tools.resources(cdao.getContext(), resources));
         final Set<Participant> unexpected = new HashSet<Participant>();
-        for(final Participant participant : cdao.getParticipants()) {
-            if(!(userParticipants.remove(participant)) && !(resourceParticipants.remove(participant))) {
-               unexpected.add( participant );
+        for (final Participant participant : cdao.getParticipants()) {
+            if (!(userParticipants.remove(participant)) && !(resourceParticipants.remove(participant))) {
+                unexpected.add(participant);
             }
         }
         final StringBuilder problems = new StringBuilder();
         boolean mustFail = false;
-        if(!unexpected.isEmpty()) {
+        if (!unexpected.isEmpty()) {
             mustFail = true;
             problems.append("Didn't expect: ").append(stringify(unexpected)).append(". ");
         }
-        if(!userParticipants.isEmpty()) {
+        if (!userParticipants.isEmpty()) {
             mustFail = true;
             problems.append("Missing user participants: ").append(stringify(userParticipants)).append(". ");
         }
-        if(!resourceParticipants.isEmpty()) {
+        if (!resourceParticipants.isEmpty()) {
             mustFail = true;
             problems.append("Missing resource participants: ").append(stringify(resourceParticipants)).append(". ");
         }
-        if( mustFail ) { fail( problems.toString() ); }
+        if (mustFail) {
+            fail(problems.toString());
+        }
     }
 
-
-    public static void assertInPrivateFolder(final CommonAppointments appointments , final Appointment appointment) throws OXException {
-        for(final Appointment currentAppointment : appointments.getPrivateAppointments()) {
-            if(appointment.getObjectID() == currentAppointment.getObjectID()) {
+    public static void assertInPrivateFolder(final CommonAppointments appointments, final Appointment appointment) throws OXException {
+        for (final Appointment currentAppointment : appointments.getPrivateAppointments()) {
+            if (appointment.getObjectID() == currentAppointment.getObjectID()) {
                 return;
             }
         }
-        fail("Couldn't find "+appointment.getObjectID()+" in private appointments");
+        fail("Couldn't find " + appointment.getObjectID() + " in private appointments");
     }
 
     private static String stringify(final Set<? extends Participant> unexpected) {
         final StringBuilder bob = new StringBuilder();
-        for(final Participant p : unexpected) {
+        for (final Participant p : unexpected) {
             bob.append(p.getIdentifier()).append(": ").append(p.getDisplayName()).append(" | ");
         }
         return bob.toString();

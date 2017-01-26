@@ -63,12 +63,11 @@ public final class SearchRequest extends AbstractGroupRequest<SearchResponse> {
 
     private final boolean failOnError;
 
-
     /**
      * @param pattern
      * @param failOnError
      */
-    public SearchRequest(final String pattern , final boolean failOnError) {
+    public SearchRequest(final String pattern, final boolean failOnError) {
         super();
         this.pattern = pattern;
         this.failOnError = failOnError;
@@ -104,8 +103,7 @@ public final class SearchRequest extends AbstractGroupRequest<SearchResponse> {
      */
     @Override
     public Parameter[] getParameters() {
-        return new Parameter[] {
-        		new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_SEARCH),
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_SEARCH),
         };
     }
 

@@ -49,7 +49,10 @@
 
 package com.openexchange.groupware.infostore.validation;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.utils.Metadata;
@@ -59,14 +62,16 @@ import com.openexchange.groupware.infostore.utils.Metadata;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class FilenamesMayNotContainSlashesValidatorTest extends TestCase {
+public class FilenamesMayNotContainSlashesValidatorTest {
 
+    @Test
     public void testFailsValidationWithSlashInFilename() {
         DocumentMetadataValidation validation = validateFilename("filename/with/slahes");
         assertNotNull("Validation was null", validation);
         assertTrue("Exepcted error in filename", validation.hasErrors(Metadata.FILENAME_LITERAL));
     }
 
+    @Test
     public void testPassesValidationWithoutSlashInFilename() {
         DocumentMetadataValidation validation = validateFilename("filename_without_slahes");
         assertNotNull("Validation was null", validation);

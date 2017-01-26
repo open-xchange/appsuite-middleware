@@ -49,7 +49,8 @@
 
 package com.openexchange.dav.carddav.tests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -67,37 +68,23 @@ import com.openexchange.groupware.container.Contact;
  */
 public class UpdateTest extends CardDAVTest {
 
-	public UpdateTest() {
-		super();
-	}
+    public UpdateTest() {
+        super();
+    }
 
-	@Test
-	public void testUpdateSimpleOnClient() throws Exception {
-		/*
-		 * fetch sync token for later synchronization
-		 */
-		SyncToken syncToken = new SyncToken(super.fetchSyncToken());
-		/*
-		 * create contact
-		 */
-    	String uid = randomUID();
-    	String firstName = "test";
-    	String lastName = "horst";
-        String vCard =
-        		"BEGIN:VCARD" + "\r\n" +
-   				"VERSION:3.0" + "\r\n" +
-				"N:" + lastName + ";" + firstName + ";;;" + "\r\n" +
-				"FN:" + firstName + " " + lastName + "\r\n" +
-				"ORG:test3;" + "\r\n" +
-				"EMAIL;type=INTERNET;type=WORK;type=pref:test@example.com" + "\r\n" +
-				"TEL;type=WORK;type=pref:24235423" + "\r\n" +
-				"TEL;type=CELL:352-3534" + "\r\n" +
-				"TEL;type=HOME:346346" + "\r\n" +
-				"UID:" + uid + "\r\n" +
-				"REV:" + super.formatAsUTC(new Date()) + "\r\n" +
-				"PRODID:-//Apple Inc.//AddressBook 6.0//EN" + "\r\n" +
-				"END:VCARD" + "\r\n"
-		;
+    @Test
+    public void testUpdateSimpleOnClient() throws Exception {
+        /*
+         * fetch sync token for later synchronization
+         */
+        SyncToken syncToken = new SyncToken(super.fetchSyncToken());
+        /*
+         * create contact
+         */
+        String uid = randomUID();
+        String firstName = "test";
+        String lastName = "horst";
+        String vCard = "BEGIN:VCARD" + "\r\n" + "VERSION:3.0" + "\r\n" + "N:" + lastName + ";" + firstName + ";;;" + "\r\n" + "FN:" + firstName + " " + lastName + "\r\n" + "ORG:test3;" + "\r\n" + "EMAIL;type=INTERNET;type=WORK;type=pref:test@example.com" + "\r\n" + "TEL;type=WORK;type=pref:24235423" + "\r\n" + "TEL;type=CELL:352-3534" + "\r\n" + "TEL;type=HOME:346346" + "\r\n" + "UID:" + uid + "\r\n" + "REV:" + super.formatAsUTC(new Date()) + "\r\n" + "PRODID:-//Apple Inc.//AddressBook 6.0//EN" + "\r\n" + "END:VCARD" + "\r\n";
         assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putVCard(uid, vCard));
         /*
          * verify contact on server
@@ -120,12 +107,12 @@ public class UpdateTest extends CardDAVTest {
         /*
          * update contact on client
          */
-    	String updatedFirstName = "test2";
-    	String udpatedLastName = "horst2";
-    	card.getVCard().getN().setFamilyName(udpatedLastName);
-    	card.getVCard().getN().setGivenName(updatedFirstName);
-    	card.getVCard().getFN().setFormattedName(updatedFirstName + " " + udpatedLastName);
-		assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putVCardUpdate(card.getUID(), card.toString(), card.getETag()));
+        String updatedFirstName = "test2";
+        String udpatedLastName = "horst2";
+        card.getVCard().getN().setFamilyName(udpatedLastName);
+        card.getVCard().getN().setGivenName(updatedFirstName);
+        card.getVCard().getFN().setFormattedName(updatedFirstName + " " + udpatedLastName);
+        assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putVCardUpdate(card.getUID(), card.toString(), card.getETag()));
         /*
          * verify updated contact on server
          */
@@ -144,26 +131,26 @@ public class UpdateTest extends CardDAVTest {
         assertEquals("N wrong", updatedFirstName, card.getGivenName());
         assertEquals("N wrong", udpatedLastName, card.getFamilyName());
         assertEquals("FN wrong", updatedFirstName + " " + udpatedLastName, card.getFN());
-	}
+    }
 
-	@Test
-	public void testUpdateSimpleOnServer() throws Exception {
-		/*
-		 * fetch sync token for later synchronization
-		 */
-		SyncToken syncToken = new SyncToken(super.fetchSyncToken());
-		/*
-		 * create contact
-		 */
-    	String uid = randomUID();
-    	String firstName = "test";
-    	String lastName = "waldemar";
-		Contact contact = new Contact();
-		contact.setSurName(lastName);
-		contact.setGivenName(firstName);
-		contact.setDisplayName(firstName + " " + lastName);
-		contact.setUid(uid);
-		super.rememberForCleanUp(super.create(contact));
+    @Test
+    public void testUpdateSimpleOnServer() throws Exception {
+        /*
+         * fetch sync token for later synchronization
+         */
+        SyncToken syncToken = new SyncToken(super.fetchSyncToken());
+        /*
+         * create contact
+         */
+        String uid = randomUID();
+        String firstName = "test";
+        String lastName = "waldemar";
+        Contact contact = new Contact();
+        contact.setSurName(lastName);
+        contact.setGivenName(firstName);
+        contact.setDisplayName(firstName + " " + lastName);
+        contact.setUid(uid);
+        super.rememberForCleanUp(super.create(contact));
         /*
          * verify contact on client
          */
@@ -177,12 +164,12 @@ public class UpdateTest extends CardDAVTest {
         /*
          * update contact on server
          */
-    	String updatedFirstName = "test2";
-    	String udpatedLastName = "waldemar2";
-		contact.setSurName(udpatedLastName);
-		contact.setGivenName(updatedFirstName);
-		contact.setDisplayName(updatedFirstName + " " + udpatedLastName);
-		contact = super.update(contact);
+        String updatedFirstName = "test2";
+        String udpatedLastName = "waldemar2";
+        contact.setSurName(udpatedLastName);
+        contact.setGivenName(updatedFirstName);
+        contact.setDisplayName(updatedFirstName + " " + udpatedLastName);
+        contact = super.update(contact);
         /*
          * verify contact on client
          */
@@ -193,35 +180,21 @@ public class UpdateTest extends CardDAVTest {
         assertEquals("N wrong", updatedFirstName, card.getGivenName());
         assertEquals("N wrong", udpatedLastName, card.getFamilyName());
         assertEquals("FN wrong", updatedFirstName + " " + udpatedLastName, card.getFN());
-	}
+    }
 
-	@Test
-	public void testUpdateWithQuotedETag() throws Exception {
-		/*
-		 * fetch sync token for later synchronization
-		 */
-		SyncToken syncToken = new SyncToken(super.fetchSyncToken());
-		/*
-		 * create contact
-		 */
-    	String uid = randomUID();
-    	String firstName = "otto";
-    	String lastName = "horst";
-        String vCard =
-        		"BEGIN:VCARD" + "\r\n" +
-   				"VERSION:3.0" + "\r\n" +
-				"N:" + lastName + ";" + firstName + ";;;" + "\r\n" +
-				"FN:" + firstName + " " + lastName + "\r\n" +
-				"ORG:test3;" + "\r\n" +
-				"EMAIL;type=INTERNET;type=WORK;type=pref:test@example.com" + "\r\n" +
-				"TEL;type=WORK;type=pref:24235423" + "\r\n" +
-				"TEL;type=CELL:352-3534" + "\r\n" +
-				"TEL;type=HOME:346346" + "\r\n" +
-				"UID:" + uid + "\r\n" +
-				"REV:" + super.formatAsUTC(new Date()) + "\r\n" +
-				"PRODID:-//Apple Inc.//AddressBook 6.0//EN" + "\r\n" +
-				"END:VCARD" + "\r\n"
-		;
+    @Test
+    public void testUpdateWithQuotedETag() throws Exception {
+        /*
+         * fetch sync token for later synchronization
+         */
+        SyncToken syncToken = new SyncToken(super.fetchSyncToken());
+        /*
+         * create contact
+         */
+        String uid = randomUID();
+        String firstName = "otto";
+        String lastName = "horst";
+        String vCard = "BEGIN:VCARD" + "\r\n" + "VERSION:3.0" + "\r\n" + "N:" + lastName + ";" + firstName + ";;;" + "\r\n" + "FN:" + firstName + " " + lastName + "\r\n" + "ORG:test3;" + "\r\n" + "EMAIL;type=INTERNET;type=WORK;type=pref:test@example.com" + "\r\n" + "TEL;type=WORK;type=pref:24235423" + "\r\n" + "TEL;type=CELL:352-3534" + "\r\n" + "TEL;type=HOME:346346" + "\r\n" + "UID:" + uid + "\r\n" + "REV:" + super.formatAsUTC(new Date()) + "\r\n" + "PRODID:-//Apple Inc.//AddressBook 6.0//EN" + "\r\n" + "END:VCARD" + "\r\n";
         assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putVCard(uid, vCard));
         /*
          * verify contact on server
@@ -244,12 +217,12 @@ public class UpdateTest extends CardDAVTest {
         /*
          * update contact on client
          */
-    	String updatedFirstName = "otto2";
-    	String udpatedLastName = "horst2";
-    	card.getVCard().getN().setFamilyName(udpatedLastName);
-    	card.getVCard().getN().setGivenName(updatedFirstName);
-    	card.getVCard().getFN().setFormattedName(updatedFirstName + " " + udpatedLastName);
-		assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putVCardUpdate(card.getUID(), card.toString(), "\"" + card.getETag() + "\""));
+        String updatedFirstName = "otto2";
+        String udpatedLastName = "horst2";
+        card.getVCard().getN().setFamilyName(udpatedLastName);
+        card.getVCard().getN().setGivenName(updatedFirstName);
+        card.getVCard().getFN().setFormattedName(updatedFirstName + " " + udpatedLastName);
+        assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putVCardUpdate(card.getUID(), card.toString(), "\"" + card.getETag() + "\""));
         /*
          * verify updated contact on server
          */
@@ -268,36 +241,22 @@ public class UpdateTest extends CardDAVTest {
         assertEquals("N wrong", updatedFirstName, card.getGivenName());
         assertEquals("N wrong", udpatedLastName, card.getFamilyName());
         assertEquals("FN wrong", updatedFirstName + " " + udpatedLastName, card.getFN());
-	}
+    }
 
-	@Test
-	public void testUpdateWithDifferentFilename() throws Exception {
-		/*
-		 * fetch sync token for later synchronization
-		 */
-		SyncToken syncToken = new SyncToken(super.fetchSyncToken());
-		/*
-		 * create contact
-		 */
-    	String uid = randomUID();
-    	String filename = randomUID();
-    	String firstName = "test";
-    	String lastName = "horst";
-        String vCard =
-        		"BEGIN:VCARD" + "\r\n" +
-   				"VERSION:3.0" + "\r\n" +
-				"N:" + lastName + ";" + firstName + ";;;" + "\r\n" +
-				"FN:" + firstName + " " + lastName + "\r\n" +
-				"ORG:test3;" + "\r\n" +
-				"EMAIL;type=INTERNET;type=WORK;type=pref:test@example.com" + "\r\n" +
-				"TEL;type=WORK;type=pref:24235423" + "\r\n" +
-				"TEL;type=CELL:352-3534" + "\r\n" +
-				"TEL;type=HOME:346346" + "\r\n" +
-				"UID:" + uid + "\r\n" +
-				"REV:" + super.formatAsUTC(new Date()) + "\r\n" +
-				"PRODID:-//Apple Inc.//AddressBook 6.0//EN" + "\r\n" +
-				"END:VCARD" + "\r\n"
-		;
+    @Test
+    public void testUpdateWithDifferentFilename() throws Exception {
+        /*
+         * fetch sync token for later synchronization
+         */
+        SyncToken syncToken = new SyncToken(super.fetchSyncToken());
+        /*
+         * create contact
+         */
+        String uid = randomUID();
+        String filename = randomUID();
+        String firstName = "test";
+        String lastName = "horst";
+        String vCard = "BEGIN:VCARD" + "\r\n" + "VERSION:3.0" + "\r\n" + "N:" + lastName + ";" + firstName + ";;;" + "\r\n" + "FN:" + firstName + " " + lastName + "\r\n" + "ORG:test3;" + "\r\n" + "EMAIL;type=INTERNET;type=WORK;type=pref:test@example.com" + "\r\n" + "TEL;type=WORK;type=pref:24235423" + "\r\n" + "TEL;type=CELL:352-3534" + "\r\n" + "TEL;type=HOME:346346" + "\r\n" + "UID:" + uid + "\r\n" + "REV:" + super.formatAsUTC(new Date()) + "\r\n" + "PRODID:-//Apple Inc.//AddressBook 6.0//EN" + "\r\n" + "END:VCARD" + "\r\n";
         assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putVCard(filename, vCard));
         /*
          * verify contact on server
@@ -320,12 +279,12 @@ public class UpdateTest extends CardDAVTest {
         /*
          * update contact on client
          */
-    	String updatedFirstName = "test2";
-    	String udpatedLastName = "horst2";
-    	card.getVCard().getN().setFamilyName(udpatedLastName);
-    	card.getVCard().getN().setGivenName(updatedFirstName);
-    	card.getVCard().getFN().setFormattedName(updatedFirstName + " " + udpatedLastName);
-		assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putVCardUpdate(filename, card.toString(), card.getETag()));
+        String updatedFirstName = "test2";
+        String udpatedLastName = "horst2";
+        card.getVCard().getN().setFamilyName(udpatedLastName);
+        card.getVCard().getN().setGivenName(updatedFirstName);
+        card.getVCard().getFN().setFormattedName(updatedFirstName + " " + udpatedLastName);
+        assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putVCardUpdate(filename, card.toString(), card.getETag()));
         /*
          * verify updated contact on server
          */
@@ -344,6 +303,6 @@ public class UpdateTest extends CardDAVTest {
         assertEquals("N wrong", updatedFirstName, card.getGivenName());
         assertEquals("N wrong", udpatedLastName, card.getFamilyName());
         assertEquals("FN wrong", updatedFirstName + " " + udpatedLastName, card.getFN());
-	}
+    }
 
 }

@@ -51,8 +51,12 @@ package com.openexchange.subscribe.microformats.parser;
 
 import java.util.List;
 import java.util.Map;
-import junit.framework.TestCase;
+import org.junit.Test;
 import com.openexchange.datatypes.genericonf.FormElement;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 
 /**
@@ -61,8 +65,7 @@ import com.openexchange.datatypes.genericonf.FormElement;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class OXMFFormParserTest extends TestCase {
-    private static final String FORM_PAGE =
+public class OXMFFormParserTest {    private static final String FORM_PAGE =
         "<html>\n"+
         "    <head>\n"+
         "        <meta name=\"ox_key\" value=\"ox_value\"></meta>\n"+
@@ -83,7 +86,8 @@ public class OXMFFormParserTest extends TestCase {
         "</html>\n";
 
 
-        public void testParseMetadata() {
+             @Test
+     public void testParseMetadata() {
 
             OXMFForm form = new CybernekoOXMFFormParser().parse(FORM_PAGE);
             assertNotNull(form);
@@ -96,7 +100,8 @@ public class OXMFFormParserTest extends TestCase {
 
         }
 
-        public void testParseForm() {
+             @Test
+     public void testParseForm() {
             OXMFForm form = new CybernekoOXMFFormParser().parse(FORM_PAGE);
             assertNotNull(form);
 

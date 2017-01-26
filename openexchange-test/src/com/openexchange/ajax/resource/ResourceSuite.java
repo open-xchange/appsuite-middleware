@@ -49,30 +49,28 @@
 
 package com.openexchange.ajax.resource;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 import com.openexchange.ajax.ResourceTest;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * Suite for the resource tests.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class ResourceSuite extends TestSuite {
+@RunWith(ParallelSuite.class)
+@Suite.SuiteClasses({
+    ResourceAllAJAXTest.class,
+    ResourceDeleteAJAXTest.class,
+    ResourceGetAJAXTest.class,
+    ResourceListAJAXTest.class,
+    ResourceNewAJAXTest.class,
+    ResourceUpdateAJAXTest.class,
+    ResourceUpdatesAJAXTest.class,
+    ResourceTest.class,
 
-    /**
-     * TODO add this tests to the AJAX interface test suite.
-     */
-    public static Test suite() {
-        final TestSuite tests = new TestSuite("com.openexchange.ajax.resource.ResourceSuite");
-        tests.addTestSuite(ResourceAllAJAXTest.class);
-        tests.addTestSuite(ResourceDeleteAJAXTest.class);
-        tests.addTestSuite(ResourceGetAJAXTest.class);
-        tests.addTestSuite(ResourceListAJAXTest.class);
-        tests.addTestSuite(ResourceNewAJAXTest.class);
-        tests.addTestSuite(ResourceUpdateAJAXTest.class);
-        tests.addTestSuite(ResourceUpdatesAJAXTest.class);
-        tests.addTestSuite(ResourceTest.class);
-        return tests;
-    }
+})
+public class ResourceSuite  {
+
 }

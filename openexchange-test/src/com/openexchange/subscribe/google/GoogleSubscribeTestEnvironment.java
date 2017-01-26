@@ -49,8 +49,8 @@
 
 package com.openexchange.subscribe.google;
 
-import com.openexchange.ajax.oauth.client.actions.OAuthService;
 import com.openexchange.ajax.oauth.client.actions.InitOAuthAccountRequest;
+import com.openexchange.ajax.oauth.client.actions.OAuthService;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.subscribe.AbstractSubscribeTestEnvironment;
 
@@ -78,9 +78,9 @@ public class GoogleSubscribeTestEnvironment extends AbstractSubscribeTestEnviron
 
     // -------------------------------------------------------------------------------------------------- //
 
-
     /**
      * Initializes a new {@link GoogleSubscribeTestEnvironment}.
+     * 
      * @param serviceId
      */
     protected GoogleSubscribeTestEnvironment() {
@@ -89,6 +89,7 @@ public class GoogleSubscribeTestEnvironment extends AbstractSubscribeTestEnviron
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.openexchange.subscribe.AbstractSubscribeTestEnvironment#initEnvironment()
      */
     @Override
@@ -99,6 +100,7 @@ public class GoogleSubscribeTestEnvironment extends AbstractSubscribeTestEnviron
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.openexchange.subscribe.AbstractSubscribeTestEnvironment#createSubscriptions()
      */
     @Override

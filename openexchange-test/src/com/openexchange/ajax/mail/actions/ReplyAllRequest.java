@@ -54,8 +54,6 @@ import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
-
-
 /**
  * {@link ReplyAllRequest}
  *
@@ -63,22 +61,23 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  */
 public class ReplyAllRequest extends ReplyRequest {
 
-    public ReplyAllRequest(String folderID, String mailID){
+    public ReplyAllRequest(String folderID, String mailID) {
         super(folderID, mailID);
     }
 
-    public ReplyAllRequest(String[] folderAndID){
+    public ReplyAllRequest(String[] folderAndID) {
         this(folderAndID[0], folderAndID[1]);
     }
 
     @Override
-    public String getAction(){
+    public String getAction() {
         return Mail.ACTION_REPLYALL;
     }
 
     @Override
     public AbstractAJAXParser<? extends ReplyResponse> getParser() {
         return new AbstractAJAXParser<ReplyAllResponse>(failOnError) {
+
             @Override
             protected ReplyAllResponse createResponse(final Response response) throws JSONException {
                 return new ReplyAllResponse(response);

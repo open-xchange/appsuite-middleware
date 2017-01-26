@@ -55,7 +55,6 @@ import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
-
 /**
  * {@link AutologinResponseParser}
  *
@@ -66,6 +65,7 @@ public class AutologinResponseParser extends AbstractAJAXParser<AutologinRespons
 
     /**
      * Initializes a new {@link AutologinResponseParser}.
+     * 
      * @param failOnError
      */
     public AutologinResponseParser(boolean failOnError) {
@@ -78,7 +78,7 @@ public class AutologinResponseParser extends AbstractAJAXParser<AutologinRespons
         JSONObject json = response.getJSON();
         if (response.hasError()) {
             response.setData(null);
-        }  else {
+        } else {
             autologinResponse.setSessionId(json.getString(LoginServlet.PARAMETER_SESSION));
             autologinResponse.setUser(json.getString(LoginServlet.PARAMETER_USER));
             autologinResponse.setUserId(json.getInt(LoginServlet.PARAMETER_USER_ID));

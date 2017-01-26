@@ -49,7 +49,11 @@
 
 package com.openexchange.admin.rmi.dataobjects;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 
 /**
@@ -58,8 +62,7 @@ import junit.framework.TestCase;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.0
  */
-public class UserTests extends TestCase {
-
+public class UserTests {
     /**
      * Initializes a new {@link UserTests}.
      */
@@ -67,7 +70,8 @@ public class UserTests extends TestCase {
         super();
     }
 
-    public void testIPv6IMAP() {
+         @Test
+     public void testIPv6IMAP() {
         User user = new User();
         user.setImapServer("imap://[2607:f0d0:1002:51::4]:1338");
 
@@ -76,7 +80,8 @@ public class UserTests extends TestCase {
         assertEquals("Unexpected host", "[2607:f0d0:1002:51::4]", user.getImapServer());
     }
 
-    public void testIPv6SMTP() {
+         @Test
+     public void testIPv6SMTP() {
         User user = new User();
         user.setSmtpServer("smtp://[2607:f0d0:1002:51::8]:1255");
 

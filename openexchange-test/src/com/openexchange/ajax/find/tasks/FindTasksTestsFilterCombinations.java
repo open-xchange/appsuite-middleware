@@ -65,22 +65,22 @@ import com.openexchange.find.tasks.TasksFacetType;
  * {@link FindTasksTests}
  * <p style="font-weight:bold; font-size:14px;">Matrix with Filter Combinations</p>
  * <table border="1">
- *  <tr style="font-weight: bold;"><td>&nbsp;</td><td>Type</td><td>Folder Type</td><td>Status</td><td>Participant</td></tr>
- *  <tr style="text-align: center"><td style="font-weight:bold;">1</td><td>0</td><td>0</td><td>0</td><td>1</td></tr>
- *  <tr style="text-align: center"><td style="font-weight:bold;">2</td><td>0</td><td>0</td><td>1</td><td>0</td></tr>
- *  <tr style="text-align: center"><td style="font-weight:bold;">3</td><td>0</td><td>0</td><td>1</td><td>1</td></tr>
- *  <tr style="text-align: center"><td style="font-weight:bold;">4</td><td>0</td><td>1</td><td>0</td><td>0</td></tr>
- *  <tr style="text-align: center"><td style="font-weight:bold;">5</td><td>0</td><td>1</td><td>0</td><td>1</td></tr>
- *  <tr style="text-align: center"><td style="font-weight:bold;">6</td><td>0</td><td>1</td><td>1</td><td>0</td></tr>
- *  <tr style="text-align: center"><td style="font-weight:bold;">7</td><td>0</td><td>1</td><td>1</td><td>1</td></tr>
- *  <tr style="text-align: center"><td style="font-weight:bold;">8</td><td>1</td><td>0</td><td>0</td><td>0</td></tr>
- *  <tr style="text-align: center"><td style="font-weight:bold;">9</td><td>1</td><td>0</td><td>0</td><td>1</td></tr>
- *  <tr style="text-align: center"><td style="font-weight:bold;">10</td><td>1</td><td>0</td><td>1</td><td>0</td></tr>
- *  <tr style="text-align: center"><td style="font-weight:bold;">11</td><td>1</td><td>0</td><td>1</td><td>1</td></tr>
- *  <tr style="text-align: center"><td style="font-weight:bold;">12</td><td>1</td><td>1</td><td>0</td><td>0</td></tr>
- *  <tr style="text-align: center"><td style="font-weight:bold;">13</td><td>1</td><td>1</td><td>0</td><td>1</td></tr>
- *  <tr style="text-align: center"><td style="font-weight:bold;">14</td><td>1</td><td>1</td><td>1</td><td>0</td></tr>
- *  <tr style="text-align: center"><td style="font-weight:bold;">15</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
+ * <tr style="font-weight: bold;"><td>&nbsp;</td><td>Type</td><td>Folder Type</td><td>Status</td><td>Participant</td></tr>
+ * <tr style="text-align: center"><td style="font-weight:bold;">1</td><td>0</td><td>0</td><td>0</td><td>1</td></tr>
+ * <tr style="text-align: center"><td style="font-weight:bold;">2</td><td>0</td><td>0</td><td>1</td><td>0</td></tr>
+ * <tr style="text-align: center"><td style="font-weight:bold;">3</td><td>0</td><td>0</td><td>1</td><td>1</td></tr>
+ * <tr style="text-align: center"><td style="font-weight:bold;">4</td><td>0</td><td>1</td><td>0</td><td>0</td></tr>
+ * <tr style="text-align: center"><td style="font-weight:bold;">5</td><td>0</td><td>1</td><td>0</td><td>1</td></tr>
+ * <tr style="text-align: center"><td style="font-weight:bold;">6</td><td>0</td><td>1</td><td>1</td><td>0</td></tr>
+ * <tr style="text-align: center"><td style="font-weight:bold;">7</td><td>0</td><td>1</td><td>1</td><td>1</td></tr>
+ * <tr style="text-align: center"><td style="font-weight:bold;">8</td><td>1</td><td>0</td><td>0</td><td>0</td></tr>
+ * <tr style="text-align: center"><td style="font-weight:bold;">9</td><td>1</td><td>0</td><td>0</td><td>1</td></tr>
+ * <tr style="text-align: center"><td style="font-weight:bold;">10</td><td>1</td><td>0</td><td>1</td><td>0</td></tr>
+ * <tr style="text-align: center"><td style="font-weight:bold;">11</td><td>1</td><td>0</td><td>1</td><td>1</td></tr>
+ * <tr style="text-align: center"><td style="font-weight:bold;">12</td><td>1</td><td>1</td><td>0</td><td>0</td></tr>
+ * <tr style="text-align: center"><td style="font-weight:bold;">13</td><td>1</td><td>1</td><td>0</td><td>1</td></tr>
+ * <tr style="text-align: center"><td style="font-weight:bold;">14</td><td>1</td><td>1</td><td>1</td><td>0</td></tr>
+ * <tr style="text-align: center"><td style="font-weight:bold;">15</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
  * </table>
  *
  *
@@ -89,24 +89,17 @@ import com.openexchange.find.tasks.TasksFacetType;
 public class FindTasksTestsFilterCombinations extends AbstractFindTasksTest {
 
     /**
-     * Initializes a new {@link FindTasksTestsFilterCombinations}.
-     * @param name
-     */
-    public FindTasksTestsFilterCombinations(String name) {
-        super(name);
-    }
-
-    /**
      * Get all relevant filters for the given combination
+     * 
      * @param combination as char array
      * @return all relevant filters for that combination
      */
-    private static final List<ActiveFacet> getRelevantActiveFacets(char[] combination) {
+    private final List<ActiveFacet> getRelevantActiveFacets(char[] combination) {
         List<ActiveFacet> facets = new ArrayList<ActiveFacet>();
         ArrayUtils.reverse(combination);
         for (int i = 0; i < combination.length; i++) {
             if (combination[i] == '1')
-                facets.addAll(FindTasksTestEnvironment.getInstance().getLoActiveFacets().get(i));
+                facets.addAll(getLoActiveFacets().get(i));
         }
         return facets;
     }
@@ -114,9 +107,6 @@ public class FindTasksTestsFilterCombinations extends AbstractFindTasksTest {
     /**
      * Static test
      * Test with more external participants
-     * @throws OXException
-     * @throws IOException
-     * @throws JSONException
      */
     @Test
     public void testMoreExternalParticipants() throws OXException, IOException, JSONException {
@@ -159,7 +149,7 @@ public class FindTasksTestsFilterCombinations extends AbstractFindTasksTest {
 
         facets.clear();
         facets.add(f.get(2)); //ext participant
-        facets.add(FindTasksTestEnvironment.createGlobalFacet());
+        facets.add(createGlobalFacet());
         assertResults(2, facets);
 
         assertResults(1, f); //all participants (a+b+ext)
@@ -169,9 +159,10 @@ public class FindTasksTestsFilterCombinations extends AbstractFindTasksTest {
      * Test filter combination 2, i.e. with status
      * - NOT STARTED: 9
      * - IN PROGRESS: 6
-     * - DONE:        6
-     * - WAITING:     5
-     * - DEFERRED:    5
+     * - DONE: 6
+     * - WAITING: 5
+     * - DEFERRED: 5
+     * 
      * @throws JSONException
      * @throws IOException
      * @throws OXException
@@ -199,35 +190,37 @@ public class FindTasksTestsFilterCombinations extends AbstractFindTasksTest {
         List<ActiveFacet> facets = new ArrayList<ActiveFacet>();
 
         // Playing around with some multi-purpose code (maybe difficult to debug the test case :-/ )
-        /*int[][] expectedResultsMatrix = { {3, 1, 1, 0, 0}, //participant a
-                                          {2, 1, 1, 0, 0}, //participant b
-                                          {2, 1, 1, 0, 0}, //participant a AND b
-                                          {1, 1, 0, 0, 0}, //participant a and external
-                                          {0, 1, 0, 0, 0}  //all participants (2int + 1ext)
-                                        };
-
-        int[][] participantCombinationMatrix = { {0},
-                                                 {1},
-                                                 {0, 1},
-                                                 {0, 2},
-                                                 {0, 1, 2}
-                                                };
-
-        for (int i = 0; i < expectedResultsMatrix.length; i++) {
-            int k = 0;
-            facets.clear();
-            int r = participantCombinationMatrix[i].length;
-            for (int py = 0; py < r; py++) {
-                facets.add(f.get(participantCombinationMatrix[i][py]));
-            }
-            for(int j = 3; j < f.size(); j++) {
-                if (j > 3)
-                    facets.remove(r);
-                facets.add(f.get(j));
-                assertResults(expectedResultsMatrix[i][k++], facets);
-            }
-            r++;
-        }*/
+        /*
+         * int[][] expectedResultsMatrix = { {3, 1, 1, 0, 0}, //participant a
+         * {2, 1, 1, 0, 0}, //participant b
+         * {2, 1, 1, 0, 0}, //participant a AND b
+         * {1, 1, 0, 0, 0}, //participant a and external
+         * {0, 1, 0, 0, 0} //all participants (2int + 1ext)
+         * };
+         * 
+         * int[][] participantCombinationMatrix = { {0},
+         * {1},
+         * {0, 1},
+         * {0, 2},
+         * {0, 1, 2}
+         * };
+         * 
+         * for (int i = 0; i < expectedResultsMatrix.length; i++) {
+         * int k = 0;
+         * facets.clear();
+         * int r = participantCombinationMatrix[i].length;
+         * for (int py = 0; py < r; py++) {
+         * facets.add(f.get(participantCombinationMatrix[i][py]));
+         * }
+         * for(int j = 3; j < f.size(); j++) {
+         * if (j > 3)
+         * facets.remove(r);
+         * facets.add(f.get(j));
+         * assertResults(expectedResultsMatrix[i][k++], facets);
+         * }
+         * r++;
+         * }
+         */
 
         facets.add(f.get(0));//participant a
         facets.add(f.get(3));//not started
@@ -265,7 +258,6 @@ public class FindTasksTestsFilterCombinations extends AbstractFindTasksTest {
         facets.add(f.get(5));//done
         assertResults(0, facets);
 
-
         facets.clear();
         facets.add(f.get(0)); //participant a
         facets.add(f.get(1)); //participant b
@@ -283,6 +275,7 @@ public class FindTasksTestsFilterCombinations extends AbstractFindTasksTest {
      * - in PRIVATE: 10
      * - in PUBLIC: 10
      * - in SHARED: 11
+     * 
      * @throws JSONException
      * @throws IOException
      * @throws OXException
@@ -352,13 +345,9 @@ public class FindTasksTestsFilterCombinations extends AbstractFindTasksTest {
 
     /**
      * Test filter combination 6, i.e. with folder type and status
-     *
-     * @throws OXException
-     * @throws IOException
-     * @throws JSONException
      */
     @Test
-    public void testWithFolderTypeAndStatus()  throws OXException, IOException, JSONException {
+    public void testWithFolderTypeAndStatus() throws OXException, IOException, JSONException {
         List<ActiveFacet> f = getRelevantActiveFacets(Integer.toBinaryString(6).toCharArray());
         List<ActiveFacet> facets = new ArrayList<ActiveFacet>();
         facets.add(f.get(0)); //not started
@@ -514,7 +503,8 @@ public class FindTasksTestsFilterCombinations extends AbstractFindTasksTest {
     /**
      * Test filter combination 8, i.e. with task type
      * - SINGLE: 29
-     * - SERIES:  2
+     * - SERIES: 2
+     * 
      * @throws JSONException
      * @throws IOException
      * @throws OXException
@@ -553,6 +543,7 @@ public class FindTasksTestsFilterCombinations extends AbstractFindTasksTest {
 
     /**
      * Test filter combination 10, i.e. with type and status
+     * 
      * @throws OXException
      * @throws IOException
      * @throws JSONException
@@ -724,12 +715,13 @@ public class FindTasksTestsFilterCombinations extends AbstractFindTasksTest {
 
     /**
      * Test filter combination 15, i.e. with all 4 filters
+     * 
      * @throws OXException
      * @throws IOException
      * @throws JSONException
      */
     @Test
-    public void testWithTypeAndFolderTypeAndStatusAndParticipant()  throws OXException, IOException, JSONException {
+    public void testWithTypeAndFolderTypeAndStatusAndParticipant() throws OXException, IOException, JSONException {
         List<ActiveFacet> f = getRelevantActiveFacets(Integer.toBinaryString(15).toCharArray());
         List<ActiveFacet> facets = new ArrayList<ActiveFacet>();
         facets.add(f.get(0)); //participant a

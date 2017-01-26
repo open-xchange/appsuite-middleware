@@ -65,6 +65,7 @@ public class GetChangeExceptionsParser extends AbstractColumnsParser<GetChangeEx
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.openexchange.ajax.framework.AbstractColumnsParser#instantiateResponse(com.openexchange.ajax.container.Response)
      */
     @Override

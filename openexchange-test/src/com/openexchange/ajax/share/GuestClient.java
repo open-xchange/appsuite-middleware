@@ -359,8 +359,6 @@ public class GuestClient extends AJAXClient {
         }
         return Executor.execute(this, loginRequest, getProtocol(), getHostname());
     }
-    
-    
 
     private static void prepareClient(DefaultHttpClient httpClient, String username, String password) {
         httpClient.getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
@@ -526,10 +524,10 @@ public class GuestClient extends AJAXClient {
              * check item delete
              */
             //TODO: throws "not exist" in folder 10
-//            DeleteInfostoreRequest deleteInfostoreRequest = new DeleteInfostoreRequest(fileID, new FileID(fileID).getFolderId(), file.getLastModified());
-//            deleteInfostoreRequest.setFailOnError(permissions.canDelete());
-//            DeleteInfostoreResponse deleteInfostoreResponse = execute(deleteInfostoreRequest);
-//            checkResponse(deleteInfostoreResponse, false == permissions.canDelete());
+            //            DeleteInfostoreRequest deleteInfostoreRequest = new DeleteInfostoreRequest(fileID, new FileID(fileID).getFolderId(), file.getLastModified());
+            //            deleteInfostoreRequest.setFailOnError(permissions.canDelete());
+            //            DeleteInfostoreResponse deleteInfostoreResponse = execute(deleteInfostoreRequest);
+            //            checkResponse(deleteInfostoreResponse, false == permissions.canDelete());
         }
     }
 
@@ -629,8 +627,7 @@ public class GuestClient extends AJAXClient {
      * @param moduleID The identifier of the module to be available
      */
     public void checkModuleAvailable(int moduleID) throws Exception {
-        com.openexchange.ajax.config.actions.GetResponse getResponse =
-            execute(new com.openexchange.ajax.config.actions.GetRequest(Tree.AvailableModules));
+        com.openexchange.ajax.config.actions.GetResponse getResponse = execute(new com.openexchange.ajax.config.actions.GetRequest(Tree.AvailableModules));
         String module = getContentType(moduleID);
         Object[] array = getResponse.getArray();
         for (Object object : array) {
@@ -647,8 +644,7 @@ public class GuestClient extends AJAXClient {
      * @param moduleID The identifier of the module to be not available
      */
     public void checkModuleNotAvailable(int moduleID) throws Exception {
-        com.openexchange.ajax.config.actions.GetResponse getResponse =
-            execute(new com.openexchange.ajax.config.actions.GetRequest(Tree.AvailableModules));
+        com.openexchange.ajax.config.actions.GetResponse getResponse = execute(new com.openexchange.ajax.config.actions.GetRequest(Tree.AvailableModules));
         String module = getContentType(moduleID);
         Object[] array = getResponse.getArray();
         for (Object object : array) {
@@ -667,8 +663,7 @@ public class GuestClient extends AJAXClient {
      * Checks that the share's module is available, as well as all others modules are not.
      */
     public void checkShareModuleAvailableExclusively() throws Exception {
-        com.openexchange.ajax.config.actions.GetResponse getResponse =
-            execute(new com.openexchange.ajax.config.actions.GetRequest(Tree.AvailableModules));
+        com.openexchange.ajax.config.actions.GetResponse getResponse = execute(new com.openexchange.ajax.config.actions.GetRequest(Tree.AvailableModules));
         Object[] array = getResponse.getArray();
         for (int moduleID : new int[] { FolderObject.CALENDAR, FolderObject.CONTACT, FolderObject.INFOSTORE, FolderObject.TASK }) {
             String module = getContentType(moduleID);
@@ -689,17 +684,17 @@ public class GuestClient extends AJAXClient {
 
     private String getContentType(int module) {
         switch (module) {
-        case FolderObject.CONTACT:
-            return "contacts";
-        case FolderObject.INFOSTORE:
-            return "infostore";
-        case FolderObject.TASK:
-            return "tasks";
-        case FolderObject.CALENDAR:
-            return "calendar";
-        default:
-            Assert.fail("no content type for " + getModule() + "");
-            return null;
+            case FolderObject.CONTACT:
+                return "contacts";
+            case FolderObject.INFOSTORE:
+                return "infostore";
+            case FolderObject.TASK:
+                return "tasks";
+            case FolderObject.CALENDAR:
+                return "calendar";
+            default:
+                Assert.fail("no content type for " + getModule() + "");
+                return null;
         }
     }
 
@@ -710,13 +705,11 @@ public class GuestClient extends AJAXClient {
      * @param expectToFail <code>true</code> if the requests are expected to fail, <code>false</code>, otherwise
      */
     public void checkSessionAlive(boolean expectToFail) throws Exception {
-        com.openexchange.ajax.user.actions.GetResponse getResponse = execute(
-            new com.openexchange.ajax.user.actions.GetRequest(TimeZones.UTC, false == expectToFail));
+        com.openexchange.ajax.user.actions.GetResponse getResponse = execute(new com.openexchange.ajax.user.actions.GetRequest(TimeZones.UTC, false == expectToFail));
         checkResponse(getResponse, expectToFail);
         if (FolderObject.INFOSTORE != getModuleID()) {
             String contentType = getContentType(getModuleID());
-            VisibleFoldersResponse response = execute(new VisibleFoldersRequest(
-                EnumAPI.OX_NEW, contentType, FolderObject.ALL_COLUMNS, false == expectToFail));
+            VisibleFoldersResponse response = execute(new VisibleFoldersRequest(EnumAPI.OX_NEW, contentType, FolderObject.ALL_COLUMNS, false == expectToFail));
             checkResponse(response, expectToFail);
         }
     }
@@ -725,7 +718,7 @@ public class GuestClient extends AJAXClient {
         Assert.assertNotNull("No response", response);
         if (expectToFail) {
             if (false == response.hasError()) {
-                System.out.println( "+++");
+                System.out.println("+++");
             }
 
             Assert.assertTrue("No errors in response", response.hasError());
@@ -739,30 +732,27 @@ public class GuestClient extends AJAXClient {
         Date timestamp = getFutureTimestamp();
         boolean failOnError = false == expectToFail;
         switch (folder.getModule()) {
-        case FolderObject.CONTACT:
-            CommonDeleteResponse deleteContactResponse = execute(
-                new com.openexchange.ajax.contact.action.DeleteRequest(folderID, Integer.parseInt(id), timestamp, failOnError));
-            checkResponse(deleteContactResponse, expectToFail);
-            break;
-        case FolderObject.INFOSTORE:
-            DeleteInfostoreRequest deleteInfostoreRequest = new DeleteInfostoreRequest(id, String.valueOf(folderID), timestamp);
-            deleteInfostoreRequest.setFailOnError(failOnError);
-            DeleteInfostoreResponse deleteInfostoreResponse = execute(deleteInfostoreRequest);
-            checkResponse(deleteInfostoreResponse, expectToFail);
-            break;
-        case FolderObject.TASK:
-            CommonDeleteResponse deleteTaskResponse = execute(
-                new com.openexchange.ajax.task.actions.DeleteRequest(folderID, Integer.parseInt(id), timestamp, failOnError));
-            checkResponse(deleteTaskResponse, expectToFail);
-            break;
-        case FolderObject.CALENDAR:
-            CommonDeleteResponse deleteAppointmentResponse = execute(
-                new com.openexchange.ajax.appointment.action.DeleteRequest(Integer.parseInt(id), folderID, timestamp, failOnError));
-            checkResponse(deleteAppointmentResponse, expectToFail);
-            break;
-        default:
-            Assert.fail("no delete item request for " + folder.getModule() + " implemented");
-            break;
+            case FolderObject.CONTACT:
+                CommonDeleteResponse deleteContactResponse = execute(new com.openexchange.ajax.contact.action.DeleteRequest(folderID, Integer.parseInt(id), timestamp, failOnError));
+                checkResponse(deleteContactResponse, expectToFail);
+                break;
+            case FolderObject.INFOSTORE:
+                DeleteInfostoreRequest deleteInfostoreRequest = new DeleteInfostoreRequest(id, String.valueOf(folderID), timestamp);
+                deleteInfostoreRequest.setFailOnError(failOnError);
+                DeleteInfostoreResponse deleteInfostoreResponse = execute(deleteInfostoreRequest);
+                checkResponse(deleteInfostoreResponse, expectToFail);
+                break;
+            case FolderObject.TASK:
+                CommonDeleteResponse deleteTaskResponse = execute(new com.openexchange.ajax.task.actions.DeleteRequest(folderID, Integer.parseInt(id), timestamp, failOnError));
+                checkResponse(deleteTaskResponse, expectToFail);
+                break;
+            case FolderObject.CALENDAR:
+                CommonDeleteResponse deleteAppointmentResponse = execute(new com.openexchange.ajax.appointment.action.DeleteRequest(Integer.parseInt(id), folderID, timestamp, failOnError));
+                checkResponse(deleteAppointmentResponse, expectToFail);
+                break;
+            default:
+                Assert.fail("no delete item request for " + folder.getModule() + " implemented");
+                break;
         }
     }
 
@@ -771,30 +761,27 @@ public class GuestClient extends AJAXClient {
         boolean failOnError = false == expectToFail;
         TimeZone timeZone = TimeZones.UTC;
         switch (folder.getModule()) {
-        case FolderObject.CONTACT:
-            com.openexchange.ajax.contact.action.GetResponse contactGetResponse = execute(
-                new com.openexchange.ajax.contact.action.GetRequest(folderID, Integer.parseInt(id), timeZone, failOnError));
-            checkResponse(contactGetResponse, expectToFail);
-            return expectToFail ? null : contactGetResponse.getContact();
-        case FolderObject.INFOSTORE:
-            GetInfostoreRequest getInfostoreRequest = new GetInfostoreRequest(id);
-            getInfostoreRequest.setFailOnError(false == expectToFail);
-            GetInfostoreResponse getInfostoreResponse = execute(getInfostoreRequest);
-            checkResponse(getInfostoreResponse, expectToFail);
-            return expectToFail ? null : getInfostoreResponse.getDocumentMetadata();
-        case FolderObject.TASK:
-            com.openexchange.ajax.task.actions.GetResponse getTaskResponse = execute(
-                new com.openexchange.ajax.task.actions.GetRequest(folderID, Integer.parseInt(id), failOnError));
-            checkResponse(getTaskResponse, expectToFail);
-            return expectToFail ? null : getTaskResponse.getTask(timeZone);
-        case FolderObject.CALENDAR:
-            com.openexchange.ajax.appointment.action.GetResponse getAppointmentResponse = execute(
-                new com.openexchange.ajax.appointment.action.GetRequest(folderID, Integer.parseInt(id), failOnError));
-            checkResponse(getAppointmentResponse, expectToFail);
-            return expectToFail ? null : getAppointmentResponse.getAppointment(timeZone);
-        default:
-            Assert.fail("no get item request for " + folder.getModule() + " implemented");
-            return null;
+            case FolderObject.CONTACT:
+                com.openexchange.ajax.contact.action.GetResponse contactGetResponse = execute(new com.openexchange.ajax.contact.action.GetRequest(folderID, Integer.parseInt(id), timeZone, failOnError));
+                checkResponse(contactGetResponse, expectToFail);
+                return expectToFail ? null : contactGetResponse.getContact();
+            case FolderObject.INFOSTORE:
+                GetInfostoreRequest getInfostoreRequest = new GetInfostoreRequest(id);
+                getInfostoreRequest.setFailOnError(false == expectToFail);
+                GetInfostoreResponse getInfostoreResponse = execute(getInfostoreRequest);
+                checkResponse(getInfostoreResponse, expectToFail);
+                return expectToFail ? null : getInfostoreResponse.getDocumentMetadata();
+            case FolderObject.TASK:
+                com.openexchange.ajax.task.actions.GetResponse getTaskResponse = execute(new com.openexchange.ajax.task.actions.GetRequest(folderID, Integer.parseInt(id), failOnError));
+                checkResponse(getTaskResponse, expectToFail);
+                return expectToFail ? null : getTaskResponse.getTask(timeZone);
+            case FolderObject.CALENDAR:
+                com.openexchange.ajax.appointment.action.GetResponse getAppointmentResponse = execute(new com.openexchange.ajax.appointment.action.GetRequest(folderID, Integer.parseInt(id), failOnError));
+                checkResponse(getAppointmentResponse, expectToFail);
+                return expectToFail ? null : getAppointmentResponse.getAppointment(timeZone);
+            default:
+                Assert.fail("no get item request for " + folder.getModule() + " implemented");
+                return null;
         }
     }
 
@@ -803,77 +790,71 @@ public class GuestClient extends AJAXClient {
         int folderID = folder.getObjectID();
         TimeZone timeZone = TimeZones.UTC;
         switch (folder.getModule()) {
-        case FolderObject.CONTACT:
-            Contact contact = new Contact();
-            contact.setParentFolderID(folderID);
-            contact.setDisplayName(UUIDs.getUnformattedString(UUID.randomUUID()));
-            InsertResponse insertContactResponse = execute(
-                new com.openexchange.ajax.contact.action.InsertRequest(contact, failOnError));
-            checkResponse(insertContactResponse, expectToFail);
-            return expectToFail ? null : String.valueOf(insertContactResponse.getId());
-        case FolderObject.INFOSTORE:
-            byte[] data = UUIDs.toByteArray(UUID.randomUUID());
-            File metadata = new DefaultFile();
-            metadata.setFolderId(String.valueOf(folderID));
-            metadata.setFileName(UUIDs.getUnformattedString(UUID.randomUUID()) + ".test");
-            NewInfostoreRequest newRequest = new NewInfostoreRequest(metadata, new ByteArrayInputStream(data));
-            newRequest.setFailOnError(false == expectToFail);
-            NewInfostoreResponse newResponse = execute(newRequest);
-            checkResponse(newResponse, expectToFail);
-            return expectToFail ? null : String.valueOf(newResponse.getID());
-        case FolderObject.TASK:
-            Task task = new Task();
-            task.setParentFolderID(folderID);
-            task.setTitle(UUIDs.getUnformattedString(UUID.randomUUID()));
-            com.openexchange.ajax.task.actions.InsertResponse insertTaskResponse = execute(
-                new com.openexchange.ajax.task.actions.InsertRequest(task, timeZone, failOnError));
-            checkResponse(insertTaskResponse, expectToFail);
-            return expectToFail ? null : String.valueOf(insertTaskResponse.getId());
-        case FolderObject.CALENDAR:
-            Appointment appointment = new Appointment();
-            appointment.setParentFolderID(folderID);
-            appointment.setTitle(UUIDs.getUnformattedString(UUID.randomUUID()));
-            appointment.setStartDate(new Date());
-            appointment.setEndDate(new Date(appointment.getStartDate().getTime() + 60 * 1000 * 60));
-            appointment.setIgnoreConflicts(true);
-            AppointmentInsertResponse insertAppointmentResponse = execute(
-                new com.openexchange.ajax.appointment.action.InsertRequest(appointment, timeZone, failOnError));
-            checkResponse(insertAppointmentResponse, expectToFail);
-            return expectToFail ? null : String.valueOf(insertAppointmentResponse.getId());
-        default:
-            Assert.fail("no create item request for " + folder.getModule() + " implemented");
-            return null;
+            case FolderObject.CONTACT:
+                Contact contact = new Contact();
+                contact.setParentFolderID(folderID);
+                contact.setDisplayName(UUIDs.getUnformattedString(UUID.randomUUID()));
+                InsertResponse insertContactResponse = execute(new com.openexchange.ajax.contact.action.InsertRequest(contact, failOnError));
+                checkResponse(insertContactResponse, expectToFail);
+                return expectToFail ? null : String.valueOf(insertContactResponse.getId());
+            case FolderObject.INFOSTORE:
+                byte[] data = UUIDs.toByteArray(UUID.randomUUID());
+                File metadata = new DefaultFile();
+                metadata.setFolderId(String.valueOf(folderID));
+                metadata.setFileName(UUIDs.getUnformattedString(UUID.randomUUID()) + ".test");
+                NewInfostoreRequest newRequest = new NewInfostoreRequest(metadata, new ByteArrayInputStream(data));
+                newRequest.setFailOnError(false == expectToFail);
+                NewInfostoreResponse newResponse = execute(newRequest);
+                checkResponse(newResponse, expectToFail);
+                return expectToFail ? null : String.valueOf(newResponse.getID());
+            case FolderObject.TASK:
+                Task task = new Task();
+                task.setParentFolderID(folderID);
+                task.setTitle(UUIDs.getUnformattedString(UUID.randomUUID()));
+                com.openexchange.ajax.task.actions.InsertResponse insertTaskResponse = execute(new com.openexchange.ajax.task.actions.InsertRequest(task, timeZone, failOnError));
+                checkResponse(insertTaskResponse, expectToFail);
+                return expectToFail ? null : String.valueOf(insertTaskResponse.getId());
+            case FolderObject.CALENDAR:
+                Appointment appointment = new Appointment();
+                appointment.setParentFolderID(folderID);
+                appointment.setTitle(UUIDs.getUnformattedString(UUID.randomUUID()));
+                appointment.setStartDate(new Date());
+                appointment.setEndDate(new Date(appointment.getStartDate().getTime() + 60 * 1000 * 60));
+                appointment.setIgnoreConflicts(true);
+                AppointmentInsertResponse insertAppointmentResponse = execute(new com.openexchange.ajax.appointment.action.InsertRequest(appointment, timeZone, failOnError));
+                checkResponse(insertAppointmentResponse, expectToFail);
+                return expectToFail ? null : String.valueOf(insertAppointmentResponse.getId());
+            default:
+                Assert.fail("no create item request for " + folder.getModule() + " implemented");
+                return null;
         }
     }
 
     private AbstractColumnsResponse getAll(FolderObject folder, boolean expectToFail) throws Exception {
         int folderID = folder.getObjectID();
         switch (folder.getModule()) {
-        case FolderObject.CONTACT:
-            CommonAllResponse allContactResponse = execute(
-                new com.openexchange.ajax.contact.action.AllRequest(folderID, Contact.ALL_COLUMNS));
-            checkResponse(allContactResponse, expectToFail);
-            return allContactResponse;
-        case FolderObject.INFOSTORE:
-            int[] columns = new int[] { Metadata.ID, Metadata.TITLE, Metadata.DESCRIPTION, Metadata.URL, Metadata.FOLDER_ID };
-            AbstractColumnsResponse allInfostoreResponse = execute(
-                new AllInfostoreRequest(folderID, columns, Metadata.ID, Order.ASCENDING));
-            checkResponse(allInfostoreResponse, expectToFail);
-            return allInfostoreResponse;
-        case FolderObject.TASK:
-            CommonAllResponse allTaskResponse = execute(new AllRequest(folderID, Task.ALL_COLUMNS, Task.OBJECT_ID, Order.ASCENDING));
-            checkResponse(allTaskResponse, expectToFail);
-            return allTaskResponse;
-        case FolderObject.CALENDAR:
-            Date start = new Date(System.currentTimeMillis() - 100000000);
-            Date end = new Date(System.currentTimeMillis() + 100000000);
-            CommonAllResponse allCalendarResponse = execute(
-                new com.openexchange.ajax.appointment.action.AllRequest(folderID, CalendarDataObject.ALL_COLUMNS, start, end, TimeZones.UTC));
-            checkResponse(allCalendarResponse, expectToFail);
-            return allCalendarResponse;
-        default:
-            Assert.fail("no all request for " + folder.getModule() + " implemented");
-            return null;
+            case FolderObject.CONTACT:
+                CommonAllResponse allContactResponse = execute(new com.openexchange.ajax.contact.action.AllRequest(folderID, Contact.ALL_COLUMNS));
+                checkResponse(allContactResponse, expectToFail);
+                return allContactResponse;
+            case FolderObject.INFOSTORE:
+                int[] columns = new int[] { Metadata.ID, Metadata.TITLE, Metadata.DESCRIPTION, Metadata.URL, Metadata.FOLDER_ID };
+                AbstractColumnsResponse allInfostoreResponse = execute(new AllInfostoreRequest(folderID, columns, Metadata.ID, Order.ASCENDING));
+                checkResponse(allInfostoreResponse, expectToFail);
+                return allInfostoreResponse;
+            case FolderObject.TASK:
+                CommonAllResponse allTaskResponse = execute(new AllRequest(folderID, Task.ALL_COLUMNS, Task.OBJECT_ID, Order.ASCENDING));
+                checkResponse(allTaskResponse, expectToFail);
+                return allTaskResponse;
+            case FolderObject.CALENDAR:
+                Date start = new Date(System.currentTimeMillis() - 100000000);
+                Date end = new Date(System.currentTimeMillis() + 100000000);
+                CommonAllResponse allCalendarResponse = execute(new com.openexchange.ajax.appointment.action.AllRequest(folderID, CalendarDataObject.ALL_COLUMNS, start, end, TimeZones.UTC));
+                checkResponse(allCalendarResponse, expectToFail);
+                return allCalendarResponse;
+            default:
+                Assert.fail("no all request for " + folder.getModule() + " implemented");
+                return null;
         }
     }
 

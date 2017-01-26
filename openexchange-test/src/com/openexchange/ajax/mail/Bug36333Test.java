@@ -49,6 +49,11 @@
 
 package com.openexchange.ajax.mail;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -59,6 +64,9 @@ import org.apache.commons.codec.binary.Base64;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.mail.actions.AttachmentRequest;
@@ -84,28 +92,30 @@ public class Bug36333Test extends AbstractMailTest {
 
     String[][] fmid;
 
-    public Bug36333Test(final String name) {
-        super(name);
+    public Bug36333Test() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         values = getClient().getValues();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        if (null != fmid) {
-            client.execute(new DeleteRequest(fmid, true).ignoreError());
+    @After
+    public void tearDown() throws Exception {
+        try {
+            if (null != fmid) {
+                getClient().execute(new DeleteRequest(fmid, true).ignoreError());
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
+    @Test
     public void testBug36333() throws OXException, IOException, JSONException {
-        InputStreamReader streamReader = new InputStreamReader(new FileInputStream(new File(
-            MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR),
-            "bug36333.eml")), "UTF-8");
+        InputStreamReader streamReader = new InputStreamReader(new FileInputStream(new File(MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR), "bug36333.eml")), "UTF-8");
         char[] buf = new char[512];
         int length;
         StringBuilder sb = new StringBuilder();
@@ -113,10 +123,9 @@ public class Bug36333Test extends AbstractMailTest {
             sb.append(buf, 0, length);
         }
         streamReader.close();
-        InputStream inputStream = new ByteArrayInputStream(
-            TestMails.replaceAddresses(sb.toString(), client.getValues().getSendAddress()).getBytes(com.openexchange.java.Charsets.UTF_8));
+        InputStream inputStream = new ByteArrayInputStream(TestMails.replaceAddresses(sb.toString(), getClient().getValues().getSendAddress()).getBytes(com.openexchange.java.Charsets.UTF_8));
         final ImportMailRequest importMailRequest = new ImportMailRequest(values.getInboxFolder(), MailFlag.SEEN.getValue(), inputStream);
-        final ImportMailResponse importResp = client.execute(importMailRequest);
+        final ImportMailResponse importResp = getClient().execute(importMailRequest);
         JSONArray json = (JSONArray) importResp.getData();
         fmid = importResp.getIds();
 
@@ -149,22 +158,21 @@ public class Bug36333Test extends AbstractMailTest {
         }
 
         {
-            AttachmentResponse response = Executor.execute(getSession(), new AttachmentRequest(new String[] {folderID, mailID, "2"}).setFromStructure(true));
+            AttachmentResponse response = Executor.execute(getSession(), new AttachmentRequest(new String[] { folderID, mailID, "2" }).setFromStructure(true));
             String strBody = response.getStringBody();
             assertNotNull(strBody);
             assertTrue(strBody.startsWith("{\\rtf1"));
         }
 
         if ((folderID != null) && (mailID != null)) {
-            DeleteResponse deleteResponse = client.execute(new DeleteRequest(folderID, mailID, true));
+            DeleteResponse deleteResponse = getClient().execute(new DeleteRequest(folderID, mailID, true));
             assertNull("Error deleting mail. Artifacts remain", deleteResponse.getErrorMessage());
         }
     }
 
+    @Test
     public void testBug36333_2() throws OXException, IOException, JSONException {
-        InputStreamReader streamReader = new InputStreamReader(new FileInputStream(new File(
-            MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR),
-            "bug36333_2.eml")), "UTF-8");
+        InputStreamReader streamReader = new InputStreamReader(new FileInputStream(new File(MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR), "bug36333_2.eml")), "UTF-8");
         char[] buf = new char[512];
         int length;
         StringBuilder sb = new StringBuilder();
@@ -172,10 +180,9 @@ public class Bug36333Test extends AbstractMailTest {
             sb.append(buf, 0, length);
         }
         streamReader.close();
-        InputStream inputStream = new ByteArrayInputStream(
-            TestMails.replaceAddresses(sb.toString(), client.getValues().getSendAddress()).getBytes(com.openexchange.java.Charsets.UTF_8));
+        InputStream inputStream = new ByteArrayInputStream(TestMails.replaceAddresses(sb.toString(), getClient().getValues().getSendAddress()).getBytes(com.openexchange.java.Charsets.UTF_8));
         final ImportMailRequest importMailRequest = new ImportMailRequest(values.getInboxFolder(), MailFlag.SEEN.getValue(), inputStream);
-        final ImportMailResponse importResp = client.execute(importMailRequest);
+        final ImportMailResponse importResp = getClient().execute(importMailRequest);
         JSONArray json = (JSONArray) importResp.getData();
         fmid = importResp.getIds();
 
@@ -208,24 +215,23 @@ public class Bug36333Test extends AbstractMailTest {
         }
 
         {
-            AttachmentResponse response = Executor.execute(getSession(), new AttachmentRequest(new String[] {folderID, mailID, "2"}).setFromStructure(true));
+            AttachmentResponse response = Executor.execute(getSession(), new AttachmentRequest(new String[] { folderID, mailID, "2" }).setFromStructure(true));
             String strBody = response.getStringBody();
             assertNotNull(strBody);
             assertTrue(strBody.startsWith("{\\rtf1"));
         }
 
         if ((folderID != null) && (mailID != null)) {
-            DeleteResponse deleteResponse = client.execute(new DeleteRequest(folderID, mailID, true));
+            DeleteResponse deleteResponse = getClient().execute(new DeleteRequest(folderID, mailID, true));
             assertNull("Error deleting mail. Artifacts remain", deleteResponse.getErrorMessage());
         }
     }
 
+    @Test
     public void testBug36333_3() throws OXException, IOException, JSONException {
         JSONArray json;
         {
-            InputStreamReader streamReader = new InputStreamReader(new FileInputStream(new File(
-                MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR),
-                "bug36333_3.eml")), "UTF-8");
+            InputStreamReader streamReader = new InputStreamReader(new FileInputStream(new File(MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR), "bug36333_3.eml")), "UTF-8");
             char[] buf = new char[512];
             int length;
             StringBuilder sb = new StringBuilder();
@@ -233,10 +239,9 @@ public class Bug36333Test extends AbstractMailTest {
                 sb.append(buf, 0, length);
             }
             streamReader.close();
-            InputStream inputStream = new ByteArrayInputStream(
-                TestMails.replaceAddresses(sb.toString(), client.getValues().getSendAddress()).getBytes(com.openexchange.java.Charsets.UTF_8));
+            InputStream inputStream = new ByteArrayInputStream(TestMails.replaceAddresses(sb.toString(), getClient().getValues().getSendAddress()).getBytes(com.openexchange.java.Charsets.UTF_8));
             final ImportMailRequest importMailRequest = new ImportMailRequest(values.getInboxFolder(), MailFlag.SEEN.getValue(), inputStream);
-            final ImportMailResponse importResp = client.execute(importMailRequest);
+            final ImportMailResponse importResp = getClient().execute(importMailRequest);
             json = (JSONArray) importResp.getData();
             fmid = importResp.getIds();
         }
@@ -271,7 +276,7 @@ public class Bug36333Test extends AbstractMailTest {
         }
 
         {
-            AttachmentResponse response = Executor.execute(getSession(), new AttachmentRequest(new String[] {folderID, mailID, "2.2"}).setFromStructure(true));
+            AttachmentResponse response = Executor.execute(getSession(), new AttachmentRequest(new String[] { folderID, mailID, "2.2" }).setFromStructure(true));
 
             byte[] binBody = response.getBinaryBody();
             assertNotNull(binBody);
@@ -283,7 +288,7 @@ public class Bug36333Test extends AbstractMailTest {
         }
 
         if ((folderID != null) && (mailID != null)) {
-            DeleteResponse deleteResponse = client.execute(new DeleteRequest(folderID, mailID, true));
+            DeleteResponse deleteResponse = getClient().execute(new DeleteRequest(folderID, mailID, true));
             assertNull("Error deleting mail. Artifacts remain", deleteResponse.getErrorMessage());
         }
     }

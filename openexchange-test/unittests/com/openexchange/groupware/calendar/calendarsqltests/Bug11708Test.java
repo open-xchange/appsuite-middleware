@@ -49,19 +49,22 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 
-
 public class Bug11708Test extends CalendarSqlTest {
+
     /**
      * Test for <a href="http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=11708">bug #11708</a>
      */
+    @Test
     public void testDisableReminderFlagDoesNotCauseConflict() {
         try {
             // 15. January 2009 08:00:00 UTC - 15. January 2009 10:00:00 UTC
-            final CalendarDataObject conflictAppointment = appointments.buildBasicAppointment(new Date(1232006400000L), new Date(
-                1232013600000L));
+            final CalendarDataObject conflictAppointment = appointments.buildBasicAppointment(new Date(1232006400000L), new Date(1232013600000L));
             conflictAppointment.setTitle("Bug 11708 Test - conflict appointment");
             appointments.save(conflictAppointment);
             clean.add(conflictAppointment);
@@ -78,7 +81,7 @@ public class Bug11708Test extends CalendarSqlTest {
             removeReminderAppointment.setAlarmFlag(false);
             removeReminderAppointment.setAlarm(-1);
             removeReminderAppointment.setStartDate(appointment.getStartDate()); // Outlook sends start- and endDate, even if it has not
-                                                                                // changed. That is the problem.
+                                                                               // changed. That is the problem.
             removeReminderAppointment.setEndDate(appointment.getEndDate());
             removeReminderAppointment.setIgnoreConflicts(false);
             CalendarDataObject[] conflicts = appointments.save(removeReminderAppointment);

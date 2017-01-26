@@ -49,24 +49,22 @@
 
 package com.openexchange.grizzly;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * {@link GrizzlyTestSuite}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
+@RunWith(ParallelSuite.class)
+@Suite.SuiteClasses({
+    ProcessingTest.class,
+    GetWithBodyTest.class,
+    MaxHttpHeaderSizeTest.class,
+    OmitUserInputTest.class,
+})
 public class GrizzlyTestSuite {
-
-    public static Test suite() {
-        final TestSuite suite = new TestSuite("com.openexchange.grizzly.GrizzlyTestSuite");
-        suite.addTestSuite(ProcessingTest.class);
-        suite.addTestSuite(GetWithBodyTest.class);
-        suite.addTestSuite(MaxHttpHeaderSizeTest.class);
-        suite.addTestSuite(OmitUserInputTest.class);
-        return suite;
-    }
 
 }

@@ -49,9 +49,8 @@
 
 package com.openexchange.ajax.folder;
 
-import junit.framework.JUnit4TestAdapter;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 import com.openexchange.ajax.folder.api2.Bug15752Test;
 import com.openexchange.ajax.folder.api2.Bug15980Test;
 import com.openexchange.ajax.folder.api2.Bug15995Test;
@@ -75,86 +74,72 @@ import com.openexchange.ajax.folder.api2.UpdatesTest;
 import com.openexchange.ajax.folder.api2.VisibleFoldersTest;
 import com.openexchange.ajax.infostore.test.Bug37211Test;
 import com.openexchange.ajax.infostore.test.InfostoreObjectCountTest;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * Suite for all folder tests.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
+@RunWith(ParallelSuite.class)
+@Suite.SuiteClasses({
+    FunctionTests.class,
+    com.openexchange.ajax.folder.ShareFolderTest.class,
+    com.openexchange.ajax.folder.DeleteFolderTest.class,
+    
+    // Now several single function tests.
+    GetMailInboxTest.class,
+    GetVirtualTest.class,
+    // GetSortedMailFolderTest.class,
+    ExemplaryFolderTestManagerTest.class,
+    
+    // New folder API
+    ClearTest.class,
+    CreateTest.class,
+    GetTest.class,
+    ListTest.class,
+    MoveTest.class,
+    PathTest.class,
+    UpdatesTest.class,
+    UpdateTest.class,
+    VisibleFoldersTest.class,
+    SubscribeTest.class,
+    DefaultMediaFoldersTest.class,
+    
+    // Test for object counts for database folder
+    ContactObjectCountTest.class,
+    TaskObjectCountTest.class,
+    AppointmentObjectCountTest.class,
+    InfostoreObjectCountTest.class,
+                    // EAS subscribe
+    com.openexchange.ajax.folder.eas.SubscribeTest.class,
+    com.openexchange.ajax.folder.eas.MultipleSubscribeTest.class,
+    com.openexchange.ajax.folder.eas.MultipleSubscribeWithoutParentTest.class,
+    
+    // And finally bug tests.
+    Bug12393Test.class,
+    Bug16899Test.class,
+    
+    // New folder API bug tests
+    Bug15752Test.class,
+    Bug15995Test.class,
+    Bug15980Test.class,
+    Bug16163Test.class,
+    Bug16243Test.class,
+    Bug16284Test.class,
+    Bug16303Test.class,
+    Bug16724Test.class,
+    Bug17027Test.class,
+    Bug17225Test.class,
+    Bug17261Test.class,
+    Bug29853Test.class,
+    ChangePermissionsTest.class,
+    Bug37211Test.class,
+    Bug44895Test.class,
+    PermissionsCascadeTest.class,
+
+})
 public final class FolderTestSuite {
 
-    /**
-     * Prevent instantiation.
-     */
-    private FolderTestSuite() {
-        super();
-    }
 
-    /**
-     * Generates the task test suite.
-     *
-     * @return the task tests suite.
-     */
-    public static Test suite() {
-        final TestSuite tests = new TestSuite("com.openexchange.ajax.folder.FolderTestSuite");
-        // First the function tests.
-        tests.addTestSuite(FunctionTests.class);
-        tests.addTestSuite(com.openexchange.ajax.folder.ShareFolderTest.class);
-        tests.addTestSuite(com.openexchange.ajax.folder.DeleteFolderTest.class);
-
-        // Now several single function tests.
-        tests.addTestSuite(GetMailInboxTest.class);
-        tests.addTestSuite(GetVirtualTest.class);
-        // tests.addTestSuite(GetSortedMailFolderTest.class);
-        tests.addTestSuite(ExemplaryFolderTestManagerTest.class);
-
-        // New folder API
-        tests.addTestSuite(ClearTest.class);
-        tests.addTestSuite(CreateTest.class);
-        tests.addTestSuite(GetTest.class);
-        tests.addTestSuite(ListTest.class);
-        tests.addTestSuite(MoveTest.class);
-        tests.addTestSuite(PathTest.class);
-        tests.addTestSuite(UpdatesTest.class);
-        tests.addTestSuite(UpdateTest.class);
-        tests.addTestSuite(VisibleFoldersTest.class);
-        tests.addTestSuite(SubscribeTest.class);
-        tests.addTestSuite(DefaultMediaFoldersTest.class);
-
-        // Test for object counts for database folder
-        tests.addTest(new JUnit4TestAdapter(ContactObjectCountTest.class));
-        tests.addTest(new JUnit4TestAdapter(TaskObjectCountTest.class));
-        tests.addTest(new JUnit4TestAdapter(AppointmentObjectCountTest.class));
-        tests.addTest(new JUnit4TestAdapter(InfostoreObjectCountTest.class));
-
-        // EAS subscribe
-        tests.addTestSuite(com.openexchange.ajax.folder.eas.SubscribeTest.class);
-        tests.addTestSuite(com.openexchange.ajax.folder.eas.MultipleSubscribeTest.class);
-        tests.addTestSuite(com.openexchange.ajax.folder.eas.MultipleSubscribeWithoutParentTest.class);
-
-        // And finally bug tests.
-        tests.addTestSuite(Bug12393Test.class);
-        tests.addTestSuite(Bug16899Test.class);
-
-        // New folder API bug tests
-        tests.addTestSuite(Bug15752Test.class);
-        tests.addTestSuite(Bug15995Test.class);
-        tests.addTestSuite(Bug15980Test.class);
-        tests.addTestSuite(Bug16163Test.class);
-        tests.addTestSuite(Bug16243Test.class);
-        tests.addTestSuite(Bug16284Test.class);
-        tests.addTestSuite(Bug16303Test.class);
-        tests.addTestSuite(Bug16724Test.class);
-        tests.addTestSuite(Bug17027Test.class);
-        tests.addTestSuite(Bug17225Test.class);
-        tests.addTestSuite(Bug17261Test.class);
-        tests.addTestSuite(Bug29853Test.class);
-        tests.addTestSuite(ChangePermissionsTest.class);
-        tests.addTestSuite(Bug37211Test.class);
-        tests.addTestSuite(Bug44895Test.class);
-
-        tests.addTestSuite(PermissionsCascadeTest.class);
-
-        return tests;
-    }
 }

@@ -62,7 +62,6 @@ import org.apache.http.HttpResponse;
 import com.openexchange.html.internal.parser.HtmlHandler;
 import com.openexchange.html.internal.parser.HtmlParser;
 
-
 /**
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */

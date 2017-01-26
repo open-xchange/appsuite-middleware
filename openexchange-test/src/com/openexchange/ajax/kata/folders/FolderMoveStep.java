@@ -74,7 +74,9 @@ public class FolderMoveStep extends NeedExistingStep<FolderObject> {
         this.destinationFolder = destinationFolder;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.ajax.kata.Step#cleanUp()
      */
     @Override
@@ -83,7 +85,9 @@ public class FolderMoveStep extends NeedExistingStep<FolderObject> {
 
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.ajax.kata.Step#perform(com.openexchange.ajax.framework.AJAXClient)
      */
     @Override
@@ -97,7 +101,7 @@ public class FolderMoveStep extends NeedExistingStep<FolderObject> {
         UpdateRequest updateRequest = new UpdateRequest(EnumAPI.OX_OLD, entry, false);
         CommonInsertResponse updateResponse = execute(updateRequest);
 
-        if(!updateResponse.hasError()) {
+        if (!updateResponse.hasError()) {
             entry.setLastModified(updateResponse.getTimestamp());
             rememberIdentityValues(entry);
         }

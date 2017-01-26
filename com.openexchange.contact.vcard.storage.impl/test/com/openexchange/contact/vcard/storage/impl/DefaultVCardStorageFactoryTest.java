@@ -109,8 +109,8 @@ public class DefaultVCardStorageFactoryTest {
         Mockito.when(configView.property(Matchers.anyString(), (Class)Matchers.any())).thenReturn(trueProperty);
     }
 
-    @Test
-    public void testGetVCardStorageService_capabilitiyAvailable_returnService() {
+     @Test
+     public void testGetVCardStorageService_capabilitiyAvailable_returnService() {
         factory = new DefaultVCardStorageFactory(vCardStorageService);
         capabilities.add("mich.gibts.1");
         capabilities.add("mich.gibts.2");
@@ -122,8 +122,8 @@ public class DefaultVCardStorageFactoryTest {
         assertEquals(vCardStorageService, returnedService);
     }
 
-    @Test
-    public void testGetVCardStorageService_capabilitiesAvailable_returnService() {
+     @Test
+     public void testGetVCardStorageService_capabilitiesAvailable_returnService() {
         factory = new DefaultVCardStorageFactory(vCardStorageService);
 
         VCardStorageService returnedService = factory.getVCardStorageService(configViewFactory, CONTEXT_ID);
@@ -131,8 +131,8 @@ public class DefaultVCardStorageFactoryTest {
         assertEquals(vCardStorageService, returnedService);
     }
 
-    @Test
-    public void testGetVCardStorageService_oneCapNotAvailable_returnNull() throws OXException {
+     @Test
+     public void testGetVCardStorageService_oneCapNotAvailable_returnNull() throws OXException {
         factory = new DefaultVCardStorageFactory(vCardStorageService);
         capabilities.add("mich.gibts.nicht");
 
@@ -143,8 +143,8 @@ public class DefaultVCardStorageFactoryTest {
         assertNull(returnedService);
     }
 
-    @Test
-    public void testGetVCardStorageService_onlyCapNotAvailable_returnnull() throws OXException {
+     @Test
+     public void testGetVCardStorageService_onlyCapNotAvailable_returnnull() throws OXException {
         factory = new DefaultVCardStorageFactory(vCardStorageService);
         Mockito.when(configView.property(Matchers.anyString(), (Class)Matchers.any())).thenReturn(falseProperty);
 
@@ -153,8 +153,8 @@ public class DefaultVCardStorageFactoryTest {
         assertNull(returnedService);
     }
 
-    @Test
-    public void testGetVCardStorageService_oneMiddleCapNotAvailable_returnNull() throws OXException {
+     @Test
+     public void testGetVCardStorageService_oneMiddleCapNotAvailable_returnNull() throws OXException {
         factory = new DefaultVCardStorageFactory(vCardStorageService);
         capabilities.add("mich.gibts.nicht");
         capabilities.add("mich.schon.aber.da.kommen.wir.nicht.hin");
@@ -166,8 +166,8 @@ public class DefaultVCardStorageFactoryTest {
         assertNull(returnedService);
     }
 
-    @Test
-    public void testGetVCardStorageService_configViewThrowsException_returnNull() throws OXException {
+     @Test
+     public void testGetVCardStorageService_configViewThrowsException_returnNull() throws OXException {
         factory = new DefaultVCardStorageFactory(vCardStorageService);
 
         Mockito.when(configViewFactory.getView(Matchers.anyInt(), Matchers.anyInt())).thenThrow(new OXException());

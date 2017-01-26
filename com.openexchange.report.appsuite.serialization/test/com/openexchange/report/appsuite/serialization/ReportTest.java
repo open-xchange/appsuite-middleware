@@ -46,8 +46,8 @@ public class ReportTest {
         }
     }
 
-    @Test
-    public void test_reportComposition() {
+     @Test
+     public void test_reportComposition() {
         // setup testfiles
         createTestFilesReportComposition();
         // compose the report from stored parts

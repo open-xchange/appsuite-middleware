@@ -52,9 +52,9 @@ package com.openexchange.ajax.share.actions;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Map;
-import junitx.framework.Assert;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.java.Strings;
+import junitx.framework.Assert;
 
 /**
  * {@link ResolveShareResponse}
@@ -102,7 +102,7 @@ public class ResolveShareResponse extends AbstractAJAXResponse {
     public String getLoginType() {
         return parameters.get("login_type");
     }
-    
+
     public String getToken() {
         return parameters.get("token");
     }

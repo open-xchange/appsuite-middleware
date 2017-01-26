@@ -46,17 +46,19 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.groupware.infostore.database;
 
-import junit.framework.TestCase;
-
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public abstract class DocumentMetadataTest extends TestCase {
+public abstract class DocumentMetadataTest {
 
+    @Test
     public void testDefaultMimetype() {
         final DocumentMetadata impl = getImplementation();
         impl.setFileMIMEType(null);

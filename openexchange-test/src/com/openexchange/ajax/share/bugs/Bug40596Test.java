@@ -49,7 +49,9 @@
 
 package com.openexchange.ajax.share.bugs;
 
+import static org.junit.Assert.assertTrue;
 import java.util.Collections;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.infostore.actions.UpdateInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.UpdateInfostoreResponse;
@@ -77,12 +79,13 @@ public class Bug40596Test extends ShareTest {
      *
      * @param name The test name
      */
-    public Bug40596Test(String name) {
-        super(name);
+    public Bug40596Test() {
+        super();
     }
 
+    @Test
     public void testBug40596() throws Exception {
-        File file = insertFile(client.getValues().getPrivateInfostoreFolder());
+        File file = insertFile(getClient().getValues().getPrivateInfostoreFolder());
         remember(file);
         OCLGuestPermission guestPermission = createNamedGuestPermission("testbug40596@example.com", "Bug 40596", "secret");
         DefaultFileStorageGuestObjectPermission objectPermission = (DefaultFileStorageGuestObjectPermission) asObjectPermission(guestPermission);

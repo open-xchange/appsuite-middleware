@@ -49,19 +49,20 @@
 
 package com.openexchange.publish.impl;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-
-import junit.framework.TestCase;
-
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.services.SimContactService;
-
 
 /**
  * {@link ContactFolderLoaderTest}
@@ -69,7 +70,8 @@ import com.openexchange.publish.services.SimContactService;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class ContactFolderLoaderTest extends TestCase {
+public class ContactFolderLoaderTest {
+
     private ContactFolderLoader contactLoader;
     private int cid;
     private int folderId;
@@ -78,10 +80,10 @@ public class ContactFolderLoaderTest extends TestCase {
     private int id3;
     private Publication publication;
 
-    @Override
+    @Before
     public void setUp() {
 
-    	final SimContactService contactService = new SimContactService();
+        final SimContactService contactService = new SimContactService();
 
         cid = 1;
         folderId = 12;
@@ -100,6 +102,7 @@ public class ContactFolderLoaderTest extends TestCase {
         contactLoader = new ContactFolderLoader(contactService);
     }
 
+    @Test
     public void testLoadFolder() throws OXException {
         final Collection<? extends Object> collection = contactLoader.load(publication, null);
 
@@ -109,7 +112,7 @@ public class ContactFolderLoaderTest extends TestCase {
         final Set<Integer> expectedIds = new HashSet<Integer>(Arrays.asList(id1, id2));
         for (final Object object : collection) {
             final Contact contact = (Contact) object;
-            assertTrue("Did not expect: "+contact.getObjectID(), expectedIds.remove(contact.getObjectID()));
+            assertTrue("Did not expect: " + contact.getObjectID(), expectedIds.remove(contact.getObjectID()));
         }
     }
 

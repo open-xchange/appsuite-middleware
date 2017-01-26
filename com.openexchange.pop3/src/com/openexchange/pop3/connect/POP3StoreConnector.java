@@ -578,25 +578,27 @@ public final class POP3StoreConnector {
     private static final class LoginAndPass {
 
         private final String login;
-
         private final String pass;
-
-        private final int hashCode;
+        private final int hash;
 
         public LoginAndPass(final String login, final String pass) {
             super();
             this.login = login;
             this.pass = pass;
-            hashCode = (login.hashCode()) ^ (pass.hashCode());
+            int prime = 31;
+            int result = 1;
+            result = prime * result + ((login == null) ? 0 : login.hashCode());
+            result = prime * result + ((pass == null) ? 0 : pass.hashCode());
+            hash = result;
         }
 
         @Override
         public int hashCode() {
-            return hashCode;
+            return hash;
         }
 
         @Override
-        public boolean equals(final Object obj) {
+        public boolean equals(Object obj) {
             if (this == obj) {
                 return true;
             }
@@ -606,7 +608,7 @@ public final class POP3StoreConnector {
             if (getClass() != obj.getClass()) {
                 return false;
             }
-            final LoginAndPass other = (LoginAndPass) obj;
+            LoginAndPass other = (LoginAndPass) obj;
             if (login == null) {
                 if (other.login != null) {
                     return false;

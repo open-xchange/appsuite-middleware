@@ -60,8 +60,8 @@ import com.openexchange.html.AbstractSanitizing;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class Bug22304Test extends AbstractSanitizing {
-    @Test
-    public void testDropUnnecessaryEndifs() {
+     @Test
+     public void testDropUnnecessaryEndifs() {
         String content = "<![endif]--><!--[if gte mso 9]><xml>\n" +
             "<o:shapelayout v:ext=\"edit\">\n" +
             "<o:idmap v:ext=\"edit\" data=\"1\" />\n" +

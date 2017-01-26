@@ -49,8 +49,13 @@
 
 package com.openexchange.ajax.folder.eas;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import java.util.LinkedList;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
@@ -78,12 +83,12 @@ public class MultipleSubscribeTest extends AbstractAJAXSession {
      *
      * @param name The name of the test.
      */
-    public MultipleSubscribeTest(final String name) {
-        super(name);
+    public MultipleSubscribeTest() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
     }
@@ -98,17 +103,14 @@ public class MultipleSubscribeTest extends AbstractAJAXSession {
         oclP.setEntity(client.getValues().getUserId());
         oclP.setGroupPermission(false);
         oclP.setFolderAdmin(true);
-        oclP.setAllPermission(
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION);
+        oclP.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         fo.setPermissionsAsArray(new OCLPermission[] { oclP });
         final InsertRequest request = new InsertRequest(EnumAPI.OUTLOOK, fo);
         final InsertResponse response = client.execute(request);
         return (String) response.getResponse().getData();
     }
 
+    @Test
     public void testSubscribeMultiplePrivate() throws Throwable {
         final String parent = FolderStorage.ROOT_ID;
         final LinkedList<String> ids = new LinkedList<String>();
@@ -120,11 +122,11 @@ public class MultipleSubscribeTest extends AbstractAJAXSession {
             SubscribeRequest subscribeRequest = new SubscribeRequest(EnumAPI.EAS_FOLDERS, parent, true);
             subscribeRequest.addFolderId(newId, true);
             client.execute(subscribeRequest);
-            
+
             /*-
              * ---------------------------------------------------
              */
-            
+
             final String newSubId = createPrivateCalendarFolder();
             assertNotNull("New ID must not be null!", newSubId);
             ids.addFirst(newSubId);
@@ -143,7 +145,7 @@ public class MultipleSubscribeTest extends AbstractAJAXSession {
                 }
             }
             assertTrue("Subscribed subfolder not found.", found);
-            
+
             /*-
              * ---------------------------------------------------
              */

@@ -62,30 +62,30 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
  */
 public final class ResourceAllResponse extends AbstractAJAXResponse {
 
-	/**
-	 * Initializes a new {@link ResourceAllResponse}
-	 *
-	 * @param response
-	 *            The JSON response container
-	 */
-	ResourceAllResponse(final Response response) {
-		super(response);
-	}
+    /**
+     * Initializes a new {@link ResourceAllResponse}
+     *
+     * @param response
+     *            The JSON response container
+     */
+    ResourceAllResponse(final Response response) {
+        super(response);
+    }
 
-	/**
-	 * Parses the IDs out of this ALL response
-	 *
-	 * @return The IDs as an array of <code>int</code>
-	 * @throws JSONException
-	 *             If a JSON error occurs
-	 */
-	public int[] getIDs() throws JSONException {
-		final JSONArray jsonArray = (JSONArray) getResponse().getData();
-		final int len = jsonArray.length();
-		final int[] retval = new int[len];
-		for (int i = 0; i < len; i++) {
-			retval[i] = jsonArray.getInt(i);
-		}
-		return retval;
-	}
+    /**
+     * Parses the IDs out of this ALL response
+     *
+     * @return The IDs as an array of <code>int</code>
+     * @throws JSONException
+     *             If a JSON error occurs
+     */
+    public int[] getIDs() throws JSONException {
+        final JSONArray jsonArray = (JSONArray) getResponse().getData();
+        final int len = jsonArray.length();
+        final int[] retval = new int[len];
+        for (int i = 0; i < len; i++) {
+            retval[i] = jsonArray.getInt(i);
+        }
+        return retval;
+    }
 }

@@ -3732,11 +3732,11 @@ public class User {
     public void setPrimaryAccountName(String primaryAccountName) {
         this.primaryAccountName = primaryAccountName;
     }
-    
-    public boolean isRemoveDriveFolderFlags() {
+
+    public Boolean isRemoveDriveFolderFlags() {
         return removeDriveFolderFlags;
     }
-    
+
     public void setRemoveDriveFolderFlags(Boolean removeDriveFolderFlags) {
         this.removeDriveFolderFlags = removeDriveFolderFlags;
     }

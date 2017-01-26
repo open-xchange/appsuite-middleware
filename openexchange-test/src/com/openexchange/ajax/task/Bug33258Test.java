@@ -50,6 +50,9 @@
 package com.openexchange.ajax.task;
 
 import static com.openexchange.java.Autoboxing.I;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.TimeZone;
 import org.json.JSONException;
@@ -80,13 +83,12 @@ public final class Bug33258Test extends AbstractAJAXSession {
     private TimeZone timeZone;
     private Task task;
 
-    public Bug33258Test(String name) {
-        super(name);
+    public Bug33258Test() {
+        super();
     }
 
     @Before
-    @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
         client1 = getClient();
         timeZone = client1.getValues().getTimeZone();
@@ -97,16 +99,19 @@ public final class Bug33258Test extends AbstractAJAXSession {
     }
 
     @After
-    @Override
-    protected void tearDown() throws Exception {
-        client1.execute(new DeleteRequest(task));
-        super.tearDown();
+    public void tearDown() throws Exception {
+        try {
+            client1.execute(new DeleteRequest(task));
+        } finally {
+            super.tearDown();
+        }
+
     }
 
     @Test
     public void testForVerifiedPriority() throws OXException, IOException, JSONException {
         Task test = TaskTools.valuesForUpdate(task);
-        for (int priority : new int[] { Task.LOW, Task.NORMAL, Task.HIGH } ) {
+        for (int priority : new int[] { Task.LOW, Task.NORMAL, Task.HIGH }) {
             test.setPriority(I(priority));
             UpdateResponse response = client1.execute(new UpdateRequest(test, timeZone, false));
             if (!response.hasError()) {
@@ -119,7 +124,7 @@ public final class Bug33258Test extends AbstractAJAXSession {
             assertTrue("Task should contain a priority.", test.containsPriority());
             assertEquals("Written priority should be equal to read one.", I(priority), test.getPriority());
         }
-        for (int priority : new int[] { Task.LOW-1, Task.HIGH+1 }) {
+        for (int priority : new int[] { Task.LOW - 1, Task.HIGH + 1 }) {
             test.setPriority(I(priority));
             UpdateResponse response = client1.execute(new UpdateRequest(test, timeZone, false));
             if (!response.hasError()) {
@@ -132,6 +137,7 @@ public final class Bug33258Test extends AbstractAJAXSession {
         {
             test.removePriority();
             UpdateResponse response = client1.execute(new UpdateRequest(test, timeZone) {
+
                 @Override
                 public JSONObject getBody() throws JSONException {
                     JSONObject json = super.getBody();

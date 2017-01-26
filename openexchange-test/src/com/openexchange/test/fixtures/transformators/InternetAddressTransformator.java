@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.test.fixtures.transformators;
 
 import java.io.UnsupportedEncodingException;
@@ -71,121 +72,122 @@ import com.openexchange.test.fixtures.SimpleCredentials;
  */
 public class InternetAddressTransformator implements Transformator {
 
-	private final FixtureLoader fixtureLoader;
+    private final FixtureLoader fixtureLoader;
 
-	public InternetAddressTransformator(final FixtureLoader fixtureLoader) {
-		super();
-		this.fixtureLoader = fixtureLoader;
-	}
-
-	@Override
-    public Object transform(final String value) throws OXException {
-		if (null == value || 1 > value.length()) { return null; }
-
-		if (false == value.contains(":")) {
-			return getAddress(value);		// try to parseICal whole string
-		}
-		String fixtureName = "users";
-		String fixtureEntry = "";
-		final String[] splitted = value.split(",");
-
-		final Pattern patFlags = Pattern.compile("\\((\\w+)\\)");
-		final String plainMarker = "(plain)";
-		final boolean[] plainFLags = new boolean[splitted.length];
-
-		for (int i = 0; i < splitted.length; i++) {
-	        final Matcher mFlag = patFlags.matcher(splitted[i]);
-	        if(mFlag.find() && mFlag.group().contains(plainMarker)) {
-	        	plainFLags[i] = true;
-	        	splitted[i] = splitted[i].replace(plainMarker, "").replace(" ", "");
-	        }
-		}
-
-		final List<InternetAddress> addresses = new ArrayList<InternetAddress>(splitted.length);
-		for (int i = 0; i < splitted.length; i++) {
-			final int idx = splitted[i].indexOf(':');
-			if (0 < idx && splitted[i].length() > idx) {
-				fixtureName = splitted[i].substring(0, idx);
-				fixtureEntry = splitted[i].substring(idx + 1);
-			} else {
-				fixtureEntry = splitted[i];
-			}
-			addresses.addAll(getAddresses(fixtureName, fixtureEntry, plainFLags[i]));
-		}
-		return addresses.toArray(new InternetAddress[addresses.size()]);
+    public InternetAddressTransformator(final FixtureLoader fixtureLoader) {
+        super();
+        this.fixtureLoader = fixtureLoader;
     }
 
-	private InternetAddress getAddress(final String address) throws OXException {
-		try {
-			return InternetAddress.parse(address)[0];
-		} catch (final Exception e) {
-			throw OXException.general("Unable to parse e-mail address from " + address);
-		}
-	}
+    @Override
+    public Object transform(final String value) throws OXException {
+        if (null == value || 1 > value.length()) {
+            return null;
+        }
 
-	private List<InternetAddress> getAddresses(final String fixtureName, final String fixtureEntry, final boolean plainFlags) throws OXException {
-		final Contact contact = ("users".equals(fixtureName))
-			? fixtureLoader.getFixtures(fixtureName, SimpleCredentials.class).getEntry(fixtureEntry).getEntry().asContact() //users
-			: fixtureLoader.getFixtures(fixtureName, Contact.class).getEntry(fixtureEntry).getEntry(); //contacts
-		if (null == contact) {
-			throw OXException.general("Unable to convert " + fixtureName + ":" + fixtureEntry + " into a contact.");
-		} else {
-			return getAddresses(contact, plainFlags);
-		}
-	}
+        if (false == value.contains(":")) {
+            return getAddress(value);		// try to parseICal whole string
+        }
+        String fixtureName = "users";
+        String fixtureEntry = "";
+        final String[] splitted = value.split(",");
 
-	private List<InternetAddress> getAddresses(final Contact contact, final boolean plainFlags) throws OXException {
-		final List<InternetAddress> addresses = new ArrayList<InternetAddress>();
-		if (contact.containsDistributionLists()) {
-			final DistributionListEntryObject[] entries = contact.getDistributionList();
-			if (null != entries && 0 < entries.length) {
-				for (final DistributionListEntryObject entry : entries) {
-					if (null != entry && entry.containsEmailaddress()) {
-						try {
-						    if(entry.containsDisplayname() && null != entry.getDisplayname()) {
-						        addresses.add(new InternetAddress(entry.getEmailaddress(), entry.getDisplayname()));
-						    } else {
-						        addresses.add(new InternetAddress(entry.getEmailaddress()));
-							}
-						} catch (final AddressException e) {
-							throw new OXException(e);
-						} catch (final UnsupportedEncodingException e) {
-						    throw new OXException(e);
+        final Pattern patFlags = Pattern.compile("\\((\\w+)\\)");
+        final String plainMarker = "(plain)";
+        final boolean[] plainFLags = new boolean[splitted.length];
+
+        for (int i = 0; i < splitted.length; i++) {
+            final Matcher mFlag = patFlags.matcher(splitted[i]);
+            if (mFlag.find() && mFlag.group().contains(plainMarker)) {
+                plainFLags[i] = true;
+                splitted[i] = splitted[i].replace(plainMarker, "").replace(" ", "");
+            }
+        }
+
+        final List<InternetAddress> addresses = new ArrayList<InternetAddress>(splitted.length);
+        for (int i = 0; i < splitted.length; i++) {
+            final int idx = splitted[i].indexOf(':');
+            if (0 < idx && splitted[i].length() > idx) {
+                fixtureName = splitted[i].substring(0, idx);
+                fixtureEntry = splitted[i].substring(idx + 1);
+            } else {
+                fixtureEntry = splitted[i];
+            }
+            addresses.addAll(getAddresses(fixtureName, fixtureEntry, plainFLags[i]));
+        }
+        return addresses.toArray(new InternetAddress[addresses.size()]);
+    }
+
+    private InternetAddress getAddress(final String address) throws OXException {
+        try {
+            return InternetAddress.parse(address)[0];
+        } catch (final Exception e) {
+            throw OXException.general("Unable to parse e-mail address from " + address);
+        }
+    }
+
+    private List<InternetAddress> getAddresses(final String fixtureName, final String fixtureEntry, final boolean plainFlags) throws OXException {
+        final Contact contact = ("users".equals(fixtureName)) ? fixtureLoader.getFixtures(fixtureName, SimpleCredentials.class).getEntry(fixtureEntry).getEntry().asContact() //users
+            : fixtureLoader.getFixtures(fixtureName, Contact.class).getEntry(fixtureEntry).getEntry(); //contacts
+        if (null == contact) {
+            throw OXException.general("Unable to convert " + fixtureName + ":" + fixtureEntry + " into a contact.");
+        } else {
+            return getAddresses(contact, plainFlags);
+        }
+    }
+
+    private List<InternetAddress> getAddresses(final Contact contact, final boolean plainFlags) throws OXException {
+        final List<InternetAddress> addresses = new ArrayList<InternetAddress>();
+        if (contact.containsDistributionLists()) {
+            final DistributionListEntryObject[] entries = contact.getDistributionList();
+            if (null != entries && 0 < entries.length) {
+                for (final DistributionListEntryObject entry : entries) {
+                    if (null != entry && entry.containsEmailaddress()) {
+                        try {
+                            if (entry.containsDisplayname() && null != entry.getDisplayname()) {
+                                addresses.add(new InternetAddress(entry.getEmailaddress(), entry.getDisplayname()));
+                            } else {
+                                addresses.add(new InternetAddress(entry.getEmailaddress()));
+                            }
+                        } catch (final AddressException e) {
+                            throw new OXException(e);
+                        } catch (final UnsupportedEncodingException e) {
+                            throw new OXException(e);
                         }
-					}
-				}
-			}
-		} else {
-			try {
-				if (contact.containsEmail1()) {
-					if (false == plainFlags) {
-						addresses.add(new InternetAddress(contact.getEmail1(), contact.getDisplayName()));
-					} else {
-						addresses.add(new InternetAddress(contact.getEmail1()));
-					}
+                    }
+                }
+            }
+        } else {
+            try {
+                if (contact.containsEmail1()) {
+                    if (false == plainFlags) {
+                        addresses.add(new InternetAddress(contact.getEmail1(), contact.getDisplayName()));
+                    } else {
+                        addresses.add(new InternetAddress(contact.getEmail1()));
+                    }
 
-				} else if (contact.containsEmail2()) {
-					if (false == plainFlags) {
-						addresses.add(new InternetAddress(contact.getEmail2(), contact.getDisplayName()));
-					} else {
-						addresses.add(new InternetAddress(contact.getEmail2()));
-					}
-				} else if (contact.containsEmail3()) {
-					if (false == plainFlags) {
-						addresses.add(new InternetAddress(contact.getEmail3(), contact.getDisplayName()));
-					} else {
-						addresses.add(new InternetAddress(contact.getEmail3()));
-					}
-				}
-			} catch (final UnsupportedEncodingException e) {
-				throw new OXException(e);
-			} catch (final AddressException e) {
-				e.printStackTrace();
-			}
-		}
-		if (1 > addresses.size()) {
-			throw OXException.general("no e-mail addresses found in contact");
-		}
-		return addresses;
-	}
+                } else if (contact.containsEmail2()) {
+                    if (false == plainFlags) {
+                        addresses.add(new InternetAddress(contact.getEmail2(), contact.getDisplayName()));
+                    } else {
+                        addresses.add(new InternetAddress(contact.getEmail2()));
+                    }
+                } else if (contact.containsEmail3()) {
+                    if (false == plainFlags) {
+                        addresses.add(new InternetAddress(contact.getEmail3(), contact.getDisplayName()));
+                    } else {
+                        addresses.add(new InternetAddress(contact.getEmail3()));
+                    }
+                }
+            } catch (final UnsupportedEncodingException e) {
+                throw new OXException(e);
+            } catch (final AddressException e) {
+                e.printStackTrace();
+            }
+        }
+        if (1 > addresses.size()) {
+            throw OXException.general("no e-mail addresses found in contact");
+        }
+        return addresses;
+    }
 }

@@ -95,7 +95,7 @@ public class GetPublicationRequest extends AbstractPublicationRequest<GetPublica
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
         LinkedList<Parameter> params = new LinkedList<Parameter>();
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET));
-        params.add(new Parameter(AJAXServlet.PARAMETER_ID, getId() ) );
+        params.add(new Parameter(AJAXServlet.PARAMETER_ID, getId()));
         return params.toArray(new Parameter[0]);
     }
 

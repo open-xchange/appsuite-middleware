@@ -49,6 +49,10 @@
 
 package com.openexchange.ajax.appointment.recurrence;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Changes;
@@ -66,17 +70,18 @@ public class TestsForModifyingChangeExceptions extends ManagedAppointmentTest {
 
     private Appointment app;
 
-    public TestsForModifyingChangeExceptions(String name) {
-        super(name);
+    public TestsForModifyingChangeExceptions() {
+        super();
     }
 
     @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         app = generateDailyAppointment();
         app.setOccurrence(3);
 
-        calendarManager.insert(app);
+        catm.insert(app);
 
         changes = new Changes();
         changes.put(Appointment.RECURRENCE_POSITION, exceptionPosition);
@@ -85,10 +90,11 @@ public class TestsForModifyingChangeExceptions extends ManagedAppointmentTest {
 
         update = app.clone();
         changes.update(update);
-        calendarManager.update(update);
+        catm.update(update);
 
     }
 
+    @Test
     public void testShouldNotAllowTurningAChangeExceptionIntoASeries() {
         Changes secondChange = new Changes();
         secondChange.put(Appointment.RECURRENCE_TYPE, Appointment.DAILY);
@@ -100,14 +106,15 @@ public class TestsForModifyingChangeExceptions extends ManagedAppointmentTest {
         secondUpdate.setLastModified(update.getLastModified());
         secondChange.update(secondUpdate);
 
-        calendarManager.update(secondUpdate);
+        catm.update(secondUpdate);
 
-        assertTrue("Should get exception when trying to make a change exception a series", calendarManager.hasLastException());
-        int code = ((OXException) calendarManager.getLastException()).getCode();
+        assertTrue("Should get exception when trying to make a change exception a series", catm.hasLastException());
+        int code = ((OXException) catm.getLastException()).getCode();
         assertTrue("Should have correct exception", 99 == code || 4035 == code);
     }
 
-    public void testDeletingAChangeException(){
+    @Test
+    public void testDeletingAChangeException() {
         Appointment secondUpdate = new Appointment();
         secondUpdate.setParentFolderID(update.getParentFolderID());
         secondUpdate.setObjectID(update.getObjectID());
@@ -115,8 +122,8 @@ public class TestsForModifyingChangeExceptions extends ManagedAppointmentTest {
         secondUpdate.setRecurrencePosition(exceptionPosition);
         secondUpdate.setRecurrenceType(Appointment.MONTHLY);
 
-        calendarManager.delete(secondUpdate);
+        catm.delete(secondUpdate);
 
-        assertFalse("Should get no error when trying to delete a change exception", calendarManager.hasLastException());
+        assertFalse("Should get no error when trying to delete a change exception", catm.hasLastException());
     }
 }

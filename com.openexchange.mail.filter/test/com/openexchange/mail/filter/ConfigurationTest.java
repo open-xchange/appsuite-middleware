@@ -1,23 +1,13 @@
+
 package com.openexchange.mail.filter;
 
 import org.junit.Assert;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
 import com.openexchange.mailfilter.osgi.MailFilterActivator;
 
-
 public class ConfigurationTest extends MailFilterActivator {
-
-    @Before
-    public void setUp() throws Exception {
-    }
-
-    @After
-    public void tearDown() throws Exception {
-    }
 
     @Test
     public void testNoPasswordSourceAndNoMasterPassword() throws Exception {

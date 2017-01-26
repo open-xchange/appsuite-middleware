@@ -49,9 +49,12 @@
 
 package com.openexchange.ajax.share.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.folder.actions.UpdateRequest;
@@ -78,10 +81,11 @@ public class AddGuestPermissionTest extends ShareTest {
      *
      * @param name The test name
      */
-    public AddGuestPermissionTest(String name) {
-        super(name);
+    public AddGuestPermissionTest() {
+        super();
     }
 
+    @Test
     public void testUpdateSharedFolderRandomly() throws Exception {
         int module = randomModule();
         testUpdateSharedFolder(randomFolderAPI(), module, randomGuestPermission(module));
@@ -97,6 +101,7 @@ public class AddGuestPermissionTest extends ShareTest {
         }
     }
 
+    @Test
     public void testUpdateSharedFileRandomly() throws Exception {
         testUpdateSharedFile(randomFolderAPI(), randomGuestObjectPermission());
     }
@@ -107,6 +112,7 @@ public class AddGuestPermissionTest extends ShareTest {
         }
     }
 
+    @Test
     public void testUpdateSharedFolderWithCascadingPermissionsRandomly() throws Exception {
         int module = randomModule();
         testUpdateSharedFolderWithCascadingPermissions(randomFolderAPI(), module, getDefaultFolder(module), randomGuestPermission(module));
@@ -141,7 +147,7 @@ public class AddGuestPermissionTest extends ShareTest {
          */
         OCLPermission matchingPermission = null;
         for (OCLPermission permission : folder.getPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
                 break;
             }
@@ -175,6 +181,7 @@ public class AddGuestPermissionTest extends ShareTest {
         rootFolder.addPermission(guestPermission);
         rootFolder.setLastModified(clientLastModified);
         rootFolder = updateFolder(api, rootFolder, new RequestCustomizer<UpdateRequest>() {
+
             @Override
             public void customize(UpdateRequest request) {
                 request.setCascadePermissions(true);
@@ -196,7 +203,7 @@ public class AddGuestPermissionTest extends ShareTest {
             assertNotNull("No permissions fround for folder " + folder.getObjectID(), permissions);
             assertEquals("Wrong number of permissions on folder " + folder.getObjectID(), 2, permissions.size());
             for (OCLPermission permission : permissions) {
-                if (permission.getEntity() != client.getValues().getUserId()) {
+                if (permission.getEntity() != getClient().getValues().getUserId()) {
                     matchingPermission = permission;
                     break;
                 }
@@ -242,14 +249,14 @@ public class AddGuestPermissionTest extends ShareTest {
         /*
          * update file, add permissions for guest
          */
-        file.setObjectPermissions(Collections.<FileStorageObjectPermission>singletonList(guestPermission));
+        file.setObjectPermissions(Collections.<FileStorageObjectPermission> singletonList(guestPermission));
         file = updateFile(file, new Field[] { Field.OBJECT_PERMISSIONS });
         /*
          * check permissions
          */
         FileStorageObjectPermission matchingPermission = null;
         for (FileStorageObjectPermission permission : file.getObjectPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
                 break;
             }
@@ -264,7 +271,7 @@ public class AddGuestPermissionTest extends ShareTest {
         /*
          * check access to share
          */
-        GuestClient guestClient =  resolveShare(guest, guestPermission.getRecipient());
+        GuestClient guestClient = resolveShare(guest, guestPermission.getRecipient());
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission);
     }

@@ -1,5 +1,9 @@
 package liquibase.change.core;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import org.junit.Before;
+import org.junit.Test;
 import liquibase.change.ChangeFactory;
 import liquibase.change.StandardChangeTest;
 import liquibase.database.Database;
@@ -8,9 +12,6 @@ import liquibase.database.core.FirebirdDatabase;
 import liquibase.database.core.MockDatabase;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RenameTableStatement;
-import static org.junit.Assert.*;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * Tests for {@link RenameTableChange}
@@ -24,14 +25,12 @@ public class RenameTableChangeTest extends StandardChangeTest {
         refactoring = new RenameTableChange();
     }
 
-    @Override
-    @Test
+     @Test
     public void getRefactoringName() throws Exception {
         assertEquals("renameTable", ChangeFactory.getInstance().getChangeMetaData(refactoring).getName());
     }
 
-    @Override
-    @Test
+     @Test
     public void generateStatement() throws Exception {
         RenameTableChange refactoring = new RenameTableChange();
         refactoring.setSchemaName("SCHEMA_NAME");
@@ -47,8 +46,7 @@ public class RenameTableChangeTest extends StandardChangeTest {
         assertEquals("NEW_NAME", ((RenameTableStatement) sqlStatements[0]).getNewTableName());
     }
 
-    @Override
-    @Test
+     @Test
     public void getConfirmationMessage() throws Exception {
         refactoring.setOldTableName("OLD_NAME");
         refactoring.setNewTableName("NEW_NAME");

@@ -51,6 +51,10 @@ package com.openexchange.ajax.task;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import static com.openexchange.java.Autoboxing.I2i;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -92,13 +96,12 @@ public final class DateTimeTest extends AbstractAJAXSession {
      *
      * @param name The test name
      */
-    public DateTimeTest(String name) {
-        super(name);
+    public DateTimeTest() {
+        super();
     }
 
     @Before
-    @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         timeZone = client.getValues().getTimeZone();
@@ -106,23 +109,25 @@ public final class DateTimeTest extends AbstractAJAXSession {
     }
 
     @After
-    @Override
-    protected void tearDown() throws Exception {
-        if (null != client && null != tasksToDelete) {
-            int folderID = client.getValues().getPrivateTaskFolder();
-            Set<Integer> ids = new HashSet<Integer>();
-            for (Task task : tasksToDelete) {
-                if (folderID != task.getParentFolderID()) {
-                    client.execute(new DeleteRequest(task));
-                } else {
-                    ids.add(Integer.valueOf(task.getObjectID()));
+    public void tearDown() throws Exception {
+        try {
+            if (null != client && null != tasksToDelete) {
+                int folderID = client.getValues().getPrivateTaskFolder();
+                Set<Integer> ids = new HashSet<Integer>();
+                for (Task task : tasksToDelete) {
+                    if (folderID != task.getParentFolderID()) {
+                        client.execute(new DeleteRequest(task));
+                    } else {
+                        ids.add(Integer.valueOf(task.getObjectID()));
+                    }
+                }
+                if (0 < ids.size()) {
+                    client.execute(new DeleteRequest(folderID, I2i(ids), new Date(Long.MAX_VALUE), false));
                 }
             }
-            if (0 < ids.size()) {
-                client.execute(new DeleteRequest(folderID, I2i(ids), new Date(Long.MAX_VALUE), false));
-            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
     @Test
@@ -205,11 +210,9 @@ public final class DateTimeTest extends AbstractAJAXSession {
         assertTrue("No fulltime", data.hasAndNotNull(CalendarFields.FULL_TIME));
         assertFalse("Fulltime wrong", data.getBoolean(CalendarFields.FULL_TIME));
         assertTrue("No start time", data.hasAndNotNull(TaskFields.START_TIME));
-        assertEquals("Start time wrong",
-            task.getStartDate().getTime() + timeZone.getOffset(task.getStartDate().getTime()), data.getLong(TaskFields.START_TIME));
+        assertEquals("Start time wrong", task.getStartDate().getTime() + timeZone.getOffset(task.getStartDate().getTime()), data.getLong(TaskFields.START_TIME));
         assertTrue("No end time", data.hasAndNotNull(TaskFields.END_TIME));
-        assertEquals("End time wrong",
-            task.getEndDate().getTime() + timeZone.getOffset(task.getEndDate().getTime()), data.getLong(TaskFields.END_TIME));
+        assertEquals("End time wrong", task.getEndDate().getTime() + timeZone.getOffset(task.getEndDate().getTime()), data.getLong(TaskFields.END_TIME));
         assertTrue("No start date", data.hasAndNotNull(CalendarFields.START_DATE));
         assertEquals("Start date wrong", task.getStartDate().getTime(), data.getLong(CalendarFields.START_DATE));
         assertTrue("No end date", data.hasAndNotNull(CalendarFields.END_DATE));
@@ -296,11 +299,9 @@ public final class DateTimeTest extends AbstractAJAXSession {
         assertTrue("No fulltime", data.hasAndNotNull(CalendarFields.FULL_TIME));
         assertTrue("Fulltime wrong", data.getBoolean(CalendarFields.FULL_TIME));
         assertTrue("No start time", data.hasAndNotNull(TaskFields.START_TIME));
-        assertEquals("Start time wrong",
-            D("22.10.2014 00:00", TimeZone.getTimeZone("UTC")).getTime(), data.getLong(TaskFields.START_TIME));
+        assertEquals("Start time wrong", D("22.10.2014 00:00", TimeZone.getTimeZone("UTC")).getTime(), data.getLong(TaskFields.START_TIME));
         assertTrue("No end time", data.hasAndNotNull(TaskFields.END_TIME));
-        assertEquals("End time wrong",
-            D("25.10.2014 00:00", TimeZone.getTimeZone("UTC")).getTime(), data.getLong(TaskFields.END_TIME));
+        assertEquals("End time wrong", D("25.10.2014 00:00", TimeZone.getTimeZone("UTC")).getTime(), data.getLong(TaskFields.END_TIME));
         assertTrue("No start date", data.hasAndNotNull(CalendarFields.START_DATE));
         assertEquals("Start date wrong", task.getStartDate().getTime(), data.getLong(CalendarFields.START_DATE));
         assertTrue("No end date", data.hasAndNotNull(CalendarFields.END_DATE));
@@ -410,11 +411,9 @@ public final class DateTimeTest extends AbstractAJAXSession {
         assertTrue("No fulltime", data.hasAndNotNull(CalendarFields.FULL_TIME));
         assertFalse("Fulltime wrong", data.getBoolean(CalendarFields.FULL_TIME));
         assertTrue("No start time", data.hasAndNotNull(TaskFields.START_TIME));
-        assertEquals("Start time wrong",
-            toUpdate.getStartDate().getTime() + timeZone.getOffset(toUpdate.getStartDate().getTime()), data.getLong(TaskFields.START_TIME));
+        assertEquals("Start time wrong", toUpdate.getStartDate().getTime() + timeZone.getOffset(toUpdate.getStartDate().getTime()), data.getLong(TaskFields.START_TIME));
         assertTrue("No end time", data.hasAndNotNull(TaskFields.END_TIME));
-        assertEquals("End time wrong",
-            toUpdate.getEndDate().getTime() + timeZone.getOffset(toUpdate.getEndDate().getTime()), data.getLong(TaskFields.END_TIME));
+        assertEquals("End time wrong", toUpdate.getEndDate().getTime() + timeZone.getOffset(toUpdate.getEndDate().getTime()), data.getLong(TaskFields.END_TIME));
         assertTrue("No start date", data.hasAndNotNull(CalendarFields.START_DATE));
         assertEquals("Start date wrong", toUpdate.getStartDate().getTime(), data.getLong(CalendarFields.START_DATE));
         assertTrue("No end date", data.hasAndNotNull(CalendarFields.END_DATE));
@@ -469,11 +468,9 @@ public final class DateTimeTest extends AbstractAJAXSession {
         assertTrue("No fulltime", data.hasAndNotNull(CalendarFields.FULL_TIME));
         assertFalse("Fulltime wrong", data.getBoolean(CalendarFields.FULL_TIME));
         assertTrue("No start time", data.hasAndNotNull(TaskFields.START_TIME));
-        assertEquals("Start time wrong",
-            task.getStartDate().getTime() + timeZone.getOffset(task.getStartDate().getTime()), data.getLong(TaskFields.START_TIME));
+        assertEquals("Start time wrong", task.getStartDate().getTime() + timeZone.getOffset(task.getStartDate().getTime()), data.getLong(TaskFields.START_TIME));
         assertTrue("No end time", data.hasAndNotNull(TaskFields.END_TIME));
-        assertEquals("End time wrong",
-            task.getEndDate().getTime() + timeZone.getOffset(task.getEndDate().getTime()), data.getLong(TaskFields.END_TIME));
+        assertEquals("End time wrong", task.getEndDate().getTime() + timeZone.getOffset(task.getEndDate().getTime()), data.getLong(TaskFields.END_TIME));
         assertTrue("No start date", data.hasAndNotNull(CalendarFields.START_DATE));
         assertEquals("Start date wrong", task.getStartDate().getTime(), data.getLong(CalendarFields.START_DATE));
         assertTrue("No end date", data.hasAndNotNull(CalendarFields.END_DATE));
@@ -521,16 +518,14 @@ public final class DateTimeTest extends AbstractAJAXSession {
         listResponse = client.execute(new ListRequest(folderAndTaskIDs, new int[] { Task.START_TIME }));
         value = listResponse.getValue(0, Task.START_TIME);
         assertTrue("Wrong type for start time", null != value && Long.class.isInstance(value));
-        assertEquals("Start time time",
-            task.getStartDate().getTime() + timeZone.getOffset(task.getStartDate().getTime()), ((Long) value).longValue());
+        assertEquals("Start time time", task.getStartDate().getTime() + timeZone.getOffset(task.getStartDate().getTime()), ((Long) value).longValue());
         /*
          * retrieve & check end_date
          */
         listResponse = client.execute(new ListRequest(folderAndTaskIDs, new int[] { Task.END_TIME }));
         value = listResponse.getValue(0, Task.END_TIME);
         assertTrue("Wrong type for end time", null != value && Long.class.isInstance(value));
-        assertEquals("End time wrong",
-            task.getEndDate().getTime() + timeZone.getOffset(task.getEndDate().getTime()), ((Long) value).longValue());
+        assertEquals("End time wrong", task.getEndDate().getTime() + timeZone.getOffset(task.getEndDate().getTime()), ((Long) value).longValue());
     }
 
 }

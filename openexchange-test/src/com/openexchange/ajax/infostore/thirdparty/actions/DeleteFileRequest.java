@@ -74,6 +74,7 @@ public class DeleteFileRequest extends AbstractFileRequest<DeleteFileResponse> {
     /**
      *
      * Initializes a new {@link DeleteFileRequest}.
+     * 
      * @param fileId
      * @param folderId
      */

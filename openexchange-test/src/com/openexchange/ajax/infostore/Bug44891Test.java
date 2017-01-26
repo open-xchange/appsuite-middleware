@@ -49,6 +49,11 @@
 
 package com.openexchange.ajax.infostore;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
@@ -57,7 +62,6 @@ import com.openexchange.ajax.folder.actions.UpdateRequest;
 import com.openexchange.ajax.infostore.test.AbstractInfostoreTest;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.groupware.container.FolderObject;
-
 
 /**
  * {@link Bug44891Test}
@@ -71,34 +75,39 @@ public class Bug44891Test extends AbstractInfostoreTest {
 
     /**
      * Initializes a new {@link Bug44891Test}.
+     * 
      * @param name
      */
-    public Bug44891Test(String name) {
-        super(name);
+    public Bug44891Test() {
+        super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         folder = generateInfostoreFolder("TestBug44891");
         InsertRequest req = new InsertRequest(EnumAPI.OX_NEW, folder);
-        InsertResponse resp = client.execute(req);
+        InsertResponse resp = getClient().execute(req);
         resp.fillObject(folder);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        if (null != folder) {
-            DeleteRequest req = new DeleteRequest(EnumAPI.OX_NEW, folder);
-            client.execute(req);
+        try {
+            if (null != folder) {
+                DeleteRequest req = new DeleteRequest(EnumAPI.OX_NEW, folder);
+                getClient().execute(req);
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
+    @Test
     public void testBug44891() throws Exception {
         folder.setFolderName("shouldFail<>");
         UpdateRequest req = new UpdateRequest(EnumAPI.OX_NEW, folder, false);
-        InsertResponse resp = client.execute(req);
+        InsertResponse resp = getClient().execute(req);
         assertTrue(resp.hasError());
         assertEquals(FileStorageExceptionCodes.ILLEGAL_CHARACTERS.getNumber(), resp.getException().getCode());
     }

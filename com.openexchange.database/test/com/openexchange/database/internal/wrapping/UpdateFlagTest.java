@@ -49,7 +49,10 @@
 
 package com.openexchange.database.internal.wrapping;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -61,7 +64,6 @@ import com.openexchange.database.internal.AssignmentImpl;
 import com.openexchange.database.internal.ConnectionState;
 import com.openexchange.database.internal.Pools;
 import com.openexchange.database.internal.ReplicationMonitor;
-
 
 /**
  * {@link UpdateFlagTest}

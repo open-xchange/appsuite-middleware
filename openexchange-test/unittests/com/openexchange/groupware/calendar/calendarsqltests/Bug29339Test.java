@@ -2,9 +2,11 @@
 package com.openexchange.groupware.calendar.calendarsqltests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTest;
 import com.openexchange.groupware.container.Participant;
 
 /**
@@ -20,7 +22,7 @@ public class Bug29339Test extends CalendarSqlTest {
 
     private int resourceId;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
@@ -35,7 +37,7 @@ public class Bug29339Test extends CalendarSqlTest {
         appointment.setIgnoreConflicts(true);
         appointments.save(appointment);
         clean.add(appointment);
-        
+
         resourceId = getResourceId(appointment);
 
         appointments.switchUser(secondUser);
@@ -48,6 +50,7 @@ public class Bug29339Test extends CalendarSqlTest {
         appointment2.setIgnoreConflicts(false);
     }
 
+    @Test
     public void testBug29339() throws Exception {
         CalendarDataObject[] conflicts = appointments.save(appointment2);
         clean.add(appointment2);
@@ -63,11 +66,6 @@ public class Bug29339Test extends CalendarSqlTest {
             }
         }
         assertTrue("Missing resource conflict.", found);
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
     }
 
     private int getResourceId(CalendarDataObject app) {

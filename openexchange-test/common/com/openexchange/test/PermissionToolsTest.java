@@ -49,11 +49,23 @@
 
 package com.openexchange.test;
 
-import static com.openexchange.server.impl.OCLPermission.*;
+import static com.openexchange.server.impl.OCLPermission.ADMIN_PERMISSION;
+import static com.openexchange.server.impl.OCLPermission.CREATE_OBJECTS_IN_FOLDER;
+import static com.openexchange.server.impl.OCLPermission.CREATE_SUB_FOLDERS;
+import static com.openexchange.server.impl.OCLPermission.DELETE_ALL_OBJECTS;
+import static com.openexchange.server.impl.OCLPermission.DELETE_OWN_OBJECTS;
+import static com.openexchange.server.impl.OCLPermission.NO_PERMISSIONS;
+import static com.openexchange.server.impl.OCLPermission.READ_ALL_OBJECTS;
+import static com.openexchange.server.impl.OCLPermission.READ_FOLDER;
+import static com.openexchange.server.impl.OCLPermission.READ_OWN_OBJECTS;
+import static com.openexchange.server.impl.OCLPermission.WRITE_ALL_OBJECTS;
+import static com.openexchange.server.impl.OCLPermission.WRITE_OWN_OBJECTS;
 import static com.openexchange.test.PermissionTools.OCLP;
 import static com.openexchange.test.PermissionTools.P;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import java.util.List;
-import junit.framework.TestCase;
+import org.junit.Test;
 import com.openexchange.server.impl.OCLPermission;
 
 /**
@@ -61,8 +73,9 @@ import com.openexchange.server.impl.OCLPermission;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class PermissionToolsTest extends TestCase {
+public class PermissionToolsTest {
 
+    @Test
     public void testOCLP() {
 
         assertPermissions("arwd", 12, false, false, ADMIN_PERMISSION, READ_ALL_OBJECTS, WRITE_ALL_OBJECTS, DELETE_ALL_OBJECTS);
@@ -89,16 +102,14 @@ public class PermissionToolsTest extends TestCase {
 
     }
 
+    @Test
     public void testP() {
-        List<OCLPermission> oclps = P(  12, "arwd",
-                                        13, "arwd",
-                                        14, "arwd/g" );
+        List<OCLPermission> oclps = P(12, "arwd", 13, "arwd", 14, "arwd/g");
 
         assertEquals(3, oclps.size());
         assertEquals(12, oclps.get(0).getEntity());
         assertEquals(13, oclps.get(1).getEntity());
         assertEquals(14, oclps.get(2).getEntity());
-
 
     }
 

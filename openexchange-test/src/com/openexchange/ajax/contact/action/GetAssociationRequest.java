@@ -56,7 +56,6 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Params;
 import com.openexchange.groupware.container.Contact;
 
-
 /**
  * {@link GetAssociationRequest}
  *
@@ -67,13 +66,13 @@ public class GetAssociationRequest extends AbstractContactRequest<GetAssociation
     private final Contact aggregator;
     private final Contact contributor;
 
-    public GetAssociationRequest(Contact contributor, Contact aggregator){
+    public GetAssociationRequest(Contact contributor, Contact aggregator) {
         this.contributor = contributor;
         this.aggregator = aggregator;
     }
 
     @Override
-    public Object getBody(){
+    public Object getBody() {
         return null;
     }
 
@@ -83,29 +82,19 @@ public class GetAssociationRequest extends AbstractContactRequest<GetAssociation
     }
 
     @Override
-    public Parameter[] getParameters(){
-        Params params = new Params(
-            AJAXServlet.PARAMETER_ACTION,
-            FinalContactConstants.ACTION_GET_ASSOCIATION.getName());
+    public Parameter[] getParameters() {
+        Params params = new Params(AJAXServlet.PARAMETER_ACTION, FinalContactConstants.ACTION_GET_ASSOCIATION.getName());
 
-        if(contributor.containsUserField20()){
+        if (contributor.containsUserField20()) {
             params.add(FinalContactConstants.PARAMETER_UUID1.getName(), contributor.getUserField20());
         } else {
-            params.add(
-                FinalContactConstants.PARAMETER_FOLDER_ID1.getName(),
-                String.valueOf(contributor.getParentFolderID()),
-                FinalContactConstants.PARAMETER_CONTACT_ID1.getName(),
-                String.valueOf(contributor.getObjectID()));
+            params.add(FinalContactConstants.PARAMETER_FOLDER_ID1.getName(), String.valueOf(contributor.getParentFolderID()), FinalContactConstants.PARAMETER_CONTACT_ID1.getName(), String.valueOf(contributor.getObjectID()));
         }
 
-        if(aggregator.containsUserField20()){
+        if (aggregator.containsUserField20()) {
             params.add(FinalContactConstants.PARAMETER_UUID2.getName(), aggregator.getUserField20());
         } else {
-            params.add(
-                FinalContactConstants.PARAMETER_FOLDER_ID2.getName(),
-                String.valueOf(aggregator.getParentFolderID()),
-                FinalContactConstants.PARAMETER_CONTACT_ID2.getName(),
-                String.valueOf(aggregator.getObjectID()));
+            params.add(FinalContactConstants.PARAMETER_FOLDER_ID2.getName(), String.valueOf(aggregator.getParentFolderID()), FinalContactConstants.PARAMETER_CONTACT_ID2.getName(), String.valueOf(aggregator.getObjectID()));
         }
 
         return params.toArray();
@@ -113,13 +102,13 @@ public class GetAssociationRequest extends AbstractContactRequest<GetAssociation
 
     @Override
     public AbstractAJAXParser<? extends GetAssociationResponse> getParser() {
-        return new AbstractAJAXParser<GetAssociationResponse>(false){
+        return new AbstractAJAXParser<GetAssociationResponse>(false) {
+
             @Override
             protected GetAssociationResponse createResponse(Response response) {
                 return new GetAssociationResponse(response);
             }
         };
     }
-
 
 }

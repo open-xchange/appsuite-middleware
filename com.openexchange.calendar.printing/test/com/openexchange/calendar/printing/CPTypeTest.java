@@ -49,14 +49,16 @@
 
 package com.openexchange.calendar.printing;
 
-import junit.framework.TestCase;
 import org.junit.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class CPTypeTest extends TestCase {
-
+public class CPTypeTest {
     private void checkType(String template, CPType expected) {
         assertEquals(
             "The template string '" + template + "' should lead to a template of type " + expected,
@@ -64,8 +66,8 @@ public class CPTypeTest extends TestCase {
             CPType.getByTemplateName(template));
     }
 
-    @Test
-    public void testShouldFindCorrectTypeByTemplateName() {
+     @Test
+     public void testShouldFindCorrectTypeByTemplateName() {
         CPType evil = CPType.WORKWEEKVIEW;
         for (CPType type : CPType.values()) {
             checkType("cp_" + type.getName() + "_" + evil.getName() + "someTemplate", type);
@@ -80,8 +82,8 @@ public class CPTypeTest extends TestCase {
         }
     }
 
-    @Test
-    public void testShouldReturnNullOnFailure() {
+     @Test
+     public void testShouldReturnNullOnFailure() {
         checkType("", null);
         checkType("666/template.tmpl", null);
         checkType("/1/666/template.tmpl", null);

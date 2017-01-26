@@ -1,22 +1,19 @@
 package liquibase.change.core;
 
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
 import liquibase.change.ChangeFactory;
 import liquibase.change.StandardChangeTest;
-import static org.junit.Assert.*;
-
-import org.junit.Test;
 
 public class CreateViewChangeTest extends StandardChangeTest {
 
 
-    @Override
-    @Test
+     @Test
     public void getRefactoringName() throws Exception {
         assertEquals("createView", ChangeFactory.getInstance().getChangeMetaData(new CreateViewChange()).getName());
     }
 
-    @Override
-    @Test
+     @Test
     public void generateStatement() throws Exception {
 
 //        new DatabaseTestTemplate().testOnAllDatabases(new DatabaseTest() {
@@ -37,8 +34,7 @@ public class CreateViewChangeTest extends StandardChangeTest {
 //        });
     }
 
-    @Override
-    @Test
+     @Test
     public void getConfirmationMessage() throws Exception {
         CreateViewChange change = new CreateViewChange();
         change.setViewName("VIEW_NAME");

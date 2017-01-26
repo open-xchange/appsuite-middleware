@@ -49,6 +49,8 @@
 
 package com.openexchange.mail;
 
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.mail.api.MailAccess;
@@ -64,170 +66,153 @@ import com.openexchange.sessiond.impl.SessionObjectWrapper;
  */
 public final class MailAccessTest extends AbstractMailTest {
 
-	/**
-	 *
-	 */
-	public MailAccessTest() {
-		super();
-	}
+    @Test
+    public void testMailAccess() throws OXException, InterruptedException {
+        final SessionObject session = getSession();
+        MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
+        mailAccess.connect();
+        /*
+         * close
+         */
+        mailAccess.close(true);
 
-	/**
-	 * @param name
-	 */
-	public MailAccessTest(final String name) {
-		super(name);
-	}
+        /*
+         * Test with altered mail configuration
+         */
+        try {
+            mailAccess = MailAccess.getInstance(session);
+            final MailConfig mailConfig = mailAccess.getMailConfig();
+            mailConfig.setLogin(getLogin());
+            mailConfig.setPassword(getPassword());
+            mailConfig.setServer(getServer());
+            mailConfig.setPort(getPort());
+            mailAccess.connect();
+        } catch (final Exception e) {
+        } finally {
+            try {
+                /*
+                 * close
+                 */
+                mailAccess.close(false);
+            } catch (final Exception e2) {
+            }
+        }
 
-	public void testMailAccess() throws OXException, InterruptedException {
-			final SessionObject session = getSession();
-			MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
-			mailAccess.connect();
-			/*
-			 * close
-			 */
-			mailAccess.close(true);
+        mailAccess = MailAccess.getInstance(session);
+        mailAccess.connect();
+        /*
+         * close
+         */
+        mailAccess.close(false);
 
-			/*
-			 * Test with altered mail configuration
-			 */
-			try {
-				mailAccess = MailAccess.getInstance(session);
-				final MailConfig mailConfig = mailAccess.getMailConfig();
-				mailConfig.setLogin(getLogin());
-				mailConfig.setPassword(getPassword());
-				mailConfig.setServer(getServer());
-				mailConfig.setPort(getPort());
-				mailAccess.connect();
-			} catch (final Exception e) {
-			} finally {
-				try {
-					/*
-					 * close
-					 */
-					mailAccess.close(false);
-				} catch (final Exception e2) {
-				}
-			}
+        session.setPassword(null);
+        mailAccess = MailAccess.getInstance(session);
+        /*
+         * Should fail
+         */
+        try {
+            mailAccess.connect();
+            assertTrue("Connect invocation should fail", false);
+        } catch (final Exception e) {
+            assertTrue(true);
+        }
 
+        session.setPassword(getPassword());
+        mailAccess = MailAccess.getInstance(session);
+        mailAccess.connect();
+        mailAccess.getMessageStorage().getAllMessages("INBOX", null, null, null, new MailField[] { MailField.ID });
+        /*
+         * close
+         */
+        mailAccess.close(true);
 
-			mailAccess = MailAccess.getInstance(session);
-			mailAccess.connect();
-			/*
-			 * close
-			 */
-			mailAccess.close(false);
+        /*
+         * Test if cache closes connection
+         */
+        Thread.sleep(10000);
+    }
 
-			session.setPassword(null);
-			mailAccess = MailAccess.getInstance(session);
-			/*
-			 * Should fail
-			 */
-			try {
-				mailAccess.connect();
-				assertTrue("Connect invocation should fail", false);
-			} catch (final Exception e) {
-				assertTrue(true);
-			}
+    @Test
+    public void testSimultaneousConnections() throws InterruptedException {
+        final MyRunnable runnable = new MyRunnable(this);
+        final Thread[] threads = new Thread[50];
+        for (int i = 0; i < threads.length; i++) {
+            threads[i] = new Thread(runnable);
+        }
 
+        for (final Thread thread : threads) {
+            thread.start();
+        }
 
-			session.setPassword(getPassword());
-			mailAccess = MailAccess.getInstance(session);
-			mailAccess.connect();
-			mailAccess.getMessageStorage().getAllMessages("INBOX", null, null, null,
-					new MailField[] { MailField.ID });
-			/*
-			 * close
-			 */
-			mailAccess.close(true);
+        /*
+         * Test if cache closes connection(s)
+         */
+        boolean wait = true;
+        while (wait) {
+            wait = false;
+            for (int i = 0; i < threads.length && !wait; i++) {
+                wait = threads[i].isAlive();
+            }
+            if (wait) {
+                Thread.sleep(1000);
+            }
+        }
+        Thread.sleep(10000);
+        assertTrue("Zero connections should be open", 0 == MailAccess.getCounter());
+    }
 
-			/*
-			 * Test if cache closes connection
-			 */
-			Thread.sleep(10000);
-	}
+    private static final class MyRunnable implements Runnable {
 
-	public void testSimultaneousConnections() throws InterruptedException {
-			final MyRunnable runnable = new MyRunnable(this);
-			final Thread[] threads = new Thread[50];
-			for (int i = 0; i < threads.length; i++) {
-				threads[i] = new Thread(runnable);
-			}
+        private final AbstractMailTest testRef;
 
-			for (final Thread thread : threads) {
-				thread.start();
-			}
+        public MyRunnable(final AbstractMailTest testRef) {
+            this.testRef = testRef;
+        }
 
-			/*
-			 * Test if cache closes connection(s)
-			 */
-			boolean wait = true;
-			while (wait) {
-				wait = false;
-				for (int i = 0; i < threads.length && !wait; i++) {
-					wait = threads[i].isAlive();
-				}
-				if (wait) {
-					Thread.sleep(1000);
-				}
-			}
-			Thread.sleep(10000);
-			assertTrue("Zero connections should be open", 0 == MailAccess.getCounter());
-	}
-
-	private static final class MyRunnable implements Runnable {
-
-		private final AbstractMailTest testRef;
-
-		public MyRunnable(final AbstractMailTest testRef) {
-			this.testRef = testRef;
-		}
-
-		@Override
+        @Override
         public void run() {
-			try {
-				final SessionObject session = SessionObjectWrapper.createSessionObject(testRef.getUser(),
-						new ContextImpl(testRef.getCid()), "mail-test-session");
-				session.setPassword(testRef.getPassword());
-				MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
-				mailAccess.connect();
-				/*
-				 * close
-				 */
-				mailAccess.close(false);
+            try {
+                final SessionObject session = SessionObjectWrapper.createSessionObject(testRef.getUser(), new ContextImpl(testRef.getCid()), "mail-test-session");
+                session.setPassword(testRef.getPassword());
+                MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
+                mailAccess.connect();
+                /*
+                 * close
+                 */
+                mailAccess.close(false);
 
-				mailAccess = MailAccess.getInstance(session);
-				mailAccess.connect();
-				/*
-				 * close
-				 */
-				mailAccess.close(false);
+                mailAccess = MailAccess.getInstance(session);
+                mailAccess.connect();
+                /*
+                 * close
+                 */
+                mailAccess.close(false);
 
-				session.setPassword(null);
-				mailAccess = MailAccess.getInstance(session);
-				/*
-				 * Should fail
-				 */
-				try {
-					mailAccess.connect();
-					assertTrue("Connect invocation should fail", false);
-				} catch (final Exception e) {
-					assertTrue(true);
-				}
+                session.setPassword(null);
+                mailAccess = MailAccess.getInstance(session);
+                /*
+                 * Should fail
+                 */
+                try {
+                    mailAccess.connect();
+                    assertTrue("Connect invocation should fail", false);
+                } catch (final Exception e) {
+                    assertTrue(true);
+                }
 
-				session.setPassword(testRef.getPassword());
-				mailAccess = MailAccess.getInstance(session);
-				mailAccess.connect();
-				mailAccess.getMessageStorage().getAllMessages("INBOX", null, null, null,
-						new MailField[] { MailField.ID });
-				/*
-				 * close
-				 */
-				mailAccess.close(false);
+                session.setPassword(testRef.getPassword());
+                mailAccess = MailAccess.getInstance(session);
+                mailAccess.connect();
+                mailAccess.getMessageStorage().getAllMessages("INBOX", null, null, null, new MailField[] { MailField.ID });
+                /*
+                 * close
+                 */
+                mailAccess.close(false);
 
-			} catch (final Exception e) {
-				e.printStackTrace();
-			}
-		}
+            } catch (final Exception e) {
+                e.printStackTrace();
+            }
+        }
 
-	}
+    }
 }

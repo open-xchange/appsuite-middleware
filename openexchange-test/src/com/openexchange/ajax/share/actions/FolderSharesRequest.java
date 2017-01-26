@@ -66,9 +66,7 @@ public class FolderSharesRequest extends AbstractFolderRequest<FolderSharesRespo
     /**
      * The default columns for the <code>shares</code> action
      */
-    public static final int[] DEFAULT_COLUMNS = {
-        FolderObject.OBJECT_ID, FolderObject.MODULE, FolderObject.TYPE, FolderObject.FOLDER_NAME,
-        FolderObject.STANDARD_FOLDER, FolderObject.CREATED_BY, FolderObject.PERMISSIONS_BITS, 3060 };
+    public static final int[] DEFAULT_COLUMNS = { FolderObject.OBJECT_ID, FolderObject.MODULE, FolderObject.TYPE, FolderObject.FOLDER_NAME, FolderObject.STANDARD_FOLDER, FolderObject.CREATED_BY, FolderObject.PERMISSIONS_BITS, 3060 };
 
     private final String contentType;
     private final int[] columns;

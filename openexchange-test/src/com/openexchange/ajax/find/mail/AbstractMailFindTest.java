@@ -1,5 +1,7 @@
+
 package com.openexchange.ajax.find.mail;
 
+import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,6 +10,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.json.JSONException;
+import org.junit.After;
+import org.junit.Before;
 import com.openexchange.ajax.find.AbstractFindTest;
 import com.openexchange.ajax.find.PropDocument;
 import com.openexchange.ajax.mail.actions.ImportMailRequest;
@@ -27,32 +31,34 @@ import com.openexchange.java.util.TimeZones;
 import com.openexchange.mail.utils.DateUtils;
 import com.openexchange.test.ContactTestManager;
 
-
 public abstract class AbstractMailFindTest extends AbstractFindTest {
 
     protected String defaultAddress;
 
     protected ContactTestManager contactManager;
 
-    public AbstractMailFindTest(String name) {
-        super(name);
+    public AbstractMailFindTest() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
-        defaultAddress = client.getValues().getSendAddress();
-        contactManager = new ContactTestManager(client);
+        defaultAddress = getClient().getValues().getSendAddress();
+        contactManager = new ContactTestManager(getClient());
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        contactManager.cleanUp();
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
+        try {
+            contactManager.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
     protected List<ActiveFacet> prepareFacets() throws OXException, IOException, JSONException {
-        return prepareFacets(client.getValues().getInboxFolder());
+        return prepareFacets(getClient().getValues().getInboxFolder());
     }
 
     protected List<ActiveFacet> prepareFacets(String folder) {
@@ -81,7 +87,6 @@ public abstract class AbstractMailFindTest extends AbstractFindTest {
         return query(Module.MAIL, facets, options);
     }
 
-
     protected List<PropDocument> query(List<ActiveFacet> facets, int[] columns) throws Exception {
         return query(Module.MAIL, facets, columns);
     }
@@ -92,8 +97,8 @@ public abstract class AbstractMailFindTest extends AbstractFindTest {
     }
 
     protected FacetValue detectContact(List<Facet> facets) throws OXException, IOException, JSONException {
-        GetRequest getRequest = new GetRequest(client.getValues().getUserId(), client.getValues().getTimeZone());
-        GetResponse getResponse = client.execute(getRequest);
+        GetRequest getRequest = new GetRequest(getClient().getValues().getUserId(), getClient().getValues().getTimeZone());
+        GetResponse getResponse = getClient().execute(getRequest);
         Contact contact = getResponse.getContact();
         FacetValue found = findByDisplayName(facets, DisplayItems.convert(contact).getDisplayName());
         return found;
@@ -145,17 +150,12 @@ public abstract class AbstractMailFindTest extends AbstractFindTest {
     protected String[][] importMails(String folder, int num, String fromHeader, String toHeader) throws OXException, IOException, JSONException {
         InputStream[] streams = new InputStream[num];
         for (int i = 0; i < num; i++) {
-            String mail = MAIL
-                .replaceAll("#FROM#", fromHeader)
-                .replaceAll("#TO#", toHeader)
-                .replaceAll("#DATE#", DateUtils.toStringRFC822(new Date(), TimeZones.UTC))
-                .replaceAll("#SUBJECT#", randomUID())
-                .replaceAll("#BODY#", randomUID());
+            String mail = MAIL.replaceAll("#FROM#", fromHeader).replaceAll("#TO#", toHeader).replaceAll("#DATE#", DateUtils.toStringRFC822(new Date(), TimeZones.UTC)).replaceAll("#SUBJECT#", randomUID()).replaceAll("#BODY#", randomUID());
             streams[i] = new ByteArrayInputStream(mail.getBytes(com.openexchange.java.Charsets.UTF_8));
         }
 
         ImportMailRequest request = new ImportMailRequest(folder, 0, true, true, streams);
-        ImportMailResponse response = client.execute(request);
+        ImportMailResponse response = getClient().execute(request);
         return response.getIds();
     }
 
@@ -164,32 +164,13 @@ public abstract class AbstractMailFindTest extends AbstractFindTest {
     }
 
     protected String[][] importMail(String folder, String toHeader, String fromHeader, String subject, String body, Date received) throws OXException, IOException, JSONException {
-        String mail = MAIL
-            .replaceAll("#FROM#", fromHeader)
-            .replaceAll("#TO#", toHeader)
-            .replaceAll("#DATE#", DateUtils.toStringRFC822(received, TimeZones.UTC))
-            .replaceAll("#SUBJECT#", subject)
-            .replaceAll("#BODY#", body);
+        String mail = MAIL.replaceAll("#FROM#", fromHeader).replaceAll("#TO#", toHeader).replaceAll("#DATE#", DateUtils.toStringRFC822(received, TimeZones.UTC)).replaceAll("#SUBJECT#", subject).replaceAll("#BODY#", body);
         ByteArrayInputStream mailStream = new ByteArrayInputStream(mail.getBytes(com.openexchange.java.Charsets.UTF_8));
         ImportMailRequest request = new ImportMailRequest(folder, 0, true, true, new ByteArrayInputStream[] { mailStream });
-        ImportMailResponse response = client.execute(request);
+        ImportMailResponse response = getClient().execute(request);
         return response.getIds();
     }
 
-    protected static final String MAIL =
-        "From: #FROM#\n" +
-        "To: #TO#\n" +
-        "CC: #TO#\n" +
-        "BCC: #TO#\n" +
-        "Received: from ox.open-xchange.com;#DATE#\n" +
-        "Date: #DATE#\n" +
-        "Subject: #SUBJECT#\n" +
-        "Disposition-Notification-To: #FROM#\n" +
-        "Mime-Version: 1.0\n" +
-        "Content-Type: text/plain; charset=\"UTF-8\"\n" +
-        "Content-Transfer-Encoding: 8bit\n" +
-        "\n" +
-        "Content\n" +
-        "#BODY#\n";
+    protected static final String MAIL = "From: #FROM#\n" + "To: #TO#\n" + "CC: #TO#\n" + "BCC: #TO#\n" + "Received: from ox.open-xchange.com;#DATE#\n" + "Date: #DATE#\n" + "Subject: #SUBJECT#\n" + "Disposition-Notification-To: #FROM#\n" + "Mime-Version: 1.0\n" + "Content-Type: text/plain; charset=\"UTF-8\"\n" + "Content-Transfer-Encoding: 8bit\n" + "\n" + "Content\n" + "#BODY#\n";
 
 }

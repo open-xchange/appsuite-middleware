@@ -52,6 +52,7 @@ package com.openexchange.subscribe.crawler;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import org.junit.Test;
 import org.yaml.snakeyaml.Yaml;
 import com.openexchange.subscribe.crawler.internal.PagePart;
 import com.openexchange.subscribe.crawler.internal.PagePartSequence;
@@ -64,7 +65,8 @@ import com.openexchange.subscribe.crawler.internal.Step;
  */
 public class GenericSubscribeServiceForYahooComTest extends GenericSubscribeServiceTestHelpers {
 
-    public void testGenericSubscribeServiceForYahooCom() {
+         @Test
+     public void testGenericSubscribeServiceForYahooCom() {
 
         // insert valid credentials here
         String username = "";

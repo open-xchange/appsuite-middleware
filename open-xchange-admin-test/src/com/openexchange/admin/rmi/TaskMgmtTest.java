@@ -115,8 +115,8 @@ public class TaskMgmtTest extends AbstractRMITest {
         client_db = null;
     }
 
-    @Test
-    public void testGetTaskResultsContextCredentialsInt() throws MalformedURLException, RemoteException, NotBoundException, Exception {
+     @Test
+     public void testGetTaskResultsContextCredentialsInt() throws MalformedURLException, RemoteException, NotBoundException, Exception {
         final Credentials cred = DummyCredentials();
 
         final int jobId = ci.moveContextDatabase(context, client_db, superAdminCredentials);

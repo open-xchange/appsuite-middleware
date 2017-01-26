@@ -60,40 +60,40 @@ import com.openexchange.tools.arrays.Arrays;
  */
 public class ListFilestoreTest extends AbstractTest {
 
-    @Test
-    public void testListFilestore() {
+     @Test
+     public void testListFilestore() {
         resetBuffers();
         ListFilestoreTester tester = new ListFilestoreTester(this);
         tester.execute(getMasterCredentialsOptionData());
         assertEquals("Expected 0 as return code!", 0, returnCode);
     }
 
-    @Test
-    public void testListFilestoreCSV() {
+     @Test
+     public void testListFilestoreCSV() {
         resetBuffers();
         ListFilestoreTester tester = new ListFilestoreTester(this);
         tester.execute(getCSVMasterOptionData());
         assertEquals("Expected 0 as return code!", 0, returnCode);
     }
 
-    @Test
-    public void testListFilestoreWithInvalidCredentials() {
+     @Test
+     public void testListFilestoreWithInvalidCredentials() {
         resetBuffers();
         ListFilestoreTester tester = new ListFilestoreTester(this);
         tester.execute(getWrongMasterCredentialsOptionData());
         assertEquals("Expected invalid credentials as return code!", BasicCommandlineOptions.SYSEXIT_INVALID_CREDENTIALS, returnCode);
     }
 
-    @Test
-    public void testListFilestoreWithUnknownOption() {
+     @Test
+     public void testListFilestoreWithUnknownOption() {
         resetBuffers();
         ListFilestoreTester tester = new ListFilestoreTester(this);
         tester.execute(getUnknownOptionData());
         assertEquals("Expected unknown option as return code!", BasicCommandlineOptions.SYSEXIT_UNKNOWN_OPTION, 0, returnCode);
     }
 
-    @Test
-    public void testListFilestoreWithOmitUsage() {
+     @Test
+     public void testListFilestoreWithOmitUsage() {
         resetBuffers();
         ListFilestoreTester tester = new ListFilestoreTester(this);
         String[] options = getMasterCredentialsOptionData();

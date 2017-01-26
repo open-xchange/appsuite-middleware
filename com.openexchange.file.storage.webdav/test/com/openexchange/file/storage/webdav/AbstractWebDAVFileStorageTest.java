@@ -53,7 +53,10 @@ import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.file.storage.SimFileStorageAccount;
 import com.openexchange.session.SimSession;
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 
 /**
@@ -61,8 +64,7 @@ import junit.framework.TestCase;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AbstractWebDAVFileStorageTest extends TestCase {
-
+public abstract class AbstractWebDAVFileStorageTest {
     /**
      * Initializes a new {@link AbstractWebDAVFileStorageTest}.
      */

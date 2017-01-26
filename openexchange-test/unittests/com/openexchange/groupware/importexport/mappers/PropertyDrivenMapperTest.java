@@ -49,20 +49,24 @@
 
 package com.openexchange.groupware.importexport.mappers;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Properties;
-import junit.framework.TestCase;
+import org.junit.Test;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.importexport.formats.csv.PropertyDrivenMapper;
-
 
 /**
  * {@link PropertyDrivenMapperTest}
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class PropertyDrivenMapperTest extends TestCase {
+public class PropertyDrivenMapperTest {
 
-    public void testReadingPropery(){
+    @Test
+    public void testReadingPropery() {
         final ContactField myField = ContactField.SUR_NAME;
         final ContactField notMyField = ContactField.GIVEN_NAME;
 

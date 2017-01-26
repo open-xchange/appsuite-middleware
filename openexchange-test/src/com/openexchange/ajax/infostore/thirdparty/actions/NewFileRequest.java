@@ -118,9 +118,9 @@ public class NewFileRequest extends AbstractFileRequest<NewFileResponse> {
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
         List<Parameter> list = new ArrayList<Parameter>();
         list.add(new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW));
-        if(file != null) {
+        if (file != null) {
             list.add(new FileParameter("file", file.getName(), new FileInputStream(file), mimeType));
-        } else if(bytes != null) {
+        } else if (bytes != null) {
             list.add(new FileParameter("file", "random", new ByteArrayInputStream(bytes), mimeType));
         }
         list.add(new FieldParameter("json", metadata.toString()));

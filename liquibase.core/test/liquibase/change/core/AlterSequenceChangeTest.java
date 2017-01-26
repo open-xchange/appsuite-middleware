@@ -1,29 +1,34 @@
 package liquibase.change.core;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import java.math.BigInteger;
+import org.junit.Test;
 import liquibase.change.ChangeFactory;
 import liquibase.change.StandardChangeTest;
 import liquibase.database.Database;
-import liquibase.database.core.*;
+import liquibase.database.core.CacheDatabase;
+import liquibase.database.core.DerbyDatabase;
+import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.MockDatabase;
+import liquibase.database.core.MySQLDatabase;
+import liquibase.database.core.SQLiteDatabase;
+import liquibase.database.core.SybaseASADatabase;
+import liquibase.database.core.SybaseDatabase;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AlterSequenceStatement;
-import static org.junit.Assert.*;
-import org.junit.Test;
-
-import java.math.BigInteger;
 
 /**
  * Tests for {@link AlterSequenceChange}
  */
 public class AlterSequenceChangeTest extends StandardChangeTest {
 
-    @Override
-    @Test
+     @Test
     public void getRefactoringName() throws Exception {
         assertEquals("alterSequence", ChangeFactory.getInstance().getChangeMetaData(new AlterSequenceChange()).getName());
     }
 
-    @Override
-    @Test
+     @Test
     public void generateStatement() throws Exception {
         AlterSequenceChange refactoring = new AlterSequenceChange();
         refactoring.setSchemaName("SCHEMA_NAME");
@@ -46,8 +51,7 @@ public class AlterSequenceChangeTest extends StandardChangeTest {
 
     }
 
-    @Override
-    @Test
+     @Test
     public void getConfirmationMessage() throws Exception {
         AlterSequenceChange refactoring = new AlterSequenceChange();
         refactoring.setSequenceName("SEQ_NAME");

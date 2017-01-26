@@ -49,7 +49,9 @@
 
 package com.openexchange.ajax.framework;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXRequest.Parameter;
 
 /**
@@ -57,29 +59,21 @@ import com.openexchange.ajax.framework.AJAXRequest.Parameter;
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class ParamsTest extends TestCase {
+public class ParamsTest {
 
     protected Params defaultParams;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         defaultParams = new Params();
         defaultParams.add("key1", "value1");
-        defaultParams.add(new Parameter("key2","value2"));
-        defaultParams.add("key3","value3","key4","value4");
-        defaultParams.add(new Parameter("key5","value5"),new Parameter("key6","value6"));
+        defaultParams.add(new Parameter("key2", "value2"));
+        defaultParams.add("key3", "value3", "key4", "value4");
+        defaultParams.add(new Parameter("key5", "value5"), new Parameter("key6", "value6"));
     }
 
+    @Test
     public void testToString() {
         assertEquals("?key1=value1&key2=value2&key3=value3&key4=value4&key5=value5&key6=value6", defaultParams.toString());
-    }
-
-    public void _testToList() {
-        // TODO
-    }
-
-    public void _testToArray(){
-        // TODO
     }
 }

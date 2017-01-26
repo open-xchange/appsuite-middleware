@@ -21,10 +21,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Writer;
 import java.util.HashMap;
-
-import junit.framework.TestCase;
-
 import org.apache.tika.io.IOUtils;
+import org.junit.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * JUnit based test of class {@link LanguageIdentifier}.
@@ -32,8 +34,7 @@ import org.apache.tika.io.IOUtils;
  * @author Sami Siren
  * @author Jerome Charron - http://frutch.free.fr/
  */
-public class LanguageIdentifierTest extends TestCase {
-
+public class LanguageIdentifierTest {
     private static final String[] languages = new String[] {
         // TODO - currently Estonian and Greek fail these tests.
         // Enable when language detection works better.
@@ -45,7 +46,8 @@ public class LanguageIdentifierTest extends TestCase {
         LanguageIdentifier.initProfiles();
     }
     
-    public void testLanguageDetection() throws IOException {
+         @Test
+     public void testLanguageDetection() throws IOException {
         for (String language : languages) {
             ProfilingWriter writer = new ProfilingWriter();
             writeTo(language, writer);
@@ -59,7 +61,8 @@ public class LanguageIdentifierTest extends TestCase {
         }
     }
 
-    public void testClearAddAndInitProfiles() throws IOException {
+         @Test
+     public void testClearAddAndInitProfiles() throws IOException {
         // Prepare english and german language profiles
         ProfilingWriter enWriter = new ProfilingWriter();
         writeTo("en", enWriter);
@@ -98,7 +101,8 @@ public class LanguageIdentifierTest extends TestCase {
         assertTrue(identifier.isReasonablyCertain());
   }
 
-  public void testMixedLanguages() throws IOException {
+       @Test
+     public void testMixedLanguages() throws IOException {
         for (String language : languages) {
             for (String other : languages) {
                 if (!language.equals(other)) {
@@ -117,7 +121,8 @@ public class LanguageIdentifierTest extends TestCase {
     }
 
     // TIKA-453: Fix up language identifier used for Estonian
-    public void testEstonia() throws Exception {
+         @Test
+     public void testEstonia() throws Exception {
         final String estonian = "et";
         ProfilingWriter writer = new ProfilingWriter();
         writeTo(estonian, writer);

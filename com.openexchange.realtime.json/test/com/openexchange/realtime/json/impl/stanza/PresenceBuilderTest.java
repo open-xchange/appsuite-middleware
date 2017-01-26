@@ -106,8 +106,8 @@ public class PresenceBuilderTest {
      * Test method for {@link com.openexchange.realtime.atmosphere.impl.parser.PresenceParser#parseStanza(org.json.JSONObject)}.
      * @throws OXException
      */
-    @Test
-    public void testBuildPresence() throws OXException {
+     @Test
+     public void testBuildPresence() throws OXException {
         StanzaBuilder<? extends Stanza> builder = StanzaBuilderSelector.getBuilder(new ID("ox://thorben.betten@premium"), null, presenceJSON);
         Stanza stanza = builder.build();
         assertEquals(6, stanza.getPayloadTrees().size());

@@ -55,8 +55,6 @@ import com.openexchange.ajax.task.actions.UpdateRequest;
 import com.openexchange.ajax.task.actions.UpdateResponse;
 import com.openexchange.groupware.tasks.Task;
 
-
-
 /**
  * {@link TaskUpdateStep}
  *
@@ -69,6 +67,7 @@ public class TaskUpdateStep extends NeedExistingStep<Task> {
 
     /**
      * Initializes a new {@link TaskUpdateStep}.
+     * 
      * @param name
      * @param expectedError
      */
@@ -77,14 +76,17 @@ public class TaskUpdateStep extends NeedExistingStep<Task> {
         this.entry = entry;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.ajax.kata.Step#cleanUp()
      */
     @Override
-    public void cleanUp() throws Exception {
-    }
+    public void cleanUp() throws Exception {}
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.ajax.kata.Step#perform(com.openexchange.ajax.framework.AJAXClient)
      */
     @Override
@@ -94,7 +96,7 @@ public class TaskUpdateStep extends NeedExistingStep<Task> {
         UpdateRequest updateRequest = new UpdateRequest(entry, getTimeZone(), false);
         UpdateResponse updateResponse = execute(updateRequest);
 
-        if(!updateResponse.hasError()) {
+        if (!updateResponse.hasError()) {
             entry.setLastModified(updateResponse.getTimestamp());
             rememberIdentityValues(entry);
         }

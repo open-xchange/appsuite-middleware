@@ -20,57 +20,69 @@ public class ReportProperties implements Reloadable {
     private static String THREAD_PRIORITY = "com.openexchange.report.appsuite.threadPriority";
     private static int THREAD_PRIORITY_DEFAULT = 1;
 
-    private static String storagePath;
-    private static Integer maxChunkSize;
-    private static Integer maxThreadPoolSize;
-    private static Integer threadPriority;
+    private static volatile String storagePath;
+    private static volatile Integer maxChunkSize;
+    private static volatile Integer maxThreadPoolSize;
+    private static volatile Integer threadPriority;
 
     public ReportProperties() {
         super();
     }
 
     public static String getStoragePath() {
-        if (storagePath == null) {
-            synchronized (storagePath) {
-                if (storagePath == null) {
-                    storagePath = loadStringValue(STORAGE_PATH, STORAGE_PATH_DEFAULT);
+        String sp = storagePath;
+        if (sp == null) {
+            synchronized (ReportProperties.class) {
+                sp = storagePath;
+                if (sp == null) {
+                    sp = loadStringValue(STORAGE_PATH, STORAGE_PATH_DEFAULT);
+                    storagePath = sp;
                 }
             }
         }
-        return storagePath;
+        return sp;
     }
 
     public static int getMaxChunkSize() {
-        if (maxChunkSize == null) {
-            synchronized (maxChunkSize) {
-                if (maxChunkSize == null) {
-                    maxChunkSize = loadIntegerValue(MAX_CHUNK_SIZE, MAX_CHUNK_SIZE_DEFAULT);
+        Integer mcs = maxChunkSize;
+        if (mcs == null) {
+            synchronized (ReportProperties.class) {
+                mcs = maxChunkSize;
+                if (mcs == null) {
+                    mcs = loadIntegerValue(MAX_CHUNK_SIZE, MAX_CHUNK_SIZE_DEFAULT);
+                    maxChunkSize = mcs;
                 }
             }
         }
-        return maxChunkSize.intValue();
+        return mcs.intValue();
     }
 
     public static int getMaxThreadPoolSize() {
-        if (maxThreadPoolSize == null) {
-            synchronized (maxThreadPoolSize) {
-                if (maxThreadPoolSize == null) {
-                    maxThreadPoolSize = loadIntegerValue(MAX_THREAD_POOL_SIZE, MAX_THREAD_POOL_SIZE_DEFAULT);
+        Integer mtpz = maxThreadPoolSize;
+        if (mtpz == null) {
+            synchronized (ReportProperties.class) {
+                mtpz = maxThreadPoolSize;
+                if (mtpz == null) {
+                    mtpz = loadIntegerValue(MAX_THREAD_POOL_SIZE, MAX_THREAD_POOL_SIZE_DEFAULT);
+                    maxThreadPoolSize = mtpz;
                 }
             }
         }
-        return maxThreadPoolSize.intValue();
+        return mtpz.intValue();
     }
 
     public static int getThreadPriority() {
-        if (threadPriority == null) {
-            synchronized (threadPriority) {
-                if (threadPriority == null) {
-                    threadPriority = loadIntegerValue(THREAD_PRIORITY, THREAD_PRIORITY_DEFAULT);
+        Integer tp = threadPriority;
+        if (tp == null) {
+            synchronized (ReportProperties.class) {
+                tp = threadPriority;
+                if (tp == null) {
+                    tp = loadIntegerValue(THREAD_PRIORITY, THREAD_PRIORITY_DEFAULT);
+                    threadPriority = tp;
                 }
             }
         }
-        return threadPriority.intValue();
+        return tp.intValue();
     }
 
     private static Integer loadIntegerValue(String key, int defaultValue) {

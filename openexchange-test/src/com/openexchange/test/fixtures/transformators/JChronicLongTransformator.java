@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.test.fixtures.transformators;
 
 import java.util.Date;
@@ -58,12 +59,12 @@ import com.openexchange.test.fixtures.FixtureLoader;
 public class JChronicLongTransformator extends JChronicDateTransformator {
 
     public JChronicLongTransformator(FixtureLoader fixtureLoader) {
-		super(fixtureLoader);
-	}
+        super(fixtureLoader);
+    }
 
-	@Override
+    @Override
     public Object transform(final String value) throws OXException {
-    	final Date date = (Date)super.transform(value);
-    	return date.getTime();
+        final Date date = (Date) super.transform(value);
+        return date.getTime();
     }
 }

@@ -66,6 +66,7 @@ public class UpdateParser extends AbstractAJAXParser<UpdateResponse> {
 
     /**
      * Initializes a new {@link UpdateParser}.
+     * 
      * @param failOnError2
      * @param withImage
      */
@@ -85,7 +86,6 @@ public class UpdateParser extends AbstractAJAXParser<UpdateResponse> {
         }
         return createResponse(response);
     }
-
 
     /**
      * {@inheritDoc}

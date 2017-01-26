@@ -62,7 +62,6 @@ import com.openexchange.share.recipient.InternalRecipient;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.recipient.ShareRecipient;
 
-
 /**
  * {@link ShareWriter}
  *

@@ -49,10 +49,14 @@
 
 package com.openexchange.ajax.conversion;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.InputStream;
 import java.util.UUID;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.conversion.actions.ConvertRequest;
 import com.openexchange.ajax.conversion.actions.ConvertResponse;
 import com.openexchange.ajax.framework.Executor;
@@ -75,10 +79,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
  */
 public class ICalMailPartImportTest extends AbstractConversionTest {
 
-    private static final byte[] ICAL_BYTES = String.valueOf(
-            "BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\n" + "DTSTART;VALUE=DATE:20061221\n" + "DTEND;VALUE=DATE:20070106\n"
-                    + "SUMMARY:Weihnachtsferien\n" + "UID:" + UUID.randomUUID().toString() + "\n" + "SEQUENCE:8\n"
-                    + "DTSTAMP:20060520T163834Z\n" + "END:VEVENT\n" + "END:VCALENDAR").getBytes();
+    private static final byte[] ICAL_BYTES = String.valueOf("BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\n" + "DTSTART;VALUE=DATE:20061221\n" + "DTEND;VALUE=DATE:20070106\n" + "SUMMARY:Weihnachtsferien\n" + "UID:" + UUID.randomUUID().toString() + "\n" + "SEQUENCE:8\n" + "DTSTAMP:20060520T163834Z\n" + "END:VEVENT\n" + "END:VCALENDAR").getBytes();
 
     /**
      * Initializes a new {@link ICalMailPartImportTest}
@@ -86,8 +87,8 @@ public class ICalMailPartImportTest extends AbstractConversionTest {
      * @param name
      *            The name
      */
-    public ICalMailPartImportTest(final String name) {
-        super(name);
+    public ICalMailPartImportTest() {
+        super();
     }
 
     /**
@@ -95,6 +96,7 @@ public class ICalMailPartImportTest extends AbstractConversionTest {
      *
      * @throws Throwable
      */
+    @Test
     public void testICalImport() throws Throwable {
         final String[] mailFolderAndMailID;
         try {
@@ -126,9 +128,7 @@ public class ICalMailPartImportTest extends AbstractConversionTest {
                 /*
                  * Perform send
                  */
-                final NetsolSendResponse response = Executor.execute(getSession(),
-                        new NetsolSendRequest(mailObject_25kb.toString(), in, "text/calendar; charset=US-ASCII",
-                                "ical.ics"));
+                final NetsolSendResponse response = Executor.execute(getSession(), new NetsolSendRequest(mailObject_25kb.toString(), in, "text/calendar; charset=US-ASCII", "ical.ics"));
                 assertTrue("Send failed", response.getFolderAndID() != null);
                 assertTrue("Duration corrupt", response.getRequestDuration() > 0);
                 mailFolderAndMailID = response.getFolderAndID();
@@ -145,8 +145,7 @@ public class ICalMailPartImportTest extends AbstractConversionTest {
                  * Get previously sent mail
                  */
                 final FolderAndID mailPath = new FolderAndID(mailFolderAndMailID[0], mailFolderAndMailID[1]);
-                final NetsolGetResponse resp = Executor.execute(getSession(),
-                        new NetsolGetRequest(mailPath, true));
+                final NetsolGetResponse resp = Executor.execute(getSession(), new NetsolGetRequest(mailPath, true));
                 final JSONObject mailObject = (JSONObject) resp.getData();
                 final JSONArray attachments = mailObject.getJSONArray(MailJSONField.ATTACHMENTS.getKey());
                 final int len = attachments.length();
@@ -162,18 +161,12 @@ public class ICalMailPartImportTest extends AbstractConversionTest {
                  */
                 final JSONObject jsonBody = new JSONObject();
                 final JSONObject jsonSource = new JSONObject().put("identifier", "com.openexchange.mail.ical");
-                jsonSource.put("args", new JSONArray().put(
-                        new JSONObject().put("com.openexchange.mail.conversion.fullname", mailFolderAndMailID[0])).put(
-                        new JSONObject().put("com.openexchange.mail.conversion.mailid", mailFolderAndMailID[1])).put(
-                        new JSONObject().put("com.openexchange.mail.conversion.sequenceid", sequenceId)));
+                jsonSource.put("args", new JSONArray().put(new JSONObject().put("com.openexchange.mail.conversion.fullname", mailFolderAndMailID[0])).put(new JSONObject().put("com.openexchange.mail.conversion.mailid", mailFolderAndMailID[1])).put(new JSONObject().put("com.openexchange.mail.conversion.sequenceid", sequenceId)));
                 jsonBody.put("datasource", jsonSource);
                 final JSONObject jsonHandler = new JSONObject().put("identifier", "com.openexchange.ical");
-                jsonHandler.put("args", new JSONArray().put(
-                        new JSONObject().put("com.openexchange.groupware.calendar.folder", getPrivateCalendarFolder()))
-                        .put(new JSONObject().put("com.openexchange.groupware.task.folder", getPrivateTaskFolder())));
+                jsonHandler.put("args", new JSONArray().put(new JSONObject().put("com.openexchange.groupware.calendar.folder", getPrivateCalendarFolder())).put(new JSONObject().put("com.openexchange.groupware.task.folder", getPrivateTaskFolder())));
                 jsonBody.put("datahandler", jsonHandler);
-                final ConvertResponse convertResponse = (ConvertResponse) Executor.execute(getSession(),
-                        new ConvertRequest(jsonBody, true));
+                final ConvertResponse convertResponse = (ConvertResponse) Executor.execute(getSession(), new ConvertRequest(jsonBody, true));
                 final String[][] sa = convertResponse.getFoldersAndIDs();
 
                 assertFalse("Missing response on action=convert", sa == null);

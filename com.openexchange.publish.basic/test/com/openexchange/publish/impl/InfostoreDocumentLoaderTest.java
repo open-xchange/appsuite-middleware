@@ -49,10 +49,13 @@
 
 package com.openexchange.publish.impl;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.publish.Publication;
@@ -65,7 +68,7 @@ import com.openexchange.publish.services.SimInfostoreFacade;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class InfostoreDocumentLoaderTest extends TestCase {
+public class InfostoreDocumentLoaderTest {
 
     private SimInfostoreFacade infostoreFacade;
     private int cid;
@@ -75,7 +78,7 @@ public class InfostoreDocumentLoaderTest extends TestCase {
     private Publication publication;
     private InfostoreDocumentLoader loader;
 
-    @Override
+    @Before
     public void setUp() {
         infostoreFacade = new SimInfostoreFacade();
 
@@ -95,7 +98,8 @@ public class InfostoreDocumentLoaderTest extends TestCase {
         loader = new InfostoreDocumentLoader(infostoreFacade);
     }
 
-    public void testLoadDocument() throws OXException, IOException {
+         @Test
+     public void testLoadDocument() throws OXException, IOException {
         Collection<? extends Object> loaded = loader.load(publication, null);
         assertNotNull("Loaded was null!", loaded);
         assertEquals("Expected one document", 1, loaded.size());

@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.test.fixtures;
 
 import java.lang.reflect.Constructor;
@@ -85,7 +86,7 @@ public abstract class AbstractFixtures<T> implements Fixtures<T> {
         attributeTransformators.put(attribute, transformator);
     }
 
-    public void addSynoym(final String attribute, final String...syns) {
+    public void addSynoym(final String attribute, final String... syns) {
         List<String> synList = synonyms.get(attribute);
         if (synList == null) {
             synList = new ArrayList<String>();
@@ -105,8 +106,8 @@ public abstract class AbstractFixtures<T> implements Fixtures<T> {
     protected void apply(final T bean, final Map attributes) throws OXException {
         for (Object o : attributes.keySet()) {
             String value = null;
-            if(attributes.containsKey(o) && null != attributes.get(o)){
-            	value = attributes.get(o).toString();
+            if (attributes.containsKey(o) && null != attributes.get(o)) {
+                value = attributes.get(o).toString();
             }
 
             Object param = value;
@@ -115,33 +116,32 @@ public abstract class AbstractFixtures<T> implements Fixtures<T> {
                 if (false == setters[i].getParameterTypes()[0].equals(String.class)) {
                     param = getTransformator(setters[i].getParameterTypes()[0], o.toString()).transform(value);
                 } else if (null != value) {
-                	param = value;
+                    param = value;
                 } else {
-                	param = null;
+                    param = null;
                 }
                 try {
-                	setters[i].invoke(bean, param);
+                    setters[i].invoke(bean, param);
                 } catch (IllegalArgumentException e) {
-                	if (i < setters.length) {
-                		continue;
-                	} else {
-                		throw new FixtureException(e);
-                	}
-                }
-                catch (IllegalAccessException e) {
-               		throw new FixtureException(e);
+                    if (i < setters.length) {
+                        continue;
+                    } else {
+                        throw new FixtureException(e);
+                    }
+                } catch (IllegalAccessException e) {
+                    throw new FixtureException(e);
                 } catch (InvocationTargetException e) {
-               		throw new FixtureException(e);
+                    throw new FixtureException(e);
                 }
-			}
+            }
         }
     }
 
     private Transformator getTransformator(final Class aClass, final String attribute) throws OXException {
-        if(attributeTransformators.containsKey(attribute)) {
+        if (attributeTransformators.containsKey(attribute)) {
             return attributeTransformators.get(attribute);
         }
-        if(!transformators.containsKey(aClass)) {
+        if (!transformators.containsKey(aClass)) {
             transformators.put(aClass, new StringConstructorTransformator(aClass));
         }
         return transformators.get(aClass);
@@ -149,25 +149,24 @@ public abstract class AbstractFixtures<T> implements Fixtures<T> {
 
     private Method discoverSetter(final String attribute) throws OXException {
 
-    	final List<String> methodNames = new ArrayList<String>();
-        methodNames.add( IntrospectionTools.setterName(attribute) );
-        for(String synonym : getSynonyms(attribute)) {
-            methodNames.add( IntrospectionTools.setterName(synonym) );
+        final List<String> methodNames = new ArrayList<String>();
+        methodNames.add(IntrospectionTools.setterName(attribute));
+        for (String synonym : getSynonyms(attribute)) {
+            methodNames.add(IntrospectionTools.setterName(synonym));
         }
 
-
-        for(Method method : klass.getMethods()) {
-            for(String acceptableName : methodNames) {
-                if(method.getName().equalsIgnoreCase(acceptableName) && method.getParameterTypes().length == 1) {
+        for (Method method : klass.getMethods()) {
+            for (String acceptableName : methodNames) {
+                if (method.getName().equalsIgnoreCase(acceptableName) && method.getParameterTypes().length == 1) {
                     return method;
                 }
             }
         }
-        throw new FixtureException("Don't know how to set attribute "+attribute);
+        throw new FixtureException("Don't know how to set attribute " + attribute);
     }
 
     private Method[] discoverSetters(final String attribute) throws OXException {
-    	final List<String> methodNames = new ArrayList<String>();
+        final List<String> methodNames = new ArrayList<String>();
         methodNames.add(IntrospectionTools.setterName(attribute));
         methodNames.add(IntrospectionTools.adderName(attribute));
         for (final String synonym : getSynonyms(attribute)) {
@@ -177,32 +176,33 @@ public abstract class AbstractFixtures<T> implements Fixtures<T> {
         for (final Method method : klass.getMethods()) {
             for (final String acceptableName : methodNames) {
                 if (method.getName().equalsIgnoreCase(acceptableName) && method.getParameterTypes().length == 1) {
-                	methods.add(method);
+                    methods.add(method);
                 }
             }
         }
         if (0 < methods.size()) {
-        	return methods.toArray(new Method[methods.size()]);
+            return methods.toArray(new Method[methods.size()]);
         } else {
-        	return new Method[0];
+            return new Method[0];
         }
     }
 
     private List<String> getSynonyms(final String attribute) {
-        if(synonyms.containsKey(attribute)) {
+        if (synonyms.containsKey(attribute)) {
             return synonyms.get(attribute);
         }
-        return Collections.EMPTY_LIST ;
+        return Collections.EMPTY_LIST;
     }
 
     private class StringConstructorTransformator implements Transformator {
+
         private Constructor<?> constructor;
 
         public StringConstructorTransformator(final Class<?> aClass) throws OXException {
             try {
                 this.constructor = aClass.getConstructor(String.class);
             } catch (NoSuchMethodException e) {
-                throw new FixtureException("I don't know how to turn a String into a "+aClass.toString(), e);
+                throw new FixtureException("I don't know how to turn a String into a " + aClass.toString(), e);
             }
         }
 

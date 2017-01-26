@@ -146,18 +146,10 @@ public class UpdateRequest extends AbstractUserRequest<UpdateResponse> {
                     ext = "png";
                 }
             }
-            return new Parameter[] {
-                new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE),
-                new URLParameter(AJAXServlet.PARAMETER_ID, Integer.toString(contactData.getInternalUserId())),
-                new URLParameter(AJAXServlet.PARAMETER_TIMESTAMP, Long.toString(contactData.getLastModified().getTime())),
-                new FieldParameter("json", stringifiedJSON),
-                new FileParameter("file", "open-xchange_image." + ext, new ByteArrayInputStream(contactData.getImage1()), ct) };
+            return new Parameter[] { new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE), new URLParameter(AJAXServlet.PARAMETER_ID, Integer.toString(contactData.getInternalUserId())), new URLParameter(AJAXServlet.PARAMETER_TIMESTAMP, Long.toString(contactData.getLastModified().getTime())), new FieldParameter("json", stringifiedJSON), new FileParameter("file", "open-xchange_image." + ext, new ByteArrayInputStream(contactData.getImage1()), ct) };
         }
 
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE),
-            new Parameter(AJAXServlet.PARAMETER_ID, Integer.toString(contactData.getInternalUserId())),
-            new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, Long.toString(contactData.getLastModified().getTime())) };
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE), new Parameter(AJAXServlet.PARAMETER_ID, Integer.toString(contactData.getInternalUserId())), new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, Long.toString(contactData.getLastModified().getTime())) };
     }
 
     @Override

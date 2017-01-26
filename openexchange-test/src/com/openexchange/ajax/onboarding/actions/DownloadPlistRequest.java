@@ -57,7 +57,6 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Header;
 import com.openexchange.ajax.framework.Params;
 
-
 /**
  * {@link DownloadPlistRequest}
  *

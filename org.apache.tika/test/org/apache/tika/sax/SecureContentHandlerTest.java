@@ -14,15 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.tika.sax;
 
+import static org.junit.Assert.fail;
 import java.io.IOException;
-
-import junit.framework.TestCase;
-
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.io.NullInputStream;
 import org.apache.tika.io.TikaInputStream;
+import org.junit.Before;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
 import org.xml.sax.helpers.DefaultHandler;
@@ -30,7 +31,7 @@ import org.xml.sax.helpers.DefaultHandler;
 /**
  * Tests for the {@link SecureContentHandler} class.
  */
-public class SecureContentHandlerTest extends TestCase {
+public class SecureContentHandlerTest {
 
     private static final int MANY_BYTES = 2000000;
 
@@ -38,11 +39,13 @@ public class SecureContentHandlerTest extends TestCase {
 
     private SecureContentHandler handler;
 
-    protected void setUp() {
+    @Before
+    public void setUp() {
         stream = TikaInputStream.get(new NullInputStream(MANY_BYTES));
         handler = new SecureContentHandler(new DefaultHandler(), stream);
     }
 
+    @Test
     public void testZeroCharactersPerByte() throws IOException {
         try {
             char[] ch = new char[] { 'x' };
@@ -55,6 +58,7 @@ public class SecureContentHandlerTest extends TestCase {
         }
     }
 
+    @Test
     public void testOneCharacterPerByte() throws IOException {
         try {
             char[] ch = new char[1];
@@ -67,6 +71,7 @@ public class SecureContentHandlerTest extends TestCase {
         }
     }
 
+    @Test
     public void testTenCharactersPerByte() throws IOException {
         try {
             char[] ch = new char[10];
@@ -79,6 +84,7 @@ public class SecureContentHandlerTest extends TestCase {
         }
     }
 
+    @Test
     public void testManyCharactersPerByte() throws IOException {
         try {
             char[] ch = new char[1000];
@@ -92,6 +98,7 @@ public class SecureContentHandlerTest extends TestCase {
         }
     }
 
+    @Test
     public void testSomeCharactersWithoutInput() throws IOException {
         try {
             char[] ch = new char[100];
@@ -103,6 +110,7 @@ public class SecureContentHandlerTest extends TestCase {
         }
     }
 
+    @Test
     public void testManyCharactersWithoutInput() throws IOException {
         try {
             char[] ch = new char[100];
@@ -115,6 +123,7 @@ public class SecureContentHandlerTest extends TestCase {
         }
     }
 
+    @Test
     public void testNestedElements() throws SAXException {
         for (int i = 1; i < handler.getMaximumDepth(); i++) {
             handler.startElement("", "x", "x", new AttributesImpl());
@@ -131,6 +140,7 @@ public class SecureContentHandlerTest extends TestCase {
         }
     }
 
+    @Test
     public void testNestedEntries() throws SAXException {
         AttributesImpl atts = new AttributesImpl();
         atts.addAttribute("", "class", "class", "CDATA", "package-entry");

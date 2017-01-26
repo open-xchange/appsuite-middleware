@@ -60,14 +60,14 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
  */
 public final class ResourceDeleteResponse extends AbstractAJAXResponse {
 
-	/**
-	 * Initializes a new {@link ResourceDeleteResponse}
-	 *
-	 * @param response
-	 *            The JSON response container
-	 */
-	ResourceDeleteResponse(final Response response) {
-		super(response);
-	}
+    /**
+     * Initializes a new {@link ResourceDeleteResponse}
+     *
+     * @param response
+     *            The JSON response container
+     */
+    ResourceDeleteResponse(final Response response) {
+        super(response);
+    }
 
 }

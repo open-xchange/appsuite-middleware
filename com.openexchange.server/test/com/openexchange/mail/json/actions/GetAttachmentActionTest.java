@@ -114,8 +114,8 @@ public class GetAttachmentActionTest {
      * parameters, something like 'image/jpeg; name=I_am_a_filename_for_an_image.jpg' was returned. That's wrong, we expect
      * only 'image/jpeg' here.
      */
-    @Test
-    public void testReturnedContentTypeAndModifiedParameters() throws Exception {
+     @Test
+     public void testReturnedContentTypeAndModifiedParameters() throws Exception {
         String folder = "default0/INBOX";
         String uid = "1";
         String attachmentId = "2";
@@ -154,8 +154,8 @@ public class GetAttachmentActionTest {
         assertEquals("Wrong content type", "image/jpeg", ((IFileHolder) object).getContentType());
     }
 
-    @Test
-    public void testProperlyDetectedInvalidHtmlContent() throws Exception {
+     @Test
+     public void testProperlyDetectedInvalidHtmlContent() throws Exception {
         String folder = "default0/INBOX";
         String uid = "1";
         String attachmentId = "2";
@@ -193,8 +193,8 @@ public class GetAttachmentActionTest {
         assertEquals("Wrong content type", "text/html", ((IFileHolder) object).getContentType());
     }
 
-    @Test
-    public void testProperlyDetectedNonHtmlBinary() throws Exception {
+     @Test
+     public void testProperlyDetectedNonHtmlBinary() throws Exception {
         String folder = "default0/INBOX";
         String uid = "1";
         String attachmentId = "2";

@@ -49,7 +49,10 @@
 
 package com.openexchange.realtime.json.payload.converter;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -59,9 +62,6 @@ import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
-import com.openexchange.realtime.json.payload.converter.RealtimeExceptionToJSONConverter;
-import com.openexchange.realtime.json.payload.converter.StackTraceElementToJSONConverter;
-import com.openexchange.realtime.json.payload.converter.ThrowableToJSONConverter;
 import com.openexchange.realtime.payload.converter.sim.SimpleConverterSim;
 
 /**
@@ -123,13 +123,13 @@ public class RealtimeExceptionToJSONConverterTest {
         throwable.setStackTrace(stackTrace);
     }
 
-    @Test
-    public void testGetInputFormat() {
+     @Test
+     public void testGetInputFormat() {
         assertEquals(RealtimeException.class.getSimpleName(), realtimeExceptionToJSONConverter.getInputFormat());
     }
 
-    @Test
-    public void testConvert() throws OXException, JSONException {
+     @Test
+     public void testConvert() throws OXException, JSONException {
         sessionInvalidException = RealtimeExceptionCodes.SESSION_INVALID.create(throwable, arg0, arg1, arg2);
         sessionInvalidException.setStackTrace(stackTrace);
         Object object = realtimeExceptionToJSONConverter.convert(sessionInvalidException, null, simpleConverter);
@@ -176,8 +176,8 @@ public class RealtimeExceptionToJSONConverterTest {
         assertEquals("org.eclipse.jdt.internal.junit.runner.RemoteTestRunner", lastCauseStackTraceElement.getString("className"));
     }
     
-    @Test
-    public void testNoArgsConvert() throws OXException, JSONException {
+     @Test
+     public void testNoArgsConvert() throws OXException, JSONException {
         sessionInvalidException = RealtimeExceptionCodes.SESSION_INVALID.create();
         sessionInvalidException.setStackTrace(stackTrace);
         Object object = realtimeExceptionToJSONConverter.convert(sessionInvalidException, null, simpleConverter);
@@ -210,8 +210,8 @@ public class RealtimeExceptionToJSONConverterTest {
         assertNull(realtimeExceptionJSON.opt("cause"));
     }
 
-    @Test
-    public void testGetOutputFormat() {
+     @Test
+     public void testGetOutputFormat() {
         assertEquals("json", realtimeExceptionToJSONConverter.getOutputFormat());
     }
 

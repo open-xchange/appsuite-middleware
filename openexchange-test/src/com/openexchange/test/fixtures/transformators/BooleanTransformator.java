@@ -46,16 +46,21 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.test.fixtures.transformators;
 
 import com.openexchange.exception.OXException;
+
 public class BooleanTransformator implements Transformator {
+
     @Override
     public Object transform(final String value) throws OXException {
-        if("TRUE".equalsIgnoreCase(value)) { return true; }
-        else if("FALSE".equalsIgnoreCase(value)) { return false; }
-        else {
-            throw OXException.general("Can not convert '"+value + "' into an boolean");
+        if ("TRUE".equalsIgnoreCase(value)) {
+            return true;
+        } else if ("FALSE".equalsIgnoreCase(value)) {
+            return false;
+        } else {
+            throw OXException.general("Can not convert '" + value + "' into an boolean");
         }
     }
 }

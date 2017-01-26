@@ -49,8 +49,6 @@
 
 package com.openexchange.sessiond.impl;
 
-import java.util.List;
-
 /**
  * SessionConfig
  *
@@ -96,12 +94,5 @@ public interface SessiondConfigInterface {
      * @return The obfuscation key
      */
     String getObfuscationKey();
-
-    /**
-     * Gets the names of such parameters that are supposed to be taken over from session to stored session representation.
-     *
-     * @return The parameter names
-     */
-    List<String> getRemoteParameterNames();
 
 }

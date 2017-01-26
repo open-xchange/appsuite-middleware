@@ -62,7 +62,6 @@ import com.openexchange.oauth.provider.authorizationserver.grant.DefaultGrantVie
 import com.openexchange.oauth.provider.authorizationserver.grant.GrantView;
 import com.openexchange.oauth.provider.resourceserver.scope.Scope;
 
-
 /**
  * {@link AllResponse}
  *
@@ -73,6 +72,7 @@ public class AllResponse extends AbstractAJAXResponse {
 
     /**
      * Initializes a new {@link AllResponse}.
+     * 
      * @param response
      */
     protected AllResponse(Response response) {

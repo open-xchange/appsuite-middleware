@@ -60,14 +60,14 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
  */
 public final class PasswordChangeUpdateResponse extends AbstractAJAXResponse {
 
-	/**
-	 * Initializes a new {@link PasswordChangeUpdateResponse}
-	 *
-	 * @param response
-	 *            The JSON response container
-	 */
-	PasswordChangeUpdateResponse(final Response response) {
-		super(response);
-	}
+    /**
+     * Initializes a new {@link PasswordChangeUpdateResponse}
+     *
+     * @param response
+     *            The JSON response container
+     */
+    PasswordChangeUpdateResponse(final Response response) {
+        super(response);
+    }
 
 }

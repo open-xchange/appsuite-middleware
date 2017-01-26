@@ -51,8 +51,12 @@ package com.openexchange.mail.config;
 
 import java.util.LinkedList;
 import java.util.List;
+import org.junit.Test;
 import com.openexchange.java.Strings;
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * {@link Bug38266Test}
@@ -60,8 +64,7 @@ import junit.framework.TestCase;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class Bug38266Test extends TestCase {
-
+public class Bug38266Test {
     /**
      * Initializes a new {@link Bug38266Test}.
      */
@@ -69,7 +72,8 @@ public class Bug38266Test extends TestCase {
         super();
     }
 
-    public void testForBug38266() {
+         @Test
+     public void testForBug38266() {
         List<IPRange> ranges = new LinkedList<IPRange>();
         for (String range : Strings.splitByComma("10.30.73.4,10.30.77.0/24,10.30.73.0/24")) {
             if (null == range) {

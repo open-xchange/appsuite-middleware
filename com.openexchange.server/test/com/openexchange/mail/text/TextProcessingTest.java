@@ -49,7 +49,11 @@
 
 package com.openexchange.mail.text;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 
 /**
@@ -57,8 +61,7 @@ import junit.framework.TestCase;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class TextProcessingTest extends TestCase {
-
+public final class TextProcessingTest {
     /**
      * Initializes a new {@link TextProcessingTest}.
      */
@@ -66,7 +69,8 @@ public final class TextProcessingTest extends TestCase {
         super();
     }
 
-    public void testForBug31157() {
+         @Test
+     public void testForBug31157() {
         // Keep trailing white-space
         final String s = "line1\n\n-- \nMy signature";
 

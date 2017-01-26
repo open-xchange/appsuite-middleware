@@ -49,7 +49,11 @@
 
 package com.openexchange.mail.mime;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 
 /**
@@ -57,8 +61,7 @@ import junit.framework.TestCase;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ContentDispositionTest extends TestCase {
-
+public class ContentDispositionTest {
     /**
      * Initializes a new {@link ContentDispositionTest}.
      */
@@ -66,7 +69,8 @@ public class ContentDispositionTest extends TestCase {
         super();
     }
 
-    public void testFileNameParameterFromBogusHeaders() {
+         @Test
+     public void testFileNameParameterFromBogusHeaders() {
         try {
             String hdr = "attachment; filename=Jana's application 4 cell phone.rtf";
             String fileName = new com.openexchange.mail.mime.ContentDisposition(hdr).getFilenameParameter();

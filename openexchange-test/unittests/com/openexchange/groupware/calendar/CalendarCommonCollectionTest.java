@@ -1,13 +1,16 @@
+
 package com.openexchange.groupware.calendar;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 
-import junit.framework.TestCase;
+public class CalendarCommonCollectionTest {
 
-public class CalendarCommonCollectionTest extends TestCase{
-
+    @Test
     public void testCheckParticipants() {
         Participant[] a, b, c, d;
 
@@ -15,10 +18,10 @@ public class CalendarCommonCollectionTest extends TestCase{
         Participant two = new UserParticipant(2);
         Participant three = new UserParticipant(3);
 
-        a = new Participant[]{one, two};
-        b = new Participant[]{two, one};
-        c = new Participant[]{one, three};
-        d = new Participant[]{one, two, three};
+        a = new Participant[] { one, two };
+        b = new Participant[] { two, one };
+        c = new Participant[] { one, three };
+        d = new Participant[] { one, two, three };
 
         CalendarCollection tools = new CalendarCollection();
         assertFalse(tools.checkParticipants(a, a));

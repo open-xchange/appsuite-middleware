@@ -49,37 +49,43 @@
 
 package com.openexchange.groupware.importexport;
 
-import junit.framework.TestCase;
-
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
 import com.openexchange.groupware.contact.helpers.ContactField;
 
-public class ContactFieldTester extends TestCase {
-	public void testNumbers(){
-		assertEquals(517, ContactField.ANNIVERSARY.getNumber());
-		assertEquals(ContactField.ANNIVERSARY, ContactField.getByValue(517));
-	}
+public class ContactFieldTester {
 
-	public void testAjax(){
-		final String value = "anniversary";
-		assertEquals(value, ContactField.ANNIVERSARY.getAjaxName());
-		assertEquals(ContactField.ANNIVERSARY, ContactField.getByAjaxName(value));
-	}
+    @Test
+    public void testNumbers() {
+        assertEquals(517, ContactField.ANNIVERSARY.getNumber());
+        assertEquals(ContactField.ANNIVERSARY, ContactField.getByValue(517));
+    }
 
-	public void testDatabase(){
-		final String value = "ANNIVERSARY";
-		assertEquals(value, ContactField.ANNIVERSARY.getFieldName());
-		assertEquals(ContactField.ANNIVERSARY, ContactField.getByDBFieldName(value));
-	}
+    @Test
+    public void testAjax() {
+        final String value = "anniversary";
+        assertEquals(value, ContactField.ANNIVERSARY.getAjaxName());
+        assertEquals(ContactField.ANNIVERSARY, ContactField.getByAjaxName(value));
+    }
 
-	public void testReadableName(){
-		final String value = "Anniversary";
-		assertEquals(value, ContactField.ANNIVERSARY.getReadableName());
-		assertEquals(ContactField.ANNIVERSARY, ContactField.getByDisplayName(value));
-	}
+    @Test
+    public void testDatabase() {
+        final String value = "ANNIVERSARY";
+        assertEquals(value, ContactField.ANNIVERSARY.getFieldName());
+        assertEquals(ContactField.ANNIVERSARY, ContactField.getByDBFieldName(value));
+    }
 
-	public void testFieldName(){
-		final String value = "timestampfield02";
-		assertEquals(value, ContactField.ANNIVERSARY.getDbName());
-		assertEquals(ContactField.ANNIVERSARY, ContactField.getByFieldName(value));
-	}
+    @Test
+    public void testReadableName() {
+        final String value = "Anniversary";
+        assertEquals(value, ContactField.ANNIVERSARY.getReadableName());
+        assertEquals(ContactField.ANNIVERSARY, ContactField.getByDisplayName(value));
+    }
+
+    @Test
+    public void testFieldName() {
+        final String value = "timestampfield02";
+        assertEquals(value, ContactField.ANNIVERSARY.getDbName());
+        assertEquals(ContactField.ANNIVERSARY, ContactField.getByFieldName(value));
+    }
 }

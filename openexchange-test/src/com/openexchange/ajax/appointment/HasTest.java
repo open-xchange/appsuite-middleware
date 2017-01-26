@@ -49,9 +49,12 @@
 
 package com.openexchange.ajax.appointment;
 
+import static org.junit.Assert.assertEquals;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.HasRequest;
@@ -69,18 +72,19 @@ public class HasTest extends AbstractAJAXSession {
 
     private TimeZone tz;
 
-    public HasTest(final String name) {
-        super(name);
+    public HasTest() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         folderId = client.getValues().getPrivateAppointmentFolder();
         tz = client.getValues().getTimeZone();
     }
 
+    @Test
     public void testHasAppointment() throws Exception {
         final Calendar c = Calendar.getInstance();
         c.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -116,6 +120,7 @@ public class HasTest extends AbstractAJAXSession {
         }
     }
 
+    @Test
     public void testHasAppointmentFullTime() throws Exception {
         final Calendar c = Calendar.getInstance();
         c.setTimeZone(TimeZone.getTimeZone("UTC"));

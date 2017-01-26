@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.mail;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -57,6 +59,9 @@ import java.io.InputStreamReader;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.mail.actions.DeleteRequest;
 import com.openexchange.ajax.mail.actions.GetRequest;
@@ -79,24 +84,28 @@ public class Bug32355Test extends AbstractMailTest {
 
     String[][] fmid;
 
-    public Bug32355Test(final String name) {
-        super(name);
+    public Bug32355Test() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         values = getClient().getValues();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        if (null != fmid) {
-            client.execute(new DeleteRequest(fmid, true).ignoreError());
+    @After
+    public void tearDown() throws Exception {
+        try {
+            if (null != fmid) {
+                getClient().execute(new DeleteRequest(fmid, true).ignoreError());
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
+    @Test
     public void testBug32355() throws OXException, IOException, JSONException {
         StringBuilder sb = new StringBuilder(8192);
         {
@@ -114,10 +123,10 @@ public class Bug32355Test extends AbstractMailTest {
 
         JSONArray json;
         {
-            InputStream inputStream = Streams.newByteArrayInputStream(TestMails.replaceAddresses(sb.toString(), client.getValues().getSendAddress()).getBytes(com.openexchange.java.Charsets.UTF_8));
+            InputStream inputStream = Streams.newByteArrayInputStream(TestMails.replaceAddresses(sb.toString(), getClient().getValues().getSendAddress()).getBytes(com.openexchange.java.Charsets.UTF_8));
             sb = null;
             final ImportMailRequest importMailRequest = new ImportMailRequest(values.getInboxFolder(), MailFlag.SEEN.getValue(), inputStream);
-            final ImportMailResponse importResp = client.execute(importMailRequest);
+            final ImportMailResponse importResp = getClient().execute(importMailRequest);
             json = (JSONArray) importResp.getData();
             fmid = importResp.getIds();
         }
@@ -140,10 +149,10 @@ public class Bug32355Test extends AbstractMailTest {
         String folderID = json.getJSONObject(0).getString("folder_id");
 
         // Delete the mail in this session
-        client.execute(new DeleteRequest(fmid, true));
+        getClient().execute(new DeleteRequest(fmid, true));
 
         // Touch via hover
-        final GetResponse response = client.execute(new GetRequest(folderID, mailID, View.TEXT).setUnseen(true).setFailOnError(false));
+        final GetResponse response = getClient().execute(new GetRequest(folderID, mailID, View.TEXT).setUnseen(true).setFailOnError(false));
 
         assertTrue("Expected error MSG-0032 for absent message, but wasn't.", response.hasError() && 32 == response.getException().getCode() && "MSG".equals(response.getException().getPrefix()));
 

@@ -141,8 +141,8 @@ public class HtmlServiceImplTest {
         htmlServiceImpl = new HtmlServiceImpl(new HashMap<Character, String>(), new HashMap<String, Character>());
     }
 
-    @Test
-    public void testSupportForDataScheme() {
+     @Test
+     public void testSupportForDataScheme() {
         String html = "Sincerely Peter Pan\n" +
             "\n" +
             "<a href=\"domain.invalid\"><img alt=\"alternative\" src=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAABQC\"></a>";
@@ -164,89 +164,89 @@ public class HtmlServiceImplTest {
         Assert.assertTrue(content.indexOf("data:image/png;") > 0);
     }
 
-    @Test
-    public void testSanitize_contentEmtpy_returnEmptyContent() {
+     @Test
+     public void testSanitize_contentEmtpy_returnEmptyContent() {
         HtmlSanitizeResult sanitize = htmlServiceImpl.sanitize("", null, false, new boolean[0], cssPrefix, 100);
         Assert.assertEquals("", sanitize.getContent());
     }
 
-    @Test
-    public void testSanitize_htmlContentWithSetMaxContentSize_returnSanitizedContent() {
+     @Test
+     public void testSanitize_htmlContentWithSetMaxContentSize_returnSanitizedContent() {
         HtmlSanitizeResult sanitize = htmlServiceImpl.sanitize(htmlContent, null, false, new boolean[0], cssPrefix, 100);
         Assert.assertTrue(!sanitize.getContent().contains("<br />"));
     }
 
-    @Test
-    public void testSanitize_htmlContentWithSetMaxContentSize_notTruncatedDueToSmallerContent() {
+     @Test
+     public void testSanitize_htmlContentWithSetMaxContentSize_notTruncatedDueToSmallerContent() {
         HtmlSanitizeResult sanitize = htmlServiceImpl.sanitize(htmlContent, null, false, new boolean[0], cssPrefix, 11111);
         Assert.assertFalse(sanitize.isTruncated());
     }
 
-    @Test
-    public void testSanitize_htmlContentWithSetMaxContentSize_truncatedDueToBigContent() {
+     @Test
+     public void testSanitize_htmlContentWithSetMaxContentSize_truncatedDueToBigContent() {
         HtmlSanitizeResult sanitize = htmlServiceImpl.sanitize(bigHtmlContent, null, false, new boolean[0], cssPrefix, 11111);
         Assert.assertTrue(sanitize.isTruncated());
     }
 
-    @Test
-    public void testSanitize_htmlContentWithNoMaxContentSize_notTruncated() {
+     @Test
+     public void testSanitize_htmlContentWithNoMaxContentSize_notTruncated() {
         HtmlSanitizeResult sanitize = htmlServiceImpl.sanitize(bigHtmlContent, null, false, new boolean[0], cssPrefix, -1);
         Assert.assertFalse(sanitize.isTruncated());
     }
 
-    @Test
-    public void testHtmlFormat_noMaxContentSize_notTruncated() {
+     @Test
+     public void testHtmlFormat_noMaxContentSize_notTruncated() {
         HtmlSanitizeResult htmlFormat = htmlServiceImpl.htmlFormat(bigPlainText, false, "", -1);
         Assert.assertFalse(htmlFormat.isTruncated());
     }
 
-    @Test
-    public void testHtmlFormat_maxContentSizeToSmall_isTruncated() {
+     @Test
+     public void testHtmlFormat_maxContentSizeToSmall_isTruncated() {
         HtmlSanitizeResult htmlFormat = htmlServiceImpl.htmlFormat(bigPlainText, false, "", 444);
         Assert.assertTrue(htmlFormat.isTruncated());
     }
 
-    @Test
-    public void testHtmlFormat_maxContentSizeToSmall_truncateAt10000() {
+     @Test
+     public void testHtmlFormat_maxContentSizeToSmall_truncateAt10000() {
         HtmlSanitizeResult htmlFormat = htmlServiceImpl.htmlFormat(bigPlainText, false, "", 444);
         Assert.assertTrue(htmlFormat.getContent().length() < 10300);
         Assert.assertTrue(htmlFormat.getContent().length() > 10000);
     }
 
-    @Test
-    public void testHtmlFormat_maxContentSizeSet_isTruncated() {
+     @Test
+     public void testHtmlFormat_maxContentSizeSet_isTruncated() {
         HtmlSanitizeResult htmlFormat = htmlServiceImpl.htmlFormat(bigPlainText, false, "", 11111);
         Assert.assertTrue(htmlFormat.isTruncated());
     }
 
-    @Test
-    public void testHtmlFormat_maxContentSizeSet_truncateAtGivenValue() {
+     @Test
+     public void testHtmlFormat_maxContentSizeSet_truncateAtGivenValue() {
         HtmlSanitizeResult htmlFormat = htmlServiceImpl.htmlFormat(bigPlainText, false, "", 11111);
         Assert.assertTrue(htmlFormat.getContent().length() < 11300);
         Assert.assertTrue(htmlFormat.getContent().length() > 11000);
     }
 
-    @Test
-    public void testHtmlFormat_maxContentSizeToSmall_isNotTruncated() {
+     @Test
+     public void testHtmlFormat_maxContentSizeToSmall_isNotTruncated() {
         HtmlSanitizeResult htmlFormat = htmlServiceImpl.htmlFormat(plainText, false, "", 4444);
         Assert.assertFalse(htmlFormat.isTruncated());
     }
 
-    @Test
-    public void testHtmlFormat_maxContentSizeSet_isNotTruncated() {
+     @Test
+     public void testHtmlFormat_maxContentSizeSet_isNotTruncated() {
         HtmlSanitizeResult htmlFormat = htmlServiceImpl.htmlFormat(plainText, false, "", 11111);
         Assert.assertFalse(htmlFormat.isTruncated());
     }
 
-    @Test
-    public void testDropSuperfluousDivTags() {
+     @Test
+     public void testDropSuperfluousDivTags() {
         String html = "<div id=\"ox-7bf62dbb34\"><p>Some text</p></div>";
         String test = htmlServiceImpl.getConformHTML(html, "UTF-8");
         Assert.assertTrue(test.indexOf("<div") < 0);
     }
 
-    @Test
-    public void testBug40943() {
+     @Test
+     public void testBug40943() {
         String html = "<!DOCTYPE html>\n" +
             "<html>\n" +
             "<head>\n" +
@@ -269,8 +269,8 @@ public class HtmlServiceImplTest {
         Assert.assertTrue(test.indexOf("<!DOCTYPE html>") >= 0);
     }
     
-    @Test
-    public void testBug46608() {
+     @Test
+     public void testBug46608() {
         HtmlSanitizeResult test = htmlServiceImpl.sanitize(htmlDownlevelRevealed, null, false, null, "ox-36f8df7e2a", 102400);
         Assert.assertTrue(test.getContent().contains("<!-- [if !IE]> --><p>You should see this</p><!-- <![endif] --><!-- [if IE 6]><p>Not this</p><![endif] -->"));
     }

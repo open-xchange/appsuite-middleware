@@ -49,6 +49,10 @@
 
 package com.openexchange.ajax.folder.api2;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.PathRequest;
 import com.openexchange.ajax.folder.actions.PathResponse;
@@ -68,29 +72,21 @@ import com.openexchange.mailaccount.MailAccount;
  */
 public class Bug16284Test extends AbstractAJAXSession {
 
-    private static final int[] COLUMNS = {
-        FolderObject.OBJECT_ID, FolderObject.FOLDER_ID, FolderObject.CREATED_BY, FolderObject.MODIFIED_BY, FolderObject.FOLDER_NAME,
-        FolderObject.MODULE, FolderObject.TYPE, FolderObject.SUBFOLDERS, FolderObject.OWN_RIGHTS, FolderObject.PERMISSIONS_BITS,
-        FolderObject.SUMMARY, FolderObject.STANDARD_FOLDER, FolderObject.TOTAL, FolderObject.NEW, FolderObject.UNREAD,
-        FolderObject.DELETED, FolderObject.CAPABILITIES, FolderObject.SUBSCRIBED, FolderObject.SUBSCR_SUBFLDS, 316 };
+    private static final int[] COLUMNS = { FolderObject.OBJECT_ID, FolderObject.FOLDER_ID, FolderObject.CREATED_BY, FolderObject.MODIFIED_BY, FolderObject.FOLDER_NAME, FolderObject.MODULE, FolderObject.TYPE, FolderObject.SUBFOLDERS, FolderObject.OWN_RIGHTS, FolderObject.PERMISSIONS_BITS, FolderObject.SUMMARY, FolderObject.STANDARD_FOLDER, FolderObject.TOTAL, FolderObject.NEW, FolderObject.UNREAD, FolderObject.DELETED, FolderObject.CAPABILITIES, FolderObject.SUBSCRIBED, FolderObject.SUBSCR_SUBFLDS, 316 };
 
     private AJAXClient client;
 
-    public Bug16284Test(final String name) {
-        super(name);
+    public Bug16284Test() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
-
+    @Test
     public void testListWithoutInfoStore() throws Throwable {
         final PathRequest request = new PathRequest(EnumAPI.OUTLOOK, MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, MailFolder.DEFAULT_FOLDER_ID), COLUMNS, false);
         final PathResponse response = client.execute(request);

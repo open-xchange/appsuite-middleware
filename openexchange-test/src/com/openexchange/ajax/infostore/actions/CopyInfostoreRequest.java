@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.infostore.actions;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -73,17 +74,23 @@ public class CopyInfostoreRequest extends AbstractInfostoreRequest<CopyInfostore
     private String folderId;
     private com.openexchange.file.storage.File metadata;
     private String version;
+    private java.io.File upload;
 
     public CopyInfostoreRequest(String id, String folderId, File file) {
         this(id, folderId, file, null);
     }
-    
-    public CopyInfostoreRequest(String id, String folderId, File file, String version) {
+
+    public CopyInfostoreRequest(String id, String folderId, File file, String version, java.io.File upload) {
         super();
         this.id = id;
         this.folderId = folderId;
         this.metadata = file;
         this.version = version;
+        this.upload = upload;
+    }
+
+    public CopyInfostoreRequest(String id, String folderId, File file, String version) {
+        this(id, folderId, file, version, null);
     }
 
     @Override
@@ -100,6 +107,10 @@ public class CopyInfostoreRequest extends AbstractInfostoreRequest<CopyInfostore
         tmp.add(new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, new Date()));
         if (version != null) {
             tmp.add(new Parameter(AJAXServlet.PARAMETER_VERSION, this.version));
+        }
+        if (null != upload) {
+            tmp.add(new FieldParameter("json", getBody()));
+            tmp.add(new FileParameter("file", metadata.getFileName(), new FileInputStream(upload), metadata.getFileMIMEType()));
         }
         return tmp.toArray(new Parameter[tmp.size()]);
     }

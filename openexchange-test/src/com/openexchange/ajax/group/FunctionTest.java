@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.group;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -56,6 +59,9 @@ import java.util.Random;
 import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.group.actions.AbstractGroupResponse;
@@ -89,68 +95,70 @@ public final class FunctionTest extends AbstractAJAXSession {
     /**
      * @param name
      */
-    public FunctionTest(final String name) {
-        super(name);
+    public FunctionTest() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         groupsToDelete = new HashSet<Integer>();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        for(int id: groupsToDelete) {
-            getClient().execute(new DeleteRequest(id, new Date(Long.MAX_VALUE), false));
+    @After
+    public void tearDown() throws Exception {
+        try {
+            for (int id : groupsToDelete) {
+                getClient().execute(new DeleteRequest(id, new Date(Long.MAX_VALUE), false));
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
+    @Test
     public void testSearch() throws Throwable {
         SearchResponse response = getClient().execute(new SearchRequest("*"));
         final Group[] groups = response.getGroups();
         LOG.trace("Found " + groups.length + " groups.");
-        assertTrue("Size of group array should be more than 0.",
-            groups.length > 0);
+        assertTrue("Size of group array should be more than 0.", groups.length > 0);
 
         JSONArray arr = (JSONArray) response.getResponse().getData();
         assertContainsLastModifiedUTC(arr);
     }
 
+    @Test
     public void testRealSearch() throws Throwable {
         final Group[] groups = getClient().execute(new SearchRequest("*l*")).getGroups();
         LOG.trace("Found " + groups.length + " groups.");
         assertNotNull(groups);
     }
 
+    @Test
     public void testList() throws Throwable {
         Group[] groups = getClient().execute(new SearchRequest("*")).getGroups();
         LOG.trace("Found " + groups.length + " groups.");
-        assertTrue("Size of group array should be more than 0.",
-            groups.length > 0);
+        assertTrue("Size of group array should be more than 0.", groups.length > 0);
         final int[] groupIds = new int[groups.length];
         for (int i = 0; i < groupIds.length; i++) {
             groupIds[i] = groups[i].getIdentifier();
         }
         AbstractGroupResponse listResponse = getClient().execute(new ListRequest(groupIds));
-        groups = listResponse
-            .getGroups();
+        groups = listResponse.getGroups();
         LOG.trace("Listed " + groups.length + " groups.");
-        assertTrue("Size of group array should be more than 0.",
-            groups.length > 0);
-        assertEquals("Size of requested groups and listed groups should be equal.",
-            groupIds.length, groups.length);
+        assertTrue("Size of group array should be more than 0.", groups.length > 0);
+        assertEquals("Size of requested groups and listed groups should be equal.", groupIds.length, groups.length);
 
         JSONArray arr = (JSONArray) listResponse.getResponse().getData();
         assertContainsLastModifiedUTC(arr);
     }
 
+    @Test
     public void testAllWithMembers() throws Throwable {
-    	int groupLengthBySearch = getClient().execute(new SearchRequest("*")).getGroups().length;
+        int groupLengthBySearch = getClient().execute(new SearchRequest("*")).getGroups().length;
 
         AllRequest allRequest = new AllRequest(Group.ALL_COLUMNS, true);
-		AllResponse allResponse = getClient().execute(allRequest);
+        AllResponse allResponse = getClient().execute(allRequest);
         JSONArray data = (JSONArray) allResponse.getData();
 
         int groupLengthByAll = data.length();
@@ -159,17 +167,17 @@ public final class FunctionTest extends AbstractAJAXSession {
 
         int memberPos = 4;
         int memberCount = 0;
-		for(int i = 0; i < data.length(); i++){
-			JSONArray row = data.getJSONArray(i);
-			String[] members = row.getString(memberPos).split(",");
-			memberCount += members.length;
+        for (int i = 0; i < data.length(); i++) {
+            JSONArray row = data.getJSONArray(i);
+            String[] members = row.getString(memberPos).split(",");
+            memberCount += members.length;
         }
         assertTrue(memberCount > 0);
     }
 
-
+    @Test
     public void testAllWithoutMembers() throws Throwable {
-    	int groupLengthBySearch = getClient().execute(new SearchRequest("*")).getGroups().length;
+        int groupLengthBySearch = getClient().execute(new SearchRequest("*")).getGroups().length;
 
         AllResponse allResponse = getClient().execute(new AllRequest(Group.ALL_COLUMNS_EXCEPT_MEMBERS, true));
         JSONArray data = (JSONArray) allResponse.getData();
@@ -179,12 +187,13 @@ public final class FunctionTest extends AbstractAJAXSession {
         assertEquals(groupLengthBySearch, groupLengthByAll);
 
         int arrLen = Group.ALL_COLUMNS_EXCEPT_MEMBERS.length;
-		for(int i = 0; i < data.length(); i++){
-			JSONArray row = data.getJSONArray(i);
-			assertEquals(arrLen, row.length());
+        for (int i = 0; i < data.length(); i++) {
+            JSONArray row = data.getJSONArray(i);
+            assertEquals(arrLen, row.length());
         }
     }
 
+    @Test
     public void testUpdatesViaComparingWithSearch() throws Exception {
         Group[] groupsViaSearch = getClient().execute(new SearchRequest("*")).getGroups();
         UpdatesResponse response = getClient().execute(new UpdatesRequest(new Date(0), false));
@@ -192,13 +201,14 @@ public final class FunctionTest extends AbstractAJAXSession {
         assertEquals("Should find the same amount of groups via *-search as via updates since day 0", groupsViaSearch.length, groupsViaUpdates.size());
     }
 
+    @Test
     public void testUpdatesViaCreateAndDelete() throws Exception {
         int staticGroupCount = 2; // "all users" & "guests" are always included in new/modified responses
         Group group = new Group();
-        group.setSimpleName("simplename_"+new Date().getTime());
-        group.setDisplayName("Group Updates Test"+new Date());
+        group.setSimpleName("simplename_" + new Date().getTime());
+        group.setDisplayName("Group Updates Test" + new Date());
 
-        CreateResponse createResponse = getClient().execute(new CreateRequest(group,true));
+        CreateResponse createResponse = getClient().execute(new CreateRequest(group, true));
         int id = createResponse.getId();
         group.setIdentifier(id);
         groupsToDelete.add(id);
@@ -214,7 +224,7 @@ public final class FunctionTest extends AbstractAJAXSession {
         assertEquals("Amount of new elements should equal modfied elements, since we cannot distinguish between the two", numberNewAfterCreation, numberModifiedAfterCreation);
 
         DeleteResponse deleteResponse = getClient().execute(new DeleteRequest(group, true));
-        if(deleteResponse.hasError()) {
+        if (deleteResponse.hasError()) {
             groupsToDelete.remove(id);
         }
 
@@ -227,22 +237,20 @@ public final class FunctionTest extends AbstractAJAXSession {
         assertEquals("Amount of new elements should equal modfied elements, since we cannot distinguish between the two", numberNewAfterDeletion, numberModifiedAfterDeletion);
     }
 
-
     public void assertContainsLastModifiedUTC(JSONArray arr) {
-        for(int i = 0, size = arr.length(); i < size; i++) {
+        for (int i = 0, size = arr.length(); i < size; i++) {
             JSONObject entry = arr.optJSONObject(i);
             assertNotNull(entry);
             assertTrue(entry.has("last_modified_utc"));
         }
     }
 
+    @Test
     public void testGet() throws Throwable {
         final Group groups[] = getClient().execute(new SearchRequest("*")).getGroups();
         LOG.trace("Found " + groups.length + " groups.");
-        assertTrue("Size of group array should be more than 0.",
-            groups.length > 0);
-        final int pos = new Random(System.currentTimeMillis()).nextInt(groups
-            .length);
+        assertTrue("Size of group array should be more than 0.", groups.length > 0);
+        final int pos = new Random(System.currentTimeMillis()).nextInt(groups.length);
         GetResponse response = getClient().execute(new GetRequest(groups[pos].getIdentifier()));
         final Group group = response.getGroup();
         LOG.trace("Loaded group: " + group.toString());
@@ -250,6 +258,7 @@ public final class FunctionTest extends AbstractAJAXSession {
         assertTrue(entry.has("last_modified_utc"));
     }
 
+    @Test
     public void testCreateChangeDelete() throws Throwable {
         // Disabled due to missing permissions for the user.
         if (true) {
@@ -272,8 +281,7 @@ public final class FunctionTest extends AbstractAJAXSession {
             LOG.trace("Changed group with identifier: " + group.getIdentifier());
         } finally {
             if (-1 != group.getIdentifier()) {
-                client1.execute(new DeleteRequest(
-                    group.getIdentifier(), group.getLastModified()));
+                client1.execute(new DeleteRequest(group.getIdentifier(), group.getLastModified()));
             }
         }
     }

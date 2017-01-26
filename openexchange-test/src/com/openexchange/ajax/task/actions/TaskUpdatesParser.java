@@ -95,7 +95,7 @@ public class TaskUpdatesParser extends CommonUpdatesParser<TaskUpdatesResponse> 
         List<Task> tasks = new ArrayList<Task>();
         for (int i = 0, size = rows.length(); i < size; i++) {
             Object arrayOrId = rows.get(i);
-            if(!JSONArray.class.isInstance(arrayOrId)) {
+            if (!JSONArray.class.isInstance(arrayOrId)) {
                 continue;
             }
             JSONArray row = (JSONArray) arrayOrId;
@@ -125,13 +125,13 @@ public class TaskUpdatesParser extends CommonUpdatesParser<TaskUpdatesResponse> 
 
     private Object transform(Object actual, int column) throws JSONException {
         switch (column) {
-        case Task.START_DATE:
-        case Task.END_DATE:
-        case Task.CREATION_DATE:
-        case Task.LAST_MODIFIED:
-            return new Date(l((Long) actual));
-        case Task.PARTICIPANTS:
-            return buildParticipantArray((JSONArray) actual);
+            case Task.START_DATE:
+            case Task.END_DATE:
+            case Task.CREATION_DATE:
+            case Task.LAST_MODIFIED:
+                return new Date(l((Long) actual));
+            case Task.PARTICIPANTS:
+                return buildParticipantArray((JSONArray) actual);
         }
         return actual;
     }
@@ -142,19 +142,19 @@ public class TaskUpdatesParser extends CommonUpdatesParser<TaskUpdatesResponse> 
             JSONObject jsonParticipant = actual.getJSONObject(i);
             int type = jsonParticipant.getInt("type");
             switch (type) {
-            case Participant.USER:
-                UserParticipant userParticipant = new UserParticipant(jsonParticipant.getInt("id"));
-                userParticipant.setConfirm(jsonParticipant.getInt("confirmation"));
-                participants.add(userParticipant);
-                break;
-            case Participant.GROUP:
-                GroupParticipant groupParticipant = new GroupParticipant(jsonParticipant.getInt("id"));
-                participants.add(groupParticipant);
-                break;
-            case Participant.EXTERNAL_USER:
-                ExternalUserParticipant externalUserParticipant = new ExternalUserParticipant(jsonParticipant.optString("mail"));
-                participants.add(externalUserParticipant);
-                break;
+                case Participant.USER:
+                    UserParticipant userParticipant = new UserParticipant(jsonParticipant.getInt("id"));
+                    userParticipant.setConfirm(jsonParticipant.getInt("confirmation"));
+                    participants.add(userParticipant);
+                    break;
+                case Participant.GROUP:
+                    GroupParticipant groupParticipant = new GroupParticipant(jsonParticipant.getInt("id"));
+                    participants.add(groupParticipant);
+                    break;
+                case Participant.EXTERNAL_USER:
+                    ExternalUserParticipant externalUserParticipant = new ExternalUserParticipant(jsonParticipant.optString("mail"));
+                    participants.add(externalUserParticipant);
+                    break;
             }
         }
         return participants.toArray(new Participant[participants.size()]);

@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.calendar.tools;
 
-import com.openexchange.exception.OXException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -63,10 +62,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
-
 import com.openexchange.api2.AppointmentSQLInterface;
-import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.calendar.CalendarSql;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
@@ -76,8 +75,8 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
-import com.openexchange.setuptools.TestFolderToolkit;
 import com.openexchange.setuptools.TestContextToolkit;
+import com.openexchange.setuptools.TestFolderToolkit;
 import com.openexchange.tools.iterator.SearchIterator;
 
 /**
@@ -88,23 +87,23 @@ public class CommonAppointments {
     private CalendarSql calendar = null;
     private int privateFolder;
     private final Context ctx;
-    private final long FUTURE = System.currentTimeMillis()+24*3600000;
+    private final long FUTURE = System.currentTimeMillis() + 24 * 3600000;
     private Session session;
 
     public CommonAppointments(final Context ctx, final String user) {
         this.ctx = ctx;
-        switchUser( user );
+        switchUser(user);
     }
 
-	/**
-	 *
-	 * Returns the folder ID of user's private calendar folder
-	 *
-	 * @return The folder ID of user's private calendar folder
-	 */
-	public int getPrivateFolder() {
-		return privateFolder;
-	}
+    /**
+     *
+     * Returns the folder ID of user's private calendar folder
+     *
+     * @return The folder ID of user's private calendar folder
+     */
+    public int getPrivateFolder() {
+        return privateFolder;
+    }
 
     public CalendarDataObject buildRecurringAppointment() {
         final CalendarDataObject cdao = new CalendarDataObject();
@@ -165,25 +164,25 @@ public class CommonAppointments {
     }
 
     public void removeAll(final String user, final List<CalendarDataObject> clean) throws SQLException, OXException {
-        switchUser( user );
-        for(final CalendarDataObject cdao : clean) {
+        switchUser(user);
+        for (final CalendarDataObject cdao : clean) {
             try {
-                calendar.deleteAppointmentObject(cdao,cdao.getParentFolderID(),new Date(Long.MAX_VALUE));
+                calendar.deleteAppointmentObject(cdao, cdao.getParentFolderID(), new Date(Long.MAX_VALUE));
             } catch (final Throwable t) {
                 t.printStackTrace(); // Drastic but apparently neccessary...
             }
         }
     }
 
-    public CalendarDataObject buildAppointmentWithUserParticipants(final String...usernames) {
+    public CalendarDataObject buildAppointmentWithUserParticipants(final String... usernames) {
         return buildAppointmentWithParticipants(usernames, new String[0], new String[0]);
     }
 
-    public CalendarDataObject buildAppointmentWithResourceParticipants(final String...resources) {
+    public CalendarDataObject buildAppointmentWithResourceParticipants(final String... resources) {
         return buildAppointmentWithParticipants(new String[0], resources, new String[0]);
     }
 
-    public CalendarDataObject buildAppointmentWithGroupParticipants(final String...groups) {
+    public CalendarDataObject buildAppointmentWithGroupParticipants(final String... groups) {
         return buildAppointmentWithParticipants(new String[0], new String[0], groups);
     }
 
@@ -193,8 +192,8 @@ public class CommonAppointments {
         cdao.setParentFolderID(privateFolder);
         cdao.setIgnoreConflicts(true);
 
-        final long FIVE_DAYS = 5L*24L*3600000L;
-        final long THREE_HOURS = 3L*3600000L;
+        final long FIVE_DAYS = 5L * 24L * 3600000L;
+        final long THREE_HOURS = 3L * 3600000L;
 
         cdao.setStartDate(new Date(FUTURE + FIVE_DAYS));
         cdao.setEndDate(new Date(FUTURE + FIVE_DAYS + THREE_HOURS));
@@ -202,11 +201,11 @@ public class CommonAppointments {
 
         final TestContextToolkit tools = new TestContextToolkit();
 
-        final List<Participant> participants = new ArrayList<Participant>(users.length+resources.length+groups.length);
+        final List<Participant> participants = new ArrayList<Participant>(users.length + resources.length + groups.length);
         final List<UserParticipant> userParticipants = tools.users(ctx, users);
         participants.addAll(userParticipants);
-        participants.addAll( tools.resources(ctx, resources) );
-        participants.addAll( tools.groups(ctx, groups) );
+        participants.addAll(tools.resources(ctx, resources));
+        participants.addAll(tools.groups(ctx, groups));
 
         cdao.setParticipants(participants);
         cdao.setUsers(userParticipants);
@@ -217,7 +216,7 @@ public class CommonAppointments {
 
     public void switchUser(final String user) {
         final TestContextToolkit tools = new TestContextToolkit();
-        final int userId = tools.resolveUser(user,ctx);
+        final int userId = tools.resolveUser(user, ctx);
         privateFolder = new TestFolderToolkit().getStandardFolder(userId, ctx);
         session = tools.getSessionForUser(user, ctx);
         calendar = new CalendarSql(session);
@@ -225,12 +224,12 @@ public class CommonAppointments {
 
     public CalendarDataObject[] move(final CalendarDataObject cdao, int sourceFolderId) throws OXException {
         CalendarDataObject[] conflicts = null;
-        if(cdao.containsObjectID()) {
+        if (cdao.containsObjectID()) {
             conflicts = calendar.updateAppointmentObject(cdao, sourceFolderId, new Date(Long.MAX_VALUE));
         } else {
             conflicts = calendar.insertAppointmentObject(cdao);
         }
-        if(conflicts == null) {
+        if (conflicts == null) {
             return null;
         }
         for (final CalendarDataObject conflict : conflicts) {
@@ -241,12 +240,12 @@ public class CommonAppointments {
 
     public CalendarDataObject[] save(final CalendarDataObject cdao) throws OXException {
         CalendarDataObject[] conflicts = null;
-        if(cdao.containsObjectID()) {
+        if (cdao.containsObjectID()) {
             conflicts = calendar.updateAppointmentObject(cdao, cdao.getParentFolderID(), new Date(Long.MAX_VALUE));
         } else {
             conflicts = calendar.insertAppointmentObject(cdao);
         }
-        if(conflicts == null) {
+        if (conflicts == null) {
             return null;
         }
         for (final CalendarDataObject conflict : conflicts) {
@@ -273,14 +272,14 @@ public class CommonAppointments {
         try {
             writeCon = DBPool.pickupWriteable(ctx);
             stmt = writeCon.createStatement();
-            for(final String tablename : new String[]{"dateExternal", "prg_dates", "prg_dates_members", "prg_date_rights"}) {
-                stmt.executeUpdate("DELETE FROM "+tablename+" WHERE cid = "+ctx.getContextId());
+            for (final String tablename : new String[] { "dateExternal", "prg_dates", "prg_dates_members", "prg_date_rights" }) {
+                stmt.executeUpdate("DELETE FROM " + tablename + " WHERE cid = " + ctx.getContextId());
             }
         } finally {
-            if(stmt != null) {
+            if (stmt != null) {
                 stmt.close();
             }
-            if(writeCon != null) {
+            if (writeCon != null) {
                 DBPool.closeWriterSilent(ctx, writeCon);
             }
         }
@@ -288,14 +287,14 @@ public class CommonAppointments {
     }
 
     public List<Appointment> getPrivateAppointments() throws OXException {
-       return getAppointmentsInFolder(privateFolder);
+        return getAppointmentsInFolder(privateFolder);
 
     }
 
     public List<Appointment> getAppointmentsInFolder(final int folderId) throws OXException {
-        return getAppointmentsInFolder(folderId, new int[]{CalendarDataObject.OBJECT_ID});
+        return getAppointmentsInFolder(folderId, new int[] { CalendarDataObject.OBJECT_ID });
     }
-    
+
     public CalendarDataObject getObjectById(int objectId, int folderId) throws OXException, SQLException {
         return calendar.getObjectById(objectId, folderId);
     }
@@ -304,7 +303,7 @@ public class CommonAppointments {
         final List<Appointment> cdao = new ArrayList<Appointment>();
         try {
             final SearchIterator<Appointment> iterator = calendar.getAppointmentsBetweenInFolder(folderId, columns, new Date(0), new Date(Long.MAX_VALUE), CalendarDataObject.OBJECT_ID, Order.ASCENDING);
-            while(iterator.hasNext()) {
+            while (iterator.hasNext()) {
                 cdao.add(iterator.next());
             }
             return cdao;
@@ -320,8 +319,8 @@ public class CommonAppointments {
         final List<Appointment> cdao = new ArrayList<Appointment>();
         try {
 
-            final SearchIterator<Appointment> iterator = calendar.getModifiedAppointmentsInFolder(folderId, new Date(0), new Date(Long.MAX_VALUE),new int[]{CalendarDataObject.OBJECT_ID}, new Date(since));
-            while(iterator.hasNext()) {
+            final SearchIterator<Appointment> iterator = calendar.getModifiedAppointmentsInFolder(folderId, new Date(0), new Date(Long.MAX_VALUE), new int[] { CalendarDataObject.OBJECT_ID }, new Date(since));
+            while (iterator.hasNext()) {
                 cdao.add(iterator.next());
             }
             return cdao;
@@ -338,8 +337,8 @@ public class CommonAppointments {
         final List<Appointment> cdao = new ArrayList<Appointment>();
         try {
 
-            final SearchIterator<Appointment> iterator = calendar.getDeletedAppointmentsInFolder(folderId, new int[]{CalendarDataObject.OBJECT_ID}, new Date(since));
-            while(iterator.hasNext()) {
+            final SearchIterator<Appointment> iterator = calendar.getDeletedAppointmentsInFolder(folderId, new int[] { CalendarDataObject.OBJECT_ID }, new Date(since));
+            while (iterator.hasNext()) {
                 cdao.add(iterator.next());
             }
             return cdao;

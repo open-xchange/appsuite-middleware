@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.groupware.infostore.database;
 
 import com.openexchange.groupware.infostore.DocumentMetadata;
@@ -55,8 +56,9 @@ import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class DocumentMetadataImplTest extends DocumentMetadataTest {
+
     @Override
-	public DocumentMetadata getImplementation() {
+    public DocumentMetadata getImplementation() {
         return new DocumentMetadataImpl();
     }
 }

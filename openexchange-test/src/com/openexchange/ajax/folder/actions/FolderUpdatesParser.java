@@ -64,10 +64,7 @@ public class FolderUpdatesParser extends CommonUpdatesParser<FolderUpdatesRespon
     public boolean getsIgnored(final int column) {
         return column == DataObject.LAST_MODIFIED_UTC || column == FolderObject.OWN_RIGHTS // generated based on user
             || column == FolderObject.SUMMARY // Thorben said that one's mail-specific
-            || column == FolderObject.STANDARD_FOLDER || column == FolderObject.TOTAL || column == FolderObject.NEW
-            || column == FolderObject.UNREAD || column == FolderObject.DELETED || column == FolderObject.CAPABILITIES
-            || column == FolderObject.SUBSCRIBED || column == FolderObject.SUBSCR_SUBFLDS
-            || column > 1000;// big numbers are used by addons that might not be installed for core tests.
+            || column == FolderObject.STANDARD_FOLDER || column == FolderObject.TOTAL || column == FolderObject.NEW || column == FolderObject.UNREAD || column == FolderObject.DELETED || column == FolderObject.CAPABILITIES || column == FolderObject.SUBSCRIBED || column == FolderObject.SUBSCR_SUBFLDS || column > 1000;// big numbers are used by addons that might not be installed for core tests.
     }
 
     @Override
@@ -77,28 +74,28 @@ public class FolderUpdatesParser extends CommonUpdatesParser<FolderUpdatesRespon
 
     public Object transform(final Object actual, final int column) throws JSONException {
         switch (column) {
-        case DataObject.CREATION_DATE:
-        case DataObject.LAST_MODIFIED:
-            return new Date(((Long) actual).longValue());
-        case FolderObject.MODULE:
-            final FolderModuleTransformator trafo = new FolderModuleTransformator();
-            try {
-                return trafo.transform((String) actual);
-            } catch (final OXException e) {
-                e.printStackTrace();
-                return null; // TODO: Tierlieb: Change?
-            }
-        case FolderObject.PERMISSIONS_BITS:
-            // like [{"group":true,"bits":4,"entity":0}]
-            final FolderParser parser = new FolderParser();
-            try {
-                return parser.parseOCLPermission((JSONArray) actual, null);
-            } catch (final OXException e) {
-                e.printStackTrace();
-                return null; // TODO: Tierlieb: Change?
-            }
-        default:
-            return actual;
+            case DataObject.CREATION_DATE:
+            case DataObject.LAST_MODIFIED:
+                return new Date(((Long) actual).longValue());
+            case FolderObject.MODULE:
+                final FolderModuleTransformator trafo = new FolderModuleTransformator();
+                try {
+                    return trafo.transform((String) actual);
+                } catch (final OXException e) {
+                    e.printStackTrace();
+                    return null; // TODO: Tierlieb: Change?
+                }
+            case FolderObject.PERMISSIONS_BITS:
+                // like [{"group":true,"bits":4,"entity":0}]
+                final FolderParser parser = new FolderParser();
+                try {
+                    return parser.parseOCLPermission((JSONArray) actual, null);
+                } catch (final OXException e) {
+                    e.printStackTrace();
+                    return null; // TODO: Tierlieb: Change?
+                }
+            default:
+                return actual;
         }
 
     }

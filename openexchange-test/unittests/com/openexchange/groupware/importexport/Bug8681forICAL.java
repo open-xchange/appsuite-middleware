@@ -66,7 +66,6 @@ import com.openexchange.groupware.userconfiguration.OverridingUserConfigurationS
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.setuptools.TestConfig;
-import junit.framework.JUnit4TestAdapter;
 
 /**
  * This class tests whether security checks for modularisation work
@@ -76,11 +75,6 @@ import junit.framework.JUnit4TestAdapter;
  *
  */
 public class Bug8681forICAL extends AbstractICalImportTest {
-
-    //workaround for JUnit 3 runner
-    public static junit.framework.Test suite() {
-        return new JUnit4TestAdapter(Bug8681forICAL.class);
-    }
 
     @BeforeClass
     public static void initialize() throws Exception {

@@ -49,8 +49,12 @@
 
 package com.openexchange.ajax.folder.api2;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
@@ -77,16 +81,17 @@ public class UpdateTest extends AbstractAJAXSession {
      *
      * @param name The name of the test.
      */
-    public UpdateTest(final String name) {
-        super(name);
+    public UpdateTest() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
     }
 
+    @Test
     public void testUpdatePrivate() throws Throwable {
         FolderObject fo = null;
         try {
@@ -99,11 +104,7 @@ public class UpdateTest extends AbstractAJAXSession {
                 oclP.setEntity(client.getValues().getUserId());
                 oclP.setGroupPermission(false);
                 oclP.setFolderAdmin(true);
-                oclP.setAllPermission(
-                    OCLPermission.ADMIN_PERMISSION,
-                    OCLPermission.ADMIN_PERMISSION,
-                    OCLPermission.ADMIN_PERMISSION,
-                    OCLPermission.ADMIN_PERMISSION);
+                oclP.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
                 fo.setPermissionsAsArray(new OCLPermission[] { oclP });
             }
             final String newId;
@@ -123,20 +124,12 @@ public class UpdateTest extends AbstractAJAXSession {
                 oclP.setEntity(client.getValues().getUserId());
                 oclP.setGroupPermission(false);
                 oclP.setFolderAdmin(true);
-                oclP.setAllPermission(
-                    OCLPermission.ADMIN_PERMISSION,
-                    OCLPermission.ADMIN_PERMISSION,
-                    OCLPermission.ADMIN_PERMISSION,
-                    OCLPermission.ADMIN_PERMISSION);
+                oclP.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
                 final OCLPermission oclP2 = new OCLPermission();
                 oclP2.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
                 oclP2.setGroupPermission(true);
                 oclP2.setFolderAdmin(false);
-                oclP2.setAllPermission(
-                    OCLPermission.READ_FOLDER,
-                    OCLPermission.READ_ALL_OBJECTS,
-                    OCLPermission.NO_PERMISSIONS,
-                    OCLPermission.NO_PERMISSIONS);
+                oclP2.setAllPermission(OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
                 fo.setPermissionsAsArray(new OCLPermission[] { oclP, oclP2 });
             }
             {

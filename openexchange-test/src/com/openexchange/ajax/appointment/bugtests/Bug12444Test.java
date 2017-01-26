@@ -49,8 +49,11 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
@@ -69,15 +72,17 @@ public final class Bug12444Test extends AbstractAJAXSession {
 
     /**
      * Default constructor.
+     * 
      * @param name test name.
      */
-    public Bug12444Test(final String name) {
-        super(name);
+    public Bug12444Test() {
+        super();
     }
 
+    @Test
     public void testExternalWithoutEmail() throws Throwable {
-        final int folderId = client.getValues().getPrivateAppointmentFolder();
-        final TimeZone tz = client.getValues().getTimeZone();
+        final int folderId = getClient().getValues().getPrivateAppointmentFolder();
+        final TimeZone tz = getClient().getValues().getTimeZone();
         final Appointment appointment = new Appointment();
         appointment.setTitle("Test for bug 12444");
         final Calendar calendar = TimeTools.createCalendar(tz);
@@ -87,7 +92,7 @@ public final class Bug12444Test extends AbstractAJAXSession {
         appointment.setParentFolderID(folderId);
         appointment.setParticipants(createParticipants());
         final InsertRequest request = new InsertRequest(appointment, tz, false);
-        final CommonInsertResponse response = client.execute(request);
+        final CommonInsertResponse response = getClient().execute(request);
         assertTrue("Server responded not with expected exception.", response.hasError());
         final OXException e = response.getException();
         assertEquals("Wrong exception code.", 8, e.getCode());

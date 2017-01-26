@@ -64,46 +64,46 @@ import com.openexchange.ajax.framework.Header;
  */
 public final class ConvertRequest implements AJAXRequest {
 
-	private final JSONObject jsonBody;
+    private final JSONObject jsonBody;
 
-	private final boolean failOnError;
+    private final boolean failOnError;
 
-	public ConvertRequest(final JSONObject jsonBody, final boolean failOnError) {
-		super();
-		this.jsonBody = jsonBody;
-		this.failOnError = failOnError;
-	}
+    public ConvertRequest(final JSONObject jsonBody, final boolean failOnError) {
+        super();
+        this.jsonBody = jsonBody;
+        this.failOnError = failOnError;
+    }
 
-	@Override
+    @Override
     public String getServletPath() {
-		return "/ajax/conversion";
-	}
+        return "/ajax/conversion";
+    }
 
-	@Override
+    @Override
     public Object getBody() {
-		return jsonBody;
-	}
+        return jsonBody;
+    }
 
-	@Override
+    @Override
     public Method getMethod() {
-		return Method.PUT;
-	}
+        return Method.PUT;
+    }
 
     @Override
     public Header[] getHeaders() {
         return NO_HEADER;
     }
 
-	@Override
+    @Override
     public Parameter[] getParameters() {
-		final List<Parameter> params = new ArrayList<Parameter>();
-		params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "convert"));
-		return params.toArray(new Parameter[params.size()]);
-	}
+        final List<Parameter> params = new ArrayList<Parameter>();
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "convert"));
+        return params.toArray(new Parameter[params.size()]);
+    }
 
-	@Override
+    @Override
     public ConvertParser getParser() {
-		return new ConvertParser(failOnError);
-	}
+        return new ConvertParser(failOnError);
+    }
 
 }

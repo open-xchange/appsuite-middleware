@@ -49,19 +49,67 @@
 
 package com.openexchange.ajax.framework;
 
-import junit.framework.TestCase;
-import com.openexchange.ajax.framework.AJAXClient.User;
+import java.util.ArrayList;
+import java.util.List;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.runner.RunWith;
+import org.slf4j.LoggerFactory;
+import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
+import com.google.code.tempusfugit.concurrency.annotations.Concurrent;
+import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
+import com.openexchange.ajax.mail.MailTestManager;
+import com.openexchange.test.AttachmentTestManager;
+import com.openexchange.test.CalendarTestManager;
+import com.openexchange.test.ContactTestManager;
+import com.openexchange.test.FolderTestManager;
+import com.openexchange.test.ReminderTestManager;
+import com.openexchange.test.ResourceTestManager;
+import com.openexchange.test.TaskTestManager;
+import com.openexchange.test.TestManager;
+import com.openexchange.test.pool.TestContext;
+import com.openexchange.test.pool.TestContextPool;
+import com.openexchange.test.pool.TestUser;
 
-public abstract class AbstractAJAXSession extends TestCase {
+@RunWith(ConcurrentTestRunner.class)
+@Concurrent(count = 10)
+public abstract class AbstractAJAXSession {
 
-    protected AJAXClient client;
+    private AJAXClient client;
+    private AJAXClient client2;
+    protected TestContext testContext;
+    protected TestUser admin;
+    protected TestUser testUser;
+    protected TestUser testUser2;
+
+    protected CalendarTestManager catm;
+    protected ContactTestManager cotm;
+    protected FolderTestManager ftm;
+    protected InfostoreTestManager itm;
+    protected TaskTestManager ttm;
+    protected ReminderTestManager remTm;
+    protected ResourceTestManager resTm;
+    protected AttachmentTestManager atm;
+    protected MailTestManager mtm;
+
+    private List<TestManager> testManager = new ArrayList<>();
 
     /**
      * Default constructor.
+     * 
      * @param name name of the test.
      */
-    protected AbstractAJAXSession(final String name) {
-        super(name);
+    protected AbstractAJAXSession() {
+        super();
+    }
+
+    protected final AJAXClient getClient() {
+        return client;
+    }
+
+    protected final AJAXClient getClient2() {
+        return client2;
     }
 
     /**
@@ -73,28 +121,70 @@ public abstract class AbstractAJAXSession extends TestCase {
         return null;
     }
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
+        ProvisioningSetup.init();
+
         String clientId = getClientId();
-        client = null == clientId ? new AJAXClient(User.User1) : new AJAXClient(User.User1, clientId);
+        testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
+        Assert.assertNotNull("Unable to retrieve a context!", testContext);
+        testUser = testContext.acquireUser();
+        testUser2 = testContext.acquireUser();
+        client = null == clientId ? new AJAXClient(testUser) : new AJAXClient(testUser, clientId);
+        client2 = null == clientId ? new AJAXClient(testUser2) : new AJAXClient(testUser2, clientId);
+        admin = testContext.getAdmin();
+
+        catm = new CalendarTestManager(client);
+        testManager.add(catm);
+        cotm = new ContactTestManager(client);
+        testManager.add(cotm);
+        ftm = new FolderTestManager(client);
+        testManager.add(ftm);
+        itm = new InfostoreTestManager(client);
+        testManager.add(itm);
+        ttm = new TaskTestManager(client);
+        testManager.add(ttm);
+        atm = new AttachmentTestManager(client);
+        testManager.add(atm);
+        mtm = new MailTestManager(client);
+        testManager.add(mtm);
+        resTm = new ResourceTestManager(client);
+        testManager.add(resTm);
+        remTm = new ReminderTestManager(client);
+        testManager.add(remTm);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        if (client != null) {
-            // Client can be null if setUp() fails
-            client.logout();
-            client = null;
+    @After
+    public void tearDown() throws Exception {
+        for (TestManager manager : testManager) {
+            if (manager != null) {
+                try {
+                    manager.cleanUp();
+                } catch (Exception e) {
+                    LoggerFactory.getLogger(AbstractAJAXSession.class).error("", e);
+                }
+            }
         }
-        super.tearDown();
+
+        try {
+            if (client != null) {
+                // Client can be null if setUp() fails
+                client.logout();
+                client = null;
+            }
+            if (client2 != null) {
+                // Client can be null if setUp() fails
+                client2.logout();
+                client2 = null;
+            }
+        } catch (Exception e) {
+            LoggerFactory.getLogger(AbstractAJAXSession.class).error("Unable to correctly tear down test setup.", e);
+        } finally {
+            TestContextPool.backContext(testContext);
+        }
     }
 
     public AJAXSession getSession() {
         return client.getSession();
-    }
-
-    protected AJAXClient getClient() {
-        return client;
     }
 }

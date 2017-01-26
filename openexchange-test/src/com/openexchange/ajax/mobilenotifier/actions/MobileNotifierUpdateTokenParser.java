@@ -53,7 +53,6 @@ import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
-
 /**
  * {@link MobileNotifierUpdateTokenParser}
  *
@@ -63,6 +62,7 @@ public class MobileNotifierUpdateTokenParser extends AbstractAJAXParser<MobileNo
 
     /**
      * Initializes a new {@link MobileNotifierUpdateTokenParser}.
+     * 
      * @param failOnError
      */
     protected MobileNotifierUpdateTokenParser(boolean failOnError) {

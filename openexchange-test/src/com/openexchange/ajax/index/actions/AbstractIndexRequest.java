@@ -53,23 +53,22 @@ import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.Header;
 
-
 /**
  * {@link AbstractIndexRequest}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public abstract class AbstractIndexRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
+
     /**
      * URL of the tasks AJAX interface.
      */
     private static final String CONFIG_URL = "/ajax/indexedSearch";
-    
-    
+
     protected AbstractIndexRequest() {
         super();
     }
-    
+
     @Override
     public String getServletPath() {
         return CONFIG_URL;

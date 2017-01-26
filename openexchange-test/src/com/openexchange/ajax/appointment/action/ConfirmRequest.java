@@ -88,6 +88,7 @@ public class ConfirmRequest extends AbstractAppointmentRequest<ConfirmResponse> 
      * For external users
      *
      * Initializes a new {@link ConfirmRequest}.
+     * 
      * @param folderId
      * @param objectId
      * @param occurrence
@@ -117,6 +118,7 @@ public class ConfirmRequest extends AbstractAppointmentRequest<ConfirmResponse> 
      * For internal users
      *
      * Initializes a new {@link ConfirmRequest}.
+     * 
      * @param folderId
      * @param objectId
      * @param occurrence
@@ -136,13 +138,12 @@ public class ConfirmRequest extends AbstractAppointmentRequest<ConfirmResponse> 
         this.lastModified = lastModified;
         this.failOnError = failOnError;
         this.type = Participant.USER;
-        
+
     }
 
     public ConfirmRequest(int folderId, int objectId, int confirmStatus, String confirmMessage, int user, Date lastModified, boolean failOnError) {
         this(folderId, objectId, 0, confirmStatus, confirmMessage, user, lastModified, failOnError);
     }
-    
 
     public ConfirmRequest(int folderId, int objectId, int confirmStatus, String confirmMessage, Date lastModified, boolean failOnError) {
         this(folderId, objectId, confirmStatus, confirmMessage, 0, lastModified, failOnError);

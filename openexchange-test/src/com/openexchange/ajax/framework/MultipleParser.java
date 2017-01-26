@@ -1,6 +1,7 @@
 /**
  *
  */
+
 package com.openexchange.ajax.framework;
 
 import java.lang.reflect.Array;
@@ -37,11 +38,9 @@ public class MultipleParser<T extends AbstractAJAXResponse> extends AbstractAJAX
     }
 
     @Override
-    protected MultipleResponse<T> createResponse(final Response response)
-        throws JSONException {
+    protected MultipleResponse<T> createResponse(final Response response) throws JSONException {
         final JSONArray array = (JSONArray) response.getData();
-        assertEquals("Multiple response array has different size.",
-            requests.length, array.length());
+        assertEquals("Multiple response array has different size.", requests.length, array.length());
         final List<T> responses2 = new ArrayList<T>();
         for (int i = 0; i < requests.length; i++) {
             responses2.add(requests[i].getParser().parse(array.getString(i)));

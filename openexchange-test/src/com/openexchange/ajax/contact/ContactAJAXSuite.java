@@ -49,48 +49,49 @@
 
 package com.openexchange.ajax.contact;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 import com.openexchange.ajax.contact.action.ExemplaryContactTestManagerTest;
+import com.openexchange.test.concurrent.ParallelSuite;
 
-public class ContactAJAXSuite extends TestSuite {
+@RunWith(ParallelSuite.class)
+@Suite.SuiteClasses({
+    AllTest.class,
+    CopyTest.class,
+    DeleteTest.class,
+    ListTest.class,
+    MoveTest.class,
+    NewTest.class,
+    SearchTest.class,
+    UpdateTest.class,
+    UpdatesTest.class,
+    ContactImageScaleTest.class,
+    MultipleTest.class,
+    NewListTest.class,
+    SearchInAllContactFoldersTest.class,
+    BasicManagedContactTests.class,
+    ExemplaryContactTestManagerTest.class,
+    ContactAttachmentTests.class,
+    AllAliasTest.class,
+    ListAliasTest.class,
+    DeleteMultipleContactsTest.class,
+    
+    YomiTest.class,
+    YomiContactSearchTests.class,
+    ContactSearchTests.class,
+    Bug18608Test_SpecialCharsInEmailTest.class,
+    DistListTest.class,
+    DistListMemberUpdateTest.class,
+    DistListPermissionsTest.class,
+    BirthdayAndAnniversaryTest.class,
+    UpdateNotAllowedFieldsTest.class,
+    SortingInJapanTest.class,
+    AutocompleteTest.class,
+    UseCountTest.class,
+    
+    ContactBugTestSuite.class,
 
-    public static Test suite() {
-        final TestSuite tests = new TestSuite("com.openexchange.ajax.contact.ContactAJAXSuite");
-        tests.addTestSuite(AllTest.class);
-        tests.addTestSuite(CopyTest.class);
-        tests.addTestSuite(DeleteTest.class);
-        tests.addTestSuite(ListTest.class);
-        tests.addTestSuite(MoveTest.class);
-        tests.addTestSuite(NewTest.class);
-        tests.addTestSuite(SearchTest.class);
-        tests.addTestSuite(UpdateTest.class);
-        tests.addTestSuite(UpdatesTest.class);
-        tests.addTestSuite(ContactImageScaleTest.class);
-        tests.addTestSuite(MultipleTest.class);
-        tests.addTestSuite(NewListTest.class);
-        tests.addTestSuite(SearchInAllContactFoldersTest.class);
-        tests.addTestSuite(BasicManagedContactTests.class);
-        tests.addTestSuite(ExemplaryContactTestManagerTest.class);
-        tests.addTestSuite(ContactAttachmentTests.class);
-        tests.addTestSuite(AllAliasTest.class);
-        tests.addTestSuite(ListAliasTest.class);
-        tests.addTestSuite(DeleteMultipleContactsTest.class);
+})
+public class ContactAJAXSuite  {
 
-        tests.addTestSuite(YomiTest.class);
-        tests.addTestSuite(YomiContactSearchTests.class);
-        tests.addTestSuite(ContactSearchTests.class);
-        tests.addTestSuite(Bug18608Test_SpecialCharsInEmailTest.class);
-        tests.addTestSuite(DistListTest.class);
-        tests.addTestSuite(DistListMemberUpdateTest.class);
-        tests.addTestSuite(DistListPermissionsTest.class);
-        tests.addTestSuite(BirthdayAndAnniversaryTest.class);
-        tests.addTestSuite(UpdateNotAllowedFieldsTest.class);
-        tests.addTestSuite(SortingInJapanTest.class);
-        tests.addTestSuite(AutocompleteTest.class);
-        tests.addTestSuite(UseCountTest.class);
-
-        tests.addTest(ContactBugTestSuite.suite());
-        return tests;
-    }
 }

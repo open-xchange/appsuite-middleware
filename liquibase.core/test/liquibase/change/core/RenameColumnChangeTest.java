@@ -1,17 +1,17 @@
 package liquibase.change.core;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import org.junit.Before;
+import org.junit.Test;
 import liquibase.change.ChangeFactory;
 import liquibase.change.StandardChangeTest;
 import liquibase.database.Database;
 import liquibase.database.core.CacheDatabase;
-import liquibase.database.core.DB2Database;
 import liquibase.database.core.MockDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RenameColumnStatement;
-import static org.junit.Assert.*;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * Tests for {@link RenameColumnChange}
@@ -30,14 +30,12 @@ public class RenameColumnChangeTest extends StandardChangeTest {
         refactoring.setNewColumnName("newColName");
     }
 
-    @Override
-    @Test
+     @Test
     public void getRefactoringName() throws Exception {
         assertEquals("renameColumn", ChangeFactory.getInstance().getChangeMetaData(refactoring).getName());
     }
 
-    @Override
-    @Test
+     @Test
     public void generateStatement() throws Exception {
         SqlStatement[] sqlStatements = refactoring.generateStatements(new MockDatabase());
         assertEquals(1, sqlStatements.length);
@@ -48,8 +46,7 @@ public class RenameColumnChangeTest extends StandardChangeTest {
         assertEquals("newColName", ((RenameColumnStatement) sqlStatements[0]).getNewColumnName());
     }
 
-    @Override
-    @Test
+     @Test
     public void getConfirmationMessage() throws Exception {
         assertEquals("Column TABLE_NAME.oldColName renamed to newColName", refactoring.getConfirmationMessage());
     }

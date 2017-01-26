@@ -230,8 +230,8 @@ public class HtmlProcessingTest {
         PowerMockito.when(htmlService.sanitize(Matchers.anyString(), Matchers.any(HtmlSanitizeOptions.class))).thenReturn(new HtmlSanitizeResult(sanitizedHtmlContent));
     }
 
-    @Test
-    public void testFormatContentForDisplay_isHtmlNoInlineContentInUserSettingMail_onlyDroppedScriptTagsInHeader() {
+     @Test
+     public void testFormatContentForDisplay_isHtmlNoInlineContentInUserSettingMail_onlyDroppedScriptTagsInHeader() {
         Mockito.when(htmlService.dropScriptTagsInHeader(htmlContent)).thenReturn(htmlContent);
 
         HtmlSanitizeResult formatTextForDisplay = HtmlProcessing.formatContentForDisplay(htmlContent, "UTF-8", true, session, mailPath, userSettingMail, modified, DisplayMode.DISPLAY, true, true, -1);
@@ -245,8 +245,8 @@ public class HtmlProcessingTest {
         Assert.assertEquals(htmlContent, formatTextForDisplay.getContent());
     }
 
-    @Test
-    public void testFormatContentForDisplay_isHtmlAllowedExternalImages_sanitizeCalled() {
+     @Test
+     public void testFormatContentForDisplay_isHtmlAllowedExternalImages_sanitizeCalled() {
         Mockito.when(htmlService.dropScriptTagsInHeader(htmlContent)).thenReturn(htmlContent);
         Mockito.when(userSettingMail.isAllowHTMLImages()).thenReturn(true);
         Mockito.when(userSettingMail.isDisplayHtmlInlineContent()).thenReturn(true);
@@ -256,8 +256,8 @@ public class HtmlProcessingTest {
         Mockito.verify(htmlService, Mockito.times(1)).sanitize(Matchers.anyString(), Matchers.any(HtmlSanitizeOptions.class));
     }
 
-    @Test
-    public void testFormatContentForDisplay_isHtmlAllowedExternalImagesMailPathNull_sanitizeCalled() {
+     @Test
+     public void testFormatContentForDisplay_isHtmlAllowedExternalImagesMailPathNull_sanitizeCalled() {
         Mockito.when(htmlService.dropScriptTagsInHeader(htmlContent)).thenReturn(htmlContent);
         Mockito.when(userSettingMail.isAllowHTMLImages()).thenReturn(true);
         Mockito.when(userSettingMail.isDisplayHtmlInlineContent()).thenReturn(true);
@@ -267,8 +267,8 @@ public class HtmlProcessingTest {
         Mockito.verify(htmlService, Mockito.times(1)).sanitize(Matchers.anyString(), Matchers.any(HtmlSanitizeOptions.class));
     }
 
-    @Test
-    public void testFormatContentForDisplay_isHtmlUseSanitize_sanitizeCalled() {
+     @Test
+     public void testFormatContentForDisplay_isHtmlUseSanitize_sanitizeCalled() {
         Mockito.when(userSettingMail.isDisplayHtmlInlineContent()).thenReturn(true);
         Mockito.when(htmlService.dropScriptTagsInHeader(htmlContent)).thenReturn(htmlContent);
 
@@ -293,8 +293,8 @@ public class HtmlProcessingTest {
         Mockito.verify(htmlService, Mockito.times(1)).htmlFormat(Matchers.anyString(), Matchers.anyBoolean(), Matchers.anyString(), Matchers.anyInt());
     }
 
-    @Test
-    public void testCheckTransferOfChildElements() {
+     @Test
+     public void testCheckTransferOfChildElements() {
         String htmlContent = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n" +
             "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n" +
             "   <head>\n" +
@@ -384,5 +384,4 @@ public class HtmlProcessingTest {
         Assert.assertFalse(replacedBody.contains("<body>"));
 
     }
-
 }

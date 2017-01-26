@@ -54,7 +54,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.sql.SQLException;
 import java.util.List;
-import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.CalendarSql;
@@ -64,79 +63,37 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 
 public class Bug7470Test extends AbstractICalImportTest {
-  //FIXME this one is still broken
-    
-    //workaround for JUnit 3 runner
-	public static junit.framework.Test suite() {
-		return new JUnit4TestAdapter(Bug7470Test.class);
-	}
+    //FIXME this one is still broken
 
-	/*
-	 * Imported appointment loses participants
-	 */
-	@Test public void test7470() throws SQLException, OXException, NumberFormatException, OXException, OXException {
-	    folderId = createTestFolder(FolderObject.CALENDAR, sessObj, ctx, "ical7470Folder");
-		final String email = "cbartkowiak@oxhemail.open-xchange.com";
-		final String cn = "Camil Bartkowiak (cbartkowiak@oxhemail.open-xchange.com)";
-		final String ical =
-			"BEGIN:VCALENDAR\n" +
-			"PRODID:-//Microsoft Corporation//Outlook 12.0 MIMEDIR//EN\n" +
-			"VERSION:2.0\n" +
-			"METHOD:REQUEST\n" +
-			"X-MS-OLK-FORCEINSPECTOROPEN:TRUE\n" +
-			"BEGIN:VEVENT\n" +
-			"ATTENDEE;CN=\""+cn+"\";RSVP\n" +
-			"\n" +
-			"=TRUE:mailto:"+email+"\n" +
-			"CLASS:PUBLIC\n" +
-			"CREATED:20070521T150327Z\n" +
-			"DESCRIPTION:Hallo Hallo\n" +
-			"\n" +
-			"\n" +
-			"DTEND:20070523T090000Z\n" +
-			"DTSTAMP:20070521T150327Z\n" +
-			"DTSTART:20070523T083000Z\n" +
-			"LAST-MODIFIED:20070521T150327Z\n" +
-			"LOCATION:Location here\n" +
-			"ORGANIZER;CN=Tobias:mailto:tfriedrich@oxhemail.open-xchange.com\n" +
-			"PRIORITY:5\n" +
-			"SEQUENCE:0\n" +
-			"SUMMARY;LANGUAGE=de:Simple Appointment with participant\n" +
-			"TRANSP:OPAQUE\nUID:040000008200E00074C5B7101A82E0080000000060565ABBC99BC701000000000000000\n" +
-			"	010000000E4B2BA931D32B84DAFB227C9E0CA348C\n" +
-			"X-MICROSOFT-CDO-BUSYSTATUS:BUSY\n" +
-			"X-MICROSOFT-CDO-IMPORTANCE:1\n" +
-			"X-MICROSOFT-DISALLOW-COUNTER:FALSE\n" +
-			"X-MS-OLK-ALLOWEXTERNCHECK:TRUE\n" +
-			"X-MS-OLK-AUTOFILLLOCATION:FALSE\n" +
-			"X-MS-OLK-CONFTYPE:0\n" +
-			"BEGIN:VALARM\n" +
-			"TRIGGER:PT0M\n" +
-			"ACTION:DISPLAY\n" +
-			"DESCRIPTION:Reminder\n" +
-			"END:VALARM\n" +
-			"END:VEVENT\n" +
-			"END:VCALENDAR";
+    /*
+     * Imported appointment loses participants
+     */
+    @Test
+    public void test7470() throws SQLException, OXException, NumberFormatException, OXException, OXException {
+        folderId = createTestFolder(FolderObject.CALENDAR, sessObj, ctx, "ical7470Folder");
+        final String email = "cbartkowiak@oxhemail.open-xchange.com";
+        final String cn = "Camil Bartkowiak (cbartkowiak@oxhemail.open-xchange.com)";
+        final String ical = "BEGIN:VCALENDAR\n" + "PRODID:-//Microsoft Corporation//Outlook 12.0 MIMEDIR//EN\n" + "VERSION:2.0\n" + "METHOD:REQUEST\n" + "X-MS-OLK-FORCEINSPECTOROPEN:TRUE\n" + "BEGIN:VEVENT\n" + "ATTENDEE;CN=\"" + cn + "\";RSVP\n" + "\n" + "=TRUE:mailto:" + email + "\n" + "CLASS:PUBLIC\n" + "CREATED:20070521T150327Z\n" + "DESCRIPTION:Hallo Hallo\n" + "\n" + "\n" + "DTEND:20070523T090000Z\n" + "DTSTAMP:20070521T150327Z\n" + "DTSTART:20070523T083000Z\n" + "LAST-MODIFIED:20070521T150327Z\n" + "LOCATION:Location here\n" + "ORGANIZER;CN=Tobias:mailto:tfriedrich@oxhemail.open-xchange.com\n" + "PRIORITY:5\n" + "SEQUENCE:0\n" + "SUMMARY;LANGUAGE=de:Simple Appointment with participant\n" + "TRANSP:OPAQUE\nUID:040000008200E00074C5B7101A82E0080000000060565ABBC99BC701000000000000000\n" + "	010000000E4B2BA931D32B84DAFB227C9E0CA348C\n" + "X-MICROSOFT-CDO-BUSYSTATUS:BUSY\n" + "X-MICROSOFT-CDO-IMPORTANCE:1\n" + "X-MICROSOFT-DISALLOW-COUNTER:FALSE\n" + "X-MS-OLK-ALLOWEXTERNCHECK:TRUE\n" + "X-MS-OLK-AUTOFILLLOCATION:FALSE\n" + "X-MS-OLK-CONFTYPE:0\n" + "BEGIN:VALARM\n" + "TRIGGER:PT0M\n" + "ACTION:DISPLAY\n" + "DESCRIPTION:Reminder\n" + "END:VALARM\n" + "END:VEVENT\n" + "END:VCALENDAR";
 
-		assertTrue("Can import?" ,  imp.canImport(sessObj, format, _folders(), null));
-		final List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(ical.getBytes(com.openexchange.java.Charsets.UTF_8)), _folders(), null);
-		assertEquals("One import?" , 1 , results.size());
-		final ImportResult res = results.get(0);
-		assertEquals("Shouldn't have error" , null, res.getException());
+        assertTrue("Can import?", imp.canImport(sessObj, format, _folders(), null));
+        final List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(ical.getBytes(com.openexchange.java.Charsets.UTF_8)), _folders(), null);
+        assertEquals("One import?", 1, results.size());
+        final ImportResult res = results.get(0);
+        assertEquals("Shouldn't have error", null, res.getException());
 
-		final AppointmentSQLInterface appointmentSql = new CalendarSql(sessObj);
-		final Appointment appointmentObj = appointmentSql.getObjectById(Integer.parseInt( res.getObjectId() ), folderId);
-		assertTrue("Exists" , appointmentObj != null);
-		final Participant[] participants = appointmentObj.getParticipants();
-		assertEquals("Number of attendees?" , 2, participants.length);
+        final AppointmentSQLInterface appointmentSql = new CalendarSql(sessObj);
+        final Appointment appointmentObj = appointmentSql.getObjectById(Integer.parseInt(res.getObjectId()), folderId);
+        assertTrue("Exists", appointmentObj != null);
+        final Participant[] participants = appointmentObj.getParticipants();
+        assertEquals("Number of attendees?", 2, participants.length);
 
-		boolean containsAttendee = false;
-		for(final Participant p : participants){
-			if(cn.equals( p.getDisplayName() ) && email.equals( p.getEmailAddress())){
-				containsAttendee = true;
-			}
-		}
-		assertTrue("Found attendee?" , containsAttendee);
+        boolean containsAttendee = false;
+        for (final Participant p : participants) {
+            if (cn.equals(p.getDisplayName()) && email.equals(p.getEmailAddress())) {
+                containsAttendee = true;
+            }
+        }
+        assertTrue("Found attendee?", containsAttendee);
 
-	}
+    }
 }

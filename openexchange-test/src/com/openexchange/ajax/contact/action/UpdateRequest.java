@@ -58,6 +58,7 @@ import com.openexchange.groupware.container.Contact;
  * Implements creating the necessary values for a contact update request. All
  * necessary values are read from the contact object. The contact must contain the folder and
  * object identifier and the last modification timestamp.
+ * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 public class UpdateRequest extends AbstractContactRequest<UpdateResponse> {
@@ -70,9 +71,10 @@ public class UpdateRequest extends AbstractContactRequest<UpdateResponse> {
 
     /**
      * Default constructor.
+     * 
      * @param contactObj Contact object with updated attributes. This contact must contain
-     * the attributes parent folder identifier, object identifier and last
-     * modification timestamp.
+     *            the attributes parent folder identifier, object identifier and last
+     *            modification timestamp.
      */
     public UpdateRequest(final Contact contactObj) {
         this(contactObj, true);
@@ -120,21 +122,11 @@ public class UpdateRequest extends AbstractContactRequest<UpdateResponse> {
     @Override
     public Parameter[] getParameters() {
         if (withImage) {
-            return new Parameter[] {
-                new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE),
-                new Parameter(AJAXServlet.PARAMETER_INFOLDER, Integer.toString(this.originFolder)),
-                new Parameter(AJAXServlet.PARAMETER_ID, Integer.toString(contactObj.getObjectID())),
-                new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, Long.toString(contactObj.getLastModified().getTime())),
-                new FieldParameter("json", fieldContent),
-                new FileParameter("file", "open-xchange_image.jpg", new ByteArrayInputStream(contactObj.getImage1()), "image/jpg")
+            return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE), new Parameter(AJAXServlet.PARAMETER_INFOLDER, Integer.toString(this.originFolder)), new Parameter(AJAXServlet.PARAMETER_ID, Integer.toString(contactObj.getObjectID())), new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, Long.toString(contactObj.getLastModified().getTime())), new FieldParameter("json", fieldContent), new FileParameter("file", "open-xchange_image.jpg", new ByteArrayInputStream(contactObj.getImage1()), "image/jpg")
             };
         }
 
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE),
-            new Parameter(AJAXServlet.PARAMETER_INFOLDER, Integer.toString(this.originFolder)),
-            new Parameter(AJAXServlet.PARAMETER_ID, Integer.toString(contactObj.getObjectID())),
-            new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, Long.toString(contactObj.getLastModified().getTime()))
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE), new Parameter(AJAXServlet.PARAMETER_INFOLDER, Integer.toString(this.originFolder)), new Parameter(AJAXServlet.PARAMETER_ID, Integer.toString(contactObj.getObjectID())), new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, Long.toString(contactObj.getLastModified().getTime()))
         };
     }
 

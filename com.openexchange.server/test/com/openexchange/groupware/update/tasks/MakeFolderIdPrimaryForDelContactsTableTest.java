@@ -53,7 +53,7 @@ public class MakeFolderIdPrimaryForDelContactsTableTest {
      * @throws OXException
      */
     @Test(expected = IllegalArgumentException.class)
-    public void testPerform_paramsNull_throwExpception() throws OXException {
+     public void testPerform_paramsNull_throwExpception() throws OXException {
         makeFolderIdPrimaryForDelContactsTable.perform(null);
     }
 
@@ -63,7 +63,7 @@ public class MakeFolderIdPrimaryForDelContactsTableTest {
      * @throws OXException
      */
     @Test(expected = OXException.class)
-    public void testPerform_connectionNotProper_throwException() throws OXException {
+     public void testPerform_connectionNotProper_throwException() throws OXException {
         makeFolderIdPrimaryForDelContactsTable.perform(mockParams);
     }
 
@@ -73,8 +73,8 @@ public class MakeFolderIdPrimaryForDelContactsTableTest {
      * @throws OXException
      * @throws SQLException
      */
-    @Test
-    public void testPerform_tableHasNoPrimaryKey_createPrimaryKeyWithoutDroppingBefore() throws OXException, SQLException {
+     @Test
+     public void testPerform_tableHasNoPrimaryKey_createPrimaryKeyWithoutDroppingBefore() throws OXException, SQLException {
         PowerMockito.mockStatic(Tools.class);
         PowerMockito.when(
             Tools.hasPrimaryKey(
@@ -110,8 +110,8 @@ public class MakeFolderIdPrimaryForDelContactsTableTest {
      * @throws OXException
      * @throws SQLException
      */
-    @Test
-    public void testPerform_tableHasNoPrimaryKey_createPrimaryKeyWithDroppingBefore() throws OXException, SQLException {
+     @Test
+     public void testPerform_tableHasNoPrimaryKey_createPrimaryKeyWithDroppingBefore() throws OXException, SQLException {
         PowerMockito.mockStatic(Tools.class);
         PowerMockito.when(
             Tools.hasPrimaryKey(

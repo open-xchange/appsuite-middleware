@@ -49,10 +49,14 @@
 
 package com.openexchange.ajax.mail;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import java.io.IOException;
 import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.mail.actions.DeleteRequest;
 import com.openexchange.ajax.mail.actions.ForwardRequest;
@@ -75,63 +79,27 @@ import com.openexchange.mail.dataobjects.compose.ComposeType;
  * @since v7.8.0
  */
 public class Bug37247Test extends AbstractMailTest {
-    private static final String EML =
-        "Return-Path: <from@example.tld>\n" +
-            "        Received: from local-out (mwinf8514 [127.0.0.1])\n" +
-            "         by mwinb8903 (Cyrus v2.3.13) with LMTPA;\n" +
-            "         Tue, 01 Jul 2014 17:38:28 +0200\n" +
-            "    X-Sieve: CMU Sieve 2.3\n" +
-            "    Received: from local ([127.0.0.1])\n" +
-            "        by mwinf8514-out with ME\n" +
-            "        id M3dU1o00G3djdXu033dUxU; Tue, 01 Jul 2014 17:37:28 +0200\n" +
-            "    X-ME-User-Auth: from foo <from@example.tld>\n" +
-            "    X-bcc: bcc bar <bcc@example.tld>\n" +
-            "    X-me-spamrating: 36.00\n" +
-            "    X-me-spamlevel: not-spam\n" +
-            "    X-ME-bounce-domain: bar.tld\n" +
-            "    X-ME-Entity: oop\n" +
-            "    Date: Tue, 1 Jul 2014 17:37:28 +0200 (CEST)\n" +
-            "    From: from foo <from@example.tld>\n" +
-            "    Reply-To: rto foo <bar@example.tld>\n" +
-            "    To: to bar <to@example.tld>\n" +
-            "    Cc: cc bar <cc@example.tld>\n" +
-            "    Bcc: bcc bar <bcc@example.tld>\n" +
-            "    Message-ID: <11140339.1095068.1404229048881.JavaMail.www@wwinf8905>\n" +
-            "    Subject: plain text\n" +
-            "    MIME-Version: 1.0\n" +
-            "    Content-Type: text/plain; charset=UTF-8\n" +
-            "    Content-Transfer-Encoding: 7bit\n" +
-            "    X-SAVECOPY: false\n" +
-            "    X-Wum-Nature: EMAIL-NATURE\n" +
-            "    X-WUM-FROM: |~|\n" +
-            "    X-WUM-TO: |~|\n" +
-            "    X-WUM-REPLYTO: |~|\n" +
-            "\n" +
-            "    plain text\n" +
-            "\n" +
-            "    A test signature";
+
+    private static final String EML = "Return-Path: <from@example.tld>\n" + "        Received: from local-out (mwinf8514 [127.0.0.1])\n" + "         by mwinb8903 (Cyrus v2.3.13) with LMTPA;\n" + "         Tue, 01 Jul 2014 17:38:28 +0200\n" + "    X-Sieve: CMU Sieve 2.3\n" + "    Received: from local ([127.0.0.1])\n" + "        by mwinf8514-out with ME\n" + "        id M3dU1o00G3djdXu033dUxU; Tue, 01 Jul 2014 17:37:28 +0200\n" + "    X-ME-User-Auth: from foo <from@example.tld>\n" + "    X-bcc: bcc bar <bcc@example.tld>\n" + "    X-me-spamrating: 36.00\n" + "    X-me-spamlevel: not-spam\n" + "    X-ME-bounce-domain: bar.tld\n" + "    X-ME-Entity: oop\n" + "    Date: Tue, 1 Jul 2014 17:37:28 +0200 (CEST)\n" + "    From: from foo <from@example.tld>\n" + "    Reply-To: rto foo <bar@example.tld>\n" + "    To: to bar <to@example.tld>\n" + "    Cc: cc bar <cc@example.tld>\n" + "    Bcc: bcc bar <bcc@example.tld>\n" + "    Message-ID: <11140339.1095068.1404229048881.JavaMail.www@wwinf8905>\n" + "    Subject: plain text\n" + "    MIME-Version: 1.0\n" + "    Content-Type: text/plain; charset=UTF-8\n" + "    Content-Transfer-Encoding: 7bit\n" + "    X-SAVECOPY: false\n" + "    X-Wum-Nature: EMAIL-NATURE\n" + "    X-WUM-FROM: |~|\n" + "    X-WUM-TO: |~|\n" + "    X-WUM-REPLYTO: |~|\n" + "\n" + "    plain text\n" + "\n" + "    A test signature";
 
     private UserValues values;
 
     /**
      * Initializes a new {@link Bug37247Test}.
+     * 
      * @param name
      */
-    public Bug37247Test(String name) {
-        super(name);
+    public Bug37247Test() {
+        super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         values = getClient().getValues();
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
-
+    @Test
     public void testBug37472Reply() throws OXException, IOException, JSONException {
         String csid = "845.1436870434189";
         NewMailRequest newMailRequest = new NewMailRequest(values.getInboxFolder(), EML, 32, true);
@@ -148,7 +116,7 @@ public class Bug37247Test extends AbstractMailTest {
             JSONObject jsonObj = (JSONObject) rResp.getData();
             assertNotNull("Got an unexpected response", jsonObj);
             assertFalse("Got an empty json object", jsonObj.isEmpty());
-            csid  = jsonObj.getString("csid");
+            csid = jsonObj.getString("csid");
 
             String subject = "Bug37472Test_testFlagsNotChangingWhenSavingDraft" + System.currentTimeMillis();
             JSONObject composedMail = createEMail(getSendAddress(), subject, "text/plain", EML);
@@ -159,7 +127,7 @@ public class Bug37247Test extends AbstractMailTest {
             mail.put("sendtype", ComposeType.DRAFT_EDIT.getType());
 
             NewMailRequestWithUploads sendDraftRequest = new NewMailRequestWithUploads(mail);
-            MailReferenceResponse sendDraftResponse = client.execute(sendDraftRequest);
+            MailReferenceResponse sendDraftResponse = getClient().execute(sendDraftRequest);
             assertNotNull(sendDraftResponse);
 
             GetRequest gReq = new GetRequest(folderId, mailId);
@@ -171,13 +139,14 @@ public class Bug37247Test extends AbstractMailTest {
             Set<MailFlag> transform = MailFlag.transform(flags);
             assertFalse("When saving replyed mail as a draft mail contains answered flag", transform.contains(MailFlag.ANSWERED));
         } finally {
-            if(false == (Strings.isEmpty(folderId) && Strings.isEmpty(mailId))) {
+            if (false == (Strings.isEmpty(folderId) && Strings.isEmpty(mailId))) {
                 DeleteRequest dReq = new DeleteRequest(folderId, mailId, true);
                 getClient().execute(dReq);
             }
         }
     }
 
+    @Test
     public void testBug37472Forward() throws OXException, IOException, JSONException {
         String csid = "845.1436870434189";
         NewMailRequest newMailRequest = new NewMailRequest(values.getInboxFolder(), EML, 32, true);
@@ -194,7 +163,7 @@ public class Bug37247Test extends AbstractMailTest {
             JSONObject jsonObj = (JSONObject) rResp.getData();
             assertNotNull("Got an unexpected response", jsonObj);
             assertFalse("Got an empty json object", jsonObj.isEmpty());
-            csid  = jsonObj.getString("csid");
+            csid = jsonObj.getString("csid");
 
             String subject = "Bug37472Test_testFlagsNotChangingWhenSavingDraft" + System.currentTimeMillis();
             JSONObject composedMail = createEMail(getSendAddress(), subject, "text/plain", EML);
@@ -205,7 +174,7 @@ public class Bug37247Test extends AbstractMailTest {
             mail.put("sendtype", ComposeType.DRAFT_EDIT.getType());
 
             NewMailRequestWithUploads sendDraftRequest = new NewMailRequestWithUploads(mail);
-            MailReferenceResponse sendDraftResponse = client.execute(sendDraftRequest);
+            MailReferenceResponse sendDraftResponse = getClient().execute(sendDraftRequest);
             assertNotNull(sendDraftResponse);
 
             GetRequest gReq = new GetRequest(folderId, mailId);
@@ -217,7 +186,7 @@ public class Bug37247Test extends AbstractMailTest {
             Set<MailFlag> transform = MailFlag.transform(flags);
             assertFalse("When saving replyed mail as a draft mail contains answered flag", transform.contains(MailFlag.FORWARDED));
         } finally {
-            if(false == (Strings.isEmpty(folderId) && Strings.isEmpty(mailId))) {
+            if (false == (Strings.isEmpty(folderId) && Strings.isEmpty(mailId))) {
                 DeleteRequest dReq = new DeleteRequest(folderId, mailId, true);
                 getClient().execute(dReq);
             }

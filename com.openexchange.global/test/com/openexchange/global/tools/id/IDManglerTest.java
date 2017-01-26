@@ -52,17 +52,21 @@ package com.openexchange.global.tools.id;
 
 import java.util.Arrays;
 import java.util.List;
-import junit.framework.TestCase;
+import org.junit.Test;
 import com.openexchange.tools.id.IDMangler;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * {@link IDManglerTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class IDManglerTest extends TestCase {
-
-    public void testRoundtrip() {
+public class IDManglerTest {
+         @Test
+     public void testRoundtrip() {
         String id = IDMangler.mangle("com.openexchange.some.service", "someFolder", "someId");
         assertNotNull(id);
 
@@ -72,7 +76,8 @@ public class IDManglerTest extends TestCase {
 
     }
 
-    public void testSlashes() {
+         @Test
+     public void testSlashes() {
         String id = IDMangler.mangle("com.openexchange.some.service", "someFolder/folder/with/slashes", "someId");
         assertNotNull(id);
 
@@ -81,7 +86,8 @@ public class IDManglerTest extends TestCase {
         assertEquals(Arrays.asList("com.openexchange.some.service", "someFolder/folder/with/slashes", "someId"), unmangled);
     }
 
-    public void testSpecialCharacters() {
+         @Test
+     public void testSpecialCharacters() {
         String id = IDMangler.mangle(
             "com.openexchange.some.service",
             "someFolder/folder/with/slashes and whitespace and f\u00ac\u00df)($nny ch$\u00ac\u00df\u00ac\u00df$\u221a\u00f2\u221a\u00e8\u221a\u00e8\u221a\u00e7r\u00ac\u00df$ter$",
@@ -96,7 +102,8 @@ public class IDManglerTest extends TestCase {
             "someId"), unmangled);
     }
 
-    public void testBrackets() {
+         @Test
+     public void testBrackets() {
         String id = IDMangler.mangle("some", "com[ponents", "wi]]th", "brackets");
 
         assertNotNull(id);
@@ -106,7 +113,8 @@ public class IDManglerTest extends TestCase {
         assertEquals(Arrays.asList("some", "com[ponents", "wi]]th", "brackets"), unmangled);
     }
 
-    public void testBackslash() {
+         @Test
+     public void testBackslash() {
         String id = IDMangler.mangle("something\\with", "neato\\backslashes");
         assertNotNull(id);
 
@@ -115,12 +123,14 @@ public class IDManglerTest extends TestCase {
         assertEquals(Arrays.asList("something\\with", "neato\\backslashes"), unmangled);
     }
 
-    public void testContainsPrimaryDelim() {
+         @Test
+     public void testContainsPrimaryDelim() {
         List<String> unmangled = IDMangler.unmangle("some:/partial:id://component");
         assertEquals(Arrays.asList("some:/partial:id", "component"), unmangled);
     }
 
-    public void testContainsFragmentsOfPrimaryDelim() {
+         @Test
+     public void testContainsFragmentsOfPrimaryDelim() {
         String id = IDMangler.mangle("some:/service:this is", "someFolder", "someId");
         assertNotNull(id);
 
@@ -129,7 +139,8 @@ public class IDManglerTest extends TestCase {
         assertEquals(Arrays.asList("some:/service:this is", "someFolder", "someId"), unmangled);
     }
 
-    public void testInfostoreFolderAndId() {
+         @Test
+     public void testInfostoreFolderAndId() {
         List<String> unmangled = IDMangler.unmangle("123/456");
 
         assertEquals("Unexpected size", 2, unmangled.size());

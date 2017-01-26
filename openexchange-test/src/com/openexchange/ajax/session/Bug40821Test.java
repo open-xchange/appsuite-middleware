@@ -49,7 +49,11 @@
 
 package com.openexchange.ajax.session;
 
+import static org.junit.Assert.assertEquals;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.GetResponse;
 import com.openexchange.ajax.config.actions.SetRequest;
@@ -59,9 +63,6 @@ import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.session.actions.LoginRequest;
 import com.openexchange.ajax.session.actions.LoginResponse;
-import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.configuration.AJAXConfig.Property;
-
 
 /**
  * {@link Bug40821Test}
@@ -76,30 +77,29 @@ public class Bug40821Test extends AbstractAJAXSession {
     private AJAXClient clientToLogin;
     private String language;
 
-    public Bug40821Test(String name) {
-        super(name);
-    }
-
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
-        AJAXConfig.init();
-        login = AJAXConfig.getProperty(Property.LOGIN) + "@" + AJAXConfig.getProperty(Property.CONTEXTNAME);
-        password = AJAXConfig.getProperty(Property.PASSWORD);
+        login = testUser.getLogin();
+        password = testUser.getPassword();
         clientToLogin = new AJAXClient(new AJAXSession(), true);
 
         GetRequest getRequest = new GetRequest(Tree.Language);
-        GetResponse getResponse = client.execute(getRequest);
+        GetResponse getResponse = getClient().execute(getRequest);
         language = getResponse.getString();
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        SetRequest setRequest = new SetRequest(Tree.Language, language);
-        client.execute(setRequest);
-        super.tearDown();
+        try {
+            SetRequest setRequest = new SetRequest(Tree.Language, language);
+            getClient().execute(setRequest);
+        } finally {
+            super.tearDown();
+        }
     }
 
+    @Test
     public void testLoginWithStoreLanguage() throws Exception {
         String languageToSet = "de_DE".equalsIgnoreCase(language) ? "en_US" : "de_DE";
         LoginRequest req = new LoginRequest(login, password, LoginTools.generateAuthId(), AJAXClient.class.getName(), AJAXClient.VERSION, languageToSet, true, false);
@@ -110,6 +110,7 @@ public class Bug40821Test extends AbstractAJAXSession {
         assertEquals("Language was not stored.", languageToSet, locale);
     }
 
+    @Test
     public void testLoginWithoutStoreLanguage() throws Exception {
         String languageToSet = "de_DE".equalsIgnoreCase(language) ? "en_US" : "de_DE";
         LoginRequest req = new LoginRequest(login, password, LoginTools.generateAuthId(), AJAXClient.class.getName(), AJAXClient.VERSION, languageToSet, false, false);

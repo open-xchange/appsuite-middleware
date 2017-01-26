@@ -1,5 +1,6 @@
 package com.openexchange.ajax.importexport;
 
+import static org.junit.Assert.*;
 import java.util.List;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.ajax.importexport.actions.ICalImportRequest;
@@ -8,10 +9,6 @@ import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.groupware.importexport.ImportResult;
 
 public class Bug20132Test_WrongRecurrenceDatePosition extends ManagedAppointmentTest {
-
-	public Bug20132Test_WrongRecurrenceDatePosition(String name) {
-		super(name);
-	}
 
 	public void testForCorrectRecurrenceDatePositionCalculation() throws Exception{
 		String ical = "BEGIN:VCALENDAR\n" +

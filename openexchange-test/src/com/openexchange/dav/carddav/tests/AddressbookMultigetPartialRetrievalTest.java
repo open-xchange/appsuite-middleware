@@ -49,7 +49,9 @@
 
 package com.openexchange.dav.carddav.tests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -127,7 +129,7 @@ public class AddressbookMultigetPartialRetrievalTest extends CardDAVTest {
 
     }
 
-    protected List<VCardResource> addressbookMultiget(String collection, Collection<String> hrefs, final String...propertyNames) throws Exception {
+    protected List<VCardResource> addressbookMultiget(String collection, Collection<String> hrefs, final String... propertyNames) throws Exception {
         DavPropertySet props = new DavPropertySet();
         props.add(new AbstractDavProperty<Object>(PropertyNames.GETETAG, false) {
 

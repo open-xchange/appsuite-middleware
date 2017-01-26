@@ -57,7 +57,7 @@ import com.openexchange.ajax.framework.Header;
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public abstract class AbstractSubscriptionRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T>{
+public abstract class AbstractSubscriptionRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
 
     private boolean failOnError;
 

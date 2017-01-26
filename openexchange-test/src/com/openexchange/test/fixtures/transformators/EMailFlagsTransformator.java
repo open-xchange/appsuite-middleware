@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.test.fixtures.transformators;
 
 import com.openexchange.exception.OXException;
@@ -59,20 +60,22 @@ import com.openexchange.mail.dataobjects.MailMessage;
  */
 public class EMailFlagsTransformator implements Transformator {
 
-	@Override
+    @Override
     public Object transform(final String value) throws OXException {
-		if (null == value || 1 > value.length()) { return 0; }
-		int flags = 0;
-		final String[] splitted = value.split(",");
-		for (final String flag : splitted) {
-			if (null != flag) {
-				flags |= getFlag(flag.trim());
-			}
-		}
-		return flags;
+        if (null == value || 1 > value.length()) {
+            return 0;
+        }
+        int flags = 0;
+        final String[] splitted = value.split(",");
+        for (final String flag : splitted) {
+            if (null != flag) {
+                flags |= getFlag(flag.trim());
+            }
+        }
+        return flags;
     }
 
-	private int getFlag(final String flag) {
+    private int getFlag(final String flag) {
         if ("FLAG_ANSWERED".equalsIgnoreCase(flag) || "ANSWERED".equalsIgnoreCase(flag)) {
             return MailMessage.FLAG_ANSWERED;
         } else if ("FLAG_DELETED".equalsIgnoreCase(flag) || "DELETED".equalsIgnoreCase(flag)) {
@@ -94,7 +97,7 @@ public class EMailFlagsTransformator implements Transformator {
         } else if ("FLAG_READ_ACK".equalsIgnoreCase(flag) || "READ_ACK".equalsIgnoreCase(flag)) {
             return MailMessage.FLAG_READ_ACK;
         } else {
-        	return 0;
+            return 0;
         }
-	}
+    }
 }

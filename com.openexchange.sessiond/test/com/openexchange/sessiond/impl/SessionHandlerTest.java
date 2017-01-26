@@ -49,7 +49,6 @@
 
 package com.openexchange.sessiond.impl;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import org.junit.After;
@@ -141,11 +140,6 @@ public class SessionHandlerTest {
             }
 
             @Override
-            public List<String> getRemoteParameterNames() {
-                return Arrays.asList(PROP_NAMES);
-            }
-
-            @Override
             public long getRandomTokenTimeout() {
                 return 100l;
             }
@@ -203,16 +197,16 @@ public class SessionHandlerTest {
         SessionHandler.close();
     }
 
-    @Test
-    public void testSessionRotation() throws Exception {
+     @Test
+     public void testSessionRotation() throws Exception {
         SessionImpl session = addSession();
         Assert.assertNotNull(SessionHandler.getSession(session.getSessionID(), false));
         Thread.sleep(SessionHandler.config.getNumberOfSessionContainers() * SessionHandler.config.getLifeTime() + SessionHandler.config.getNumberOfLongTermSessionContainers() * SessionHandler.config.getLongLifeTime() + 2000);
         Assert.assertNull(SessionHandler.getSession(session.getSessionID(), false));
     }
 
-    @Test
-    public void testFindLocalSessions() throws Exception {
+     @Test
+     public void testFindLocalSessions() throws Exception {
         String v1 = "thevalue";
         String v2 = "othervalue";
         SessionImpl s1 = addSession(v1);
@@ -228,8 +222,8 @@ public class SessionHandlerTest {
         Assert.assertTrue(sessions.contains(s1.getSessionID()) && sessions.contains(s2.getSessionID()));
     }
 
-    @Test
-    public void testRemoveLocalSessions() throws Exception {
+     @Test
+     public void testRemoveLocalSessions() throws Exception {
         String v1 = "thevalue";
         String v2 = "othervalue";
         SessionImpl s1 = addSession(v1);
@@ -247,8 +241,8 @@ public class SessionHandlerTest {
         Assert.assertEquals(s2.getSessionID(), sessions.get(0));
     }
 
-    @Test
-    public void testFindRemoteSessions() throws Exception {
+     @Test
+     public void testFindRemoteSessions() throws Exception {
         String v1 = "thevalue";
         String v2 = "othervalue";
         SessionImpl s1 = addSession(v1);

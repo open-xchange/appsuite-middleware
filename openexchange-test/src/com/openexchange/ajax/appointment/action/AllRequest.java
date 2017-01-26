@@ -101,8 +101,11 @@ public class AllRequest extends CommonAllRequest {
         // Add time zone's offset to simulate local time as passed by requests from GUI
         this.start = addTimeZone2Date(start, tz);
         this.end = addTimeZone2Date(end, tz);
+//        this.start = start;
+//        this.end = end;
         this.recurrenceMaster = recurrenceMaster;
         this.showPrivates = showPrivates;
+        this.timeZoneId = tz.getID();
     }
 
     public AllRequest(final int folderId, final String alias, final Date start, final Date end, final TimeZone tz) {
@@ -118,8 +121,11 @@ public class AllRequest extends CommonAllRequest {
         // Add time zone's offset to simulate local time as passed by requests from GUI
         this.start = addTimeZone2Date(start, tz);
         this.end = addTimeZone2Date(end, tz);
+//        this.start = start;
+//        this.end = end;
         this.recurrenceMaster = recurrenceMaster;
         this.showPrivates = showPrivates;
+        this.timeZoneId = tz.getID();
     }
 
     /**

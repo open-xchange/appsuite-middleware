@@ -213,9 +213,7 @@ public class AutocompleteRequest extends AbstractFindRequest<AutocompleteRespons
         private FacetValue parseJFacetValue(final JSONObject jFacetValue) throws JSONException {
             final String id = jFacetValue.getString("id");
             final int count = jFacetValue.optInt("count", -1);
-            FacetValueBuilder builder = FacetValue.newBuilder(id)
-                .withDisplayItem(extractDisplayItem(jFacetValue))
-                .withCount(count);
+            FacetValueBuilder builder = FacetValue.newBuilder(id).withDisplayItem(extractDisplayItem(jFacetValue)).withCount(count);
             if (jFacetValue.has("filter")) {
                 final JSONObject jFilter = jFacetValue.getJSONObject("filter");
                 builder.withFilter(parseJFilter(jFilter));
@@ -246,7 +244,7 @@ public class AutocompleteRequest extends AbstractFindRequest<AutocompleteRespons
             }
 
             final JSONArray jFields = jFilter.getJSONArray("fields");
-            length= jFields.length();
+            length = jFields.length();
             final List<String> fields = new LinkedList<String>();
             for (int i = 0; i < length; i++) {
                 fields.add(jFields.getString(i));
@@ -257,7 +255,7 @@ public class AutocompleteRequest extends AbstractFindRequest<AutocompleteRespons
 
         private static FacetType facetTypeFor(Module module, String id) {
             FacetType type = null;
-            switch(module) {
+            switch (module) {
                 case MAIL:
                     type = MailFacetType.getById(id);
                     break;

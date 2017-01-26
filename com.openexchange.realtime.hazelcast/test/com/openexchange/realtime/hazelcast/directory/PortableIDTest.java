@@ -49,7 +49,8 @@
 
 package com.openexchange.realtime.hazelcast.directory;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Before;
@@ -73,21 +74,21 @@ public class PortableIDTest {
         portableMarensID = new PortableID(marensID);
     }
 
-    @Test
-    public void testEquals() {
+     @Test
+     public void testEquals() {
         assertEquals("IDs should be equal", marensID, portableMarensID);
     }
 
-    @Test
-    public void testToGeneralEquals() {
+     @Test
+     public void testToGeneralEquals() {
         ID generalMarensID = marensID.toGeneralForm();
         PortableID generalPortableMarensID = portableMarensID.toGeneralForm();
         assertTrue(generalPortableMarensID instanceof PortableID);
         assertEquals(generalMarensID, generalPortableMarensID);
     }
 
-    @Test
-    public void testListRemoval() {
+     @Test
+     public void testListRemoval() {
         List<ID> idList = new ArrayList<ID>() ;
         PortableID portableMarensID = new PortableID(marensID);
         idList.add(marensID);

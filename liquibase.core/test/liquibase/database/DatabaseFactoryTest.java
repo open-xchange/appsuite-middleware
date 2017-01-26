@@ -1,11 +1,6 @@
 package liquibase.database;
 
-import static org.junit.Assert.*;
-
-import liquibase.database.core.H2Database;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.MySQLDatabase;
-import liquibase.database.core.OracleDatabase;
+import static org.junit.Assert.assertNotNull;
 import org.junit.Test;
 
 public class DatabaseFactoryTest {

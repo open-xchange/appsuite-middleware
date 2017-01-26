@@ -60,9 +60,9 @@ import com.openexchange.ajax.framework.Header;
  * @since v7.8.0
  */
 public abstract class AbstractDriveRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
-    
+
     protected Integer root;
-    
+
     protected AbstractDriveRequest(Integer root) {
         this.root = root;
     }

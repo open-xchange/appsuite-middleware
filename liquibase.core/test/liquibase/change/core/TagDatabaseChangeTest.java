@@ -1,13 +1,14 @@
 package liquibase.change.core;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import org.junit.Before;
+import org.junit.Test;
 import liquibase.change.ChangeFactory;
 import liquibase.change.StandardChangeTest;
 import liquibase.database.core.MockDatabase;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.TagDatabaseStatement;
-import static org.junit.Assert.*;
-import org.junit.Before;
-import org.junit.Test;
 
 public class TagDatabaseChangeTest extends StandardChangeTest {
 
@@ -18,14 +19,12 @@ public class TagDatabaseChangeTest extends StandardChangeTest {
         refactoring = new TagDatabaseChange();
     }
 
-    @Override
-    @Test
+     @Test
     public void getRefactoringName() throws Exception {
         assertEquals("tagDatabase", ChangeFactory.getInstance().getChangeMetaData(refactoring).getName());
     }
 
-    @Override
-    @Test
+     @Test
     public void generateStatement() throws Exception {
         TagDatabaseChange refactoring = new TagDatabaseChange();
         refactoring.setTag("TAG_NAME");
@@ -36,8 +35,7 @@ public class TagDatabaseChangeTest extends StandardChangeTest {
         assertEquals("TAG_NAME", ((TagDatabaseStatement) sqlStatements[0]).getTag());
     }
 
-    @Override
-    @Test
+     @Test
     public void getConfirmationMessage() throws Exception {
         refactoring.setTag("TAG_NAME");
 

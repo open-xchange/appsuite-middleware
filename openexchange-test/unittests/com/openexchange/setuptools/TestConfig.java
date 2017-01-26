@@ -46,15 +46,20 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.setuptools;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.exception.OXException;
+import com.openexchange.test.pool.TestContextPool;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
+ * @deprecated - use contexts/user provided by {@link TestContextPool}
  */
+@Deprecated
 public class TestConfig {
+
     private String user;
     private String secondUser;
     private String thirdUser;

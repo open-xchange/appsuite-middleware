@@ -50,7 +50,12 @@
 package com.openexchange.ajax.folder;
 
 import static com.openexchange.java.Autoboxing.I;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.FolderUpdatesResponse;
@@ -69,24 +74,19 @@ import com.openexchange.groupware.container.FolderObject;
  */
 public class Bug17027Test extends AbstractAJAXSession {
 
-    private static final int[] COLUMNS = {
-        FolderObject.OBJECT_ID, FolderObject.CREATED_BY, FolderObject.MODIFIED_BY, FolderObject.CREATION_DATE, FolderObject.LAST_MODIFIED,
-        FolderObject.LAST_MODIFIED_UTC, FolderObject.FOLDER_ID, FolderObject.FOLDER_NAME, FolderObject.MODULE, FolderObject.TYPE,
-        FolderObject.SUBFOLDERS, FolderObject.OWN_RIGHTS, FolderObject.PERMISSIONS_BITS, FolderObject.SUMMARY,
-        FolderObject.STANDARD_FOLDER, FolderObject.TOTAL, FolderObject.NEW, FolderObject.UNREAD, FolderObject.DELETED,
-        FolderObject.CAPABILITIES, FolderObject.SUBSCRIBED, FolderObject.SUBSCR_SUBFLDS, 3010, 3020 };
+    private static final int[] COLUMNS = { FolderObject.OBJECT_ID, FolderObject.CREATED_BY, FolderObject.MODIFIED_BY, FolderObject.CREATION_DATE, FolderObject.LAST_MODIFIED, FolderObject.LAST_MODIFIED_UTC, FolderObject.FOLDER_ID, FolderObject.FOLDER_NAME, FolderObject.MODULE, FolderObject.TYPE, FolderObject.SUBFOLDERS, FolderObject.OWN_RIGHTS, FolderObject.PERMISSIONS_BITS, FolderObject.SUMMARY, FolderObject.STANDARD_FOLDER, FolderObject.TOTAL, FolderObject.NEW, FolderObject.UNREAD, FolderObject.DELETED, FolderObject.CAPABILITIES, FolderObject.SUBSCRIBED, FolderObject.SUBSCR_SUBFLDS, 3010, 3020 };
 
     private AJAXClient client;
     private FolderObject createdFolder;
     private Date before;
     private boolean folderDeleted = false;
 
-    public Bug17027Test(String name) {
-        super(name);
+    public Bug17027Test() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         createdFolder = Create.createPrivateFolder("Test for bug 17027", FolderObject.CALENDAR, client.getValues().getUserId());
@@ -96,14 +96,18 @@ public class Bug17027Test extends AbstractAJAXSession {
         before = new Date(createdFolder.getLastModified().getTime() - 1);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        if (!folderDeleted) {
-            client.execute(new DeleteRequest(EnumAPI.OX_NEW, createdFolder));
+    @After
+    public void tearDown() throws Exception {
+        try {
+            if (!folderDeleted) {
+                client.execute(new DeleteRequest(EnumAPI.OX_NEW, createdFolder));
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
+    @Test
     public void testUpdates() throws Throwable {
         FolderUpdatesResponse response = client.execute(new UpdatesRequest(EnumAPI.OX_NEW, COLUMNS, -1, null, before, Ignore.NONE));
         boolean found = false;
@@ -113,9 +117,7 @@ public class Bug17027Test extends AbstractAJAXSession {
             }
         }
         assertTrue("Newly created folder not found.", found);
-        assertFalse(
-            "Newly created folder should not be contained in deleted list.",
-            response.getDeletedIds().contains(I(createdFolder.getObjectID())));
+        assertFalse("Newly created folder should not be contained in deleted list.", response.getDeletedIds().contains(I(createdFolder.getObjectID())));
         client.execute(new DeleteRequest(EnumAPI.OX_NEW, createdFolder));
         folderDeleted = true;
         response = client.execute(new UpdatesRequest(EnumAPI.OX_NEW, COLUMNS, -1, null, before, Ignore.NONE));

@@ -78,8 +78,8 @@ public class ContactFolderMultipleUpdaterStrategyTest {
         this.session = new HashMap<Integer,Object>();
     }
 
-    @Test
-    public void testHandles() {
+     @Test
+     public void testHandles() {
         FolderObject contactFolder = new FolderObject();
         contactFolder.setModule(FolderObject.CONTACT);
 
@@ -90,8 +90,8 @@ public class ContactFolderMultipleUpdaterStrategyTest {
         assertFalse("Should not handle infostore folders", strategy.handles(infostoreFolder));
     }
 
-    @Test
-    public void testScoring() throws OXException {
+     @Test
+     public void testScoring() throws OXException {
         // First name is not enough
         Contact contact = new Contact();
         contact.setGivenName("Hans");
@@ -122,8 +122,8 @@ public class ContactFolderMultipleUpdaterStrategyTest {
 
     }
 
-    @Test
-    public void testTwoCompaniesDiffer() throws OXException {
+     @Test
+     public void testTwoCompaniesDiffer() throws OXException {
         Contact contact = new Contact();
         contact.setGivenName("");
         contact.setSurName("");
@@ -142,8 +142,8 @@ public class ContactFolderMultipleUpdaterStrategyTest {
         assertTrue("Empty names shouldn't be considered equal.", score < strategy.getThreshold(session));
     }
 
-    @Test
-    public void testNameChangedButMailAdressStayedTheSame() throws OXException {
+     @Test
+     public void testNameChangedButMailAdressStayedTheSame() throws OXException {
         // First name is not enough
         Contact contact = new Contact();
         contact.setGivenName("Hans");
@@ -162,8 +162,8 @@ public class ContactFolderMultipleUpdaterStrategyTest {
         assertTrue("First name and email address should suffice", score >= strategy.getThreshold(session));
     }
 
-    @Test
-    public void testWithoutUUIDNoMagicWillHappen() throws OXException {
+     @Test
+     public void testWithoutUUIDNoMagicWillHappen() throws OXException {
         Contact contact = new Contact();
         contact.setGivenName("Hans");
         contact.setSurName("Dampf");
@@ -180,8 +180,8 @@ public class ContactFolderMultipleUpdaterStrategyTest {
         assertTrue("These two contacts should not score higher than the treshhold", score < strategy.getThreshold(contact2));
     }
 
-    @Test
-    public void testSecondContactHasUUIDButIsNotOnThisSystem() throws OXException {
+     @Test
+     public void testSecondContactHasUUIDButIsNotOnThisSystem() throws OXException {
         Contact contact = new Contact();
         contact.setGivenName("Hans");
         contact.setSurName("Dampf");
@@ -199,8 +199,8 @@ public class ContactFolderMultipleUpdaterStrategyTest {
         assertTrue("These two contacts should not score higher than the treshhold", score < strategy.getThreshold(contact2));
     }
 
-    @Test
-    public void testTwoContactsAreSimilarButWillNotBeAssociatedBecauseOneIsNotOnTheSystem() throws OXException {
+     @Test
+     public void testTwoContactsAreSimilarButWillNotBeAssociatedBecauseOneIsNotOnTheSystem() throws OXException {
         Contact contact = new Contact();
         contact.setGivenName("Hans");
         contact.setSurName("Dampf");
@@ -218,8 +218,8 @@ public class ContactFolderMultipleUpdaterStrategyTest {
         assertTrue("These two contacts are similar and should be merged", score >= strategy.getThreshold(contact2));
     }
 
-    @Test
-    public void testCalculateSimilarityScore_mobileEqual_increaseSimilarityScore() throws OXException {
+     @Test
+     public void testCalculateSimilarityScore_mobileEqual_increaseSimilarityScore() throws OXException {
         // First name is not enough
         Contact contact = new Contact();
         contact.setGivenName("Hans");
@@ -235,8 +235,8 @@ public class ContactFolderMultipleUpdaterStrategyTest {
         assertTrue("Score to low. CellularTelephone is equal.", score >= strategy.getThreshold(session));
     }
 
-    @Test
-    public void testCalculateSimilarityScore_mobileDifferent_smallScore() throws OXException {
+     @Test
+     public void testCalculateSimilarityScore_mobileDifferent_smallScore() throws OXException {
         // First name is not enough
         Contact contact = new Contact();
         contact.setGivenName("Hans");

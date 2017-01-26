@@ -71,6 +71,7 @@ public class GetSnippetAttachmentParser extends AbstractAJAXParser<GetSnippetAtt
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.openexchange.ajax.framework.AbstractAJAXParser#createResponse(com.openexchange.ajax.container.Response)
      */
     @Override

@@ -58,7 +58,7 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
  */
 public class UpdateResponse extends AbstractAJAXResponse {
 
-	private String id;
+    private String id;
 
     /**
      * @param response
