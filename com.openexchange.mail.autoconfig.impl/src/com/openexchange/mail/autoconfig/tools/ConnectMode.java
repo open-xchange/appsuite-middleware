@@ -47,59 +47,39 @@
  *
  */
 
-package com.openexchange.html;
+package com.openexchange.mail.autoconfig.tools;
 
-import java.util.Map;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import com.openexchange.html.internal.HtmlServiceImpl;
-import com.openexchange.html.osgi.HTMLServiceActivator;
 
 /**
- * {@link Bug31826Test}
+ * {@link ConnectMode} - Specifies how to connect to the remote end-point.
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Bug31826Test {
+public enum ConnectMode {
 
-    private HtmlService service;
+    /**
+     * Initiate a plain connection; use STARTTLS only if supported, but do not require it.
+     */
+    DONT_CARE,
+    /**
+     * Initiate a connection right from the start using an SSL socket
+     */
+    SSL,
+    /**
+     * STARTTLS is required; start off with a plain socket, but switch to a TLS-protected one through STARTTLSE hand-shake
+     */
+    STARTTLS,
+    ;
 
-    public Bug31826Test() {
-        super();
+    /**
+     * Determines the appropriate connect mode for given arguments.
+     *
+     * @param secure Whether an SSL socket is supposed to be established
+     * @param requireTls Whether STARTTLS is required (in case no SSL Socket is created)
+     * @return The connect mode
+     */
+    public static ConnectMode connectModeFor(boolean secure, boolean requireTls) {
+        return secure ? ConnectMode.SSL : (requireTls ? ConnectMode.STARTTLS : ConnectMode.DONT_CARE);
     }
 
-    @Before
-    public void setUp() {
-        Object[] maps = HTMLServiceActivator.getDefaultHTMLEntityMaps();
-
-        @SuppressWarnings("unchecked")
-        final Map<String, Character> htmlEntityMap = (Map<String, Character>) maps[1];
-        @SuppressWarnings("unchecked")
-        final Map<Character, String> htmlCharMap = (Map<Character, String>) maps[0];
-
-        htmlEntityMap.put("apos", Character.valueOf('\''));
-
-        service = new HtmlServiceImpl(htmlCharMap, htmlEntityMap);
-    }
-
-    @After
-    public void tearDown()
- {
-        service = null;
-    }
-
-     @Test
-     public void testKeepUnicode() throws Exception {
-        String content = "dfg &hearts;&diams;&spades;&clubs;&copy;&reg;&trade; dfg";
-        String test = service.sanitize(content, null, true, null, null);
-
-        Assert.assertEquals("Unexpected return value.", "dfg \u2665\u2666\u2660\u2663\u00a9\u00ae\u2122 dfg", test);
-
-        content = "\u2665\u2666\u2660\u2663\u00a9\u00ae\u2122 <>";
-        test = service.htmlFormat(content, true, "--==--");
-
-        Assert.assertEquals("Unexpected return value.", "\u2665\u2666\u2660\u2663\u00a9\u00ae\u2122 &lt;&gt;", test);
-    }
 }

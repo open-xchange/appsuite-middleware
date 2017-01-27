@@ -63,7 +63,7 @@ import com.openexchange.html.HtmlService;
 public class Bug17195Test extends AbstractSanitizing {
 
      @Test
-     public void testContainsSigns() {
+     public void testContainsSigns() throws Exception {
         HtmlService htmlService = getHtmlService();
 
         String url = "https://ox6.local.com/ox6/#m=3Dinfostore&f=485D112&i=4D89719";

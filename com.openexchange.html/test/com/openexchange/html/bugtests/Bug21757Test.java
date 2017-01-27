@@ -62,7 +62,7 @@ import com.openexchange.html.AbstractSanitizing;
 public class Bug21757Test extends AbstractSanitizing {
 
      @Test
-     public void testEnsureBodyTagPresence() {
+     public void testEnsureBodyTagPresence() throws Exception {
         String htmlContent = "<center>Lorem Ipsum Dolor<table<tr><td>cell</td></tr></table></center>";
         String actual = getHtmlService().getConformHTML(htmlContent, "UTF-8");
         StringBuilder expectedBuilder = new StringBuilder();

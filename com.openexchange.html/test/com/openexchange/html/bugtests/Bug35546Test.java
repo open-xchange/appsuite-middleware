@@ -61,7 +61,7 @@ import com.openexchange.html.AbstractSanitizing;
  */
 public class Bug35546Test extends AbstractSanitizing {
      @Test
-     public void testKeepEmptyBreaksAfterConversion() {
+     public void testKeepEmptyBreaksAfterConversion() throws Exception {
         String content = getHtmlService().getConformHTML("<p>Text before one empty line</p><p><br></p><p>Text after empty line.</p>", "UTF-8");
         assertEquals("Unexpected return value", "<!DOCTYPE html>\n" +
             "<html><head>\n" +

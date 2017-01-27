@@ -141,7 +141,7 @@ public final class POP3Config extends MailConfig {
     @Override
     protected void parseServerURL(final UrlInfo urlInfo) {
         pop3Server = urlInfo.getServerURL();
-        startTls = urlInfo.isStartTls();
+        requireTls = urlInfo.isRequireStartTls();
         pop3Port = 110;
         {
             final String[] parsed = parseProtocol(pop3Server);

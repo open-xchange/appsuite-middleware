@@ -61,7 +61,7 @@ import com.openexchange.html.AbstractSanitizing;
  */
 public class Bug21532Test extends AbstractSanitizing {
      @Test
-     public void testConvertConditionalCommentsWihoutWhitespaces() {
+     public void testConvertConditionalCommentsWihoutWhitespaces() throws Exception {
         String content = getHtmlService().getConformHTML("</head><body><![if !supportLists]><p>You should see this</p><![endif]></body></html>", "UTF-8");
 
         String expected = "<!DOCTYPE html>\n" +

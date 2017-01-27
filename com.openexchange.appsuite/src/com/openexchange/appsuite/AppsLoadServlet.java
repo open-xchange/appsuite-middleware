@@ -70,7 +70,7 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
- * {@link AppsLoadServlet} - Provides App Suite data for loading applciations.
+ * {@link AppsLoadServlet} - Provides App Suite data for loading applications.
  *
  * @author <a href="mailto:viktor.pracht@open-xchange.com">Viktor Pracht</a>
  */

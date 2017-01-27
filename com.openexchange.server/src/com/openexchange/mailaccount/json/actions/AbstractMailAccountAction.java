@@ -414,6 +414,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
                 }
             }
             mailConfig.setSecure(accountDescription.isMailSecure());
+            mailConfig.setRequireTls(accountDescription.isMailStartTls());
             mailAccess.setCacheable(false);
             return mailAccess;
         } catch (final OXException e) {

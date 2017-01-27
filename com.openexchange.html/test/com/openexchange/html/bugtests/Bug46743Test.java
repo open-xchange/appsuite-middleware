@@ -6,11 +6,11 @@ import org.junit.Test;
 import com.openexchange.html.AbstractSanitizing;
 
 public class Bug46743Test extends AbstractSanitizing {
-    
+
      @Test
-     public void testInsuficentParanthesesAtEndOfComment() {
+     public void testInsuficentParanthesesAtEndOfComment() throws Exception {
         String content = "<style type=\"text/css\">\n"+
-    "<!--\n"+   
+    "<!--\n"+
         "@media screen and (max-width: 440px) {\n"+
             "@media only screen and (max-device-width: 440px) and (-webkit-min-device-pixel-ratio: 1) {\n"+
                 ".recoMobile {\n"+

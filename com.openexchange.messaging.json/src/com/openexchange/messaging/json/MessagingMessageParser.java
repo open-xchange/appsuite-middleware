@@ -384,7 +384,14 @@ public class MessagingMessageParser {
                 bodyPart.setHeader("Content-Disposition", mcd.toString());
                 bodyPart.setContent(managedFileContent, managedFileContent.getContentType());
             } else {
-                bodyPart.setContent(parsedContent, bodyPart.getContentType().getValue());
+                if (bodyPart.getContentType() != null) {
+                    bodyPart.setContent(parsedContent, bodyPart.getContentType().getValue());
+                } else {
+                    // Expect content to be a string
+                    final String contentType = "text/plain; charset=ISO-8859-1";
+                    final ContentType mct = new MimeContentType(contentType);
+                    bodyPart.setContent(parsedContent, mct.toString());
+                }
             }
         }
     }
