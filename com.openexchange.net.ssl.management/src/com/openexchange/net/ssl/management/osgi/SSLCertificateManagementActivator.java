@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,61 +47,66 @@
  *
  */
 
-package com.openexchange.net.ssl.management;
+package com.openexchange.net.ssl.management.osgi;
 
-import com.openexchange.exception.OXException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.database.CreateTableService;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.net.ssl.management.SSLCertificateManagementService;
+import com.openexchange.net.ssl.management.internal.SSLCertificateManagementServiceImpl;
+import com.openexchange.net.ssl.management.storage.CreateSSLCertificateManagementTable;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link SSLCertificateManagementService}
+ * {@link SSLCertificateManagementActivator}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface SSLCertificateManagementService {
+public class SSLCertificateManagementActivator extends HousekeepingActivator {
 
     /**
-     * Checks whether the SSL {@link Certificate} with the specified fingerprint
-     * is already trusted by the specified user in the specified context
-     * 
-     * @param userId The user's identifier
-     * @param contextId The context's identifier
-     * @param fingerprint The SSL {@link Certificate}'s fingerprint
-     * @return <code>true</code> if the {@link Certificate} is trusted; <code>false</code> otherwise
-     * @throws OXException if the certificate is not found or any other error is occurred
+     * Initialises a new {@link SSLCertificateManagementActivator}.
      */
-    boolean isTrusted(int userId, int contextId, String fingerprint) throws OXException;
+    public SSLCertificateManagementActivator() {
+        super();
+    }
 
-    /**
-     * Checks whether the SSL {@link Certificate} with the specified fingerprint
-     * already exists for the specified user in the specified context
+    /*
+     * (non-Javadoc)
      * 
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @param fingerprint The SSL {@link Certificate}'s fingerprint
-     * @return <code>true</code> if the {@link Certificate} exists; <code>false</code> otherwise
-     * @throws OXException if any error is occurred
+     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
      */
-    boolean contains(int userId, int contextId, String fingerprint) throws OXException;
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { DatabaseService.class };
+    }
 
-    /**
-     * Stores the specified {@link Certificate} for the specified user in the specified context
-     * If a certificate with the same fingerprint exists for the same user, then the certificate
-     * is updated instead.
+    /*
+     * (non-Javadoc)
      * 
-     * @param userId The user's identifier
-     * @param contextId The context's identifier
-     * @param certificate The SSL {@link Certificate} to store
-     * @throws OXException if any error is occurred
+     * @see com.openexchange.osgi.DeferredActivator#startBundle()
      */
-    void store(int userId, int contextId, Certificate certificate) throws OXException;
+    @Override
+    protected void startBundle() throws Exception {
+        registerService(CreateTableService.class, new CreateSSLCertificateManagementTable());
+        //registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService());
+        registerService(SSLCertificateManagementService.class, new SSLCertificateManagementServiceImpl(this));
+        Logger logger = LoggerFactory.getLogger(SSLCertificateManagementActivator.class);
+        logger.info("SSLCertificateManagementService registered successfully");
+    }
 
-    /**
-     * Deletes the SSL {@link Certificate} with the specified fingerprint for the specified
-     * user in the specified context
+    /*
+     * (non-Javadoc)
      * 
-     * @param userId The user identifier
-     * @param contextId The context identifer
-     * @param fingerprint The SSL {@link Certificate}'s fingerprint
-     * @throws OXException if the certificate is not found or any other error is occurred
+     * @see com.openexchange.osgi.HousekeepingActivator#stopBundle()
      */
-    void delete(int userId, int contextId, String fingerprint) throws OXException;
+    @Override
+    protected void stopBundle() throws Exception {
+        unregisterService(SSLCertificateManagementService.class);
+        Logger logger = LoggerFactory.getLogger(SSLCertificateManagementActivator.class);
+        logger.info("SSLCertificateManagementService unregistered successfully");
+        super.stopBundle();
+    }
+
 }

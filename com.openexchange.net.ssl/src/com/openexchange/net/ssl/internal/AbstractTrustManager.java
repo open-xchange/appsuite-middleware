@@ -68,6 +68,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.util.Tools;
 import com.openexchange.log.LogProperties;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
+import com.openexchange.net.ssl.exception.SSLExceptionCode;
 import com.openexchange.net.ssl.management.SSLCertificateManagementService;
 import com.openexchange.net.ssl.osgi.Services;
 
@@ -127,15 +128,15 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         try {
             this.trustManager.checkServerTrusted(chain, authType, socket);
             return;
-        } catch (Exception e) {
+        } catch (CertificateException e) {
             //TODO: try to determine the reason of failure
             if (e.getMessage().contains("unable to find valid certification path to requested target")) {
-                LOG.warn("All good it's just an invalid certificate");
-                // All good, it's just an invalid certificate
+                // It's an invalid certificate, check if the user trusts it
+                checkUserTrustsServer(chain);
             }
-            // re-throw if we can not handle the exception
+            throw e;
         }
-        checkUserTrustsServer(chain);
+
     }
 
     /*
@@ -170,15 +171,14 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         try {
             this.trustManager.checkServerTrusted(chain, authType);
             return;
-        } catch (Exception e) {
+        } catch (CertificateException e) {
             //TODO: try to determine the reason of failure
             if (e.getMessage().contains("unable to find valid certification path to requested target")) {
-                LOG.warn("All good it's just an invalid certificate");
-                // All good, it's just an invalid certificate
+                // It's an invalid certificate, check if the user trusts it
+                checkUserTrustsServer(chain);
             }
-            // re-throw if we can not handle the exception
+            throw e;
         }
-        checkUserTrustsServer(chain);
     }
 
     /**
@@ -217,15 +217,14 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         try {
             this.trustManager.checkServerTrusted(chain, authType, engine);
             return;
-        } catch (Exception e) {
+        } catch (CertificateException e) {
             //TODO: try to determine the reason of failure
             if (e.getMessage().contains("unable to find valid certification path to requested target")) {
-                LOG.warn("All good it's just an invalid certificate");
-                // All good, it's just an invalid certificate
+                // It's an invalid certificate, check if the user trusts it
+                checkUserTrustsServer(chain);
             }
-            // re-throw if we can not handle the exception
+            throw e;
         }
-        checkUserTrustsServer(chain);
     }
 
     @Override
@@ -271,7 +270,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
                 }
             }
             if (!untrustedFingerprints.isEmpty()) {
-                //TODO: Throw an exception with the indication that the server is untrusted (the user can then choose what to do)
+                throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create();
             }
         } catch (NoSuchAlgorithmException | CertificateEncodingException | OXException e) {
             // TODO: throw

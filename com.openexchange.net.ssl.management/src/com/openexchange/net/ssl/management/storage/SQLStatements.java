@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,61 +47,37 @@
  *
  */
 
-package com.openexchange.net.ssl.management;
-
-import com.openexchange.exception.OXException;
+package com.openexchange.net.ssl.management.storage;
 
 /**
- * {@link SSLCertificateManagementService}
+ * {@link SQLStatements}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface SSLCertificateManagementService {
+final class SQLStatements {
 
     /**
-     * Checks whether the SSL {@link Certificate} with the specified fingerprint
-     * is already trusted by the specified user in the specified context
-     * 
-     * @param userId The user's identifier
-     * @param contextId The context's identifier
-     * @param fingerprint The SSL {@link Certificate}'s fingerprint
-     * @return <code>true</code> if the {@link Certificate} is trusted; <code>false</code> otherwise
-     * @throws OXException if the certificate is not found or any other error is occurred
+     * Insert a certificate
      */
-    boolean isTrusted(int userId, int contextId, String fingerprint) throws OXException;
+    final static String INSERT = "INSERT INTO userCertificate (cid, userid, fingerprint, trusted) VALUES (?,?,?,?)";
 
     /**
-     * Checks whether the SSL {@link Certificate} with the specified fingerprint
-     * already exists for the specified user in the specified context
-     * 
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @param fingerprint The SSL {@link Certificate}'s fingerprint
-     * @return <code>true</code> if the {@link Certificate} exists; <code>false</code> otherwise
-     * @throws OXException if any error is occurred
+     * Updates a certificate
      */
-    boolean contains(int userId, int contextId, String fingerprint) throws OXException;
+    final static String UPDATE = "UPDATE userCertificate SET trusted=? WHERE userid=? AND cid=? AND fingerprint=?";
 
     /**
-     * Stores the specified {@link Certificate} for the specified user in the specified context
-     * If a certificate with the same fingerprint exists for the same user, then the certificate
-     * is updated instead.
-     * 
-     * @param userId The user's identifier
-     * @param contextId The context's identifier
-     * @param certificate The SSL {@link Certificate} to store
-     * @throws OXException if any error is occurred
+     * Check for existence
      */
-    void store(int userId, int contextId, Certificate certificate) throws OXException;
+    final static String CONTAINS = "SELECT 1 from userCertificate WHERE cid=? AND userid=? AND fingerprint=?";
 
     /**
-     * Deletes the SSL {@link Certificate} with the specified fingerprint for the specified
-     * user in the specified context
-     * 
-     * @param userId The user identifier
-     * @param contextId The context identifer
-     * @param fingerprint The SSL {@link Certificate}'s fingerprint
-     * @throws OXException if the certificate is not found or any other error is occurred
+     * Check if the cert is trusted
      */
-    void delete(int userId, int contextId, String fingerprint) throws OXException;
+    final static String IS_TRUSTED = "SELECT trusted from userCertificate WHERE cid=? AND userid=? AND fingerprint=?";
+
+    /**
+     * Delete certificate
+     */
+    final static String DELETE = "DELETE FROM userCertificate WHERE cid=? AND userid=? AND fingerprint=?";
 }

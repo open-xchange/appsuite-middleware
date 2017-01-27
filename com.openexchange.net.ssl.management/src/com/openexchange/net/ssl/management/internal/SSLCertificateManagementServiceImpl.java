@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,61 +47,70 @@
  *
  */
 
-package com.openexchange.net.ssl.management;
+package com.openexchange.net.ssl.management.internal;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.net.ssl.management.Certificate;
+import com.openexchange.net.ssl.management.SSLCertificateManagementService;
+import com.openexchange.net.ssl.management.storage.SSLCertificateManagementSQL;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link SSLCertificateManagementService}
+ * {@link SSLCertificateManagementServiceImpl}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface SSLCertificateManagementService {
+public class SSLCertificateManagementServiceImpl implements SSLCertificateManagementService {
+
+    private final SSLCertificateManagementSQL storage;
 
     /**
-     * Checks whether the SSL {@link Certificate} with the specified fingerprint
-     * is already trusted by the specified user in the specified context
+     * Initialises a new {@link SSLCertificateManagementServiceImpl}.
      * 
-     * @param userId The user's identifier
-     * @param contextId The context's identifier
-     * @param fingerprint The SSL {@link Certificate}'s fingerprint
-     * @return <code>true</code> if the {@link Certificate} is trusted; <code>false</code> otherwise
-     * @throws OXException if the certificate is not found or any other error is occurred
+     * @param services The {@link ServiceLookup} instance
      */
-    boolean isTrusted(int userId, int contextId, String fingerprint) throws OXException;
+    public SSLCertificateManagementServiceImpl(ServiceLookup services) {
+        super();
+        storage = new SSLCertificateManagementSQL(services);
+    }
 
-    /**
-     * Checks whether the SSL {@link Certificate} with the specified fingerprint
-     * already exists for the specified user in the specified context
+    /*
+     * (non-Javadoc)
      * 
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @param fingerprint The SSL {@link Certificate}'s fingerprint
-     * @return <code>true</code> if the {@link Certificate} exists; <code>false</code> otherwise
-     * @throws OXException if any error is occurred
+     * @see com.openexchange.net.ssl.management.SSLCertificateManagementService#isTrusted(int, int, java.lang.String)
      */
-    boolean contains(int userId, int contextId, String fingerprint) throws OXException;
+    @Override
+    public boolean isTrusted(int userId, int contextId, String fingerprint) throws OXException {
+        return storage.isTrusted(userId, contextId, fingerprint);
+    }
 
-    /**
-     * Stores the specified {@link Certificate} for the specified user in the specified context
-     * If a certificate with the same fingerprint exists for the same user, then the certificate
-     * is updated instead.
+    /*
+     * (non-Javadoc)
      * 
-     * @param userId The user's identifier
-     * @param contextId The context's identifier
-     * @param certificate The SSL {@link Certificate} to store
-     * @throws OXException if any error is occurred
+     * @see com.openexchange.net.ssl.management.SSLCertificateManagementService#contains(int, int, java.lang.String)
      */
-    void store(int userId, int contextId, Certificate certificate) throws OXException;
+    @Override
+    public boolean contains(int userId, int contextId, String fingerprint) throws OXException {
+        return storage.contains(userId, contextId, fingerprint);
+    }
 
-    /**
-     * Deletes the SSL {@link Certificate} with the specified fingerprint for the specified
-     * user in the specified context
+    /*
+     * (non-Javadoc)
      * 
-     * @param userId The user identifier
-     * @param contextId The context identifer
-     * @param fingerprint The SSL {@link Certificate}'s fingerprint
-     * @throws OXException if the certificate is not found or any other error is occurred
+     * @see com.openexchange.net.ssl.management.SSLCertificateManagementService#store(int, int, com.openexchange.net.ssl.management.Certificate)
      */
-    void delete(int userId, int contextId, String fingerprint) throws OXException;
+    @Override
+    public void store(int userId, int contextId, Certificate certificate) throws OXException {
+        storage.store(userId, contextId, certificate);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.net.ssl.management.SSLCertificateManagementService#delete(int, int, java.lang.String)
+     */
+    @Override
+    public void delete(int userId, int contextId, String fingerprint) throws OXException {
+        storage.delete(userId, contextId, fingerprint);
+    }
 }
