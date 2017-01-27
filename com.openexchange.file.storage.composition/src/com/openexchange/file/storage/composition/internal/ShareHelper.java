@@ -337,7 +337,7 @@ public class ShareHelper {
     }
 
     private static boolean isInvalidGuestPermission(FileStorageObjectPermission p, GuestInfo guestInfo) {
-        if (guestInfo.getRecipientType() == RecipientType.ANONYMOUS) {
+        if (guestInfo != null && guestInfo.getRecipientType() == RecipientType.ANONYMOUS) {
             return (p.canWrite() || p.canDelete());
         }
 
