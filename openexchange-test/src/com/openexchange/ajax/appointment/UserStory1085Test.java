@@ -51,9 +51,7 @@ package com.openexchange.ajax.appointment;
 
 import static com.openexchange.ajax.folder.Create.ocl;
 import static com.openexchange.groupware.calendar.TimeTools.D;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import java.util.Date;
 import org.junit.After;
 import org.junit.Before;
@@ -86,6 +84,7 @@ public class UserStory1085Test extends AppointmentTest {
 
     private Date start, end;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -107,6 +106,19 @@ public class UserStory1085Test extends AppointmentTest {
         CommonInsertResponse insertResponse = clientB.execute(new InsertRequest(appointmenShare, clientB.getValues().getTimeZone()));
         insertResponse.fillObject(appointmenShare);
 
+        /*
+         * reset permissions in default calendar folder of user c if required
+         */
+        FolderObject calendarFolderC = clientC.execute(new com.openexchange.ajax.folder.actions.GetRequest(
+            EnumAPI.OX_OLD, clientC.getValues().getPrivateAppointmentFolder())).getFolder();
+        if (1 < calendarFolderC.getPermissions().size()) {
+            FolderObject folderUpdate = new FolderObject(calendarFolderC.getObjectID());
+            folderUpdate.setLastModified(calendarFolderC.getLastModified());
+            folderUpdate.setPermissionsAsArray(new OCLPermission[] { ocl(
+                userIdC, false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION) });
+            clientC.execute(new com.openexchange.ajax.folder.actions.UpdateRequest(EnumAPI.OX_OLD, folderUpdate)).getResponse();
+        }
+
         appointmentPrivate = CalendarTestManager.createAppointmentObject(clientC.getValues().getPrivateAppointmentFolder(), "Title of private flagged appointment", D("01.02.2009 12:00"), D("01.02.2009 14:00"));
         appointmentPrivate.setPrivateFlag(true);
         appointmentPrivate.setIgnoreConflicts(true);
@@ -122,6 +134,7 @@ public class UserStory1085Test extends AppointmentTest {
         end = D("02.02.2009 00:00");
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
