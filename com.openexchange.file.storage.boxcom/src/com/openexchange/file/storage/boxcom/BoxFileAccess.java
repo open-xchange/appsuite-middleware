@@ -289,39 +289,24 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                     String boxFolderId = toBoxFolderId(destFolder);
                     com.box.sdk.BoxFolder boxFolder = new com.box.sdk.BoxFolder(boxClient, boxFolderId);
 
-                    // Check destination folder
-                    String title = fileInfo.getName();
-                    {
-                        String baseName;
-                        String ext;
-                        {
-                            int dotPos = title.lastIndexOf('.');
-                            if (dotPos > 0) {
-                                baseName = title.substring(0, dotPos);
-                                ext = title.substring(dotPos);
-                            } else {
-                                baseName = title;
-                                ext = "";
+                    String name = fileInfo.getName();
+                    FileName fn = null;
+                    Info copiedFile = null;
+                    do {
+                        try {
+                            // Copy the file
+                            copiedFile = boxFile.copy(boxFolder, name);
+                        } catch (BoxAPIException e) {
+                            if (409 != e.getResponseCode() || null == name) {
+                                throw e;
                             }
-                        }
-
-                        int count = 1;
-                        boolean keepOn = true;
-                        while (keepOn) {
-                            keepOn = false;
-                            for (com.box.sdk.BoxItem.Info info : boxFolder) {
-                                // Check for filename clashes and append a number at the end of the filename
-                                if (info instanceof Info && title.equals(info.getName())) {
-                                    keepOn = true;
-                                    title = new StringBuilder(baseName).append(" (").append(count++).append(')').append(ext).toString();
-                                    break;
-                                }
+                            // API returned conflict. Compose another name and retry
+                            if (null == fn) {
+                                fn = new FileName(name);
                             }
+                            name = fn.enhance();
                         }
-                    }
-
-                    // Copy the file
-                    Info copiedFile = boxFile.copy(boxFolder, title);
+                    } while (null == copiedFile);
 
                     return new IDTuple(destFolder, copiedFile.getID());
                 } catch (final BoxAPIException e) {
@@ -346,39 +331,24 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                     String boxFolderId = toBoxFolderId(destFolder);
                     com.box.sdk.BoxFolder boxFolder = new com.box.sdk.BoxFolder(apiConnection, boxFolderId);
 
-                    // Check destination folder
-                    String title = fileInfo.getName();
-                    {
-                        String baseName;
-                        String ext;
-                        {
-                            int dotPos = title.lastIndexOf('.');
-                            if (dotPos > 0) {
-                                baseName = title.substring(0, dotPos);
-                                ext = title.substring(dotPos);
-                            } else {
-                                baseName = title;
-                                ext = "";
+                    String name = fileInfo.getName();
+                    FileName fn = null;
+                    com.box.sdk.BoxItem.Info movedFile = null;
+                    do {
+                        try {
+                            // Copy the file
+                            movedFile = boxFile.move(boxFolder, name);
+                        } catch (BoxAPIException e) {
+                            if (409 != e.getResponseCode() || null == name) {
+                                throw e;
                             }
-                        }
-                        int count = 1;
-                        boolean keepOn = true;
-                        while (keepOn) {
-                            keepOn = false;
-                            // TODO: Expensive as it needs to iterate through all the files in a folder...
-                            //       Consider the possibility of checking if the file exists in the folder with the exists method
-                            for (com.box.sdk.BoxItem.Info info : boxFolder) {
-                                // Check for filename clashes and append a number at the end of the filename
-                                if (info instanceof Info && title.equals(info.getName())) {
-                                    keepOn = true;
-                                    title = new StringBuilder(baseName).append(" (").append(count++).append(')').append(ext).toString();
-                                    break;
-                                }
+                            // API returned conflict. Compose another name and retry
+                            if (null == fn) {
+                                fn = new FileName(name);
                             }
+                            name = fn.enhance();
                         }
-                    }
-
-                    com.box.sdk.BoxItem.Info movedFile = boxFile.move(boxFolder, title);
+                    } while (null == movedFile);
 
                     return new IDTuple(destFolder, movedFile.getID());
                 } catch (final BoxAPIException e) {
