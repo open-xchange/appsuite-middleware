@@ -49,6 +49,7 @@
 
 package com.openexchange.rss.preprocessors;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
 import com.openexchange.rss.RssResult;
 import com.openexchange.rss.osgi.Services;
@@ -71,7 +72,7 @@ public class SanitizingPreprocessor extends AbstractPreprocessor {
     }
 
     @Override
-    protected String innerProcess(String payload, RssResult rssResult) {
+    protected String innerProcess(String payload, RssResult rssResult) throws OXException {
         final HtmlService htmlService = Services.getService(HtmlService.class);
         if (null == htmlService) {
             return payload;

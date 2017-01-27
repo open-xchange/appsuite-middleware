@@ -139,7 +139,7 @@ public class IMAPProtocol extends Protocol {
 	    if (capabilities == null)
 		capability();
 
-	    if (hasCapability("IMAP4rev1"))
+	    if (false == rev1 && hasCapability("IMAP4rev1"))
 		rev1 = true;
 
 	    searchCharsets = new String[2]; // 2, for now.
@@ -252,6 +252,8 @@ public class IMAPProtocol extends Protocol {
 	    // some server vendors claim otherwise.
 	    if (ir.keyEquals("CAPABILITY")) {
             parseCapabilities(ir);
+            if (false == rev1 && capabilities.containsKey("IMAP4REV1"))
+                rev1 = true;
         }
 	}
     }
@@ -286,6 +288,8 @@ public class IMAPProtocol extends Protocol {
                 }
             }
             parseCapabilities(r);
+            if (false == rev1 && capabilities.containsKey("IMAP4REV1"))
+                rev1 = true;
             return true;
         }
     } 
@@ -314,6 +318,8 @@ public class IMAPProtocol extends Protocol {
         }
 	}
 	parseCapabilities(r);
+    if (false == rev1 && capabilities.containsKey("IMAP4REV1"))
+        rev1 = true;
 	return true;
     }
 

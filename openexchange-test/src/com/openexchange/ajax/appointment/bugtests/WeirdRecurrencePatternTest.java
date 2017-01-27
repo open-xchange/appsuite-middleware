@@ -100,6 +100,7 @@ public class WeirdRecurrencePatternTest extends AbstractAJAXSession {
         getClient().execute(setRequest);
 
         ctm = new CalendarTestManager(getClient());
+        ctm.setTimezone(tz);
         appointment = new Appointment();
         appointment.setTitle("hiliowequhe234123.3");
         appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());

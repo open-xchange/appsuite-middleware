@@ -91,7 +91,7 @@ public class Bug36024Test  {
     }
 
      @Test
-     public void testPositionFixedReplacedByDisplayBlock() {
+     public void testPositionFixedReplacedByDisplayBlock() throws Exception {
         String content = "<a href=\"http://example.com/attack.html\" style=\"position: fixed; top: 0px; left: 0; width: 1000000px; height: 100000px; background-color: red;\"></a>";
         String sanitized = service.sanitize(content, null, true, null, null);
         assertTrue("CSS style not sanitized", (sanitized.indexOf("display: block") > -1));

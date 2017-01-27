@@ -227,11 +227,11 @@ public class XingAPI<S extends Session> {
                 session);
             final JSONArray jItems = responseInformation.getJSONObject("results").optJSONArray("items");
             if (null == jItems) {
-                return null;
+                return Collections.emptyList();
             }
             final int length = jItems.length();
             if (length <= 0) {
-                return null;
+                return Collections.emptyList();
             }
 
             for (int i = 0; i < jItems.length(); i++) {

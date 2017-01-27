@@ -61,7 +61,7 @@ import com.openexchange.html.AbstractSanitizing;
  */
 public class Bug19428Test extends AbstractSanitizing {
      @Test
-     public void testGetConformHtml() {
+     public void testGetConformHtml() throws Exception {
 
         String content = "<html>\n" +
             "<head>\n" +

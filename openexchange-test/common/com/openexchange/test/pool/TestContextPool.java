@@ -80,12 +80,18 @@ public class TestContextPool {
     }
 
     public static TestContext acquireContext(String acquiredBy) {
-        TestContext context = contexts.poll();
-        Assert.assertNotNull("Unable to acquire test context due to an empty pool.", context);
-        context.setAcquiredBy(acquiredBy);
-        contextWatcher.get().contextInUse(context);
-        LOG.debug("Context '{}' with id {} has been acquired by {}.", context.getName(), context.getId(), acquiredBy, new Throwable());
-        return context;
+        try {
+            TestContext context = contexts.take();
+            Assert.assertNotNull("Unable to acquire test context due to an empty pool.", context);
+            context.setAcquiredBy(acquiredBy);
+            contextWatcher.get().contextInUse(context);
+            LOG.debug("Context '{}' with id {} has been acquired by {}.", context.getName(), context.getId(), acquiredBy, new Throwable());
+            return context;
+        } catch (InterruptedException e) {
+            // should not happen
+            LOG.error("", e);
+        }
+        return null;
     }
 
     public static void backContext(TestContext context) {

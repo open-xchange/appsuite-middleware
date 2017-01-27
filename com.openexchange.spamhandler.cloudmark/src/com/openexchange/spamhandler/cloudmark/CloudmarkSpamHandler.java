@@ -92,6 +92,8 @@ public final class CloudmarkSpamHandler extends SpamHandler {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CloudmarkSpamHandler.class);
 
+    protected static final String TARGET_SPAM_ADDRESS = "com.openexchange.spamhandler.cloudmark.targetSpamEmailAddress";
+
     private static final String NAME = "CloudmarkSpamHandler";
 
     // -------------------------------------------------------------------------------------------
@@ -193,7 +195,7 @@ public final class CloudmarkSpamHandler extends SpamHandler {
         ConfigViewFactory factory = services.getService(ConfigViewFactory.class);
         ConfigView view = factory.getView(session.getUserId(), session.getContextId());
 
-        String sTargetSpamEmailAddress = getPropertyFromView(view, "com.openexchange.spamhandler.name", "", String.class).trim();
+        String sTargetSpamEmailAddress = getPropertyFromView(view, TARGET_SPAM_ADDRESS, "", String.class).trim();
 
         MailAccess<?, ?> mailAccess = null;
         try {
