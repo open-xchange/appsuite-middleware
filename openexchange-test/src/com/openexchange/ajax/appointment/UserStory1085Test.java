@@ -109,13 +109,14 @@ public class UserStory1085Test extends AppointmentTest {
         /*
          * reset permissions in default calendar folder of user c if required
          */
-        FolderObject calendarFolderC = clientC.execute(new com.openexchange.ajax.folder.actions.GetRequest(
-            EnumAPI.OX_OLD, clientC.getValues().getPrivateAppointmentFolder())).getFolder();
+        com.openexchange.ajax.folder.actions.GetResponse folderGetResponse = clientC.execute(
+            new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_OLD, clientC.getValues().getPrivateAppointmentFolder()));
+        FolderObject calendarFolderC = folderGetResponse.getFolder();
         if (1 < calendarFolderC.getPermissions().size()) {
             FolderObject folderUpdate = new FolderObject(calendarFolderC.getObjectID());
-            folderUpdate.setLastModified(calendarFolderC.getLastModified());
+            folderUpdate.setLastModified(folderGetResponse.getTimestamp());
             folderUpdate.setPermissionsAsArray(new OCLPermission[] { ocl(
-                userIdC, false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION) });
+                clientC.getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION) });
             clientC.execute(new com.openexchange.ajax.folder.actions.UpdateRequest(EnumAPI.OX_OLD, folderUpdate)).getResponse();
         }
 
