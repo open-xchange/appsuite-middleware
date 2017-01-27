@@ -283,9 +283,10 @@ public class Utils {
         }
         if (null != from) {
             boolean includeOldSeries = true;
+            boolean inclusiveFrom = false;
             if (includeOldSeries) {
                 searchTerm.addSearchTerm(new CompositeSearchTerm(CompositeOperation.OR)
-                    .addSearchTerm(getSearchTerm(EventField.END_DATE, SingleOperation.GREATER_OR_EQUAL, from))
+                    .addSearchTerm(getSearchTerm(EventField.END_DATE, inclusiveFrom ? SingleOperation.GREATER_OR_EQUAL : SingleOperation.GREATER_THAN, from))
                     .addSearchTerm(new CompositeSearchTerm(CompositeOperation.AND)
                         .addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID)))
                         .addSearchTerm(new CompositeSearchTerm(CompositeOperation.NOT)
@@ -294,7 +295,7 @@ public class Utils {
                     )
                 );
             } else {
-                searchTerm.addSearchTerm(getSearchTerm(EventField.END_DATE, SingleOperation.GREATER_OR_EQUAL, from));
+                searchTerm.addSearchTerm(getSearchTerm(EventField.END_DATE, inclusiveFrom ? SingleOperation.GREATER_OR_EQUAL : SingleOperation.GREATER_THAN, from));
             }
         }
         if (null != until) {
