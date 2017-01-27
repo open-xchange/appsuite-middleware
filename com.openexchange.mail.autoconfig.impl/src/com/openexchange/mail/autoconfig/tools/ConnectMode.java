@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2016 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,35 +47,39 @@
  *
  */
 
-package com.openexchange.mail.api;
+package com.openexchange.mail.autoconfig.tools;
 
 
 /**
- * {@link UrlInfo}
+ * {@link ConnectMode} - Specifies how to connect to the remote end-point.
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since v7.8.2
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UrlInfo {
-
-    private final String serverURL;
-    private final boolean requireStartTls;
+public enum ConnectMode {
 
     /**
-     * Initializes a new {@link UrlInfo}.
+     * Initiate a plain connection; use STARTTLS only if supported, but do not require it.
      */
-    public UrlInfo(String serverURL, boolean requireStartTls) {
-        super();
-        this.serverURL = serverURL;
-        this.requireStartTls = requireStartTls;
-    }
+    DONT_CARE,
+    /**
+     * Initiate a connection right from the start using an SSL socket
+     */
+    SSL,
+    /**
+     * STARTTLS is required; start off with a plain socket, but switch to a TLS-protected one through STARTTLSE hand-shake
+     */
+    STARTTLS,
+    ;
 
-    public String getServerURL() {
-        return serverURL;
-    }
-
-    public boolean isRequireStartTls() {
-        return requireStartTls;
+    /**
+     * Determines the appropriate connect mode for given arguments.
+     *
+     * @param secure Whether an SSL socket is supposed to be established
+     * @param requireTls Whether STARTTLS is required (in case no SSL Socket is created)
+     * @return The connect mode
+     */
+    public static ConnectMode connectModeFor(boolean secure, boolean requireTls) {
+        return secure ? ConnectMode.SSL : (requireTls ? ConnectMode.STARTTLS : ConnectMode.DONT_CARE);
     }
 
 }

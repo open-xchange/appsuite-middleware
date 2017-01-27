@@ -162,9 +162,17 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
             ClientConfig clientConfig = new AutoconfigParser().getConfig(rsp.getEntity().getContent());
 
             DefaultAutoconfig autoconfig = getBestConfiguration(clientConfig, emailDomain);
+            if (null == autoconfig) {
+                return null;
+            }
+
+            // If 'forceSecure' is true, ensure that both - mail and transport settings - either support SSL or STARTTLS
+            if (forceSecure && ((!autoconfig.isMailSecure() && !autoconfig.isMailStartTls()) || (!autoconfig.isTransportSecure() && !autoconfig.isTransportStartTls()))) {
+                // Either mail or transport do not support a secure connection (or neither of them)
+                return null;
+            }
+
             replaceUsername(autoconfig, emailLocalPart, emailDomain);
-            autoconfig.setMailStartTls(forceSecure);
-            autoconfig.setTransportStartTls(forceSecure);
             return autoconfig;
         } catch (ClientProtocolException e) {
             LOG.warn("Could not retrieve config XML.", e);

@@ -141,7 +141,7 @@ public final class SMTPConfig extends TransportConfig implements TransportAuthSu
         secure = PROTOCOL_SMTP_SECURE.equals(uri.getScheme());
         smtpServer = uri.getHost();
         smtpPort = uri.getPort();
-        startTls = urlInfo.isStartTls();
+        requireTls = urlInfo.isRequireStartTls();
     }
 
     @Override
