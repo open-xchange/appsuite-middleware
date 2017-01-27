@@ -87,6 +87,7 @@ public class Bug21620Test extends AbstractAJAXSession {
     private AJAXClient clientB;
     private AJAXClient clientC;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -135,6 +136,7 @@ public class Bug21620Test extends AbstractAJAXSession {
         appointment.setPrincipalId(clientA.getValues().getUserId());
     }
 
+    @Test
     public void testBug21620() throws Exception {
         /*
          * insert appointment in user a's calendar as user B ("on behalf of user a")
@@ -160,6 +162,7 @@ public class Bug21620Test extends AbstractAJAXSession {
         assertEquals("Wrong principal ID", clientA.getValues().getUserId(), loadedAppointment.getPrincipalId());
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
