@@ -16,7 +16,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 23
+%define        ox_release 24
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -90,6 +90,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/contextSets/*
 
 %changelog
+* Fri Jan 27 2017 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2017-02-06 (3917)
 * Thu Jan 26 2017 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2017-01-26 (3924)
 * Thu Jan 19 2017 Steffen Templin <marcus.klein@open-xchange.com>
@@ -167,7 +169,7 @@ Sixth candidate for 7.8.0 release
 * Wed Sep 30 2015 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2015-10-12 (2784)
 * Fri Sep 25 2015 Steffen Templin <marcus.klein@open-xchange.com>
-Build for patch 2015-09-28  (2767)
+Build for patch 2015-09-28 (2767)
 * Fri Sep 25 2015 Steffen Templin <marcus.klein@open-xchange.com>
 Fith candidate for 7.8.0 release
 * Fri Sep 18 2015 Steffen Templin <marcus.klein@open-xchange.com>
@@ -629,7 +631,7 @@ First release candidate for 7.4.0
 * Tue Jul 16 2013 Steffen Templin <marcus.klein@open-xchange.com>
 prepare for 7.4.0
 * Mon Jul 15 2013 Steffen Templin <marcus.klein@open-xchange.com>
-Second build for patch  2013-07-18
+Second build for patch 2013-07-18
 * Mon Jul 15 2013 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2013-07-18
 * Fri Jul 12 2013 Steffen Templin <marcus.klein@open-xchange.com>
