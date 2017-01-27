@@ -66,6 +66,7 @@ import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.participants.ConfirmableParticipant;
+import com.openexchange.test.CalendarTestManager;
 
 /**
  * {@link ConfirmOccurrencesTest}
@@ -77,6 +78,8 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
     private AJAXClient client1;
 
     private AJAXClient client2;
+
+    private CalendarTestManager ctm2;
 
     private Appointment appointment;
 
@@ -108,6 +111,7 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
 
         client1 = getClient();
         client2 = getClient2();
+        ctm2 = new CalendarTestManager(getClient2());
         nextYear = Calendar.getInstance().get(Calendar.YEAR) + 1;
         folderId1 = client1.getValues().getPrivateAppointmentFolder();
         folderId2 = client2.getValues().getPrivateAppointmentFolder();
@@ -129,15 +133,21 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
         catm.insert(appointment);
     }
 
+    @Override
+    public void tearDown() throws Exception {
+        try {
+            ctm2.cleanUp();
+        } finally {
+            super.tearDown();
+        }
+    }
+
     @Test
     public void testConfirmSeries() throws Exception {
-        catm.setClient(client1);
         catm.confirm(folderId1, appointment.getObjectID(), catm.getLastModification(), Appointment.TENTATIVE, "tentative");
         catm.confirmExternal(folderId1, appointment.getObjectID(), catm.getLastModification(), "external1@example.com", Appointment.TENTATIVE, "tentative");
         catm.confirmExternal(folderId1, appointment.getObjectID(), catm.getLastModification(), "external2@example.com", Appointment.TENTATIVE, "tentative");
-        catm.setClient(client2);
-        catm.confirm(folderId2, appointment.getObjectID(), catm.getLastModification(), Appointment.TENTATIVE, "tentative");
-        catm.setClient(client1);
+        ctm2.confirm(folderId2, appointment.getObjectID(), catm.getLastModification(), Appointment.TENTATIVE, "tentative");
 
         Appointment loadedAppointment = catm.get(appointment);
         checkConfirmations(loadedAppointment, Appointment.TENTATIVE, "tentative", 2, 0);
@@ -152,13 +162,10 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
 
     @Test
     public void testException() throws Exception {
-        catm.setClient(client1);
         catm.confirm(folderId1, appointment.getObjectID(), catm.getLastModification(), Appointment.TENTATIVE, "tentative");
         catm.confirmExternal(folderId1, appointment.getObjectID(), catm.getLastModification(), "external1@example.com", Appointment.TENTATIVE, "tentative");
         catm.confirmExternal(folderId1, appointment.getObjectID(), catm.getLastModification(), "external2@example.com", Appointment.TENTATIVE, "tentative");
-        catm.setClient(client2);
-        catm.confirm(folderId2, appointment.getObjectID(), catm.getLastModification(), Appointment.TENTATIVE, "tentative");
-        catm.setClient(client1);
+        ctm2.confirm(folderId2, appointment.getObjectID(), catm.getLastModification(), Appointment.TENTATIVE, "tentative");
 
         Appointment exception = catm.createIdentifyingCopy(appointment);
         exception.setStartDate(D("05.02." + nextYear + " 10:00"));
@@ -173,9 +180,7 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
         catm.confirm(folderId1, exception.getObjectID(), catm.getLastModification(), Appointment.DECLINE, "decline");
         catm.confirmExternal(folderId1, exception.getObjectID(), catm.getLastModification(), "external1@example.com", Appointment.DECLINE, "decline");
         catm.confirmExternal(folderId1, exception.getObjectID(), catm.getLastModification(), "external2@example.com", Appointment.DECLINE, "decline");
-        catm.setClient(client2);
-        catm.confirm(folderId2, exception.getObjectID(), catm.getLastModification(), Appointment.DECLINE, "decline");
-        catm.setClient(client1);
+        ctm2.confirm(folderId2, exception.getObjectID(), catm.getLastModification(), Appointment.DECLINE, "decline");
 
         Appointment loadedAppointment = catm.get(appointment);
         checkConfirmations(loadedAppointment, Appointment.TENTATIVE, "tentative", 2, 0);
@@ -193,20 +198,15 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
 
     @Test
     public void testOccurrence() throws Exception {
-        catm.setClient(client1);
         catm.confirm(folderId1, appointment.getObjectID(), catm.getLastModification(), Appointment.TENTATIVE, "tentative");
         catm.confirmExternal(folderId1, appointment.getObjectID(), catm.getLastModification(), "external1@example.com", Appointment.TENTATIVE, "tentative");
         catm.confirmExternal(folderId1, appointment.getObjectID(), catm.getLastModification(), "external2@example.com", Appointment.TENTATIVE, "tentative");
-        catm.setClient(client2);
-        catm.confirm(folderId2, appointment.getObjectID(), catm.getLastModification(), Appointment.TENTATIVE, "tentative");
-        catm.setClient(client1);
+        ctm2.confirm(folderId2, appointment.getObjectID(), catm.getLastModification(), Appointment.TENTATIVE, "tentative");
 
-        catm.confirm(folderId1, appointment.getObjectID(), catm.getLastModification(), Appointment.DECLINE, "decline", this.occurrence);
+        catm.confirm(folderId1, appointment.getObjectID(), ctm2.getLastModification(), Appointment.DECLINE, "decline", this.occurrence);
         catm.confirmExternal(folderId1, appointment.getObjectID(), catm.getLastModification(), "external1@example.com", Appointment.DECLINE, "decline", this.occurrence);
         catm.confirmExternal(folderId1, appointment.getObjectID(), catm.getLastModification(), "external2@example.com", Appointment.DECLINE, "decline", this.occurrence);
-        catm.setClient(client2);
-        catm.confirm(folderId2, appointment.getObjectID(), catm.getLastModification(), Appointment.DECLINE, "decline", this.occurrence);
-        catm.setClient(client1);
+        ctm2.confirm(folderId2, appointment.getObjectID(), catm.getLastModification(), Appointment.DECLINE, "decline", this.occurrence);
 
         Appointment loadedAppointment = catm.get(appointment);
         checkConfirmations(loadedAppointment, Appointment.TENTATIVE, "tentative", 2, 0);
@@ -225,13 +225,10 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
 
     @Test
     public void testOccurrenceOnExistingException() throws Exception {
-        catm.setClient(client1);
         catm.confirm(folderId1, appointment.getObjectID(), catm.getLastModification(), Appointment.TENTATIVE, "tentative");
         catm.confirmExternal(folderId1, appointment.getObjectID(), catm.getLastModification(), "external1@example.com", Appointment.TENTATIVE, "tentative");
         catm.confirmExternal(folderId1, appointment.getObjectID(), catm.getLastModification(), "external2@example.com", Appointment.TENTATIVE, "tentative");
-        catm.setClient(client2);
-        catm.confirm(folderId2, appointment.getObjectID(), catm.getLastModification(), Appointment.TENTATIVE, "tentative");
-        catm.setClient(client1);
+        ctm2.confirm(folderId2, appointment.getObjectID(), catm.getLastModification(), Appointment.TENTATIVE, "tentative");
 
         Appointment exception = catm.createIdentifyingCopy(appointment);
         exception.setStartDate(D("05.02." + nextYear + " 10:00"));
@@ -246,9 +243,7 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
         catm.confirm(folderId1, exception.getObjectID(), catm.getLastModification(), Appointment.DECLINE, "decline");
         catm.confirmExternal(folderId1, exception.getObjectID(), catm.getLastModification(), "external1@example.com", Appointment.DECLINE, "decline");
         catm.confirmExternal(folderId1, exception.getObjectID(), catm.getLastModification(), "external2@example.com", Appointment.DECLINE, "decline");
-        catm.setClient(client2);
-        catm.confirm(folderId2, exception.getObjectID(), catm.getLastModification(), Appointment.DECLINE, "decline");
-        catm.setClient(client1);
+        ctm2.confirm(folderId2, exception.getObjectID(), catm.getLastModification(), Appointment.DECLINE, "decline");
 
         Appointment loadedAppointment = catm.get(appointment);
         checkConfirmations(loadedAppointment, Appointment.TENTATIVE, "tentative", 2);
@@ -266,9 +261,7 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
         catm.confirm(folderId1, appointment.getObjectID(), catm.getLastModification(), Appointment.ACCEPT, "accept", this.occurrence);
         catm.confirmExternal(folderId1, appointment.getObjectID(), catm.getLastModification(), "external1@example.com", Appointment.ACCEPT, "accept", this.occurrence);
         catm.confirmExternal(folderId1, appointment.getObjectID(), catm.getLastModification(), "external2@example.com", Appointment.ACCEPT, "accept", this.occurrence);
-        catm.setClient(client2);
-        catm.confirm(folderId2, appointment.getObjectID(), catm.getLastModification(), Appointment.ACCEPT, "accept", this.occurrence);
-        catm.setClient(client1);
+        ctm2.confirm(folderId2, appointment.getObjectID(), catm.getLastModification(), Appointment.ACCEPT, "accept", this.occurrence);
 
         loadedAppointment = catm.get(appointment);
         checkConfirmations(loadedAppointment, Appointment.TENTATIVE, "tentative", 2);
@@ -286,20 +279,15 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
 
     @Test
     public void testConflicts() throws Exception {
-        catm.setClient(client1);
         catm.confirm(folderId1, appointment.getObjectID(), catm.getLastModification(), Appointment.ACCEPT, "accept");
         catm.confirmExternal(folderId1, appointment.getObjectID(), catm.getLastModification(), "external1@example.com", Appointment.ACCEPT, "accept");
         catm.confirmExternal(folderId1, appointment.getObjectID(), catm.getLastModification(), "external2@example.com", Appointment.ACCEPT, "accept");
-        catm.setClient(client2);
-        catm.confirm(folderId2, appointment.getObjectID(), catm.getLastModification(), Appointment.ACCEPT, "accept");
-        catm.setClient(client1);
+        ctm2.confirm(folderId2, appointment.getObjectID(), catm.getLastModification(), Appointment.ACCEPT, "accept");
 
-        catm.confirm(folderId1, appointment.getObjectID(), catm.getLastModification(), Appointment.DECLINE, "decline", this.occurrence);
+        catm.confirm(folderId1, appointment.getObjectID(), ctm2.getLastModification(), Appointment.DECLINE, "decline", this.occurrence);
         catm.confirmExternal(folderId1, appointment.getObjectID(), catm.getLastModification(), "external1@example.com", Appointment.DECLINE, "decline", this.occurrence);
         catm.confirmExternal(folderId1, appointment.getObjectID(), catm.getLastModification(), "external2@example.com", Appointment.DECLINE, "decline", this.occurrence);
-        catm.setClient(client2);
-        catm.confirm(folderId2, appointment.getObjectID(), catm.getLastModification(), Appointment.DECLINE, "decline", this.occurrence);
-        catm.setClient(client1);
+        ctm2.confirm(folderId2, appointment.getObjectID(), catm.getLastModification(), Appointment.DECLINE, "decline", this.occurrence);
 
         Appointment loadedAppointment = catm.get(appointment);
         checkConfirmations(loadedAppointment, Appointment.ACCEPT, "accept", 2, 0);
