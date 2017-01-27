@@ -98,15 +98,15 @@ public final class InfoStoreFolderAdminHelper {
         addDefaultFolder(connection, contextID, userID, userFolderID, FolderObject.MUSIC, null);
         addDefaultFolder(connection, contextID, userID, userFolderID, FolderObject.VIDEOS, null);
     }
-    
+
     /**
-     * Adds all default infostore folders for a user at their default locations in the folder tree. Expect the User main folder 
+     * Adds all default infostore folders for a user at their default locations in the folder tree. Expect the User main folder
      * and the trash folder, all other folders are not created like default folders and remain deletable.
      *
      * @param connection A (writable) database connection
      * @param contextID The context identifier
      * @param userID The user identifier
-     * @param locale 
+     * @param locale
      * @return The identifier of the created folder
      */
     public static void addDefaultFoldersDeletable(Connection connection, int contextID, int userID, Locale locale) throws OXException {
@@ -118,7 +118,7 @@ public final class InfoStoreFolderAdminHelper {
         addDeletableDefaultFolder(connection, contextID, userID, userFolderID, FolderObject.MUSIC, locale);
         addDeletableDefaultFolder(connection, contextID, userID, userFolderID, FolderObject.VIDEOS, locale);
     }
-    
+
     /**
      * Adds trash and users main default infostore folders for a user at their default locations in the folder tree.
      *
@@ -171,7 +171,7 @@ public final class InfoStoreFolderAdminHelper {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
     }
-    
+
     private static int addDeletableDefaultFolder(Connection connection, int contextID, int userID, int parentFolderID, int type, Locale locale) throws OXException {
         try {
             Context context = new ContextImpl(contextID);
@@ -226,6 +226,9 @@ public final class InfoStoreFolderAdminHelper {
             case FolderObject.PUBLIC:
                 Context context = new ContextImpl(contextID);
                 String name = OXFolderAdminHelper.getUserDisplayName(userID, contextID, connection);
+                if (name == null) {
+                    throw OXFolderExceptionCode.UNKNOWN_EXCEPTION.create("Couldn't retrieve the display name for user " + userID + " in context " + contextID);
+                }
                 int resetLen = name.length();
                 int count = 0;
                 while (-1 != lookUpFolder(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, name, FolderObject.INFOSTORE, connection, context)) {
