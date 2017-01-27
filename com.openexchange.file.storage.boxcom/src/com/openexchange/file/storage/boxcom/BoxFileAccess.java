@@ -51,7 +51,6 @@ package com.openexchange.file.storage.boxcom;
 
 import static com.openexchange.java.Strings.isEmpty;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PipedOutputStream;
@@ -220,9 +219,45 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                         Info fileInfo = boxFile.getInfo();
                         checkFileValidity(fileInfo);
 
-                        fileInfo.setName(file.getFileName());
-                        fileInfo.setDescription(file.getDescription());
-                        boxFile.updateInfo(fileInfo);
+                        String name = null;
+                        if (null == modifiedFields || modifiedFields.contains(Field.FILENAME)) {
+                            name = file.getFileName();
+                            if (Strings.isEmpty(name)) {
+                                name = null;
+                            }
+                        }
+
+                        String description = null;
+                        if (null == modifiedFields || modifiedFields.contains(Field.DESCRIPTION)) {
+                            description = file.getDescription();
+                            if (Strings.isEmpty(description)) {
+                                description = null;
+                            }
+                        }
+
+                        if (null != name || null != description) {
+                            // Optimistic rename...
+                            FileName fn = null;
+                            boolean retry;
+                            do {
+                                try {
+                                    retry = false;
+                                    fileInfo.setName(name);
+                                    fileInfo.setDescription(description);
+                                    boxFile.updateInfo(fileInfo);
+                                } catch (BoxAPIException e) {
+                                    if (409 != e.getResponseCode() || null == name) {
+                                        throw e;
+                                    }
+                                    // API returned conflict. Compose another name and retry
+                                    if (null == fn) {
+                                        fn = new FileName(name);
+                                    }
+                                    name = fn.enhance();
+                                    retry = true;
+                                }
+                            } while (retry);
+                        }
 
                         return new IDTuple(file.getFolderId(), boxFile.getID());
                     } catch (final BoxAPIException e) {
@@ -383,7 +418,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                                         } else {
                                             pin.setException(ioe);
                                         }
-                                    } else {                                        
+                                    } else {
                                         pin.setException(e);
                                     }
                                 } catch (Exception e) {
@@ -399,7 +434,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                         } else {
                             threadPool.submit(ThreadPools.task(r), AbortBehavior.getInstance());
                         }
-                        
+
                         return pin;
                     } catch (IOException e) {
                         throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
@@ -407,16 +442,16 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                         throw handleHttpResponseError(id, account.getId(), e);
                     }
                 }
-                
+
                 // Otherwise use a ThresholdFileHolder for a memory-safe download
                 ThresholdFileHolder tfh = null;
                 boolean error = true;
                 try {
                     com.box.sdk.BoxFile boxFile = getBoxFile();
-                    
+
                     tfh = new ThresholdFileHolder();
                     boxFile.download(tfh.asOutputStream());
-                    
+
                     SizeKnowingInputStream stream = new SizeKnowingInputStream(tfh.getClosingStream(), tfh.getLength());
                     error = true; // Avoid premature closing
                     return stream;
@@ -800,7 +835,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
 
     /**
      * Returns a {@link List} of {@link File}s contained in the specified folder
-     * 
+     *
      * @param folderId The folder identifier
      * @param fields The optional fields to fetch for each file
      * @return a {@link List} of {@link File}s contained in the specified folder
@@ -879,7 +914,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
 
         /**
          * Initialises a new {@link BoxFileField}.
-         * 
+         *
          * @param field The mapped {@link Field}
          */
         private BoxFileField(Field field, String boxField) {
@@ -907,7 +942,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
 
         /**
          * Return an array of strings of the {@link BoxFileField}s
-         * 
+         *
          * @return an array of string of the {@link BoxFileField}s
          */
         public static String[] getAllFields() {
@@ -916,7 +951,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
 
         /**
          * Parses the specified {@link Field}s to {@link BoxFileField}s and returns those as a string array
-         * 
+         *
          * @param fields The OX File {@link Field}s
          * @return a string array with all parsed {@link BoxFileField}s
          */
@@ -932,6 +967,34 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                 }
             }
             return parsedFields.toArray(new String[parsedFields.size()]);
+        }
+    }
+
+    private static class FileName {
+
+        private final String base;
+        private final String extension;
+        private int count;
+
+        FileName(String fileName) {
+            super();
+            int dot = fileName.lastIndexOf('.');
+            base = (dot == -1) ? fileName : fileName.substring(0, dot);
+            extension = (dot == -1) ? null : fileName.substring(dot+1);
+            count = 0;
+        }
+
+        String enhance() {
+            if (null == extension) {
+                return new StringBuilder(base).append('(').append(++count).append(')').toString();
+            }
+
+            return new StringBuilder(base).append('(').append(++count).append(')').append('.').append(extension).toString();
+        }
+
+        @Override
+        public String toString() {
+            return null == extension ? base : base + "." + extension;
         }
     }
 }

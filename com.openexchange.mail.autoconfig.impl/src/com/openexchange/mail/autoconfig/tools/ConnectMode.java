@@ -47,57 +47,39 @@
  *
  */
 
-package com.openexchange.file.storage.json.actions.files;
+package com.openexchange.mail.autoconfig.tools;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import com.openexchange.ajax.container.TmpFileFileHolder;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.DispatcherNotes;
-import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.composition.IDBasedFileAccess;
-import com.openexchange.file.storage.json.services.Services;
-import com.openexchange.java.Streams;
-import com.openexchange.rdiff.RdiffService;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- * {@link DocumentSigAction}
+ * {@link ConnectMode} - Specifies how to connect to the remote end-point.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@DispatcherNotes(defaultFormat = "file")
-public class DocumentSigAction extends AbstractFileAction {
+public enum ConnectMode {
 
-    @Override
-    public AJAXRequestResult handle(InfostoreRequest request) throws OXException {
-        request.require(AbstractFileAction.Param.ID);
+    /**
+     * Initiate a plain connection; use STARTTLS only if supported, but do not require it.
+     */
+    DONT_CARE,
+    /**
+     * Initiate a connection right from the start using an SSL socket
+     */
+    SSL,
+    /**
+     * STARTTLS is required; start off with a plain socket, but switch to a TLS-protected one through STARTTLSE hand-shake
+     */
+    STARTTLS,
+    ;
 
-        IDBasedFileAccess fileAccess = request.getFileAccess();
-
-        InputStream documentStream = null;
-        OutputStream sigOut = null;
-        try {
-            final RdiffService rdiff = Services.getRdiffService();
-            if (rdiff == null) {
-                throw ServiceExceptionCode.absentService(RdiffService.class);
-            }
-            documentStream = fileAccess.getDocument(request.getId(), request.getVersion());
-            // Make signature
-            final TmpFileFileHolder fileHolder = new TmpFileFileHolder();
-            sigOut = new FileOutputStream(fileHolder.getTmpFile());
-            rdiff.createSignatures(documentStream, sigOut);
-            sigOut.flush();
-            // Return FileHolder result
-            return new AJAXRequestResult(fileHolder, "file");
-        } catch (final IOException e) {
-            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } finally {
-            Streams.close(documentStream, sigOut);
-        }
+    /**
+     * Determines the appropriate connect mode for given arguments.
+     *
+     * @param secure Whether an SSL socket is supposed to be established
+     * @param requireTls Whether STARTTLS is required (in case no SSL Socket is created)
+     * @return The connect mode
+     */
+    public static ConnectMode connectModeFor(boolean secure, boolean requireTls) {
+        return secure ? ConnectMode.SSL : (requireTls ? ConnectMode.STARTTLS : ConnectMode.DONT_CARE);
     }
 
 }

@@ -359,7 +359,7 @@ public final class IMAPConfig extends MailConfig {
         secure = PROTOCOL_IMAP_SECURE.equals(uri.getScheme());
         imapServer = uri.getHost();
         imapPort = uri.getPort();
-        startTls = urlInfo.isStartTls();
+        requireTls = urlInfo.isRequireStartTls();
     }
 
     /**

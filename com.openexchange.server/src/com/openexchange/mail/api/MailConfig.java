@@ -981,7 +981,6 @@ public abstract class MailConfig {
     protected String login;
     protected String password;
     protected boolean requireTls;
-    protected boolean startTls;
     protected final String[] standardNames;
     protected final String[] standardFullNames;
 
@@ -1157,39 +1156,21 @@ public abstract class MailConfig {
     }
 
     /**
-     * CHecks if TLS is required in case {@link #isSecure()} returns <code>false</code>
+     * Checks if STARTTLS is required in case {@link #isSecure()} returns <code>false</code>
      *
-     * @return <code>true</code> if TLS is required; otherwise <code>false</code>
+     * @return <code>true</code> if STARTTLS is required; otherwise <code>false</code>
      */
     public boolean isRequireTls() {
         return requireTls;
     }
 
     /**
-     * Sets whether TLS is required in case {@link #isSecure()} returns <code>false</code>
+     * Sets whether STARTTLS is required in case {@link #isSecure()} returns <code>false</code>
      *
-     * @param requireTls <code>true</code> if TLS is required; otherwise <code>false</code>
+     * @param requireTls <code>true</code> if STARTTLS is required; otherwise <code>false</code>
      */
     public void setRequireTls(boolean requireTls) {
         this.requireTls = requireTls;
-    }
-
-    /**
-     * Checks if STARTTLS is required
-     *
-     * @return <code>true</code> if STARTTLS is required; otherwise <code>false</code>
-     */
-    public boolean isStartTls() {
-        return startTls;
-    }
-
-    /**
-     * Sets whether STARTTLS is required
-     *
-     * @param startTls <code>true</code> if STARTTLS is required; otherwise <code>false</code>
-     */
-    public void setStartTls(boolean startTls) {
-        this.startTls = startTls;
     }
 
     /**

@@ -59,23 +59,23 @@ package com.openexchange.mail.api;
 public final class UrlInfo {
 
     private final String serverURL;
-    private final boolean startTls;
+    private final boolean requireStartTls;
 
     /**
      * Initializes a new {@link UrlInfo}.
      */
-    public UrlInfo(String serverURL, boolean startTls) {
+    public UrlInfo(String serverURL, boolean requireStartTls) {
         super();
         this.serverURL = serverURL;
-        this.startTls = startTls;
+        this.requireStartTls = requireStartTls;
     }
 
     public String getServerURL() {
         return serverURL;
     }
 
-    public boolean isStartTls() {
-        return startTls;
+    public boolean isRequireStartTls() {
+        return requireStartTls;
     }
 
 }
