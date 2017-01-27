@@ -256,7 +256,7 @@ public class Appointment2Event {
      */
     public static RecurrenceId getRecurrenceID(RecurrenceData recurrenceData, Date recurrenceDatePosition) throws OXException {
         Calendar calendar = CalendarUtils.initCalendar(TimeZones.UTC, recurrenceData.getSeriesStart());
-        RecurrenceRuleIterator iterator = Recurrence.getRecurrenceIterator(recurrenceData);
+        RecurrenceRuleIterator iterator = Recurrence.getRecurrenceIterator(recurrenceData, true);
         int position = 0;
         while (iterator.hasNext()) {
             long nextMillis = iterator.nextMillis();
