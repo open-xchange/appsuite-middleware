@@ -83,6 +83,7 @@ public class ExDateTest extends CalDAVTest {
     @Override
     @Before
     public void setUp() throws Exception {
+        super.setUp();
         manager2 = new CalendarTestManager(getClient2());
         manager2.setFailOnError(true);
     }
@@ -90,11 +91,12 @@ public class ExDateTest extends CalDAVTest {
     @Override
     @After
     public void tearDown() throws Exception {
-        if (null != manager2) {
-            manager2.cleanUp();
-            if (null != manager2.getClient()) {
-                manager2.getClient().logout();
+        try {
+            if (null != manager2) {
+                manager2.cleanUp();
             }
+        } finally {
+            super.tearDown();
         }
     }
 
