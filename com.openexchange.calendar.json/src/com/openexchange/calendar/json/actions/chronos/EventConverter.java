@@ -51,6 +51,7 @@ package com.openexchange.calendar.json.actions.chronos;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -776,11 +777,6 @@ public class EventConverter {
                 pattern.setType(appointment.getRecurrenceType());
             }
         }
-        if (appointment.containsRecurringStart()) {
-            pattern.setSeriesStart(Long.valueOf(appointment.getRecurringStart()));
-        } else if (null == pattern.getSeriesStart() && null != appointment.getStartDate()) {
-            pattern.setSeriesStart(Long.valueOf(appointment.getStartDate().getTime()));
-        }
         if (appointment.containsDays()) {
             pattern.setDaysOfWeek(appointment.getDays());
         }
@@ -808,6 +804,28 @@ public class EventConverter {
             pattern.setTz(TimeZone.getTimeZone(appointment.getTimezone()));
         } else if (null == pattern.getTimeZone()) {
             pattern.setTz(session.get(CalendarParameters.PARAMETER_TIMEZONE, TimeZone.class, TimeZone.getTimeZone(session.getUser().getTimeZone())));
+        }
+        if (appointment.containsRecurringStart() && appointment.containsStartDate()) {
+            /*
+             * recurring start and appointment start are both set; prefer the time fraction from start date
+             */
+            Calendar seriesStartCalendar = CalendarUtils.initCalendar(pattern.getTimeZone(), appointment.getRecurringStart());
+            Calendar startDateCalendar = CalendarUtils.initCalendar(pattern.getTimeZone(), appointment.getStartDate());
+            seriesStartCalendar.set(Calendar.HOUR_OF_DAY, startDateCalendar.get(Calendar.HOUR_OF_DAY));
+            seriesStartCalendar.set(Calendar.MINUTE, startDateCalendar.get(Calendar.MINUTE));
+            seriesStartCalendar.set(Calendar.SECOND, startDateCalendar.get(Calendar.SECOND));
+            seriesStartCalendar.set(Calendar.MILLISECOND, startDateCalendar.get(Calendar.MILLISECOND));
+            pattern.setSeriesStart(Long.valueOf(seriesStartCalendar.getTimeInMillis()));
+        } else if (appointment.containsRecurringStart()) {
+            /*
+             * take over recurring start
+             */
+            pattern.setSeriesStart(Long.valueOf(appointment.getRecurringStart()));
+        } else if (null == pattern.getSeriesStart() && null != appointment.getStartDate()) {
+            /*
+             * use appointment start as recurring start if missing
+             */
+            pattern.setSeriesStart(Long.valueOf(appointment.getStartDate().getTime()));
         }
         return Appointment2Event.getRecurrenceData(validate(pattern));
     }
