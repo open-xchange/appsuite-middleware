@@ -949,8 +949,13 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
         FileName(String fileName) {
             super();
             int dot = fileName.lastIndexOf('.');
-            base = (dot == -1) ? fileName : fileName.substring(0, dot);
-            extension = (dot == -1) ? null : fileName.substring(dot+1);
+            if (dot >= 0) {
+                base = fileName.substring(0, dot);
+                extension = fileName.substring(dot+1);
+            } else {
+                base = fileName;
+                extension = null;
+            }
             count = 0;
         }
 
