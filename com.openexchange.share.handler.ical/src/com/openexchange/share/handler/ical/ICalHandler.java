@@ -176,8 +176,7 @@ public class ICalHandler extends HttpAuthShareHandler {
         ShareTarget target = resolvedShare.getShareRequest().getTarget();
         int module = target.getModule();
         if (Module.CALENDAR.getFolderConstant() == module) {
-            boolean legacy = false;
-            if (legacy) {
+            if (Services.getService(CalendarService.class, true).init(resolvedShare.getSession()).getConfig().isUseLegacyStack()) {
                 writeAppointments(resolvedShare, target);
             } else {
                 writeEvents(resolvedShare, target);

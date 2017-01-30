@@ -254,8 +254,7 @@ public class ICalImporter extends AbstractImporter {
 		final List<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
 
 		if (appointmentFolderId != -1) {
-            boolean legacy = false;
-		    if (legacy) {
+            if (ImportExportServices.LOOKUP.get().getService(CalendarService.class).init(session).getConfig().isUseLegacyStack()) {
     			importAppointment(session, is, optionalParams, appointmentFolderId,
     					appointmentInterface, parser, ctx, defaultTz, list, errors,
     					warnings);

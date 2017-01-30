@@ -83,6 +83,7 @@ import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CommonObject.Marker;
 import com.openexchange.groupware.container.Participant;
@@ -90,6 +91,7 @@ import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 import com.openexchange.groupware.results.CollectionDelta;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -130,56 +132,61 @@ public abstract class ChronosAction extends AppointmentAction {
             throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create("calendar");
         }
         AppointmentAJAXRequest request = AppointmentAJAXRequestFactory.createAppointmentAJAXRequest(requestData, session);
-        boolean legacy;
-        switch (requestData.getAction().toLowerCase()) {
-            case "all":
-                legacy = false;
-                break;
-            case "list":
-                legacy = false;
-                break;
-            case "get":
-                legacy = false;
-                break;
-            case "updates":
-                legacy = false;
-                break;
-            case "search":
-                legacy = false;
-                break;
-            case "newappointments":
-                legacy = false;
-                break;
-            case "has":
-                legacy = false;
-                break;
-            case "resolveuid":
-                legacy = false;
-                break;
-            case "getchangeexceptions":
-                legacy = false;
-                break;
-            case "freebusy":
-                legacy = false;
-                break;
-            case "new":
-                legacy = false;
-                break;
-            case "update":
-                legacy = false;
-                break;
-            case "confirm":
-                legacy = false;
-                break;
-            case "delete":
-                legacy = false;
-                break;
-            case "copy":
-                legacy = false;
-                break;
-            default:
-                legacy = false;
-                break;
+        CalendarSession calendarSession = initSession(request);
+        boolean legacy = calendarSession.getConfig().isUseLegacyStack();
+
+        boolean perActionOverride = false;
+        if (perActionOverride) {
+            switch (requestData.getAction().toLowerCase()) {
+                case "all":
+                    legacy = false;
+                    break;
+                case "list":
+                    legacy = false;
+                    break;
+                case "get":
+                    legacy = false;
+                    break;
+                case "updates":
+                    legacy = false;
+                    break;
+                case "search":
+                    legacy = false;
+                    break;
+                case "newappointments":
+                    legacy = false;
+                    break;
+                case "has":
+                    legacy = false;
+                    break;
+                case "resolveuid":
+                    legacy = false;
+                    break;
+                case "getchangeexceptions":
+                    legacy = false;
+                    break;
+                case "freebusy":
+                    legacy = false;
+                    break;
+                case "new":
+                    legacy = false;
+                    break;
+                case "update":
+                    legacy = false;
+                    break;
+                case "confirm":
+                    legacy = false;
+                    break;
+                case "delete":
+                    legacy = false;
+                    break;
+                case "copy":
+                    legacy = false;
+                    break;
+                default:
+                    legacy = false;
+                    break;
+            }
         }
         String legacyValue = request.getParameter("legacy");
         if (null != legacyValue) {
@@ -195,7 +202,7 @@ public abstract class ChronosAction extends AppointmentAction {
             }
         } else {
             try {
-                return perform(initSession(request), request);
+                return perform(calendarSession, request);
             } catch (OXException e) {
                 throw EventConverter.wrapCalendarException(e);
             } catch (JSONException e) {
@@ -204,6 +211,13 @@ public abstract class ChronosAction extends AppointmentAction {
         }
     }
 
+    /**
+     * Performs an appointment request.
+     *
+     * @param session The calendar session
+     * @param request The request
+     * @return The request result
+     */
     protected abstract AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException;
 
     protected AJAXRequestResult getAppointmentResultWithTimestamp(CalendarSession session, List<Event> events) throws OXException {
@@ -218,15 +232,15 @@ public abstract class ChronosAction extends AppointmentAction {
 
     protected AJAXRequestResult getAppointmentResultWithTimestamp(CalendarSession session, List<Event> events, List<EventID> requestedIDs) throws OXException {
         Date timestamp = new Date(0L);
-
         if (requestedIDs.size() != events.size()) {
-            throw new IllegalStateException("requestedIDs.size() != events.size()");
+            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(new IllegalStateException("requestedIDs.size() != events.size()"), Autoboxing.I(50933));
         }
         List<Appointment> appointments = new ArrayList<Appointment>(requestedIDs.size());
         for (int i = 0; i < requestedIDs.size(); i++) {
             Event event = events.get(i);
             if (null == event) {
-                continue; //TODO check
+                org.slf4j.LoggerFactory.getLogger(ChronosAction.class).info("Requested object {} not found in results; skipping silently.", Autoboxing.I(i));
+                continue;
             }
             appointments.add(getEventConverter().getAppointment(session.getSession(), event));
             timestamp = getLatestModified(timestamp, event);
@@ -326,10 +340,22 @@ public abstract class ChronosAction extends AppointmentAction {
         return new EventID(folderID, objectID);
     }
 
+    /**
+     * Gets a list of required parameter names that will be evaluated. If missing in the request, an appropriate exception is thrown. By
+     * default, an empty list is returned.
+     *
+     * @return The list of required parameters
+     */
     protected Set<String> getRequiredParameters() {
         return Collections.emptySet();
     }
 
+    /**
+     * Gets a list of parameter names that will be evaluated if set, but are not required to fulfill the request. By default, an empty
+     * list is returned.
+     *
+     * @return The list of optional parameters
+     */
     protected Set<String> getOptionalParameters() {
         return Collections.emptySet();
     }

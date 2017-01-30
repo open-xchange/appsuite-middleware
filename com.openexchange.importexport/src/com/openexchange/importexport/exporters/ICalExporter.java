@@ -229,7 +229,6 @@ public class ICalExporter implements Exporter {
     @Override
     public SizedInputStream exportData(ServerSession session, Format format, String folderID, int objectID, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
         FolderObject folder = getFolder(session, folderID);
-        boolean legacy = false;
 
         AJAXRequestData requestData = (AJAXRequestData) (optionalParams == null ? null : optionalParams.get("__requestData"));
         if (null != requestData) {
@@ -242,7 +241,7 @@ public class ICalExporter implements Exporter {
                     requestData.removeCachingHeader();
 
                     if (FolderObject.CALENDAR == folder.getModule()) {
-                        if (legacy) {
+                        if (ImportExportServices.LOOKUP.get().getService(CalendarService.class).init(session).getConfig().isUseLegacyStack()) {
                             exportAppointments(session, folder.getObjectID(), objectID, fieldsToBeExported, out);
                         } else {
                             exportEvents(session, folder.getObjectID(), objectID, fieldsToBeExported, out);
@@ -261,7 +260,7 @@ public class ICalExporter implements Exporter {
 
         ThresholdFileHolder sink;
         if (FolderObject.CALENDAR == folder.getModule()) {
-            if (legacy) {
+            if (ImportExportServices.LOOKUP.get().getService(CalendarService.class).init(session).getConfig().isUseLegacyStack()) {
                 sink = exportAppointments(session, folder.getObjectID(), objectID, fieldsToBeExported, null);
             } else {
                 sink = exportEvents(session, folder.getObjectID(), objectID, fieldsToBeExported, null);
