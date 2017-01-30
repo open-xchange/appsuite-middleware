@@ -58,7 +58,7 @@ package com.openexchange.mail.autoconfig.tools;
 public enum ConnectMode {
 
     /**
-     * Initiate a plain connection; use STARTTLS only if supported, but do not require it.
+     * Initiate a plain connection; use STARTTLS if supported, but do not require it.
      */
     DONT_CARE,
     /**
@@ -66,7 +66,7 @@ public enum ConnectMode {
      */
     SSL,
     /**
-     * STARTTLS is required; start off with a plain socket, but switch to a TLS-protected one through STARTTLSE hand-shake
+     * STARTTLS is required; start off with a plain socket, but switch to a TLS-protected one through STARTTLS hand-shake
      */
     STARTTLS,
     ;
