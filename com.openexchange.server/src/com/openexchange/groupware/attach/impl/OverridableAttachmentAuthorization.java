@@ -53,6 +53,7 @@ import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentAuthorization;
 import com.openexchange.groupware.attach.AttachmentExceptionCodes;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.tools.service.ServicePriorityConflictException;
 import com.openexchange.tools.service.SpecificServiceChooser;
 import com.openexchange.tools.session.ServerSession;
@@ -88,7 +89,11 @@ public class OverridableAttachmentAuthorization implements AttachmentAuthorizati
 
     private AttachmentAuthorization getDelegate(int folderId, int contextId) throws OXException {
         try {
-            return chooser.choose(contextId, folderId);
+            AttachmentAuthorization attachmentAuthorization = chooser.choose(contextId, folderId);
+            if (null == attachmentAuthorization) {
+                throw ServiceExceptionCode.absentService(AttachmentAuthorization.class);
+            }
+            return attachmentAuthorization;
         } catch (ServicePriorityConflictException e) {
             throw AttachmentExceptionCodes.SERVICE_CONFLICT.create(I(contextId), I(folderId));
         }
