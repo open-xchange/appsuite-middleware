@@ -284,7 +284,9 @@ public final class Utils {
             return new FileSizeTerm(pattern);
         } else if (CommonConstants.FIELD_DATE.equals(field)) {
             final Pair<Comparison, Long> pair = parseDateQuery(query);
-            return buildDateTerm(pair.getFirst(), pair.getSecond().longValue());
+            if (null != pair) {
+                return buildDateTerm(pair.getFirst(), pair.getSecond().longValue());
+            }
         }
         throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(field);
     }
