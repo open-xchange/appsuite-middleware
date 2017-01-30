@@ -59,17 +59,17 @@ package com.openexchange.client.onboarding;
 public enum ClientDevice {
 
     /**
-     * The client is a Desktop PC
+     * <code>"desktop"</code> - The client is a Desktop PC
      */
     DESKTOP("desktop"),
     /**
-     * The client is a smart phone device
-     */
-    SMARTPHONE("smartphone"),
-    /**
-     * The client is a tablet device
+     * <code>"tablet"</code> - The client is a tablet device (possibly not supporting SMS)
      */
     TABLET("tablet"),
+    /**
+     * <code>"smartphone"</code> - The client is a smart phone device
+     */
+    SMARTPHONE("smartphone"),
     ;
 
     private final String id;
