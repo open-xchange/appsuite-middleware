@@ -59,6 +59,7 @@ import java.util.Set;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentBase;
+import com.openexchange.groupware.attach.AttachmentBatch;
 import com.openexchange.groupware.attach.AttachmentEvent;
 import com.openexchange.groupware.attach.AttachmentListener;
 import com.openexchange.groupware.attach.AttachmentMetadata;
@@ -87,6 +88,7 @@ public abstract class AttachmentEventAction extends AbstractUndoable implements
         long ts = 0;
         for(final AttachmentMetadata att : attachments) {
             final AttachmentEventImpl event = new AttachmentEventImpl(att,att.getFolderId(),att.getAttachedId(),att.getModuleId(),user,userConfig,session,ctx,provider,source);
+            event.setBatch(att.getAttachmentBatch());
 
             try {
                 for(final AttachmentListener listener : listeners) {
@@ -211,6 +213,7 @@ public abstract class AttachmentEventAction extends AbstractUndoable implements
         private final AttachmentBase base;
         private int[] detached = new int[0];
         private final UserConfiguration userConfig;
+        private AttachmentBatch attachmentBatch;
 
 
         public AttachmentEventImpl(final AttachmentMetadata m, final int folderId, final int attachedId, final int moduleId, final User user, final UserConfiguration userConfig, final Session session, final Context ctx, final DBProvider provider, final AttachmentBase base) {
@@ -303,12 +306,18 @@ public abstract class AttachmentEventAction extends AbstractUndoable implements
             return moduleId;
         }
 
-        /* (non-Javadoc)
-         * @see com.openexchange.groupware.attach.AttachmentEvent#getSession()
-         */
         @Override
         public Session getSession() {
             return session;
+        }
+
+        public void setBatch(AttachmentBatch batch) {
+            this.attachmentBatch = batch;
+        }
+
+        @Override
+        public AttachmentBatch getAttachmentBatch() {
+            return attachmentBatch;
         }
 
     }

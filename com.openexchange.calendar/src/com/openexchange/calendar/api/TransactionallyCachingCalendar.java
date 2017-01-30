@@ -58,6 +58,7 @@ import java.util.Map;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.CalendarSql;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.attach.AttachmentBatch;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
@@ -308,12 +309,9 @@ public class TransactionallyCachingCalendar implements AppointmentSQLInterface {
     }
 
     @Override
-    public long attachmentAction(int folderId, int objectId, int userId,
-        Session session, Context c, int numberOfAttachments)
-            throws com.openexchange.exception.OXException {
+    public long attachmentAction(int folderId, int objectId, int userId, Session session, Context c, int numberOfAttachments, AttachmentBatch batch) throws com.openexchange.exception.OXException {
         cached.remove(objectId);
-        return delegate.attachmentAction(folderId, objectId, userId, session, c,
-            numberOfAttachments);
+        return delegate.attachmentAction(folderId, objectId, userId, session, c, numberOfAttachments, batch);
     }
 
     @Override

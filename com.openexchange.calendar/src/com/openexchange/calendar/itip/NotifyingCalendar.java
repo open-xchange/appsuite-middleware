@@ -63,6 +63,7 @@ import com.openexchange.calendar.itip.generators.NotificationMail;
 import com.openexchange.calendar.itip.generators.NotificationParticipant;
 import com.openexchange.calendar.itip.sender.MailSenderService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.attach.AttachmentBatch;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
@@ -148,12 +149,12 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
     }
 
     @Override
-    public long attachmentAction(final int folderId, final int objectId, final int userId, final Session session, final Context c, final int numberOfAttachments) throws OXException {
+    public long attachmentAction(final int folderId, final int objectId, final int userId, final Session session, final Context c, final int numberOfAttachments, AttachmentBatch batch) throws OXException {
         attachmentMemory.rememberAttachmentChange(objectId, c.getContextId());
 
-        final long retval = delegate.attachmentAction(folderId, objectId, userId, session, c, numberOfAttachments);
+        final long retval = delegate.attachmentAction(folderId, objectId, userId, session, c, numberOfAttachments, batch);
         // Trigger Update Mail unless attachment is in create new limbo
-        if (!createNewLimbo.containsKey(new AppointmentAddress(objectId, c.getContextId()))) {
+        if (batch != null && batch.getBatchId() != null && !batch.isFinalElement()) {
             try {
                 final CalendarDataObject reloaded = getObjectById(objectId);
                 final ITipMailGenerator generator = generators.create(reloaded, reloaded, session, onBehalfOf(folderId));
@@ -172,6 +173,7 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
                 throw OXCalendarExceptionCodes.SQL_ERROR.create(e);
             }
         }
+        attachmentMemory.forgetAttachmentChange(objectId, c.getContextId());
         return retval;
 
     }
