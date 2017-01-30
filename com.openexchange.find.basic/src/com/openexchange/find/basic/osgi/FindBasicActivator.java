@@ -105,12 +105,8 @@ public class FindBasicActivator extends HousekeepingActivator {
         registerService(ModuleSearchDriver.class, new BasicMailDriver(searchMailBody), defaultProperties());
         registerService(ModuleSearchDriver.class, new BasicDriveDriver(), defaultProperties());
         registerService(ModuleSearchDriver.class, new BasicContactsDriver(), defaultProperties());
-        boolean legacy = false;
-        if (legacy) {
-            registerService(ModuleSearchDriver.class, new BasicCalendarDriver(), defaultProperties());
-        } else {
-            registerService(ModuleSearchDriver.class, new BasicEventDriver(), defaultProperties());
-        }
+        registerService(ModuleSearchDriver.class, new BasicCalendarDriver(), defaultProperties());
+        registerService(ModuleSearchDriver.class, new BasicEventDriver(), 14);
         registerService(ModuleSearchDriver.class, new BasicTasksDriver(), defaultProperties());
         registerService(PreferencesItemService.class, AutocompleteFields.class.newInstance());
     }

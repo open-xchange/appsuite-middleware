@@ -100,6 +100,14 @@ public class BasicEventDriver extends BasicCalendarDriver {
     }
 
     @Override
+    public boolean isValidFor(ServerSession session) throws OXException {
+        if (Services.requireService(CalendarService.class).init(session).getConfig().isUseLegacyStack()) {
+            return false;
+        }
+        return super.isValidFor(session);
+    }
+
+    @Override
     public SearchResult doSearch(SearchRequest searchRequest, ServerSession session) throws OXException {
         /*
          * prepare & perform the search
