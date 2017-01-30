@@ -84,7 +84,6 @@ public class LowLevelServicesActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() {
         unregisterServices();
-        closeTrackers();
-        cleanUp();
+        super.stopBundle();
     }
 }
