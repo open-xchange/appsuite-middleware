@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2017-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,66 +47,61 @@
  *
  */
 
-package com.openexchange.net.ssl.management.osgi;
+package com.openexchange.net.ssl.management.storage;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.openexchange.database.CreateTableService;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.net.ssl.management.SSLCertificateManagementService;
-import com.openexchange.net.ssl.management.internal.SSLCertificateManagementServiceImpl;
-import com.openexchange.net.ssl.management.storage.CreateSSLCertificateManagementTable;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.database.AbstractCreateTableImpl;
 
 /**
- * {@link SSLCertificateManagementActivator}
+ * {@link CreateSSLCertificateManagementTable}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SSLCertificateManagementActivator extends HousekeepingActivator {
+public class CreateSSLCertificateManagementTable extends AbstractCreateTableImpl {
+
+    private static final String TABLE_NAME = "user_certificate";
+
+    private static final String CREATE_STATEMENT = "CREATE TABLE `user_certificate` (" + 
+        "`cid` INT4 UNSIGNED NOT NULL," + 
+        "`userid` INT UNSIGNED NOT NULL," + 
+        "`fingerprint` VARCHAR(64) NOT NULL," + 
+        "`trusted` BOOLEAN NOT NULL," + 
+        "PRIMARY KEY (`cid`,`userid`,`fingerprint`)" + 
+        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
     /**
-     * Initialises a new {@link SSLCertificateManagementActivator}.
+     * Initialises a new {@link CreateSSLCertificateManagementTable}.
      */
-    public SSLCertificateManagementActivator() {
+    public CreateSSLCertificateManagementTable() {
         super();
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
+     * @see com.openexchange.database.CreateTableService#requiredTables()
      */
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class };
+    public String[] requiredTables() {
+        return NO_TABLES;
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.osgi.DeferredActivator#startBundle()
+     * @see com.openexchange.database.CreateTableService#tablesToCreate()
      */
     @Override
-    protected void startBundle() throws Exception {
-        registerService(CreateTableService.class, new CreateSSLCertificateManagementTable());
-        //registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService());
-        registerService(SSLCertificateManagementService.class, new SSLCertificateManagementServiceImpl(this));
-        Logger logger = LoggerFactory.getLogger(SSLCertificateManagementActivator.class);
-        logger.info("SSLCertificateManagementService registered successfully");
+    public String[] tablesToCreate() {
+        return new String[] { TABLE_NAME };
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.osgi.HousekeepingActivator#stopBundle()
+     * @see com.openexchange.database.AbstractCreateTableImpl#getCreateStatements()
      */
     @Override
-    protected void stopBundle() throws Exception {
-        unregisterService(SSLCertificateManagementService.class);
-        Logger logger = LoggerFactory.getLogger(SSLCertificateManagementActivator.class);
-        logger.info("SSLCertificateManagementService unregistered successfully");
-        super.stopBundle();
+    protected String[] getCreateStatements() {
+        return new String[] { CREATE_STATEMENT };
     }
-
 }

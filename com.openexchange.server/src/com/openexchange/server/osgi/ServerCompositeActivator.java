@@ -109,6 +109,7 @@ public class ServerCompositeActivator extends CompositeBundleActivator {
         new com.openexchange.ajax.anonymizer.osgi.AnonymizerActivator(),
         new com.openexchange.server.osgi.inspector.SessionInspectorChainActivator(),
         new com.openexchange.groupware.upload.osgi.UploadActivator(),
+        new com.openexchange.net.ssl.management.osgi.SSLCertificateManagementActivator(),
     };
 
     public ServerCompositeActivator() {

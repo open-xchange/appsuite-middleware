@@ -132,7 +132,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             //TODO: try to determine the reason of failure
             if (e.getMessage().contains("unable to find valid certification path to requested target")) {
                 // It's an invalid certificate, check if the user trusts it
-                checkUserTrustsServer(chain);
+                checkUserTrustsServer(chain, e);
             }
             throw e;
         }
@@ -175,7 +175,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             //TODO: try to determine the reason of failure
             if (e.getMessage().contains("unable to find valid certification path to requested target")) {
                 // It's an invalid certificate, check if the user trusts it
-                checkUserTrustsServer(chain);
+                checkUserTrustsServer(chain, e);
             }
             throw e;
         }
@@ -221,7 +221,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             //TODO: try to determine the reason of failure
             if (e.getMessage().contains("unable to find valid certification path to requested target")) {
                 // It's an invalid certificate, check if the user trusts it
-                checkUserTrustsServer(chain);
+                checkUserTrustsServer(chain, e);
             }
             throw e;
         }
@@ -247,7 +247,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
      * 
      * @param chain The certificate to check
      */
-    private void checkUserTrustsServer(X509Certificate[] chain) {
+    private void checkUserTrustsServer(X509Certificate[] chain, CertificateException ce) throws CertificateException {
         int user = Tools.getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_USER_ID));
         int context = Tools.getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_CONTEXT_ID));
 
@@ -273,8 +273,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
                 throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create();
             }
         } catch (NoSuchAlgorithmException | CertificateEncodingException | OXException e) {
-            // TODO: throw
-            e.printStackTrace();
+            throw ce;
         }
     }
 

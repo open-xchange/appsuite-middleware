@@ -12,4 +12,4 @@ Import-Package: com.openexchange.database,
  com.openexchange.server,
  org.osgi.framework,
  org.slf4j
-Bundle-Activator: com.openexchange.net.ssl.management.osgi.SSLCertificateManagementActivator
+ 
