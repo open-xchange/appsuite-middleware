@@ -118,8 +118,10 @@ public class FileFieldHandling {
 
         for (final Map.Entry<String, Object> entry : map.entrySet()) {
             final Field field = Field.get(entry.getKey());
-            foundFields.add(field);
-            field.doSwitch(set, file, entry.getValue());
+            if (null != field) {
+                foundFields.add(field);
+                field.doSwitch(set, file, entry.getValue());
+            }
         }
     }
 
