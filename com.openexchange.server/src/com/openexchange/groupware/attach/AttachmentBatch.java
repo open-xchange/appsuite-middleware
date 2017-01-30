@@ -49,60 +49,58 @@
 
 package com.openexchange.groupware.attach;
 
-import java.util.Date;
+import java.util.UUID;
 
-public interface AttachmentMetadata {
+/**
+ * {@link AttachmentBatch}
+ *
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @since v7.8.0
+ */
+public class AttachmentBatch {
 
-    public abstract int getCreatedBy();
+    private UUID batchId;
 
-    public abstract void setCreatedBy(int createdBy);
+    private boolean finalElement;
 
-    public abstract Date getCreationDate();
+    public AttachmentBatch(UUID batchId, boolean finalElement) {
+        this.batchId = batchId;
+        this.finalElement = finalElement;
+    }
 
-    public abstract void setCreationDate(Date creationDate);
+    /**
+     * Gets the batchId
+     *
+     * @return The batchId
+     */
+    public UUID getBatchId() {
+        return batchId;
+    }
 
-    public abstract String getFileMIMEType();
+    /**
+     * Sets the batchId
+     *
+     * @param batchId The batchId to set
+     */
+    public void setBatchId(UUID batchId) {
+        this.batchId = batchId;
+    }
 
-    public abstract void setFileMIMEType(String fileMIMEType);
+    /**
+     * Gets the finalElement
+     *
+     * @return The finalElement
+     */
+    public boolean isFinalElement() {
+        return finalElement;
+    }
 
-    public abstract String getFilename();
-
-    public abstract void setFilename(String filename);
-
-    public abstract long getFilesize();
-
-    public abstract void setFilesize(long filesize);
-
-    public abstract int getAttachedId();
-
-    public abstract void setAttachedId(int objectId);
-
-    public abstract boolean getRtfFlag();
-
-    public abstract void setRtfFlag(boolean rtfFlag);
-
-    public abstract int getModuleId();
-
-    public abstract void setModuleId(int moduleId);
-
-    public abstract int getId();
-
-    public abstract void setId(int id);
-
-    public abstract void setFolderId(int folderId);
-
-    public abstract int getFolderId();
-
-    public abstract void setComment(String string);
-
-    public abstract String getComment();
-
-    public abstract void setFileId(String string);
-
-    public abstract String getFileId();
-
-    public void setAttachmentBatch(AttachmentBatch batch);
-
-    public AttachmentBatch getAttachmentBatch();
-
+    /**
+     * Sets the finalElement
+     *
+     * @param finalElement The finalElement to set
+     */
+    public void setFinalElement(boolean finalElement) {
+        this.finalElement = finalElement;
+    }
 }
