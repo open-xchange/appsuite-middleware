@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.net.ssl.management.storage;
+package com.openexchange.net.ssl.management.exception;
 
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
@@ -64,7 +64,12 @@ public enum SSLCertificateManagementSQLExceptionCode implements DisplayableOXExc
     /**
      * Unexpected database error: %1$s
      */
-    SQL_PROBLEM("Unexpected database error: %1$s", OXExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 1);
+    SQL_PROBLEM("Unexpected database error: %1$s", OXExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 1),
+    /**
+     * The SSL certificate with fingerprint '%1$s' was not found for user '%2$s' in context '%3$s'
+     */
+    CERTIFICATE_NOT_FOUND("The SSL certificate with fingerprint '%1$s' was not found for user '%2$s' in context '%3$s'", SSLCertificateManagementSQLExceptionMessages.CERTIFICATE_NOT_FOUND, Category.CATEGORY_ERROR, 2),
+    ;
 
     private static final String PREFIX = "SSL-CERT-MGMT";
     private final String message;

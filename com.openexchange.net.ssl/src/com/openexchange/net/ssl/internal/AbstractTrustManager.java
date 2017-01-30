@@ -70,6 +70,7 @@ import com.openexchange.log.LogProperties;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.net.ssl.exception.SSLExceptionCode;
 import com.openexchange.net.ssl.management.SSLCertificateManagementService;
+import com.openexchange.net.ssl.management.exception.SSLCertificateManagementSQLExceptionCode;
 import com.openexchange.net.ssl.osgi.Services;
 
 /**
@@ -130,11 +131,11 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             return;
         } catch (CertificateException e) {
             //TODO: try to determine the reason of failure
-            if (e.getMessage().contains("unable to find valid certification path to requested target")) {
-                // It's an invalid certificate, check if the user trusts it
-                checkUserTrustsServer(chain, e);
-            }
-            throw e;
+            if (!e.getMessage().contains("unable to find valid certification path to requested target")) {
+                throw e;
+            } 
+            // It's an invalid certificate, check if the user trusts it
+            checkUserTrustsServer(chain, e);
         }
 
     }
@@ -173,11 +174,11 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             return;
         } catch (CertificateException e) {
             //TODO: try to determine the reason of failure
-            if (e.getMessage().contains("unable to find valid certification path to requested target")) {
-                // It's an invalid certificate, check if the user trusts it
-                checkUserTrustsServer(chain, e);
-            }
-            throw e;
+            if (!e.getMessage().contains("unable to find valid certification path to requested target")) {
+                throw e;
+            } 
+            // It's an invalid certificate, check if the user trusts it
+            checkUserTrustsServer(chain, e);
         }
     }
 
@@ -219,11 +220,11 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             return;
         } catch (CertificateException e) {
             //TODO: try to determine the reason of failure
-            if (e.getMessage().contains("unable to find valid certification path to requested target")) {
-                // It's an invalid certificate, check if the user trusts it
-                checkUserTrustsServer(chain, e);
-            }
-            throw e;
+            if (!e.getMessage().contains("unable to find valid certification path to requested target")) {
+                throw e;
+            } 
+            // It's an invalid certificate, check if the user trusts it
+            checkUserTrustsServer(chain, e);
         }
     }
 
@@ -260,20 +261,28 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             throw new IllegalArgumentException("The server certificate chain cannot be null");
         }
 
-        try {
-            Set<String> untrustedFingerprints = new HashSet<String>();
-            for (X509Certificate cert : chain) {
-                String fingerprint = getFingerprint(cert);
+        Set<String> untrustedFingerprints = new HashSet<String>();
+        Set<String> unknownFingerprints = new HashSet<String>();
+        for (X509Certificate cert : chain) {
+            String fingerprint = null;
+            try {
+                fingerprint = getFingerprint(cert);
                 SSLCertificateManagementService certificateManagement = Services.getService(SSLCertificateManagementService.class);
                 if (!certificateManagement.isTrusted(user, context, fingerprint)) {
                     untrustedFingerprints.add(fingerprint);
                 }
+            } catch (NoSuchAlgorithmException e) {
+                LOG.error("Cannot retrieve the fingerprint for the chain");
+            } catch (OXException e) {
+                if (SSLCertificateManagementSQLExceptionCode.CERTIFICATE_NOT_FOUND.equals(e)) {
+                    unknownFingerprints.add(fingerprint);
+                }
+                LOG.error("{}", e.getMessage(), e);
             }
-            if (!untrustedFingerprints.isEmpty()) {
-                throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create();
-            }
-        } catch (NoSuchAlgorithmException | CertificateEncodingException | OXException e) {
-            throw ce;
+        }
+        // TODO: Create a list with the untrusted certificates and pass them as parameters to a nested OX exception
+        if (!untrustedFingerprints.isEmpty() || !unknownFingerprints.isEmpty()) {
+            throw new CertificateException(SSLExceptionCode.USER_DOES_NOT_TRUST_CERTS.create(user, context, untrustedFingerprints.toString(), unknownFingerprints.toString()));
         }
     }
 

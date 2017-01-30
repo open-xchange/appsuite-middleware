@@ -47,29 +47,19 @@
  *
  */
 
-package com.openexchange.net.ssl.exception;
+package com.openexchange.net.ssl.management.exception;
 
 import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link SSLExceptionMessages}
+ * {@link SSLCertificateManagementSQLExceptionMessages}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since v7.8.3
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SSLExceptionMessages implements LocalizableStrings {
+final class SSLCertificateManagementSQLExceptionMessages implements LocalizableStrings {
 
-    // The certificate for domain "%1$s" is untrusted.
-    public final static String UNTRUSTED_CERTIFICATE_MSG = "The certificate for domain \"%1$s\" is untrusted.";
-
-    // The certificate for domain "%1$s" is untrusted. You can change your general trust level in the settings.
-    public final static String UNTRUSTED_CERT_USER_CONFIG_MSG = "The certificate for domain \"%1$s\" is untrusted. You can change your general trust level in the settings.";
-
-    // The user '%1$s' in context '%2$s' does not trust the certificates '%3$s' and does know the certificates '%4$s'
-    public final static String USER_DOES_NOT_TRUST_CERTS = "The user '%1$s' in context '%2$s' does not trust the certificates '%3$s' and does know the certificates '%4$s'";
-
-    private SSLExceptionMessages() {
-        super();
-    }
-
+    /**
+     * The SSL certificate with fingerprint '%1$s' was not found for user '%2$s' in context '%3$s'
+     */
+    final static String CERTIFICATE_NOT_FOUND = "The SSL certificate with fingerprint '%1$s' was not found for user '%2$s' in context '%3$s'";
 }

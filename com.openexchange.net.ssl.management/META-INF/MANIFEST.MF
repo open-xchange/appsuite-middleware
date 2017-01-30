@@ -5,9 +5,11 @@ Bundle-SymbolicName: com.openexchange.net.ssl.management
 Bundle-Version: 7.8.4
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Export-Package: com.openexchange.net.ssl.management
+Export-Package: com.openexchange.net.ssl.management,
+ com.openexchange.net.ssl.management.exception
 Import-Package: com.openexchange.database,
  com.openexchange.exception,
+ com.openexchange.i18n,
  com.openexchange.osgi,
  com.openexchange.server,
  org.osgi.framework,

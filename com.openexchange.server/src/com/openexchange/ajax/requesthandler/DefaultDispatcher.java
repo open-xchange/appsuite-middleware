@@ -62,7 +62,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import javax.net.ssl.SSLException;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult.ResultType;
 import com.openexchange.continuation.Continuation;
@@ -197,7 +199,7 @@ public class DefaultDispatcher implements Dispatcher {
             }
 
             // State already initialized for module?
-            if (state!=null && factory instanceof AJAXStateHandler) {
+            if (state != null && factory instanceof AJAXStateHandler) {
                 final AJAXStateHandler handler = (AJAXStateHandler) factory;
                 if (state.addInitializer(modifiedRequestData.getModule(), handler)) {
                     handler.initialize(state);
@@ -239,6 +241,14 @@ public class DefaultDispatcher implements Dispatcher {
                     if (userAwareSSLConfigurationService.isAllowedToDefineTrustLevel(session.getUserId(), session.getContextId())) {
                         throw SSLExceptionCode.UNTRUSTED_CERT_USER_CONFIG.create(e.getDisplayArgs()[0]);
                     }
+                }
+            }
+            // MW-445: Try to unpack and throw the OXException
+            if (e.getCause() instanceof SSLException) {
+                Throwable t = ExceptionUtils.getRootCause(e);
+                if (t instanceof OXException) {
+                    OXException oxe = (OXException) t;
+                    throw oxe;
                 }
             }
             throw e;

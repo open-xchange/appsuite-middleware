@@ -58,6 +58,7 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.net.ssl.management.Certificate;
+import com.openexchange.net.ssl.management.exception.SSLCertificateManagementSQLExceptionCode;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
@@ -171,7 +172,7 @@ public class SSLCertificateManagementSQL {
 
             resultSet = preparedStatement.executeQuery();
             if (!resultSet.next()) {
-                //throw
+                throw SSLCertificateManagementSQLExceptionCode.CERTIFICATE_NOT_FOUND.create(fingerprint, userId, contextId);
             }
             return resultSet.getBoolean("trusted");
         } catch (SQLException e) {
