@@ -88,6 +88,7 @@ import com.openexchange.ajax.appointment.action.SearchResponse;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.appointment.action.UpdatesRequest;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
@@ -99,6 +100,8 @@ import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CommonObject;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.server.impl.OCLPermission;
 
 /**
  * {@link CalendarTestManager}
@@ -574,6 +577,22 @@ public class CalendarTestManager implements TestManager {
 
         final JSONArray arr = (JSONArray) response.getResponse().getData();
         return CTMUtils.jsonArray2AppointmentArray(arr, client.getValues().getTimeZone());
+    }
+
+    /**
+     * Resets the permissions of the user's personal calendar folder to their defaults in case there are currently two or more permission
+     * entities defined.
+     */
+    public void resetDefaultFolderPermissions() throws Exception {
+        FolderObject folder = getClient().execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_OLD, getPrivateFolder())).getFolder();
+        if (1 < folder.getPermissions().size()) {
+            FolderObject folderUpdate = new FolderObject(getPrivateFolder());
+            folderUpdate.setPermissionsAsArray(new OCLPermission[] { com.openexchange.ajax.folder.Create.ocl(
+                getClient().getValues().getUserId(), false, true,
+                OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION) });
+            folderUpdate.setLastModified(new Date(Long.MAX_VALUE));
+            getClient().execute(new com.openexchange.ajax.folder.actions.UpdateRequest(EnumAPI.OX_OLD, folderUpdate));
+        }
     }
 
     public static Appointment createAppointmentObject(int parentFolderId, String title, Date start, Date end) {
