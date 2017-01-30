@@ -107,7 +107,7 @@ public class DefaultEntityResolver implements EntityResolver {
      * @param session The underlying session
      * @param services A service lookup reference
      */
-    public DefaultEntityResolver(ServerSession session, ServiceLookup services) throws OXException {
+    public DefaultEntityResolver(ServerSession session, ServiceLookup services) {
         super();
         this.services = services;
         this.context = session.getContext();

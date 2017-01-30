@@ -47,19 +47,10 @@
  *
  */
 
-package com.openexchange.chronos.impl;
+package com.openexchange.chronos.service;
 
-import java.util.List;
-import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.ParticipationStatus;
-import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.Type;
-import com.openexchange.folderstorage.type.PublicType;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.preferences.ServerUserSetting;
-import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
  * {@link CalendarConfig}
@@ -67,21 +58,23 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class CalendarConfig {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CalendarConfig.class);
-
-    private final Context context;
+public interface CalendarConfig {
 
     /**
-     * Initializes a new {@link CalendarConfig}
+     * Gets a value indicating whether newly added group attendees should be resolved to their individual members, without preserving the
+     * group reference, or not.
      *
-     * @param context The groupware context
+     * @return <code>true</code> if group attendees should be resolved, <code>false</code>, otherwise
      */
-    public CalendarConfig(Context context) {
-        super();
-        this.context = context;
-    }
+    boolean isResolveGroupAttendees();
+
+    /**
+     * Gets the identifier of a specific user's default personal calendar folder.
+     *
+     * @param userID The identifier of the user to retrieve the default calendar identifier for
+     * @return The default calendar folder identifier
+     */
+    int getDefaultFolderID(int userID) throws OXException;
 
     /**
      * Gets the initial participation status to use for new events in a specific folder.
@@ -90,24 +83,56 @@ public class CalendarConfig {
      * @param userID The identifier of the user to get the participation status for
      * @return The initial participation status, or {@link ParticipationStatus#NEEDS_ACTION} if not defined
      */
-    public ParticipationStatus getInitialPartStat(Type folderType, int userID) throws OXException {
-        Integer defaultStatus;
-        if (PublicType.getInstance().equals(folderType)) {
-            defaultStatus = ServerUserSetting.getInstance().getDefaultStatusPublic(context.getContextId(), userID);
-        } else {
-            defaultStatus = ServerUserSetting.getInstance().getDefaultStatusPrivate(context.getContextId(), userID);
-        }
-        return null != defaultStatus ? Appointment2Event.getParticipationStatus(defaultStatus.intValue()) : ParticipationStatus.NEEDS_ACTION;
-    }
+    ParticipationStatus getInitialPartStat(com.openexchange.folderstorage.Type folderType, int userID);
 
-    public int getDefaultFolderID(int userID) throws OXException {
-        //TODO: via higher level service?
-        return new OXFolderAccess(context).getDefaultFolderID(userID, FolderObject.CALENDAR);
-    }
+    /**
+     * Gets the configured minimum search pattern length.
+     *
+     * @return The minimum search pattern length, or <code>0</code> for no limitation
+     */
+    int getMinimumSearchPatternLength() throws OXException;
 
-    public List<Alarm> getDefaultAlarms(Type folderType, int userID, boolean allDay) throws OXException {
+    /**
+     * Gets a value indicating whether the legacy <i>Appointment</i> stack should be used or not.
+     *
+     * @return <code>true</code> if the legacy stack should be used, <code>false</code>, otherwise
+     */
+    boolean isUseLegacyStack();
 
-        return null;
-    }
+    /**
+     * Gets the configured limit for the maximum calculated occurrences when expanding event series.
+     *
+     * @return The recurrence calculation limit
+     */
+    int getRecurrenceCalculationLimit();
+
+    /**
+     * Gets a value indicating whether <i>old</i> event series can be ignored when fetching events from the storage or not, i.e. series
+     * where the recurrence calculation limit kicks in prior the actually requested timeframe.
+     *
+     * @return <code>true</code> if old event series can be ignored, <code>false</code>, otherwise
+     */
+    boolean isIgnoreSeriesPastCalculationLimit();
+
+    /**
+     * Gets the configured maximum number of conflicts between two recurring event series.
+     *
+     * @return The maximum conflicts per recurrence
+     */
+    int getMaxConflictsPerRecurrence();
+
+    /**
+     * Gets the configured maximum number of attendees to indicate per conflict.
+     *
+     * @return The the maximum number of attendees to indicate per conflict
+     */
+    int getMaxAttendeesPerConflict();
+
+    /**
+     * Gets the overall maximum number of conflicts to return.
+     *
+     * @return The the maximum number of conflicts to return
+     */
+    int getMaxConflicts();
 
 }

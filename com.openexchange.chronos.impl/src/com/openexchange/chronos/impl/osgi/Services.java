@@ -50,7 +50,8 @@
 package com.openexchange.chronos.impl.osgi;
 
 import java.util.concurrent.atomic.AtomicReference;
-
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -101,6 +102,14 @@ public class Services {
             throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.chronos.impl\" not started?");
         }
         return serviceLookup.getService(clazz);
+    }
+
+    public static <S extends Object> S getService(Class<? extends S> c, boolean throwOnAbsence) throws OXException {
+        S service = getService(c);
+        if (null == service && throwOnAbsence) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(c.getName());
+        }
+        return service;
     }
 
     /**

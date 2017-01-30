@@ -68,7 +68,8 @@ import com.openexchange.exception.OXException;
  */
 public abstract class StorageOperation<T> {
 
-    static final String PARAM_CONNECTION = Connection.class.getName();
+    /** The session parameter name where the underlying database connection is held during transactions */
+    public static final String PARAM_CONNECTION = Connection.class.getName();
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(StorageOperation.class);
 

@@ -126,6 +126,13 @@ public interface CalendarSession extends CalendarParameters {
     CalendarUtilities getUtilities();
 
     /**
+     * Provides access to several calendar-related configuration settings.
+     *
+     * @return The calendar config
+     */
+    CalendarConfig getConfig();
+
+    /**
      * Logs a debug message with an associated identifier of this particular CalendarSession.
      *
      * @param message The message to be logged

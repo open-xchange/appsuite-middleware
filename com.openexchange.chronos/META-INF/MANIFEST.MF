@@ -8,6 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.ajax.fileholder,
  com.openexchange.database.provider,
  com.openexchange.exception,
+ com.openexchange.folderstorage,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.ldap,
  com.openexchange.groupware.notify.hostname,

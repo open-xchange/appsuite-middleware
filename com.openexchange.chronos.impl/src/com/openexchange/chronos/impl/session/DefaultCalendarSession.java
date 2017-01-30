@@ -54,6 +54,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.impl.osgi.Services;
+import com.openexchange.chronos.service.CalendarConfig;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
@@ -79,14 +80,15 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public class DefaultCalendarSession implements CalendarSession {
 
+    private static final Logger SESSION_LOGGER = LoggerFactory.getLogger("calendar-session-logger");
+    private static final CalendarUtilities CALENDAR_UTILITIES = new DefaultCalendarUtilities();
+
     private final CalendarService calendarService;
     private final Map<String, Object> parameters;
     private final ServerSession session;
     private final EntityResolver entityResolver;
     private final HostData hostData;
-
-    private static final Logger SESSION_LOGGER = LoggerFactory.getLogger("calendar-session-logger");
-    private static final CalendarUtilities CALENDAR_UTILITIES = new DefaultCalendarUtilities();
+    private final CalendarConfig config;
 
     /**
      * Initializes a new {@link DefaultCalendarSession}.
@@ -102,6 +104,7 @@ public class DefaultCalendarSession implements CalendarSession {
         this.entityResolver = new DefaultEntityResolver(this.session, Services.getServiceLookup());
         RequestContext requestContext = RequestContextHolder.get();
         this.hostData = null != requestContext ? requestContext.getHostData() : null;
+        this.config = new CalendarConfigImpl(this);
         if (isDebugEnabled()) {
             debug("New DefaultCalendarSession created. User: " + session.getUserId() + ", Context: " + session.getContextId());
         }
@@ -125,6 +128,11 @@ public class DefaultCalendarSession implements CalendarSession {
     @Override
     public CalendarUtilities getUtilities() {
         return CALENDAR_UTILITIES;
+    }
+
+    @Override
+    public CalendarConfig getConfig() {
+        return config;
     }
 
     @Override
