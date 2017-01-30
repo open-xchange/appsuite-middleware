@@ -53,8 +53,10 @@ import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.client.onboarding.ClientDevice;
+import com.openexchange.client.onboarding.ClientDevices;
 import com.openexchange.client.onboarding.CompositeId;
 import com.openexchange.client.onboarding.DeviceAwareScenario;
+import com.openexchange.client.onboarding.OnboardingExceptionCodes;
 import com.openexchange.client.onboarding.OnboardingUtility;
 import com.openexchange.client.onboarding.service.OnboardingService;
 import com.openexchange.exception.OXException;
@@ -86,10 +88,10 @@ public class GetScenarioAction extends AbstractOnboardingAction {
         CompositeId compositeId = OnboardingUtility.parseCompositeId(sCompositeId);
 
         String clientDeviceId = requestData.getParameter("client");
-        ClientDevice clientDevice = ClientDevice.clientDeviceFor(clientDeviceId);
-        if (null == clientDevice) {
-            // Fall-back to Desktop PC
-            clientDevice = ClientDevice.DESKTOP;
+        ClientDevice clientDevice = ClientDevices.getClientDeviceFor(clientDeviceId);
+
+        if (false == clientDevice.implies(compositeId.getDevice())) {
+            throw OnboardingExceptionCodes.NO_SUCH_SCENARIO.create(compositeId.getScenarioId());
         }
 
         DeviceAwareScenario scenario = onboardingService.getScenario(compositeId.getScenarioId(), clientDevice, compositeId.getDevice(), session);

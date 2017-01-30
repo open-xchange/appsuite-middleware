@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,39 +47,54 @@
  *
  */
 
-package com.openexchange.mail.autoconfig.tools;
+package com.openexchange.client.onboarding;
 
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
- * {@link ConnectMode} - Specifies how to connect to the remote end-point.
+ * {@link ConcreteClientDevice} - A client device backed by a concrete device.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.4
  */
-public enum ConnectMode {
+public class ConcreteClientDevice implements ClientDevice {
+
+    private static final ConcurrentMap<Device, ConcreteClientDevice> UNIVERSE;
+
+    static {
+        ConcurrentMap<Device, ConcreteClientDevice> m = new ConcurrentHashMap<>(8);
+        for (Device device : Device.values()) {
+            m.put(device, new ConcreteClientDevice(device));
+        }
+        UNIVERSE = m;
+    }
 
     /**
-     * Initiate a plain connection; use STARTTLS if supported, but do not require it.
-     */
-    DONT_CARE,
-    /**
-     * Initiate a connection right from the start using an SSL socket
-     */
-    SSL,
-    /**
-     * STARTTLS is required; start off with a plain socket, but switch to a TLS-protected one through STARTTLS hand-shake
-     */
-    STARTTLS,
-    ;
-
-    /**
-     * Determines the appropriate connect mode for given arguments.
+     * Gets the concrete client device for specified device constant.
      *
-     * @param secure Whether an SSL socket is supposed to be established
-     * @param requireTls Whether STARTTLS is required (in case no SSL Socket is created)
-     * @return The connect mode
+     * @param device The device
+     * @return The concrete client device
      */
-    public static ConnectMode connectModeFor(boolean secure, boolean requireTls) {
-        return secure ? ConnectMode.SSL : (requireTls ? ConnectMode.STARTTLS : ConnectMode.DONT_CARE);
+    public static ConcreteClientDevice concreteClientDeviceFor(Device device) {
+        return null == device ? null : UNIVERSE.get(device);
+    }
+
+    // ---------------------------------------------------------------------------
+
+    private final Device device;
+
+    /**
+     * Initializes a new {@link ConcreteClientDevice}.
+     */
+    private ConcreteClientDevice(Device device) {
+        super();
+        this.device = device;
+    }
+
+    @Override
+    public boolean implies(Device device) {
+        return this.device == device;
     }
 
 }

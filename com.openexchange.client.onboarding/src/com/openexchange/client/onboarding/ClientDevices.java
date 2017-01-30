@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,39 +47,53 @@
  *
  */
 
-package com.openexchange.mail.autoconfig.tools;
+package com.openexchange.client.onboarding;
 
 
 /**
- * {@link ConnectMode} - Specifies how to connect to the remote end-point.
+ * {@link ClientDevices} - Helper class for client devices.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.4
  */
-public enum ConnectMode {
+public class ClientDevices {
 
     /**
-     * Initiate a plain connection; use STARTTLS if supported, but do not require it.
+     * Initializes a new {@link ClientDevices}.
      */
-    DONT_CARE,
-    /**
-     * Initiate a connection right from the start using an SSL socket
-     */
-    SSL,
-    /**
-     * STARTTLS is required; start off with a plain socket, but switch to a TLS-protected one through STARTTLS hand-shake
-     */
-    STARTTLS,
-    ;
+    private ClientDevices() {
+        super();
+    }
 
     /**
-     * Determines the appropriate connect mode for given arguments.
+     * Gets the client device for specified identifier with fall-back to {@link ClientDevice#IMPLIES_ALL}.
      *
-     * @param secure Whether an SSL socket is supposed to be established
-     * @param requireTls Whether STARTTLS is required (in case no SSL Socket is created)
-     * @return The connect mode
+     * @param id The identifier to resolve
+     * @return The resolved client device or given {@code ClientDevice#IMPLIES_ALL}
      */
-    public static ConnectMode connectModeFor(boolean secure, boolean requireTls) {
-        return secure ? ConnectMode.SSL : (requireTls ? ConnectMode.STARTTLS : ConnectMode.DONT_CARE);
+    public static ClientDevice getClientDeviceFor(String id) {
+        return getClientDeviceFor(id, ClientDevice.IMPLIES_ALL);
+    }
+
+    /**
+     * Gets the client device for specified identifier.
+     *
+     * @param id The identifier to resolve
+     * @param def The default client device to return if passed identifier cannot be resolved
+     * @return The resolved client device or given <code>def</code>
+     */
+    public static ClientDevice getClientDeviceFor(String id, ClientDevice def) {
+        if (null == id) {
+            return def;
+        }
+
+        Device device = Device.deviceFor(id);
+        if (null != device) {
+            return ConcreteClientDevice.concreteClientDeviceFor(device);
+        }
+
+        GenericClientDevice genericClientDevice = GenericClientDevice.clientDeviceFor(id);
+        return null == genericClientDevice ? def : genericClientDevice;
     }
 
 }

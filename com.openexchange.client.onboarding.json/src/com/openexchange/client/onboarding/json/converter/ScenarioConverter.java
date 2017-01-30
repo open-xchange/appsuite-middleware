@@ -144,7 +144,7 @@ public class ScenarioConverter implements ResultConverter {
     }
 
     private DefaultOnboardingRequest createOnboardingRequest(DeviceAwareScenario scenario, AJAXRequestData requestData, OnboardingAction action) {
-        return new DefaultOnboardingRequest(scenario, action, ClientDevice.DESKTOP, scenario.getDevice(), requestData.getHostData(), null);
+        return new DefaultOnboardingRequest(scenario, action, ClientDevice.IMPLIES_ALL, scenario.getDevice(), requestData.getHostData(), null);
     }
 
     private JSONObject toJson(DeviceAwareScenario scenario, AJAXRequestData requestData, ServerSession session, OnboardingService onboardingService) throws OXException, JSONException {
@@ -196,7 +196,7 @@ public class ScenarioConverter implements ResultConverter {
             List<Scenario> alternatives = scenario.getAlternatives(session);
             JSONArray jAlternatives = new JSONArray(alternatives.size());
             for (Scenario alternative : alternatives) {
-                DeviceAwareScenario deviceAwareScenario = onboardingService.getScenario(alternative.getId(), ClientDevice.DESKTOP, scenario.getDevice(), session);
+                DeviceAwareScenario deviceAwareScenario = onboardingService.getScenario(alternative.getId(), ClientDevice.IMPLIES_ALL, scenario.getDevice(), session);
                 JSONObject jAlternative = toJson(deviceAwareScenario, requestData, session, onboardingService);
                 jAlternatives.put(jAlternative);
             }

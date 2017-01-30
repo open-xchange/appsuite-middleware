@@ -47,39 +47,70 @@
  *
  */
 
-package com.openexchange.mail.autoconfig.tools;
+package com.openexchange.client.onboarding;
 
+import java.util.EnumSet;
+import java.util.Set;
 
 /**
- * {@link ConnectMode} - Specifies how to connect to the remote end-point.
+ * {@link GenericClientDevice} - The client device, which is the target for the on-boarding action.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.4
  */
-public enum ConnectMode {
+public enum GenericClientDevice implements ClientDevice {
 
     /**
-     * Initiate a plain connection; use STARTTLS if supported, but do not require it.
+     * <code>"desktop"</code> - The client is a Desktop PC
      */
-    DONT_CARE,
+    DESKTOP("desktop", EnumSet.of(Device.APPLE_MAC, Device.WINDOWS_DESKTOP_8_10)),
     /**
-     * Initiate a connection right from the start using an SSL socket
+     * <code>"tablet"</code> - The client is a tablet device (possibly not supporting SMS)
      */
-    SSL,
+    TABLET("tablet", EnumSet.of(Device.ANDROID_TABLET, Device.APPLE_IPAD)),
     /**
-     * STARTTLS is required; start off with a plain socket, but switch to a TLS-protected one through STARTTLS hand-shake
+     * <code>"smartphone"</code> - The client is a smart phone device
      */
-    STARTTLS,
+    SMARTPHONE("smartphone", EnumSet.of(Device.ANDROID_PHONE, Device.APPLE_IPHONE)),
     ;
 
+    private final String id;
+    private final Set<Device> impliedDevices;
+
+    private GenericClientDevice(String id, Set<Device> impliedDevices) {
+        this.id = id;
+        this.impliedDevices = impliedDevices;
+    }
+
+    @Override
+    public boolean implies(Device device) {
+        return null != device && impliedDevices.contains(device);
+    }
+
     /**
-     * Determines the appropriate connect mode for given arguments.
+     * Gets the identifier
      *
-     * @param secure Whether an SSL socket is supposed to be established
-     * @param requireTls Whether STARTTLS is required (in case no SSL Socket is created)
-     * @return The connect mode
+     * @return The identifier
      */
-    public static ConnectMode connectModeFor(boolean secure, boolean requireTls) {
-        return secure ? ConnectMode.SSL : (requireTls ? ConnectMode.STARTTLS : ConnectMode.DONT_CARE);
+    public String getId() {
+        return id;
+    }
+
+    /**
+     * Gets the client device associated with specified identifier
+     *
+     * @param id The identifier to resolve
+     * @return The client device or <code>null</code>
+     */
+    public static GenericClientDevice clientDeviceFor(String id) {
+        if (null != id) {
+            for (GenericClientDevice clientDevice : GenericClientDevice.values()) {
+                if (id.equalsIgnoreCase(clientDevice.id)) {
+                    return clientDevice;
+                }
+            }
+        }
+        return null;
     }
 
 }
