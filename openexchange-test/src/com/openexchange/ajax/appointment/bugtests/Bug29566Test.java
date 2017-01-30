@@ -50,9 +50,7 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
@@ -82,7 +80,9 @@ public class Bug29566Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
 
+        catm.resetDefaultFolderPermissions();
         catm2 = new CalendarTestManager(getClient2());
+        catm2.resetDefaultFolderPermissions();
 
         appointment = new Appointment();
         appointment.setStartDate(D("18.11.2013 08:00"));
