@@ -16,7 +16,7 @@ BuildRequires:  ant-nodeps
 BuildRequires: open-xchange-oauth
 BuildRequires: open-xchange-halo
 Version:       @OXVERSION@
-%define        ox_release 30
+%define        ox_release 31
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -101,6 +101,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/linkedinsubscribe.properties
 
 %changelog
+* Mon Jan 30 2017 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2017-02-02 (3929)
 * Thu Jan 26 2017 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2017-01-26 (3923)
 * Thu Jan 19 2017 Marcus Klein <marcus.klein@open-xchange.com>
