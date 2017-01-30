@@ -360,73 +360,75 @@ public class Configuration
 
     private void startOrUpdate()
     {
-        LogWrapper.getLogger().setLogLevel(m_logLevel);
-        LogWrapper.getLogger().log(LogWrapper.LOG_DEBUG,
-                PROP_LOG_LEVEL + "=" + m_logLevel);
-        LogWrapper.getLogger().log(LogWrapper.LOG_DEBUG,
-            PROP_THREAD_POOL_SIZE + "=" + m_threadPoolSize);
-        LogWrapper.getLogger().log(LogWrapper.LOG_DEBUG,
-                PROP_ASYNC_TO_SYNC_THREAD_RATIO + "=" + m_asyncToSyncThreadRatio);
-        LogWrapper.getLogger().log(LogWrapper.LOG_DEBUG,
-                "Async Pool Size=" + m_asyncThreadPoolSize);
-        LogWrapper.getLogger().log(LogWrapper.LOG_DEBUG,
-            PROP_TIMEOUT + "=" + m_timeout);
-        LogWrapper.getLogger().log(LogWrapper.LOG_DEBUG,
-            PROP_REQUIRE_TOPIC + "=" + m_requireTopic);
-
-        // Note that this uses a lazy thread pool that will create new threads on
-        // demand - in case none of its cached threads is free - until threadPoolSize
-        // is reached. Subsequently, a threadPoolSize of 2 effectively disables
-        // caching of threads.
-        if ( m_sync_pool == null )
+        synchronized ( this )
         {
-            m_sync_pool = new DefaultThreadPool(m_threadPoolSize, true);
-        }
-        else
-        {
-            m_sync_pool.configure(m_threadPoolSize);
-        }
-        final int asyncThreadPoolSize = m_asyncThreadPoolSize;
-        if ( m_async_pool == null )
-        {
-            m_async_pool = new DefaultThreadPool(asyncThreadPoolSize, false);
-        }
-        else
-        {
-            m_async_pool.configure(asyncThreadPoolSize);
-        }
-
-        if ( m_admin == null )
-        {
-            m_admin = new EventAdminImpl(m_bundleContext,
-                    m_sync_pool,
-                    m_async_pool,
-                    m_timeout,
-                    m_ignoreTimeout,
-                    m_requireTopic,
-                    m_ignoreTopics);
-
-            // Finally, adapt the outside events to our kind of events as per spec
-            adaptEvents(m_admin);
-
-            // register the admin wrapped in a service factory (SecureEventAdminFactory)
-            // that hands-out the m_admin object wrapped in a decorator that checks
-            // appropriated permissions of each calling bundle
-            m_registration = m_bundleContext.registerService(EventAdmin.class.getName(),
-                    new SecureEventAdminFactory(m_admin), null);
-
-            try {
-                m_mbean = new EventAdminMBeanImpl(m_admin.getAsyncDeliverTasks());
-                m_mbean_registration = m_bundleContext.registerService(EventAdminMBean.class.getName(), m_mbean, null);
-            } catch (NotCompliantMBeanException e) {
-                LogWrapper.getLogger().log(LogWrapper.LOG_WARNING, "Could not register EventAdminMBean.", e);
+            LogWrapper.getLogger().setLogLevel(m_logLevel);
+            LogWrapper.getLogger().log(LogWrapper.LOG_DEBUG,
+                    PROP_LOG_LEVEL + "=" + m_logLevel);
+            LogWrapper.getLogger().log(LogWrapper.LOG_DEBUG,
+                PROP_THREAD_POOL_SIZE + "=" + m_threadPoolSize);
+            LogWrapper.getLogger().log(LogWrapper.LOG_DEBUG,
+                    PROP_ASYNC_TO_SYNC_THREAD_RATIO + "=" + m_asyncToSyncThreadRatio);
+            LogWrapper.getLogger().log(LogWrapper.LOG_DEBUG,
+                    "Async Pool Size=" + m_asyncThreadPoolSize);
+            LogWrapper.getLogger().log(LogWrapper.LOG_DEBUG,
+                PROP_TIMEOUT + "=" + m_timeout);
+            LogWrapper.getLogger().log(LogWrapper.LOG_DEBUG,
+                PROP_REQUIRE_TOPIC + "=" + m_requireTopic);
+    
+            // Note that this uses a lazy thread pool that will create new threads on
+            // demand - in case none of its cached threads is free - until threadPoolSize
+            // is reached. Subsequently, a threadPoolSize of 2 effectively disables
+            // caching of threads.
+            if ( m_sync_pool == null )
+            {
+                m_sync_pool = new DefaultThreadPool(m_threadPoolSize, true);
+            }
+            else
+            {
+                m_sync_pool.configure(m_threadPoolSize);
+            }
+            final int asyncThreadPoolSize = m_asyncThreadPoolSize;
+            if ( m_async_pool == null )
+            {
+                m_async_pool = new DefaultThreadPool(asyncThreadPoolSize, false);
+            }
+            else
+            {
+                m_async_pool.configure(asyncThreadPoolSize);
+            }
+    
+            if ( m_admin == null )
+            {
+                m_admin = new EventAdminImpl(m_bundleContext,
+                        m_sync_pool,
+                        m_async_pool,
+                        m_timeout,
+                        m_ignoreTimeout,
+                        m_requireTopic,
+                        m_ignoreTopics);
+    
+                // Finally, adapt the outside events to our kind of events as per spec
+                adaptEvents(m_admin);
+    
+                // register the admin wrapped in a service factory (SecureEventAdminFactory)
+                // that hands-out the m_admin object wrapped in a decorator that checks
+                // appropriated permissions of each calling bundle
+                m_registration = m_bundleContext.registerService(EventAdmin.class.getName(),
+                        new SecureEventAdminFactory(m_admin), null);
+    
+                try {
+                    m_mbean = new EventAdminMBeanImpl(m_admin.getAsyncDeliverTasks());
+                    m_mbean_registration = m_bundleContext.registerService(EventAdminMBean.class.getName(), m_mbean, null);
+                } catch (NotCompliantMBeanException e) {
+                    LogWrapper.getLogger().log(LogWrapper.LOG_WARNING, "Could not register EventAdminMBean.", e);
+                }
+            }
+            else
+            {
+                m_admin.update(m_timeout, m_ignoreTimeout, m_requireTopic, m_ignoreTopics);
             }
         }
-        else
-        {
-            m_admin.update(m_timeout, m_ignoreTimeout, m_requireTopic, m_ignoreTopics);
-        }
-
     }
 
     /**

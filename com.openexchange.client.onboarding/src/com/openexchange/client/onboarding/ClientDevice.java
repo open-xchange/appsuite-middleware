@@ -65,6 +65,11 @@ public interface ClientDevice {
         public boolean implies(Device device) {
             return true;
         }
+
+        @Override
+        public String toString() {
+            return "IMPLIES_ALL";
+        }
     };
 
     /**

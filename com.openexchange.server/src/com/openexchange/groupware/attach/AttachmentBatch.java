@@ -47,43 +47,60 @@
  *
  */
 
-package com.openexchange.oauth.impl.osgi;
+package com.openexchange.groupware.attach;
 
-import com.openexchange.database.CreateTableService;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.oauth.impl.internal.groupware.CreateOAuthAccountTable;
-import com.openexchange.oauth.impl.internal.groupware.OAuthDeleteListener;
-import com.openexchange.osgi.HousekeepingActivator;
+import java.util.UUID;
 
 /**
- * Registers the services necessary for the administration daemon.
+ * {@link AttachmentBatch}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @since v7.8.0
  */
-public class LowLevelServicesActivator extends HousekeepingActivator {
+public class AttachmentBatch {
 
-    public LowLevelServicesActivator() {
-        super();
+    private UUID batchId;
+
+    private boolean finalElement;
+
+    public AttachmentBatch(UUID batchId, boolean finalElement) {
+        this.batchId = batchId;
+        this.finalElement = finalElement;
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        // Nothing to do
-        return null;
+    /**
+     * Gets the batchId
+     *
+     * @return The batchId
+     */
+    public UUID getBatchId() {
+        return batchId;
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        registerService(CreateTableService.class, new CreateOAuthAccountTable(), null);
-        registerService(DeleteListener.class, new OAuthDeleteListener(), null);
-        track(DatabaseService.class, new UpdateTaskRegisterer(context));
-        openTrackers();
+    /**
+     * Sets the batchId
+     *
+     * @param batchId The batchId to set
+     */
+    public void setBatchId(UUID batchId) {
+        this.batchId = batchId;
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        unregisterServices();
-        super.stopBundle();
+    /**
+     * Gets the finalElement
+     *
+     * @return The finalElement
+     */
+    public boolean isFinalElement() {
+        return finalElement;
+    }
+
+    /**
+     * Sets the finalElement
+     *
+     * @param finalElement The finalElement to set
+     */
+    public void setFinalElement(boolean finalElement) {
+        this.finalElement = finalElement;
     }
 }

@@ -74,6 +74,7 @@ import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.attach.AttachmentBatch;
 import com.openexchange.groupware.calendar.CalendarConfig;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarFolderObject;
@@ -1432,7 +1433,7 @@ public class CalendarSql implements AppointmentSQLInterface {
     }
 
     @Override
-    public final long attachmentAction(final int folderId, final int oid, final int uid, final Session session, final Context c, final int numberOfAttachments) throws OXException {
+    public final long attachmentAction(final int folderId, final int oid, final int uid, final Session session, final Context c, final int numberOfAttachments, AttachmentBatch batch) throws OXException {
         return cimp.attachmentAction(folderId, oid, uid, session, c, numberOfAttachments);
     }
 

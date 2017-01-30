@@ -99,6 +99,7 @@ public class ExternalSourcesActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         Services.setServiceLookup(null);
+        super.stopBundle();
     }
 
     private void tryConfig() {
