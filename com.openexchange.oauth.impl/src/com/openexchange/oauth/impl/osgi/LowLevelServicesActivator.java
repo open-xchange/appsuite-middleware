@@ -82,7 +82,7 @@ public class LowLevelServicesActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void stopBundle() {
+    protected void stopBundle() throws Exception {
         unregisterServices();
         super.stopBundle();
     }
