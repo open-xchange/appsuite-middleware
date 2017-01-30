@@ -93,6 +93,7 @@ public class MoveTestNew extends AbstractAppointmentTest {
 
     private int idB, idC;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -124,7 +125,7 @@ public class MoveTestNew extends AbstractAppointmentTest {
         folderA = ftm.getFolderFromServer(getClient().getValues().getPrivateAppointmentFolder());
         folderA1 = createPrivateFolder("SubfolderA1" + UUID.randomUUID().toString(), ftm, getClient());
         ftm.insertFolderOnServer(folderA1);
-        
+
         folderB = ftmB.getFolderFromServer(valuesB.getPrivateAppointmentFolder());
         addAuthorPermissions(folderB, getClient().getValues().getUserId(), ftmB);
         folderB1 = createPrivateFolder("SubfolderB1" + UUID.randomUUID().toString(), ftmB, clientB, getClient());
@@ -147,14 +148,13 @@ public class MoveTestNew extends AbstractAppointmentTest {
             }
         }
         newPermissions.add(authorPermissions);
-        folder.removePermissions();
-        for (OCLPermission ocl : newPermissions) {
-            folder.addPermission(ocl);
-        }
-        folder.setLastModified(new Date(Long.MAX_VALUE));
-        actor.updateFolderOnServer(folder);
+        FolderObject folderUpdate = new FolderObject(folder.getObjectID());
+        folderUpdate.setPermissions(newPermissions);
+        folderUpdate.setLastModified(new Date(Long.MAX_VALUE));
+        actor.updateFolderOnServer(folderUpdate);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
