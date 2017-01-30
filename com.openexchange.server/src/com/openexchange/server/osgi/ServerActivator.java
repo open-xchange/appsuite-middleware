@@ -196,7 +196,7 @@ import com.openexchange.mail.json.compose.share.internal.EnabledCheckerRegistry;
 import com.openexchange.mail.json.compose.share.internal.MessageGeneratorRegistry;
 import com.openexchange.mail.json.compose.share.internal.ShareLinkGeneratorRegistry;
 import com.openexchange.mail.loginhandler.MailLoginHandler;
-import com.openexchange.mail.loginhandler.TransportLoginHandler;
+import com.openexchange.mail.loginhandler.SpamConfigurationHandler;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.oauth.MailOAuthService;
 import com.openexchange.mail.osgi.AuthenticationFailedHandlerServiceImpl;
@@ -722,11 +722,12 @@ public final class ServerActivator extends HousekeepingActivator {
                 }
             });
         }
-        registerService(NoReplyConfigFactory.class, new DefaultNoReplyConfigFactory(contextService, getService(ConfigViewFactory.class)));
+        ConfigViewFactory configViewFactory = getService(ConfigViewFactory.class);
+        registerService(NoReplyConfigFactory.class, new DefaultNoReplyConfigFactory(contextService, configViewFactory));
         // TODO: Register server's login handler here until its encapsulated in an own bundle
         registerService(LoginHandlerService.class, new MailLoginHandler());
-        registerService(LoginHandlerService.class, new TransportLoginHandler());
         registerService(LoginHandlerService.class, new LoginNameRecorder(userService));
+        registerService(LoginHandlerService.class, new SpamConfigurationHandler(configViewFactory));
         // registrationList.add(context.registerService(LoginHandlerService.class.getName(), new PasswordCrypter(), null));
         // Register table creation for mail account storage.
         registerService(CreateTableService.class, new CreateMailAccountTables());
