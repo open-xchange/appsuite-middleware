@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,54 +47,53 @@
  *
  */
 
-package com.openexchange.client.onboarding.json.actions;
+package com.openexchange.client.onboarding;
 
-import java.util.List;
-import org.json.JSONException;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.client.onboarding.ClientDevice;
-import com.openexchange.client.onboarding.ClientDevices;
-import com.openexchange.client.onboarding.Device;
-import com.openexchange.client.onboarding.DeviceAwareScenario;
-import com.openexchange.client.onboarding.OnboardingExceptionCodes;
-import com.openexchange.client.onboarding.service.OnboardingService;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link AllScenariosAction}
+ * {@link ClientDevices} - Helper class for client devices.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.1
+ * @since v7.8.4
  */
-public class AllScenariosAction extends AbstractOnboardingAction {
+public class ClientDevices {
 
     /**
-     * Initializes a new {@link AllScenariosAction}.
-     *
-     * @param services
+     * Initializes a new {@link ClientDevices}.
      */
-    public AllScenariosAction(ServiceLookup services) {
-        super(services);
+    private ClientDevices() {
+        super();
     }
 
-    @Override
-    protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
-        OnboardingService onboardingService = getOnboardingService();
+    /**
+     * Gets the client device for specified identifier with fall-back to {@link ClientDevice#IMPLIES_ALL}.
+     *
+     * @param id The identifier to resolve
+     * @return The resolved client device or given {@code ClientDevice#IMPLIES_ALL}
+     */
+    public static ClientDevice getClientDeviceFor(String id) {
+        return getClientDeviceFor(id, ClientDevice.IMPLIES_ALL);
+    }
 
-        String deviceId = requestData.checkParameter("device");
-        Device device = Device.deviceFor(deviceId);
-        if (null == device) {
-            throw OnboardingExceptionCodes.INVALID_DEVICE_ID.create(deviceId);
+    /**
+     * Gets the client device for specified identifier.
+     *
+     * @param id The identifier to resolve
+     * @param def The default client device to return if passed identifier cannot be resolved
+     * @return The resolved client device or given <code>def</code>
+     */
+    public static ClientDevice getClientDeviceFor(String id, ClientDevice def) {
+        if (null == id) {
+            return def;
         }
 
-        String clientDeviceId = requestData.getParameter("client");
-        ClientDevice clientDevice = ClientDevices.getClientDeviceFor(clientDeviceId);
+        Device device = Device.deviceFor(id);
+        if (null != device) {
+            return ConcreteClientDevice.concreteClientDeviceFor(device);
+        }
 
-        List<DeviceAwareScenario> scenarios = onboardingService.getScenariosFor(clientDevice, device, session);
-        return new AJAXRequestResult(scenarios, "onboardingScenario");
+        GenericClientDevice genericClientDevice = GenericClientDevice.clientDeviceFor(id);
+        return null == genericClientDevice ? def : genericClientDevice;
     }
 
 }

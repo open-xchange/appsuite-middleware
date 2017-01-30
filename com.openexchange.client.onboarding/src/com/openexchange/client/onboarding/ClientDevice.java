@@ -56,52 +56,23 @@ package com.openexchange.client.onboarding;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.4
  */
-public enum ClientDevice {
+public interface ClientDevice {
 
-    /**
-     * <code>"desktop"</code> - The client is a Desktop PC
-     */
-    DESKTOP("desktop"),
-    /**
-     * <code>"tablet"</code> - The client is a tablet device (possibly not supporting SMS)
-     */
-    TABLET("tablet"),
-    /**
-     * <code>"smartphone"</code> - The client is a smart phone device
-     */
-    SMARTPHONE("smartphone"),
-    ;
+    /** The special fall-back client device implying all devices */
+    public static final ClientDevice IMPLIES_ALL = new ClientDevice() {
 
-    private final String id;
-
-    private ClientDevice(String id) {
-        this.id = id;
-    }
-
-    /**
-     * Gets the identifier
-     *
-     * @return The identifier
-     */
-    public String getId() {
-        return id;
-    }
-
-    /**
-     * Gets the client device associated with specified identifier
-     *
-     * @param id The identifier to resolve
-     * @return The client device or <code>null</code>
-     */
-    public static ClientDevice clientDeviceFor(String id) {
-        if (null != id) {
-            for (ClientDevice clientDevice : ClientDevice.values()) {
-                if (id.equalsIgnoreCase(clientDevice.id)) {
-                    return clientDevice;
-                }
-            }
+        @Override
+        public boolean implies(Device device) {
+            return true;
         }
-        return null;
-    }
+    };
+
+    /**
+     * Checks if this client device implies the specified device.
+     *
+     * @param device The device that might be implied
+     * @return <code>true</code> if specified device is implied; otherwise <code>false</code>
+     */
+    boolean implies(Device device);
 
 }

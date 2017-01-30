@@ -47,54 +47,70 @@
  *
  */
 
-package com.openexchange.client.onboarding.json.actions;
+package com.openexchange.client.onboarding;
 
-import java.util.List;
-import org.json.JSONException;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.client.onboarding.ClientDevice;
-import com.openexchange.client.onboarding.ClientDevices;
-import com.openexchange.client.onboarding.Device;
-import com.openexchange.client.onboarding.DeviceAwareScenario;
-import com.openexchange.client.onboarding.OnboardingExceptionCodes;
-import com.openexchange.client.onboarding.service.OnboardingService;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
+import java.util.EnumSet;
+import java.util.Set;
 
 /**
- * {@link AllScenariosAction}
+ * {@link GenericClientDevice} - The client device, which is the target for the on-boarding action.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.1
+ * @since v7.8.4
  */
-public class AllScenariosAction extends AbstractOnboardingAction {
+public enum GenericClientDevice implements ClientDevice {
 
     /**
-     * Initializes a new {@link AllScenariosAction}.
-     *
-     * @param services
+     * <code>"desktop"</code> - The client is a Desktop PC
      */
-    public AllScenariosAction(ServiceLookup services) {
-        super(services);
+    DESKTOP("desktop", EnumSet.of(Device.APPLE_MAC, Device.WINDOWS_DESKTOP_8_10)),
+    /**
+     * <code>"tablet"</code> - The client is a tablet device (possibly not supporting SMS)
+     */
+    TABLET("tablet", EnumSet.of(Device.ANDROID_TABLET, Device.APPLE_IPAD)),
+    /**
+     * <code>"smartphone"</code> - The client is a smart phone device
+     */
+    SMARTPHONE("smartphone", EnumSet.of(Device.ANDROID_PHONE, Device.APPLE_IPHONE)),
+    ;
+
+    private final String id;
+    private final Set<Device> impliedDevices;
+
+    private GenericClientDevice(String id, Set<Device> impliedDevices) {
+        this.id = id;
+        this.impliedDevices = impliedDevices;
     }
 
     @Override
-    protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
-        OnboardingService onboardingService = getOnboardingService();
+    public boolean implies(Device device) {
+        return null != device && impliedDevices.contains(device);
+    }
 
-        String deviceId = requestData.checkParameter("device");
-        Device device = Device.deviceFor(deviceId);
-        if (null == device) {
-            throw OnboardingExceptionCodes.INVALID_DEVICE_ID.create(deviceId);
+    /**
+     * Gets the identifier
+     *
+     * @return The identifier
+     */
+    public String getId() {
+        return id;
+    }
+
+    /**
+     * Gets the client device associated with specified identifier
+     *
+     * @param id The identifier to resolve
+     * @return The client device or <code>null</code>
+     */
+    public static GenericClientDevice clientDeviceFor(String id) {
+        if (null != id) {
+            for (GenericClientDevice clientDevice : GenericClientDevice.values()) {
+                if (id.equalsIgnoreCase(clientDevice.id)) {
+                    return clientDevice;
+                }
+            }
         }
-
-        String clientDeviceId = requestData.getParameter("client");
-        ClientDevice clientDevice = ClientDevices.getClientDeviceFor(clientDeviceId);
-
-        List<DeviceAwareScenario> scenarios = onboardingService.getScenariosFor(clientDevice, device, session);
-        return new AJAXRequestResult(scenarios, "onboardingScenario");
+        return null;
     }
 
 }

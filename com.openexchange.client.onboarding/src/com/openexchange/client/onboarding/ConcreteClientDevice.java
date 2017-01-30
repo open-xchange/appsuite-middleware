@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,54 +47,54 @@
  *
  */
 
-package com.openexchange.client.onboarding.json.actions;
+package com.openexchange.client.onboarding;
 
-import java.util.List;
-import org.json.JSONException;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.client.onboarding.ClientDevice;
-import com.openexchange.client.onboarding.ClientDevices;
-import com.openexchange.client.onboarding.Device;
-import com.openexchange.client.onboarding.DeviceAwareScenario;
-import com.openexchange.client.onboarding.OnboardingExceptionCodes;
-import com.openexchange.client.onboarding.service.OnboardingService;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
- * {@link AllScenariosAction}
+ * {@link ConcreteClientDevice} - A client device backed by a concrete device.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.1
+ * @since v7.8.4
  */
-public class AllScenariosAction extends AbstractOnboardingAction {
+public class ConcreteClientDevice implements ClientDevice {
+
+    private static final ConcurrentMap<Device, ConcreteClientDevice> UNIVERSE;
+
+    static {
+        ConcurrentMap<Device, ConcreteClientDevice> m = new ConcurrentHashMap<>(8);
+        for (Device device : Device.values()) {
+            m.put(device, new ConcreteClientDevice(device));
+        }
+        UNIVERSE = m;
+    }
 
     /**
-     * Initializes a new {@link AllScenariosAction}.
+     * Gets the concrete client device for specified device constant.
      *
-     * @param services
+     * @param device The device
+     * @return The concrete client device
      */
-    public AllScenariosAction(ServiceLookup services) {
-        super(services);
+    public static ConcreteClientDevice concreteClientDeviceFor(Device device) {
+        return null == device ? null : UNIVERSE.get(device);
+    }
+
+    // ---------------------------------------------------------------------------
+
+    private final Device device;
+
+    /**
+     * Initializes a new {@link ConcreteClientDevice}.
+     */
+    private ConcreteClientDevice(Device device) {
+        super();
+        this.device = device;
     }
 
     @Override
-    protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
-        OnboardingService onboardingService = getOnboardingService();
-
-        String deviceId = requestData.checkParameter("device");
-        Device device = Device.deviceFor(deviceId);
-        if (null == device) {
-            throw OnboardingExceptionCodes.INVALID_DEVICE_ID.create(deviceId);
-        }
-
-        String clientDeviceId = requestData.getParameter("client");
-        ClientDevice clientDevice = ClientDevices.getClientDeviceFor(clientDeviceId);
-
-        List<DeviceAwareScenario> scenarios = onboardingService.getScenariosFor(clientDevice, device, session);
-        return new AJAXRequestResult(scenarios, "onboardingScenario");
+    public boolean implies(Device device) {
+        return this.device == device;
     }
 
 }
