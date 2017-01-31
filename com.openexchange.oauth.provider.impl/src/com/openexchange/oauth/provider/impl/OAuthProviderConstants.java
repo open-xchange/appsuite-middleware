@@ -76,6 +76,10 @@ public interface OAuthProviderConstants {
      */
     public static final String TOKEN_INFO_SERVLET_ALIAS = "oauth/provider/tokeninfo";
 
+    /**
+     * Servlet alias of the endpoint for token introspection
+     */
+    public static final String TOKEN_INTROSPECTION_SERVLET_ALIAS = "oauth/provider/introspect";
 
     // ---------------- Parameters ---------------------------------------------------------------------------
 

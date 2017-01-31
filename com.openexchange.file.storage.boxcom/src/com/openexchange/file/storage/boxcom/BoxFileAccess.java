@@ -51,9 +51,9 @@ package com.openexchange.file.storage.boxcom;
 
 import static com.openexchange.java.Strings.isEmpty;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PipedOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -85,10 +85,14 @@ import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.boxcom.access.BoxOAuthAccess;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.java.ExceptionAwarePipedInputStream;
 import com.openexchange.java.SizeKnowingInputStream;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.threadpool.behavior.AbortBehavior;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 
@@ -215,9 +219,45 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                         Info fileInfo = boxFile.getInfo();
                         checkFileValidity(fileInfo);
 
-                        fileInfo.setName(file.getFileName());
-                        fileInfo.setDescription(file.getDescription());
-                        boxFile.updateInfo(fileInfo);
+                        String name = null;
+                        if (null == modifiedFields || modifiedFields.contains(Field.FILENAME)) {
+                            name = file.getFileName();
+                            if (Strings.isEmpty(name)) {
+                                name = null;
+                            }
+                        }
+
+                        String description = null;
+                        if (null == modifiedFields || modifiedFields.contains(Field.DESCRIPTION)) {
+                            description = file.getDescription();
+                            if (Strings.isEmpty(description)) {
+                                description = null;
+                            }
+                        }
+
+                        if (null != name || null != description) {
+                            // Optimistic rename...
+                            FileName fn = null;
+                            boolean retry;
+                            do {
+                                try {
+                                    retry = false;
+                                    fileInfo.setName(name);
+                                    fileInfo.setDescription(description);
+                                    boxFile.updateInfo(fileInfo);
+                                } catch (BoxAPIException e) {
+                                    if (409 != e.getResponseCode() || null == name) {
+                                        throw e;
+                                    }
+                                    // API returned conflict. Compose another name and retry
+                                    if (null == fn) {
+                                        fn = new FileName(name);
+                                    }
+                                    name = fn.enhance();
+                                    retry = true;
+                                }
+                            } while (retry);
+                        }
 
                         return new IDTuple(file.getFolderId(), boxFile.getID());
                     } catch (final BoxAPIException e) {
@@ -249,39 +289,24 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                     String boxFolderId = toBoxFolderId(destFolder);
                     com.box.sdk.BoxFolder boxFolder = new com.box.sdk.BoxFolder(boxClient, boxFolderId);
 
-                    // Check destination folder
-                    String title = fileInfo.getName();
-                    {
-                        String baseName;
-                        String ext;
-                        {
-                            int dotPos = title.lastIndexOf('.');
-                            if (dotPos > 0) {
-                                baseName = title.substring(0, dotPos);
-                                ext = title.substring(dotPos);
-                            } else {
-                                baseName = title;
-                                ext = "";
+                    String name = fileInfo.getName();
+                    FileName fn = null;
+                    Info copiedFile = null;
+                    do {
+                        try {
+                            // Copy the file
+                            copiedFile = boxFile.copy(boxFolder, name);
+                        } catch (BoxAPIException e) {
+                            if (409 != e.getResponseCode() || null == name) {
+                                throw e;
                             }
-                        }
-
-                        int count = 1;
-                        boolean keepOn = true;
-                        while (keepOn) {
-                            keepOn = false;
-                            for (com.box.sdk.BoxItem.Info info : boxFolder) {
-                                // Check for filename clashes and append a number at the end of the filename
-                                if (info instanceof Info && title.equals(info.getName())) {
-                                    keepOn = true;
-                                    title = new StringBuilder(baseName).append(" (").append(count++).append(')').append(ext).toString();
-                                    break;
-                                }
+                            // API returned conflict. Compose another name and retry
+                            if (null == fn) {
+                                fn = new FileName(name);
                             }
+                            name = fn.enhance();
                         }
-                    }
-
-                    // Copy the file
-                    Info copiedFile = boxFile.copy(boxFolder, title);
+                    } while (null == copiedFile);
 
                     return new IDTuple(destFolder, copiedFile.getID());
                 } catch (final BoxAPIException e) {
@@ -306,39 +331,24 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                     String boxFolderId = toBoxFolderId(destFolder);
                     com.box.sdk.BoxFolder boxFolder = new com.box.sdk.BoxFolder(apiConnection, boxFolderId);
 
-                    // Check destination folder
-                    String title = fileInfo.getName();
-                    {
-                        String baseName;
-                        String ext;
-                        {
-                            int dotPos = title.lastIndexOf('.');
-                            if (dotPos > 0) {
-                                baseName = title.substring(0, dotPos);
-                                ext = title.substring(dotPos);
-                            } else {
-                                baseName = title;
-                                ext = "";
+                    String name = fileInfo.getName();
+                    FileName fn = null;
+                    com.box.sdk.BoxItem.Info movedFile = null;
+                    do {
+                        try {
+                            // Copy the file
+                            movedFile = boxFile.move(boxFolder, name);
+                        } catch (BoxAPIException e) {
+                            if (409 != e.getResponseCode() || null == name) {
+                                throw e;
                             }
-                        }
-                        int count = 1;
-                        boolean keepOn = true;
-                        while (keepOn) {
-                            keepOn = false;
-                            // TODO: Expensive as it needs to iterate through all the files in a folder...
-                            //       Consider the possibility of checking if the file exists in the folder with the exists method
-                            for (com.box.sdk.BoxItem.Info info : boxFolder) {
-                                // Check for filename clashes and append a number at the end of the filename
-                                if (info instanceof Info && title.equals(info.getName())) {
-                                    keepOn = true;
-                                    title = new StringBuilder(baseName).append(" (").append(count++).append(')').append(ext).toString();
-                                    break;
-                                }
+                            // API returned conflict. Compose another name and retry
+                            if (null == fn) {
+                                fn = new FileName(name);
                             }
+                            name = fn.enhance();
                         }
-                    }
-
-                    com.box.sdk.BoxItem.Info movedFile = boxFile.move(boxFolder, title);
+                    } while (null == movedFile);
 
                     return new IDTuple(destFolder, movedFile.getID());
                 } catch (final BoxAPIException e) {
@@ -354,23 +364,82 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
 
             @Override
             protected InputStream doPerform() throws OXException, BoxAPIException, UnsupportedEncodingException {
+                // For a memory-safe download, either pipe the binary data or do the "store in memory, if too big flush to a temp. file" approach
+                boolean usePipes = true;
+                if (usePipes) {
+                    try {
+                        final com.box.sdk.BoxFile boxFile = getBoxFile();
+
+                        final PipedOutputStream pos = new PipedOutputStream();
+                        final ExceptionAwarePipedInputStream pin = new ExceptionAwarePipedInputStream(pos, 65536);
+                        Runnable r = new Runnable() {
+
+                            @Override
+                            public void run() {
+                                try {
+                                    boxFile.download(pos);
+                                    pos.flush();
+                                } catch (BoxAPIException e) {
+                                    Throwable cause = e.getCause();
+                                    if (cause instanceof IOException) {
+                                        IOException ioe = (IOException) cause;
+                                        if ("Pipe closed".equals(ioe.getMessage())) {
+                                            // Sink closed intentionally, ignore
+                                        } else {
+                                            pin.setException(ioe);
+                                        }
+                                    } else {
+                                        pin.setException(e);
+                                    }
+                                } catch (Exception e) {
+                                    pin.setException(e);
+                                } finally {
+                                    Streams.close(pos);
+                                }
+                            }
+                        };
+                        ThreadPoolService threadPool = ThreadPools.getThreadPool();
+                        if (null == threadPool) {
+                            new Thread(r, "BoxFileAccess.getDocument").start();
+                        } else {
+                            threadPool.submit(ThreadPools.task(r), AbortBehavior.getInstance());
+                        }
+
+                        return pin;
+                    } catch (IOException e) {
+                        throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
+                    } catch (BoxAPIException e) {
+                        throw handleHttpResponseError(id, account.getId(), e);
+                    }
+                }
+
+                // Otherwise use a ThresholdFileHolder for a memory-safe download
+                ThresholdFileHolder tfh = null;
+                boolean error = true;
                 try {
-                    BoxAPIConnection apiConnection = getAPIConnection();
-                    com.box.sdk.BoxFile boxFile = new com.box.sdk.BoxFile(apiConnection, id);
-                    Info fileInfo = boxFile.getInfo("trashed_at", "name", "size");
-                    checkFileValidity(fileInfo);
+                    com.box.sdk.BoxFile boxFile = getBoxFile();
 
-                    // FIXME: Memory intensive?
-                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                    boxFile.download(outputStream);
-                    outputStream.close();
+                    tfh = new ThresholdFileHolder();
+                    boxFile.download(tfh.asOutputStream());
 
-                    return new SizeKnowingInputStream(new ByteArrayInputStream(outputStream.toByteArray()), fileInfo.getSize());
-                } catch (IOException e) {
-                    throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
+                    SizeKnowingInputStream stream = new SizeKnowingInputStream(tfh.getClosingStream(), tfh.getLength());
+                    error = true; // Avoid premature closing
+                    return stream;
                 } catch (final BoxAPIException e) {
                     throw handleHttpResponseError(id, account.getId(), e);
+                } finally {
+                    if (error) {
+                        Streams.close(tfh);
+                    }
                 }
+            }
+
+            private com.box.sdk.BoxFile getBoxFile() throws OXException {
+                BoxAPIConnection apiConnection = getAPIConnection();
+                com.box.sdk.BoxFile boxFile = new com.box.sdk.BoxFile(apiConnection, id);
+                Info fileInfo = boxFile.getInfo("trashed_at", "name", "size");
+                checkFileValidity(fileInfo);
+                return boxFile;
             }
         });
     }
@@ -736,7 +805,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
 
     /**
      * Returns a {@link List} of {@link File}s contained in the specified folder
-     * 
+     *
      * @param folderId The folder identifier
      * @param fields The optional fields to fetch for each file
      * @return a {@link List} of {@link File}s contained in the specified folder
@@ -815,7 +884,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
 
         /**
          * Initialises a new {@link BoxFileField}.
-         * 
+         *
          * @param field The mapped {@link Field}
          */
         private BoxFileField(Field field, String boxField) {
@@ -843,7 +912,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
 
         /**
          * Return an array of strings of the {@link BoxFileField}s
-         * 
+         *
          * @return an array of string of the {@link BoxFileField}s
          */
         public static String[] getAllFields() {
@@ -852,7 +921,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
 
         /**
          * Parses the specified {@link Field}s to {@link BoxFileField}s and returns those as a string array
-         * 
+         *
          * @param fields The OX File {@link Field}s
          * @return a string array with all parsed {@link BoxFileField}s
          */
@@ -868,6 +937,39 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                 }
             }
             return parsedFields.toArray(new String[parsedFields.size()]);
+        }
+    }
+
+    private static class FileName {
+
+        private final String base;
+        private final String extension;
+        private int count;
+
+        FileName(String fileName) {
+            super();
+            int dot = fileName.lastIndexOf('.');
+            if (dot >= 0) {
+                base = fileName.substring(0, dot);
+                extension = fileName.substring(dot+1);
+            } else {
+                base = fileName;
+                extension = null;
+            }
+            count = 0;
+        }
+
+        String enhance() {
+            if (null == extension) {
+                return new StringBuilder(base).append('(').append(++count).append(')').toString();
+            }
+
+            return new StringBuilder(base).append('(').append(++count).append(')').append('.').append(extension).toString();
+        }
+
+        @Override
+        public String toString() {
+            return null == extension ? base : base + "." + extension;
         }
     }
 }

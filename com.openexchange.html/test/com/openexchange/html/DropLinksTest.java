@@ -65,7 +65,7 @@ public class DropLinksTest extends AbstractSanitizing {
     }
 
     @Test
-    public void testDroppedLinks1() {
+    public void testDroppedLinks1() throws Exception {
         String content = "<!DOCTYPE html>\n" +
             "<html><head>\n" +
             "    <meta charset=\"UTF-8\">\n" +
@@ -92,7 +92,7 @@ public class DropLinksTest extends AbstractSanitizing {
     }
 
     @Test
-    public void testDroppedLinks2() {
+    public void testDroppedLinks2() throws Exception {
         String content = "<!DOCTYPE html>\n" +
             "<html><head>\n" +
             "    <meta charset=\"UTF-8\">\n" +
@@ -109,7 +109,7 @@ public class DropLinksTest extends AbstractSanitizing {
     }
 
     @Test
-    public void testNoDroppedLinks() {
+    public void testNoDroppedLinks() throws Exception {
         String content = "<!DOCTYPE html>\n" +
             "<html><head>\n" +
             "    <meta charset=\"UTF-8\">\n" +

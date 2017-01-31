@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.autoconfig.tools;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
@@ -82,21 +81,20 @@ public class MailValidator {
      *
      * @param host The IMAP host
      * @param port The IMAP port
-     * @param secure Whether to establish a secure connection
-     * @param requireTls Whether STARTTLS is required
+     * @param connectMode The connect mode to use
      * @param user The login
      * @param pwd The password
      * @return <code>true</code> for successful authentication, otherwise <code>false</code> for failed authentication
      */
-    public static boolean validateImap(String host, int port, boolean secure, boolean requireTls, String user, String pwd) {
+    public static boolean validateImap(String host, int port, ConnectMode connectMode, String user, String pwd) {
         Store store = null;
         try {
             SSLSocketFactoryProvider factoryProvider = Services.getService(SSLSocketFactoryProvider.class);
             String socketFactoryClass = factoryProvider.getDefault().getClass().getName();
             Properties props = new Properties();
-            if (secure) {
+            if (ConnectMode.SSL == connectMode) {
                 props.put("mail.imap.socketFactory.class", socketFactoryClass);
-            } else if (requireTls) {
+            } else if (ConnectMode.STARTTLS == connectMode) {
                 props.put("mail.imap.starttls.required", true);
                 props.put("mail.imap.ssl.trust", "*");
             } else {
@@ -141,21 +139,20 @@ public class MailValidator {
      *
      * @param host The POP3 host
      * @param port The POP3 port
-     * @param secure Whether to establish a secure connection
-     * @param requireTls Whether STARTTLS is required
+     * @param connectMode The connect mode to use
      * @param user The login
      * @param pwd The password
      * @return <code>true</code> for successful authentication, otherwise <code>false</code> for failed authentication
      */
-    public static boolean validatePop3(String host, int port, boolean secure, boolean requireTls, String user, String pwd) {
+    public static boolean validatePop3(String host, int port, ConnectMode connectMode, String user, String pwd) {
         Store store = null;
         try {
             Properties props = new Properties();
             SSLSocketFactoryProvider factoryProvider = Services.getService(SSLSocketFactoryProvider.class);
             String socketFactoryClass = factoryProvider.getDefault().getClass().getName();
-            if (secure) {
+            if (ConnectMode.SSL == connectMode) {
                 props.put("mail.pop3.socketFactory.class", socketFactoryClass);
-            } else if (requireTls) {
+            } else if (ConnectMode.STARTTLS == connectMode) {
                 props.put("mail.pop3.starttls.required", true);
                 props.put("mail.pop3.ssl.trust", "*");
             } else {
@@ -200,14 +197,13 @@ public class MailValidator {
      *
      * @param host The SMTP host
      * @param port The SMTP port
-     * @param secure Whether to establish a secure connection
-     * @param requireTls Whether STARTTLS is required
+     * @param connectMode The connect mode to use
      * @param user The login
      * @param pwd The password
      * @return <code>true</code> for successful authentication, otherwise <code>false</code> for failed authentication
      */
-    public static boolean validateSmtp(String host, int port, boolean secure, boolean requireTls, String user, String pwd) {
-        return validateSmtp(host, port, secure, requireTls, user, pwd, null);
+    public static boolean validateSmtp(String host, int port, ConnectMode connectModes, String user, String pwd) {
+        return validateSmtp(host, port, connectModes, user, pwd, null);
     }
 
     /**
@@ -215,22 +211,21 @@ public class MailValidator {
      *
      * @param host The SMTP host
      * @param port The SMTP port
-     * @param secure Whether to establish a secure connection
-     * @param requireTls Whether STARTTLS is required
+     * @param connectMode The connect mode to use
      * @param user The login
      * @param pwd The password
      * @param optProperties The optional container for arbitrary properties
      * @return <code>true</code> for successful authentication, otherwise <code>false</code> for failed authentication
      */
-    public static boolean validateSmtp(String host, int port, boolean secure, boolean requireTls, String user, String pwd, Map<String, Object> optProperties) {
+    public static boolean validateSmtp(String host, int port, ConnectMode connectMode, String user, String pwd, Map<String, Object> optProperties) {
         Transport transport = null;
         try {
             SSLSocketFactoryProvider factoryProvider = Services.getService(SSLSocketFactoryProvider.class);
             String socketFactoryClass = factoryProvider.getDefault().getClass().getName();
             Properties props = new Properties();
-            if (secure) {
+            if (ConnectMode.SSL == connectMode) {
                 props.put("mail.smtp.socketFactory.class", socketFactoryClass);
-            } else if (requireTls) {
+            } else if (ConnectMode.STARTTLS == connectMode) {
                 props.put("mail.smtp.starttls.required", true);
                 props.put("mail.smtp.ssl.trust", "*");
             } else {
@@ -281,7 +276,17 @@ public class MailValidator {
         return true;
     }
 
-    public static boolean checkForImap(String host, int port, boolean secure) throws IOException {
+    // ------------------------------------------------------- Connect tests ---------------------------------------------------------
+
+    /**
+     * Checks if a (SSL) socket connection can be established to the specified IMAP end-point (host & port)
+     *
+     * @param host The IMAP host
+     * @param port The IMAP port
+     * @param secure Whether to create an SSL socket or a plain one.
+     * @return <code>true</code> if such a socket could be successfully linked to the given IMAP end-point; otherwise <code>false</code>
+     */
+    public static boolean tryImapConnect(String host, int port, boolean secure) {
         Socket s = null;
         String greeting = null;
         try {
@@ -324,7 +329,7 @@ public class MailValidator {
                 /*
                  * Consume final LF
                  */
-                i = in.read();
+                in.read();
                 skipLF = false;
             }
 
@@ -338,7 +343,15 @@ public class MailValidator {
         return greeting != null;
     }
 
-    public static boolean checkForSmtp(String host, int port, boolean secure) throws IOException {
+    /**
+     * Checks if a (SSL) socket connection can be established to the specified SMTP end-point (host & port)
+     *
+     * @param host The SMTP host
+     * @param port The SMTP port
+     * @param secure Whether to create an SSL socket or a plain one.
+     * @return <code>true</code> if such a socket could be successfully linked to the given SMTP end-point; otherwise <code>false</code>
+     */
+    public static boolean trySmtpConnect(String host, int port, boolean secure) {
         Socket s = null;
         String greeting = null;
         try {
@@ -380,7 +393,7 @@ public class MailValidator {
                 /*
                  * Consume final LF
                  */
-                i = in.read();
+                in.read();
                 skipLF = false;
             }
 
@@ -394,7 +407,15 @@ public class MailValidator {
         return greeting != null;
     }
 
-    public static boolean checkForPop3(String host, int port, boolean secure) throws IOException {
+    /**
+     * Checks if a (SSL) socket connection can be established to the specified POP3 end-point (host & port)
+     *
+     * @param host The POP3 host
+     * @param port The POP3 port
+     * @param secure Whether to create an SSL socket or a plain one.
+     * @return <code>true</code> if such a socket could be successfully linked to the given POP3 end-point; otherwise <code>false</code>
+     */
+    public static boolean tryPop3Connect(String host, int port, boolean secure) {
         Socket s = null;
         String greeting = null;
         try {
@@ -436,7 +457,7 @@ public class MailValidator {
                 /*
                  * Consume final LF
                  */
-                i = in.read();
+                in.read();
                 skipLF = false;
             }
 
@@ -460,11 +481,11 @@ public class MailValidator {
         }
     }
 
-    private static void closeSafe(final Service service) {
+    private static void closeSafe(Service service) {
         if (null != service) {
             try {
                 service.close();
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 // Ignore
             }
         }

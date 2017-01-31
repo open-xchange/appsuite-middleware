@@ -52,7 +52,6 @@ package com.openexchange.test;
 import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -75,8 +74,6 @@ import edu.emory.mathcs.backport.java.util.Arrays;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class ResourceTestManager implements TestManager {
-
-    private final List<Resource> createdEntites = new LinkedList<Resource>();
 
     private final AJAXClient client;
 
@@ -144,15 +141,7 @@ public class ResourceTestManager implements TestManager {
 
     @Override
     public void cleanUp() {
-        boolean old = failOnError;
-        setFailOnError(false);
-        try {
-            for (Resource res : createdEntites) {
-                // TODO
-            }
-        } finally {
-            setFailOnError(old);
-        }
+        // nothing to do
     }
 
     public Resource generateDefaultResource() {

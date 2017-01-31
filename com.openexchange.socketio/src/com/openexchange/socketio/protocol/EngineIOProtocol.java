@@ -24,7 +24,6 @@
 package com.openexchange.socketio.protocol;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -36,6 +35,9 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import com.google.common.io.ByteStreams;
+import com.openexchange.ajax.container.ThresholdFileHolder;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.socketio.server.SocketIOProtocolException;
 
 /**
@@ -61,22 +63,34 @@ public final class EngineIOProtocol {
 
     public static void binaryEncode(EngineIOPacket packet, OutputStream os) throws IOException {
         if (packet.getBinaryData() != null) {
-            ByteArrayInputStream bytes;
             InputStream is = packet.getBinaryData();
             if (is instanceof ByteArrayInputStream) {
-                bytes = (ByteArrayInputStream) is;
+                ByteArrayInputStream bais = (ByteArrayInputStream) is;
+                os.write(1); // binary packet
+                os.write(encodeLength(bais.available() + 1)); // +1 for packet type
+                os.write(255);
+                os.write(packet.getType().value());
+                ByteStreams.copy(bais, os);
             } else {
-                // Cannot avoid double copy. The protocol requires to send the length before the data
-                //TODO: ask user to provide length? Could be useful to send files
-                ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-                ByteStreams.copy(is, buffer);
-                bytes = new ByteArrayInputStream(buffer.toByteArray());
+                ThresholdFileHolder tmp = new ThresholdFileHolder();
+                boolean error = true;
+                try {
+                    tmp.write(is);
+                    os.write(1); // binary packet
+                    os.write(encodeLength(tmp.getLength() + 1)); // +1 for packet type
+                    os.write(255);
+                    os.write(packet.getType().value());
+                    ByteStreams.copy(tmp.getClosingStream(), os);
+                    error = false;
+                } catch (OXException e) {
+                    Throwable cause = e.getCause();
+                    throw (null == cause) ? new IOException(e) : ((cause instanceof IOException) ? (IOException) cause : new IOException(cause));
+                } finally {
+                    if (error) {
+                        Streams.close(tmp);
+                    }
+                }
             }
-            os.write(1); // binary packet
-            os.write(encodeLength(bytes.available() + 1)); // +1 for packet type
-            os.write(255);
-            os.write(packet.getType().value());
-            ByteStreams.copy(bytes, os);
         } else {
             assert (packet.getTextData() != null);
 
@@ -90,8 +104,8 @@ public final class EngineIOProtocol {
     }
 
     //this is most ridiculous encoding I ever seen
-    private static byte[] encodeLength(int len) {
-        byte[] bytes = String.valueOf(len).getBytes();
+    private static byte[] encodeLength(long len) {
+        byte[] bytes = Long.toString(len).getBytes();
         for (int i = 0; i < bytes.length; i++) {
             bytes[i] -= '0';
         }

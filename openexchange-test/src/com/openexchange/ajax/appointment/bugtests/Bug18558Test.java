@@ -51,9 +51,7 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.ajax.folder.Create.ocl;
 import static com.openexchange.groupware.calendar.TimeTools.D;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import java.util.Date;
 import org.json.JSONArray;
 import org.junit.After;
@@ -75,6 +73,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.test.CalendarTestManager;
 
 /**
  * {@link Bug18558Test}
@@ -94,6 +93,7 @@ public class Bug18558Test extends AbstractAJAXSession {
     private AJAXClient clientD;
     private Appointment appointment;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -128,6 +128,7 @@ public class Bug18558Test extends AbstractAJAXSession {
         appointment.setUsers(new UserParticipant[] { new UserParticipant(clientA.getValues().getUserId()), new UserParticipant(clientB.getValues().getUserId()) });
         appointment.setParticipants(new Participant[] { new UserParticipant(clientA.getValues().getUserId()), new UserParticipant(clientB.getValues().getUserId()) });
 
+        new CalendarTestManager(clientC).resetDefaultFolderPermissions();
         InsertRequest insertRequest = new InsertRequest(appointment, clientC.getValues().getTimeZone());
         AppointmentInsertResponse insertResponse = clientC.execute(insertRequest);
         insertResponse.fillObject(appointment);
@@ -165,6 +166,7 @@ public class Bug18558Test extends AbstractAJAXSession {
         assertFalse("No error expected.", getResponse.hasError());
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

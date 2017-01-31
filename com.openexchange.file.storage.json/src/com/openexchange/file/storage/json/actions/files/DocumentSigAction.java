@@ -61,6 +61,7 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.json.services.Services;
 import com.openexchange.java.Streams;
 import com.openexchange.rdiff.RdiffService;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
@@ -81,6 +82,9 @@ public class DocumentSigAction extends AbstractFileAction {
         OutputStream sigOut = null;
         try {
             final RdiffService rdiff = Services.getRdiffService();
+            if (rdiff == null) {
+                throw ServiceExceptionCode.absentService(RdiffService.class);
+            }
             documentStream = fileAccess.getDocument(request.getId(), request.getVersion());
             // Make signature
             final TmpFileFileHolder fileHolder = new TmpFileFileHolder();

@@ -61,7 +61,7 @@ import com.openexchange.html.AbstractSanitizing;
  */
 public class Bug35291Test extends AbstractSanitizing {
      @Test
-     public void testObeyEndTagsForStandaloneTags() {
+     public void testObeyEndTagsForStandaloneTags() throws Exception {
         String content = getHtmlService().getConformHTML("<img src=\"https://foo.bar.tld/foo2bar.jpg\">", "UTF-8");
 
         assertEquals("Unexpected return value", "<!DOCTYPE html>\n" +

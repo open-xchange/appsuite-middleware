@@ -67,6 +67,7 @@ import com.openexchange.groupware.generic.TargetFolderDefinition;
 import com.openexchange.session.Session;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
+import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionExecutionService;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
@@ -219,6 +220,9 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
             }
             final SubscribeService subscribeService = source.getSubscribeService();
             final Subscription subscription = subscribeService.loadSubscription(context, subscriptionId, null);
+            if (subscription == null) {
+                throw SubscriptionErrorMessage.SubscriptionNotFound.create();
+            }
             subscription.setSession(session);
             final boolean knowsSource = discoverer.filter(subscription.getUserId(), context.getContextId()).knowsSource(subscribeService.getSubscriptionSource().getId());
             if (!knowsSource) {

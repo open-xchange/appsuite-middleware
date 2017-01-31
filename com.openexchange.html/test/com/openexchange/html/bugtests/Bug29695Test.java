@@ -61,7 +61,7 @@ import com.openexchange.html.AbstractSanitizing;
  */
 public class Bug29695Test extends AbstractSanitizing {
      @Test
-     public void testDontReplaceCopyRegEntities() {
+     public void testDontReplaceCopyRegEntities() throws Exception {
         String content = getHtmlService().getConformHTML("<b>&copy; by &reg;</b>", "UTF-8");
         assertEquals("Unexpected return value ", "<!DOCTYPE html>\n" +
             "<html><head>\n" +

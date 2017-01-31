@@ -50,6 +50,7 @@
 package com.openexchange.groupware.attach.impl;
 
 import java.util.Date;
+import com.openexchange.groupware.attach.AttachmentBatch;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.util.AttachmentToolkit;
 
@@ -74,6 +75,8 @@ public class AttachmentImpl implements AttachmentMetadata {
 	private String comment;
 
 	private String fileId;
+
+    private AttachmentBatch batch;
 
 	public AttachmentImpl(final AttachmentMetadata a) {
 		AttachmentToolkit.copy(a,this);
@@ -212,5 +215,14 @@ public class AttachmentImpl implements AttachmentMetadata {
 		this.fileId = fileId;
 	}
 
+    @Override
+    public void setAttachmentBatch(AttachmentBatch batch) {
+        this.batch = batch;
+    }
+
+    @Override
+    public AttachmentBatch getAttachmentBatch() {
+        return batch;
+    }
 
 }

@@ -88,6 +88,9 @@ public class DocumentDeltaAction extends AbstractFileAction {
             }
             documentStream = fileAccess.getDocument(request.getId(), request.getVersion());
             requestStream = request.getUploadStream();
+            if (requestStream == null) {
+                throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
+            }
             // Read in signature
             final List<ChecksumPair> signatures = rdiff.readSignatures(requestStream);
             // Create delta against document and write it directly to HTTP output stream

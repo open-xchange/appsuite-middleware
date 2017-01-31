@@ -2250,7 +2250,7 @@ public class Mail extends PermissionServlet {
         }
     }
 
-    private static String sanitizeHtml(final String htmlContent, final HtmlService htmlService) {
+    private static String sanitizeHtml(final String htmlContent, final HtmlService htmlService) throws OXException {
         return htmlService.sanitize(htmlContent, null, false, null, null);
     }
 

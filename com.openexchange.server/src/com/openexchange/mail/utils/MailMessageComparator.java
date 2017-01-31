@@ -173,7 +173,7 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
         } else {
             IFieldComparer tmp = COMPARERS.get(sortField);
             if (null == tmp) {
-                tmp = createFieldComparer(sortField, locale);
+                tmp = createFieldComparer(sortField, null == locale ? Locale.US : locale);
             }
             fieldComparer = tmp;
         }

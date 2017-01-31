@@ -139,7 +139,9 @@ public class FreeBusyServiceImpl implements FreeBusyService {
     @Override
     public FreeBusyData getMergedFreeBusy(Session session, String participant, Date from, Date until) throws OXException {
         FreeBusyData freeBusyData = this.getFreeBusy(session, participant, from, until);
-        freeBusyData.normalize();
+        if (freeBusyData != null) {
+            freeBusyData.normalize();
+        }
         return freeBusyData;
     }
 

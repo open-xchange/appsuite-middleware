@@ -140,24 +140,26 @@ public class OXHCalendarParser implements ObjectParser<Appointment>{
 
     private void storeInformation(final Element elem, final String value){
         final List<String> classes = getClasses(elem);
-        for(final String classname: classes){
-            if("vevent".equalsIgnoreCase(classname)) {
-                calendarData.add(new Appointment());
-            }
-            if(value == null) {
-                continue;
-            }
-            if("location".equalsIgnoreCase(classname)) {
-                last().setLocation(value);
-            }
-            if("summary".equalsIgnoreCase(classname)) {
-                last().setNote(value);
-            }
-            if("dtstart".equalsIgnoreCase(classname)) {
-                last().setStartDate(parseDate(value));
-            }
-            if("dtend".equalsIgnoreCase(classname)) {
-                last().setEndDate(parseDate(value));
+        if (classes != null) {
+            for (final String classname : classes) {
+                if ("vevent".equalsIgnoreCase(classname)) {
+                    calendarData.add(new Appointment());
+                }
+                if (value == null) {
+                    continue;
+                }
+                if ("location".equalsIgnoreCase(classname)) {
+                    last().setLocation(value);
+                }
+                if ("summary".equalsIgnoreCase(classname)) {
+                    last().setNote(value);
+                }
+                if ("dtstart".equalsIgnoreCase(classname)) {
+                    last().setStartDate(parseDate(value));
+                }
+                if ("dtend".equalsIgnoreCase(classname)) {
+                    last().setEndDate(parseDate(value));
+                }
             }
         }
     }

@@ -61,7 +61,7 @@ import com.openexchange.html.AbstractSanitizing;
  */
 public class Bug28337Test extends AbstractSanitizing {
      @Test
-     public void testGetConformHtml() {
+     public void testGetConformHtml() throws Exception {
         String content = getHtmlService().getConformHTML("<strong>Very important information</strong><ul><li>Point 1</li><li>Oh forgot the /li</ul>", "UTF-8");
 
         assertEquals("<!DOCTYPE html>\n" +

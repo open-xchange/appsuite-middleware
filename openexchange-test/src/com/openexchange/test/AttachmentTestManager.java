@@ -177,6 +177,10 @@ public class AttachmentTestManager implements TestManager {
         for (AttachmentMetadata attachment : objects) {
             try {
                 detach(attachment, new int[] { attachment.getId() });
+                if (getLastResponse().hasError()) {
+                    org.slf4j.LoggerFactory.getLogger(AttachmentTestManager.class).warn("Unable to delete the attachment with id {}, attachedId {} in folder {} with name '{}': {}", attachment.getId(), attachment.getAttachedId(), attachment.getFolderId(), attachment.getFilename(), getLastResponse().getException().getMessage());
+                }
+
             } catch (OXException | IOException | JSONException e) {
                 LOG.error("Unable to remove attachment!", e);
             }

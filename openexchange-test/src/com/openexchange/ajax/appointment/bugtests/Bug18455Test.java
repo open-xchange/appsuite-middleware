@@ -51,8 +51,7 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.ajax.folder.Create.ocl;
 import static com.openexchange.groupware.calendar.TimeTools.D;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import org.json.JSONArray;
 import org.junit.After;
 import org.junit.Before;
@@ -98,6 +97,7 @@ public class Bug18455Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -105,6 +105,20 @@ public class Bug18455Test extends AbstractAJAXSession {
         clientA = getClient();
         clientB = new AJAXClient(testContext.acquireUser());
         clientC = new AJAXClient(testContext.acquireUser());
+
+        /*
+         * reset permissions in default calendar folder of user c if required
+         */
+        com.openexchange.ajax.folder.actions.GetResponse folderGetResponse = clientC.execute(
+            new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_OLD, clientC.getValues().getPrivateAppointmentFolder()));
+        FolderObject calendarFolderC = folderGetResponse.getFolder();
+        if (1 < calendarFolderC.getPermissions().size()) {
+            FolderObject folderUpdate = new FolderObject(calendarFolderC.getObjectID());
+            folderUpdate.setLastModified(folderGetResponse.getTimestamp());
+            folderUpdate.setPermissionsAsArray(new OCLPermission[] { ocl(
+                clientC.getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION) });
+            clientC.execute(new com.openexchange.ajax.folder.actions.UpdateRequest(EnumAPI.OX_OLD, folderUpdate)).getResponse();
+        }
 
         folder = Create.folder(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, "Folder to test bug 18455", FolderObject.CALENDAR, FolderObject.PRIVATE, ocl(clientA.getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION), ocl(clientB.getValues().getUserId(), false, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION));
 
@@ -141,6 +155,7 @@ public class Bug18455Test extends AbstractAJAXSession {
         assertTrue("Test broken, unable to find appointment.", found);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

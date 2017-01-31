@@ -204,6 +204,7 @@ public final class XMLUtils {
     public static Document parse(final InputStream in) throws ParserConfigurationException, SAXException, IOException {
         if (in == null) {
             LOGGER.debug("XMLUtils trying to parse a null inputstream");
+            throw new IOException("XMLUtils trying to parse a null inputstream");
         }
         return getParser().parse(in);
     }

@@ -109,7 +109,7 @@ import com.openexchange.version.Version;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMessageStorage> implements Serializable, Closeable {
+public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMessageStorage> implements Serializable, Closeable, IMailStorage {
 
     /**
      * Serial version UID
@@ -244,6 +244,11 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
         this.accountId = accountId;
         cacheable = true;
         trackable = true;
+    }
+
+    @Override
+    public <T> T supports(Class<T> iface) throws OXException {
+        return iface.isInstance(this) ? (T) this : null;
     }
 
     /**
