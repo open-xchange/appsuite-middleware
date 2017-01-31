@@ -80,6 +80,7 @@ import com.openexchange.net.ssl.osgi.Services;
  * {@link AbstractTrustManager}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.8.3
  */
 public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
