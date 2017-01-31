@@ -233,12 +233,15 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         if (!e.getMessage().contains("unable to find valid certification path to requested target")) {
             throw e;
         }
+        int user = Tools.getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_USER_ID));
+        int context = Tools.getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_CONTEXT_ID));
+
         // a) Check if the user trusts it
-        checkUserTrustsServer(chain, e);
+        checkUserTrustsServer(user, context, chain, e);
         // b) Check if the certificate is self-signed
-        checkSelfSigned(chain);
+        checkSelfSigned(user, context, chain);
         // c) Check if the root certificate authority is trusted
-        checkRootCATrusted(chain);
+        checkRootCATrusted(user, context, chain);
     }
 
     /**
@@ -247,12 +250,13 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
      * @param chain The {@link X509Certificate} chain
      * @throws CertificateException If the specified {@link X509Certificate} is self-signed
      */
-    private void checkSelfSigned(X509Certificate[] chain) throws CertificateException {
+    private void checkSelfSigned(int userId, int contextId, X509Certificate[] chain) throws CertificateException {
         // Self-signed certificates are the only certificates in the chain
         if (chain.length < 2) {
             String fingerprint = "";
             try {
                 fingerprint = getFingerprint(chain[0]);
+                cacheCertificate(userId, contextId, chain[0]);
             } catch (NoSuchAlgorithmException e) {
                 //TODO: detailed error log
                 LOG.error("Cannot retrieve the fingerprint for the chain");
@@ -267,7 +271,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
      * @param chain The {@link X509Certificate} chain
      * @throws CertificateException if the root CA is not trusted by the user
      */
-    private void checkRootCATrusted(X509Certificate[] chain) throws CertificateException {
+    private void checkRootCATrusted(int userId, int contextId, X509Certificate[] chain) throws CertificateException {
         Set<TrustAnchor> anchors = params.getTrustAnchors();
 
         //The root CA is always the last element of the chain
@@ -279,6 +283,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             }
         }
 
+        cacheCertificate(userId, contextId, rootCert);
         throw new CertificateException(SSLExceptionCode.ROOT_CA_UNTRUSTED.create(rootCert.getIssuerDN()));
     }
 
@@ -287,7 +292,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
      * 
      * @param chain The certificate to check
      */
-    private void checkUserTrustsServer(X509Certificate[] chain, CertificateException ce) throws CertificateException {
+    private void checkUserTrustsServer(int userId, int contextId, X509Certificate[] chain, CertificateException ce) throws CertificateException {
         /*
          * MW-445: Main Concept
          * - Check if the server is to be trusted; if yes return
@@ -297,9 +302,6 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
          * |_ Throw an exception in case the user previously denied the certificate
          * |_ Throw an exception with the indication that the server is untrusted (the user can then choose what to do)
          */
-
-        int user = Tools.getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_USER_ID));
-        int context = Tools.getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_CONTEXT_ID));
 
         // TODO: Check if the user is allowed to accept untrusted certificates
         // via config
@@ -317,7 +319,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             try {
                 fingerprint = getFingerprint(cert);
                 SSLCertificateManagementService certificateManagement = Services.getService(SSLCertificateManagementService.class);
-                if (!certificateManagement.isTrusted(user, context, fingerprint)) {
+                if (!certificateManagement.isTrusted(userId, contextId, fingerprint)) {
                     Certificate certificate = new Certificate(fingerprint);
                     certificate.setCommonName(cert.getSubjectDN().toString());
                     certificate.setIssuer(cert.getIssuerDN().toString());
@@ -344,7 +346,35 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             }
             builder.setLength(builder.length() - 1);
             builder.append("]");
-            throw new CertificateException(SSLExceptionCode.USER_DOES_NOT_TRUST_CERTS.create(user, context, untrustedFingerprints.toString(), builder.toString()));
+            throw new CertificateException(SSLExceptionCode.USER_DOES_NOT_TRUST_CERTS.create(userId, contextId, untrustedFingerprints.toString(), builder.toString()));
+        }
+    }
+
+    /**
+     * Caches the specified {@link X509Certificate} for future reference
+     * 
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param chain The {@link X509Certificate}
+     * @throws CertificateException if an error is occurred
+     */
+    private void cacheCertificate(int userId, int contextId, X509Certificate cert) throws CertificateException {
+        try {
+            // Create the certificate
+            Certificate certificate = new Certificate(getFingerprint(cert));
+            certificate.setCommonName(getHostFromPrincipal(cert));
+            certificate.setExpirationTimestamp(cert.getNotAfter().getTime());
+            certificate.setExpirationTimestamp(cert.getNotBefore().getTime());
+            certificate.setIssuer(cert.getIssuerDN().toString());
+            certificate.setSerialNumber(cert.getSerialNumber().toString(16));
+            certificate.setSignature(toHex(cert.getSignature()));
+            certificate.setTrusted(false);
+
+            // Cache it
+            SSLCertificateManagementService certificateManagement = Services.getService(SSLCertificateManagementService.class);
+            certificateManagement.cache(userId, contextId, certificate);
+        } catch (OXException | NoSuchAlgorithmException e) {
+            throw new CertificateException(e);
         }
     }
 
