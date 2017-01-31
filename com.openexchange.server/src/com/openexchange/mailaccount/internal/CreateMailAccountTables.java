@@ -108,6 +108,9 @@ public final class CreateMailAccountTables extends AbstractCreateTableImpl {
             + "archive_fullname VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT '',"
             + "starttls TINYINT UNSIGNED NOT NULL DEFAULT 0,"
             + "oauth INT(10) UNSIGNED DEFAULT NULL,"
+            + "disabled TINYINT UNSIGNED NOT NULL DEFAULT 0,"
+            + "failed_auth_count INT4 UNSIGNED NOT NULL DEFAULT 0,"
+            + "failed_auth_date BIGINT(64) NOT NULL DEFAULT 0,"
             + "PRIMARY KEY (cid, id, user),"
             + "INDEX (cid, user)"
             + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
@@ -129,6 +132,9 @@ public final class CreateMailAccountTables extends AbstractCreateTableImpl {
             + "unified_inbox TINYINT UNSIGNED DEFAULT 0,"
             + "starttls TINYINT UNSIGNED NOT NULL DEFAULT 0,"
             + "oauth INT(10) UNSIGNED DEFAULT NULL,"
+            + "disabled TINYINT UNSIGNED NOT NULL DEFAULT 0,"
+            + "failed_auth_count INT4 UNSIGNED NOT NULL DEFAULT 0,"
+            + "failed_auth_date BIGINT(64) NOT NULL DEFAULT 0,"
             + "PRIMARY KEY (cid, id, user),"
             + "INDEX (cid, user)"
             + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";

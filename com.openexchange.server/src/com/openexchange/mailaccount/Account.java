@@ -84,13 +84,6 @@ public interface Account extends Serializable {
     int getId();
 
     /**
-     * Checks if this account is a mail account.
-     *
-     * @return <code>true</code> for mail account; otherwise <code>false</code> for transport-only
-     */
-    boolean isMailAccount();
-
-    /**
      * Gets the login.
      *
      * @return The login
@@ -102,7 +95,7 @@ public interface Account extends Serializable {
      *
      * @return The (display) name
      */
-    public String getName();
+    String getName();
 
     /**
      * Gets the password.
@@ -127,14 +120,14 @@ public interface Account extends Serializable {
      *
      * @return The personal
      */
-    public String getPersonal();
+    String getPersonal();
 
     /**
      * Gets the reply-to address.
      *
      * @return The reply-to address
      */
-    public String getReplyTo();
+    String getReplyTo();
 
     /**
      * Gets the transport-auth value.
@@ -186,7 +179,7 @@ public interface Account extends Serializable {
      *
      * @return <code>true</code> if a secure connection to transport server shall be established; otherwise <code>false</code>
      */
-    public boolean isTransportSecure();
+    boolean isTransportSecure();
 
     /**
      * Checks if this mail account is a default account.
@@ -215,5 +208,12 @@ public interface Account extends Serializable {
      * @return The OAuth account identifier or <code>-1</code> if there is no associated OAuth account
      */
     int getTransportOAuthId();
+
+    /**
+     * Checks whether mail transport is disabled
+     *
+     * @return <code>true</code> if disabled; otherwise <code>false</code>
+     */
+    boolean isTransportDisabled();
 
 }

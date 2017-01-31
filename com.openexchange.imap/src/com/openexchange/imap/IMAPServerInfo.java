@@ -55,6 +55,7 @@ import javax.mail.internet.idn.IDNA;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.ping.IMAPCapabilityAndGreetingCache;
+import com.openexchange.imap.util.HostAndPort;
 import com.openexchange.mail.MailExceptionCode;
 
 /**
@@ -75,8 +76,7 @@ public class IMAPServerInfo {
      */
     public static IMAPServerInfo instanceFor(IMAPConfig imapConfig, int accountId) throws OXException {
         try {
-            String serverUrl = new StringBuilder(36).append(IDNA.toASCII(imapConfig.getServer())).append(':').append(imapConfig.getPort()).toString();
-            String greeting = IMAPCapabilityAndGreetingCache.getGreeting(serverUrl, imapConfig.isSecure(), imapConfig.getIMAPProperties());
+            String greeting = IMAPCapabilityAndGreetingCache.getGreeting(new HostAndPort(IDNA.toASCII(imapConfig.getServer()), imapConfig.getPort()), imapConfig.isSecure(), imapConfig.getIMAPProperties());
             Map<String, String> capabilities = imapConfig.asMap();
             return new IMAPServerInfo(greeting, capabilities, accountId);
         } catch (IOException e) {

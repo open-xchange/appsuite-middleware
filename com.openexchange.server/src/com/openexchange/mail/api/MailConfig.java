@@ -352,7 +352,7 @@ public abstract class MailConfig {
         mailConfig.accountId = accountId;
         mailConfig.session = session;
         mailConfig.applyStandardNames(mailAccount);
-        fillLoginAndPassword(mailConfig, session, getUser(session).getLoginInfo(), mailAccount);
+        fillLoginAndPassword(mailConfig, session, getUser(session).getLoginInfo(), mailAccount, true);
         UrlInfo urlInfo = MailConfig.getMailServerURL(mailAccount);
         String serverURL = urlInfo.getServerURL();
         if (serverURL == null) {
@@ -361,17 +361,13 @@ public abstract class MailConfig {
             }
             throw MailConfigException.create(new StringBuilder(64).append("Cannot determine mail server URL for user ").append(session.getUserId()).append(" in context ").append(session.getContextId()).toString());
         }
-        {
-            /*
-             * Remove ending '/' character
-             */
-            int lastPos = serverURL.length() - 1;
-            if (serverURL.charAt(lastPos) == '/') {
-                serverURL = serverURL.substring(0, lastPos);
-            }
-        }
 
         mailConfig.parseServerURL(urlInfo);
+
+        if (mailAccount.isMailDisabled()) {
+            throw MailExceptionCode.MAIL_ACCESS_DISABLED.create(mailConfig.getServer(), mailConfig.getLogin(), session.getUserId(), session.getContextId());
+        }
+
         return mailConfig;
     }
 
@@ -816,13 +812,14 @@ public abstract class MailConfig {
      * @param mailConfig The mail config whose login and password shall be set
      * @param sessionPassword The session password
      * @param account The mail account
+     * @param forMailAccess <code>true</code> if credentials are supposed to be set for mail access; otherwise <code>false</code> for mail transport
      * @throws OXException If a configuration error occurs
      */
-    protected static final void fillLoginAndPassword(final MailConfig mailConfig, final Session session, final String userLoginInfo, final Account account) throws OXException {
+    protected static final void fillLoginAndPassword(MailConfig mailConfig, Session session, String userLoginInfo, Account account, boolean forMailAccess) throws OXException {
         // Assign login
         {
             String proxyDelimiter = account.isDefaultAccount() ? MailProperties.getInstance().getAuthProxyDelimiter() : null;
-            final String slogin = session.getLoginName();
+            String slogin = session.getLoginName();
             if (proxyDelimiter != null && slogin.contains(proxyDelimiter)) {
                 mailConfig.login = saneLogin(slogin);
             } else {
@@ -833,7 +830,7 @@ public abstract class MailConfig {
         // Assign password
         if (account.isDefaultAccount()) {
             // First, check the configured authentication type for current user
-            AuthType configuredAuthType = getConfiguredAuthType(account.isMailAccount(), session);
+            AuthType configuredAuthType = getConfiguredAuthType(forMailAccess, session);
             if (AuthType.isOAuthType(configuredAuthType)) {
                 // Apparently, OAuth is supposed to be used
                 Object obj = session.getParameter(Session.PARAM_OAUTH_ACCESS_TOKEN);
@@ -860,17 +857,17 @@ public abstract class MailConfig {
                 }
             }
         } else {
-            CredentialsProviderService credentialsProvider = CredentialsProviderRegistry.getInstance().optCredentialsProviderFor(account.isMailAccount(), account.getId(), session);
+            CredentialsProviderService credentialsProvider = CredentialsProviderRegistry.getInstance().optCredentialsProviderFor(forMailAccess, account.getId(), session);
             if (null == credentialsProvider) {
-                applyPasswordAndAuthType(mailConfig, session, account);
+                applyPasswordAndAuthType(mailConfig, session, account, forMailAccess);
             } else {
-                if (account.isMailAccount()) {
+                if (forMailAccess) {
                     if (false == applyCredentials(mailConfig, credentialsProvider.getMailCredentials(account.getId(), session))) {
-                        applyPasswordAndAuthType(mailConfig, session, account);
+                        applyPasswordAndAuthType(mailConfig, session, account, forMailAccess);
                     }
                 } else {
                     if (false == applyCredentials(mailConfig, credentialsProvider.getTransportCredentials(account.getId(), session))) {
-                        applyPasswordAndAuthType(mailConfig, session, account);
+                        applyPasswordAndAuthType(mailConfig, session, account, forMailAccess);
                     }
                 }
             }
@@ -905,8 +902,8 @@ public abstract class MailConfig {
         }
     }
 
-    private static void applyPasswordAndAuthType(MailConfig mailConfig, Session session, Account account) throws OXException {
-        AuthInfo authInfo = determinePasswordAndAuthType(mailConfig.login, session, account, account.isMailAccount());
+    private static void applyPasswordAndAuthType(MailConfig mailConfig, Session session, Account account, boolean forMailAccess) throws OXException {
+        AuthInfo authInfo = determinePasswordAndAuthType(mailConfig.login, session, account, forMailAccess);
         mailConfig.password = authInfo.getPassword();
         mailConfig.authType = authInfo.getAuthType();
         mailConfig.oauthAccountId = authInfo.getOauthAccountId();

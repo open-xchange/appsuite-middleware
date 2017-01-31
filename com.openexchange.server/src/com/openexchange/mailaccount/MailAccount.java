@@ -56,21 +56,21 @@ import java.util.Map;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface MailAccount extends Account {
+public interface MailAccount extends TransportAccount {
 
     /**
      * Gets the ID of the user belonging to this mail account.
      *
      * @return The ID of the user
      */
-    public int getUserId();
+    int getUserId();
 
     /**
      * Generates the mail server URL; e.g. <code>&quot;imap://imap.somewhere.com:4143&quot;</code>.
      *
      * @return The generated mail server URL
      */
-    public String generateMailServerURL();
+    String generateMailServerURL();
 
     /**
      * Gets the mail server name.
@@ -80,28 +80,28 @@ public interface MailAccount extends Account {
      *
      * @return The mail server name
      */
-    public String getMailServer();
+    String getMailServer();
 
     /**
      * Gets the mail server port.
      *
      * @return The mail server port
      */
-    public int getMailPort();
+    int getMailPort();
 
     /**
      * Gets the mail server protocol.
      *
      * @return The mail server protocol
      */
-    public String getMailProtocol();
+    String getMailProtocol();
 
     /**
      * Checks if a secure connection to mail server shall be established.
      *
      * @return <code>true</code> if a secure connection to mail server shall be established; otherwise <code>false</code>
      */
-    public boolean isMailSecure();
+    boolean isMailSecure();
 
     /**
      * Checks if mail server expects to authenticate via OAuth or not.
@@ -118,12 +118,19 @@ public interface MailAccount extends Account {
     int getMailOAuthId();
 
     /**
+     * Checks whether mail access is disabled
+     *
+     * @return <code>true</code> if disabled; otherwise <code>false</code>
+     */
+    boolean isMailDisabled();
+
+    /**
      * Gets the transport authentication information
      *
      * @return The transport authentication information
      */
     @Override
-    public TransportAuth getTransportAuth();
+    TransportAuth getTransportAuth();
 
     /**
      * Gets the optional transport login.
@@ -133,7 +140,7 @@ public interface MailAccount extends Account {
      * @return The optional transport login
      */
     @Override
-    public String getTransportLogin();
+    String getTransportLogin();
 
     /**
      * Gets the optional transport password.
@@ -143,7 +150,7 @@ public interface MailAccount extends Account {
      * @return The optional transport password
      */
     @Override
-    public String getTransportPassword();
+    String getTransportPassword();
 
     /**
      * Checks if transport server expects to authenticate via OAuth or not.
@@ -166,7 +173,7 @@ public interface MailAccount extends Account {
      *
      * @return The spam handler name
      */
-    public String getSpamHandler();
+    String getSpamHandler();
 
     /**
      * Gets the name of the draft folder.
@@ -175,7 +182,7 @@ public interface MailAccount extends Account {
      *
      * @return The name of the draft folder
      */
-    public String getDrafts();
+    String getDrafts();
 
     /**
      * Gets the name of the sent folder.
@@ -184,7 +191,7 @@ public interface MailAccount extends Account {
      *
      * @return The name of the sent folder
      */
-    public String getSent();
+    String getSent();
 
     /**
      * Gets the name of the spam folder.
@@ -193,7 +200,7 @@ public interface MailAccount extends Account {
      *
      * @return The name of the spam folder
      */
-    public String getSpam();
+    String getSpam();
 
     /**
      * Gets the name of the trash folder.
@@ -202,7 +209,7 @@ public interface MailAccount extends Account {
      *
      * @return The name of the trash folder
      */
-    public String getTrash();
+    String getTrash();
 
     /**
      * Gets the name of the archive folder.
@@ -211,7 +218,7 @@ public interface MailAccount extends Account {
      *
      * @return The name of the archive folder
      */
-    public String getArchive();
+    String getArchive();
 
     /**
      * Gets the name of the confirmed ham folder.
@@ -220,7 +227,7 @@ public interface MailAccount extends Account {
      *
      * @return The name of the confirmed ham folder
      */
-    public String getConfirmedHam();
+    String getConfirmedHam();
 
     /**
      * Gets the name of the confirmed spam folder.
@@ -229,70 +236,70 @@ public interface MailAccount extends Account {
      *
      * @return The name of the confirmed spam folder
      */
-    public String getConfirmedSpam();
+    String getConfirmedSpam();
 
     /**
      * Checks if this mail account is enabled for Unified Mail.
      *
      * @return <code>true</code> if this mail account is enabled for Unified Mail; otherwise <code>false</code>
      */
-    public boolean isUnifiedINBOXEnabled();
+    boolean isUnifiedINBOXEnabled();
 
     /**
      * Gets the trash full name
      *
      * @return The trash full name
      */
-    public String getTrashFullname();
+    String getTrashFullname();
 
     /**
      * Gets the archive full name
      *
      * @return The archive full name
      */
-    public String getArchiveFullname();
+    String getArchiveFullname();
 
     /**
      * Gets the sent full name
      *
      * @return The sent full name
      */
-    public String getSentFullname();
+    String getSentFullname();
 
     /**
      * Gets the drafts full name
      *
      * @return The drafts full name
      */
-    public String getDraftsFullname();
+    String getDraftsFullname();
 
     /**
      * Gets the spam full name
      *
      * @return The spam full name
      */
-    public String getSpamFullname();
+    String getSpamFullname();
 
     /**
      * Gets the confirmed-spam full name
      *
      * @return The confirmed-spam full name
      */
-    public String getConfirmedSpamFullname();
+    String getConfirmedSpamFullname();
 
     /**
      * Gets the confirmed-ham full name
      *
      * @return The confirmed-ham full name
      */
-    public String getConfirmedHamFullname();
+    String getConfirmedHamFullname();
 
     /**
      * Gets this account's properties.
      *
      * @return Account's properties
      */
-    public Map<String, String> getProperties();
+    Map<String, String> getProperties();
 
     /**
      * Adds specified name-value-pair to properties.
@@ -300,14 +307,14 @@ public interface MailAccount extends Account {
      * @param name The property name
      * @param value The property value
      */
-    public void addProperty(String name, String value);
+    void addProperty(String name, String value);
 
     /**
      * Gets this account's transport properties.
      *
      * @return Account's transport properties
      */
-    public Map<String, String> getTransportProperties();
+    Map<String, String> getTransportProperties();
 
     /**
      * Adds specified name-value-pair to transport properties.
@@ -315,20 +322,20 @@ public interface MailAccount extends Account {
      * @param name The transport property name
      * @param value The transport property value
      */
-    public void addTransportProperty(String name, String value);
+    void addTransportProperty(String name, String value);
 
     /**
      * Checks if STARTTLS should be used to connect to mail server
      *
      * @return <code>true</code> if STARTTLS should be used; otherwise <code>false</code>
      */
-    public boolean isMailStartTls();
+    boolean isMailStartTls();
 
     /**
      * Gets the identifier of the account's root folder.
      *
      * @return The root folder identifier
      */
-    public String getRootFolder();
+    String getRootFolder();
 
 }

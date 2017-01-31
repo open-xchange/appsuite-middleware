@@ -267,7 +267,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement("SELECT name, url, login, password, primary_addr, default_flag, trash, sent, drafts, spam, confirmed_spam, confirmed_ham, spam_handler, unified_inbox, trash_fullname, sent_fullname, drafts_fullname, spam_fullname, confirmed_spam_fullname, confirmed_ham_fullname, personal, replyTo, archive, archive_fullname, starttls, oauth FROM user_mail_account WHERE cid = ? AND id = ? AND user = ?");
+            stmt = con.prepareStatement("SELECT name, url, login, password, primary_addr, default_flag, trash, sent, drafts, spam, confirmed_spam, confirmed_ham, spam_handler, unified_inbox, trash_fullname, sent_fullname, drafts_fullname, spam_fullname, confirmed_spam_fullname, confirmed_ham_fullname, personal, replyTo, archive, archive_fullname, starttls, oauth, disabled FROM user_mail_account WHERE cid = ? AND id = ? AND user = ?");
             stmt.setLong(1, contextId);
             stmt.setLong(2, id);
             stmt.setLong(3, userId);
@@ -333,24 +333,38 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
              */
             mailAccount.setConfirmedSpamFullname(getOptionalString(result.getString(19)));
             mailAccount.setConfirmedHamFullname(getOptionalString(result.getString(20)));
+            /*
+             * Personal
+             */
             final String pers = result.getString(21);
             if (result.wasNull()) {
                 mailAccount.setPersonal(null);
             } else {
                 mailAccount.setPersonal(pers);
             }
+            /*
+             * Reply-To address
+             */
             final String replyTo = result.getString(22);
             if (result.wasNull()) {
                 mailAccount.setReplyTo(null);
             } else {
                 mailAccount.setReplyTo(replyTo);
             }
+            /*
+             * (Optional) OAuth account identifier
+             */
             int oauthAccountId = result.getInt(26);
             if (result.wasNull()) {
                 mailAccount.setMailOAuthId(-1);
             } else {
                 mailAccount.setMailOAuthId(oauthAccountId);
             }
+            /*
+             * Enabled flag
+             */
+            boolean disabled = result.getBoolean(27);
+            mailAccount.setMailDisabled(disabled);
 
             mailAccount.setUserId(userId);
             /*
@@ -372,7 +386,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement("SELECT name, url, login, password, send_addr, default_flag, personal, replyTo, starttls, oauth FROM user_transport_account WHERE cid = ? AND id = ? AND user = ?");
+            stmt = con.prepareStatement("SELECT name, url, login, password, send_addr, default_flag, personal, replyTo, starttls, oauth, disabled FROM user_transport_account WHERE cid = ? AND id = ? AND user = ?");
             stmt.setLong(1, contextId);
             stmt.setLong(2, id);
             stmt.setLong(3, userId);
@@ -410,6 +424,8 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 } else {
                     mailAccount.setTransportOAuthId(oauthAccountId);
                 }
+                boolean disabled = result.getBoolean(11);
+                mailAccount.setTransportDisabled(disabled);
                 /*
                  * Fill properties
                  */
@@ -2817,7 +2833,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement("SELECT t.name, t.url, t.login, t.password, t.personal, t.replyTo, t.starttls, t.send_addr, t.oauth, m.login, m.password, m.oauth FROM user_transport_account AS t JOIN user_mail_account AS m ON t.cid=m.cid AND t.id=m.id AND t.user=m.user WHERE t.cid=? and t.id=? and t.user=?");
+            stmt = con.prepareStatement("SELECT t.name, t.url, t.login, t.password, t.personal, t.replyTo, t.starttls, t.send_addr, t.oauth, t.disabled, m.login, m.password, m.oauth FROM user_transport_account AS t JOIN user_mail_account AS m ON t.cid=m.cid AND t.id=m.id AND t.user=m.user WHERE t.cid=? and t.id=? and t.user=?");
             stmt.setLong(1, contextId);
             stmt.setLong(2, accountId);
             stmt.setLong(3, userId);
@@ -2863,6 +2879,8 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             } else {
                 transportAccount.setTransportOAuthId(oauthAccountId);
             }
+            boolean disabled = result.getBoolean(10);
+            transportAccount.setTransportDisabled(disabled);
             /*
              * Fill properties
              */
@@ -2872,17 +2890,17 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
              */
             if (transportAccount.getTransportAuth() == null) {
                 if (Strings.isEmpty(transportAccount.getTransportLogin()) || Strings.isEmpty(transportAccount.getTransportPassword())) {
-                    String login = result.getString(10);
+                    String login = result.getString(11);
                     if (!result.wasNull()) {
                         transportAccount.setTransportLogin(login);
                     }
 
-                    String password = result.getString(11);
+                    String password = result.getString(12);
                     if (!result.wasNull()) {
                         transportAccount.setTransportPassword(password);
                     }
 
-                    int oauthId = result.getInt(12);
+                    int oauthId = result.getInt(13);
                     if (result.wasNull()) {
                         transportAccount.setTransportOAuthId(-1);
                     } else {
@@ -3556,6 +3574,18 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         }
     }
 
+    @Override
+    public boolean incrementFailedMailAuthCount(int accountId, int userId, int contextId) throws OXException {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean incrementFailedTransportAuthCount(int accountId, int userId, int contextId) throws OXException {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
     private void checkDuplicateMailAccount(final MailAccountDescription mailAccount, final TIntSet excepts, final int userId, final int contextId, final Connection con) throws OXException {
         final String server = mailAccount.getMailServer();
         if (isEmpty(server)) {
@@ -3633,7 +3663,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             do {
                 final int id = (int) result.getLong(1);
                 if (null == excepts || !excepts.contains(id)) {
-                    final TransportAccount current = new TransportAccountImpl();
+                    final TransportAccountImpl current = new TransportAccountImpl();
                     final String url = result.getString(2);
                     if (null != url) {
                         current.parseTransportServerURL(url);
