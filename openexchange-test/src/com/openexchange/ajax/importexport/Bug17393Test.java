@@ -1,6 +1,7 @@
 package com.openexchange.ajax.importexport;
 
 import static org.junit.Assert.assertFalse;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.ajax.importexport.actions.ICalImportRequest;
 import com.openexchange.ajax.importexport.actions.ICalImportResponse;
@@ -70,6 +71,7 @@ public class Bug17393Test extends ManagedAppointmentTest {
 		+ "END:VEVENT\n"
 		+ "END:VCALENDAR\n";
 
+    @Test
     public void testChangeException() throws Exception {
         ICalImportRequest request = new ICalImportRequest(folder.getObjectID(), CULPRIT);
         ICalImportResponse response = getClient().execute(request);
