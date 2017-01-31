@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,74 +47,35 @@
  *
  */
 
-package com.openexchange.conversion.engine.osgi;
+package com.openexchange.pns.mobile.api.facade.osgi;
 
-import com.openexchange.conversion.ConversionService;
-import com.openexchange.conversion.DataHandler;
-import com.openexchange.conversion.DataSource;
-import com.openexchange.conversion.engine.internal.ConversionEngineRegistry;
-import com.openexchange.conversion.engine.internal.ConversionServiceImpl;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.pns.PushMessageGenerator;
+import com.openexchange.pns.mobile.api.facade.MobileApiFacadeMessageGenerator;
 
 /**
- * {@link ConversionEngineActivator} - Activator for conversion engine
+ * {@link MobileApiFacadePushStuffActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.4
  */
-public final class ConversionEngineActivator extends HousekeepingActivator {
-
-    private static final org.slf4j.Logger LOG =
-        org.slf4j.LoggerFactory.getLogger(ConversionEngineActivator.class);
+public class MobileApiFacadePushStuffActivator extends HousekeepingActivator {
 
     /**
-     * Initializes a new {@link ConversionEngineActivator}
+     * Initializes a new {@link MobileApiFacadePushStuffActivator}.
      */
-    public ConversionEngineActivator() {
+    public MobileApiFacadePushStuffActivator() {
         super();
     }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+        return new Class<?>[] {};
     }
 
     @Override
     protected void startBundle() throws Exception {
-        try {
-            /*
-             * Clear registry
-             */
-            ConversionEngineRegistry.getInstance().clearAll();
-            /*
-             * Start-up service trackers
-             */
-            track(DataHandler.class, new DataHandlerTracker(context));
-            track(DataSource.class, new DataSourceTracker(context));
-            openTrackers();
-            /*
-             * Register service
-             */
-            registerService(ConversionService.class, new ConversionServiceImpl());
-            LOG.info("Conversion engine successfully started");
-        } catch (final Exception e) {
-            LOG.error("", e);
-            throw e;
-        }
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        try {
-            super.stopBundle();
-            /*
-             * Clear registry
-             */
-            ConversionEngineRegistry.getInstance().clearAll();
-            LOG.info("Conversion engine successfully stopped");
-        } catch (final Exception e) {
-            LOG.error("", e);
-            throw e;
-        }
+        registerService(PushMessageGenerator.class, new MobileApiFacadeMessageGenerator());
     }
 
 }
