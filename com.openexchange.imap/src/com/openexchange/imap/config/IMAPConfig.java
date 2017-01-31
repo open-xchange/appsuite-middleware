@@ -363,9 +363,9 @@ public final class IMAPConfig extends MailConfig {
     }
 
     /**
-     * Gets the internet address of the IMAP server.
+     * Gets the Internet Protocol (IP) address of the IMAP server.
      *
-     * @return The internet address of the IMAP server.
+     * @return The Internet Protocol (IP) address of the IMAP server.
      * @throws OXException If IMAP server cannot be resolved
      */
     public InetAddress getImapServerAddress() throws OXException {
