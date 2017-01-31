@@ -358,8 +358,9 @@ public class SieveMailCategoriesRuleEngine implements MailCategoriesRuleEngine {
             if (removed) {
                 rules2update.add(rule);
             }
-            for (TestCommand parent : toDeleteMap.keySet()) {
-                for (TestCommand deleteEntry : toDeleteMap.get(parent)) {
+            for (Map.Entry<TestCommand, List<TestCommand>> entry : toDeleteMap.entrySet()) {
+                TestCommand parent = entry.getKey();
+                for (TestCommand deleteEntry : entry.getValue()) {
                     parent.removeTestCommand(deleteEntry);
                 }
             }
