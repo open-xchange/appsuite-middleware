@@ -318,6 +318,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             fingerprint = getFingerprint(cert);
             SSLCertificateManagementService certificateManagement = Services.getService(SSLCertificateManagementService.class);
             if (!certificateManagement.isTrusted(userId, contextId, fingerprint)) {
+                cacheCertificate(userId, contextId, cert);
                 throw new CertificateException(SSLExceptionCode.USER_DOES_NOT_TRUST_CERTIFICATE.create(userId, contextId, fingerprint));
             }
         } catch (NoSuchAlgorithmException e) {
@@ -325,6 +326,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             LOG.error("Cannot retrieve the fingerprint for the chain");
         } catch (OXException e) {
             if (SSLCertificateManagementSQLExceptionCode.CERTIFICATE_NOT_FOUND.equals(e)) {
+                cacheCertificate(userId, contextId, cert);
                 throw new CertificateException(SSLExceptionCode.USER_DOES_NOT_TRUST_CERTIFICATE.create(userId, contextId, fingerprint));
             }
             throw new CertificateException(e);
