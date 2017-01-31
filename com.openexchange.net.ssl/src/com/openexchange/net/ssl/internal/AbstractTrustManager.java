@@ -135,14 +135,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             this.trustManager.checkServerTrusted(chain, authType, socket);
             return;
         } catch (CertificateException e) {
-            if (!e.getMessage().contains("unable to find valid certification path to requested target")) {
-                throw e;
-            }
-            // Try to determine the reason of failure
-            // Check if the root certificate authority is trusted
-            checkRootCATrusted(chain);
-            // It's an invalid certificate, check if the user trusts it
-            checkUserTrustsServer(chain, e);
+            handleCertificateException(chain, e);
         }
     }
 
@@ -179,14 +172,46 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             this.trustManager.checkServerTrusted(chain, authType);
             return;
         } catch (CertificateException e) {
-            //TODO: try to determine the reason of failure
-            if (!e.getMessage().contains("unable to find valid certification path to requested target")) {
-                throw e;
-            }
-            // It's an invalid certificate, check if the user trusts it
-            checkUserTrustsServer(chain, e);
+            handleCertificateException(chain, e);
         }
     }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.net.ssl.X509ExtendedTrustManager#checkServerTrusted(java.security.cert.X509Certificate[], java.lang.String, javax.net.ssl.SSLEngine)
+     */
+    @Override
+    public void checkServerTrusted(X509Certificate[] chain, String authType, SSLEngine engine) throws CertificateException {
+        if (Services.getService(SSLConfigurationService.class).isWhitelisted(engine.getSession().getPeerHost())) {
+            return;
+        }
+
+        // Check if the server is to be trusted; if yes return
+        try {
+            this.trustManager.checkServerTrusted(chain, authType, engine);
+            return;
+        } catch (CertificateException e) {
+            handleCertificateException(chain, e);
+        }
+    }
+
+    @Override
+    public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+        // do not check client
+    }
+
+    @Override
+    public void checkClientTrusted(X509Certificate[] chain, String authType, Socket socket) throws CertificateException {
+        // do not check client
+    }
+
+    @Override
+    public void checkClientTrusted(X509Certificate[] chain, String authType, SSLEngine engine) throws CertificateException {
+        // do not check client
+    }
+
+    ////////////////////////////////////////////////// HELPERS ///////////////////////////////////////////////
 
     /**
      * Returns the hostname from the specified {@link X509Certificate}
@@ -209,44 +234,23 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Handles the specified {@link CertificateException}. It first verifies whether the issuer of the
+     * specified {@link X509Certificate} chain is trusted, then whether the user trusts the certificate
      * 
-     * @see javax.net.ssl.X509ExtendedTrustManager#checkServerTrusted(java.security.cert.X509Certificate[], java.lang.String, javax.net.ssl.SSLEngine)
+     * @param chain The {@link X509Certificate} chain
+     * @param e The {@link CertificateException} to handle/or re-throw
+     * @throws CertificateException if the specified {@link X509Certificate} chain is not trusted by the user
      */
-    @Override
-    public void checkServerTrusted(X509Certificate[] chain, String authType, SSLEngine engine) throws CertificateException {
-        if (Services.getService(SSLConfigurationService.class).isWhitelisted(engine.getSession().getPeerHost())) {
-            return;
+    private void handleCertificateException(X509Certificate[] chain, CertificateException e) throws CertificateException {
+        if (!e.getMessage().contains("unable to find valid certification path to requested target")) {
+            throw e;
         }
-
-        // Check if the server is to be trusted; if yes return
-        try {
-            this.trustManager.checkServerTrusted(chain, authType, engine);
-            return;
-        } catch (CertificateException e) {
-            //TODO: try to determine the reason of failure
-            if (!e.getMessage().contains("unable to find valid certification path to requested target")) {
-                throw e;
-            }
-            // It's an invalid certificate, check if the user trusts it
-            checkUserTrustsServer(chain, e);
-        }
-    }
-
-    @Override
-    public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-        // do not check client
-    }
-
-    @Override
-    public void checkClientTrusted(X509Certificate[] chain, String authType, Socket socket) throws CertificateException {
-        // do not check client
-    }
-
-    @Override
-    public void checkClientTrusted(X509Certificate[] chain, String authType, SSLEngine engine) throws CertificateException {
-        // do not check client
+        // Try to determine the reason of failure
+        // Check if the root certificate authority is trusted
+        checkRootCATrusted(chain);
+        // It's an invalid certificate, check if the user trusts it
+        checkUserTrustsServer(chain, e);
     }
 
     /**
@@ -266,9 +270,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             }
         }
 
-        int user = Tools.getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_USER_ID));
-        int context = Tools.getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_CONTEXT_ID));
-        throw new CertificateException(SSLExceptionCode.ROOT_CA_UNTRUSTED.create(rootCert.getIssuerDN(), user, context));
+        throw new CertificateException(SSLExceptionCode.ROOT_CA_UNTRUSTED.create(rootCert.getIssuerDN()));
     }
 
     /**
