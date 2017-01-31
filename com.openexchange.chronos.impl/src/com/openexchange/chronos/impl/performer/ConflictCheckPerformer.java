@@ -182,7 +182,10 @@ public class ConflictCheckPerformer extends AbstractQueryPerformer {
         TimeZone eventTimeZone = isFloating(event) || null == event.getTimeZone() ? getTimeZone(session) : TimeZone.getTimeZone(event.getTimeZone());
         List<EventConflict> conflicts = new ArrayList<EventConflict>();
         for (Event eventInPeriod : eventsInPeriod) {
-            if (eventInPeriod.getId() == event.getId()) {
+            /*
+             * skip checks with event itself or any other event from same series
+             */
+            if (eventInPeriod.getId() == event.getId() || 0 < event.getSeriesId() && event.getSeriesId() == eventInPeriod.getSeriesId()) {
                 continue;
             }
             /*
