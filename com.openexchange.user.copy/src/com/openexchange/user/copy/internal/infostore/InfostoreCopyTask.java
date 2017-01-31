@@ -312,8 +312,9 @@ public class InfostoreCopyTask implements CopyUserTaskService {
             } finally {
                 DBUtils.closeSQLStuff(rs, stmt);
             }
-            for (final DocumentMetadata master : documents.keySet()) {
-                final List<DocumentMetadata> versions = documents.get(master);
+            for (Map.Entry<DocumentMetadata, List<DocumentMetadata>> entry : documents.entrySet()) {
+                DocumentMetadata master = entry.getKey();
+                List<DocumentMetadata> versions = entry.getValue();
                 try {
                     stmt = con.prepareStatement(SELECT_INFOSTORE_VERSIONS);
                     stmt.setInt(1, cid);
