@@ -68,4 +68,6 @@ public interface PGPMailRecognizer {
      * @throws OXException
      */
     boolean isPGPMessage(MailMessage message) throws OXException;
+
+    boolean isPGPSignedMessage(MailMessage message) throws OXException;
 }
