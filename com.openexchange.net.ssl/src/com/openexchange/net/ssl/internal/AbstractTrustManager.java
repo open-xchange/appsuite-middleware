@@ -229,6 +229,9 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
      * @throws CertificateException if the specified {@link X509Certificate} chain is not trusted by the user
      */
     private void handleCertificateException(X509Certificate[] chain, CertificateException e) throws CertificateException {
+        if (chain == null || chain.length == 0) {
+            throw new IllegalArgumentException("The supplied certificate chain is empty", e);
+        }
         // Try to determine the reason of failure
         if (!e.getMessage().contains("unable to find valid certification path to requested target")) {
             throw e;
@@ -258,7 +261,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
                 fingerprint = getFingerprint(chain[0]);
                 cacheCertificate(userId, contextId, chain[0]);
             } catch (NoSuchAlgorithmException e) {
-                //TODO: detailed error log
+                //TODO: detailed error log or re-throw as CertificateException?
                 LOG.error("Cannot retrieve the fingerprint for the chain");
             }
             throw new CertificateException(SSLExceptionCode.SELF_SIGNED_CERTIFICATE.create(fingerprint));
@@ -306,12 +309,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         // TODO: Check if the user is allowed to accept untrusted certificates
         // via config
 
-        if (chain == null) {
-            LOG.error("Could not obtain server certificate chain");
-            //TODO: throw exception
-            throw new IllegalArgumentException("The server certificate chain cannot be null");
-        }
-
+        // The certificate is always the first one in the chain
         X509Certificate cert = chain[0];
         String fingerprint = null;
         try {
