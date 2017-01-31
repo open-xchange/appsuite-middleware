@@ -195,6 +195,9 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                     com.openexchange.file.storage.boxcom.BoxFile boxFile = new com.openexchange.file.storage.boxcom.BoxFile(folderId, id, userId, rootFolderId).parseBoxFile(fileInfo);
                     return boxFile;
                 } catch (final BoxAPIException e) {
+                    if (SC_UNAUTHORIZED == e.getResponseCode()) {
+                        throw e;
+                    }
                     throw handleHttpResponseError(id, account.getId(), e);
                 }
             }
@@ -261,6 +264,9 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
 
                         return new IDTuple(file.getFolderId(), boxFile.getID());
                     } catch (final BoxAPIException e) {
+                        if (SC_UNAUTHORIZED == e.getResponseCode()) {
+                            throw e;
+                        }
                         throw handleHttpResponseError(file.getId(), account.getId(), e);
                     }
                 }
@@ -310,6 +316,9 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
 
                     return new IDTuple(destFolder, copiedFile.getID());
                 } catch (final BoxAPIException e) {
+                    if (SC_UNAUTHORIZED == e.getResponseCode()) {
+                        throw e;
+                    }
                     throw handleHttpResponseError(source.getId(), account.getId(), e);
                 }
             }
@@ -352,6 +361,9 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
 
                     return new IDTuple(destFolder, movedFile.getID());
                 } catch (final BoxAPIException e) {
+                    if (SC_UNAUTHORIZED == e.getResponseCode()) {
+                        throw e;
+                    }
                     throw handleHttpResponseError(source.getId(), account.getId(), e);
                 }
             }
@@ -409,6 +421,9 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                     } catch (IOException e) {
                         throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
                     } catch (BoxAPIException e) {
+                        if (SC_UNAUTHORIZED == e.getResponseCode()) {
+                            throw e;
+                        }
                         throw handleHttpResponseError(id, account.getId(), e);
                     }
                 }
@@ -426,6 +441,9 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                     error = true; // Avoid premature closing
                     return stream;
                 } catch (final BoxAPIException e) {
+                    if (SC_UNAUTHORIZED == e.getResponseCode()) {
+                        throw e;
+                    }
                     throw handleHttpResponseError(id, account.getId(), e);
                 } finally {
                     if (error) {
@@ -457,6 +475,9 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
 
                     return new ByteArrayInputStream(thumbnail);
                 } catch (final BoxAPIException e) {
+                    if (SC_UNAUTHORIZED == e.getResponseCode()) {
+                        throw e;
+                    }
                     throw handleHttpResponseError(id, account.getId(), e);
                 }
             }
@@ -546,6 +567,9 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
 
                     return new IDTuple(file.getFolderId(), fileInfo.getID());
                 } catch (BoxAPIException e) {
+                    if (SC_UNAUTHORIZED == e.getResponseCode()) {
+                        throw e;
+                    }
                     throw handleHttpResponseError(file.getId(), account.getId(), e);
                 }
             }
