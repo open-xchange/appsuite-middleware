@@ -555,7 +555,7 @@ If you would like to add a reference to another property use the following appro
 | __File__ | mail.properties  |
 
 ---
-| Key | <span style="font-weight:normal">com.openexhange.mail.authType</span> |
+| Key | <span style="font-weight:normal">com.openexchange.mail.authType</span> |
 |:----------------|:--------|
 | __Description__ | Specifies the authentication type which should be used for primary account's mail access. Known values: 'login', 'xoauth2', and "oauthbearer"<br> |
 | __Default__ | login  |
@@ -565,7 +565,7 @@ If you would like to add a reference to another property use the following appro
 | __File__ | mail.properties  |
 
 ---
-| Key | <span style="font-weight:normal">com.openexhange.mail.transport.authType</span> |
+| Key | <span style="font-weight:normal">com.openexchange.mail.transport.authType</span> |
 |:----------------|:--------|
 | __Description__ | Specifies the authentication type which should be used for primary account's mail transport. Known values: 'login', 'xoauth2', and "oauthbearer"<br> |
 | __Default__ | login  |
