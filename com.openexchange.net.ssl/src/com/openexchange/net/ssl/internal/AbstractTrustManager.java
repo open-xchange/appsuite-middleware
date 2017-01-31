@@ -341,6 +341,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param chain The {@link X509Certificate}
+     * @param failureReason The reason why the certificate is untrusted
      * @throws CertificateException if an error is occurred
      */
     private void cacheCertificate(int userId, int contextId, X509Certificate cert, String failureReason) throws CertificateException {
