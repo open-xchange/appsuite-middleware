@@ -99,9 +99,31 @@ public interface SSLCertificateManagementService {
      * user in the specified context
      * 
      * @param userId The user identifier
-     * @param contextId The context identifer
+     * @param contextId The context identifier
      * @param fingerprint The SSL {@link Certificate}'s fingerprint
      * @throws OXException if the certificate is not found or any other error is occurred
      */
     void delete(int userId, int contextId, String fingerprint) throws OXException;
+
+    /**
+     * Caches the specified {@link Certificate} temporarily for the specified user in the
+     * specified context
+     * 
+     * @param userId the user identifier
+     * @param contextId the context identifier
+     * @param certificate The SSL {@link Certificate}
+     * @throws OXException if the certificate cannot be cached or any other error is occurred
+     */
+    void cache(int userId, int contextId, Certificate certificate) throws OXException;
+
+    /**
+     * Returns the cached {@link Certificate}
+     * 
+     * @param userId the user identifier
+     * @param contextId the context identifier
+     * @param fingerprint The fingerprint of the {@link Certificate}
+     * @return The cached {@link Certificate}
+     * @throws OXException if an error is occurred
+     */
+    Certificate getCached(int userId, int contextId, String fingerprint) throws OXException;
 }

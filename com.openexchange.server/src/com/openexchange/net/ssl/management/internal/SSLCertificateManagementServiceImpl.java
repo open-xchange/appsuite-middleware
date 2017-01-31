@@ -49,6 +49,11 @@
 
 package com.openexchange.net.ssl.management.internal;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.openexchange.exception.OXException;
 import com.openexchange.net.ssl.management.Certificate;
 import com.openexchange.net.ssl.management.SSLCertificateManagementService;
@@ -64,6 +69,8 @@ public class SSLCertificateManagementServiceImpl implements SSLCertificateManage
 
     private final SSLCertificateManagementSQL storage;
 
+    private final Cache<CertificateKey, Certificate> certificateCache;
+
     /**
      * Initialises a new {@link SSLCertificateManagementServiceImpl}.
      * 
@@ -72,6 +79,7 @@ public class SSLCertificateManagementServiceImpl implements SSLCertificateManage
     public SSLCertificateManagementServiceImpl(ServiceLookup services) {
         super();
         storage = new SSLCertificateManagementSQL(services);
+        certificateCache = CacheBuilder.newBuilder().maximumSize(1000).expireAfterWrite(5, TimeUnit.MINUTES).expireAfterAccess(5, TimeUnit.MINUTES).build();
     }
 
     /*
@@ -102,6 +110,7 @@ public class SSLCertificateManagementServiceImpl implements SSLCertificateManage
     @Override
     public void store(int userId, int contextId, Certificate certificate) throws OXException {
         storage.store(userId, contextId, certificate);
+        certificateCache.invalidate(new CertificateKey(userId, contextId, certificate.getFingerprint()));
     }
 
     /*
@@ -112,5 +121,41 @@ public class SSLCertificateManagementServiceImpl implements SSLCertificateManage
     @Override
     public void delete(int userId, int contextId, String fingerprint) throws OXException {
         storage.delete(userId, contextId, fingerprint);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.net.ssl.management.SSLCertificateManagementService#cache(int, int, com.openexchange.net.ssl.management.Certificate)
+     */
+    @Override
+    public void cache(int userId, int contextId, final Certificate certificate) throws OXException {
+        try {
+            certificateCache.get(new CertificateKey(userId, contextId, certificate.getFingerprint()), new Callable<Certificate>() {
+
+                @Override
+                public Certificate call() throws Exception {
+                    return certificate;
+                }
+
+            });
+        } catch (ExecutionException e) {
+            //TODO: throw OXException
+            e.printStackTrace();
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.net.ssl.management.SSLCertificateManagementService#getCached(int, int, java.lang.String)
+     */
+    @Override
+    public Certificate getCached(int userId, int contextId, String fingerprint) throws OXException {
+        Certificate certificate = certificateCache.getIfPresent(new CertificateKey(userId, contextId, fingerprint));
+        if (certificate == null) {
+            //TODO: throw OXException
+        }
+        return certificate;
     }
 }
