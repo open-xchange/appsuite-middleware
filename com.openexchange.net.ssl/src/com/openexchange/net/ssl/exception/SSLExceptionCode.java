@@ -77,14 +77,9 @@ public enum SSLExceptionCode implements DisplayableOXExceptionCode {
      */
     USER_DOES_NOT_TRUST_CERTIFICATE("The user '%1$s' in context '%2$s' does not trust the certificate '%3$s'", CATEGORY_ERROR, 3, SSLExceptionMessages.USER_DOES_NOT_TRUST_CERTIFICATE),
     /**
-     * The root certificate issued by '%1$s' is not trusted
-     */
-    ROOT_CA_UNTRUSTED("The root certificate issued by '%1$s' is not trusted.", CATEGORY_ERROR, 4, SSLExceptionMessages.UNTRUSTED_ROOT_CERTIFICATE),
-    /**
      * The certificate is self-signed
      */
-    SELF_SIGNED_CERTIFICATE("The certificate is self-signed", CATEGORY_ERROR, 5, SSLExceptionMessages.SELF_SIGNED_CERTIFICATE),
-
+    SELF_SIGNED_CERTIFICATE("The certificate is self-signed", CATEGORY_ERROR, 4, SSLExceptionMessages.SELF_SIGNED_CERTIFICATE),
     ;
 
     public static final String PREFIX = "SSL";

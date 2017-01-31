@@ -350,11 +350,12 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             Certificate certificate = new Certificate(getFingerprint(cert));
             certificate.setCommonName(getHostFromPrincipal(cert));
             certificate.setExpirationTimestamp(cert.getNotAfter().getTime());
-            certificate.setExpirationTimestamp(cert.getNotBefore().getTime());
+            certificate.setIssuedOnTimestamp(cert.getNotBefore().getTime());
             certificate.setIssuer(cert.getIssuerDN().toString());
             certificate.setSerialNumber(cert.getSerialNumber().toString(16));
             certificate.setSignature(toHex(cert.getSignature()));
             certificate.setTrusted(false);
+            certificate.setExpired(certificate.getExpirationTimestamp() < System.currentTimeMillis());
             certificate.setFailureReason(failureReason);
 
             // Cache it
