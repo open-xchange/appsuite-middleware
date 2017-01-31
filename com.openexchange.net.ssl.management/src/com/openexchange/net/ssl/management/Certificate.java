@@ -57,9 +57,14 @@ package com.openexchange.net.ssl.management;
 public class Certificate {
 
     private final String fingerprint;
+    private long issuedOnTimestamp;
     private long expirationTimestamp;
     private boolean trusted;
     private boolean expired;
+    private String commonName;
+    private String issuer;
+    private String signature;
+    private String serialNumber;
 
     /**
      * Initialises a new {@link Certificate}.
@@ -130,5 +135,110 @@ public class Certificate {
      */
     public void setExpired(boolean expired) {
         this.expired = expired;
+    }
+
+    /**
+     * Gets the issuedOnTimestamp
+     *
+     * @return The issuedOnTimestamp
+     */
+    public long getIssuedOnTimestamp() {
+        return issuedOnTimestamp;
+    }
+
+    /**
+     * Sets the issuedOnTimestamp
+     *
+     * @param issuedOnTimestamp The issuedOnTimestamp to set
+     */
+    public void setIssuedOnTimestamp(long issuedOnTimestamp) {
+        this.issuedOnTimestamp = issuedOnTimestamp;
+    }
+
+    /**
+     * Gets the commonName
+     *
+     * @return The commonName
+     */
+    public String getCommonName() {
+        return commonName;
+    }
+
+    /**
+     * Sets the commonName
+     *
+     * @param commonName The commonName to set
+     */
+    public void setCommonName(String commonName) {
+        this.commonName = commonName;
+    }
+
+    /**
+     * Gets the issuer
+     *
+     * @return The issuer
+     */
+    public String getIssuer() {
+        return issuer;
+    }
+
+    /**
+     * Sets the issuer
+     *
+     * @param issuer The issuer to set
+     */
+    public void setIssuer(String issuer) {
+        this.issuer = issuer;
+    }
+
+    /**
+     * Gets the signature
+     *
+     * @return The signature
+     */
+    public String getSignature() {
+        return signature;
+    }
+
+    /**
+     * Sets the signature
+     *
+     * @param signature The signature to set
+     */
+    public void setSignature(String signature) {
+        this.signature = signature;
+    }
+
+    /**
+     * Gets the serialNumber
+     *
+     * @return The serialNumber
+     */
+    public String getSerialNumber() {
+        return serialNumber;
+    }
+
+    /**
+     * Sets the serialNumber
+     *
+     * @param serialNumber The serialNumber to set
+     */
+    public void setSerialNumber(String serialNumber) {
+        this.serialNumber = serialNumber;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder("{");
+        builder.append("\"issuer\":\"").append(issuer).append("\",");
+        builder.append("\"commonName\":\"").append(commonName).append("\",");
+        builder.append("\"fingerprint\":\"").append(fingerprint).append("\"");
+        builder.append("}");
+        return builder.toString();
     }
 }

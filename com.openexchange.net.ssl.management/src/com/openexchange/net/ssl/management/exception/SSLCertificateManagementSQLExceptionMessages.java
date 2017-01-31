@@ -58,8 +58,6 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 final class SSLCertificateManagementSQLExceptionMessages implements LocalizableStrings {
 
-    /**
-     * The SSL certificate with fingerprint '%1$s' was not found for user '%2$s' in context '%3$s'
-     */
+    // The SSL certificate with fingerprint '%1$s' was not found for user '%2$s' in context '%3$s'
     final static String CERTIFICATE_NOT_FOUND = "The SSL certificate with fingerprint '%1$s' was not found for user '%2$s' in context '%3$s'";
 }

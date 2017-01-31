@@ -55,11 +55,11 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
 
-
 /**
  * {@link SSLExceptionCode}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.8.3
  */
 public enum SSLExceptionCode implements DisplayableOXExceptionCode {
@@ -76,6 +76,10 @@ public enum SSLExceptionCode implements DisplayableOXExceptionCode {
      * The user '%1$s' in context '%2$s' does not trust the certificates '%3$s' and does know the certificates '%4$s'
      */
     USER_DOES_NOT_TRUST_CERTS("The user '%1$s' in context '%2$s' does not trust the certificates '%3$s' and does know the certificates '%4$s'", CATEGORY_ERROR, 3, SSLExceptionMessages.USER_DOES_NOT_TRUST_CERTS),
+    /**
+     * The root certificate issued by '%1$s' is not trusted by the user '%2$s' in context '%3$s
+     */
+    ROOT_CA_UNTRUSTED("The root certificate issued by '%1$s' is not trusted by the user '%2$s' in context '%3$s", CATEGORY_ERROR, 4, SSLExceptionMessages.UNTRUSTED_ROOT_CERTIFICATE),
 
     ;
 
@@ -88,6 +92,7 @@ public enum SSLExceptionCode implements DisplayableOXExceptionCode {
 
     /**
      * Initializes a new {@link SSLExceptionCode}.
+     * 
      * @param detailNumber
      */
     private SSLExceptionCode(final String message, final Category category, final int detailNumber) {
@@ -166,6 +171,5 @@ public enum SSLExceptionCode implements DisplayableOXExceptionCode {
     public OXException create(final Throwable cause, final Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
     }
-
 
 }

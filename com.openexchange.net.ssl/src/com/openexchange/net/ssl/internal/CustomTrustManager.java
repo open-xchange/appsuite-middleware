@@ -53,10 +53,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.security.cert.PKIXParameters;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509ExtendedTrustManager;
@@ -68,16 +70,25 @@ import com.openexchange.net.ssl.osgi.Services;
  * {@link CustomTrustManager}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.8.3
  */
 public class CustomTrustManager extends AbstractTrustManager {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CustomTrustManager.class);
 
+    /**
+     * Initialises a new {@link CustomTrustManager}.
+     */
     public CustomTrustManager() {
         super(initCustomTrustManager());
     }
 
+    /**
+     * Initialises the {@link CustomTrustManager}
+     * 
+     * @return An {@link X509ExtendedTrustManager}
+     */
     private static X509ExtendedTrustManager initCustomTrustManager() {
         SSLConfigurationService sslConfigService = Services.getService(SSLConfigurationService.class);
         if (null == sslConfigService) {
@@ -115,6 +126,7 @@ public class CustomTrustManager extends AbstractTrustManager {
 
             TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
             tmf.init(ks);
+            params = new PKIXParameters(ks);
 
             for (TrustManager tm : tmf.getTrustManagers()) {
                 if (tm instanceof X509ExtendedTrustManager) {
@@ -124,7 +136,7 @@ public class CustomTrustManager extends AbstractTrustManager {
         } catch (IOException e) {
             LOG.error("Unable to read custom truststore file from " + file.getAbsolutePath(), e);
             //TODO re-throw or OXException?
-        } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException e) {
+        } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | InvalidAlgorithmParameterException e) {
             LOG.error("Unable to initialize custom truststore file from " + file.getAbsolutePath(), e);
             //TODO re-throw or OXException?
         }

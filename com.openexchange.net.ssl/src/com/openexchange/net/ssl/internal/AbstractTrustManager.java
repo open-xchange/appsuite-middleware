@@ -54,6 +54,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
+import java.security.cert.PKIXParameters;
+import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.HashSet;
@@ -69,6 +71,7 @@ import com.openexchange.java.util.Tools;
 import com.openexchange.log.LogProperties;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.net.ssl.exception.SSLExceptionCode;
+import com.openexchange.net.ssl.management.Certificate;
 import com.openexchange.net.ssl.management.SSLCertificateManagementService;
 import com.openexchange.net.ssl.management.exception.SSLCertificateManagementSQLExceptionCode;
 import com.openexchange.net.ssl.osgi.Services;
@@ -84,6 +87,8 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractTrustManager.class);
 
     protected final X509ExtendedTrustManager trustManager;
+
+    protected static PKIXParameters params;
 
     /**
      * Initializes a new {@link AbstractTrustManager}.
@@ -130,14 +135,15 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             this.trustManager.checkServerTrusted(chain, authType, socket);
             return;
         } catch (CertificateException e) {
-            //TODO: try to determine the reason of failure
             if (!e.getMessage().contains("unable to find valid certification path to requested target")) {
                 throw e;
-            } 
+            }
+            // Try to determine the reason of failure
+            // Check if the root certificate authority is trusted
+            checkRootCATrusted(chain);
             // It's an invalid certificate, check if the user trusts it
             checkUserTrustsServer(chain, e);
         }
-
     }
 
     /*
@@ -176,7 +182,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             //TODO: try to determine the reason of failure
             if (!e.getMessage().contains("unable to find valid certification path to requested target")) {
                 throw e;
-            } 
+            }
             // It's an invalid certificate, check if the user trusts it
             checkUserTrustsServer(chain, e);
         }
@@ -222,7 +228,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             //TODO: try to determine the reason of failure
             if (!e.getMessage().contains("unable to find valid certification path to requested target")) {
                 throw e;
-            } 
+            }
             // It's an invalid certificate, check if the user trusts it
             checkUserTrustsServer(chain, e);
         }
@@ -244,6 +250,28 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
     }
 
     /**
+     * Checks whether the issuer of the specified {@link X509Certificate} chain is a trusted root CA
+     * 
+     * @param chain The {@link X509Certificate} chain
+     * @throws CertificateException if the root CA is not trusted by the user
+     */
+    private void checkRootCATrusted(X509Certificate[] chain) throws CertificateException {
+        // Check if root authority is trusted
+        Set<TrustAnchor> anchors = params.getTrustAnchors();
+        X509Certificate rootCert = chain[chain.length - 1];
+        for (TrustAnchor a : anchors) {
+            if (a.getTrustedCert().getSubjectDN().equals(rootCert.getIssuerDN())) {
+                LOG.debug("The root CA '{}' is trusted", rootCert.getIssuerDN());
+                return;
+            }
+        }
+
+        int user = Tools.getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_USER_ID));
+        int context = Tools.getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_CONTEXT_ID));
+        throw new CertificateException(SSLExceptionCode.ROOT_CA_UNTRUSTED.create(rootCert.getIssuerDN(), user, context));
+    }
+
+    /**
      * Checks whether the user trusts the specified {@link X509Certificate}
      * 
      * @param chain The certificate to check
@@ -261,28 +289,40 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             throw new IllegalArgumentException("The server certificate chain cannot be null");
         }
 
-        Set<String> untrustedFingerprints = new HashSet<String>();
-        Set<String> unknownFingerprints = new HashSet<String>();
+        Set<Certificate> untrustedFingerprints = new HashSet<>();
+        Set<Certificate> unknownFingerprints = new HashSet<>();
         for (X509Certificate cert : chain) {
             String fingerprint = null;
             try {
                 fingerprint = getFingerprint(cert);
                 SSLCertificateManagementService certificateManagement = Services.getService(SSLCertificateManagementService.class);
                 if (!certificateManagement.isTrusted(user, context, fingerprint)) {
-                    untrustedFingerprints.add(fingerprint);
+                    Certificate certificate = new Certificate(fingerprint);
+                    certificate.setCommonName(cert.getSubjectDN().toString());
+                    certificate.setIssuer(cert.getIssuerDN().toString());
+                    untrustedFingerprints.add(certificate);
                 }
             } catch (NoSuchAlgorithmException e) {
                 LOG.error("Cannot retrieve the fingerprint for the chain");
             } catch (OXException e) {
                 if (SSLCertificateManagementSQLExceptionCode.CERTIFICATE_NOT_FOUND.equals(e)) {
-                    unknownFingerprints.add(fingerprint);
+                    Certificate certificate = new Certificate(fingerprint);
+                    certificate.setCommonName(cert.getSubjectDN().toString());
+                    certificate.setIssuer(cert.getIssuerDN().toString());
+                    unknownFingerprints.add(certificate);
                 }
                 LOG.error("{}", e.getMessage(), e);
             }
         }
         // TODO: Create a list with the untrusted certificates and pass them as parameters to a nested OX exception
         if (!untrustedFingerprints.isEmpty() || !unknownFingerprints.isEmpty()) {
-            throw new CertificateException(SSLExceptionCode.USER_DOES_NOT_TRUST_CERTS.create(user, context, untrustedFingerprints.toString(), unknownFingerprints.toString()));
+            StringBuilder builder = new StringBuilder("[");
+            for (Certificate c : unknownFingerprints) {
+                builder.append(c.toString()).append(",");
+            }
+            builder.setLength(builder.length() - 1);
+            builder.append("]");
+            throw new CertificateException(SSLExceptionCode.USER_DOES_NOT_TRUST_CERTS.create(user, context, untrustedFingerprints.toString(), builder.toString()));
         }
     }
 

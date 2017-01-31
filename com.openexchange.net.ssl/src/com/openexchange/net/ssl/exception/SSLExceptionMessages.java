@@ -55,6 +55,7 @@ import com.openexchange.i18n.LocalizableStrings;
  * {@link SSLExceptionMessages}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.8.3
  */
 public class SSLExceptionMessages implements LocalizableStrings {
@@ -67,6 +68,10 @@ public class SSLExceptionMessages implements LocalizableStrings {
 
     // The user '%1$s' in context '%2$s' does not trust the certificates '%3$s' and does know the certificates '%4$s'
     public final static String USER_DOES_NOT_TRUST_CERTS = "The user '%1$s' in context '%2$s' does not trust the certificates '%3$s' and does know the certificates '%4$s'";
+    
+     // The root certificate issued by '%1$s' is not trusted by the user '%2$s' in context '%3$s
+    public final static String UNTRUSTED_ROOT_CERTIFICATE = "The root certificate issued by '%1$s' is not trusted by the user '%2$s' in context '%3$s";
+
 
     private SSLExceptionMessages() {
         super();
