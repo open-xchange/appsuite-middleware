@@ -83,11 +83,9 @@ import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.impl.EventConflictImpl;
 import com.openexchange.chronos.impl.Utils;
-import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventConflict;
-import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
@@ -104,14 +102,9 @@ import com.openexchange.java.util.TimeZones;
  */
 public class ConflictCheckPerformer extends AbstractQueryPerformer {
 
-    /** Specifies the maximum number of conflicts between two recurring event series */
-    private static final int MAX_CONFLICTS_PER_RECURRENCE = 5;
-
-    /** Specifies the maximum number of attendees to indicate per conflict */
-    private static final int MAX_ATTENDEES_PER_CONFLICT = 5;
-
-    /** Defines the overall maximum number of conflicts to return */
-    private static final int MAX_CONFLICTS = 999;
+    private final int maxConflictsPerRecurrence;
+    private final int maxConflicts;
+    private final int maxAttendeesPerConflict;
 
     private final Date today;
 
@@ -126,6 +119,9 @@ public class ConflictCheckPerformer extends AbstractQueryPerformer {
     public ConflictCheckPerformer(CalendarSession session, CalendarStorage storage) throws OXException {
         super(session, storage);
         this.today = truncateTime(new Date(), getTimeZone(session));
+        maxConflicts = session.getConfig().getMaxConflicts();
+        maxAttendeesPerConflict = session.getConfig().getMaxAttendeesPerConflict();
+        maxConflictsPerRecurrence = session.getConfig().getMaxConflictsPerRecurrence();
     }
 
     /**
@@ -149,8 +145,8 @@ public class ConflictCheckPerformer extends AbstractQueryPerformer {
         List<EventConflict> conflicts = isSeriesMaster(event) ? getSeriesConflicts(event, attendeesToCheck) : getEventConflicts(event, attendeesToCheck);
         if (1 < conflicts.size()) {
             Collections.sort(conflicts, HARD_CONFLICTS_FIRST_COMPARATOR);
-            if (MAX_CONFLICTS < conflicts.size()) {
-                conflicts = conflicts.subList(0, MAX_CONFLICTS);
+            if (maxConflicts < conflicts.size()) {
+                conflicts = conflicts.subList(0, maxConflicts);
             }
         }
         return conflicts;
@@ -202,7 +198,7 @@ public class ConflictCheckPerformer extends AbstractQueryPerformer {
                  * expand & check all occurrences of event series in period
                  */
                 long duration = eventInPeriod.getEndDate().getTime() - eventInPeriod.getStartDate().getTime();
-                Iterator<RecurrenceId> iterator = Services.getService(RecurrenceService.class)
+                Iterator<RecurrenceId> iterator = session.getRecurrenceService()
                     .getRecurrenceIterator(eventInPeriod, initCalendar(TimeZones.UTC, from), initCalendar(TimeZones.UTC, until), false);
                 while (iterator.hasNext()) {
                     RecurrenceId recurrenceId = iterator.next();
@@ -236,7 +232,7 @@ public class ConflictCheckPerformer extends AbstractQueryPerformer {
         /*
          * resolve occurrences for event series & derive checked period
          */
-        List<RecurrenceId> eventRecurrenceIds = asList(Services.getService(RecurrenceService.class)
+        List<RecurrenceId> eventRecurrenceIds = asList(session.getRecurrenceService()
             .getRecurrenceIterator(masterEvent, initCalendar(TimeZones.UTC, today), null, false));
         if (0 == eventRecurrenceIds.size()) {
             return Collections.emptyList();
@@ -276,9 +272,9 @@ public class ConflictCheckPerformer extends AbstractQueryPerformer {
                  */
                 int count = 0;
                 long duration = eventInPeriod.getEndDate().getTime() - eventInPeriod.getStartDate().getTime();
-                Iterator<RecurrenceId> iterator = Services.getService(RecurrenceService.class)
+                Iterator<RecurrenceId> iterator = session.getRecurrenceService()
                     .getRecurrenceIterator(eventInPeriod, initCalendar(TimeZones.UTC, from), initCalendar(TimeZones.UTC, until), false);
-                while (iterator.hasNext() && count < MAX_CONFLICTS_PER_RECURRENCE) {
+                while (iterator.hasNext() && count < maxConflictsPerRecurrence) {
                     RecurrenceId recurrenceId = iterator.next();
                     for (RecurrenceId eventRecurrenceId : eventRecurrenceIds) {
                         if (eventRecurrenceId.getValue() >= recurrenceId.getValue() + duration) {
@@ -399,15 +395,15 @@ public class ConflictCheckPerformer extends AbstractQueryPerformer {
                 if (null != matchingAttendee && false == ParticipationStatus.DECLINED.equals(matchingAttendee.getPartStat())) {
                     conflictingAttendees.add(0, matchingAttendee);
                 }
-            } else if (MAX_ATTENDEES_PER_CONFLICT > conflictingAttendees.size()) {
+            } else if (maxAttendeesPerConflict > conflictingAttendees.size()) {
                 Attendee matchingAttendee = find(allAttendees, checkedAttendee);
                 if (null != matchingAttendee && false == ParticipationStatus.DECLINED.equals(matchingAttendee.getPartStat())) {
                     conflictingAttendees.add(matchingAttendee);
                 }
             }
         }
-        if (MAX_ATTENDEES_PER_CONFLICT < conflictingAttendees.size()) {
-            return conflictingAttendees.subList(0, MAX_ATTENDEES_PER_CONFLICT);
+        if (maxAttendeesPerConflict < conflictingAttendees.size()) {
+            return conflictingAttendees.subList(0, maxAttendeesPerConflict);
         }
         return 0 < conflictingAttendees.size() ? conflictingAttendees : null;
     }

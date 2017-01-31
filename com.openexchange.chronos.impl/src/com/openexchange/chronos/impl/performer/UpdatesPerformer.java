@@ -50,13 +50,11 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
-import static com.openexchange.chronos.impl.Utils.appendCommonTerms;
+import static com.openexchange.chronos.impl.Utils.appendTimeRangeTerms;
 import static com.openexchange.chronos.impl.Utils.getCalendarUser;
 import static com.openexchange.chronos.impl.Utils.getFields;
 import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
-import static com.openexchange.chronos.impl.Utils.getFrom;
 import static com.openexchange.chronos.impl.Utils.getSearchTerm;
-import static com.openexchange.chronos.impl.Utils.getUntil;
 import static com.openexchange.chronos.impl.Utils.isIncludePrivate;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
@@ -106,9 +104,10 @@ public class UpdatesPerformer extends AbstractQueryPerformer {
         /*
          * construct search term
          */
-        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
-            .addSearchTerm(getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, I(session.getUser().getId())));
-        appendCommonTerms(searchTerm, getFrom(session), getUntil(session), since);
+        CompositeSearchTerm searchTerm = appendTimeRangeTerms(session, new CompositeSearchTerm(CompositeOperation.AND)
+            .addSearchTerm(getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, I(session.getUser().getId())))
+            .addSearchTerm(getSearchTerm(EventField.LAST_MODIFIED, SingleOperation.GREATER_THAN, since))
+        );
         /*
          * perform search & userize the results for the current session's user
          */
@@ -141,8 +140,10 @@ public class UpdatesPerformer extends AbstractQueryPerformer {
         /*
          * construct search term
          */
-        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND).addSearchTerm(getFolderIdTerm(folder));
-        appendCommonTerms(searchTerm, getFrom(session), getUntil(session), since);
+        CompositeSearchTerm searchTerm = appendTimeRangeTerms(session, new CompositeSearchTerm(CompositeOperation.AND)
+            .addSearchTerm(getFolderIdTerm(folder))
+            .addSearchTerm(getSearchTerm(EventField.LAST_MODIFIED, SingleOperation.GREATER_THAN, since))
+        );
         /*
          * perform search & userize the results
          */

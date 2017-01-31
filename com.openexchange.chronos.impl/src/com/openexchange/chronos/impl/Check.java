@@ -68,7 +68,6 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.performer.ResolveUidPerformer;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.storage.CalendarStorage;
-import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -125,14 +124,14 @@ public class Check {
     /**
      * Checks that the supplied search pattern length is equal to or greater than a configured minimum.
      *
+     * @param minimumPatternLength, The minimum search pattern length, or <code>0</code> for no limitation
      * @param pattern The pattern to check
      * @return The passed pattern, after the length was checked
      * @throws OXException {@link CalendarExceptionCodes#QUERY_TOO_SHORT}
      */
-    public static String minimumSearchPatternLength(String pattern) throws OXException {
-        int minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
-        if (null != pattern && 0 < minimumSearchCharacters && pattern.length() < minimumSearchCharacters) {
-            throw CalendarExceptionCodes.QUERY_TOO_SHORT.create(I(minimumSearchCharacters), pattern);
+    public static String minimumSearchPatternLength(String pattern, int minimumPatternLength) throws OXException {
+        if (null != pattern && 0 < minimumPatternLength && pattern.length() < minimumPatternLength) {
+            throw CalendarExceptionCodes.QUERY_TOO_SHORT.create(I(minimumPatternLength), pattern);
         }
         return pattern;
     }

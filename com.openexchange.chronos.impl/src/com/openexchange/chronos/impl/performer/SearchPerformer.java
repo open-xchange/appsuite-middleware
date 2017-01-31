@@ -98,6 +98,8 @@ import com.openexchange.search.SingleSearchTerm.SingleOperation;
  */
 public class SearchPerformer extends AbstractQueryPerformer {
 
+    private final int minimumSearchPatternLength;
+
     /**
      * Initializes a new {@link SearchPerformer}.
      *
@@ -106,6 +108,7 @@ public class SearchPerformer extends AbstractQueryPerformer {
      */
     public SearchPerformer(CalendarSession session, CalendarStorage storage) throws OXException {
         super(session, storage);
+        this.minimumSearchPatternLength = session.getConfig().getMinimumSearchPatternLength();
     }
 
     /**
@@ -156,12 +159,12 @@ public class SearchPerformer extends AbstractQueryPerformer {
         return sortEvents(events, new SortOptions(session));
     }
 
-    private static SearchTerm<?> buildSearchTerm(UserizedFolder folder, List<String> queries) throws OXException {
+    private SearchTerm<?> buildSearchTerm(UserizedFolder folder, List<String> queries) throws OXException {
         CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND).addSearchTerm(getFolderIdTerm(folder));
         if (null != queries) {
             for (String query : queries) {
                 if (false == isWildcardOnly(query)) {
-                    String pattern = addWildcards(Check.minimumSearchPatternLength(query), true, true);
+                    String pattern = addWildcards(Check.minimumSearchPatternLength(query, minimumSearchPatternLength), true, true);
                     searchTerm.addSearchTerm(new CompositeSearchTerm(CompositeOperation.OR)
                         .addSearchTerm(getSearchTerm(EventField.SUMMARY, SingleOperation.EQUALS, pattern))
                         .addSearchTerm(getSearchTerm(EventField.DESCRIPTION, SingleOperation.EQUALS, pattern))
@@ -173,12 +176,12 @@ public class SearchPerformer extends AbstractQueryPerformer {
         return 1 == searchTerm.getOperands().length ? searchTerm.getOperands()[0] : searchTerm;
     }
 
-    private static SearchTerm<?> buildSearchTerm(List<UserizedFolder> folders, List<String> queries) throws OXException {
+    private SearchTerm<?> buildSearchTerm(List<UserizedFolder> folders, List<String> queries) throws OXException {
         CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND).addSearchTerm(getFolderIdsTerm(folders));
         if (null != queries) {
             for (String query : queries) {
                 if (false == isWildcardOnly(query)) {
-                    String pattern = addWildcards(Check.minimumSearchPatternLength(query), true, true);
+                    String pattern = addWildcards(Check.minimumSearchPatternLength(query, minimumSearchPatternLength), true, true);
                     searchTerm.addSearchTerm(new CompositeSearchTerm(CompositeOperation.OR)
                         .addSearchTerm(getSearchTerm(EventField.SUMMARY, SingleOperation.EQUALS, pattern))
                         .addSearchTerm(getSearchTerm(EventField.DESCRIPTION, SingleOperation.EQUALS, pattern))

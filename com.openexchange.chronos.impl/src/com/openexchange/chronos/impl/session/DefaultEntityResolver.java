@@ -73,7 +73,6 @@ import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
@@ -81,7 +80,6 @@ import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.arrays.Arrays;
-import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
@@ -173,12 +171,6 @@ public class DefaultEntityResolver implements EntityResolver {
     @Override
     public TimeZone getTimeZone(int userID) throws OXException {
         return TimeZone.getTimeZone(getUser(userID).getTimeZone());
-    }
-
-    @Override
-    public int getDefaultCalendarID(int userID) throws OXException {
-        //TODO: via higher level service?
-        return new OXFolderAccess(context).getDefaultFolderID(userID, FolderObject.CALENDAR);
     }
 
     @Override

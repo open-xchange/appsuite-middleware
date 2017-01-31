@@ -53,7 +53,6 @@ import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.anonymizeIfNeeded;
-import static com.openexchange.chronos.impl.Utils.appendCommonTerms;
 import static com.openexchange.chronos.impl.Utils.applyExceptionDates;
 import static com.openexchange.chronos.impl.Utils.getCalendarUser;
 import static com.openexchange.chronos.impl.Utils.getFields;
@@ -81,9 +80,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.impl.Utils;
-import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.service.SortOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
@@ -134,7 +131,10 @@ public abstract class AbstractQueryPerformer {
                 searchTerm.addSearchTerm(orTerm);
             }
         }
-        appendCommonTerms(searchTerm, getFrom(session), getUntil(session), updatedSince);
+        if (null != updatedSince) {
+            searchTerm.addSearchTerm(getSearchTerm(EventField.LAST_MODIFIED, SingleOperation.GREATER_THAN, updatedSince));
+        }
+        Utils.appendTimeRangeTerms(session, searchTerm);
         /*
          * perform search & userize the results
          */
@@ -159,8 +159,7 @@ public abstract class AbstractQueryPerformer {
         TimeZone timeZone = getTimeZone(session);
         Calendar fromCalendar = null == from ? null : initCalendar(timeZone, from);
         Calendar untilCalendar = null == until ? null : initCalendar(timeZone, until);
-        return Services.getService(RecurrenceService.class).calculateInstancesRespectExceptions(masterEvent, fromCalendar, untilCalendar, null, null);
-        //        return Services.getService(RecurrenceService.class).calculateInstances(masterEvent, fromCalendar, untilCalendar, null);
+        return session.getRecurrenceService().calculateInstancesRespectExceptions(masterEvent, fromCalendar, untilCalendar, null, null);
     }
 
     /**
@@ -176,7 +175,7 @@ public abstract class AbstractQueryPerformer {
         TimeZone timeZone = getTimeZone(session);
         Calendar fromCalendar = null == from ? null : initCalendar(timeZone, from);
         Calendar untilCalendar = null == until ? null : initCalendar(timeZone, until);
-        return Services.getService(RecurrenceService.class).getRecurrenceIterator(masterEvent, fromCalendar, untilCalendar, true);
+        return session.getRecurrenceService().getRecurrenceIterator(masterEvent, fromCalendar, untilCalendar, true);
     }
 
     /**

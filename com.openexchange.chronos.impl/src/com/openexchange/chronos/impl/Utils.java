@@ -269,24 +269,21 @@ public class Utils {
     }
 
     /**
-     * Appends search terms for commonly used restriction.
+     * Appends search terms for the commonly used restriction by time range, based on the session parameters
+     * {@link CalendarParameters#PARAMETER_RANGE_START} and {@link CalendarParameters#PARAMETER_RANGE_END}.
      *
+     * @param session The calendar session
      * @param searchTerm The search term to append the search terms for
-     * @param from The minimum (inclusive) end time of the events, or <code>null</code> for no restrictions
-     * @param until The maximum (exclusive) start time of the events, or <code>null</code> for no restrictions
-     * @param updatedSince The minimum (exclusive) last modification time of the events, or <code>null</code> for no restrictions
      * @return The passed search term reference
      */
-    public static CompositeSearchTerm appendCommonTerms(CompositeSearchTerm searchTerm, Date from, Date until, Date updatedSince) {
-        if (null != updatedSince) {
-            searchTerm.addSearchTerm(getSearchTerm(EventField.LAST_MODIFIED, SingleOperation.GREATER_THAN, updatedSince));
-        }
+    public static CompositeSearchTerm appendTimeRangeTerms(CalendarSession session, CompositeSearchTerm searchTerm) {
+        Date from = getFrom(session);
         if (null != from) {
-            boolean includeOldSeries = true;
-            boolean inclusiveFrom = false;
-            if (includeOldSeries) {
+            boolean inclusiveFrom = false; // TODO: https://tools.ietf.org/html/rfc4791#section-9.9
+            SingleOperation comparisonOperation = inclusiveFrom ? SingleOperation.GREATER_OR_EQUAL : SingleOperation.GREATER_THAN;
+            if (session.getConfig().isIgnoreSeriesPastCalculationLimit()) {
                 searchTerm.addSearchTerm(new CompositeSearchTerm(CompositeOperation.OR)
-                    .addSearchTerm(getSearchTerm(EventField.END_DATE, inclusiveFrom ? SingleOperation.GREATER_OR_EQUAL : SingleOperation.GREATER_THAN, from))
+                    .addSearchTerm(getSearchTerm(EventField.END_DATE, comparisonOperation, from))
                     .addSearchTerm(new CompositeSearchTerm(CompositeOperation.AND)
                         .addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID)))
                         .addSearchTerm(new CompositeSearchTerm(CompositeOperation.NOT)
@@ -295,9 +292,10 @@ public class Utils {
                     )
                 );
             } else {
-                searchTerm.addSearchTerm(getSearchTerm(EventField.END_DATE, inclusiveFrom ? SingleOperation.GREATER_OR_EQUAL : SingleOperation.GREATER_THAN, from));
+                searchTerm.addSearchTerm(getSearchTerm(EventField.END_DATE, comparisonOperation, from));
             }
         }
+        Date until = getUntil(session);
         if (null != until) {
             searchTerm.addSearchTerm(getSearchTerm(EventField.START_DATE, SingleOperation.LESS_THAN, until));
         }
@@ -649,7 +647,7 @@ public class Utils {
         } catch (OXException e) {
             if ("FLD-0003".equals(e.getErrorCode())) {
                 // com.openexchange.tools.oxfolder.OXFolderExceptionCode.NOT_VISIBLE
-                throw CalendarExceptionCodes.NO_READ_PERMISSION.create(I(folderID));
+                throw CalendarExceptionCodes.NO_READ_PERMISSION.create(e, I(folderID));
             }
             throw e;
         }
@@ -786,21 +784,14 @@ public class Utils {
         return list;
     }
 
+    /**
+     * Gets all calendar folders accessible by the current sesssion's user.
+     *
+     * @param session The underlying calendar session
+     * @return The folders, or an empty list if there are none
+     */
     public static List<UserizedFolder> getVisibleFolders(CalendarSession session) throws OXException {
         return getVisibleFolders(session, PrivateType.getInstance(), SharedType.getInstance(), PublicType.getInstance());
-    }
-
-    public static List<UserizedFolder> getVisibleFolders(CalendarSession session, Type... types) throws OXException {
-        List<UserizedFolder> visibleFolders = new ArrayList<UserizedFolder>();
-        FolderService folderService = Services.getService(FolderService.class);
-        for (Type type : types) {
-            FolderResponse<UserizedFolder[]> response = folderService.getVisibleFolders(FolderStorage.REAL_TREE_ID, CalendarContentType.getInstance(), type, false, session.getSession(), initDecorator(session));
-            UserizedFolder[] folders = response.getResponse();
-            if (null != folders && 0 < folders.length) {
-                visibleFolders.addAll(Arrays.asList(folders));
-            }
-        }
-        return visibleFolders;
     }
 
     /**
@@ -841,6 +832,19 @@ public class Utils {
                 return false;
             }
         };
+    }
+
+    private static List<UserizedFolder> getVisibleFolders(CalendarSession session, Type... types) throws OXException {
+        List<UserizedFolder> visibleFolders = new ArrayList<UserizedFolder>();
+        FolderService folderService = Services.getService(FolderService.class);
+        for (Type type : types) {
+            FolderResponse<UserizedFolder[]> response = folderService.getVisibleFolders(FolderStorage.REAL_TREE_ID, CalendarContentType.getInstance(), type, false, session.getSession(), initDecorator(session));
+            UserizedFolder[] folders = response.getResponse();
+            if (null != folders && 0 < folders.length) {
+                visibleFolders.addAll(Arrays.asList(folders));
+            }
+        }
+        return visibleFolders;
     }
 
     private static FolderServiceDecorator initDecorator(CalendarSession session) {

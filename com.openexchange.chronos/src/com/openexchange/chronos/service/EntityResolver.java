@@ -125,14 +125,6 @@ public interface EntityResolver {
     TimeZone getTimeZone(int userID) throws OXException;;
 
     /**
-     * Gets the identifier of a specific user's default personal calendar folder.
-     *
-     * @param userID The identifier of the user to retrieve the default calendar identifier for
-     * @return The default calendar folder identifier
-     */
-    int getDefaultCalendarID(int userID) throws OXException;;
-
-    /**
      * Prepares a new attendee representing the internal user with the supplied identifier.
      *
      * @param userID The identifier of the user to prepare the attendee for

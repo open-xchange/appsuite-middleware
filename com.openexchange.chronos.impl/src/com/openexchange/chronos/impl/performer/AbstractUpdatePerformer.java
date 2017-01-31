@@ -388,7 +388,7 @@ public abstract class AbstractUpdatePerformer {
      * @return The default calendar folder identifier
      */
     protected int getDefaultCalendarID(int userID) throws OXException {
-        return session.getEntityResolver().getDefaultCalendarID(userID);
+        return session.getConfig().getDefaultFolderID(userID);
     }
 
 }

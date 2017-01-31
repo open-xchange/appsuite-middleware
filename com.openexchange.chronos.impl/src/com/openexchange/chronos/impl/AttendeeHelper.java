@@ -63,15 +63,12 @@ import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.ParticipationStatus;
-import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.preferences.ServerUserSetting;
 
 /**
  * {@link AttendeeHelper}
@@ -291,16 +288,16 @@ public class AttendeeHelper {
             }
             userAttendee = session.getEntityResolver().applyEntityData(userAttendee, AttendeeField.ROLE, AttendeeField.RSVP);
             userAttendee.setFolderID(PublicType.getInstance().equals(folder.getType()) ?
-                ATTENDEE_PUBLIC_FOLDER_ID : session.getEntityResolver().getDefaultCalendarID(userAttendee.getEntity()));
+                ATTENDEE_PUBLIC_FOLDER_ID : session.getConfig().getDefaultFolderID(userAttendee.getEntity()));
             if (false == userAttendee.containsPartStat() || null == userAttendee.getPartStat()) {
-                userAttendee.setPartStat(getInitialPartStat(session.getContext().getContextId(), userAttendee.getEntity(), folder.getType()));
+                userAttendee.setPartStat(session.getConfig().getInitialPartStat(folder.getType(), userAttendee.getEntity()));
             }
             attendees.add(userAttendee);
         }
         /*
          * resolve & add any internal group attendees
          */
-        boolean resolveGroupAttendees = false;
+        boolean resolveGroupAttendees = session.getConfig().isResolveGroupAttendees();
         for (Attendee groupAttendee : filter(newAttendees, Boolean.TRUE, CalendarUserType.GROUP)) {
             if (contains(existingAttendees, groupAttendee) || contains(attendees, groupAttendee)) {
                 LOG.debug("Skipping duplicate group attendee {}", groupAttendee);
@@ -308,6 +305,7 @@ public class AttendeeHelper {
             }
             groupAttendee = session.getEntityResolver().applyEntityData(groupAttendee);
             if (false == resolveGroupAttendees) {
+                LOG.debug("Skipping group attendee {}; only resolving group members.", groupAttendee);
                 attendees.add(groupAttendee);
             }
             for (int memberID : session.getEntityResolver().getGroupMembers(groupAttendee.getEntity())) {
@@ -317,8 +315,8 @@ public class AttendeeHelper {
                 }
                 Attendee memberAttendee = session.getEntityResolver().prepareUserAttendee(memberID);
                 memberAttendee.setFolderID(PublicType.getInstance().equals(folder.getType()) ?
-                    ATTENDEE_PUBLIC_FOLDER_ID : session.getEntityResolver().getDefaultCalendarID(memberID));
-                memberAttendee.setPartStat(getInitialPartStat(session.getContext().getContextId(), memberID, folder.getType()));
+                    ATTENDEE_PUBLIC_FOLDER_ID : session.getConfig().getDefaultFolderID(memberID));
+                memberAttendee.setPartStat(session.getConfig().getInitialPartStat(folder.getType(), memberID));
                 if (false == resolveGroupAttendees) {
                     memberAttendee.setMember(groupAttendee.getUri());
                 }
@@ -381,28 +379,9 @@ public class AttendeeHelper {
         return defaultAttendee;
     }
 
-    /**
-     * Gets the initial participation status to use for new events in a specific folder.
-     *
-     * @param contextID The context identifier
-     * @param userID The identifier of the user to get the participation status for
-     * @param folderType The folder type where the new event is located in
-     * @return The initial participation status, or {@link ParticipationStatus#NEEDS_ACTION} if not defined
-     */
-    private static ParticipationStatus getInitialPartStat(int contextID, int userID, Type folderType) throws OXException {
-        Integer defaultStatus;
-        if (PublicType.getInstance().equals(folderType)) {
-            defaultStatus = ServerUserSetting.getInstance().getDefaultStatusPublic(contextID, userID);
-        } else {
-            defaultStatus = ServerUserSetting.getInstance().getDefaultStatusPrivate(contextID, userID);
-        }
-        return null != defaultStatus ? Appointment2Event.getParticipationStatus(defaultStatus.intValue()) : ParticipationStatus.NEEDS_ACTION;
-    }
-
     private static List<Attendee> emptyForNull(List<Attendee> attendees) {
         return null == attendees ? Collections.<Attendee> emptyList() : attendees;
     }
-
 
     /**
      * Looks up an internal user attendee who attends as member of a specific group.

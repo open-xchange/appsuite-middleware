@@ -620,7 +620,7 @@ public class EventPatches {
                             try {
                                 Trigger trigger = alarm.getTrigger();
                                 trigger.setDuration(AlarmUtils.getTriggerDuration(alarm.getTrigger(), exportedEvent,
-                                    resource.getFactory().requireService(RecurrenceService.class)));
+                                    resource.getCalendarSession().getRecurrenceService()));
                                 trigger.setDateTime(null);
                             } catch (OXException e) {
                                 LOG.warn("Error converting snoozed alarm trigger", e);
