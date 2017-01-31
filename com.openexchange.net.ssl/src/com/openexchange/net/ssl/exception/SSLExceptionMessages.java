@@ -68,10 +68,12 @@ public class SSLExceptionMessages implements LocalizableStrings {
 
     // The user '%1$s' in context '%2$s' does not trust the certificates '%3$s' and does know the certificates '%4$s'
     public final static String USER_DOES_NOT_TRUST_CERTS = "The user '%1$s' in context '%2$s' does not trust the certificates '%3$s' and does know the certificates '%4$s'";
-    
-     // The root certificate issued by '%1$s' is not trusted
+
+    // The root certificate issued by '%1$s' is not trusted
     public final static String UNTRUSTED_ROOT_CERTIFICATE = "The root certificate issued by '%1$s' is not trusted";
 
+    // The certificate is self-signed
+    public final static String SELF_SIGNED_CERTIFICATE = "The certificate is self-signed";
 
     private SSLExceptionMessages() {
         super();

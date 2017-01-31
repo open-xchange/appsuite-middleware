@@ -80,6 +80,10 @@ public enum SSLExceptionCode implements DisplayableOXExceptionCode {
      * The root certificate issued by '%1$s' is not trusted
      */
     ROOT_CA_UNTRUSTED("The root certificate issued by '%1$s' is not trusted.", CATEGORY_ERROR, 4, SSLExceptionMessages.UNTRUSTED_ROOT_CERTIFICATE),
+    /**
+     * The certificate is self-signed
+     */
+    SELF_SIGNED_CERTIFICATE("The certificate is self-signed", CATEGORY_ERROR, 5, SSLExceptionMessages.SELF_SIGNED_CERTIFICATE),
 
     ;
 

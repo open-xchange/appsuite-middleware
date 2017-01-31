@@ -120,17 +120,6 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             return;
         }
 
-        /*
-         * MW-445: Main Concept
-         * - Check if the server is to be trusted; if yes return
-         * - Check if the user is allowed to accept untrusted certificates; if not throw an exception
-         * - Retrieve the fingerprint(s) of the certificate
-         * - Search if the user already accepted the certificate; if yes return
-         * |_ Throw an exception in case the user previously denied the certificate
-         * |_ Throw an exception with the indication that the server is untrusted (the user can then choose what to do)
-         */
-
-        // Check if the server is to be trusted; if yes return
         try {
             this.trustManager.checkServerTrusted(chain, authType, socket);
             return;
@@ -166,8 +155,6 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             }
         }
 
-        //this.trustManager.checkServerTrusted(chain, authType);
-        // Check if the server is to be trusted; if yes return
         try {
             this.trustManager.checkServerTrusted(chain, authType);
             return;
@@ -187,7 +174,6 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             return;
         }
 
-        // Check if the server is to be trusted; if yes return
         try {
             this.trustManager.checkServerTrusted(chain, authType, engine);
             return;
@@ -243,14 +229,36 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
      * @throws CertificateException if the specified {@link X509Certificate} chain is not trusted by the user
      */
     private void handleCertificateException(X509Certificate[] chain, CertificateException e) throws CertificateException {
+        // Try to determine the reason of failure
         if (!e.getMessage().contains("unable to find valid certification path to requested target")) {
             throw e;
         }
-        // Try to determine the reason of failure
-        // Check if the root certificate authority is trusted
-        checkRootCATrusted(chain);
-        // It's an invalid certificate, check if the user trusts it
+        // a) Check if the user trusts it
         checkUserTrustsServer(chain, e);
+        // b) Check if the certificate is self-signed
+        checkSelfSigned(chain);
+        // c) Check if the root certificate authority is trusted
+        checkRootCATrusted(chain);
+    }
+
+    /**
+     * Checks whether the specified {@link X509Certificate} chain is a self-signed certificate
+     * 
+     * @param chain The {@link X509Certificate} chain
+     * @throws CertificateException If the specified {@link X509Certificate} is self-signed
+     */
+    private void checkSelfSigned(X509Certificate[] chain) throws CertificateException {
+        // Self-signed certificates are the only certificates in the chain
+        if (chain.length < 2) {
+            String fingerprint = "";
+            try {
+                fingerprint = getFingerprint(chain[0]);
+            } catch (NoSuchAlgorithmException e) {
+                //TODO: detailed error log
+                LOG.error("Cannot retrieve the fingerprint for the chain");
+            }
+            throw new CertificateException(SSLExceptionCode.SELF_SIGNED_CERTIFICATE.create(fingerprint));
+        }
     }
 
     /**
@@ -260,8 +268,9 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
      * @throws CertificateException if the root CA is not trusted by the user
      */
     private void checkRootCATrusted(X509Certificate[] chain) throws CertificateException {
-        // Check if root authority is trusted
         Set<TrustAnchor> anchors = params.getTrustAnchors();
+
+        //The root CA is always the last element of the chain
         X509Certificate rootCert = chain[chain.length - 1];
         for (TrustAnchor a : anchors) {
             if (a.getTrustedCert().getSubjectDN().equals(rootCert.getIssuerDN())) {
@@ -279,6 +288,16 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
      * @param chain The certificate to check
      */
     private void checkUserTrustsServer(X509Certificate[] chain, CertificateException ce) throws CertificateException {
+        /*
+         * MW-445: Main Concept
+         * - Check if the server is to be trusted; if yes return
+         * - Check if the user is allowed to accept untrusted certificates; if not throw an exception
+         * - Retrieve the fingerprint(s) of the certificate
+         * - Search if the user already accepted the certificate; if yes return
+         * |_ Throw an exception in case the user previously denied the certificate
+         * |_ Throw an exception with the indication that the server is untrusted (the user can then choose what to do)
+         */
+
         int user = Tools.getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_USER_ID));
         int context = Tools.getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_CONTEXT_ID));
 
@@ -305,6 +324,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
                     untrustedFingerprints.add(certificate);
                 }
             } catch (NoSuchAlgorithmException e) {
+                //TODO: detailed error log
                 LOG.error("Cannot retrieve the fingerprint for the chain");
             } catch (OXException e) {
                 if (SSLCertificateManagementSQLExceptionCode.CERTIFICATE_NOT_FOUND.equals(e)) {
