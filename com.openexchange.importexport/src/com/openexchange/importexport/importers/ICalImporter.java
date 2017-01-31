@@ -384,7 +384,18 @@ public class ICalImporter extends AbstractImporter {
         /*
          * perform the import
          */
-        CalendarImport calendarImport = iCalService.importICal(inputStream, iCalParameters);
+        CalendarImport calendarImport;
+        try {
+            calendarImport = iCalService.importICal(inputStream, iCalParameters);
+        } catch (OXException e) {
+            if ("ICAL-0003".equals(e.getErrorCode())) {
+                // "No calendar data found", silently ignore, as expected by com.openexchange.ajax.importexport.Bug9209Test.test9209ICal()
+                return Collections.emptyList();
+            }
+            ImportResult result = new ImportResult();
+            result.setException(e);
+            return Collections.singletonList(result);
+        }
         boolean ignoreUIDs = isIgnoreUIDs(optionalParameters);
         List<ImportResult> importResults = new ArrayList<ImportResult>();
         for (Map.Entry<String, List<Event>> entry : getEventsByUID(calendarImport.getEvents(), true).entrySet()) {
@@ -875,7 +886,7 @@ public class ICalImporter extends AbstractImporter {
      */
     private static Map<String, List<Event>> getEventsByUID(List<Event> events, boolean assignIfEmpty) {
         if (null == events) {
-            return null;
+            return Collections.emptyMap();
         }
         Map<String, List<Event>> eventsByUID = new LinkedHashMap<String, List<Event>>();
         for (Event event : events) {
