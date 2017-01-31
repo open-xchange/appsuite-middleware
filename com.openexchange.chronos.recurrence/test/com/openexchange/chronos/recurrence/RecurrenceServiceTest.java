@@ -93,6 +93,10 @@ public abstract class RecurrenceServiceTest {
         assertNotNull("Instance must not be null", instance);
         Event clone = master.clone();
 
+        instance = instance.clone();
+        instance.removeRecurrenceId();
+        instance.removeRecurrenceRule();
+
         clone.removeId();
         clone.removeRecurrenceRule();
         clone.removeDeleteExceptionDates();
