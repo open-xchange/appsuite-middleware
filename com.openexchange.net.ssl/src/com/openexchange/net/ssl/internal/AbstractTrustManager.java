@@ -54,8 +54,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
-import java.security.cert.PKIXParameters;
-import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.HashSet;
@@ -87,8 +85,6 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractTrustManager.class);
 
     protected final X509ExtendedTrustManager trustManager;
-
-    protected static PKIXParameters params;
 
     /**
      * Initializes a new {@link AbstractTrustManager}.
@@ -243,8 +239,6 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         checkUserTrustsServer(user, context, chain, e);
         // b) Check if the certificate is self-signed
         checkSelfSigned(user, context, chain);
-        // c) Check if the root certificate authority is trusted
-        checkRootCATrusted(user, context, chain);
     }
 
     /**
@@ -266,28 +260,6 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             }
             throw new CertificateException(SSLExceptionCode.SELF_SIGNED_CERTIFICATE.create(fingerprint));
         }
-    }
-
-    /**
-     * Checks whether the issuer of the specified {@link X509Certificate} chain is a trusted root CA
-     * 
-     * @param chain The {@link X509Certificate} chain
-     * @throws CertificateException if the root CA is not trusted by the user
-     */
-    private void checkRootCATrusted(int userId, int contextId, X509Certificate[] chain) throws CertificateException {
-        Set<TrustAnchor> anchors = params.getTrustAnchors();
-
-        //The root CA is always the last element of the chain
-        X509Certificate rootCert = chain[chain.length - 1];
-        for (TrustAnchor a : anchors) {
-            if (a.getTrustedCert().getSubjectDN().equals(rootCert.getIssuerDN())) {
-                LOG.debug("The root CA '{}' is trusted", rootCert.getIssuerDN());
-                return;
-            }
-        }
-
-        cacheCertificate(userId, contextId, rootCert);
-        throw new CertificateException(SSLExceptionCode.ROOT_CA_UNTRUSTED.create(rootCert.getIssuerDN()));
     }
 
     /**

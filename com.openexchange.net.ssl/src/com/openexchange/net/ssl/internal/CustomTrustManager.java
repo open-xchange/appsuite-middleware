@@ -53,12 +53,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
-import java.security.cert.PKIXParameters;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509ExtendedTrustManager;
@@ -126,7 +124,6 @@ public class CustomTrustManager extends AbstractTrustManager {
 
             TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
             tmf.init(ks);
-            params = new PKIXParameters(ks);
 
             for (TrustManager tm : tmf.getTrustManagers()) {
                 if (tm instanceof X509ExtendedTrustManager) {
@@ -136,7 +133,7 @@ public class CustomTrustManager extends AbstractTrustManager {
         } catch (IOException e) {
             LOG.error("Unable to read custom truststore file from " + file.getAbsolutePath(), e);
             //TODO re-throw or OXException?
-        } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | InvalidAlgorithmParameterException e) {
+        } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException e) {
             LOG.error("Unable to initialize custom truststore file from " + file.getAbsolutePath(), e);
             //TODO re-throw or OXException?
         }
