@@ -174,8 +174,9 @@ public class ContactCopyTask implements CopyUserTaskService {
             writeContactsToDB(contacts, contactFields, dstCon, i(dstCtxId), i(dstUsrId));
             writeAdditionalContentsToDB(contacts, dstCon, i(dstCtxId));
 
-            for (final Integer contactId : contacts.keySet()) {
-                final Contact contact = contacts.get(contactId);
+            for (Map.Entry<Integer, Contact> entry : contacts.entrySet()) {
+                Integer contactId = entry.getKey();
+                Contact contact = entry.getValue();
                 mapping.addMapping(contactId, contact.getObjectID());
             }
         }
@@ -261,8 +262,7 @@ public class ContactCopyTask implements CopyUserTaskService {
         try {
             final ContactSwitcher getter = new ContactDatabaseGetter();
             stmt = con.prepareStatement(insertSql);
-            for (final Integer contactId : contacts.keySet()) {
-                final Contact contact = contacts.get(contactId);
+            for (Contact contact : contacts.values()) {
                 int i = 1;
                 for (final ContactField field : contactFields) {
                     if (field.isDBField() && !field.getDbName().equals("value")) {
