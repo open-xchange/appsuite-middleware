@@ -67,10 +67,8 @@ import java.util.Set;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.Utils;
-import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
-import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -111,9 +109,7 @@ public class ListPerformer extends AbstractQueryPerformer {
             List<Event> eventsInFolder = eventsPerFolderId.get(I(eventID.getFolderID()));
             Event event = find(eventsInFolder, eventID.getObjectID(), eventID.getRecurrenceID());
             if (null == event) {
-                orderedEvents.add(null);
-                continue; //TODO check; see com.openexchange.ajax.appointment.NewListTest.testRemovedObjectHandling()
-                //                throw OXException.notFound(eventID.toString()); //TODO
+                org.slf4j.LoggerFactory.getLogger(ListPerformer.class).debug("Event with {} not found, skipping.", eventID);
             }
             orderedEvents.add(event);
         }
@@ -133,13 +129,12 @@ public class ListPerformer extends AbstractQueryPerformer {
         for (EventID eventID : eventIDs) {
             Event event = find(events, eventID.getObjectID());
             if (null == event) {
-                continue; //TODO check; see com.openexchange.ajax.appointment.NewListTest.testRemovedObjectHandling()
-                //                throw CalendarExceptionCodes.EVENT_NOT_FOUND_IN_FOLDER.create(I(i(folder)), I(eventID.getObjectID()));
+                continue;
             }
             if (null != eventID.getRecurrenceID()) {
                 if (isSeriesMaster(event)) {
                     Calendar fromCalendar = initCalendar(getTimeZone(session), eventID.getRecurrenceID().getValue());
-                    Iterator<Event> iterator = Services.getService(RecurrenceService.class).calculateInstancesRespectExceptions(event, fromCalendar, null, I(1), null);
+                    Iterator<Event> iterator = session.getRecurrenceService().calculateInstancesRespectExceptions(event, fromCalendar, null, I(1), null);
                     if (false == iterator.hasNext()) {
                         throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(I(eventID.getObjectID()), eventID.getRecurrenceID());
                     }
