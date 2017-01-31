@@ -331,8 +331,8 @@ public abstract class MailConfig {
 
     protected static final Object[] INIT_ARGS = new Object[0];
 
-    private static final String PROPERTY_AUTH_TYPE_MAIL = "com.openexhange.mail.authType";
-    private static final String PROPERTY_AUTH_TYPE_TRANSPORT = "com.openexhange.mail.transport.authType";
+    private static final String PROPERTY_AUTH_TYPE_MAIL = "com.openexchange.mail.authType";
+    private static final String PROPERTY_AUTH_TYPE_TRANSPORT = "com.openexchange.mail.transport.authType";
 
     /**
      * Gets the user-specific mail configuration.
