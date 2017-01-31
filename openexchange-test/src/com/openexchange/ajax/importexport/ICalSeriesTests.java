@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.TimeZone;
 import org.json.JSONException;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
@@ -70,6 +71,7 @@ import com.openexchange.groupware.container.Appointment;
  */
 public class ICalSeriesTests extends ManagedAppointmentTest {
 
+    @Test
 	public void testDeleteException() throws OXException, IOException, JSONException{
 		String ical =
 		"BEGIN:VCALENDAR\n"+
@@ -97,6 +99,7 @@ public class ICalSeriesTests extends ManagedAppointmentTest {
 		assertEquals(0,data.length);
 	}
 
+    @Test
 	public void testChangeExceptionWithExceptionFirst() throws Exception{
 		String uid = "change-exception-"+new Date().getTime();
 		String title = "Change to exceptional meeting #3: One hour later";
@@ -130,6 +133,7 @@ public class ICalSeriesTests extends ManagedAppointmentTest {
 		testChangeException(ical, title, start, end);
 	}
 
+    @Test
 	public void testChangeExceptionWithMasterFirst() throws Exception{
 		String uid = "change-exception-"+new Date().getTime();
 
