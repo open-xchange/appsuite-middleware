@@ -470,6 +470,8 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                         smtpProps.put("mail.smtp.auth.mechanisms", "XOAUTH2");
                     } else if (AuthType.OAUTHBEARER == smtpConfig.getAuthType()) {
                         smtpProps.put("mail.smtp.auth.mechanisms", "OAUTHBEARER");
+                    } else {
+                        smtpProps.put("mail.imap.auth.mechanisms", "LOGIN PLAIN DIGEST-MD5 NTLM");
                     }
                     /*
                      * Check if a secure SMTP connection should be established
