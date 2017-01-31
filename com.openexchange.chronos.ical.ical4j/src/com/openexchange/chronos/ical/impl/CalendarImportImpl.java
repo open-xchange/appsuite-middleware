@@ -55,6 +55,7 @@ import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.FreeBusyData;
 import com.openexchange.chronos.ical.CalendarImport;
+import com.openexchange.chronos.ical.ICalExceptionCodes;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ical4j.mapping.ICalMapper;
 import com.openexchange.exception.OXException;
@@ -75,13 +76,24 @@ public class CalendarImportImpl implements CalendarImport {
     private String method;
     private String name;
 
+    /**
+     * Initializes a new {@link CalendarImportImpl}.
+     *
+     * @param calendar The imported calendar data
+     * @param mapper The iCal mapper to use
+     * @param parameters The iCal parameters
+     */
     public CalendarImportImpl(net.fortuna.ical4j.model.Calendar calendar, ICalMapper mapper, ICalParameters parameters) throws OXException {
         super();
-        this.warnings = Collections.emptyList();
-        this.events = ICalUtils.importEvents(calendar.getComponents(Component.VEVENT), mapper, parameters);
-        this.method = ICalUtils.optPropertyValue(calendar.getMethod());
-        this.name = ICalUtils.optPropertyValue(calendar.getProperty(WrCalName.PROPERTY_NAME));
-        this.freeBusys = ICalUtils.importFreeBusys(calendar.getComponents(Component.VFREEBUSY), mapper, parameters);
+        if (null == calendar) {
+            this.warnings = Collections.singletonList(ICalExceptionCodes.NO_CALENDAR.create());
+        } else {
+            this.warnings = Collections.emptyList();
+            this.events = ICalUtils.importEvents(calendar.getComponents(Component.VEVENT), mapper, parameters);
+            this.method = ICalUtils.optPropertyValue(calendar.getMethod());
+            this.name = ICalUtils.optPropertyValue(calendar.getProperty(WrCalName.PROPERTY_NAME));
+            this.freeBusys = ICalUtils.importFreeBusys(calendar.getComponents(Component.VFREEBUSY), mapper, parameters);
+        }
     }
 
     @Override

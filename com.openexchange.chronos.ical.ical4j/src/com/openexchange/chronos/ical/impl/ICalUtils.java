@@ -151,14 +151,15 @@ public class ICalUtils {
     }
 
     static Calendar importCalendar(InputStream iCalFile, ICalParameters parameters) throws OXException {
-        Calendar calendar = null;
         ICalParameters iCalParameters = getParametersOrDefault(parameters);
         CalendarBuilder calendarBuilder = getCalendarBuilder(iCalParameters);
+        Calendar calendar;
         try {
             if (Boolean.TRUE.equals(parameters.get(ICalParameters.SANITIZE_INPUT, Boolean.class))) {
-                return new ICal4JParser().parse(calendarBuilder, iCalFile);
+                calendar = new ICal4JParser().parse(calendarBuilder, iCalFile);
+            } else {
+                calendar = calendarBuilder.build(iCalFile);
             }
-            calendar = calendarBuilder.build(iCalFile);
         } catch (IOException e) {
             throw ICalExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (ParserException e) {
