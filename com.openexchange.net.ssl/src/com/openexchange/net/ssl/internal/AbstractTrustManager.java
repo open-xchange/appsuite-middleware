@@ -312,42 +312,33 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             throw new IllegalArgumentException("The server certificate chain cannot be null");
         }
 
-        Set<Certificate> untrustedFingerprints = new HashSet<>();
-        Set<Certificate> unknownFingerprints = new HashSet<>();
-        for (X509Certificate cert : chain) {
-            String fingerprint = null;
-            try {
-                fingerprint = getFingerprint(cert);
-                SSLCertificateManagementService certificateManagement = Services.getService(SSLCertificateManagementService.class);
-                if (!certificateManagement.isTrusted(userId, contextId, fingerprint)) {
-                    Certificate certificate = new Certificate(fingerprint);
-                    certificate.setCommonName(cert.getSubjectDN().toString());
-                    certificate.setIssuer(cert.getIssuerDN().toString());
-                    untrustedFingerprints.add(certificate);
-                }
-            } catch (NoSuchAlgorithmException e) {
-                //TODO: detailed error log
-                LOG.error("Cannot retrieve the fingerprint for the chain");
-            } catch (OXException e) {
-                if (SSLCertificateManagementSQLExceptionCode.CERTIFICATE_NOT_FOUND.equals(e)) {
-                    Certificate certificate = new Certificate(fingerprint);
-                    certificate.setCommonName(cert.getSubjectDN().toString());
-                    certificate.setIssuer(cert.getIssuerDN().toString());
-                    unknownFingerprints.add(certificate);
-                }
-                LOG.error("{}", e.getMessage(), e);
+        X509Certificate cert = chain[0];
+        String fingerprint = null;
+        try {
+            fingerprint = getFingerprint(cert);
+            SSLCertificateManagementService certificateManagement = Services.getService(SSLCertificateManagementService.class);
+            if (!certificateManagement.isTrusted(userId, contextId, fingerprint)) {
+                throw new CertificateException(SSLExceptionCode.USER_DOES_NOT_TRUST_CERTIFICATE.create(userId, contextId, fingerprint));
             }
+        } catch (NoSuchAlgorithmException e) {
+            //TODO: detailed error log
+            LOG.error("Cannot retrieve the fingerprint for the chain");
+        } catch (OXException e) {
+            if (SSLCertificateManagementSQLExceptionCode.CERTIFICATE_NOT_FOUND.equals(e)) {
+                throw new CertificateException(SSLExceptionCode.USER_DOES_NOT_TRUST_CERTIFICATE.create(userId, contextId, fingerprint));
+            }
+            throw new CertificateException(e);
         }
         // TODO: Create a list with the untrusted certificates and pass them as parameters to a nested OX exception
-        if (!untrustedFingerprints.isEmpty() || !unknownFingerprints.isEmpty()) {
-            StringBuilder builder = new StringBuilder("[");
-            for (Certificate c : unknownFingerprints) {
-                builder.append(c.toString()).append(",");
-            }
-            builder.setLength(builder.length() - 1);
-            builder.append("]");
-            throw new CertificateException(SSLExceptionCode.USER_DOES_NOT_TRUST_CERTS.create(userId, contextId, untrustedFingerprints.toString(), builder.toString()));
-        }
+        //        if (!untrustedFingerprints.isEmpty() || !unknownFingerprints.isEmpty()) {
+        //            StringBuilder builder = new StringBuilder("[");
+        //            for (Certificate c : unknownFingerprints) {
+        //                builder.append(c.toString()).append(",");
+        //            }
+        //            builder.setLength(builder.length() - 1);
+        //            builder.append("]");
+        //            throw new CertificateException(SSLExceptionCode.USER_DOES_NOT_TRUST_CERTIFICATE.create(userId, contextId, untrustedFingerprints.toString(), builder.toString()));
+        //        }
     }
 
     /**

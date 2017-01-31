@@ -66,8 +66,8 @@ public class SSLExceptionMessages implements LocalizableStrings {
     // The certificate for domain "%1$s" is untrusted. You can change your general trust level in the settings.
     public final static String UNTRUSTED_CERT_USER_CONFIG_MSG = "The certificate for domain \"%1$s\" is untrusted. You can change your general trust level in the settings.";
 
-    // The user '%1$s' in context '%2$s' does not trust the certificates '%3$s' and does know the certificates '%4$s'
-    public final static String USER_DOES_NOT_TRUST_CERTS = "The user '%1$s' in context '%2$s' does not trust the certificates '%3$s' and does know the certificates '%4$s'";
+    // The user '%1$s' in context '%2$s' does not trust the certificate '%3$s'
+    public final static String USER_DOES_NOT_TRUST_CERTIFICATE = "The user '%1$s' in context '%2$s' does not trust the certificate '%3$s'";
 
     // The root certificate issued by '%1$s' is not trusted
     public final static String UNTRUSTED_ROOT_CERTIFICATE = "The root certificate issued by '%1$s' is not trusted";

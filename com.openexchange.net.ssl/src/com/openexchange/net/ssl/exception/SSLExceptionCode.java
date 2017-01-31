@@ -73,9 +73,9 @@ public enum SSLExceptionCode implements DisplayableOXExceptionCode {
      */
     UNTRUSTED_CERT_USER_CONFIG("The certificate for domain \"%1$s\" is untrusted.", CATEGORY_ERROR, 2, SSLExceptionMessages.UNTRUSTED_CERT_USER_CONFIG_MSG),
     /**
-     * The user '%1$s' in context '%2$s' does not trust the certificates '%3$s' and does know the certificates '%4$s'
+     * The user '%1$s' in context '%2$s' does not trust the certificate '%3$s'
      */
-    USER_DOES_NOT_TRUST_CERTS("The user '%1$s' in context '%2$s' does not trust the certificates '%3$s' and does know the certificates '%4$s'", CATEGORY_ERROR, 3, SSLExceptionMessages.USER_DOES_NOT_TRUST_CERTS),
+    USER_DOES_NOT_TRUST_CERTIFICATE("The user '%1$s' in context '%2$s' does not trust the certificate '%3$s'", CATEGORY_ERROR, 3, SSLExceptionMessages.USER_DOES_NOT_TRUST_CERTIFICATE),
     /**
      * The root certificate issued by '%1$s' is not trusted
      */
