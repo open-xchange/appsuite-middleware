@@ -99,7 +99,9 @@ public class AddStartTLSColumnForMailAccountTablesTask extends UpdateTaskAdapter
             con.setAutoCommit(false);
             Column column = new Column("starttls", "TINYINT UNSIGNED NOT NULL DEFAULT 0");
             for (String table : tables) {
-                Tools.addColumns(con, table, new Column[] { column });
+                if (false == Tools.columnExists(con, table, "starttls")) {
+                    Tools.addColumns(con, table, new Column[] { column });
+                }
             }
             if (force) {
                 activateStartTLS(con, force);
@@ -130,7 +132,7 @@ public class AddStartTLSColumnForMailAccountTablesTask extends UpdateTaskAdapter
             try {
                 stmt = con.prepareStatement("SELECT id, cid, user, url FROM " + table + " WHERE id <> 0 FOR UPDATE");
                 rs = stmt.executeQuery();
-                
+
                 if (rs.next()) {
                     stmt2 = con.prepareStatement("UPDATE " + table + " SET starttls = ? WHERE id = ? AND cid = ? AND user = ?");
                     do {
@@ -139,7 +141,7 @@ public class AddStartTLSColumnForMailAccountTablesTask extends UpdateTaskAdapter
                         int user = rs.getInt(3);
                         String url = rs.getString(4);
                         boolean secure = checkSecureUrl(url) || forceSecure;
-                        
+
                         stmt2.setBoolean(1, secure);
                         stmt2.setInt(2, id);
                         stmt2.setInt(3, cid);

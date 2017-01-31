@@ -499,11 +499,12 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
         }
 
         final List<ConfirmableParticipant> confirmableParticipants = new ArrayList<ConfirmableParticipant>();
-        for(final String mail : mails.keySet()) {
+        for (Map.Entry<String, Participants<T, U>.ICalParticipant> entry : mails.entrySet()) {
+            String mail = entry.getKey();
             final ExternalUserParticipant external = new ExternalUserParticipant(mail);
             external.setDisplayName(null);
 
-            final ICalParticipant icalP = mails.get(mail);
+            final ICalParticipant icalP = entry.getValue();
 
             if (icalP.message != null) {
                 external.setMessage(icalP.message);

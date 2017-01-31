@@ -241,121 +241,124 @@ public class Configuration
      */
     void configure( Dictionary<String, Object> config )
     {
-        if ( config == null )
+        synchronized ( this )
         {
-            // The size of the internal thread pool. Note that we must execute
-            // each synchronous event dispatch that happens in the synchronous event
-            // dispatching thread in a new thread.
-            // A value of less then 2 triggers the default value. A value of 2
-            // effectively disables thread pooling. Furthermore, this will be used by
-            // a lazy thread pool (i.e., new threads are created when needed). Ones the
-            // the size is reached and no cached thread is available, the delivery
-            // is blocked.
-            m_threadPoolSize = getIntProperty(
-                PROP_THREAD_POOL_SIZE, m_bundleContext.getProperty(PROP_THREAD_POOL_SIZE), 20, 2);
-
-            // The ratio of asynchronous to synchronous threads in the internal thread
-            // pool.  Ratio must be positive and may be adjusted to represent the
-            // distribution of post to send operations.  Applications with higher number
-            // of post operations should have a higher ratio.
-            m_asyncToSyncThreadRatio = getDoubleProperty(
-            	PROP_ASYNC_TO_SYNC_THREAD_RATIO, m_bundleContext.getProperty(PROP_ASYNC_TO_SYNC_THREAD_RATIO), 0.5, 0.0);
-
-            // The timeout in milliseconds - A value of less then 100 turns timeouts off.
-            // Any other value is the time in milliseconds granted to each EventHandler
-            // before it gets blacklisted.
-            m_timeout = getIntProperty(PROP_TIMEOUT,
-                    m_bundleContext.getProperty(PROP_TIMEOUT), 5000, Integer.MIN_VALUE);
-
-            // Are EventHandler required to be registered with a topic? - The default is
-            // true. The specification says that EventHandler must register with a list
-            // of topics they are interested in. Setting this value to false will enable
-            // that handlers without a topic are receiving all events
-            // (i.e., they are treated the same as with a topic=*).
-            m_requireTopic = getBooleanProperty(
-                m_bundleContext.getProperty(PROP_REQUIRE_TOPIC), true);
-            final String value = m_bundleContext.getProperty(PROP_IGNORE_TIMEOUT);
-            if ( value == null )
+            if ( config == null )
             {
-                m_ignoreTimeout = null;
-            }
-            else
-            {
-                final StringTokenizer st = new StringTokenizer(value, ",");
-                m_ignoreTimeout = new String[st.countTokens()];
-                for(int i=0; i<m_ignoreTimeout.length; i++)
-                {
-                    m_ignoreTimeout[i] = st.nextToken();
-                }
-            }
-
-            final String valueIgnoreTopic = m_bundleContext.getProperty(PROP_IGNORE_TOPIC);
-            if ( valueIgnoreTopic == null )
-            {
-                m_ignoreTopics = null;
-            }
-            else
-            {
-                final StringTokenizer st = new StringTokenizer(valueIgnoreTopic, ",");
-                m_ignoreTopics = new String[st.countTokens()];
-                for(int i=0; i<m_ignoreTopics.length; i++)
-                {
-                    m_ignoreTopics[i] = st.nextToken();
-                }
-            }
-            m_logLevel = getIntProperty(PROP_LOG_LEVEL,
-                    m_bundleContext.getProperty(PROP_LOG_LEVEL),
-                    LogWrapper.LOG_WARNING, // default log level is WARNING
-                    LogWrapper.LOG_ERROR);
-        }
-        else
-        {
-            m_threadPoolSize = getIntProperty(PROP_THREAD_POOL_SIZE, config.get(PROP_THREAD_POOL_SIZE), 20, 2);
-            m_asyncToSyncThreadRatio = getDoubleProperty(
+                // The size of the internal thread pool. Note that we must execute
+                // each synchronous event dispatch that happens in the synchronous event
+                // dispatching thread in a new thread.
+                // A value of less then 2 triggers the default value. A value of 2
+                // effectively disables thread pooling. Furthermore, this will be used by
+                // a lazy thread pool (i.e., new threads are created when needed). Ones the
+                // the size is reached and no cached thread is available, the delivery
+                // is blocked.
+                m_threadPoolSize = getIntProperty(
+                    PROP_THREAD_POOL_SIZE, m_bundleContext.getProperty(PROP_THREAD_POOL_SIZE), 20, 2);
+    
+                // The ratio of asynchronous to synchronous threads in the internal thread
+                // pool.  Ratio must be positive and may be adjusted to represent the
+                // distribution of post to send operations.  Applications with higher number
+                // of post operations should have a higher ratio.
+                m_asyncToSyncThreadRatio = getDoubleProperty(
                 	PROP_ASYNC_TO_SYNC_THREAD_RATIO, m_bundleContext.getProperty(PROP_ASYNC_TO_SYNC_THREAD_RATIO), 0.5, 0.0);
-            m_timeout = getIntProperty(PROP_TIMEOUT, config.get(PROP_TIMEOUT), 5000, Integer.MIN_VALUE);
-            m_requireTopic = getBooleanProperty(config.get(PROP_REQUIRE_TOPIC), true);
-            m_ignoreTimeout = null;
-            final Object value = config.get(PROP_IGNORE_TIMEOUT);
-            if ( value instanceof String )
-            {
-                m_ignoreTimeout = new String[] {(String)value};
+    
+                // The timeout in milliseconds - A value of less then 100 turns timeouts off.
+                // Any other value is the time in milliseconds granted to each EventHandler
+                // before it gets blacklisted.
+                m_timeout = getIntProperty(PROP_TIMEOUT,
+                        m_bundleContext.getProperty(PROP_TIMEOUT), 5000, Integer.MIN_VALUE);
+    
+                // Are EventHandler required to be registered with a topic? - The default is
+                // true. The specification says that EventHandler must register with a list
+                // of topics they are interested in. Setting this value to false will enable
+                // that handlers without a topic are receiving all events
+                // (i.e., they are treated the same as with a topic=*).
+                m_requireTopic = getBooleanProperty(
+                    m_bundleContext.getProperty(PROP_REQUIRE_TOPIC), true);
+                final String value = m_bundleContext.getProperty(PROP_IGNORE_TIMEOUT);
+                if ( value == null )
+                {
+                    m_ignoreTimeout = null;
+                }
+                else
+                {
+                    final StringTokenizer st = new StringTokenizer(value, ",");
+                    m_ignoreTimeout = new String[st.countTokens()];
+                    for(int i=0; i<m_ignoreTimeout.length; i++)
+                    {
+                        m_ignoreTimeout[i] = st.nextToken();
+                    }
+                }
+    
+                final String valueIgnoreTopic = m_bundleContext.getProperty(PROP_IGNORE_TOPIC);
+                if ( valueIgnoreTopic == null )
+                {
+                    m_ignoreTopics = null;
+                }
+                else
+                {
+                    final StringTokenizer st = new StringTokenizer(valueIgnoreTopic, ",");
+                    m_ignoreTopics = new String[st.countTokens()];
+                    for(int i=0; i<m_ignoreTopics.length; i++)
+                    {
+                        m_ignoreTopics[i] = st.nextToken();
+                    }
+                }
+                m_logLevel = getIntProperty(PROP_LOG_LEVEL,
+                        m_bundleContext.getProperty(PROP_LOG_LEVEL),
+                        LogWrapper.LOG_WARNING, // default log level is WARNING
+                        LogWrapper.LOG_ERROR);
             }
-            else if ( value instanceof String[] )
+            else
             {
-                m_ignoreTimeout = (String[])value;
+                m_threadPoolSize = getIntProperty(PROP_THREAD_POOL_SIZE, config.get(PROP_THREAD_POOL_SIZE), 20, 2);
+                m_asyncToSyncThreadRatio = getDoubleProperty(
+                    	PROP_ASYNC_TO_SYNC_THREAD_RATIO, m_bundleContext.getProperty(PROP_ASYNC_TO_SYNC_THREAD_RATIO), 0.5, 0.0);
+                m_timeout = getIntProperty(PROP_TIMEOUT, config.get(PROP_TIMEOUT), 5000, Integer.MIN_VALUE);
+                m_requireTopic = getBooleanProperty(config.get(PROP_REQUIRE_TOPIC), true);
+                m_ignoreTimeout = null;
+                final Object value = config.get(PROP_IGNORE_TIMEOUT);
+                if ( value instanceof String )
+                {
+                    m_ignoreTimeout = new String[] {(String)value};
+                }
+                else if ( value instanceof String[] )
+                {
+                    m_ignoreTimeout = (String[])value;
+                }
+                else if ( value != null )
+                {
+                    LogWrapper.getLogger().log(LogWrapper.LOG_WARNING,
+                            "Value for property: " + PROP_IGNORE_TIMEOUT + " is neither a string nor a string array - Using default");
+                }
+                m_ignoreTopics = null;
+                final Object valueIT = config.get(PROP_IGNORE_TOPIC);
+                if ( valueIT instanceof String )
+                {
+                    m_ignoreTopics = new String[] {(String)valueIT};
+                }
+                else if ( valueIT instanceof String[] )
+                {
+                    m_ignoreTopics = (String[])valueIT;
+                }
+                else if ( valueIT != null )
+                {
+                    LogWrapper.getLogger().log(LogWrapper.LOG_WARNING,
+                            "Value for property: " + PROP_IGNORE_TOPIC + " is neither a string nor a string array - Using default");
+                }
+                m_logLevel = getIntProperty(PROP_LOG_LEVEL,
+                        config.get(PROP_LOG_LEVEL),
+                        LogWrapper.LOG_WARNING, // default log level is WARNING
+                        LogWrapper.LOG_ERROR);
             }
-            else if ( value != null )
+            // a timeout less or equals to 100 means : disable timeout
+            if ( m_timeout <= 100 )
             {
-                LogWrapper.getLogger().log(LogWrapper.LOG_WARNING,
-                        "Value for property: " + PROP_IGNORE_TIMEOUT + " is neither a string nor a string array - Using default");
+                m_timeout = 0;
             }
-            m_ignoreTopics = null;
-            final Object valueIT = config.get(PROP_IGNORE_TOPIC);
-            if ( valueIT instanceof String )
-            {
-                m_ignoreTopics = new String[] {(String)valueIT};
-            }
-            else if ( valueIT instanceof String[] )
-            {
-                m_ignoreTopics = (String[])valueIT;
-            }
-            else if ( valueIT != null )
-            {
-                LogWrapper.getLogger().log(LogWrapper.LOG_WARNING,
-                        "Value for property: " + PROP_IGNORE_TOPIC + " is neither a string nor a string array - Using default");
-            }
-            m_logLevel = getIntProperty(PROP_LOG_LEVEL,
-                    config.get(PROP_LOG_LEVEL),
-                    LogWrapper.LOG_WARNING, // default log level is WARNING
-                    LogWrapper.LOG_ERROR);
+            m_asyncThreadPoolSize = m_threadPoolSize > 5 ? (int)Math.floor(m_threadPoolSize * m_asyncToSyncThreadRatio)  : 2;
         }
-        // a timeout less or equals to 100 means : disable timeout
-        if ( m_timeout <= 100 )
-        {
-            m_timeout = 0;
-        }
-        m_asyncThreadPoolSize = m_threadPoolSize > 5 ? (int)Math.floor(m_threadPoolSize * m_asyncToSyncThreadRatio)  : 2;
     }
 
     private void startOrUpdate()

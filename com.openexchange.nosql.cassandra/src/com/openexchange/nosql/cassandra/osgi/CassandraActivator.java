@@ -113,7 +113,8 @@ public class CassandraActivator extends HousekeepingActivator {
 
         // Unregister cassandra service
         CassandraService cassandraService = this.cassandraService;
-        if (cassandraService == null) {
+        if (cassandraService != null) {
+            this.cassandraService = null;
             unregisterService(CassandraService.class);
             // Shutdown the service
             ((CassandraServiceImpl) cassandraService).shutdown();
