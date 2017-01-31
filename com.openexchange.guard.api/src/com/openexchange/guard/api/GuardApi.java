@@ -99,7 +99,7 @@ public interface GuardApi {
 
     /**
      * Performs a POST using given parameters.
-     * 
+     *
      * @param parameters
      * @param bodyParameters
      * @param clazz The return type
@@ -141,7 +141,7 @@ public interface GuardApi {
      * @see GuardApis#mapFor(String...)
      */
     InputStream processResource(Map<String, String> parameters, InputStream resource, String contentType, String name) throws OXException;
-    
+
     /**
      * Requests Guard end-point to process multiply resources.
      *
@@ -167,6 +167,22 @@ public interface GuardApi {
      * @see GuardApis#extractCookiesFrom(javax.servlet.http.HttpServletRequest, Session)
      */
     <R> R doCallSessionSensitiveGet(Map<String, String> parameters, Class<? extends R> clazz, Session session, List<Cookie> cookies, List<Header> headers) throws OXException;
+
+
+    /**
+     * Performs the POST using given parameters
+     *
+     * @param parameters
+     * @param jsonBody
+     * @param clazz The return type
+     * @param session The associated session
+     * @param cookies The needed cookies for user authentication, typically the secret and public cookie
+     * @param headers The needed headers to set, typically <code>"User-Agent"</code> header
+     * @throws OXException If POST fails
+     * @see GuardApis#mapFor(String...)
+     * @see GuardApis#extractCookiesFrom(javax.servlet.http.HttpServletRequest, Session)
+     */
+    <R> R doCallSessionSensitivePost(Map<String, String> parameters, JSONValue jsonBody, Class<? extends R> clazz, Session session, List<Cookie> cookies, List<com.openexchange.guard.api.Header> headers) throws OXException;
 
     /**
      * Performs the PUT using given parameters.
