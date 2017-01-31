@@ -113,7 +113,7 @@ public final class LoginConfiguration {
     }
 
     public boolean isSessiondAutoLogin() {
-        String hostname = LogProperties.get(LogProperties.Name.HOSTNAME);
+        String hostname = LogProperties.getHostName();
         if (hostname != null) {
             return isSessiondAutoLogin(hostname);
         }

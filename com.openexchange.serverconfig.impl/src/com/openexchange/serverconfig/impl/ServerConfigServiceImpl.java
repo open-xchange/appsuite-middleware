@@ -53,11 +53,16 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.ExceptionUtils;
 import com.openexchange.exception.OXException;
@@ -80,6 +85,12 @@ public class ServerConfigServiceImpl implements ServerConfigService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ServerConfigService.class);
 
+    private final static String SERVERCONFIG_PREFIX = "com.openexchange.appsuite.serverConfig.";
+    private final static String SERVER_PREFIX = "com.openexchange.appsuite.server";
+    private final static String[] PREFIXES = {SERVERCONFIG_PREFIX, SERVER_PREFIX};
+
+    // --------------------------------------------------------------------------------------------------------------------------------
+
     private final ServiceLookup serviceLookup;
     private final ServerConfigServicesLookup serverConfigServicesLookup;
 
@@ -90,6 +101,135 @@ public class ServerConfigServiceImpl implements ServerConfigService {
         super();
         this.serviceLookup = serviceLookup;
         this.serverConfigServicesLookup = serverConfigServicesLookup;
+    }
+
+    @Override
+    public List<Map<String, Object>> getCustomHostConfigurations(String hostName, int userID, int contextID) throws OXException {
+        // Get configured brands/server configurations
+        ConfigurationService configService = serviceLookup.getService(ConfigurationService.class);
+        Map<String, Object> configurations = (Map<String, Object>) configService.getYaml("as-config.yml");
+
+        LinkedList<Map<String, Object>> applicableConfigs = new LinkedList<Map<String, Object>>();
+
+        if (configurations != null) {
+            for (Map.Entry<String, Object> configEntry : configurations.entrySet()) {
+                Map<String, Object> possibleConfiguration = (Map<String, Object>) configEntry.getValue();
+                if (looksApplicable(possibleConfiguration, hostName)) {
+                    // ensure that "all"-host-wildcards are applied first
+                    if ("all".equals(possibleConfiguration.get("host"))) {
+                        applicableConfigs.addFirst(possibleConfiguration);
+                    } else {
+                        applicableConfigs.add(possibleConfiguration);
+                    }
+                } else {
+                    final String configName = configEntry.getKey();
+                    if (null == possibleConfiguration) {
+                        LOG.debug("Empty configuration \"{}\" is not applicable", configName);
+                    } else {
+                        LOG.debug("Configuration \"{}\" is not applicable: {}", configName, prettyPrint(configName, possibleConfiguration));
+                    }
+                }
+            }
+
+            // Add key/value pairs that start with SERVER_PREFIX or SERVERCONFIG_PREFIX to the applicableConfigs.
+            Map<String, Object> ccValues = new HashMap<String, Object>();
+            ConfigViewFactory configViewFactory = serviceLookup.getService(ConfigViewFactory.class);
+            ConfigView configView = configViewFactory.getView(userID, contextID);
+
+            Map<String, ComposedConfigProperty<String>> allProperties = configView.all();
+            for (Map.Entry<String, ComposedConfigProperty<String>> entry : allProperties.entrySet()) {
+
+                String propName = entry.getKey();
+                for (String prefix : PREFIXES) {
+                    if (propName.startsWith(prefix)) {
+                        String value = entry.getValue().get();
+                        //Allow to keep value from global config if specified as "<as-config>"
+                        if (!value.equals("<as-config>")) {
+                            ccValues.put(propName.substring(prefix.length()), value);
+                        }
+                    }
+                }
+            }
+            applicableConfigs.add(ccValues);
+        }
+
+        return applicableConfigs;
+    }
+
+    /**
+     * Every configuration object from the as-config.yml should have a host or hostRegex entry that specifies if a configuration object
+     * should be used for an incoming request. If either of these matches the host given in the {@code AJAXRequestData} the configuration
+     * objects looks applicable to us.
+     * This check can additionally be expanded by your own {@link ServerConfigMatcherServices} that might apply other criteria to decide if
+     * a configuration object is applicable for the combination of {@code AJAXRequestData} and {@code ServerSession}.
+     *
+     * @param possibleConfiguration A possible configuration Object that should be checked
+     * @param requestData The current request data
+     * @param session The current session
+     * @return true if the configuration object should be applied, false otherwise
+     */
+    protected boolean looksApplicable(Map<String, Object> possibleConfiguration, String hostName) {
+        if (possibleConfiguration == null) {
+            return false;
+        }
+
+        // We need a hostname for the host and hostRegex check
+        if ( !Strings.isEmpty(hostName) ) {
+
+            // Check "host"
+            {
+                final String host = (String) possibleConfiguration.get("host");
+                if (host != null) {
+                    if ("all".equals(host)) {
+                        return true;
+                    }
+
+                    if (host.equals(hostName)) {
+                        return true;
+                    }
+
+                    // Not applicable according to host check
+                    LOG.debug("Host '{}' does not apply to {}", host, hostName);
+                }
+            }
+
+            // Check "hostRegex"
+            {
+                final String keyHostRegex = "hostRegex";
+                final String hostRegex = (String) possibleConfiguration.get(keyHostRegex);
+                if (hostRegex != null) {
+                    try {
+                        final Pattern pattern = Pattern.compile(hostRegex);
+
+                        if (pattern.matcher(hostName).find()) {
+                            return true;
+                        }
+
+                        // Not applicable according to hostRegex check
+                        LOG.debug("Host-Regex '{}' does not match {}", hostRegex, hostName);
+                    } catch (final PatternSyntaxException e) {
+                        // Ignore. Treat as absent.
+                        LOG.debug("Invalid regex pattern for {}: {}", keyHostRegex, hostRegex, e);
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private String prettyPrint(final String configName, Map<String, Object> configuration) {
+        if (null == configuration) {
+            return "<not-set>";
+        }
+
+        final StringBuilder sb = new StringBuilder(configuration.size() << 4);
+        final String indent = "    ";
+        final String sep = Strings.getLineSeparator();
+
+        sb.append(sep);
+        prettyPrint(configName, configuration, indent, sep, sb);
+        return sb.toString();
     }
 
     @Override
@@ -115,12 +255,11 @@ public class ServerConfigServiceImpl implements ServerConfigService {
             debugOut("as-config-defaults.yml", defaults);
         }
 
-        LinkedList<Map<String, Object>> applicableConfigs = configService.getCustomHostConfigurations(hostName, userID, contextID, serviceLookup.getService(ConfigViewFactory.class));
-        
+        List<Map<String, Object>> applicableConfigs = getCustomHostConfigurations(hostName, userID, contextID);
         for (Map<String, Object> config : applicableConfigs) {
             serverConfiguration.putAll(config);
         }
-        
+
         /*
          * Add computed values after configview values
          */
@@ -137,7 +276,7 @@ public class ServerConfigServiceImpl implements ServerConfigService {
 
         return new ServerConfigImpl(serverConfiguration, serverConfigServicesLookup.getClientFilters());
     }
-    
+
 
     /**
      * The languages config item in the as-config.yml can be:

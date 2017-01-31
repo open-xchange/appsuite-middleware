@@ -52,7 +52,6 @@ import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -60,7 +59,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Filter;
 import com.openexchange.config.PropertyFilter;
 import com.openexchange.config.PropertyListener;
-import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 
 public class MockConfigurationService implements ConfigurationService {
@@ -200,12 +198,6 @@ public class MockConfigurationService implements ConfigurationService {
     @Override
     public List<String> getProperty(String name, String defaultValue, PropertyListener listener, String separator) {
         return Collections.emptyList();
-    }
-
-    @Override
-    public LinkedList<Map<String, Object>> getCustomHostConfigurations(String hostName, int userID, int contextID, ConfigViewFactory configViewFactory) throws OXException {
-     // Nothing to do
-        return null;
     }
 
 }
