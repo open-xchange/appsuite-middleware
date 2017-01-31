@@ -49,9 +49,15 @@
 
 package com.openexchange.net.ssl.internal;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.PKIXParameters;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509ExtendedTrustManager;
@@ -98,7 +104,14 @@ public class DefaultTrustManager extends AbstractTrustManager {
             return null;
         }
 
+        String filename = System.getProperty("java.home") + "/lib/security/cacerts".replace('/', File.separatorChar);
         try {
+            FileInputStream is = new FileInputStream(filename);
+            KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+            String password = "changeit"; //TODO: Introduce a default keystore password property?
+            keystore.load(is, password.toCharArray());
+            params = new PKIXParameters(keystore);
+
             TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
             tmf.init((KeyStore) null); // Using null here initializes the TMF with the default trust store.
 
@@ -107,7 +120,10 @@ public class DefaultTrustManager extends AbstractTrustManager {
                     return (X509ExtendedTrustManager) tm;
                 }
             }
-        } catch (KeyStoreException | NoSuchAlgorithmException e) {
+        } catch (IOException e) {
+            LOG.error("Unable to read custom truststore file from " + filename, e);
+            //TODO re-throw or OXException?
+        } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | InvalidAlgorithmParameterException e) {
             LOG.error("Unable to initialize default truststore.", e);
             //TODO re-throw or OXException?
         }
