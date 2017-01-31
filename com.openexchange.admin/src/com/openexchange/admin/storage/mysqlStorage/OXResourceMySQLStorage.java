@@ -89,10 +89,10 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
     @Override
     public void change(final Context ctx, final Resource res)
             throws StorageException {
-        Connection con = null;
-        PreparedStatement editres = null;
         final int context_id = ctx.getId().intValue();
         final int resource_id = res.getId().intValue();
+        Connection con = null;
+        PreparedStatement editres = null;
         boolean rollback = false;
         try {
 
@@ -208,28 +208,31 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             throw new StorageException(e);
         } finally {
             if (rollback) {
-                dorollback(con);
+                Databases.rollback(con);
             }
             Databases.closeSQLStuff(editres);
-            try {
-                cache.pushConnectionForContext(context_id, con);
-            } catch (final PoolException e) {
-                log.error("Error pushing ox write connection to pool!", e);
+            if (null != con) {
+                try {
+                    cache.pushConnectionForContext(context_id, con);
+                } catch (final PoolException e) {
+                    log.error("Error pushing ox write connection to pool!", e);
+                }
             }
-
         }
     }
 
     @Override
     public int create(final Context ctx, final Resource res)
             throws StorageException {
+        final int context_ID = ctx.getId();
         Connection con = null;
         PreparedStatement prep_insert = null;
-        final int context_ID = ctx.getId();
+        boolean rollback = false;
         try {
 
             con = cache.getConnectionForContext(context_ID);
             con.setAutoCommit(false);
+            rollback = true;
 
             final String identifier = res.getName();
             final String displayName = res.getDisplayname();
@@ -281,6 +284,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             prep_insert.executeUpdate();
 
             con.commit();
+            rollback = false;
             log.info("Resource {} created!", resID);
             return resID;
         }catch (final DataTruncation dt){
@@ -288,38 +292,35 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             throw AdminCache.parseDataTruncation(dt);
         } catch (final SQLException e) {
             log.error("SQL Error", e);
-            dorollback(con);
             throw new StorageException(e.toString());
         } catch (final PoolException e) {
             log.error("Pool Error", e);
-            dorollback(con);
             throw new StorageException(e);
         } finally {
-            try {
-                if (prep_insert != null) {
-                    prep_insert.close();
-                }
-            } catch (final SQLException e) {
-                log.error("Error closing statemtent!", e);
+            if (rollback) {
+                Databases.rollback(con);
             }
-
-            try {
-                cache.pushConnectionForContext(context_ID, con);
-            } catch (final PoolException e) {
-                log.error("Error pushing ox write connection to pool!", e);
+            Databases.closeSQLStuff(prep_insert);
+            if (null != con) {
+                try {
+                    cache.pushConnectionForContext(context_ID, con);
+                } catch (final PoolException e) {
+                    log.error("Error pushing ox write connection to pool!", e);
+                }
             }
         }
     }
 
     @Override
-    public void delete(final Context ctx, final int resource_id)
-            throws StorageException {
+    public void delete(final Context ctx, final int resource_id) throws StorageException {
+        final int context_id = ctx.getId();
         Connection con = null;
         PreparedStatement prep_del = null;
-        final int context_id = ctx.getId();
+        boolean rollback = false;
         try {
             con = cache.getConnectionForContext(context_id);
             con.setAutoCommit(false);
+            rollback = true;
 
             final DeleteEvent delev = new DeleteEvent(this, resource_id, DeleteEvent.TYPE_RESOURCE, context_id);
             DeleteRegistry.getInstance().fireDeleteEvent(delev, con, con);
@@ -332,46 +333,44 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             prep_del.executeUpdate();
 
             con.commit();
+            rollback = false;
             log.info("Resource {} deleted!", resource_id);
         } catch (final SQLException e) {
             log.error("SQL Error", e);
-            dorollback(con);
             throw new StorageException(e.toString());
         } catch (final PoolException e) {
             log.error("Pool Error", e);
-            dorollback(con);
             throw new StorageException(e);
         } catch (final OXException e) {
             log.error("Internal Error", e);
-            dorollback(con);
             throw new StorageException(e.toString());
         } finally {
-            try {
-                if (prep_del != null) {
-                    prep_del.close();
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.closeSQLStuff(prep_del);
+            if (null != con) {
+                try {
+
+                    cache.pushConnectionForContext(context_id, con);
+                } catch (final PoolException e) {
+                    log.error("Error pushing ox write connection to pool!", e);
                 }
-            } catch (final SQLException ex) {
-                log.error("Error closing  PreparedStatement", ex);
             }
-            try {
-
-                cache.pushConnectionForContext(context_id, con);
-            } catch (final PoolException e) {
-                log.error("Error pushing ox write connection to pool!", e);
-            }
-
         }
     }
 
     @Override
     public void delete(final Context ctx, final Resource resource) throws StorageException {
-        Connection con = null;
-        PreparedStatement prep_del = null;
         final int resource_id = resource.getId().intValue();
         final int context_id = ctx.getId();
+        Connection con = null;
+        PreparedStatement prep_del = null;
+        boolean rollback = false;
         try {
             con = cache.getConnectionForContext(context_id);
             con.setAutoCommit(false);
+            rollback = true;
 
             final DeleteEvent delev = new DeleteEvent(this, resource_id, DeleteEvent.TYPE_RESOURCE, context_id);
             DeleteRegistry.getInstance().fireDeleteEvent(delev, con, con);
@@ -384,42 +383,37 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             prep_del.executeUpdate();
 
             con.commit();
+            rollback = false;
             log.info("Resource {} deleted!", resource_id);
         } catch (final SQLException e) {
             log.error("SQL Error", e);
-            dorollback(con);
             throw new StorageException(e.toString());
         } catch (final PoolException e) {
             log.error("Pool Error", e);
-            dorollback(con);
             throw new StorageException(e);
         } catch (final OXException e) {
             log.error("Context Error", e);
-            dorollback(con);
             throw new StorageException(e.toString());
         } finally {
-            try {
-                if (prep_del != null) {
-                    prep_del.close();
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.closeSQLStuff(prep_del);
+            if (null != con) {
+                try {
+                    cache.pushConnectionForContext(context_id, con);
+                } catch (final PoolException e) {
+                    log.error("Error pushing ox write connection to pool!", e);
                 }
-            } catch (final SQLException ex) {
-                log.error("Error closing  PreparedStatement", ex);
             }
-            try {
-
-                cache.pushConnectionForContext(context_id, con);
-            } catch (final PoolException e) {
-                log.error("Error pushing ox write connection to pool!", e);
-            }
-
         }
     }
 
     @Override
     public Resource getData(final Context ctx, final Resource resource) throws StorageException {
+        final int context_id = ctx.getId();
         Connection con = null;
         PreparedStatement prep_list = null;
-        final int context_id = ctx.getId();
         try {
 
             con = cache.getConnectionForContext(context_id);
@@ -464,14 +458,12 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
 
         } catch (final SQLException e) {
             log.error("SQL Error", e);
-            dorollback(con);
             throw new StorageException(e.toString());
         } catch (final PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
         } catch (final CloneNotSupportedException e) {
             log.error("", e);
-            dorollback(con);
             throw new StorageException(e);
         } finally {
             try {
@@ -579,8 +571,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
     }
 
     @Override
-    public void changeLastModified(final int resource_id, final Context ctx, final Connection write_ox_con)
-            throws StorageException {
+    public void changeLastModified(final int resource_id, final Context ctx, final Connection write_ox_con) throws StorageException {
         PreparedStatement prep_edit_user = null;
         try {
             prep_edit_user = write_ox_con.prepareStatement("UPDATE resource SET lastModified=? WHERE cid=? AND id=?");
@@ -591,7 +582,6 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             prep_edit_user.close();
         } catch (final SQLException e) {
             log.error("SQL Error", e);
-            dorollback(write_ox_con);
             throw new StorageException(e.toString());
         } finally {
             if (null != prep_edit_user) {
@@ -608,8 +598,8 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
     public void createRecoveryData(final int resource_id, final Context ctx, final Connection con)
             throws StorageException {
         // insert into del_resource table
-        PreparedStatement del_st = null;
         final int context_id = ctx.getId();
+        PreparedStatement del_st = null;
         try {
             del_st = con.prepareStatement("" + "INSERT " + "into del_resource " + "(id,cid,lastModified) " + "VALUES " + "(?,?,?)");
             del_st.setInt(1, resource_id);
@@ -621,7 +611,6 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             throw AdminCache.parseDataTruncation(dt);
         } catch (final SQLException e) {
             log.error("SQL Error", e);
-            dorollback(con);
             throw new StorageException(e.toString());
         } finally {
             try {
@@ -639,15 +628,14 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
     public void deleteAllRecoveryData(final Context ctx, final Connection con)
             throws StorageException {
         // delete from del_resource table
-        PreparedStatement del_st = null;
         final int context_id = ctx.getId();
+        PreparedStatement del_st = null;
         try {
             del_st = con.prepareStatement("DELETE from del_resource WHERE cid = ?");
             del_st.setInt(1, context_id);
             del_st.executeUpdate();
         } catch (final SQLException e) {
             log.error("SQL Error", e);
-            dorollback(con);
             throw new StorageException(e.toString());
         } finally {
             try {
@@ -664,8 +652,8 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
     public void deleteRecoveryData(final int resource_id, final Context ctx, final Connection con)
             throws StorageException {
         // delete from del_resource table
-        PreparedStatement del_st = null;
         final int context_id = ctx.getId();
+        PreparedStatement del_st = null;
         try {
             del_st = con.prepareStatement("DELETE from del_resource WHERE id = ? AND cid = ?");
             del_st.setInt(1, resource_id);
@@ -673,7 +661,6 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             del_st.executeUpdate();
         } catch (final SQLException e) {
             log.error("SQL Error", e);
-            dorollback(con);
             throw new StorageException(e.toString());
         } finally {
             try {
@@ -686,11 +673,4 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
         }
     }
 
-    private void dorollback(final Connection con) {
-        try {
-            con.rollback();
-        } catch (final SQLException e) {
-            log.error("Error processing rollback of ox db connection", e);
-        }
-    }
 }

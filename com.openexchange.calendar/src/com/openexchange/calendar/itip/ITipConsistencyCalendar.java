@@ -56,6 +56,7 @@ import java.util.List;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.AppointmentDiff;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.attach.AttachmentBatch;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.Appointment;
@@ -452,19 +453,13 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
     }
 
     @Override
-    public long attachmentAction(final int folderId, final int objectId, final int userId,
-        final Session session, final Context c, final int numberOfAttachments)
-            throws OXException {
-        return delegate.attachmentAction(folderId, objectId, userId, session, c,
-            numberOfAttachments);
+    public long attachmentAction(final int folderId, final int objectId, final int userId, final Session session, final Context c, final int numberOfAttachments, AttachmentBatch batch) throws OXException {
+        return delegate.attachmentAction(folderId, objectId, userId, session, c, numberOfAttachments, batch);
     }
 
     @Override
-    public long attachmentAction(final int folderId, final int objectId, final int userId,
-        final Session session, final Context c, final int numberOfAttachments, Connection writeCon)
-            throws OXException {
-        return delegate.attachmentAction(folderId, objectId, userId, session, c,
-            numberOfAttachments, writeCon);
+    public long attachmentAction(final int folderId, final int objectId, final int userId, final Session session, final Context c, final int numberOfAttachments, AttachmentBatch batch, Connection writeCon) throws OXException {
+        return delegate.attachmentAction(folderId, objectId, userId, session, c, numberOfAttachments, batch, writeCon);
     }
 
     @Override
