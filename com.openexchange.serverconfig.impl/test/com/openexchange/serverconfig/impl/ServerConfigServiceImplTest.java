@@ -219,6 +219,42 @@ public class ServerConfigServiceImplTest {
     }
 
     @Test
+    public void testLooksApplicable_host_not_matching() {
+        Map<String, Object> host1Config = (Map<String, Object>) asConfig.get("host1.mycloud.net");
+        assertFalse(serverConfigServiceImpl.looksApplicable(host1Config, "host4.mycloud.net"));
+    }
+
+    @Test
+    public void testLooksApplicable_host_matching() {
+        Map<String, Object> host1Config = (Map<String, Object>) asConfig.get("host1.mycloud.net");
+        assertTrue(serverConfigServiceImpl.looksApplicable(host1Config, "host1.mycloud.net"));
+    }
+
+    @Test
+    public void testLooksApplicable_hostregex_not_matching() {
+        Map<String, Object> host1Config = (Map<String, Object>) asConfig.get("host*.mycloud.net");
+        assertFalse(serverConfigServiceImpl.looksApplicable(host1Config, "performance.mycloud.net"));
+    }
+
+    @Test
+    public void testLooksApplicable_hostregex_matching() {
+        Map<String, Object> host1Config = (Map<String, Object>) asConfig.get("host*.mycloud.net");
+        assertTrue(serverConfigServiceImpl.looksApplicable(host1Config, "host1.mycloud.net"));
+    }
+
+    @Test
+    public void testLooksApplicable_NoConfig() {
+        Map<String, Object> host1Config = (Map<String, Object>) asConfig.get("host*.mycloud.net");
+        assertFalse(serverConfigServiceImpl.looksApplicable(host1Config, null));
+    }
+
+    @Test
+    public void testLooksApplicable_NoData() {
+        Map<String, Object> host1Config = (Map<String, Object>) asConfig.get("host*.mycloud.net");
+        assertFalse(serverConfigServiceImpl.looksApplicable(host1Config, null));
+    }
+
+    @Test
     public void testGetServerConfigServicesLookup() {
         assertNotNull(serverConfigServiceImpl.getServerConfigServicesLookup());
     }
