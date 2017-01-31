@@ -507,9 +507,9 @@ public abstract class MailMessage extends MailPart {
     private boolean encrypted = false;
 
     /**
-     * Email is decoded
+     * Email security data
      */
-    private boolean decrypted = false;
+    private SecurityResult securityResult = null;
 
     /**
      * Default constructor
@@ -2026,11 +2026,15 @@ public abstract class MailMessage extends MailPart {
         return this.encrypted;
     }
 
-    public void setDecrypted (boolean decrypted) {
-        this.decrypted = decrypted;
+    public void setSecurityResult (SecurityResult result) {
+        this.securityResult = result;
     }
 
-    public boolean isDecrypted () {
-        return this.decrypted;
+    public SecurityResult getSecurityResult () {
+        return this.securityResult;
+    }
+
+    public boolean hasSecurityResult () {
+        return this.securityResult != null;
     }
 }
