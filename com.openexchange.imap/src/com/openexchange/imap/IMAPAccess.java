@@ -1413,6 +1413,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             imapProps.put("mail.imap.auth.mechanisms", "XOAUTH2");
         } else if (AuthType.OAUTHBEARER == config.getAuthType()) {
             imapProps.put("mail.imap.auth.mechanisms", "OAUTHBEARER");
+        } else {
+            imapProps.put("mail.imap.auth.mechanisms", "PLAIN LOGIN NTLM");
         }
         /*
          * Check if a secure IMAP connection should be established
