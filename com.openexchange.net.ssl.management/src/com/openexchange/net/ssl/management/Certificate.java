@@ -65,6 +65,7 @@ public class Certificate {
     private String issuer;
     private String signature;
     private String serialNumber;
+    private String failureReason;
 
     /**
      * Initialises a new {@link Certificate}.
@@ -240,5 +241,23 @@ public class Certificate {
         builder.append("\"fingerprint\":\"").append(fingerprint).append("\"");
         builder.append("}");
         return builder.toString();
+    }
+
+    /**
+     * Gets the failureReason
+     *
+     * @return The failureReason
+     */
+    public String getFailureReason() {
+        return failureReason;
+    }
+
+    /**
+     * Sets the failureReason
+     *
+     * @param failureReason The failureReason to set
+     */
+    public void setFailureReason(String failureReason) {
+        this.failureReason = failureReason;
     }
 }
