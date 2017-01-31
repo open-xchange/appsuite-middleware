@@ -331,16 +331,6 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             }
             throw new CertificateException(e);
         }
-        // TODO: Create a list with the untrusted certificates and pass them as parameters to a nested OX exception
-        //        if (!untrustedFingerprints.isEmpty() || !unknownFingerprints.isEmpty()) {
-        //            StringBuilder builder = new StringBuilder("[");
-        //            for (Certificate c : unknownFingerprints) {
-        //                builder.append(c.toString()).append(",");
-        //            }
-        //            builder.setLength(builder.length() - 1);
-        //            builder.append("]");
-        //            throw new CertificateException(SSLExceptionCode.USER_DOES_NOT_TRUST_CERTIFICATE.create(userId, contextId, untrustedFingerprints.toString(), builder.toString()));
-        //        }
     }
 
     /**
