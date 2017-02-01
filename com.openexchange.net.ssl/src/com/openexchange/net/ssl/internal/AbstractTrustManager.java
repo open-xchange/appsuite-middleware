@@ -453,7 +453,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         return toHex(sha256.digest());
     }
 
-    final protected static char[] hexArray = "0123456789abcdef".toCharArray();
+    private final static char[] hexArray = "0123456789abcdef".toCharArray();
 
     /**
      * Converts the specified byte array to a hexadecimal string
