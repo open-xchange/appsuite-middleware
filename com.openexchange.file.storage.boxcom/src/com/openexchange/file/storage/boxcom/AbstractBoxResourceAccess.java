@@ -182,14 +182,14 @@ public abstract class AbstractBoxResourceAccess {
      * @param identifier The optional identifier for associated Box.com resource
      * @param e The HTTP error
      * @return The resulting exception
+     * @throws BoxAPIException If specified {@code BoxAPIException} instance should be handled outside
      */
     protected OXException handleHttpResponseError(String identifier, String accountId, BoxAPIException e) {
         if (null != identifier && SC_NOT_FOUND == e.getResponseCode()) {
             return FileStorageExceptionCodes.NOT_FOUND.create(e, "Box", identifier);
         }
-        if (null != accountId && SC_UNAUTHORIZED == e.getResponseCode()) {
-            String resp = e.getResponse();
-            return FileStorageExceptionCodes.AUTHENTICATION_FAILED.create(e, accountId, BoxConstants.ID, null == resp ? "Authentication failed" : resp);
+        if (SC_UNAUTHORIZED == e.getResponseCode()) {
+            throw e;
         }
         if (accountId != null && e.getResponseCode() == SC_BAD_REQUEST) {
             try {
