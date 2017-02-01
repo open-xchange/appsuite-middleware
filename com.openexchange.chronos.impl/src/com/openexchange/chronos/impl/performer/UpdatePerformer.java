@@ -160,7 +160,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         /*
          * update event or event occurrence
          */
-        if (CalendarUtils.isSeriesMaster(originalEvent) && updatedEvent.containsRecurrenceId() && null != updatedEvent.getRecurrenceId()) {
+        if (isSeriesMaster(originalEvent) && updatedEvent.containsRecurrenceId() && null != updatedEvent.getRecurrenceId()) {
             updateEvent(originalEvent, updatedEvent, updatedEvent.getRecurrenceId());
         } else {
             updateEvent(originalEvent, updatedEvent);
@@ -178,7 +178,9 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                  * update for existing change exception
                  */
                 Event originalExceptionEvent = loadExceptionData(originalEvent.getId(), recurrenceID);
-                updateEvent(originalExceptionEvent, updatedEvent);
+                if (updateEvent(originalExceptionEvent, updatedEvent)) {
+                    touch(originalEvent.getSeriesId());
+                }
             } else {
                 /*
                  * update for new change exception, prepare & insert a plain exception first
@@ -209,7 +211,9 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             /*
              * update for existing change exception
              */
-            updateEvent(originalEvent, updatedEvent);
+            if (updateEvent(originalEvent, updatedEvent)) {
+                touch(originalEvent.getSeriesId());
+            }
         } else {
             /*
              * unsupported, otherwise
@@ -218,7 +222,15 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         }
     }
 
-    private void updateEvent(Event originalEvent, Event updatedEvent, EventField... ignoredFields) throws OXException {
+    /**
+     * Updates an existing event.
+     *
+     * @param originalEvent The original event data
+     * @param updatedEvent The updated event data
+     * @param ignoredFields Additional fields to ignore during the update; {@link UpdatePerformer#SKIPPED_FIELDS} are always skipped
+     * @return <code>true</code> if there were changes, <code>false</code>, otherwise
+     */
+    private boolean updateEvent(Event originalEvent, Event updatedEvent, EventField... ignoredFields) throws OXException {
         boolean wasUpdated = false;
         /*
          * check if folder view on event is allowed as needed
@@ -321,6 +333,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             }
             result.addUpdate(new UpdateResultImpl(originalEvent, loadEventData(originalEvent.getId())));
         }
+        return wasUpdated;
     }
 
     /**

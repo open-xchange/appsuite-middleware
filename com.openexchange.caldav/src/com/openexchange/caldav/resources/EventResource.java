@@ -433,7 +433,7 @@ public class EventResource extends DAVObjectResource<Event> {
             EventID eventID = new EventID(parent.folderID, object.getId());
             CalendarResult result = calendarSession.getCalendarService().updateEvent(calendarSession, eventID, caldavImport.getEvent());
             if (result.getUpdates().isEmpty()) {
-                LOG.warn("{}: No event updated.", getUrl());
+                LOG.debug("{}: Master event {} not updated.", getUrl(), eventID);
             }
             calendarSession.set(CalendarParameters.PARAMETER_TIMESTAMP, Long.valueOf(result.getTimestamp().getTime()));
         }
@@ -444,7 +444,7 @@ public class EventResource extends DAVObjectResource<Event> {
             EventID eventID = new EventID(parent.folderID, object.getId(), changeException.getRecurrenceId());
             CalendarResult result = calendarSession.getCalendarService().updateEvent(calendarSession, eventID, changeException);
             if (result.getUpdates().isEmpty()) {
-                LOG.warn("{}: No event updated.", getUrl());
+                LOG.debug("{}: Exception {} not updated.", getUrl(), eventID);
             }
             calendarSession.set(CalendarParameters.PARAMETER_TIMESTAMP, Long.valueOf(result.getTimestamp().getTime()));
         }
