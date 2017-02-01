@@ -99,11 +99,11 @@ public class UpdateTransportAccountBuilder implements AttributeSwitch {
     /**
      * Initializes a new {@link UpdateTransportAccountBuilder}.
      */
-    public UpdateTransportAccountBuilder() {
+    public UpdateTransportAccountBuilder(boolean clearFailAuthCount) {
         super();
         bob = new StringBuilder("UPDATE user_transport_account SET ");
-        valid = false;
-        injectClearingFailAuthCount = false;
+        valid = clearFailAuthCount;
+        injectClearingFailAuthCount = clearFailAuthCount;
     }
 
     /**
@@ -132,10 +132,10 @@ public class UpdateTransportAccountBuilder implements AttributeSwitch {
      * @see #isValid()
      */
     public String getUpdateQuery() {
-        bob.setLength(bob.length() - 1);
         if (injectClearingFailAuthCount) {
-            bob.append(", failed_auth_count=0, failed_auth_date=0");
+            bob.append("failed_auth_count=0,failed_auth_date=0,disabled=0,");
         }
+        bob.setLength(bob.length() - 1);
         bob.append(" WHERE cid = ? AND id = ? and user = ?");
         return bob.toString();
     }

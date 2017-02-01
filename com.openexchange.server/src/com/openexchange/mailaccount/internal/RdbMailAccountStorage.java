@@ -1808,6 +1808,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             String encryptedPassword = null; //
 
             List<Attribute> orderedAttributes = null;
+            boolean clearFailAuthCount = false;
             if (UpdateMailAccountBuilder.needsUpdate(attributes)) {
                 orderedAttributes = new ArrayList<>(attributes);
 
@@ -1831,6 +1832,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
                 if (sqlBuilder.isValid()) {
                     stmt = con.prepareStatement(sqlBuilder.getUpdateQuery());
+                    clearFailAuthCount = sqlBuilder.isInjectClearingFailAuthCount();
                     // Fill prepared statement
                     int pos = 1;
                     for (Attribute attribute : orderedAttributes) {
@@ -1923,7 +1925,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 }
             }
 
-            if (UpdateTransportAccountBuilder.needsUpdate(attributes)) {
+            if (UpdateTransportAccountBuilder.needsUpdate(attributes) || clearFailAuthCount) {
                 if (orderedAttributes == null) {
                     orderedAttributes = new ArrayList<>(attributes);
                 }
@@ -1940,7 +1942,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 closeSQLStuff(rs, stmt);
 
                 if (exists) {
-                    UpdateTransportAccountBuilder sqlBuilder = new UpdateTransportAccountBuilder();
+                    UpdateTransportAccountBuilder sqlBuilder = new UpdateTransportAccountBuilder(clearFailAuthCount);
                     GetSwitch getter = new GetSwitch(mailAccount);
 
                     // Compose SQL statement
@@ -2254,7 +2256,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             rollback = true;
             {
                 final String encryptedPassword = encrypt(mailAccount.getPassword(), session);
-                stmt = con.prepareStatement("UPDATE user_mail_account SET name = ?, url = ?, login = ?, password = ?, primary_addr = ?, spam_handler = ?, trash = ?, sent = ?, drafts = ?, spam = ?, confirmed_spam = ?, confirmed_ham = ?, unified_inbox = ?, trash_fullname = ?, sent_fullname = ?, drafts_fullname = ?, spam_fullname = ?, confirmed_spam_fullname = ?, confirmed_ham_fullname = ?, personal = ?, replyTo = ?, archive = ?, archive_fullname = ?, starttls = ?, oauth = ? WHERE cid = ? AND id = ? AND user = ?");
+                stmt = con.prepareStatement("UPDATE user_mail_account SET name = ?, url = ?, login = ?, password = ?, primary_addr = ?, spam_handler = ?, trash = ?, sent = ?, drafts = ?, spam = ?, confirmed_spam = ?, confirmed_ham = ?, unified_inbox = ?, trash_fullname = ?, sent_fullname = ?, drafts_fullname = ?, spam_fullname = ?, confirmed_spam_fullname = ?, confirmed_ham_fullname = ?, personal = ?, replyTo = ?, archive = ?, archive_fullname = ?, starttls = ?, oauth = ?, failed_auth_count=0, failed_auth_date=0, disabled=0 WHERE cid = ? AND id = ? AND user = ?");
                 int pos = 1;
                 stmt.setString(pos++, name);
                 stmt.setString(pos++, mailAccount.generateMailServerURL());
@@ -2317,7 +2319,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             if (null != transportURL) {
                 final String encryptedTransportPassword = encrypt(mailAccount.getTransportPassword(), session);
                 stmt.close();
-                stmt = con.prepareStatement("UPDATE user_transport_account SET name = ?, url = ?, login = ?, password = ?, send_addr = ?, personal = ?, replyTo = ?, starttls = ?, oauth = ? WHERE cid = ? AND id = ? AND user = ?");
+                stmt = con.prepareStatement("UPDATE user_transport_account SET name = ?, url = ?, login = ?, password = ?, send_addr = ?, personal = ?, replyTo = ?, starttls = ?, oauth = ?, failed_auth_count=0, failed_auth_date=0, disabled=0 WHERE cid = ? AND id = ? AND user = ?");
                 int pos = 1;
                 stmt.setString(pos++, name);
                 stmt.setString(pos++, transportURL);
@@ -2452,7 +2454,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 if (null != name) {
                     sb.append("name = ?, ");
                 }
-                sb.append("url = ?, login = ?, password = ?, send_addr = ?, personal = ?, replyTo = ?, starttls = ?, oauth = ? WHERE cid = ? AND id = ? AND user = ?");
+                sb.append("url = ?, login = ?, password = ?, send_addr = ?, personal = ?, replyTo = ?, starttls = ?, oauth = ?, failed_auth_count=0, failed_auth_date=0, disabled=0 WHERE cid = ? AND id = ? AND user = ?");
                 stmt = con.prepareStatement(sb.toString());
                 sb = null;
 
@@ -2664,7 +2666,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 closeSQLStuff(rs, stmt);
 
                 if (exists) {
-                    UpdateTransportAccountBuilder sqlBuilder = new UpdateTransportAccountBuilder();
+                    UpdateTransportAccountBuilder sqlBuilder = new UpdateTransportAccountBuilder(false);
                     TransportGetSwitch getter = new TransportGetSwitch(transportAccount);
 
                     // Compose SQL statement

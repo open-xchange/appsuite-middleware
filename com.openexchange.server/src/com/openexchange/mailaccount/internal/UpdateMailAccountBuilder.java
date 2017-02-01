@@ -113,6 +113,15 @@ public class UpdateMailAccountBuilder implements AttributeSwitch {
     }
 
     /**
+     * Checks whether clearing of failed authentication counter has been injected
+     *
+     * @return <code>true</code> if injected; otherwise <code>false</code>
+     */
+    public boolean isInjectClearingFailAuthCount() {
+        return injectClearingFailAuthCount;
+    }
+
+    /**
      * Checks if this SQL builder handles given attribute.
      *
      * @param attribute The attribute to check
@@ -129,10 +138,10 @@ public class UpdateMailAccountBuilder implements AttributeSwitch {
      * @see #isValid()
      */
     public String getUpdateQuery() {
-        bob.setLength(bob.length() - 1);
         if (injectClearingFailAuthCount) {
-            bob.append(", failed_auth_count=0, failed_auth_date=0");
+            bob.append("failed_auth_count=0,failed_auth_date=0,disabled=0,");
         }
+        bob.setLength(bob.length() - 1);
         bob.append(" WHERE cid = ? AND id = ? AND user = ?");
         return bob.toString();
     }

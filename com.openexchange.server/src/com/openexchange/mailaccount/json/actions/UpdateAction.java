@@ -217,7 +217,7 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
 
         }
         // Check standard folder names against full names
-        if (false == isPop3(toUpdate)) {
+        if (false == isPop3(toUpdate) && false == toUpdate.isMailDisabled()) {
             fillMailConfig(accountDescription, fieldsToUpdate, toUpdate, session);
             MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = getMailAccess(accountDescription, session, warnings);
             Tools.checkNames(accountDescription, fieldsToUpdate, Tools.getSeparator(mailAccess));
