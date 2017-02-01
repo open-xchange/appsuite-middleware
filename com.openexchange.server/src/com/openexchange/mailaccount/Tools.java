@@ -68,7 +68,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
-import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageDefaultFolderAware;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -600,9 +599,9 @@ public final class Tools {
             return f.get(3000L, TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw MailExceptionCode.INTERRUPT_ERROR.create(e);
+            return null;
         } catch (ExecutionException e) {
-            throw ThreadPools.launderThrowable(e, OXException.class);
+            return null;
         } catch (TimeoutException e) {
             f.cancel(true);
             return null;
