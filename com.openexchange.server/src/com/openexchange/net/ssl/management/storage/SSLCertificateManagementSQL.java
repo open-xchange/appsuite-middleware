@@ -105,6 +105,46 @@ public class SSLCertificateManagementSQL {
     }
 
     /**
+     * Retrieve a {@link Certificate} from the database
+     * 
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param fingerprint The fingerprint of the {@link Certificate}
+     * @return The {@link Certificate}
+     * @throws OXException if the {@link Certificate} does not exist, or any other error occurs
+     */
+    public Certificate get(int userId, int contextId, String fingerprint) throws OXException {
+        DatabaseService databaseService = getDatabaseService();
+        Connection connection = databaseService.getReadOnly(contextId);
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try {
+            preparedStatement = connection.prepareStatement(SQLStatements.GET);
+
+            int index = 1;
+            preparedStatement.setInt(index++, contextId);
+            preparedStatement.setInt(index++, userId);
+            preparedStatement.setString(index++, fingerprint);
+
+            resultSet = preparedStatement.executeQuery();
+            if (!resultSet.next()) {
+                throw SSLCertificateManagementSQLExceptionCode.CERTIFICATE_NOT_FOUND.create(fingerprint, userId, contextId);
+            }
+
+            Certificate certificate = new Certificate(fingerprint);
+            certificate.setCommonName(resultSet.getString("host"));
+            certificate.setTrusted(resultSet.getBoolean("trusted"));
+            return certificate;
+        } catch (SQLException e) {
+            throw SSLCertificateManagementSQLExceptionCode.SQL_PROBLEM.create(e.getMessage(), e);
+        } finally {
+            closeResultSet(resultSet);
+            closeStatement(preparedStatement);
+            databaseService.backReadOnly(connection);
+        }
+    }
+
+    /**
      * Deletes the {@link Certificate} with the specified fingerprint for the specified user
      * in the specified context.
      * 

@@ -62,6 +62,11 @@ final class SQLStatements {
     final static String INSERT = "INSERT INTO user_certificate (cid, userid, host, fingerprint, trusted) VALUES (?,?,?,?,?)";
 
     /**
+     * Get the certificate
+     */
+    final static String GET = "SELECT * FROM  user_certificate WHERE cid=? AND userid=? AND fingerprint=?";
+
+    /**
      * Updates a certificate
      */
     final static String UPDATE = "UPDATE user_certificate SET trusted=? WHERE userid=? AND cid=? AND fingerprint=?";

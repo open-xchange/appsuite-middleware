@@ -232,6 +232,26 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
     }
 
     /**
+     * Retrieves the hostname from the specified {@link Socket}
+     * 
+     * @param socket The {@link Socket} from which to retrieve the hostname
+     * @return The hostname or <code>null</code> if the socket is <code>null</code>,
+     *         or not connected
+     */
+    private String getHostFromSocket(Socket socket) {
+        if (socket == null) {
+            LOG.debug("The socket is null");
+            return null;
+        }
+        InetAddress inetAddress = socket.getInetAddress();
+        if (inetAddress == null) {
+            LOG.debug("The socket is not connected.");
+            return null;
+        }
+        return inetAddress.getHostName();
+    }
+
+    /**
      * Handles the specified {@link CertificateException}. It first verifies whether the issuer of the
      * specified {@link X509Certificate} chain is trusted, then whether the user trusts the certificate
      * 
@@ -290,11 +310,23 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         X509Certificate cert = chain[0];
         try {
             String fingerprint = getFingerprint(cert);
+
             SSLCertificateManagementService certificateManagement = Services.getService(SSLCertificateManagementService.class);
-            if (!certificateManagement.isTrusted(userId, contextId, fingerprint)) {
+            Certificate certificate = certificateManagement.get(userId, contextId, fingerprint);
+            if (!certificate.isTrusted()) {
                 //TODO: Do we need to cache it again? Will the user want to change it at that point?
                 cacheCertificate(userId, contextId, cert, FailureReason.NOT_TRUSTED_BY_USER);
                 throw new CertificateException(SSLExceptionCode.USER_DOES_NOT_TRUST_CERTIFICATE.create(userId, contextId, fingerprint));
+            }
+
+            String socketHostname = getHostFromSocket(socket);
+            if (Strings.isEmpty(socketHostname)) {
+                //TODO: fail? skip common name check
+            }
+
+            if (!socketHostname.equals(certificate.getCommonName())) {
+                cacheCertificate(userId, contextId, cert, FailureReason.INVALID_COMMON_NAME);
+                throw new CertificateException(SSLExceptionCode.INVALID_COMMON_NAME.create(fingerprint));
             }
         } catch (OXException e) {
             if (SSLCertificateManagementSQLExceptionCode.CERTIFICATE_NOT_FOUND.equals(e)) {
@@ -375,12 +407,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             LOG.debug("No common name retrieved from the certificate. Skipping common name check");
             return;
         }
-        InetAddress inetAddress = socket.getInetAddress();
-        if (inetAddress == null) {
-            LOG.debug("The socket is not connected. Skipping common name check");
-            return;
-        }
-        String hostname = inetAddress.getHostName();
+        String hostname = getHostFromSocket(socket);
         if (commonName.equals(hostname)) {
             return;
         }

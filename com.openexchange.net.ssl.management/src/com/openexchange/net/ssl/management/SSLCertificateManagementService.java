@@ -71,6 +71,17 @@ public interface SSLCertificateManagementService {
     boolean isTrusted(int userId, int contextId, String fingerprint) throws OXException;
 
     /**
+     * Retrieves the {@link Certificate} with the specified fingerprint from the storage
+     * 
+     * @param userId The user identifier
+     * @param contextId The context identifer
+     * @param fingerprint The fingerprint of the {@link Certificate}
+     * @return The {@link Certificate}
+     * @throws OXException if the {@link Certificate} does not exist, or any other error occurs
+     */
+    Certificate get(int userId, int contextId, String fingerprint) throws OXException;
+
+    /**
      * Checks whether the SSL {@link Certificate} with the specified fingerprint
      * already exists for the specified user in the specified context
      * 
