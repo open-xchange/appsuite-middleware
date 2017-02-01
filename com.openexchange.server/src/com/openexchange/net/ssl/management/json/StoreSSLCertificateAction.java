@@ -53,6 +53,8 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
+import com.openexchange.net.ssl.management.Certificate;
 import com.openexchange.net.ssl.management.SSLCertificateManagementService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -79,13 +81,25 @@ public class StoreSSLCertificateAction extends AbstractSSLCertificateManagementA
      */
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        // Try storing from cache
+        String fingerprint = requestData.getParameter("fingerprint", String.class, true);
+        if (!Strings.isEmpty(fingerprint)) {
+            SSLCertificateManagementService managementService = getService(SSLCertificateManagementService.class);
+            Certificate certificate = managementService.getCached(session.getUserId(), session.getContextId(), fingerprint);
+            managementService.store(session.getUserId(), session.getContextId(), certificate);
+
+            return new AJAXRequestResult();
+        }
+
+        // Try from payload
         Object obj = requestData.getData();
         if (!(obj instanceof JSONObject)) {
             throw AjaxExceptionCodes.INVALID_REQUEST_BODY.create("JSONObject", obj.getClass());
         }
 
+        JSONObject data = (JSONObject) requestData.getData();
         SSLCertificateManagementService managementService = getService(SSLCertificateManagementService.class);
-        //managementService.store(session.getUserId(), session.getContextId(), certificate);
+        managementService.store(session.getUserId(), session.getContextId(), parse(data));
 
         return new AJAXRequestResult();
     }
