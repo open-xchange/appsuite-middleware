@@ -304,14 +304,12 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
                 checkSelfSigned(userId, contextId, chain);
                 // b) Check if the root certificate authority is trusted
                 checkRootCATrusted(userId, contextId, chain);
-                // Check common name
+                // c) Check common name
                 checkCommonName(userId, contextId, chain, socket);
-                // c) Check if expired
+                // d) Check if expired
                 checkExpired(userId, contextId, chain);
-                // d) check for the target host
-                //checkSocket(chain, socket, e);
 
-                // If the previous checks did not fail, cache it and throw as last resort
+                // If the previous checks did not fail, cache it for future reference and throw as last resort
                 String fingerprint = cacheCertificate(userId, contextId, cert, FailureReason.NOT_TRUSTED_BY_USER);
                 throw new CertificateException(SSLExceptionCode.USER_DOES_NOT_TRUST_CERTIFICATE.create(userId, contextId, fingerprint));
             }
@@ -405,33 +403,6 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         if (certificate.getNotAfter().getTime() < System.currentTimeMillis()) {
             String fingerprint = cacheCertificate(userId, contextId, chain[0], FailureReason.EXPIRED);
             throw new CertificateException(SSLExceptionCode.CERTIFICATE_IS_EXPIRED.create(userId, contextId, fingerprint));
-        }
-    }
-
-    /**
-     * Check the certificate against the target host
-     * 
-     * @param chain The chain
-     * @param socket The socket
-     * @param ce The exception
-     * @throws CertificateException
-     */
-    private void checkSocket(X509Certificate[] chain, Socket socket, CertificateException ce) throws CertificateException {
-        if (socket == null) {
-            return;
-        }
-
-        X509Certificate cert = chain[0];
-        String host = getHostFromPrincipal(cert);
-        if (host == null) {
-            //TODO: fail?
-            throw ce;
-        }
-
-        // Check the socket hostname gainst the issued common name
-        String hostname = socket.getInetAddress().getHostName();
-        if (!host.equals(hostname)) {
-            throw ce;
         }
     }
 
