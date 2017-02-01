@@ -59,7 +59,7 @@ final class SQLStatements {
     /**
      * Insert a certificate
      */
-    final static String INSERT = "INSERT INTO user_certificate (cid, userid, fingerprint, trusted) VALUES (?,?,?,?)";
+    final static String INSERT = "INSERT INTO user_certificate (cid, userid, host, fingerprint, trusted) VALUES (?,?,?,?,?)";
 
     /**
      * Updates a certificate

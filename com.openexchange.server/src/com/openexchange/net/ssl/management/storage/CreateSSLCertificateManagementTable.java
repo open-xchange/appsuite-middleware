@@ -63,6 +63,7 @@ public class CreateSSLCertificateManagementTable extends AbstractCreateTableImpl
     private static final String CREATE_STATEMENT = "CREATE TABLE `user_certificate` (" + 
         "`cid` INT4 UNSIGNED NOT NULL," + 
         "`userid` INT UNSIGNED NOT NULL," + 
+        "`host` VARCHAR(255) NOT NULL," + 
         "`fingerprint` VARCHAR(64) NOT NULL," + 
         "`trusted` BOOLEAN NOT NULL," + 
         "PRIMARY KEY (`cid`,`userid`,`fingerprint`)" + 

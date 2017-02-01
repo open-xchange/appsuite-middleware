@@ -292,6 +292,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             String fingerprint = getFingerprint(cert);
             SSLCertificateManagementService certificateManagement = Services.getService(SSLCertificateManagementService.class);
             if (!certificateManagement.isTrusted(userId, contextId, fingerprint)) {
+                //TODO: Do we need to cache it again? Will the user want to change it at that point?
                 cacheCertificate(userId, contextId, cert, FailureReason.NOT_TRUSTED_BY_USER);
                 throw new CertificateException(SSLExceptionCode.USER_DOES_NOT_TRUST_CERTIFICATE.create(userId, contextId, fingerprint));
             }

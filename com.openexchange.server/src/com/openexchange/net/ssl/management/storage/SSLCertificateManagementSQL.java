@@ -232,6 +232,7 @@ public class SSLCertificateManagementSQL {
             int index = 1;
             preparedStatement.setInt(index++, contextId);
             preparedStatement.setInt(index++, userId);
+            preparedStatement.setString(index++, certificate.getCommonName());
             preparedStatement.setString(index++, certificate.getFingerprint());
             preparedStatement.setBoolean(index++, certificate.isTrusted());
 
