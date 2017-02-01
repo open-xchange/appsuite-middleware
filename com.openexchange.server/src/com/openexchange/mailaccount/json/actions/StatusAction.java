@@ -156,6 +156,10 @@ public final class StatusAction extends AbstractValidateMailAccountAction implem
             return null;
         }
 
+        if (mailAccount.isMailDisabled()) {
+            return KnownStatus.DISABLED;
+        }
+
         Boolean valid = actionValidateBoolean(mailAccount, session, false, warnings, false);
         return valid.booleanValue() ? KnownStatus.OK : KnownStatus.INVALID_CREDENTIALS;
     }

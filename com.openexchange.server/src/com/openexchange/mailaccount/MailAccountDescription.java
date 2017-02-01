@@ -118,6 +118,8 @@ public final class MailAccountDescription implements Serializable {
     private int transportOAuthId;
     private AuthType authType;
     private AuthType transportAuthType;
+    private boolean mailDisabled;
+    private boolean transportDisabled;
 
     /**
      * Initializes a new {@link MailAccountDescription}.
@@ -136,6 +138,8 @@ public final class MailAccountDescription implements Serializable {
         id = -1;
         mailOAuthId = -1;
         transportOAuthId = -1;
+        mailDisabled = false;
+        transportDisabled = false;
     }
 
     /**
@@ -717,6 +721,42 @@ public final class MailAccountDescription implements Serializable {
         } else {
             properties.put("replyto", replyTo);
         }
+    }
+
+    /**
+     * Checks whether mail access is disabled
+     *
+     * @return <code>true</code> if disabled; otherwise <code>false</code>
+     */
+    public boolean isMailDisabled() {
+        return mailDisabled;
+    }
+
+    /**
+     * Sets whether mail access is disabled
+     *
+     * @param mailDisabled <code>true</code> if disabled; otherwise <code>false</code>
+     */
+    public void setMailDisabled(boolean mailDisabled) {
+        this.mailDisabled = mailDisabled;
+    }
+
+    /**
+     * Checks whether mail transport is disabled
+     *
+     * @return <code>true</code> if disabled; otherwise <code>false</code>
+     */
+    public boolean isTransportDisabled() {
+        return transportDisabled;
+    }
+
+    /**
+     * Sets whether mail transport is disabled
+     *
+     * @param transportDisabled <code>true</code> if disabled; otherwise <code>false</code>
+     */
+    public void setTransportDisabled(boolean transportDisabled) {
+        this.transportDisabled = transportDisabled;
     }
 
     /**

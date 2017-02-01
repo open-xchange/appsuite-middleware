@@ -102,6 +102,16 @@ final class SanitizingStorageService implements MailAccountStorageService {
     }
 
     @Override
+    public boolean incrementFailedMailAuthCount(int accountId, int userId, int contextId) throws OXException {
+        return storageService.incrementFailedMailAuthCount(accountId, userId, contextId);
+    }
+
+    @Override
+    public boolean incrementFailedTransportAuthCount(int accountId, int userId, int contextId) throws OXException {
+        return storageService.incrementFailedTransportAuthCount(accountId, userId, contextId);
+    }
+
+    @Override
     public MailAccount getRawMailAccount(int id, int userId, int cid) throws OXException {
         try {
             return storageService.getRawMailAccount(id, userId, cid);
