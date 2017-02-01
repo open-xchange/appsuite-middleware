@@ -75,6 +75,9 @@ public class SSLExceptionMessages implements LocalizableStrings {
     // The certificate is self-signed
     public final static String SELF_SIGNED_CERTIFICATE = "The certificate is self-signed";
 
+    // The certificate is expired
+    public final static String CERTIFICATE_IS_EXPIRED = "The certificate is expired";
+
     private SSLExceptionMessages() {
         super();
     }

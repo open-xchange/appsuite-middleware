@@ -91,14 +91,22 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
 
     protected static PKIXParameters params;
 
+    private final MessageDigest sha256;
+
     /**
-     * Initializes a new {@link AbstractTrustManager}.
+     * Initialises a new {@link AbstractTrustManager}.
      *
      * @param trustManager The trust manager
      */
     protected AbstractTrustManager(X509ExtendedTrustManager trustManager) {
         super();
         this.trustManager = trustManager;
+        try {
+            sha256 = MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) {
+            LOG.error("The cryptographic algorithm 'SHA-256' is not available. Failed to initialise the TrustManager", e);
+            throw new IllegalArgumentException(e);
+        }
     }
 
     public boolean isInitialized() {
@@ -125,7 +133,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             this.trustManager.checkServerTrusted(chain, authType, socket);
             return;
         } catch (CertificateException e) {
-            handleCertificateException(chain, e);
+            handleCertificateException(chain, socket, e);
         }
     }
 
@@ -230,6 +238,18 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
      * @throws CertificateException if the specified {@link X509Certificate} chain is not trusted by the user
      */
     private void handleCertificateException(X509Certificate[] chain, CertificateException e) throws CertificateException {
+        handleCertificateException(chain, null, e);
+    }
+
+    /**
+     * Handles the specified {@link CertificateException}. It first verifies whether the issuer of the
+     * specified {@link X509Certificate} chain is trusted, then whether the user trusts the certificate
+     * 
+     * @param chain The {@link X509Certificate} chain
+     * @param e The {@link CertificateException} to handle/or re-throw
+     * @throws CertificateException if the specified {@link X509Certificate} chain is not trusted by the user
+     */
+    private void handleCertificateException(X509Certificate[] chain, Socket socket, CertificateException e) throws CertificateException {
         /*
          * MW-445: Main Concept
          * - Check if the server is to be trusted; if yes return
@@ -243,6 +263,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         if (chain == null || chain.length == 0) {
             throw new IllegalArgumentException("The supplied certificate chain is empty", e);
         }
+
         // Try to determine the reason of failure
         if (!e.getMessage().contains("unable to find valid certification path to requested target")) {
             throw e;
@@ -252,10 +273,87 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
 
         // a) Check if the user trusts it
         checkUserTrustsServer(user, context, chain, e);
-        // b) Check if the certificate is self-signed
-        checkSelfSigned(user, context, chain);
-        // c) Check if the root certificate authority is trusted
-        checkRootCATrusted(user, context, chain);
+    }
+
+    /**
+     * Checks whether the user trusts the specified {@link X509Certificate}
+     * 
+     * @param chain The certificate to check
+     */
+    private void checkUserTrustsServer(int userId, int contextId, X509Certificate[] chain, CertificateException ce) throws CertificateException {
+        // TODO: Check if the user is allowed to accept untrusted certificates
+        // via config
+
+        // The certificate is always the first one in the chain
+        X509Certificate cert = chain[0];
+        String fingerprint = null;
+        try {
+            fingerprint = getFingerprint(cert);
+            SSLCertificateManagementService certificateManagement = Services.getService(SSLCertificateManagementService.class);
+            if (!certificateManagement.isTrusted(userId, contextId, fingerprint)) {
+                cacheCertificate(userId, contextId, cert, "The user does not trust this certificate");
+                throw new CertificateException(SSLExceptionCode.USER_DOES_NOT_TRUST_CERTIFICATE.create(userId, contextId, fingerprint));
+            }
+        } catch (OXException e) {
+            if (SSLCertificateManagementSQLExceptionCode.CERTIFICATE_NOT_FOUND.equals(e)) {
+                // b) Check if the certificate is self-signed
+                checkSelfSigned(userId, contextId, chain);
+                // c) Check if the root certificate authority is trusted
+                checkRootCATrusted(userId, contextId, chain);
+                //
+                checkExpired(userId, contextId, chain);
+
+                // d) check for the target host
+                //checkSocket(chain, socket, e);
+                cacheCertificate(userId, contextId, cert, "The user does not trust this certificate");
+                throw new CertificateException(SSLExceptionCode.USER_DOES_NOT_TRUST_CERTIFICATE.create(userId, contextId, fingerprint));
+            }
+            throw new CertificateException(e);
+        }
+    }
+
+    /**
+     * Check the certificate against the target host
+     * 
+     * @param chain The chain
+     * @param socket The socket
+     * @param ce The exception
+     * @throws CertificateException
+     */
+    private void checkSocket(X509Certificate[] chain, Socket socket, CertificateException ce) throws CertificateException {
+        if (socket == null) {
+            return;
+        }
+
+        X509Certificate cert = chain[0];
+        String host = getHostFromPrincipal(cert);
+        if (host == null) {
+            //TODO: fail?
+            throw ce;
+        }
+
+        // Check the socket hostname gainst the issued common name
+        String hostname = socket.getInetAddress().getHostName();
+        if (!host.equals(hostname)) {
+            throw ce;
+        }
+    }
+
+    /**
+     * Checks if the certificate is expired
+     * 
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param chain The {@link X509Certificate} chain
+     * @throws CertificateException if the specified {@link X509Certificate} is expired
+     */
+    private void checkExpired(int userId, int contextId, X509Certificate[] chain) throws CertificateException {
+        X509Certificate certificate = chain[0];
+        if (certificate.getNotAfter().getTime() < System.currentTimeMillis()) {
+            String fingerprint = getFingerprint(chain[0]);
+            cacheCertificate(userId, contextId, chain[0], "The certificate is expired");
+            throw new CertificateException(SSLExceptionCode.CERTIFICATE_IS_EXPIRED.create(userId, contextId, fingerprint));
+        }
     }
 
     /**
@@ -267,14 +365,8 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
     private void checkSelfSigned(int userId, int contextId, X509Certificate[] chain) throws CertificateException {
         // Self-signed certificates are the only certificates in the chain
         if (chain.length < 2) {
-            String fingerprint = "";
-            try {
-                fingerprint = getFingerprint(chain[0]);
-                cacheCertificate(userId, contextId, chain[0], "The certificate is self-signed");
-            } catch (NoSuchAlgorithmException e) {
-                //TODO: detailed error log or re-throw as CertificateException?
-                LOG.error("Cannot retrieve the fingerprint for the chain");
-            }
+            String fingerprint = getFingerprint(chain[0]);
+            cacheCertificate(userId, contextId, chain[0], "The certificate is self-signed");
             throw new CertificateException(SSLExceptionCode.SELF_SIGNED_CERTIFICATE.create(fingerprint));
         }
     }
@@ -298,42 +390,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         }
 
         cacheCertificate(userId, contextId, chain[0], "The certificate was signed by an untrusted issuer");
-        try {
-            throw new CertificateException(SSLExceptionCode.USER_DOES_NOT_TRUST_CERTIFICATE.create(userId, contextId, getFingerprint(chain[0])));
-        } catch (NoSuchAlgorithmException e) {
-            LOG.error("Cannot retrieve the fingerprint for the chain");
-        }
-    }
-
-    /**
-     * Checks whether the user trusts the specified {@link X509Certificate}
-     * 
-     * @param chain The certificate to check
-     */
-    private void checkUserTrustsServer(int userId, int contextId, X509Certificate[] chain, CertificateException ce) throws CertificateException {
-        // TODO: Check if the user is allowed to accept untrusted certificates
-        // via config
-
-        // The certificate is always the first one in the chain
-        X509Certificate cert = chain[0];
-        String fingerprint = null;
-        try {
-            fingerprint = getFingerprint(cert);
-            SSLCertificateManagementService certificateManagement = Services.getService(SSLCertificateManagementService.class);
-            if (!certificateManagement.isTrusted(userId, contextId, fingerprint)) {
-                cacheCertificate(userId, contextId, cert, "The user does not trust this certificate");
-                throw new CertificateException(SSLExceptionCode.USER_DOES_NOT_TRUST_CERTIFICATE.create(userId, contextId, fingerprint));
-            }
-        } catch (NoSuchAlgorithmException e) {
-            //TODO: detailed error log
-            LOG.error("Cannot retrieve the fingerprint for the chain");
-        } catch (OXException e) {
-            if (SSLCertificateManagementSQLExceptionCode.CERTIFICATE_NOT_FOUND.equals(e)) {
-                cacheCertificate(userId, contextId, cert, "The user does not trust this certificate");
-                throw new CertificateException(SSLExceptionCode.USER_DOES_NOT_TRUST_CERTIFICATE.create(userId, contextId, fingerprint));
-            }
-            throw new CertificateException(e);
-        }
+        throw new CertificateException(SSLExceptionCode.USER_DOES_NOT_TRUST_CERTIFICATE.create(userId, contextId, getFingerprint(chain[0])));
     }
 
     /**
@@ -362,7 +419,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             // Cache it
             SSLCertificateManagementService certificateManagement = Services.getService(SSLCertificateManagementService.class);
             certificateManagement.cache(userId, contextId, certificate);
-        } catch (OXException | NoSuchAlgorithmException e) {
+        } catch (OXException e) {
             throw new CertificateException(e);
         }
     }
@@ -375,8 +432,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
      * @throws NoSuchAlgorithmException
      * @throws CertificateEncodingException
      */
-    private String getFingerprint(X509Certificate certificate) throws NoSuchAlgorithmException, CertificateEncodingException {
-        MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
+    private String getFingerprint(X509Certificate certificate) throws CertificateEncodingException {
         sha256.update(certificate.getEncoded());
         return toHex(sha256.digest());
     }

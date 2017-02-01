@@ -80,6 +80,7 @@ public enum SSLExceptionCode implements DisplayableOXExceptionCode {
      * The certificate is self-signed
      */
     SELF_SIGNED_CERTIFICATE("The certificate is self-signed", CATEGORY_ERROR, 4, SSLExceptionMessages.SELF_SIGNED_CERTIFICATE),
+    CERTIFICATE_IS_EXPIRED("The certificate is expired", CATEGORY_ERROR, 5, SSLExceptionMessages.CERTIFICATE_IS_EXPIRED),
     ;
 
     public static final String PREFIX = "SSL";
