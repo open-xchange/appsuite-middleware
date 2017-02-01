@@ -51,6 +51,7 @@ package com.openexchange.chronos.impl;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -106,7 +107,7 @@ public abstract class StorageOperation<T> {
             committed = true;
             return result;
         } catch (SQLException e) {
-            throw new OXException(e);
+            throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
             session.set(PARAM_CONNECTION, null);
             if (null != writeConnection) {
