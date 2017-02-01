@@ -296,7 +296,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         // TODO: Check if the user is allowed to accept untrusted certificates
         // via config
 
-        // a) Check if the user trusts it
+        // Check if the user trusts it
         checkUserTrustsServer(user, context, chain, socket);
     }
 
@@ -326,7 +326,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
 
             if (!socketHostname.equals(certificate.getCommonName())) {
                 cacheCertificate(userId, contextId, cert, FailureReason.INVALID_COMMON_NAME);
-                throw new CertificateException(SSLExceptionCode.INVALID_COMMON_NAME.create(fingerprint));
+                throw new CertificateException(SSLExceptionCode.INVALID_COMMON_NAME.create(socketHostname, fingerprint));
             }
         } catch (OXException e) {
             if (SSLCertificateManagementSQLExceptionCode.CERTIFICATE_NOT_FOUND.equals(e)) {
@@ -413,7 +413,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         }
 
         String fingerprint = cacheCertificate(userId, contextId, chain[0], FailureReason.INVALID_COMMON_NAME);
-        throw new CertificateException(SSLExceptionCode.INVALID_COMMON_NAME.create(fingerprint));
+        throw new CertificateException(SSLExceptionCode.INVALID_COMMON_NAME.create(hostname, fingerprint));
 
     }
 
@@ -429,7 +429,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         X509Certificate certificate = chain[0];
         if (certificate.getNotAfter().getTime() < System.currentTimeMillis()) {
             String fingerprint = cacheCertificate(userId, contextId, chain[0], FailureReason.EXPIRED);
-            throw new CertificateException(SSLExceptionCode.CERTIFICATE_IS_EXPIRED.create(userId, contextId, fingerprint));
+            throw new CertificateException(SSLExceptionCode.CERTIFICATE_IS_EXPIRED.create(fingerprint));
         }
     }
 

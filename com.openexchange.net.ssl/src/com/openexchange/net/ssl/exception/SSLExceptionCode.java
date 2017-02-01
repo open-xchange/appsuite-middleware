@@ -77,17 +77,17 @@ public enum SSLExceptionCode implements DisplayableOXExceptionCode {
      */
     USER_DOES_NOT_TRUST_CERTIFICATE("The user '%1$s' in context '%2$s' does not trust the certificate '%3$s'", CATEGORY_ERROR, 3, SSLExceptionMessages.USER_DOES_NOT_TRUST_CERTIFICATE),
     /**
-     * The certificate is self-signed
+     * The certificate '%1$s' is self-signed
      */
-    SELF_SIGNED_CERTIFICATE("The certificate is self-signed", CATEGORY_ERROR, 4, SSLExceptionMessages.SELF_SIGNED_CERTIFICATE),
+    SELF_SIGNED_CERTIFICATE("The certificate '%1$s' is self-signed", CATEGORY_ERROR, 4, SSLExceptionMessages.SELF_SIGNED_CERTIFICATE),
     /**
-     * The certificate is expired
+     * The certificate '%1$s' is expired
      */
-    CERTIFICATE_IS_EXPIRED("The certificate is expired", CATEGORY_ERROR, 5, SSLExceptionMessages.CERTIFICATE_IS_EXPIRED),
+    CERTIFICATE_IS_EXPIRED("The certificate '%1$s' is expired", CATEGORY_ERROR, 5, SSLExceptionMessages.CERTIFICATE_IS_EXPIRED),
     /**
-     * The common name for the certificate is invalid
+     * The hostname '%1$s' for the certificate '%2$s' is invalid
      */
-    INVALID_COMMON_NAME("The common name for the certificate is invalid", CATEGORY_ERROR, 6, SSLExceptionMessages.INVALID_COMMON_NAME),
+    INVALID_COMMON_NAME("The hostname '%1$s' for the certificate '%2$s' is invalid", CATEGORY_ERROR, 6, SSLExceptionMessages.INVALID_COMMON_NAME),
     ;
 
     public static final String PREFIX = "SSL";
