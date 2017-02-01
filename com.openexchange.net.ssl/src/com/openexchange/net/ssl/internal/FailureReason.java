@@ -57,12 +57,15 @@ package com.openexchange.net.ssl.internal;
 public enum FailureReason {
     SELF_SIGNED(FailureReasonMessage.SELF_SIGNED),
     UNTRUSTED_ISSUER(FailureReasonMessage.UNTRUSTED_ISSUER),
-    EXPIRED(FailureReasonMessage.EXPIRED);
+    EXPIRED(FailureReasonMessage.EXPIRED),
+    NOT_TRUSTED_BY_USER(FailureReasonMessage.NOT_TRUSTED_BY_USER);
 
     private final String detail;
 
     /**
      * Initialises a new {@link FailureReason}.
+     * 
+     * @param detail The detail message for the failure reason
      */
     private FailureReason(String detail) {
         this.detail = detail;

@@ -290,7 +290,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             String fingerprint = getFingerprint(cert);
             SSLCertificateManagementService certificateManagement = Services.getService(SSLCertificateManagementService.class);
             if (!certificateManagement.isTrusted(userId, contextId, fingerprint)) {
-                cacheCertificate(userId, contextId, cert, "The user does not trust this certificate");
+                cacheCertificate(userId, contextId, cert, FailureReason.NOT_TRUSTED_BY_USER);
                 throw new CertificateException(SSLExceptionCode.USER_DOES_NOT_TRUST_CERTIFICATE.create(userId, contextId, fingerprint));
             }
         } catch (OXException e) {
@@ -306,7 +306,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
                 //checkSocket(chain, socket, e);
 
                 // If the previous checks did not fail, cache it and throw as last resort
-                String fingerprint = cacheCertificate(userId, contextId, cert, "The user does not trust this certificate");
+                String fingerprint = cacheCertificate(userId, contextId, cert, FailureReason.NOT_TRUSTED_BY_USER);
                 throw new CertificateException(SSLExceptionCode.USER_DOES_NOT_TRUST_CERTIFICATE.create(userId, contextId, fingerprint));
             }
             throw new CertificateException(e);
@@ -322,7 +322,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
     private void checkSelfSigned(int userId, int contextId, X509Certificate[] chain) throws CertificateException {
         // Self-signed certificates are the only certificates in the chain
         if (chain.length == 1) {
-            String fingerprint = cacheCertificate(userId, contextId, chain[0], "The certificate is self-signed");
+            String fingerprint = cacheCertificate(userId, contextId, chain[0], FailureReason.SELF_SIGNED);
             throw new CertificateException(SSLExceptionCode.SELF_SIGNED_CERTIFICATE.create(fingerprint));
         }
     }
@@ -336,7 +336,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
     private void checkRootCATrusted(int userId, int contextId, X509Certificate[] chain) throws CertificateException {
         Set<TrustAnchor> anchors = params.getTrustAnchors();
 
-        //The root CA is always the last element of the chain
+        //The root CA is always the last element in the chain
         X509Certificate rootCert = chain[chain.length - 1];
         for (TrustAnchor a : anchors) {
             if (a.getTrustedCert().getSubjectDN().equals(rootCert.getIssuerDN())) {
@@ -345,7 +345,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             }
         }
 
-        String fingerprint = cacheCertificate(userId, contextId, chain[0], "The certificate was signed by an untrusted issuer");
+        String fingerprint = cacheCertificate(userId, contextId, chain[0], FailureReason.UNTRUSTED_ISSUER);
         throw new CertificateException(SSLExceptionCode.USER_DOES_NOT_TRUST_CERTIFICATE.create(userId, contextId, fingerprint));
     }
 
@@ -360,7 +360,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
     private void checkExpired(int userId, int contextId, X509Certificate[] chain) throws CertificateException {
         X509Certificate certificate = chain[0];
         if (certificate.getNotAfter().getTime() < System.currentTimeMillis()) {
-            String fingerprint = cacheCertificate(userId, contextId, chain[0], "The certificate is expired");
+            String fingerprint = cacheCertificate(userId, contextId, chain[0], FailureReason.EXPIRED);
             throw new CertificateException(SSLExceptionCode.CERTIFICATE_IS_EXPIRED.create(userId, contextId, fingerprint));
         }
     }
@@ -402,7 +402,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
      * @return returns the fingerprint of the {@link Certificate}
      * @throws CertificateException if an error is occurred
      */
-    private String cacheCertificate(int userId, int contextId, X509Certificate cert, String failureReason) throws CertificateException {
+    private String cacheCertificate(int userId, int contextId, X509Certificate cert, FailureReason failureReason) throws CertificateException {
         try {
             // Create the certificate
             Certificate certificate = new Certificate(getFingerprint(cert));
@@ -414,7 +414,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             certificate.setSignature(toHex(cert.getSignature()));
             certificate.setTrusted(false);
             certificate.setExpired(certificate.getExpirationTimestamp() < System.currentTimeMillis());
-            certificate.setFailureReason(failureReason);
+            certificate.setFailureReason(failureReason.getDetail());
 
             // Cache it
             SSLCertificateManagementService certificateManagement = Services.getService(SSLCertificateManagementService.class);

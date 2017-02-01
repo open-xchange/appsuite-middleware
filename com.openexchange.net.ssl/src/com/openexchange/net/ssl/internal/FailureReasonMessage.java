@@ -66,4 +66,7 @@ public class FailureReasonMessage implements LocalizableStrings {
 
     // The certificate is expired
     public static final String EXPIRED = "The certificate is expired";
+
+    // The user does not trust this certificate
+    public static final String NOT_TRUSTED_BY_USER = "The user does not trust this certificate";
 }
