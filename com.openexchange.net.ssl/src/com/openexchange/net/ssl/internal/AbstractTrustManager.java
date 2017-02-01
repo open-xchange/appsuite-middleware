@@ -326,7 +326,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
 
             if (!socketHostname.equals(certificate.getCommonName())) {
                 cacheCertificate(userId, contextId, cert, FailureReason.INVALID_COMMON_NAME);
-                throw new CertificateException(SSLExceptionCode.INVALID_COMMON_NAME.create(socketHostname, fingerprint));
+                throw new CertificateException(SSLExceptionCode.INVALID_HOSTNAME.create(socketHostname, fingerprint));
             }
         } catch (OXException e) {
             if (SSLCertificateManagementSQLExceptionCode.CERTIFICATE_NOT_FOUND.equals(e)) {
@@ -413,7 +413,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         }
 
         String fingerprint = cacheCertificate(userId, contextId, chain[0], FailureReason.INVALID_COMMON_NAME);
-        throw new CertificateException(SSLExceptionCode.INVALID_COMMON_NAME.create(hostname, fingerprint));
+        throw new CertificateException(SSLExceptionCode.INVALID_HOSTNAME.create(hostname, fingerprint));
 
     }
 

@@ -87,7 +87,7 @@ public enum SSLExceptionCode implements DisplayableOXExceptionCode {
     /**
      * The hostname '%1$s' for the certificate '%2$s' is invalid
      */
-    INVALID_COMMON_NAME("The hostname '%1$s' for the certificate '%2$s' is invalid", CATEGORY_ERROR, 6, SSLExceptionMessages.INVALID_COMMON_NAME),
+    INVALID_HOSTNAME("The hostname '%1$s' for the certificate '%2$s' is invalid", CATEGORY_ERROR, 6, SSLExceptionMessages.INVALID_COMMON_NAME),
     ;
 
     public static final String PREFIX = "SSL";
