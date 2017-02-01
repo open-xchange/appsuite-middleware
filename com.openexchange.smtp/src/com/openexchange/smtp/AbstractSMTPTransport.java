@@ -686,20 +686,6 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                 }
             }
         } catch (javax.mail.AuthenticationFailedException e) {
-            if (accountId != MailAccount.DEFAULT_ID) {
-                AbstractTask<Void> task = new AbstractTask<Void>() {
-
-                    @Override
-                    public Void call() throws Exception {
-                        MailAccountStorageService mass = Services.optService(MailAccountStorageService.class);
-                        if (null != mass) {
-                            mass.incrementFailedMailAuthCount(accountId, session.getUserId(), session.getContextId());
-                        }
-                        return null;
-                    }
-                };
-                ThreadPools.getThreadPool().submit(task);
-            }
             throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
         } catch (MessagingException e) {
             if (MimeMailException.isSSLHandshakeException(e)) {
@@ -734,12 +720,27 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
      * @throws OXException If connect attempt fails
      * @throws MessagingException If connect attempt fails
      */
-    protected static void doConnectTransport(Transport transport, String host, int port, String user, String password, SMTPConfig smtpConfig, Session session) throws OXException, MessagingException {
+    protected static void doConnectTransport(Transport transport, String host, int port, String user, String password, final SMTPConfig smtpConfig, final Session session) throws OXException, MessagingException {
         try {
             transport.connect(host, port, user, password);
         } catch (javax.mail.AuthenticationFailedException e) {
             if (null == smtpConfig || null == session) {
                 throw e;
+            }
+
+            if (smtpConfig.getAccountId() != MailAccount.DEFAULT_ID) {
+                AbstractTask<Void> task = new AbstractTask<Void>() {
+
+                    @Override
+                    public Void call() throws Exception {
+                        MailAccountStorageService mass = Services.optService(MailAccountStorageService.class);
+                        if (null != mass) {
+                            mass.incrementFailedTransportAuthCount(smtpConfig.getAccountId(), session.getUserId(), session.getContextId());
+                        }
+                        return null;
+                    }
+                };
+                ThreadPools.getThreadPool().submit(task);
             }
 
             if ("No authentication mechanisms supported by both server and client".equals(e.getMessage())) {

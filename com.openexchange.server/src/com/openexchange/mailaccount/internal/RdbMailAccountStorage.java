@@ -3728,7 +3728,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
             if (failedAuthInfo.count + 1 > getFailedAuthThreshold(userId, contextId)) {
                 // Exceeded...
-                return disableAccount(true, accountId, userId, contextId, con);
+                return disableAccount(mailAccess, accountId, userId, contextId, con);
             }
 
             if ((System.currentTimeMillis() - failedAuthInfo.start) <= getFailedAuthTimeSpan(userId, contextId)) {
