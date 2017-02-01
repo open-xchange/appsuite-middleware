@@ -109,7 +109,6 @@ import com.openexchange.chronos.impl.UpdateResultImpl;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CollectionUpdate;
-import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.service.SimpleCollectionUpdate;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -255,11 +254,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                 } else {
                     changedAttendees = originalEvent.getAttendees();
                 }
-                List<EventConflict> conflicts = new ConflictCheckPerformer(session, storage).perform(changedEvent, changedAttendees);
-                if (null != conflicts && 0 < conflicts.size()) {
-                    result.addConflicts(conflicts);
-                    return;
-                }
+                Check.noConflicts(storage, session, changedEvent, changedAttendees);
             }
             if (needsSequenceNumberIncrement(eventUpdate)) {
                 /*

@@ -52,6 +52,7 @@ package com.openexchange.chronos.service;
 import java.util.List;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
+import com.openexchange.exception.OXException.ProblematicAttribute;
 
 /**
  * {@link EventConflict}
@@ -59,7 +60,7 @@ import com.openexchange.chronos.Event;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface EventConflict {
+public interface EventConflict extends ProblematicAttribute {
 
     /**
      * Gets the underlying conflicting event.

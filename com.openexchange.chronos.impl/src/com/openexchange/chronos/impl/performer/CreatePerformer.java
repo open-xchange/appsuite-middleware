@@ -73,7 +73,6 @@ import com.openexchange.chronos.impl.Consistency;
 import com.openexchange.chronos.impl.CreateResultImpl;
 import com.openexchange.chronos.impl.EventMapper;
 import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -112,20 +111,11 @@ public class CreatePerformer extends AbstractUpdatePerformer {
          */
         requireCalendarPermission(folder, CREATE_OBJECTS_IN_FOLDER, NO_PERMISSIONS, WRITE_OWN_OBJECTS, NO_PERMISSIONS);
         /*
-         * prepare event & attendee data for insert
+         * prepare event & attendee data for insert, check for conflicts
          */
         Event newEvent = prepareEvent(event);
         List<Attendee> newAttendees = prepareAttendees(event.getAttendees());
-        /*
-         * check for conflicts
-         */
-        List<EventConflict> conflicts = new ConflictCheckPerformer(session, storage).perform(newEvent, newAttendees);
-        if (null != conflicts && 0 < conflicts.size()) {
-            for (EventConflict eventConflict : conflicts) {
-                result.addConflict(eventConflict);
-            }
-            return result;
-        }
+        Check.noConflicts(storage, session, newEvent, newAttendees);
         /*
          * insert event, attendees, attachments & alarms of user
          */

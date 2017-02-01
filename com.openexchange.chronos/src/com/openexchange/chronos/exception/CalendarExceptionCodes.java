@@ -53,6 +53,7 @@ import static com.openexchange.chronos.exception.CalendarExceptionMessages.ATTEN
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.CONCURRENT_MODIFICATION_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.DATA_TRUNCATION_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.END_BEFORE_START_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.EVENT_CONFLICTS_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.EVENT_NOT_FOUND_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INCORRECT_STRING_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVALID_CALENDAR_USER_MSG;
@@ -158,6 +159,16 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * <li>UID conflict [uid %1$s, conflicting id %2$d]</li>
      */
     UID_CONFLICT("UID conflict [uid %1$s, conflicting id %2$d]", UID_CONFLICT_MSG, Category.CATEGORY_CONFLICT, 4090),
+    /**
+     * <li>The event conflicts with one or more other events.</li>
+     * <li>Event conflicts detected [see problematics]</li>
+     */
+    EVENT_CONFLICTS("Event conflicts detected [see problematics]", EVENT_CONFLICTS_MSG, Category.CATEGORY_CONFLICT, 4091),
+    /**
+     * <li>The event conflicts with one or more other events.</li>
+     * <li>(Hard) event conflicts detected [see problematics]</li>
+     */
+    HARD_EVENT_CONFLICTS("(Hard) event conflicts detected [see problematics]", EVENT_CONFLICTS_MSG, Category.CATEGORY_CONFLICT, 4092),
     /**
      * <li>The field \"%1$s\" is mandatory. Please supply a valid value and try again.</li>
      * <li>Mandatory field missing [field %1$s]</li>

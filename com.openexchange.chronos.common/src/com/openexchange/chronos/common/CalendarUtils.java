@@ -54,6 +54,7 @@ import static com.openexchange.java.Autoboxing.I2i;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -69,6 +70,10 @@ import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Period;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.service.EventConflict;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXException.ProblematicAttribute;
 import com.openexchange.search.Operand;
 import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
@@ -549,6 +554,29 @@ public class CalendarUtils {
             previousToken = token;
         }
         return negative ? -1 * totalMillis : totalMillis;
+    }
+
+    /**
+     * Extracts all event conflicts from the problematic attributes of the supplied conflict exception
+     * ({@link CalendarExceptionCodes#EVENT_CONFLICTS} or {@link CalendarExceptionCodes#HARD_EVENT_CONFLICTS}).
+     *
+     * @param conflictException The conflict exception
+     * @return The extracted event conflicts, or an empty list if there are none
+     */
+    public static List<EventConflict> extractEventConflicts(OXException conflictException) {
+        if (null != conflictException) {
+            ProblematicAttribute[] problematics = conflictException.getProblematics();
+            if (null != problematics && 0 < problematics.length) {
+                List<EventConflict> eventConflicts = new ArrayList<EventConflict>(problematics.length);
+                for (ProblematicAttribute problematic : problematics) {
+                    if (EventConflict.class.isInstance(problematic)) {
+                        eventConflicts.add((EventConflict) problematic);
+                    }
+                }
+                return eventConflicts;
+            }
+        }
+        return Collections.emptyList();
     }
 
 }

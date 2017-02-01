@@ -67,6 +67,8 @@ import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.calendar.json.actions.chronos.ChronosAction;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
@@ -194,22 +196,23 @@ public final class UpdateAction extends ChronosAction {
             eventID = new EventID(appointment.getParentFolderID(), eventID.getObjectID(), eventID.getRecurrenceID());
         }
         /*
-         * update event
+         * update event & return result, preferring the identifier of a created change exception if present
          */
-        CalendarResult result = session.getCalendarService().updateEvent(session, eventID, event);
-        if (false == result.getConflicts().isEmpty()) {
-            return getAppointmentConflictResult(session, result.getConflicts());
+        try {
+            CalendarResult result = session.getCalendarService().updateEvent(session, eventID, event);
+            JSONObject resultObject = new JSONObject(1);
+            if (0 < result.getCreations().size()) {
+                resultObject.put(DataFields.ID, result.getCreations().get(0).getCreatedEvent().getId());
+            } else if (0 < result.getUpdates().size()) {
+                resultObject.put(DataFields.ID, result.getUpdates().get(0).getUpdate().getId());
+            }
+            return new AJAXRequestResult(resultObject, result.getTimestamp(), "json");
+        } catch (OXException e) {
+            if (CalendarExceptionCodes.EVENT_CONFLICTS.equals(e) || CalendarExceptionCodes.HARD_EVENT_CONFLICTS.equals(e)) {
+                return getAppointmentConflictResult(session, CalendarUtils.extractEventConflicts(e));
+            }
+            throw e;
         }
-        /*
-         * return result; preferring the identifier of a created change exception if present
-         */
-        JSONObject resultObject = new JSONObject(1);
-        if (0 < result.getCreations().size()) {
-            resultObject.put(DataFields.ID, result.getCreations().get(0).getCreatedEvent().getId());
-        } else if (0 < result.getUpdates().size()) {
-            resultObject.put(DataFields.ID, result.getUpdates().get(0).getUpdate().getId());
-        }
-        return new AJAXRequestResult(resultObject, result.getTimestamp(), "json");
     }
 
 }

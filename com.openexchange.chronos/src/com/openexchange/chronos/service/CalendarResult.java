@@ -112,11 +112,4 @@ public interface CalendarResult {
      */
     List<CreateResult> getCreations();
 
-    /**
-     * Gets the conflicts that occurred during create- or update operations.
-     *
-     * @return The conflicts, or an empty list if there are none
-     */
-    List<EventConflict> getConflicts();
-
 }

@@ -188,7 +188,7 @@ public class EventResource extends DAVObjectResource<Event> {
         try {
             caldavImport = new CalDAVImport(this, body);
         } catch (OXException e) {
-            throw protocolException(getUrl(), e);
+            throw getProtocolException(e);
         }
     }
 
@@ -197,7 +197,7 @@ public class EventResource extends DAVObjectResource<Event> {
             try {
                 iCalFile = generateICal();
             } catch (OXException e) {
-                throw protocolException(getUrl(), e);
+                throw getProtocolException(e);
             }
         }
         return iCalFile;
@@ -331,7 +331,7 @@ public class EventResource extends DAVObjectResource<Event> {
             calendarSession.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.TRUE);
             calendarSession.getCalendarService().moveEvent(calendarSession, eventID, targetCollection.folderID);
         } catch (OXException e) {
-            throw protocolException(getUrl(), e);
+            throw getProtocolException(e);
         }
         return this;
     }
@@ -352,7 +352,7 @@ public class EventResource extends DAVObjectResource<Event> {
                         return;
                     }
                 }
-                throw protocolException(getUrl(), e);
+                throw getProtocolException(e);
             }
         } while (true);
     }
@@ -373,7 +373,7 @@ public class EventResource extends DAVObjectResource<Event> {
                         return;
                     }
                 }
-                throw protocolException(getUrl(), e);
+                throw getProtocolException(e);
             }
         } while (true);
     }
@@ -394,7 +394,7 @@ public class EventResource extends DAVObjectResource<Event> {
                         return;
                     }
                 }
-                throw protocolException(getUrl(), e);
+                throw getProtocolException(e);
             }
         } while (true);
     }
@@ -432,10 +432,6 @@ public class EventResource extends DAVObjectResource<Event> {
              */
             EventID eventID = new EventID(parent.folderID, object.getId());
             CalendarResult result = calendarSession.getCalendarService().updateEvent(calendarSession, eventID, caldavImport.getEvent());
-            if (false == result.getConflicts().isEmpty()) {
-                LOG.info("{}: Event update failed due to non-ignorable conflicts.", getUrl());
-                throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "allowed-organizer-scheduling-object-change", getUrl(), HttpServletResponse.SC_FORBIDDEN);
-            }
             if (result.getUpdates().isEmpty()) {
                 LOG.warn("{}: No event updated.", getUrl());
             }
@@ -468,10 +464,6 @@ public class EventResource extends DAVObjectResource<Event> {
         calendarSession.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.TRUE);
         caldavImport = EventPatches.Incoming.applyAll(this, caldavImport);
         CalendarResult result = calendarSession.getCalendarService().createEvent(calendarSession, parent.folderID, caldavImport.getEvent());
-        if (false == result.getConflicts().isEmpty()) {
-            LOG.info("{}: Event creation failed due to non-ignorable conflicts.", getUrl());
-            throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "allowed-organizer-scheduling-object-change", getUrl(), HttpServletResponse.SC_FORBIDDEN);
-        }
         if (result.getCreations().isEmpty()) {
             LOG.warn("{}: No event created.", getUrl());
             throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "valid-calendar-object-resource", url, HttpServletResponse.SC_FORBIDDEN);
@@ -484,16 +476,11 @@ public class EventResource extends DAVObjectResource<Event> {
         for (Event changeException : caldavImport.getChangeExceptions()) {
             EventID eventID = new EventID(createdEvent.getFolderId(), createdEvent.getId(), changeException.getRecurrenceId());
             result = calendarSession.getCalendarService().updateEvent(calendarSession, eventID, changeException);
-            if (false == result.getConflicts().isEmpty()) {
-                LOG.info("{}: Exception creation failed due to non-ignorable conflicts.", getUrl());
-                throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "allowed-organizer-scheduling-object-change", getUrl(), HttpServletResponse.SC_FORBIDDEN);
-            }
             if (result.getCreations().isEmpty()) {
                 LOG.warn("{}: No exception created.", getUrl());
                 throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "valid-calendar-object-resource", url, HttpServletResponse.SC_FORBIDDEN);
             }
             calendarSession.set(CalendarParameters.PARAMETER_TIMESTAMP, Long.valueOf(result.getTimestamp().getTime()));
-            //            Event createdException = result.getCreations().get(0).getCreatedEvent();
         }
         return createdEvent;
     }
@@ -614,6 +601,25 @@ public class EventResource extends DAVObjectResource<Event> {
             }
         }
         return null;
+    }
+
+    /**
+     * Gets an appropriate WebDAV protocol exception for the supplied OX exception.
+     *
+     * @param e The OX exception to get the protocol exception for
+     * @return The protocol exception
+     */
+    private WebdavProtocolException getProtocolException(OXException e) {
+        switch (e.getErrorCode()) {
+            case "CAL-4091":
+            case "CAL-4092":
+                LOG.info("{}: PUT operation failed due to non-ignorable conflicts.", getUrl());
+                return new PreconditionException(e, DAVProtocol.CAL_NS.getURI(), "allowed-organizer-scheduling-object-change", getUrl(), HttpServletResponse.SC_FORBIDDEN);
+            case "ICAL-0003":
+                return new PreconditionException(e, DAVProtocol.CAL_NS.getURI(), "valid-calendar-data", getUrl(), HttpServletResponse.SC_BAD_REQUEST);
+            default:
+                return com.openexchange.dav.DAVProtocol.protocolException(getUrl(), e);
+        }
     }
 
     @Override

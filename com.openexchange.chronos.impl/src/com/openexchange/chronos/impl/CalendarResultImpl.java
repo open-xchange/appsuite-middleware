@@ -58,7 +58,6 @@ import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CreateResult;
 import com.openexchange.chronos.service.DeleteResult;
-import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.groupware.ldap.User;
 
@@ -78,7 +77,6 @@ public class CalendarResultImpl implements CalendarResult {
     protected List<CreateResult> creations;
     protected List<UpdateResult> updates;
     protected List<DeleteResult> deletions;
-    protected List<EventConflict> conflicts;
 
     /**
      * Initializes a new {@link CalendarResultImpl}.
@@ -101,7 +99,6 @@ public class CalendarResultImpl implements CalendarResult {
      */
     public void merge(CalendarResult result) {
         applyTimestamp(result.getTimestamp());
-        addConflicts(result.getConflicts());
         addDeletions(result.getDeletions());
         addCreations(result.getCreations());
         addUpdates(result.getUpdates());
@@ -211,35 +208,6 @@ public class CalendarResultImpl implements CalendarResult {
         return this;
     }
 
-    /**
-     * Adds a conflict to this calendar result.
-     *
-     * @param conflict The conflict to add
-     * @return A self reference
-     */
-    public CalendarResultImpl addConflict(EventConflict conflict) {
-        if (null == conflicts) {
-            conflicts = new ArrayList<EventConflict>();
-        }
-        conflicts.add(conflict);
-        return this;
-    }
-
-    /**
-     * Adds multiple conflicts to this calendar result.
-     *
-     * @param conflicts The conflicts to add
-     * @return A self reference
-     */
-    public CalendarResultImpl addConflicts(Collection<? extends EventConflict> conflicts) {
-        if (null == this.conflicts) {
-            this.conflicts = new ArrayList<EventConflict>(conflicts);
-        } else {
-            this.conflicts.addAll(conflicts);
-        }
-        return this;
-    }
-
     @Override
     public CalendarSession getSession() {
         return session;
@@ -273,11 +241,6 @@ public class CalendarResultImpl implements CalendarResult {
     @Override
     public List<CreateResult> getCreations() {
         return null == creations ? Collections.<CreateResult> emptyList() : Collections.unmodifiableList(creations);
-    }
-
-    @Override
-    public List<EventConflict> getConflicts() {
-        return null == conflicts ? Collections.<EventConflict> emptyList() : Collections.unmodifiableList(conflicts);
     }
 
 }

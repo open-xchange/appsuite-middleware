@@ -71,6 +71,8 @@ public class CalendarExceptionMessages implements LocalizableStrings {
 
     public static final String UID_CONFLICT_MSG = "The event could not be created due to another conflicting event with the same unique identifier.";
 
+    public static final String EVENT_CONFLICTS_MSG = "The event conflicts with one or more other events.";
+
     public static final String MANDATORY_FIELD_MSG = "The field \"%1$s\" is mandatory. Please supply a valid value and try again.";
 
     public static final String END_BEFORE_START_MSG = "The end date lies before the start date. Please correct the event times and try again.";

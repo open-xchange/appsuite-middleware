@@ -65,8 +65,11 @@ import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.compat.Recurrence;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.impl.performer.ConflictCheckPerformer;
 import com.openexchange.chronos.impl.performer.ResolveUidPerformer;
 import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
@@ -320,6 +323,37 @@ public class Check {
             throw CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(attendee, I(event.getId()));
         }
         return matchingAttendee;
+    }
+
+    /**
+     * Checks that an event being inserted/updated does not conflict with other existing events.
+     *
+     * @param storage The underlying calendar storage
+     * @param session The calendar session
+     * @param event The event being inserted/updated
+     * @param attendees The event's list of attendees
+     * @throws OXException {@link CalendarExceptionCodes#EVENT_CONFLICTS}, {@link CalendarExceptionCodes#HARD_EVENT_CONFLICTS}
+     */
+    public static void noConflicts(CalendarStorage storage, CalendarSession session, Event event, List<Attendee> attendees) throws OXException {
+        noConflicts(new ConflictCheckPerformer(session, storage).perform(event, attendees));
+    }
+
+    /**
+     * Checks that the supplied list of conflicts is empty.
+     *
+     * @param conflicts The conflict check result
+     * @throws OXException {@link CalendarExceptionCodes#EVENT_CONFLICTS}, {@link CalendarExceptionCodes#HARD_EVENT_CONFLICTS}
+     */
+    public static void noConflicts(List<EventConflict> conflicts) throws OXException {
+        if (null != conflicts && 0 < conflicts.size()) {
+            // derive "hard conflict" from first event as list should be ordered
+            OXException conflictException = conflicts.get(0).isHardConflict() ?
+                CalendarExceptionCodes.HARD_EVENT_CONFLICTS.create() : CalendarExceptionCodes.EVENT_CONFLICTS.create();
+            for (EventConflict eventConflict : conflicts) {
+                conflictException.addProblematic(eventConflict);
+            }
+            throw conflictException;
+        }
     }
 
     /**

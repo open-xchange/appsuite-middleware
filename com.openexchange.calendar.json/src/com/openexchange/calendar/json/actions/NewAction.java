@@ -66,6 +66,8 @@ import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.calendar.json.actions.chronos.ChronosAction;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
@@ -175,15 +177,19 @@ public final class NewAction extends ChronosAction {
         session.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.valueOf(appointment.getIgnoreConflicts()));
         Event event = getEventConverter().getEvent(session.getSession(), appointment, null);
         int folderID = appointment.getParentFolderID();
-        CalendarResult result = session.getCalendarService().createEvent(session, folderID, event);
-        if (false == result.getConflicts().isEmpty()) {
-            return getAppointmentConflictResult(session, result.getConflicts());
+        try {
+            CalendarResult result = session.getCalendarService().createEvent(session, folderID, event);
+            JSONObject resultObject = new JSONObject(1);
+            if (0 < result.getCreations().size()) {
+                resultObject.put(DataFields.ID, result.getCreations().get(0).getCreatedEvent().getId());
+            }
+            return new AJAXRequestResult(resultObject, result.getTimestamp(), "json");
+        } catch (OXException e) {
+            if (CalendarExceptionCodes.EVENT_CONFLICTS.equals(e) || CalendarExceptionCodes.HARD_EVENT_CONFLICTS.equals(e)) {
+                return getAppointmentConflictResult(session, CalendarUtils.extractEventConflicts(e));
+            }
+            throw e;
         }
-        JSONObject resultObject = new JSONObject(1);
-        if (0 < result.getCreations().size()) {
-            resultObject.put(DataFields.ID, result.getCreations().get(0).getCreatedEvent().getId());
-        }
-        return new AJAXRequestResult(resultObject, result.getTimestamp(), "json");
     }
 
 }

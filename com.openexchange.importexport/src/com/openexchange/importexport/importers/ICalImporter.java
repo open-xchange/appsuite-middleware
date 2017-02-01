@@ -812,11 +812,7 @@ public class ICalImporter extends AbstractImporter {
                 importResult.setDate(result.getTimestamp());
                 session.set(CalendarParameters.PARAMETER_TIMESTAMP, Long.valueOf(result.getTimestamp().getTime()));
                 if (result.getCreations().isEmpty()) {
-                    if (0 < result.getConflicts().size()) {
-                        importResult.setException(ImportExportExceptionCodes.RESOURCE_HARD_CONFLICT.create());
-                    } else {
-                        importResult.setException(ImportExportExceptionCodes.COULD_NOT_CREATE.create(importedEvent));
-                    }
+                    importResult.setException(ImportExportExceptionCodes.COULD_NOT_CREATE.create(importedEvent));
                 } else {
                     importResult.setFolder(String.valueOf(result.getCreations().get(0).getCreatedEvent().getFolderId()));
                     importResult.setObjectId(String.valueOf(result.getCreations().get(0).getCreatedEvent().getId()));
@@ -849,11 +845,7 @@ public class ICalImporter extends AbstractImporter {
                 importResult.setDate(result.getTimestamp());
                 session.set(CalendarParameters.PARAMETER_TIMESTAMP, Long.valueOf(result.getTimestamp().getTime()));
                 if (result.getCreations().isEmpty()) {
-                    if (0 < result.getConflicts().size()) {
-                        importResult.setException(ImportExportExceptionCodes.RESOURCE_HARD_CONFLICT.create());
-                    } else {
-                        importResult.setException(ImportExportExceptionCodes.COULD_NOT_CREATE.create(importedException));
-                    }
+                    importResult.setException(ImportExportExceptionCodes.COULD_NOT_CREATE.create(importedException));
                 } else {
                     importResult.setFolder(String.valueOf(result.getCreations().get(0).getCreatedEvent().getFolderId()));
                     importResult.setObjectId(String.valueOf(result.getCreations().get(0).getCreatedEvent().getId()));
