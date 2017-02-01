@@ -58,7 +58,8 @@ public enum FailureReason {
     SELF_SIGNED(FailureReasonMessage.SELF_SIGNED),
     UNTRUSTED_ISSUER(FailureReasonMessage.UNTRUSTED_ISSUER),
     EXPIRED(FailureReasonMessage.EXPIRED),
-    NOT_TRUSTED_BY_USER(FailureReasonMessage.NOT_TRUSTED_BY_USER);
+    NOT_TRUSTED_BY_USER(FailureReasonMessage.NOT_TRUSTED_BY_USER),
+    INVALID_COMMON_NAME(FailureReasonMessage.INVALID_COMMON_NAME);
 
     private final String detail;
 

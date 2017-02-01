@@ -77,6 +77,10 @@ public class SSLExceptionMessages implements LocalizableStrings {
 
     // The certificate is expired
     public final static String CERTIFICATE_IS_EXPIRED = "The certificate is expired";
+    
+    // The common name for the certificate is invalid
+    public final static String INVALID_COMMON_NAME = "The common name for the certificate is invalid";
+
 
     private SSLExceptionMessages() {
         super();

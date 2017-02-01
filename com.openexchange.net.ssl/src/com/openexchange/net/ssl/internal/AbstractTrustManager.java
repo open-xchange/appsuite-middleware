@@ -49,6 +49,7 @@
 
 package com.openexchange.net.ssl.internal;
 
+import java.net.InetAddress;
 import java.net.Socket;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -67,6 +68,7 @@ import javax.naming.ldap.Rdn;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.X509ExtendedTrustManager;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.java.util.Tools;
 import com.openexchange.log.LogProperties;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
@@ -275,7 +277,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         // via config
 
         // a) Check if the user trusts it
-        checkUserTrustsServer(user, context, chain);
+        checkUserTrustsServer(user, context, chain, socket);
     }
 
     /**
@@ -283,7 +285,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
      * 
      * @param chain The certificate to check
      */
-    private void checkUserTrustsServer(int userId, int contextId, X509Certificate[] chain) throws CertificateException {
+    private void checkUserTrustsServer(int userId, int contextId, X509Certificate[] chain, Socket socket) throws CertificateException {
         // The certificate under examination is always the first one in the chain
         X509Certificate cert = chain[0];
         try {
@@ -296,10 +298,13 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         } catch (OXException e) {
             if (SSLCertificateManagementSQLExceptionCode.CERTIFICATE_NOT_FOUND.equals(e)) {
                 // If not found in the user's store, try to determine the reason of failure
+
                 // a) Check if the certificate is self-signed
                 checkSelfSigned(userId, contextId, chain);
                 // b) Check if the root certificate authority is trusted
                 checkRootCATrusted(userId, contextId, chain);
+                // Check common name
+                checkCommonName(userId, contextId, chain, socket);
                 // c) Check if expired
                 checkExpired(userId, contextId, chain);
                 // d) check for the target host
@@ -347,6 +352,43 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
 
         String fingerprint = cacheCertificate(userId, contextId, chain[0], FailureReason.UNTRUSTED_ISSUER);
         throw new CertificateException(SSLExceptionCode.USER_DOES_NOT_TRUST_CERTIFICATE.create(userId, contextId, fingerprint));
+    }
+
+    /**
+     * Checks the common name for which the specified {@link X509Certificate} was issued against the hostname
+     * used in the specified {@link Socket}
+     * 
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param chain The {@link X509Certificate} chain
+     * @param socket The socket
+     * @throws CertificateException if the common name is invalid
+     */
+    private void checkCommonName(int userId, int contextId, X509Certificate[] chain, Socket socket) throws CertificateException {
+        if (socket == null) {
+            LOG.debug("No socket was provided. Skipping common name check");
+            return;
+        }
+
+        X509Certificate certificate = chain[0];
+        String commonName = getHostFromPrincipal(certificate);
+        if (Strings.isEmpty(commonName)) {
+            LOG.debug("No common name retrieved from the certificate. Skipping common name check");
+            return;
+        }
+        InetAddress inetAddress = socket.getInetAddress();
+        if (inetAddress == null) {
+            LOG.debug("The socket is not connected. Skipping common name check");
+            return;
+        }
+        String hostname = inetAddress.getHostName();
+        if (commonName.equals(hostname)) {
+            return;
+        }
+
+        String fingerprint = cacheCertificate(userId, contextId, chain[0], FailureReason.INVALID_COMMON_NAME);
+        throw new CertificateException(SSLExceptionCode.INVALID_COMMON_NAME.create(fingerprint));
+
     }
 
     /**
