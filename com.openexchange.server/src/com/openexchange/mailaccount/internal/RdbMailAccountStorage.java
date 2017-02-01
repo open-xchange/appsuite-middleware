@@ -3585,11 +3585,24 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     private static final class FailedAuthInfo {
         final int count;
         final long start;
+        final String url;
 
-        FailedAuthInfo(int count, long start) {
+        FailedAuthInfo(int count, long start, String url) {
             super();
             this.count = count;
+            this.url = url;
             this.start = 0 == start ? System.currentTimeMillis() : start;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder builder = new StringBuilder(32);
+            builder.append("[count=").append(count).append(", start=").append(start).append(", ");
+            if (url != null) {
+                builder.append("url=").append(url);
+            }
+            builder.append("]");
+            return builder.toString();
         }
     }
 
@@ -3709,9 +3722,9 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         ResultSet rs = null;
         try {
             if (mailAccess) {
-                stmt = con.prepareStatement("SELECT failed_auth_count, failed_auth_date, disabled FROM user_mail_account WHERE cid=? AND id=? AND user=?");
+                stmt = con.prepareStatement("SELECT failed_auth_count, failed_auth_date, disabled, url FROM user_mail_account WHERE cid=? AND id=? AND user=?");
             } else {
-                stmt = con.prepareStatement("SELECT failed_auth_count, failed_auth_date, disabled FROM user_transport_account WHERE cid=? AND id=? AND user=?");
+                stmt = con.prepareStatement("SELECT failed_auth_count, failed_auth_date, disabled, url FROM user_transport_account WHERE cid=? AND id=? AND user=?");
             }
             stmt.setLong(1, contextId);
             stmt.setLong(2, accountId);
@@ -3723,26 +3736,32 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 return false;
             }
 
-            FailedAuthInfo failedAuthInfo = new FailedAuthInfo(rs.getInt(1), rs.getLong(2));
+            FailedAuthInfo failedAuthInfo = new FailedAuthInfo(rs.getInt(1), rs.getLong(2), rs.getString(4));
             Databases.closeSQLStuff(rs, stmt);
             rs = null;
             stmt = null;
 
             if (failedAuthInfo.count + 1 > getFailedAuthThreshold(userId, contextId)) {
                 // Exceeded...
-                return disableAccount(mailAccess, accountId, userId, contextId, con);
+                boolean disabled = disableAccount(mailAccess, accountId, userId, contextId, con);
+                if (disabled) {
+                    LOG.info("Disabled {} account {} ({}) of user {} in context {} due to exceeded failed auth count", mailAccess ? "mail" : "transport", accountId, failedAuthInfo.url, userId, contextId);
+                }
+                return disabled;
             }
 
             if ((System.currentTimeMillis() - failedAuthInfo.start) <= getFailedAuthTimeSpan(userId, contextId)) {
                 // Increment
                 boolean incremented = incrementOrResetAccount(mailAccess, false, failedAuthInfo.count, accountId, userId, contextId, con);
                 if (incremented) {
+                    LOG.debug("Incremented failed auth count to {} for {} account {} ({}) of user {} in context {}", failedAuthInfo.count + 1, mailAccess ? "mail" : "transport", accountId, failedAuthInfo.url, userId, contextId);
                     return false;
                 }
             } else {
                 // Reset
                 boolean resetted = incrementOrResetAccount(mailAccess, true, failedAuthInfo.count, accountId, userId, contextId, con);
                 if (resetted) {
+                    LOG.debug("Set failed auth count to {} for {} account {} ({}) of user {} in context {}", 1, mailAccess ? "mail" : "transport", accountId, failedAuthInfo.url, userId, contextId);
                     return false;
                 }
             }
