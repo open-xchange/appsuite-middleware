@@ -513,6 +513,8 @@ public interface MailAccountStorageService {
      */
     TransportAccount getTransportByReference(String reference, int userId, int contextId) throws OXException;
 
+    // --------------------------------------------------------------------------------------------------------------------
+
     /**
      * Increments the count of failed authentications for specified account's mail access.
      *
@@ -534,6 +536,8 @@ public interface MailAccountStorageService {
      * @throws OXException If incrementing the count fails
      */
     boolean incrementFailedTransportAuthCount(int accountId, int userId, int contextId) throws OXException;
+
+    // --------------------------------------------------------------------------------------------------------------------
 
     /**
      * Gets those mail accounts of given user in given context whose host name occurs in specified collection of host names.

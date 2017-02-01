@@ -50,7 +50,6 @@
 package com.openexchange.mail.transport.config;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.UrlInfo;
@@ -92,7 +91,9 @@ public abstract class TransportConfig extends MailConfig {
          * Fetch mail account
          */
         TransportAccount transportAccount = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true).getTransportAccount(accountId, session.getUserId(), session.getContextId());
+        transportConfig.account = transportAccount;
         transportConfig.accountId = accountId;
+        transportConfig.session = session;
         fillLoginAndPassword(transportConfig, session, getUser(session).getLoginInfo(), transportAccount, false);
 
         UrlInfo urlInfo = TransportConfig.getTransportServerURL(transportAccount);
@@ -106,11 +107,6 @@ public abstract class TransportConfig extends MailConfig {
 
         transportConfig.parseServerURL(urlInfo);
         transportConfig.doCustomParsing(transportAccount, session);
-
-        if (transportAccount.isTransportDisabled()) {
-            throw MailExceptionCode.MAIL_TRANSPORT_DISABLED.create(transportConfig.getServer(), transportConfig.getLogin(), session.getUserId(), session.getContextId());
-        }
-
         return transportConfig;
     }
 

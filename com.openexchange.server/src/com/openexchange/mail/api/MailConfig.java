@@ -349,6 +349,7 @@ public abstract class MailConfig {
          * Fetch mail account
          */
         MailAccount mailAccount = ServerServiceRegistry.getServize(MailAccountStorageService.class, true).getMailAccount(accountId, session.getUserId(), session.getContextId());
+        mailConfig.account = mailAccount;
         mailConfig.accountId = accountId;
         mailConfig.session = session;
         mailConfig.applyStandardNames(mailAccount);
@@ -363,11 +364,6 @@ public abstract class MailConfig {
         }
 
         mailConfig.parseServerURL(urlInfo);
-
-        if (mailAccount.isMailDisabled()) {
-            throw MailExceptionCode.MAIL_ACCESS_DISABLED.create(mailConfig.getServer(), mailConfig.getLogin(), session.getUserId(), session.getContextId());
-        }
-
         return mailConfig;
     }
 
@@ -978,6 +974,7 @@ public abstract class MailConfig {
     protected String login;
     protected String password;
     protected boolean requireTls;
+    protected Account account;
     protected final String[] standardNames;
     protected final String[] standardFullNames;
 
@@ -994,6 +991,14 @@ public abstract class MailConfig {
         standardNames = new String[LENGTH];
     }
 
+    /**
+     * Gets the account currently associated with this instance
+     *
+     * @return The account or <code>null</code>
+     */
+    public Account getAccount() {
+        return account;
+    }
 
     /**
      * Gets the authentication type.

@@ -124,6 +124,8 @@ import com.openexchange.net.ssl.exception.SSLExceptionCode;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.session.Sessions;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.sun.mail.iap.ConnectQuotaExceededException;
@@ -807,6 +809,20 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             try {
                 imapStore = connectIMAPStore(maxCount);
             } catch (final AuthenticationFailedException e) {
+                if (accountId != MailAccount.DEFAULT_ID) {
+                    AbstractTask<Void> task = new AbstractTask<Void>() {
+
+                        @Override
+                        public Void call() throws Exception {
+                            MailAccountStorageService mass = Services.optService(MailAccountStorageService.class);
+                            if (null != mass) {
+                                mass.incrementFailedMailAuthCount(accountId, session.getUserId(), session.getContextId());
+                            }
+                            return null;
+                        }
+                    };
+                    ThreadPools.getThreadPool().submit(task);
+                }
                 throw e;
             } catch (final MessagingException e) {
                 /*
