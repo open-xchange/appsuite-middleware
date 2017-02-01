@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2017-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,70 +47,60 @@
  *
  */
 
-package com.openexchange.net.ssl.management.osgi;
+package com.openexchange.net.ssl.management.json;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.openexchange.database.CreateTableService;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.net.ssl.management.SSLCertificateManagementService;
-import com.openexchange.net.ssl.management.internal.SSLCertificateManagementServiceImpl;
-import com.openexchange.net.ssl.management.storage.CreateSSLCertificateManagementTable;
-import com.openexchange.net.ssl.management.storage.CreateSSLCertificateManagementTableTask;
-import com.openexchange.osgi.HousekeepingActivator;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link SSLCertificateManagementActivator}
+ * {@link SSLCertificateManagementActionFactory}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SSLCertificateManagementActivator extends HousekeepingActivator {
+public class SSLCertificateManagementActionFactory implements AJAXActionServiceFactory {
+
+    private final Map<String, AJAXActionService> actions;
+
+    private final Collection<AJAXActionService> supportedServices;
 
     /**
-     * Initialises a new {@link SSLCertificateManagementActivator}.
+     * Initialises a new {@link SSLCertificateManagementActionFactory}.
+     * 
+     * @param services The {@link ServiceLookup} instance
      */
-    public SSLCertificateManagementActivator() {
+    public SSLCertificateManagementActionFactory(ServiceLookup services) {
         super();
+        Map<String, AJAXActionService> a = new HashMap<>(4);
+        a.put("get", new GetSSLCertificateAction(services));
+        a.put("store", new StoreSSLCertificateAction(services));
+        
+        actions = Collections.unmodifiableMap(a);
+        supportedServices = Collections.unmodifiableCollection(actions.values());
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
+     * @see com.openexchange.documentation.AnnotatedServices#getSupportedServices()
      */
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class };
+    public Collection<?> getSupportedServices() {
+        return supportedServices;
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.osgi.DeferredActivator#startBundle()
+     * @see com.openexchange.ajax.requesthandler.AJAXActionServiceFactory#createActionService(java.lang.String)
      */
     @Override
-    protected void startBundle() throws Exception {
-        registerService(CreateTableService.class, new CreateSSLCertificateManagementTable());
-        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new CreateSSLCertificateManagementTableTask(getService(DatabaseService.class))));
-        registerService(SSLCertificateManagementService.class, new SSLCertificateManagementServiceImpl(this));
-
-        Logger logger = LoggerFactory.getLogger(SSLCertificateManagementActivator.class);
-        logger.info("SSLCertificateManagementService registered successfully");
+    public AJAXActionService createActionService(String action) throws OXException {
+        return actions.get(action);
     }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.osgi.HousekeepingActivator#stopBundle()
-     */
-    @Override
-    protected void stopBundle() throws Exception {
-        unregisterService(SSLCertificateManagementService.class);
-        Logger logger = LoggerFactory.getLogger(SSLCertificateManagementActivator.class);
-        logger.info("SSLCertificateManagementService unregistered successfully");
-        super.stopBundle();
-    }
-
 }
