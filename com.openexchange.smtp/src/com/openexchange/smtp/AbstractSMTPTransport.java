@@ -49,6 +49,7 @@
 
 package com.openexchange.smtp;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.mail.MailExceptionCode.getSize;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import java.io.IOException;
@@ -132,6 +133,7 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mailaccount.Account;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.TransportAuth;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.net.ssl.exception.SSLExceptionCode;
@@ -653,8 +655,13 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
         // Check if account is disabled
         if (false == forPing) {
             Account account = getAccount(smtpConfig);
-            if (null != account && account.isTransportDisabled()) {
-                throw MailExceptionCode.MAIL_TRANSPORT_DISABLED.create(smtpConfig.getServer(), smtpConfig.getLogin(), session.getUserId(), session.getContextId());
+            if (null != account) {
+                if (account.isTransportDisabled()) {
+                    throw MailExceptionCode.MAIL_TRANSPORT_DISABLED.create(smtpConfig.getServer(), smtpConfig.getLogin(), I(session.getUserId()), I(session.getContextId()));
+                }
+                if (TransportAuth.considerAsMailTransportAuth(account.getTransportAuth()) && ((account instanceof MailAccount) && ((MailAccount) account).isMailDisabled())) {
+                    throw MailExceptionCode.MAIL_TRANSPORT_DISABLED.create(smtpConfig.getServer(), smtpConfig.getLogin(), I(session.getUserId()), I(session.getContextId()));
+                }
             }
         }
 
