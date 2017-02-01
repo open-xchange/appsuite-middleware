@@ -54,6 +54,7 @@ import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.findAttachment;
 import static com.openexchange.chronos.common.CalendarUtils.getUserIDs;
 import static com.openexchange.chronos.common.CalendarUtils.hasExternalOrganizer;
+import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
 import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
@@ -71,7 +72,11 @@ import static com.openexchange.folderstorage.Permission.WRITE_OWN_OBJECTS;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -112,6 +117,7 @@ import com.openexchange.chronos.storage.EventStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.util.TimeZones;
 import com.openexchange.tools.arrays.Arrays;
 
 /**
@@ -261,14 +267,10 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                  */
                 eventUpdate.getUpdate().setSequence(originalEvent.getSequence() + 1);
             }
-            if (isSeriesMaster(originalEvent) && needsChangeExceptionsReset(eventUpdate)) {
-                /*
-                 * reset change & delete exceptions
-                 */
-                eventUpdate.getUpdate().setDeleteExceptionDates(null);
-                eventUpdate.getUpdate().setChangeExceptionDates(null);
-                deleteExceptions(originalEvent.getSeriesId(), originalEvent.getChangeExceptionDates());
-            }
+            /*
+             * adjust change & delete exceptions as needed
+             */
+            adjustExceptionsOnReschedule(eventUpdate);
             /*
              * perform update
              */
@@ -327,6 +329,85 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
     }
 
     /**
+     * Adjusts any previously existing change- and delete exceptions whenever a series event is rescheduled. In particluar:
+     * <ul>
+     * <li>If the series master event's period is changed, any series exceptions are removed</li>
+     * <li>If an event series is turned into a single event, any series exceptions are removed</li>
+     * <li>If the recurrence rule changes, any exceptions whose recurrence identifier no longer matches the recurrence are removed</li>
+     * </ul>
+     *
+     * @param eventUpdate The event update
+     * @return <code>true</code> if there were changes, <code>false</code>, otherwise
+     */
+    private boolean adjustExceptionsOnReschedule(ItemUpdate<Event, EventField> eventUpdate) throws OXException {
+        /*
+         * check if applicable for event update
+         */
+        Event originalEvent = eventUpdate.getOriginal();
+        if (false == isSeriesMaster(originalEvent) ||
+            (isNullOrEmpty(originalEvent.getChangeExceptionDates()) && isNullOrEmpty(originalEvent.getDeleteExceptionDates()))) {
+            return false;
+        }
+        /*
+         * reset all delete- and change exceptions if master period changes, or if recurrence is deleted
+         */
+        if (eventUpdate.containsAnyChangeOf(new EventField[] {
+            EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY }) ||
+            eventUpdate.getUpdatedFields().contains(EventField.RECURRENCE_RULE) && null == eventUpdate.getUpdate().getRecurrenceRule()) {
+            eventUpdate.getUpdate().setDeleteExceptionDates(null);
+            eventUpdate.getUpdate().setChangeExceptionDates(null);
+            deleteExceptions(originalEvent.getSeriesId(), originalEvent.getChangeExceptionDates());
+            return true;
+        }
+        if (eventUpdate.getUpdatedFields().contains(EventField.RECURRENCE_RULE)) {
+            /*
+             * recurrence rule changed, build list of possible exception dates matching the new rule
+             */
+            LinkedList<Date> exceptionDates = new LinkedList<Date>();
+            if (null != originalEvent.getDeleteExceptionDates()) {
+                exceptionDates.addAll(originalEvent.getDeleteExceptionDates());
+            }
+            if (null != originalEvent.getChangeExceptionDates()) {
+                exceptionDates.addAll(originalEvent.getChangeExceptionDates());
+            }
+            Collections.sort(exceptionDates);
+            Calendar fromCalendar = initCalendar(TimeZones.UTC, exceptionDates.getFirst());
+            Calendar untilCalendar = initCalendar(TimeZones.UTC, exceptionDates.getLast());
+            untilCalendar.add(Calendar.DATE, 1);
+            List<Date> possibleExceptionDates = new ArrayList<Date>();
+            Iterator<RecurrenceId> recurrenceIterator = session.getRecurrenceService().getRecurrenceIterator(
+                eventUpdate.getUpdate(), fromCalendar, untilCalendar, true);
+            while (recurrenceIterator.hasNext()) {
+                possibleExceptionDates.add(new Date(recurrenceIterator.next().getValue()));
+            }
+            /*
+             * reset no longer matching delete- and change exceptions if recurrence rule changes
+             */
+            boolean wasUpdated = false;
+            if (false == isNullOrEmpty(originalEvent.getDeleteExceptionDates())) {
+                List<Date> newDeleteExceptionDates = new ArrayList<Date>(originalEvent.getDeleteExceptionDates());
+                if (newDeleteExceptionDates.retainAll(possibleExceptionDates)) {
+                    eventUpdate.getUpdate().setDeleteExceptionDates(newDeleteExceptionDates);
+                    wasUpdated |= true;
+                }
+            }
+            if (false == isNullOrEmpty(originalEvent.getChangeExceptionDates())) {
+                List<Date> notMatchingChangeExceptionDates = new ArrayList<Date>(originalEvent.getChangeExceptionDates());
+                notMatchingChangeExceptionDates.removeAll(possibleExceptionDates);
+                if (0 < notMatchingChangeExceptionDates.size()) {
+                    deleteExceptions(originalEvent.getSeriesId(), notMatchingChangeExceptionDates);
+                    List<Date> newChangeExceptionDates = new ArrayList<Date>(originalEvent.getChangeExceptionDates());
+                    newChangeExceptionDates.removeAll(notMatchingChangeExceptionDates);
+                    eventUpdate.getUpdate().setChangeExceptionDates(newChangeExceptionDates);
+                    wasUpdated |= true;
+                }
+            }
+            return wasUpdated;
+        }
+        return false;
+    }
+
+    /**
      * Determines if it's allowed to skip the check if the updated event already exists in the targeted folder or not.
      * <p/>
      * The skip may be checked under certain circumstances, particularly:
@@ -347,24 +428,6 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             return false;
         }
         return true;
-    }
-
-    /**
-     * Gets a value indicating whether a recurring master event's change exceptions should be reset along with the update or not.
-     *
-     * @param eventUpdate The event update to evaluate
-     * @return <code>true</code> if the change exceptions should be reseted, <code>false</code>, otherwise
-     */
-    private boolean needsChangeExceptionsReset(ItemUpdate<Event, EventField> eventUpdate) throws OXException {
-        if (eventUpdate.containsAnyChangeOf(new EventField[] {
-            EventField.RECURRENCE_ID, EventField.RECURRENCE_RULE, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY
-        })) {
-            return true;
-        }
-        if (eventUpdate.getUpdatedFields().contains(EventField.RECURRENCE_RULE) && null == eventUpdate.getUpdate().getRecurrenceRule()) {
-            return true;
-        }
-        return false;
     }
 
     /**
@@ -614,7 +677,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                     /*
                      * ignore OPAQUE to TRANSPARENT transition when attendee's participation status is declined
                      */
-                    if (null != updatedEvent.getTransp() && Transp.TRANSPARENT.equals(updatedEvent.getTransp().getValue()) && 
+                    if (null != updatedEvent.getTransp() && Transp.TRANSPARENT.equals(updatedEvent.getTransp().getValue()) &&
                         false == isOrganizer(originalEvent, calendarUser.getId())) {
                         Attendee originalAttendee = find(originalEvent.getAttendees(), calendarUser.getId());
                         if (null != originalAttendee && false == ParticipationStatus.DECLINED.equals(originalAttendee.getPartStat())) {

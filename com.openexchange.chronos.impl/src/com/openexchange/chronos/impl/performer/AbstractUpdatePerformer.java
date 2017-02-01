@@ -258,7 +258,6 @@ public abstract class AbstractUpdatePerformer {
      *
      * @param seriesID The series identifier
      * @param exceptionDates The recurrence identifiers of the change exceptions to delete
-     * @return The results, or <code>null</code> if there are none
      */
     protected void deleteExceptions(int seriesID, List<Date> exceptionDates) throws OXException {
         if (null != exceptionDates && 0 < exceptionDates.size()) {
