@@ -85,7 +85,15 @@ public class StoreSSLCertificateAction extends AbstractSSLCertificateManagementA
         String fingerprint = requestData.getParameter("fingerprint", String.class, true);
         if (!Strings.isEmpty(fingerprint)) {
             SSLCertificateManagementService managementService = getService(SSLCertificateManagementService.class);
+
             Certificate certificate = managementService.getCached(session.getUserId(), session.getContextId(), fingerprint);
+
+            String hostname = requestData.getParameter("hostname", String.class, false);
+            certificate.setHostname(hostname);
+            
+            boolean trust = requestData.getParameter("trust", Boolean.class, false);
+            certificate.setTrusted(trust);
+
             managementService.store(session.getUserId(), session.getContextId(), certificate);
 
             return new AJAXRequestResult();

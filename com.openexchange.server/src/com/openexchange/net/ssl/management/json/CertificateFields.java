@@ -59,6 +59,7 @@ final class CertificateFields {
     static final String FINGERPRINT = "fingerprint";
     static final String ISSUED_ON = "issuedOn";
     static final String EXPIRES_ON = "expiresOn";
+    static final String HOSTNAME = "hostname";
     static final String COMMON_NAME = "commonName";
     static final String ISSUED_BY = "issuedBy";
     static final String SIGNATURE = "signature";

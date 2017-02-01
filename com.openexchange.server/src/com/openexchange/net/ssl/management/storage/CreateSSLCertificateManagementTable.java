@@ -66,7 +66,7 @@ public class CreateSSLCertificateManagementTable extends AbstractCreateTableImpl
         "`host` VARCHAR(255) NOT NULL," + 
         "`fingerprint` VARCHAR(64) NOT NULL," + 
         "`trusted` BOOLEAN NOT NULL," + 
-        "PRIMARY KEY (`cid`,`userid`,`fingerprint`)" + 
+        "PRIMARY KEY (`cid`,`userid`,`host`,`fingerprint`)" + 
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
     /**

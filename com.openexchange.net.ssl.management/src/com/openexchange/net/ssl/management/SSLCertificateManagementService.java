@@ -68,7 +68,7 @@ public interface SSLCertificateManagementService {
      * @return <code>true</code> if the {@link Certificate} is trusted; <code>false</code> otherwise
      * @throws OXException if the certificate is not found or any other error is occurred
      */
-    boolean isTrusted(int userId, int contextId, String fingerprint) throws OXException;
+    boolean isTrusted(int userId, int contextId, String hostname, String fingerprint) throws OXException;
 
     /**
      * Retrieves the {@link Certificate} with the specified fingerprint from the storage
@@ -79,7 +79,7 @@ public interface SSLCertificateManagementService {
      * @return The {@link Certificate}
      * @throws OXException if the {@link Certificate} does not exist, or any other error occurs
      */
-    Certificate get(int userId, int contextId, String fingerprint) throws OXException;
+    Certificate get(int userId, int contextId, String hostname, String fingerprint) throws OXException;
 
     /**
      * Checks whether the SSL {@link Certificate} with the specified fingerprint
@@ -91,7 +91,7 @@ public interface SSLCertificateManagementService {
      * @return <code>true</code> if the {@link Certificate} exists; <code>false</code> otherwise
      * @throws OXException if any error is occurred
      */
-    boolean contains(int userId, int contextId, String fingerprint) throws OXException;
+    boolean contains(int userId, int contextId, String hostname, String fingerprint) throws OXException;
 
     /**
      * Stores the specified {@link Certificate} for the specified user in the specified context
@@ -114,7 +114,7 @@ public interface SSLCertificateManagementService {
      * @param fingerprint The SSL {@link Certificate}'s fingerprint
      * @throws OXException if the certificate is not found or any other error is occurred
      */
-    void delete(int userId, int contextId, String fingerprint) throws OXException;
+    void delete(int userId, int contextId, String hostname, String fingerprint) throws OXException;
 
     /**
      * Caches the specified {@link Certificate} temporarily for the specified user in the

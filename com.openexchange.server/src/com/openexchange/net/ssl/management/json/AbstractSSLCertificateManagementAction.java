@@ -105,6 +105,7 @@ abstract class AbstractSSLCertificateManagementAction implements AJAXActionServi
             json.put(CertificateFields.FINGERPRINT, certificate.getFingerprint());
             json.put(CertificateFields.ISSUED_ON, certificate.getIssuedOnTimestamp());
             json.put(CertificateFields.EXPIRES_ON, certificate.getExpirationTimestamp());
+            json.put(CertificateFields.HOSTNAME, certificate.getHostname());
             json.put(CertificateFields.COMMON_NAME, certificate.getCommonName());
             json.put(CertificateFields.ISSUED_BY, certificate.getIssuer());
             json.put(CertificateFields.SIGNATURE, certificate.getSignature());
@@ -129,6 +130,7 @@ abstract class AbstractSSLCertificateManagementAction implements AJAXActionServi
             Certificate certificate = new Certificate(jsonObject.getString("fingerprint"));
             certificate.setIssuedOnTimestamp(jsonObject.getLong(CertificateFields.ISSUED_ON));
             certificate.setExpirationTimestamp(jsonObject.getLong(CertificateFields.EXPIRES_ON));
+            certificate.setHostname(jsonObject.getString(CertificateFields.HOSTNAME));
             certificate.setCommonName(jsonObject.getString(CertificateFields.COMMON_NAME));
             certificate.setIssuer(jsonObject.getString(CertificateFields.ISSUED_BY));
             certificate.setSignature(jsonObject.getString(CertificateFields.SIGNATURE));

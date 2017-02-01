@@ -97,7 +97,7 @@ public class SSLCertificateManagementSQL {
         DatabaseService databaseService = getDatabaseService();
         Connection connection = databaseService.getWritable(contextId);
 
-        if (contains(userId, contextId, certificate.getFingerprint(), connection)) {
+        if (contains(userId, contextId, certificate.getHostname(), certificate.getFingerprint(), connection)) {
             update(userId, contextId, certificate, connection);
         } else {
             insert(userId, contextId, certificate, connection);
@@ -113,7 +113,7 @@ public class SSLCertificateManagementSQL {
      * @return The {@link Certificate}
      * @throws OXException if the {@link Certificate} does not exist, or any other error occurs
      */
-    public Certificate get(int userId, int contextId, String fingerprint) throws OXException {
+    public Certificate get(int userId, int contextId, String hostname, String fingerprint) throws OXException {
         DatabaseService databaseService = getDatabaseService();
         Connection connection = databaseService.getReadOnly(contextId);
         PreparedStatement preparedStatement = null;
@@ -124,6 +124,7 @@ public class SSLCertificateManagementSQL {
             int index = 1;
             preparedStatement.setInt(index++, contextId);
             preparedStatement.setInt(index++, userId);
+            preparedStatement.setString(index++, hostname);
             preparedStatement.setString(index++, fingerprint);
 
             resultSet = preparedStatement.executeQuery();
@@ -132,7 +133,7 @@ public class SSLCertificateManagementSQL {
             }
 
             Certificate certificate = new Certificate(fingerprint);
-            certificate.setCommonName(resultSet.getString("host"));
+            certificate.setHostname(resultSet.getString("host"));
             certificate.setTrusted(resultSet.getBoolean("trusted"));
             return certificate;
         } catch (SQLException e) {
@@ -153,7 +154,7 @@ public class SSLCertificateManagementSQL {
      * @param fingerprint The fingerprint of the {@link Certificate}
      * @throws OXException If the {@link Certificate} cannot be deleted
      */
-    public void delete(int userId, int contextId, String fingerprint) throws OXException {
+    public void delete(int userId, int contextId, String hostname, String fingerprint) throws OXException {
         DatabaseService databaseService = getDatabaseService();
         Connection connection = databaseService.getWritable(contextId);
         PreparedStatement preparedStatement = null;
@@ -183,8 +184,8 @@ public class SSLCertificateManagementSQL {
      * @return <code>true<code> if the {@link Certificate} exists; <code>false</code> otherwise
      * @throws OXException If an error is occurred
      */
-    public boolean contains(int userId, int contextId, String fingerprint) throws OXException {
-        return contains(userId, contextId, fingerprint, null);
+    public boolean contains(int userId, int contextId, String hostname, String fingerprint) throws OXException {
+        return contains(userId, contextId, hostname, fingerprint, null);
     }
 
     /**
@@ -197,7 +198,7 @@ public class SSLCertificateManagementSQL {
      * @return <code>true<code> if the {@link Certificate} is trusted; <code>false</code> otherwise
      * @throws OXException If an error is occurred
      */
-    public boolean isTrusted(int userId, int contextId, String fingerprint) throws OXException {
+    public boolean isTrusted(int userId, int contextId, String hostname, String fingerprint) throws OXException {
         DatabaseService databaseService = getDatabaseService();
         Connection connection = databaseService.getReadOnly(contextId);
         PreparedStatement preparedStatement = null;
@@ -208,6 +209,7 @@ public class SSLCertificateManagementSQL {
             int index = 1;
             preparedStatement.setInt(index++, contextId);
             preparedStatement.setInt(index++, userId);
+            preparedStatement.setString(index++, hostname);
             preparedStatement.setString(index++, fingerprint);
 
             resultSet = preparedStatement.executeQuery();
@@ -241,10 +243,11 @@ public class SSLCertificateManagementSQL {
         try {
             preparedStatement = connection.prepareStatement(SQLStatements.UPDATE);
             int index = 1;
-            preparedStatement.setInt(index++, contextId);
-            preparedStatement.setInt(index++, userId);
-            preparedStatement.setString(index++, certificate.getFingerprint());
             preparedStatement.setBoolean(index++, certificate.isTrusted());
+            preparedStatement.setInt(index++, userId);
+            preparedStatement.setInt(index++, contextId);
+            preparedStatement.setString(index++, certificate.getHostname());
+            preparedStatement.setString(index++, certificate.getFingerprint());
 
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
@@ -272,7 +275,7 @@ public class SSLCertificateManagementSQL {
             int index = 1;
             preparedStatement.setInt(index++, contextId);
             preparedStatement.setInt(index++, userId);
-            preparedStatement.setString(index++, certificate.getCommonName());
+            preparedStatement.setString(index++, certificate.getHostname());
             preparedStatement.setString(index++, certificate.getFingerprint());
             preparedStatement.setBoolean(index++, certificate.isTrusted());
 
@@ -296,7 +299,7 @@ public class SSLCertificateManagementSQL {
      * @return <code>true<code> if the {@link Certificate} exists; <code>false</code> otherwise
      * @throws OXException If an error is occurred
      */
-    private boolean contains(int userId, int contextId, String fingerprint, Connection connection) throws OXException {
+    private boolean contains(int userId, int contextId, String hostname, String fingerprint, Connection connection) throws OXException {
         DatabaseService databaseService = getDatabaseService();
         boolean connectionInitialised = false;
         if (connection == null) {
@@ -311,6 +314,7 @@ public class SSLCertificateManagementSQL {
             int index = 1;
             preparedStatement.setInt(index++, contextId);
             preparedStatement.setInt(index++, userId);
+            preparedStatement.setString(index++, hostname);
             preparedStatement.setString(index++, fingerprint);
 
             resultSet = preparedStatement.executeQuery();

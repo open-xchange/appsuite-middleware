@@ -61,11 +61,12 @@ public class Certificate {
     private long expirationTimestamp;
     private boolean trusted;
     private boolean expired;
-    private String commonName;
     private String issuer;
     private String signature;
     private String serialNumber;
     private String failureReason;
+    private String hostname;
+    private String commonName;
 
     /**
      * Initialises a new {@link Certificate}.
@@ -157,24 +158,6 @@ public class Certificate {
     }
 
     /**
-     * Gets the commonName
-     *
-     * @return The commonName
-     */
-    public String getCommonName() {
-        return commonName;
-    }
-
-    /**
-     * Sets the commonName
-     *
-     * @param commonName The commonName to set
-     */
-    public void setCommonName(String commonName) {
-        this.commonName = commonName;
-    }
-
-    /**
      * Gets the issuer
      *
      * @return The issuer
@@ -228,21 +211,6 @@ public class Certificate {
         this.serialNumber = serialNumber;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#toString()
-     */
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder("{");
-        builder.append("\"issuer\":\"").append(issuer).append("\",");
-        builder.append("\"commonName\":\"").append(commonName).append("\",");
-        builder.append("\"fingerprint\":\"").append(fingerprint).append("\"");
-        builder.append("}");
-        return builder.toString();
-    }
-
     /**
      * Gets the failureReason
      *
@@ -259,5 +227,41 @@ public class Certificate {
      */
     public void setFailureReason(String failureReason) {
         this.failureReason = failureReason;
+    }
+
+    /**
+     * Gets the hostname
+     *
+     * @return The hostname
+     */
+    public String getHostname() {
+        return hostname;
+    }
+
+    /**
+     * Sets the hostname
+     *
+     * @param hostname The hostname to set
+     */
+    public void setHostname(String hostname) {
+        this.hostname = hostname;
+    }
+
+    /**
+     * Gets the commonName
+     *
+     * @return The commonName
+     */
+    public String getCommonName() {
+        return commonName;
+    }
+
+    /**
+     * Sets the commonName
+     *
+     * @param commonName The commonName to set
+     */
+    public void setCommonName(String commonName) {
+        this.commonName = commonName;
     }
 }

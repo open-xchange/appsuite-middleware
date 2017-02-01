@@ -64,25 +64,25 @@ final class SQLStatements {
     /**
      * Get the certificate
      */
-    final static String GET = "SELECT * FROM  user_certificate WHERE cid=? AND userid=? AND fingerprint=?";
+    final static String GET = "SELECT * FROM  user_certificate WHERE cid=? AND userid=? AND host=? AND fingerprint=?";
 
     /**
      * Updates a certificate
      */
-    final static String UPDATE = "UPDATE user_certificate SET trusted=? WHERE userid=? AND cid=? AND fingerprint=?";
+    final static String UPDATE = "UPDATE user_certificate SET trusted=? WHERE userid=? AND cid=? AND host=? AND fingerprint=?";
 
     /**
      * Check for existence
      */
-    final static String CONTAINS = "SELECT 1 from user_certificate WHERE cid=? AND userid=? AND fingerprint=?";
+    final static String CONTAINS = "SELECT 1 from user_certificate WHERE cid=? AND userid=? AND host=? AND fingerprint=?";
 
     /**
      * Check if the cert is trusted
      */
-    final static String IS_TRUSTED = "SELECT trusted from user_certificate WHERE cid=? AND userid=? AND fingerprint=?";
+    final static String IS_TRUSTED = "SELECT trusted from user_certificate WHERE cid=? AND userid=? AND host=? AND fingerprint=?";
 
     /**
      * Delete certificate
      */
-    final static String DELETE = "DELETE FROM user_certificate WHERE cid=? AND userid=? AND fingerprint=?";
+    final static String DELETE = "DELETE FROM user_certificate WHERE cid=? AND userid=? AND host=? AND fingerprint=?";
 }

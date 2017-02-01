@@ -88,8 +88,8 @@ public class SSLCertificateManagementServiceImpl implements SSLCertificateManage
      * @see com.openexchange.net.ssl.management.SSLCertificateManagementService#isTrusted(int, int, java.lang.String)
      */
     @Override
-    public boolean isTrusted(int userId, int contextId, String fingerprint) throws OXException {
-        return storage.isTrusted(userId, contextId, fingerprint);
+    public boolean isTrusted(int userId, int contextId, String hostname, String fingerprint) throws OXException {
+        return storage.isTrusted(userId, contextId, hostname, fingerprint);
     }
 
     /*
@@ -98,8 +98,8 @@ public class SSLCertificateManagementServiceImpl implements SSLCertificateManage
      * @see com.openexchange.net.ssl.management.SSLCertificateManagementService#get(int, int, java.lang.String)
      */
     @Override
-    public Certificate get(int userId, int contextId, String fingerprint) throws OXException {
-        return storage.get(userId, contextId, fingerprint);
+    public Certificate get(int userId, int contextId, String hostname, String fingerprint) throws OXException {
+        return storage.get(userId, contextId, hostname, fingerprint);
     }
 
     /*
@@ -108,8 +108,8 @@ public class SSLCertificateManagementServiceImpl implements SSLCertificateManage
      * @see com.openexchange.net.ssl.management.SSLCertificateManagementService#contains(int, int, java.lang.String)
      */
     @Override
-    public boolean contains(int userId, int contextId, String fingerprint) throws OXException {
-        return storage.contains(userId, contextId, fingerprint);
+    public boolean contains(int userId, int contextId, String hostname, String fingerprint) throws OXException {
+        return storage.contains(userId, contextId, hostname, fingerprint);
     }
 
     /*
@@ -129,8 +129,8 @@ public class SSLCertificateManagementServiceImpl implements SSLCertificateManage
      * @see com.openexchange.net.ssl.management.SSLCertificateManagementService#delete(int, int, java.lang.String)
      */
     @Override
-    public void delete(int userId, int contextId, String fingerprint) throws OXException {
-        storage.delete(userId, contextId, fingerprint);
+    public void delete(int userId, int contextId, String hostname, String fingerprint) throws OXException {
+        storage.delete(userId, contextId, hostname, fingerprint);
     }
 
     /*
