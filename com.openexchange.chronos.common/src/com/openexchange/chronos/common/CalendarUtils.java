@@ -368,18 +368,83 @@ public class CalendarUtils {
 
     /**
      * Gets a value indicating whether a specific event falls (at least partly) into a time range.
+     * <p/>
+     * According to RFC 4791, an event overlaps a given time range if the condition for the corresponding component state specified in
+     * the table below is satisfied:
+     * <pre>
+     * +---------------------------------------------------------------+
+     * | VEVENT has the DTEND property? |
+     * | +-----------------------------------------------------------+
+     * | | VEVENT has the DURATION property? |
+     * | | +-------------------------------------------------------+
+     * | | | DURATION property value is greater than 0 seconds? |
+     * | | | +---------------------------------------------------+
+     * | | | | DTSTART property is a DATE-TIME value? |
+     * | | | | +-----------------------------------------------+
+     * | | | | | Condition to evaluate |
+     * +---+---+---+---+-----------------------------------------------+
+     * | Y | N | N | * | (start < DTEND AND end > DTSTART) |
+     * +---+---+---+---+-----------------------------------------------+
+     * | N | Y | Y | * | (start < DTSTART+DURATION AND end > DTSTART) |
+     * | | +---+---+-----------------------------------------------+
+     * | | | N | * | (start <= DTSTART AND end > DTSTART) |
+     * +---+---+---+---+-----------------------------------------------+
+     * | N | N | N | Y | (start <= DTSTART AND end > DTSTART) |
+     * +---+---+---+---+-----------------------------------------------+
+     * | N | N | N | N | (start < DTSTART+P1D AND end > DTSTART) |
+     * +---+---+---+---+-----------------------------------------------+
+     * </pre>
      *
      * @param event The event to check
      * @param from The lower inclusive limit of the range, i.e. the event should start on or after this date, or <code>null</code> for no limit
      * @param until The upper exclusive limit of the range, i.e. the event should end before this date, or <code>null</code> for no limit
      * @param timeZone The timezone to consider if the event has <i>floating</i> dates
      * @return <code>true</code> if the event falls into the time range, <code>false</code>, otherwise
+     * @see <a href="https://tools.ietf.org/html/rfc4791#section-9.9">RFC 4791, section 9.9</a>
      */
     public static boolean isInRange(Event event, Date from, Date until, TimeZone timeZone) {
-        // TODO floating events that are not "all-day"
-        Date startDate = isFloating(event) ? getDateInTimeZone(event.getStartDate(), timeZone) : event.getStartDate();
-        Date endDate = isFloating(event) ? getDateInTimeZone(event.getEndDate(), timeZone) : event.getEndDate();
-        return (null == until || startDate.before(until)) && (null == from || endDate.after(from));
+        /*
+         * determine effective timestamps for check
+         */
+        long start = null == from ? Long.MIN_VALUE : from.getTime();
+        long end = null == until ? Long.MAX_VALUE : until.getTime();
+        long dtStart = event.getStartDate().getTime();
+        long dtEnd = event.getEndDate().getTime();
+        if (isFloating(event)) {
+            dtStart -= timeZone.getOffset(dtStart);
+            dtEnd -= timeZone.getOffset(dtEnd);
+        }
+        /*
+         * check if a 'real' end date is set in event
+         */
+        boolean hasDtEnd;
+        if (event.isAllDay()) {
+            Calendar calendar = initCalendar(timeZone, dtStart);
+            calendar.add(Calendar.DATE, 1);
+            hasDtEnd = calendar.getTimeInMillis() != dtEnd;
+        } else {
+            hasDtEnd = dtStart != dtEnd;
+        }
+        /*
+         * perform checks
+         */
+        if (hasDtEnd) {
+            // VEVENT has the DTEND property? Y
+            // (start <  DTEND AND end > DTSTART)
+            return start < dtEnd && end > dtStart;
+        } else {
+            // VEVENT has the DTEND property? N
+            if (false == event.isAllDay()) {
+                // DTSTART property is a DATE-TIME value? Y
+                // (start <= DTSTART AND end > DTSTART)
+                return start <= dtStart && end > dtStart;
+            } else {
+                // DTSTART property is a DATE-TIME value? N
+                // (start <  DTSTART+P1D AND end > DTSTART)
+                // DTSTART+P1D == dtEnd
+                return start < dtEnd && end > dtStart;
+            }
+        }
     }
 
     /**
