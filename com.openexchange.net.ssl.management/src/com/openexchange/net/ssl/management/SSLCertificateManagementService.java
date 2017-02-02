@@ -74,7 +74,7 @@ public interface SSLCertificateManagementService {
      * Retrieves the {@link Certificate} with the specified fingerprint from the storage
      * 
      * @param userId The user identifier
-     * @param contextId The context identifer
+     * @param contextId The context identifier
      * @param fingerprint The fingerprint of the {@link Certificate}
      * @return The {@link Certificate}
      * @throws OXException if the {@link Certificate} does not exist, or any other error occurs
