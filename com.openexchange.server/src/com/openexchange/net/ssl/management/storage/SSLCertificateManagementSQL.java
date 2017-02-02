@@ -182,6 +182,7 @@ public class SSLCertificateManagementSQL {
                 Certificate certificate = new Certificate(resultSet.getString("fingerprint"));
                 certificate.setHostname(resultSet.getString("host"));
                 certificate.setTrusted(resultSet.getBoolean("trusted"));
+                certificates.add(certificate);
             }
 
             return Collections.unmodifiableList(certificates);
