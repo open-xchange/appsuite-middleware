@@ -278,7 +278,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
          * - Check if the server is to be trusted; if yes return
          * - Check if the user is allowed to accept untrusted certificates; if not throw an exception
          * - Retrieve the fingerprint(s) of the certificate
-         * - Search if the user already accepted the certificate 
+         * - Search if the user already accepted the certificate
          * |- if yes check if the hostname of the socket matches the stored hostname; if yes return
          * |_ Throw an exception in case the user previously denied the certificate
          * |_ Throw an exception with the indication that the server is untrusted (the user can then choose what to do)
@@ -292,7 +292,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         if (!e.getMessage().contains("unable to find valid certification path to requested target")) {
             throw e;
         }
-        
+
         // Fetch user details
         int user = Tools.getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_USER_ID));
         int context = Tools.getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_CONTEXT_ID));
@@ -302,7 +302,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         if (!sslConfigurationService.isAllowedToDefineTrustLevel(user, context)) {
             throw e;
         }
-        
+
         // Check if the user trusts it
         checkUserTrustsServer(user, context, chain, socket);
     }
@@ -337,12 +337,12 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
 
                 // a) Check if the certificate is self-signed
                 checkSelfSigned(userId, contextId, chain, socketHostname);
-                // b) Check if the root certificate authority is trusted
-                checkRootCATrusted(userId, contextId, chain);
+                // b) Check if expired
+                checkExpired(userId, contextId, chain);
                 // c) Check common name
                 checkCommonName(userId, contextId, chain, socket);
-                // d) Check if expired
-                checkExpired(userId, contextId, chain);
+                // d) Check if the root certificate authority is trusted
+                checkRootCATrusted(userId, contextId, chain);
 
                 // If the previous checks did not fail, cache it for future reference and throw as last resort
                 String fingerprint = cacheCertificate(userId, contextId, cert, socketHostname, FailureReason.UNTRUSTED_CERTIFICATE);
