@@ -77,8 +77,8 @@ public class SplitSeriesTest extends CalDAVTest {
          * create daily event series at client
          */
         String uid = randomUID();
-        Date start = TimeTools.D("tomorrow at 16:00", TimeZone.getTimeZone("Europe/Berline"));
-        Date end = TimeTools.D("tomorrow at 17:00", TimeZone.getTimeZone("Europe/Berline"));
+        Date start = TimeTools.D("tomorrow at 16:00", TimeZone.getTimeZone("Europe/Berlin"));
+        Date end = TimeTools.D("tomorrow at 17:00", TimeZone.getTimeZone("Europe/Berlin"));
         String iCal =
             "BEGIN:VCALENDAR\r\n" +
             "VERSION:2.0\r\n" +
