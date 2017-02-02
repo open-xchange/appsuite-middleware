@@ -1513,7 +1513,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
             user.setDefaultSenderAddress(tmp);
         }
         
-        tmp = soapUser.getDriveFolderMode();
+        tmp = soapUser.getDriveUserFolderMode();
         if (tmp != null) {
             user.setDriveFolderMode(tmp);
         }
@@ -2166,7 +2166,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         soapUser.setCountryHome(user.getCountry_home());
         soapUser.setCountryOther(user.getCountry_other());
         soapUser.setDefaultSenderAddress(user.getDefaultSenderAddress());
-        soapUser.setDriveFolderMode(user.getDriveFolderMode());
+        soapUser.setDriveUserFolderMode(user.getDriveFolderMode());
         soapUser.setDefaultGroup(group2Soap(user.getDefault_group()));
         soapUser.setDepartment(user.getDepartment());
         soapUser.setDisplayName(user.getDisplay_name());
