@@ -890,6 +890,17 @@ If you would like to add a reference to another property use the following appro
 | __File__ | spamhandler.properties  |
 
 ---
+| Key | <span style="font-weight:normal">com.openexchange.spamhandler.enabled</span> |
+|:----------------|:--------|
+| __Description__ | Allows to enable/disable spam handling per user/context/server via ConfigCascade (based on the configured spam handler).<br>This property will only be taken into account when the users configuration for 'gui_spam_filter_capabilities_enabled' is set to 'false' (default for createuser). If the user has been <br>provisioned with gui_spam_filter_capabilities_enabled = true changing the described property will be ignored. If the setting isn't defined the user configuration from database will be used.<br> |
+| __Default__ | UserSettingMail permission bit from database  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | true  |
+| __Configcascade Aware__ | true  |
+| __Related__ | com.openexchange.spamhandler.name  |
+| __File__ | spamhandler.properties  |
+
+---
 
 
 ## SSL 
