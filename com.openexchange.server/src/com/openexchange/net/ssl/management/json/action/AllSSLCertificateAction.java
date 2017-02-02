@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2017-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,47 +47,48 @@
  *
  */
 
-package com.openexchange.net.ssl.management.storage;
+package com.openexchange.net.ssl.management.json.action;
+
+import java.util.List;
+import org.json.JSONArray;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
+import com.openexchange.net.ssl.management.Certificate;
+import com.openexchange.net.ssl.management.SSLCertificateManagementService;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link SQLStatements}
+ * {@link AllSSLCertificateAction}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-final class SQLStatements {
+public class AllSSLCertificateAction extends AbstractSSLCertificateManagementAction {
 
     /**
-     * Insert a certificate
+     * Initialises a new {@link AllSSLCertificateAction}.
+     * 
+     * @param services The {@link ServiceLookup} instance
      */
-    final static String INSERT = "INSERT INTO user_certificate (cid, userid, host, fingerprint, trusted) VALUES (?,?,?,?,?)";
+    public AllSSLCertificateAction(ServiceLookup services) {
+        super(services);
+    }
 
-    /**
-     * Get the certificate
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.requesthandler.AJAXActionService#perform(com.openexchange.ajax.requesthandler.AJAXRequestData, com.openexchange.tools.session.ServerSession)
      */
-    final static String GET = "SELECT * FROM  user_certificate WHERE cid=? AND userid=? AND host=? AND fingerprint=?";
+    @Override
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        SSLCertificateManagementService managementService = getService(SSLCertificateManagementService.class);
+        List<Certificate> certificates = managementService.getAll(session.getUserId(), session.getContextId());
 
-    /**
-     * Get all certificates
-     */
-    final static String GET_ALL = "SELECT * FROM  user_certificate WHERE cid=? AND userid=?";
-
-    /**
-     * Updates a certificate
-     */
-    final static String UPDATE = "UPDATE user_certificate SET trusted=? WHERE userid=? AND cid=? AND host=? AND fingerprint=?";
-
-    /**
-     * Check for existence
-     */
-    final static String CONTAINS = "SELECT 1 from user_certificate WHERE cid=? AND userid=? AND host=? AND fingerprint=?";
-
-    /**
-     * Check if the cert is trusted
-     */
-    final static String IS_TRUSTED = "SELECT trusted from user_certificate WHERE cid=? AND userid=? AND host=? AND fingerprint=?";
-
-    /**
-     * Delete certificate
-     */
-    final static String DELETE = "DELETE FROM user_certificate WHERE cid=? AND userid=? AND host=? AND fingerprint=?";
+        JSONArray array = new JSONArray(certificates.size());
+        for (Certificate certificate : certificates) {
+            array.put(parse(certificate));
+        }
+        return new AJAXRequestResult(array);
+    }
 }

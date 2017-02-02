@@ -76,11 +76,12 @@ public class SSLCertificateManagementActionFactory implements AJAXActionServiceF
      */
     public SSLCertificateManagementActionFactory(ServiceLookup services) {
         super();
-        Map<String, AJAXActionService> a = new HashMap<>(4);
+        Map<String, AJAXActionService> a = new HashMap<>(8);
         a.put("get", new GetSSLCertificateAction(services));
         a.put("store", new StoreSSLCertificateAction(services));
         a.put("delete", new DeleteSSLCertificateAction(services));
         a.put("update", new UpdateSSLCertificateAction(services));
+        a.put("all", new AllSSLCertificateAction(services));
 
         actions = Collections.unmodifiableMap(a);
         supportedServices = Collections.unmodifiableCollection(actions.values());

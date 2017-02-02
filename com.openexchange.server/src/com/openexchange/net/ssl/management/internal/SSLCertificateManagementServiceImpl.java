@@ -49,6 +49,7 @@
 
 package com.openexchange.net.ssl.management.internal;
 
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -100,6 +101,14 @@ public class SSLCertificateManagementServiceImpl implements SSLCertificateManage
     @Override
     public Certificate get(int userId, int contextId, String hostname, String fingerprint) throws OXException {
         return storage.get(userId, contextId, hostname, fingerprint);
+    }
+    
+    /* (non-Javadoc)
+     * @see com.openexchange.net.ssl.management.SSLCertificateManagementService#getAll(int, int)
+     */
+    @Override
+    public List<Certificate> getAll(int userId, int contextId) throws OXException {
+        return storage.getAll(userId, contextId);
     }
 
     /*

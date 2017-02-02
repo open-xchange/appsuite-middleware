@@ -49,6 +49,7 @@
 
 package com.openexchange.net.ssl.management;
 
+import java.util.List;
 import com.openexchange.exception.OXException;
 
 /**
@@ -80,6 +81,18 @@ public interface SSLCertificateManagementService {
      * @throws OXException if the {@link Certificate} does not exist, or any other error occurs
      */
     Certificate get(int userId, int contextId, String hostname, String fingerprint) throws OXException;
+
+    /**
+     * Returns an unmodifiable {@link List} with all managed {@link Certificate}s for the specified
+     * user in the specified context
+     * 
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return an unmodifiable {@link List} with all managed {@link Certificate}s for the specified
+     *         user in the specified context
+     * @throws OXException if an error is occurred
+     */
+    List<Certificate> getAll(int userId, int contextId) throws OXException;
 
     /**
      * Checks whether the SSL {@link Certificate} with the specified fingerprint

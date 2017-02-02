@@ -53,6 +53,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.net.ssl.management.Certificate;
@@ -143,6 +146,45 @@ public class SSLCertificateManagementSQL {
             certificate.setHostname(resultSet.getString("host"));
             certificate.setTrusted(resultSet.getBoolean("trusted"));
             return certificate;
+        } catch (SQLException e) {
+            throw SSLCertificateManagementSQLExceptionCode.SQL_PROBLEM.create(e.getMessage(), e);
+        } finally {
+            DBUtils.closeResources(resultSet, preparedStatement, connection, true, contextId);
+        }
+    }
+
+    /**
+     * Returns an unmodifiable {@link List} with all managed {@link Certificate}s for the specified
+     * user in the specified context
+     * 
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return an unmodifiable {@link List} with all managed {@link Certificate}s for the specified
+     *         user in the specified context
+     * @throws OXException if an error is occurred
+     */
+    public List<Certificate> getAll(int userId, int contextId) throws OXException {
+        DatabaseService databaseService = getDatabaseService();
+        Connection connection = databaseService.getReadOnly(contextId);
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try {
+            preparedStatement = connection.prepareStatement(SQLStatements.GET_ALL);
+
+            int index = 1;
+            preparedStatement.setInt(index++, contextId);
+            preparedStatement.setInt(index++, userId);
+
+            resultSet = preparedStatement.executeQuery();
+
+            List<Certificate> certificates = new ArrayList<>();
+            while (resultSet.next()) {
+                Certificate certificate = new Certificate(resultSet.getString("fingerprint"));
+                certificate.setHostname(resultSet.getString("host"));
+                certificate.setTrusted(resultSet.getBoolean("trusted"));
+            }
+
+            return Collections.unmodifiableList(certificates);
         } catch (SQLException e) {
             throw SSLCertificateManagementSQLExceptionCode.SQL_PROBLEM.create(e.getMessage(), e);
         } finally {
