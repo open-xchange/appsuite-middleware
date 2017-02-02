@@ -93,6 +93,8 @@ public class SimMailAccount implements MailAccount {
     private Map<String, String> properties;
     private Map<String, String> transportProperties;
 
+    private int failedAuthCount;
+
     public void setProperties(final Map<String, String> properties) {
         this.properties = properties;
     }
@@ -165,6 +167,15 @@ public class SimMailAccount implements MailAccount {
         this.mailServer = mailServer;
     }
 
+    /**
+     * Sets the number of failed authentication attempts
+     *
+     * @param failedAuthCount The number of failed authentication attempts
+     */
+    public void setFailedAuthCount(int failedAuthCount) {
+        this.failedAuthCount = failedAuthCount;
+    }
+
     @Override
     public void addProperty(final String name, final String value) {
         // Nothing to do
@@ -223,11 +234,6 @@ public class SimMailAccount implements MailAccount {
     public int getId() {
         // Nothing to do
         return 0;
-    }
-
-    @Override
-    public boolean isMailAccount() {
-        return true;
     }
 
     @Override
@@ -433,6 +439,16 @@ public class SimMailAccount implements MailAccount {
     @Override
     public String getRootFolder() {
         return null;
+    }
+
+    @Override
+    public boolean isMailDisabled() {
+        return false;
+    }
+
+    @Override
+    public boolean isTransportDisabled() {
+        return false;
     }
 
 }

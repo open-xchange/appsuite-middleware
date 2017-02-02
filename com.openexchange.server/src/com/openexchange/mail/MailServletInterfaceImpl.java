@@ -3358,13 +3358,21 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     @Override
     public List<String> sendMessages(List<? extends ComposedMailMessage> transportMails, ComposedMailMessage mailToAppend, boolean transportEqualToSent, ComposeType type, int accountId, UserSettingMail optUserSetting, MtaStatusInfo statusInfo, String remoteAddress) throws OXException {
         // Initialize
-        initConnection(isTransportOnly(accountId) ? MailAccount.DEFAULT_ID : accountId);
+        boolean accessAvailable = true;
+        try {
+            initConnection(isTransportOnly(accountId) ? MailAccount.DEFAULT_ID : accountId);
+        } catch (OXException e) {
+            if (false == MailExceptionCode.MAIL_ACCESS_DISABLED.equals(e)) {
+                throw e;
+            }
+            accessAvailable = false;
+        }
         MailTransport transport = MailTransport.getInstance(session, accountId);
         try {
             // Invariants
             UserSettingMail usm = null == optUserSetting ? UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx) : optUserSetting;
             List<String> ids = new ArrayList<>(transportMails.size());
-            boolean settingsAllowAppendToSend = !usm.isNoCopyIntoStandardSentFolder();
+            boolean settingsAllowAppendToSend = accessAvailable && !usm.isNoCopyIntoStandardSentFolder();
 
             // State variables
             OXException failedAppend2Sent = null;
@@ -3468,7 +3476,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     }
 
                     // Check for a reply/forward
-                    if (first) {
+                    if (first && accessAvailable) {
                         try {
                             if (ComposeType.REPLY.equals(type)) {
                                 setFlagReply(composedMail.getMsgref());
@@ -3531,6 +3539,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     warnings.add(oxe);
                 }
                 first = false;
+            }
+
+            if (!accessAvailable) {
+                throw MailExceptionCode.COPY_TO_SENT_FOLDER_FAILED.create(new Object[0]);
             }
 
             if (null != failedAppend2Sent) {

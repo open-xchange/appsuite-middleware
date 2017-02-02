@@ -70,7 +70,8 @@ public class UpdateTransportAccountBuilder implements AttributeSwitch {
         Attribute.PERSONAL_LITERAL,
         Attribute.REPLY_TO_LITERAL,
         Attribute.TRANSPORT_STARTTLS_LITERAL,
-        Attribute.TRANSPORT_OAUTH_LITERAL);
+        Attribute.TRANSPORT_OAUTH_LITERAL,
+        Attribute.TRANSPORT_DISABLED);
 
     private static final Set<Attribute> PROPERTY_ATTRIBUTES = EnumSet.of(
         Attribute.POP3_DELETE_WRITE_THROUGH_LITERAL,
@@ -93,14 +94,16 @@ public class UpdateTransportAccountBuilder implements AttributeSwitch {
 
     private final StringBuilder bob;
     private boolean valid;
+    private boolean injectClearingFailAuthCount;
 
     /**
      * Initializes a new {@link UpdateTransportAccountBuilder}.
      */
-    public UpdateTransportAccountBuilder() {
+    public UpdateTransportAccountBuilder(boolean clearFailAuthCount) {
         super();
         bob = new StringBuilder("UPDATE user_transport_account SET ");
-        valid = false;
+        valid = clearFailAuthCount;
+        injectClearingFailAuthCount = clearFailAuthCount;
     }
 
     /**
@@ -129,6 +132,9 @@ public class UpdateTransportAccountBuilder implements AttributeSwitch {
      * @see #isValid()
      */
     public String getUpdateQuery() {
+        if (injectClearingFailAuthCount) {
+            bob.append("failed_auth_count=0,failed_auth_date=0,disabled=0,");
+        }
         bob.setLength(bob.length() - 1);
         bob.append(" WHERE cid = ? AND id = ? and user = ?");
         return bob.toString();
@@ -160,6 +166,7 @@ public class UpdateTransportAccountBuilder implements AttributeSwitch {
     public Object transportURL() {
         bob.append("url = ?,");
         valid = true;
+        injectClearingFailAuthCount = true;
         return null;
     }
 
@@ -278,6 +285,7 @@ public class UpdateTransportAccountBuilder implements AttributeSwitch {
     public Object transportLogin() {
         bob.append("login = ?,");
         valid = true;
+        injectClearingFailAuthCount = true;
         return null;
     }
 
@@ -285,6 +293,7 @@ public class UpdateTransportAccountBuilder implements AttributeSwitch {
     public Object transportPassword() {
         bob.append("password = ?,");
         valid = true;
+        injectClearingFailAuthCount = true;
         return null;
     }
 
@@ -384,11 +393,24 @@ public class UpdateTransportAccountBuilder implements AttributeSwitch {
     public Object transportOAuth() {
         bob.append("oauth = ?,");
         valid = true;
+        injectClearingFailAuthCount = true;
         return null;
     }
 
     @Override
     public Object rootFolder() {
+        return null;
+    }
+
+    @Override
+    public Object mailDisabled() {
+        return null;
+    }
+
+    @Override
+    public Object transportDisabled() {
+        bob.append("disabled = ?,");
+        valid = true;
         return null;
     }
 

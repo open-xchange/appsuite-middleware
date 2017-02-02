@@ -45,14 +45,11 @@ import java.lang.reflect.Constructor;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.Vector;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.Folder;
@@ -67,7 +64,6 @@ import javax.mail.URLName;
 import javax.mail.event.StoreEvent;
 import com.sun.mail.iap.BadCommandException;
 import com.sun.mail.iap.CommandFailedException;
-import com.sun.mail.iap.ConnectQuotaExceededException;
 import com.sun.mail.iap.ConnectionException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
@@ -199,36 +195,6 @@ public class IMAPStore extends Store
     public static final String ID_ARGUMENTS = "arguments";
     public static final String ID_ENVIRONMENT = "environment";
 
-    private static final class StampAndError {
-        final AuthenticationFailedException error;
-        final long stamp;
-        StampAndError(AuthenticationFailedException error, long stamp) {
-            super();
-            this.error = error;
-            this.stamp = stamp;
-        }
-    }
-
-    private static final ConcurrentMap<String, StampAndError> FAILED_AUTHS = new ConcurrentHashMap<String, StampAndError>(32);
-
-    /**
-     * Clean-up cached failed authentication attempts occurred within specified timeout range.
-     *
-     * @param timeout The timeout
-     */
-    public static void cleanUpFailedAuths(final long timeout) {
-        if (timeout <= 0) {
-            return;
-        }
-        final long maxStamp = System.currentTimeMillis() - timeout;
-        final ConcurrentMap<String, StampAndError> map = FAILED_AUTHS;
-        for (final Iterator<StampAndError> it = map.values().iterator(); it.hasNext();) {
-            if (it.next().stamp < maxStamp) {
-                it.remove();
-            }
-        }
-    }
-
     protected final String name;		// name of this protocol
     protected final int defaultPort;	// default IMAP port
     protected final boolean isSSL;	// use SSL?
@@ -271,7 +237,6 @@ public class IMAPStore extends Store
     private Map<String, String> clientParameters = null;
     private ExternalIdGenerator externalIdGenerator = null;
     private boolean failOnNOFetch = false;
-    private int authTimeout = -1;
     private final String guid;			// for Yahoo! Mail IMAP
     private boolean throwSearchException = false;
     private boolean peek = false;
@@ -670,17 +635,6 @@ public class IMAPStore extends Store
         logger.log(Level.CONFIG, "mail.imap.failOnNOFetch: {0}", failOnNOFetch);
     }
 
-    // check temporary down
-    s = session.getProperty("mail." + name + ".authTimeout");
-    if (s != null) {
-        try {
-            authTimeout = Integer.parseInt(s.trim());
-        } catch (NumberFormatException e) {
-            authTimeout = -1;
-        }
-        logger.log(Level.CONFIG, "mail.imap.authTimeout: {0}", authTimeout);
-    }
-
 	guid = session.getProperty("mail." + name + ".yahoo.guid");
 	if (guid != null) {
         logger.log(Level.CONFIG, "mail.imap.yahoo.guid: {0}", guid);
@@ -794,32 +748,6 @@ public class IMAPStore extends Store
         return null == clientParameters ? null : clientParameters.get(name);
     }
 
-    private void checkFailedAuths(String host, int port, String u, String pw) throws AuthenticationFailedException {
-        if (authTimeout <= 0 || null == host || null == u || null == pw) {
-            return;
-        }
-        
-        ConcurrentMap<String, StampAndError> map = FAILED_AUTHS;
-        String key = new StringBuilder(u).append(':').append(pw).append('@').append(host).append(':').append(port).toString();
-        StampAndError sae = map.get(key);
-        if (sae != null) {
-            if ((System.currentTimeMillis() - sae.stamp) <= authTimeout) {
-                throw new AuthenticationFailedException(sae.error.getMessage(), sae.error.getNextException());
-            }
-            map.remove(key);
-        }
-    }
-
-    private void rememberFailedAuths(String host, int port, String u, String pw, AuthenticationFailedException failedAuth) {
-        if (authTimeout <= 0 || null == host || null == u || null == pw) {
-            return;
-        }
-        
-        ConcurrentMap<String, StampAndError> map = FAILED_AUTHS;
-        String key = new StringBuilder(u).append(':').append(pw).append('@').append(host).append(':').append(port).toString();
-        map.put(key, new StampAndError(failedAuth, System.currentTimeMillis()));
-    }
-
     /**
      * Implementation of protocolConnect().  Will create a connection
      * to the server and authenticate the user using the mechanisms
@@ -860,9 +788,6 @@ public class IMAPStore extends Store
 	if (port == -1) {
 	    port = defaultPort;
 	}
-
-	// Check for known failed authentication attempt
-	checkFailedAuths(host, port, user, password);
 
 	try {
             boolean poolEmpty;
@@ -909,10 +834,8 @@ public class IMAPStore extends Store
             protocol.disconnect();
         }
 	    protocol = null;
-	    AuthenticationFailedException e = new AuthenticationFailedException(
+	    throw new AuthenticationFailedException(
 					cex.getResponse().getRest(), cex);
-	    rememberFailedAuths(host, port, user, password, e);
-	    throw e;
 	} catch (ProtocolException pex) { // any other exception
 	    // failure in login command, close connection to server
 	    if (protocol != null) {

@@ -7664,6 +7664,15 @@ msgid ""
 "Layer Security (TLS) is not in use, the client could try STARTTLS)"
 msgstr ""
 
+#. Thrown when a mail access has been disabled. That is it exceeded the limit for failed authentication count.
+#. Thrown when a mail transport has been disabled. That is it exceeded the limit for failed authentication count.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:248
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:251
+msgid ""
+"Accessing server %1$s is disabled. Please update the account and enter valid "
+"credentials in order to use it again."
+msgstr ""
+
 #. The default name for a file
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:73
 msgid "File"
