@@ -61,6 +61,7 @@ import com.openexchange.net.ssl.management.Certificate;
 import com.openexchange.net.ssl.management.exception.SSLCertificateManagementSQLExceptionCode;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link SSLCertificateManagementSQL}
@@ -97,10 +98,19 @@ public class SSLCertificateManagementSQL {
         DatabaseService databaseService = getDatabaseService();
         Connection connection = databaseService.getWritable(contextId);
 
-        if (contains(userId, contextId, certificate.getHostname(), certificate.getFingerprint(), connection)) {
-            update(userId, contextId, certificate, connection);
-        } else {
-            insert(userId, contextId, certificate, connection);
+        try {
+            connection.setAutoCommit(false);
+            if (contains(userId, contextId, certificate.getHostname(), certificate.getFingerprint(), connection)) {
+                update(userId, contextId, certificate, connection);
+            } else {
+                insert(userId, contextId, certificate, connection);
+            }
+            connection.commit();
+        } catch (SQLException e) {
+            DBUtils.rollback(connection);
+            throw SSLCertificateManagementSQLExceptionCode.SQL_PROBLEM.create(e.getMessage(), e);
+        } finally {
+            databaseService.backWritable(connection);
         }
     }
 
@@ -220,9 +230,7 @@ public class SSLCertificateManagementSQL {
         } catch (SQLException e) {
             throw SSLCertificateManagementSQLExceptionCode.SQL_PROBLEM.create(e.getMessage(), e);
         } finally {
-            closeResultSet(resultSet);
-            closeStatement(preparedStatement);
-            databaseService.backReadOnly(connection);
+            DBUtils.closeResources(resultSet, preparedStatement, connection, false, contextId);
         }
     }
 
@@ -238,7 +246,6 @@ public class SSLCertificateManagementSQL {
      * @throws OXException If the {@link Certificate} cannot be updated
      */
     private void update(int userId, int contextId, Certificate certificate, Connection connection) throws OXException {
-        DatabaseService databaseService = getDatabaseService();
         PreparedStatement preparedStatement = null;
         try {
             preparedStatement = connection.prepareStatement(SQLStatements.UPDATE);
@@ -253,8 +260,7 @@ public class SSLCertificateManagementSQL {
         } catch (SQLException e) {
             throw SSLCertificateManagementSQLExceptionCode.SQL_PROBLEM.create(e.getMessage(), e);
         } finally {
-            closeStatement(preparedStatement);
-            databaseService.backWritable(connection);
+            DBUtils.closeSQLStuff(preparedStatement);
         }
     }
 
@@ -268,7 +274,6 @@ public class SSLCertificateManagementSQL {
      * @throws OXException If the {@link Certificate} cannot be inserted
      */
     private void insert(int userId, int contextId, Certificate certificate, Connection connection) throws OXException {
-        DatabaseService databaseService = getDatabaseService();
         PreparedStatement preparedStatement = null;
         try {
             preparedStatement = connection.prepareStatement(SQLStatements.INSERT);
@@ -283,8 +288,7 @@ public class SSLCertificateManagementSQL {
         } catch (SQLException e) {
             throw SSLCertificateManagementSQLExceptionCode.SQL_PROBLEM.create(e.getMessage(), e);
         } finally {
-            closeStatement(preparedStatement);
-            databaseService.backWritable(connection);
+            DBUtils.closeSQLStuff(preparedStatement);
         }
     }
 
