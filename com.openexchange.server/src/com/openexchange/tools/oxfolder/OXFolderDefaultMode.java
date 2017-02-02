@@ -58,8 +58,8 @@ package com.openexchange.tools.oxfolder;
  */
 public enum OXFolderDefaultMode {
     DEFAULT("default"),
-    DEFAULT_DELETABLE("default-deletable"),
-    NONE("no-default-folders");
+    NORMAL("normal"),
+    NONE("none");
 
     private String text;
 
