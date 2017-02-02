@@ -53,8 +53,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.net.ssl.management.Certificate;
@@ -69,8 +67,6 @@ import com.openexchange.tools.sql.DBUtils;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class SSLCertificateManagementSQL {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(SSLCertificateManagementSQL.class);
 
     private ServiceLookup services;
 
@@ -149,9 +145,7 @@ public class SSLCertificateManagementSQL {
         } catch (SQLException e) {
             throw SSLCertificateManagementSQLExceptionCode.SQL_PROBLEM.create(e.getMessage(), e);
         } finally {
-            closeResultSet(resultSet);
-            closeStatement(preparedStatement);
-            databaseService.backReadOnly(connection);
+            DBUtils.closeResources(resultSet, preparedStatement, connection, true, contextId);
         }
     }
 
@@ -179,8 +173,7 @@ public class SSLCertificateManagementSQL {
         } catch (SQLException e) {
             throw SSLCertificateManagementSQLExceptionCode.SQL_PROBLEM.create(e.getMessage(), e);
         } finally {
-            closeStatement(preparedStatement);
-            databaseService.backWritable(connection);
+            DBUtils.closeResources(null, preparedStatement, connection, false, contextId);
         }
     }
 
@@ -326,8 +319,7 @@ public class SSLCertificateManagementSQL {
         } catch (SQLException e) {
             throw SSLCertificateManagementSQLExceptionCode.SQL_PROBLEM.create(e.getMessage(), e);
         } finally {
-            closeResultSet(resultSet);
-            closeStatement(preparedStatement);
+            DBUtils.closeSQLStuff(resultSet, preparedStatement);
             if (connectionInitialised) {
                 databaseService.backReadOnly(connection);
             }
@@ -346,37 +338,5 @@ public class SSLCertificateManagementSQL {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create("DatabaseService");
         }
         return databaseService;
-    }
-
-    /**
-     * Closes the specified {@link PreparedStatement}
-     * 
-     * @param preparedStatement The {@link PreparedStatement} to close
-     */
-    private void closeStatement(PreparedStatement preparedStatement) {
-        if (preparedStatement == null) {
-            return;
-        }
-        try {
-            preparedStatement.close();
-        } catch (SQLException e) {
-            LOGGER.error("", e);
-        }
-    }
-
-    /**
-     * Closes the specified {@link ResultSet}
-     * 
-     * @param resultSet The {@link ResultSet} to close
-     */
-    private void closeResultSet(ResultSet resultSet) {
-        if (resultSet == null) {
-            return;
-        }
-        try {
-            resultSet.close();
-        } catch (SQLException e) {
-            LOGGER.error("", e);
-        }
     }
 }
