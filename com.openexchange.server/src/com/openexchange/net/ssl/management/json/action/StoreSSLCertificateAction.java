@@ -84,14 +84,13 @@ public class StoreSSLCertificateAction extends AbstractSSLCertificateManagementA
         // Try storing from cache
         String fingerprint = requestData.getParameter("fingerprint", String.class, true);
         if (!Strings.isEmpty(fingerprint)) {
+            String hostname = requestData.getParameter("hostname", String.class, false);
+            boolean trust = requestData.getParameter("trust", Boolean.class, false);
+
             SSLCertificateManagementService managementService = getService(SSLCertificateManagementService.class);
 
             Certificate certificate = managementService.getCached(session.getUserId(), session.getContextId(), fingerprint);
-
-            String hostname = requestData.getParameter("hostname", String.class, false);
             certificate.setHostname(hostname);
-            
-            boolean trust = requestData.getParameter("trust", Boolean.class, false);
             certificate.setTrusted(trust);
 
             managementService.store(session.getUserId(), session.getContextId(), certificate);

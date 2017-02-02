@@ -49,60 +49,48 @@
 
 package com.openexchange.net.ssl.management.json.action;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.net.ssl.management.Certificate;
+import com.openexchange.net.ssl.management.SSLCertificateManagementService;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link SSLCertificateManagementActionFactory}
+ * {@link UpdateSSLCertificateAction}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SSLCertificateManagementActionFactory implements AJAXActionServiceFactory {
-
-    private final Map<String, AJAXActionService> actions;
-
-    private final Collection<AJAXActionService> supportedServices;
+public class UpdateSSLCertificateAction extends AbstractSSLCertificateManagementAction {
 
     /**
-     * Initialises a new {@link SSLCertificateManagementActionFactory}.
-     * 
-     * @param services The {@link ServiceLookup} instance
+     * Initialises a new {@link UpdateSSLCertificateAction}.
      */
-    public SSLCertificateManagementActionFactory(ServiceLookup services) {
-        super();
-        Map<String, AJAXActionService> a = new HashMap<>(4);
-        a.put("get", new GetSSLCertificateAction(services));
-        a.put("store", new StoreSSLCertificateAction(services));
-        a.put("delete", new DeleteSSLCertificateAction(services));
-        a.put("update", new UpdateSSLCertificateAction(services));
-
-        actions = Collections.unmodifiableMap(a);
-        supportedServices = Collections.unmodifiableCollection(actions.values());
+    public UpdateSSLCertificateAction(ServiceLookup services) {
+        super(services);
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.documentation.AnnotatedServices#getSupportedServices()
+     * @see com.openexchange.ajax.requesthandler.AJAXActionService#perform(com.openexchange.ajax.requesthandler.AJAXRequestData, com.openexchange.tools.session.ServerSession)
      */
     @Override
-    public Collection<?> getSupportedServices() {
-        return supportedServices;
-    }
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        // Try storing from cache
+        String fingerprint = requestData.getParameter("fingerprint", String.class, false);
+        String hostname = requestData.getParameter("hostname", String.class, false);
+        boolean trust = requestData.getParameter("trust", Boolean.class, false);
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.requesthandler.AJAXActionServiceFactory#createActionService(java.lang.String)
-     */
-    @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
+        Certificate certificate = new Certificate(fingerprint);
+        certificate.setHostname(hostname);
+        certificate.setTrusted(trust);
+
+        SSLCertificateManagementService managementService = getService(SSLCertificateManagementService.class);
+        managementService.store(session.getUserId(), session.getContextId(), certificate);
+
+        return new AJAXRequestResult();
+
     }
 }
