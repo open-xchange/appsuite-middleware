@@ -72,6 +72,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.java.util.Tools;
 import com.openexchange.log.LogProperties;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
+import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
 import com.openexchange.net.ssl.exception.SSLExceptionCode;
 import com.openexchange.net.ssl.management.Certificate;
 import com.openexchange.net.ssl.management.SSLCertificateManagementService;
@@ -277,7 +278,8 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
          * - Check if the server is to be trusted; if yes return
          * - Check if the user is allowed to accept untrusted certificates; if not throw an exception
          * - Retrieve the fingerprint(s) of the certificate
-         * - Search if the user already accepted the certificate; if yes return
+         * - Search if the user already accepted the certificate 
+         * |- if yes check if the hostname of the socket matches the stored hostname; if yes return
          * |_ Throw an exception in case the user previously denied the certificate
          * |_ Throw an exception with the indication that the server is untrusted (the user can then choose what to do)
          */
@@ -290,12 +292,17 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         if (!e.getMessage().contains("unable to find valid certification path to requested target")) {
             throw e;
         }
+        
+        // Fetch user details
         int user = Tools.getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_USER_ID));
         int context = Tools.getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_CONTEXT_ID));
 
-        // TODO: Check if the user is allowed to accept untrusted certificates
-        // via config
-
+        // Check if the user is allowed to accept untrusted certificates
+        UserAwareSSLConfigurationService sslConfigurationService = Services.getService(UserAwareSSLConfigurationService.class);
+        if (!sslConfigurationService.isAllowedToDefineTrustLevel(user, context)) {
+            throw e;
+        }
+        
         // Check if the user trusts it
         checkUserTrustsServer(user, context, chain, socket);
     }
