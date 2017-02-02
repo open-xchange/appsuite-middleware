@@ -1,0 +1,14 @@
+array:
+  - data:
+      Key: com.openexchange.spamhandler.enabled
+      Description: >
+Allows to enable/disable spam handling per user/context/server via ConfigCascade (based on the configured spam handler).
+This property will only be taken into account when the users configuration for 'gui_spam_filter_capabilities_enabled' is set to 'false' (default for createuser). If the user has been 
+provisioned with gui_spam_filter_capabilities_enabled = true changing the described property will be ignored. If the setting isn't defined the user configuration from database will be used.
+      Default: UserSettingMail permission bit from database
+      Version: 7.8.3
+      Reloadable: true
+      Configcascade_Aware: true
+      Related:
+      File: spamhandler.properties
+      
