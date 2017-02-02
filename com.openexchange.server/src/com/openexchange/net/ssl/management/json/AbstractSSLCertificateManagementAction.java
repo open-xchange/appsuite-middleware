@@ -128,16 +128,19 @@ abstract class AbstractSSLCertificateManagementAction implements AJAXActionServi
     Certificate parse(JSONObject jsonObject) throws OXException {
         try {
             Certificate certificate = new Certificate(jsonObject.getString("fingerprint"));
-            certificate.setIssuedOnTimestamp(jsonObject.getLong(CertificateFields.ISSUED_ON));
-            certificate.setExpirationTimestamp(jsonObject.getLong(CertificateFields.EXPIRES_ON));
+            // Mandatory
             certificate.setHostname(jsonObject.getString(CertificateFields.HOSTNAME));
-            certificate.setCommonName(jsonObject.getString(CertificateFields.COMMON_NAME));
-            certificate.setIssuer(jsonObject.getString(CertificateFields.ISSUED_BY));
-            certificate.setSignature(jsonObject.getString(CertificateFields.SIGNATURE));
-            certificate.setSerialNumber(jsonObject.getString(CertificateFields.SERIAL_NUMBER));
-            certificate.setFailureReason(jsonObject.getString(CertificateFields.FAILURE_REASON));
-            certificate.setExpired(jsonObject.getBoolean(CertificateFields.EXPIRED));
             certificate.setTrusted(jsonObject.getBoolean(CertificateFields.TRUSTED));
+
+            // Optional
+            certificate.setIssuedOnTimestamp(jsonObject.optLong(CertificateFields.ISSUED_ON));
+            certificate.setExpirationTimestamp(jsonObject.optLong(CertificateFields.EXPIRES_ON));
+            certificate.setCommonName(jsonObject.optString(CertificateFields.COMMON_NAME));
+            certificate.setIssuer(jsonObject.optString(CertificateFields.ISSUED_BY));
+            certificate.setSignature(jsonObject.optString(CertificateFields.SIGNATURE));
+            certificate.setSerialNumber(jsonObject.optString(CertificateFields.SERIAL_NUMBER));
+            certificate.setFailureReason(jsonObject.optString(CertificateFields.FAILURE_REASON));
+            certificate.setExpired(jsonObject.optBoolean(CertificateFields.EXPIRED));
             return certificate;
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e);
