@@ -102,6 +102,7 @@ public class SSLCertificateManagementSQL {
                 insert(userId, contextId, certificate, connection);
             }
             connection.commit();
+            connection.setAutoCommit(true);
         } catch (SQLException e) {
             DBUtils.rollback(connection);
             throw SSLCertificateManagementSQLExceptionCode.SQL_PROBLEM.create(e.getMessage(), e);

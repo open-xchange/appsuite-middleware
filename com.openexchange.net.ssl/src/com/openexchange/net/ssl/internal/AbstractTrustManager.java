@@ -345,8 +345,8 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
                 checkExpired(userId, contextId, chain);
 
                 // If the previous checks did not fail, cache it for future reference and throw as last resort
-                String fingerprint = cacheCertificate(userId, contextId, cert, socketHostname, FailureReason.NOT_TRUSTED_BY_USER);
-                throw new CertificateException(SSLExceptionCode.USER_DOES_NOT_TRUST_CERTIFICATE.create(userId, contextId, fingerprint));
+                String fingerprint = cacheCertificate(userId, contextId, cert, socketHostname, FailureReason.UNTRUSTED_CERTIFICATE);
+                throw new CertificateException(SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(socketHostname, fingerprint));
             }
             throw new CertificateException(e);
         }

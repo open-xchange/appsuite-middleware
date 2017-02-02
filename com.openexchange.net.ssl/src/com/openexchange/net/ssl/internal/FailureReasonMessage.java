@@ -69,7 +69,10 @@ public class FailureReasonMessage implements LocalizableStrings {
 
     // The user does not trust this certificate
     public static final String NOT_TRUSTED_BY_USER = "The user does not trust this certificate";
-    
+
     // Invalid common name
     public static final String INVALID_COMMON_NAME = "Invalid common name";
+
+    // The certificate is untrusted
+    public static final String UNTRUSTED_CERTIFICATE = "The certificate is untrusted";
 }

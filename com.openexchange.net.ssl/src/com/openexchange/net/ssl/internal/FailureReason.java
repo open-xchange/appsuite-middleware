@@ -55,6 +55,7 @@ package com.openexchange.net.ssl.internal;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public enum FailureReason {
+    UNTRUSTED_CERTIFICATE(FailureReasonMessage.UNTRUSTED_CERTIFICATE),
     SELF_SIGNED(FailureReasonMessage.SELF_SIGNED),
     UNTRUSTED_ISSUER(FailureReasonMessage.UNTRUSTED_ISSUER),
     EXPIRED(FailureReasonMessage.EXPIRED),
