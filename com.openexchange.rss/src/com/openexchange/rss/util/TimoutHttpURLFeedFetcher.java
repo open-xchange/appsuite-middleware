@@ -63,7 +63,6 @@ import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.Reloadables;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
-import com.openexchange.net.ssl.TrustedSSLSocketFactory;
 import com.openexchange.rss.osgi.Services;
 import com.openexchange.tools.stream.CountingInputStream;
 import com.sun.syndication.feed.synd.SyndFeed;
