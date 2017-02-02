@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.net.ssl.management.json;
+package com.openexchange.net.ssl.management.json.action;
 
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;

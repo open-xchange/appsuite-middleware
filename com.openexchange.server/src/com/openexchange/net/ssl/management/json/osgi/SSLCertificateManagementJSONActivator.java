@@ -51,7 +51,7 @@ package com.openexchange.net.ssl.management.json.osgi;
 
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.net.ssl.management.SSLCertificateManagementService;
-import com.openexchange.net.ssl.management.json.SSLCertificateManagementActionFactory;
+import com.openexchange.net.ssl.management.json.action.SSLCertificateManagementActionFactory;
 
 /**
  * {@link SSLCertificateManagementJSONActivator}

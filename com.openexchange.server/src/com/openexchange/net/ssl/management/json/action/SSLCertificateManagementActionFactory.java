@@ -47,68 +47,61 @@
  *
  */
 
-package com.openexchange.net.ssl.management.json;
+package com.openexchange.net.ssl.management.json.action;
 
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
-import com.openexchange.net.ssl.management.Certificate;
-import com.openexchange.net.ssl.management.SSLCertificateManagementService;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link StoreSSLCertificateAction}
+ * {@link SSLCertificateManagementActionFactory}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class StoreSSLCertificateAction extends AbstractSSLCertificateManagementAction {
+public class SSLCertificateManagementActionFactory implements AJAXActionServiceFactory {
+
+    private final Map<String, AJAXActionService> actions;
+
+    private final Collection<AJAXActionService> supportedServices;
 
     /**
-     * Initialises a new {@link StoreSSLCertificateAction}.
+     * Initialises a new {@link SSLCertificateManagementActionFactory}.
+     * 
+     * @param services The {@link ServiceLookup} instance
      */
-    public StoreSSLCertificateAction(ServiceLookup services) {
-        super(services);
+    public SSLCertificateManagementActionFactory(ServiceLookup services) {
+        super();
+        Map<String, AJAXActionService> a = new HashMap<>(4);
+        a.put("get", new GetSSLCertificateAction(services));
+        a.put("store", new StoreSSLCertificateAction(services));
+        a.put("delete", new DeleteSSLCertificateAction(services));
+
+        actions = Collections.unmodifiableMap(a);
+        supportedServices = Collections.unmodifiableCollection(actions.values());
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.ajax.requesthandler.AJAXActionService#perform(com.openexchange.ajax.requesthandler.AJAXRequestData, com.openexchange.tools.session.ServerSession)
+     * @see com.openexchange.documentation.AnnotatedServices#getSupportedServices()
      */
     @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        // Try storing from cache
-        String fingerprint = requestData.getParameter("fingerprint", String.class, true);
-        if (!Strings.isEmpty(fingerprint)) {
-            SSLCertificateManagementService managementService = getService(SSLCertificateManagementService.class);
+    public Collection<?> getSupportedServices() {
+        return supportedServices;
+    }
 
-            Certificate certificate = managementService.getCached(session.getUserId(), session.getContextId(), fingerprint);
-
-            String hostname = requestData.getParameter("hostname", String.class, false);
-            certificate.setHostname(hostname);
-            
-            boolean trust = requestData.getParameter("trust", Boolean.class, false);
-            certificate.setTrusted(trust);
-
-            managementService.store(session.getUserId(), session.getContextId(), certificate);
-
-            return new AJAXRequestResult();
-        }
-
-        // Try from payload
-        Object obj = requestData.getData();
-        if (!(obj instanceof JSONObject)) {
-            throw AjaxExceptionCodes.INVALID_REQUEST_BODY.create("JSONObject", obj.getClass());
-        }
-
-        JSONObject data = (JSONObject) requestData.getData();
-        SSLCertificateManagementService managementService = getService(SSLCertificateManagementService.class);
-        managementService.store(session.getUserId(), session.getContextId(), parse(data));
-
-        return new AJAXRequestResult();
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.requesthandler.AJAXActionServiceFactory#createActionService(java.lang.String)
+     */
+    @Override
+    public AJAXActionService createActionService(String action) throws OXException {
+        return actions.get(action);
     }
 }

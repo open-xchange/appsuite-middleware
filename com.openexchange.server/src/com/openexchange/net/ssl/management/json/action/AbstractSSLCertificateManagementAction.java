@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.net.ssl.management.json;
+package com.openexchange.net.ssl.management.json.action;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -72,7 +72,7 @@ abstract class AbstractSSLCertificateManagementAction implements AJAXActionServi
      * 
      * @param services The {@link ServiceLookup} instance
      */
-    public AbstractSSLCertificateManagementAction(ServiceLookup services) {
+    AbstractSSLCertificateManagementAction(ServiceLookup services) {
         super();
         this.services = services;
     }

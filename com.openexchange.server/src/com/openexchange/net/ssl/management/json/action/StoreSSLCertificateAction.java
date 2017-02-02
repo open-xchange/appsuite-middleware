@@ -47,29 +47,30 @@
  *
  */
 
-package com.openexchange.net.ssl.management.json;
+package com.openexchange.net.ssl.management.json.action;
 
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.net.ssl.management.Certificate;
 import com.openexchange.net.ssl.management.SSLCertificateManagementService;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link GetSSLCertificateAction}
+ * {@link StoreSSLCertificateAction}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class GetSSLCertificateAction extends AbstractSSLCertificateManagementAction {
+public class StoreSSLCertificateAction extends AbstractSSLCertificateManagementAction {
 
     /**
-     * Initialises a new {@link GetSSLCertificateAction}.
-     * 
-     * @param services The {@link ServiceLookup} instance
+     * Initialises a new {@link StoreSSLCertificateAction}.
      */
-    public GetSSLCertificateAction(ServiceLookup services) {
+    public StoreSSLCertificateAction(ServiceLookup services) {
         super(services);
     }
 
@@ -80,9 +81,34 @@ public class GetSSLCertificateAction extends AbstractSSLCertificateManagementAct
      */
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        String fingerprint = requestData.getParameter("fingerprint", String.class, false);
+        // Try storing from cache
+        String fingerprint = requestData.getParameter("fingerprint", String.class, true);
+        if (!Strings.isEmpty(fingerprint)) {
+            SSLCertificateManagementService managementService = getService(SSLCertificateManagementService.class);
+
+            Certificate certificate = managementService.getCached(session.getUserId(), session.getContextId(), fingerprint);
+
+            String hostname = requestData.getParameter("hostname", String.class, false);
+            certificate.setHostname(hostname);
+            
+            boolean trust = requestData.getParameter("trust", Boolean.class, false);
+            certificate.setTrusted(trust);
+
+            managementService.store(session.getUserId(), session.getContextId(), certificate);
+
+            return new AJAXRequestResult();
+        }
+
+        // Try from payload
+        Object obj = requestData.getData();
+        if (!(obj instanceof JSONObject)) {
+            throw AjaxExceptionCodes.INVALID_REQUEST_BODY.create("JSONObject", obj.getClass());
+        }
+
+        JSONObject data = (JSONObject) requestData.getData();
         SSLCertificateManagementService managementService = getService(SSLCertificateManagementService.class);
-        Certificate certificate = managementService.getCached(session.getUserId(), session.getContextId(), fingerprint);
-        return new AJAXRequestResult(parse(certificate));
+        managementService.store(session.getUserId(), session.getContextId(), parse(data));
+
+        return new AJAXRequestResult();
     }
 }

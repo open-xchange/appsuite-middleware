@@ -47,60 +47,24 @@
  *
  */
 
-package com.openexchange.net.ssl.management.json;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
+package com.openexchange.net.ssl.management.json.action;
 
 /**
- * {@link SSLCertificateManagementActionFactory}
+ * {@link CertificateFields}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SSLCertificateManagementActionFactory implements AJAXActionServiceFactory {
+final class CertificateFields {
 
-    private final Map<String, AJAXActionService> actions;
-
-    private final Collection<AJAXActionService> supportedServices;
-
-    /**
-     * Initialises a new {@link SSLCertificateManagementActionFactory}.
-     * 
-     * @param services The {@link ServiceLookup} instance
-     */
-    public SSLCertificateManagementActionFactory(ServiceLookup services) {
-        super();
-        Map<String, AJAXActionService> a = new HashMap<>(4);
-        a.put("get", new GetSSLCertificateAction(services));
-        a.put("store", new StoreSSLCertificateAction(services));
-        
-        actions = Collections.unmodifiableMap(a);
-        supportedServices = Collections.unmodifiableCollection(actions.values());
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.documentation.AnnotatedServices#getSupportedServices()
-     */
-    @Override
-    public Collection<?> getSupportedServices() {
-        return supportedServices;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.requesthandler.AJAXActionServiceFactory#createActionService(java.lang.String)
-     */
-    @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
-    }
+    static final String FINGERPRINT = "fingerprint";
+    static final String ISSUED_ON = "issuedOn";
+    static final String EXPIRES_ON = "expiresOn";
+    static final String HOSTNAME = "hostname";
+    static final String COMMON_NAME = "commonName";
+    static final String ISSUED_BY = "issuedBy";
+    static final String SIGNATURE = "signature";
+    static final String SERIAL_NUMBER = "serialNumber";
+    static final String FAILURE_REASON = "failureReason";
+    static final String EXPIRED = "expired";
+    static final String TRUSTED = "trusted";
 }

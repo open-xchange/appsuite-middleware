@@ -47,24 +47,42 @@
  *
  */
 
-package com.openexchange.net.ssl.management.json;
+package com.openexchange.net.ssl.management.json.action;
+
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
+import com.openexchange.net.ssl.management.Certificate;
+import com.openexchange.net.ssl.management.SSLCertificateManagementService;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link CertificateFields}
+ * {@link GetSSLCertificateAction}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-final class CertificateFields {
+public class GetSSLCertificateAction extends AbstractSSLCertificateManagementAction {
 
-    static final String FINGERPRINT = "fingerprint";
-    static final String ISSUED_ON = "issuedOn";
-    static final String EXPIRES_ON = "expiresOn";
-    static final String HOSTNAME = "hostname";
-    static final String COMMON_NAME = "commonName";
-    static final String ISSUED_BY = "issuedBy";
-    static final String SIGNATURE = "signature";
-    static final String SERIAL_NUMBER = "serialNumber";
-    static final String FAILURE_REASON = "failureReason";
-    static final String EXPIRED = "expired";
-    static final String TRUSTED = "trusted";
+    /**
+     * Initialises a new {@link GetSSLCertificateAction}.
+     * 
+     * @param services The {@link ServiceLookup} instance
+     */
+    public GetSSLCertificateAction(ServiceLookup services) {
+        super(services);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.requesthandler.AJAXActionService#perform(com.openexchange.ajax.requesthandler.AJAXRequestData, com.openexchange.tools.session.ServerSession)
+     */
+    @Override
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        String fingerprint = requestData.getParameter("fingerprint", String.class, false);
+        SSLCertificateManagementService managementService = getService(SSLCertificateManagementService.class);
+        Certificate certificate = managementService.getCached(session.getUserId(), session.getContextId(), fingerprint);
+        return new AJAXRequestResult(parse(certificate));
+    }
 }
