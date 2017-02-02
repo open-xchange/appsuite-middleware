@@ -167,6 +167,7 @@ public class SSLCertificateManagementSQL {
             int index = 1;
             preparedStatement.setInt(index++, contextId);
             preparedStatement.setInt(index++, userId);
+            preparedStatement.setString(index++, hostname);
             preparedStatement.setString(index++, fingerprint);
 
             preparedStatement.executeUpdate();
