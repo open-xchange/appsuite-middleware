@@ -69,7 +69,8 @@ import com.openexchange.test.concurrent.ParallelSuite;
     AlarmTestMacCalendar.class,
     AlarmTestLightning.class,
     AlarmTestIOSCalendar.class,
-    ExDateTest.class
+    ExDateTest.class,
+    SplitSeriesTest.class
 })
 public final class CalDAVTestSuite {
 
