@@ -158,4 +158,8 @@ public interface MailAccountFields {
 
     public static final String ROOT_FOLDER = "root_folder";
 
+    public static final String MAIL_DISABLED = "mail_disabled";
+
+    public static final String TRANSPORT_DISABLED = "transport_disabled";
+
 }

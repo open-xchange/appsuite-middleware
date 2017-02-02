@@ -67,7 +67,8 @@ public class UpdateMailAccountBuilder implements AttributeSwitch {
         Attribute.TRANSPORT_LOGIN_LITERAL,
         Attribute.TRANSPORT_PASSWORD_LITERAL,
         Attribute.TRANSPORT_STARTTLS_LITERAL,
-        Attribute.TRANSPORT_OAUTH_LITERAL));
+        Attribute.TRANSPORT_OAUTH_LITERAL,
+        Attribute.TRANSPORT_DISABLED));
 
     private static final Set<Attribute> PROPERTY_ATTRIBUTES = EnumSet.of(
         Attribute.POP3_DELETE_WRITE_THROUGH_LITERAL,
@@ -90,6 +91,7 @@ public class UpdateMailAccountBuilder implements AttributeSwitch {
 
     private final StringBuilder bob;
     private boolean valid;
+    private boolean injectClearingFailAuthCount;
 
     /**
      * Initializes a new {@link UpdateMailAccountBuilder}.
@@ -98,6 +100,7 @@ public class UpdateMailAccountBuilder implements AttributeSwitch {
         super();
         bob = new StringBuilder("UPDATE user_mail_account SET ");
         valid = false;
+        injectClearingFailAuthCount = false;
     }
 
     /**
@@ -107,6 +110,15 @@ public class UpdateMailAccountBuilder implements AttributeSwitch {
      */
     public boolean isValid() {
         return valid;
+    }
+
+    /**
+     * Checks whether clearing of failed authentication counter has been injected
+     *
+     * @return <code>true</code> if injected; otherwise <code>false</code>
+     */
+    public boolean isInjectClearingFailAuthCount() {
+        return injectClearingFailAuthCount;
     }
 
     /**
@@ -126,6 +138,9 @@ public class UpdateMailAccountBuilder implements AttributeSwitch {
      * @see #isValid()
      */
     public String getUpdateQuery() {
+        if (injectClearingFailAuthCount) {
+            bob.append("failed_auth_count=0,failed_auth_date=0,disabled=0,");
+        }
         bob.setLength(bob.length() - 1);
         bob.append(" WHERE cid = ? AND id = ? AND user = ?");
         return bob.toString();
@@ -166,12 +181,14 @@ public class UpdateMailAccountBuilder implements AttributeSwitch {
     public Object login() {
         bob.append("login = ?,");
         valid = true;
+        injectClearingFailAuthCount = true;
         return null;
     }
 
     @Override
     public Object mailURL() {
         bob.append("url = ?,");
+        injectClearingFailAuthCount = true;
         valid = true;
         return null;
     }
@@ -187,6 +204,7 @@ public class UpdateMailAccountBuilder implements AttributeSwitch {
     public Object password() {
         bob.append("password = ?,");
         valid = true;
+        injectClearingFailAuthCount = true;
         return null;
     }
 
@@ -408,6 +426,7 @@ public class UpdateMailAccountBuilder implements AttributeSwitch {
     public Object mailOAuth() {
         bob.append("oauth = ?,");
         valid = true;
+        injectClearingFailAuthCount = true;
         return null;
     }
 
@@ -418,6 +437,18 @@ public class UpdateMailAccountBuilder implements AttributeSwitch {
 
     @Override
     public Object rootFolder() {
+        return null;
+    }
+
+    @Override
+    public Object mailDisabled() {
+        bob.append("disabled = ?,");
+        valid = true;
+        return null;
+    }
+
+    @Override
+    public Object transportDisabled() {
         return null;
     }
 

@@ -146,11 +146,6 @@ public class MailAccountValidateRequest implements AJAXRequest<MailAccountValida
             }
 
             @Override
-            public boolean isMailAccount() {
-                return true;
-            }
-
-            @Override
             public String getLogin() {
                 return acc.getLogin();
             }
@@ -381,6 +376,16 @@ public class MailAccountValidateRequest implements AJAXRequest<MailAccountValida
             @Override
             public String getRootFolder() {
                 return null;
+            }
+
+            @Override
+            public boolean isMailDisabled() {
+                return acc.isMailDisabled();
+            }
+
+            @Override
+            public boolean isTransportDisabled() {
+                return acc.isTransportDisabled();
             }
         };
     }

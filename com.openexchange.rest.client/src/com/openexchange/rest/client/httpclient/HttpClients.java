@@ -571,7 +571,7 @@ public final class HttpClients {
         @Override
         public long getKeepAliveDuration(HttpResponse response, HttpContext context) {
             // Keep-alive for the shorter of 20 seconds or what the server specifies.
-            long timeout = keepAliveSeconds * 1000;
+            long timeout = keepAliveSeconds * 1000L;
 
             final HeaderElementIterator i = new BasicHeaderElementIterator(response.headerIterator(HTTP.CONN_KEEP_ALIVE));
             while (i.hasNext()) {

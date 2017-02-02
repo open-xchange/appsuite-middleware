@@ -90,16 +90,11 @@ public abstract class TransportConfig extends MailConfig {
         /*
          * Fetch mail account
          */
-        int userId = session.getUserId();
-        int contextId = session.getContextId();
-        TransportAccount transportAccount;
-        {
-            MailAccountStorageService storage = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-            transportAccount = storage.getTransportAccount(accountId, userId, contextId);
-        }
+        TransportAccount transportAccount = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true).getTransportAccount(accountId, session.getUserId(), session.getContextId());
+        transportConfig.account = transportAccount;
         transportConfig.accountId = accountId;
-        fillLoginAndPassword(transportConfig, session, getUser(session).getLoginInfo(), transportAccount);
-        transportConfig.setRequireTls(transportAccount.isTransportStartTls());
+        transportConfig.session = session;
+        fillLoginAndPassword(transportConfig, session, getUser(session).getLoginInfo(), transportAccount, false);
 
         UrlInfo urlInfo = TransportConfig.getTransportServerURL(transportAccount);
         String serverURL = urlInfo.getServerURL();
@@ -107,17 +102,9 @@ public abstract class TransportConfig extends MailConfig {
             if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getTransportServerSource())) {
                 throw MailConfigException.create(new StringBuilder(128).append("Property \"").append("com.openexchange.mail.transportServer").append("\" not set in mail properties").toString());
             }
-            throw MailConfigException.create(new StringBuilder(128).append("Cannot determine transport server URL for user ").append(userId).append(" in context ").append(contextId).toString());
+            throw MailConfigException.create(new StringBuilder(128).append("Cannot determine transport server URL for user ").append(session.getUserId()).append(" in context ").append(session.getContextId()).toString());
         }
-        {
-            /*
-             * Remove ending '/' character
-             */
-            int lastPos = serverURL.length() - 1;
-            if (serverURL.charAt(lastPos) == '/') {
-                serverURL = serverURL.substring(0, lastPos);
-            }
-        }
+
         transportConfig.parseServerURL(urlInfo);
         transportConfig.doCustomParsing(transportAccount, session);
         return transportConfig;

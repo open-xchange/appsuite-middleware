@@ -72,6 +72,7 @@ import com.openexchange.pop3.POP3Provider;
 import com.openexchange.pop3.storage.POP3StorageProvider;
 import com.openexchange.pop3.storage.mailaccount.MailAccountPOP3StorageProvider;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
 
@@ -99,7 +100,7 @@ public final class POP3Activator extends HousekeepingActivator {
         return new Class<?>[] {
             ConfigurationService.class, CacheService.class, UserService.class, MailAccountStorageService.class,
             ContextService.class, TimerService.class, ConfigViewFactory.class, CapabilityService.class, SSLSocketFactoryProvider.class,
-            SSLConfigurationService.class, UserAwareSSLConfigurationService.class
+            SSLConfigurationService.class, UserAwareSSLConfigurationService.class, ThreadPoolService.class
         };
     }
 

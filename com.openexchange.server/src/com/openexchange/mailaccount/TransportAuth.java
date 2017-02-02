@@ -104,6 +104,16 @@ public enum TransportAuth {
         return null;
     }
 
+    /**
+     * Whether to consider specified transport auth as mail-backed authentication.
+     *
+     * @param transportAuth The transport auth to check
+     * @return <code>true</code> for mail-backed authentication; otherwise <code>false</code>
+     */
+    public static boolean considerAsMailTransportAuth(TransportAuth transportAuth) {
+        return MAIL == transportAuth || NONE == transportAuth;
+    }
+
     @Override
     public String toString() {
         return id;

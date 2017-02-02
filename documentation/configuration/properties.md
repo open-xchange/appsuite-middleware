@@ -513,7 +513,7 @@ If you would like to add a reference to another property use the following appro
 ---
 
 
-## Mail 
+## MailAccount 
 
 | Key | <span style="font-weight:normal">com.openexchange.mail.useStaticDefaultFolders</span> |
 |:----------------|:--------|
@@ -555,7 +555,7 @@ If you would like to add a reference to another property use the following appro
 | __File__ | mail.properties  |
 
 ---
-| Key | <span style="font-weight:normal">com.openexhange.mail.authType</span> |
+| Key | <span style="font-weight:normal">com.openexchange.mail.authType</span> |
 |:----------------|:--------|
 | __Description__ | Specifies the authentication type which should be used for primary account's mail access. Known values: 'login', 'xoauth2', and "oauthbearer"<br> |
 | __Default__ | login  |
@@ -565,7 +565,7 @@ If you would like to add a reference to another property use the following appro
 | __File__ | mail.properties  |
 
 ---
-| Key | <span style="font-weight:normal">com.openexhange.mail.transport.authType</span> |
+| Key | <span style="font-weight:normal">com.openexchange.mail.transport.authType</span> |
 |:----------------|:--------|
 | __Description__ | Specifies the authentication type which should be used for primary account's mail transport. Known values: 'login', 'xoauth2', and "oauthbearer"<br> |
 | __Default__ | login  |
@@ -617,6 +617,27 @@ If you would like to add a reference to another property use the following appro
 | __Configcascade Aware__ | true  |
 | __Related__ | com.openexchange.mail.maliciousFolders.enabled  |
 | __File__ | mail.properties  |
+
+---
+
+| Key | <span style="font-weight:normal">com.openexchange.mailaccount.failedAuth.limit</span> |
+|:----------------|:--------|
+| __Description__ | Specifies the max. number of failed authentication attempts until the associated mail account is disabled.<br> |
+| __Default__ | 5  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | true  |
+| __Configcascade Aware__ | true  |
+| __File__ | mailaccount.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexchange.mailaccount.failedAuth.span</span> |
+|:----------------|:--------|
+| __Description__ | Specifies the time span in which the failed authentication attempts are tracked.<br>The value accepts known time span syntax like "1W" or "5m"<br> |
+| __Default__ | 30m  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | true  |
+| __Configcascade Aware__ | true  |
+| __File__ | mailaccount.properties  |
 
 ---
 

@@ -49,6 +49,7 @@
 
 package com.openexchange.smtp;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.mail.MailExceptionCode.getSize;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import java.io.IOException;
@@ -129,7 +130,10 @@ import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.mail.transport.listener.Reply;
 import com.openexchange.mail.transport.listener.Result;
 import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.mailaccount.Account;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.TransportAuth;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.net.ssl.exception.SSLExceptionCode;
@@ -145,6 +149,8 @@ import com.openexchange.smtp.config.SMTPConfig;
 import com.openexchange.smtp.config.SMTPSessionProperties;
 import com.openexchange.smtp.filler.SMTPMessageFiller;
 import com.openexchange.smtp.services.Services;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.ThreadPools;
 import com.sun.mail.smtp.JavaSMTPTransport;
 import com.sun.mail.smtp.SMTPMessage;
 import com.sun.mail.smtp.SMTPSendFailedException;
@@ -470,6 +476,8 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                         smtpProps.put("mail.smtp.auth.mechanisms", "XOAUTH2");
                     } else if (AuthType.OAUTHBEARER == smtpConfig.getAuthType()) {
                         smtpProps.put("mail.smtp.auth.mechanisms", "OAUTHBEARER");
+                    } else {
+                        smtpProps.put("mail.imap.auth.mechanisms", "LOGIN PLAIN DIGEST-MD5 NTLM");
                     }
                     /*
                      * Check if a secure SMTP connection should be established
@@ -640,10 +648,23 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
      *
      * @param transport The instance to connect
      * @param smtpConfig The associated SMTP configuration
-     * @param knownExternal <code>true</code> if it is known that a connection is supposed to be established to an external SMTP service, otherwise <code>false</code> if not known
+     * @param forPing <code>true</code> if it is known that a connection is supposed to be established to an external SMTP service, otherwise <code>false</code> if not known
      * @throws OXException If connect attempt fails
      */
-    protected void connectTransport(Transport transport, SMTPConfig smtpConfig, boolean knownExternal) throws OXException {
+    protected void connectTransport(Transport transport, SMTPConfig smtpConfig, boolean forPing) throws OXException {
+        // Check if account is disabled
+        if (false == forPing) {
+            Account account = getAccount(smtpConfig);
+            if (null != account) {
+                if (account.isTransportDisabled()) {
+                    throw MailExceptionCode.MAIL_TRANSPORT_DISABLED.create(smtpConfig.getServer(), smtpConfig.getLogin(), I(session.getUserId()), I(session.getContextId()));
+                }
+                if (TransportAuth.considerAsMailTransportAuth(account.getTransportAuth()) && ((account instanceof MailAccount) && ((MailAccount) account).isMailDisabled())) {
+                    throw MailExceptionCode.MAIL_TRANSPORT_DISABLED.create(smtpConfig.getServer(), smtpConfig.getLogin(), I(session.getUserId()), I(session.getContextId()));
+                }
+            }
+        }
+
         final String server = IDNA.toASCII(smtpConfig.getServer());
         final int port = smtpConfig.getPort();
         final String login = smtpConfig.getLogin();
@@ -667,7 +688,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
             if (session != null) {
                 AuditLogService auditLogService = Services.optService(AuditLogService.class);
                 if (null != auditLogService) {
-                    String eventId = knownExternal ? "smtp.external.login" : (MailAccount.DEFAULT_ID == accountId ? "smtp.primary.login" : "smtp.external.login");
+                    String eventId = forPing ? "smtp.external.login" : (MailAccount.DEFAULT_ID == accountId ? "smtp.primary.login" : "smtp.external.login");
                     auditLogService.log(eventId, DefaultAttribute.valueFor(Name.LOGIN, session.getLoginName()), DefaultAttribute.valueFor(Name.IP_ADDRESS, session.getLocalIp()), DefaultAttribute.timestampFor(new Date()), DefaultAttribute.arbitraryFor("smtp.login", null == login ? "<none>" : login), DefaultAttribute.arbitraryFor("smtp.server", server), DefaultAttribute.arbitraryFor("smtp.port", Integer.toString(port)));
                 }
             }
@@ -681,6 +702,20 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
         }
     }
 
+    private Account getAccount(SMTPConfig smtpConfig) throws OXException {
+        Account account = smtpConfig.getAccount();
+        if (null != account) {
+            return account;
+        }
+
+        MailAccountStorageService service = Services.optService(MailAccountStorageService.class);
+        if (null == service) {
+            return null;
+        }
+
+        return service.getTransportAccount(accountId, session.getUserId(), session.getContextId());
+    }
+
     /**
      * Connects specified transport using given arguments
      *
@@ -692,12 +727,27 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
      * @throws OXException If connect attempt fails
      * @throws MessagingException If connect attempt fails
      */
-    protected static void doConnectTransport(Transport transport, String host, int port, String user, String password, SMTPConfig smtpConfig, Session session) throws OXException, MessagingException {
+    protected static void doConnectTransport(Transport transport, String host, int port, String user, String password, final SMTPConfig smtpConfig, final Session session) throws OXException, MessagingException {
         try {
             transport.connect(host, port, user, password);
         } catch (javax.mail.AuthenticationFailedException e) {
             if (null == smtpConfig || null == session) {
                 throw e;
+            }
+
+            if (smtpConfig.getAccountId() != MailAccount.DEFAULT_ID) {
+                AbstractTask<Void> task = new AbstractTask<Void>() {
+
+                    @Override
+                    public Void call() throws Exception {
+                        MailAccountStorageService mass = Services.optService(MailAccountStorageService.class);
+                        if (null != mass) {
+                            mass.incrementFailedTransportAuthCount(smtpConfig.getAccountId(), session.getUserId(), session.getContextId());
+                        }
+                        return null;
+                    }
+                };
+                ThreadPools.getThreadPool().submit(task);
             }
 
             if ("No authentication mechanisms supported by both server and client".equals(e.getMessage())) {
