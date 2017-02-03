@@ -98,7 +98,6 @@ public class GetSSLWebSite implements AJAXActionService {
             HttpsURLConnection httpsConnection = (HttpsURLConnection) httpConnection;
 
             SSLSocketFactory sslSocketFactory = services.getService(SSLSocketFactoryProvider.class).getDefault();
-            System.err.println(sslSocketFactory);
             HttpsURLConnection.setDefaultSSLSocketFactory(sslSocketFactory);
             httpConnection = httpsConnection;
 

@@ -95,8 +95,6 @@ public class SSLActivator extends HousekeepingActivator {
             } else {
                 HttpsURLConnection.setDefaultHostnameVerifier(new AllowAllHostnameVerifier());
             }
-
-            HttpsURLConnection.setDefaultSSLSocketFactory(factoryProvider.getDefault());
         } catch (Exception e) {
             org.slf4j.LoggerFactory.getLogger(SSLActivator.class).error("", e);
             throw e;
