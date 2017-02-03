@@ -2321,19 +2321,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
 
         /*
-         * Set account information
-         */
-        List<MailMessage> l = new LinkedList<>();
-        for (MailMessage mail : mails) {
-            if (mail != null) {
-                if (!mail.containsAccountId() || mail.getAccountId() < 0) {
-                    mail.setAccountId(accountId);
-                }
-                l.add(mail);
-            }
-        }
-
-        /*
          * Put message information into cache
          */
         try {
@@ -2393,7 +2380,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         } else {
             mails = mailAccess.getMessageStorage().searchMessages(fullName, indexRange, sortField, orderDir, searchTerm, useFields);
         }
-
         /*
          * Set account information & filter null elements
          */
