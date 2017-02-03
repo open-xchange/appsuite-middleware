@@ -52,11 +52,11 @@ package com.openexchange.net.ssl.management.exception;
 import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link SSLCertificateManagementSQLExceptionMessages}
+ * {@link SSLCertificateManagementExceptionMessages}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-final class SSLCertificateManagementSQLExceptionMessages implements LocalizableStrings {
+final class SSLCertificateManagementExceptionMessages implements LocalizableStrings {
 
     // The SSL certificate with fingerprint '%1$s' was not found for user '%2$s' in context '%3$s'
     final static String CERTIFICATE_NOT_FOUND = "The SSL certificate with fingerprint '%1$s' was not found for user '%2$s' in context '%3$s'";

@@ -56,28 +56,40 @@ import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
 
 /**
- * {@link SSLCertificateManagementSQLExceptionCode}
+ * {@link SSLCertificateManagementExceptionCode}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public enum SSLCertificateManagementSQLExceptionCode implements DisplayableOXExceptionCode {
+public enum SSLCertificateManagementExceptionCode implements DisplayableOXExceptionCode {
+    /**
+     * The SSL certificate with fingerprint '%1$s' was not found in cache
+     */
+    NOT_CACHED("The SSL certificate with fingerprint '%1$s' was not found in cache", OXExceptionStrings.MESSAGE_NOT_FOUND, CATEGORY_ERROR, 1),
+    /**
+     * An unexpected error occurred: %1$s
+     */
+    UNEXPECTED_ERROR("An unexpected error occurred: %1$s", OXExceptionStrings.DEFAULT_MESSAGE, CATEGORY_ERROR, 2),
     /**
      * Unexpected database error: %1$s
      */
-    SQL_PROBLEM("Unexpected database error: %1$s", OXExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 1),
+    SQL_PROBLEM("Unexpected database error: %1$s", OXExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 3),
     /**
      * The SSL certificate with fingerprint '%1$s' was not found for user '%2$s' in context '%3$s'
      */
-    CERTIFICATE_NOT_FOUND("The SSL certificate with fingerprint '%1$s' was not found for user '%2$s' in context '%3$s'", SSLCertificateManagementSQLExceptionMessages.CERTIFICATE_NOT_FOUND, Category.CATEGORY_ERROR, 2),
+    CERTIFICATE_NOT_FOUND("The SSL certificate with fingerprint '%1$s' was not found for user '%2$s' in context '%3$s'", SSLCertificateManagementExceptionMessages.CERTIFICATE_NOT_FOUND, Category.CATEGORY_ERROR, 4),
     ;
 
-    private static final String PREFIX = "SSL-CERT-MGMT";
+    public static final String PREFIX = "SSL-CERT-MGMT";
+
+    private final Category category;
+    private final int detailNumber;
     private final String message;
     private final String displayMessage;
-    private final int detailNumber;
-    private final Category category;
 
-    private SSLCertificateManagementSQLExceptionCode(final String message, String displayMessage, final Category category, final int detailNumber) {
+    /**
+     * Initialises a new {@link SSLCertificateManagementExceptionCode}.
+     */
+    private SSLCertificateManagementExceptionCode(final String message, String displayMessage, final Category category, final int detailNumber) {
         this.message = message;
         this.displayMessage = displayMessage;
         this.detailNumber = detailNumber;
@@ -85,18 +97,13 @@ public enum SSLCertificateManagementSQLExceptionCode implements DisplayableOXExc
     }
 
     @Override
-    public String getMessage() {
-        return message;
-    }
-
-    @Override
-    public String getDisplayMessage() {
-        return displayMessage;
-    }
-
-    @Override
     public Category getCategory() {
         return category;
+    }
+
+    @Override
+    public String getMessage() {
+        return message;
     }
 
     @Override
@@ -112,6 +119,14 @@ public enum SSLCertificateManagementSQLExceptionCode implements DisplayableOXExc
     @Override
     public boolean equals(final OXException e) {
         return OXExceptionFactory.getInstance().equals(this, e);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getDisplayMessage() {
+        return this.displayMessage;
     }
 
     /**

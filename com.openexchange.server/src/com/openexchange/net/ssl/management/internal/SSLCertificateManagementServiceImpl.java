@@ -58,6 +58,7 @@ import com.google.common.cache.CacheBuilder;
 import com.openexchange.exception.OXException;
 import com.openexchange.net.ssl.management.Certificate;
 import com.openexchange.net.ssl.management.SSLCertificateManagementService;
+import com.openexchange.net.ssl.management.exception.SSLCertificateManagementExceptionCode;
 import com.openexchange.net.ssl.management.storage.SSLCertificateManagementSQL;
 import com.openexchange.server.ServiceLookup;
 

@@ -59,7 +59,7 @@ import java.util.List;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.net.ssl.management.Certificate;
-import com.openexchange.net.ssl.management.storage.exception.SSLCertificateManagementSQLExceptionCode;
+import com.openexchange.net.ssl.management.exception.SSLCertificateManagementExceptionCode;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.sql.DBUtils;
@@ -108,7 +108,7 @@ public class SSLCertificateManagementSQL {
             connection.setAutoCommit(true);
         } catch (SQLException e) {
             DBUtils.rollback(connection);
-            throw SSLCertificateManagementSQLExceptionCode.SQL_PROBLEM.create(e.getMessage(), e);
+            throw SSLCertificateManagementExceptionCode.SQL_PROBLEM.create(e.getMessage(), e);
         } finally {
             databaseService.backWritable(connection);
         }
@@ -139,7 +139,7 @@ public class SSLCertificateManagementSQL {
 
             resultSet = preparedStatement.executeQuery();
             if (!resultSet.next()) {
-                throw SSLCertificateManagementSQLExceptionCode.CERTIFICATE_NOT_FOUND.create(fingerprint, userId, contextId);
+                throw SSLCertificateManagementExceptionCode.CERTIFICATE_NOT_FOUND.create(fingerprint, userId, contextId);
             }
 
             Certificate certificate = new Certificate(fingerprint);
@@ -147,7 +147,7 @@ public class SSLCertificateManagementSQL {
             certificate.setTrusted(resultSet.getBoolean("trusted"));
             return certificate;
         } catch (SQLException e) {
-            throw SSLCertificateManagementSQLExceptionCode.SQL_PROBLEM.create(e.getMessage(), e);
+            throw SSLCertificateManagementExceptionCode.SQL_PROBLEM.create(e.getMessage(), e);
         } finally {
             DBUtils.closeResources(resultSet, preparedStatement, connection, true, contextId);
         }
@@ -187,7 +187,7 @@ public class SSLCertificateManagementSQL {
 
             return Collections.unmodifiableList(certificates);
         } catch (SQLException e) {
-            throw SSLCertificateManagementSQLExceptionCode.SQL_PROBLEM.create(e.getMessage(), e);
+            throw SSLCertificateManagementExceptionCode.SQL_PROBLEM.create(e.getMessage(), e);
         } finally {
             DBUtils.closeResources(resultSet, preparedStatement, connection, true, contextId);
         }
@@ -216,7 +216,7 @@ public class SSLCertificateManagementSQL {
 
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw SSLCertificateManagementSQLExceptionCode.SQL_PROBLEM.create(e.getMessage(), e);
+            throw SSLCertificateManagementExceptionCode.SQL_PROBLEM.create(e.getMessage(), e);
         } finally {
             DBUtils.closeResources(null, preparedStatement, connection, false, contextId);
         }
@@ -262,11 +262,11 @@ public class SSLCertificateManagementSQL {
 
             resultSet = preparedStatement.executeQuery();
             if (!resultSet.next()) {
-                throw SSLCertificateManagementSQLExceptionCode.CERTIFICATE_NOT_FOUND.create(fingerprint, userId, contextId);
+                throw SSLCertificateManagementExceptionCode.CERTIFICATE_NOT_FOUND.create(fingerprint, userId, contextId);
             }
             return resultSet.getBoolean("trusted");
         } catch (SQLException e) {
-            throw SSLCertificateManagementSQLExceptionCode.SQL_PROBLEM.create(e.getMessage(), e);
+            throw SSLCertificateManagementExceptionCode.SQL_PROBLEM.create(e.getMessage(), e);
         } finally {
             DBUtils.closeResources(resultSet, preparedStatement, connection, false, contextId);
         }
@@ -296,7 +296,7 @@ public class SSLCertificateManagementSQL {
 
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw SSLCertificateManagementSQLExceptionCode.SQL_PROBLEM.create(e.getMessage(), e);
+            throw SSLCertificateManagementExceptionCode.SQL_PROBLEM.create(e.getMessage(), e);
         } finally {
             DBUtils.closeSQLStuff(preparedStatement);
         }
@@ -324,7 +324,7 @@ public class SSLCertificateManagementSQL {
 
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw SSLCertificateManagementSQLExceptionCode.SQL_PROBLEM.create(e.getMessage(), e);
+            throw SSLCertificateManagementExceptionCode.SQL_PROBLEM.create(e.getMessage(), e);
         } finally {
             DBUtils.closeSQLStuff(preparedStatement);
         }
@@ -362,7 +362,7 @@ public class SSLCertificateManagementSQL {
             resultSet = preparedStatement.executeQuery();
             return resultSet.next();
         } catch (SQLException e) {
-            throw SSLCertificateManagementSQLExceptionCode.SQL_PROBLEM.create(e.getMessage(), e);
+            throw SSLCertificateManagementExceptionCode.SQL_PROBLEM.create(e.getMessage(), e);
         } finally {
             DBUtils.closeSQLStuff(resultSet, preparedStatement);
             if (connectionInitialised) {

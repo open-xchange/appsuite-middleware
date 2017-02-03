@@ -76,7 +76,7 @@ import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
 import com.openexchange.net.ssl.exception.SSLExceptionCode;
 import com.openexchange.net.ssl.management.Certificate;
 import com.openexchange.net.ssl.management.SSLCertificateManagementService;
-import com.openexchange.net.ssl.management.exception.SSLCertificateManagementSQLExceptionCode;
+import com.openexchange.net.ssl.management.exception.SSLCertificateManagementExceptionCode;
 import com.openexchange.net.ssl.osgi.Services;
 
 /**
@@ -331,7 +331,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
                 throw new CertificateException(SSLExceptionCode.INVALID_HOSTNAME.create(socketHostname, fingerprint));
             }
         } catch (OXException e) {
-            if (SSLCertificateManagementSQLExceptionCode.CERTIFICATE_NOT_FOUND.equals(e)) {
+            if (SSLCertificateManagementExceptionCode.CERTIFICATE_NOT_FOUND.equals(e)) {
                 // If not found in the user's store, try to determine the reason of failure
 
                 // a) Check if the certificate is self-signed
