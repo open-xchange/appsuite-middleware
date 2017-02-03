@@ -50,20 +50,23 @@
 package com.openexchange.mail.usersetting.reloadable;
 
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.DefaultInterests;
+import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.Interests;
-import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 
-
 /**
- * {@link UserSettingMailReloadable}
+ * {@link ForcedReloadable} that ensures to clear {@link UserSettingMail} cache and guarantees reading the configuration again.<br>
+ * <br>
+ * As the initial configuration setting 'com.openexchange.spamhandler.enabled' is ConfigCascade-aware and might only have configurations within
+ * the contextSets definition we have to force this download as changes in the contextSets cannot be recognized without having a defined file.
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.4
  */
-public class UserSettingMailReloadable implements Reloadable {
+public class UserSettingMailReloadable implements ForcedReloadable {
 
     @Override
     public void reloadConfiguration(ConfigurationService configService) {
@@ -75,12 +78,8 @@ public class UserSettingMailReloadable implements Reloadable {
 
     }
 
-    private static final String[] PROPERTIES = new String[] {
-        "com.openexchange.spamhandler.enabled"
-    };
-
     @Override
     public Interests getInterests() {
-        return DefaultInterests.builder().propertiesOfInterest(PROPERTIES).build();
+        return Reloadables.getInterestsForAll();
     }
 }
