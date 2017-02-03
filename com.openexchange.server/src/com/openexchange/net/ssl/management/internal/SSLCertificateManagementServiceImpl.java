@@ -80,7 +80,7 @@ public class SSLCertificateManagementServiceImpl implements SSLCertificateManage
     public SSLCertificateManagementServiceImpl(ServiceLookup services) {
         super();
         storage = new SSLCertificateManagementSQL(services);
-        certificateCache = CacheBuilder.newBuilder().maximumSize(1000).expireAfterWrite(5, TimeUnit.MINUTES).expireAfterAccess(5, TimeUnit.MINUTES).build();
+        certificateCache = CacheBuilder.newBuilder().maximumSize(1000).expireAfterWrite(2, TimeUnit.MINUTES).expireAfterAccess(2, TimeUnit.MINUTES).build();
     }
 
     /*
