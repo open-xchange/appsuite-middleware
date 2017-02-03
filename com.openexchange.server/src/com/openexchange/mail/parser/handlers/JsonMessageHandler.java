@@ -132,6 +132,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private static final String NESTED_MESSAGES = MailJSONField.NESTED_MESSAGES.getKey();
     private static final String ATTACHMENTS = MailJSONField.ATTACHMENTS.getKey();
     private static final String ACCOUNT_ID = MailJSONField.ACCOUNT_ID.getKey();
+    private static final String MALICIOUS = "malicious";
     private static final String ACCOUNT_NAME = MailJSONField.ACCOUNT_NAME.getKey();
     private static final String HAS_ATTACHMENTS = MailJSONField.HAS_ATTACHMENTS.getKey();
     private static final String HAS_REAL_ATTACHMENTS = "real_attachment";
@@ -360,6 +361,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 jsonObject.put(SIZE, mail.getSize());
                 jsonObject.put(ACCOUNT_NAME, mail.getAccountName());
                 jsonObject.put(ACCOUNT_ID, mail.getAccountId());
+                jsonObject.put(MALICIOUS, usm.isSuppressLinks());
                 this.initialiserSequenceId = mail.getSequenceId();
 
 
