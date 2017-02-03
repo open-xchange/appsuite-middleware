@@ -406,26 +406,23 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
             LOG.warn("Required ConfigView not available. Unable to retrieve spam configuration for user {} in context {}.");
             return;
         }
-
-        Boolean overwritten = configView.get(SPAM_FILTER_USER_SETTING_MAIL_ORIG_BIT, Boolean.class);
-        if ((!userSettingMail.isSpamOptionEnabled()) && (overwritten == null)) { // if the spam option is disabled, apply new handling (this might only be valid once)
-            configView.set("user", SPAM_FILTER_USER_SETTING_MAIL_ORIG_BIT, userSettingMail.isSpamOptionEnabled()); // remember
-            updateSpamSetting(userSettingMail, userId, ctx, configView);
-        } else if (overwritten != null) { // check if set via CC
-            updateSpamSetting(userSettingMail, userId, ctx, configView);
-        }
+        updateSpamSetting(userSettingMail, userId, ctx, configView);
     }
 
     protected void updateSpamSetting(UserSettingMail userSettingMail, int userId, Context ctx, ConfigView configView) throws OXException {
-        Boolean spamEnabledByConfig = configView.get(SPAM_ENABLED, Boolean.class);
-        if (spamEnabledByConfig == null) {
-            LOG.debug("Unable to update 'spam enabled' user permission bit. No config for user {} in context {} available. Spam handling will be disabled.", userId, ctx.getContextId());
-            return;
-        }
-        boolean boolSpamEnabledByConfig = spamEnabledByConfig.booleanValue();
-        if (userSettingMail.isSpamOptionEnabled() != boolSpamEnabledByConfig) {
-            userSettingMail.setSpamEnabled(boolSpamEnabledByConfig);
-            this.saveUserSettingMail(userSettingMail, userId, ctx);
+        Boolean overwritten = configView.get(SPAM_FILTER_USER_SETTING_MAIL_ORIG_BIT, Boolean.class);
+        if (((!userSettingMail.isSpamOptionEnabled()) && (overwritten == null)) || (overwritten != null)) {
+            Boolean spamEnabledByConfig = configView.get(SPAM_ENABLED, Boolean.class);
+            if (spamEnabledByConfig == null) {
+                LOG.debug("Unable to update 'spam enabled' user permission bit. No config for user {} in context {} available. Spam handling will be disabled.", userId, ctx.getContextId());
+                return;
+            }
+            boolean boolSpamEnabledByConfig = spamEnabledByConfig.booleanValue();
+            if (userSettingMail.isSpamOptionEnabled() != boolSpamEnabledByConfig) {
+                userSettingMail.setSpamEnabled(boolSpamEnabledByConfig);
+                this.saveUserSettingMail(userSettingMail, userId, ctx);
+                configView.set("user", SPAM_FILTER_USER_SETTING_MAIL_ORIG_BIT, userSettingMail.isSpamOptionEnabled()); // remember
+            }
         }
     }
 
