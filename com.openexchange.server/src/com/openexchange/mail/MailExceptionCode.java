@@ -608,6 +608,10 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
      */
     DEFAULT_FOLDER_CHECK_FAILED_OVER_QUOTA("Default folders cannot be created on server %1$s for user %2$s (%3$s) in context on %4$s as mail system denies to create more folders: %5$s",
         MailExceptionStrings.DEFAULT_FOLDER_CHECK_FAILED_OVER_QUOTA_MSG, CATEGORY_PERMISSION_DENIED, 113),
+    /**
+     * Unable to save draft, due to exceeded quota.
+     */
+    UNABLE_TO_SAVE_DRAFT_QUOTA("Unable to save draft, due to exceeded quota.", MailExceptionStrings.UNABLE_TO_SAVE_DRAFT_QUOTA_MSG, CATEGORY_CAPACITY, 116),
     ;
 
     private static final String PREFIX = "MSG";
