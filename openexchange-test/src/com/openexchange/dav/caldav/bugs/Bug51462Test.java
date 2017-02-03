@@ -51,6 +51,7 @@ package com.openexchange.dav.caldav.bugs;
 
 import static org.junit.Assert.*;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.TimeZone;
 import org.junit.Test;
@@ -73,7 +74,7 @@ public class Bug51462Test extends CalDAVTest {
 
     @Override
     protected String getDefaultUserAgent() {
-        return UserAgents.LIGHTNING_4_0_3_1;
+        return UserAgents.LIGHTNING_4_7_7;
     }
 
     @Test
@@ -126,9 +127,9 @@ public class Bug51462Test extends CalDAVTest {
          */
         Date newStart = TimeTools.D("tomorrow at 16:00", TimeZone.getTimeZone("Europe/Berlin"));
         Date newEnd = TimeTools.D("tomorrow at 17:00", TimeZone.getTimeZone("Europe/Berlin"));
-        iCalResource.getVEvent().setProperty("DTSTART", format(newStart, "Europe/Berlin"));
-        iCalResource.getVEvent().setProperty("DTEND", format(newEnd, "Europe/Berlin"));
-        assertEquals("response code wrong", StatusCodes.SC_CREATED, putICalUpdate(uid, iCal, iCalResource.getETag()));
+        iCalResource.getVEvent().setProperty("DTSTART", format(newStart, "Europe/Berlin"), Collections.singletonMap("TZID", "Europe/Berlin"));
+        iCalResource.getVEvent().setProperty("DTEND", format(newEnd, "Europe/Berlin"), Collections.singletonMap("TZID", "Europe/Berlin"));
+        assertEquals("response code wrong", StatusCodes.SC_CREATED, putICalUpdate(iCalResource));
         /*
          * verify event on client
          */
