@@ -75,6 +75,17 @@ import com.openexchange.java.util.TimeZones;
  */
 public class AlarmUtils extends CalendarUtils {
 
+    /**
+     * Constructs a duration string that consists of the supplied properties.
+     *
+     * @param negative <code>true</code> if the duration should become negative, <code>false</code>, otherwise
+     * @param weeks The number of weeks in the duration
+     * @param days The number of days in the duration
+     * @param hours The number of hours in the duration
+     * @param minutes The number of minutes in the duration
+     * @param seconds The number of seconds in the duration
+     * @return The duration string, or <code>PT0S</code> for a neutral duration
+     */
     public static String getDuration(boolean negative, long weeks, long days, long hours, long minutes, long seconds) {
         if (0 == weeks + days + hours + minutes + seconds) {
             return "PT0S";
@@ -154,6 +165,45 @@ public class AlarmUtils extends CalendarUtils {
     }
 
     /**
+     * Applies a specific trigger duration to the supplied calendar instance.
+     *
+     * @param duration The duration to apply
+     * @param calendar the calendar instance to apply the duration to
+     * @return The passed calendar instance, with the duration applied
+     */
+    public static Calendar applyDuration(String duration, Calendar calendar) {
+        boolean negative = duration.indexOf('-') > duration.indexOf('+');
+        String token = null;
+        String previousToken = null;
+        StringTokenizer tokenizer = new StringTokenizer(duration.toUpperCase(), "+-PWDTHMS", true);
+        while (tokenizer.hasMoreTokens()) {
+            token = tokenizer.nextToken();
+            switch (token) {
+                case "W":
+                    calendar.add(Calendar.DATE, (int) Long.parseLong(previousToken) * (negative ? -7 : 7));
+                    break;
+                case "D":
+                    calendar.add(Calendar.DATE, (int) Long.parseLong(previousToken) * (negative ? -1 : 1));
+                    break;
+                case "H":
+                    calendar.add(Calendar.HOUR_OF_DAY, (int) Long.parseLong(previousToken) * (negative ? -1 : 1));
+                    break;
+                case "M":
+                    calendar.add(Calendar.MINUTE, (int) Long.parseLong(previousToken) * (negative ? -1 : 1));
+                    break;
+                case "S":
+                    calendar.add(Calendar.SECOND, (int) Long.parseLong(previousToken) * (negative ? -1 : 1));
+                    break;
+                default:
+                    // skip
+                    break;
+            }
+            previousToken = token;
+        }
+        return calendar;
+    }
+
+    /**
      * Filters a list of attendees based on their alarm action.
      *
      * @param alarms The alarms to filter
@@ -216,7 +266,7 @@ public class AlarmUtils extends CalendarUtils {
      *
      * @param trigger The trigger to get the effective trigger time for
      * @param event The event the trigger's alarm is associated with
-     * @param timeZone The timezone to consider if the event has <i>floating</i> dates
+     * @param timeZone The timezone to consider if the event has <i>floating</i> dates, and to calculate a relative trigger in
      * @return The trigger time, or <code>null</code> if not specified in supplied trigger
      */
     public static Date getTriggerTime(Trigger trigger, Event event, TimeZone timeZone) {
@@ -227,17 +277,12 @@ public class AlarmUtils extends CalendarUtils {
             return trigger.getDateTime();
         }
         if (null != trigger.getDuration()) {
-            long duration = getTriggerDuration(trigger.getDuration());
             Date relatedDate = getRelatedDate(trigger.getRelated(), event);
             if (isFloating(event)) {
                 relatedDate = getDateInTimeZone(relatedDate, timeZone);
             }
-            if (0L == duration) {
-                return relatedDate;
-            }
-            Calendar calendar = initCalendar(TimeZones.UTC, relatedDate);
-            calendar.add(Calendar.SECOND, (int) TimeUnit.SECONDS.convert(duration, TimeUnit.MILLISECONDS));
-            return calendar.getTime();
+            Calendar calendar = initCalendar(timeZone, relatedDate);
+            return applyDuration(trigger.getDuration(), calendar).getTime();
         }
         return null;
     }
