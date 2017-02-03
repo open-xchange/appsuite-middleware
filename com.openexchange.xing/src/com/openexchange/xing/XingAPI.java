@@ -634,7 +634,7 @@ public class XingAPI<S extends Session> {
             }
             // Manually sort contacts
             final Contacts contacts = new Contacts(responseInformation.getJSONObject("shared_contacts"));
-            Collections.sort(contacts.getUsers(), (null == orderBy ? UserField.ID : orderBy).getComparator(false));
+            Collections.sort(contacts.getUsers(), orderBy.getComparator(false));
             return contacts;
         } catch (final JSONException e) {
             throw new XingException(e);
