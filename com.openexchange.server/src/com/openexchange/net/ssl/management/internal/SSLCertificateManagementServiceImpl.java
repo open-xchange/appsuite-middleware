@@ -102,8 +102,10 @@ public class SSLCertificateManagementServiceImpl implements SSLCertificateManage
     public Certificate get(int userId, int contextId, String hostname, String fingerprint) throws OXException {
         return storage.get(userId, contextId, hostname, fingerprint);
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.net.ssl.management.SSLCertificateManagementService#getAll(int, int)
      */
     @Override
@@ -159,8 +161,7 @@ public class SSLCertificateManagementServiceImpl implements SSLCertificateManage
 
             });
         } catch (ExecutionException e) {
-            //TODO: throw proper OXException
-            throw new OXException(e);
+            throw SSLCertificateManagementExceptionCode.UNEXPECTED_ERROR.create(e.getMessage(), e);
         }
     }
 
@@ -173,8 +174,7 @@ public class SSLCertificateManagementServiceImpl implements SSLCertificateManage
     public Certificate getCached(int userId, int contextId, String fingerprint) throws OXException {
         Certificate certificate = certificateCache.getIfPresent(new CertificateKey(userId, contextId, fingerprint));
         if (certificate == null) {
-            //TODO: throw proper OXException
-            throw new OXException(1337, "No certificate cached with fingerprint " + fingerprint);
+            throw SSLCertificateManagementExceptionCode.NOT_CACHED.create(fingerprint);
         }
         return certificate;
     }

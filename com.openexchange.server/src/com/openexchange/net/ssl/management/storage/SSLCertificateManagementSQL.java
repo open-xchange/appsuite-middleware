@@ -59,7 +59,7 @@ import java.util.List;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.net.ssl.management.Certificate;
-import com.openexchange.net.ssl.management.exception.SSLCertificateManagementSQLExceptionCode;
+import com.openexchange.net.ssl.management.storage.exception.SSLCertificateManagementSQLExceptionCode;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.sql.DBUtils;
