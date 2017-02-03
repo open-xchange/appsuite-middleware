@@ -58,6 +58,7 @@ import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.FreeBusyData;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.ical.CalendarExport;
 import com.openexchange.chronos.ical.ICalExceptionCodes;
 import com.openexchange.chronos.ical.ICalParameters;
@@ -212,7 +213,9 @@ public class CalendarExportImpl implements CalendarExport {
          */
         VEvent vEvent = mapper.exportEvent(event, parameters, warnings);
         ICalUtils.exportProperties(event, vEvent);
-        trackTimezones(event.getStartTimeZone(), event.getEndTimeZone());
+        if (false == CalendarUtils.isFloating(event)) {
+            trackTimezones(event.getStartTimeZone(), event.getEndTimeZone());
+        }
         /*
          * export alarms as sub-components
          */
