@@ -89,8 +89,8 @@ public class DefaultTrustManager extends AbstractTrustManager {
      */
     private static X509ExtendedTrustManager initDefaultTrustManager() {
         boolean useDefaultTruststore;
+        SSLConfigurationService sslConfigService = Services.getService(SSLConfigurationService.class);
         {
-            SSLConfigurationService sslConfigService = Services.getService(SSLConfigurationService.class);
             if (null == sslConfigService) {
                 LOG.warn("Absent service " + SSLConfigurationService.class.getName() + ". Assuming default JVM truststore is supposed to be used.");
                 useDefaultTruststore = true;
@@ -108,7 +108,7 @@ public class DefaultTrustManager extends AbstractTrustManager {
         try {
             FileInputStream is = new FileInputStream(filename);
             KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
-            String password = "changeit"; //TODO: Introduce a default keystore password property?
+            String password = sslConfigService.getDefaultTrustStrorePassword();
             keystore.load(is, password.toCharArray());
             params = new PKIXParameters(keystore);
 
