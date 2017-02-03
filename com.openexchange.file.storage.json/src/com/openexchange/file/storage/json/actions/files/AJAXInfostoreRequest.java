@@ -73,6 +73,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.Document;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
@@ -572,6 +573,12 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
             } catch (final JSONException e) {
                 throw AjaxExceptionCodes.JSON_ERROR.create( e.getMessage());
             }
+        }
+
+        // Disallow to manually set MIME type
+        boolean mimeTypeRemoved = null != jFile.remove(File.Field.FILE_MIMETYPE.getName());
+        if (mimeTypeRemoved) {
+            throw FileStorageExceptionCodes.DENIED_MIME_TYPE.create();
         }
 
         UploadFile uploadFile = null;
