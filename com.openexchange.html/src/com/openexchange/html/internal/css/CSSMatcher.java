@@ -870,6 +870,26 @@ public final class CSSMatcher {
         return modified;
     }
 
+    private static boolean dropImport(final Stringer cssBuilder) {
+        if (cssBuilder.indexOf("@import") < 0) {
+            return false;
+        }
+
+
+        StringBuffer sb = new StringBuffer(cssBuilder.length());
+        sb.append(cssBuilder.toString());
+        Thread thread = Thread.currentThread();
+        boolean modified = false;
+        for (int pos; !thread.isInterrupted() && (pos = sb.indexOf("@import")) >= 0;) {
+            sb.delete(pos, pos + 7);
+            modified = true;
+        }
+
+        cssBuilder.setLength(0);
+        cssBuilder.append(sb);
+        return modified;
+    }
+
     private static final Pattern PATTERN_HTML_ENTITIES = Pattern.compile("&([^;\\W]+);");
 
     /**
@@ -935,6 +955,7 @@ public final class CSSMatcher {
         correctRGBFunc(cssBuilder);
         // replaceHtmlEntities(cssBuilder);
         modified = dropInlineData(cssBuilder);
+        modified |= dropImport(cssBuilder);
         modified |= replacePositionFixedWithDisplayBlock(cssBuilder);
 
         /*
