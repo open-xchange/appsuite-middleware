@@ -181,20 +181,48 @@ After the general restrictions have been checked and are fulfilled, the followin
 
 Within the Chronos stack, the recurrence information is transferred and treated as plain ``RRULE`` string, like it is defined in RFC 5545. Any series calculations are performed ad-hoc, under the constraints of some further influencing properties (start-date, start timezone, all-day flag) of the series master event. In the legacy implementation, the recurrence information was split over different properties in the class ``CalendarDataObject``, and provided as such to clients accessing the HTTP API. In particular, the properties ``recurrence_type``, ``days``, ``day_in_month``, ``month``, ``interval`` and ``until``. In the database, this recurrence information is stored in a combined field as so-called *series pattern*. 
 
-For interoperability with the old API and database format, distinct conversion routines are in place, which were built upon already existing (de-)serialization routines to and from iCalendar. This also means that consequently still only those recurrence rules are supported that can also be expressed with the legacy series pattern, at least as long as the data is stored in this format. However, any recurrence calculations in the Chronos stack so already support all ''RRULE`` parts as described in RFC 5545.
+For interoperability with the old API and database format, distinct conversion routines are in place, which were built upon already existing (de-)serialization routines to and from iCalendar. This also means that consequently still only those recurrence rules are supported that can also be expressed with the legacy series pattern, at least as long as the data is stored in this format. However, any recurrence calculations in the Chronos stack do already support all ``RRULE`` parts as described in RFC 5545.
 
 ### Supported ``RRULE`` parts
 
 The following list gives an overview about the supported ``RRULE`` parts, based on the limitations described before.
-
 - ``FREQ:DAILY``: ``INTERVAL``, ``UNTIL``, ``COUNT``
 - ``FREQ:WEEKLY``: ``INTERVAL``, ``UNTIL``, ``COUNT``, ``BYDAY``
 - ``FREQ:MONTHLY``: ``INTERVAL``, ``UNTIL``, ``COUNT``, ``BYDAY``, ``BYSETPOS``, ``BYMONTHDAY``
 - ``FREQ:YEARLY``: ``INTERVAL``, ``UNTIL``, ``COUNT``, ``BYDAY``, ``BYMONTH``, ``BYSETPOS``, ``BYMONTHDAY``
+
+### ``UNTIL`` handling
+
+If an event series is decorated with an end date, this used to be stored as *the date of the last occurrence without time fraction in milliseconds since the Unix epoch*. However, in RFC 5545, the corresponding ``UNTIL`` part of a ``RRULE`` is just defined as 
+> The UNTIL rule part defines a DATE or DATE-TIME value that bounds the recurrence rule in an inclusive manner.
+
+Therefore, some information might currently get lost when converting a recurrence rule to a legacy series pattern, since the time fraction of the date-time value from the ``RRULE`` has to be truncated prior saving. Also, some special checks need to be in place during conversion to prevent an additional occurrence if the client-supplied ``UNTIL`` lies behind the last occurrence (and possibly right before the start date of a next occurrence).  
 
 ### References / further reading
 - https://tools.ietf.org/html/rfc5545#section-3.3.10
 - https://intranet.open-xchange.com/wiki/backend-team:info:calendar#serientermine
 - com.openexchange.groupware.calendar.CalendarDataObject
 - com.openexchange.chronos.compat.Recurrence
+- com.openexchange.chronos.compat.Recurrence.getSeriesEnd
 
+
+## Reset of Participation Status
+
+Whenever an existing event with attendees is *rescheduled*, each attendee's participation status is reset to ``NEEDS-INFO``. A reschedule occurs, when any ``DTSTART``, ``DTEND``, ``DURATION``, ``RRULE``, ``RDATE``, or ``EXDATE`` property changes such that existing recurrence instances are impacted by the changes (RFC 6638, 3.2.8).
+
+Internally, these kind of checks are performed along with each event update is checked. Optionally, the standard allows to behave similarly in case of other changes, e.g. a changed event location, however, currently only time changes are considered.  
+
+### References / further reading
+- https://tools.ietf.org/html/rfc6638#section-3.2.8
+- com.openexchange.chronos.impl.performer.UpdatePerformer.needsParticipationStatusReset
+
+## Reset of Change Exceptions
+
+When an event series is updated, there are situations where all previously created change exceptions need to be reset, i.e. they get removed so that there are only regular occurrences again. In the legacy implementation, this has always been the case whenever the series pattern is changed (in any way), or the recurring master's start-/endtime are updated. Implicitly, this would also reset any participation status of the attendees, see above. 
+
+In the Chronos stack, a slightly enhanced approach is used so that not necessarily all previous change- and delete-exceptions are lost along with an updated recurrence rule. Now, whenever the recurrence rule is changed, the implementation checks if there are existing exceptions whose ``RECURRENCE-ID`` would still be matched by the recurrence set of the updated rule. If so, the change- or delete-exception is kept, otherwise it is still removed. In other words, if the original start time of an existing exception would still be a occurrence of the new recurrence rule, then it can be preserved. For example, any exceptions prior an updated ``UNTIL`` or ``COUNT`` part survive the update. Or, when changing a previously ``DAILY`` rule to only occur on *working days*, any previous exceptions on those days are kept.      
+
+### References / further reading
+- com.openexchange.calendar.api.CalendarCollection.detectTimeChange
+- com.openexchange.calendar.CalendarOperation.checkPatternChange
+- com.openexchange.calendar.CalendarMySQL.deleteAllRecurringExceptions
