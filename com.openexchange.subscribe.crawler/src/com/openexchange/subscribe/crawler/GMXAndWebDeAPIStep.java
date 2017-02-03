@@ -163,11 +163,11 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
                 String location = "";
                 List<NameValuePair> responseHeaders = e.getResponse().getResponseHeaders();
                 for (NameValuePair nvp : responseHeaders){
-                    if (nvp.getName().equals("Location")){
+                    if (nvp.getName().equals("Location") && nvp.getValue() != null) {
                         location = nvp.getValue();
                     }
                 }
-                if (null != location && location.endsWith("error_bad_password")) {
+                if (location.endsWith("error_bad_password")) {
                     throw SubscriptionErrorMessage.INVALID_LOGIN.create();
                 }
                 Matcher matcher = pattern.matcher(location);
