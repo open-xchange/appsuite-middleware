@@ -3646,7 +3646,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 mailAccess.getMessageStorage().updateMessageUserFlags(sentFullname, uidArr, userFlags, true);
             }
         }
-        MailPath retval = new MailPath(mailAccess.getAccountId(), sentFullname, uidArr[0]);
+        MailPath retval = new MailPath(mailAccess.getAccountId(), sentFullname, (uidArr == null || uidArr.length == 0) ? null : uidArr[0]);
         LOG.debug("Mail copy ({}) appended in {}msec", retval, System.currentTimeMillis() - start);
         return retval;
     }
