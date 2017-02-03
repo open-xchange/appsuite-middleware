@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.usersetting;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -134,95 +136,60 @@ public class CachingUserSettingMailStorageTest {
     }
 
     @Test
-    public void testApplyConfigCascadeSettings_initiallyEnabledViaUserSettingMailBit_doNothing() throws OXException {
+    public void testUpdateSpamSetting_initiallyEnabledViaUserSettingMailBit_doNothing() throws OXException {
         CachingUserSettingMailStorage storageSpy = PowerMockito.spy(new CachingUserSettingMailStorage());
-
         userSettingMail.setSpamEnabled(true);
         PowerMockito.when(configView.get(CachingUserSettingMailStorage.SPAM_FILTER_USER_SETTING_MAIL_ORIG_BIT, Boolean.class)).thenReturn(null);
 
-        storageSpy.applyConfigCascadeSettings(userSettingMail, user.getId(), context);
+        storageSpy.updateSpamSetting(userSettingMail, user.getId(), context, configView);
 
-        Mockito.verify(storageSpy, Mockito.never()).updateSpamSetting((UserSettingMail) Matchers.any(), Matchers.anyInt(), (Context) Matchers.any(), (ConfigView) Matchers.any());
         Mockito.verify(configView, Mockito.never()).set("user", CachingUserSettingMailStorage.SPAM_FILTER_USER_SETTING_MAIL_ORIG_BIT, userSettingMail.isSpamOptionEnabled());
+        Mockito.verify(storageSpy, Mockito.never()).saveUserSettingMail(userSettingMail, user.getId(), context);
+        Mockito.verify(configView, Mockito.never()).get(CachingUserSettingMailStorage.SPAM_ENABLED, Boolean.class);
+        assertTrue(userSettingMail.isSpamOptionEnabled());
     }
 
     @Test
-    public void testApplyConfigCascadeSettings_initiallyDisabled_updateToNewConfig() throws OXException {
+    public void testUpdateSpamSetting_initiallyDisabledButNoConfigAvailable_useUserSettingMailBit() throws OXException {
         CachingUserSettingMailStorage storageSpy = PowerMockito.spy(new CachingUserSettingMailStorage());
-        Mockito.doNothing().when(storageSpy).updateSpamSetting((UserSettingMail) Matchers.any(), Matchers.anyInt(), (Context) Matchers.any(), (ConfigView) Matchers.any());
-
         userSettingMail.setSpamEnabled(false);
         PowerMockito.when(configView.get(CachingUserSettingMailStorage.SPAM_FILTER_USER_SETTING_MAIL_ORIG_BIT, Boolean.class)).thenReturn(null);
-
-        storageSpy.applyConfigCascadeSettings(userSettingMail, user.getId(), context);
-
-        Mockito.verify(configView, Mockito.times(1)).set("user", CachingUserSettingMailStorage.SPAM_FILTER_USER_SETTING_MAIL_ORIG_BIT, userSettingMail.isSpamOptionEnabled());
-        Mockito.verify(storageSpy, Mockito.times(1)).updateSpamSetting((UserSettingMail) Matchers.any(), Matchers.anyInt(), (Context) Matchers.any(), (ConfigView) Matchers.any());
-    }
-
-    @Test
-    public void testApplyConfigCascadeSettings_alreadyOverridden_updateToNewConfig() throws OXException {
-        CachingUserSettingMailStorage storageSpy = PowerMockito.spy(new CachingUserSettingMailStorage());
-        Mockito.doNothing().when(storageSpy).updateSpamSetting((UserSettingMail) Matchers.any(), Matchers.anyInt(), (Context) Matchers.any(), (ConfigView) Matchers.any());
-
-        userSettingMail.setSpamEnabled(false);
-        PowerMockito.when(configView.get(CachingUserSettingMailStorage.SPAM_FILTER_USER_SETTING_MAIL_ORIG_BIT, Boolean.class)).thenReturn(Boolean.TRUE);
-
-        storageSpy.applyConfigCascadeSettings(userSettingMail, user.getId(), context);
-
-        Mockito.verify(configView, Mockito.never()).set("user", CachingUserSettingMailStorage.SPAM_FILTER_USER_SETTING_MAIL_ORIG_BIT, userSettingMail.isSpamOptionEnabled());
-        Mockito.verify(storageSpy, Mockito.times(1)).updateSpamSetting((UserSettingMail) Matchers.any(), Matchers.anyInt(), (Context) Matchers.any(), (ConfigView) Matchers.any());
-    }
-
-    @Test
-    public void testApplyConfigCascadeSettings_alreadyOverriddenFalse_updateToNewConfig() throws OXException {
-        CachingUserSettingMailStorage storageSpy = PowerMockito.spy(new CachingUserSettingMailStorage());
-        Mockito.doNothing().when(storageSpy).updateSpamSetting((UserSettingMail) Matchers.any(), Matchers.anyInt(), (Context) Matchers.any(), (ConfigView) Matchers.any());
-
-        userSettingMail.setSpamEnabled(false);
-        PowerMockito.when(configView.get(CachingUserSettingMailStorage.SPAM_FILTER_USER_SETTING_MAIL_ORIG_BIT, Boolean.class)).thenReturn(Boolean.FALSE);
-
-        storageSpy.applyConfigCascadeSettings(userSettingMail, user.getId(), context);
-
-        Mockito.verify(configView, Mockito.never()).set("user", CachingUserSettingMailStorage.SPAM_FILTER_USER_SETTING_MAIL_ORIG_BIT, userSettingMail.isSpamEnabled());
-        Mockito.verify(storageSpy, Mockito.times(1)).updateSpamSetting((UserSettingMail) Matchers.any(), Matchers.anyInt(), (Context) Matchers.any(), (ConfigView) Matchers.any());
-    }
-
-    @Test
-    public void testUpdateSpamSetting_configNotAvailable_ignore() throws OXException {
-        CachingUserSettingMailStorage storageSpy = PowerMockito.spy(new CachingUserSettingMailStorage());
         PowerMockito.when(configView.get(CachingUserSettingMailStorage.SPAM_ENABLED, Boolean.class)).thenReturn(null);
 
         storageSpy.updateSpamSetting(userSettingMail, user.getId(), context, configView);
 
         Mockito.verify(configView, Mockito.times(1)).get(CachingUserSettingMailStorage.SPAM_ENABLED, Boolean.class);
         Mockito.verify(storageSpy, Mockito.never()).saveUserSettingMail(userSettingMail, user.getId(), context);
+        Mockito.verify(configView, Mockito.never()).set("user", CachingUserSettingMailStorage.SPAM_FILTER_USER_SETTING_MAIL_ORIG_BIT, userSettingMail.isSpamOptionEnabled());
+        assertFalse(userSettingMail.isSpamOptionEnabled());
     }
 
     @Test
-    public void testUpdateSpamSetting_newValueNotEqualOldValue_update() throws OXException {
+    public void testUpdateSpamSetting_alreadyOverriddenButChanged_updateToNewConfig() throws OXException {
         CachingUserSettingMailStorage storageSpy = PowerMockito.spy(new CachingUserSettingMailStorage());
-        userSettingMail.setSpamEnabled(true);
-        PowerMockito.doNothing().when(storageSpy).saveUserSettingMail((UserSettingMail) Matchers.any(), Matchers.anyInt(), (Context) Matchers.any());
-        PowerMockito.when(configView.get(CachingUserSettingMailStorage.SPAM_ENABLED, Boolean.class)).thenReturn(Boolean.FALSE);
-
-        storageSpy.updateSpamSetting(userSettingMail, user.getId(), context, configView);
-
-        Mockito.verify(configView, Mockito.times(1)).get(CachingUserSettingMailStorage.SPAM_ENABLED, Boolean.class);
-        Mockito.verify(storageSpy, Mockito.times(1)).saveUserSettingMail(userSettingMail, user.getId(), context);
-    }
-
-    @Test
-    public void testUpdateSpamSetting_newValueNotEqualOldValue_update2() throws OXException {
-        CachingUserSettingMailStorage storageSpy = PowerMockito.spy(new CachingUserSettingMailStorage());
+        PowerMockito.when(configView.get(CachingUserSettingMailStorage.SPAM_FILTER_USER_SETTING_MAIL_ORIG_BIT, Boolean.class)).thenReturn(Boolean.TRUE);
+        PowerMockito.when(configView.get(CachingUserSettingMailStorage.SPAM_ENABLED, Boolean.class)).thenReturn(Boolean.TRUE);
         PowerMockito.doNothing().when(storageSpy).saveUserSettingMail((UserSettingMail) Matchers.any(), Matchers.anyInt(), (Context) Matchers.any());
         userSettingMail.setSpamEnabled(false);
-        PowerMockito.when(configView.get(CachingUserSettingMailStorage.SPAM_ENABLED, Boolean.class)).thenReturn(Boolean.TRUE);
 
         storageSpy.updateSpamSetting(userSettingMail, user.getId(), context, configView);
 
-        Mockito.verify(configView, Mockito.times(1)).get(CachingUserSettingMailStorage.SPAM_ENABLED, Boolean.class);
         Mockito.verify(storageSpy, Mockito.times(1)).saveUserSettingMail(userSettingMail, user.getId(), context);
+        assertTrue(userSettingMail.isSpamOptionEnabled());
+    }
+
+    @Test
+    public void testUpdateSpamSetting_alreadyOverriddenButChanged2_updateToNewConfig() throws OXException {
+        CachingUserSettingMailStorage storageSpy = PowerMockito.spy(new CachingUserSettingMailStorage());
+        PowerMockito.when(configView.get(CachingUserSettingMailStorage.SPAM_FILTER_USER_SETTING_MAIL_ORIG_BIT, Boolean.class)).thenReturn(Boolean.FALSE);
+        PowerMockito.when(configView.get(CachingUserSettingMailStorage.SPAM_ENABLED, Boolean.class)).thenReturn(Boolean.FALSE);
+        PowerMockito.doNothing().when(storageSpy).saveUserSettingMail((UserSettingMail) Matchers.any(), Matchers.anyInt(), (Context) Matchers.any());
+        userSettingMail.setSpamEnabled(true);
+
+        storageSpy.updateSpamSetting(userSettingMail, user.getId(), context, configView);
+
+        Mockito.verify(storageSpy, Mockito.times(1)).saveUserSettingMail(userSettingMail, user.getId(), context);
+        assertFalse(userSettingMail.isSpamOptionEnabled());
     }
 
     @Test
@@ -234,20 +201,25 @@ public class CachingUserSettingMailStorageTest {
 
         storageSpy.updateSpamSetting(userSettingMail, user.getId(), context, configView);
 
+        Mockito.verify(configView, Mockito.never()).set("user", CachingUserSettingMailStorage.SPAM_FILTER_USER_SETTING_MAIL_ORIG_BIT, userSettingMail.isSpamOptionEnabled());
         Mockito.verify(configView, Mockito.times(1)).get(CachingUserSettingMailStorage.SPAM_ENABLED, Boolean.class);
         Mockito.verify(storageSpy, Mockito.never()).saveUserSettingMail(userSettingMail, user.getId(), context);
+        assertFalse(userSettingMail.isSpamOptionEnabled());
     }
 
     @Test
     public void testUpdateSpamSetting_newValueEqual_doNotUpdate2() throws OXException {
         CachingUserSettingMailStorage storageSpy = PowerMockito.spy(new CachingUserSettingMailStorage());
+        PowerMockito.when(configView.get(CachingUserSettingMailStorage.SPAM_FILTER_USER_SETTING_MAIL_ORIG_BIT, Boolean.class)).thenReturn(Boolean.FALSE);
         PowerMockito.doNothing().when(storageSpy).saveUserSettingMail((UserSettingMail) Matchers.any(), Matchers.anyInt(), (Context) Matchers.any());
         userSettingMail.setSpamEnabled(true);
         PowerMockito.when(configView.get(CachingUserSettingMailStorage.SPAM_ENABLED, Boolean.class)).thenReturn(Boolean.TRUE);
 
         storageSpy.updateSpamSetting(userSettingMail, user.getId(), context, configView);
 
+        Mockito.verify(configView, Mockito.never()).set("user", CachingUserSettingMailStorage.SPAM_FILTER_USER_SETTING_MAIL_ORIG_BIT, userSettingMail.isSpamOptionEnabled());
         Mockito.verify(configView, Mockito.times(1)).get(CachingUserSettingMailStorage.SPAM_ENABLED, Boolean.class);
         Mockito.verify(storageSpy, Mockito.never()).saveUserSettingMail(userSettingMail, user.getId(), context);
+        assertTrue(userSettingMail.isSpamOptionEnabled());
     }
 }
