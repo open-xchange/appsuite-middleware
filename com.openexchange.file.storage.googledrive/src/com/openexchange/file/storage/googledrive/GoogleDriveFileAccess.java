@@ -197,7 +197,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 com.google.api.services.drive.model.File savedFile = new com.google.api.services.drive.model.File();
                 if (FileStorageFileAccess.NEW != file.getId()) {
                     savedFile.setId(file.getId());
-                    if ((null == modifiedFields || modifiedFields.contains(Field.FILENAME)) && false == Strings.isEmpty(file.getFileName())) {
+                    if ((null == modifiedFields || modifiedFields.contains(Field.FILENAME)) && false == Strings.isEmpty(file.getFileName()) && false == drive.files().get(file.getId()).execute().getTitle().equals(file.getFileName())) {
                         /*
                          * first check if there is already such a file
                          */
@@ -595,7 +595,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
              *
              * Upload new version of existing file, adjusting metadata as requested
              */
-            if (null != file.getFileName() && (null == modifiedFields || modifiedFields.contains(Field.FILENAME))) {
+            if ((null == modifiedFields || modifiedFields.contains(Field.FILENAME)) && false == Strings.isEmpty(file.getFileName()) && false == drive.files().get(file.getId()).execute().getTitle().equals(file.getFileName())) {
                 /*
                  * first check if there is already such a file
                  */

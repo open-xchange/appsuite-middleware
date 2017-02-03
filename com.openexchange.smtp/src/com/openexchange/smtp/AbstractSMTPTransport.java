@@ -708,6 +708,11 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
             return account;
         }
 
+        Session session = this.session;
+        if (null == session) {
+            return null;
+        }
+
         MailAccountStorageService service = Services.optService(MailAccountStorageService.class);
         if (null == service) {
             return null;

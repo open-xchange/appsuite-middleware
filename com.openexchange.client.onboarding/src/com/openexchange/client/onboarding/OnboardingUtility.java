@@ -894,10 +894,11 @@ public class OnboardingUtility {
             throw OnboardingExceptionCodes.UNEXPECTED_ERROR.create("UserService is unavailable");
         }
         Map<String, String> attributes = userService.getUser(userId, contextId).getAttributes();
-        if (!attributes.containsKey("loginnamerecorder/user_login")) {
-            LOG.warn("No login user attribute for user %s in context %s.", userId, contextId);
+        String login = attributes.get("loginnamerecorder/user_login");
+        if (null == login) {
+            LOG.warn("No login user attribute for user {} in context {}.", userId, contextId);
             return null;
         }
-        return attributes.get("loginnamerecorder/user_login");
+        return login;
     }
 }

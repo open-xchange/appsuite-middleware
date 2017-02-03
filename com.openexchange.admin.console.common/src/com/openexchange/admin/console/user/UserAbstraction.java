@@ -580,7 +580,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected static final String OPT_DEFAULTSENDERADDRESS_LONG = "defaultsenderaddress";
     protected static final String OPT_COUNTRY_BUSINESS_LONG = "country_business";
     protected static final String OPT_FOLDERTREE_LONG = "foldertree";
-    protected static final String OPT_DRIVE_FOLDER_MODE_LONG = "drive-folder-mode";
     protected static final String OPT_TITLE_LONG = "title";
     protected static final String OPT_POSITION_LONG = "position";
 
@@ -783,7 +782,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     private CLIOption defaultsenderaddressOption;
     private CLIOption country_businessOption;
     private CLIOption foldertreeOption;
-    private CLIOption driveFolderModeOption;
     private CLIOption titleOption;
     private CLIOption positionOption;
     private CLIOption primaryAccountNameOption;
@@ -2499,7 +2497,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         this.mail_folder_confirmed_spam_nameOption = setLongOpt(parser, OPT_MAIL_FOLDER_CONFIRMED_SPAM_NAME_LONG, "stringvalue", "Mail_folder_confirmed_spam_name", true, false, true);
         this.defaultsenderaddressOption = setLongOpt(parser, OPT_DEFAULTSENDERADDRESS_LONG, "stringvalue", "DefaultSenderAddress", true, false, true);
         this.foldertreeOption = setIntegerLongOpt(parser, OPT_FOLDERTREE_LONG, "intvalue", "FolderTree", true, false, true);
-        this.driveFolderModeOption = setLongOpt(parser, OPT_DRIVE_FOLDER_MODE_LONG, "stringvalue", "The mode how the default drive folders should be created. 'default', 'default-deletable', 'no-default-folders'. If not selected, 'default' is applied.", true, false, true);
         this.primaryAccountNameOption = setLongOpt(parser, OPT_PRIMARY_ACCOUNT_NAME, "The name of the primary mail account.", true, false, true);
         setGui_Spam_option(parser);
         setModuleAccessOptions(parser);
@@ -3370,12 +3367,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             final Integer value = (Integer)parser.getOptionValue(foldertreeOption);
             if (null != value) {
                 usr.setFolderTree(value);
-            }
-        }
-        {
-            String value = (String) parser.getOptionValue(driveFolderModeOption);
-            if (null != value) {
-                usr.setDriveFolderMode(value);
             }
         }
         {

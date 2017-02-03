@@ -62,6 +62,8 @@ public final class UserAgents {
 
     public static final String LIGHTNING_4_0_3_1 = "Mozilla/5.0 (Windows NT 10.0; WOW64; rv:38.0) Gecko/20100101 Thunderbird/38.3.0 Lightning/4.0.3.1";
 
+    public static final String LIGHTNING_4_7_7 = "Mozilla/5.0 (Windows NT 10.0; WOW64; rv:45.0) Gecko/20100101 Thunderbird/45.7.0 Lightning/4.7.7";
+
     public static final String IOS_9_1 = "iOS/9.1 (13B143) dataaccessd/1.0";
 
     public static final String EM_CLIENT_6_0 = "eM Client/6.0.24144.0";

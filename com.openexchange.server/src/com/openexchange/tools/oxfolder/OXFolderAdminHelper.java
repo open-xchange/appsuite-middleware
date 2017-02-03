@@ -1536,7 +1536,7 @@ public final class OXFolderAdminHelper {
              * Insert default infostore folders
              */
             switch (folderDefaultMode) {
-                case DEFAULT_DELETABLE:
+                case NORMAL:
                     InfoStoreFolderAdminHelper.addDefaultFoldersDeletable(writeCon, cid, userId, LocaleTools.getLocale(language));
                     break;
                 case NONE:
