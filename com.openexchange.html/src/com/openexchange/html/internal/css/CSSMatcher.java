@@ -938,18 +938,24 @@ public final class CSSMatcher {
         /*
          * Feed matcher with buffer's content and reset
          */
-        final Matcher m;
-        final MatcherReplacer mr;
+        Matcher m;
+        MatcherReplacer mr;
         {
-            final String str = cssBuilder.toString();
+            String str = cssBuilder.toString();
             m = PATTERN_STYLE_LINE.matcher(InterruptibleCharSequence.valueOf(str));
             mr = new MatcherReplacer(m, str);
         }
         cssBuilder.setLength(0);
-        final StringBuilder elemBuilder = new StringBuilder(128);
-        final Thread thread = Thread.currentThread();
-        while (!thread.isInterrupted() && m.find()) {
-            final String elementName = m.group(1);
+
+        if (false == m.find()) {
+            // Found no single CSS element...
+            return true;
+        }
+
+        StringBuilder elemBuilder = new StringBuilder(128);
+        Thread thread = Thread.currentThread();
+        do {
+            String elementName = m.group(1);
             if (null != elementName) {
                 Set<String> allowedValuesSet = styleMap.get(toLowerCase(elementName));
                 if (null != allowedValuesSet) {
@@ -997,7 +1003,7 @@ public final class CSSMatcher {
                     mr.appendReplacement(cssBuilder, "");
                 }
             }
-        }
+        } while (!thread.isInterrupted() && m.find());
         mr.appendTail(cssBuilder);
         return modified;
     }
