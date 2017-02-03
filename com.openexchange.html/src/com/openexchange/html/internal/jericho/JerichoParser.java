@@ -281,11 +281,17 @@ public final class JerichoParser {
             EnumTagType enumType = EnumTagType.enumFor(tagType);
             if (null == enumType) {
                 if (!segment.isWhiteSpace()) {
+                    if ((tag instanceof StartTag) && (indexOf('<', 1, tag) >= 0)) {
+                        throw HtmlExceptionCodes.CORRUPT.create();
+                    }
                     handler.handleUnknownTag(tag);
                 }
             } else {
                 switch (enumType) {
                     case START_TAG:
+                        if (indexOf('<', 1, tag) >= 0) {
+                            throw HtmlExceptionCodes.CORRUPT.create();
+                        }
                         handler.handleStartTag((StartTag) tag);
                         break;
                     case END_TAG:
@@ -319,13 +325,13 @@ public final class JerichoParser {
 
     private static Segment safeParse(JerichoHandler handler, Segment segment, boolean fixStartTags, boolean force) throws OXException {
         if (!fixStartTags || !containsStartTag(segment)) {
-            handler.handleSegment(segment);
+            handler.handleSegment(saneCharSequence(segment));
             return null;
         }
 
         Matcher m = FIX_START_TAG.matcher(segment);
         if (!m.find()) {
-            handler.handleSegment(segment);
+            handler.handleSegment(saneCharSequence(segment));
             return null;
         }
 
@@ -345,7 +351,7 @@ public final class JerichoParser {
 
         int start = m.start();
         if (start > 0) {
-            handler.handleSegment(segment.subSequence(0, start));
+            handler.handleSegment(saneCharSequence(segment.subSequence(0, start)));
         }
         int[] remainder = null;
 
@@ -447,6 +453,31 @@ public final class JerichoParser {
             sb.append(' ').append(m.group());
         }
         sb.append('>');
+        return sb.toString();
+    }
+
+    private static CharSequence saneCharSequence(CharSequence segment) {
+        if (indexOf('<', 0, segment) < 0 && indexOf('>', 0, segment) < 0) {
+            return segment;
+        }
+
+        String content = segment.toString();
+        int len = content.length();
+        StringBuilder sb = new StringBuilder(content.length() + 16);
+        for (int i = 0, k = len; k-- > 0; i++) {
+            char ch = content.charAt(i);
+            switch (ch) {
+                case '<':
+                    sb.append("&lt;");
+                    break;
+                case '>':
+                    sb.append("&gt;");
+                    break;
+                default:
+                    sb.append(ch);
+                    break;
+            }
+        }
         return sb.toString();
     }
 
