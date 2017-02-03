@@ -106,7 +106,7 @@ public abstract class BoxClosure<R> {
             return doPerform();
         } catch (BoxAPIException e) {
             int statusCode = e.getResponseCode();
-            if (statusCode == SC_UNAUTHORIZED) {
+            if (resourceAccess != null && statusCode == SC_UNAUTHORIZED) {
                 if (handleAuthError) {
                     BoxOAuthAccess newBoxAccess = resourceAccess.handleAuthError(e, session);
                     return innerPerform(false, resourceAccess, newBoxAccess, session);
