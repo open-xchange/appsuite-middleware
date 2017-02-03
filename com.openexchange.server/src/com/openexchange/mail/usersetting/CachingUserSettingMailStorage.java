@@ -69,7 +69,9 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.userconfiguration.UserConfigurationCodes;
 import com.openexchange.lock.LockService;
+import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.usersetting.UserSettingMail.Signature;
+import com.openexchange.mail.usersetting.reloadable.UserSettingMailReloadable;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
 
@@ -424,6 +426,10 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
                 configView.set("user", SPAM_FILTER_USER_SETTING_MAIL_ORIG_BIT, userSettingMail.isSpamOptionEnabled()); // remember
             }
         }
+    }
+
+    static {
+        MailReloadable.getInstance().addReloadable(new UserSettingMailReloadable());
     }
 
     private static final String SQL_LOAD_SIGNATURES = "SELECT id, signature FROM user_setting_mail_signature WHERE cid = ? AND user = ?";
