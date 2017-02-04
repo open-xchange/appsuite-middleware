@@ -66,6 +66,7 @@ public class Options {
         return new Builder();
     }
 
+    /** The builder for an <code>Options</code> instance */
     public static class Builder {
 
         boolean markSeen;
