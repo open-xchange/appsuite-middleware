@@ -89,6 +89,7 @@ import com.openexchange.mail.api.ISimplifiedThreadStructureEnhanced;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailMessageStorage;
+import com.openexchange.mail.api.Options;
 import com.openexchange.mail.api.unified.UnifiedFullName;
 import com.openexchange.mail.api.unified.UnifiedViewService;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -591,6 +592,11 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
     @Override
     public MailMessage getMessage(String fullName, String mailId, boolean markSeen) throws OXException {
         return getMessage(fullName, mailId, markSeen, session, access);
+    }
+
+    @Override
+    public MailMessage getMessage(String fullName, String mailId, Options options) throws OXException {
+        return getMessage(fullName, mailId, (null != options && options.isMarkSeen()), session, access);
     }
 
     @Override

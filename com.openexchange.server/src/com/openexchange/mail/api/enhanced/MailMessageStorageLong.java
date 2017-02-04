@@ -58,6 +58,7 @@ import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailMessageStorage;
+import com.openexchange.mail.api.Options;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
@@ -306,12 +307,32 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      * @throws OXException If message could not be returned
      */
     public MailMessage getMessageLong(final String folder, final long mailId, final boolean markSeen) throws OXException {
+        return getMessageLong(folder, mailId, Options.builder().markSeen(markSeen).build());
+    }
+
+    /**
+     * Gets the mail located in given folder whose mail ID matches specified ID.
+     * <p>
+     * This is a convenience method that invokes {@link #getMessagesLong(String, long[], MailField[])} with specified mail ID and
+     * {@link MailField#FULL}. Thus the returned instance of {@link MailMessage} is completely pre-filled including content references.
+     * <p>
+     * If no mail could be found for given mail ID, <code>null</code> is returned.
+     * <p>
+     * This method may be overridden in implementing subclass if a faster way can be achieved.
+     *
+     * @param folder The folder full name
+     * @param mailId The mail ID
+     * @param options The options to apply when fetching the message
+     * @return Corresponding message
+     * @throws OXException If message could not be returned
+     */
+    public MailMessage getMessageLong(String folder, long mailId, Options options) throws OXException {
         final MailMessage[] mails = getMessagesLong(folder, new long[] { mailId }, FIELDS_FULL);
         if ((mails == null) || (mails.length == 0) || (mails[0] == null)) {
             return null;
         }
         final MailMessage mail = mails[0];
-        if (!mail.isSeen() && markSeen) {
+        if (!mail.isSeen() && (null != options && options.isMarkSeen())) {
             mail.setPrevSeen(false);
             updateMessageFlagsLong(folder, new long[] { mailId }, MailMessage.FLAG_SEEN, true);
             mail.setFlag(MailMessage.FLAG_SEEN, true);
@@ -594,7 +615,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
 
     /**
      * Like {@link #updateMessageFlagsLong(String, long[], int, boolean)} but also updates user flags
-     * 
+     *
      * @param folder The folder full name
      * @param mailIds The mail IDs
      * @param flags The bit pattern for the flags to alter
