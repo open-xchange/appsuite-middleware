@@ -185,26 +185,10 @@ public interface IMailMessageStorage extends IMailStorage {
      * @param mailId The mail ID
      * @param markSeen <code>true</code> to explicitly mark corresponding mail as seen (setting system flag <i>\Seen</i>); otherwise
      *            <code>false</code> to leave as-is
-     * @return The message or <code>null</code>
+     * @return Corresponding message
      * @throws OXException If message could not be returned
      */
     public MailMessage getMessage(String folder, String mailId, boolean markSeen) throws OXException;
-
-    /**
-     * Gets the mail located in given folder whose mail ID matches specified ID.
-     * <p>
-     * This is a convenience method that invokes {@link #getMessages(String, String[], MailField[])} with specified mail ID and
-     * {@link MailField#FULL}. Thus the returned instance of {@link MailMessage} is completely pre-filled including content references.
-     * <p>
-     * If no mail could be found for given mail ID, <code>null</code> is returned.
-     *
-     * @param folder The folder full name
-     * @param mailId The mail ID
-     * @param options The options to apply when fetching the message
-     * @return The message or <code>null</code>
-     * @throws OXException If message could not be returned
-     */
-    public MailMessage getMessage(String folder, String mailId, Options options) throws OXException;
 
     /**
      * Gets the mails located in given folder whose mail ID matches specified ID. The constant {@link #EMPTY_RETVAL} may be returned, if

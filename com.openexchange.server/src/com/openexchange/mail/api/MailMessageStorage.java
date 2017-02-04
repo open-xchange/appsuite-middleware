@@ -208,17 +208,12 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
      */
     @Override
     public MailMessage getMessage(final String folder, final String mailId, final boolean markSeen) throws OXException {
-        return getMessage(folder, mailId, Options.builder().markSeen(markSeen).build());
-    }
-
-    @Override
-    public MailMessage getMessage(String folder, String mailId, Options options) throws OXException {
-        MailMessage[] mails = getMessages(folder, new String[] { mailId }, FIELDS_FULL);
+        final MailMessage[] mails = getMessages(folder, new String[] { mailId }, FIELDS_FULL);
         if ((mails == null) || (mails.length == 0) || (mails[0] == null)) {
             return null;
         }
         final MailMessage mail = mails[0];
-        if (!mail.isSeen() && (null != options && options.isMarkSeen())) {
+        if (!mail.isSeen() && markSeen) {
             mail.setPrevSeen(false);
             updateMessageFlags(folder, new String[] { mailId }, MailMessage.FLAG_SEEN, true);
             mail.setFlag(MailMessage.FLAG_SEEN, true);

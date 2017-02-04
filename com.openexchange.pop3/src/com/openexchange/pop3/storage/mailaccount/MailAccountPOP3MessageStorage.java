@@ -66,7 +66,6 @@ import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailMessageStorageMimeSupport;
 import com.openexchange.mail.api.ISimplifiedThreadStructure;
-import com.openexchange.mail.api.Options;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
@@ -342,12 +341,7 @@ public class MailAccountPOP3MessageStorage implements ISimplifiedThreadStructure
 
     @Override
     public MailMessage getMessage(final String folder, final String mailId, final boolean markSeen) throws OXException {
-        return getMessage(folder, mailId, Options.builder().markSeen(markSeen).build());
-    }
-
-    @Override
-    public MailMessage getMessage(String folder, String mailId, Options options) throws OXException {
-        MailMessage mail = delegatee.getMessage(getRealFullname(folder), mailId, options);
+        final MailMessage mail = delegatee.getMessage(getRealFullname(folder), mailId, markSeen);
         if (null != mail && mail.containsFolder() && null != mail.getFolder()) {
             mail.setFolder(folder);
             if (mail.containsAccountName()) {

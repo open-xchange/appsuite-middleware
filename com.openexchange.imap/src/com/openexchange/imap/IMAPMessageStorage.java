@@ -141,7 +141,6 @@ import com.openexchange.mail.api.IMailMessageStorageExt;
 import com.openexchange.mail.api.IMailMessageStorageMimeSupport;
 import com.openexchange.mail.api.ISimplifiedThreadStructureEnhanced;
 import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.api.Options;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -1503,16 +1502,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     @Override
     public MailMessage getMessageLong(final String fullName, final long msgUID, final boolean markSeen) throws OXException {
-        return getMessageLong(fullName, msgUID, Options.builder().markSeen(markSeen).build());
-    }
-
-    @Override
-    public MailMessage getMessageLong(final String fullName, final long msgUID, final Options options) throws OXException {
         if (msgUID < 0) {
             return null;
         }
         try {
-            boolean markSeen = null != options && options.isMarkSeen();
             final int desiredMode = markSeen ? READ_WRITE : READ_ONLY;
             try {
                 imapFolder = setAndOpenFolder(imapFolder, fullName, desiredMode);

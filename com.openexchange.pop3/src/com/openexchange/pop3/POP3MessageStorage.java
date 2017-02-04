@@ -63,7 +63,6 @@ import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.ISimplifiedThreadStructure;
 import com.openexchange.mail.api.MailMessageStorage;
-import com.openexchange.mail.api.Options;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
@@ -177,13 +176,6 @@ public final class POP3MessageStorage extends MailMessageStorage implements ISim
     @Override
     public MailMessage getMessage(final String folder, final String mailId, final boolean markSeen) throws OXException {
         final MailMessage mail = pop3MessageStorage.getMessage(folder, mailId, markSeen);
-        setAccountInfo(mail);
-        return mail;
-    }
-
-    @Override
-    public MailMessage getMessage(String folder, String mailId, Options options) throws OXException {
-        MailMessage mail = pop3MessageStorage.getMessage(folder, mailId, options);
         setAccountInfo(mail);
         return mail;
     }
