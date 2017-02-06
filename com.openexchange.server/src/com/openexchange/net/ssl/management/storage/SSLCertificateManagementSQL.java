@@ -115,6 +115,38 @@ public class SSLCertificateManagementSQL {
     }
 
     /**
+     * Retrieve an unmodifiable {@link List} with all trusted/untrusted hostname/certificate combinations
+     * for the specified certificate fingerprint
+     * 
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param fingerprint The fingerprint of the {@link Certificate}
+     * @return @return an unmodifiable {@link List} with {@link Certificate}s
+     * @throws OXException if any error is occurred
+     */
+    public List<Certificate> get(int userId, int contextId, String fingerprint) throws OXException {
+        DatabaseService databaseService = getDatabaseService();
+        Connection connection = databaseService.getReadOnly(contextId);
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try {
+            preparedStatement = connection.prepareStatement(SQLStatements.GET_FOR_ALL_HOSTS);
+
+            int index = 1;
+            preparedStatement.setInt(index++, contextId);
+            preparedStatement.setInt(index++, userId);
+            preparedStatement.setString(index++, fingerprint);
+
+            resultSet = preparedStatement.executeQuery();
+            return parse(resultSet);
+        } catch (SQLException e) {
+            throw SSLCertificateManagementExceptionCode.SQL_PROBLEM.create(e.getMessage(), e);
+        } finally {
+            DBUtils.closeResources(resultSet, preparedStatement, connection, true, contextId);
+        }
+    }
+
+    /**
      * Retrieve a {@link Certificate} from the database
      * 
      * @param userId The user identifier
@@ -129,7 +161,7 @@ public class SSLCertificateManagementSQL {
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         try {
-            preparedStatement = connection.prepareStatement(SQLStatements.GET);
+            preparedStatement = connection.prepareStatement(SQLStatements.GET_FOR_HOST);
 
             int index = 1;
             preparedStatement.setInt(index++, contextId);
@@ -177,15 +209,7 @@ public class SSLCertificateManagementSQL {
 
             resultSet = preparedStatement.executeQuery();
 
-            List<Certificate> certificates = new ArrayList<>();
-            while (resultSet.next()) {
-                Certificate certificate = new Certificate(resultSet.getString("fingerprint"));
-                certificate.setHostname(resultSet.getString("host"));
-                certificate.setTrusted(resultSet.getBoolean("trusted"));
-                certificates.add(certificate);
-            }
-
-            return Collections.unmodifiableList(certificates);
+            return parse(resultSet);
         } catch (SQLException e) {
             throw SSLCertificateManagementExceptionCode.SQL_PROBLEM.create(e.getMessage(), e);
         } finally {
@@ -369,6 +393,24 @@ public class SSLCertificateManagementSQL {
                 databaseService.backReadOnly(connection);
             }
         }
+    }
+
+    /**
+     * Parses the {@link ResultSet}
+     * 
+     * @param resultSet The {@link ResultSet} to parse
+     * @return An unmodifiable {@link List} with {@link Certificate}s, or an empty {@link List}
+     * @throws SQLException if an SQL error is occurred
+     */
+    private List<Certificate> parse(ResultSet resultSet) throws SQLException {
+        List<Certificate> certificates = new ArrayList<>();
+        while (resultSet.next()) {
+            Certificate certificate = new Certificate(resultSet.getString("fingerprint"));
+            certificate.setHostname(resultSet.getString("host"));
+            certificate.setTrusted(resultSet.getBoolean("trusted"));
+            certificates.add(certificate);
+        }
+        return Collections.unmodifiableList(certificates);
     }
 
     /**

@@ -107,6 +107,16 @@ public class SSLCertificateManagementServiceImpl implements SSLCertificateManage
     /*
      * (non-Javadoc)
      * 
+     * @see com.openexchange.net.ssl.management.SSLCertificateManagementService#get(int, int, java.lang.String)
+     */
+    @Override
+    public List<Certificate> get(int userId, int contextId, String fingerprint) throws OXException {
+        return storage.get(userId,  contextId, fingerprint);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.net.ssl.management.SSLCertificateManagementService#getAll(int, int)
      */
     @Override

@@ -77,6 +77,7 @@ public class SSLCertificateManagementActionFactory implements AJAXActionServiceF
     public SSLCertificateManagementActionFactory(ServiceLookup services) {
         super();
         Map<String, AJAXActionService> a = new HashMap<>(8);
+        a.put("examine", new ExamineSSLCertificateAction(services));
         a.put("get", new GetSSLCertificateAction(services));
         a.put("store", new StoreSSLCertificateAction(services));
         a.put("delete", new DeleteSSLCertificateAction(services));

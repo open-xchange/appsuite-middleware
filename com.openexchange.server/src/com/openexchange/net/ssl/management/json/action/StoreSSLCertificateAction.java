@@ -89,7 +89,13 @@ public class StoreSSLCertificateAction extends AbstractSSLCertificateManagementA
 
             SSLCertificateManagementService managementService = getService(SSLCertificateManagementService.class);
 
-            Certificate certificate = managementService.getCached(session.getUserId(), session.getContextId(), fingerprint);
+            Certificate certificate;
+            try {
+                certificate = managementService.getCached(session.getUserId(), session.getContextId(), fingerprint);
+            } catch (OXException e) {
+                // Cache miss; everything is OK, we have all necessary information to proceed
+                certificate = new Certificate(fingerprint);
+            }
             certificate.setHostname(hostname);
             certificate.setTrusted(trust);
 

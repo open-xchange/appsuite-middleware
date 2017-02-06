@@ -49,29 +49,27 @@
 
 package com.openexchange.net.ssl.management.json.action;
 
-import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 import com.openexchange.net.ssl.management.Certificate;
 import com.openexchange.net.ssl.management.SSLCertificateManagementService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link GetSSLCertificateAction}
+ * {@link ExamineSSLCertificateAction}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class GetSSLCertificateAction extends AbstractSSLCertificateManagementAction {
+public class ExamineSSLCertificateAction extends AbstractSSLCertificateManagementAction {
 
     /**
-     * Initialises a new {@link GetSSLCertificateAction}.
+     * Initialises a new {@link ExamineSSLCertificateAction}.
      * 
      * @param services The {@link ServiceLookup} instance
      */
-    public GetSSLCertificateAction(ServiceLookup services) {
+    public ExamineSSLCertificateAction(ServiceLookup services) {
         super(services);
     }
 
@@ -83,15 +81,8 @@ public class GetSSLCertificateAction extends AbstractSSLCertificateManagementAct
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         String fingerprint = requestData.getParameter("fingerprint", String.class, false);
-        String hostname = requestData.getParameter("hostname", String.class, true);
         SSLCertificateManagementService managementService = getService(SSLCertificateManagementService.class);
-
-        if (Strings.isEmpty(hostname)) {
-            List<Certificate> certificates = managementService.get(session.getUserId(), session.getContextId(), fingerprint);
-            return new AJAXRequestResult(parse(certificates));
-        }
-
-        Certificate certificate = managementService.get(session.getUserId(), session.getContextId(), hostname, fingerprint);
+        Certificate certificate = managementService.getCached(session.getUserId(), session.getContextId(), fingerprint);
         return new AJAXRequestResult(parse(certificate));
     }
 }

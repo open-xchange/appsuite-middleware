@@ -62,9 +62,14 @@ final class SQLStatements {
     final static String INSERT = "INSERT INTO user_certificate (cid, userid, host, fingerprint, trusted) VALUES (?,?,?,?,?)";
 
     /**
+     * Get the certificate for a specified host
+     */
+    final static String GET_FOR_HOST = "SELECT * FROM  user_certificate WHERE cid=? AND userid=? AND host=? AND fingerprint=?";
+
+    /**
      * Get the certificate
      */
-    final static String GET = "SELECT * FROM  user_certificate WHERE cid=? AND userid=? AND host=? AND fingerprint=?";
+    final static String GET_FOR_ALL_HOSTS = "SELECT * FROM  user_certificate WHERE cid=? AND userid=? AND fingerprint=?";
 
     /**
      * Get all certificates

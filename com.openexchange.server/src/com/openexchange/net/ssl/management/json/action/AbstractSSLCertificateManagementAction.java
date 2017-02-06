@@ -49,6 +49,8 @@
 
 package com.openexchange.net.ssl.management.json.action;
 
+import java.util.List;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -90,6 +92,20 @@ abstract class AbstractSSLCertificateManagementAction implements AJAXActionServi
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(clazz.getSimpleName());
         }
         return service;
+    }
+
+    /**
+     * 
+     * @param certificates
+     * @return
+     * @throws OXException
+     */
+    JSONArray parse(List<Certificate> certificates) throws OXException {
+        JSONArray array = new JSONArray(certificates.size());
+        for (Certificate certificate : certificates) {
+            array.put(parse(certificate));
+        }
+        return array;
     }
 
     /**

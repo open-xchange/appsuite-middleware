@@ -374,7 +374,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
     private void checkRootCATrusted(int userId, int contextId, X509Certificate[] chain) throws CertificateException {
         Set<TrustAnchor> anchors = params.getTrustAnchors();
 
-        //The root CA is always the last element in the chain
+        //The root CA certificate is always the last element in the chain
         X509Certificate rootCert = chain[chain.length - 1];
         for (TrustAnchor a : anchors) {
             if (a.getTrustedCert().getSubjectDN().equals(rootCert.getIssuerDN())) {
