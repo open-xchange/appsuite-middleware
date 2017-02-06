@@ -511,9 +511,9 @@ public class AuditEventHandler implements EventHandler {
      */
     private Contact extractContact(CommonEvent commonEvent) throws OXException {
         Contact contact = (Contact) commonEvent.getActionObj();
-        if (CommonEvent.DELETE != commonEvent.getAction() && null != commonEvent.getSession() && (
-            null == contact || false == contact.containsDisplayName() || false == contact.containsCreatedBy() ||
-                false == contact.containsModifiedBy() || false == contact.containsObjectID() || false == contact.containsParentFolderID())) {
+        if (CommonEvent.DELETE != commonEvent.getAction() && null != commonEvent.getSession() && contact!=null && (
+            false == contact.containsDisplayName() || false == contact.containsCreatedBy() ||
+            false == contact.containsModifiedBy()  || false == contact.containsObjectID()  || false == contact.containsParentFolderID())) {
             /*
              * try and get more details
              */

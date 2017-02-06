@@ -2573,9 +2573,9 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             return;
         }
 
-        Session session = updateProperties == null ? null : updateProperties.getSession();
-        boolean changePrimary = updateProperties == null ? false : updateProperties.isChangePrimary();
-        boolean changeProtocol = updateProperties == null ? false : updateProperties.isChangeProtocol();
+        Session session = updateProperties.getSession();
+        boolean changePrimary = updateProperties.isChangePrimary();
+        boolean changeProtocol = updateProperties.isChangeProtocol();
 
         if (attributes.contains(Attribute.NAME_LITERAL)) {
             // Check name
