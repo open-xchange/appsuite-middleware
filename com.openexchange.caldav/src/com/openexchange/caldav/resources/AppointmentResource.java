@@ -682,6 +682,9 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             applyReminderProperties(appointment);
             applyPrivateComments(appointment);
             applyAttachments(appointment);
+            if (false == DAVUserAgent.EM_CLIENT.equals(getUserAgent())) {
+                appointment.setProperty("com.openexchange.data.conversion.ical.useXMicrosoftCDOAllDayEvent", Boolean.FALSE);
+            }
             changeExceptions = 0 < object.getRecurrenceID() ? parent.loadChangeExceptions(object, true) : null;
             /*
              * transform change exceptions to delete-exceptions where user is removed from participants if needed (bug #26293)
@@ -708,6 +711,9 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 applyPrivateComments(changeException);
                 if (false == DAVUserAgent.MAC_CALENDAR.equals(getUserAgent())) {
                     applyAttachments(changeException);
+                }
+                if (false == DAVUserAgent.EM_CLIENT.equals(getUserAgent())) {
+                    changeException.setProperty("com.openexchange.data.conversion.ical.useXMicrosoftCDOAllDayEvent", Boolean.FALSE);
                 }
                 icalEmitter.writeAppointment(session, changeException, factory.getContext(), conversionErrors, conversionWarnings);
             }

@@ -410,15 +410,17 @@ public class TestCommand extends Command {
             if (!tagArray.isEmpty()) {
                 throw new SieveException("One of the tagArguments: " + tagArray + " is not valid for " + this.command.getCommandName());
             }
-        }
-        if (null != this.arguments && this.command.getNumberOfArguments() >= 0) {
-            final int realArguments = this.arguments.size() - this.tagArguments.size();
-            final int minArguments = this.command.getNumberOfArguments() + ((-1 != indexOfComparator) ? 1 : 0);
-            final int maxArguments = this.command.getMaxNumberOfArguments();
-            if (realArguments < minArguments || realArguments > maxArguments) {
-                throw new SieveException("The number of arguments (" + realArguments + ") for " + this.command.getCommandName() + " is not valid.");
+
+            if (null != this.arguments && this.command.getNumberOfArguments() >= 0) {
+                final int realArguments = this.arguments.size() - this.tagArguments.size();
+                final int minArguments = this.command.getNumberOfArguments() + ((-1 != indexOfComparator) ? 1 : 0);
+                final int maxArguments = this.command.getMaxNumberOfArguments();
+                if (realArguments < minArguments || realArguments > maxArguments) {
+                    throw new SieveException("The number of arguments (" + realArguments + ") for " + this.command.getCommandName() + " is not valid.");
+                }
             }
         }
+
         // Add test for testcommands here only anyof and allof are allowed to
         // take further tests
     }

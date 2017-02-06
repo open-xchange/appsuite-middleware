@@ -620,6 +620,11 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
      * Mail transport is disabled for server %1$s with login %2$s (user=%3$s, context=%4$s)
      */
     MAIL_TRANSPORT_DISABLED("Mail transport is disabled for server %1$s with login %2$s (user=%3$s, context=%4$s)", MailExceptionStrings.MAIL_TRANSPORT_DISABLED_MSG, CATEGORY_PERMISSION_DENIED, 115),
+
+    /**
+     * Unable to save draft, due to exceeded quota.
+     */
+    UNABLE_TO_SAVE_DRAFT_QUOTA("Unable to save draft, due to exceeded quota.", MailExceptionStrings.UNABLE_TO_SAVE_DRAFT_QUOTA_MSG, CATEGORY_CAPACITY, 116),
     ;
 
     private static final String PREFIX = "MSG";

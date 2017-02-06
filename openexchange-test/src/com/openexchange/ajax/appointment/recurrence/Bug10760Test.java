@@ -11,7 +11,7 @@ import com.openexchange.groupware.container.Appointment;
 /**
  *
  * {@link Bug10760Test}
- * 
+ *
  * @author Offspring
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - added clean-up
  *
@@ -34,6 +34,7 @@ public class Bug10760Test extends AbstractRecurrenceTest {
 
         appointmentObj.setRecurrencePosition(2);
         catm.update(appointmentFolderId, appointmentObj);
+        int newObjectId = appointmentObj.getObjectID();
         final List<Integer> tmp = new ArrayList<Integer>();
         for (int i = 0; i < APPOINTMENT_FIELDS.length; i++) {
             tmp.add(Integer.valueOf(APPOINTMENT_FIELDS[i]));
@@ -48,10 +49,10 @@ public class Bug10760Test extends AbstractRecurrenceTest {
         for (int i = 0; i < fields.length; i++) {
             fields[i] = tmp.get(i).intValue();
         }
-        
+
         final Appointment[] appointmentArray = catm.all(appointmentFolderId, new Date(), new Date(), APPOINTMENT_FIELDS, false);
         for (int a = 0; a < appointmentArray.length; a++) {
-            if (appointmentArray[a].getObjectID() == objectId) {
+            if (appointmentArray[a].getObjectID() == newObjectId) {
                 assertEquals("recurrence id is not equals expected", objectId, appointmentArray[a].getRecurrenceID());
                 assertEquals("recurrence pos is not equals expected", 2, appointmentArray[a].getRecurrencePosition());
             }

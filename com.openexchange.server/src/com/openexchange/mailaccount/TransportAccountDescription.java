@@ -447,6 +447,15 @@ public class TransportAccountDescription {
     }
 
     /**
+     * Gets the transport secure flag
+     *
+     * @return The transport secure flag
+     */
+    public boolean isTransportSecure() {
+        return transportSecure;
+    }
+
+    /**
      * Sets if STARTTLS should be used to connect to transport server
      *
      * @return

@@ -372,7 +372,7 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
                     return cl2 <= 0 ? 0 : 1;
                 }
                 if (cl2 <= 0) {
-                    return cl1 <= 0 ? 0 : -1;
+                    return -1;
                 }
                 return (cl1 < cl2 ? -1 : (cl1 == cl2 ? 0 : 1));
             }
