@@ -83,6 +83,18 @@ public interface SSLCertificateManagementService {
     Certificate get(int userId, int contextId, String hostname, String fingerprint) throws OXException;
 
     /**
+     * Returns an unmodifiable {@link List} with all trusted/untrusted hostname/certificate combinations
+     * for the specified certificate fingerprint
+     * 
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param fingerprint The fingerprint of the {@link Certificate}
+     * @return an unmodifiable {@link List} with {@link Certificate}s
+     * @throws OXException if an error is occurred
+     */
+    List<Certificate> get(int userId, int contextId, String fingerprint) throws OXException;
+
+    /**
      * Returns an unmodifiable {@link List} with all managed {@link Certificate}s for the specified
      * user in the specified context
      * 
