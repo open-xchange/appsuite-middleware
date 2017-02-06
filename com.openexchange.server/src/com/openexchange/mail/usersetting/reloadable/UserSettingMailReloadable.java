@@ -52,8 +52,6 @@ package com.openexchange.mail.usersetting.reloadable;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.Interests;
-import com.openexchange.config.Reloadables;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 
@@ -68,18 +66,26 @@ import com.openexchange.mail.usersetting.UserSettingMailStorage;
  */
 public class UserSettingMailReloadable implements ForcedReloadable {
 
+    /**
+     * Initializes a new {@link UserSettingMailReloadable}.
+     */
+    public UserSettingMailReloadable() {
+        super();
+    }
+
     @Override
     public void reloadConfiguration(ConfigurationService configService) {
         try {
             UserSettingMailStorage.getInstance().clearStorage();
-        } catch (OXException e) {
-            org.slf4j.LoggerFactory.getLogger(UserSettingMailReloadable.class).error("Unable to reload configuration for UserSettingMail.", e);
+        } catch (Exception e) {
+            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(UserSettingMailReloadable.class);
+            logger.error("Unable to reload configuration for UserSettingMail.", e);
         }
 
     }
 
     @Override
     public Interests getInterests() {
-        return Reloadables.getInterestsForAll();
+        return null;
     }
 }
