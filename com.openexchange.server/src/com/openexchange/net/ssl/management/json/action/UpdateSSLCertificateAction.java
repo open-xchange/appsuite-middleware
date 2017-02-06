@@ -78,7 +78,6 @@ public class UpdateSSLCertificateAction extends AbstractSSLCertificateManagement
      */
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        // Try storing from cache
         String fingerprint = requestData.getParameter("fingerprint", String.class, false);
         String hostname = requestData.getParameter("hostname", String.class, false);
         boolean trust = requestData.getParameter("trust", Boolean.class, false);
@@ -91,6 +90,5 @@ public class UpdateSSLCertificateAction extends AbstractSSLCertificateManagement
         managementService.store(session.getUserId(), session.getContextId(), certificate);
 
         return new AJAXRequestResult();
-
     }
 }
