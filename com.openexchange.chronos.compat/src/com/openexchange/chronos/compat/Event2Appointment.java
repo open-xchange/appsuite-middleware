@@ -301,7 +301,7 @@ public class Event2Appointment {
      * @param recurrenceData The recurrence data
      * @return The series pattern, or <code>null</code> if passed <code>recurrenceData</code> reference was null
      */
-    public static SeriesPattern getSeriesPattern(RecurrenceData recurrenceData) {
+    public static SeriesPattern getSeriesPattern(RecurrenceData recurrenceData) throws OXException {
         if (null != recurrenceData) {
             TimeZone timeZone = null != recurrenceData.getTimeZoneID() ? TimeZone.getTimeZone(recurrenceData.getTimeZoneID()) : TimeZones.UTC;
             return Recurrence.generatePattern(recurrenceData.getRecurrenceRule(), CalendarUtils.initCalendar(timeZone, recurrenceData.getSeriesStart()));

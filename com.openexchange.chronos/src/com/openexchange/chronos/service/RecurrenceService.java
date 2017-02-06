@@ -98,7 +98,7 @@ public interface RecurrenceService {
      * @param position The 1-based position.
      * @return The date position of a given 1-based position. Null if the position is out of boundaries.
      */
-    public Calendar calculateRecurrenceDatePosition(Event master, int position);
+    public Calendar calculateRecurrenceDatePosition(Event master, int position) throws OXException;
 
     /**
      * Calculates a 1-based recurrence position for a given reccurence date position of a recurring event.
@@ -107,7 +107,7 @@ public interface RecurrenceService {
      * @param datePosition The date position. Must match a start date.
      * @return The Position of the given datePosition. 1-based. 0 if not found or out of boundaries.
      */
-    public int calculateRecurrencePosition(Event master, Calendar datePosition);
+    public int calculateRecurrencePosition(Event master, Calendar datePosition) throws OXException;
 
     Iterator<RecurrenceId> getRecurrenceIterator(Event master, Calendar start, Calendar end, boolean ignoreExceptions) throws OXException;
 

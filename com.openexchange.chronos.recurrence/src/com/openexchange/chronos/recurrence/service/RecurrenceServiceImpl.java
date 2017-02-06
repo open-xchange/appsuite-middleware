@@ -54,12 +54,11 @@ import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TimeZone;
-import org.dmfs.rfc5545.DateTime;
-import org.dmfs.rfc5545.recur.InvalidRecurrenceRuleException;
-import org.dmfs.rfc5545.recur.RecurrenceRule;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.common.DefaultRecurrenceData;
+import com.openexchange.chronos.compat.Recurrence;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.exception.OXException;
 
@@ -82,23 +81,15 @@ public class RecurrenceServiceImpl implements RecurrenceService {
     }
 
     @Override
-    public Calendar calculateRecurrenceDatePosition(Event master, int position) {
+    public Calendar calculateRecurrenceDatePosition(Event master, int position) throws OXException {
         if (!master.containsRecurrenceRule()) {
             return null;
         }
         if (position <= 0) {
             return null;
         }
-        RecurrenceRule rrule = null;
-        try {
-            rrule = new RecurrenceRule(master.getRecurrenceRule());
-        } catch (InvalidRecurrenceRuleException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
         int counter = 1;
-        RecurrenceRuleIterator iterator = rrule.iterator(new DateTime(TimeZone.getTimeZone(master.getStartTimeZone()), master.getStartDate().getTime()));
+        RecurrenceRuleIterator iterator = Recurrence.getRecurrenceIterator(new DefaultRecurrenceData(master), true);
         while (iterator.hasNext()) {
             long nextMillis = iterator.nextMillis();
             if (counter++ == position) {
@@ -112,23 +103,15 @@ public class RecurrenceServiceImpl implements RecurrenceService {
     }
 
     @Override
-    public int calculateRecurrencePosition(Event master, Calendar datePosition) {
+    public int calculateRecurrencePosition(Event master, Calendar datePosition) throws OXException {
         if (!master.containsRecurrenceRule()) {
             return 0;
         }
         if (datePosition.compareTo(master.getStart()) < 0) {
             return 0;
         }
-        RecurrenceRule rrule = null;
-        try {
-            rrule = new RecurrenceRule(master.getRecurrenceRule());
-        } catch (InvalidRecurrenceRuleException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
         int position = 1;
-        RecurrenceRuleIterator iterator = rrule.iterator(new DateTime(TimeZone.getTimeZone(master.getStartTimeZone()), master.getStartDate().getTime()));
+        RecurrenceRuleIterator iterator = Recurrence.getRecurrenceIterator(new DefaultRecurrenceData(master), true);
         while (iterator.hasNext()) {
             long nextMillis = iterator.nextMillis();
             if (nextMillis > datePosition.getTimeInMillis()) {

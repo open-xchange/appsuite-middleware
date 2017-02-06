@@ -81,13 +81,13 @@ public class RecurrenceTests {
                 } else if (check.contains("INTERVAL=")) {
                     Assert.fail("Expected \"" + expect + "\" to be part of " + check + "\".");
                 }
-            } else {                
+            } else {
                 Assert.assertTrue("Expected \"" + expect + "\" to be part of " + check + "\".", check.contains(expect));
                 increaseCount(expect.length());
             }
             return this;
         }
-        
+
         private void increaseCount(int expect) {
             if (count > 0) {
                 count++;
@@ -142,7 +142,7 @@ public class RecurrenceTests {
     }
 
     @Test
-    public void testSimpleRecurringRulesToPattern() {
+    public void testSimpleRecurringRulesToPattern() throws Exception {
         Calendar cal = GregorianCalendar.getInstance();
 
         cal.setTimeInMillis(1222865100000L);

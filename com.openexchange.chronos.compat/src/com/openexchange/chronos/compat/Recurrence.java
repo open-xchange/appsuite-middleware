@@ -262,12 +262,7 @@ public class Recurrence {
      * @throws OXException {@link CalendarExceptionCodes#INVALID_RRULE} {@link CalendarExceptionCodes#UNSUPPORTED_RRULE}
      */
     public static void checkIsSupported(RecurrenceData recurrenceData) throws OXException {
-        RecurrenceRule rule = null;
-        try {
-            rule = new RecurrenceRule(recurrenceData.getRecurrenceRule());
-        } catch (InvalidRecurrenceRuleException | IllegalArgumentException e) {
-            throw CalendarExceptionCodes.INVALID_RRULE.create(e, recurrenceData.getRecurrenceRule());
-        }
+        RecurrenceRule rule = getRecurrenceRule(recurrenceData.getRecurrenceRule());
         //TODO: further checks
         switch (rule.getFreq()) {
             case DAILY:
@@ -317,13 +312,24 @@ public class Recurrence {
      * @throws OXException {@link CalendarExceptionCodes#INVALID_RRULE}
      */
     public static RecurrenceRuleIterator getRecurrenceIterator(RecurrenceData recurrenceData, boolean forwardToOccurrence) throws OXException {
-        RecurrenceRule rule = null;
-        try {
-            rule = new RecurrenceRule(recurrenceData.getRecurrenceRule());
-        } catch (InvalidRecurrenceRuleException | IllegalArgumentException e) {
-            throw CalendarExceptionCodes.INVALID_RRULE.create(e, recurrenceData.getRecurrenceRule());
-        }
+        RecurrenceRule rule = getRecurrenceRule(recurrenceData.getRecurrenceRule());
         return getRecurrenceIterator(rule, recurrenceData.getSeriesStart(), recurrenceData.getTimeZoneID(), recurrenceData.isAllDay(), forwardToOccurrence);
+    }
+
+    /**
+     * Initializes a new recurrence rule for the supplied recurrence rule string.
+     *
+     *
+     * @param rrule The recurrence rule string
+     * @return The recurrence rule
+     * @throws OXException {@link CalendarExceptionCodes#INVALID_RRULE}
+     */
+    private static RecurrenceRule getRecurrenceRule(String rrule) throws OXException {
+        try {
+            return new RecurrenceRule(rrule);
+        } catch (InvalidRecurrenceRuleException | IllegalArgumentException e) {
+            throw CalendarExceptionCodes.INVALID_RRULE.create(e, rrule);
+        }
     }
 
     /**
@@ -364,6 +370,8 @@ public class Recurrence {
                     }
                 }
                 throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(new DefaultRecurrenceId(seriesStart), rule);
+            } catch (IllegalArgumentException e) {
+                throw CalendarExceptionCodes.INVALID_RRULE.create(e, rule);
             } finally {
                 if (null != originalCount) {
                     rule.setCount(originalCount.intValue());
