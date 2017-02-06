@@ -166,7 +166,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
 
     @Override
     protected List<Appointment> getTargetedObjects(String[] recurrenceIDs) throws OXException {
-        List<Appointment> objects = new ArrayList<Appointment>();
+        List<Appointment> objects = new ArrayList<>();
         if (null == recurrenceIDs) {
             /*
              * all recurrence instances are targeted
@@ -631,8 +631,8 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
         } else {
             session = icalEmitter.createSession();
         }
-        List<ConversionError> conversionErrors = new LinkedList<ConversionError>();
-        List<ConversionWarning> conversionWarnings = new LinkedList<ConversionWarning>();
+        List<ConversionError> conversionErrors = new LinkedList<>();
+        List<ConversionWarning> conversionWarnings = new LinkedList<>();
         try {
             /*
              * load appointment & apply extended properties for serialization
@@ -641,6 +641,9 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             applyReminderProperties(appointment);
             applyPrivateComments(appointment);
             applyAttachments(appointment);
+            if (false == CalDAVAgent.EM_CLIENT.equals(factory.getState().getUserAgent())) {
+                appointment.setProperty("com.openexchange.data.conversion.ical.useXMicrosoftCDOAllDayEvent", Boolean.FALSE);
+            }
             CalendarDataObject[] changeExceptions = 0 < object.getRecurrenceID() ? parent.loadChangeExceptions(object, true) : null;
             /*
              * transform change exceptions to delete-exceptions where user is removed from participants if needed (bug #26293)
@@ -661,6 +664,9 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                     applyPrivateComments(changeException);
                     if (false == CalDAVAgent.MAC_CALENDAR.equals(factory.getState().getUserAgent())) {
                         applyAttachments(changeException);
+                    }
+                    if (false == CalDAVAgent.EM_CLIENT.equals(factory.getState().getUserAgent())) {
+                        changeException.setProperty("com.openexchange.data.conversion.ical.useXMicrosoftCDOAllDayEvent", Boolean.FALSE);
                     }
                     icalEmitter.writeAppointment(session, changeException, factory.getContext(), conversionErrors, conversionWarnings);
                 }
@@ -695,8 +701,8 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             /*
              * parse appointment & exceptions
              */
-            deleteExceptionsToSave = new ArrayList<CalendarDataObject>();
-            exceptionsToSave = new ArrayList<CalendarDataObject>();
+            deleteExceptionsToSave = new ArrayList<>();
+            exceptionsToSave = new ArrayList<>();
             for (CalendarDataObject cdo : appointments) {
                 cdo.setContext(factory.getContext());
                 cdo.removeLastModified();
@@ -850,7 +856,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             return;
         }
         // Normalize the wanted DelEx to midnight, and add them to our set.
-        final Set<Date> wantedSet = new HashSet<Date>(Arrays.asList(wantedDeleteExceptions));
+        final Set<Date> wantedSet = new HashSet<>(Arrays.asList(wantedDeleteExceptions));
 
         if (null != oldAppointment && null != oldAppointment.getDeleteException()) {
             for (Date knownDeleteException : oldAppointment.getDeleteException()) {
@@ -1117,9 +1123,9 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             return Collections.emptyList();
         }
         if (null == originalAppointment || null == originalAppointment.getChangeException() || 0 == originalAppointment.getChangeException().length) {
-            return new ArrayList<CalendarDataObject>(exceptionsToSave);
+            return new ArrayList<>(exceptionsToSave);
         }
-        List<CalendarDataObject> newExceptions = new ArrayList<CalendarDataObject>(exceptionsToSave.size());
+        List<CalendarDataObject> newExceptions = new ArrayList<>(exceptionsToSave.size());
         for (CalendarDataObject updatedException : exceptionsToSave) {
             boolean found = false;
             for (Date recurrenceDatePosition : originalAppointment.getChangeException()) {
