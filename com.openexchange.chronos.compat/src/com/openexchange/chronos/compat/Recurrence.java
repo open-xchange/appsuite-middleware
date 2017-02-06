@@ -587,13 +587,8 @@ public class Recurrence {
         return null;
     }
 
-    public static SeriesPattern generatePattern(String recur, Calendar startDate) {
-        RecurrenceRule rrule = null;
-        try {
-            rrule = new RecurrenceRule(recur);
-        } catch (InvalidRecurrenceRuleException e) {
-            // TODO:
-        }
+    public static SeriesPattern generatePattern(String recur, Calendar startDate) throws OXException {
+        RecurrenceRule rrule = getRecurrenceRule(recur);
         CalendarDataObject cObj = new CalendarDataObject();
         cObj.setTimezone(startDate.getTimeZone().getID());
         cObj.setStartDate(startDate.getTime());
