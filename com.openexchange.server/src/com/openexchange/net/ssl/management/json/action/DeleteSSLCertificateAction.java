@@ -52,6 +52,7 @@ package com.openexchange.net.ssl.management.json.action;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.net.ssl.management.SSLCertificateManagementService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -80,10 +81,14 @@ public class DeleteSSLCertificateAction extends AbstractSSLCertificateManagement
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         String fingerprint = requestData.getParameter("fingerprint", String.class, false);
-        String hostname = requestData.getParameter("hostname", String.class, false);
-        
+        String hostname = requestData.getParameter("hostname", String.class, true);
+
         SSLCertificateManagementService managementService = getService(SSLCertificateManagementService.class);
-        managementService.delete(session.getUserId(), session.getContextId(), hostname, fingerprint);
+        if (Strings.isEmpty(hostname)) {
+            managementService.delete(session.getUserId(), session.getContextId(), fingerprint);
+        } else {
+            managementService.delete(session.getUserId(), session.getContextId(), hostname, fingerprint);
+        }
         return new AJAXRequestResult();
     }
 }

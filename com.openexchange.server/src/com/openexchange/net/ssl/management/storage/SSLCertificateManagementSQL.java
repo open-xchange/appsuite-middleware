@@ -218,11 +218,40 @@ public class SSLCertificateManagementSQL {
     }
 
     /**
+     * Deletes all exceptions of the {@link Certificate} with the specified fingerprint for the specified user
+     * in the specified context.
+     * 
+     * @param userId the user identifier
+     * @param contextId The context identifier
+     * @param fingerprint The fingerprint of the {@link Certificate}
+     * @throws OXException If the {@link Certificate} cannot be deleted
+     */
+    public void delete(int userId, int contextId, String fingerprint) throws OXException {
+        DatabaseService databaseService = getDatabaseService();
+        Connection connection = databaseService.getWritable(contextId);
+        PreparedStatement preparedStatement = null;
+        try {
+            preparedStatement = connection.prepareStatement(SQLStatements.DELETE_FOR_ALL_HOSTS);
+            int index = 1;
+            preparedStatement.setInt(index++, contextId);
+            preparedStatement.setInt(index++, userId);
+            preparedStatement.setString(index++, fingerprint);
+
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw SSLCertificateManagementExceptionCode.SQL_PROBLEM.create(e.getMessage(), e);
+        } finally {
+            DBUtils.closeResources(null, preparedStatement, connection, false, contextId);
+        }
+    }
+
+    /**
      * Deletes the {@link Certificate} with the specified fingerprint for the specified user
      * in the specified context.
      * 
      * @param userId the user identifier
      * @param contextId The context identifier
+     * @param hostname The hostname
      * @param fingerprint The fingerprint of the {@link Certificate}
      * @throws OXException If the {@link Certificate} cannot be deleted
      */
@@ -231,7 +260,7 @@ public class SSLCertificateManagementSQL {
         Connection connection = databaseService.getWritable(contextId);
         PreparedStatement preparedStatement = null;
         try {
-            preparedStatement = connection.prepareStatement(SQLStatements.DELETE);
+            preparedStatement = connection.prepareStatement(SQLStatements.DELETE_FOR_HOST);
             int index = 1;
             preparedStatement.setInt(index++, contextId);
             preparedStatement.setInt(index++, userId);

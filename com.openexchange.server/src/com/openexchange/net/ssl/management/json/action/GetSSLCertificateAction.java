@@ -86,11 +86,13 @@ public class GetSSLCertificateAction extends AbstractSSLCertificateManagementAct
         String hostname = requestData.getParameter("hostname", String.class, true);
         SSLCertificateManagementService managementService = getService(SSLCertificateManagementService.class);
 
+        // Get all exceptions for the specified certificate
         if (Strings.isEmpty(hostname)) {
             List<Certificate> certificates = managementService.get(session.getUserId(), session.getContextId(), fingerprint);
             return new AJAXRequestResult(parse(certificates));
         }
 
+        // Get a specific exception
         Certificate certificate = managementService.get(session.getUserId(), session.getContextId(), hostname, fingerprint);
         return new AJAXRequestResult(parse(certificate));
     }

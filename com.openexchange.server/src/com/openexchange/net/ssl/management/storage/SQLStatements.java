@@ -92,7 +92,12 @@ final class SQLStatements {
     final static String IS_TRUSTED = "SELECT trusted from user_certificate WHERE cid=? AND userid=? AND host=? AND fingerprint=?";
 
     /**
-     * Delete certificate
+     * Delete certificate for a specified host
      */
-    final static String DELETE = "DELETE FROM user_certificate WHERE cid=? AND userid=? AND host=? AND fingerprint=?";
+    final static String DELETE_FOR_HOST = "DELETE FROM user_certificate WHERE cid=? AND userid=? AND host=? AND fingerprint=?";
+
+    /**
+     * Delete certificate for all hosts
+     */
+    final static String DELETE_FOR_ALL_HOSTS = "DELETE FROM user_certificate WHERE cid=? AND userid=? AND fingerprint=?";
 }

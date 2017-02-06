@@ -131,11 +131,23 @@ public interface SSLCertificateManagementService {
     void store(int userId, int contextId, Certificate certificate) throws OXException;
 
     /**
+     * Deletes all hostname exceptions for the SSL {@link Certificate} with the specified fingerprint
+     * for the specified user in the specified context
+     * 
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param fingerprint The SSL {@link Certificate}'s fingerprint
+     * @throws OXException if the certificate is not found or any other error is occurred
+     */
+    void delete(int userId, int contextId, String fingerprint) throws OXException;
+
+    /**
      * Deletes the SSL {@link Certificate} with the specified fingerprint for the specified
      * user in the specified context
      * 
      * @param userId The user identifier
      * @param contextId The context identifier
+     * @param hostname The hostname
      * @param fingerprint The SSL {@link Certificate}'s fingerprint
      * @throws OXException if the certificate is not found or any other error is occurred
      */

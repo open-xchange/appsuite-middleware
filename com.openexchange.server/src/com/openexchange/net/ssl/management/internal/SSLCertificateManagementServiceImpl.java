@@ -111,7 +111,7 @@ public class SSLCertificateManagementServiceImpl implements SSLCertificateManage
      */
     @Override
     public List<Certificate> get(int userId, int contextId, String fingerprint) throws OXException {
-        return storage.get(userId,  contextId, fingerprint);
+        return storage.get(userId, contextId, fingerprint);
     }
 
     /*
@@ -143,6 +143,16 @@ public class SSLCertificateManagementServiceImpl implements SSLCertificateManage
     public void store(int userId, int contextId, Certificate certificate) throws OXException {
         storage.store(userId, contextId, certificate);
         certificateCache.invalidate(new CertificateKey(userId, contextId, certificate.getFingerprint()));
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.net.ssl.management.SSLCertificateManagementService#delete(int, int, java.lang.String)
+     */
+    @Override
+    public void delete(int userId, int contextId, String fingerprint) throws OXException {
+        storage.delete(userId, contextId, fingerprint);
     }
 
     /*
