@@ -104,6 +104,7 @@ import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig.PasswordSource;
 import com.openexchange.mail.cache.IMailAccessCache;
+import com.openexchange.mail.config.ConfiguredServer;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.MailPasswordUtil;
@@ -1257,7 +1258,21 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
         switch(MailProperties.getInstance().getMailServerSource()){
             case GLOBAL:
-                retval.setMailServer(MailProperties.getInstance().getMailServer());
+                {
+                    ConfiguredServer server = MailProperties.getInstance().getMailServer();
+                    retval.setMailServer(server.getHostName());
+                    String protocol = server.getProtocol();
+                    if (null != protocol) {
+                        retval.setMailProtocol(protocol);
+                    }
+                    int port = server.getPort();
+                    if (port > 0) {
+                        retval.setMailPort(port);
+                    }
+                    if (server.isSecure()) {
+                        retval.setMailSecure(true);
+                    }
+                }
                 break;
             case USER:
             default:
@@ -1267,7 +1282,21 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
         switch(MailProperties.getInstance().getTransportServerSource()){
             case GLOBAL:
-                retval.setTransportServer(MailProperties.getInstance().getTransportServer());
+                {
+                    ConfiguredServer server = MailProperties.getInstance().getTransportServer();
+                    retval.setTransportServer(server.getHostName());
+                    String protocol = server.getProtocol();
+                    if (null != protocol) {
+                        retval.setTransportProtocol(protocol);
+                    }
+                    int port = server.getPort();
+                    if (port > 0) {
+                        retval.setTransportPort(port);
+                    }
+                    if (server.isSecure()) {
+                        retval.setTransportSecure(true);
+                    }
+                }
                 break;
             case USER:
             default:

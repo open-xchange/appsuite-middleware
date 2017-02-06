@@ -96,7 +96,7 @@ public class CurrentDateTestCommandParser implements CommandParser<TestCommand> 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser#parse(org.json.JSONObject)
      */
     @Override
@@ -149,7 +149,7 @@ public class CurrentDateTestCommandParser implements CommandParser<TestCommand> 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser#parse(org.json.JSONObject, java.lang.Object)
      */
     @Override
@@ -157,7 +157,8 @@ public class CurrentDateTestCommandParser implements CommandParser<TestCommand> 
         jsonObject.put(GeneralField.id.name(), command.getCommand().getCommandName());
         final String comparison = command.getMatchType().substring(1);
         if ("value".equals(comparison)) {
-            jsonObject.put(CurrentDateTestField.comparison.name(), ((List) command.getArguments().get(command.getTagArguments().size())).get(0));
+            int compPos = command.getTagArguments().size() == 1 ? 1 : 3;
+            jsonObject.put(CurrentDateTestField.comparison.name(), ((List) command.getArguments().get(compPos)).get(0));
         } else {
             jsonObject.put(CurrentDateTestField.comparison.name(), comparison);
         }

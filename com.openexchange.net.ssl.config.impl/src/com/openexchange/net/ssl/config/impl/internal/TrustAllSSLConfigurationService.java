@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,71 +49,72 @@
 
 package com.openexchange.net.ssl.config.impl.internal;
 
-import com.openexchange.config.ConfigurationService;
+import java.util.List;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.net.ssl.config.TrustLevel;
 
+
 /**
- * The {@link SSLConfigurationServiceImpl} provides user specific configuration with regards to SSL
+ * {@link TrustAllSSLConfigurationService} - The SSL configuration service in case trust-all is configured.
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class SSLConfigurationServiceImpl implements SSLConfigurationService {
+public class TrustAllSSLConfigurationService implements SSLConfigurationService {
 
-    private final ConfigurationService configService;
-
-    public SSLConfigurationServiceImpl(ConfigurationService configService) {
-        this.configService = configService;
+    /**
+     * Initializes a new {@link TrustAllSSLConfigurationService}.
+     */
+    public TrustAllSSLConfigurationService() {
+        super();
     }
 
     @Override
     public boolean isWhitelisted(String hostName) {
-        return SSLProperties.isWhitelisted(hostName);
+        return true;
     }
 
     @Override
     public TrustLevel getTrustLevel() {
-        return SSLProperties.trustLevel();
+        return TrustLevel.TRUST_ALL;
     }
 
     @Override
     public String[] getSupportedProtocols() {
-        return SSLProperties.supportedProtocols();
+        List<String> protocols = SSLProperties.getSupportedProtocols();
+        return protocols.toArray(new String[protocols.size()]);
     }
 
     @Override
     public String[] getSupportedCipherSuites() {
-        return SSLProperties.supportedCipherSuites();
-    }
-
-    @Override
-    public void reload() {
-        SSLProperties.reload();
+        List<String> cipherSuites = SSLProperties.getSupportedCipherSuites();
+        return cipherSuites.toArray(new String[cipherSuites.size()]);
     }
 
     @Override
     public boolean isVerifyHostname() {
-        return this.configService.getBoolProperty(SSLProperties.HOSTNAME_VERIFICATION_ENABLED.getName(), SSLProperties.HOSTNAME_VERIFICATION_ENABLED.getDefaultBoolean());
+        return false;
     }
 
     @Override
     public boolean isDefaultTruststoreEnabled() {
-        return this.configService.getBoolProperty(SSLProperties.DEFAULT_TRUSTSTORE_ENABLED.getName(), SSLProperties.DEFAULT_TRUSTSTORE_ENABLED.getDefaultBoolean());
+        return true;
     }
 
     @Override
     public boolean isCustomTruststoreEnabled() {
-        return this.configService.getBoolProperty(SSLProperties.CUSTOM_TRUSTSTORE_ENABLED.getName(), SSLProperties.CUSTOM_TRUSTSTORE_ENABLED.getDefaultBoolean());
+        return false;
     }
 
     @Override
     public String getCustomTruststoreLocation() {
-        return this.configService.getProperty(SSLProperties.CUSTOM_TRUSTSTORE_LOCATION.getName(), SSLProperties.CUSTOM_TRUSTSTORE_LOCATION.getDefault());
+        return null;
     }
 
     @Override
     public String getCustomTruststorePassword() {
-        return this.configService.getProperty(SSLProperties.CUSTOM_TRUSTSTORE_PASSWORD.getName(), SSLProperties.CUSTOM_TRUSTSTORE_PASSWORD.getDefault());
+        // TODO Auto-generated method stub
+        return null;
     }
+
 }

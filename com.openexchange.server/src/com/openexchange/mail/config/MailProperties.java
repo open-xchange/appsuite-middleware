@@ -71,6 +71,7 @@ import com.openexchange.mail.partmodifier.DummyPartModifier;
 import com.openexchange.mail.partmodifier.PartModifier;
 import com.openexchange.net.HostList;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.net.URIDefaults;
 
 /**
  * {@link MailProperties} - Global mail properties read from properties file.
@@ -128,9 +129,9 @@ public final class MailProperties implements IMailProperties {
 
     private ServerSource transportServerSource;
 
-    private String mailServer;
+    private ConfiguredServer mailServer;
 
-    private String transportServer;
+    private ConfiguredServer transportServer;
 
     private String masterPassword;
 
@@ -367,16 +368,18 @@ public final class MailProperties implements IMailProperties {
         }
 
         {
-            mailServer = configuration.getProperty("com.openexchange.mail.mailServer");
+            String mailServer = configuration.getProperty("com.openexchange.mail.mailServer");
             if (mailServer != null) {
                 mailServer = mailServer.trim();
+                this.mailServer = ConfiguredServer.parseFrom(mailServer, URIDefaults.IMAP);
             }
         }
 
         {
-            transportServer = configuration.getProperty("com.openexchange.mail.transportServer");
+            String transportServer = configuration.getProperty("com.openexchange.mail.transportServer");
             if (transportServer != null) {
                 transportServer = transportServer.trim();
+                this.transportServer = ConfiguredServer.parseFrom(transportServer, URIDefaults.SMTP);
             }
         }
 
@@ -926,7 +929,7 @@ public final class MailProperties implements IMailProperties {
      *
      * @return The global mail server
      */
-    public String getMailServer() {
+    public ConfiguredServer getMailServer() {
         return mailServer;
     }
 
@@ -989,7 +992,7 @@ public final class MailProperties implements IMailProperties {
      *
      * @return The global transport server
      */
-    public String getTransportServer() {
+    public ConfiguredServer getTransportServer() {
         return transportServer;
     }
 

@@ -81,27 +81,27 @@ import com.openexchange.jsieve.commands.test.ITestCommand;
  * <li><code>anyof &lt;tests: test-list&gt; </code> (logical OR)</code></li>
  * <li><code>Match-types are ":is", ":contains", and ":matches"</code></li>
  * </ul>
- * 
+ *
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class TestCommand extends Command {
 
     public enum Commands implements ITestCommand {
-        ADDRESS("address", 2, Integer.MAX_VALUE, standardAddressPart(), standardComparators(), standardAddressMatchTypes(), standardJSONAddressMatchTypes(), null),
-        ENVELOPE("envelope", 2, Integer.MAX_VALUE, standardAddressPart(), standardComparators(), standardMatchTypes(), standardJSONMatchTypes(), "envelope"),
+        ADDRESS("address", 2, Integer.MAX_VALUE, standardAddressPart(), standardComparators(), standardAddressMatchTypes(), standardJSONAddressMatchTypes(), null, null),
+        ENVELOPE("envelope", 2, Integer.MAX_VALUE, standardAddressPart(), standardComparators(), standardMatchTypes(), standardJSONMatchTypes(), "envelope", null),
         //        EXITS("exists", 1, 1, null, null, null, null, null),
-        FALSE("false", 0, 0, null, null, null, null, null),
-        TRUE("true", 0, 0, null, null, null, null, null),
-        NOT("not", 0, 0, null, null, null, null, null),
-        SIZE("size", 1, 1, null, null, matchTypeSize(), standardJSONSizeMatchTypes(), null),
-        HEADER("header", 2, Integer.MAX_VALUE, standardAddressPart(), standardComparators(), standardMatchTypes(), standardJSONMatchTypes(), null),
-        ALLOF("allof", 0, 0, null, null, null, null, null),
-        ANYOF("anyof", 0, 0, null, null, null, null, null),
-        BODY("body", 1, 1, standardBodyPart(), null, standardMatchTypes(), standardJSONMatchTypes(), "body"),
+        FALSE("false", 0, 0, null, null, null, null, null, null),
+        TRUE("true", 0, 0, null, null, null, null, null, null),
+        NOT("not", 0, 0, null, null, null, null, null, null),
+        SIZE("size", 1, 1, null, null, matchTypeSize(), standardJSONSizeMatchTypes(), null, null),
+        HEADER("header", 2, Integer.MAX_VALUE, standardAddressPart(), standardComparators(), standardMatchTypes(), standardJSONMatchTypes(), null, null),
+        ALLOF("allof", 0, 0, null, null, null, null, null, null),
+        ANYOF("anyof", 0, 0, null, null, null, null, null, null),
+        BODY("body", 1, 1, standardBodyPart(), null, standardMatchTypes(), standardJSONMatchTypes(), "body", null),
         //DATE("date", 3, null, null, date_match_types(), "date"),
-        CURRENTDATE("currentdate", 2, Integer.MAX_VALUE, null, null, dateMatchTypes(), dateJSONMatchTypes(), "date"),
-        HASFLAG("hasflag", 1, Integer.MAX_VALUE, null, standardComparators(), standardMatchTypes(), standardJSONMatchTypes(), null);
+        CURRENTDATE("currentdate", 2, Integer.MAX_VALUE, null, null, dateMatchTypes(), dateJSONMatchTypes(), "date", dateOtherArguments()),
+        HASFLAG("hasflag", 1, Integer.MAX_VALUE, null, standardComparators(), standardMatchTypes(), standardJSONMatchTypes(), null, null);
 
         private static Hashtable<String, String> matchTypeSize() {
             final Hashtable<String, String> match_type_size = new Hashtable<String, String>(2);
@@ -182,6 +182,12 @@ public class TestCommand extends Command {
             return standard_match_types;
         }
 
+        private static Hashtable<String, String> dateOtherArguments() {
+            final Hashtable<String, String> standard_match_types = new Hashtable<String, String>(1);
+            standard_match_types.put(":zone", "");
+            return standard_match_types;
+        }
+
         private static List<String[]> dateJSONMatchTypes() {
             final List<String[]> standard_match_types = Collections.synchronizedList(new ArrayList<String[]>(2));
             standard_match_types.add(new String[] { "relational", "ge" });
@@ -233,6 +239,11 @@ public class TestCommand extends Command {
         private Hashtable<String, String> matchTypes;
 
         /**
+         * Defines additional allowed arguments
+         */
+        private Hashtable<String, String> otherArguments;
+
+        /**
          * Needed for the resolution of the configuration parameters for JSON
          */
         private final List<String[]> jsonMatchTypes;
@@ -242,7 +253,7 @@ public class TestCommand extends Command {
          */
         private String required;
 
-        Commands(final String commandName, final int numberOfArguments, int maxNumberOfArguments, final Hashtable<String, String> address, final Hashtable<String, String> comparator, final Hashtable<String, String> matchTypes, List<String[]> jsonMatchTypes, final String required) {
+        Commands(final String commandName, final int numberOfArguments, int maxNumberOfArguments, final Hashtable<String, String> address, final Hashtable<String, String> comparator, final Hashtable<String, String> matchTypes, List<String[]> jsonMatchTypes, final String required, final Hashtable<String, String> otherArguments) {
             this.commandName = commandName;
             this.numberOfArguments = numberOfArguments;
             this.maxNumberOfArguments = maxNumberOfArguments;
@@ -251,6 +262,7 @@ public class TestCommand extends Command {
             this.matchTypes = matchTypes;
             this.jsonMatchTypes = jsonMatchTypes;
             this.required = required;
+            this.otherArguments = otherArguments;
         }
 
         @Override
@@ -271,6 +283,11 @@ public class TestCommand extends Command {
         @Override
         public final Hashtable<String, String> getAddress() {
             return address;
+        }
+
+        @Override
+        public final Hashtable<String, String> getOtherArguments() {
+            return otherArguments;
         }
 
         @Override
@@ -365,6 +382,11 @@ public class TestCommand extends Command {
             }
             if (tagArray.contains(":comparator")) {
                 throw new SieveException("Sieve comparators aren't supported by this implementation");
+            }
+
+            final Hashtable<String, String> otherArguments = this.command.getOtherArguments();
+            if (null != otherArguments) {
+                tagArray.removeAll(otherArguments.keySet());
             }
             //            final Hashtable<String, String> comparator = this.command.getComparator();
             //            if (null != comparator) {
