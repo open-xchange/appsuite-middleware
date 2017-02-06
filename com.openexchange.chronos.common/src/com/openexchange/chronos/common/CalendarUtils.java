@@ -367,6 +367,42 @@ public class CalendarUtils {
     }
 
     /**
+     * Initializes a new calendar in a specific timezone and sets the initial time.
+     * <p/>
+     * The field {@link Calendar#MILLISECOND} is set to <code>0</code> explicitly.
+     *
+     * @param timeZone The timezone to use for the calendar
+     * @param year The value used to set the {@link Calendar#YEAR} field
+     * @param month The value used to set the {@link Calendar#MONTH} field
+     * @param date The value used to set the {@link Calendar#DATE} field
+     * @return A new calendar instance
+     */
+    public static Calendar initCalendar(TimeZone timeZone, int year, int month, int date) {
+        return initCalendar(timeZone, year, month, date, 0, 0, 0);
+    }
+
+    /**
+     * Initializes a new calendar in a specific timezone and sets the initial time.
+     * <p/>
+     * The field {@link Calendar#MILLISECOND} is set to <code>0</code> explicitly.
+     *
+     * @param timeZone The timezone to use for the calendar
+     * @param year The value used to set the {@link Calendar#YEAR} field
+     * @param month The value used to set the {@link Calendar#MONTH} field
+     * @param date The value used to set the {@link Calendar#DATE} field
+     * @param hourOfDay The value used to set the {@link Calendar#HOUR_OF_DAY} field
+     * @param minute The value used to set the {@link Calendar#MINUTE} field
+     * @param second The value used to set the {@link Calendar#SECOND} field
+     * @return A new calendar instance
+     */
+    public static Calendar initCalendar(TimeZone timeZone, int year, int month, int date, int hourOfDay, int minute, int second) {
+        Calendar calendar = GregorianCalendar.getInstance(timeZone);
+        calendar.set(year, month, date, hourOfDay, minute, second);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar;
+    }
+
+    /**
      * Gets a value indicating whether a specific event falls (at least partly) into a time range.
      * <p/>
      * According to RFC 4791, an event overlaps a given time range if the condition for the corresponding component state specified in
