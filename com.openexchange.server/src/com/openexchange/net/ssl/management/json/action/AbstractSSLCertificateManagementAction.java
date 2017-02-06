@@ -103,9 +103,16 @@ abstract class AbstractSSLCertificateManagementAction implements AJAXActionServi
         try {
             JSONObject json = new JSONObject();
             json.put(CertificateFields.FINGERPRINT, certificate.getFingerprint());
+            json.put(CertificateFields.ISSUED_ON, certificate.getIssuedOnTimestamp());
+            json.put(CertificateFields.EXPIRES_ON, certificate.getExpirationTimestamp());
             json.put(CertificateFields.HOSTNAME, certificate.getHostname());
+            json.put(CertificateFields.COMMON_NAME, certificate.getCommonName());
+            json.put(CertificateFields.ISSUED_BY, certificate.getIssuer());
+            json.put(CertificateFields.SIGNATURE, certificate.getSignature());
+            json.put(CertificateFields.SERIAL_NUMBER, certificate.getSerialNumber());
+            json.put(CertificateFields.FAILURE_REASON, certificate.getFailureReason());
+            json.put(CertificateFields.EXPIRED, certificate.isExpired());
             json.put(CertificateFields.TRUSTED, certificate.isTrusted());
-
             return json;
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e);
@@ -121,8 +128,19 @@ abstract class AbstractSSLCertificateManagementAction implements AJAXActionServi
     Certificate parse(JSONObject jsonObject) throws OXException {
         try {
             Certificate certificate = new Certificate(jsonObject.getString("fingerprint"));
+            // Mandatory
             certificate.setHostname(jsonObject.getString(CertificateFields.HOSTNAME));
             certificate.setTrusted(jsonObject.getBoolean(CertificateFields.TRUSTED));
+
+            // Optional
+            certificate.setIssuedOnTimestamp(jsonObject.optLong(CertificateFields.ISSUED_ON));
+            certificate.setExpirationTimestamp(jsonObject.optLong(CertificateFields.EXPIRES_ON));
+            certificate.setCommonName(jsonObject.optString(CertificateFields.COMMON_NAME));
+            certificate.setIssuer(jsonObject.optString(CertificateFields.ISSUED_BY));
+            certificate.setSignature(jsonObject.optString(CertificateFields.SIGNATURE));
+            certificate.setSerialNumber(jsonObject.optString(CertificateFields.SERIAL_NUMBER));
+            certificate.setFailureReason(jsonObject.optString(CertificateFields.FAILURE_REASON));
+            certificate.setExpired(jsonObject.optBoolean(CertificateFields.EXPIRED));
             return certificate;
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e);
