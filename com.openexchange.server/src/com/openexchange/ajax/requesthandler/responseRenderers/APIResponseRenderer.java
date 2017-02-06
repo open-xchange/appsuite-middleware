@@ -70,7 +70,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.java.Strings;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -198,8 +197,11 @@ public class APIResponseRenderer implements ResponseRenderer {
         // Try to obtain writer instance
         PrintWriter writer = getWriterFrom(resp);
 
-        // Write response (if writer is available)
-        return null == writer ? false : writeResponse(response, action, writer, req, resp, false);
+        if (null == writer) {
+            return false;
+        }
+
+        return writeResponse(response, action, writer, req, resp);
     }
 
     /**
@@ -221,7 +223,8 @@ public class APIResponseRenderer implements ResponseRenderer {
      * @throws IOException If an I/O error occurs
      */
     public static boolean writeResponse(Response response, String action, PrintWriter writer, HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        return writeResponse(response, action, writer, req, resp, false);
+        String plainJson = req.getParameter(PLAIN_JSON);
+        return writeResponse(response, action, writer, req, resp, AJAXRequestDataTools.parseBoolParameter(plainJson));
     }
 
     private static final char[] JS_FRAGMENT_PART1 = ("<!DOCTYPE html><html><head>"
@@ -353,17 +356,6 @@ public class APIResponseRenderer implements ResponseRenderer {
 
     private static boolean isRespondWithHTML(final HttpServletRequest req) {
         return Boolean.parseBoolean(req.getParameter("respondWithHTML"));
-    }
-
-    private static final String JS_FRAGMENT = com.openexchange.ajax.AJAXServlet.JS_FRAGMENT;
-
-    private static final Pattern RPL_JSON = Pattern.compile("**json**", Pattern.LITERAL);
-
-    private static final Pattern RPL_ACTION = Pattern.compile("**action**", Pattern.LITERAL);
-
-    private static String substituteJS(final String json, final String action) {
-        return RPL_ACTION.matcher(RPL_JSON.matcher(JS_FRAGMENT).replaceAll(Strings.quoteReplacement(json.replaceAll(Pattern.quote("</") , "<\\/")))).replaceAll(
-            Strings.quoteReplacement(action));
     }
 
     /**
