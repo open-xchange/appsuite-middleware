@@ -1,0 +1,20 @@
+/certificate?action=examine:
+  put:
+    operationId: examineCertificate
+    tags:
+      - Certificate
+    summary: Examines an invalid SSL certificate from a previous endpoint call
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: fingerprint
+        type: string
+        description: The fingerprint of the SSL certificate
+        required: true
+    responses:
+      200:
+        description: A JSON object containing the data of the certificate. In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
+        schema:
+          $ref: "#/definitions/CertificateResponse"

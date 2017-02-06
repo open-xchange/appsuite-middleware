@@ -559,3 +559,10 @@ SubscriptionData:
   $ref: ./pns/SubscriptionData.yaml
 UnsubscriptionData:
   $ref: ./pns/UnsubscriptionData.yaml
+# Module: certificate
+CertificateData:
+  $ref: ./certificate/CertificateData.yaml
+CertificateResponse:
+  $ref: ./certificate/CertificateResponse.yaml
+CertificatesResponse:
+  $ref: ./certificate/CertificatesResponse.yaml
