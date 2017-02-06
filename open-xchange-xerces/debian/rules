@@ -3,7 +3,7 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-PKGNAME = open-xchange-xerces-sun
+PKGNAME = open-xchange-xerces
 ROOT = $(CURDIR)/debian/$(PKGNAME)
 
 override_dh_auto_install:
