@@ -130,4 +130,6 @@ public class TaskExceptionMessage implements LocalizableStrings {
     public static final String INVALID_PRIORITY_MSG = "Priority is %d but must be between 1 and 3.";
 
     public final static String INCORRECT_STRING_DISPLAY = "The character \"%1$s\" in field \"%2$s\" can't be saved. Please remove the problematic character and try again.";
+
+    public static final String NOT_VISIBLE = "This folder (%2$d) is not visible.";
 }

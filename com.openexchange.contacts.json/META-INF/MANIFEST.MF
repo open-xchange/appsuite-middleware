@@ -84,4 +84,5 @@ Import-Package: com.openexchange.ajax,
  org.json,
  org.osgi.framework,
  org.slf4j
-Export-Package: com.openexchange.contacts.json.mapping
+Export-Package: com.openexchange.contacts.json,
+ com.openexchange.contacts.json.mapping

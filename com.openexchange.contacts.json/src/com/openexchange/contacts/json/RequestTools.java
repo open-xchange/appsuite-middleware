@@ -137,6 +137,33 @@ public class RequestTools {
 		}
 	}
 
+	/**
+     * Applies image data from request to given contact.
+     *
+     * @param request The request providing image data
+     * @param contact The contact
+     * @throws OXException If applying image data to contact fails
+     */
+    public static void setImageData(final AJAXRequestData request, final Contact contact) throws OXException {
+        UploadEvent uploadEvent = null;
+        try {
+            uploadEvent = request.getUploadEvent();
+            final UploadFile uploadFile;
+            {
+                final List<UploadFile> list = uploadEvent.getUploadFilesByFieldName("file");
+                uploadFile = null == list || list.isEmpty() ? null : list.get(0);
+            }
+            if (null == uploadFile) {
+                throw AjaxExceptionCodes.NO_UPLOAD_IMAGE.create();
+            }
+            setImageData(contact, uploadFile);
+        } finally {
+            if (null != uploadEvent) {
+                uploadEvent.cleanUp();
+            }
+        }
+    }
+
     /**
      * Applies image data from file to given contact.
      *

@@ -261,7 +261,10 @@ public enum TaskExceptionCode implements DisplayableOXExceptionCode {
     INVALID_PRIORITY(TaskExceptionMessage.INVALID_PRIORITY_MSG, TaskExceptionMessage.INVALID_PRIORITY_MSG, Category.CATEGORY_USER_INPUT, 57),
 
     /** "The character \"%1$s\" in field \"%2$s\" can't be saved. Please remove the problematic character and try again." */
-    INCORRECT_STRING("Field \"%2$s\" contains invalid character: \"%1$s\"", TaskExceptionMessage.INCORRECT_STRING_DISPLAY, Category.CATEGORY_USER_INPUT, 58);
+    INCORRECT_STRING("Field \"%2$s\" contains invalid character: \"%1$s\"", TaskExceptionMessage.INCORRECT_STRING_DISPLAY, Category.CATEGORY_USER_INPUT, 58),
+
+    /** This folder (%2$d) is not visible. */
+    NOT_VISIBLE("This folder (%2$d) is not visible.", TaskExceptionMessage.NOT_VISIBLE, Category.CATEGORY_PERMISSION_DENIED, 59),;
 
     private String message;
 

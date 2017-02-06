@@ -49,15 +49,9 @@
 
 package com.openexchange.user.json.actions;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.sql.Connection;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
-import javax.activation.MimetypesFileTypeMap;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -65,6 +59,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.contact.ContactService;
+import com.openexchange.contacts.json.RequestTools;
 import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
@@ -75,13 +70,9 @@ import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.upload.UploadFile;
-import com.openexchange.groupware.upload.impl.UploadEvent;
-import com.openexchange.java.Streams;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.user.UserService;
 import com.openexchange.user.json.Constants;
 import com.openexchange.user.json.field.UserField;
@@ -149,7 +140,7 @@ public final class UpdateAction extends AbstractUserAction {
             parsedUser = UserMapper.getInstance().deserialize(jData, USER_FIELDS, timeZoneID);
 
             if (containsImage) {
-                setImageData(request, parsedUserContact);
+                RequestTools.setImageData(request, parsedUserContact);
             }
 
 
@@ -225,79 +216,6 @@ public final class UpdateAction extends AbstractUserAction {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
 
-    }
-    // Copied from RequestTools in contact module
-
-    public static void setImageData(final AJAXRequestData request, final Contact contact) throws OXException {
-        UploadEvent uploadEvent = null;
-        try {
-            uploadEvent = request.getUploadEvent();
-            final UploadFile uploadFile;
-            {
-                final List<UploadFile> list = uploadEvent.getUploadFilesByFieldName("file");
-                uploadFile = null == list || list.isEmpty() ? null : list.get(0);
-            }
-            if (null == uploadFile) {
-                throw AjaxExceptionCodes.NO_UPLOAD_IMAGE.create();
-            }
-            setImageData(contact, uploadFile);
-        } finally {
-            if (null != uploadEvent) {
-                uploadEvent.cleanUp();
-            }
-        }
-    }
-
-    public static void setImageData(final Contact contact, final UploadFile file) throws OXException {
-        checkIsImageFile(file);
-        FileInputStream fis = null;
-        ByteArrayOutputStream outputStream = null;
-        try {
-            fis = new FileInputStream(file.getTmpFile());
-            outputStream = new UnsynchronizedByteArrayOutputStream((int) file.getSize());
-            final byte[] buf = new byte[2048];
-            int len = -1;
-            while ((len = fis.read(buf)) != -1) {
-                outputStream.write(buf, 0, len);
-            }
-            contact.setImage1(outputStream.toByteArray());
-            contact.setImageContentType(file.getContentType());
-        } catch (final FileNotFoundException e) {
-            throw AjaxExceptionCodes.NO_UPLOAD_IMAGE.create(e);
-        } catch (final IOException e) {
-            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, "I/O error while reading uploaded contact image.");
-        } finally {
-            Streams.close(outputStream);
-            Streams.close(fis);
-        }
-    }
-
-    private static void checkIsImageFile(UploadFile file) throws OXException {
-        if (null == file) {
-            throw AjaxExceptionCodes.NO_UPLOAD_IMAGE.create();
-        }
-        String contentType = file.getContentType();
-        if (isImageContentType(contentType)) {
-            return;
-        }
-        String mimeType = null;
-        if (null != file.getPreparedFileName()) {
-            mimeType = new MimetypesFileTypeMap().getContentType(file.getPreparedFileName());
-            if (isImageContentType(mimeType)) {
-                return;
-            }
-        }
-        String readableType = (null == contentType ? (null == mimeType ? "application/unknown" : mimeType) : contentType);
-        //        int idx = readableType.indexOf('/');
-        //        if (-1 < idx && idx < readableType.length()) {
-        //            readableType = readableType.substring(idx + 1);
-        //        }
-        throw AjaxExceptionCodes.NO_IMAGE_FILE.create(file.getPreparedFileName(), readableType);
-    }
-
-
-    private static boolean isImageContentType(String contentType) {
-        return null != contentType && contentType.toLowerCase().startsWith("image");
     }
 
     private static long sysconfMaxUpload() {

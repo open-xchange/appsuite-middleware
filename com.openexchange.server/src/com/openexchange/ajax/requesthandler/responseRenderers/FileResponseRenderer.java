@@ -368,6 +368,11 @@ public class FileResponseRenderer implements ResponseRenderer {
                         }
                     }
                     checkedDownload = DownloadUtility.checkInlineDownload(documentData, fileLength, fileName, cts, contentDisposition, userAgent, requestData.getSession());
+                    if (checkedDownload.isConsideredHarmful()) {
+                        // Quit with 403
+                        resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Denied to output possibly harmful content");
+                        return;
+                    }
                 }
                 /*
                  * Set stream

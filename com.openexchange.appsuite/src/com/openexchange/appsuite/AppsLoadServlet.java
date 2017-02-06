@@ -70,11 +70,11 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link AppsLoadServlet} - Provides App Suite data for loading applciations.
- * 
+ *
  * @author <a href="mailto:viktor.pracht@open-xchange.com">Viktor Pracht</a>
  */
 public class AppsLoadServlet extends SessionServlet {
-    
+
     public static FileContributor contributors = null;
 
     private static final long serialVersionUID = -8909104490806162791L;
@@ -87,7 +87,7 @@ public class AppsLoadServlet extends SessionServlet {
 
     /**
      * Initializes a new {@link AppsLoadServlet}.
-     * 
+     *
      * @throws IOException
      */
     public AppsLoadServlet(final File[] roots, final File zoneinfo) throws IOException {
@@ -185,13 +185,13 @@ public class AppsLoadServlet extends SessionServlet {
             }
             buffer = null;
         }
-        
+
         public void write(byte[] data) throws IOException {
             write(data, null);
         }
 
         public void write(byte[] data, String options) throws IOException {
-            
+
             if (buffering) {
                 data = new StringBuilder(new String(data, "UTF-8")).append("\n\n/* :oxoptions: " + options + " :/oxoptions: */").toString().getBytes("UTF-8");
                 buffer[count++] = data;
@@ -225,7 +225,7 @@ public class AppsLoadServlet extends SessionServlet {
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         ServerSession session = getSessionObject(req, true);
-        
+
         final String[] modules = Strings.splitByComma(req.getPathInfo());
         if (null == modules) {
             return; // no actual files requested
@@ -303,34 +303,44 @@ public class AppsLoadServlet extends SessionServlet {
                             }
                         }
                     } catch (OXException e) {
-                        int len = module.length() - 3;
-                        String moduleName = module;
-                        if (format == null && len > 0 && ".js".equals(module.substring(len))) {
-                            moduleName = module.substring(0, len);
-                        }
-                        name = escapeName(name);
-                        ew.error(("define('" + escapeName(moduleName) + "', function () {\n" +
-                                  "    if (ox.debug) console.log(\"Could not read '" + name + "': " + e.toString() + "\");\n" +
-                                  "    throw new Error(\"Could not read '" + name + "'\");\n" +
-                                  "});\n").getBytes(Charsets.UTF_8));
+                        LOG.debug("Error loading data for module '{}'", escapeName(module), e);
+                        writeErrorResponse(ew, format, module);
                     }
                 }
                 if (data != null) {
                     ew.write(data, options);
                 } else {
-                    int len = module.length() - 3;
-                    String moduleName = module;
-                    if (format == null && len > 0 && ".js".equals(module.substring(len))) {
-                        moduleName = module.substring(0, len);
-                    }
-                    name = escapeName(name);
-                    ew.error(("define('" + escapeName(moduleName) + "', function () {\n" +
-                              "    if (ox.debug) console.log(\"Could not read '" + name + "'\");\n" +
-                              "    throw new Error(\"Could not read '" + name + "'\");\n" +
-                              "});\n").getBytes(Charsets.UTF_8));
+                    LOG.debug("Could not read data for module '{}'", escapeName(module));
+                    writeErrorResponse(ew, format, module);
                 }
             }
         }
         ew.done();
     }
+
+    private void writeErrorResponse(ErrorWriter ew, String format, String module) throws UnsupportedEncodingException, IOException {
+        LOG.debug("Could not read data for module '{}'", escapeName(module));
+        int len = module.length() - 3;
+        String moduleName = module;
+        if (format == null && len > 0 && ".js".equals(module.substring(len))) {
+            moduleName = module.substring(0, len);
+        }
+        int[] key = new int[8];
+        java.util.Random r = new java.util.Random();
+        for (int j = 0; j < key.length; j++) key[j] = r.nextInt(256);
+        char[] obfuscated = moduleName.toCharArray();
+        for (int j = 0; j < obfuscated.length; j++) obfuscated[j] += key[j % key.length];
+        ew.error(("(function(){" +
+            "var key = [" + Strings.join(key, ",") + "], name = '" + escapeName(new String(obfuscated)) + "';" +
+            "function c(c, i) { return c.charCodeAt(0) - key[i % key.length]; }" +
+            "name = String.fromCharCode.apply(String, [].slice.call(name).map(c));" +
+            "define(name, function () {" +
+            "if (ox.debug) console.log(\"Could not read '\" + name + \"'\");" +
+            "throw new Error(\"Could not read '\" + name + \"'\");" +
+            "});" +
+            "}());").getBytes("UTF-8")
+        );
+
+    }
+
 }

@@ -60,6 +60,7 @@ import static com.openexchange.sessiond.SessionExceptionMessages.NO_SESSION_FOR_
 import static com.openexchange.sessiond.SessionExceptionMessages.PASSWORD_UPDATE_FAILED_MSG;
 import static com.openexchange.sessiond.SessionExceptionMessages.SESSION_EXPIRED_MSG;
 import static com.openexchange.sessiond.SessionExceptionMessages.SESSION_INVALIDATED_MSG;
+import java.util.regex.Pattern;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
@@ -172,6 +173,9 @@ public enum SessionExceptionCodes implements DisplayableOXExceptionCode {
 
     private static final String PREFIX = "SES";
 
+    /** The pattern to match the expected format of the generated session identifiers */
+    private static final Pattern UUID_SESSION_PATTERN = Pattern.compile("^[0-9a-f]{32}\\z");
+
     /**
      * Checks if specified {@code OXException}'s prefix is equal to this {@code OXExceptionCode} enumeration.
      *
@@ -255,7 +259,7 @@ public enum SessionExceptionCodes implements DisplayableOXExceptionCode {
      * @return The newly created {@link OXException} instance
      */
     public OXException create(final Object... args) {
-        return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
+        return OXExceptionFactory.getInstance().create(this, (Throwable) null, sanitize(args));
     }
 
     /**
@@ -266,7 +270,53 @@ public enum SessionExceptionCodes implements DisplayableOXExceptionCode {
      * @return The newly created {@link OXException} instance
      */
     public OXException create(final Throwable cause, final Object... args) {
-        return OXExceptionFactory.getInstance().create(this, cause, args);
+        return OXExceptionFactory.getInstance().create(this, cause, sanitize(args));
+    }
+
+    /**
+     * Sanitizes the supplied exception message arguments.
+     *
+     * @param args The exception arguments to sanitize
+     * @return The sanitized exception arguments
+     */
+    private Object[] sanitize(Object[] args) {
+        if (null == args || 0 == args.length) {
+            return args;
+        }
+        switch (this) {
+            case SESSION_EXPIRED:
+            case KERBEROS_TICKET_MISSING:
+                args[0] = sanitizeSessionIdParamter(args[0]);
+                break;
+            case WRONG_SESSION:
+                args[0] = sanitizeSessionIdParamter(args[0]);
+                if (1 < args.length) {
+                    args[1] = sanitizeSessionIdParamter(args[1]);
+                }
+                break;
+            case WRONG_BY_RANDOM:
+                args[0] = sanitizeSessionIdParamter(args[0]);
+                if (3 < args.length) {
+                    args[3] = sanitizeSessionIdParamter(args[3]);
+                }
+                break;
+            default:
+                break;
+        }
+        return args;
+    }
+
+    /**
+     * Sanitizes the session id parameter to ensure it is at least in the expected format.
+     *
+     * @param sessionIdParameter The parameter to sanitize
+     * @return The parameter, or a sane string if not in expected format
+     */
+    private static Object sanitizeSessionIdParamter(Object sessionIdParameter) {
+        if (null != sessionIdParameter && String.class.isInstance(sessionIdParameter) && false == UUID_SESSION_PATTERN.matcher((String) sessionIdParameter).matches()) {
+            return "<invalid_sessionid>";
+        }
+        return sessionIdParameter;
     }
 
 }

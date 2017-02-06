@@ -9,7 +9,7 @@ BuildRequires: open-xchange-osgi
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 21
+%define        ox_release 23
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -1268,6 +1268,10 @@ if [ -e $TMPFILE ]; then
     rm -f $TMPFILE
 fi
 
+# SoftwareChange_Request-3862
+ox_comment html.tag.form add /opt/open-xchange/etc/whitelist.properties
+ox_comment html.tag.input add /opt/open-xchange/etc/whitelist.properties
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
@@ -1308,6 +1312,10 @@ exit 0
 %doc com.openexchange.server/ChangeLog
 
 %changelog
+* Thu Jan 26 2017 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2017-01-26 (3922)
+* Thu Jan 19 2017 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2017-01-23 (3875)
 * Tue Jan 03 2017 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2017-01-06 (3833)
 * Fri Nov 11 2016 Marcus Klein <marcus.klein@open-xchange.com>
