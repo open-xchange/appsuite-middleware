@@ -49,25 +49,23 @@
 
 package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
 
-import static com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools.toDate;
-import static com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools.toDateTime;
+import static com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools.*;
 import static com.openexchange.data.conversion.ical.ical4j.internal.ParserTools.parseDateConsideringDateType;
-
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-
-import net.fortuna.ical4j.model.Property;
-import net.fortuna.ical4j.model.component.CalendarComponent;
-import net.fortuna.ical4j.model.property.DateProperty;
-import net.fortuna.ical4j.model.property.DtEnd;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools;
+import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
+import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.component.CalendarComponent;
+import net.fortuna.ical4j.model.property.DateProperty;
+import net.fortuna.ical4j.model.property.DtEnd;
 
 /**
  *
@@ -117,35 +115,35 @@ public final class End<T extends CalendarComponent, U extends CalendarObject> ex
             calendar.setEndDate(parseDateConsideringDateType(component, new DtEnd(), timeZone));
         }
     }
-    
+
 
 
     /**
      * Overrides fulltime setting depending on Exchange Property: X-MICROSOFT-CDO-ALLDAYEVENT
-     * 
+     *
      * @param component
      * @param calendar
      */
     private boolean overrideFullTimeSetting(T component, U calendar) {
-        boolean retval = false;
-        
+        if (Boolean.FALSE.equals(calendar.getProperty("com.openexchange.data.conversion.ical.useXMicrosoftCDOAllDayEvent"))) {
+            return false;
+        }
         DtEnd dtEnd = new DtEnd();
         Property msAllDay = component.getProperty(XMicrosoftCdoAlldayEvent.property);
         if (msAllDay != null && msAllDay.getValue().equalsIgnoreCase("true")) {
             DateProperty dateProperty = (DateProperty)component.getProperty(dtEnd.getName());
-            int timeZoneOffset = dateProperty.getTimeZone() != null ? dateProperty.getTimeZone().getOffset(dateProperty.getDate().getTime()) : 0;
-            Date e = new Date(dateProperty.getDate().getTime() + timeZoneOffset);
-            calendar.setEndDate(e);
-            
-            if (calendar instanceof Appointment) {
-                Appointment appointment = (Appointment) calendar;
-                appointment.setFullTime(true);
+            if (ParserTools.isDateOrMidnight(dateProperty)) {
+                int timeZoneOffset = dateProperty.getTimeZone() != null ? dateProperty.getTimeZone().getOffset(dateProperty.getDate().getTime()) : 0;
+                Date e = new Date(dateProperty.getDate().getTime() + timeZoneOffset);
+                calendar.setEndDate(e);
+                if (calendar instanceof Appointment) {
+                    Appointment appointment = (Appointment) calendar;
+                    appointment.setFullTime(true);
+                }
+                return true;
             }
-            
-            retval = true;
         }
-        
-        return retval;
+        return false;
     }
 
 }
