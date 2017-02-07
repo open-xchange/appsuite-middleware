@@ -273,17 +273,6 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
      * @throws CertificateException if the specified {@link X509Certificate} chain is not trusted by the user
      */
     private void handleCertificateException(X509Certificate[] chain, Socket socket, CertificateException e) throws CertificateException {
-        /*
-         * MW-445: Main Concept
-         * - Check if the server is to be trusted; if yes return
-         * - Check if the user is allowed to accept untrusted certificates; if not throw an exception
-         * - Retrieve the fingerprint(s) of the certificate
-         * - Search if the user already accepted the certificate
-         * |- if yes check if the hostname of the socket matches the stored hostname; if yes return
-         * |_ Throw an exception in case the user previously denied the certificate
-         * |_ Throw an exception with the indication that the server is untrusted (the user can then choose what to do)
-         */
-
         if (chain == null || chain.length == 0) {
             throw new IllegalArgumentException("The supplied certificate chain is empty", e);
         }
