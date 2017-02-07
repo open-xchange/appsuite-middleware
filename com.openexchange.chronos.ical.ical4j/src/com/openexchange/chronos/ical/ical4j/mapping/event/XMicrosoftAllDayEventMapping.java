@@ -80,7 +80,7 @@ public class XMicrosoftAllDayEventMapping extends AbstractICalMapping<VEvent, Ev
     @Override
     public void export(Event object, VEvent component, ICalParameters parameters, List<OXException> warnings) {
         removeProperties(component, AllDayEvent.PROPERTY_NAME);
-        if (object.isAllDay()) {
+        if (object.isAllDay() && isNotIgnored(parameters, AllDayEvent.PROPERTY_NAME)) {
             component.getProperties().add(TRUE);
         }
     }
@@ -88,7 +88,7 @@ public class XMicrosoftAllDayEventMapping extends AbstractICalMapping<VEvent, Ev
     @Override
     public void importICal(VEvent component, Event object, ICalParameters parameters, List<OXException> warnings) {
         Property property = component.getProperty(AllDayEvent.PROPERTY_NAME);
-        if (null != property && Boolean.valueOf(property.getValue())) {
+        if (null != property && Boolean.valueOf(property.getValue()) && isNotIgnored(parameters, AllDayEvent.PROPERTY_NAME)) {
             object.setAllDay(true);
         }
     }

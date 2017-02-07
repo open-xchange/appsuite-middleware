@@ -91,6 +91,16 @@ public interface ICalParameters {
      */
     String DEFAULT_TIMEZONE = "DEFAULT_TIMEZONE";
 
+    /**
+     * {@link String[]}
+     * <p/>
+     * Optional string array denoting the names of the properties to forcibly ignore during import or export.
+     * <p/>
+     * During export, the properties are removed after mapping, prior serialization. During import, the properties are removed after deserialization, before mapping.
+     * <p/>
+     * Wildcards are allowed in the names, e.g. <code>X-MOZ-SNOOZE-TIME*</code>.
+     */
+    String IGNORED_PROPERTIES = "IGNORED_PROPERTIES";
 
     /**
      * Gets the value of an arbitrary extended parameter.

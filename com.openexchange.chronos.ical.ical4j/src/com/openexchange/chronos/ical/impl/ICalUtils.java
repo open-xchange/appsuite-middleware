@@ -185,6 +185,7 @@ public class ICalUtils {
 
     static Event importEvent(int index, VEvent vEvent, ICalMapper mapper, ICalParameters parameters) throws OXException {
         List<OXException> warnings = new ArrayList<OXException>();
+        removeProperties(vEvent, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
         ImportedEvent importedEvent = new ImportedEvent(index, mapper.importVEvent(vEvent, parameters, warnings), warnings);
         importedEvent.setProperties(importProperties(vEvent, parameters.get(ICalParameters.EXTRA_PROPERTIES, String[].class)));
         importedEvent.setAlarms(importAlarms(vEvent.getAlarms(), mapper, parameters));
@@ -205,6 +206,7 @@ public class ICalUtils {
 
     static ImportedAlarm importAlarm(int index, VAlarm vAlarm, ICalMapper mapper, ICalParameters parameters) throws OXException {
         List<OXException> warnings = new ArrayList<OXException>();
+        removeProperties(vAlarm, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
         ImportedAlarm importedAlarm = new ImportedAlarm(index, mapper.importVAlarm(vAlarm, parameters, warnings), warnings);
         importedAlarm.setProperties(importProperties(vAlarm, parameters.get(ICalParameters.EXTRA_PROPERTIES, String[].class)));
         return importedAlarm;
@@ -224,6 +226,7 @@ public class ICalUtils {
 
     static FreeBusyData importFreeBusy(int index, VFreeBusy vFreeBusy, ICalMapper mapper, ICalParameters parameters) throws OXException {
         List<OXException> warnings = new ArrayList<OXException>();
+        removeProperties(vFreeBusy, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
         return mapper.importVFreeBusy(vFreeBusy, parameters, warnings);
     }
 
@@ -299,6 +302,19 @@ public class ICalUtils {
             }
         }
         return parameterList;
+    }
+
+    static <T extends Component> T removeProperties(T component, String[] propertyNames) {
+        if (null == propertyNames || 0 == propertyNames.length) {
+            return component;
+        }
+        for (String propertyName : propertyNames) {
+            PropertyList propertyList = getProperties(component, propertyName);
+            for (Iterator<?> iterator = propertyList.iterator(); iterator.hasNext();) {
+                component.getProperties().remove((Property) iterator.next());
+            }
+        }
+        return component;
     }
 
     static List<ICalProperty> importProperties(Component component, String[] propertyNames) {

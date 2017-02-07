@@ -213,6 +213,7 @@ public class CalendarExportImpl implements CalendarExport {
          */
         VEvent vEvent = mapper.exportEvent(event, parameters, warnings);
         ICalUtils.exportProperties(event, vEvent);
+        ICalUtils.removeProperties(vEvent, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
         if (false == CalendarUtils.isFloating(event)) {
             trackTimezones(event.getStartTimeZone(), event.getEndTimeZone());
         }
@@ -234,6 +235,7 @@ public class CalendarExportImpl implements CalendarExport {
          */
         VAlarm vAlarm = mapper.exportAlarm(alarm, parameters, warnings);
         ICalUtils.exportProperties(alarm, vAlarm);
+        ICalUtils.removeProperties(vAlarm, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
         return vAlarm;
     }
 
@@ -243,6 +245,7 @@ public class CalendarExportImpl implements CalendarExport {
          */
         VFreeBusy vFreeBusy = mapper.exportFreeBusy(freeBusyData, parameters, warnings);
         ICalUtils.exportProperties(freeBusyData, vFreeBusy);
+        ICalUtils.removeProperties(vFreeBusy, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
         trackTimezones(freeBusyData.getStartTimeZone(), freeBusyData.getEndTimeZone());
         return vFreeBusy;
     }

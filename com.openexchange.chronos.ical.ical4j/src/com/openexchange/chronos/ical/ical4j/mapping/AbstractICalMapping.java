@@ -54,7 +54,9 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.ical.ICalExceptionCodes;
+import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.exception.OXException;
+import com.openexchange.tools.arrays.Arrays;
 import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.Parameter;
 import net.fortuna.ical4j.model.Property;
@@ -76,6 +78,36 @@ public abstract class AbstractICalMapping<T extends Component, U> implements ICa
      */
     protected AbstractICalMapping() {
         super();
+    }
+
+    /**
+     * Gets a value indicating whether a specific property is <i>ignored</i> based on the configured
+     * {@link ICalParameters#IGNORED_PROPERTIES} array.
+     *
+     * @param parameters The iCal parameters
+     * @param propertyName The property name to check
+     * @return <code>true</code> if the property is ignored, <code>false</code>, otherwise
+     */
+    protected boolean isIgnored(ICalParameters parameters, String propertyName) {
+        if (null != parameters && null != propertyName) {
+            String[] ignoredProperties = parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class);
+            if (null != ignoredProperties && Arrays.contains(ignoredProperties, propertyName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Gets a value indicating whether a specific property is not <i>ignored</i> based on the configured
+     * {@link ICalParameters#IGNORED_PROPERTIES} array.
+     *
+     * @param parameters The iCal parameters
+     * @param propertyName The property name to check
+     * @return <code>true</code> if the property is not ignored, <code>false</code>, otherwise
+     */
+    protected boolean isNotIgnored(ICalParameters parameters, String propertyName) {
+        return false == isIgnored(parameters, propertyName);
     }
 
     /**
