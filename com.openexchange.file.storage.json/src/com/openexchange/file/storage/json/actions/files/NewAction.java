@@ -56,8 +56,10 @@ import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -106,9 +108,10 @@ public class NewAction extends AbstractWriteAction {
         String saveAction = "none";
         if (null != newId && request.extendedResponse()) {
             File metadata = fileAccess.getFileMetadata(newId, FileStorageFileAccess.CURRENT_VERSION);
+            FileID id = new FileID(file.getId());
             if (null != originalFileName && !originalFileName.equals(metadata.getFileName())) {
                 saveAction = "rename";
-            } else if (1 < metadata.getNumberOfVersions()) {
+            } else if (fileAccess.supports(id.getService(), id.getAccountId(), FileStorageCapability.FILE_VERSIONS) && 1 < metadata.getNumberOfVersions()) {
                 saveAction = "new_version";
             }
             result = result(metadata, (AJAXInfostoreRequest) request, saveAction);
