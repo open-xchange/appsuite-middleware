@@ -984,16 +984,7 @@ If you would like to add a reference to another property use the following appro
 | __File__ | ssl.properties  |
 
 ---
-| Key | <span style="font-weight:normal">com.openexchange.net.ssl.default.truststore.password</span> |
-|:----------------|:--------|
-| __Description__ |         Defines the password to access the JVM's default truststore. |
-| __Default__ | changeit  |
-| __Version__ | 7.8.4  |
-| __Reloadable__ | true  |
-| __Configcascade Aware__ | true  |
-| __File__ | ssl.properties  |
 
----
 
 ## Websockets 
 
