@@ -66,6 +66,7 @@ import com.openexchange.caldav.Tools;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.ical.CalendarExport;
+import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
@@ -212,7 +213,8 @@ public class EventResource extends DAVObjectResource<Event> {
             CalendarSession calendarSession = getCalendarSession();
             calendarSession.set(CalendarParameters.PARAMETER_FIELDS, null);
             ICalService iCalService = getFactory().requireService(ICalService.class);
-            CalendarExport calendarExport = iCalService.exportICal(null);
+            ICalParameters iCalParameters = EventPatches.applyIgnoredProperties(this, iCalService.initParameters());
+            CalendarExport calendarExport = iCalService.exportICal(iCalParameters);
             List<Event> changeExceptions = null;
             if (PhantomMaster.class.isInstance(object)) {
                 /*

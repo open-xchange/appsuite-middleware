@@ -92,7 +92,7 @@ public class CalDAVImport {
      * @param inputStream The input stream to deserialize
      */
     public CalDAVImport(EventResource resource, InputStream inputStream) throws OXException {
-        this(resource.getUrl(), importEvents(resource.getFactory(), inputStream));
+        this(resource.getUrl(), importEvents(resource, inputStream));
     }
 
     /**
@@ -201,15 +201,15 @@ public class CalDAVImport {
         return null != event.getRecurrenceId();
     }
 
-    private static CalendarImport importICal(GroupwareCaldavFactory factory, InputStream inputStream) throws OXException {
-        ICalService iCalService = factory.requireService(ICalService.class);
-        ICalParameters parameters = iCalService.initParameters();
-        parameters.set(ICalParameters.EXTRA_PROPERTIES, EXTRA_PROPERTIES);
-        return iCalService.importICal(inputStream, parameters);
+    private static CalendarImport importICal(EventResource resource, InputStream inputStream) throws OXException {
+        ICalService iCalService = resource.getFactory().requireService(ICalService.class);
+        ICalParameters iCalParameters = EventPatches.applyIgnoredProperties(resource, iCalService.initParameters());
+        iCalParameters.set(ICalParameters.EXTRA_PROPERTIES, EXTRA_PROPERTIES);
+        return iCalService.importICal(inputStream, iCalParameters);
     }
 
-    private static List<Event> importEvents(GroupwareCaldavFactory factory, InputStream inputStream) throws OXException {
-        CalendarImport calendarImport = importICal(factory, inputStream);
+    private static List<Event> importEvents(EventResource resource, InputStream inputStream) throws OXException {
+        CalendarImport calendarImport = importICal(resource, inputStream);
         return null != calendarImport ? calendarImport.getEvents() : null;
     }
 

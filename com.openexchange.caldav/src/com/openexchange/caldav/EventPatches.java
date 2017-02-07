@@ -76,6 +76,7 @@ import com.openexchange.chronos.RelatedTo;
 import com.openexchange.chronos.Trigger;
 import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.ical.DefaultICalProperty;
+import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalProperty;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
@@ -113,6 +114,25 @@ public class EventPatches {
      */
     private EventPatches() {
     	// prevent instantiation
+    }
+
+    /**
+     * Configures the {@link ICalParameters#IGNORED_PROPERTIES} parameter as needed prior exporting/importing iCal data.
+     *
+     * @param resource The underlying event resource
+     * @param parameters The iCal parameters to configure the ignored properties in
+     * @return The passed iCal paramters instance
+     */
+    public static ICalParameters applyIgnoredProperties(EventResource resource, ICalParameters parameters) {
+        if (null != parameters) {
+            if (false == DAVUserAgent.EM_CLIENT.equals(resource.getUserAgent())) {
+                /*
+                 * ignore X-MICROSOFT-CDO-ALLDAYEVENT for clients other than em client
+                 */
+                parameters.set(ICalParameters.IGNORED_PROPERTIES, new String[] { "X-MICROSOFT-CDO-ALLDAYEVENT" });
+            }
+        }
+        return parameters;
     }
 
     /**
