@@ -4,6 +4,7 @@
     tags:
       - Certificate
     summary: Deletes the fingerprint/hostname combination
+    description: Deletes the fingerprint/hostname combination
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - in: query

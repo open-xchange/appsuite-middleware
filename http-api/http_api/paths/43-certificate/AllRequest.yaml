@@ -3,7 +3,8 @@
     operationId: getAllCertificates
     tags:
       - Certificate
-    summary: Gets all SSL Certificates
+    summary: Gets all SSL certificates.
+    description: Returns all trusted and untrusted SSL certificates
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
     responses:
@@ -12,4 +13,4 @@
           A JSON object containing an array with data for all certificates. In case of errors the responsible fields in the response are
           filled (see [Error handling](#error-handling)).
         schema:
-          $ref: "#/definitions/CertificatesResponse"
+          $ref: "#/definitions/CertificatesAllResponse"

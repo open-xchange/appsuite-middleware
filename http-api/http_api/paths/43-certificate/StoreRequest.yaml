@@ -3,7 +3,8 @@
     operationId: storeCertificate
     tags:
       - Certificate
-    summary: Stores the fingerprint of an SSL certificate in combination with a hostname as either trusted or untrusted for a user
+    summary: Stores the fingerprint of an SSL certificate.
+    description: Stores the fingerprint of an SSL certificate in combination with a hostname as either trusted or untrusted. This API call also accepts a JSONObject.
     consumes:
       - application/json
     parameters:
@@ -23,6 +24,12 @@
         type: boolean
         description: Whether the combination of the SSL certificate and the hostname is to be trusted
         required: true
+      - in: body
+        name: body
+        description: A JSON object describing the SSL certificate.
+        required: false
+        schema:
+          $ref: "#/definitions/CertificateStoreData"
     responses:
       200:
         description: An empty JSON object. In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).

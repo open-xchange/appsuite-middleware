@@ -2,4 +2,4 @@ type: object
 properties:
   $ref: ../common/CommonResponseData.yaml
   data:
-    $ref: "#/definitions/CertificateData"
+    $ref: "#/definitions/CertificateExamineData"

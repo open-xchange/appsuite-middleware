@@ -1,11 +1,10 @@
 /certificate?action=examine:
-  put:
+  get:
     operationId: examineCertificate
     tags:
       - Certificate
-    summary: Examines an invalid SSL certificate from a previous endpoint call
-    consumes:
-      - application/json
+    summary: Examines an untrusted SSL certificate from a previous endpoint call
+    description: Examines an untrusted SSL certificate from a previous endpoint call. The SSL certificate is cached for a brief amount of time by the middleware (2 minutes).
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - in: query
@@ -17,4 +16,4 @@
       200:
         description: A JSON object containing the data of the certificate. In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
         schema:
-          $ref: "#/definitions/CertificateResponse"
+          $ref: "#/definitions/CertificateExamineResponse"
