@@ -1033,9 +1033,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     tool.unsetUserSettingMailBit(ctx, usrdata, UserSettingMail.INT_SPAM_ENABLED, con);
                 }
             }
-            
-            if (usrdata.isRemoveDriveFolderFlags()) {
-                removeDriveFolderFlags(ctx, usrdata, con);
+
+            if (usrdata.isConvertDriveUserFolders()) {
+                convertDriveUserFolders(ctx, usrdata, con);
             }
 
             // update the user mail settings
@@ -3647,7 +3647,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
     }
 
-    private void removeDriveFolderFlags(Context ctx, User user, Connection con) throws StorageException {
+    private void convertDriveUserFolders(Context ctx, User user, Connection con) throws StorageException {
         int contextId = ctx.getId().intValue();
         int userId = user.getId().intValue();
         PreparedStatement stmt = null;

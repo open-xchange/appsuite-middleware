@@ -155,8 +155,12 @@ import javax.xml.datatype.XMLGregorianCalendar;
 <<<<<<< HEAD
 =======
  *         &lt;element name="primaryAccountName" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+<<<<<<< HEAD
  *         &lt;element name="remove_drive_folder_flags" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
 >>>>>>> 2b50186a082... MW-488: Added SOAP & refactoring
+=======
+ *         &lt;element name="convert_drive_user_folders" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+>>>>>>> c60111aa698... MW-488: Changed parameter name
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -299,7 +303,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
     "userfield19",
     "userfield20",
     "primaryAccountName",
-    "removeDriveFolderFlags"
+    "convertDriveUserFolders"
 })
 public class User {
 
@@ -566,8 +570,8 @@ public class User {
     protected String userfield20;
     @XmlElement(nillable = true)
     private String primaryAccountName;
-    @XmlElement(name = "remove_drive_folder_flags", nillable = true)
-    protected Boolean removeDriveFolderFlags;
+    @XmlElement(name = "convert_drive_user_folders", nillable = true)
+    protected Boolean convertDriveUserFolders;
 
     /**
      * Gets the value of the aliases property.
@@ -3780,13 +3784,13 @@ public class User {
     public void setPrimaryAccountName(String primaryAccountName) {
         this.primaryAccountName = primaryAccountName;
     }
-    
-    public boolean isRemoveDriveFolderFlags() {
-        return removeDriveFolderFlags;
+
+    public Boolean isConvertDriveUserFolders() {
+        return this.convertDriveUserFolders;
     }
-    
-    public void setRemoveDriveFolderFlags(Boolean removeDriveFolderFlags) {
-        this.removeDriveFolderFlags = removeDriveFolderFlags;
+
+    public void setConvertDriveUserFolders(Boolean convertDriveUserFolders) {
+        this.convertDriveUserFolders = convertDriveUserFolders;
     }
 
 }

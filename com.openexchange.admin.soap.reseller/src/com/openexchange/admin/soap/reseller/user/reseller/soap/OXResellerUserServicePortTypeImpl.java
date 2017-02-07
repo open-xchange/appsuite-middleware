@@ -1496,9 +1496,9 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
             user.setDriveFolderMode(tmp);
         }
         
-        Boolean bool_tmp = soapUser.isRemoveDriveFolderFlags();
+        Boolean bool_tmp = soapUser.isConvertDriveUserFolders();
         if (bool_tmp != null) {
-            user.setRemoveDriveFolderFlags(bool_tmp);
+            user.setConvertDriveUserFolders(bool_tmp);
         }
         
         tmp = soapUser.getDepartment();
