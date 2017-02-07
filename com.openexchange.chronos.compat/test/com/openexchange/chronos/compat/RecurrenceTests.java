@@ -49,12 +49,11 @@
 
 package com.openexchange.chronos.compat;
 
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.TimeZone;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import com.openexchange.chronos.common.DefaultRecurrenceData;
 
 /**
  * {@link RecurrenceTests}
@@ -143,27 +142,22 @@ public class RecurrenceTests {
 
     @Test
     public void testSimpleRecurringRulesToPattern() throws Exception {
-        Calendar cal = GregorianCalendar.getInstance();
+        String tz = TimeZone.getDefault().getID();
 
-        cal.setTimeInMillis(1222865100000L);
-        SeriesPattern pattern = Recurrence.generatePattern("FREQ=DAILY;INTERVAL=1", cal);
-        Assert.assertEquals("Wrong pattern.", "t|1|i|1|s|1222865100000", pattern.toString());
+        SeriesPattern pattern = Recurrence.getSeriesPattern(new DefaultRecurrenceData("FREQ=DAILY;INTERVAL=1", false, tz, 1222865100000L));
+        Assert.assertEquals("Wrong pattern.", "t|1|i|1|s|1222865100000|", pattern.toString());
 
-        cal.setTimeInMillis(1222865100000L);
-        pattern = Recurrence.generatePattern("FREQ=DAILY;INTERVAL=1;COUNT=3", cal);
-        Assert.assertEquals("Wrong pattern.", "t|1|i|1|o|3|s|1222865100000|e|1222992000000", pattern.toString());
+        pattern = Recurrence.getSeriesPattern(new DefaultRecurrenceData("FREQ=DAILY;INTERVAL=1;COUNT=3", false, tz, 1222865100000L));
+        Assert.assertEquals("Wrong pattern.", "t|1|i|1|o|3|s|1222865100000|e|1222992000000|", pattern.toString());
 
-        cal.setTimeInMillis(1222865100000L);
-        pattern = Recurrence.generatePattern("FREQ=DAILY;INTERVAL=1;UNTIL=20081012T124500Z", cal);
-        Assert.assertEquals("Wrong pattern.", "t|1|i|1|s|1222865100000|e|1223769600000", pattern.toString());
+        pattern = Recurrence.getSeriesPattern(new DefaultRecurrenceData("FREQ=DAILY;INTERVAL=1;UNTIL=20081012T124500Z", false, tz, 1222865100000L));
+        Assert.assertEquals("Wrong pattern.", "t|1|i|1|s|1222865100000|e|1223769600000|", pattern.toString());
 
-        cal.setTimeInMillis(1222840800000L);
-        pattern = Recurrence.generatePattern("FREQ=WEEKLY;INTERVAL=1;BYDAY=WE", cal);
-        Assert.assertEquals("Wrong pattern.", "t|2|i|1|a|8|s|1222840800000", pattern.toString());
+        pattern = Recurrence.getSeriesPattern(new DefaultRecurrenceData("FREQ=WEEKLY;INTERVAL=1;BYDAY=WE", false, tz, 1222840800000L));
+        Assert.assertEquals("Wrong pattern.", "t|2|i|1|a|8|s|1222840800000|", pattern.toString());
 
-        cal.setTimeInMillis(1222840800000L);
-        pattern = Recurrence.generatePattern("FREQ=WEEKLY;INTERVAL=1;COUNT=5;BYDAY=WE,FR", cal);
-        Assert.assertEquals("Wrong pattern.", "t|2|i|1|a|40|o|5|s|1222840800000|e|1224028800000", pattern.toString());
+        pattern = Recurrence.getSeriesPattern(new DefaultRecurrenceData("FREQ=WEEKLY;INTERVAL=1;COUNT=5;BYDAY=WE,FR", false, tz, 1222840800000L));
+        Assert.assertEquals("Wrong pattern.", "t|2|i|1|a|40|o|5|s|1222840800000|e|1224028800000|", pattern.toString());
     }
 
     @Test

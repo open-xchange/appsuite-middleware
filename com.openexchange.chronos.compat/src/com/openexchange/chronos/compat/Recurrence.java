@@ -50,12 +50,14 @@
 package com.openexchange.chronos.compat;
 
 import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -76,9 +78,6 @@ import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.java.util.TimeZones;
 
 /**
@@ -90,8 +89,6 @@ import com.openexchange.java.util.TimeZones;
  */
 public class Recurrence {
 
-    private static final Map<String, Integer> weekdays = new HashMap<String, Integer>();
-
     private static final Map<Integer, String> reverseDays = new HashMap<Integer, String>();
 
     private static final List<Integer> allDays = new LinkedList<Integer>();
@@ -99,6 +96,7 @@ public class Recurrence {
     private static final SimpleDateFormat date;
 
     static {
+        Map<String, Integer> weekdays = new HashMap<String, Integer>();
         weekdays.put("SU", 1);
         weekdays.put("MO", 2);
         weekdays.put("TU", 4);
@@ -187,9 +185,8 @@ public class Recurrence {
         /*
          * iterate recurrence and take over end date of "last" occurrence
          */
-        //TODO recurrence service should know "max until"
         long millis = masterPeriod.getEndDate().getTime();
-        for (int i = 1; i < 1000 && iterator.hasNext(); millis = iterator.nextMillis(), i++)
+        for (int i = 1; i <= SeriesPattern.MAX_OCCURRENCESE && iterator.hasNext(); millis = iterator.nextMillis(), i++)
             ;
         calendar.setTimeInMillis(millis);
         calendar.set(Calendar.HOUR_OF_DAY, endHour);
@@ -591,68 +588,74 @@ public class Recurrence {
         return null;
     }
 
-    public static SeriesPattern generatePattern(String recur, Calendar startDate) throws OXException {
-        RecurrenceRule rrule = getRecurrenceRule(recur);
-        CalendarDataObject cObj = new CalendarDataObject();
-        cObj.setTimezone(startDate.getTimeZone().getID());
-        cObj.setStartDate(startDate.getTime());
+    /**
+     * Gets the legacy series pattern for the supplied recurrence data.
+     *
+     * @param recurrenceData The recurrence data to construct the series pattern for
+     * @return The series pattern
+     */
+    public static SeriesPattern getSeriesPattern(RecurrenceData recurrenceData) throws OXException {
+        /*
+         * take over common attributes
+         */
+        TimeZone timeZone = null != recurrenceData.getTimeZoneID() ? TimeZone.getTimeZone(recurrenceData.getTimeZoneID()) : TimeZones.UTC;
+        Calendar seriesStartCalendar = initCalendar(timeZone, recurrenceData.getSeriesStart());
+        RecurrenceRule rrule = getRecurrenceRule(recurrenceData.getRecurrenceRule());
+        SeriesPattern pattern = new SeriesPattern();
+        pattern.setInterval(I(rrule.getInterval()));
+        pattern.setSeriesStart(L(recurrenceData.getSeriesStart()));
+        pattern.setFullTime(B(recurrenceData.isAllDay())); //TODO: needed?
+        pattern.setTz(timeZone); //TODO: needed?
+        if (null != rrule.getCount()) {
+            pattern.setOccurrences(rrule.getCount());
+            pattern.setSeriesEnd(L(getUntilForUnlimited(rrule, recurrenceData.getSeriesStart(), recurrenceData.getTimeZoneID(), recurrenceData.isAllDay()).getTime()));
+        } else if (null != rrule.getUntil()) {
+            pattern.setSeriesEnd(L(getSeriesEnd(rrule, recurrenceData.getSeriesStart(), recurrenceData.getTimeZoneID()).getTime()));
+        }
+        /*
+         * apply specific parts based on rule's FREQ
+         */
         switch (rrule.getFreq()) {
             case DAILY:
-                if (rrule.getByDayPart() != null && rrule.getByDayPart().size() > 0) {
+                if (null != rrule.getByDayPart() && 0 < rrule.getByDayPart().size()) {
                     // used as "each weekday" by some clients: FREQ=DAILY;INTERVAL=1;WKST=SU;BYDAY=MO,TU,WE,TH,FR
                     // save as 'weekly' type with daymask
-                    cObj.setRecurrenceType(CalendarObject.WEEKLY);
-                    setDays(cObj, rrule, startDate);
+                    setDays(pattern, rrule, seriesStartCalendar);
+                    pattern.setType(SeriesPattern.WEEKLY);
                 } else {
-                    cObj.setRecurrenceType(CalendarObject.DAILY);
+                    pattern.setType(SeriesPattern.DAILY);
                 }
-                if (rrule.getByPart(Part.BYMONTH) != null && !rrule.getByPart(Part.BYMONTH).isEmpty()) {
-                    // TODO:
-                }
-                break;
+                return pattern;
             case WEEKLY:
-                cObj.setRecurrenceType(CalendarObject.WEEKLY);
-                setDays(cObj, rrule, startDate);
-                break;
+                setDays(pattern, rrule, seriesStartCalendar);
+                pattern.setType(SeriesPattern.WEEKLY);
+                return pattern;
             case MONTHLY:
-                cObj.setRecurrenceType(CalendarObject.MONTHLY);
-                setMonthDay(cObj, rrule, startDate);
-                break;
+                setMonthDay(pattern, rrule, seriesStartCalendar);
+                if (null == rrule.getByDayPart() || 0 == rrule.getByDayPart().size()) {
+                    pattern.setType(SeriesPattern.MONTHLY_1);
+                } else {
+                    pattern.setType(SeriesPattern.MONTHLY_2);
+                }
+                return pattern;
             case YEARLY:
-                cObj.setRecurrenceType(CalendarObject.YEARLY);
                 List<Integer> monthList = rrule.getByPart(Part.BYMONTH);
                 if (null != monthList && !monthList.isEmpty()) {
-                    cObj.setMonth(monthList.get(0).intValue());
-                    setMonthDay(cObj, rrule, startDate);
+                    pattern.setMonth(monthList.get(0));
+                    setMonthDay(pattern, rrule, seriesStartCalendar);
                 } else {
-                    cObj.setMonth(startDate.get(Calendar.MONTH));
-                    setMonthDay(cObj, rrule, startDate);
+                    pattern.setMonth(I(seriesStartCalendar.get(Calendar.MONTH))); //TODO: which timezone for floating events?
+                    setMonthDay(pattern, rrule, seriesStartCalendar);
                 }
-                break;
+                if (null == rrule.getByDayPart() || 0 == rrule.getByDayPart().size()) {
+                    pattern.setType(SeriesPattern.YEARLY_1);
+                } else {
+                    pattern.setType(SeriesPattern.YEARLY_2);
+                }
+                return pattern;
             default:
-                break;
+                throw CalendarExceptionCodes.UNSUPPORTED_RRULE.create(recurrenceData.getRecurrenceRule(), Part.FREQ, "Unsupported frequency");
         }
-
-        int interval = rrule.getInterval();
-        if (interval == -1) {
-            interval = 1;
-        }
-        cObj.setInterval(interval);
-        Integer count = rrule.getCount();
-        if (count != null) {
-            final int recurrenceCount = rrule.getCount();
-            cObj.setRecurrenceCount(recurrenceCount);
-            setOccurrenceIfNeededRecoveryFIXME(cObj, recurrenceCount);
-        } else if (rrule.getUntil() != null) {
-            try {
-                cObj.setUntil(getSeriesEnd(rrule, startDate.getTime(), startDate.getTimeZone().getID()));
-            } catch (OXException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
-
-        return generatePattern(cObj, rrule);
     }
 
     /**
@@ -664,7 +667,7 @@ public class Recurrence {
      * @param timeZoneID The timezone associated with the event series, or <code>null</code> for floating events
      * @return The series end date, or <code>null</code> if not set in the recurrence rule
      */
-    private static Date getSeriesEnd(RecurrenceRule recurrenceRule, Date seriesStart, String timeZoneID) throws OXException {
+    private static Date getSeriesEnd(RecurrenceRule recurrenceRule, long seriesStart, String timeZoneID) throws OXException {
         if (null == recurrenceRule || null == recurrenceRule.getUntil()) {
             return null;
         }
@@ -679,10 +682,10 @@ public class Recurrence {
          * consider DATE-TIME value type - determine start date of first occurrence outside range
          */
         DateTime nextOccurrenceStart = null;
-        if (until.getTimestamp() > seriesStart.getTime()) {
+        if (until.getTimestamp() > seriesStart) {
             try {
                 recurrenceRule.setUntil(null);
-                RecurrenceRuleIterator iterator = getRecurrenceIterator(recurrenceRule, seriesStart.getTime(), timeZoneID, false, true);
+                RecurrenceRuleIterator iterator = getRecurrenceIterator(recurrenceRule, seriesStart, timeZoneID, false, true);
                 while (iterator.hasNext()) {
                     DateTime occurrenceStart = iterator.nextDateTime();
                     if (occurrenceStart.after(until)) {
@@ -807,8 +810,7 @@ public class Recurrence {
         /*
          * "OX" model defines until as 00:00:00 utc if the day of the last occurrence.
          */
-        Calendar utcUntilCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        utcUntilCalendar.setTimeInMillis(pattern.getSeriesEnd());
+        Calendar utcUntilCalendar = initCalendar(TimeZones.UTC, pattern.getSeriesEnd().longValue());
         /*
          * iCal wants a correct inclusive until value. With time zone and time. So extract time from the start date.
          */
@@ -825,199 +827,77 @@ public class Recurrence {
         return dt;
     }
 
-    private static void setDays(CalendarObject cObj, RecurrenceRule rrule, Calendar startDate) {
-        List<WeekdayNum> weekdayList = rrule.getByDayPart();
-        if (weekdayList.isEmpty()) {
-            int day_of_week = startDate.get(Calendar.DAY_OF_WEEK);
-            int days = -1;
-            switch (day_of_week) {
-                case Calendar.MONDAY:
-                    days = CalendarObject.MONDAY;
-                    break;
-                case Calendar.TUESDAY:
-                    days = CalendarObject.TUESDAY;
-                    break;
-                case Calendar.WEDNESDAY:
-                    days = CalendarObject.WEDNESDAY;
-                    break;
-                case Calendar.THURSDAY:
-                    days = CalendarObject.THURSDAY;
-                    break;
-                case Calendar.FRIDAY:
-                    days = CalendarObject.FRIDAY;
-                    break;
-                case Calendar.SATURDAY:
-                    days = CalendarObject.SATURDAY;
-                    break;
-                case Calendar.SUNDAY:
-                    days = CalendarObject.SUNDAY;
-                    break;
-                default:
-            }
-            cObj.setDays(days);
+    private static void setDays(SeriesPattern pattern, RecurrenceRule rrule, Calendar seriesStart) {
+        List<WeekdayNum> byDayPart = rrule.getByDayPart();
+        if (null == byDayPart || byDayPart.isEmpty()) {
+            pattern.setDaysOfWeek(I(1 << (seriesStart.get(Calendar.DAY_OF_WEEK) - 1)));
         } else {
             int days = 0;
-            for (WeekdayNum weekday : weekdayList) {
-                Integer day = weekdays.get(weekday.weekday.name());
-                if (null == day) {
-                    // TODO:
-                }
-                days |= day.intValue();
+            for (WeekdayNum weekday : byDayPart) {
+                days |= 1 << weekday.weekday.ordinal();
             }
-            cObj.setDays(days);
+            pattern.setDaysOfWeek(I(days));
         }
     }
 
-    private static void setMonthDay(CalendarObject cObj, RecurrenceRule rrule, Calendar startDate) {
-        List<Integer> monthDayList = rrule.getByPart(Part.BYMONTHDAY);
-        if (null == monthDayList || monthDayList.isEmpty()) {
-            List<Integer> weekNoList = rrule.getByPart(Part.BYWEEKNO);
-            if (null != weekNoList && !weekNoList.isEmpty()) {
-                int week = weekNoList.get(0).intValue();
-                if (week == -1) {
-                    week = 5;
-                }
-                cObj.setDayInMonth(week); // Day in month stores week
-                setDays(cObj, rrule, startDate);
-            } else if (null != rrule.getByDayPart() && !rrule.getByDayPart().isEmpty()) {
-                setWeekdayInMonth(cObj, rrule);
-                setDayInMonthFromSetPos(cObj, rrule);
+    private static void setMonthDay(SeriesPattern pattern, RecurrenceRule rrule, Calendar seriesStart) {
+        List<Integer> byMonthDayPart = rrule.getByPart(Part.BYMONTHDAY);
+        if (null != byMonthDayPart && 0 < byMonthDayPart.size()) {
+            pattern.setDayOfMonth(byMonthDayPart.get(0));
+        } else {
+            List<Integer> byWeekNoPart = rrule.getByPart(Part.BYWEEKNO);
+            if (null != byWeekNoPart && 0 < byWeekNoPart.size()) {
+                Integer firstWeek = byWeekNoPart.get(0);
+                pattern.setDaysOfWeek(-1 == firstWeek.intValue() ? I(5) : firstWeek); // Day in month stores week
+                setDays(pattern, rrule, seriesStart);
+            } else if (null != rrule.getByDayPart() && 0 < rrule.getByDayPart().size()) {
+                setWeekdayInMonth(pattern, rrule);
+                setDayInMonthFromSetPos(pattern, rrule);
             } else {
                 // Default to monthly series on specific day of month
-                cObj.setDayInMonth(startDate.get(Calendar.DAY_OF_MONTH));
+                pattern.setDayOfMonth(I(seriesStart.get(Calendar.DAY_OF_MONTH)));
             }
-        } else {
-            cObj.setDayInMonth(monthDayList.get(0).intValue());
         }
     }
 
-    private static void setDayInMonthFromSetPos(CalendarObject obj, RecurrenceRule rrule) {
-        if (!rrule.getByPart(Part.BYSETPOS).isEmpty()) {
-            int firstPos = rrule.getByPart(Part.BYSETPOS).get(0);
-            if (firstPos == -1) {
-                firstPos = 5;
-            }
-            obj.setDayInMonth(firstPos);
+    private static void setDayInMonthFromSetPos(SeriesPattern pattern, RecurrenceRule rrule) {
+        List<Integer> bySetPosPart = rrule.getByPart(Part.BYSETPOS);
+        if (null != bySetPosPart && 0 < bySetPosPart.size()) {
+            Integer firstPos = bySetPosPart.get(0);
+            pattern.setDayOfMonth(-1 == firstPos.intValue() ? I(5) : firstPos);
         }
     }
 
-    private static void setWeekdayInMonth(CalendarObject cObj, RecurrenceRule rrule) {
-        List<WeekdayNum> weekdayList = rrule.getByDayPart();
-        if (!weekdayList.isEmpty()) {
+    private static void setWeekdayInMonth(SeriesPattern pattern, RecurrenceRule rrule) {
+        List<WeekdayNum> byDayPart = rrule.getByDayPart();
+        if (null != byDayPart && 0 < byDayPart.size()) {
             int days = 0;
-            for (WeekdayNum weekday : weekdayList) {
-                Integer day = weekdays.get(weekday.weekday.name());
-                if (null == day) {
-                    // TODO:
+            for (WeekdayNum weekday : byDayPart) {
+                days |= 1 << weekday.weekday.ordinal();
+                if (0 != weekday.pos) {
+                    pattern.setDayOfMonth(I(-1 == weekday.pos ? 5 : weekday.pos));
                 }
-                int offset = weekday.pos;
-                if (offset != 0) {
-                    if (offset == -1) {
-                        offset = 5;
-                    }
-                    cObj.setDayInMonth(offset);
-                }
-                days |= day.intValue();
             }
-            cObj.setDays(days);
+            pattern.setDaysOfWeek(I(days));
         }
     }
 
-    private static void setOccurrenceIfNeededRecoveryFIXME(CalendarDataObject cObj, int recurrenceCount) {
-        if (Appointment.class.isAssignableFrom(cObj.getClass())) {
-            cObj.setOccurrence(recurrenceCount);
-        }
-    }
-
-    private static SeriesPattern generatePattern(CalendarDataObject cdao, RecurrenceRule rrule) {
-        if (!cdao.containsStartDate()) {
-            return null;
-        }
-
-        int recurrenceType = cdao.getRecurrenceType();
-        int interval = cdao.getInterval(); // i
-        int weekdays = cdao.getDays();
-        int monthday = cdao.getDayInMonth();
-        int month = cdao.getMonth();
-        int occurrences = cdao.getOccurrence();
-        if (!cdao.containsUntil() && !cdao.containsOccurrence()) {
-            occurrences = -1;
-        }
-
-        SeriesPattern pattern = new SeriesPattern(recurrenceType, cdao.getTimezone(), cdao.getFullTime());
-        pattern.setInterval(interval);
-        pattern.setSeriesStart(cdao.getStartDate().getTime());
-
-        if (recurrenceType == CalendarObject.DAILY) {
-            pattern.setType(SeriesPattern.DAILY);
-        } else if (recurrenceType == CalendarObject.WEEKLY) {
-            pattern.setType(SeriesPattern.WEEKLY);
-            pattern.setDaysOfWeek(weekdays);
-        } else if (recurrenceType == CalendarObject.MONTHLY) {
-            if (monthday <= 0) {
-                // TODO:
-            }
-            if (weekdays <= 0) {
-                if (monthday > 31) {
-                    // TODO:
-                }
-                pattern.setType(SeriesPattern.MONTHLY_1);
-                pattern.setDayOfMonth(monthday);
-            } else {
-                if (monthday > 5) {
-                    // TODO:
-                }
-                pattern.setType(SeriesPattern.MONTHLY_2);
-                pattern.setDaysOfWeek(weekdays);
-                pattern.setDayOfMonth(monthday);
-            }
-        } else if (recurrenceType == CalendarObject.YEARLY) {
-            if (weekdays <= 0) {
-                if (monthday <= 0 || monthday > 31) {
-                    // TODO:
-                }
-                pattern.setType(SeriesPattern.YEARLY_1);
-                pattern.setDayOfMonth(monthday);
-                pattern.setMonth(month);
-            } else {
-                if (monthday < 1 || monthday > 5) {
-                    // TODO:
-                }
-                pattern.setType(SeriesPattern.YEARLY_2);
-                pattern.setDaysOfWeek(weekdays);
-                pattern.setDayOfMonth(monthday);
-                pattern.setMonth(month);
-            }
-        } else {
-            throw new IllegalArgumentException("Invalid value for recurrence type: " + recurrenceType);
-        }
-
-        if (occurrences > 0) {
-            pattern.setSeriesEnd(calculateUntilForUnlimited(cdao, rrule).getTime());
-            pattern.setOccurrences(occurrences);
-        } else if (cdao.containsUntil() && cdao.getUntil() != null) {
-            pattern.setSeriesEnd(cdao.getUntil().getTime());
-        } else {
-            //            pattern.setSeriesEnd(calculateUntilForUnlimited(cdao, rrule).getTime());
-        }
-        return pattern;
-    }
-
-    private static Date calculateUntilForUnlimited(CalendarDataObject cObj, RecurrenceRule rrule) {
-        DateTime start = new DateTime(cObj.getStartDate().getTime());
-        RecurrenceRuleIterator iterator = rrule.iterator(start);
-        int count = 0;
-        long millis = 0L;
-        while (iterator.hasNext() && count++ <= 999) { // TODO: implicit limit
-            millis = iterator.nextMillis();
-        }
-        Calendar until = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"));
-        until.setTimeInMillis(millis);
-        until.set(Calendar.HOUR_OF_DAY, 0);
-        until.set(Calendar.MINUTE, 0);
-        until.set(Calendar.SECOND, 0);
-        until.set(Calendar.MILLISECOND, 0);
-        return until.getTime();
+    /**
+     * Gets the date of the "last" calculated occurrence for a specific recurrence (either based on the real end of the recurrence, or
+     * the latest possible occurrence based on the legacy recurrence calculation limit.
+     *
+     * @param rule The recurrence rule
+     * @param seriesStart The series start date, usually the date of the first occurrence
+     * @param timeZoneID The timezone identifier applicable for the recurrence
+     * @param allDay <code>true</code> if the recurrence is <i>all-day</i>, <code>false</code>, otherwise
+     * @return The calculated until date (in UTC timezone, with truncated time fraction)
+     */
+    private static Date getUntilForUnlimited(RecurrenceRule rule, long seriesStart, String timeZoneID, boolean allDay) throws OXException {
+        RecurrenceRuleIterator iterator = getRecurrenceIterator(rule, seriesStart, timeZoneID, allDay, true);
+        DateTime localUntil = new DateTime(seriesStart);
+        for (int i = 0; i <= SeriesPattern.MAX_OCCURRENCESE && iterator.hasNext(); localUntil = iterator.nextDateTime(), i++)
+            ;
+        return initCalendar(TimeZones.UTC, localUntil.getYear(), localUntil.getMonth(), localUntil.getDayOfMonth()).getTime();
     }
 
 }

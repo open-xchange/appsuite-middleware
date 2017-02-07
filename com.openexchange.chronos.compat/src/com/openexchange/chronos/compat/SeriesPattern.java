@@ -60,6 +60,14 @@ import java.util.TimeZone;
  */
 public class SeriesPattern {
 
+    /**
+     * The legacy constant dictating the maximum number of calculated occurrences. Needs to be considered when converting legacy series
+     * patterns to recurrence rules and vice versa.
+     *
+     * @see com.openexchange.groupware.calendar.CalendarCollectionService.MAX_OCCURRENCESE
+     */
+    public static final int MAX_OCCURRENCESE = 999;
+
     private Integer type;
     private Integer interval;
     private Integer daysOfWeek;
@@ -336,14 +344,14 @@ public class SeriesPattern {
         if (null != month) {
             stringBuilder.append("c|").append(month).append('|');
         }
+        if (null != occurrences) {
+            stringBuilder.append("o|").append(occurrences).append('|');
+        }
         if (null != seriesStart) {
             stringBuilder.append("s|").append(seriesStart).append('|');
         }
         if (null != seriesEnd) {
             stringBuilder.append("e|").append(seriesEnd).append('|');
-        }
-        if (null != occurrences) {
-            stringBuilder.append("o|").append(occurrences).append('|');
         }
         return stringBuilder.toString();
     }

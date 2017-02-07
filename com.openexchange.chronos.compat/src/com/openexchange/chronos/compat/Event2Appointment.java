@@ -54,7 +54,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.StringTokenizer;
-import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
 import com.openexchange.chronos.Alarm;
@@ -302,11 +301,10 @@ public class Event2Appointment {
      * @return The series pattern, or <code>null</code> if passed <code>recurrenceData</code> reference was null
      */
     public static SeriesPattern getSeriesPattern(RecurrenceData recurrenceData) throws OXException {
-        if (null != recurrenceData) {
-            TimeZone timeZone = null != recurrenceData.getTimeZoneID() ? TimeZone.getTimeZone(recurrenceData.getTimeZoneID()) : TimeZones.UTC;
-            return Recurrence.generatePattern(recurrenceData.getRecurrenceRule(), CalendarUtils.initCalendar(timeZone, recurrenceData.getSeriesStart()));
+        if (null == recurrenceData) {
+            return null;
         }
-        return null;
+        return Recurrence.getSeriesPattern(recurrenceData);
     }
 
     /**
