@@ -89,7 +89,7 @@ public class RecurrenceServiceImpl implements RecurrenceService {
             return null;
         }
         int counter = 1;
-        RecurrenceRuleIterator iterator = Recurrence.getRecurrenceIterator(new DefaultRecurrenceData(master), true);
+        RecurrenceRuleIterator iterator = Recurrence.getRecurrenceIterator(new DefaultRecurrenceData(master));
         while (iterator.hasNext()) {
             long nextMillis = iterator.nextMillis();
             if (counter++ == position) {
@@ -111,7 +111,7 @@ public class RecurrenceServiceImpl implements RecurrenceService {
             return 0;
         }
         int position = 1;
-        RecurrenceRuleIterator iterator = Recurrence.getRecurrenceIterator(new DefaultRecurrenceData(master), true);
+        RecurrenceRuleIterator iterator = Recurrence.getRecurrenceIterator(new DefaultRecurrenceData(master));
         while (iterator.hasNext()) {
             long nextMillis = iterator.nextMillis();
             if (nextMillis > datePosition.getTimeInMillis()) {

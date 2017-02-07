@@ -72,7 +72,7 @@ public class RecurrenceDatePositionTest extends AbstractSingleTimeZoneTest {
     }
 
     @Test
-    public void dailyNoEnd() {
+    public void dailyNoEnd() throws Exception {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         master.setStartDate(TimeTools.D("01.10.2008 14:45:00", TimeZone.getTimeZone(timeZone)));
@@ -84,7 +84,7 @@ public class RecurrenceDatePositionTest extends AbstractSingleTimeZoneTest {
     }
 
     @Test
-    public void dailyThreeOccurrences() {
+    public void dailyThreeOccurrences() throws Exception {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1;COUNT=3");
         master.setStartDate(TimeTools.D("01.10.2008 14:45:00", TimeZone.getTimeZone(timeZone)));
@@ -96,7 +96,7 @@ public class RecurrenceDatePositionTest extends AbstractSingleTimeZoneTest {
     }
 
     @Test
-    public void dailyUntil() {
+    public void dailyUntil() throws Exception {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1;UNTIL=" + getUntilZulu(getCal("12.10.2008 14:45:00")));
         master.setStartDate(TimeTools.D("01.10.2008 14:45:00", TimeZone.getTimeZone(timeZone)));
@@ -107,7 +107,7 @@ public class RecurrenceDatePositionTest extends AbstractSingleTimeZoneTest {
     }
 
     @Test
-    public void weeklyNoEnd() {
+    public void weeklyNoEnd() throws Exception {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=WEEKLY;BYDAY=WE;INTERVAL=1");
         master.setStartDate(TimeTools.D("01.10.2008 08:00:00", TimeZone.getTimeZone(timeZone)));
@@ -121,7 +121,7 @@ public class RecurrenceDatePositionTest extends AbstractSingleTimeZoneTest {
     }
 
     @Test
-    public void weeklyThreeOccurrencesAndStartOffset() {
+    public void weeklyThreeOccurrencesAndStartOffset() throws Exception {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=WEEKLY;BYDAY=TH;INTERVAL=1;COUNT=3");
         master.setStartDate(TimeTools.D("01.10.2008 08:00:00", TimeZone.getTimeZone(timeZone)));
@@ -133,7 +133,7 @@ public class RecurrenceDatePositionTest extends AbstractSingleTimeZoneTest {
     }
 
     @Test
-    public void weeklyComplex() {
+    public void weeklyComplex() throws Exception {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR;INTERVAL=2;UNTIL=" + getUntilZulu(getCal("27.10.2008 08:00:00")));
         master.setStartDate(TimeTools.D("01.10.2008 08:00:00", TimeZone.getTimeZone(timeZone)));
