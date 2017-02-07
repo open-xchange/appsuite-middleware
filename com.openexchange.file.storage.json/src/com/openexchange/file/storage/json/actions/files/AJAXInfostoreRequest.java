@@ -73,8 +73,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.Document;
 import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
@@ -560,19 +560,35 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
 
     }
 
+    private JSONObject getBodyAsJSONObject() throws OXException {
+        JSONObject object = (JSONObject) data.getData();
+        if (object == null) {
+            try {
+                object = new JSONObject(data.getParameter(JSON));
+            } catch (JSONException e) {
+                throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+            }
+        }
+        return object;
+    }
+
     protected void parseFile() throws OXException {
         if(file != null) {
             return;
         }
         requireFileMetadata();
 
-        JSONObject object = (JSONObject) data.getData();
-        if(object == null) {
+        JSONObject jFile;
+        JSONObject object = getBodyAsJSONObject();
+
+        if (object.hasAndNotNull("file")) {
             try {
-                object = new JSONObject(data.getParameter(JSON));
-            } catch (final JSONException e) {
-                throw AjaxExceptionCodes.JSON_ERROR.create( e.getMessage());
+                jFile = object.getJSONObject("file");
+            } catch (JSONException e) {
+                throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create(e);
             }
+        } else {
+            jFile = object;
         }
 
         // Disallow to manually set MIME type
