@@ -1,6 +1,7 @@
 %define __jar_repack %{nil}
 
 Name:          open-xchange-munin-scripts
+%define use_systemd (0%{?rhel_version} && 0%{?rhel_version} >= 700) || (0%{?suse_version} && 0%{?suse_version} >=1210)
 BuildArch:     noarch
 #!BuildIgnore: post-build-checks
 %if 0%{?rhel_version} && 0%{?rhel_version} >= 700
@@ -24,7 +25,8 @@ Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       Open-Xchange Munin scripts
 Autoreqprov:   no
 Requires:      munin-node, perl-JSON, perl-libwww-perl
-Conflicts:     open-xchange-munin-scripts
+Provides:      open-xchange-munin-scripts-jolokia = %{version}
+Obsoletes:     open-xchange-munin-scripts-jolokia < %{version}
 
 %description
 Munin is a highly flexible and powerful solution used to create graphs of
@@ -52,14 +54,13 @@ export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
 %post
+. /opt/open-xchange/lib/oxfunctions.sh
+GLOBIGNORE='*'
+
 function contains() { grep $@ >/dev/null 2>&1; return $?; }
 
 # only when updating
 if [ ${1:-0} -eq 2 ]; then
-  #not needed yet
-  #. /opt/open-xchange/lib/oxfunctions.sh
-  #GLOBIGNORE='*'
-
   # SoftwareChange_request-3870
   PFILE=/etc/munin/plugin-conf.d/ox
   if test -f ${PFILE} && ! contains env.oxJolokiaUrl ${PFILE}; then
@@ -79,7 +80,6 @@ if [ ${1:-0} -eq 2 ]; then
       a env.oxJolokiaPassword s3cr3t!toBeChanged
     }' ${PFILE}
   fi
-
 fi
 
 TMPFILE=`mktemp /tmp/munin-node.configure.XXXXXXXXXX`
@@ -89,7 +89,21 @@ if [ -f $TMPFILE ] ; then
   rm -f $TMPFILE
 fi
 find -L /etc/munin/plugins -name 'ox_*' -type l -delete
+
+# The admin has to actively configure and start jolokia and munin
+PFILE=/opt/open-xchange/etc/jolokia.properties
+jolokia_enabled=$(ox_read_property com.openexchange.jolokia.start ${PFILE})
+if [[ ! ${jolokia_enabled//[[:space:]]/} = true ]]
+then
+  echo -e "\n\e[31mWARNING\e[0m: You have to properly configure and activate jolokia and munin for working monitoring! \n"
+fi
+
+#no common service wrapper dependency across rpm distros
+%if %{use_systemd}
+systemctl try-restart munin-node >/dev/null 2>&1 || :
+%else
 /etc/init.d/munin-node restart || :
+%endif
 exit 0
 
 
@@ -103,7 +117,7 @@ exit 0
 /usr/share/munin/plugins/
 %dir /etc/munin/
 %dir /etc/munin/plugin-conf.d/
-%config(noreplace) /etc/munin/plugin-conf.d/*
+%config(noreplace) /etc/munin/plugin-conf.d/ox
 
 %changelog
 * Fri Nov 25 2016 Carsten Hoeger <choeger@open-xchange.com>
