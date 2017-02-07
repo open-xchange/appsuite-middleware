@@ -68,6 +68,36 @@ public class SeriesPattern {
      */
     public static final int MAX_OCCURRENCESE = 999;
 
+    /**
+     * The legacy constant to indicate a "daily"-type series pattern.
+     */
+    public static final Integer DAILY = 1;
+
+    /**
+     * The legacy constant to indicate a "weekly"-type series pattern.
+     */
+    public static final Integer WEEKLY = 2;
+
+    /**
+     * The legacy constant to indicate a "monthly (each n-th day of month)"-type series pattern.
+     */
+    public static final Integer MONTHLY_1 = 3;
+
+    /**
+     * The legacy constant to indicate a "yearly (each n-th day of a certain month)"-type series pattern.
+     */
+    public static final Integer YEARLY_1 = 4;
+
+    /**
+     * The legacy constant to indicate a "monthly (a specific day of the n-th week of month)"-type series pattern.
+     */
+    public static final Integer MONTHLY_2 = 5;
+
+    /**
+     * The legacy constant to indicate a "yearly (a specific day of the n-th week of a certain month)"-type series pattern.
+     */
+    public static final Integer YEARLY_2 = 6;
+
     private Integer type;
     private Integer interval;
     private Integer daysOfWeek;
@@ -78,13 +108,6 @@ public class SeriesPattern {
     private Long seriesEnd;
     private TimeZone tz;
     private Boolean fullTime;
-
-    public static final Integer DAILY = 1;
-    public static final Integer WEEKLY = 2;
-    public static final Integer MONTHLY_1 = 3;
-    public static final Integer YEARLY_1 = 4;
-    public static final Integer MONTHLY_2 = 5;
-    public static final Integer YEARLY_2 = 6;
 
     /**
      * Initializes a new, empty {@link SeriesPattern}.

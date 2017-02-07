@@ -53,18 +53,14 @@ import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
 import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.TimeZone;
 import org.dmfs.rfc5545.DateTime;
 import org.dmfs.rfc5545.Duration;
+import org.dmfs.rfc5545.Weekday;
 import org.dmfs.rfc5545.recur.Freq;
 import org.dmfs.rfc5545.recur.InvalidRecurrenceRuleException;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
@@ -88,31 +84,6 @@ import com.openexchange.java.util.TimeZones;
  * @since v7.10.0
  */
 public class Recurrence {
-
-    private static final Map<Integer, String> reverseDays = new HashMap<Integer, String>();
-
-    private static final List<Integer> allDays = new LinkedList<Integer>();
-
-    private static final SimpleDateFormat date;
-
-    static {
-        Map<String, Integer> weekdays = new HashMap<String, Integer>();
-        weekdays.put("SU", 1);
-        weekdays.put("MO", 2);
-        weekdays.put("TU", 4);
-        weekdays.put("WE", 8);
-        weekdays.put("TH", 16);
-        weekdays.put("FR", 32);
-        weekdays.put("SA", 64);
-
-        for (final Map.Entry<String, Integer> entry : weekdays.entrySet()) {
-            allDays.add(entry.getValue());
-            reverseDays.put(entry.getValue(), entry.getKey());
-        }
-        Collections.sort(allDays); // nicer order in BYDAYS
-        date = new SimpleDateFormat("yyyyMMdd");
-        date.setTimeZone(TimeZone.getTimeZone("UTC"));
-    }
 
     /**
      * Calculates the actual start- and end-date of the "master" recurrence for a specific series pattern, i.e. the start- and end-date of
@@ -724,21 +695,20 @@ public class Recurrence {
 
     private static String weekly(SeriesPattern pattern) throws InvalidRecurrenceRuleException {
         RecurrenceRule recur = getRecurBuilder(Freq.WEEKLY, pattern);
-        int days = pattern.getDaysOfWeek();
-        addDays(days, recur);
+        recur.setByDayPart(getByDayPart(pattern.getDaysOfWeek()));
         return recur.toString();
     }
 
     private static String monthly(SeriesPattern pattern) throws InvalidRecurrenceRuleException {
         RecurrenceRule recur = getRecurBuilder(Freq.MONTHLY, pattern);
-        if (pattern.getType() == 5) {
-            addDays(pattern.getDaysOfWeek(), recur);
+        if (SeriesPattern.MONTHLY_2 == pattern.getType()) {
+            recur.setByDayPart(getByDayPart(pattern.getDaysOfWeek()));
             int weekNo = pattern.getDayOfMonth();
             if (5 == weekNo) {
                 weekNo = -1;
             }
             recur.setByPart(Part.BYSETPOS, weekNo);
-        } else if (pattern.getType() == 3) {
+        } else if (SeriesPattern.MONTHLY_1 == pattern.getType()) {
             recur.setByPart(Part.BYMONTHDAY, pattern.getDayOfMonth());
         } else {
             return null;
@@ -748,16 +718,16 @@ public class Recurrence {
 
     private static String yearly(SeriesPattern pattern) throws InvalidRecurrenceRuleException {
         RecurrenceRule recur = getRecurBuilder(Freq.YEARLY, pattern);
-        if (pattern.getType() == 6) {
-            addDays(pattern.getDaysOfWeek(), recur);
+        if (SeriesPattern.YEARLY_2 == pattern.getType()) {
+            recur.setByDayPart(getByDayPart(pattern.getDaysOfWeek()));
             recur.setByPart(Part.BYMONTH, pattern.getMonth());
             int weekNo = pattern.getDayOfMonth();
             if (5 == weekNo) {
                 weekNo = -1;
             }
             recur.setByPart(Part.BYSETPOS, weekNo);
-        } else if (pattern.getType() == 4) {
-            recur.setByPart(Part.BYMONTH, pattern.getMonth()); //TODO +1 or not? " ... The value is a list of non-zero integers. ..."
+        } else if (SeriesPattern.YEARLY_1 == pattern.getType()) {
+            recur.setByPart(Part.BYMONTH, pattern.getMonth());
             recur.setByPart(Part.BYMONTHDAY, pattern.getDayOfMonth());
         } else {
             return null;
@@ -765,14 +735,17 @@ public class Recurrence {
         return recur.toString();
     }
 
-    private static void addDays(int days, final RecurrenceRule recur) throws InvalidRecurrenceRuleException {
-        List<WeekdayNum> weekdays = new ArrayList<WeekdayNum>();
-        for (int day : allDays) {
-            if (day == (day & days)) {
-                weekdays.add(WeekdayNum.valueOf(reverseDays.get(Integer.valueOf(day))));
+    private static List<WeekdayNum> getByDayPart(Integer daysOfWeek) throws InvalidRecurrenceRuleException {
+        List<WeekdayNum> byDayPart = new ArrayList<WeekdayNum>();
+        if (null != daysOfWeek) {
+            for (Weekday weekday : Weekday.values()) {
+                int day = 1 << weekday.ordinal();
+                if (day == (daysOfWeek.intValue() & day)) {
+                    byDayPart.add(new WeekdayNum(0, weekday));
+                }
             }
         }
-        recur.setByDayPart(weekdays);
+        return byDayPart;
     }
 
     private static RecurrenceRule getRecurBuilder(Freq frequency, SeriesPattern pattern) {
