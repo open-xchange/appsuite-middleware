@@ -354,31 +354,35 @@ public class Recurrence {
         } else {
             start = new DateTime(seriesStart);
         }
-        if (forwardToOccurrence && false == isPotentialOccurrence(start, rule)) {
-            /*
-             * supplied start does not match recurrence rule, forward to first "real" occurrence
-             */
-            Integer originalCount = rule.getCount();
-            try {
-                if (null != originalCount) {
-                    rule.setUntil(null);
-                }
-                for (RecurrenceRuleIterator iterator = rule.iterator(start); iterator.hasNext(); iterator.nextMillis()) {
-                    // TODO: max_recurrences guard?
-                    if (iterator.peekMillis() > seriesStart) {
-                        return iterator;
+        try {
+            if (forwardToOccurrence && false == isPotentialOccurrence(start, rule)) {
+                /*
+                 * supplied start does not match recurrence rule, forward to first "real" occurrence
+                 */
+                DateTime firstOccurrence = null;
+                Integer originalCount = rule.getCount();
+                try {
+                    if (null != originalCount) {
+                        rule.setUntil(null);
+                    }
+                    for (RecurrenceRuleIterator iterator = rule.iterator(start); null == firstOccurrence && iterator.hasNext(); iterator.nextMillis()) {
+                        // TODO: max_recurrences guard?
+                        long millis = iterator.peekMillis();
+                        if (millis > seriesStart) {
+                            firstOccurrence = iterator.peekDateTime();
+                        }
+                    }
+                    if (null != firstOccurrence) {
+                        start = firstOccurrence;
+                    } else {
+                        throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(new DefaultRecurrenceId(seriesStart), rule);
+                    }
+                } finally {
+                    if (null != originalCount) {
+                        rule.setCount(originalCount.intValue());
                     }
                 }
-                throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(new DefaultRecurrenceId(seriesStart), rule);
-            } catch (IllegalArgumentException e) {
-                throw CalendarExceptionCodes.INVALID_RRULE.create(e, rule);
-            } finally {
-                if (null != originalCount) {
-                    rule.setCount(originalCount.intValue());
-                }
             }
-        }
-        try {
             return rule.iterator(start);
         } catch (IllegalArgumentException e) {
             throw CalendarExceptionCodes.INVALID_RRULE.create(e, rule);
