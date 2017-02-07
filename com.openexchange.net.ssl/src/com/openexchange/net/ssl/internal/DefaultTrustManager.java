@@ -90,12 +90,15 @@ public class DefaultTrustManager extends AbstractTrustManager {
     private static X509ExtendedTrustManager initDefaultTrustManager() {
         boolean useDefaultTruststore;
         SSLConfigurationService sslConfigService = Services.getService(SSLConfigurationService.class);
+        String password;
         {
             if (null == sslConfigService) {
                 LOG.warn("Absent service " + SSLConfigurationService.class.getName() + ". Assuming default JVM truststore is supposed to be used.");
                 useDefaultTruststore = true;
+                password = "changeit"; //At this point we can only fall back to the default password
             } else {
                 useDefaultTruststore = sslConfigService.isDefaultTruststoreEnabled();
+                password = sslConfigService.getDefaultTrustStrorePassword();
             }
         }
 
@@ -108,12 +111,11 @@ public class DefaultTrustManager extends AbstractTrustManager {
         try {
             FileInputStream is = new FileInputStream(filename);
             KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
-            String password = sslConfigService.getDefaultTrustStrorePassword();
             keystore.load(is, password.toCharArray());
             params = new PKIXParameters(keystore);
 
             TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            tmf.init((KeyStore) null); // Using null here initializes the TMF with the default trust store.
+            tmf.init((KeyStore) null); // Using null here initialises the TMF with the default trust store.
 
             for (TrustManager tm : tmf.getTrustManagers()) {
                 if (tm instanceof X509ExtendedTrustManager) {
