@@ -4610,7 +4610,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         }
         clone.setParticipants(newP);
 
-        COLLECTION.triggerEvent(so, CalendarOperation.UPDATE, clone);
+        COLLECTION.triggerModificationEvent(so, cdao, clone);
         deleteReminder(oid, userId, c, writecon);
 
         return lastModified;
