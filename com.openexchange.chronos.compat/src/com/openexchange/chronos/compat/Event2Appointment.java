@@ -53,7 +53,6 @@ import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.StringTokenizer;
 import java.util.concurrent.TimeUnit;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
 import com.openexchange.chronos.Alarm;
@@ -65,6 +64,7 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.Trigger;
 import com.openexchange.chronos.Trigger.Related;
+import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
@@ -283,9 +283,9 @@ public class Event2Appointment {
                 if (AlarmAction.DISPLAY == alarm.getAction()) {
                     Trigger trigger = alarm.getTrigger();
                     if (null != trigger && (null == trigger.getRelated() || Related.START.equals(trigger.getRelated()))) {
-                        Integer reminder = parseTriggerDuration(trigger.getDuration());
-                        if (null != reminder) {
-                            return reminder;
+                        if (Strings.isNotEmpty(trigger.getDuration())) {
+                            long triggerDuration = AlarmUtils.getTriggerDuration(trigger.getDuration());
+                            return I((int) TimeUnit.MILLISECONDS.toMinutes(triggerDuration * -1));
                         }
                     }
                 }
@@ -358,62 +358,6 @@ public class Event2Appointment {
             recurrenceDatePositions.add(getRecurrenceDatePosition(new DefaultRecurrenceId(recurrenceID)));
         }
         return recurrenceDatePositions;
-    }
-
-    /**
-     * Parses a trigger duration string.
-     *
-     * @param duration The duration to parse
-     * @return The total seconds of the parsed duration, or <code>null</code> if not parsable
-     * @see <a href="https://tools.ietf.org/html/rfc5545#section-3.3.6">RFC 5545, section 3.3.6</a>
-     */
-    private static Integer parseTriggerDuration(String duration) {
-        if (Strings.isEmpty(duration)) {
-            return null;
-        }
-        boolean negative = false;
-        int weeks = 0;
-        int days = 0;
-        int hours = 0;
-        int minutes = 0;
-        int seconds = 0;
-        String token = null;
-        String previousToken = null;
-        StringTokenizer tokenizer = new StringTokenizer(duration.toUpperCase(), "+-PWDTHMS", true);
-        while (tokenizer.hasMoreTokens()) {
-            token = tokenizer.nextToken();
-            switch (token) {
-                case "+":
-                    negative = false;
-                    break;
-                case "-":
-                    negative = true;
-                    break;
-                case "W":
-                    weeks = Integer.parseInt(previousToken);
-                    break;
-                case "D":
-                    days = Integer.parseInt(previousToken);
-                    break;
-                case "H":
-                    hours = Integer.parseInt(previousToken);
-                    break;
-                case "M":
-                    minutes = Integer.parseInt(previousToken);
-                    break;
-                case "S":
-                    seconds = Integer.parseInt(previousToken);
-                    break;
-                case "T":
-                case "P":
-                default:
-                    // skip
-                    break;
-            }
-            previousToken = token;
-        }
-        long totalMinutes = TimeUnit.DAYS.toMinutes(7 * weeks + days) + TimeUnit.HOURS.toMinutes(hours) + minutes + TimeUnit.SECONDS.toMinutes(seconds);
-        return I(negative ? (int) totalMinutes : -1 * (int) totalMinutes);
     }
 
     /**
