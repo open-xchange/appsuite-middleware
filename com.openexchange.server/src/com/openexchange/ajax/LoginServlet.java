@@ -57,8 +57,6 @@ import java.io.IOException;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -73,6 +71,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.ajax.helper.Send;
+import com.openexchange.ajax.ipcheck.IPCheckService;
 import com.openexchange.ajax.login.AnonymousLogin;
 import com.openexchange.ajax.login.AutoLogin;
 import com.openexchange.ajax.login.FormLogin;
@@ -94,7 +93,6 @@ import com.openexchange.ajax.writer.LoginWriter;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.config.ConfigTools;
-import com.openexchange.configuration.ClientWhitelist;
 import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
@@ -120,7 +118,6 @@ import com.openexchange.session.Session;
 import com.openexchange.session.SessionResult;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.sessiond.impl.IPRange;
 import com.openexchange.tools.io.IOTools;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Cookies;
@@ -334,8 +331,7 @@ public class LoginServlet extends AJAXServlet {
                 try {
                     final Session session = LoginPerformer.getInstance().lookupSession(sessionId);
                     if (session != null) {
-                        final LoginConfiguration conf = getLoginConfiguration(session);
-                        SessionUtility.checkIP(conf.isIpCheck(), conf.getRanges(), session, req.getRemoteAddr(), conf.getIpCheckWhitelist());
+                        SessionUtility.checkIP(session, req.getRemoteAddr());
                         String[] additionalsForHash;
                         if (Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
                             /*
@@ -345,8 +341,9 @@ public class LoginServlet extends AJAXServlet {
                         } else {
                             additionalsForHash = null;
                         }
-                        final String secret = SessionUtility.extractSecret(conf.getHashSource(), req, session.getHash(), session.getClient(), null, additionalsForHash);
 
+                        LoginConfiguration conf = getLoginConfiguration(session);
+                        String secret = SessionUtility.extractSecret(conf.getHashSource(), req, session.getHash(), session.getClient(), null, additionalsForHash);
                         if (secret == null || !session.getSecret().equals(secret)) {
                             LOG.info("Status code 403 (FORBIDDEN): Missing or non-matching secret.");
                             resp.sendError(HttpServletResponse.SC_FORBIDDEN);
@@ -395,13 +392,30 @@ public class LoginServlet extends AJAXServlet {
                     } else {
                         session = sessiondService.getSessionByRandomToken(randomToken);
                         if (null != session) {
-                            final String oldIP = session.getLocalIp();
-                            if (null == oldIP || SessionUtility.isWhitelistedFromIPCheck(oldIP, conf.getRanges())) {
-                                final String newIP = req.getRemoteAddr();
-                                if (!newIP.equals(oldIP)) {
-                                    LOG.info("Changing IP of session {} with authID: {} from {} to {}.", session.getSessionID(), session.getAuthId(), oldIP, newIP);
-                                    session.setLocalIp(newIP);
+                            try {
+                                String oldIP = session.getLocalIp();
+
+                                boolean changeIp = false;
+                                if (null == oldIP) {
+                                    changeIp = true;
+                                } else {
+                                    IPCheckService ipCheckService = ServerServiceRegistry.getInstance().getService(IPCheckService.class);
+                                    if (SessionUtility.isWhitelistedFromIPCheck(oldIP,  ipCheckService.getConfigurationFor(session).getRanges())) {
+                                        changeIp = true;
+                                    }
                                 }
+
+                                if (changeIp) {
+                                    String newIP = req.getRemoteAddr();
+                                    if (!newIP.equals(oldIP)) {
+                                        LOG.info("Changing IP of session {} with authID: {} from {} to {}.", session.getSessionID(), session.getAuthId(), oldIP, newIP);
+                                        sessiondService.setLocalIp(session.getSessionID(), newIP);
+                                    }
+                                }
+                            } catch (OXException e) {
+                                LOG.error("", e);
+                                resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                                return;
                             }
                         }
                     }
@@ -483,9 +497,9 @@ public class LoginServlet extends AJAXServlet {
                         // Add session log properties
                         LogProperties.putSessionProperties(session);
                         // Check
-                        final LoginConfiguration conf = confReference.get();
-                        SessionUtility.checkIP(conf.isIpCheck(), conf.getRanges(), session, req.getRemoteAddr(), conf.getIpCheckWhitelist());
-                        final String secret = SessionUtility.extractSecret(conf.getHashSource(), req, session.getHash(), session.getClient());
+                        SessionUtility.checkIP(session, req.getRemoteAddr());
+                        LoginConfiguration conf = confReference.get();
+                        String secret = SessionUtility.extractSecret(conf.getHashSource(), req, session.getHash(), session.getClient());
                         if (secret == null || !session.getSecret().equals(secret)) {
                             if (null != secret) {
                                 LOG.info("Session secret is different. Given secret \"{}\" differs from secret in session \"{}\".", secret, session.getSecret());
@@ -550,13 +564,30 @@ public class LoginServlet extends AJAXServlet {
                     } else {
                         session = sessiondService.getSessionByRandomToken(randomToken);
                         if (null != session) {
-                            final String oldIP = session.getLocalIp();
-                            if (null == oldIP || SessionUtility.isWhitelistedFromIPCheck(oldIP, conf.getRanges())) {
-                                final String newIP = req.getRemoteAddr();
-                                if (!newIP.equals(oldIP)) {
-                                    LOG.info("Changing IP of session {} with authID: {} from {} to {}.", session.getSessionID(), session.getAuthId(), oldIP, newIP);
-                                    session.setLocalIp(newIP);
+                            try {
+                                String oldIP = session.getLocalIp();
+
+                                boolean changeIp = false;
+                                if (null == oldIP) {
+                                    changeIp = true;
+                                } else {
+                                    IPCheckService ipCheckService = ServerServiceRegistry.getInstance().getService(IPCheckService.class);
+                                    if (SessionUtility.isWhitelistedFromIPCheck(oldIP,  ipCheckService.getConfigurationFor(session).getRanges())) {
+                                        changeIp = true;
+                                    }
                                 }
+
+                                if (changeIp) {
+                                    String newIP = req.getRemoteAddr();
+                                    if (!newIP.equals(oldIP)) {
+                                        LOG.info("Changing IP of session {} with authID: {} from {} to {}.", session.getSessionID(), session.getAuthId(), oldIP, newIP);
+                                        sessiondService.setLocalIp(session.getSessionID(), newIP);
+                                    }
+                                }
+                            } catch (OXException e) {
+                                LOG.error("", e);
+                                resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                                return;
                             }
                         }
                     }
@@ -631,13 +662,13 @@ public class LoginServlet extends AJAXServlet {
     @Override
     public void init(final ServletConfig config) throws ServletException {
         super.init(config);
-        final String uiWebPath = config.getInitParameter(ServerConfig.Property.UI_WEB_PATH.getPropertyName());
-        final boolean sessiondAutoLogin = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.SESSIOND_AUTOLOGIN.getPropertyName()));
-        final CookieHashSource hashSource = CookieHashSource.parse(config.getInitParameter(Property.COOKIE_HASH.getPropertyName()));
-        final String httpAuthAutoLogin = config.getInitParameter(ConfigurationProperty.HTTP_AUTH_AUTOLOGIN.getPropertyName());
-        final String defaultClient = config.getInitParameter(ConfigurationProperty.HTTP_AUTH_CLIENT.getPropertyName());
-        final String clientVersion = config.getInitParameter(ConfigurationProperty.HTTP_AUTH_VERSION.getPropertyName());
-        final String templateFileLocation = config.getInitParameter(ConfigurationProperty.ERROR_PAGE_TEMPLATE.getPropertyName());
+        String uiWebPath = config.getInitParameter(ServerConfig.Property.UI_WEB_PATH.getPropertyName());
+        boolean sessiondAutoLogin = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.SESSIOND_AUTOLOGIN.getPropertyName()));
+        CookieHashSource hashSource = CookieHashSource.parse(config.getInitParameter(Property.COOKIE_HASH.getPropertyName()));
+        String httpAuthAutoLogin = config.getInitParameter(ConfigurationProperty.HTTP_AUTH_AUTOLOGIN.getPropertyName());
+        String defaultClient = config.getInitParameter(ConfigurationProperty.HTTP_AUTH_CLIENT.getPropertyName());
+         String clientVersion = config.getInitParameter(ConfigurationProperty.HTTP_AUTH_VERSION.getPropertyName());
+        String templateFileLocation = config.getInitParameter(ConfigurationProperty.ERROR_PAGE_TEMPLATE.getPropertyName());
         String errorPageTemplate;
         if (null == templateFileLocation) {
             errorPageTemplate = ERROR_PAGE_TEMPLATE;
@@ -651,28 +682,15 @@ public class LoginServlet extends AJAXServlet {
                 errorPageTemplate = ERROR_PAGE_TEMPLATE;
             }
         }
-        final int cookieExpiry = ConfigTools.parseTimespanSecs(config.getInitParameter(ServerConfig.Property.COOKIE_TTL.getPropertyName()));
-        final boolean cookieForceHTTPS = Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.COOKIE_FORCE_HTTPS.getPropertyName())) || Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.FORCE_HTTPS.getPropertyName()));
-        final boolean insecure = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.INSECURE.getPropertyName()));
-        final boolean ipCheck = Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.IP_CHECK.getPropertyName()));
-        final ClientWhitelist ipCheckWhitelist = new ClientWhitelist().add(config.getInitParameter(Property.IP_CHECK_WHITELIST.getPropertyName()));
-        final boolean redirectIPChangeAllowed = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.REDIRECT_IP_CHANGE_ALLOWED.getPropertyName()));
-        final List<IPRange> ranges = new LinkedList<IPRange>();
-        final String tmp = config.getInitParameter(ConfigurationProperty.NO_IP_CHECK_RANGE.getPropertyName());
-        if (tmp != null) {
-            final String[] lines = Strings.splitByCRLF(tmp);
-            for (String line : lines) {
-                line = line.replaceAll("\\s", "");
-                if (!line.equals("") && (line.length() == 0 || line.charAt(0) != '#')) {
-                    ranges.add(IPRange.parseRange(line));
-                }
-            }
-        }
-        final boolean disableTrimLogin = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.DISABLE_TRIM_LOGIN.getPropertyName()));
-        final boolean formLoginWithoutAuthId = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.FORM_LOGIN_WITHOUT_AUTHID.getPropertyName()));
-        final boolean isRandomTokenEnabled = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.RANDOM_TOKEN.getPropertyName()));
-        final boolean checkPunyCodeLoginString = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.CHECK_PUNY_CODE_LOGIN.getPropertyName()));
-        LoginConfiguration conf = new LoginConfiguration(uiWebPath, sessiondAutoLogin, hashSource, httpAuthAutoLogin, defaultClient, clientVersion, errorPageTemplate, cookieExpiry, cookieForceHTTPS, insecure, ipCheck, ipCheckWhitelist, redirectIPChangeAllowed, ranges, disableTrimLogin, formLoginWithoutAuthId, isRandomTokenEnabled, checkPunyCodeLoginString);
+        int cookieExpiry = ConfigTools.parseTimespanSecs(config.getInitParameter(ServerConfig.Property.COOKIE_TTL.getPropertyName()));
+        boolean cookieForceHTTPS = Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.COOKIE_FORCE_HTTPS.getPropertyName())) || Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.FORCE_HTTPS.getPropertyName()));
+        boolean insecure = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.INSECURE.getPropertyName()));
+        boolean redirectIPChangeAllowed = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.REDIRECT_IP_CHANGE_ALLOWED.getPropertyName()));
+        boolean disableTrimLogin = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.DISABLE_TRIM_LOGIN.getPropertyName()));
+        boolean formLoginWithoutAuthId = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.FORM_LOGIN_WITHOUT_AUTHID.getPropertyName()));
+        boolean isRandomTokenEnabled = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.RANDOM_TOKEN.getPropertyName()));
+        boolean checkPunyCodeLoginString = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.CHECK_PUNY_CODE_LOGIN.getPropertyName()));
+        LoginConfiguration conf = new LoginConfiguration(uiWebPath, sessiondAutoLogin, hashSource, httpAuthAutoLogin, defaultClient, clientVersion, errorPageTemplate, cookieExpiry, cookieForceHTTPS, insecure, redirectIPChangeAllowed, disableTrimLogin, formLoginWithoutAuthId, isRandomTokenEnabled, checkPunyCodeLoginString);
         confReference.set(conf);
         ShareLoginConfiguration shareConf = initShareLoginConfig(config);
         shareConfReference.set(shareConf);
@@ -778,7 +796,7 @@ public class LoginServlet extends AJAXServlet {
             throw AjaxExceptionCodes.DISABLED_ACTION.create("store");
         }
         try {
-            SessionUtility.checkIP(conf.isIpCheck(), conf.getRanges(), session, req.getRemoteAddr(), conf.getIpCheckWhitelist());
+            SessionUtility.checkIP(session, req.getRemoteAddr());
             if (type == CookieType.SESSION) {
                 writeSessionCookie(resp, session, session.getHash(), req.isSecure(), req.getServerName());
             } else {
