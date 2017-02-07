@@ -69,7 +69,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,open-xchange-meta"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,open-xchange-mobile-config"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,open-xchange-munin-scripts"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,open-xchange-munin-scripts-jolokia"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,open-xchange-oauth-provider"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,open-xchange-client-onboarding"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,open-xchange-drive-client-windows"/>
