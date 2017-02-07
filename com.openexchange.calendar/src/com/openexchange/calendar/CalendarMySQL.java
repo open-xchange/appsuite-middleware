@@ -4494,7 +4494,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         return isInvited;
     }
 
-    private final long deleteOnlyOneParticipantInPrivateFolder(int oid, int recurrenceId, String uid, String filename, int cid, int userId, int fid, Context c, Connection writecon, Session so) throws SQLException, OXException {
+    private final long deleteOnlyOneParticipantInPrivateFolder(int oid, int recurrenceId, String uid, String filename, CalendarDataObject cdao, int cid, int userId, int fid, Context c, Connection writecon, Session so) throws SQLException, OXException {
         CalendarVolatileCache.getInstance().invalidateGroup(String.valueOf(cid));
         final long lastModified = System.currentTimeMillis();
         final PreparedStatement pd = writecon.prepareStatement("delete from prg_dates_members WHERE object_id = ? AND cid = ? AND member_uid = ?");
@@ -4592,10 +4592,25 @@ public class CalendarMySQL implements CalendarSqlImp {
                 COLLECTION.closePreparedStatement(ddu);
             }
         }
-        final Appointment ao = new Appointment();
-        ao.setObjectID(oid);
-        ao.setParentFolderID(fid);
-        COLLECTION.triggerEvent(so, CalendarOperation.UPDATE, ao);
+
+        CalendarDataObject clone = cdao.clone();
+        List<UserParticipant> newUP = new ArrayList<UserParticipant>();
+        for (UserParticipant up : clone.getUsers()) {
+            if (up.getIdentifier() != userId) {
+                newUP.add(up);
+            }
+        }
+        clone.setUsers(newUP);
+
+        List<Participant> newP = new ArrayList<Participant>();
+        for (Participant p : clone.getParticipants()) {
+            if (p.getIdentifier() != userId) {
+                newP.add(p);
+            }
+        }
+        clone.setParticipants(newP);
+
+        COLLECTION.triggerEvent(so, CalendarOperation.UPDATE, clone);
         deleteReminder(oid, userId, c, writecon);
 
         return lastModified;
@@ -4638,7 +4653,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     private static final String SQL_SELECT_WHOLE_RECURRENCE = "SELECT " + COLLECTION.getFieldName(Appointment.OBJECT_ID) + " FROM prg_dates WHERE cid = ? AND " + COLLECTION.getFieldName(Appointment.RECURRENCE_ID) + " = ? ORDER BY " + COLLECTION.getFieldName(Appointment.OBJECT_ID);
 
-    private final void deleteOnlyOneRecurringParticipantInPrivateFolder(int recurrenceId, String uid, String filename, int cid, int userId, int fid, Context c, Connection writecon, Session so) throws SQLException, OXException {
+    private final void deleteOnlyOneRecurringParticipantInPrivateFolder(int recurrenceId, String uid, String filename, CalendarDataObject cdao, int cid, int userId, int fid, Context c, Connection writecon, Session so) throws SQLException, OXException {
         /*
          * Get all object IDs belonging to specified recurrence ID
          */
@@ -4661,7 +4676,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             }
         }
         for (final Integer objectId : objectIDs) {
-            deleteOnlyOneParticipantInPrivateFolder(objectId.intValue(), recurrenceId, uid, filename, cid, userId, fid, c, writecon, so);
+            deleteOnlyOneParticipantInPrivateFolder(objectId.intValue(), recurrenceId, uid, filename, cdao, cid, userId, fid, c, writecon, so);
         }
     }
 
@@ -5024,6 +5039,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                             edao == null ? cdao.getRecurrenceID() : edao.getRecurrenceID(),
                                 dao.getUid(),
                                 dao.getFilename(),
+                                dao,
                                 cid,
                                 uid,
                                 fid,
@@ -5037,6 +5053,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                             dao.getRecurrenceID(),
                             dao.getUid(),
                             dao.getFilename(),
+                            dao,
                             cid,
                             uid,
                             fid,
