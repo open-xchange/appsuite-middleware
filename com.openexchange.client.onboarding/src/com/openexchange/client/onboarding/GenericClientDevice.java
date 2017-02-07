@@ -87,6 +87,11 @@ public enum GenericClientDevice implements ClientDevice {
         return null != device && impliedDevices.contains(device);
     }
 
+    @Override
+    public boolean matches(Device device) {
+        return implies(device);
+    }
+
     /**
      * Gets the identifier
      *

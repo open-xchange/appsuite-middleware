@@ -150,7 +150,7 @@ public enum Device implements Entity {
      */
     public boolean hasScenarios(Session session) throws OXException {
         String proprSceanrios = OnboardingUtility.getValueFromProperty(scenariosProperty, null, session);
-        return (Strings.isEmpty(proprSceanrios));
+        return (false == Strings.isEmpty(proprSceanrios));
     }
 
     /**
@@ -304,7 +304,12 @@ public enum Device implements Entity {
                 {
                     switch (type) {
                         case PLIST:
-                            return queryActionsFor(device, type, Arrays.asList(OnboardingAction.EMAIL, OnboardingAction.DOWNLOAD), userId, contextId);
+                            {
+                                if (null != clientDevice && clientDevice.matches(device)) {
+                                    return queryActionsFor(device, type, Arrays.asList(OnboardingAction.DOWNLOAD), userId, contextId);
+                                }
+                                return queryActionsFor(device, type, Arrays.asList(OnboardingAction.EMAIL, OnboardingAction.DOWNLOAD), userId, contextId);
+                            }
                         default:
                             throw new IllegalArgumentException("Unknown type: " + type.getId());
                     }
@@ -313,7 +318,12 @@ public enum Device implements Entity {
                 {
                     switch (type) {
                         case PLIST:
-                            return queryActionsFor(device, type, Arrays.asList(OnboardingAction.SMS, OnboardingAction.EMAIL), userId, contextId);
+                            {
+                                if (null != clientDevice && clientDevice.matches(device)) {
+                                    return queryActionsFor(device, type, Arrays.asList(OnboardingAction.DOWNLOAD), userId, contextId);
+                                }
+                                return queryActionsFor(device, type, Arrays.asList(OnboardingAction.SMS, OnboardingAction.EMAIL), userId, contextId);
+                            }
                         default:
                             throw new IllegalArgumentException("Unknown type: " + type.getId());
                     }
@@ -322,7 +332,12 @@ public enum Device implements Entity {
                 {
                     switch (type) {
                         case PLIST:
-                            return queryActionsFor(device, type, Arrays.asList(OnboardingAction.DOWNLOAD, OnboardingAction.EMAIL), userId, contextId);
+                            {
+                                if (null != clientDevice && clientDevice.matches(device)) {
+                                    return queryActionsFor(device, type, Arrays.asList(OnboardingAction.DOWNLOAD), userId, contextId);
+                                }
+                                return queryActionsFor(device, type, Arrays.asList(OnboardingAction.DOWNLOAD, OnboardingAction.EMAIL), userId, contextId);
+                            }
                         default:
                             throw new IllegalArgumentException("Unknown type: " + type.getId());
                     }
