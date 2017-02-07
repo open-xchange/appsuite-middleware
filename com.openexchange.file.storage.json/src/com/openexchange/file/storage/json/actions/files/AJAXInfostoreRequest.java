@@ -579,16 +579,17 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         requireFileMetadata();
 
         JSONObject jFile;
-        JSONObject object = getBodyAsJSONObject();
-
-        if (object.hasAndNotNull("file")) {
-            try {
-                jFile = object.getJSONObject("file");
-            } catch (JSONException e) {
-                throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create(e);
+        {
+            JSONObject object = getBodyAsJSONObject();
+            if (object.hasAndNotNull("file")) {
+                try {
+                    jFile = object.getJSONObject("file");
+                } catch (JSONException e) {
+                    throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create(e);
+                }
+            } else {
+                jFile = object;
             }
-        } else {
-            jFile = object;
         }
 
         // Disallow to manually set MIME type
@@ -612,8 +613,8 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
             }
         }
 
-        file = parser.parse(object);
-        fields = parser.getFields(object);
+        file = parser.parse(jFile);
+        fields = parser.getFields(jFile);
         if(uploadFile != null) {
             if(!fields.contains(File.Field.FILENAME) || file.getFileName() == null || file.getFileName().trim().length() == 0) {
                 file.setFileName(uploadFile.getPreparedFileName());
@@ -641,9 +642,9 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
             fields.add(File.Field.ID);
         }
 
-        if (object.has("content")) {
+        if (jFile.has("content")) {
         	try {
-				contentData = object.opt("content").toString().getBytes("UTF-8");
+				contentData = jFile.opt("content").toString().getBytes("UTF-8");
 
                 file.setFileSize(contentData.length);
                 fields.add(File.Field.FILE_SIZE);
