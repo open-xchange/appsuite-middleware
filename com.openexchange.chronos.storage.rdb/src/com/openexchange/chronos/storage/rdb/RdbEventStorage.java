@@ -476,7 +476,11 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
 
     private static List<Event> selectOverlappingEvents(Connection connection, int contextID, Date from, Date until, int userID, boolean includeDeclined, boolean includeTransparent, SortOptions sortOptions, EventField[] fields) throws SQLException, OXException {
         EventField[] mappedFields = EventMapper.getInstance().getMappedFields(fields);
-        StringBuilder stringBuilder = new StringBuilder().append("SELECT DISTINCT ").append(EventMapper.getInstance().getColumns(mappedFields, "d.")).append(" FROM prg_dates AS d").append(" LEFT JOIN prg_dates_members AS m ON d.cid=m.cid AND d.intfield01=m.object_id").append(" WHERE d.cid=? AND m.member_uid=?");
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("SELECT DISTINCT ").append(EventMapper.getInstance().getColumns(mappedFields, "d.")).append(" FROM prg_dates AS d ")
+            .append("LEFT JOIN prg_dates_members AS m ON d.cid=m.cid AND d.intfield01=m.object_id ")
+            .append("WHERE d.cid=? AND m.member_uid=?")
+        ;
         if (false == includeTransparent) {
             stringBuilder.append(" AND d.intfield06<>4");
         }
