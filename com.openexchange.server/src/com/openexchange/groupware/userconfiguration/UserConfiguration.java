@@ -484,7 +484,7 @@ public class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if conflict handling is allowed; otherwise <code>false</code>
      */
     public boolean hasConflictHandling() {
-        return hasCalendar() && hasFullSharedFolderAccess() && hasFullPublicFolderAccess();
+        return hasCalendar();
     }
 
     /**
@@ -493,7 +493,7 @@ public class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if the user configuration allows the participant dialog.
      */
     public boolean hasParticipantsDialog() {
-        return hasConflictHandling();
+        return hasCalendar() && hasFullSharedFolderAccess() && hasFullPublicFolderAccess();
     }
 
     /**
