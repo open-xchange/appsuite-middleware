@@ -50,8 +50,14 @@
 package com.openexchange.ajax.login;
 
 import java.util.List;
+import com.openexchange.capabilities.Capability;
 import com.openexchange.configuration.ClientWhitelist;
 import com.openexchange.configuration.CookieHashSource;
+import com.openexchange.exception.OXException;
+import com.openexchange.log.LogProperties;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.serverconfig.ServerConfig;
+import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.sessiond.impl.IPRange;
 
 /**
@@ -107,6 +113,23 @@ public final class LoginConfiguration {
     }
 
     public boolean isSessiondAutoLogin() {
+        String hostname = LogProperties.getHostName();
+        if (hostname != null) {
+            return isSessiondAutoLogin(hostname);
+        }
+        return sessiondAutoLogin;
+    }
+
+    private static final Capability AUTO_LOGIN = new Capability("autologin");
+
+    public boolean isSessiondAutoLogin(String hostname) {
+        try {
+            ServerConfigService configService = ServerServiceRegistry.getInstance().getService(ServerConfigService.class);
+            ServerConfig config = configService.getServerConfig(hostname, -1, -1);
+            return config.getCapabilities().contains(AUTO_LOGIN);
+        } catch (OXException e) {
+            // fallback to default
+        }
         return sessiondAutoLogin;
     }
 

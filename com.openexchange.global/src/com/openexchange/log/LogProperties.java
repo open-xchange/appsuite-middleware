@@ -843,4 +843,17 @@ public final class LogProperties {
         return sb.toString();
     }
 
+    /**
+     * Gets the available host name
+     *
+     * @return The host name or <code>null</code>
+     */
+    public static String getHostName() {
+        String hostname = LogProperties.get(Name.HOSTNAME);
+        if (null == hostname) {
+            hostname = LogProperties.get(Name.GRIZZLY_SERVER_NAME);
+        }
+        return hostname;
+    }
+
 }
