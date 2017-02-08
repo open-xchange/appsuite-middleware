@@ -57,6 +57,8 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.ChronosLogger;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.compat.Recurrence;
@@ -77,7 +79,7 @@ public abstract class AbstractRecurrenceIterator<T> implements Iterator<T> {
     protected final Calendar start;
     protected final Calendar end;
     protected final Integer limit;
-    protected final List<Date> exceptionDates;
+    protected final List<RecurrenceId> exceptionDates;
     protected final boolean ignoreExceptions;
     protected final RecurrenceData recurrenceData;
 
@@ -102,7 +104,7 @@ public abstract class AbstractRecurrenceIterator<T> implements Iterator<T> {
         this.end = end;
         this.limit = limit;
         this.ignoreExceptions = ignoreExceptions;
-        this.exceptionDates = new ArrayList<Date>();
+        this.exceptionDates = new ArrayList<RecurrenceId>();
         if (master.getDeleteExceptionDates() != null) {
             this.exceptionDates.addAll(master.getDeleteExceptionDates());
         }
@@ -213,7 +215,7 @@ public abstract class AbstractRecurrenceIterator<T> implements Iterator<T> {
     }
 
     private boolean isException(long start) {
-        return exceptionDates.contains(new Date(start));
+        return CalendarUtils.contains(exceptionDates, start);
     }
 
     @Override

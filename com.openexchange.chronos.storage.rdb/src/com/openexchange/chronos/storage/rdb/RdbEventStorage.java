@@ -64,6 +64,8 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
@@ -72,8 +74,10 @@ import com.openexchange.chronos.Period;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
+import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.compat.Event2Appointment;
+import com.openexchange.chronos.compat.PositionAwareRecurrenceId;
 import com.openexchange.chronos.compat.Recurrence;
 import com.openexchange.chronos.compat.SeriesPattern;
 import com.openexchange.chronos.service.EntityResolver;
@@ -608,10 +612,10 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
                  * transform legacy "recurrence date positions" for exceptions to recurrence ids
                  */
                 if (event.containsDeleteExceptionDates() && null != event.getDeleteExceptionDates()) {
-                    event.setDeleteExceptionDates(Appointment2Event.getRecurrenceIDs(recurrenceData, event.getDeleteExceptionDates()));
+                    event.setDeleteExceptionDates(Appointment2Event.getRecurrenceIDs(recurrenceData, getDates(event.getDeleteExceptionDates())));
                 }
                 if (event.containsChangeExceptionDates() && null != event.getChangeExceptionDates()) {
-                    event.setChangeExceptionDates(Appointment2Event.getRecurrenceIDs(recurrenceData, event.getChangeExceptionDates()));
+                    event.setChangeExceptionDates(Appointment2Event.getRecurrenceIDs(recurrenceData, getDates(event.getChangeExceptionDates())));
                 }
             } else if (isSeriesException(event)) {
                 /*
@@ -625,7 +629,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
                     event.setRecurrenceId(Appointment2Event.getRecurrenceID(recurrenceData, ((StoredRecurrenceId) event.getRecurrenceId()).getRecurrencePosition()));
                 }
                 if (event.containsChangeExceptionDates() && null != event.getChangeExceptionDates()) {
-                    event.setChangeExceptionDates(Appointment2Event.getRecurrenceIDs(recurrenceData, event.getChangeExceptionDates()));
+                    event.setChangeExceptionDates(Appointment2Event.getRecurrenceIDs(recurrenceData, getDates(event.getChangeExceptionDates())));
                 }
             }
         }
@@ -689,10 +693,15 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
                 eventData.setRecurrenceRule(absoluteDuration + "~" + seriesPattern.getDatabasePattern());
             }
             /*
-             * transform recurrence ids to legacy "recurrence date positions" (UTC dates with truncated time fraction)
+             * transform recurrence id to legacy "recurrence position" (wrappen in stored recurrence id container)
              */
             if (eventData.containsRecurrenceId() && null != eventData.getRecurrenceId()) {
-                int recurrencePosition = Event2Appointment.getRecurrencePosition(recurrenceData, eventData.getRecurrenceId());
+                int recurrencePosition;
+                if (PositionAwareRecurrenceId.class.isInstance(eventData.getRecurrenceId())) {
+                    recurrencePosition = ((PositionAwareRecurrenceId) eventData.getRecurrenceId()).getRecurrencePosition();
+                } else {
+                    recurrencePosition = Event2Appointment.getRecurrencePosition(recurrenceData, eventData.getRecurrenceId());
+                }
                 eventData.setRecurrenceId(new StoredRecurrenceId(recurrencePosition));
             }
         }
@@ -705,13 +714,35 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             eventData.setCreated(new Date((eventData.getCreated().getTime() / 1000) * 1000));
         }
         if (eventData.containsDeleteExceptionDates()) {
-            eventData.setDeleteExceptionDates(Event2Appointment.getRecurrenceDatePositions(eventData.getDeleteExceptionDates()));
+            eventData.setDeleteExceptionDates(getRecurrenceIds(Event2Appointment.getRecurrenceDatePositions(eventData.getDeleteExceptionDates())));
         }
         if (eventData.containsChangeExceptionDates()) {
-            eventData.setChangeExceptionDates(Event2Appointment.getRecurrenceDatePositions(eventData.getChangeExceptionDates()));
+            eventData.setChangeExceptionDates(getRecurrenceIds(Event2Appointment.getRecurrenceDatePositions(eventData.getChangeExceptionDates())));
         }
 
         return eventData;
+    }
+
+    private static List<Date> getDates(SortedSet<RecurrenceId> recurrenceIds) {
+        if (null == recurrenceIds) {
+            return null;
+        }
+        List<Date> dates = new ArrayList<Date>(recurrenceIds.size());
+        for (RecurrenceId recurrenceId : recurrenceIds) {
+            dates.add(new Date(recurrenceId.getValue()));
+        }
+        return dates;
+    }
+
+    private static SortedSet<RecurrenceId> getRecurrenceIds(List<Date> dates) {
+        if (null == dates) {
+            return null;
+        }
+        SortedSet<RecurrenceId> recurrenceIds = new TreeSet<RecurrenceId>();
+        for (Date date : dates) {
+            recurrenceIds.add(new DefaultRecurrenceId(date));
+        }
+        return recurrenceIds;
     }
 
 }

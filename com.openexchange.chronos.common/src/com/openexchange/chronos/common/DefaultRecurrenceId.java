@@ -89,6 +89,11 @@ public class DefaultRecurrenceId implements RecurrenceId {
     }
 
     @Override
+    public int compareTo(RecurrenceId other) {
+        return null == other ? 1 : Long.compare(getValue(), other.getValue());
+    }
+
+    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
@@ -97,8 +102,8 @@ public class DefaultRecurrenceId implements RecurrenceId {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        return null != obj && RecurrenceId.class.isInstance(obj) && value == ((RecurrenceId) obj).getValue();
+    public boolean equals(Object other) {
+        return null != other && RecurrenceId.class.isInstance(other) && value == ((RecurrenceId) other).getValue();
     }
 
     @Override

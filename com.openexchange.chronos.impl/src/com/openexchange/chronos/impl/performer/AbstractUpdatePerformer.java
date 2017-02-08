@@ -55,17 +55,19 @@ import static com.openexchange.chronos.impl.Utils.getCalendarUser;
 import static com.openexchange.chronos.impl.Utils.i;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Period;
 import com.openexchange.chronos.RecurrenceId;
-import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.AttendeeMapper;
 import com.openexchange.chronos.impl.CalendarResultImpl;
@@ -128,7 +130,7 @@ public abstract class AbstractUpdatePerformer {
         EventMapper.getInstance().copy(originalMasterEvent, exceptionEvent, EventField.values());
         exceptionEvent.setId(storage.nextObjectID());
         exceptionEvent.setRecurrenceId(recurrenceID);
-        exceptionEvent.setChangeExceptionDates(Collections.singletonList(new Date(recurrenceID.getValue())));
+        exceptionEvent.setChangeExceptionDates(new TreeSet<RecurrenceId>(Collections.singleton(recurrenceID)));
         exceptionEvent.setDeleteExceptionDates(null);
         exceptionEvent.setStartDate(new Date(recurrenceID.getValue()));
         exceptionEvent.setEndDate(new Date(recurrenceID.getValue() + new Period(originalMasterEvent).getDuration()));
@@ -158,11 +160,11 @@ public abstract class AbstractUpdatePerformer {
      * @param recurrenceID The recurrence identifier of the occurrence to add
      */
     protected void addChangeExceptionDate(Event originalMasterEvent, RecurrenceId recurrenceID) throws OXException {
-        List<Date> changeExceptionDates = new ArrayList<Date>();
+        SortedSet<RecurrenceId> changeExceptionDates = new TreeSet<RecurrenceId>();
         if (null != originalMasterEvent.getChangeExceptionDates()) {
             changeExceptionDates.addAll(originalMasterEvent.getChangeExceptionDates());
         }
-        if (false == changeExceptionDates.add(new Date(recurrenceID.getValue()))) {
+        if (false == changeExceptionDates.add(recurrenceID)) {
             // TODO throw/log?
         }
         Event eventUpdate = new Event();
@@ -259,11 +261,11 @@ public abstract class AbstractUpdatePerformer {
      * @param seriesID The series identifier
      * @param exceptionDates The recurrence identifiers of the change exceptions to delete
      */
-    protected void deleteExceptions(int seriesID, List<Date> exceptionDates) throws OXException {
+    protected void deleteExceptions(int seriesID, Collection<RecurrenceId> exceptionDates) throws OXException {
         if (null != exceptionDates && 0 < exceptionDates.size()) {
             List<RecurrenceId> recurrenceIDs = new ArrayList<RecurrenceId>();
-            for (Date exceptionDate : exceptionDates) {
-                recurrenceIDs.add(new DefaultRecurrenceId(exceptionDate));
+            for (RecurrenceId exceptionDate : exceptionDates) {
+                recurrenceIDs.add(exceptionDate);
             }
             for (Event originalExceptionEvent : loadExceptionData(seriesID, recurrenceIDs)) {
                 delete(originalExceptionEvent);
@@ -281,11 +283,11 @@ public abstract class AbstractUpdatePerformer {
      * @param exceptionDates The recurrence identifiers of the change exceptions to delete
      * @param userID The identifier of the user attendee to delete
      */
-    protected void deleteExceptions(int seriesID, List<Date> exceptionDates, int userID) throws OXException {
+    protected void deleteExceptions(int seriesID, Collection<RecurrenceId> exceptionDates, int userID) throws OXException {
         if (null != exceptionDates && 0 < exceptionDates.size()) {
             List<RecurrenceId> recurrenceIDs = new ArrayList<RecurrenceId>();
-            for (Date exceptionDate : exceptionDates) {
-                recurrenceIDs.add(new DefaultRecurrenceId(exceptionDate));
+            for (RecurrenceId exceptionDate : exceptionDates) {
+                recurrenceIDs.add(exceptionDate);
             }
             for (Event originalExceptionEvent : loadExceptionData(seriesID, recurrenceIDs)) {
                 Attendee originalUserAttendee = find(originalExceptionEvent.getAttendees(), userID);
