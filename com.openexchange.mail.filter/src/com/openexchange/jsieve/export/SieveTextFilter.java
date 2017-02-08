@@ -248,7 +248,17 @@ public final class SieveTextFilter {
         this.username = username;
     }
 
-    public RuleListAndNextUid readScriptFromString(final String readFileToString) throws ParseException, SieveException, OXException {
+    /**
+     * Reads the sieve script from the specified string and parses it to a {@link RuleListAndNextUid} object
+     * which contains a {@link List} of {@link Rule}s and the next unique identifier for a future {@link Rule}
+     * 
+     * @param readFileToString the sieve script to parse
+     * @return a {@link RuleListAndNextUid} object
+     *         which contains a {@link List} of {@link Rule}s and the next unique identifier for a future {@link Rule}
+     * @throws ParseException if a parsing error is occurred
+     * @throws SieveException if a Sieve protocol error is occurred
+     */
+    public RuleListAndNextUid readScriptFromString(final String readFileToString) throws ParseException, SieveException {
         boolean errorsinscript = false;
         // The following line strips off the first line of the script
         // final String first = readFileToString.replaceAll("^.*(\r)?\n", "");
@@ -609,7 +619,7 @@ public final class SieveTextFilter {
         return commentedtext.substring(start, end);
     }
 
-    private ArrayList<RuleComment> getRulenames(final String readFileToString) throws OXException {
+    private ArrayList<RuleComment> getRulenames(final String readFileToString) {
         final ArrayList<RuleComment> ruleComments = new ArrayList<RuleComment>();
         final ArrayList<String> stringToList = stringToList(readFileToString);
         for (int i = 0; i < stringToList.size(); i++) {
