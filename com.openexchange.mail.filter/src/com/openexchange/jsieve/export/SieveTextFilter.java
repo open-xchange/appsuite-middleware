@@ -78,7 +78,9 @@ import com.openexchange.jsieve.visitors.InternalVisitor;
 import com.openexchange.jsieve.visitors.Visitor;
 import com.openexchange.jsieve.visitors.Visitor.OwnType;
 import com.openexchange.mailfilter.Credentials;
+import com.openexchange.mailfilter.MailFilterInterceptorRegistry;
 import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
+import com.openexchange.mailfilter.services.Services;
 
 /**
  * This class will be used to filter out special things which are not part of
@@ -257,8 +259,9 @@ public final class SieveTextFilter {
      *         which contains a {@link List} of {@link Rule}s and the next unique identifier for a future {@link Rule}
      * @throws ParseException if a parsing error is occurred
      * @throws SieveException if a Sieve protocol error is occurred
+     * @throws OXException 
      */
-    public RuleListAndNextUid readScriptFromString(final String readFileToString) throws ParseException, SieveException {
+    public RuleListAndNextUid readScriptFromString(final String readFileToString) throws ParseException, SieveException, OXException {
         boolean errorsInScript = false;
         // The following line strips off the first line of the script
         // final String first = readFileToString.replaceAll("^.*(\r)?\n", "");
@@ -279,6 +282,7 @@ public final class SieveTextFilter {
         // Attention: After merging the manipulation of finalrules also
         // manipulates rules and rules2
         final ArrayList<Rule> finalRules = mergeRules(uncommentedRules, commentedRules);
+        
         if (addRulenameToFittingCommandAndSetErrors(ruleNames, finalRules, readFileToString, commentedLines)) {
             errorsInScript = true;
         }
@@ -286,6 +290,7 @@ public final class SieveTextFilter {
         if (nextUidAndError.isError()) {
             errorsInScript = true;
         }
+        
         return new RuleListAndNextUid(finalRules, nextUidAndError.getNextuid(), errorsInScript);
     }
 
@@ -296,8 +301,9 @@ public final class SieveTextFilter {
      * @param capabilities The SIEVE capabilities
      * @return
      * @throws SieveException
+     * @throws OXException 
      */
-    public String writeback(final ClientRulesAndRequire clientRulesAndRequire, final Set<String> capabilities) throws SieveException {
+    public String writeback(final ClientRulesAndRequire clientRulesAndRequire, final Set<String> capabilities) throws SieveException, OXException {
         final ArrayList<Rule> finalRulesWithRightRequires = addRightRequires(clientRulesAndRequire, capabilities);
         addLines(finalRulesWithRightRequires);
         final ArrayList<Rule> nonCommented = new ArrayList<Rule>();
@@ -765,55 +771,55 @@ public final class SieveTextFilter {
      */
     private String kickCommentsRight(final String readFileToString) {
         final StringBuilder sb = new StringBuilder(readFileToString);
-        boolean dontparse = false;
-        boolean nextchar = false;
-        boolean newline = true;
+        boolean dontParse = false;
+        boolean nextChar = false;
+        boolean newLine = true;
         boolean comment = false;
-        boolean commentremoved = false;
+        boolean commentRemoved = false;
         boolean inQuotes = false;
         for (int i = 0; i < sb.length();) {
             final char c = sb.charAt(i);
             if (c == '\n') {
-                newline = true;
-                nextchar = false;
+                newLine = true;
+                nextChar = false;
                 comment = false;
-                commentremoved = false;
+                commentRemoved = false;
                 i++;
-            } else if (dontparse && c == '\\') {
+            } else if (dontParse && c == '\\') {
                 //Ignore next char
                 i += 2;
-            } else if (!commentremoved && !comment && c == '"') {
+            } else if (!commentRemoved && !comment && c == '"') {
                 // The comment flag is important because otherwise
                 // you could struggle about '"' in comments
-                dontparse = !dontparse;
+                dontParse = !dontParse;
                 inQuotes = !inQuotes;
-                nextchar = false;
+                nextChar = false;
                 i++;
-            } else if (!commentremoved && !comment && c == 't') {
+            } else if (!commentRemoved && !comment && c == 't') {
                 if ("text:".equals(sb.substring(i, i + 5))) {
-                    dontparse = true;
+                    dontParse = true;
                 }
-                nextchar = false;
+                nextChar = false;
                 i++;
-            } else if (!dontparse && !nextchar && newline && c == '#') {
+            } else if (!dontParse && !nextChar && newLine && c == '#') {
                 // Only delete chars at the beginning of a line
                 if ((i == 0 || sb.charAt(i - 1) == '\n') && ((i + COMMENT_TAG.length()) < sb.length()) && COMMENT_TAG.equals(sb.substring(i, i + COMMENT_TAG.length()))) {
                     sb.delete(i, i + COMMENT_TAG.length());
                 }
-                commentremoved = true;
-                nextchar = true;
-                newline = false;
-            } else if (dontparse && c == '.') {
+                commentRemoved = true;
+                nextChar = true;
+                newLine = false;
+            } else if (dontParse && c == '.') {
                 if (sb.charAt(i - 1) == '\n' && sb.charAt(i + 1) == '\r' && !inQuotes) {
-                    dontparse = false;
+                    dontParse = false;
                 }
-                nextchar = false;
+                nextChar = false;
                 i++;
-            } else if (nextchar && c == '#') {
+            } else if (nextChar && c == '#') {
                 comment = true;
                 i++;
             } else {
-                nextchar = false;
+                nextChar = false;
                 i++;
             }
         }
