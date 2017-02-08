@@ -6,7 +6,7 @@ BuildRequires: ant
 BuildRequires: ant-nodeps
 BuildRequires: java-devel >= 1.6.0
 Version:	   @OXVERSION@
-%define        ox_release 23
+%define        ox_release 24
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GNU General Public License (GPL)
@@ -69,6 +69,8 @@ exit 0
 %config(noreplace) /etc/munin/plugin-conf.d/*
 
 %changelog
+* Wed Feb 08 2017 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2017-02-20 (3949)
 * Thu Jan 26 2017 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2017-01-26 (3922)
 * Thu Jan 19 2017 Carsten Hoeger <choeger@open-xchange.com>
@@ -124,7 +126,7 @@ Build for patch 2015-10-23 (2806)
 * Wed Sep 30 2015 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2015-10-12 (2784)
 * Fri Sep 25 2015 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2015-09-28  (2767)
+Build for patch 2015-09-28 (2767)
 * Tue Sep 08 2015 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2015-09-14 (2732)
 * Wed Sep 02 2015 Carsten Hoeger <choeger@open-xchange.com>
@@ -574,7 +576,7 @@ First release candidate for 7.4.0
 * Tue Jul 16 2013 Carsten Hoeger <choeger@open-xchange.com>
 prepare for 7.4.0
 * Mon Jul 15 2013 Carsten Hoeger <choeger@open-xchange.com>
-Second build for patch  2013-07-18
+Second build for patch 2013-07-18
 * Mon Jul 15 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-07-18
 * Fri Jul 12 2013 Carsten Hoeger <choeger@open-xchange.com>
@@ -674,27 +676,7 @@ Second release candidate for 7.0.1
 * Fri Feb 01 2013 Carsten Hoeger <choeger@open-xchange.com>
 First release candidate for 7.0.1
 * Mon Jan 17 2011 Carsten Hoeger <choeger@open-xchange.com>
-bugfix release
-
-
-open-xchange-munin-scripts (0.1-7) unstable; urgency=low
-
-  * bugfix release
-
-
-open-xchange-munin-scripts (0.1-6) unstable; urgency=low
-
-  * bugfix release
-
-
-open-xchange-munin-scripts (0.1-5) unstable; urgency=low
-
-  * New build
-
-
-open-xchange-munin-scripts (0.1-4) unstable; urgency=low
-
-  * new build including latest changes
+bugfix releaseopen-xchange-munin-scripts (0.1-7) unstable; urgency=low * bugfix releaseopen-xchange-munin-scripts (0.1-6) unstable; urgency=low * bugfix releaseopen-xchange-munin-scripts (0.1-5) unstable; urgency=low * New buildopen-xchange-munin-scripts (0.1-4) unstable; urgency=low * new build including latest changes
 * Fri Oct 08 2010 Carsten Hoeger <choeger@open-xchange.com>
 new build with fix for rpm packages
 * Wed Oct 06 2010 Holger Achtziger <holger.achtziger@open-xchange.com>
