@@ -76,6 +76,7 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.RelatedTo;
 import com.openexchange.chronos.Trigger;
 import com.openexchange.chronos.common.AlarmUtils;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.ical.DefaultICalProperty;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalProperty;
@@ -343,7 +344,7 @@ public class EventPatches {
             } else {
                 for (Event importedChangeException : importedChangeExceptions) {
                     RecurrenceId recurrenceId = importedChangeException.getRecurrenceId();
-                    if (null != recurrenceId && false == changeExceptionDates.contains(new Date(recurrenceId.getValue()))) {
+                    if (null != recurrenceId && false == CalendarUtils.contains(changeExceptionDates, recurrenceId.getValue())) {
                         newChangeExceptions.add(importedChangeException);
                     }
                 }
