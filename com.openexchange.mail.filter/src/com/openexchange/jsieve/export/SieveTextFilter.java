@@ -259,66 +259,66 @@ public final class SieveTextFilter {
      * @throws SieveException if a Sieve protocol error is occurred
      */
     public RuleListAndNextUid readScriptFromString(final String readFileToString) throws ParseException, SieveException {
-        boolean errorsinscript = false;
+        boolean errorsInScript = false;
         // The following line strips off the first line of the script
         // final String first = readFileToString.replaceAll("^.*(\r)?\n", "");
-        final String commentedlines = diffremovenotcommentedlines(kickcommentsright(readFileToString), readFileToString);
+        final String commentedLines = diffRemoveNotCommentedLines(kickCommentsRight(readFileToString), readFileToString);
 
         final Node uncommented = new SieveParser(new StringReader(readFileToString)).start();
         // final List<OwnType> jjtAccept = (List<OwnType>)
         // uncommented.jjtAccept(new Visitor(), null);
         // log.debug(jjtAccept);
-        final Node commented = new SieveParser(new StringReader(commentedlines)).start();
+        final Node commented = new SieveParser(new StringReader(commentedLines)).start();
         // log.debug("\n-------------------------");
         // final List<OwnType> jjtAccept2 = (List<OwnType>)
         // commented.jjtAccept(new Visitor(), null);
         // log.debug(jjtAccept2);
-        final ArrayList<RuleComment> rulenames = getRulenames(readFileToString);
-        final ArrayList<Rule> rules = (ArrayList<Rule>) uncommented.jjtAccept(new InternalVisitor(), Boolean.FALSE);
-        final ArrayList<Rule> rules2 = (ArrayList<Rule>) commented.jjtAccept(new InternalVisitor(), Boolean.TRUE);
+        final ArrayList<RuleComment> ruleNames = getRuleNames(readFileToString);
+        final ArrayList<Rule> uncommentedRules = (ArrayList<Rule>) uncommented.jjtAccept(new InternalVisitor(), Boolean.FALSE);
+        final ArrayList<Rule> commentedRules = (ArrayList<Rule>) commented.jjtAccept(new InternalVisitor(), Boolean.TRUE);
         // Attention: After merging the manipulation of finalrules also
         // manipulates rules and rules2
-        final ArrayList<Rule> finalrules = mergerules(rules, rules2);
-        if (addRulenameToFittingCommandAndSetErrors(rulenames, finalrules, readFileToString, commentedlines)) {
-            errorsinscript = true;
+        final ArrayList<Rule> finalRules = mergeRules(uncommentedRules, commentedRules);
+        if (addRulenameToFittingCommandAndSetErrors(ruleNames, finalRules, readFileToString, commentedLines)) {
+            errorsInScript = true;
         }
-        final NextUidAndError nextuidanderror = setPosAndMissingErrortextsAndIds(finalrules, readFileToString, commentedlines);
-        if (nextuidanderror.isError()) {
-            errorsinscript = true;
+        final NextUidAndError nextUidAndError = setPosAndMissingErrortextsAndIds(finalRules, readFileToString, commentedLines);
+        if (nextUidAndError.isError()) {
+            errorsInScript = true;
         }
-        return new RuleListAndNextUid(finalrules, nextuidanderror.getNextuid(), errorsinscript);
+        return new RuleListAndNextUid(finalRules, nextUidAndError.getNextuid(), errorsInScript);
     }
 
     /**
      * This method is used to get back the resulting sieve script
      *
-     * @param clientrulesandrequire
+     * @param clientRulesAndRequire
      * @param capabilities The SIEVE capabilities
      * @return
      * @throws SieveException
      */
-    public String writeback(final ClientRulesAndRequire clientrulesandrequire, final Set<String> capabilities) throws SieveException {
-        final ArrayList<Rule> finalruleswithrightrequires = addRightRequires(clientrulesandrequire, capabilities);
-        addLines(finalruleswithrightrequires);
-        final ArrayList<Rule> noncommented = new ArrayList<Rule>();
+    public String writeback(final ClientRulesAndRequire clientRulesAndRequire, final Set<String> capabilities) throws SieveException {
+        final ArrayList<Rule> finalRulesWithRightRequires = addRightRequires(clientRulesAndRequire, capabilities);
+        addLines(finalRulesWithRightRequires);
+        final ArrayList<Rule> nonCommented = new ArrayList<Rule>();
         final ArrayList<Rule> commented = new ArrayList<Rule>();
-        splitRules(finalruleswithrightrequires, noncommented, commented);
+        splitRules(finalRulesWithRightRequires, nonCommented, commented);
 
         // Convert the rules to jjTree form but only if they are filled
-        Node noncommentednode = null;
-        if (!noncommented.isEmpty()) {
-            noncommentednode = RuleConverter.rulesToNodes(noncommented);
+        Node nonCommentedNode = null;
+        if (!nonCommented.isEmpty()) {
+            nonCommentedNode = RuleConverter.rulesToNodes(nonCommented);
         }
-        final Node commentednode = RuleConverter.rulesToNodes(commented);
+        final Node commentedNode = RuleConverter.rulesToNodes(commented);
 
         // and convert this to a writeable form
-        List<OwnType> noncommentedoutput = new ArrayList<OwnType>();
-        if (null != noncommentednode) {
-            noncommentedoutput = (List<OwnType>) noncommentednode.jjtAccept(new Visitor(), null);
+        List<OwnType> nonCommentedOutput = new ArrayList<OwnType>();
+        if (null != nonCommentedNode) {
+            nonCommentedOutput = (List<OwnType>) nonCommentedNode.jjtAccept(new Visitor(), null);
         }
-        final List<OwnType> commentedoutput = (List<OwnType>) commentednode.jjtAccept(new Visitor(), null);
+        final List<OwnType> commentedOutput = (List<OwnType>) commentedNode.jjtAccept(new Visitor(), null);
 
-        return listToString(interweaving(noncommentedoutput, commentedoutput, clientrulesandrequire.getRules()));
+        return listToString(interweaving(nonCommentedOutput, commentedOutput, clientRulesAndRequire.getRules()));
     }
 
     /**
@@ -389,35 +389,35 @@ public final class SieveTextFilter {
     /**
      * This method goes through all Rules and adds a fitting line number
      *
-     * @param finalrules
+     * @param finalRules
      */
-    private void addLines(final ArrayList<Rule> finalrules) {
+    private void addLines(final ArrayList<Rule> finalRules) {
         // We add one to the first line offset here, so that the first real rule isn't written directly below
         // the require rule
-        int linenumber = FIRST_LINE_OFFSET + 1;
-        for (int i = 0; i < finalrules.size(); i++) {
-            final Rule rule = finalrules.get(i);
+        int lineNumber = FIRST_LINE_OFFSET + 1;
+        for (int i = 0; i < finalRules.size(); i++) {
+            final Rule rule = finalRules.get(i);
             final RuleComment ruleComment = rule.getRuleComment();
             if (null != ruleComment) {
-                LOG.debug("Added line number {} to comment {}", linenumber, ruleComment);
-                ruleComment.setLine(linenumber++);
+                LOG.debug("Added line number {} to comment {}", lineNumber, ruleComment);
+                ruleComment.setLine(lineNumber++);
             }
-            LOG.debug("Added line number {} to rule {}", linenumber, rule);
-            rule.setLinenumber(linenumber);
+            LOG.debug("Added line number {} to rule {}", lineNumber, rule);
+            rule.setLinenumber(lineNumber);
             // Here we add one because a space between two rules looks better
             final ArrayList<Command> commands = rule.getCommands();
             if (null != commands && !commands.isEmpty()) {
-                linenumber += countcommandlines(commands) + 1;
+                lineNumber += countCommandLines(commands) + 1;
             } else {
                 final String text = rule.getText();
                 if (null != text) {
-                    linenumber += countlines(text) + 1;
+                    lineNumber += countLines(text) + 1;
                 }
             }
         }
     }
 
-    private int countlines(final String text) {
+    private int countLines(final String text) {
         int start = 0;
         int number = 0;
         while (true) {
@@ -431,14 +431,14 @@ public final class SieveTextFilter {
         return number;
     }
 
-    private void addPlainTextToRule(final String wholetext, final String commentedtext, final RuleComment ruleComment, final Rule rightrule) {
-        final int linenumber = rightrule.getLinenumber();
-        final int endlinenumber = rightrule.getEndlinenumber();
+    private void addPlainTextToRule(final String wholeText, final String commentedText, final RuleComment ruleComment, final Rule rightRule) {
+        final int lineNumber = rightRule.getLinenumber();
+        final int endLineNumber = rightRule.getEndlinenumber();
         // Known comments aren't written to the plain text part, otherwise they will be doubled when writing back
-        if (rightrule.isCommented()) {
-            rightrule.setText(getRightPart(commentedtext, linenumber, endlinenumber));
+        if (rightRule.isCommented()) {
+            rightRule.setText(getRightPart(commentedText, lineNumber, endLineNumber));
         } else {
-            rightrule.setText(getRightPart(wholetext, linenumber, endlinenumber));
+            rightRule.setText(getRightPart(wholeText, lineNumber, endLineNumber));
         }
     }
 
@@ -447,43 +447,43 @@ public final class SieveTextFilter {
      * and adds the proper require commands according to the actions used in the
      * command within
      *
-     * @param clientrulesandrequire
+     * @param clientRulesAndRequire
      * @param capabilities The SIEVE capabilities
      * @return
      */
-    private ArrayList<Rule> addRightRequires(final ClientRulesAndRequire clientrulesandrequire, final Set<String> capabilities) {
-        final ArrayList<Rule> newruleslist = new ArrayList<Rule>();
-        final Set<String> requireds = new HashSet<String>();
-        for (final Rule rule : clientrulesandrequire.getRules()) {
+    private ArrayList<Rule> addRightRequires(final ClientRulesAndRequire clientRulesAndRequire, final Set<String> capabilities) {
+        final ArrayList<Rule> newRulesList = new ArrayList<Rule>();
+        final Set<String> requires = new HashSet<String>();
+        for (final Rule rule : clientRulesAndRequire.getRules()) {
             if (null == rule.getRequireCommand()) {
-                newruleslist.add(rule);
+                newRulesList.add(rule);
                 final ArrayList<Command> commands = rule.getCommands();
                 if (!rule.isCommented() && null != commands) {
                     for (final Command command : commands) {
                         final Set<String> required = command.getRequired();
                         required.retainAll(capabilities);
-                        requireds.addAll(required);
+                        requires.addAll(required);
                     }
                 }
             }
         }
-        requireds.addAll(clientrulesandrequire.getRequire());
-        if (!requireds.isEmpty()) {
+        requires.addAll(clientRulesAndRequire.getRequire());
+        if (!requires.isEmpty()) {
             final ArrayList<ArrayList<String>> arrayList = new ArrayList<ArrayList<String>>();
-            arrayList.add(new ArrayList<String>(requiredList(requireds)));
-            final ArrayList<Command> commandlist = new ArrayList<Command>();
-            commandlist.add(new RequireCommand(arrayList));
-            newruleslist.add(0, new Rule(commandlist, FIRST_LINE_OFFSET + 1));
+            arrayList.add(new ArrayList<String>(requiredList(requires)));
+            final ArrayList<Command> commandList = new ArrayList<Command>();
+            commandList.add(new RequireCommand(arrayList));
+            newRulesList.add(0, new Rule(commandList, FIRST_LINE_OFFSET + 1));
         }
-        return newruleslist;
+        return newRulesList;
     }
 
-    private static Set<String> requiredList(final Set<String> requireds) {
-        if (requireds.contains("imapflags") && requireds.contains("imap4flags")) {
+    private static Set<String> requiredList(final Set<String> requires) {
+        if (requires.contains("imapflags") && requires.contains("imap4flags")) {
             // Prefer "imap4flags" if both supported
-            requireds.remove("imapflags");
+            requires.remove("imapflags");
         }
-        return requireds;
+        return requires;
     }
 
     /**
@@ -492,39 +492,39 @@ public final class SieveTextFilter {
      *
      * @param ruleComments All the comments which are found and must be applied to a rule
      * @param rules The rules
-     * @param wholetext The whole text of the script
-     * @param commentedtext The commented text of the script
+     * @param wholeText The whole text of the script
+     * @param commentedText The commented text of the script
      * @return true if an errortext and plaintext has been added anywhere false if not
      */
-    private boolean addRulenameToFittingCommandAndSetErrors(final ArrayList<RuleComment> ruleComments, final ArrayList<Rule> rules, final String wholetext, final String commentedtext) {
-        boolean erroradded = false;
+    private boolean addRulenameToFittingCommandAndSetErrors(final ArrayList<RuleComment> ruleComments, final ArrayList<Rule> rules, final String wholeText, final String commentedText) {
+        boolean errorAdded = false;
         for (final RuleComment ruleComment : ruleComments) {
-            int mindiff = Integer.MAX_VALUE;
-            Rule rightrule = null;
+            int minDiff = Integer.MAX_VALUE;
+            Rule rightRule = null;
             for (final Rule rule : rules) {
                 final int abs = getPosDif(rule.getLinenumber() - ruleComment.getLine());
-                if (abs < mindiff) {
-                    mindiff = abs;
-                    rightrule = rule;
+                if (abs < minDiff) {
+                    minDiff = abs;
+                    rightRule = rule;
                 }
             }
-            if (null != rightrule) {
-                final String errortext = ruleComment.getErrortext();
-                if (null != errortext) {
-                    final String errormsg = rightrule.getErrormsg();
-                    rightrule.setErrormsg(null != errormsg ? errormsg + CRLF + errortext : errortext);
-                    if (handleRuleError(wholetext, commentedtext, ruleComment, rightrule)) {
-                        erroradded = true;
+            if (null != rightRule) {
+                final String errorText = ruleComment.getErrortext();
+                if (null != errorText) {
+                    final String errorMsg = rightRule.getErrormsg();
+                    rightRule.setErrormsg(null != errorMsg ? errorMsg + CRLF + errorText : errorText);
+                    if (handleRuleError(wholeText, commentedText, ruleComment, rightRule)) {
+                        errorAdded = true;
                     }
                 } else {
-                    rightrule.setRuleComments(ruleComment);
-                    if (handleRuleError(wholetext, commentedtext, ruleComment, rightrule)) {
-                        erroradded = true;
+                    rightRule.setRuleComments(ruleComment);
+                    if (handleRuleError(wholeText, commentedText, ruleComment, rightRule)) {
+                        errorAdded = true;
                     }
                 }
             }
         }
-        return erroradded;
+        return errorAdded;
     }
 
     /**
@@ -534,7 +534,7 @@ public final class SieveTextFilter {
      * @param commands
      * @return
      */
-    private int countcommandlines(final ArrayList<Command> commands) {
+    private int countCommandLines(final ArrayList<Command> commands) {
         int i = 0;
         for (final Command command : commands) {
             if (command instanceof IfStructureCommand) {
@@ -557,18 +557,18 @@ public final class SieveTextFilter {
      * @param first
      * @return
      */
-    private String diffremovenotcommentedlines(final String test, final String first) {
-        final ArrayList<String> removedcomments = stringToList(test);
+    private String diffRemoveNotCommentedLines(final String test, final String first) {
+        final ArrayList<String> removedComments = stringToList(test);
         final List<String> orig = stringToList(first);
         for (int i = 0; i < orig.size(); i++) {
-            final String removedcommentsline = removedcomments.get(i);
+            final String removedCommentsLine = removedComments.get(i);
             final String origline = orig.get(i);
-            if (removedcommentsline.equals(origline)) {
-                removedcomments.remove(i);
-                removedcomments.add(i, "");
+            if (removedCommentsLine.equals(origline)) {
+                removedComments.remove(i);
+                removedComments.add(i, "");
             }
         }
-        return listToString(removedcomments);
+        return listToString(removedComments);
     }
 
     private void fillup(final List<String> retval, final int i) {
@@ -577,17 +577,17 @@ public final class SieveTextFilter {
         }
     }
 
-    private int getActionCommandSize(final List<ActionCommand> actioncommands) {
+    private int getActionCommandSize(final List<ActionCommand> actionCommands) {
         int size = 0;
-        if (null != actioncommands) {
-            for (final ActionCommand actionCommand : actioncommands) {
+        if (null != actionCommands) {
+            for (final ActionCommand actionCommand : actionCommands) {
                 if (Commands.VACATION.equals(actionCommand.getCommand()) || Commands.ENOTIFY.equals(actionCommand.getCommand()) || Commands.PGP_ENCRYPT.equals(actionCommand.getCommand())) {
                     // The text arguments for vacation end method for enotify are the last in the list
                     final ArrayList<Object> arguments = actionCommand.getArguments();
                     final int size2 = arguments.size();
                     if (0 < size2) {
                         final ArrayList<String> object = (ArrayList<String>) arguments.get(size2 - 1);
-                        size += countlines(object.get(0)) + 1;
+                        size += countLines(object.get(0)) + 1;
                     }
                 } else {
                     size++;
@@ -601,25 +601,25 @@ public final class SieveTextFilter {
         return (i > 0) ? i : Integer.MAX_VALUE;
     }
 
-    private String getRightPart(final String commentedtext, final int linenumber, final int endlinenumber) {
+    private String getRightPart(final String commentedText, final int lineNumber, final int endLineNumber) {
         int start = 0;
         int end = 0;
         int number = 1;
-        while (number < linenumber) {
-            final int indexOf = commentedtext.indexOf(CRLF, start);
+        while (number < lineNumber) {
+            final int indexOf = commentedText.indexOf(CRLF, start);
             start = indexOf + CRLF.length();
             number++;
         }
         end = start;
-        while (number <= endlinenumber) {
-            final int indexOf = commentedtext.indexOf(CRLF, end);
+        while (number <= endLineNumber) {
+            final int indexOf = commentedText.indexOf(CRLF, end);
             end = indexOf + CRLF.length();
             number++;
         }
-        return commentedtext.substring(start, end);
+        return commentedText.substring(start, end);
     }
 
-    private ArrayList<RuleComment> getRulenames(final String readFileToString) {
+    private ArrayList<RuleComment> getRuleNames(final String readFileToString) {
         final ArrayList<RuleComment> ruleComments = new ArrayList<RuleComment>();
         final ArrayList<String> stringToList = stringToList(readFileToString);
         for (int i = 0; i < stringToList.size(); i++) {
@@ -628,33 +628,33 @@ public final class SieveTextFilter {
             if (matcher.matches()) {
                 final String flags = matcher.group(1);
                 if (flags.length() > 0) {
-                    String errortext = null;
-                    final List<String> flaglist = Arrays.asList(flags.split(","));
-                    for (final String flag : flaglist) {
+                    String errorText = null;
+                    final List<String> flagList = Arrays.asList(flags.split(","));
+                    for (final String flag : flagList) {
                         final String illegal = flag.replaceAll(LEGAL_FLAG_CHARS, "");
                         if (illegal.length() > 0) {
                             final String error = "Illegal chars inside flags: \"" + illegal + "\"";
-                            if (null != errortext) {
-                                errortext += CRLF + error;
+                            if (null != errorText) {
+                                errorText += CRLF + error;
                             } else {
-                                errortext = error;
+                                errorText = error;
                             }
                         }
                     }
-                    if (null != errortext) {
-                        ruleComments.add(new RuleComment(i + 1, errortext));
+                    if (null != errorText) {
+                        ruleComments.add(new RuleComment(i + 1, errorText));
                     } else {
                         try {
-                            final int uniqueid = Integer.parseInt(matcher.group(2));
-                            ruleComments.add(new RuleComment(flaglist, uniqueid, matcher.group(3), i + 1));
+                            final int uniqueId = Integer.parseInt(matcher.group(2));
+                            ruleComments.add(new RuleComment(flagList, uniqueId, matcher.group(3), i + 1));
                         } catch (final NumberFormatException e) {
                             ruleComments.add(new RuleComment(i + 1, "Unique id is no integer"));
                         }
                     }
                 } else {
                     try {
-                        final int uniqueid = Integer.parseInt(matcher.group(2));
-                        ruleComments.add(new RuleComment(uniqueid, matcher.group(3), i + 1));
+                        final int uniqueId = Integer.parseInt(matcher.group(2));
+                        ruleComments.add(new RuleComment(uniqueId, matcher.group(3), i + 1));
                     } catch (final NumberFormatException e) {
                         ruleComments.add(new RuleComment(i + 1, "Unique id is no integer"));
                     }
@@ -665,41 +665,41 @@ public final class SieveTextFilter {
     }
 
     /**
-     * @param wholetext
-     * @param commentedtext
-     * @param rulename
-     * @param rightrule
+     * @param wholeText
+     * @param commentedText
+     * @param ruleComment
+     * @param rightRule
      * @return true if an errortext and plaintext has been added false otherwise
      */
-    private boolean handleRuleError(final String wholetext, final String commentedtext, final RuleComment rulename, final Rule rightrule) {
-        final String errormsg = rightrule.getErrormsg();
-        if (null != errormsg) {
-            rightrule.setCommands(null);
+    private boolean handleRuleError(final String wholeText, final String commentedText, final RuleComment ruleComment, final Rule rightRule) {
+        final String errorMsg = rightRule.getErrormsg();
+        if (null != errorMsg) {
+            rightRule.setCommands(null);
             try {
-                addPlainTextToRule(wholetext, commentedtext, rulename, rightrule);
+                addPlainTextToRule(wholeText, commentedText, ruleComment, rightRule);
             } catch (Exception e) {
                 LOG.warn("Unable to add add rule because of: " + e.getMessage());
                 // continue in case an error occurs
             }
-            printErrorForUser(MailFilterExceptionCode.SIEVE_ERROR.create(errormsg));
+            printErrorForUser(MailFilterExceptionCode.SIEVE_ERROR.create(errorMsg));
             return true;
         }
         return false;
     }
 
-    private List<String> interweaving(final List<OwnType> noncommentedoutput, final List<OwnType> commentedoutput, final List<Rule> rules) {
+    private List<String> interweaving(final List<OwnType> nonCommentedOutput, final List<OwnType> commentedOutput, final List<Rule> rules) {
         final List<String> retval = new ArrayList<String>();
         retval.add(FIRST_LINE + (new Date()).toString());
-        for (final OwnType owntype : noncommentedoutput) {
-            final int linenumber = owntype.getLinenumber();
-            final String string = owntype.getOutput().toString();
+        for (final OwnType ownType : nonCommentedOutput) {
+            final int lineNumber = ownType.getLinenumber();
+            final String string = ownType.getOutput().toString();
             final int size = retval.size();
-            if (linenumber > size + 1) {
-                fillup(retval, linenumber - (size + 1));
+            if (lineNumber > size + 1) {
+                fillup(retval, lineNumber - (size + 1));
             }
             retval.addAll(stringToList(string));
         }
-        for (final OwnType owntype : commentedoutput) {
+        for (final OwnType owntype : commentedOutput) {
             int linenumber = owntype.getLinenumber() - 1;
             final String string = owntype.getOutput().toString();
             final int size = retval.size();
@@ -763,7 +763,7 @@ public final class SieveTextFilter {
      * @param readFileToString
      * @return
      */
-    private String kickcommentsright(final String readFileToString) {
+    private String kickCommentsRight(final String readFileToString) {
         final StringBuilder sb = new StringBuilder(readFileToString);
         boolean dontparse = false;
         boolean nextchar = false;
@@ -849,7 +849,7 @@ public final class SieveTextFilter {
      * @param rules2
      * @return
      */
-    private ArrayList<Rule> mergerules(final ArrayList<Rule> rules, final ArrayList<Rule> rules2) {
+    private ArrayList<Rule> mergeRules(final ArrayList<Rule> rules, final ArrayList<Rule> rules2) {
         final ArrayList<Rule> retval = new ArrayList<Rule>();
         retval.addAll(rules);
         retval.addAll(rules2);
