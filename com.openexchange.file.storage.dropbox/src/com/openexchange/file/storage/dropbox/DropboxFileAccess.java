@@ -324,10 +324,12 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     public IDTuple saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
         boolean addVersion = null != modifiedFields && modifiedFields.contains(Field.VERSION_COMMENT);
         String path = FileStorageFileAccess.NEW == file.getId() ? null : toPath(file.getFolderId(), file.getId());
+        checkFolderExistence(file.getFolderId());
         try {
             final long fileSize = file.getFileSize();
             final long length = fileSize > 0 ? fileSize : -1L;
             Entry entry = null;
+            
             if (Strings.isEmpty(path) || !exists(file.getFolderId(), file.getId(), CURRENT_VERSION)) {
                 // Create
                 ThresholdFileHolder sink = null;
@@ -378,6 +380,22 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             throw handle(e, path);
         }
     }
+    
+    
+    private void checkFolderExistence(String folderId) throws OXException{
+    	String folderPath = toId(folderId);
+        Entry folderEntry;
+		try {
+			folderEntry = dropboxAPI.metadata(folderPath, 1, null, false, CURRENT_VERSION);
+            if (folderEntry == null || folderEntry.isDeleted) {
+                throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create();
+            }
+		} catch (DropboxException e) {
+			throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, DropboxConstants.ID, e.getMessage());
+		}
+        
+    }
+
 
     @Override
     public void removeDocument(final String folderId, final long sequenceNumber) throws OXException {
