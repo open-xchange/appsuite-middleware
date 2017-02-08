@@ -51,6 +51,7 @@ package com.openexchange.chronos.compat;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
@@ -284,14 +285,20 @@ public class Appointment2Event {
      * @throws {@link CalendarExceptionCodes#INVALID_RECURRENCE_ID}
      */
     public static List<Date> getRecurrenceIDs(RecurrenceData recurrenceData, List<Date> recurrenceDatePositions) throws OXException {
-        // TODO
         if (null == recurrenceDatePositions) {
             return null;
         }
+        if (0 == recurrenceDatePositions.size()) {
+            return Collections.emptyList();
+        }
         List<Date> recurrenceIDs = new ArrayList<Date>(recurrenceDatePositions.size());
+        RecurrenceRuleIterator recurrenceIterator = Recurrence.getRecurrenceIterator(recurrenceData, true);
         for (Date recurrenceDatePosition : recurrenceDatePositions) {
-            RecurrenceId recurrenceID = getRecurrenceID(recurrenceData, recurrenceDatePosition);
-            recurrenceIDs.add(new Date(recurrenceID.getValue()));
+            Date recurrenceID = getRecurrenceID(recurrenceIterator, recurrenceDatePosition.getTime());
+            if (null == recurrenceID) {
+                throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create("legacy recurrence date position " + recurrenceDatePosition.getTime(), recurrenceData.getRecurrenceRule());
+            }
+            recurrenceIDs.add(recurrenceID);
         }
         return recurrenceIDs;
     }
@@ -316,6 +323,21 @@ public class Appointment2Event {
             }
         }
         throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create("legacy recurrence position " + recurrencePosition, recurrenceData.getRecurrenceRule());
+    }
+
+    private static Date getRecurrenceID(RecurrenceRuleIterator iterator, long recurrenceDatePosition) {
+        while (iterator.hasNext()) {
+            long nextMillis = iterator.nextMillis();
+            Calendar calendar = CalendarUtils.initCalendar(TimeZones.UTC, nextMillis);
+            long nextDatePosition = CalendarUtils.truncateTime(calendar).getTimeInMillis();
+            if (recurrenceDatePosition == nextDatePosition) {
+                return new Date(nextMillis);
+            }
+            if (nextDatePosition > recurrenceDatePosition) {
+                break;
+            }
+        }
+        return null;
     }
 
     /**
