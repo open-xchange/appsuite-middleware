@@ -60,7 +60,8 @@ import org.junit.runners.Suite.SuiteClasses;
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-    RecurrenceTests.class
+    RecurrenceTests.class,
+    RecurrencePositionTest.class
 })
 public class UnitTests {
 
