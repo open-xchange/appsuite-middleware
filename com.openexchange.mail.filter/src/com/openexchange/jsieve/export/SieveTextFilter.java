@@ -283,19 +283,6 @@ public final class SieveTextFilter {
      * This method is used to get back the resulting sieve script
      *
      * @param clientrulesandrequire
-     * @return
-     * @throws SieveException
-     * @deprecated Use {@link #writeback(ClientRulesAndRequire, Set)}
-     */
-    @Deprecated
-    public String writeback(final ClientRulesAndRequire clientrulesandrequire) throws SieveException {
-        return writeback(clientrulesandrequire, Collections.<String> emptySet());
-    }
-
-    /**
-     * This method is used to get back the resulting sieve script
-     *
-     * @param clientrulesandrequire
      * @param capabilities The SIEVE capabilities
      * @return
      * @throws SieveException
@@ -681,7 +668,7 @@ public final class SieveTextFilter {
             try {
                 addPlainTextToRule(wholetext, commentedtext, rulename, rightrule);
             } catch (Exception e) {
-                LOG.warn("Unable to add add rule because of: "+e.getMessage());
+                LOG.warn("Unable to add add rule because of: " + e.getMessage());
                 // continue in case an error occurs
             }
             printErrorForUser(MailFilterExceptionCode.SIEVE_ERROR.create(errormsg));
