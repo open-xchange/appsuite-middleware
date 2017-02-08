@@ -124,7 +124,10 @@ public enum Attribute {
     MAIL_OAUTH_LITERAL(MailAccountFields.MAIL_OAUTH, 1047),
     // Whether OAuth is required for transport server
     TRANSPORT_OAUTH_LITERAL(MailAccountFields.TRANSPORT_OAUTH, 1048),
-
+    // The flag for enabling/disabling the mail access end-point
+    MAIL_DISABLED(MailAccountFields.MAIL_DISABLED, 1049),
+    // The flag for enabling/disabling the mail transport end-point
+    TRANSPORT_DISABLED(MailAccountFields.TRANSPORT_DISABLED, 1050),
     ;
 
     public static final Set<Attribute> MAIL_URL_ATTRIBUTES = Collections.unmodifiableSet(EnumSet.of(
@@ -280,6 +283,10 @@ public enum Attribute {
             return switcher.transportOAuth();
         case ROOT_FOLDER:
             return switcher.rootFolder();
+        case MAIL_DISABLED:
+            return switcher.mailDisabled();
+        case TRANSPORT_DISABLED:
+            return switcher.transportDisabled();
         default:
             throw new IllegalArgumentException(getName());
         }

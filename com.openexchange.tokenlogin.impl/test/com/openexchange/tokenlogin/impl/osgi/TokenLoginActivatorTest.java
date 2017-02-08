@@ -153,8 +153,8 @@ public class TokenLoginActivatorTest {
         MockUtils.injectValueIntoPrivateField(this.tokenLoginActivator, InjectionFieldConstants.CONTEXT, bundleContext);
     }
 
-    @Test
-    public void testStartBundle_EverythingFine_TwoServicesRegistered() throws Exception {
+     @Test
+     public void testStartBundle_EverythingFine_TwoServicesRegistered() throws Exception {
         PowerMockito.when(hazelcastConfigurationService.isEnabled()).thenReturn(false);
 
         this.tokenLoginActivator.startBundle();
@@ -163,8 +163,8 @@ public class TokenLoginActivatorTest {
         Mockito.verify(hazelcastConfigurationService, Mockito.times(1)).isEnabled();
     }
 
-    @Test
-    public void testStartBundle_HazelcastDisabled_NoTrackerRegistered() throws Exception {
+     @Test
+     public void testStartBundle_HazelcastDisabled_NoTrackerRegistered() throws Exception {
         PowerMockito.when(hazelcastConfigurationService.isEnabled()).thenReturn(false);
 
         this.tokenLoginActivator.startBundle();
@@ -173,15 +173,15 @@ public class TokenLoginActivatorTest {
         Mockito.verify(hazelcastConfigurationService, Mockito.times(1)).isEnabled();
     }
 
-    @Test
-    public void testStartBundle_HazelcastEnabled_OneTrackerRegistered() throws Exception {
+     @Test
+     public void testStartBundle_HazelcastEnabled_OneTrackerRegistered() throws Exception {
         this.tokenLoginActivator.startBundle();
 
         ServiceMockActivatorAsserter.verifyAllServiceTrackersRegistered(this.tokenLoginActivator, 1);
     }
 
-    @Test
-    public void testStartBundle_TokenLoginDisabled_NoTrackerRegistered() throws Exception {
+     @Test
+     public void testStartBundle_TokenLoginDisabled_NoTrackerRegistered() throws Exception {
         PowerMockito.when(this.configurationService.getBoolProperty("com.openexchange.tokenlogin", true)).thenReturn(false);
 
         this.tokenLoginActivator.startBundle();
@@ -189,8 +189,8 @@ public class TokenLoginActivatorTest {
         ServiceMockActivatorAsserter.verifyAllServiceTrackersRegistered(this.tokenLoginActivator, 0);
     }
 
-    @Test
-    public void testStartBundle_TokenLoginDisabled_NoServiceRegistered() throws Exception {
+     @Test
+     public void testStartBundle_TokenLoginDisabled_NoServiceRegistered() throws Exception {
         PowerMockito.when(this.configurationService.getBoolProperty("com.openexchange.tokenlogin", true)).thenReturn(false);
 
         this.tokenLoginActivator.startBundle();
@@ -199,8 +199,8 @@ public class TokenLoginActivatorTest {
         Mockito.verify(hazelcastConfigurationService, Mockito.times(0)).isEnabled();
     }
 
-    @Test
-    public void testStopBundle_EverythingFine_AllTrackersClosed() throws Exception {
+     @Test
+     public void testStopBundle_EverythingFine_AllTrackersClosed() throws Exception {
         final List<ServiceTracker<?, ?>> serviceTrackers = new LinkedList<ServiceTracker<?, ?>>();
         ServiceTracker<?, ?> serviceTracker = PowerMockito.mock(ServiceTracker.class);
         serviceTrackers.add(serviceTracker);
@@ -211,8 +211,8 @@ public class TokenLoginActivatorTest {
         ServiceMockActivatorAsserter.verifyAllServiceTrackersClosed(this.tokenLoginActivator);
     }
 
-    @Test
-    public void testStopBundle_EverythingFine_AllServicesUnregistered() throws Exception {
+     @Test
+     public void testStopBundle_EverythingFine_AllServicesUnregistered() throws Exception {
         final Multimap<Object, ServiceRegistration<?>> serviceRegistrations = HashMultimap.create(6,2);
         ServiceRegistration<?> serviceRegistration = PowerMockito.mock(ServiceRegistration.class);
         serviceRegistrations.put(TokenLoginService.class, serviceRegistration);

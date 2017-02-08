@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.importexport.actions;
 
+import java.util.ArrayList;
+import java.util.List;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.importexport.actions.AbstractImportRequest.Action;
 
 /**
@@ -57,8 +60,29 @@ import com.openexchange.ajax.importexport.actions.AbstractImportRequest.Action;
  */
 public final class ICalExportRequest extends AbstractExportRequest<ICalExportResponse> {
 
+    private final int type;
+
     public ICalExportRequest(final int folderId) {
+        this(folderId, -1);
+    }
+    
+    public ICalExportRequest(final int folderId, final int type) {
         super(Action.ICal, folderId);
+        this.type = type;
+        
+    }
+    
+    @Override
+    public Parameter[] getParameters() {
+        com.openexchange.ajax.framework.AJAXRequest.Parameter[] parameters = super.getParameters();
+        if (type != -1) {
+            List<com.openexchange.ajax.framework.AJAXRequest.Parameter> arrayList = new ArrayList<Parameter>(parameters.length);
+            for (Parameter param : parameters) {
+                arrayList.add(param);
+            }
+            arrayList.add(new Parameter(AJAXServlet.PARAMETER_TYPE, this.type));
+        }
+        return parameters;
     }
 
     @Override

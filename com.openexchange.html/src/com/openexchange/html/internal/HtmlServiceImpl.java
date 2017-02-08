@@ -105,6 +105,7 @@ import org.jsoup.Jsoup;
 import org.owasp.esapi.codecs.HTMLEntityCodec;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.html.HtmlSanitizeOptions;
 import com.openexchange.html.HtmlSanitizeResult;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.HtmlServices;
@@ -113,7 +114,6 @@ import com.openexchange.html.internal.image.DroppingImageHandler;
 import com.openexchange.html.internal.image.ImageProcessor;
 import com.openexchange.html.internal.image.ProxyRegistryImageHandler;
 import com.openexchange.html.internal.jericho.JerichoParser;
-import com.openexchange.html.internal.jericho.JerichoParser.ParsingDeniedException;
 import com.openexchange.html.internal.jericho.handler.FilterJerichoHandler;
 import com.openexchange.html.internal.jericho.handler.UrlReplacerJerichoHandler;
 import com.openexchange.html.internal.parser.HtmlParser;
@@ -479,7 +479,7 @@ public final class HtmlServiceImpl implements HtmlService {
      * {@inheritDoc}
      */
     @Override
-    public String sanitize(final String htmlContent, final String optConfigName, final boolean dropExternalImages, final boolean[] modified, final String cssPrefix) {
+    public String sanitize(final String htmlContent, final String optConfigName, final boolean dropExternalImages, final boolean[] modified, final String cssPrefix) throws OXException {
         return sanitize(htmlContent, optConfigName, dropExternalImages, modified, cssPrefix, -1).getContent();
     }
 
@@ -512,11 +512,13 @@ public final class HtmlServiceImpl implements HtmlService {
         return tmp.toString();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public HtmlSanitizeResult sanitize(final String htmlContent, final String optConfigName, final boolean dropExternalImages, final boolean[] modified, final String cssPrefix, final int maxContentSize) {
+    public HtmlSanitizeResult sanitize(String htmlContent, String optConfigName, boolean dropExternalImages, boolean[] modified, String cssPrefix, int maxContentSize) throws OXException {
+        return sanitize(htmlContent, HtmlSanitizeOptions.builder().setCssPrefix(cssPrefix).setDropExternalImages(dropExternalImages).setMaxContentSize(maxContentSize).setModified(modified).setOptConfigName(optConfigName).build());
+    }
+
+    @Override
+    public HtmlSanitizeResult sanitize(String htmlContent, HtmlSanitizeOptions options) throws OXException {
         HtmlSanitizeResult htmlSanitizeResult = new HtmlSanitizeResult(htmlContent);
         if (isEmpty(htmlContent)) {
             return htmlSanitizeResult;
@@ -555,13 +557,14 @@ public final class HtmlServiceImpl implements HtmlService {
             }
 
             // CSS- and tag-wise sanitizing
-            try {
+            {
                 // Initialize the handler
-                FilterJerichoHandler handler = getHandlerFor(html.length(), optConfigName);
-                handler.setDropExternalImages(dropExternalImages).setCssPrefix(cssPrefix).setMaxContentSize(maxContentSize);
+                FilterJerichoHandler handler = getHandlerFor(html.length(), options.getOptConfigName());
+                handler.setDropExternalImages(options.isDropExternalImages()).setCssPrefix(options.getCssPrefix()).setMaxContentSize(options.getMaxContentSize()).setSuppressLinks(options.isSuppressLinks());
 
                 // Drop external images using regular expression
-                if (dropExternalImages) {
+                boolean[] modified = options.getModified();
+                if (options.isDropExternalImages()) {
                     DroppingImageHandler imageHandler = new DroppingImageHandler();
                     html = ImageProcessor.getInstance().replaceImages(html, imageHandler);
                     if (null != modified) {
@@ -570,18 +573,16 @@ public final class HtmlServiceImpl implements HtmlService {
                 }
 
                 // Parse the HTML content
-                JerichoParser.getInstance().parse(html, handler, maxContentSize <= 0);
+                JerichoParser.getInstance().parse(html, handler, options.getMaxContentSize() <= 0);
 
                 // Check if modified by handler
-                if (dropExternalImages && null != modified) {
+                if (options.isDropExternalImages() && null != modified) {
                     modified[0] |= handler.isImageURLFound();
                 }
 
                 // Get HTML content
                 html = handler.getHTML();
                 htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
-            } catch (final ParsingDeniedException e) {
-                LOG.warn("HTML content will be returned un-white-listed.", e);
             }
 
             // Replace HTML entities
@@ -1611,12 +1612,12 @@ public final class HtmlServiceImpl implements HtmlService {
     }
 
     @Override
-    public String getConformHTML(final String htmlContent, final String charset) {
+    public String getConformHTML(final String htmlContent, final String charset) throws OXException {
         return getConformHTML(htmlContent, charset, true);
     }
 
     @Override
-    public String getConformHTML(final String htmlContent, final String charset, final boolean replaceUrls) {
+    public String getConformHTML(final String htmlContent, final String charset, final boolean replaceUrls) throws OXException {
         if (null == htmlContent || 0 == htmlContent.length()) {
             // Nothing to do...
             return htmlContent;

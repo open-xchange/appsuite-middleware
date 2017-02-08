@@ -49,20 +49,23 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
+import static org.junit.Assert.assertEquals;
 import java.util.Date;
+import org.junit.Test;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
 
-
 public class Bug11695Test extends CalendarSqlTest {
+
     /**
      * Test for <a href= "http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=11695">bug #11695</a>
      *
      * @throws OXException If an OX error occurs
      */
+    @Test
     public void testShouldCalculateProperWeeklyRecurrence() throws OXException {
         final Date start = D("04/09/2008 22:00");
         final Date end = D("04/09/2008 23:00");
@@ -89,6 +92,7 @@ public class Bug11695Test extends CalendarSqlTest {
      *
      * @throws OXException If an OX error occurs
      */
+    @Test
     public void testShouldCalculateProperWeeklyRecurrence2() throws OXException {
         final Date start = D("14/09/2008 22:00");
         final Date end = D("14/09/2008 23:00");
@@ -102,14 +106,11 @@ public class Bug11695Test extends CalendarSqlTest {
         appointments.save(appointment);
         clean.add(appointment);
         // Check for 6 occurrences
-        final long[] expectedLongs = new long[] {
-            D("15/09/2008 22:00").getTime(), D("16/09/2008 22:00").getTime(), D("17/09/2008 22:00").getTime(),
-            D("18/09/2008 22:00").getTime(), D("19/09/2008 22:00").getTime(), D("22/09/2008 22:00").getTime() };
+        final long[] expectedLongs = new long[] { D("15/09/2008 22:00").getTime(), D("16/09/2008 22:00").getTime(), D("17/09/2008 22:00").getTime(), D("18/09/2008 22:00").getTime(), D("19/09/2008 22:00").getTime(), D("22/09/2008 22:00").getTime() };
         final RecurringResultsInterface results = getTools().calculateRecurring(appointment, 0, 0, 0);
         assertEquals("Unexpected size in recurring results of weekly recurrence appointment", expectedLongs.length, results.size());
         for (int i = 0; i < expectedLongs.length; i++) {
-            assertEquals("Unexpected " + (i + 1) + " occurrence", new Date(expectedLongs[i]), new Date(
-                results.getRecurringResult(i).getStart()));
+            assertEquals("Unexpected " + (i + 1) + " occurrence", new Date(expectedLongs[i]), new Date(results.getRecurringResult(i).getStart()));
         }
     }
 }

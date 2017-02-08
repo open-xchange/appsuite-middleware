@@ -60,8 +60,8 @@ import com.openexchange.html.AssertionHelper;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class Bug22286VulTest extends AbstractSanitizing {
-    @Test
-    public void testSanitize() {
+     @Test
+     public void testSanitize() {
         String content = "\n" +
             "<!--[if<img src=x onerror=alert(1)//]>-->\n" +
             "<!--[if<img src=x onerror=alert(2)//]--!>-->";

@@ -1,8 +1,8 @@
 package liquibase.serializer;
 
 import static org.junit.Assert.assertEquals;
-import liquibase.sql.visitor.PrependSqlVisitor;
 import org.junit.Test;
+import liquibase.sql.visitor.PrependSqlVisitor;
 
 
 public class ReflectionSerializerTest {

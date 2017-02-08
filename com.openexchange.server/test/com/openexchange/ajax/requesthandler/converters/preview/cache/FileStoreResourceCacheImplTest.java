@@ -89,13 +89,13 @@ import com.openexchange.server.services.ServerServiceRegistry;
 @PrepareForTest({ FileStoreResourceCacheImpl.class, ServerServiceRegistry.class })
 public class FileStoreResourceCacheImplTest {
 
-    @Test
-    public void testFileIsDeletedOnDataTruncation() throws Exception {
+     @Test
+     public void testFileIsDeletedOnDataTruncation() throws Exception {
         testFileIsDeletedOnRollback(DataTruncation.class);
     }
 
-    @Test
-    public void testFileIsDeletedOnSqlException() throws Exception {
+     @Test
+     public void testFileIsDeletedOnSqlException() throws Exception {
         testFileIsDeletedOnRollback(SQLException.class);
     }
 

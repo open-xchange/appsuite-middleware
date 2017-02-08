@@ -49,28 +49,32 @@
 
 package com.openexchange.tools.file;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.filestore.impl.LocalFileStorage;
 
 /**
  * Test for the file storage.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  * @author <a href="mailto:steffen.templin@open-xchange.org">Steffen Templin</a>
  */
-public class FileStorageThreadTest extends TestCase {
+public class FileStorageThreadTest {
 
-	private final FMRunner[] fmr = new FMRunner[5];
-	private final Thread[] thread = new Thread[fmr.length];
-	static File tempFile;
+    private final FMRunner[] fmr = new FMRunner[5];
+    private final Thread[] thread = new Thread[fmr.length];
+    static File tempFile;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         tempFile = File.createTempFile("filestorage", ".tmp");
         tempFile.delete();
         new LocalFileStorage(tempFile.toURI()); // initialize file storage
@@ -84,7 +88,7 @@ public class FileStorageThreadTest extends TestCase {
         }
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         for (int i = 0; i < fmr.length; i++) {
             fmr[i].stop();
@@ -99,8 +103,7 @@ public class FileStorageThreadTest extends TestCase {
         }
         final com.openexchange.filestore.FileStorage fm = new LocalFileStorage(tempFile.toURI());
         assertTrue("State file is not correct.", fm.stateFileIsCorrect());
-    	rmdir(new File("file:" + tempFile.toString()));
-    	super.tearDown();
+        rmdir(new File("file:" + tempFile.toString()));
     }
 
     private static void rmdir(final File dir) {
@@ -120,57 +123,60 @@ public class FileStorageThreadTest extends TestCase {
         FMRunner() {
             super();
         }
+
         void stop() {
             run = false;
         }
+
         Throwable getThrowable() {
             return t;
         }
 
         @Override
         public void run() {
-        	try {
+            try {
                 final File testfile = File.createTempFile("filestorage", ".test");
                 final com.openexchange.filestore.FileStorage fm = new LocalFileStorage(tempFile.toURI());
-            	SortedSet<String> set = new TreeSet<String>();
-            	while (run) {
-            		for (int i = 0; i < 10; i++) {
-            			InputStream is = new FileInputStream(testfile);
-            			String str = fm.saveNewFile(is);
-            	    	is.close();
-            	    	set.add(str);
-            	    	System.out.println("Thread: " + Thread.currentThread().getName() + ", speichern: " + str);
-            		}
-            		for (int i = 0; i < 10; i = i + 3) {
-            			boolean del = fm.deleteFile(set.first());
-            			set.remove(set.first());
-            			System.out.println("Thread: " + Thread.currentThread().getName() + ", l\u00f6schen: " + del);
-            		}
-            	}
-            	testfile.delete();
-        	} catch (Throwable t2) {
+                SortedSet<String> set = new TreeSet<String>();
+                while (run) {
+                    for (int i = 0; i < 10; i++) {
+                        InputStream is = new FileInputStream(testfile);
+                        String str = fm.saveNewFile(is);
+                        is.close();
+                        set.add(str);
+                        System.out.println("Thread: " + Thread.currentThread().getName() + ", speichern: " + str);
+                    }
+                    for (int i = 0; i < 10; i = i + 3) {
+                        boolean del = fm.deleteFile(set.first());
+                        set.remove(set.first());
+                        System.out.println("Thread: " + Thread.currentThread().getName() + ", l\u00f6schen: " + del);
+                    }
+                }
+                testfile.delete();
+            } catch (Throwable t2) {
                 t = t2;
-        	}
+            }
         }
     }
 
+    @Test
     public void testStateFileIsCorrect() throws Throwable {
         final File testfile = File.createTempFile("filestorage", ".test");
         final com.openexchange.filestore.FileStorage fm = new LocalFileStorage(tempFile.toURI());
-    	SortedSet<String> set = new TreeSet<String>();
-    	for (int j = 0; j < 10; j++) {
-    		for (int i = 0; i < 10; i++) {
-    			InputStream is = new FileInputStream(testfile);
-    			String str = fm.saveNewFile(is);
-    	    	set.add(str);
-    	    	System.out.println("Thread: " + Thread.currentThread().getName() + ", speichern: " + str);
-    	    	is.close();
-    		}
-    		for (int k = 0; k < 10; k = k + 3) {
-    			System.out.println("Thread: " + Thread.currentThread().getName() + ", speichern: " + fm.deleteFile(set.first()));
-    			set.remove(set.first());
-    		}
-    	}
-    	rmdir(testfile);
+        SortedSet<String> set = new TreeSet<String>();
+        for (int j = 0; j < 10; j++) {
+            for (int i = 0; i < 10; i++) {
+                InputStream is = new FileInputStream(testfile);
+                String str = fm.saveNewFile(is);
+                set.add(str);
+                System.out.println("Thread: " + Thread.currentThread().getName() + ", speichern: " + str);
+                is.close();
+            }
+            for (int k = 0; k < 10; k = k + 3) {
+                System.out.println("Thread: " + Thread.currentThread().getName() + ", speichern: " + fm.deleteFile(set.first()));
+                set.remove(set.first());
+            }
+        }
+        rmdir(testfile);
     }
 }

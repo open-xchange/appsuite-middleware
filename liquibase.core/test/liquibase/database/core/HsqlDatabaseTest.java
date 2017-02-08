@@ -2,12 +2,12 @@ package liquibase.database.core;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import liquibase.database.Database;
 import org.junit.Test;
+import liquibase.database.Database;
 
 public class HsqlDatabaseTest {
-    @Test
-    public void testGetDefaultDriver() {
+     @Test
+     public void testGetDefaultDriver() {
         Database database = new HsqlDatabase();
 
         assertEquals("org.hsqldb.jdbcDriver", database.getDefaultDriver("jdbc:hsqldb:mem:liquibase"));
@@ -15,8 +15,8 @@ public class HsqlDatabaseTest {
         assertNull(database.getDefaultDriver("jdbc:oracle://localhost;databaseName=liquibase"));
     }
 
-    @Test
-    public void testGetConcatSql() {
+     @Test
+     public void testGetConcatSql() {
         Database database = new HsqlDatabase();
         String expectedResult = "CONCAT(str1, CONCAT(str2, CONCAT(str3, str4)))";
         String value = "v";

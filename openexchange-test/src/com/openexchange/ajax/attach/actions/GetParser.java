@@ -66,9 +66,10 @@ public class GetParser extends AbstractAJAXParser<GetResponse> {
     protected GetParser(boolean failOnError) {
         super(failOnError);
     }
-//    {"data":{"creation_date":1264674332832,"atta
-//        ched":8937,"rtf_flag":false,"file_size":4,"file_mimetype":"text/plain","file_id":"00/0b/52","comment":"","filename":"test.txt","folder":31,"id":905,"module":4,"created_by":4},
-//        "timestamp":1264670732832}
+
+    //    {"data":{"creation_date":1264674332832,"atta
+    //        ched":8937,"rtf_flag":false,"file_size":4,"file_mimetype":"text/plain","file_id":"00/0b/52","comment":"","filename":"test.txt","folder":31,"id":905,"module":4,"created_by":4},
+    //        "timestamp":1264670732832}
     @Override
     protected GetResponse createResponse(Response response) throws JSONException {
         GetResponse retval = new GetResponse(response);

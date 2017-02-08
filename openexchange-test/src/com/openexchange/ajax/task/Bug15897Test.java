@@ -49,8 +49,11 @@
 
 package com.openexchange.ajax.task;
 
+import static org.junit.Assert.assertEquals;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.task.actions.ConfirmResponse;
 import com.openexchange.ajax.task.actions.ConfirmWith2IdsRequest;
 import com.openexchange.ajax.task.actions.ConfirmWithTaskInBodyRequest;
@@ -76,15 +79,15 @@ public class Bug15897Test extends AbstractTaskTest {
     private Task task;
     private int participantId;
 
-    public Bug15897Test(String name) {
-        super(name);
+    public Bug15897Test() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
-        client2 = new AJAXClient(User.User2);
+        client2 = new AJAXClient(testContext.acquireUser());
         task = Create.createWithDefaults(getPrivateFolder(), "Task to test bug 15897");
         participantId = client2.getValues().getUserId();
         task.addParticipant(new UserParticipant(participantId));
@@ -93,13 +96,16 @@ public class Bug15897Test extends AbstractTaskTest {
         response.fillTask(task);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        DeleteRequest request = new DeleteRequest(task);
-        client.execute(request);
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
+        try {
+            client.execute(new DeleteRequest(task));
+        } finally {
+            super.tearDown();
+        }
     }
 
+    @Test
     public void testConfirmWithIdOnlyInBody() throws Throwable {
         String message = "Task identifier in body of confirm request.";
         ConfirmWithTaskInBodyRequest request = new ConfirmWithTaskInBodyRequest(task, Task.TENTATIVE, message);
@@ -108,6 +114,7 @@ public class Bug15897Test extends AbstractTaskTest {
         checkConfirmation(message, Task.TENTATIVE);
     }
 
+    @Test
     public void testConfirmWithIdOnlyInURL() throws Throwable {
         String message = "Task identifier in URL parameters of confirm request.";
         ConfirmWithTaskInParametersRequest request = new ConfirmWithTaskInParametersRequest(task, Task.DECLINE, message);
@@ -119,6 +126,7 @@ public class Bug15897Test extends AbstractTaskTest {
     /**
      * Backend must prefer identifier in URL parameters.
      */
+    @Test
     public void testConfirmWithIdInBodyAndURL() throws Throwable {
         String message = "Task identifier in URL parameters and body contains nonsense identifier.";
         ConfirmWith2IdsRequest request = new ConfirmWith2IdsRequest(task, Integer.MIN_VALUE, Task.ACCEPT, message);

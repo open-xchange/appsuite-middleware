@@ -78,6 +78,12 @@ public class SearchInfostoreRequest extends AbstractInfostoreRequest<SearchInfos
 
     final boolean failOnError;
 
+    private int limit;
+
+    private int start;
+
+    private int end;
+
     public SearchInfostoreRequest(final String title, final int[] columns) {
         this(-1, title, columns, true);
     }
@@ -87,20 +93,27 @@ public class SearchInfostoreRequest extends AbstractInfostoreRequest<SearchInfos
     }
 
     public SearchInfostoreRequest(final long folderId, final String title, final int[] columns, final boolean failOnError) {
-        this(folderId, title, columns, 0, null, failOnError);
+        this(folderId, title, columns, 0, null, -1, -1, -1, failOnError);
     }
 
-    public SearchInfostoreRequest(final long folderId, final String title, final int[] columns, final int sort, final Order order) {
-        this(folderId, title, columns, sort, order, true);
+    public SearchInfostoreRequest(final long folderId, final String title, final int[] columns, final int sort, final Order order, final int limit) {
+        this(folderId, title, columns, sort, order, limit, -1, -1, true);
+    }
+    public SearchInfostoreRequest(final long folderId, final String title, final int[] columns, final int sort, final Order order, final int limit, final int start, final int end) {
+        this(folderId, title, columns, sort, order, limit, start, end, true);
     }
 
-    public SearchInfostoreRequest(final long folderId, final String title, final int[] columns, final int sort, final Order order, final boolean failOnError) {
+    
+    public SearchInfostoreRequest(final long folderId, final String title, final int[] columns, final int sort, final Order order, final int limit,final int start, final int end, final boolean failOnError) {
         super();
         this.folderId = folderId;
         this.title = title;
         this.columns = columns;
         this.sort = sort;
         this.order = order;
+        this.limit = limit;
+        this.start = start;
+        this.end = end;
         this.failOnError = failOnError;
     }
 
@@ -131,6 +144,16 @@ public class SearchInfostoreRequest extends AbstractInfostoreRequest<SearchInfos
             params.add(new Parameter(AJAXServlet.PARAMETER_SORT, sort));
             params.add(new Parameter(AJAXServlet.PARAMETER_ORDER, OrderFields.write(order)));
         }
+        if (this.limit != -1) {
+            params.add(new Parameter(AJAXServlet.PARAMETER_LIMIT, this.limit));
+        }
+        if (this.start != -1) {
+            params.add(new Parameter(AJAXServlet.PARAMETER_START, this.start));
+        }
+        if (this.end != -1) {
+            params.add(new Parameter(AJAXServlet.PARAMETER_END, this.end));
+        }
+        
         return params.toArray(new Parameter[params.size()]);
     }
 

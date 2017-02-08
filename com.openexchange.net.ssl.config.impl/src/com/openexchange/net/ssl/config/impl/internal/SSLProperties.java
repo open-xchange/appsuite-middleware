@@ -50,9 +50,13 @@
 package com.openexchange.net.ssl.config.impl.internal;
 
 import static com.openexchange.net.ssl.config.impl.internal.CipherSuiteName.nameFor;
+import java.security.Provider;
+import java.security.Security;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
@@ -61,7 +65,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Strings;
 import com.openexchange.net.HostList;
 import com.openexchange.net.ssl.config.TrustLevel;
-import com.openexchange.net.ssl.config.impl.osgi.Services;
 
 /**
  * {@link SSLProperties} include configurations made by the administrator. This means that only server wide configurations can be found here. ConfigCascade properities should not be added here.
@@ -86,227 +89,8 @@ public enum SSLProperties {
 
     ;
 
-    private static final String EMPTY_STRING = "";
-
-    private static final AtomicReference<String[]> DEFAULT_CIPHER_SUITES_REFERENCE = new AtomicReference<String[]>(null);
-
-    /**
-     * Initializes the JVM's default cipher suites.
-     */
-    public static void initJvmDefaultCipherSuites() {
-        String[] jvmDefaults = ((javax.net.ssl.SSLSocketFactory) javax.net.ssl.SSLSocketFactory.getDefault()).getDefaultCipherSuites();
-        DEFAULT_CIPHER_SUITES_REFERENCE.set(jvmDefaults);
-    }
-
-    static final String SECURE_CONNECTIONS_DEBUG_LOGS_KEY = "com.openexchange.net.ssl.debug.logs";
-
-    static final String DEFAULT_TRUSTSTORE_ENABLED_KEY = "com.openexchange.net.ssl.default.truststore.enabled";
-
-    static final String CUSTOM_TRUSTSTORE_ENABLED_KEY = "com.openexchange.net.ssl.custom.truststore.enabled";
-
-    static final String CUSTOM_TRUSTSTORE_PATH_KEY = "com.openexchange.net.ssl.custom.truststore.path";
-
-    static final String CUSTOM_TRUSTSTORE_PASSWORD_KEY = "com.openexchange.net.ssl.custom.truststore.password";
-
-    static final String HOSTNAME_VERIFICATION_ENABLED_KEY = "com.openexchange.net.ssl.hostname.verification.enabled";
-
-    //---------- Reloadable Properties -------------//
-
-    static final String TRUST_LEVEL_KEY = "com.openexchange.net.ssl.trustlevel";
-
-    static final String TRUST_LEVEL_DEFAULT = "all";
-
-    private static volatile TrustLevel trustLevel;
-
-    protected static TrustLevel trustLevel() {
-        TrustLevel tmp = trustLevel;
-        if (null == tmp) {
-            synchronized (SSLProperties.class) {
-                tmp = trustLevel;
-                if (null == tmp) {
-                    ConfigurationService service = Services.optService(ConfigurationService.class);
-                    if (null == service) {
-                        org.slf4j.LoggerFactory.getLogger(SSLProperties.class).info("ConfigurationService not yet available. Use default value for 'com.openexchange.net.ssl.trustlevel'.");
-                        return TrustLevel.TRUST_ALL;
-                    }
-                    String prop = service.getProperty(TRUST_LEVEL_KEY, TRUST_LEVEL_DEFAULT);
-                    tmp = TrustLevel.find(prop);
-                    trustLevel = tmp;
-                }
-            }
-        }
-        return tmp;
-    }
-
-    static final String PROTOCOLS_KEY = "com.openexchange.net.ssl.protocols";
-
-    static final String PROTOCOLS_DEFAULT = "TLSv1, TLSv1.1, TLSv1.2";
-
-    private static volatile String[] protocols;
-
-    protected static String[] supportedProtocols() {
-        String[] tmp = protocols;
-        if (null == tmp) {
-            synchronized (SSLProperties.class) {
-                tmp = protocols;
-                if (null == tmp) {
-                    ConfigurationService service = Services.optService(ConfigurationService.class);
-                    if (null == service) {
-                        org.slf4j.LoggerFactory.getLogger(SSLProperties.class).info("ConfigurationService not yet available. Use default value for 'com.openexchange.net.ssl.protocols'.");
-                        return Strings.splitByComma(PROTOCOLS_DEFAULT);
-                    }
-                    String prop = service.getProperty(PROTOCOLS_KEY, PROTOCOLS_DEFAULT);
-                    tmp = Strings.splitByComma(prop);
-                    protocols = tmp;
-                }
-            }
-        }
-        return tmp;
-    }
-
-    static final String CIPHERS_KEY = "com.openexchange.net.ssl.ciphersuites";
-
-    private static volatile String[] ciphers;
-
-    protected static String[] supportedCipherSuites() {
-        String[] tmp = ciphers;
-        if (null == tmp) {
-            synchronized (SSLProperties.class) {
-                tmp = ciphers;
-                if (null == tmp) {
-                    ConfigurationService service = Services.optService(ConfigurationService.class);
-                    if (null == service) {
-                        org.slf4j.LoggerFactory.getLogger(SSLProperties.class).info("ConfigurationService not yet available. Use default value for 'com.openexchange.net.ssl.ciphersuites'.");
-                        return getJvmApplicableCipherSuites(CIPHERS_DEFAULT_DESIRED, true);
-                    }
-                    String prop = service.getProperty(CIPHERS_KEY);
-                    tmp = null == prop ? getJvmApplicableCipherSuites(CIPHERS_DEFAULT_DESIRED, true) : getJvmApplicableCipherSuites(Arrays.asList(Strings.splitByComma(prop)), false);
-                    ciphers = tmp;
-                }
-            }
-        }
-        return tmp;
-    }
-
-    static final List<String> CIPHERS_DEFAULT_DESIRED = ImmutableList.<String> builder().add(
-        "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA",
-        "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA",
-        "TLS_RSA_WITH_AES_128_CBC_SHA",
-        "TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA",
-        "TLS_ECDH_RSA_WITH_AES_128_CBC_SHA",
-        "TLS_DHE_RSA_WITH_AES_128_CBC_SHA",
-        "TLS_DHE_DSS_WITH_AES_128_CBC_SHA",
-        "TLS_EMPTY_RENEGOTIATION_INFO_SCSV"
-        ).build();
-
-    private static String[] getJvmApplicableCipherSuites(List<String> desiredCipherSuites, boolean allowDefaultOnes) {
-        // Get the cipher suites actually supported by running JVM
-        String[] jvmDefaults = DEFAULT_CIPHER_SUITES_REFERENCE.get();
-        Map<CipherSuiteName, String> supportedCipherSuites = new HashMap<>(jvmDefaults.length);
-        for (String jvmDefaultCipherSuite : jvmDefaults) {
-            supportedCipherSuites.put(nameFor(jvmDefaultCipherSuite), jvmDefaultCipherSuite);
-        }
-
-        // Grab the desired ones from JVM's default cipher suites
-        List<String> defaultCipherSuites = new ArrayList<>(desiredCipherSuites.size());
-        for (String desiredCipherSuite : desiredCipherSuites) {
-            String supportedCipherSuite = supportedCipherSuites.get(nameFor(desiredCipherSuite));
-            if (null != supportedCipherSuite) {
-                defaultCipherSuites.add(desiredCipherSuite);
-            }
-        }
-
-        if (defaultCipherSuites.isEmpty()) {
-            // None of desired cipher suites is supported by JVM...
-            if (allowDefaultOnes) {
-                // Just use JVM default ones
-                return jvmDefaults;
-            }
-
-            // Illegal configuration
-            throw new IllegalStateException("None of the desired cipher suites is actually supported by the Java Virtual Machine. Please list supported ones in value for 'com.openexchange.net.ssl.ciphersuites'.");
-        }
-
-        return defaultCipherSuites.toArray(new String[defaultCipherSuites.size()]);
-    }
-
-    static final String TRUSTSTORE_WHITELIST_KEY = "com.openexchange.net.ssl.whitelist";
-
-    static final String TRUSTSTORE_WHITELIST_DEFAULT = "127.0.0.1-127.255.255.255,localhost";
-
-    private static volatile HostList whitelistedHosts;
-
-    private static HostList whitelistedHosts() {
-        HostList tmp = whitelistedHosts;
-        if (null == tmp) {
-            synchronized (SSLProperties.class) {
-                tmp = whitelistedHosts;
-                if (null == tmp) {
-                    ConfigurationService service = Services.optService(ConfigurationService.class);
-                    if (null == service) {
-                        org.slf4j.LoggerFactory.getLogger(SSLProperties.class).info("ConfigurationService not yet available. Use default value for 'com.openexchange.net.ssl.whitelist'.");
-                        return HostList.valueOf(TRUSTSTORE_WHITELIST_DEFAULT);
-                    }
-                    String prop = service.getProperty(TRUSTSTORE_WHITELIST_KEY, TRUSTSTORE_WHITELIST_DEFAULT);
-                    if (Strings.isNotEmpty(prop)) {
-                        prop = prop.trim();
-                    }
-                    tmp = HostList.valueOf(prop);
-                    whitelistedHosts = tmp;
-                }
-            }
-        }
-        return tmp;
-    }
-
-    /**
-     * Checks if specified host name is white-listed.
-     * <p>
-     * The host name can either be a machine name, such as "<code>java.sun.com</code>", or a textual representation of its IP address.
-     *
-     * @param hostName The host name; either a machine name or a textual representation of its IP address
-     * @return <code>true</code> if white-listed; otherwise <code>false</code>
-     */
-    protected static boolean isWhitelisted(String hostName) {
-        if (Strings.isEmpty(hostName)) {
-            return false;
-        }
-        return whitelistedHosts().contains(hostName);
-    }
-
-    /**
-     * Checks if one of the specified host names is white-listed.
-     * <p>
-     * The host names can either be a machine name, such as "<code>java.sun.com</code>", or a textual representation of its IP address.
-     *
-     * @param hostNames The host names as an array; either a machine name or a textual representation of its IP address
-     * @return <code>true</code> if at least one of the hosts is white-listed; otherwise <code>false</code>
-     */
-    protected static boolean isWhitelisted(String... hostNames) {
-        for (String hostName : hostNames) {
-            boolean whitelisted = isWhitelisted(hostName);
-            if (whitelisted) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public static void reload() {
-        trustLevel = null;
-        protocols = null;
-        ciphers = null;
-        whitelistedHosts = null;
-    }
-
-    //---------- End of reloadables -------------//
-
-    //***************************************/
-
     private final String propertyName;
-
     private String defaultValue;
-
     private boolean defaultBoolValue;
 
     private SSLProperties(final String propertyName, final String defaultValue) {
@@ -330,5 +114,193 @@ public enum SSLProperties {
     public boolean getDefaultBoolean() {
         return defaultBoolValue;
     }
+
+    // ------------------------------------------------------------------------------------------------------------
+
+    private static final String EMPTY_STRING = "";
+
+    private static final AtomicReference<List<String>> DEFAULT_CIPHER_SUITES_REFERENCE = new AtomicReference<List<String>>(null);
+    private static final AtomicReference<List<String>> SUPPORTED_CIPHER_SUITES_REFERENCE = new AtomicReference<List<String>>(null);
+    private static final AtomicReference<List<String>> SUPPORTED_PROTOCOLS_REFERENCE = new AtomicReference<List<String>>(null);
+
+    /**
+     * Initializes the JVM's supported cipher suites that are the names of the cipher suites, which could be enabled for use on an SSL connection.
+     */
+    public static void initJvmDefaults() {
+        javax.net.ssl.SSLSocketFactory sslSocketFactory = (javax.net.ssl.SSLSocketFactory) javax.net.ssl.SSLSocketFactory.getDefault();
+
+        String[] jvmSupported = sslSocketFactory.getSupportedCipherSuites();
+        SUPPORTED_CIPHER_SUITES_REFERENCE.set(ImmutableList.<String> copyOf(jvmSupported));
+
+        String[] jvmDefaults = sslSocketFactory.getDefaultCipherSuites();
+        DEFAULT_CIPHER_SUITES_REFERENCE.set(ImmutableList.<String> copyOf(jvmDefaults));
+
+        // Auto-detect protocols
+        List<String> protocols = new LinkedList<String>();
+        // Allow the specification of a specific provider (or set?)
+        for (Provider provider : Security.getProviders()) {
+            for (Object prop : provider.keySet()) {
+                String key = (String) prop;
+                if (key.startsWith("SSLContext.") && !key.equals("SSLContext.Default") && key.matches(".*[0-9].*")) {
+                    protocols.add(key.substring("SSLContext.".length()));
+                } else if (key.startsWith("Alg.Alias.SSLContext.") && key.matches(".*[0-9].*")) {
+                    protocols.add(key.substring("Alg.Alias.SSLContext.".length()));
+                }
+            }
+        }
+        Collections.sort(protocols); // Should give us a nice sort-order by default
+        SUPPORTED_PROTOCOLS_REFERENCE.set(ImmutableList.<String> copyOf(protocols));
+    }
+
+    /**
+     * Gets the names of the cipher suites which could be enabled for use on an SSL connection.
+     * <p>
+     * Normally, only a subset of these will actually be enabled by default, since this list may include cipher suites which do not meet quality of service requirements for those defaults.
+     * Such cipher suites are useful in specialized applications.
+     *
+     * @return The list of cipher suites (or <code>null</code> if not initialized)
+     */
+    public static List<String> getSupportedCipherSuites() {
+        return SUPPORTED_CIPHER_SUITES_REFERENCE.get();
+    }
+
+    /**
+     * Gets the list of cipher suites which are enabled by default.
+     * <p>
+     * Unless a different list is enabled, handshaking on an SSL connection will use one of these cipher suites.
+     * The minimum quality of service for these defaults requires confidentiality protection and server authentication (that is, no anonymous cipher suites).
+     *
+     * @return The list of cipher suites (or <code>null</code> if not initialized)
+     */
+    public static List<String> getDefaultCipherSuites() {
+        return DEFAULT_CIPHER_SUITES_REFERENCE.get();
+    }
+
+    /**
+     * Gets the list of protocols which could be enabled for use on an SSL connection.
+     *
+     * @return The list of protocols (or <code>null</code> if not initialized)
+     */
+    public static List<String> getSupportedProtocols() {
+        return SUPPORTED_PROTOCOLS_REFERENCE.get();
+    }
+
+    static final String SECURE_CONNECTIONS_DEBUG_LOGS_KEY = "com.openexchange.net.ssl.debug.logs";
+
+    static final String DEFAULT_TRUSTSTORE_ENABLED_KEY = "com.openexchange.net.ssl.default.truststore.enabled";
+
+    static final String CUSTOM_TRUSTSTORE_ENABLED_KEY = "com.openexchange.net.ssl.custom.truststore.enabled";
+
+    static final String CUSTOM_TRUSTSTORE_PATH_KEY = "com.openexchange.net.ssl.custom.truststore.path";
+
+    static final String CUSTOM_TRUSTSTORE_PASSWORD_KEY = "com.openexchange.net.ssl.custom.truststore.password";
+
+    static final String HOSTNAME_VERIFICATION_ENABLED_KEY = "com.openexchange.net.ssl.hostname.verification.enabled";
+
+    //---------- Reloadable Properties -------------//
+
+    static final String TRUST_LEVEL_KEY = "com.openexchange.net.ssl.trustlevel";
+
+    static final String TRUST_LEVEL_DEFAULT = "all";
+
+    /**
+     * Gets the configured trust level.
+     *
+     * @param service The service to use
+     * @return The trust level
+     */
+    public static TrustLevel trustLevel(ConfigurationService service) {
+        if (null == service) {
+            org.slf4j.LoggerFactory.getLogger(SSLProperties.class).info("ConfigurationService not yet available. Use default value for 'com.openexchange.net.ssl.trustlevel'.");
+            return TrustLevel.TRUST_ALL;
+        }
+        String prop = service.getProperty(TRUST_LEVEL_KEY, TRUST_LEVEL_DEFAULT);
+        return TrustLevel.find(prop);
+    }
+
+    /**
+     * Creates a new <code>RestrictedConfig</code> instance reading configuration from specified service.
+     *
+     * @param service The service to use
+     * @return The created <code>RestrictedConfig</code> instance
+     */
+    public static RestrictedConfig newConfig(ConfigurationService service) {
+        String[] protocols;
+        {
+            String prop = service.getProperty(PROTOCOLS_KEY, PROTOCOLS_DEFAULT);
+            protocols = Strings.splitByComma(prop);
+        }
+
+        String[] ciphers;
+        {
+            String prop = service.getProperty(CIPHERS_KEY);
+            String[] tmp = null == prop ? getJvmApplicableCipherSuites(CIPHERS_DEFAULT_DESIRED, true) : getJvmApplicableCipherSuites(Arrays.asList(Strings.splitByComma(prop)), false);
+            ciphers = tmp;
+        }
+
+        HostList whitelistedHosts;
+        {
+            String prop = service.getProperty(TRUSTSTORE_WHITELIST_KEY, TRUSTSTORE_WHITELIST_DEFAULT);
+            if (Strings.isNotEmpty(prop)) {
+                prop = prop.trim();
+            }
+            HostList tmp = HostList.valueOf(prop);
+            whitelistedHosts = tmp;
+        }
+
+        return new RestrictedConfig(protocols, ciphers, whitelistedHosts);
+    }
+
+    static final String PROTOCOLS_KEY = "com.openexchange.net.ssl.protocols";
+
+    static final String PROTOCOLS_DEFAULT = "TLSv1, TLSv1.1, TLSv1.2";
+
+    static final String CIPHERS_KEY = "com.openexchange.net.ssl.ciphersuites";
+
+    static final List<String> CIPHERS_DEFAULT_DESIRED = ImmutableList.<String> builder().add(
+        "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA",
+        "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA",
+        "TLS_RSA_WITH_AES_128_CBC_SHA",
+        "TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA",
+        "TLS_ECDH_RSA_WITH_AES_128_CBC_SHA",
+        "TLS_DHE_RSA_WITH_AES_128_CBC_SHA",
+        "TLS_DHE_DSS_WITH_AES_128_CBC_SHA",
+        "TLS_EMPTY_RENEGOTIATION_INFO_SCSV"
+        ).build();
+
+    private static String[] getJvmApplicableCipherSuites(List<String> desiredCipherSuites, boolean allowDefaultOnes) {
+        // Get the cipher suites actually supported by running JVM
+        List<String> jvmDefaults = SUPPORTED_CIPHER_SUITES_REFERENCE.get();
+        Map<CipherSuiteName, String> supportedCipherSuites = new HashMap<>(jvmDefaults.size());
+        for (String jvmDefaultCipherSuite : jvmDefaults) {
+            supportedCipherSuites.put(nameFor(jvmDefaultCipherSuite), jvmDefaultCipherSuite);
+        }
+
+        // Grab the desired ones from JVM's default cipher suites
+        List<String> defaultCipherSuites = new ArrayList<>(desiredCipherSuites.size());
+        for (String desiredCipherSuite : desiredCipherSuites) {
+            String supportedCipherSuite = supportedCipherSuites.get(nameFor(desiredCipherSuite));
+            if (null != supportedCipherSuite) {
+                defaultCipherSuites.add(desiredCipherSuite);
+            }
+        }
+
+        if (defaultCipherSuites.isEmpty()) {
+            // None of desired cipher suites is supported by JVM...
+            if (allowDefaultOnes) {
+                // Just use JVM default ones
+                return jvmDefaults.toArray(new String[jvmDefaults.size()]);
+            }
+
+            // Illegal configuration
+            throw new IllegalStateException("None of the desired cipher suites is actually supported by the Java Virtual Machine. Please list supported ones in value for 'com.openexchange.net.ssl.ciphersuites'.");
+        }
+
+        return defaultCipherSuites.toArray(new String[defaultCipherSuites.size()]);
+    }
+
+    static final String TRUSTSTORE_WHITELIST_KEY = "com.openexchange.net.ssl.whitelist";
+
+    static final String TRUSTSTORE_WHITELIST_DEFAULT = "127.0.0.1-127.255.255.255,localhost";
 
 }

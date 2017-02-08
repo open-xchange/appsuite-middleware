@@ -16,11 +16,13 @@
  */
 package org.apache.tika.xmp;
 
-import static org.junit.Assert.*;
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import java.util.Properties;
-
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.DublinCore;
 import org.apache.tika.metadata.Metadata;
@@ -30,7 +32,6 @@ import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.metadata.XMPRights;
 import org.junit.Before;
 import org.junit.Test;
-
 import com.adobe.xmp.XMPConst;
 import com.adobe.xmp.XMPException;
 import com.adobe.xmp.XMPMeta;
@@ -175,8 +176,8 @@ public class XMPMetadataTest {
         checkArrayValues( values, "keyword" );
     }
 
-    @Test
-    public void testSetAll() {
+     @Test
+     public void testSetAll() {
         Properties props = new Properties();
         props.put( TikaCoreProperties.FORMAT.getName(), "format" );
         props.put( TikaCoreProperties.KEYWORDS.getName(), "keyword" );

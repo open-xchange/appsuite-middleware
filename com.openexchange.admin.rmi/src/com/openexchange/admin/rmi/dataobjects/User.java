@@ -591,7 +591,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
 
     private boolean primaryAccountNameSet = false;
     
-    private boolean removeDriveFolderFlags = false;
+    private boolean convertDriveUserFolders = false;
 
     /**
      * Instantiates a new empty user object
@@ -4261,12 +4261,12 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         return ht;
     }
     
-    public void setRemoveDriveFolderFlags(boolean removeDriveFolderFlags) {
-        this.removeDriveFolderFlags = removeDriveFolderFlags;
+    public void setConvertDriveUserFolders(boolean convertDriveUserFolders) {
+        this.convertDriveUserFolders = convertDriveUserFolders;
     }
     
-    public boolean isRemoveDriveFolderFlags() {
-        return removeDriveFolderFlags;
+    public boolean isConvertDriveUserFolders() {
+        return convertDriveUserFolders;
     }
 
     @Override
@@ -5107,7 +5107,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         result = prime * result + (userfield20set ? 1231 : 1237);
         result = prime * result + ((primaryAccountName == null) ? 0 : primaryAccountName.hashCode());
         result = prime * result + (primaryAccountNameSet ? 1231 : 1237);
-        result = prime * result + (removeDriveFolderFlags ? 1231: 1237);
+        result = prime * result + (convertDriveUserFolders ? 1231: 1237);
         return result;
     }
 
@@ -6305,7 +6305,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         if(primaryAccountNameSet!=other.primaryAccountNameSet){
             return false;
         }
-        if (removeDriveFolderFlags != other.removeDriveFolderFlags) {
+        if (convertDriveUserFolders != other.convertDriveUserFolders) {
             return false;
         }
         return true;

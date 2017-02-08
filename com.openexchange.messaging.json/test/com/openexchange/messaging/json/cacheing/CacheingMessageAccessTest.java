@@ -51,13 +51,17 @@ package com.openexchange.messaging.json.cacheing;
 
 import java.util.LinkedList;
 import java.util.List;
-import junit.framework.TestCase;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.IndexRange;
 import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.MessagingMessageAccess;
 import com.openexchange.messaging.SimMessageAccess;
 import com.openexchange.messaging.SimpleMessagingMessage;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 
 /**
@@ -65,9 +69,9 @@ import com.openexchange.messaging.SimpleMessagingMessage;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class CacheingMessageAccessTest extends TestCase {
-
-    public void testGetTriesCache() throws OXException {
+public class CacheingMessageAccessTest {
+         @Test
+     public void testGetTriesCache() throws OXException {
         final SimMessageAccess access = new SimMessageAccess();
         final TestCacheMessageAccess messageAccess = new TestCacheMessageAccess(access);
 
@@ -79,7 +83,8 @@ public class CacheingMessageAccessTest extends TestCase {
         assertSame(message, retval);
     }
 
-    public void testBulkLoadingTriesCache() throws OXException {
+         @Test
+     public void testBulkLoadingTriesCache() throws OXException {
         final SimMessageAccess access = new SimMessageAccess();
         final TestCacheMessageAccess messageAccess = new TestCacheMessageAccess(access);
 
@@ -95,7 +100,8 @@ public class CacheingMessageAccessTest extends TestCase {
 
     }
 
-    public void testGetFallbackOnCacheMiss() throws OXException {
+         @Test
+     public void testGetFallbackOnCacheMiss() throws OXException {
         final SimMessageAccess access = new SimMessageAccess();
         final TestCacheMessageAccess messageAccess = new TestCacheMessageAccess(access);
 
@@ -112,7 +118,8 @@ public class CacheingMessageAccessTest extends TestCase {
         assertSame(message, rememberedMessages.get(0));
     }
 
-    public void testBulkFallbackOnCacheMiss() throws OXException {
+         @Test
+     public void testBulkFallbackOnCacheMiss() throws OXException {
         final SimMessageAccess access = new SimMessageAccess();
         final TestCacheMessageAccess messageAccess = new TestCacheMessageAccess(access);
 
@@ -135,7 +142,8 @@ public class CacheingMessageAccessTest extends TestCase {
         assertSame(storedMessage, messages.get(1));
     }
 
-    public void testAllRefreshesCache() throws OXException {
+         @Test
+     public void testAllRefreshesCache() throws OXException {
         final SimMessageAccess access = new SimMessageAccess();
         final TestCacheMessageAccess messageAccess = new TestCacheMessageAccess(access);
 

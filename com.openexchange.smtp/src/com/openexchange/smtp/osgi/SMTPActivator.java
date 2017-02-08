@@ -134,7 +134,7 @@ public final class SMTPActivator extends HousekeepingActivator {
     public void stopBundle() throws Exception {
         try {
             ListenerChain.releaseInstance();
-            cleanUp();
+            super.stopBundle();
             Services.setServiceLookup(null);
         } catch (final Throwable t) {
             LOG.error("", t);

@@ -58,8 +58,6 @@ import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertResponse;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.dav.caldav.CalDAVTest;
 import com.openexchange.dav.caldav.UserAgents;
 import com.openexchange.groupware.container.FolderObject;
@@ -87,10 +85,10 @@ public class Bug47121Test extends CalDAVTest {
 
     @Before
     public void setUp() throws Exception {
-        manager2 = new CalendarTestManager(new AJAXClient(User.User2));
+        super.setUp();
+        manager2 = new CalendarTestManager(getClient2());
         manager2.setFailOnError(true);
-        FolderObject calendarFolder = manager2.getClient().execute(
-            new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, manager2.getPrivateFolder())).getFolder();
+        FolderObject calendarFolder = manager2.getClient().execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, manager2.getPrivateFolder())).getFolder();
         String subFolderName = "testfolder_" + randomUID();
         FolderObject folder = new FolderObject();
         folder.setFolderName(subFolderName);
@@ -113,13 +111,18 @@ public class Bug47121Test extends CalDAVTest {
 
     @After
     public void tearDown() throws Exception {
-        if (null != manager2) {
-            if (null != subfolder) {
-                manager2.getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_NEW, subfolder));
+        try {
+            if (null != manager2) {
+                if (null != subfolder) {
+                    manager2.getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_NEW, subfolder));
+                }
+                manager2.cleanUp();
+                manager2.getClient().logout();
             }
-            manager2.cleanUp();
-            manager2.getClient().logout();
+        } finally {
+            super.tearDown();
         }
+
     }
 
     @Test

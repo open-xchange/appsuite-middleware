@@ -60,15 +60,16 @@ import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.java.Strings;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -87,7 +88,7 @@ public class APIResponseRenderer implements ResponseRenderer {
 
     private static final String CALLBACK = "callback";
 
-    private static final String PLAIN_JSON = "plainJson";
+    private static final String PLAIN_JSON = AJAXServlet.PARAM_PLAIN_JSON;
 
     private static final String INCLUDE_STACK_TRACE_ON_ERROR = com.openexchange.ajax.AJAXServlet.PARAMETER_INCLUDE_STACK_TRACE_ON_ERROR;
 
@@ -112,8 +113,13 @@ public class APIResponseRenderer implements ResponseRenderer {
 
     @Override
     public void write(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-        final Boolean plainJson = (Boolean) result.getParameter(PLAIN_JSON);
-        final Response response = (Response) result.getResultObject();
+        Boolean plainJson = (Boolean) result.getParameter(PLAIN_JSON);
+        if (null == plainJson) {
+            boolean b = AJAXRequestDataTools.parseBoolParameter(PLAIN_JSON, request);
+            plainJson = b ? Boolean.TRUE : null;
+        }
+
+        Response response = (Response) result.getResultObject();
         response.setContinuationUUID(result.getContinuationUuid());
         if (parseBoolParameter(INCLUDE_STACK_TRACE_ON_ERROR, request) ) {
             response.setIncludeStackTraceOnError(true);
@@ -191,8 +197,11 @@ public class APIResponseRenderer implements ResponseRenderer {
         // Try to obtain writer instance
         PrintWriter writer = getWriterFrom(resp);
 
-        // Write response (if writer is available)
-        return null == writer ? false : writeResponse(response, action, writer, req, resp, false);
+        if (null == writer) {
+            return false;
+        }
+
+        return writeResponse(response, action, writer, req, resp);
     }
 
     /**
@@ -214,7 +223,8 @@ public class APIResponseRenderer implements ResponseRenderer {
      * @throws IOException If an I/O error occurs
      */
     public static boolean writeResponse(Response response, String action, PrintWriter writer, HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        return writeResponse(response, action, writer, req, resp, false);
+        String plainJson = req.getParameter(PLAIN_JSON);
+        return writeResponse(response, action, writer, req, resp, AJAXRequestDataTools.parseBoolParameter(plainJson));
     }
 
     private static final char[] JS_FRAGMENT_PART1 = ("<!DOCTYPE html><html><head>"
@@ -346,17 +356,6 @@ public class APIResponseRenderer implements ResponseRenderer {
 
     private static boolean isRespondWithHTML(final HttpServletRequest req) {
         return Boolean.parseBoolean(req.getParameter("respondWithHTML"));
-    }
-
-    private static final String JS_FRAGMENT = com.openexchange.ajax.AJAXServlet.JS_FRAGMENT;
-
-    private static final Pattern RPL_JSON = Pattern.compile("**json**", Pattern.LITERAL);
-
-    private static final Pattern RPL_ACTION = Pattern.compile("**action**", Pattern.LITERAL);
-
-    private static String substituteJS(final String json, final String action) {
-        return RPL_ACTION.matcher(RPL_JSON.matcher(JS_FRAGMENT).replaceAll(Strings.quoteReplacement(json.replaceAll(Pattern.quote("</") , "<\\/")))).replaceAll(
-            Strings.quoteReplacement(action));
     }
 
     /**

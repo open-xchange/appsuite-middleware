@@ -70,63 +70,63 @@ public class URIParserTest {
         super();
     }
 
-    @Test
-    public void testProtIPv6Port() throws URISyntaxException {
+     @Test
+     public void testProtIPv6Port() throws URISyntaxException {
         test("imap://[fc00::2]:143", "imap", "[fc00::2]", 143);
     }
 
-    @Test
-    public void testProtIPv6() throws URISyntaxException {
+     @Test
+     public void testProtIPv6() throws URISyntaxException {
         test("imap://[fc00::2]", "imap", "[fc00::2]", -1);
     }
 
-    @Test
-    public void testIPv6Port() throws URISyntaxException {
+     @Test
+     public void testIPv6Port() throws URISyntaxException {
         test("[fc00::2]:143", null, "[fc00::2]", 143);
     }
 
-    @Test
-    public void testIPv6() throws URISyntaxException {
+     @Test
+     public void testIPv6() throws URISyntaxException {
         test("fc00::2", null, "[fc00::2]", -1);
     }
 
-    @Test
-    public void testProtIPv4Port() throws URISyntaxException {
+     @Test
+     public void testProtIPv4Port() throws URISyntaxException {
         test("imap://192.168.32.134:143", "imap", "192.168.32.134", 143);
     }
 
-    @Test
-    public void testProtIPv4() throws URISyntaxException {
+     @Test
+     public void testProtIPv4() throws URISyntaxException {
         test("imap://192.168.32.134", "imap", "192.168.32.134", -1);
     }
 
-    @Test
-    public void testIPv4Port() throws URISyntaxException {
+     @Test
+     public void testIPv4Port() throws URISyntaxException {
         test("192.168.32.134:143", null, "192.168.32.134", 143);
     }
 
-    @Test
-    public void testIPv4() throws URISyntaxException {
+     @Test
+     public void testIPv4() throws URISyntaxException {
         test("192.168.32.134", null, "192.168.32.134", -1);
     }
 
-    @Test
-    public void testProtHostPort() throws URISyntaxException {
+     @Test
+     public void testProtHostPort() throws URISyntaxException {
         test("imap://devel-mail.example.org:143", "imap", "devel-mail.example.org", 143);
     }
 
-    @Test
-    public void testProtHost() throws URISyntaxException {
+     @Test
+     public void testProtHost() throws URISyntaxException {
         test("imap://devel-mail.example.org", "imap", "devel-mail.example.org", -1);
     }
 
-    @Test
-    public void testHostPort() throws URISyntaxException {
+     @Test
+     public void testHostPort() throws URISyntaxException {
         test("devel-mail.example.org:143", null, "devel-mail.example.org", 143);
     }
 
-    @Test
-    public void testHost() throws URISyntaxException {
+     @Test
+     public void testHost() throws URISyntaxException {
         test("devel-mail.example.org", null, "devel-mail.example.org", -1);
     }
 

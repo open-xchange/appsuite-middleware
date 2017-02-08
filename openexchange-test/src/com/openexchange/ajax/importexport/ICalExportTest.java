@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.importexport;
 
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.webdav.xml.AppointmentTest;
@@ -56,64 +58,55 @@ import com.openexchange.webdav.xml.TaskTest;
 
 public class ICalExportTest extends AbstractICalTest {
 
-	public ICalExportTest(final String name) {
-		super(name);
-	}
+    @Test
+    public void testExportICalAppointment() throws Exception {
+        final String title = "testExportICalAppointment" + System.currentTimeMillis();
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-	}
+        final Appointment appointmentObj = new Appointment();
+        appointmentObj.setTitle(title);
+        appointmentObj.setStartDate(startTime);
+        appointmentObj.setEndDate(endTime);
+        appointmentObj.setShownAs(Appointment.RESERVED);
+        appointmentObj.setParentFolderID(appointmentFolderId);
+        appointmentObj.setIgnoreConflicts(true);
+        
+        final int objectId = catm.insert(appointmentObj).getObjectID();
 
-	public void testExportICalAppointment() throws Exception {
-		final String title = "testExportICalAppointment" + System.currentTimeMillis();
+        final Appointment[] appointmentArray = exportAppointment(appointmentFolderId, null);
 
-		final Appointment appointmentObj = new Appointment();
-		appointmentObj.setTitle(title);
-		appointmentObj.setStartDate(startTime);
-		appointmentObj.setEndDate(endTime);
-		appointmentObj.setShownAs(Appointment.RESERVED);
-		appointmentObj.setParentFolderID(appointmentFolderId);
-		appointmentObj.setIgnoreConflicts(true);
+        boolean found = false;
+        for (int a = 0; a < appointmentArray.length; a++) {
+            if ((null != appointmentArray[a].getTitle()) && (appointmentArray[a].getTitle().equals(title))) {
+                found = true;
+                appointmentObj.setUntil(appointmentArray[a].getUntil());
+                appointmentArray[a].setParentFolderID(appointmentFolderId);
+                AppointmentTest.compareObject(appointmentObj, appointmentArray[a]);
+            }
+        }
 
-		final int objectId = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, getHostName(), getLogin(), getPassword(), "");
+        assertTrue("appointment with title: " + title + " not found", found);
+    }
 
-		final Appointment[] appointmentArray = exportAppointment(getWebConversation(), appointmentFolderId, timeZone, getHostName(), getSessionId(), null);
-
-		boolean found = false;
-		for (int a = 0; a < appointmentArray.length; a++) {
-			if ((null != appointmentArray[a].getTitle()) && (appointmentArray[a].getTitle().equals(title))) {
-				found = true;
-				appointmentObj.setUntil(appointmentArray[a].getUntil());
-				appointmentArray[a].setParentFolderID(appointmentFolderId);
-				AppointmentTest.compareObject(appointmentObj, appointmentArray[a]);
-			}
-		}
-
-		assertTrue("appointment with title: " + title + " not found", found);
-
-		AppointmentTest.deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getLogin(), getPassword(), "");
-	}
-
-	public void testExportICalTask() throws Exception {
-		final String title = "testExportICalTask" + System.currentTimeMillis();
-		final Task taskObj = new Task();
-		taskObj.setTitle(title);
-		taskObj.setStartDate(startTime);
-		taskObj.setEndDate(endTime);
-		taskObj.setParentFolderID(taskFolderId);
-		final int objectId = TaskTest.insertTask(getWebConversation(), taskObj, getHostName(), getLogin(), getPassword(), "");
-		final Task[] taskArray = exportTask(getWebConversation(), taskFolderId, emailaddress, timeZone, getHostName(), getSessionId(), null);
-		boolean found = false;
-		for (int a = 0; a < taskArray.length; a++) {
-			if (title.equals(taskArray[a].getTitle())) {
-				found = true;
-				taskObj.setStartDate(taskArray[a].getStartDate());
-				taskArray[a].setParentFolderID(taskFolderId);
-				TaskTest.compareObject(taskObj, taskArray[a]);
-			}
-		}
-		assertTrue("task with id: " + objectId + " not found", found);
-		TaskTest.deleteTask(getWebConversation(), objectId, taskFolderId, getHostName(), getLogin(), getPassword(), "");
-	}
+    @Test
+    public void testExportICalTask() throws Exception {
+        final String title = "testExportICalTask" + System.currentTimeMillis();
+        final Task taskObj = new Task();
+        taskObj.setTitle(title);
+        taskObj.setStartDate(startTime);
+        taskObj.setEndDate(endTime);
+        taskObj.setParentFolderID(taskFolderId);
+        
+        final int objectId = ttm.insertTaskOnServer(taskObj).getObjectID();
+        final Task[] taskArray = exportTask(timeZone, null);
+        boolean found = false;
+        for (int a = 0; a < taskArray.length; a++) {
+            if (title.equals(taskArray[a].getTitle())) {
+                found = true;
+                taskObj.setStartDate(taskArray[a].getStartDate());
+                taskArray[a].setParentFolderID(taskFolderId);
+                TaskTest.compareObject(taskObj, taskArray[a]);
+            }
+        }
+        assertTrue("task with id: " + objectId + " not found", found);
+    }
 }

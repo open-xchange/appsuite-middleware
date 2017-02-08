@@ -49,26 +49,21 @@
 
 package com.openexchange.ajax.roundtrip.pubsub;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * Test suite for all publish/subscribe tests.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
+@RunWith(ParallelSuite.class)
+@Suite.SuiteClasses({
+    DoNotDuplicateEmptyContactsTest.class,
+    DoNotLoseContactsWhenPublishingAndSubscribing.class,
+
+})
 public class PubSubSuite {
 
-    private PubSubSuite() {
-        super();
-    }
-
-    public static final Test suite() {
-        TestSuite suite = new TestSuite("com.openexchange.ajax.roundtrip.pubsub.PubSubSuite");
-
-        suite.addTestSuite(DoNotDuplicateEmptyContactsTest.class);
-        suite.addTestSuite(DoNotLoseContactsWhenPublishingAndSubscribing.class);
-
-        return suite;
-    }
 }

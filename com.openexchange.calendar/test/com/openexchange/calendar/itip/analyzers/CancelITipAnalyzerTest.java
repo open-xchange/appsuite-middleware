@@ -75,14 +75,14 @@ import com.openexchange.sim.SimBuilder;
  */
 public class CancelITipAnalyzerTest extends AbstractITipAnalyzerTest{
 
-    @Test
-    public void testMethod() {
+     @Test
+     public void testMethod() {
         final List<ITipMethod> methods = new CancelITipAnalyzer(null, null).getMethods();
         assertEquals(Arrays.asList(ITipMethod.CANCEL), methods);
     }
 
-    @Test
-    public void testCancel() throws OXException {
+     @Test
+     public void testCancel() throws OXException {
         final CalendarDataObject appointment = appointment("123-123-123-123");
 
         final ITipMessage message = new ITipMessage();
@@ -111,8 +111,8 @@ public class CancelITipAnalyzerTest extends AbstractITipAnalyzerTest{
         integrationBuilder.assertAllWereCalled();
     }
 
-    @Test
-    public void testCancelChangeException() throws OXException {
+     @Test
+     public void testCancelChangeException() throws OXException {
         final CalendarDataObject appointment = appointment("123-123-123-123");
         appointment.setRecurrenceDatePosition(new Date(12345));
         final ITipMessage message = new ITipMessage();
@@ -153,8 +153,8 @@ public class CancelITipAnalyzerTest extends AbstractITipAnalyzerTest{
         integrationBuilder.assertAllWereCalled();
     }
 
-    @Test
-    public void testCreateDeleteException() throws OXException {
+     @Test
+     public void testCreateDeleteException() throws OXException {
         final CalendarDataObject appointment = appointment("123-123-123-123");
         appointment.setRecurrenceDatePosition(new Date(12345));
         final ITipMessage message = new ITipMessage();
@@ -189,14 +189,15 @@ public class CancelITipAnalyzerTest extends AbstractITipAnalyzerTest{
         integrationBuilder.assertAllWereCalled();
     }
 
-    public void testCancelRange() {
+         @Test
+     public void testCancelRange() {
         // TODO
     }
 
     // Error Cases
 
-    @Test
-    public void testCancelDeletedAppointment() throws OXException {
+     @Test
+     public void testCancelDeletedAppointment() throws OXException {
         final CalendarDataObject appointment = appointment("123-123-123-123");
 
         final ITipMessage message = new ITipMessage();
@@ -225,8 +226,8 @@ public class CancelITipAnalyzerTest extends AbstractITipAnalyzerTest{
         integrationBuilder.assertAllWereCalled();
     }
 
-    @Test
-    public void testCancelUnknownException() throws OXException {
+     @Test
+     public void testCancelUnknownException() throws OXException {
         final CalendarDataObject appointment = appointment("123-123-123-123");
         appointment.setRecurrenceDatePosition(new Date(12345));
 

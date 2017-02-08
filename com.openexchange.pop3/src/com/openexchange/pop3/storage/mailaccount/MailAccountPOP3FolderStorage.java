@@ -238,17 +238,21 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage, I
     }
 
     @Override
+    public <T> T supports(Class<T> iface) throws OXException {
+        return delegatee.supports(iface);
+    }
+
+    @Override
     public boolean isInfoSupported() throws OXException {
-        return (delegatee instanceof IMailFolderStorageInfoSupport) && ((IMailFolderStorageInfoSupport) delegatee).isInfoSupported();
+        IMailFolderStorageInfoSupport infoSupport = delegatee.supports(IMailFolderStorageInfoSupport.class);
+        return null != infoSupport && infoSupport.isInfoSupported();
     }
 
     @Override
     public MailFolderInfo getFolderInfo(final String fullName) throws OXException {
-        if (delegatee instanceof IMailFolderStorageInfoSupport) {
-            final IMailFolderStorageInfoSupport infoSupport = ((IMailFolderStorageInfoSupport) delegatee);
-            if (infoSupport.isInfoSupported()) {
-                return infoSupport.getFolderInfo(fullName);
-            }
+        IMailFolderStorageInfoSupport infoSupport = delegatee.supports(IMailFolderStorageInfoSupport.class);
+        if (null != infoSupport && infoSupport.isInfoSupported()) {
+            return infoSupport.getFolderInfo(fullName);
         }
         throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
     }
@@ -260,11 +264,9 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage, I
 
     @Override
     public List<MailFolderInfo> getFolderInfos(final String optParentFullName, final boolean subscribedOnly) throws OXException {
-        if (delegatee instanceof IMailFolderStorageInfoSupport) {
-            final IMailFolderStorageInfoSupport infoSupport = ((IMailFolderStorageInfoSupport) delegatee);
-            if (infoSupport.isInfoSupported()) {
-                return infoSupport.getFolderInfos(optParentFullName, subscribedOnly);
-            }
+        IMailFolderStorageInfoSupport infoSupport = delegatee.supports(IMailFolderStorageInfoSupport.class);
+        if (null != infoSupport && infoSupport.isInfoSupported()) {
+            return infoSupport.getFolderInfos(optParentFullName, subscribedOnly);
         }
         throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
     }

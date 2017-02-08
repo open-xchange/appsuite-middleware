@@ -1,9 +1,8 @@
 package liquibase.test;
 
-import liquibase.util.StringUtils;
-
 import java.util.Arrays;
 import java.util.Set;
+import liquibase.util.StringUtils;
 
 public class Assert
 {

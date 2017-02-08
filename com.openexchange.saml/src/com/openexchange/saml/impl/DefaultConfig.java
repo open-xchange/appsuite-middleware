@@ -63,6 +63,8 @@ import static com.openexchange.saml.SAMLProperties.LOGOUT_RESPONSE_BINDING;
 import static com.openexchange.saml.SAMLProperties.LOGOUT_RESPONSE_POST_TEMPLATE;
 import static com.openexchange.saml.SAMLProperties.PROVIDER_NAME;
 import static com.openexchange.saml.SAMLProperties.SLS_URL;
+import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
@@ -76,6 +78,8 @@ import com.openexchange.saml.SAMLConfig;
  * @since v7.6.1
  */
 public class DefaultConfig implements SAMLConfig {
+
+    private static final ImmutableSet<String> ALL_HOSTS_SET = ImmutableSet.of("all");
 
     private String providerName;
 
@@ -280,4 +284,10 @@ public class DefaultConfig implements SAMLConfig {
     private void setSessionIndexAutoLoginEnabled(boolean sessionIndexAutoLoginEnabled) {
         this.sessionIndexAutoLoginEnabled = sessionIndexAutoLoginEnabled;
     }
+
+    @Override
+    public Set<String> getHosts() {
+        return ALL_HOSTS_SET;
+    }
+
 }

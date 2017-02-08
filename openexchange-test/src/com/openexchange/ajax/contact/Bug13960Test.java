@@ -50,10 +50,16 @@
 package com.openexchange.ajax.contact;
 
 import static com.openexchange.java.Autoboxing.I;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.contact.action.ContactUpdatesResponse;
 import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.GetRequest;
@@ -80,31 +86,35 @@ public class Bug13960Test extends AbstractAJAXSession {
     private TimeZone timeZone;
     private Contact contact;
 
-    public Bug13960Test(String name) {
-        super(name);
+    public Bug13960Test() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
-        timeZone = client.getValues().getTimeZone();
+        timeZone = getClient().getValues().getTimeZone();
         contact = new Contact();
-        contact.setParentFolderID(client.getValues().getPrivateContactFolder());
-        InsertResponse response = client.execute(new InsertRequest(contact));
+        contact.setParentFolderID(getClient().getValues().getPrivateContactFolder());
+        InsertResponse response = getClient().execute(new InsertRequest(contact));
         response.fillObject(contact);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        client.execute(new DeleteRequest(contact));
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
+        try {
+            getClient().execute(new DeleteRequest(contact));
+        } finally {
+            super.tearDown();
+        }
     }
 
+    @Test
     public void testJSONValues() throws Throwable {
         {
             GetRequest request = new GetRequest(contact, timeZone);
-            GetResponse response = client.execute(request);
+            GetResponse response = getClient().execute(request);
             JSONObject json = (JSONObject) response.getData();
             assertFalse("'Default address' should not be contained if not set.", json.has(ContactFields.DEFAULT_ADDRESS));
             assertFalse("'File as should' not be contained if not set.", json.has(ContactFields.FILE_AS));
@@ -113,7 +123,7 @@ public class Bug13960Test extends AbstractAJAXSession {
         }
         {
             UpdatesRequest request = new UpdatesRequest(contact.getParentFolderID(), COLUMNS, 0, Order.ASCENDING, new Date(contact.getLastModified().getTime() - 1));
-            ContactUpdatesResponse response = client.execute(request);
+            ContactUpdatesResponse response = getClient().execute(request);
             int row = 0;
             while (row < response.size()) {
                 if (response.getValue(row, Contact.OBJECT_ID).equals(I(contact.getObjectID()))) {

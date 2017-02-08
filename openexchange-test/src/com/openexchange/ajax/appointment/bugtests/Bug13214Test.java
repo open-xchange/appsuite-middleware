@@ -49,9 +49,11 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
@@ -69,14 +71,15 @@ import com.openexchange.groupware.container.Appointment;
  */
 public class Bug13214Test extends AbstractAJAXSession {
 
-    public Bug13214Test(String name) {
-        super(name);
+    public Bug13214Test() {
+        super();
     }
 
+    @Test
     public void testBugAsWritten() throws Exception {
         final AJAXClient client = getClient();
-        final int folderId = client.getValues().getPrivateAppointmentFolder();
-        final TimeZone tz = client.getValues().getTimeZone();
+        final int folderId = getClient().getValues().getPrivateAppointmentFolder();
+        final TimeZone tz = getClient().getValues().getTimeZone();
         final Appointment appointment = new Appointment();
         int objectId = 0;
         Date lastModified = null;
@@ -96,7 +99,7 @@ public class Bug13214Test extends AbstractAJAXSession {
 
             // Insert
             final InsertRequest insertRequest = new InsertRequest(appointment, tz, false);
-            final AppointmentInsertResponse insertResponse = client.execute(insertRequest);
+            final AppointmentInsertResponse insertResponse = getClient().execute(insertRequest);
             appointment.setObjectID(insertResponse.getId());
             appointment.setLastModified(insertResponse.getTimestamp());
             objectId = appointment.getObjectID();
@@ -115,14 +118,13 @@ public class Bug13214Test extends AbstractAJAXSession {
 
             // Update
             UpdateRequest updateRequest = new UpdateRequest(updateAppointment, tz, false);
-            UpdateResponse updateResponse = client.execute(updateRequest);
+            UpdateResponse updateResponse = getClient().execute(updateRequest);
 
             try {
                 assertTrue("No Exception occurred.", updateResponse.hasError());
                 OXException e = updateResponse.getException();
                 assertTrue("Wrong Exception", e instanceof OXException);
-                assertTrue(
-                    "Wrong Exception", e.similarTo(OXCalendarExceptionCodes.END_DATE_BEFORE_START_DATE.create()));
+                assertTrue("Wrong Exception", e.similarTo(OXCalendarExceptionCodes.END_DATE_BEFORE_START_DATE.create()));
             } finally {
                 if (!updateResponse.hasError()) {
                     updateAppointment.setLastModified(updateResponse.getTimestamp());
@@ -133,7 +135,7 @@ public class Bug13214Test extends AbstractAJAXSession {
         } finally {
             if (objectId != 0 && lastModified != null) {
                 final DeleteRequest deleteRequest = new DeleteRequest(objectId, folderId, lastModified);
-                client.execute(deleteRequest);
+                getClient().execute(deleteRequest);
             }
         }
     }

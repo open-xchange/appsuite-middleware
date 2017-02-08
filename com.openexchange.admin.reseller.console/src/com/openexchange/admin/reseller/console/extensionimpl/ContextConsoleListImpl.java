@@ -76,10 +76,12 @@ public class ContextConsoleListImpl implements ContextConsoleListInterface {
 
     @Override
     public void addExtensionOptions(final AdminParser parser) throws OXConsolePluginException {
+        // Nothing
     }
 
     @Override
     public void setAndFillExtension(final AdminParser parser, final Context ctx, Credentials auth) throws OXConsolePluginException {
+        // Nothing
     }
 
     @Override

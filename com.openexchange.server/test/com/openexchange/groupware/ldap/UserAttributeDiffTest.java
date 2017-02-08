@@ -74,6 +74,7 @@ public class UserAttributeDiffTest {
         Map<String, String> added = new HashMap<String, String>();
         Map<String, String> removed = new HashMap<String, String>();
         Map<String, ValuePair> changed = new HashMap<String, ValuePair>();
+
         RdbUserStorage.calculateDifferences(oldAttributes, newAttributes, added, removed, changed);
         assertTrue(oldAttributes.isEmpty());
         assertTrue(newAttributes.isEmpty());

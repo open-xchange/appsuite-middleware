@@ -58,7 +58,6 @@ import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
-
 /**
  * {@link AutosaveRequest}
  *
@@ -69,7 +68,6 @@ public class AutosaveRequest extends AbstractMailRequest<MailReferenceResponse> 
     private boolean failOnError;
 
     private JSONObject mail;
-
 
     public AutosaveRequest(JSONObject mail) {
         this(mail, true);
@@ -101,6 +99,7 @@ public class AutosaveRequest extends AbstractMailRequest<MailReferenceResponse> 
     @Override
     public AbstractAJAXParser<? extends MailReferenceResponse> getParser() {
         return new AbstractAJAXParser<MailReferenceResponse>(failOnError) {
+
             @Override
             protected MailReferenceResponse createResponse(Response response) throws JSONException {
                 return new MailReferenceResponse(response);

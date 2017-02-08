@@ -299,4 +299,14 @@ public class TransportGetSwitch implements AttributeSwitch {
         return null;
     }
 
+    @Override
+    public Object mailDisabled() {
+        return null;
+    }
+
+    @Override
+    public Object transportDisabled() {
+        return Boolean.valueOf(desc.isTransportDisabled());
+    }
+
 }

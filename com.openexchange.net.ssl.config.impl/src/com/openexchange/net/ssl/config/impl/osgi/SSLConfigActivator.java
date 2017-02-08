@@ -53,9 +53,11 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
-import com.openexchange.net.ssl.config.impl.internal.SSLConfigurationServiceImpl;
+import com.openexchange.net.ssl.config.TrustLevel;
+import com.openexchange.net.ssl.config.impl.internal.RestrictedSSLConfigurationService;
 import com.openexchange.net.ssl.config.impl.internal.SSLProperties;
 import com.openexchange.net.ssl.config.impl.internal.SSLPropertiesReloadable;
+import com.openexchange.net.ssl.config.impl.internal.TrustAllSSLConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -88,10 +90,9 @@ public class SSLConfigActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         try {
             org.slf4j.LoggerFactory.getLogger(SSLConfigActivator.class).info("starting bundle: \"com.openexchange.net.ssl.config.impl\"");
-            Services.setServiceLookup(this);
 
             // Pre-initialize cipher suites
-            com.openexchange.net.ssl.config.impl.internal.SSLProperties.initJvmDefaultCipherSuites();
+            com.openexchange.net.ssl.config.impl.internal.SSLProperties.initJvmDefaults();
 
             ConfigurationService configService = getService(ConfigurationService.class);
             ConfigViewFactory configViewFactory = getService(ConfigViewFactory.class);
@@ -105,8 +106,18 @@ public class SSLConfigActivator extends HousekeepingActivator {
             track(registerer.getFilter(), registerer);
             openTrackers();
 
-            registerService(Reloadable.class, new SSLPropertiesReloadable());
-            registerService(SSLConfigurationService.class, new SSLConfigurationServiceImpl(configService));
+            SSLConfigurationService sslConfigurationService;
+            {
+                TrustLevel trustLevel = SSLProperties.trustLevel(configService);
+                if (TrustLevel.TRUST_ALL.equals(trustLevel)) {
+                    sslConfigurationService = new TrustAllSSLConfigurationService();
+                } else {
+                    RestrictedSSLConfigurationService restrictedSslConfigurationService = new RestrictedSSLConfigurationService(trustLevel, configService);
+                    sslConfigurationService = restrictedSslConfigurationService;
+                    registerService(Reloadable.class, new SSLPropertiesReloadable(restrictedSslConfigurationService));
+                }
+            }
+            registerService(SSLConfigurationService.class, sslConfigurationService);
         } catch (Exception e) {
             org.slf4j.LoggerFactory.getLogger(SSLConfigActivator.class).error("", e);
             throw e;
@@ -117,7 +128,6 @@ public class SSLConfigActivator extends HousekeepingActivator {
     protected void stopBundle() throws Exception {
         org.slf4j.LoggerFactory.getLogger(SSLConfigActivator.class).info("stopping bundle: \"com.openexchange.net.ssl.config.impl\"");
         super.stopBundle();
-        Services.setServiceLookup(null);
     }
 
 }

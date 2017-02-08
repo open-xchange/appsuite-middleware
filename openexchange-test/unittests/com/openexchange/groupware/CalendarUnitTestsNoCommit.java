@@ -49,36 +49,24 @@
 
 package com.openexchange.groupware;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    com.openexchange.groupware.AppointmentDeleteNoCommit.class,
+
+    // Cisco tests
+    com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTestSuite.class,
+    com.openexchange.groupware.calendar.RecurringCalculationTest.class,
+
+    // Kauss tests
+    com.openexchange.groupware.CalendarTest.class,
+    com.openexchange.groupware.CalendarRecurringTests.class,
+    com.openexchange.groupware.AppointmentBugTests.class,
+
+    com.openexchange.groupware.AppointmentDeleteNoCommit.class
+})
 public class CalendarUnitTestsNoCommit {
 
-	public static Test suite() {
-		final TestSuite tests = new TestSuite();
-
-		tests.addTestSuite(com.openexchange.groupware.AppointmentDeleteNoCommit.class);
-
-		// Cisco tests
-		tests.addTest(com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTestSuite.suite());
-		tests.addTestSuite(com.openexchange.groupware.calendar.RecurringCalculationTest.class);
-
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.DailyRecurrenceTest.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.WeeklyRecurrenceTest.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.Bug9497Test.class);
-		//tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.Bug9742Test.class);
-
-		// Kauss tests
-		tests.addTestSuite(com.openexchange.groupware.CalendarTest.class);
-		tests.addTestSuite(com.openexchange.groupware.CalendarRecurringTests.class);
-		tests.addTestSuite(com.openexchange.groupware.AppointmentBugTests.class);
-
-		tests.addTestSuite(com.openexchange.groupware.AppointmentDeleteNoCommit.class);
-
-		// Performance tests
-		//tests.addTestSuite(com.openexchange.groupware.CalendarPerformanceTests.class);
-
-
-		return tests;
-	}
 }

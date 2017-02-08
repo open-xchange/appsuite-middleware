@@ -54,7 +54,6 @@ import org.osgi.service.http.HttpService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.recaptcha.ReCaptchaService;
 import com.openexchange.recaptcha.ReCaptchaServlet;
 import com.openexchange.recaptcha.impl.ReCaptchaServiceImpl;
@@ -65,8 +64,8 @@ public class Activator extends HousekeepingActivator {
 
     private static final String ALIAS_APPENDIX = "recaptcha";
 
-    private volatile ReCaptchaServlet servlet;
-    private volatile String alias;
+    private ReCaptchaServlet servlet;
+    private String alias;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -74,51 +73,28 @@ public class Activator extends HousekeepingActivator {
     }
 
     @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        registerServlet();
-    }
+    protected synchronized void startBundle() throws Exception {
+        ConfigurationService config = getService(ConfigurationService.class);
 
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        unregisterServlet();
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        final ServiceRegistry registry = ReCaptchaServiceRegistry.getInstance();
-        registry.clearRegistry();
-        final Class<?>[] classes = getNeededServices();
-        for (int i = 0; i < classes.length; i++) {
-            final Object service = getService(classes[i]);
-            if (service != null) {
-                registry.addService(classes[i], service);
-            }
-        }
-
-        final ConfigurationService config = registry.getService(ConfigurationService.class);
-        final Properties props = config.getFile("recaptcha.properties");
-        final Properties options = config.getFile("recaptcha_options.properties");
-        final ReCaptchaServiceImpl reCaptchaService = new ReCaptchaServiceImpl(props, options);
-        registerService(ReCaptchaService.class, reCaptchaService, null);
-        registry.addService(ReCaptchaService.class, reCaptchaService);
+        Properties props = config.getFile("recaptcha.properties");
+        Properties options = config.getFile("recaptcha_options.properties");
+        registerService(ReCaptchaService.class, new ReCaptchaServiceImpl(props, options), null);
 
         registerServlet();
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        cleanUp();
+    protected synchronized void stopBundle() throws Exception {
         unregisterServlet();
-        ReCaptchaServiceRegistry.getInstance().clearRegistry();
+        super.stopBundle();
     }
 
-    private synchronized void registerServlet() {
-        ServiceRegistry registry = ReCaptchaServiceRegistry.getInstance();
-        HttpService httpService = registry.getService(HttpService.class);
+    private void registerServlet() {
         if (servlet == null) {
+            HttpService httpService = getService(HttpService.class);
             try {
                 String alias = getService(DispatcherPrefixService.class).getPrefix() + ALIAS_APPENDIX;
-                ReCaptchaServlet servlet = new ReCaptchaServlet();
+                ReCaptchaServlet servlet = new ReCaptchaServlet(this);
                 httpService.registerServlet(alias, servlet, null, null);
                 this.alias = alias;
                 this.servlet = servlet;

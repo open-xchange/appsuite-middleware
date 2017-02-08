@@ -50,6 +50,7 @@
 package com.openexchange.config.cascade.osgi;
 
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -67,7 +68,7 @@ import com.openexchange.tools.strings.StringParser;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class ConfigCascadeActivator extends HousekeepingActivator{
+public class ConfigCascadeActivator extends HousekeepingActivator {
 
     private boolean configured;
 
@@ -88,48 +89,88 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
     protected void startBundle() throws Exception {
         final Logger logger = org.slf4j.LoggerFactory.getLogger(ConfigCascadeActivator.class);
 
+        // Create the ConfigCascade instance
         final ConfigCascade configCascade = new ConfigCascade();
-        final ServiceTracker<StringParser, StringParser> stringParsers = track(StringParser.class);
 
-        configCascade.setStringParser(new StringParser() {
-
-            @Override
-            public <T> T parse(final String s, final Class<T> t) {
-                final StringParser parser = stringParsers.getService();
-                if(parser == null) {
-                    logger.error("Could not find suitable string parser in OSGi system");
-                    return null;
-                }
-                return parser.parse(s, t);
-            }
-
-        });
-
+        // Initialize tracker for StringParser
         final BundleContext context = this.context;
-        track(TrackingProvider.createFilter("server", context), new ServiceTrackerCustomizer<ConfigProviderService, ConfigProviderService>() {
+        final ConfigCascadeActivator activator = this;
+        {
+            ServiceTrackerCustomizer<StringParser, StringParser> customizer = new ServiceTrackerCustomizer<StringParser, StringParser>() {
 
-            @Override
-            public ConfigProviderService addingService(ServiceReference<ConfigProviderService> reference) {
-                ConfigProviderService provider = context.getService(reference);
-                if (isServerProvider(reference)) {
-                    String scopes = getScopes(provider);
-                    configure(scopes, configCascade);
-                    configCascade.setProvider("server", provider);
-                    registerService(ConfigViewFactory.class, configCascade);
+                private boolean configCascadeStarted = false;
+
+                @Override
+                public void removedService(ServiceReference<StringParser> reference, StringParser service) {
+                    context.ungetService(reference);
                 }
-                return provider;
-            }
 
-            @Override
-            public void modifiedService(ServiceReference<ConfigProviderService> reference, ConfigProviderService service) {
-                // IGNORE
-            }
+                @Override
+                public void modifiedService(ServiceReference<StringParser> reference, StringParser service) {
+                    // Ignore
+                }
 
-            @Override
-            public void removedService(ServiceReference<ConfigProviderService> reference, ConfigProviderService service) {
-                context.ungetService(reference);
-            }
-        });
+                @Override
+                public StringParser addingService(ServiceReference<StringParser> reference) {
+                    StringParser service = context.getService(reference);
+
+                    // At least one StringParser instance available
+                    startConfigCascade();
+
+                    return service;
+                }
+
+                private synchronized void startConfigCascade() {
+                    if (configCascadeStarted) {
+                        return;
+                    }
+
+                    ServiceTracker<ConfigProviderService, ConfigProviderService> configProviders = activator.track(TrackingProvider.createFilter("server", context), new ServiceTrackerCustomizer<ConfigProviderService, ConfigProviderService>() {
+
+                        @Override
+                        public ConfigProviderService addingService(ServiceReference<ConfigProviderService> reference) {
+                            ConfigProviderService provider = context.getService(reference);
+                            if (isServerProvider(reference)) {
+                                String scopes = getScopes(provider);
+                                configure(scopes, configCascade);
+                                configCascade.setProvider("server", provider);
+                                registerService(ConfigViewFactory.class, configCascade);
+                            }
+                            return provider;
+                        }
+
+                        @Override
+                        public void modifiedService(ServiceReference<ConfigProviderService> reference, ConfigProviderService service) {
+                            // IGNORE
+                        }
+
+                        @Override
+                        public void removedService(ServiceReference<ConfigProviderService> reference, ConfigProviderService service) {
+                            context.ungetService(reference);
+                        }
+                    });
+                    configProviders.open();
+                    configCascadeStarted = true;
+                }
+            };
+
+            final ServiceTracker<StringParser, StringParser> stringParsers = new ServiceTracker<StringParser, StringParser>(context, StringParser.class, customizer);
+            rememberTracker(stringParsers);
+
+            configCascade.setStringParser(new StringParser() {
+
+                @Override
+                public <T> T parse(final String s, final Class<T> t) {
+                    final StringParser parser = stringParsers.getService();
+                    if(parser == null) {
+                        logger.error("Could not find suitable string parser in OSGi system");
+                        return null;
+                    }
+                    return parser.parse(s, t);
+                }
+
+            });
+        }
 
         openTrackers();
     }
@@ -137,6 +178,11 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
     @Override
     public <S> void registerService(java.lang.Class<S> clazz, S service) {
         super.registerService(clazz, service);
+    }
+
+    @Override
+    public <S> ServiceTracker<S, S> track(Filter filter, ServiceTrackerCustomizer<S, S> customizer) {
+        return super.track(filter, customizer);
     }
 
     boolean isServerProvider(final ServiceReference<?> reference) {

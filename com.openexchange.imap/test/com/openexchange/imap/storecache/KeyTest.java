@@ -49,8 +49,12 @@
 
 package com.openexchange.imap.storecache;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 import com.openexchange.imap.storecache.IMAPStoreCache.Key;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 
 /**
@@ -59,13 +63,13 @@ import com.openexchange.imap.storecache.IMAPStoreCache.Key;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.6.0
  */
-public class KeyTest extends TestCase {
-
+public class KeyTest {
     public KeyTest() {
         super();
     }
 
-    public void testDifferingKeys() {
+         @Test
+     public void testDifferingKeys() {
         final Key key1 = new Key(0, "imap.host.org", 143, "proxyuser", 11, 1);
         final int hc1 = key1.hashCode();
 

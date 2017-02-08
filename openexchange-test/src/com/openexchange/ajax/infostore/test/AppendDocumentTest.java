@@ -49,6 +49,10 @@
 
 package com.openexchange.ajax.infostore.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Date;
@@ -74,21 +78,12 @@ import com.openexchange.java.util.UUIDs;
  */
 public class AppendDocumentTest extends AbstractInfostoreTest {
 
-    /**
-     * Initializes a new {@link AppendDocumentTest}.
-     *
-     * @param name The test name
-     */
-    public AppendDocumentTest(String name) {
-        super(name);
-    }
-
     @Test
     public void testAppendFile() throws Exception {
         /*
          * prepare chunks to upload
          */
-        String folderId = String.valueOf(client.getValues().getPrivateInfostoreFolder());
+        String folderId = String.valueOf(getClient().getValues().getPrivateInfostoreFolder());
         long expectedLength = 0;
         List<byte[]> chunks = new ArrayList<byte[]>();
         for (int i = 0; i < 10; i++) {
@@ -128,8 +123,8 @@ public class AppendDocumentTest extends AbstractInfostoreTest {
             document.setFileName(tempFile.getName());
             document.setVersion(String.valueOf(1));
             document.setFileSize(tempFile.length());
-            infoMgr.newAction(document, tempFile);
-            timestamp = infoMgr.getLastResponse().getTimestamp();
+            itm.newAction(document, tempFile);
+            timestamp = itm.getLastResponse().getTimestamp();
             offset = tempFile.length();
         } finally {
             if (null != tempFile) {
@@ -179,7 +174,7 @@ public class AppendDocumentTest extends AbstractInfostoreTest {
         /*
          * prepare chunks to upload
          */
-        String folderId = String.valueOf(client.getValues().getPrivateInfostoreFolder());
+        String folderId = String.valueOf(getClient().getValues().getPrivateInfostoreFolder());
         long expectedLength = 0;
         List<byte[]> chunks = new ArrayList<byte[]>();
         for (int i = 0; i < 10; i++) {
@@ -219,8 +214,8 @@ public class AppendDocumentTest extends AbstractInfostoreTest {
             document.setFileName(tempFile.getName());
             document.setVersion(String.valueOf(1));
             document.setFileSize(tempFile.length());
-            infoMgr.newAction(document, tempFile);
-            timestamp = infoMgr.getLastResponse().getTimestamp();
+            itm.newAction(document, tempFile);
+            timestamp = itm.getLastResponse().getTimestamp();
             offset = tempFile.length();
         } finally {
             if (null != tempFile) {

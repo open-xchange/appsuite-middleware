@@ -1,9 +1,8 @@
 package liquibase.util;
 
-import static org.junit.Assert.*;
-import org.junit.Test;
-
+import static org.junit.Assert.assertEquals;
 import java.io.ByteArrayInputStream;
+import org.junit.Test;
 
 public class MD5UtilTest {
 
@@ -16,8 +15,8 @@ public class MD5UtilTest {
     private static final String TEST_STRING3 = "bbb";
     private static final String TEST_STRING3_MD5_HASH = "08f8e0260c64418510cefb2b06eee5cd";
 
-	@Test
-	public void testComputeMD5() throws Exception {
+     @Test
+     public void testComputeMD5() throws Exception {
 		String hash = MD5Util.computeMD5(TEST_STRING);
 		assertEquals(TEST_STRING_MD5_HASH, hash);
 
@@ -28,8 +27,8 @@ public class MD5UtilTest {
         assertEquals(TEST_STRING3_MD5_HASH, hash3);
 	}
 
-	@Test
-	public void testComputeMD5InputStream() {
+     @Test
+     public void testComputeMD5InputStream() {
 		ByteArrayInputStream bais = new ByteArrayInputStream(TEST_STRING.getBytes());
 		String hexString = MD5Util.computeMD5(bais);
 		assertEquals(TEST_STRING_MD5_HASH, hexString);

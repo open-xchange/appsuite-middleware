@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.test.fixtures.transformators;
 
 import com.openexchange.exception.OXException;
@@ -60,27 +61,27 @@ import com.openexchange.test.fixtures.SimpleCredentials;
  */
 public class CredentialsTransformator implements Transformator {
 
-	private final FixtureLoader fixtureLoader;
+    private final FixtureLoader fixtureLoader;
 
-	public CredentialsTransformator(FixtureLoader fixtureLoader) {
-		super();
-		this.fixtureLoader = fixtureLoader;
-	}
-
-	@Override
-    public Object transform(final String value) throws OXException {
-		if (null == value || 1 > value.length() || false == value.contains(":")) {
-			throw OXException.general("Unable to transform '" + value + "' into simple credentials");
-		}
-		final String[] splitted = value.split(":");
-		if (splitted.length < 2) {
-			throw OXException.general("Unable to transform '" + value + "' into simple credentials");
-		} else {
-			return getCredentials(splitted[0], splitted[1]);
-		}
+    public CredentialsTransformator(FixtureLoader fixtureLoader) {
+        super();
+        this.fixtureLoader = fixtureLoader;
     }
 
-	private final SimpleCredentials getCredentials(final String fixtureName, final String fixtureEntry) throws OXException {
-		return fixtureLoader.getFixtures(fixtureName, SimpleCredentials.class).getEntry(fixtureEntry).getEntry();
-	}
+    @Override
+    public Object transform(final String value) throws OXException {
+        if (null == value || 1 > value.length() || false == value.contains(":")) {
+            throw OXException.general("Unable to transform '" + value + "' into simple credentials");
+        }
+        final String[] splitted = value.split(":");
+        if (splitted.length < 2) {
+            throw OXException.general("Unable to transform '" + value + "' into simple credentials");
+        } else {
+            return getCredentials(splitted[0], splitted[1]);
+        }
+    }
+
+    private final SimpleCredentials getCredentials(final String fixtureName, final String fixtureEntry) throws OXException {
+        return fixtureLoader.getFixtures(fixtureName, SimpleCredentials.class).getEntry(fixtureEntry).getEntry();
+    }
 }

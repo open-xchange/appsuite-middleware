@@ -49,10 +49,15 @@
 
 package com.openexchange.ajax.mail;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Arrays;
 import org.json.JSONException;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.mail.contenttypes.MailContentType;
@@ -73,24 +78,28 @@ public class MaxMailSizeTest extends AbstractMailTest {
      *
      * @param name Name of this test.
      */
-    public MaxMailSizeTest(String name) {
-        super(name);
+    public MaxMailSizeTest() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
-        manager = new MailTestManager(client, true);
+        manager = new MailTestManager(getClient(), true);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        manager.cleanUp();
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
+        try {
+            manager.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
+    @Test
     public void testSendWithManager() throws OXException, IOException, SAXException, JSONException {
-        UserValues values = client.getValues();
+        UserValues values = getClient().getValues();
 
         // Should work
         TestMail mail = new TestMail();
@@ -100,24 +109,6 @@ public class MaxMailSizeTest extends AbstractMailTest {
         mail.setContentType(MailContentType.PLAIN.toString());
         mail.setBody("Test Mail");
         mail.sanitize();
-
-        class FooInputStream extends InputStream {
-
-            private final long size;
-
-            private long read = 0L;
-
-            public FooInputStream(long size) {
-                super();
-                this.size = size;
-            }
-
-            @Override
-            public int read() throws IOException {
-                return read++ < size ? 'a' : -1;
-            }
-
-        }
 
         TestMail inSentBox = manager.send(mail, new FooInputStream(3500000L)); // Results in approx. 4800000 Byte Mail Size
         assertFalse("Sending resulted in error.", manager.getLastResponse().hasError());

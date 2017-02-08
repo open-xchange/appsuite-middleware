@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.test.fixtures.transformators;
 
 import com.openexchange.exception.OXException;
@@ -57,16 +58,16 @@ import com.openexchange.groupware.tasks.Task;
  */
 public class PriorityTransformator implements Transformator {
 
-	@Override
+    @Override
     public Object transform(final String value) throws OXException {
-        if("low".equalsIgnoreCase(value)) {
+        if ("low".equalsIgnoreCase(value)) {
             return Task.LOW;
         } else if ("normal".equalsIgnoreCase(value)) {
             return Task.NORMAL;
         } else if ("high".equalsIgnoreCase(value)) {
             return Task.HIGH;
         } else {
-            throw OXException.general("Unknown Priority: "+value);
+            throw OXException.general("Unknown Priority: " + value);
         }
     }
 }

@@ -58,37 +58,39 @@ import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
+
 /**
-* @author <a href="karsten.will@open-xchange.com">Karsten Will</a>
-*/
+ * @author <a href="karsten.will@open-xchange.com">Karsten Will</a>
+ */
 public class AllResponse extends CommonAllResponse {
-	protected AllResponse(final Response response) {
+
+    protected AllResponse(final Response response) {
         super(response);
     }
 
-	public MailMessage[] getMailMessages(int[] columns) throws JSONException, AddressException, OXException{
-		final JSONArray objectsArray = (JSONArray) getData();
-		MailMessage[] messages = new MailMessage[objectsArray.length()];
-		for (int i=0; i<objectsArray.length(); i++){
-			JSONArray oneMailAsArray = objectsArray.getJSONArray(i);
-			MailMessage message = parse(oneMailAsArray, columns);
-			messages[i] = message;
-		}
+    public MailMessage[] getMailMessages(int[] columns) throws JSONException, AddressException, OXException {
+        final JSONArray objectsArray = (JSONArray) getData();
+        MailMessage[] messages = new MailMessage[objectsArray.length()];
+        for (int i = 0; i < objectsArray.length(); i++) {
+            JSONArray oneMailAsArray = objectsArray.getJSONArray(i);
+            MailMessage message = parse(oneMailAsArray, columns);
+            messages[i] = message;
+        }
 
-		return messages;
-	}
+        return messages;
+    }
 
-	private MailMessage parse(JSONArray mailAsArray, int[] columns) throws JSONException, AddressException{
-		MimeMailMessage message = new MimeMailMessage();
+    private MailMessage parse(JSONArray mailAsArray, int[] columns) throws JSONException, AddressException {
+        MimeMailMessage message = new MimeMailMessage();
 
-		for (int i=0; i<mailAsArray.length() && i<columns.length; i++){
-			// MailID
-			if (columns[i] == 600) {
-                message.setMailId((String)mailAsArray.get(i));
+        for (int i = 0; i < mailAsArray.length() && i < columns.length; i++) {
+            // MailID
+            if (columns[i] == 600) {
+                message.setMailId((String) mailAsArray.get(i));
             } else if (columns[i] == 601) {
-                message.setFolder((String)mailAsArray.get(i));
+                message.setFolder((String) mailAsArray.get(i));
             } else if (columns[i] == 602) {
-                message.setHasAttachment((Boolean)mailAsArray.get(i));
+                message.setHasAttachment((Boolean) mailAsArray.get(i));
             } else if (columns[i] == 603) {
                 handleInnerArrays(mailAsArray, message, i, "from");
             } else if (columns[i] == 604) {
@@ -98,41 +100,40 @@ public class AllResponse extends CommonAllResponse {
             } else if (columns[i] == 606) {
                 handleInnerArrays(mailAsArray, message, i, "bcc");
             } else if (columns[i] == 607) {
-                message.setSubject((String)mailAsArray.get(i));
-            } else if (columns[i] == 608)
-             {
-                message.setSize((Integer)mailAsArray.get(i));
+                message.setSubject((String) mailAsArray.get(i));
+            } else if (columns[i] == 608) {
+                message.setSize((Integer) mailAsArray.get(i));
                 // Sent date
                 //else if (columns[i] == 609) message.setSentDate(new Date((Long)mailAsArray.get(i)));
                 // Received date
                 //else if (columns[i] == 610) message.setReceivedDate(new Date((Long)mailAsArray.get(i)));
             }
-		}
+        }
 
-		return message;
-	}
+        return message;
+    }
 
-	private void handleInnerArrays(JSONArray mailAsArray, MimeMailMessage message, int i, String type) throws JSONException, AddressException {
-		JSONArray innerArray = (JSONArray)(mailAsArray.get(i));
-		for (int a=0; a<innerArray.length(); a++){
-			JSONArray secondInnerArray = (JSONArray) innerArray.get(a);
-			for (int x=0; x<secondInnerArray.length(); x++){
-				String string ="";
-				if (null!= secondInnerArray.getString(x) && !"null".equals(secondInnerArray.getString(x))){
-					string = secondInnerArray.getString(x);
-					if (string.contains("@")) {
-						if (type.equals("from")){
-							message.addFrom(new InternetAddress(string));
-						} else if (type.equals("to")){
-							message.addTo(new InternetAddress(string));
-						} else if (type.equals("cc")){
-							message.addCc(new InternetAddress(string));
-						} else if (type.equals("bcc")){
-							message.addBcc(new InternetAddress(string));
-						}
-					}
-				}
-			}
-		}
-	}
+    private void handleInnerArrays(JSONArray mailAsArray, MimeMailMessage message, int i, String type) throws JSONException, AddressException {
+        JSONArray innerArray = (JSONArray) (mailAsArray.get(i));
+        for (int a = 0; a < innerArray.length(); a++) {
+            JSONArray secondInnerArray = (JSONArray) innerArray.get(a);
+            for (int x = 0; x < secondInnerArray.length(); x++) {
+                String string = "";
+                if (null != secondInnerArray.getString(x) && !"null".equals(secondInnerArray.getString(x))) {
+                    string = secondInnerArray.getString(x);
+                    if (string.contains("@")) {
+                        if (type.equals("from")) {
+                            message.addFrom(new InternetAddress(string));
+                        } else if (type.equals("to")) {
+                            message.addTo(new InternetAddress(string));
+                        } else if (type.equals("cc")) {
+                            message.addCc(new InternetAddress(string));
+                        } else if (type.equals("bcc")) {
+                            message.addBcc(new InternetAddress(string));
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

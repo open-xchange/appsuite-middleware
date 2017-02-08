@@ -1,8 +1,6 @@
 package liquibase.structure.core;
 
-import static org.junit.Assert.*;
-
-import liquibase.structure.core.PrimaryKey;
+import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 public class PrimaryKeyTest  {

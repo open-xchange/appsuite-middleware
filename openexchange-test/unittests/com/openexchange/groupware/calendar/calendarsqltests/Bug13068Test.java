@@ -49,18 +49,22 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
-import com.openexchange.api2.ReminderService;
+import org.junit.Test;
+import com.openexchange.api2.ReminderSQLInterface;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.tools.iterator.SearchIterator;
 
-
 public class Bug13068Test extends CalendarSqlTest {
+
     /**
      * Test for <a href="http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=13068">bug #13068</a>
      */
+    @Test
     public void testRemoveReminderIfChangedIntoPast() throws Throwable {
         final long oneHour = 3600000;
         final long tomorrow = System.currentTimeMillis() + 24 * 3600000;
@@ -74,8 +78,8 @@ public class Bug13068Test extends CalendarSqlTest {
         appointments.save(appointment);
         clean.add(appointment);
 
-        final ReminderService reminderInterface = new ReminderHandler(ctx);
-        SearchIterator<?> iterator = reminderInterface.listReminder(Types.APPOINTMENT, appointment.getObjectID());
+        final ReminderSQLInterface reminderInterface = ReminderHandler.getInstance();
+        SearchIterator<?> iterator = reminderInterface.listReminder(Types.APPOINTMENT, appointment.getObjectID(), ctx);
 
         assertTrue("Reminder expected", iterator.hasNext());
 
@@ -84,7 +88,7 @@ public class Bug13068Test extends CalendarSqlTest {
         updateAppointment.setEndDate(new Date(yesterday + oneHour));
         appointments.save(updateAppointment);
 
-        iterator = reminderInterface.listReminder(Types.APPOINTMENT, appointment.getObjectID());
+        iterator = reminderInterface.listReminder(Types.APPOINTMENT, appointment.getObjectID(), ctx);
 
         assertFalse("No Reminder expected", iterator.hasNext());
     }

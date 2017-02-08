@@ -50,6 +50,8 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -67,19 +69,18 @@ public class Bug42018Test extends AbstractAJAXSession {
 
     private CalendarTestManager ctm;
     private Appointment appointment;
-    
+
     boolean works = false;
 
-    public Bug42018Test(String name) {
-        super(name);
+    public Bug42018Test() {
+        super();
     }
 
     @Before
-    @Override
     public void setUp() throws Exception {
         super.setUp();
 
-        ctm = new CalendarTestManager(client);
+        ctm = new CalendarTestManager(getClient());
         ctm.setFailOnError(true);
         appointment = new Appointment();
         appointment.setTitle("Bug 42018 Test");
@@ -94,7 +95,7 @@ public class Bug42018Test extends AbstractAJAXSession {
         appointment.setRecurrenceType(Appointment.WEEKLY);
         appointment.setDays(Appointment.MONDAY);
         appointment.setInterval(1);
-        appointment.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         appointment.setIgnoreConflicts(true);
     }
 
@@ -108,10 +109,12 @@ public class Bug42018Test extends AbstractAJAXSession {
     }
 
     @After
-    @Override
     public void tearDown() throws Exception {
-        ctm.cleanUp();
-        super.tearDown();
+        try {
+            ctm.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
 }

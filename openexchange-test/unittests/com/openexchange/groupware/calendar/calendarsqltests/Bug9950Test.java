@@ -49,17 +49,18 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.tools.events.EventAssertions.assertModificationEventWithOldObject;
+import org.junit.Test;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.setuptools.TestContextToolkit;
 import com.openexchange.tools.events.TestEventAdmin;
 
-
 public class Bug9950Test extends CalendarSqlTest {
     // Bug #9950
 
+    @Test
     public void testParticipantChangeTriggersEvent() throws OXException {
         final TestContextToolkit tools = new TestContextToolkit();
 

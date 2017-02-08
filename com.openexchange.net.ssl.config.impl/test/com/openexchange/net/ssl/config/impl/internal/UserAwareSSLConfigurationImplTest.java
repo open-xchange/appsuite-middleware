@@ -108,8 +108,8 @@ public class UserAwareSSLConfigurationImplTest {
         Mockito.when(this.context.getContextId()).thenReturn(this.contextId);
     }
 
-    @Test
-    public void testIsAllowedToDefineTrustLevel_contextIdInvalid_returnFalse() {
+     @Test
+     public void testIsAllowedToDefineTrustLevel_contextIdInvalid_returnFalse() {
         this.userAwareSSLConfigurationService = new UserAwareSSLConfigurationImpl(userService, contextService, configViewFactory);
 
         boolean trustAll = this.userAwareSSLConfigurationService.isAllowedToDefineTrustLevel(userId, 0);
@@ -117,8 +117,8 @@ public class UserAwareSSLConfigurationImplTest {
         assertFalse(trustAll);
     }
 
-    @Test
-    public void testIsAllowedToDefineTrustLevel_userIdInvalid_returnFalse() {
+     @Test
+     public void testIsAllowedToDefineTrustLevel_userIdInvalid_returnFalse() {
         this.userAwareSSLConfigurationService = new UserAwareSSLConfigurationImpl(userService, contextService, configViewFactory);
 
         boolean trustAll = this.userAwareSSLConfigurationService.isAllowedToDefineTrustLevel(0, contextId);
@@ -126,8 +126,8 @@ public class UserAwareSSLConfigurationImplTest {
         assertFalse(trustAll);
     }
 
-    @Test
-    public void testIsAllowedToDefineTrustLevel_propertyNotAvailabled_returnFalse() throws OXException {
+     @Test
+     public void testIsAllowedToDefineTrustLevel_propertyNotAvailabled_returnFalse() throws OXException {
         Mockito.when(booleanProp.get()).thenReturn(null);
         this.userAwareSSLConfigurationService = new UserAwareSSLConfigurationImpl(userService, contextService, configViewFactory);
 
@@ -136,8 +136,8 @@ public class UserAwareSSLConfigurationImplTest {
         assertFalse(trustAll);
     }
 
-    @Test
-    public void testIsAllowedToDefineTrustLevel_disabledByConfig_returnFalse() throws OXException {
+     @Test
+     public void testIsAllowedToDefineTrustLevel_disabledByConfig_returnFalse() throws OXException {
         Mockito.when(booleanProp.get()).thenReturn(Boolean.FALSE);
         this.userAwareSSLConfigurationService = new UserAwareSSLConfigurationImpl(userService, contextService, configViewFactory);
 
@@ -146,8 +146,8 @@ public class UserAwareSSLConfigurationImplTest {
         assertFalse(trustAll);
     }
 
-    @Test
-    public void testIsAllowedToDefineTrustLevel_enabledByConfig_returnTrue() throws OXException {
+     @Test
+     public void testIsAllowedToDefineTrustLevel_enabledByConfig_returnTrue() throws OXException {
         Mockito.when(booleanProp.get()).thenReturn(Boolean.TRUE);
         this.userAwareSSLConfigurationService = new UserAwareSSLConfigurationImpl(userService, contextService, configViewFactory);
 
@@ -156,8 +156,8 @@ public class UserAwareSSLConfigurationImplTest {
         assertTrue(trustAll);
     }
 
-    @Test
-    public void testIsTrustAll_userNotAllowed_returnFalse() {
+     @Test
+     public void testIsTrustAll_userNotAllowed_returnFalse() {
         this.userAwareSSLConfigurationService = new UserAwareSSLConfigurationImpl(userService, contextService, configViewFactory) {
 
             @Override
@@ -171,8 +171,8 @@ public class UserAwareSSLConfigurationImplTest {
         assertFalse(trustAll);
     }
 
-    @Test
-    public void testIsTrustAll_userAttributeNotSet_returnFalse() throws OXException {
+     @Test
+     public void testIsTrustAll_userAttributeNotSet_returnFalse() throws OXException {
         Mockito.when(this.userService.getUserAttribute(UserAwareSSLConfigurationService.USER_ATTRIBUTE_NAME, userId, this.context)).thenReturn(null);
         this.userAwareSSLConfigurationService = new UserAwareSSLConfigurationImpl(userService, contextService, configViewFactory) {
 
@@ -187,8 +187,8 @@ public class UserAwareSSLConfigurationImplTest {
         assertFalse(trustAll);
     }
 
-    @Test
-    public void testIsTrustAll_userAttributeSetToFalse_returnFalse() throws OXException {
+     @Test
+     public void testIsTrustAll_userAttributeSetToFalse_returnFalse() throws OXException {
         Mockito.when(this.userService.getUserAttribute(UserAwareSSLConfigurationService.USER_ATTRIBUTE_NAME, userId, this.context)).thenReturn("false");
         this.userAwareSSLConfigurationService = new UserAwareSSLConfigurationImpl(userService, contextService, configViewFactory) {
 
@@ -203,8 +203,8 @@ public class UserAwareSSLConfigurationImplTest {
         assertFalse(trustAll);
     }
 
-    @Test
-    public void testIsTrustAll_userAttributeSetToTrue_returnTrue() throws OXException {
+     @Test
+     public void testIsTrustAll_userAttributeSetToTrue_returnTrue() throws OXException {
         Mockito.when(this.userService.getUserAttribute(UserAwareSSLConfigurationService.USER_ATTRIBUTE_NAME, userId, this.context)).thenReturn("true");
         this.userAwareSSLConfigurationService = new UserAwareSSLConfigurationImpl(userService, contextService, configViewFactory) {
 
@@ -219,8 +219,8 @@ public class UserAwareSSLConfigurationImplTest {
         assertTrue(trustAll);
     }
 
-    @Test
-    public void testSetTrustAll_userIdNotCorrect_notSet() throws OXException {
+     @Test
+     public void testSetTrustAll_userIdNotCorrect_notSet() throws OXException {
         this.userAwareSSLConfigurationService = new UserAwareSSLConfigurationImpl(userService, contextService, configViewFactory) {
 
             @Override
@@ -233,8 +233,8 @@ public class UserAwareSSLConfigurationImplTest {
         Mockito.verify(this.userService, Mockito.never()).setUserAttribute(Matchers.anyString(), Matchers.anyString(), Matchers.anyInt(), (Context) Matchers.any());
     }
 
-    @Test
-    public void testSetTrustAll_contextIdNotCorrect_notSet() throws OXException {
+     @Test
+     public void testSetTrustAll_contextIdNotCorrect_notSet() throws OXException {
         this.userAwareSSLConfigurationService = new UserAwareSSLConfigurationImpl(userService, contextService, configViewFactory) {
 
             @Override
@@ -247,8 +247,8 @@ public class UserAwareSSLConfigurationImplTest {
         Mockito.verify(this.userService, Mockito.never()).setUserAttribute(Matchers.anyString(), Matchers.anyString(), Matchers.anyInt(), (Context) Matchers.any());
     }
 
-    @Test
-    public void testSetTrustAll_everythingOk_set() throws OXException {
+     @Test
+     public void testSetTrustAll_everythingOk_set() throws OXException {
         this.userAwareSSLConfigurationService = new UserAwareSSLConfigurationImpl(userService, contextService, configViewFactory) {
 
             @Override

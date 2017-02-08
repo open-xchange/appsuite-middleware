@@ -49,13 +49,16 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import java.util.UUID;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.contact.action.CopyRequest;
 import com.openexchange.ajax.contact.action.CopyResponse;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.groupware.container.Contact;
-
 
 /**
  * {@link Bug34075Test}
@@ -69,30 +72,30 @@ public class Bug34075Test extends AbstractManagedContactTest {
      *
      * @param name The test name
      */
-    public Bug34075Test(String name) {
-		super(name);
-	}
+    public Bug34075Test() {
+        super();
+    }
 
-	public void testAssignNewUidDuringCopy() throws Exception {
-	    /*
-	     * create contact
-	     */
-	    Contact contact = generateContact();
-	    contact.setUid(UUID.randomUUID().toString());
-	    contact = manager.newAction(contact);
-	    /*
-	     * copy contact
-	     */
-        CopyResponse copyResponse = client.execute(
-            new CopyRequest(contact.getObjectID(), contact.getParentFolderID(), contact.getParentFolderID(), true));
+    @Test
+    public void testAssignNewUidDuringCopy() throws Exception {
+        /*
+         * create contact
+         */
+        Contact contact = generateContact();
+        contact.setUid(UUID.randomUUID().toString());
+        contact = cotm.newAction(contact);
+        /*
+         * copy contact
+         */
+        CopyResponse copyResponse = getClient().execute(new CopyRequest(contact.getObjectID(), contact.getParentFolderID(), contact.getParentFolderID(), true));
         assertNotNull("No response", copyResponse);
         assertFalse("Errors in response", copyResponse.hasError());
-		JSONObject data = (JSONObject)copyResponse.getData();
-		int objectID = data.getInt(DataFields.ID);
-		/*
-		 * check copy
-		 */
-		Contact copiedContact = manager.getAction(contact.getParentFolderID(), objectID);
+        JSONObject data = (JSONObject) copyResponse.getData();
+        int objectID = data.getInt(DataFields.ID);
+        /*
+         * check copy
+         */
+        Contact copiedContact = cotm.getAction(contact.getParentFolderID(), objectID);
         assertNotNull("Copied contact not found", copiedContact);
         assertEquals("Last name wrong", contact.getSurName(), copiedContact.getSurName());
         assertFalse("Same UID in copied contact", contact.getUid().equals(copiedContact.getUid()));

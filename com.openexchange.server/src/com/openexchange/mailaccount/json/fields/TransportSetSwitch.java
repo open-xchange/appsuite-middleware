@@ -342,4 +342,15 @@ public class TransportSetSwitch implements AttributeSwitch {
         return null;
     }
 
+    @Override
+    public Object mailDisabled() {
+        return null;
+    }
+
+    @Override
+    public Object transportDisabled() {
+        desc.setTransportDisabled(Boolean.parseBoolean(value.toString()));
+        return null;
+    }
+
 }

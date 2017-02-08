@@ -89,6 +89,7 @@ import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
+import com.openexchange.html.HtmlSanitizeOptions;
 import com.openexchange.html.HtmlSanitizeResult;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.HtmlServices;
@@ -128,7 +129,7 @@ public final class HtmlProcessing {
      * @see #formatContentForDisplay(String, String, boolean, Session, MailPath, UserSettingMail, boolean[], DisplayMode)
      * @return The formatted content
      */
-    public static HtmlSanitizeResult formatTextForDisplay(String content, UserSettingMail usm, DisplayMode mode, boolean asMarkup, int maxContentSize) {
+    public static HtmlSanitizeResult formatTextForDisplay(String content, UserSettingMail usm, DisplayMode mode, boolean asMarkup, int maxContentSize) throws OXException {
         return formatContentForDisplay(content, null, false, null, null, usm, null, mode, false, asMarkup, maxContentSize);
     }
 
@@ -141,7 +142,7 @@ public final class HtmlProcessing {
      * @see #formatContentForDisplay(String, String, boolean, Session, MailPath, UserSettingMail, boolean[], DisplayMode)
      * @return The formatted content
      */
-    public static String formatTextForDisplay(String content, UserSettingMail usm, DisplayMode mode) {
+    public static String formatTextForDisplay(String content, UserSettingMail usm, DisplayMode mode) throws OXException {
         return formatTextForDisplay(content, usm, mode, true, -1).getContent();
     }
 
@@ -160,7 +161,7 @@ public final class HtmlProcessing {
      * @see #formatContentForDisplay(String, String, boolean, Session, MailPath, UserSettingMail, boolean[], DisplayMode)
      * @return The formatted content
      */
-    public static String formatHTMLForDisplay(String content, String charset, Session session, MailPath mailPath, UserSettingMail usm, boolean[] modified, DisplayMode mode, boolean embedded, boolean asMarkup) {
+    public static String formatHTMLForDisplay(String content, String charset, Session session, MailPath mailPath, UserSettingMail usm, boolean[] modified, DisplayMode mode, boolean embedded, boolean asMarkup) throws OXException {
         return formatHTMLForDisplay(content, charset, session, mailPath, usm, modified, mode, embedded, asMarkup, -1).getContent();
     }
 
@@ -179,7 +180,7 @@ public final class HtmlProcessing {
      * @see #formatContentForDisplay(String, String, boolean, Session, MailPath, UserSettingMail, boolean[], DisplayMode)
      * @return The formatted content
      */
-    public static String formatHTMLForDisplay(String content, String charset, Session session, MailPath mailPath, MailPath originalMailPath, UserSettingMail usm, boolean[] modified, DisplayMode mode, boolean embedded, boolean asMarkup) {
+    public static String formatHTMLForDisplay(String content, String charset, Session session, MailPath mailPath, MailPath originalMailPath, UserSettingMail usm, boolean[] modified, DisplayMode mode, boolean embedded, boolean asMarkup) throws OXException {
         return formatHTMLForDisplay(content, charset, session, mailPath, originalMailPath, usm, modified, mode, embedded, asMarkup, -1).getContent();
     }
 
@@ -199,7 +200,7 @@ public final class HtmlProcessing {
      * @see #formatContentForDisplay(String, String, boolean, Session, MailPath, UserSettingMail, boolean[], DisplayMode)
      * @return The formatted content
      */
-    public static HtmlSanitizeResult formatHTMLForDisplay(String content, String charset, Session session, MailPath mailPath, UserSettingMail usm, boolean[] modified, DisplayMode mode, boolean embedded, boolean asMarkup, int maxContentSize) {
+    public static HtmlSanitizeResult formatHTMLForDisplay(String content, String charset, Session session, MailPath mailPath, UserSettingMail usm, boolean[] modified, DisplayMode mode, boolean embedded, boolean asMarkup, int maxContentSize) throws OXException {
         return formatHTMLForDisplay(content, charset, session, mailPath, null, usm, modified, mode, embedded, asMarkup, maxContentSize);
     }
 
@@ -220,7 +221,7 @@ public final class HtmlProcessing {
      * @see #formatContentForDisplay(String, String, boolean, Session, MailPath, UserSettingMail, boolean[], DisplayMode)
      * @return The formatted content
      */
-    public static HtmlSanitizeResult formatHTMLForDisplay(String content, String charset, Session session, MailPath mailPath, MailPath originalMailPath, UserSettingMail usm, boolean[] modified, DisplayMode mode, boolean embedded, boolean asMarkup, int maxContentSize) {
+    public static HtmlSanitizeResult formatHTMLForDisplay(String content, String charset, Session session, MailPath mailPath, MailPath originalMailPath, UserSettingMail usm, boolean[] modified, DisplayMode mode, boolean embedded, boolean asMarkup, int maxContentSize) throws OXException {
         return formatContentForDisplay(content, charset, true, session, mailPath, originalMailPath, usm, modified, mode, embedded, asMarkup, maxContentSize);
     }
 
@@ -252,7 +253,7 @@ public final class HtmlProcessing {
      * @param maxContentSize maximum number of bytes that is will be returned for content. '<=0' means unlimited.
      * @return The formatted content
      */
-    public static HtmlSanitizeResult formatContentForDisplay(String content, String charset, boolean isHtml, Session session, MailPath mailPath, UserSettingMail usm, boolean[] modified, DisplayMode mode, boolean embedded, boolean asMarkup, int maxContentSize) {
+    public static HtmlSanitizeResult formatContentForDisplay(String content, String charset, boolean isHtml, Session session, MailPath mailPath, UserSettingMail usm, boolean[] modified, DisplayMode mode, boolean embedded, boolean asMarkup, int maxContentSize) throws OXException {
         return formatContentForDisplay(content, charset, isHtml, session, mailPath, null, usm, modified, mode, embedded, asMarkup, maxContentSize);
     }
 
@@ -287,7 +288,7 @@ public final class HtmlProcessing {
      * @param maxContentSize maximum number of bytes that is will be returned for content. '<=0' means unlimited.
      * @return The formatted content
      */
-    public static HtmlSanitizeResult formatContentForDisplay(String content, String charset, boolean isHtml, Session session, MailPath mailPath, MailPath originalMailPath, UserSettingMail usm, boolean[] modified, DisplayMode mode, boolean embedded, boolean asMarkup, int maxContentSize) {
+    public static HtmlSanitizeResult formatContentForDisplay(String content, String charset, boolean isHtml, Session session, MailPath mailPath, MailPath originalMailPath, UserSettingMail usm, boolean[] modified, DisplayMode mode, boolean embedded, boolean asMarkup, int maxContentSize) throws OXException {
         HtmlSanitizeResult retval = new HtmlSanitizeResult(content);
         if (isHtml) {
             if (DisplayMode.RAW.equals(mode)) {
@@ -297,32 +298,22 @@ public final class HtmlProcessing {
                 retval.setContent(htmlService.dropScriptTagsInHeader(content));
 
                 if (DisplayMode.MODIFYABLE.isIncluded(mode) && usm.isDisplayHtmlInlineContent()) {
-                    final boolean externalImagesAllowed = usm.isAllowHTMLImages();
+                    boolean externalImagesAllowed = usm.isAllowHTMLImages();
+                    boolean suppressLinks = usm.isSuppressLinks();
                     // Resolve <base> tags
                     retval.setContent(htmlService.checkBaseTag(retval.getContent(), externalImagesAllowed));
                     // TODO: Use static string "o1p2e3n4-x5c6h7a8n9g0e" ?
-                    final String cssPrefix = null == mailPath ? null : (embedded ? "ox-" + getHash(mailPath.toString(), 10) : null);
-                    if (useSanitize()) {
+                    String cssPrefix = null == mailPath ? null : (embedded ? "ox-" + getHash(mailPath.toString(), 10) : null);
+                    {
                         // No need to generate well-formed HTML
+                        HtmlSanitizeOptions.Builder optionsBuilder = HtmlSanitizeOptions.builder();
                         if (externalImagesAllowed) {
-                            retval = htmlService.sanitize(retval.getContent(), null, false, null, cssPrefix, maxContentSize);
+                            optionsBuilder.setDropExternalImages(false);
                         } else {
-                            retval = htmlService.sanitize(retval.getContent(), null, true, modified, cssPrefix, maxContentSize);
+                            optionsBuilder.setDropExternalImages(true).setModified(modified);
                         }
-                    } else {
-                        retval.setContent(htmlService.getConformHTML(retval.getContent(), charset == null ? CHARSET_US_ASCII : charset, false));
-                        /*
-                         * Filter according to white-list
-                         */
-                        retval.setContent(htmlService.filterWhitelist(retval.getContent()));
-                        if (externalImagesAllowed) {
-                            /*
-                             * TODO: Does not work reliably by now
-                             */
-                            // retval = htmlService.checkExternalImages(retval);
-                        } else {
-                            retval.setContent(htmlService.filterExternalImages(retval.getContent(), modified));
-                        }
+                        optionsBuilder.setCssPrefix(cssPrefix).setMaxContentSize(maxContentSize).setSuppressLinks(suppressLinks);
+                        retval = htmlService.sanitize(retval.getContent(), optionsBuilder.build());
                     }
                     /*
                      * Filter inlined images
@@ -347,7 +338,9 @@ public final class HtmlProcessing {
                 if (DisplayMode.MODIFYABLE.isIncluded(mode)) {
                     HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
                     if (DisplayMode.DISPLAY.isIncluded(mode)) {
-                        retval.setContent(htmlService.formatURLs(retval.getContent(), COMMENT_ID));
+                        if (false == usm.isSuppressLinks()) {
+                            retval.setContent(htmlService.formatURLs(retval.getContent(), COMMENT_ID));
+                        }
                         retval = htmlService.htmlFormat(retval.getContent(), true, COMMENT_ID, maxContentSize);
                         if (usm.isUseColorQuote()) {
                             retval.setContent(replaceHTMLSimpleQuotesForDisplay(retval.getContent()));
@@ -364,29 +357,11 @@ public final class HtmlProcessing {
         return retval;
     }
 
-    private static volatile Boolean useSanitize;
-
-    /**
-     * Whether to use sanitize.
-     */
-    public static boolean useSanitize() {
-        if (null == useSanitize) {
-            synchronized (HtmlProcessing.class) {
-                if (null == useSanitize) {
-                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    useSanitize = Boolean.valueOf((null == service) || (service.getBoolProperty("com.openexchange.mail.text.useSanitize", true)));
-                }
-            }
-        }
-        return useSanitize.booleanValue();
-    }
-
     static {
         MailReloadable.getInstance().addReloadable(new Reloadable() {
 
             @Override
             public void reloadConfiguration(ConfigurationService configService) {
-                useSanitize = null;
                 imageHost = null;
             }
 
@@ -742,7 +717,7 @@ public final class HtmlProcessing {
      * @param contentType The corresponding content type (including charset parameter)
      * @return The HTML content conform to W3C standards
      */
-    public static String getConformHTML(final String htmlContent, final ContentType contentType) {
+    public static String getConformHTML(final String htmlContent, final ContentType contentType) throws OXException {
         return getConformHTML(htmlContent, contentType.getCharsetParameter());
     }
 
@@ -753,7 +728,7 @@ public final class HtmlProcessing {
      * @param charset The charset parameter
      * @return The HTML content conform to W3C standards
      */
-    public static String getConformHTML(final String htmlContent, final String charset) {
+    public static String getConformHTML(final String htmlContent, final String charset) throws OXException {
         return ServerServiceRegistry.getInstance().getService(HtmlService.class).getConformHTML(htmlContent, charset);
     }
 

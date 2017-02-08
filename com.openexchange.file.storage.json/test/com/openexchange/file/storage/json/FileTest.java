@@ -49,18 +49,20 @@
 
 package com.openexchange.file.storage.json;
 
-import junit.framework.TestCase;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.json.actions.files.TestFriendlyInfostoreRequest;
 import com.openexchange.sim.SimBuilder;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * {@link FileTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class FileTest extends TestCase {
-
+public class FileTest {
     protected SimBuilder fileAccessBuilder;
 
     protected TestFriendlyInfostoreRequest request;

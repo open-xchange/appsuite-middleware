@@ -430,10 +430,8 @@ public final class POP3CapabilityCache {
                             final char c = (char) i;
                             if (c == '\r') {
                                 eol = true;
-                                skipLF = true;
                             } else if (c == '\n') {
                                 eol = true;
-                                skipLF = false;
                             } else {
                                 sb.append(c);
                             }

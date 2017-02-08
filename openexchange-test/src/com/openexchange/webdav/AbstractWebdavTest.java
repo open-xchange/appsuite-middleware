@@ -49,12 +49,13 @@
 
 package com.openexchange.webdav;
 
+import static org.junit.Assert.assertTrue;
 import java.util.Properties;
 import javax.xml.parsers.SAXParserFactory;
-import junit.framework.TestCase;
 import org.jdom2.Namespace;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.input.sax.XMLReaders;
+import org.junit.Before;
 import com.meterware.httpunit.Base64;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
@@ -67,7 +68,7 @@ import com.openexchange.webdav.xml.framework.Constants;
 /**
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public abstract class AbstractWebdavTest extends TestCase {
+public abstract class AbstractWebdavTest {
 
     protected static final String PROTOCOL = "http://";
 
@@ -85,7 +86,7 @@ public abstract class AbstractWebdavTest extends TestCase {
 
     protected String secondlogin = null;
 
-	protected String context;
+    protected String context;
 
     protected int userId = -1;
 
@@ -101,21 +102,15 @@ public abstract class AbstractWebdavTest extends TestCase {
 
     protected WebConversation secondWebCon = null;
 
-
     protected static final int dayInMillis = 86400000;
 
     public static final String AUTHORIZATION = "authorization";
 
-    public AbstractWebdavTest(final String name) {
-        super(name);
-    }
-
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         webCon = new WebConversation();
         secondWebCon = new WebConversation();
 
@@ -149,9 +144,9 @@ public abstract class AbstractWebdavTest extends TestCase {
             password = "";
         }
         if (context != null && context.length() > 0) {
-        	login = login+"@"+context;
+            login = login + "@" + context;
         }
-        return new String(Base64.encode(login+":"+ password));
+        return new String(Base64.encode(login + ":" + password));
     }
 
     protected WebConversation getWebConversation() {

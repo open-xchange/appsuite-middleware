@@ -49,37 +49,30 @@
 
 package com.openexchange.subscribe.google;
 
-import junit.extensions.TestSetup;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * {@link GoogleTestSuite}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class GoogleTestSuite extends TestSuite {
+@RunWith(ParallelSuite.class)
+@Suite.SuiteClasses({ GoogleSubscribeCalendarTest.class, GoogleSubscribeContactTest.class,
 
-    private GoogleTestSuite() {
-        super();
+})
+public class GoogleTestSuite {
+
+    @BeforeClass
+    public static void setUp() {
+        GoogleSubscribeTestEnvironment.getInstance().init();
     }
 
-    public static Test suite() {
-        final TestSuite suite = new TestSuite("com.openexchange.subscribe.google.GoogleTestSuite");
-        suite.addTestSuite(GoogleSubscribeCalendarTest.class);
-        suite.addTestSuite(GoogleSubscribeContactTest.class);
-
-        TestSetup setup = new TestSetup(suite) {
-            @Override
-            protected void setUp() {
-                GoogleSubscribeTestEnvironment.getInstance().init();
-            }
-            @Override
-            protected void tearDown() throws Exception {
-                GoogleSubscribeTestEnvironment.getInstance().cleanup();
-            }
-        };
-
-        return setup;
+    @AfterClass
+    public static void tearDown() throws Exception {
+        GoogleSubscribeTestEnvironment.getInstance().cleanup();
     }
 }

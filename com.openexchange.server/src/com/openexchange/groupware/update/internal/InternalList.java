@@ -635,6 +635,12 @@ public final class InternalList {
 
         list.add(new com.openexchange.groupware.update.tasks.ChangePrimaryKeyForUserAttribute());
 
+        // Drops rather needless foreign keys from tables.
+        list.add(new com.openexchange.groupware.update.tasks.DropFKTaskv3());
+
+        // Adds several columns to "user_mail_account" and "user_transport_account" tables for tracking/managing failed authentication attempts.
+        list.add(new com.openexchange.groupware.update.tasks.AddFailedAuthColumnsToMailAccountTablesTask());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 

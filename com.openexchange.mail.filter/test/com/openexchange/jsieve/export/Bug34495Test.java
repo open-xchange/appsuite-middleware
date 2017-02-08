@@ -93,13 +93,13 @@ public class Bug34495Test extends SieveHandler {
         });
     }
 
-    @Test
-    public void testParseMessageWithQuotes() throws Exception {
+     @Test
+     public void testParseMessageWithQuotes() throws Exception {
         testParseMessage(ERROR_MSG_1);
     }
 
-    @Test
-    public void testParseMessageWithLineBreaks() throws Exception {
+     @Test
+     public void testParseMessageWithLineBreaks() throws Exception {
         testParseMessage(ERROR_MSG_2);
     }
 

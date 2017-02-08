@@ -46,16 +46,16 @@ import org.apache.commons.httpclient.methods.EntityEnclosingMethod;
  */
 public class PropFindMethod extends EntityEnclosingMethod {
 
-	public PropFindMethod() {
-		super();
-	}
+    public PropFindMethod() {
+        super();
+    }
 
-	public PropFindMethod(final String url) {
-		super(url);
-	}
+    public PropFindMethod(final String url) {
+        super(url);
+    }
 
-	@Override
-	public String getName() {
-		return "PROPFIND";
-	}
+    @Override
+    public String getName() {
+        return "PROPFIND";
+    }
 }

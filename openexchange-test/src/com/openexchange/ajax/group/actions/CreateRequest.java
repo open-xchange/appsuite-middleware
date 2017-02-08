@@ -57,6 +57,7 @@ import com.openexchange.group.Group;
 
 /**
  * Request class for creating a group.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class CreateRequest extends AbstractGroupRequest<CreateResponse> {
@@ -89,8 +90,7 @@ public final class CreateRequest extends AbstractGroupRequest<CreateResponse> {
 
     @Override
     public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW)
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW)
         };
     }
 

@@ -156,6 +156,7 @@ public class ConfigurationServices {
      *
      * @param file The file to compute the hash from
      * @return The computed hash
+     * @throws IllegalStateException If hash cannot be computed; file is corrupt/non-existing
      */
     public static byte[] getHash(File file) {
         return getHash(file, "SHA-256");
@@ -167,6 +168,7 @@ public class ConfigurationServices {
      * @param file The file to compute the hash from
      * @param algorithm The algorithm to use
      * @return The computed hash
+     * @throws IllegalStateException If hash cannot be computed; either algorithm is unknown or file is corrupt/non-existing
      */
     public static byte[] getHash(File file, String algorithm) {
         if (null == file || null == algorithm) {

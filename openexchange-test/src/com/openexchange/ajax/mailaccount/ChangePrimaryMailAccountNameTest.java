@@ -49,10 +49,14 @@
 
 package com.openexchange.ajax.mailaccount;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.EnumSet;
 import java.util.List;
 import org.json.JSONException;
+import org.junit.Test;
 import com.openexchange.ajax.mailaccount.actions.MailAccountAllRequest;
 import com.openexchange.ajax.mailaccount.actions.MailAccountAllResponse;
 import com.openexchange.ajax.mailaccount.actions.MailAccountUpdateRequest;
@@ -70,20 +74,13 @@ import com.openexchange.mailaccount.MailAccountDescription;
 public class ChangePrimaryMailAccountNameTest extends AbstractMailAccountTest{
 
     /**
-     * Initializes a new {@link ChangePrimaryMailAccountNameTest}.
-     * @param name
-     */
-    public ChangePrimaryMailAccountNameTest(String name) {
-        super(name);
-    }
-
-    /**
      * Tests that the primary mail account name is changeable.
      *
      * @throws OXException
      * @throws IOException
      * @throws JSONException
      */
+    @Test
     public void testUpdateOfPrimaryMailAccountName() throws OXException, IOException, JSONException{
         MailAccountDescription description = getPrimaryAccount();
         String oldName = description.getName();

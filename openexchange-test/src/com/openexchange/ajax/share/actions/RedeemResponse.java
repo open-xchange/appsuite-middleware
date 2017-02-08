@@ -53,7 +53,6 @@ import java.util.Map;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
-
 /**
  * {@link RedeemResponse}
  *
@@ -61,18 +60,18 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
  * @since v7.8.2
  */
 public class RedeemResponse extends AbstractAJAXResponse {
-    
+
     private final Map<String, String> properties;
 
     protected RedeemResponse(Response response, Map<String, String> properties) {
         super(response);
         this.properties = properties;
     }
-    
+
     public String getShare() {
         return properties.get("share");
     }
-    
+
     public String getLoginType() {
         return properties.get("login_type");
     }
@@ -80,11 +79,11 @@ public class RedeemResponse extends AbstractAJAXResponse {
     public String getMessageType() {
         return properties.get("message_type");
     }
-    
+
     public String getMessage() {
         return properties.get("message");
     }
-    
+
     public String getTarget() {
         return properties.get("target");
     }

@@ -49,10 +49,14 @@
 
 package com.openexchange.groupware;
 
+import static org.junit.Assert.assertTrue;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Properties;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.calendar.CalendarAdministration;
 import com.openexchange.event.impl.EventConfigImpl;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
@@ -67,10 +71,8 @@ import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.setuptools.TestConfig;
 import com.openexchange.test.AjaxInit;
-import junit.framework.TestCase;
 
-
-public class CalendarDeleteTest extends TestCase {
+public class CalendarDeleteTest {
 
     private static int contextid = 1;
     private static int userid = 11;
@@ -81,9 +83,8 @@ public class CalendarDeleteTest extends TestCase {
 
     private static boolean init = false;
 
-    @Override
-	protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         Init.startServer();
 
         final TestConfig config = new TestConfig();
@@ -137,15 +138,15 @@ public class CalendarDeleteTest extends TestCase {
         return uStorage.getUserId(user, context);
     }
 
-    @Override
-	protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         if (init) {
             init = false;
             Init.stopServer();
         }
-        super.tearDown();
     }
 
+    @Test
     public void testDeleteUserData() throws Throwable {
         final Connection readcon = DBPool.pickup(context);
         final Connection writecon = DBPool.pickupWriteable(context);
@@ -157,20 +158,20 @@ public class CalendarDeleteTest extends TestCase {
         ca.deletePerformed(delEvent, readcon, writecon);
 
         final Statement stmt = readcon.createStatement();
-        final ResultSet rs = stmt.executeQuery("SELECT pd.intfield01 from prg_dates pd, prg_dates_members pdm WHERE pd.intfield01 = pdm.object_id AND pdm.member_uid = "+deleteuserid+" AND pd.cid = "+contextid);
-        assertTrue("Test that no appointment exists for user "+deleteuserid, rs.next() != true);
+        final ResultSet rs = stmt.executeQuery("SELECT pd.intfield01 from prg_dates pd, prg_dates_members pdm WHERE pd.intfield01 = pdm.object_id AND pdm.member_uid = " + deleteuserid + " AND pd.cid = " + contextid);
+        assertTrue("Test that no appointment exists for user " + deleteuserid, rs.next() != true);
         rs.close();
 
-        final ResultSet rs2 = stmt.executeQuery("SELECT pd.intfield01 from prg_dates pd WHERE pd.created_from = "+deleteuserid+" AND pd.cid = "+contextid);
-        assertTrue("Test that no cerated_from exists for user "+deleteuserid, rs2.next() != true);
+        final ResultSet rs2 = stmt.executeQuery("SELECT pd.intfield01 from prg_dates pd WHERE pd.created_from = " + deleteuserid + " AND pd.cid = " + contextid);
+        assertTrue("Test that no cerated_from exists for user " + deleteuserid, rs2.next() != true);
         rs2.close();
 
-        final ResultSet rs3 = stmt.executeQuery("SELECT pd.intfield01 from prg_dates pd WHERE pd.changed_from = "+deleteuserid+" AND pd.cid = "+contextid);
-        assertTrue("Test that no changed_from exists for user "+deleteuserid, rs3.next() != true);
+        final ResultSet rs3 = stmt.executeQuery("SELECT pd.intfield01 from prg_dates pd WHERE pd.changed_from = " + deleteuserid + " AND pd.cid = " + contextid);
+        assertTrue("Test that no changed_from exists for user " + deleteuserid, rs3.next() != true);
         rs3.close();
 
-        final ResultSet rs4 = stmt.executeQuery("SELECT pd.intfield01 from prg_dates pd, prg_date_rights pdr WHERE pd.intfield01 = pdr.object_id AND pdr.id = "+deleteuserid+" AND pdr.type = "+Participant.USER+" AND pd.cid = "+contextid);
-        assertTrue("Test that no user_right entry exists for user "+deleteuserid, rs4.next() != true);
+        final ResultSet rs4 = stmt.executeQuery("SELECT pd.intfield01 from prg_dates pd, prg_date_rights pdr WHERE pd.intfield01 = pdr.object_id AND pdr.id = " + deleteuserid + " AND pdr.type = " + Participant.USER + " AND pd.cid = " + contextid);
+        assertTrue("Test that no user_right entry exists for user " + deleteuserid, rs4.next() != true);
         rs4.close();
 
         stmt.close();
@@ -179,7 +180,8 @@ public class CalendarDeleteTest extends TestCase {
         DBPool.pushWrite(context, writecon);
     }
 
-     public void testDeleteGroup() throws Throwable {
+    @Test
+    public void testDeleteGroup() throws Throwable {
         final Connection readcon = DBPool.pickup(context);
         final Connection writecon = DBPool.pickupWriteable(context);
         final SessionObject so = SessionObjectWrapper.createSessionObject(deleteuserid, context.getContextId(), "deleteAllUserApps");
@@ -190,8 +192,8 @@ public class CalendarDeleteTest extends TestCase {
         ca.deletePerformed(delEvent, readcon, writecon);
 
         final Statement stmt = readcon.createStatement();
-        final ResultSet rs = stmt.executeQuery("SELECT pd.intfield01 from prg_dates pd, prg_date_rights pdr WHERE pd.intfield01 = pdr.object_id AND pdr.id = "+groupid+" AND pdr.type = "+Participant.GROUP+" AND pd.cid = "+contextid);
-        assertTrue("Test that no user_right entry exists for group "+deleteuserid, rs.next() != true);
+        final ResultSet rs = stmt.executeQuery("SELECT pd.intfield01 from prg_dates pd, prg_date_rights pdr WHERE pd.intfield01 = pdr.object_id AND pdr.id = " + groupid + " AND pdr.type = " + Participant.GROUP + " AND pd.cid = " + contextid);
+        assertTrue("Test that no user_right entry exists for group " + deleteuserid, rs.next() != true);
         rs.close();
 
         stmt.close();
@@ -200,6 +202,7 @@ public class CalendarDeleteTest extends TestCase {
         DBPool.pushWrite(context, writecon);
     }
 
+    @Test
     public void testDeleteResource() throws Throwable {
         final Connection readcon = DBPool.pickup(context);
         final Connection writecon = DBPool.pickupWriteable(context);
@@ -211,8 +214,8 @@ public class CalendarDeleteTest extends TestCase {
         ca.deletePerformed(delEvent, readcon, writecon);
 
         final Statement stmt = readcon.createStatement();
-        final ResultSet rs = stmt.executeQuery("SELECT pd.intfield01 from prg_dates pd, prg_date_rights pdr WHERE pd.intfield01 = pdr.object_id AND pdr.id = "+resourceid+" AND pdr.type = "+Participant.RESOURCE+" AND pd.cid = "+contextid);
-        assertTrue("Test that no user_right entry exists for resource "+deleteuserid, rs.next() != true);
+        final ResultSet rs = stmt.executeQuery("SELECT pd.intfield01 from prg_dates pd, prg_date_rights pdr WHERE pd.intfield01 = pdr.object_id AND pdr.id = " + resourceid + " AND pdr.type = " + Participant.RESOURCE + " AND pd.cid = " + contextid);
+        assertTrue("Test that no user_right entry exists for resource " + deleteuserid, rs.next() != true);
         rs.close();
 
         stmt.close();
@@ -220,6 +223,5 @@ public class CalendarDeleteTest extends TestCase {
         DBPool.push(context, readcon);
         DBPool.pushWrite(context, writecon);
     }
-
 
 }

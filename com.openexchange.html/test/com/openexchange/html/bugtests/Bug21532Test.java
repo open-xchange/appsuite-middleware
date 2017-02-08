@@ -60,8 +60,8 @@ import com.openexchange.html.AbstractSanitizing;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class Bug21532Test extends AbstractSanitizing {
-    @Test
-    public void testConvertConditionalCommentsWihoutWhitespaces() {
+     @Test
+     public void testConvertConditionalCommentsWihoutWhitespaces() throws Exception {
         String content = getHtmlService().getConformHTML("</head><body><![if !supportLists]><p>You should see this</p><![endif]></body></html>", "UTF-8");
 
         String expected = "<!DOCTYPE html>\n" +

@@ -77,48 +77,34 @@ public class NewAppointmentSearchRequest extends AbstractAppointmentRequest<NewA
      */
     private final Date end;
 
+    /**
+     * The max count of returned appointments
+     */
+    private final int limit;
 
-	/**
-	 * The max count of returned appointments
-	 */
-	private final int limit;
+    private final TimeZone timeZone;
 
-	private final TimeZone timeZone;
+    private int[] columns = { DataObject.OBJECT_ID, FolderChildObject.FOLDER_ID, CommonObject.PRIVATE_FLAG, CommonObject.CATEGORIES, CalendarObject.TITLE, Appointment.LOCATION, CalendarObject.START_DATE, CalendarObject.END_DATE, CalendarObject.NOTE, CalendarObject.RECURRENCE_TYPE, Appointment.SHOWN_AS, Appointment.FULL_TIME, Appointment.COLOR_LABEL
+    };
 
-	private int[] columns = {
-		DataObject.OBJECT_ID,
-		FolderChildObject.FOLDER_ID,
-		CommonObject.PRIVATE_FLAG,
-		CommonObject.CATEGORIES,
-		CalendarObject.TITLE,
-		Appointment.LOCATION,
-		CalendarObject.START_DATE,
-		CalendarObject.END_DATE,
-		CalendarObject.NOTE,
-		CalendarObject.RECURRENCE_TYPE,
-		Appointment.SHOWN_AS,
-		Appointment.FULL_TIME,
-		Appointment.COLOR_LABEL
-	};
-
-	/**
+    /**
      * Default constructor.
      */
     public NewAppointmentSearchRequest(final Date start, final Date end, final int limit, final TimeZone timeZone) {
-		super();
+        super();
         this.start = start;
         this.end = end;
-		this.limit = limit;
-		this.timeZone = timeZone;
+        this.limit = limit;
+        this.timeZone = timeZone;
     }
 
     public NewAppointmentSearchRequest(final Date start, final Date end, final int limit, final TimeZone timeZone, final int[] columns) {
         super();
         this.start = start;
         this.end = end;
-		this.limit = limit;
-		this.timeZone = timeZone;
-		this.columns = columns;
+        this.limit = limit;
+        this.timeZone = timeZone;
+        this.columns = columns;
     }
 
     /**
@@ -142,14 +128,14 @@ public class NewAppointmentSearchRequest extends AbstractAppointmentRequest<NewA
      */
     @Override
     public Parameter[] getParameters() {
-		final List<Parameter> parameterList = new ArrayList<Parameter>();
-		parameterList.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW_APPOINTMENTS));
+        final List<Parameter> parameterList = new ArrayList<Parameter>();
+        parameterList.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW_APPOINTMENTS));
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_START, String.valueOf(start.getTime())));
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_END, String.valueOf(end.getTime())));
-		parameterList.add(new Parameter("limit", String.valueOf(limit)));
-		parameterList.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
+        parameterList.add(new Parameter("limit", String.valueOf(limit)));
+        parameterList.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
 
-		return parameterList.toArray(new Parameter[parameterList.size()]);
+        return parameterList.toArray(new Parameter[parameterList.size()]);
     }
 
     /**

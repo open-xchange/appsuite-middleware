@@ -49,7 +49,7 @@
 
 package com.openexchange.dav.carddav.bugs;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;
@@ -67,35 +67,25 @@ import com.openexchange.groupware.container.Contact;
  */
 public class Bug21235Test extends CardDAVTest {
 
-	public Bug21235Test() {
-		super();
-	}
+    public Bug21235Test() {
+        super();
+    }
 
     @Before
     public void setUserAgent() throws Exception {
-		super.getWebDAVClient().setUserAgent(UserAgents.MACOS_10_6_8);
+        super.getWebDAVClient().setUserAgent(UserAgents.MACOS_10_6_8);
     }
 
     @Test
-	public void testUpdateContact() throws Exception {
-		/*
-		 * create contact
-		 */
-    	final String uid = randomUID() + "-ABSPlugin";
-    	final String pathUid = randomUID() + "-ABSPlugin";
-    	final String firstName = "test";
-    	final String lastName = "heinz";
-    	final String vCard =
-    			"BEGIN:VCARD" + "\r\n" +
-				"VERSION:3.0" + "\r\n" +
-				"N:" + lastName + ";" + firstName + ";;;" + "\r\n" +
-				"FN:" + firstName + " " + lastName + "\r\n" +
-				"CATEGORIES:Kontakte" + "\r\n" +
-				"X-ABUID:A33920F3-656F-47B7-A335-2C603DA3F324\\:ABPerson" + "\r\n" +
-				"UID:" + uid + "\r\n" +
-				"REV:" + super.formatAsUTC(new Date()) + "\r\n" +
-				"END:VCARD" + "\r\n"
-		;
+    public void testUpdateContact() throws Exception {
+        /*
+         * create contact
+         */
+        final String uid = randomUID() + "-ABSPlugin";
+        final String pathUid = randomUID() + "-ABSPlugin";
+        final String firstName = "test";
+        final String lastName = "heinz";
+        final String vCard = "BEGIN:VCARD" + "\r\n" + "VERSION:3.0" + "\r\n" + "N:" + lastName + ";" + firstName + ";;;" + "\r\n" + "FN:" + firstName + " " + lastName + "\r\n" + "CATEGORIES:Kontakte" + "\r\n" + "X-ABUID:A33920F3-656F-47B7-A335-2C603DA3F324\\:ABPerson" + "\r\n" + "UID:" + uid + "\r\n" + "REV:" + super.formatAsUTC(new Date()) + "\r\n" + "END:VCARD" + "\r\n";
         assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putVCard(pathUid, vCard));
         /*
          * verify contact on server
@@ -105,21 +95,11 @@ public class Bug21235Test extends CardDAVTest {
         assertEquals("uid wrong", uid, contact.getUid());
         assertEquals("firstname wrong", firstName, contact.getGivenName());
         assertEquals("lastname wrong", lastName, contact.getSurName());
-		/*
-		 * update contact
-		 */
+        /*
+         * update contact
+         */
         final String updatedFirstName = "test2";
-        final String updatedVCard =
-    			"BEGIN:VCARD" + "\r\n" +
-				"VERSION:3.0" + "\r\n" +
-				"N:" + lastName + ";" + updatedFirstName + ";;;" + "\r\n" +
-				"FN:" + updatedFirstName + " " + lastName + "\r\n" +
-				"CATEGORIES:Kontakte" + "\r\n" +
-				"X-ABUID:A33920F3-656F-47B7-A335-2C603DA3F324\\:ABPerson" + "\r\n" +
-				"UID:" + uid + "\r\n" +
-				"REV:" + super.formatAsUTC(new Date()) + "\r\n" +
-				"END:VCARD" + "\r\n"
-		;
+        final String updatedVCard = "BEGIN:VCARD" + "\r\n" + "VERSION:3.0" + "\r\n" + "N:" + lastName + ";" + updatedFirstName + ";;;" + "\r\n" + "FN:" + updatedFirstName + " " + lastName + "\r\n" + "CATEGORIES:Kontakte" + "\r\n" + "X-ABUID:A33920F3-656F-47B7-A335-2C603DA3F324\\:ABPerson" + "\r\n" + "UID:" + uid + "\r\n" + "REV:" + super.formatAsUTC(new Date()) + "\r\n" + "END:VCARD" + "\r\n";
         assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putVCardUpdate(pathUid, updatedVCard));
         /*
          * verify contact on server
@@ -128,5 +108,5 @@ public class Bug21235Test extends CardDAVTest {
         assertEquals("uid wrong", uid, updatedContact.getUid());
         assertEquals("firstname wrong", updatedFirstName, updatedContact.getGivenName());
         assertEquals("lastname wrong", lastName, updatedContact.getSurName());
-	}
+    }
 }

@@ -53,14 +53,15 @@ import java.util.Collection;
 import java.util.List;
 import com.openexchange.groupware.container.FolderObject;
 
-
 /**
  * {@link FolderNode}
  * FolderNodes are arranged in a tree structure that allows one to navigate through the OX folder tree.
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
 public interface FolderNode {
+
     /**
      * @return The underlying FolderObject
      */
@@ -78,10 +79,11 @@ public interface FolderNode {
 
     /**
      * Tries to resolve the given path parameters as subfolder names relative to this folder.
+     * 
      * @param path, a list of folder names to resolve along
      * @return the FolderNode the resolver arrived at, or null if this path is unknown
      */
-    public FolderNode resolve(String...path);
+    public FolderNode resolve(String... path);
 
     /**
      * Utility method that links to #resolve(String[])
@@ -90,6 +92,7 @@ public interface FolderNode {
 
     /**
      * Recurses breadth first through this subtree
+     * 
      * @param visitor
      */
     public void recurse(FolderNodeVisitor visitor);

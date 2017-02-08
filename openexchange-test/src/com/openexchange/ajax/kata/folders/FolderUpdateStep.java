@@ -57,7 +57,7 @@ import com.openexchange.groupware.container.FolderObject;
 /**
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class FolderUpdateStep extends NeedExistingStep<FolderObject>{
+public class FolderUpdateStep extends NeedExistingStep<FolderObject> {
 
     private final FolderObject entry;
 
@@ -78,7 +78,7 @@ public class FolderUpdateStep extends NeedExistingStep<FolderObject>{
         UpdateRequest updateRequest = new UpdateRequest(EnumAPI.OX_OLD, entry, false);
         CommonInsertResponse updateResponse = execute(updateRequest);
 
-        if(!updateResponse.hasError()) {
+        if (!updateResponse.hasError()) {
             entry.setLastModified(updateResponse.getTimestamp());
             rememberIdentityValues(entry);
         }

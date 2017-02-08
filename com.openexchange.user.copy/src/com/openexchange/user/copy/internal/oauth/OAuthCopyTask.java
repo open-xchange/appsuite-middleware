@@ -58,6 +58,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.id.IDGeneratorService;
@@ -145,8 +146,9 @@ public class OAuthCopyTask implements CopyUserTaskService {
                 final Map<Integer, Integer> oAuthMapping = exchangeOAuthIds(dstCon, accounts, dstCtx);
                 writeOAuthAccountsToDB(accounts, dstCon, i(dstCtxId), i(dstUsrId));
 
-                for (final Integer origin : oAuthMapping.keySet()) {
-                    final Integer target = oAuthMapping.get(origin);
+                for (final Entry<Integer, Integer> entry : oAuthMapping.entrySet()) {
+                    Integer origin = entry.getKey();
+                    Integer target = entry.getValue();
                     accountMapping.addMapping(origin, target);
                 }
             }

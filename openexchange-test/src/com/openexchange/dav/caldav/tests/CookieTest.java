@@ -66,15 +66,14 @@ import com.openexchange.dav.caldav.CalDAVTest;
  */
 public class CookieTest extends CalDAVTest {
 
-	@Test
-	public void testNoSessionCookieForCalDAV() throws Exception {
-	    /*
+    @Test
+    public void testNoSessionCookieForCalDAV() throws Exception {
+        /*
          * execute simple propfind
          */
         DavPropertyNameSet props = new DavPropertyNameSet();
         props.add(PropertyNames.PRINCIPAL_URL);
-        PropFindMethod propFind = new PropFindMethod(getWebDAVClient().getBaseURI() + "/",
-                DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
+        PropFindMethod propFind = new PropFindMethod(getWebDAVClient().getBaseURI() + "/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
         try {
             Assert.assertEquals("unexpected http status", StatusCodes.SC_MULTISTATUS, getWebDAVClient().executeMethod(propFind));
         } finally {
@@ -91,6 +90,6 @@ public class CookieTest extends CalDAVTest {
                 }
             }
         }
-	}
+    }
 
 }

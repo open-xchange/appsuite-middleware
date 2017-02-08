@@ -49,14 +49,17 @@
 
 package com.openexchange.ajax.share.bugs;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetResponse;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.infostore.actions.GetInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.GetInfostoreResponse;
 import com.openexchange.ajax.share.GuestClient;
@@ -85,27 +88,22 @@ import com.openexchange.tools.arrays.Arrays;
  */
 public class Bug40627Test extends ShareTest {
 
-    /**
-     * Initializes a new {@link Bug40627Test}.
-     *
-     * @param name The test name
-     */
-    public Bug40627Test(String name) {
-        super(name);
-    }
-
+    @Test
     public void testCheckExtendedFolderPermissionAsAnonymousGuest() throws Exception {
         testCheckExtendedFolderPermissions(createAnonymousGuestPermission());
     }
 
+    @Test
     public void testCheckExtendedFolderPermissionAsInvitedGuest() throws Exception {
         testCheckExtendedFolderPermissions(createNamedGuestPermission(randomUID() + "@example.org", "Test Guest"));
     }
 
+    @Test
     public void testCheckExtendedObjectPermissionAsAnonymousGuest() throws Exception {
         testCheckExtendedObjectPermissions(asObjectPermission(createAnonymousGuestPermission()));
     }
 
+    @Test
     public void testCheckExtendedObjectPermissionAsInvitedGuest() throws Exception {
         testCheckExtendedObjectPermissions(asObjectPermission(createNamedGuestPermission(randomUID() + "@example.org", "Test Guest")));
     }
@@ -118,16 +116,14 @@ public class Bug40627Test extends ShareTest {
         List<OCLPermission> permissions = new ArrayList<OCLPermission>();
         permissions.add(guestPermission);
         OCLPermission groupPermission = new OCLPermission(GroupStorage.GROUP_ZERO_IDENTIFIER, 0);
-        groupPermission.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS,
-            OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
+        groupPermission.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
         groupPermission.setGroupPermission(true);
         permissions.add(groupPermission);
-        AJAXClient client2 = new AJAXClient(User.User2);
+        AJAXClient client2 = getClient2();
         int userId2 = client2.getValues().getUserId();
         client2.logout();
         OCLPermission userPermission = new OCLPermission(userId2, 0);
-        userPermission.setAllPermission(OCLPermission.READ_ALL_OBJECTS, OCLPermission.READ_ALL_OBJECTS,
-            OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+        userPermission.setAllPermission(OCLPermission.READ_ALL_OBJECTS, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
         permissions.add(userPermission);
         FolderObject folder = insertSharedFolder(EnumAPI.OX_NEW, module, getDefaultFolder(module), randomUID(), permissions.toArray(new OCLPermission[permissions.size()]));
         /*
@@ -135,7 +131,7 @@ public class Bug40627Test extends ShareTest {
          */
         OCLPermission matchingPermission = null;
         for (OCLPermission permission : folder.getPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId() && false == permission.isGroupPermission() && permission.getEntity() != userId2) {
+            if (permission.getEntity() != getClient().getValues().getUserId() && false == permission.isGroupPermission() && permission.getEntity() != userId2) {
                 matchingPermission = permission;
                 break;
             }
@@ -168,7 +164,7 @@ public class Bug40627Test extends ShareTest {
         } else {
             visibleUserIDs = new int[] { getClient().getValues().getUserId(), userId2 };
         }
-        checkExtendedPermissions(client, folderShare.getExtendedPermissions(), guest.getEntity(), visibleUserIDs);
+        checkExtendedPermissions(getClient(), folderShare.getExtendedPermissions(), guest.getEntity(), visibleUserIDs);
     }
 
     private void testCheckExtendedObjectPermissions(FileStorageGuestObjectPermission guestPermission) throws Exception {
@@ -178,7 +174,7 @@ public class Bug40627Test extends ShareTest {
         List<FileStorageObjectPermission> permissions = new ArrayList<FileStorageObjectPermission>();
         permissions.add(guestPermission);
         permissions.add(new DefaultFileStorageObjectPermission(GroupStorage.GROUP_ZERO_IDENTIFIER, true, FileStorageObjectPermission.READ));
-        AJAXClient client2 = new AJAXClient(User.User2);
+        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
         int userId2 = client2.getValues().getUserId();
         client2.logout();
         permissions.add(new DefaultFileStorageObjectPermission(userId2, false, FileStorageObjectPermission.WRITE));
@@ -192,7 +188,7 @@ public class Bug40627Test extends ShareTest {
          */
         FileStorageObjectPermission matchingPermission = null;
         for (FileStorageObjectPermission permission : file.getObjectPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId() && false == permission.isGroup() && permission.getEntity() != userId2) {
+            if (permission.getEntity() != getClient().getValues().getUserId() && false == permission.isGroup() && permission.getEntity() != userId2) {
                 matchingPermission = permission;
                 break;
             }
@@ -227,7 +223,7 @@ public class Bug40627Test extends ShareTest {
         } else {
             visibleUserIDs = new int[] { getClient().getValues().getUserId(), userId2 };
         }
-        checkExtendedPermissions(client, fileShare.getExtendedPermissions(), guest.getEntity(), visibleUserIDs);
+        checkExtendedPermissions(getClient(), fileShare.getExtendedPermissions(), guest.getEntity(), visibleUserIDs);
     }
 
     private static void checkExtendedPermissions(AJAXClient sharingClient, List<ExtendedPermissionEntity> actual, int guestID, int[] visibleUserIDs) throws Exception {

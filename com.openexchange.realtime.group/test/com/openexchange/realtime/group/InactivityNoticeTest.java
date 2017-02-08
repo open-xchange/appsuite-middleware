@@ -71,11 +71,8 @@ public class InactivityNoticeTest {
      * @throws java.lang.Exception
      */
     @Before
-    public void setUp() throws Exception {
-    }
-
-    @Test
-    public void test() throws OXException {
+     @Test
+     public void test() throws OXException {
         ID group = new ID("synthetic.office://operations@premium/66499.62446");
         ID member = new ID("ox://francisco.laguna@internal/20d39asd9da93249f009d");
         ID inactivityBot = new ID("inactivityBot@internal");

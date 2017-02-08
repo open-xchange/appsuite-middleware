@@ -154,7 +154,7 @@ public abstract class DefaultFileStorage implements FileStorage {
             boolean deleted = file.delete();
             if (deleted) {
                 File parent = file.getParentFile();
-                while (!parent.equals(storage) && parent.list().length == 0 && deleted) {
+                while (parent != null && !parent.equals(storage) && parent.list().length == 0 && deleted) {
                     File newParent = parent.getParentFile();
                     deleted = parent.delete();
                     parent = newParent;

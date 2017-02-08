@@ -60,7 +60,6 @@ import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
-
 /**
  * {@link FileParser}
  *
@@ -72,6 +71,7 @@ public class FileParser extends AbstractAJAXParser<FileResponse> {
 
     /**
      * Initializes a new {@link FileParser}.
+     * 
      * @param failOnError
      */
     public FileParser(boolean failOnError) {

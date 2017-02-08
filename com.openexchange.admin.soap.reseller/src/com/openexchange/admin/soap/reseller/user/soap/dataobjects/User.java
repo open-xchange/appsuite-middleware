@@ -38,7 +38,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *         &lt;element name="country_business" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="country_home" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="country_other" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="driveFolderMode" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *         &lt;element name="driveUserFolderMode" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="defaultSenderAddress" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="default_group" type="{http://dataobjects.soap.admin.openexchange.com/xsd}Group" minOccurs="0"/>
  *         &lt;element name="department" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
@@ -147,7 +147,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *         &lt;element name="userfield19" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="userfield20" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="primaryAccountName" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="remove_drive_folder_flags" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ *         &lt;element name="convert_drive_user_folders" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -176,7 +176,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
     "countryBusiness",
     "countryHome",
     "countryOther",
-    "driveFolderMode",
+    "driveUserFolderMode",
     "defaultSenderAddress",
     "defaultGroup",
     "department",
@@ -290,7 +290,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
     "userfield19",
     "userfield20",
     "primaryAccountName",
-    "removeDriveFolderFlags"
+    "convertDriveUserFolders"
 })
 public class User {
 
@@ -331,8 +331,8 @@ public class User {
     protected String countryHome;
     @XmlElement(name = "country_other", nillable = true)
     protected String countryOther;
-    @XmlElement(name = "drive_folder_mode", nillable = true)
-    protected String driveFolderMode;
+    @XmlElement(name = "drive_user_folder_mode", nillable = true)
+    protected String driveUserFolderMode;
     @XmlElement(nillable = true)
     protected String defaultSenderAddress;
     @XmlElement(name = "default_group", nillable = true)
@@ -557,8 +557,8 @@ public class User {
     protected String userfield20;
     @XmlElement(nillable = true)
     private String primaryAccountName;
-    @XmlElement(name = "remove_drive_folder_flags", nillable = true)
-    protected Boolean removeDriveFolderFlags;
+    @XmlElement(name = "convert_drive_user_folders", nillable = true)
+    protected Boolean convertDriveUserFolders;
 
     /**
      * Gets the value of the aliases property.
@@ -1028,26 +1028,26 @@ public class User {
     }
     
     /**
-     * Get driveFolderMode value.
+     * Get driveUserFolderMode value.
      * 
      * @return
      *      possible object is
      *     {@link String }
      */
-    public String getDriveFolderMode() {
-        return driveFolderMode;
+    public String getDriveUserFolderMode() {
+        return driveUserFolderMode;
     }
 
     /**
-     * Set driveFolderMode value..
+     * Set driveUserFolderMode value..
      *
      * @param value
      *     allowed object is
      *     {@link String }
      *
      */
-    public void setDriveFolderMode(String value) {
-        this.driveFolderMode = value;
+    public void setDriveUserFolderMode(String value) {
+        this.driveUserFolderMode = value;
     }
 
     /**
@@ -3732,13 +3732,13 @@ public class User {
     public void setPrimaryAccountName(String primaryAccountName) {
         this.primaryAccountName = primaryAccountName;
     }
-    
-    public boolean isRemoveDriveFolderFlags() {
-        return removeDriveFolderFlags;
+
+    public Boolean isConvertDriveUserFolders() {
+        return convertDriveUserFolders;
     }
-    
-    public void setRemoveDriveFolderFlags(Boolean removeDriveFolderFlags) {
-        this.removeDriveFolderFlags = removeDriveFolderFlags;
+
+    public void setConvertDriveUserFolders(Boolean convertDriveUserFolders) {
+        this.convertDriveUserFolders = convertDriveUserFolders;
     }
 
 }

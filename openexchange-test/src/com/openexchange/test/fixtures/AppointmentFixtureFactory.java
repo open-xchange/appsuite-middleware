@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.test.fixtures;
 
 import java.util.ArrayList;
@@ -68,27 +69,29 @@ import com.openexchange.test.fixtures.transformators.ShowAsTransformator;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  * @author Markus Wagner <markus.wagner@open-xchange.com>
  */
-public class AppointmentFixtureFactory implements FixtureFactory<Appointment>{
+public class AppointmentFixtureFactory implements FixtureFactory<Appointment> {
+
     private final FixtureLoader fixtureLoader;
-	private final GroupResolver groupResolver;
+    private final GroupResolver groupResolver;
 
-	public AppointmentFixtureFactory(GroupResolver groupResolver, FixtureLoader fixtureLoader) {
-		super();
-		this.fixtureLoader = fixtureLoader;
-		this.groupResolver = groupResolver;
-	}
+    public AppointmentFixtureFactory(GroupResolver groupResolver, FixtureLoader fixtureLoader) {
+        super();
+        this.fixtureLoader = fixtureLoader;
+        this.groupResolver = groupResolver;
+    }
 
-	@Override
+    @Override
     public Fixtures<Appointment> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
         return new AppointmentFixtures(fixtureName, entries, fixtureLoader, groupResolver);
     }
 
     private class AppointmentFixtures extends DefaultFixtures<Appointment> implements Fixtures<Appointment> {
+
         private final Map<String, Map<String, String>> entries;
 
         private final Map<String, Fixture<Appointment>> appointments = new HashMap<String, Fixture<Appointment>>();
 
-		private final GroupResolver groupResolver;
+        private final GroupResolver groupResolver;
 
         public AppointmentFixtures(final String fixtureName, final Map<String, Map<String, String>> entries, FixtureLoader fixtureLoader, GroupResolver groupResolver) {
             super(Appointment.class, entries, fixtureLoader);
@@ -113,7 +116,7 @@ public class AppointmentFixtureFactory implements FixtureFactory<Appointment>{
                 throw new FixtureException("Entry with name " + entryName + " not found");
             }
             final Appointment appointment = new Appointment();
-            apply(appointment,values);
+            apply(appointment, values);
             applyUsers(appointment, groupResolver);
             final Fixture<Appointment> fixture = new Fixture<Appointment>(appointment, values.keySet().toArray(new String[values.size()]), values);
             appointments.put(entryName, fixture);
@@ -121,29 +124,29 @@ public class AppointmentFixtureFactory implements FixtureFactory<Appointment>{
         }
 
         private void applyUsers(final Appointment appointment, GroupResolver groupResolver) {
-        	if (null != appointment) {
-        		final Participant[] participants = appointment.getParticipants();
-        		if (null != participants) {
-        			final List<UserParticipant> users = new ArrayList<UserParticipant>();
-        			for (Participant participant : participants) {
-						if (Participant.USER == participant.getType()) {
-							users.add((UserParticipant)participant);
-						} else if (Participant.GROUP == participant.getType()) {
-							final GroupParticipant group = (GroupParticipant)participant;
-							final Contact[] groupMembers = groupResolver.resolveGroup(group.getIdentifier());
-							if (null != groupMembers) {
-								for (Contact groupMember : groupMembers) {
-									final UserParticipant userParticipant = new UserParticipant(groupMember.getObjectID());
-									userParticipant.setDisplayName(groupMember.getDisplayName());
-									userParticipant.setEmailAddress(groupMember.getEmail1());
-									users.add(userParticipant);
-								}
-							}
-						}
-					}
-        			appointment.setUsers(users);
-        		}
-        	}
+            if (null != appointment) {
+                final Participant[] participants = appointment.getParticipants();
+                if (null != participants) {
+                    final List<UserParticipant> users = new ArrayList<UserParticipant>();
+                    for (Participant participant : participants) {
+                        if (Participant.USER == participant.getType()) {
+                            users.add((UserParticipant) participant);
+                        } else if (Participant.GROUP == participant.getType()) {
+                            final GroupParticipant group = (GroupParticipant) participant;
+                            final Contact[] groupMembers = groupResolver.resolveGroup(group.getIdentifier());
+                            if (null != groupMembers) {
+                                for (Contact groupMember : groupMembers) {
+                                    final UserParticipant userParticipant = new UserParticipant(groupMember.getObjectID());
+                                    userParticipant.setDisplayName(groupMember.getDisplayName());
+                                    userParticipant.setEmailAddress(groupMember.getEmail1());
+                                    users.add(userParticipant);
+                                }
+                            }
+                        }
+                    }
+                    appointment.setUsers(users);
+                }
+            }
         }
     }
 }

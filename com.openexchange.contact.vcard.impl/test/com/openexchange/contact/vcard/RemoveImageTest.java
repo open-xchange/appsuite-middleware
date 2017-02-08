@@ -49,6 +49,11 @@
 
 package com.openexchange.contact.vcard;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 
@@ -66,7 +71,8 @@ public class RemoveImageTest extends VCardTest {
         super();
     }
 
-    public void testRemoveImageFromKeptVCard() throws Exception {
+         @Test
+     public void testRemoveImageFromKeptVCard() throws Exception {
         VCardParameters parameters = getService().createParameters().setKeepOriginalVCard(true).setRemoveImageFromKeptVCard(true);
         /*
          * import vCard
@@ -113,7 +119,8 @@ public class RemoveImageTest extends VCardTest {
         assertTrue(originalVCard.length() < vCard.length() / 2);
     }
 
-    public void testDontRemoveImageFromKeptVCard_1() throws Exception {
+         @Test
+     public void testDontRemoveImageFromKeptVCard_1() throws Exception {
         VCardParameters parameters = getService().createParameters().setKeepOriginalVCard(true).setRemoveImageFromKeptVCard(false);
         /*
          * import vCard
@@ -160,7 +167,8 @@ public class RemoveImageTest extends VCardTest {
         assertFalse(originalVCard.length() < vCard.length() / 2);
     }
 
-    public void testDontRemoveImageFromKeptVCard_2() throws Exception {
+         @Test
+     public void testDontRemoveImageFromKeptVCard_2() throws Exception {
         VCardParameters parameters = getService().createParameters().setKeepOriginalVCard(false).setRemoveImageFromKeptVCard(true);
         /*
          * import vCard

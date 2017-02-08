@@ -50,7 +50,11 @@
 package com.openexchange.mail.mime;
 
 import javax.mail.internet.MimeUtility;
-import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 
 /**
@@ -59,8 +63,7 @@ import junit.framework.TestCase;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.0
  */
-public class MimeUtilityTest extends TestCase {
-
+public class MimeUtilityTest {
     /**
      * Initializes a new {@link MimeUtilityTest}.
      */
@@ -68,7 +71,8 @@ public class MimeUtilityTest extends TestCase {
         super();
     }
 
-    public void testBug31828() {
+         @Test
+     public void testBug31828() {
         try {
             final byte[] emojiBytes = new byte[] { -16, -97, -110, -87, -16, -97, -110, -87, -16, -97, -110, -87, -16, -97, -110, -87, -16, -97, -110, -87, -16, -97, -110, -87, -16, -97, -110, -87, -16, -97, -110, -87, -16, -97, -110, -87, -16, -97, -110, -87, -16, -97, -110, -87, -16, -97, -110, -87, -16, -97, -110, -87, -16, -97, -110, -87, -16, -97, -110, -87 };
             final String emojiString = new String(emojiBytes, "UTF8");

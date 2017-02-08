@@ -49,37 +49,34 @@
 
 package com.openexchange.ajax.session;
 
-import junit.framework.JUnit4TestAdapter;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * Test suite collecting the tests for the login servlet.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
+@RunWith(ParallelSuite.class)
+@Suite.SuiteClasses({
+    LoginTest.class,
+    StoreTest.class,
+    RedirectTest.class,
+    Bug12437Test.class,
+    DuplicateAuthIdTest.class,
+    RedeemTest.class,
+    HttpAuthTest.class,
+    ChangeIPTest.class,
+    FormLoginTest.class,
+    TokenLoginTest.class,
+    Bug32695Test.class,
+    Bug34928Test.class,
+    Bug35129Test.class,
+    Bug36484Test.class,
+    Bug40821Test.class,
+
+})
 public final class SessionTestSuite {
 
-    private SessionTestSuite() {
-        super();
-    }
-
-    public static Test suite() {
-        final TestSuite tests = new TestSuite("com.openexchange.ajax.session.SessionTestSuite");
-        tests.addTestSuite(LoginTest.class);
-        tests.addTestSuite(StoreTest.class);
-        tests.addTestSuite(RedirectTest.class);
-        tests.addTestSuite(Bug12437Test.class);
-        tests.addTestSuite(DuplicateAuthIdTest.class);
-        tests.addTestSuite(RedeemTest.class);
-        tests.addTestSuite(HttpAuthTest.class);
-        tests.addTestSuite(ChangeIPTest.class);
-        tests.addTestSuite(FormLoginTest.class);
-        tests.addTestSuite(TokenLoginTest.class);
-        tests.addTestSuite(Bug32695Test.class);
-        tests.addTestSuite(Bug34928Test.class);
-        tests.addTest(new JUnit4TestAdapter(Bug35129Test.class));
-        tests.addTestSuite(Bug36484Test.class);
-        tests.addTestSuite(Bug40821Test.class);
-        return tests;
-    }
 }

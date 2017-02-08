@@ -72,6 +72,7 @@ public class RangeRequest extends AbstractReminderRequest<RangeResponse> {
 
     /**
      * Default constructor.
+     * 
      * @param end reminder until this date will be fetched from server.
      */
     public RangeRequest(final Date end) {
@@ -90,9 +91,7 @@ public class RangeRequest extends AbstractReminderRequest<RangeResponse> {
 
     @Override
     public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_RANGE),
-            new Parameter(AJAXServlet.PARAMETER_END, String.valueOf(end.getTime()))
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_RANGE), new Parameter(AJAXServlet.PARAMETER_END, String.valueOf(end.getTime()))
         };
     }
 

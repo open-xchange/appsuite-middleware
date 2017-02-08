@@ -49,7 +49,9 @@
 
 package com.openexchange.realtime.hazelcast.serialization.util;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import org.junit.After;
@@ -103,7 +105,8 @@ public class PortableIDToOXExceptionMapTest {
     }
 
     @After
-    public void tearDown() {
+    public void tearDown()
+ {
         hzInstance1.shutdown();
         hzInstance2.shutdown();
     }
@@ -115,8 +118,8 @@ public class PortableIDToOXExceptionMapTest {
      * @throws InterruptedException
      * @throws ExecutionException
      */
-    @Test
-    public void testIDMapDeserialization() throws InterruptedException, ExecutionException {
+     @Test
+     public void testIDMapDeserialization() throws InterruptedException, ExecutionException {
         IExecutorService hzExecutorService = hzInstance1.getExecutorService("default");
 
         Future<IDMap<OXException>> portableDispatcherFuture = null;

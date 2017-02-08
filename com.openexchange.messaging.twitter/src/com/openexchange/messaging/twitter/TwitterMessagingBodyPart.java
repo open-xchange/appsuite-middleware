@@ -128,7 +128,7 @@ public final class TwitterMessagingBodyPart implements MessagingBodyPart {
      * @param html <code>true</code> to convert status to HTML; otherwise <code>false</code> for text-plain
      * @param parent The parental multipart
      */
-    public TwitterMessagingBodyPart(final Status status, final boolean html, final MultipartContent parent, final Session session) {
+    public TwitterMessagingBodyPart(final Status status, final boolean html, final MultipartContent parent, final Session session) throws OXException {
         super();
         this.parent = parent;
         contentType = html ? CONTENT_TYPE_HTML : CONTENT_TYPE_PLAIN;

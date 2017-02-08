@@ -189,6 +189,10 @@ public class ContextConsoleCreateImpl implements ContextConsoleCreateInterface {
 
     @Override
     public void setAndFillExtension(final AdminParser parser, final Context ctx, final Credentials auth) throws OXConsolePluginException {
+        if (null == ctx) {
+            return;
+        }
+
         final OXContextExtensionImpl firstExtensionByName = (OXContextExtensionImpl) ctx.getFirstExtensionByName(OXContextExtensionImpl.class.getName());
         try {
             HashSet<Restriction> ret = getRestrictions(ResellerAbstraction.parseRestrictions(parser, this.addRestrictionsOption));

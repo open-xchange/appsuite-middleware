@@ -65,49 +65,49 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  */
 public class CopyRequest extends AbstractMailRequest<CopyResponse> {
 
-	private final String sourceFolderID;
-	private final String destinationFolderID;
-	private final boolean failOnError = true;
+    private final String sourceFolderID;
+    private final String destinationFolderID;
+    private final boolean failOnError = true;
     private final String mailID;
 
-    public CopyRequest(String mailID, String sourceFolderID, String destinationFolderID){
-    	this.mailID = mailID;
-    	this.sourceFolderID = sourceFolderID;
-    	this.destinationFolderID = destinationFolderID;
+    public CopyRequest(String mailID, String sourceFolderID, String destinationFolderID) {
+        this.mailID = mailID;
+        this.sourceFolderID = sourceFolderID;
+        this.destinationFolderID = destinationFolderID;
     }
 
-	@Override
+    @Override
     public Object getBody() throws JSONException {
         JSONObject jso = new JSONObject();
         jso.put("folder_id", destinationFolderID);
         return jso;
-	}
+    }
 
-	@Override
+    @Override
     public Method getMethod() {
-		return Method.PUT;
-	}
+        return Method.PUT;
+    }
 
-	@Override
+    @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
-		List<Parameter> list = new LinkedList<Parameter>();
+        List<Parameter> list = new LinkedList<Parameter>();
 
         list.add(new Parameter(Mail.PARAMETER_ACTION, Mail.ACTION_COPY));
         list.add(new Parameter(Mail.PARAMETER_FOLDERID, sourceFolderID));
         list.add(new Parameter(Mail.PARAMETER_ID, mailID));
 
         return list.toArray(new Parameter[list.size()]);
-	}
+    }
 
-	@Override
+    @Override
     public AbstractAJAXParser<? extends CopyResponse> getParser() {
-		return new AbstractAJAXParser<CopyResponse>(failOnError) {
+        return new AbstractAJAXParser<CopyResponse>(failOnError) {
 
             @Override
             protected CopyResponse createResponse(final Response response) throws JSONException {
                 return new CopyResponse(response);
             }
         };
-	}
+    }
 
 }

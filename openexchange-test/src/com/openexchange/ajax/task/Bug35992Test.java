@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.task;
 
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.TimeZone;
 import org.json.JSONException;
@@ -77,13 +78,12 @@ public final class Bug35992Test extends AbstractAJAXSession {
     private TimeZone timeZone;
     private Task task;
 
-    public Bug35992Test(String name) {
-        super(name);
+    public Bug35992Test() {
+        super();
     }
 
     @Before
-    @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
         client1 = getClient();
         timeZone = client1.getValues().getTimeZone();
@@ -96,12 +96,14 @@ public final class Bug35992Test extends AbstractAJAXSession {
     }
 
     @After
-    @Override
-    protected void tearDown() throws Exception {
-        if (task.containsObjectID()) {
-            client1.execute(new DeleteRequest(task));
+    public void tearDown() throws Exception {
+        try {
+            if (task.containsObjectID()) {
+                client1.execute(new DeleteRequest(task));
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
     @Test

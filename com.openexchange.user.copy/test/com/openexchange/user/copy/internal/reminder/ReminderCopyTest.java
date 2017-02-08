@@ -106,8 +106,9 @@ public class ReminderCopyTest extends AbstractUserCopyTest {
         return new String[] { "sequence_reminder" };
     }
     
-    @Override
-    public void tearDown() throws Exception {
+    @After
+    public void tearDown()
+ throws Exception {
         PreparedStatement stmt = null;
         try {
             stmt = srcCon.prepareStatement("DELETE FROM reminder WHERE cid = ? AND userid = ?");
@@ -131,7 +132,8 @@ public class ReminderCopyTest extends AbstractUserCopyTest {
         srcUser = userService.getUser(srcUserId, srcCtx);
     }
 
-    public void testReminderCopy() throws Exception {
+         @Test
+     public void testReminderCopy() throws Exception {
         final Map<String, ObjectMapping<?>> mapping = getBasicObjectMapping();
         fillObjectMappingAndGetReminderIds(srcCon, srcCtx.getContextId(), srcUserId, mapping);
         final Date end = new Date(Long.MAX_VALUE);

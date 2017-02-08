@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.infostore.test;
 
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.util.UUIDs;
 
@@ -61,24 +63,16 @@ import com.openexchange.java.util.UUIDs;
  */
 public class Bug37211Test extends AbstractInfostoreTest {
 
-    /**
-     * Initializes a new {@link Bug37211Test}.
-     *
-     * @param name The test name
-     */
-    public Bug37211Test(final String name) {
-        super(name);
-    }
-
+    @Test
     public void testMoveFolderFromTrash() throws Exception {
         /*
          * create folder below trash
          */
-        int trashFolderID = client.getValues().getInfostoreTrashFolder();
+        int trashFolderID = getClient().getValues().getInfostoreTrashFolder();
         String name = UUIDs.getUnformattedStringFromRandom();
-        FolderObject folder = fMgr.generatePrivateFolder(name, FolderObject.INFOSTORE, trashFolderID, client.getValues().getUserId());
-        folder = fMgr.insertFolderOnServer(folder);
-        FolderObject reloadedFolder = fMgr.getFolderFromServer(folder.getObjectID());
+        FolderObject folder = ftm.generatePrivateFolder(name, FolderObject.INFOSTORE, trashFolderID, getClient().getValues().getUserId());
+        folder = ftm.insertFolderOnServer(folder);
+        FolderObject reloadedFolder = ftm.getFolderFromServer(folder.getObjectID());
         assertEquals("folder type wrong", FolderObject.TRASH, reloadedFolder.getType());
         /*
          * move to public folders
@@ -87,16 +81,16 @@ public class Bug37211Test extends AbstractInfostoreTest {
         toUpdate.setLastModified(folder.getLastModified());
         toUpdate.setObjectID(folder.getObjectID());
         toUpdate.setParentFolderID(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID);
-        fMgr.updateFolderOnServer(toUpdate);
+        ftm.updateFolderOnServer(toUpdate);
         /*
          * check folder type
          */
-        reloadedFolder = fMgr.getFolderFromServer(folder.getObjectID());
+        reloadedFolder = ftm.getFolderFromServer(folder.getObjectID());
         assertEquals("folder type wrong", FolderObject.PUBLIC, reloadedFolder.getType());
         /*
          * verify deletion
          */
-        fMgr.deleteFolderOnServer(folder, true);
+        ftm.deleteFolderOnServer(folder, true);
     }
 
 }

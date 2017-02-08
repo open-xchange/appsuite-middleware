@@ -49,23 +49,27 @@
 
 package com.openexchange.ajax.requesthandler;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 import com.openexchange.ajax.requesthandler.DefaultConverter.NoSuchPath;
 import com.openexchange.ajax.requesthandler.DefaultConverter.Step;
 import com.openexchange.ajax.requesthandler.ResultConverter.Quality;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * {@link DefaultConverterTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class DefaultConverterTest extends TestCase {
-
+public class DefaultConverterTest {
     private final DefaultConverter converter = new DefaultConverter();
 
-    public void testSingleStepConversion() {
+         @Test
+     public void testSingleStepConversion() {
         try {
             TestConverter tc = new TestConverter("A", "B", Quality.GOOD);
             converter.addConverter(tc);
@@ -78,7 +82,8 @@ public class DefaultConverterTest extends TestCase {
         }
     }
 
-    public void testMultiStepConversion() {
+         @Test
+     public void testMultiStepConversion() {
         try {
             TestConverter a = new TestConverter("A", "B", Quality.GOOD);
             TestConverter b = new TestConverter("B", "C", Quality.GOOD);
@@ -95,7 +100,8 @@ public class DefaultConverterTest extends TestCase {
         }
     }
 
-    public void testRetrace() {
+         @Test
+     public void testRetrace() {
         try {
             TestConverter a = new TestConverter("A", "B", Quality.GOOD);
             TestConverter b = new TestConverter("B", "C", Quality.GOOD);
@@ -114,7 +120,8 @@ public class DefaultConverterTest extends TestCase {
         }
     }
 
-    public void testPreferHighQuality() {
+         @Test
+     public void testPreferHighQuality() {
         try {
             TestConverter a = new TestConverter("A", "B", Quality.GOOD);
             TestConverter b = new TestConverter("B", "C", Quality.GOOD);
@@ -133,7 +140,8 @@ public class DefaultConverterTest extends TestCase {
         }
     }
 
-    public void testImpossible() {
+         @Test
+     public void testImpossible() {
         try {
             TestConverter a = new TestConverter("A", "B", Quality.GOOD);
             TestConverter b = new TestConverter("B", "C", Quality.GOOD);

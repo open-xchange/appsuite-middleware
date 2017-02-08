@@ -159,7 +159,7 @@ public class JCSCacheInformation extends StandardMBean implements CacheInformati
             throw new MBeanException(new Exception(message), message);
         }
         if (false == ImmutableSet.copyOf(cacheHub.getCacheNames()).contains(name)) {
-            String message = "No suche cache: " + name;
+            String message = "No such cache: " + name;
             throw new MBeanException(new Exception(message), message);
         }
 
@@ -204,11 +204,12 @@ public class JCSCacheInformation extends StandardMBean implements CacheInformati
         final Iterator<?> iter = memCache.getIterator();
 
         final CountingOnlyOutputStream counter = new CountingOnlyOutputStream();
-        final ObjectOutputStream out;
+       ObjectOutputStream out= null;
         try {
             out = new ObjectOutputStream(counter);
         } catch (final IOException e) {
             LOG.error("", e);
+            Streams.close(out);
             return 0;
         }
         try {

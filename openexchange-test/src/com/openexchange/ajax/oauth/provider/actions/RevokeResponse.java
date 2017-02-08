@@ -52,7 +52,6 @@ package com.openexchange.ajax.oauth.provider.actions;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
-
 /**
  * {@link RevokeResponse}
  *
@@ -63,6 +62,7 @@ public class RevokeResponse extends AbstractAJAXResponse {
 
     /**
      * Initializes a new {@link RevokeResponse}.
+     * 
      * @param response
      */
     protected RevokeResponse(Response response) {

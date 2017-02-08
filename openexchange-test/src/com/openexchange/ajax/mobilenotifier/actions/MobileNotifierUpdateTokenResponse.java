@@ -52,15 +52,16 @@ package com.openexchange.ajax.mobilenotifier.actions;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
-
 /**
  * {@link MobileNotifierUpdateTokenResponse}
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class MobileNotifierUpdateTokenResponse extends AbstractAJAXResponse {
+
     /**
      * Initializes a new {@link MobileNotifierUpdateTokenResponse}.
+     * 
      * @param response
      */
     public MobileNotifierUpdateTokenResponse(Response response) {

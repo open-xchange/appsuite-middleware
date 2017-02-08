@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment.recurrence;
 
+import org.junit.Test;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.Appointment;
@@ -60,8 +61,8 @@ import com.openexchange.groupware.container.Expectations;
  */
 public class TestsForChangingAmongMonthlyRecurrences extends ManagedAppointmentTest {
 
-    public TestsForChangingAmongMonthlyRecurrences(String name) {
-        super(name);
+    public TestsForChangingAmongMonthlyRecurrences() {
+        super();
     }
 
     private Changes generateMonthlyChanges() {
@@ -72,6 +73,7 @@ public class TestsForChangingAmongMonthlyRecurrences extends ManagedAppointmentT
         return changes;
     }
 
+    @Test
     public void testShouldChangeFromMonthly1ToMonthly2WhenCreating() throws Exception {
         Appointment app = generateMonthlyAppointment();
 
@@ -83,6 +85,7 @@ public class TestsForChangingAmongMonthlyRecurrences extends ManagedAppointmentT
         positiveAssertionOnCreateAndUpdate.check(app, changes, expectations);
     }
 
+    @Test
     public void testShouldChangeFromMonthly1ToMonthly2WhenUpdating() throws Exception {
         Appointment app = generateMonthlyAppointment();
 
@@ -94,6 +97,7 @@ public class TestsForChangingAmongMonthlyRecurrences extends ManagedAppointmentT
         positiveAssertionOnCreateAndUpdate.check(app, changes, expectations);
     }
 
+    @Test
     public void testShouldNotFailChangingFromMonthly1ToMonthly2() throws Exception {
         Appointment app = generateMonthlyAppointment();
 
@@ -103,6 +107,7 @@ public class TestsForChangingAmongMonthlyRecurrences extends ManagedAppointmentT
         positiveAssertionOnCreate.check(app, changes, new Expectations(changes));
     }
 
+    @Test
     public void testShouldFailChangingFromMonthly1ToMonthly2UsingOnlyAdditionalData() throws Exception {
         Appointment app = generateMonthlyAppointment();
 
@@ -114,12 +119,10 @@ public class TestsForChangingAmongMonthlyRecurrences extends ManagedAppointmentT
         changes.put(Appointment.RECURRENCE_TYPE, Appointment.MONTHLY);
         changes.put(Appointment.DAYS, Appointment.MONDAY);
 
-        negativeAssertionOnUpdate.check(
-            app,
-            changes,
-            OXExceptionFactory.getInstance().create(OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_INTERVAL));
+        negativeAssertionOnUpdate.check(app, changes, OXExceptionFactory.getInstance().create(OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_INTERVAL));
     }
 
+    @Test
     public void testShouldChangeFromMonthly2ToMonthly1With127DuringCreation() throws Exception {
         Appointment app = generateMonthlyAppointment();
 
@@ -134,6 +137,7 @@ public class TestsForChangingAmongMonthlyRecurrences extends ManagedAppointmentT
         positiveAssertionOnCreate.check(app, changes, expectations);
     }
 
+    @Test
     public void testShouldChangeFromMonthly2ToMonthly1With127WhenUpdating() throws Exception {
         Appointment app = generateMonthlyAppointment();
 
@@ -148,6 +152,7 @@ public class TestsForChangingAmongMonthlyRecurrences extends ManagedAppointmentT
         positiveAssertionOnCreateAndUpdate.check(app, changes, expectations);
     }
 
+    @Test
     public void testShouldChangeFromMonthly2ToMonthly1WithNullDuringCreation() throws Exception {
         Appointment app = generateMonthlyAppointment();
 
@@ -163,6 +168,7 @@ public class TestsForChangingAmongMonthlyRecurrences extends ManagedAppointmentT
         positiveAssertionOnCreate.check(app, changes, expectations);
     }
 
+    @Test
     public void testShouldChangeFromMonthly2ToMonthly1WithNullWhenUpdating() throws Exception {
         Appointment app = generateMonthlyAppointment();
 
@@ -178,6 +184,7 @@ public class TestsForChangingAmongMonthlyRecurrences extends ManagedAppointmentT
         positiveAssertionOnCreateAndUpdate.check(app, changes, expectations);
     }
 
+    @Test
     public void testShouldFailChangingFromMonthly2ToMonthly1UsingOnlyAdditionalData() throws Exception {
         Appointment app = generateMonthlyAppointment();
 
@@ -189,10 +196,7 @@ public class TestsForChangingAmongMonthlyRecurrences extends ManagedAppointmentT
         changes.put(Appointment.RECURRENCE_TYPE, Appointment.MONTHLY);
         changes.put(Appointment.DAYS, 127);
 
-        negativeAssertionOnUpdate.check(
-            app,
-            changes,
-            OXExceptionFactory.getInstance().create(OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_INTERVAL));
+        negativeAssertionOnUpdate.check(app, changes, OXExceptionFactory.getInstance().create(OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_INTERVAL));
     }
 
 }

@@ -52,6 +52,8 @@ package com.openexchange.ajax.find.calendar;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import org.junit.After;
+import org.junit.Before;
 import com.openexchange.ajax.find.AbstractFindTest;
 import com.openexchange.ajax.find.PropDocument;
 import com.openexchange.find.Module;
@@ -76,23 +78,26 @@ public class CalendarFindTest extends AbstractFindTest {
      *
      * @param name The test name
      */
-    public CalendarFindTest(String name) {
-        super(name);
+    public CalendarFindTest() {
+        super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         random = new Random();
-        manager = new CalendarTestManager(client);
+        manager = new CalendarTestManager(getClient());
         manager2 = new CalendarTestManager(client2);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        manager.cleanUp();
-        manager2.cleanUp();
-        super.tearDown();
+        try {
+            manager.cleanUp();
+            manager2.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
     /**
@@ -108,7 +113,7 @@ public class CalendarFindTest extends AbstractFindTest {
         app.setNote(randomUID());
         app.setStartDate(TimeTools.D("Next friday at 10:15"));
         app.setEndDate(TimeTools.D("Next friday at 11:30"));
-        app.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        app.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         app.setIgnoreConflicts(true);
         return app;
     }

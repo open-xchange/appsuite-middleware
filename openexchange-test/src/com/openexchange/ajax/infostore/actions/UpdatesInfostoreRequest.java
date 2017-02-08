@@ -53,7 +53,6 @@ import java.util.Date;
 import com.openexchange.ajax.framework.AbstractUpdatesRequest;
 import com.openexchange.groupware.search.Order;
 
-
 /**
  * {@link UpdatesInfostoreRequest}
  *

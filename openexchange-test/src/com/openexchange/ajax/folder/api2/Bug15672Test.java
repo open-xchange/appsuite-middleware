@@ -49,7 +49,13 @@
 
 package com.openexchange.ajax.folder.api2;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.List;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
@@ -71,31 +77,35 @@ public class Bug15672Test extends AbstractAJAXSession {
     private AJAXClient client;
     private FolderObject folder;
 
-    public Bug15672Test(String name) {
-        super(name);
+    public Bug15672Test() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         folder = new FolderObject();
         folder.setParentFolderID(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
         folder.setFolderName("Bug 15672 Test folder " + System.currentTimeMillis());
         folder.setModule(FolderObject.TASK);
-//        folder.setPermissionsAsArray(new OCLPermission[0]);
+        //        folder.setPermissionsAsArray(new OCLPermission[0]);
         InsertRequest request = new InsertRequest(EnumAPI.OUTLOOK, folder);
         CommonInsertResponse response = client.execute(request);
         response.fillObject(folder);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        DeleteRequest request = new DeleteRequest(EnumAPI.OUTLOOK, folder);
-        client.execute(request);
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
+        try {
+            DeleteRequest request = new DeleteRequest(EnumAPI.OUTLOOK, folder);
+            client.execute(request);
+        } finally {
+            super.tearDown();
+        }
     }
 
+    @Test
     public void test4ProperPermissions() throws Throwable {
         GetRequest request = new GetRequest(EnumAPI.OUTLOOK, folder.getObjectID());
         GetResponse response = client.execute(request);

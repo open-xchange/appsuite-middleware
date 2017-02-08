@@ -61,14 +61,13 @@ import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.json.fields.GetSwitch;
 
-
 /**
  * {@link MailAccountUpdateRequest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class MailAccountUpdateRequest implements AJAXRequest<MailAccountUpdateResponse>{
+public class MailAccountUpdateRequest implements AJAXRequest<MailAccountUpdateResponse> {
 
     private final MailAccountDescription account;
     private final Set<Attribute> attributes;
@@ -97,10 +96,10 @@ public class MailAccountUpdateRequest implements AJAXRequest<MailAccountUpdateRe
         try {
             final JSONObject incrementalUpdate = new JSONObject();
             final GetSwitch getter = new GetSwitch(account);
-            for(final Attribute attribute : attributes) {
+            for (final Attribute attribute : attributes) {
                 incrementalUpdate.put(attribute.getName(), attribute.doSwitch(getter));
             }
-            if(! attributes.contains(Attribute.ID_LITERAL)) {
+            if (!attributes.contains(Attribute.ID_LITERAL)) {
                 incrementalUpdate.put(Attribute.ID_LITERAL.getName(), account.getId());
             }
 
@@ -122,8 +121,7 @@ public class MailAccountUpdateRequest implements AJAXRequest<MailAccountUpdateRe
 
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
-        return new Parameter[]{
-            new Parameter("action", "update")
+        return new Parameter[] { new Parameter("action", "update")
         };
     }
 
@@ -131,6 +129,7 @@ public class MailAccountUpdateRequest implements AJAXRequest<MailAccountUpdateRe
     public AbstractAJAXParser<MailAccountUpdateResponse> getParser() {
         return new MailAccountUpdateParser(failOnError);
     }
+
     @Override
     public String getServletPath() {
         return "/ajax/account";

@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.test.fixtures;
 
 import java.io.Serializable;
@@ -58,25 +59,25 @@ import java.util.Date;
  */
 public class DayOnlyDateComparator implements Comparator<Date>, Serializable {
 
-	private static final long serialVersionUID = 5478489828627817393L;
+    private static final long serialVersionUID = 5478489828627817393L;
 
-	@Override
+    @Override
     public int compare(final Date d1, final Date d2) {
-		final Calendar cal1 = Calendar.getInstance();
-		cal1.setTime(d1);
+        final Calendar cal1 = Calendar.getInstance();
+        cal1.setTime(d1);
 
-		final Calendar cal2 = Calendar.getInstance();
-		cal2.setTime(d2);
+        final Calendar cal2 = Calendar.getInstance();
+        cal2.setTime(d2);
 
-		int difference = cal1.get(Calendar.YEAR) - cal2.get(Calendar.YEAR);
-		if(difference != 0) {
-			return difference;
-		}
+        int difference = cal1.get(Calendar.YEAR) - cal2.get(Calendar.YEAR);
+        if (difference != 0) {
+            return difference;
+        }
 
-		difference = cal1.get(Calendar.DAY_OF_YEAR) - cal2.get(Calendar.DAY_OF_YEAR);
-		if(difference != 0) {
-			return difference;
-		}
-		return 0;
-	}
+        difference = cal1.get(Calendar.DAY_OF_YEAR) - cal2.get(Calendar.DAY_OF_YEAR);
+        if (difference != 0) {
+            return difference;
+        }
+        return 0;
+    }
 }

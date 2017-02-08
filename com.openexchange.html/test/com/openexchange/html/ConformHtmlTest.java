@@ -58,8 +58,8 @@ import org.junit.Test;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class ConformHtmlTest extends AbstractSanitizing {
-    @Test
-    public void testConformHtml() {
+     @Test
+     public void testConformHtml() throws Exception {
         String content = "<table><tr>\n" +
             "<td style=\"background-color:#FFFFFF; height:52px; width:100px;\">\n" +
             "<span style = \"font-size:48px; font-family: Veranda; font-weight: bold; color: #6666FF;\">OX</span>\n" +
@@ -75,8 +75,8 @@ public class ConformHtmlTest extends AbstractSanitizing {
         Assert.assertTrue("Missing <meta> tag.", test.indexOf("?") < 0);
     }
 
-    @Test
-    public void testConformHtml2() {
+     @Test
+     public void testConformHtml2() throws Exception {
         String content = "<p>Text before one empty line</p><p><br></p><p>Text after empty line.</p>";
 
         String test = getHtmlService().getConformHTML(content, "us-ascii");

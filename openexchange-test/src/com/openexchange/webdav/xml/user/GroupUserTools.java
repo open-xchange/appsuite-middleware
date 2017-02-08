@@ -77,13 +77,11 @@ public final class GroupUserTools {
         this.client = client;
     }
 
-    public final int getUserId() throws OXException, IOException,
-        JDOMException, OXException {
+    public final int getUserId() throws OXException, IOException, JDOMException, OXException {
         return getUserId(null);
     }
 
-    public final int getUserId(final String host) throws OXException,
-        IOException, JDOMException, OXException {
+    public final int getUserId(final String host) throws OXException, IOException, JDOMException, OXException {
         if (0 == userId) {
             final SearchRequest request = new SearchRequest();
             final SearchResponse response = client.execute(host, request);

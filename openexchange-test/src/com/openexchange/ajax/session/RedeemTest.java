@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.session;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import org.junit.Test;
 import com.openexchange.java.Strings;
 
 /**
@@ -58,10 +61,11 @@ import com.openexchange.java.Strings;
  */
 public class RedeemTest extends AbstractLoginTest {
 
-    public RedeemTest(String name) {
-        super(name);
+    public RedeemTest() {
+        super();
     }
 
+    @Test
     public void testRedeemRandom() throws Exception {
         createClient();
         String[] credentials = credentials(USER1);

@@ -50,9 +50,7 @@
 package com.openexchange.admin.console.util;
 
 import static org.junit.Assert.assertTrue;
-
 import org.junit.Test;
-
 import com.openexchange.admin.console.AbstractTest;
 import com.openexchange.admin.console.BasicCommandlineOptions;
 import com.openexchange.admin.console.util.database.ListDatabase;
@@ -64,8 +62,8 @@ import com.openexchange.admin.console.util.database.ListDatabase;
 public class ListDatabasesTest extends AbstractTest {
     
     
-    @Test
-    public void testListDatabase() {
+     @Test
+     public void testListDatabase() {
         
         resetBuffers();
         
@@ -79,8 +77,8 @@ public class ListDatabasesTest extends AbstractTest {
         assertTrue("Expected 0 as return code!",0==this.returnCode);
     }
     
-    @Test
-    public void testListDatabaseCSV() {
+     @Test
+     public void testListDatabaseCSV() {
         
         resetBuffers();
         
@@ -94,8 +92,8 @@ public class ListDatabasesTest extends AbstractTest {
         assertTrue("Expected 0 as return code!",0==this.returnCode);
     }
     
-    @Test
-    public void testListDatabaseInvalidCredentials() {
+     @Test
+     public void testListDatabaseInvalidCredentials() {
         
         resetBuffers();
         
@@ -109,8 +107,8 @@ public class ListDatabasesTest extends AbstractTest {
         assertTrue("Expected invalid credentials as return code!",BasicCommandlineOptions.SYSEXIT_INVALID_CREDENTIALS==this.returnCode);
     }
     
-    @Test
-    public void testListDatabaseUnknownOption() {
+     @Test
+     public void testListDatabaseUnknownOption() {
         
         resetBuffers();
         

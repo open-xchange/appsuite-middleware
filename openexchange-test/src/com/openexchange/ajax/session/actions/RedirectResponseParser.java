@@ -51,7 +51,6 @@ package com.openexchange.ajax.session.actions;
 
 import com.openexchange.ajax.framework.AbstractRedirectParser;
 
-
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>

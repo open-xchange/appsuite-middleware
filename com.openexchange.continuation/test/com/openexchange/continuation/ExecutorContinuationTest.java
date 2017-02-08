@@ -88,8 +88,8 @@ public class ExecutorContinuationTest {
         registry = null;
     }
 
-    @Test
-    public void testExecutorContinuation() {
+     @Test
+     public void testExecutorContinuation() {
         try {
             ExecutorContinuation<String> executorContinuation = ExecutorContinuation.newContinuation(Executors.newCachedThreadPool());
 

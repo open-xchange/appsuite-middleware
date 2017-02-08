@@ -16,10 +16,13 @@
  */
 package org.apache.tika;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
-public class TikaDetectionTest extends TestCase {
-
+public class TikaDetectionTest {
     private final Tika tika = new Tika();
 
     /**
@@ -35,7 +38,8 @@ public class TikaDetectionTest extends TestCase {
      * }'
      * </pre>
      */
-    public void testHttpServerFileExtensions() {
+         @Test
+     public void testHttpServerFileExtensions() {
         assertEquals("application/andrew-inset", tika.detect("x.ez"));
         assertEquals("application/applixware", tika.detect("x.aw"));
         assertEquals("application/atom+xml", tika.detect("x.atom"));

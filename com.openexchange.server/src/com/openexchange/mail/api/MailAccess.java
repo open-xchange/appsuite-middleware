@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.api;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.Closeable;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -88,7 +89,9 @@ import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.mime.MimeCleanUp;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
+import com.openexchange.mailaccount.Account;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
@@ -109,7 +112,7 @@ import com.openexchange.version.Version;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMessageStorage> implements Serializable, Closeable {
+public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMessageStorage> implements Serializable, Closeable, IMailStorage {
 
     /**
      * Serial version UID
@@ -244,6 +247,11 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
         this.accountId = accountId;
         cacheable = true;
         trackable = true;
+    }
+
+    @Override
+    public <T> T supports(Class<T> iface) throws OXException {
+        return iface.isInstance(this) ? (T) this : null;
     }
 
     /**
@@ -767,6 +775,12 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             if (!supports(mailConfig.getAuthType())) {
                 throw MailExceptionCode.AUTH_TYPE_NOT_SUPPORTED.create(mailConfig.getAuthType().getName(), mailConfig.getServer());
             }
+            {
+                MailAccount mailAccount = getMailAccount(mailConfig);
+                if (null != mailAccount && mailAccount.isMailDisabled()) {
+                    throw MailExceptionCode.MAIL_ACCESS_DISABLED.create(mailConfig.getServer(), mailConfig.getLogin(), I(session.getUserId()), I(session.getContextId()));
+                }
+            }
             try {
                 connectInternal();
             } catch (OXException e) {
@@ -783,6 +797,20 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             MailAccessWatcher.addMailAccess(this);
             tracked = true;
         }
+    }
+
+    private MailAccount getMailAccount(MailConfig mailConfig) throws OXException {
+        Account account = mailConfig.getAccount();
+        if (account instanceof MailAccount) {
+            return (MailAccount) account;
+        }
+
+        MailAccountStorageService service = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
+        if (null == service) {
+            return null;
+        }
+
+        return service.getMailAccount(accountId, session.getUserId(), session.getContextId());
     }
 
     private OXException handleConnectFailure(OXException e, MailConfig mailConfig) {

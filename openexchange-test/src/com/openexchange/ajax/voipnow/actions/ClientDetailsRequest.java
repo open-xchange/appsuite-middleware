@@ -93,10 +93,7 @@ public class ClientDetailsRequest extends AbstractVoipNowRequest<ClientDetailsRe
      */
     @Override
     public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, "clientdetails"),
-            new Parameter("id", id),
-            new Parameter("identifier", identifier)
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, "clientdetails"), new Parameter("id", id), new Parameter("identifier", identifier)
         };
     }
 

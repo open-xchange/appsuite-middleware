@@ -56,7 +56,6 @@ import org.apache.http.ParseException;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 
-
 /**
  * {@link CustomizedParser}
  *
@@ -93,6 +92,5 @@ public abstract class CustomizedParser<T extends AbstractAJAXResponse> extends A
     public T createResponse(Response response) throws JSONException {
         return delegate.createResponse(response);
     }
-
 
 }

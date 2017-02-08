@@ -52,11 +52,10 @@ package com.openexchange.groupware;
 import java.sql.Connection;
 import java.util.Date;
 import java.util.Properties;
-
-import junit.framework.TestCase;
-
-import com.openexchange.event.impl.EventConfigImpl;
+import org.junit.After;
+import org.junit.Before;
 import com.openexchange.calendar.CalendarSql;
+import com.openexchange.event.impl.EventConfigImpl;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
@@ -69,34 +68,31 @@ import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.test.AjaxInit;
 import com.openexchange.tools.iterator.SearchIterator;
 
-
-public class AppointmentDeleteNoCommit extends TestCase {
+public class AppointmentDeleteNoCommit {
 
     int cols[] = new int[] { Appointment.START_DATE, Appointment.END_DATE, Appointment.TITLE, Appointment.RECURRENCE_ID, Appointment.RECURRENCE_POSITION, Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.USERS, Appointment.FULL_TIME };
     public static final long SUPER_END = 253402210800000L; // 31.12.9999 00:00:00 (GMT)
     public static final String TIMEZONE = "Europe/Berlin";
- // Override these in setup
+    // Override these in setup
     private static int userid = 11; // bishoph
     public final static int contextid = 1;
 
     private static boolean init = false;
 
-    @Override
-	protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         final EventConfigImpl event = new EventConfigImpl();
         event.setEventQueueEnabled(false);
         AppointmentDeleteNoCommit.userid = getUserId();
         ContextStorage.start();
     }
 
-    @Override
-	protected void tearDown() throws Exception {
+    @After
+    protected void tearDown() throws Exception {
         if (init) {
             init = false;
             Init.stopServer();
         }
-        super.tearDown();
     }
 
     private static Properties getAJAXProperties() {
@@ -122,12 +118,12 @@ public class AppointmentDeleteNoCommit extends TestCase {
         return new ContextImpl(contextid);
     }
 
-    void deleteAllAppointments() throws Exception  {
+    void deleteAllAppointments() throws Exception {
         final Connection readcon = DBPool.pickup(getContext());
         final Context context = new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "deleteAllApps");
         final CalendarSql csql = new CalendarSql(so);
-        final SearchIterator<Appointment> si = csql.getAppointmentsBetween(userid, new Date(0), new Date(SUPER_END), cols, 0,  null);
+        final SearchIterator<Appointment> si = csql.getAppointmentsBetween(userid, new Date(0), new Date(SUPER_END), cols, 0, null);
         while (si.hasNext()) {
             final Appointment cdao = si.next();
             CalendarTest.testDelete(cdao);
@@ -146,9 +142,9 @@ public class AppointmentDeleteNoCommit extends TestCase {
     }
 
     /*
-     when i open a multi participant appt and add one resource to the appt, the
-     following error is thrown:
-    */
+     * when i open a multi participant appt and add one resource to the appt, the
+     * following error is thrown:
+     */
     public void testDeleteAll() throws Exception {
 
         // Clean up appointments

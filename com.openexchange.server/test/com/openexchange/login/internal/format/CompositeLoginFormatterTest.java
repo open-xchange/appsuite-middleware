@@ -50,7 +50,11 @@
 package com.openexchange.login.internal.format;
 
 import java.util.List;
-import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 
 /**
@@ -58,8 +62,7 @@ import junit.framework.TestCase;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CompositeLoginFormatterTest extends TestCase {
-
+public final class CompositeLoginFormatterTest {
     /**
      * Initializes a new {@link CompositeLoginFormatterTest}.
      */
@@ -67,7 +70,8 @@ public final class CompositeLoginFormatterTest extends TestCase {
         super();
     }
 
-    public void testLoginFormat() {
+         @Test
+     public void testLoginFormat() {
         final CompositeLoginFormatter cp = new CompositeLoginFormatter("$u - $c - $s - $agent $client end", null);
         List<LoginFormatter> loginFormatters = cp.getLoginFormatters();
 

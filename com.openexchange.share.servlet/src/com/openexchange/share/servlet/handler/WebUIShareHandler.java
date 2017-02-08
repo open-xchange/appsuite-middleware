@@ -173,9 +173,7 @@ public class WebUIShareHandler extends AbstractShareHandler {
             if (guestInfo.getAuthentication() == AuthenticationMode.GUEST_PASSWORD) {
                 location.loginName(guestInfo.getEmailAddress());
             }
-            if (targetPath != null) {
-                location.target(targetPath);
-            }
+            location.target(targetPath);
             LoginLocationRegistry.getInstance().putAndRedirect(location, response);
             return ShareHandlerReply.ACCEPT;
         } catch (IOException e) {

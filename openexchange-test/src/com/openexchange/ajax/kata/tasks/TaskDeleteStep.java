@@ -72,8 +72,7 @@ public class TaskDeleteStep extends NeedExistingStep<Task> {
     }
 
     @Override
-    public void cleanUp() throws Exception {
-    }
+    public void cleanUp() throws Exception {}
 
     @Override
     public void perform(AJAXClient client) throws Exception {

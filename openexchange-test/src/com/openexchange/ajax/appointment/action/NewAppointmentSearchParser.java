@@ -60,25 +60,24 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  */
 public class NewAppointmentSearchParser extends AbstractAJAXParser<NewAppointmentSearchResponse> {
 
-	final int[] columns;
+    final int[] columns;
 
-	final TimeZone timeZone;
+    final TimeZone timeZone;
 
     /**
      * Default constructor.
      */
     NewAppointmentSearchParser(final int[] columns, final TimeZone timeZone) {
         super(false);
-		this.columns = columns;
-		this.timeZone = timeZone;
+        this.columns = columns;
+        this.timeZone = timeZone;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected NewAppointmentSearchResponse createResponse(final Response response)
-        throws JSONException {
+    protected NewAppointmentSearchResponse createResponse(final Response response) throws JSONException {
         return new NewAppointmentSearchResponse(response, columns, timeZone);
     }
 }

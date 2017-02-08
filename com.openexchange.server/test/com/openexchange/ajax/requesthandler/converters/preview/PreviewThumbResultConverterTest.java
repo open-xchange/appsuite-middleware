@@ -1,3 +1,4 @@
+
 package com.openexchange.ajax.requesthandler.converters.preview;
 
 import static com.google.common.net.HttpHeaders.ETAG;
@@ -42,7 +43,7 @@ import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.session.ServerSession;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ThreadPools.class, PreviewImageGenerator.class})
+@PrepareForTest({ ThreadPools.class, PreviewImageGenerator.class })
 public class PreviewThumbResultConverterTest {
 
     private final static String ETAG_VALUE = "http://www.open-xchange.com/infostore/258086/7/1409843861900";
@@ -52,7 +53,7 @@ public class PreviewThumbResultConverterTest {
     private AJAXRequestResult result;
     private ServerSession session;
     private ResourceCache resourceCache;
-    private CachedResource aResource = new CachedResource(new byte[] {1}, "cachedResource", "image/jpeg", 1);
+    private CachedResource aResource = new CachedResource(new byte[] { 1 }, "cachedResource", "image/jpeg", 1);
     private CachedResource noResource = null;
     private Future voidFuture = null;
     private ExecutorService executorService;
@@ -63,11 +64,11 @@ public class PreviewThumbResultConverterTest {
     @Before
     public void setUp() throws Exception {
         allowedConfig = mock(ConfigurationService.class);
-        when(allowedConfig.getBoolProperty( anyString(), anyBoolean())).thenReturn(true);
+        when(allowedConfig.getBoolProperty(anyString(), anyBoolean())).thenReturn(true);
 
         forbiddenConfig = mock(ConfigurationService.class);
-        when(forbiddenConfig.getBoolProperty( anyString(), anyBoolean())).thenReturn(false);
-        
+        when(forbiddenConfig.getBoolProperty(anyString(), anyBoolean())).thenReturn(false);
+
         session = mock(ServerSession.class);
         when(session.getContextId()).thenReturn(1);
         when(session.getUserId()).thenReturn(1);
@@ -76,6 +77,7 @@ public class PreviewThumbResultConverterTest {
         when(session.getUser()).thenReturn(user);
 
         requestData = new AJAXRequestData() {
+
             {
                 setSession(session);
                 putParameter("width", "160");
@@ -104,16 +106,16 @@ public class PreviewThumbResultConverterTest {
         PowerMockito.mockStatic(ThreadPools.class);
         PowerMockito.when(ThreadPools.getExecutorService()).thenReturn(executorService);
 
-
         result = new AJAXRequestResult();
         result.setHeader(ETAG, ETAG_VALUE);
     }
 
     /**
      * * The cache is enabled but we didn't find a valid entry for the request. Expect a 202 status and a Retry-After header.
+     * 
      * @throws OXException
      */
-    @Test 
+    @Test
     public void testConvertWithoutCachedResult() throws OXException {
         when(resourceCache.isEnabledFor(anyInt(), anyInt())).thenReturn(true);
         when(resourceCache.get(anyString(), anyInt(), anyInt())).thenReturn(noResource);
@@ -125,8 +127,8 @@ public class PreviewThumbResultConverterTest {
         FileHolder resultObject = (FileHolder) result.getResultObject();
         assertEquals(PreviewConst.MISSING_THUMBNAIL.length, resultObject.getLength());
         assertEquals(200, result.getHttpStatusCode());
-//        assertEquals(202, result.getHttpStatusCode());
-//        assertEquals(String.valueOf(10), result.getHeader(RETRY_AFTER));
+        //        assertEquals(202, result.getHttpStatusCode());
+        //        assertEquals(String.valueOf(10), result.getHeader(RETRY_AFTER));
     }
 
     /**
@@ -155,20 +157,14 @@ public class PreviewThumbResultConverterTest {
     @Test
     public void testConvertWithoutCacheBlockingAllowed() throws OXException {
         when(resourceCache.isEnabledFor(anyInt(), anyInt())).thenReturn(false);
-        result.setResultObject(new ByteArrayFileHolder(new byte[] {1}));
+        result.setResultObject(new ByteArrayFileHolder(new byte[] { 1 }));
         previewDocument = mock(PreviewDocument.class);
-        when(previewDocument.getThumbnail()).thenReturn(new ByteArrayInputStream(new byte[] {1}));
+        when(previewDocument.getThumbnail()).thenReturn(new ByteArrayInputStream(new byte[] { 1 }));
         Map<String, String> metadata = new HashMap<String, String>(1);
         metadata.put("resourcename", "image.jpg");
         when(previewDocument.getMetaData()).thenReturn(metadata);
         PowerMockito.mockStatic(PreviewImageGenerator.class);
-        PowerMockito.when(PreviewImageGenerator.getPreviewDocument(
-            any(AJAXRequestResult.class),
-            any(AJAXRequestData.class),
-            any(ServerSession.class),
-            any(PreviewService.class),
-            anyLong(),
-            anyBoolean())).thenReturn(previewDocument);
+        PowerMockito.when(PreviewImageGenerator.getPreviewDocument(any(AJAXRequestResult.class), any(AJAXRequestData.class), any(ServerSession.class), any(PreviewService.class), anyLong(), anyBoolean())).thenReturn(previewDocument);
         converter = new PreviewThumbResultConverter(allowedConfig);
         converter.convert(requestData, result, session, null);
         assertNotNull(result.getResultObject());
@@ -179,9 +175,9 @@ public class PreviewThumbResultConverterTest {
     /**
      * There is no cache enabled for the user and we aren't allowed to generate a preview in a blocking fashion. An Exception is expected.
      * 
-     * @throws OXException 
+     * @throws OXException
      */
-    @Test(expected=OXException.class)
+    @Test(expected = OXException.class)
     public void testConvertWithoutCacheBlockingForbiden() throws OXException {
         when(resourceCache.isEnabledFor(anyInt(), anyInt())).thenReturn(false);
         converter = new PreviewThumbResultConverter(forbiddenConfig);

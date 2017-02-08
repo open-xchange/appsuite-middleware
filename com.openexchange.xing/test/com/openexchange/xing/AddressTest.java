@@ -22,8 +22,8 @@ public class AddressTest {
 
     private String filledZeroZeroExistend = "{\"street\":\"Zullicher Strasse 1\",\"zip_code\":\"33333\",\"city\":\"Gross-Kleinostheim\",\"province\":\"Nordrhein-Westfalen\",\"country\":\"DE\",\"email\":\"huhu@huphup.hup\",\"fax\":\"0049|111|111111-1111\",\"phone\":\"0049|111|22222-2222\",\"mobile_phone\":\"0049|170|87654321\"}";
 
-    @Test
-    public void testConstructor_JSONwithNullValues_stillNullAfterSanitizing() throws JSONException {
+     @Test
+     public void testConstructor_JSONwithNullValues_stillNullAfterSanitizing() throws JSONException {
         JSONObject addressInformation = new JSONObject(empty);
 
         Address address = new Address(addressInformation);
@@ -33,8 +33,8 @@ public class AddressTest {
         Assert.assertEquals(null, address.getPhone());
     }
 
-    @Test
-    public void testConstructor_noLeadingZeroZeroOrPlus_setCorrectlyAfterSanitizing() throws JSONException {
+     @Test
+     public void testConstructor_noLeadingZeroZeroOrPlus_setCorrectlyAfterSanitizing() throws JSONException {
         JSONObject addressInformation = new JSONObject(filledNothingInfrontOfCountryCode);
 
         Address address = new Address(addressInformation);
@@ -48,8 +48,8 @@ public class AddressTest {
         Assert.assertEquals("Karl-Wilhelma 99", address.getStreet());
     }
 
-    @Test
-    public void testConstructor_leadingPlusExistend_setCorrectlyAfterSanitzing() throws JSONException {
+     @Test
+     public void testConstructor_leadingPlusExistend_setCorrectlyAfterSanitzing() throws JSONException {
         JSONObject addressInformation = new JSONObject(filledPlusExistend);
 
         Address address = new Address(addressInformation);
@@ -63,8 +63,8 @@ public class AddressTest {
         Assert.assertEquals("Zullicher Strasse 1", address.getStreet());
     }
 
-    @Test
-    public void testConstructor_leadingZeroZeroExistent_setCorrectlyAfterSanitizing() throws JSONException {
+     @Test
+     public void testConstructor_leadingZeroZeroExistent_setCorrectlyAfterSanitizing() throws JSONException {
         JSONObject addressInformation = new JSONObject(filledZeroZeroExistend);
 
         Address address = new Address(addressInformation);

@@ -49,38 +49,19 @@
 
 package com.openexchange.subscribe.mslive;
 
-import junit.extensions.TestSetup;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * {@link MSLiveTestSuite}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class MSLiveTestSuite extends TestSuite {
+@RunWith(ParallelSuite.class)
+@Suite.SuiteClasses({
+    SubscribeMSLiveContactsTest.class,
+})
+public class MSLiveTestSuite {
 
-    private MSLiveTestSuite() {
-        super();
-    }
-
-    public static Test suite() {
-        final TestSuite suite = new TestSuite("com.openexchange.subscribe.mslive.MSLiveTestSuite");
-        suite.addTestSuite(SubscribeMSLiveContactsTest.class);
-
-        TestSetup setup = new TestSetup(suite) {
-
-            @Override
-            protected void setUp() {
-                MSLiveSubscribeTestEnvironment.getInstance().init();
-            }
-
-            @Override
-            protected void tearDown() throws Exception {
-                MSLiveSubscribeTestEnvironment.getInstance().cleanup();
-            }
-        };
-
-        return setup;
-    }
 }

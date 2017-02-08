@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.requesthandler.converters;
 
-import java.util.Iterator;
+import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -75,10 +75,8 @@ public class DebugConverter implements ResultConverter {
         StringBuilder out = new StringBuilder("<!DOCTYPE html><head><title>").append(requestData.getAction()+" Response").append("</title></head><body><h1>Request with action ").append(requestData.getAction()).append("</h1>");
         out.append("<h2>Parameters:</h2>");
         out.append("<table>");
-        Iterator<String> parameterNames = requestData.getParameterNames();
-        while(parameterNames.hasNext()) {
-            String paramName = parameterNames.next();
-            out.append("<tr><th>").append(paramName).append("</th><td>").append(requestData.getParameter(paramName)).append("</td></tr>");
+        for (Map.Entry<String, String> entry : requestData.getParameters().entrySet()) {
+            out.append("<tr><th>").append(entry.getKey()).append("</th><td>").append(entry.getValue()).append("</td></tr>");
         }
         out.append("</table>");
 

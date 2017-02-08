@@ -50,7 +50,11 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
 import java.util.TimeZone;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.GetResponse;
 import com.openexchange.ajax.config.actions.SetRequest;
@@ -58,7 +62,6 @@ import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.test.CalendarTestManager;
-
 
 /**
  * {@link WeirdRecurrencePatternTest}
@@ -78,13 +81,14 @@ public class WeirdRecurrencePatternTest extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link WeirdRecurrencePatternTest}.
+     * 
      * @param name
      */
-    public WeirdRecurrencePatternTest(String name) {
-        super(name);
+    public WeirdRecurrencePatternTest() {
+        super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
@@ -95,34 +99,38 @@ public class WeirdRecurrencePatternTest extends AbstractAJAXSession {
         SetRequest setRequest = new SetRequest(Tree.TimeZone, tz.getID());
         getClient().execute(setRequest);
 
-        ctm = new CalendarTestManager(client);
+        ctm = new CalendarTestManager(getClient());
+        ctm.setTimezone(tz);
         appointment = new Appointment();
         appointment.setTitle("hiliowequhe234123.3");
-        appointment.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         appointment.setRecurrenceType(Appointment.DAILY);
         appointment.setInterval(1);
         appointment.setIgnoreConflicts(true);
     }
 
+    @Test
     public void testPattern() throws Exception {
-        
+
         appointment.setStartDate(D("06.01.2015 15:30", tz));
         appointment.setEndDate(D("06.01.2015 16:30", tz));
         appointment.setTimezone(tz.getID());
         ctm.insert(appointment);
-        
+
         Appointment loaded = ctm.get(appointment.getParentFolderID(), appointment.getObjectID());
         assertEquals("Wrong start date.", D("06.01.2015 15:30", tz), loaded.getStartDate());
         assertEquals("Wrong end date.", D("06.01.2015 16:30", tz), loaded.getEndDate());
     }
-    
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        ctm.cleanUp();
-        SetRequest setRequest = new SetRequest(Tree.TimeZone, origTimeZone);
-        getClient().execute(setRequest);
-        super.tearDown();
+        try {
+            ctm.cleanUp();
+            SetRequest setRequest = new SetRequest(Tree.TimeZone, origTimeZone);
+            getClient().execute(setRequest);
+        } finally {
+            super.tearDown();
+        }
     }
 
 }

@@ -49,14 +49,17 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
+import static org.junit.Assert.fail;
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 
-
 public class Bug11730Test extends CalendarSqlTest {
+
     /**
      * Test for <a href="http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=11730">bug #11730</a>
      */
+    @Test
     public void testDeleteTwoOccurrencesAsParticipant() throws Throwable {
         try {
             final CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(user, secondUser);

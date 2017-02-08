@@ -22,12 +22,7 @@ import java.io.NotSerializableException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-
-import junit.framework.TestCase;
-
 import org.apache.tika.Tika;
-import org.apache.tika.config.TikaConfig;
-import org.apache.tika.detect.DefaultDetector;
 import org.apache.tika.detect.Detector;
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.fork.ForkParser;
@@ -36,21 +31,26 @@ import org.apache.tika.mime.MediaType;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
 import org.apache.tika.sax.BodyContentHandler;
+import org.junit.Test;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * Test that the ForkParser correctly behaves when
  *  wired in to the regular Parsers and their test data
  */
-public class ForkParserIntegrationTest extends TestCase {
-
+public class ForkParserIntegrationTest {
     private Tika tika = new Tika(); // TODO Use TikaConfig instead, when it works
 
     /**
      * Simple text parsing
      */
-    public void testForkedTextParsing() throws Exception {
+         @Test
+     public void testForkedTextParsing() throws Exception {
         ForkParser parser = new ForkParser(
                 ForkParserIntegrationTest.class.getClassLoader(),
                 tika.getParser());
@@ -144,7 +144,8 @@ public class ForkParserIntegrationTest extends TestCase {
      * TIKA-831 Parsers throwing errors should be caught and
      *  properly reported
      */
-    public void testParsingErrorInForkedParserShouldBeReported() throws Exception {
+         @Test
+     public void testParsingErrorInForkedParserShouldBeReported() throws Exception {
         BrokenParser brokenParser = new BrokenParser();
         Parser parser = new ForkParser(ForkParser.class.getClassLoader(), brokenParser);
         InputStream stream = getClass().getResourceAsStream("/test-documents/testTXT.txt");
@@ -179,7 +180,8 @@ public class ForkParserIntegrationTest extends TestCase {
      * If we supply a non serializable object on the ParseContext,
      *  check we get a helpful exception back
      */
-    public void testParserHandlingOfNonSerializable() throws Exception {
+         @Test
+     public void testParserHandlingOfNonSerializable() throws Exception {
        ForkParser parser = new ForkParser(
              ForkParserIntegrationTest.class.getClassLoader(),
              tika.getParser());
@@ -210,7 +212,8 @@ public class ForkParserIntegrationTest extends TestCase {
     /**
      * TIKA-832
      */
-    public void testAttachingADebuggerOnTheForkedParserShouldWork()
+         @Test
+     public void testAttachingADebuggerOnTheForkedParserShouldWork()
             throws Exception {
         ParseContext context = new ParseContext();
         context.set(Parser.class, tika.getParser());
@@ -238,7 +241,8 @@ public class ForkParserIntegrationTest extends TestCase {
      * TIKA-808 - Ensure that parsing of our test PDFs work under
      * the Fork Parser, to ensure that complex parsing behaves
      */
-    public void testForkedPDFParsing() throws Exception {
+         @Test
+     public void testForkedPDFParsing() throws Exception {
         ForkParser parser = new ForkParser(
                 ForkParserIntegrationTest.class.getClassLoader(),
                 tika.getParser());

@@ -223,7 +223,13 @@ public class DispatcherServlet extends SessionServlet {
      * Clears all registered renderer.
      */
     public static void clearRenderer() {
-        RESPONSE_RENDERERS.set(Collections.<ResponseRenderer> emptyList());
+        List<ResponseRenderer> expect;
+        do {
+            expect = RESPONSE_RENDERERS.get();
+            if (expect.isEmpty()) {
+                return;
+            }
+        } while (!RESPONSE_RENDERERS.compareAndSet(expect, Collections.<ResponseRenderer> emptyList()));
     }
 
     // -------------------------------------------------------------------------------------------------

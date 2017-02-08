@@ -52,6 +52,7 @@ package com.openexchange.subscribe.crawler;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import org.junit.Test;
 import org.yaml.snakeyaml.Yaml;
 import com.openexchange.subscribe.crawler.internal.PagePart;
 import com.openexchange.subscribe.crawler.internal.PagePartSequence;
@@ -63,7 +64,8 @@ import com.openexchange.subscribe.crawler.internal.Step;
  */
 public class GenericSubscribeServiceForGoogleWebTest extends GenericSubscribeServiceTestHelpers {
 
-    public void testGenericSubscribeServiceForGoogleMail() {
+         @Test
+     public void testGenericSubscribeServiceForGoogleMail() {
         // insert valid credentials here
         String username = "";
         String password = "";

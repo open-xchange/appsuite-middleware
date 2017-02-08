@@ -70,7 +70,7 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
- * {@link AppsLoadServlet} - Provides App Suite data for loading applciations.
+ * {@link AppsLoadServlet} - Provides App Suite data for loading applications.
  *
  * @author <a href="mailto:viktor.pracht@open-xchange.com">Viktor Pracht</a>
  */
@@ -273,18 +273,43 @@ public class AppsLoadServlet extends SessionServlet {
                         }
                     } catch (OXException e) {
                         LOG.debug("Error loading data for module '{}'", escapeName(module), e);
-                        ew.error(("console.error('Error loading data for supplied module');\n").getBytes("UTF-8"));
+                        writeErrorResponse(ew, format, module);
                     }
                 }
                 if (data != null) {
                     ew.write(data, options);
                 } else {
                     LOG.debug("Could not read data for module '{}'", escapeName(module));
-                    ew.error(("console.error('Could not read data for supplied module');\n").getBytes("UTF-8"));
+                    writeErrorResponse(ew, format, module);
                 }
             }
         }
         ew.done();
+    }
+
+    private void writeErrorResponse(ErrorWriter ew, String format, String module) throws UnsupportedEncodingException, IOException {
+        LOG.debug("Could not read data for module '{}'", escapeName(module));
+        int len = module.length() - 3;
+        String moduleName = module;
+        if (format == null && len > 0 && ".js".equals(module.substring(len))) {
+            moduleName = module.substring(0, len);
+        }
+        int[] key = new int[8];
+        java.util.Random r = new java.util.Random();
+        for (int j = 0; j < key.length; j++) key[j] = r.nextInt(256);
+        char[] obfuscated = moduleName.toCharArray();
+        for (int j = 0; j < obfuscated.length; j++) obfuscated[j] += key[j % key.length];
+        ew.error(("(function(){" +
+            "var key = [" + Strings.join(key, ",") + "], name = '" + escapeName(new String(obfuscated)) + "';" +
+            "function c(c, i) { return c.charCodeAt(0) - key[i % key.length]; }" +
+            "name = String.fromCharCode.apply(String, [].slice.call(name).map(c));" +
+            "define(name, function () {" +
+            "if (ox.debug) console.log(\"Could not read '\" + name + \"'\");" +
+            "throw new Error(\"Could not read '\" + name + \"'\");" +
+            "});" +
+            "}());").getBytes("UTF-8")
+        );
+
     }
 
     // ------------------------------------------------------------------------------------------------------------------------

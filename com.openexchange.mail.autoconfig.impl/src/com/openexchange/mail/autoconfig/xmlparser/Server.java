@@ -56,6 +56,41 @@ package com.openexchange.mail.autoconfig.xmlparser;
  */
 public abstract class Server {
 
+    public static enum SocketType {
+        PLAIN(Server.PLAIN), STARTTLS(Server.STARTTLS), SSL(Server.SSL);
+
+        private final String keyword;
+
+        private SocketType(String keyword) {
+            this.keyword = keyword;
+        }
+
+        public static SocketType getSocketType(String keyword) {
+            if (keyword.equalsIgnoreCase(Server.PLAIN)) {
+                return PLAIN;
+            }
+            if (keyword.equalsIgnoreCase(Server.STARTTLS)) {
+                return STARTTLS;
+            }
+            if (keyword.equalsIgnoreCase(Server.SSL)) {
+                return SSL;
+            }
+            return null;
+        }
+
+        /**
+         * Gets the keyword
+         *
+         * @return The keyword
+         */
+        public String getKeyword() {
+            return keyword;
+        }
+
+    }
+
+    // ---------------------------------------------- Constants -----------------------------------------------
+
     public static final String TYPE = "type";
 
     public static final String POP3 = "pop3";
@@ -100,62 +135,34 @@ public abstract class Server {
 
     public static final String NONE = "none";
 
+    // ---------------------------------------------- Members -----------------------------------------------
+
     private String hostname;
-
     private int port;
-
     private SocketType socketType;
-
     private String username;
-
     private String authentication;
 
-    public enum SocketType {
-        PLAIN(Server.PLAIN), STARTTLS(Server.STARTTLS), SSL(Server.SSL);
-
-        private final String keyword;
-
-        private SocketType(String keyword) {
-            this.keyword = keyword;
-        }
-
-        public static SocketType getSocketType(String keyword) {
-            if (keyword.equalsIgnoreCase(Server.PLAIN)) {
-                return PLAIN;
-            }
-            if (keyword.equalsIgnoreCase(Server.STARTTLS)) {
-                return STARTTLS;
-            }
-            if (keyword.equalsIgnoreCase(Server.SSL)) {
-                return SSL;
-            }
-            return null;
-        }
-
-        /**
-         * Gets the keyword
-         *
-         * @return The keyword
-         */
-        public String getKeyword() {
-            return keyword;
-        }
-
+    /**
+     * Initializes a new {@link Server}.
+     */
+    protected Server() {
+        super();
     }
 
     /**
-     * Gets the hostname
+     * Gets the host name
      *
-     * @return The hostname
+     * @return The host name
      */
     public String getHostname() {
         return hostname;
     }
 
     /**
-     * Sets the hostname
+     * Sets the host name
      *
-     * @param hostname The hostname to set
+     * @param hostname The host name to set
      */
     public void setHostname(String hostname) {
         this.hostname = hostname;
@@ -198,18 +205,18 @@ public abstract class Server {
     }
 
     /**
-     * Gets the username
+     * Gets the user name
      *
-     * @return The username
+     * @return The user name
      */
     public String getUsername() {
         return username;
     }
 
     /**
-     * Sets the username
+     * Sets the user name
      *
-     * @param username The username to set
+     * @param username The user name to set
      */
     public void setUsername(String username) {
         this.username = username;

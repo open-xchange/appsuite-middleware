@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.conversion;
 
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.TimeZone;
 import org.json.JSONException;
@@ -64,38 +65,39 @@ import com.openexchange.exception.OXException;
  */
 public abstract class AbstractConversionTest extends AbstractAJAXSession {
 
-	/**
-	 * Initializes a new {@link AbstractConversionTest}
-	 * @param name
-	 */
-	public AbstractConversionTest(final String name) {
-		super(name);
-	}
+    /**
+     * Initializes a new {@link AbstractConversionTest}
+     * 
+     * @param name
+     */
+    public AbstractConversionTest() {
+        super();
+    }
 
-	/**
-	 * @return the private contact folder of the user.
-	 */
-	protected int getPrivateContactFolder() throws OXException, IOException, SAXException, JSONException {
-		return getClient().getValues().getPrivateContactFolder();
-	}
+    /**
+     * @return the private contact folder of the user.
+     */
+    protected int getPrivateContactFolder() throws OXException, IOException, SAXException, JSONException {
+        return getClient().getValues().getPrivateContactFolder();
+    }
 
-	/**
-	 * @return the private calendar folder of the user.
-	 */
-	protected int getPrivateCalendarFolder() throws OXException, IOException, SAXException, JSONException {
-		return getClient().getValues().getPrivateAppointmentFolder();
-	}
+    /**
+     * @return the private calendar folder of the user.
+     */
+    protected int getPrivateCalendarFolder() throws OXException, IOException, SAXException, JSONException {
+        return getClient().getValues().getPrivateAppointmentFolder();
+    }
 
-	/**
-	 * @return the private task folder of the user.
-	 */
-	protected int getPrivateTaskFolder() throws OXException, IOException, SAXException, JSONException {
-		return getClient().getValues().getPrivateTaskFolder();
-	}
+    /**
+     * @return the private task folder of the user.
+     */
+    protected int getPrivateTaskFolder() throws OXException, IOException, SAXException, JSONException {
+        return getClient().getValues().getPrivateTaskFolder();
+    }
 
-	protected TimeZone getTimeZone() throws OXException, IOException, SAXException, JSONException {
-		return getClient().getValues().getTimeZone();
-	}
+    protected TimeZone getTimeZone() throws OXException, IOException, SAXException, JSONException {
+        return getClient().getValues().getTimeZone();
+    }
 
     protected String parseMailId(String input) {
         try {

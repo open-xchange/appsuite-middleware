@@ -59,6 +59,7 @@ import java.rmi.RemoteException;
 import java.text.ParseException;
 import au.com.bytecode.opencsv.CSVReader;
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -72,6 +73,9 @@ import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public abstract class CreateCore extends UserFilestoreAbstraction {
+    
+    protected static final String OPT_DRIVE_FOLDER_MODE_LONG = "drive-user-folder-mode";
+    private CLIOption driveFolderModeOption;
 
     protected final void setOptions(final AdminParser parser) {
 
@@ -86,8 +90,14 @@ public abstract class CreateCore extends UserFilestoreAbstraction {
         setOptionalOptions(parser);
 
         setFurtherOptions(parser);
+        
+        setUserFolderModeOptions(parser);
 
         parser.allowDynamicOptions();
+    }
+
+    private void setUserFolderModeOptions(AdminParser parser) {
+        this.driveFolderModeOption = setLongOpt(parser, OPT_DRIVE_FOLDER_MODE_LONG, "stringvalue", "The mode how the default drive folders should be created. 'default', 'normal', 'none'. If not selected, 'default' is applied.", true, false, true);
     }
 
     protected abstract void setFurtherOptions(final AdminParser parser);
@@ -122,6 +132,11 @@ public abstract class CreateCore extends UserFilestoreAbstraction {
             applyExtendedOptionsToUser(parser, usr);
 
             applyDynamicOptionsToUser(parser, usr);
+            
+            String value = (String) parser.getOptionValue(driveFolderModeOption);
+            if (null != value) {
+                usr.setDriveFolderMode(value);
+            }
 
             final String filename = (String) parser.getOptionValue(parser.getCsvImportOption());
 

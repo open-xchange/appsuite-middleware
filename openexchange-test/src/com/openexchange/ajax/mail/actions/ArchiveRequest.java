@@ -63,15 +63,15 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  */
 public class ArchiveRequest extends AbstractMailRequest<ArchiveResponse> {
 
-	private final String sourceFolderID;
-	private final boolean failOnError = true;
+    private final String sourceFolderID;
+    private final boolean failOnError = true;
     private final String[] mailIDs;
     private Boolean useDefaultName;
     private Boolean createIfAbsent;
 
-    public ArchiveRequest(String[] mailIDs, String sourceFolderID){
-    	this.mailIDs = mailIDs;
-    	this.sourceFolderID = sourceFolderID;
+    public ArchiveRequest(String[] mailIDs, String sourceFolderID) {
+        this.mailIDs = mailIDs;
+        this.sourceFolderID = sourceFolderID;
     }
 
     /**
@@ -92,24 +92,24 @@ public class ArchiveRequest extends AbstractMailRequest<ArchiveResponse> {
         this.useDefaultName = Boolean.valueOf(useDefaultName);
     }
 
-	@Override
+    @Override
     public Object getBody() throws JSONException {
-	    int length = mailIDs.length;
-	    JSONArray jso = new JSONArray(length);
-	    for (int i = 0; i < length; i++) {
+        int length = mailIDs.length;
+        JSONArray jso = new JSONArray(length);
+        for (int i = 0; i < length; i++) {
             jso.put(mailIDs[i]);
         }
         return jso;
-	}
+    }
 
-	@Override
+    @Override
     public Method getMethod() {
-		return Method.PUT;
-	}
+        return Method.PUT;
+    }
 
-	@Override
+    @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
-		List<Parameter> list = new LinkedList<Parameter>();
+        List<Parameter> list = new LinkedList<Parameter>();
 
         list.add(new Parameter(Mail.PARAMETER_ACTION, "archive"));
         list.add(new Parameter(Mail.PARAMETER_FOLDERID, sourceFolderID));
@@ -121,17 +121,17 @@ public class ArchiveRequest extends AbstractMailRequest<ArchiveResponse> {
         }
 
         return list.toArray(new Parameter[list.size()]);
-	}
+    }
 
-	@Override
+    @Override
     public AbstractAJAXParser<? extends ArchiveResponse> getParser() {
-		return new AbstractAJAXParser<ArchiveResponse>(failOnError) {
+        return new AbstractAJAXParser<ArchiveResponse>(failOnError) {
 
             @Override
             protected ArchiveResponse createResponse(final Response response) throws JSONException {
                 return new ArchiveResponse(response);
             }
         };
-	}
+    }
 
 }

@@ -148,15 +148,15 @@ public class ActivatorTest {
         MockUtils.injectValueIntoPrivateField(this.activator, InjectionFieldConstants.CONTEXT, bundleContext);
     }
 
-    @Test
-    public void testStartBundle_Fine_OneServiceRegistered() throws Exception {
+     @Test
+     public void testStartBundle_Fine_OneServiceRegistered() throws Exception {
         this.activator.startBundle();
 
         ServiceMockActivatorAsserter.verifyAllServicesRegistered(this.activator, 1);
     }
 
-    @Test
-    public void testStopBundle_Fine_AllServicesUnregistered() throws Exception {
+     @Test
+     public void testStopBundle_Fine_AllServicesUnregistered() throws Exception {
         final Multimap<Object, ServiceRegistration<?>> serviceRegistrations = HashMultimap.create(6,2);
         ServiceRegistration<?> serviceRegistration = PowerMockito.mock(ServiceRegistration.class);
         serviceRegistrations.put(PublicationService.class, serviceRegistration);
@@ -167,8 +167,8 @@ public class ActivatorTest {
         ServiceMockActivatorAsserter.verifyAllServicesUnregistered(this.activator);
     }
 
-    @Test
-    public void testStopBundle_Fine_AllTrackersClosed() throws Exception {
+     @Test
+     public void testStopBundle_Fine_AllTrackersClosed() throws Exception {
         final List<ServiceTracker<?, ?>> serviceTrackers = new LinkedList<ServiceTracker<?, ?>>();
         ServiceTracker<?, ?> serviceTracker = PowerMockito.mock(ServiceTracker.class);
         serviceTrackers.add(serviceTracker);

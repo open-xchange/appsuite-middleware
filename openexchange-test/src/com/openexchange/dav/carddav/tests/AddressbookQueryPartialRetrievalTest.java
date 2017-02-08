@@ -49,7 +49,10 @@
 
 package com.openexchange.dav.carddav.tests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -141,22 +144,7 @@ public class AddressbookQueryPartialRetrievalTest extends CardDAVTest {
         String uid = randomUID();
         String firstName = "test";
         String lastName = "horst";
-        String vCard =
-            "BEGIN:VCARD" + "\r\n" +
-            "VERSION:3.0" + "\r\n" +
-            "N:" + lastName + ";" + firstName + ";;;" + "\r\n" +
-            "FN:" + firstName + " " + lastName + "\r\n" +
-            "ORG:test3;" + "\r\n" +
-            "EMAIL;type=INTERNET;type=WORK;type=pref:test@example.com" + "\r\n" +
-            "TEL;type=WORK;type=pref:" + telephone1 + "\r\n" +
-            "TEL;type=CELL:352-3534" + "\r\n" +
-            "TEL;type=HOME:346346" + "\r\n" +
-            "UID:" + uid + "\r\n" +
-            "X-OTTO-HABICHNICHT:Hallo" + "\r\n" +
-            "REV:" + formatAsUTC(new Date()) + "\r\n" +
-            "PRODID:-//Apple Inc.//AddressBook 6.0//EN" + "\r\n" +
-            "END:VCARD" + "\r\n"
-        ;
+        String vCard = "BEGIN:VCARD" + "\r\n" + "VERSION:3.0" + "\r\n" + "N:" + lastName + ";" + firstName + ";;;" + "\r\n" + "FN:" + firstName + " " + lastName + "\r\n" + "ORG:test3;" + "\r\n" + "EMAIL;type=INTERNET;type=WORK;type=pref:test@example.com" + "\r\n" + "TEL;type=WORK;type=pref:" + telephone1 + "\r\n" + "TEL;type=CELL:352-3534" + "\r\n" + "TEL;type=HOME:346346" + "\r\n" + "UID:" + uid + "\r\n" + "X-OTTO-HABICHNICHT:Hallo" + "\r\n" + "REV:" + formatAsUTC(new Date()) + "\r\n" + "PRODID:-//Apple Inc.//AddressBook 6.0//EN" + "\r\n" + "END:VCARD" + "\r\n";
         assertEquals("response code wrong", StatusCodes.SC_CREATED, putVCard(uid, vCard, collection));
         /*
          * verify contact on server
@@ -185,11 +173,11 @@ public class AddressbookQueryPartialRetrievalTest extends CardDAVTest {
         assertNull(vCardResource.getVCard().getOrg());
     }
 
-    private VCardResource assertQueryMatch(int folderID, PropFilter filter, String expectedUID, String...propertyNames) throws Exception {
+    private VCardResource assertQueryMatch(int folderID, PropFilter filter, String expectedUID, String... propertyNames) throws Exception {
         return assertQueryMatch(folderID, Collections.singletonList(filter), null, expectedUID, propertyNames);
     }
 
-	private VCardResource assertQueryMatch(int folderID, List<PropFilter> filters, String filterTest, String expectedUID, final String...propertyNames) throws Exception {
+    private VCardResource assertQueryMatch(int folderID, List<PropFilter> filters, String filterTest, String expectedUID, final String... propertyNames) throws Exception {
         /*
          * construct query
          */
@@ -245,6 +233,6 @@ public class AddressbookQueryPartialRetrievalTest extends CardDAVTest {
         }
         assertNotNull("no matching vcard resource found", matchingResource);
         return matchingResource;
-	}
+    }
 
 }

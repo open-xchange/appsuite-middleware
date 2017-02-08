@@ -54,6 +54,7 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.attach.AttachmentBatch;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
@@ -408,9 +409,11 @@ public interface AppointmentSQLInterface {
      * The context
      * @param numberOfAttachments
      * Amount of attached attachments.
+     * @param batch
+     * Amount batch information about bundled attachment actions.
      * @throws OXException
      */
-    long attachmentAction(int folderId, int objectId, int userId, Session session, Context c, int numberOfAttachments) throws OXException;
+    long attachmentAction(int folderId, int objectId, int userId, Session session, Context c, int numberOfAttachments, AttachmentBatch batch) throws OXException;
 
 
     /**

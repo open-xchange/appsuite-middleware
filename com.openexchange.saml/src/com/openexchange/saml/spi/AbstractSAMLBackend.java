@@ -67,6 +67,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.saml.SAMLConfig;
+import com.openexchange.saml.impl.DefaultConfigReference;
 import com.openexchange.saml.state.AuthnRequestInfo;
 import com.openexchange.saml.state.DefaultAuthnRequestInfo;
 import com.openexchange.saml.state.StateManagement;
@@ -234,4 +235,34 @@ public abstract class AbstractSAMLBackend implements SAMLBackend {
         return defaultAuthnRequestInfo;
     }
 
+    @Override
+    public SAMLConfig getConfig() {
+        return DefaultConfigReference.getDefaultConfig();
+    }
+
+    @Override
+    public String getPath() {
+        return doGethPath();
+    }
+
+    /**
+     * The implementation of the getPath Method
+     * @return the path part
+     */
+    protected String doGethPath() {
+        return "";
+    }
+
+    @Override
+    public String getStaticLoginRedirectLocation(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+        return doGetStaticLoginRedirectLocation(httpRequest, httpResponse);
+    }
+
+    /**
+     * The implementation of the getStaticLoginRedirectLocation Method
+     * @return the static redirect at login and relogin time
+     */
+    protected String doGetStaticLoginRedirectLocation(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+        return null;
+    }
 }

@@ -61,7 +61,6 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Header;
 import com.openexchange.ajax.framework.Header.SimpleHeader;
 
-
 /**
  * {@link NewMailRequestWithUploads}
  *
@@ -109,6 +108,7 @@ public class NewMailRequestWithUploads extends AbstractMailRequest<MailReference
     @Override
     public AbstractAJAXParser<MailReferenceResponse> getParser() {
         return new AbstractAJAXParser<MailReferenceResponse>(failOnError) {
+
             @Override
             protected MailReferenceResponse createResponse(final Response response) throws JSONException {
                 return new MailReferenceResponse(response);

@@ -1,3 +1,8 @@
+* 2017-01-20 - daniel.becker@open-xchange.com
+
+ - Bugfix #51017: Added check for "N/A" values within grizzly_TCPNOIOTransport (a99dee95cc365849d7c387507f8d160f86db3f30)
+ - Bugfix #51018: Removed non-existing mbean "Java heap" in java_heap          (d3b802cf601803da48aa5104b13a8819d00b8542)
+
 * 2011-09-20 - holger.achtziger@open-xchange.com
 
  - Fixed cache statistics

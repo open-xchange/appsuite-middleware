@@ -77,7 +77,6 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.mail.mime.MimeDefaultSession;
 
-
 /**
  * {@link GetMailsResponse}
  *
@@ -88,6 +87,7 @@ public class GetMailsResponse extends AbstractAJAXResponse {
 
     /**
      * Initializes a new {@link GetMailsResponse}.
+     * 
      * @param response
      */
     protected GetMailsResponse(Response response) {

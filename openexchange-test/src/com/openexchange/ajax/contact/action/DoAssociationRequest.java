@@ -58,7 +58,6 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Params;
 import com.openexchange.groupware.container.Contact;
 
-
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
@@ -86,40 +85,30 @@ public class DoAssociationRequest extends AbstractContactRequest<DoAssociationRe
     }
 
     @Override
-    public Parameter[] getParameters(){
-        Params params = new Params(
-            AJAXServlet.PARAMETER_ACTION,
-            FinalContactConstants.ACTION_ASSOCIATE.getName()
-        );
+    public Parameter[] getParameters() {
+        Params params = new Params(AJAXServlet.PARAMETER_ACTION, FinalContactConstants.ACTION_ASSOCIATE.getName());
 
-            if(contributor.containsUserField20()){
-                params.add(FinalContactConstants.PARAMETER_UUID1.getName(), contributor.getUserField20());
-            } else {
-                params.add(
-                    FinalContactConstants.PARAMETER_FOLDER_ID1.getName(),
-                    String.valueOf(contributor.getParentFolderID()),
-                    FinalContactConstants.PARAMETER_CONTACT_ID1.getName(),
-                    String.valueOf(contributor.getObjectID()));
-            }
+        if (contributor.containsUserField20()) {
+            params.add(FinalContactConstants.PARAMETER_UUID1.getName(), contributor.getUserField20());
+        } else {
+            params.add(FinalContactConstants.PARAMETER_FOLDER_ID1.getName(), String.valueOf(contributor.getParentFolderID()), FinalContactConstants.PARAMETER_CONTACT_ID1.getName(), String.valueOf(contributor.getObjectID()));
+        }
 
-            if(aggregator.containsUserField20()){
-                params.add(FinalContactConstants.PARAMETER_UUID2.getName(), aggregator.getUserField20());
-            } else {
-                params.add(
-                    FinalContactConstants.PARAMETER_FOLDER_ID2.getName(),
-                    String.valueOf(aggregator.getParentFolderID()),
-                    FinalContactConstants.PARAMETER_CONTACT_ID2.getName(),
-                    String.valueOf(aggregator.getObjectID()));
-            }
+        if (aggregator.containsUserField20()) {
+            params.add(FinalContactConstants.PARAMETER_UUID2.getName(), aggregator.getUserField20());
+        } else {
+            params.add(FinalContactConstants.PARAMETER_FOLDER_ID2.getName(), String.valueOf(aggregator.getParentFolderID()), FinalContactConstants.PARAMETER_CONTACT_ID2.getName(), String.valueOf(aggregator.getObjectID()));
+        }
 
         return params.toArray();
     }
 
     @Override
     public AbstractAJAXParser<? extends DoAssociationResponse> getParser() {
-        return new AbstractAJAXParser<DoAssociationResponse>(true){
+        return new AbstractAJAXParser<DoAssociationResponse>(true) {
+
             @Override
-            public DoAssociationResponse createResponse(final Response response){
+            public DoAssociationResponse createResponse(final Response response) {
                 return new DoAssociationResponse(response);
             }
         };

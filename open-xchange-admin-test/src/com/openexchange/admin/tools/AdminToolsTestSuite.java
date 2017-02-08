@@ -67,6 +67,4 @@ import org.junit.runners.Suite.SuiteClasses;
 })
 public class AdminToolsTestSuite {
 
-    private AdminToolsTestSuite() {
-    }
 }

@@ -438,7 +438,7 @@ If you would like to add a reference to another property use the following appro
 ---
 | Key | <span style="font-weight:normal">com.openexchange.dovecot.doveadm.endpoints</span> |
 |:----------------|:--------|
-| __Description__ | Specifies the URIs to the Dovecot DoveAdm REST interface end-points. <br>e.g. "http://dovecot1.host.invalid:8081, http://dovecot2.host.invalid:8081, http://dovecot3.host.invalid:8081"<br><br>Moreover connection-related attributes are allowed to be specified to influence HTTP connection and pooling behavior<br>com.openexchange.dovecot.doveadm.endpoints.totalConnections        The number of total connections held in HTTP connection pool<br>com.openexchange.dovecot.doveadm.endpoints.maxConnectionsPerRoute  The number of connections per route held in HTTP connection pool; or less than/equal to 0 (zero) for auto-determining<br>com.openexchange.dovecot.doveadm.endpoints.readTimeout             The read time-out in milliseconds<br>com.openexchange.dovecot.doveadm.endpoints.connectTimeout          The connect time-out in milliseconds<br><br>Full example :<br>com.openexchange.dovecot.doveadm.endpoints=http://dovecot1.host.invalid:8081, http://dovecot2.host.invalid:8081<br>com.openexchange.dovecot.doveadm.endpoints.totalConnections=100<br>com.openexchange.dovecot.doveadm.endpoints.maxConnectionsPerRoute=0 (max. connections per route is then determined automatically by specified end-points)<br>com.openexchange.dovecot.doveadm.endpoints.readTimeout=2500<br>com.openexchange.dovecot.doveadm.endpoints.connectTimeout=1500<br><br>The values can be configured within a dedicated .properties file; e.g. 'doveadm.properties'.<br> |
+| __Description__ | Specifies the URIs to the Dovecot DoveAdm REST interface end-points. <br>e.g. "http://dovecot1.host.invalid:8081, http://dovecot2.host.invalid:8081, http://dovecot3.host.invalid:8081"<br><br>Moreover connection-related attributes are allowed to be specified to influence HTTP connection and pooling behavior<br>com.openexchange.dovecot.doveadm.endpoints.totalConnections        The number of total connections held in HTTP connection pool<br>com.openexchange.dovecot.doveadm.endpoints.maxConnectionsPerRoute  The number of connections per route held in HTTP connection pool; or less than/equal to 0 (zero) for auto-determining<br>com.openexchange.dovecot.doveadm.endpoints.readTimeout             The read time-out in milliseconds (default is 10sec)<br>com.openexchange.dovecot.doveadm.endpoints.connectTimeout          The connect time-out in milliseconds (default is 3sec)<br>com.openexchange.dovecot.doveadm.endpoints.checkInterval           The time interval in milliseconds when to check if a previously black-listed end-point is re-available again (default is 60sec)<br><br>Full example :<br>com.openexchange.dovecot.doveadm.endpoints=http://dovecot1.host.invalid:8081, http://dovecot2.host.invalid:8081<br>com.openexchange.dovecot.doveadm.endpoints.totalConnections=100<br>com.openexchange.dovecot.doveadm.endpoints.maxConnectionsPerRoute=0 (max. connections per route is then determined automatically by specified end-points)<br>com.openexchange.dovecot.doveadm.endpoints.readTimeout=10000<br>com.openexchange.dovecot.doveadm.endpoints.connectTimeout=3000<br>com.openexchange.dovecot.doveadm.endpoints.checkInterval=60000<br><br>The values can be configured within a dedicated .properties file; e.g. 'doveadm.properties'.<br> |
 | __Default__ |  |
 | __Version__ | 7.8.3  |
 | __Reloadable__ | false  |
@@ -513,7 +513,7 @@ If you would like to add a reference to another property use the following appro
 ---
 
 
-## Mail 
+## MailAccount 
 
 | Key | <span style="font-weight:normal">com.openexchange.mail.useStaticDefaultFolders</span> |
 |:----------------|:--------|
@@ -555,7 +555,7 @@ If you would like to add a reference to another property use the following appro
 | __File__ | mail.properties  |
 
 ---
-| Key | <span style="font-weight:normal">com.openexhange.mail.authType</span> |
+| Key | <span style="font-weight:normal">com.openexchange.mail.authType</span> |
 |:----------------|:--------|
 | __Description__ | Specifies the authentication type which should be used for primary account's mail access. Known values: 'login', 'xoauth2', and "oauthbearer"<br> |
 | __Default__ | login  |
@@ -565,7 +565,7 @@ If you would like to add a reference to another property use the following appro
 | __File__ | mail.properties  |
 
 ---
-| Key | <span style="font-weight:normal">com.openexhange.mail.transport.authType</span> |
+| Key | <span style="font-weight:normal">com.openexchange.mail.transport.authType</span> |
 |:----------------|:--------|
 | __Description__ | Specifies the authentication type which should be used for primary account's mail transport. Known values: 'login', 'xoauth2', and "oauthbearer"<br> |
 | __Default__ | login  |
@@ -573,6 +573,71 @@ If you would like to add a reference to another property use the following appro
 | __Reloadable__ | true  |
 | __Configcascade Aware__ | true  |
 | __File__ | mail.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexchange.mail.flagging.mode</span> |
+|:----------------|:--------|
+| __Description__ | Specifies how color labels and special \Flagged system flag are connected (or not). Possible values:<br>-<code>colorOnly</code> Only color flags are available. The special \Flagged system flag is not touched.<br>-<code>flaggedOnly</code> Only special \Flagged system flag is used. Color labels are not published.<br>-<code>flaggedAndColor</code> Both - color flags and special \Flagged system flag - are available and set independently.<br>-<code>flaggedImplicit</code>Both - color flags and special \Flagged system flag - are available. A certain color label is linked with the \Flagged system flag. That is to add a color to colorless flagged mails and to add flagged to unflagged but colored mails.<br> |
+| __Default__ | colorOnly  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | true  |
+| __Configcascade Aware__ | true  |
+| __Related__ | com.openexchange.mail.flagging.color  |
+| __File__ | mail.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexchange.mail.flagging.color</span> |
+|:----------------|:--------|
+| __Description__ | Specifies the color which should be added to colorless flagged mails in case the flagging mode is "flaggedImplicit". Only values from 1 to 10 are allowed.<br> |
+| __Default__ | 1  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | true  |
+| __Configcascade Aware__ | true  |
+| __Related__ | com.openexchange.mail.flagging.mode  |
+| __File__ | mail.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexchange.mail.maliciousFolders.enabled</span> |
+|:----------------|:--------|
+| __Description__ | Enables/disables support for malicious folders<br> |
+| __Default__ | true  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | true  |
+| __Configcascade Aware__ | true  |
+| __Related__ | com.openexchange.mail.maliciousFolders.listing  |
+| __File__ | mail.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexchange.mail.maliciousFolders.listing</span> |
+|:----------------|:--------|
+| __Description__ | Specifies the full paths for such mail folders in the primary account's folder tree that are supposed being considered as malicious<br>and therefore a special treatment happens; e.g. hyper-links that occur in mail content are not displayed and/or are not clickable.<br><br>The value is supposed to be comma-separated list of folder paths.<br>Such tokens starting with the '$' character refer to a standard folder. Currently supported: $Spam, $Drafts, $Inbox, $Sent, $Trash, $Confirmed-Spam, $Confirmed-Ham<br><br> Example $Spam, INBOX/Malware<br>Special treatment happens for standard Spam folder and for the "INBOX/Malware" folder in primary account's folder tree hierarchy.<br> |
+| __Default__ | $Spam  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | true  |
+| __Configcascade Aware__ | true  |
+| __Related__ | com.openexchange.mail.maliciousFolders.enabled  |
+| __File__ | mail.properties  |
+
+---
+
+| Key | <span style="font-weight:normal">com.openexchange.mailaccount.failedAuth.limit</span> |
+|:----------------|:--------|
+| __Description__ | Specifies the max. number of failed authentication attempts until the associated mail account is disabled.<br> |
+| __Default__ | 5  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | true  |
+| __Configcascade Aware__ | true  |
+| __File__ | mailaccount.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexchange.mailaccount.failedAuth.span</span> |
+|:----------------|:--------|
+| __Description__ | Specifies the time span in which the failed authentication attempts are tracked.<br>The value accepts known time span syntax like "1W" or "5m"<br> |
+| __Default__ | 30m  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | true  |
+| __Configcascade Aware__ | true  |
+| __File__ | mailaccount.properties  |
 
 ---
 
@@ -873,7 +938,7 @@ If you would like to add a reference to another property use the following appro
 | __Description__ |         Defines which level of trust should be considered for potentially secure connections (e. g. https). The default value 'all' means that all certificates will be trusted and a SSLSocketFactory that does not check certificates (and host names) will be used. You can switch this setting to 'restricted' so that every certificate provided by the defined endpoint will be validated trusted.<br> |
 | __Default__ | all  |
 | __Version__ | 7.8.3  |
-| __Reloadable__ | true  |
+| __Reloadable__ | false  |
 | __Configcascade Aware__ | false  |
 | __File__ | ssl.properties  |
 

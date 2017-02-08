@@ -49,8 +49,12 @@
 
 package com.openexchange.ajax.mail;
 
+import static org.junit.Assert.assertNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.actions.SendRequest;
 import com.openexchange.ajax.mail.actions.SendResponse;
@@ -71,20 +75,23 @@ public final class Send2Test extends AbstractMailTest {
      *
      * @param name Name of this test.
      */
-    public Send2Test(final String name) {
-        super(name);
+    public Send2Test() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
-        manager = new MailTestManager(client, false);
+        manager = new MailTestManager(getClient(), false);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        manager.cleanUp();
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
+        try {
+            manager.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
     /**
@@ -92,10 +99,11 @@ public final class Send2Test extends AbstractMailTest {
      *
      * @throws Throwable
      */
+    @Test
     public void testSend() throws Throwable {
         // Create JSON mail object
         final JSONObject jMail = new JSONObject(16);
-        jMail.put(MailJSONField.FROM.getKey(), getSendAddress(client));
+        jMail.put(MailJSONField.FROM.getKey(), getSendAddress(getClient()));
         jMail.put(MailJSONField.RECIPIENT_TO.getKey(), getSendAddress());
         jMail.put(MailJSONField.RECIPIENT_CC.getKey(), "");
         jMail.put(MailJSONField.RECIPIENT_BCC.getKey(), "");
@@ -107,7 +115,7 @@ public final class Send2Test extends AbstractMailTest {
 
         {
             final JSONObject jHeaders = new JSONObject(4);
-            jHeaders.put("X-OxGuard",true).put("X-OxGuard-ID","45fe1029-edd1-4866-8a1a-7889b4a98bca");
+            jHeaders.put("X-OxGuard", true).put("X-OxGuard-ID", "45fe1029-edd1-4866-8a1a-7889b4a98bca");
             jMail.putOpt("headers", jHeaders);
         }
 

@@ -53,13 +53,12 @@ import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.Header;
 
-
 /**
  * {@link AbstractFolderRequest}
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public abstract class AbstractFolderRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T>  {
+public abstract class AbstractFolderRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
 
     protected final boolean failOnError;
 

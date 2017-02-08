@@ -52,17 +52,21 @@ package com.openexchange.test;
 import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.resource.actions.ResourceGetRequest;
+import com.openexchange.ajax.resource.actions.ResourceGetResponse;
+import com.openexchange.ajax.resource.actions.ResourceListRequest;
+import com.openexchange.ajax.resource.actions.ResourceListResponse;
 import com.openexchange.ajax.resource.actions.ResourceNewResponse;
 import com.openexchange.ajax.resource.actions.ResourceSearchRequest;
 import com.openexchange.ajax.resource.actions.ResourceSearchResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.resource.Resource;
+import edu.emory.mathcs.backport.java.util.Arrays;
 
 /**
  * This was just a quick&dirty implementation to get other tests running that use resources.
@@ -70,8 +74,6 @@ import com.openexchange.resource.Resource;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class ResourceTestManager implements TestManager {
-
-    private final List<Resource> createdEntites = new LinkedList<Resource>();
 
     private final AJAXClient client;
 
@@ -139,15 +141,7 @@ public class ResourceTestManager implements TestManager {
 
     @Override
     public void cleanUp() {
-        boolean old = failOnError;
-        setFailOnError(false);
-        try {
-            for (Resource res : createdEntites) {
-                // TODO
-            }
-        } finally {
-            setFailOnError(old);
-        }
+        // nothing to do
     }
 
     public Resource generateDefaultResource() {
@@ -164,6 +158,18 @@ public class ResourceTestManager implements TestManager {
         ResourceSearchResponse response = execute(new ResourceSearchRequest(pattern, getFailOnError()));
         extractInfo(response);
         return response.getResources();
+    }
+
+    public List<Resource> list(int[] ids) throws JSONException {
+        ResourceListResponse response = execute(new ResourceListRequest(ids));
+        extractInfo(response);
+        return Arrays.asList(response.getResources());
+    }
+
+    public Resource get(int id) throws JSONException {
+        ResourceGetResponse response = execute(new ResourceGetRequest(id, false));
+        extractInfo(response);
+        return response.getResource();
     }
 
     protected <T extends AbstractAJAXResponse> T execute(final AJAXRequest<T> request) {

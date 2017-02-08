@@ -49,10 +49,15 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
 import java.util.Calendar;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
@@ -75,11 +80,11 @@ public class Bug13505Test extends AbstractAJAXSession {
 
     private TimeZone tz;
 
-    public Bug13505Test(String name) {
-        super(name);
+    public Bug13505Test() {
+        super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
@@ -112,10 +117,11 @@ public class Bug13505Test extends AbstractAJAXSession {
         updateAppointment.setIgnoreConflicts(true);
     }
 
+    @Test
     public void testBug13505() throws Exception {
         SpecialUpdateRequest updateRequest = new SpecialUpdateRequest(updateAppointment, tz);
         try {
-            UpdateResponse updateResponse = client.execute(updateRequest);
+            UpdateResponse updateResponse = getClient().execute(updateRequest);
             appointment.setLastModified(updateResponse.getTimestamp());
         } catch (Exception e) {
             fail(e.getMessage());
@@ -125,11 +131,13 @@ public class Bug13505Test extends AbstractAJAXSession {
         assertFalse("No days values expected", loadA.containsDays());
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        getClient().execute(new DeleteRequest(appointment.getObjectID(), appointment.getParentFolderID(), appointment.getLastModified()));
-
-        super.tearDown();
+        try {
+            getClient().execute(new DeleteRequest(appointment.getObjectID(), appointment.getParentFolderID(), appointment.getLastModified()));
+        } finally {
+            super.tearDown();
+        }
     }
 
     protected class SpecialUpdateRequest extends UpdateRequest {

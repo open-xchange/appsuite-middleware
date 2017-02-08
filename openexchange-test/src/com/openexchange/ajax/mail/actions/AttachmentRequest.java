@@ -73,81 +73,81 @@ import com.openexchange.java.Strings;
  */
 public final class AttachmentRequest extends AbstractMailRequest<AttachmentResponse> {
 
-	class AttachmentParser extends AbstractAJAXParser<AttachmentResponse> {
+    class AttachmentParser extends AbstractAJAXParser<AttachmentResponse> {
 
-	    private String strBody;
+        private String strBody;
         private byte[] bytesBody;
 
-		/**
-		 * Default constructor.
-		 */
-		AttachmentParser(final boolean failOnError) {
-			super(failOnError);
-		}
+        /**
+         * Default constructor.
+         */
+        AttachmentParser(final boolean failOnError) {
+            super(failOnError);
+        }
 
-		@Override
-		public String checkResponse(HttpResponse resp, HttpRequest request) throws ParseException, IOException {
-		    assertEquals("Response code is not okay. (" + resp.getStatusLine().getReasonPhrase() + ")", HttpStatus.SC_OK, resp.getStatusLine().getStatusCode());
-		    Header contentType = resp.getFirstHeader("Content-Type");
-		    if (Strings.asciiLowerCase(contentType.getValue()).startsWith("text/")) {
+        @Override
+        public String checkResponse(HttpResponse resp, HttpRequest request) throws ParseException, IOException {
+            assertEquals("Response code is not okay. (" + resp.getStatusLine().getReasonPhrase() + ")", HttpStatus.SC_OK, resp.getStatusLine().getStatusCode());
+            Header contentType = resp.getFirstHeader("Content-Type");
+            if (Strings.asciiLowerCase(contentType.getValue()).startsWith("text/")) {
                 strBody = EntityUtils.toString(resp.getEntity());
             } else {
                 bytesBody = EntityUtils.toByteArray(resp.getEntity());
             }
-		    return "{}";
-		}
+            return "{}";
+        }
 
-		@Override
-		public AttachmentResponse parse(String body) throws JSONException {
-		    if (body.length() == 0) {
-		        return new AttachmentResponse(new Response());
-		    }
-		    return null == strBody ? new AttachmentResponse(bytesBody) : new AttachmentResponse(strBody);
-		}
+        @Override
+        public AttachmentResponse parse(String body) throws JSONException {
+            if (body.length() == 0) {
+                return new AttachmentResponse(new Response());
+            }
+            return null == strBody ? new AttachmentResponse(bytesBody) : new AttachmentResponse(strBody);
+        }
 
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		protected AttachmentResponse createResponse(final Response response) throws JSONException {
-			return new AttachmentResponse(response);
-		}
-	}
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        protected AttachmentResponse createResponse(final Response response) throws JSONException {
+            return new AttachmentResponse(response);
+        }
+    }
 
-	/**
-	 * Unique identifier
-	 */
-	private final String[] folderAndIDAndSequenceID;
+    /**
+     * Unique identifier
+     */
+    private final String[] folderAndIDAndSequenceID;
 
-	private final boolean failOnError;
-	private boolean saveToDisk;
-	private boolean filter;
+    private final boolean failOnError;
+    private boolean saveToDisk;
+    private boolean filter;
     private boolean fromStructure;
 
-	public AttachmentRequest(final String folder, final String ID, final String sequenceId) {
-		this(new String[] { folder, ID, sequenceId }, true);
-	}
+    public AttachmentRequest(final String folder, final String ID, final String sequenceId) {
+        this(new String[] { folder, ID, sequenceId }, true);
+    }
 
-	/**
-	 * Initializes a new {@link AttachmentRequest}
-	 *
-	 * @param mailPath
-	 */
-	public AttachmentRequest(final String[] folderAndIDAndSequenceID) {
-		this(folderAndIDAndSequenceID, true);
-	}
+    /**
+     * Initializes a new {@link AttachmentRequest}
+     *
+     * @param mailPath
+     */
+    public AttachmentRequest(final String[] folderAndIDAndSequenceID) {
+        this(folderAndIDAndSequenceID, true);
+    }
 
-	/**
-	 * Initializes a new {@link AttachmentRequest}
-	 *
-	 * @param mailPath
-	 * @param failOnError
-	 */
-	public AttachmentRequest(final String[] folderAndIDAndSequenceID, final boolean failOnError) {
-		super();
-		this.folderAndIDAndSequenceID = folderAndIDAndSequenceID;
-		this.failOnError = failOnError;
-	}
+    /**
+     * Initializes a new {@link AttachmentRequest}
+     *
+     * @param mailPath
+     * @param failOnError
+     */
+    public AttachmentRequest(final String[] folderAndIDAndSequenceID, final boolean failOnError) {
+        super();
+        this.folderAndIDAndSequenceID = folderAndIDAndSequenceID;
+        this.failOnError = failOnError;
+    }
 
     /**
      * Sets the <code>fromStructure</code> flag
@@ -159,68 +159,68 @@ public final class AttachmentRequest extends AbstractMailRequest<AttachmentRespo
         return this;
     }
 
-	@Override
+    @Override
     public Object getBody() throws JSONException {
-		return null;
-	}
+        return null;
+    }
 
-	@Override
+    @Override
     public Method getMethod() {
-		return Method.GET;
-	}
+        return Method.GET;
+    }
 
-	@Override
+    @Override
     public Parameter[] getParameters() {
-	    List<Parameter> l = new LinkedList<Parameter>();
-	    l.add(new Parameter(AJAXServlet.PARAMETER_ACTION, Mail.ACTION_MATTACH));
-	    l.add( new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderAndIDAndSequenceID[0]) );
-	    l.add( new Parameter(AJAXServlet.PARAMETER_ID, folderAndIDAndSequenceID[1]) );
-	    l.add( new Parameter(Mail.PARAMETER_MAILATTCHMENT, folderAndIDAndSequenceID[2]) );
-	    l.add( new Parameter(Mail.PARAMETER_SAVE, String.valueOf(saveToDisk ? 1 : 0)) );
-	    l.add( new Parameter(Mail.PARAMETER_FILTER, filter ? "true" : "false") );
-	    l.add( new Parameter("from_structure", fromStructure ? "true" : "false") );
-	    return l.toArray(new Parameter[0]);
-	}
+        List<Parameter> l = new LinkedList<Parameter>();
+        l.add(new Parameter(AJAXServlet.PARAMETER_ACTION, Mail.ACTION_MATTACH));
+        l.add(new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderAndIDAndSequenceID[0]));
+        l.add(new Parameter(AJAXServlet.PARAMETER_ID, folderAndIDAndSequenceID[1]));
+        l.add(new Parameter(Mail.PARAMETER_MAILATTCHMENT, folderAndIDAndSequenceID[2]));
+        l.add(new Parameter(Mail.PARAMETER_SAVE, String.valueOf(saveToDisk ? 1 : 0)));
+        l.add(new Parameter(Mail.PARAMETER_FILTER, filter ? "true" : "false"));
+        l.add(new Parameter("from_structure", fromStructure ? "true" : "false"));
+        return l.toArray(new Parameter[0]);
+    }
 
-	@Override
+    @Override
     public AttachmentParser getParser() {
-		return new AttachmentParser(failOnError);
-	}
+        return new AttachmentParser(failOnError);
+    }
 
-	/**
-	 * Gets the saveToDisk
-	 *
-	 * @return the saveToDisk
-	 */
-	public boolean isSaveToDisk() {
-		return saveToDisk;
-	}
+    /**
+     * Gets the saveToDisk
+     *
+     * @return the saveToDisk
+     */
+    public boolean isSaveToDisk() {
+        return saveToDisk;
+    }
 
-	/**
-	 * Sets the saveToDisk
-	 *
-	 * @param saveToDisk the saveToDisk to set
-	 */
-	public void setSaveToDisk(final boolean saveToDisk) {
-		this.saveToDisk = saveToDisk;
-	}
+    /**
+     * Sets the saveToDisk
+     *
+     * @param saveToDisk the saveToDisk to set
+     */
+    public void setSaveToDisk(final boolean saveToDisk) {
+        this.saveToDisk = saveToDisk;
+    }
 
-	/**
-	 * Gets the filter
-	 *
-	 * @return the filter
-	 */
-	public boolean isFilter() {
-		return filter;
-	}
+    /**
+     * Gets the filter
+     *
+     * @return the filter
+     */
+    public boolean isFilter() {
+        return filter;
+    }
 
-	/**
-	 * Sets the filter
-	 *
-	 * @param filter the filter to set
-	 */
-	public void setFilter(final boolean filter) {
-		this.filter = filter;
-	}
+    /**
+     * Sets the filter
+     *
+     * @param filter the filter to set
+     */
+    public void setFilter(final boolean filter) {
+        this.filter = filter;
+    }
 
 }

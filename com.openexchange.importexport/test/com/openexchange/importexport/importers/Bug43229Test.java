@@ -134,8 +134,8 @@ public class Bug43229Test {
         MockUtils.injectValueIntoPrivateField(csvContactImporter, "mappers", mappers);
     }
 
-    @Test
-    public void testContinueOnParseException() throws Exception {
+     @Test
+     public void testContinueOnParseException() throws Exception {
         byte[] csv = {
             34, 70, 105, 114, 115, 116, 32, 110, 97, 109, 101, 34, 44, 34, 76, 97, 115, 116, 32, 110, 97, 109, 101, 34, 44, 34, 69, 109,
             97, 105, 108, 34, 13, 10, 34, 84, 101, 115, 116, 34, 44, 34, 34, 44, 34, 116, 101, 115, 116, 64, 100, 111, 109, 97, 105, 110,

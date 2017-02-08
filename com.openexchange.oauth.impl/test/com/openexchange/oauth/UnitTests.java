@@ -49,8 +49,8 @@
 
 package com.openexchange.oauth;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 import com.openexchange.oauth.internal.OAuthServiceImplDBTest;
 
 /**
@@ -58,15 +58,9 @@ import com.openexchange.oauth.internal.OAuthServiceImplDBTest;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    OAuthServiceImplDBTest.class
+})
 public class UnitTests {
-
-    public UnitTests() {
-        super();
-    }
-
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(OAuthServiceImplDBTest.class);
-        return tests;
-    }
 }

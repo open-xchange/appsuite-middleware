@@ -49,9 +49,14 @@
 
 package com.openexchange.ajax.folder;
 
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
@@ -60,7 +65,6 @@ import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.folder.actions.UpdateRequest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.ajax.framework.UserValues;
@@ -81,69 +85,58 @@ public class DeleteFolderTest extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link DeleteFolderTest}.
+     * 
      * @param name name of the test.
      */
-    public DeleteFolderTest(String name) {
-        super(name);
+    public DeleteFolderTest() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         // Create 2. User
-        secondClient = new AJAXClient(User.User2);
+        secondClient = new AJAXClient(testContext.acquireUser());
         secondUserValues = secondClient.getValues();
 
         // Create folder
-        final OCLPermission perm1 =
-            Create.ocl(
-                client.getValues().getUserId(),
-                false,
-                true,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION);
-        final OCLPermission perm2 =
-            Create.ocl(
-                secondUserValues.getUserId(),
-                false,
-                true,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION);
+        final OCLPermission perm1 = Create.ocl(getClient().getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+        final OCLPermission perm2 = Create.ocl(secondUserValues.getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         parentId = FolderObject.SYSTEM_PUBLIC_FOLDER_ID;
-        testFolder = Create.folder(parentId, "TestDeletion" + System.currentTimeMillis(), FolderObject.CALENDAR, FolderObject.PUBLIC, perm1, perm2);
+        testFolder = Create.folder(parentId, "TestDeletion" + UUID.randomUUID().toString(), FolderObject.CALENDAR, FolderObject.PUBLIC, perm1, perm2);
         InsertRequest insFolder = new InsertRequest(EnumAPI.OX_OLD, testFolder);
         InsertResponse folderInsertResponse = secondClient.execute(insFolder);
         testFolder.setObjectID(folderInsertResponse.getId());
         testFolder.setLastModified(secondClient.execute(new GetRequest(EnumAPI.OX_OLD, testFolder.getObjectID())).getTimestamp());
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        // Delete testFolder
-        if (testFolder != null) {
-            secondClient.execute(new DeleteRequest(EnumAPI.OX_OLD, testFolder));
-            testFolder = null;
-            parentId = -1;
-        }
+        try {
+            // Delete testFolder
+            if (testFolder != null) {
+                secondClient.execute(new DeleteRequest(EnumAPI.OX_OLD, testFolder));
+                testFolder = null;
+                parentId = -1;
+            }
 
-        if (secondClient != null) {
-            secondClient.logout();
-            secondClient = null;
-            secondUserValues = null;
-        }
+            if (secondClient != null) {
+                secondClient.logout();
+                secondClient = null;
+                secondUserValues = null;
+            }
 
-        super.tearDown();
+        } finally {
+            super.tearDown();
+        }
     }
 
+    @Test
     public void testUnauthorizedDeletion() throws Throwable {
         final int folderId = testFolder.getObjectID();
 
-        final List<FolderObject> l = FolderTools.getSubFolders(client, Integer.toString(FolderObject.SYSTEM_PUBLIC_FOLDER_ID), true);
-        assertTrue("No public subfolders available for user " + client.getValues().getUserId(), l != null && !l.isEmpty());
+        final List<FolderObject> l = FolderTools.getSubFolders(getClient(), Integer.toString(FolderObject.SYSTEM_PUBLIC_FOLDER_ID), true);
+        assertTrue("No public subfolders available for user " + getClient().getValues().getUserId(), l != null && !l.isEmpty());
 
         boolean found = false;
         Next: for (FolderObject subfolder : l) {
@@ -152,7 +145,7 @@ public class DeleteFolderTest extends AbstractAJAXSession {
                 break Next;
             }
         }
-        assertTrue("Folder " + folderId + " not beneath public folder of user " + client.getValues().getUserId(), found);
+        assertTrue("Folder " + folderId + " not beneath public folder of user " + getClient().getValues().getUserId(), found);
 
         GetRequest getQ = new GetRequest(EnumAPI.OX_OLD, folderId);
         GetResponse getR = secondClient.execute(getQ);
@@ -161,7 +154,7 @@ public class DeleteFolderTest extends AbstractAJAXSession {
         permissions.addAll(origFolder.getPermissions());
         Iterator<OCLPermission> iter = permissions.iterator();
         while (iter.hasNext()) {
-            if (iter.next().getEntity() == client.getValues().getUserId()) {
+            if (iter.next().getEntity() == getClient().getValues().getUserId()) {
                 iter.remove();
             }
         }
@@ -179,7 +172,7 @@ public class DeleteFolderTest extends AbstractAJAXSession {
         origFolder.setLastModified(getR.getTimestamp());
 
         // Delete should fail
-        CommonDeleteResponse deleteResponse = client.execute(new DeleteRequest(EnumAPI.OX_OLD, false, origFolder).setFailOnErrorParam(Boolean.TRUE));
+        CommonDeleteResponse deleteResponse = getClient().execute(new DeleteRequest(EnumAPI.OX_OLD, false, origFolder).setFailOnErrorParam(Boolean.TRUE));
         assertTrue("Delete attempt should have failed", deleteResponse.hasError());
 
     }

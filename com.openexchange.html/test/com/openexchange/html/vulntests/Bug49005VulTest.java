@@ -64,8 +64,8 @@ public class Bug49005VulTest extends AbstractSanitizing {
         super();
     }
 
-    @Test
-    public void testHrefSanitizing() {
+     @Test
+     public void testHrefSanitizing() {
         String content = "<!DOCTYPE html>\n" +
             "<html><head>\n" +
             "    <meta charset=\"UTF-8\">\n" +

@@ -102,11 +102,12 @@ public class ExamineAction extends AbstractMailAction {
             }
 
             IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
-            if (!IMailFolderStorageStatusSupport.class.isInstance(folderStorage)) {
+
+            IMailFolderStorageStatusSupport validityFolderStorage = folderStorage.supports(IMailFolderStorageStatusSupport.class);
+            if (null == validityFolderStorage) {
                 throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
             }
 
-            IMailFolderStorageStatusSupport validityFolderStorage = (IMailFolderStorageStatusSupport) folderStorage;
             if (!validityFolderStorage.isStatusSupported()) {
                 throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
             }

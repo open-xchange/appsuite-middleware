@@ -60,11 +60,11 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
  */
 public class MultipleAttachmentResponse extends AbstractAJAXResponse {
 
-	/**
-	 * @param response
-	 */
-	MultipleAttachmentResponse(final Response response) {
-		super(response);
-	}
+    /**
+     * @param response
+     */
+    MultipleAttachmentResponse(final Response response) {
+        super(response);
+    }
 
 }

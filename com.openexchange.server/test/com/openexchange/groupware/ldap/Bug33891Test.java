@@ -147,7 +147,8 @@ public class Bug33891Test {
     }
 
     @After
-    public void tearDown() {
+    public void tearDown()
+ {
         cachingUserStorage = null;
         mockedUserStorage = null;
         mockedCacheService = null;
@@ -155,8 +156,8 @@ public class Bug33891Test {
         mockedCacheKey = null;
     }
 
-    @Test
-    public void test() throws OXException {
+     @Test
+     public void test() throws OXException {
         SimContext simContext = new SimContext(1);
         cachingUserStorage.updateUserInternal(null, mockedUser, simContext);
         Mockito.verify(mockedUserStorage).updateUser(mockedUser, simContext);

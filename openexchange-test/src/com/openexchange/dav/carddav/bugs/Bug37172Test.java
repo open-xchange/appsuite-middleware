@@ -49,7 +49,8 @@
 
 package com.openexchange.dav.carddav.bugs;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.util.List;
 import java.util.Map;
 import org.junit.Test;
@@ -81,21 +82,7 @@ public class Bug37172Test extends CardDAVTest {
          * create contact
          */
         String uid = randomUID();
-        String vCard =
-            "BEGIN:VCARD\r\n" +
-                "VERSION:3.0\r\n" +
-                "N:;Test;;;\r\n" +
-                "UID:" + uid + "\r\n" +
-                "REV:2015-03-09T23:04:44+00:00\r\n" +
-                "FN:Test\r\n" +
-                "PRODID:-//ownCloud//NONSGML Contacts 0.3.0.18//EN\r\n" +
-                "EMAIL;TYPE=WORK:test@abc123.de\r\n" +
-                "TEL;TYPE=CELL:0151 123456789\r\n" +
-                "TEL;TYPE=HOME:0911 9876543\r\n" +
-                "TEL;TYPE=HOME:0160 123456\r\n" +
-                "IMPP;X-SERVICE-TYPE=jabber:xmpp:87654321\r\n" +
-                "TEL;TYPE=WORK:0912 12345678\r\n" +
-                "END:VCARD\r\n";
+        String vCard = "BEGIN:VCARD\r\n" + "VERSION:3.0\r\n" + "N:;Test;;;\r\n" + "UID:" + uid + "\r\n" + "REV:2015-03-09T23:04:44+00:00\r\n" + "FN:Test\r\n" + "PRODID:-//ownCloud//NONSGML Contacts 0.3.0.18//EN\r\n" + "EMAIL;TYPE=WORK:test@abc123.de\r\n" + "TEL;TYPE=CELL:0151 123456789\r\n" + "TEL;TYPE=HOME:0911 9876543\r\n" + "TEL;TYPE=HOME:0160 123456\r\n" + "IMPP;X-SERVICE-TYPE=jabber:xmpp:87654321\r\n" + "TEL;TYPE=WORK:0912 12345678\r\n" + "END:VCARD\r\n";
 
         assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putVCard(uid, vCard));
         /*
@@ -134,21 +121,7 @@ public class Bug37172Test extends CardDAVTest {
          * create contact
          */
         String uid = randomUID();
-        String vCard =
-            "BEGIN:VCARD\r\n" +
-                "VERSION:3.0\r\n" +
-                "N:;Test;;;\r\n" +
-                "UID:" + uid + "\r\n" +
-                "REV:2015-03-09T23:04:44+00:00\r\n" +
-                "FN:Test\r\n" +
-                "PRODID:-//ownCloud//NONSGML Contacts 0.3.0.18//EN\r\n" +
-                "EMAIL;TYPE=WORK:test@abc123.de\r\n" +
-                "TEL;TYPE=CELL:0151 123456789\r\n" +
-                "TEL;TYPE=home,voice:0911 9876543\r\n" +
-                "TEL;TYPE=home,voice:0160 123456\r\n" +
-                "IMPP;X-SERVICE-TYPE=jabber:xmpp:87654321\r\n" +
-                "TEL;TYPE=WORK,voice:0912 12345678\r\n" +
-                "END:VCARD\r\n";
+        String vCard = "BEGIN:VCARD\r\n" + "VERSION:3.0\r\n" + "N:;Test;;;\r\n" + "UID:" + uid + "\r\n" + "REV:2015-03-09T23:04:44+00:00\r\n" + "FN:Test\r\n" + "PRODID:-//ownCloud//NONSGML Contacts 0.3.0.18//EN\r\n" + "EMAIL;TYPE=WORK:test@abc123.de\r\n" + "TEL;TYPE=CELL:0151 123456789\r\n" + "TEL;TYPE=home,voice:0911 9876543\r\n" + "TEL;TYPE=home,voice:0160 123456\r\n" + "IMPP;X-SERVICE-TYPE=jabber:xmpp:87654321\r\n" + "TEL;TYPE=WORK,voice:0912 12345678\r\n" + "END:VCARD\r\n";
 
         assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putVCard(uid, vCard));
         /*

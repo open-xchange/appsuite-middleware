@@ -73,6 +73,7 @@ public abstract class AbstractSnippetRequest<T extends AbstractAJAXResponse> imp
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.openexchange.ajax.framework.AJAXRequest#getServletPath()
      */
     @Override
@@ -82,6 +83,7 @@ public abstract class AbstractSnippetRequest<T extends AbstractAJAXResponse> imp
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.openexchange.ajax.framework.AJAXRequest#getHeaders()
      */
     @Override

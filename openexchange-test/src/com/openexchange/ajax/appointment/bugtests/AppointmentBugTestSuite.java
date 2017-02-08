@@ -49,126 +49,97 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * Suite for appointment bug tests.
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class AppointmentBugTestSuite extends TestSuite {
+@RunWith(ParallelSuite.class)
+@Suite.SuiteClasses({
+    Bug13214Test.class,
+    Bug13027Test.class,
+    Bug13501Test.class,
+    Bug13942Test.class,
+    Bug13826Test.class,
+    Bug13625Test.class,
+    Bug13447Test.class,
+    Bug13505Test.class,
+    Bug13960Test.class,
+    Bug12509Test.class,
+    Bug14357Test.class,
+    Bug13788Test.class,
+    Bug14679Test.class,
+    Bug15074Test.class,
+    Bug15585Test.class,
+    Bug15590Test.class,
+    Bug15903Test.class,
+    Bug15937Test.class,
+    Bug15986Test.class,
+    Bug16292Test.class,
+    Bug16151Test.class,
+    Bug16194Test.class,
+    Bug16211Test.class,
+    Bug16089Test.class,
+    Bug16107Test.class,
+    Bug16441Test.class,
+    Bug16476Test.class,
+    Bug16249Test.class,
+    Bug16579Test.class,
+    Bug17175Test.class,
+    Bug17264Test.class,
+    Bug17535Test.class,
+    Bug18336Test.class,
+    Bug13090Test.class,
+    Bug17327Test.class,
+    Bug18455Test.class,
+    Bug18558Test.class,
+    Bug19489Test.class,
+    Bug19109Test.class,
+    //Bug20980Test_DateOnMissingDSTHour.class,
+    Bug21264Test.class,
+    Bug21614Test.class,
+    Bug21620Test.class,
+    Bug24502Test.class,
+    Bug26842Test.class,
+    Bug26350Test.class,
+    Bug29268Test.class,
+    Bug29133Test.class,
+    Bug29146Test.class,
+    Bug29566Test.class,
+    Bug30118Test.class,
+    Bug30142Test.class,
+    Bug30414Test.class,
+    Bug31810Test.class,
+    Bug31779Test.class,
+    Bug31963Test.class,
+    Bug32278Test.class,
+    Bug32385Test.class,
+    Bug33242Test.class,
+    Bug33697Test.class,
+    Bug35610Test.class,
+    Bug35687Test.class,
+    Bug35355Test.class,
+    Bug37198Test.class,
+    Bug37668Test.class,
+    Bug38079Test.class,
+    WeirdRecurrencePatternTest.class, // Is also a bug test. Related to 37668 and 38079.
+    Bug39571Test.class,
+    Bug38404Test.class,
+    Bug41794Test.class,
+    Bug42018Test.class,
+    Bug41995Test.class,
+    Bug42018Test.class,
+    Bug42775Test.class,
+    Bug44002Test.class,
+    Bug47012Test.class,
+    Bug48149Test.class,
+    Bug48165Test.class,
 
-    private AppointmentBugTestSuite() {
-        super();
-    }
+})
+public class AppointmentBugTestSuite {
 
-    /**
-     * @return the suite.
-     */
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        /*tests.addTestSuite(Bug4392Test.class);
-        tests.addTestSuite(Bug4541Test.class);
-        tests.addTestSuite(Bug6055Test.class);
-        tests.addTestSuite(Bug8317Test.class);
-        tests.addTestSuite(Bug8724Test.class);
-        tests.addTestSuite(Bug8836Test.class);
-        tests.addTestSuite(Bug9089Test.class);
-        tests.addTestSuite(Bug10154Test.class);
-        tests.addTestSuite(Bug10733Test.class);
-        tests.addTestSuite(Bug10836Test.class);
-        tests.addTestSuite(Bug11250Test.class);
-        tests.addTestSuite(Bug11865Test.class);
-        tests.addTestSuite(Bug12099Test.class);
-        tests.addTestSuite(Bug12326Test.class);
-        tests.addTestSuite(Bug12372Test.class);
-        tests.addTestSuite(Bug12444Test.class);
-        tests.addTestSuite(Bug12264Test.class);
-        tests.addTestSuite(Bug12463Test.class);
-        tests.addTestSuite(Bug12212Test.class);
-        tests.addTestSuite(Bug12495Test.class);
-        tests.addTestSuite(Bug12610Test.class);
-        tests.addTestSuite(Bug12432Test.class);
-        tests.addTestSuite(Bug12842Test.class);
-        */tests.addTestSuite(Bug13214Test.class);
-        tests.addTestSuite(Bug13027Test.class);
-        tests.addTestSuite(Bug13501Test.class);
-        tests.addTestSuite(Bug13942Test.class);
-        tests.addTestSuite(Bug13826Test.class);
-        tests.addTestSuite(Bug13625Test.class);
-        tests.addTestSuite(Bug13447Test.class);
-        tests.addTestSuite(Bug13505Test.class);
-        tests.addTestSuite(Bug13960Test.class);
-        tests.addTestSuite(Bug12509Test.class);
-        tests.addTestSuite(Bug14357Test.class);
-        tests.addTestSuite(Bug13788Test.class);
-        tests.addTestSuite(Bug14679Test.class);
-        tests.addTestSuite(Bug15074Test.class);
-        tests.addTestSuite(Bug15585Test.class);
-        tests.addTestSuite(Bug15590Test.class);
-        tests.addTestSuite(Bug15903Test.class);
-        tests.addTestSuite(Bug15937Test.class);
-        tests.addTestSuite(Bug15986Test.class);
-        tests.addTestSuite(Bug16292Test.class);
-        tests.addTestSuite(Bug16151Test.class);
-        tests.addTestSuite(Bug16194Test.class);
-        tests.addTestSuite(Bug16211Test.class);
-        tests.addTestSuite(Bug16089Test.class);
-        tests.addTestSuite(Bug16107Test.class);
-        tests.addTestSuite(Bug16441Test.class);
-        tests.addTestSuite(Bug16476Test.class);
-        tests.addTestSuite(Bug16249Test.class);
-        tests.addTestSuite(Bug16579Test.class);
-        tests.addTestSuite(Bug17175Test.class);
-        tests.addTestSuite(Bug17264Test.class);
-        tests.addTestSuite(Bug17535Test.class);
-        tests.addTestSuite(Bug18336Test.class);
-        tests.addTestSuite(Bug13090Test.class);
-        tests.addTestSuite(Bug17327Test.class);
-        tests.addTestSuite(Bug18455Test.class);
-        tests.addTestSuite(Bug18558Test.class);
-        tests.addTestSuite(Bug19489Test.class);
-        tests.addTestSuite(Bug19109Test.class);
-        //tests.addTestSuite(Bug20980Test_DateOnMissingDSTHour.class);
-        tests.addTestSuite(Bug21264Test.class);
-        tests.addTestSuite(Bug21614Test.class);
-        tests.addTestSuite(Bug21620Test.class);
-        tests.addTestSuite(Bug24502Test.class);
-        tests.addTestSuite(Bug26842Test.class);
-        tests.addTestSuite(Bug26350Test.class);
-        tests.addTestSuite(Bug29268Test.class);
-        tests.addTestSuite(Bug29133Test.class);
-        tests.addTestSuite(Bug29146Test.class);
-        tests.addTestSuite(Bug29566Test.class);
-        tests.addTestSuite(Bug30118Test.class);
-        tests.addTestSuite(Bug30142Test.class);
-        tests.addTestSuite(Bug30414Test.class);
-        tests.addTestSuite(Bug31810Test.class);
-        tests.addTestSuite(Bug31779Test.class);
-        tests.addTestSuite(Bug31963Test.class);
-        tests.addTestSuite(Bug32278Test.class);
-        tests.addTestSuite(Bug32385Test.class);
-        tests.addTestSuite(Bug33242Test.class);
-        tests.addTestSuite(Bug33697Test.class);
-        tests.addTestSuite(Bug35610Test.class);
-        tests.addTestSuite(Bug35687Test.class);
-        tests.addTestSuite(Bug35355Test.class);
-        tests.addTestSuite(Bug37198Test.class);
-        tests.addTestSuite(Bug37668Test.class);
-        tests.addTestSuite(Bug38079Test.class);
-        tests.addTestSuite(WeirdRecurrencePatternTest.class); // Is also a bug test. Related to 37668 and 38079.
-        tests.addTestSuite(Bug39571Test.class);
-        tests.addTestSuite(Bug38404Test.class);
-        tests.addTestSuite(Bug41794Test.class);
-        tests.addTestSuite(Bug42018Test.class);
-        tests.addTestSuite(Bug41995Test.class);
-        tests.addTestSuite(Bug42018Test.class);
-        tests.addTestSuite(Bug42775Test.class);
-        tests.addTestSuite(Bug44002Test.class);
-        tests.addTestSuite(Bug47012Test.class);
-        tests.addTestSuite(Bug48149Test.class);
-        tests.addTestSuite(Bug48165Test.class);
-        return tests;
-    }
 }

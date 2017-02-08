@@ -59,7 +59,6 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Header;
 import com.openexchange.ajax.framework.Params;
 
-
 /**
  * {@link ExecuteRequest}
  *
@@ -100,11 +99,7 @@ public class ExecuteRequest implements AJAXRequest<OnboardingTestResponse> {
 
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
-        return new Params(
-            AJAXServlet.PARAMETER_ACTION, "execute",
-            AJAXServlet.PARAMETER_ID, id,
-            "action_id", actionId
-        ).toArray();
+        return new Params(AJAXServlet.PARAMETER_ACTION, "execute", AJAXServlet.PARAMETER_ID, id, "action_id", actionId).toArray();
     }
 
     @Override

@@ -49,8 +49,12 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Comparator;
 import java.util.UUID;
+import org.junit.Test;
 import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.contact.action.GetResponse;
 import com.openexchange.groupware.container.Contact;
@@ -66,19 +70,15 @@ import com.openexchange.java.util.UUIDs;
  */
 public class Bug35059Test extends AbstractManagedContactTest {
 
-    public Bug35059Test(String name) {
-        super(name);
+    public Bug35059Test() {
+        super();
     }
 
-	@Override
-	public void setUp() throws Exception {
-	    super.setUp();
-	}
-
+    @Test
     public void testSortOrder() throws Exception {
-    	/*
-    	 * create distribution list
-    	 */
+        /*
+         * create distribution list
+         */
         DistributionListEntryObject[] distributionList = new DistributionListEntryObject[100];
         for (int i = 0; i < 100; i++) {
             DistributionListEntryObject member = new DistributionListEntryObject();
@@ -90,11 +90,11 @@ public class Bug35059Test extends AbstractManagedContactTest {
         }
         Contact contact = super.generateContact("List");
         contact.setDistributionList(distributionList);
-        contact = manager.newAction(contact);
-    	/*
-    	 * get distribution list again
-    	 */
-        GetResponse response = client.execute(new GetRequest(contact, client.getValues().getTimeZone()));
+        contact = cotm.newAction(contact);
+        /*
+         * get distribution list again
+         */
+        GetResponse response = getClient().execute(new GetRequest(contact, getClient().getValues().getTimeZone()));
         contact = response.getContact();
         DistributionListEntryObject[] list = contact.getDistributionList();
         assertNotNull("No distribution list", list);

@@ -49,11 +49,14 @@
 
 package com.openexchange.ajax.infostore.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import java.io.IOException;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.json.JSONException;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
@@ -66,13 +69,14 @@ import com.openexchange.test.TestInit;
  */
 public class CreateAndDeleteInfostoreTest extends AbstractInfostoreTest {
 
-    public CreateAndDeleteInfostoreTest(String name) {
-        super(name);
+    public CreateAndDeleteInfostoreTest() {
+        super();
     }
 
+    @Test
     public void testCreatingOneItem() throws OXException, IOException, SAXException, JSONException, OXException {
         FolderObject folder = generateInfostoreFolder("InfostoreCreateDeleteTest Folder");
-        fMgr.insertFolderOnServer(folder);
+        ftm.insertFolderOnServer(folder);
 
         File expected = new DefaultFile();
         expected.setCreated(new Date());
@@ -83,20 +87,21 @@ public class CreateAndDeleteInfostoreTest extends AbstractInfostoreTest {
         meta.put("customField0012", "value0012");
         expected.setMeta(meta);
 
-        infoMgr.newAction(expected);
-        assertFalse("Creating an entry should work", infoMgr.getLastResponse().hasError());
+        itm.newAction(expected);
+        assertFalse("Creating an entry should work", itm.getLastResponse().hasError());
 
-        File actual = infoMgr.getAction(expected.getId());
+        File actual = itm.getAction(expected.getId());
         assertEquals("Name should be the same", expected.getTitle(), actual.getTitle());
 
-        infoMgr.deleteAction(expected);
-        assertFalse("Deleting an entry should work", infoMgr.getLastResponse().hasError());
+        itm.deleteAction(expected);
+        assertFalse("Deleting an entry should work", itm.getLastResponse().hasError());
     }
 
+    @Test
     public void testCreatingOneItemWithFile() throws Exception {
 
         FolderObject folder = generateInfostoreFolder("InfostoreCreateDeleteTest Folder");
-        fMgr.insertFolderOnServer(folder);
+        ftm.insertFolderOnServer(folder);
 
         File expected = new DefaultFile();
         expected.setCreated(new Date());
@@ -105,20 +110,21 @@ public class CreateAndDeleteInfostoreTest extends AbstractInfostoreTest {
         expected.setLastModified(new Date());
         new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile"));
 
-        infoMgr.newAction(expected);//TODO, upload);
-        assertFalse("Creating an entry should work", infoMgr.getLastResponse().hasError());
+        itm.newAction(expected);//TODO, upload);
+        assertFalse("Creating an entry should work", itm.getLastResponse().hasError());
 
-        File actual = infoMgr.getAction(expected.getId());
+        File actual = itm.getAction(expected.getId());
         assertEquals("Name should be the same", expected.getTitle(), actual.getTitle());
 
-        infoMgr.deleteAction(expected);
-        assertFalse("Deleting an entry should work", infoMgr.getLastResponse().hasError());
+        itm.deleteAction(expected);
+        assertFalse("Deleting an entry should work", itm.getLastResponse().hasError());
     }
 
+    @Test
     public void testCreatingTwoItemWithFiles() throws Exception {
 
         FolderObject folder = generateInfostoreFolder("InfostoreCreateDeleteTest Folder");
-        fMgr.insertFolderOnServer(folder);
+        ftm.insertFolderOnServer(folder);
 
         {
             File expected = new DefaultFile();
@@ -128,10 +134,10 @@ public class CreateAndDeleteInfostoreTest extends AbstractInfostoreTest {
             expected.setLastModified(new Date());
             java.io.File file = new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile"));
 
-            infoMgr.newAction(expected, file);
-            assertFalse("Creating an entry should work", infoMgr.getLastResponse().hasError());
+            itm.newAction(expected, file);
+            assertFalse("Creating an entry should work", itm.getLastResponse().hasError());
 
-            File actual = infoMgr.getAction(expected.getId());
+            File actual = itm.getAction(expected.getId());
             assertEquals("Name should be the same", expected.getTitle(), actual.getTitle());
         }
 
@@ -143,10 +149,10 @@ public class CreateAndDeleteInfostoreTest extends AbstractInfostoreTest {
             expected.setLastModified(new Date());
             java.io.File file = new java.io.File(TestInit.getTestProperty("webdavPropertiesFile"));
 
-            infoMgr.newAction(expected, file);
-            assertFalse("Creating an entry should work", infoMgr.getLastResponse().hasError());
+            itm.newAction(expected, file);
+            assertFalse("Creating an entry should work", itm.getLastResponse().hasError());
 
-            File actual = infoMgr.getAction(expected.getId());
+            File actual = itm.getAction(expected.getId());
             assertEquals("Name should be the same", expected.getTitle(), actual.getTitle());
         }
     }

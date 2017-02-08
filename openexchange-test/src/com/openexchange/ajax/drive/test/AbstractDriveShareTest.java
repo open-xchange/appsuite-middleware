@@ -49,10 +49,11 @@
 
 package com.openexchange.ajax.drive.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.List;
-import jonelo.jacksum.algorithm.MD;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
@@ -61,6 +62,7 @@ import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
+import jonelo.jacksum.algorithm.MD;
 
 /**
  * {@link AbstractDriveShareTest}
@@ -70,9 +72,9 @@ import com.openexchange.server.impl.OCLPermission;
  */
 public abstract class AbstractDriveShareTest extends ShareTest {
 
-    protected AbstractDriveShareTest(String name) {
+    protected AbstractDriveShareTest() {
         // TODO Auto-generated constructor stub
-        super(name);
+        super();
     }
 
     protected void checkFilePermission(int entity, int expectedBits, File file) {
@@ -91,12 +93,7 @@ public abstract class AbstractDriveShareTest extends ShareTest {
     protected void checkFolderPermission(int entity, int expectedBits, FolderObject folder) {
         for (OCLPermission permission : folder.getPermissions()) {
             if (permission.getEntity() == entity) {
-                assertEquals(expectedBits, Permissions.createPermissionBits(
-                    permission.getFolderPermission(),
-                    permission.getReadPermission(),
-                    permission.getWritePermission(),
-                    permission.getDeletePermission(),
-                    permission.isFolderAdmin()));
+                assertEquals(expectedBits, Permissions.createPermissionBits(permission.getFolderPermission(), permission.getReadPermission(), permission.getWritePermission(), permission.getDeletePermission(), permission.isFolderAdmin()));
                 return;
             }
         }

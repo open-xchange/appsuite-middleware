@@ -316,8 +316,10 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                         mails = mailAccess.getMessageStorage().getMessages(folder, uids.toArray(new String[uids.size()]), fields);
                                     } else {
                                         IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-                                        if (messageStorage instanceof IMailMessageStorageExt) {
-                                            mails = ((IMailMessageStorageExt) messageStorage).getMessages(folder, uids.toArray(new String[uids.size()]), fields, headerNames);
+
+                                        IMailMessageStorageExt messageStorageExt = messageStorage.supports(IMailMessageStorageExt.class);
+                                        if (null != messageStorageExt) {
+                                            mails = messageStorageExt.getMessages(folder, uids.toArray(new String[uids.size()]), fields, headerNames);
                                         } else {
                                             MailField[] fields2 = MailFields.addIfAbsent(fields, MailField.ID);
                                             mails = messageStorage.getMessages(folder, uids.toArray(new String[uids.size()]), fields2);
@@ -454,8 +456,10 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 mails = mailAccess.getMessageStorage().getMessages(fa.getFullname(), mailIds, fields);
             } else {
                 IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-                if (messageStorage instanceof IMailMessageStorageExt) {
-                    mails = ((IMailMessageStorageExt) messageStorage).getMessages(fa.getFullname(), mailIds, fields, headerNames);
+
+                IMailMessageStorageExt messageStorageExt = messageStorage.supports(IMailMessageStorageExt.class);
+                if (null != messageStorageExt) {
+                    mails = messageStorageExt.getMessages(fa.getFullname(), mailIds, fields, headerNames);
                 } else {
                     MailField[] fields2 = MailFields.addIfAbsent(fields, MailField.ID);
                     mails = messageStorage.getMessages(fa.getFullname(), mailIds, fields2);
@@ -714,9 +718,11 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                             }
                             // Get account's messages
                             IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-                            if (messageStorage instanceof ISimplifiedThreadStructureEnhanced) {
+
+                            ISimplifiedThreadStructureEnhanced structureEnhanced = messageStorage.supports(ISimplifiedThreadStructureEnhanced.class);
+                            if (null != structureEnhanced) {
                                 try {
-                                    List<List<MailMessage>> list = ((ISimplifiedThreadStructureEnhanced) messageStorage).getThreadSortedMessages(fn, includeSent, false, applicableRange, max, sortField, order, checkedFields, headerNames, searchTerm);
+                                    List<List<MailMessage>> list = structureEnhanced.getThreadSortedMessages(fn, includeSent, false, applicableRange, max, sortField, order, checkedFields, headerNames, searchTerm);
                                     List<List<MailMessage>> ret = new ArrayList<>(list.size());
                                     UnifiedInboxUID helper = new UnifiedInboxUID();
                                     for (List<MailMessage> list2 : list) {
@@ -741,9 +747,11 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                     // Use fall-back mechanism
                                 }
                             }
-                            if (messageStorage instanceof ISimplifiedThreadStructure) {
+
+                            ISimplifiedThreadStructure structure = messageStorage.supports(ISimplifiedThreadStructure.class);
+                            if (null != structure) {
                                 try {
-                                    List<List<MailMessage>> list = ((ISimplifiedThreadStructure) messageStorage).getThreadSortedMessages(fn, includeSent, false, applicableRange, max, sortField, order, checkedFields, searchTerm);
+                                    List<List<MailMessage>> list = structure.getThreadSortedMessages(fn, includeSent, false, applicableRange, max, sortField, order, checkedFields, searchTerm);
 
                                     if (null != headerNames && headerNames.length > 0) {
                                         MessageUtility.enrichWithHeaders(list, headerNames, messageStorage);
@@ -941,9 +949,11 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             mailAccess.connect();
             // Get account's messages
             final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-            if ((messageStorage instanceof ISimplifiedThreadStructureEnhanced)) {
+
+            ISimplifiedThreadStructureEnhanced structureEnhanced = messageStorage.supports(ISimplifiedThreadStructureEnhanced.class);
+            if (null != structureEnhanced) {
                 try {
-                    return ((ISimplifiedThreadStructureEnhanced) messageStorage).getThreadSortedMessages(fa.getFullname(), includeSent, false, indexRange, max, sortField, order, mailFields, headerNames, searchTerm);
+                    return structureEnhanced.getThreadSortedMessages(fa.getFullname(), includeSent, false, indexRange, max, sortField, order, mailFields, headerNames, searchTerm);
                 } catch (OXException e) {
                     if (!MailExceptionCode.UNSUPPORTED_OPERATION.equals(e)) {
                         throw e;
@@ -951,9 +961,11 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                     // Use fall-back mechanism
                 }
             }
-            if ((messageStorage instanceof ISimplifiedThreadStructure)) {
+
+            ISimplifiedThreadStructure structure = messageStorage.supports(ISimplifiedThreadStructure.class);
+            if (null != structure) {
                 try {
-                    List<List<MailMessage>> mails = ((ISimplifiedThreadStructure) messageStorage).getThreadSortedMessages(fa.getFullname(), includeSent, false, indexRange, max, sortField, order, mailFields, searchTerm);
+                    List<List<MailMessage>> mails = structure.getThreadSortedMessages(fa.getFullname(), includeSent, false, indexRange, max, sortField, order, mailFields, searchTerm);
 
                     if (null != headerNames && headerNames.length > 0) {
                         MessageUtility.enrichWithHeaders(mails, headerNames, messageStorage);
@@ -1070,9 +1082,11 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                             }
                             // Get account's messages
                             IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-                            if (messageStorage instanceof ISimplifiedThreadStructure) {
+
+                            ISimplifiedThreadStructure structure = messageStorage.supports(ISimplifiedThreadStructure.class);
+                            if (null != structure) {
                                 try {
-                                    List<List<MailMessage>> list = ((ISimplifiedThreadStructure) messageStorage).getThreadSortedMessages(fn, includeSent, false, applicableRange, max, sortField, order, checkedFields, searchTerm);
+                                    List<List<MailMessage>> list = structure.getThreadSortedMessages(fn, includeSent, false, applicableRange, max, sortField, order, checkedFields, searchTerm);
                                     List<List<MailMessage>> ret = new ArrayList<>(list.size());
                                     UnifiedInboxUID helper = new UnifiedInboxUID();
                                     for (List<MailMessage> list2 : list) {
@@ -1258,9 +1272,11 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             mailAccess.connect();
             // Get account's messages
             final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-            if ((messageStorage instanceof ISimplifiedThreadStructure)) {
+
+            ISimplifiedThreadStructure structure = messageStorage.supports(ISimplifiedThreadStructure.class);
+            if (null != structure) {
                 try {
-                    return ((ISimplifiedThreadStructure) messageStorage).getThreadSortedMessages(fa.getFullname(), includeSent, false, indexRange, max, sortField, order, mailFields, searchTerm);
+                    return structure.getThreadSortedMessages(fa.getFullname(), includeSent, false, indexRange, max, sortField, order, mailFields, searchTerm);
                 } catch (OXException e) {
                     if (!MailExceptionCode.UNSUPPORTED_OPERATION.equals(e)) {
                         throw e;
@@ -1564,8 +1580,9 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 mailAccess.connect();
 
                 IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-                if (messageStorage instanceof IMailMessageStorageExt) {
-                    ((IMailMessageStorageExt) messageStorage).clearCache();
+                IMailMessageStorageExt messageStorageExt = messageStorage.supports(IMailMessageStorageExt.class);
+                if (null != messageStorageExt) {
+                    messageStorageExt.clearCache();
                 }
             } finally {
                 closeSafe(mailAccess);
@@ -1763,8 +1780,9 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                     accountMails = mailAccess.getMessageStorage().searchMessages(fn, null, sortField, orderDir, searchTerm, checkedFields);
                                 } else {
                                     IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-                                    if (messageStorage instanceof IMailMessageStorageExt) {
-                                        accountMails = ((IMailMessageStorageExt) messageStorage).searchMessages(fn, applicableRange, sortField, orderDir, searchTerm, checkedFields, headerNames);
+                                    IMailMessageStorageExt messageStorageExt = messageStorage.supports(IMailMessageStorageExt.class);
+                                    if (null != messageStorageExt) {
+                                        accountMails = messageStorageExt.searchMessages(fn, applicableRange, sortField, orderDir, searchTerm, checkedFields, headerNames);
                                     } else {
                                         MailField[] checkedFields2 = MailFields.addIfAbsent(checkedFields, MailField.ID);
                                         accountMails = messageStorage.searchMessages(fn, applicableRange, sortField, orderDir, searchTerm, checkedFields2);
@@ -1876,8 +1894,9 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                 accountMails = mailAccess.getMessageStorage().searchMessages(fn, indexRange, sortField, orderDir, searchTerm, checkedFields);
                             } else {
                                 IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-                                if (messageStorage instanceof IMailMessageStorageExt) {
-                                    accountMails = ((IMailMessageStorageExt) messageStorage).searchMessages(fn, indexRange, sortField, orderDir, searchTerm, checkedFields, headerNames);
+                                IMailMessageStorageExt messageStorageExt = messageStorage.supports(IMailMessageStorageExt.class);
+                                if (null != messageStorageExt) {
+                                    accountMails = messageStorageExt.searchMessages(fn, indexRange, sortField, orderDir, searchTerm, checkedFields, headerNames);
                                 } else {
                                     MailField[] checkedFields2 = MailFields.addIfAbsent(checkedFields, MailField.ID);
                                     accountMails = messageStorage.searchMessages(fn, indexRange, sortField, orderDir, searchTerm, checkedFields2);
@@ -2003,8 +2022,9 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 mails = mailAccess.getMessageStorage().searchMessages(fa.getFullname(), indexRange, effectiveSortField, order, searchTerm, fields);
             } else {
                 IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-                if (messageStorage instanceof IMailMessageStorageExt) {
-                    mails = ((IMailMessageStorageExt) messageStorage).searchMessages(fa.getFullname(), indexRange, effectiveSortField, order, searchTerm, fields, headerNames);
+                IMailMessageStorageExt messageStorageExt = messageStorage.supports(IMailMessageStorageExt.class);
+                if (null != messageStorageExt) {
+                    mails = messageStorageExt.searchMessages(fa.getFullname(), indexRange, effectiveSortField, order, searchTerm, fields, headerNames);
                 } else {
                     MailField[] checkedFields2 = MailFields.addIfAbsent(fields, MailField.ID);
                     mails = messageStorage.searchMessages(fa.getFullname(), indexRange, effectiveSortField, order, searchTerm, checkedFields2);

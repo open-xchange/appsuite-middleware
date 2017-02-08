@@ -1,12 +1,14 @@
 package liquibase.serializer;
 
-import liquibase.serializer.core.string.StringChangeLogSerializer;
-import liquibase.serializer.core.xml.XMLChangeLogSerializer;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.Map;
+import liquibase.serializer.core.string.StringChangeLogSerializer;
+import liquibase.serializer.core.xml.XMLChangeLogSerializer;
 
 public class ChangeLogSerializerFactoryTest {
 

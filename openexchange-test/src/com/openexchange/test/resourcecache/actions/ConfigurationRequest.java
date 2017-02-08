@@ -53,7 +53,6 @@ import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
-
 /**
  * {@link ConfigurationRequest}
  *
@@ -68,6 +67,7 @@ public class ConfigurationRequest extends AbstractResourceCacheRequest<Configura
     @Override
     public AbstractAJAXParser<? extends ConfigurationResponse> getParser() {
         return new AbstractAJAXParser<ConfigurationResponse>(true) {
+
             @Override
             protected ConfigurationResponse createResponse(Response response) throws JSONException {
                 return new ConfigurationResponse(response);

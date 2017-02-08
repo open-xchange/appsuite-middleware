@@ -49,6 +49,10 @@
 
 package com.openexchange.ajax.share.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
@@ -74,10 +78,11 @@ public class CreateSubfolderTest extends ShareTest {
      *
      * @param name The test name
      */
-    public CreateSubfolderTest(String name) {
-        super(name);
+    public CreateSubfolderTest() {
+        super();
     }
 
+    @Test
     public void testCreateSubfolderWithAdminFlagRandomly() throws Exception {
         testCreateSubfolderWithAdminFlag(randomFolderAPI(), FolderObject.INFOSTORE);
     }
@@ -108,7 +113,7 @@ public class CreateSubfolderTest extends ShareTest {
          */
         OCLPermission matchingPermission = null;
         for (OCLPermission permission : folder.getPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
                 break;
             }

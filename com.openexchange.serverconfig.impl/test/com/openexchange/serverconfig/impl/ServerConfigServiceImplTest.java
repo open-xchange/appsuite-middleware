@@ -181,8 +181,8 @@ public class ServerConfigServiceImplTest {
         this.configFilters = configFilters;
     }
 
-    @Test
-    public void testGetServerConfig() throws OXException {
+     @Test
+     public void testGetServerConfig() throws OXException {
         ServerConfig serverConfig2 = serverConfigServiceImpl.getServerConfig("host1.mycloud.net", 1, 1);
         Map<String, Object> configMap = serverConfig2.asMap();
 
@@ -218,49 +218,49 @@ public class ServerConfigServiceImplTest {
 
     }
 
-    @Test
-    public void testLooksApplicable_host_not_matching() {
+     @Test
+     public void testLooksApplicable_host_not_matching() {
         Map<String, Object> host1Config = (Map<String, Object>) asConfig.get("host1.mycloud.net");
         assertFalse(serverConfigServiceImpl.looksApplicable(host1Config, "host4.mycloud.net"));
     }
 
-    @Test
-    public void testLooksApplicable_host_matching() {
+     @Test
+     public void testLooksApplicable_host_matching() {
         Map<String, Object> host1Config = (Map<String, Object>) asConfig.get("host1.mycloud.net");
         assertTrue(serverConfigServiceImpl.looksApplicable(host1Config, "host1.mycloud.net"));
     }
 
-    @Test
-    public void testLooksApplicable_hostregex_not_matching() {
+     @Test
+     public void testLooksApplicable_hostregex_not_matching() {
         Map<String, Object> host1Config = (Map<String, Object>) asConfig.get("host*.mycloud.net");
         assertFalse(serverConfigServiceImpl.looksApplicable(host1Config, "performance.mycloud.net"));
     }
 
-    @Test
-    public void testLooksApplicable_hostregex_matching() {
+     @Test
+     public void testLooksApplicable_hostregex_matching() {
         Map<String, Object> host1Config = (Map<String, Object>) asConfig.get("host*.mycloud.net");
         assertTrue(serverConfigServiceImpl.looksApplicable(host1Config, "host1.mycloud.net"));
     }
 
-    @Test
-    public void testLooksApplicable_NoConfig() {
+     @Test
+     public void testLooksApplicable_NoConfig() {
         Map<String, Object> host1Config = (Map<String, Object>) asConfig.get("host*.mycloud.net");
         assertFalse(serverConfigServiceImpl.looksApplicable(host1Config, null));
     }
 
-    @Test
-    public void testLooksApplicable_NoData() {
+     @Test
+     public void testLooksApplicable_NoData() {
         Map<String, Object> host1Config = (Map<String, Object>) asConfig.get("host*.mycloud.net");
         assertFalse(serverConfigServiceImpl.looksApplicable(host1Config, null));
     }
 
-    @Test
-    public void testGetServerConfigServicesLookup() {
+     @Test
+     public void testGetServerConfigServicesLookup() {
         assertNotNull(serverConfigServiceImpl.getServerConfigServicesLookup());
     }
 
-    @Test
-    public void testDefaultNotificationMailConfiguration() throws Exception {
+     @Test
+     public void testDefaultNotificationMailConfiguration() throws Exception {
         ServerConfig serverConfig = serverConfigServiceImpl.getServerConfig("nonconfiguredhost.com", -1, -1);
         NotificationMailConfig nmc = serverConfig.getNotificationMailConfig();
         assertEquals("Wrong button text color", "#ffffff", nmc.getButtonTextColor());
@@ -270,8 +270,8 @@ public class ServerConfigServiceImplTest {
         assertEquals("Wrong footer text", "", nmc.getFooterText());
     }
 
-    @Test
-    public void testCustomNotificationMailConfiguration() throws Exception {
+     @Test
+     public void testCustomNotificationMailConfiguration() throws Exception {
         ServerConfig serverConfig = serverConfigServiceImpl.getServerConfig("host3.mycloud.net", -1, -1);
         NotificationMailConfig nmc = serverConfig.getNotificationMailConfig();
         assertEquals("Wrong button text color", "#000000", nmc.getButtonTextColor());
@@ -281,8 +281,8 @@ public class ServerConfigServiceImplTest {
         assertEquals("Wrong footer text", "Footer text", nmc.getFooterText());
     }
 
-    @Test
-    public void testCustomNotificationMailConfigurationWithoutFooter() throws Exception {
+     @Test
+     public void testCustomNotificationMailConfigurationWithoutFooter() throws Exception {
         ServerConfig serverConfig = serverConfigServiceImpl.getServerConfig("host2.mycloud.net", -1, -1);
         NotificationMailConfig nmc = serverConfig.getNotificationMailConfig();
         assertEquals("Wrong button text color", "#ffffff", nmc.getButtonTextColor());
@@ -292,8 +292,8 @@ public class ServerConfigServiceImplTest {
         assertEquals("Wrong footer text", null, nmc.getFooterText());
     }
 
-    @Test
-    public void testCustomNotificationMailConfigurationWithoutFooterImage() throws Exception {
+     @Test
+     public void testCustomNotificationMailConfigurationWithoutFooterImage() throws Exception {
         ServerConfig serverConfig = serverConfigServiceImpl.getServerConfig("host1.mycloud.net", -1, -1);
         NotificationMailConfig nmc = serverConfig.getNotificationMailConfig();
         assertEquals("Wrong button text color", "#ffffff", nmc.getButtonTextColor());
@@ -303,8 +303,8 @@ public class ServerConfigServiceImplTest {
         assertEquals("Wrong footer text", "Footer text", nmc.getFooterText());
     }
 
-    @Test
-    public void testCustomSingleLanguageConfiguration() throws Exception {
+     @Test
+     public void testCustomSingleLanguageConfiguration() throws Exception {
         ComputedServerConfigValueService languages = new Languages(serviceLookup);
         setConfigValues(Collections.singletonList(languages));
         ServerConfig host1 = serverConfigServiceImpl.getServerConfig("host1.mycloud.net", 1, 1);
@@ -313,8 +313,8 @@ public class ServerConfigServiceImplTest {
         assertEquals(1, configLanguages.size());
     }
 
-    @Test
-    public void testCustomAllLanguageConfiguration() throws Exception {
+     @Test
+     public void testCustomAllLanguageConfiguration() throws Exception {
         ComputedServerConfigValueService languages = new Languages(serviceLookup);
         setConfigValues(Collections.singletonList(languages));
         ServerConfig host2 = serverConfigServiceImpl.getServerConfig("host2.mycloud.net", 1, 1);
@@ -323,8 +323,8 @@ public class ServerConfigServiceImplTest {
         assertEquals(2, configLanguages.size());
     }
 
-    @Test
-    public void testMissingLanguageConfiguration() throws Exception {
+     @Test
+     public void testMissingLanguageConfiguration() throws Exception {
         ComputedServerConfigValueService languages = new Languages(serviceLookup);
         setConfigValues(Collections.singletonList(languages));
         ServerConfig host2 = serverConfigServiceImpl.getServerConfig("host3.mycloud.net", 1, 1);

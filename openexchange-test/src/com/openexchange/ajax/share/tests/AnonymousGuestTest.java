@@ -49,9 +49,9 @@
 
 package com.openexchange.ajax.share.tests;
 
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -63,13 +63,12 @@ import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.DefaultFileStorageObjectPermission;
 import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageGuestObjectPermission;
+import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.recipient.AnonymousRecipient;
-
 
 /**
  * Anonymous guests are created for creating links to folders/items. At most one link must exist
@@ -85,28 +84,13 @@ public class AnonymousGuestTest extends ShareTest {
 
     private File file;
 
-    /**
-     * Initializes a new {@link AnonymousGuestTest}.
-     * @param name
-     */
-    public AnonymousGuestTest(String name) {
-        super(name);
-    }
-
-    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        folder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, client.getValues().getPrivateInfostoreFolder());
+        folder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder());
         remember(folder);
         file = insertFile(folder.getObjectID());
         remember(file);
-    }
-
-    @Override
-    @After
-    protected void tearDown() throws Exception {
-        super.tearDown();
     }
 
     @Test
@@ -192,7 +176,7 @@ public class AnonymousGuestTest extends ShareTest {
         FolderObject updated = addPermissions(folder, guestPermission);
         OCLPermission entityPermission = findAndCheckPermission(updated);
 
-        FolderObject newFolder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, client.getValues().getPrivateInfostoreFolder());
+        FolderObject newFolder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder());
         remember(newFolder);
 
         boolean thrown = false;
@@ -210,9 +194,9 @@ public class AnonymousGuestTest extends ShareTest {
         OCLGuestPermission guestPermission = createAnonymousGuestPermission();
         FolderObject updated = addPermissions(folder, guestPermission);
         OCLPermission entityPermission = findAndCheckPermission(updated);
-         /*
-          * Change to writable
-          */
+        /*
+         * Change to writable
+         */
         entityPermission.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
         boolean thrown = false;
         try {
@@ -308,7 +292,7 @@ public class AnonymousGuestTest extends ShareTest {
         File updated = addPermissions(file, guestPermission);
         FileStorageObjectPermission entityPermission = findAndCheckPermission(updated);
 
-        File newFile = insertFile(client.getValues().getPrivateInfostoreFolder());
+        File newFile = insertFile(getClient().getValues().getPrivateInfostoreFolder());
         remember(newFile);
 
         boolean thrown = false;
@@ -326,9 +310,9 @@ public class AnonymousGuestTest extends ShareTest {
         FileStorageGuestObjectPermission guestPermission = asObjectPermission(createAnonymousGuestPermission());
         File updated = addPermissions(file, guestPermission);
         FileStorageObjectPermission entityPermission = findAndCheckPermission(updated);
-         /*
-          * Change to writable
-          */
+        /*
+         * Change to writable
+         */
         List<FileStorageObjectPermission> newPermissions = new ArrayList<>(2);
         newPermissions.addAll(updated.getObjectPermissions());
         newPermissions.remove(entityPermission);
@@ -409,7 +393,7 @@ public class AnonymousGuestTest extends ShareTest {
 
         OCLPermission matchingPermission = null;
         for (OCLPermission p : permissions) {
-            if (p.getEntity() != client.getValues().getUserId()) {
+            if (p.getEntity() != getClient().getValues().getUserId()) {
                 Assert.assertTrue(p.isFolderVisible());
                 Assert.assertTrue(p.canReadOwnObjects());
                 Assert.assertTrue(p.canReadAllObjects());
@@ -434,7 +418,7 @@ public class AnonymousGuestTest extends ShareTest {
 
         FileStorageObjectPermission matchingPermission = null;
         for (FileStorageObjectPermission p : permissions) {
-            if (p.getEntity() != client.getValues().getUserId()) {
+            if (p.getEntity() != getClient().getValues().getUserId()) {
                 Assert.assertTrue(p.canRead());
                 Assert.assertFalse(p.canWrite());
                 Assert.assertFalse(p.canDelete());

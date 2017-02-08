@@ -165,7 +165,7 @@ public class QueryRequest extends AbstractFindRequest<QueryResponse> {
                 documents.add(new PropDocument(jDocuments.getJSONObject(i).asMap()));
             }
 
-            return new QueryResponse(response, new SearchResult(numFound, from, documents, Collections.<ActiveFacet>emptyList()));
+            return new QueryResponse(response, new SearchResult(numFound, from, documents, Collections.<ActiveFacet> emptyList()));
         }
     }
 

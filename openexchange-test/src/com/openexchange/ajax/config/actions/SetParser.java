@@ -70,8 +70,7 @@ public final class SetParser extends AbstractAJAXParser<SetResponse> {
      * {@inheritDoc}
      */
     @Override
-    protected SetResponse createResponse(final Response response)
-        throws JSONException {
+    protected SetResponse createResponse(final Response response) throws JSONException {
         return new SetResponse(response);
     }
 

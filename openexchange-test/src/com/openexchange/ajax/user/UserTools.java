@@ -50,13 +50,13 @@
 package com.openexchange.ajax.user;
 
 import java.io.IOException;
-import org.junit.Assert;
+import java.util.ArrayList;
+import java.util.List;
 import org.json.JSONException;
+import org.junit.Assert;
 import org.xml.sax.SAXException;
-import com.meterware.httpunit.WebConversation;
 import com.openexchange.ajax.UserTest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.user.actions.GetRequest;
 import com.openexchange.ajax.user.actions.GetResponse;
@@ -80,28 +80,31 @@ public final class UserTools extends Assert {
         super();
     }
 
-    public static UserImpl4Test[] searchUser(WebConversation webCon, String host, String searchpattern, String session) throws OXException, IOException, SAXException, JSONException {
+    public static UserImpl4Test[] searchUser(AJAXClient client, String searchpattern) throws OXException, IOException, SAXException, JSONException {
         final ContactSearchObject search = new ContactSearchObject();
         search.setPattern(searchpattern);
         search.addFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID);
         final SearchRequest request = new SearchRequest(search, UserTest.CONTACT_FIELDS);
-        final AJAXClient client = new AJAXClient(new AJAXSession(webCon, host, session), false);
         final SearchResponse response = Executor.execute(client, request);
         assertNotNull("timestamp", response.getTimestamp());
         return response.getUser();
     }
 
-    public static Contact getUserContact(WebConversation webCon, String host, String session, int userId) throws OXException, IOException, SAXException, JSONException {
-        AJAXClient client = new AJAXClient(new AJAXSession(webCon, host, session), false);
-        client.setHostname(host);
-        GetRequest request = new GetRequest(userId, client.getValues().getTimeZone());
-        GetResponse response = client.execute(request);
-        return response.getContact();
+        public static Contact getUserContact(AJAXClient client, int userId) throws OXException, IOException, SAXException, JSONException {
+            GetRequest request = new GetRequest(userId, client.getValues().getTimeZone());
+            GetResponse response = client.execute(request);
+            return response.getContact();
+        }
+
+    public static User getUser(AJAXClient client, int userId) throws OXException, IOException, JSONException {
+        return new UserResolver(client).getUser(userId);
     }
 
-    public static User getUser(WebConversation webCon, String host, String session, int userId) throws OXException, IOException, SAXException, JSONException {
-        AJAXClient client = new AJAXClient(new AJAXSession(webCon, host, session), false);
-        client.setHostname(host);
-        return new UserResolver(client).getUser(userId);
+    public static User[] listUser(AJAXClient client, int[] ids) throws OXException, IOException, JSONException {
+        List<User> users = new ArrayList<>();
+        for (int id : ids) {
+            users.add(getUser(client, id));
+        }
+        return users.toArray(new User[users.size()]);
     }
 }

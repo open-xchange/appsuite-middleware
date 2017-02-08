@@ -66,9 +66,7 @@ public class StoreRequest extends AbstractRequest<StoreResponse> {
     }
 
     public StoreRequest(final String session, final boolean failOnError) {
-        super(new Parameter[] {
-            new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_STORE),
-            new URLParameter(PARAM_SESSION, session)
+        super(new Parameter[] { new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_STORE), new URLParameter(PARAM_SESSION, session)
         });
         this.failOnError = failOnError;
     }

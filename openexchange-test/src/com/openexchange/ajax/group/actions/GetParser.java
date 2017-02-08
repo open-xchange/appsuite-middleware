@@ -70,8 +70,7 @@ public final class GetParser extends AbstractAJAXParser<GetResponse> {
      * {@inheritDoc}
      */
     @Override
-    protected GetResponse createResponse(final Response response)
-        throws JSONException {
+    protected GetResponse createResponse(final Response response) throws JSONException {
         assertNotNull("Timestamp is missing.", response.getTimestamp());
         return new GetResponse(response);
     }

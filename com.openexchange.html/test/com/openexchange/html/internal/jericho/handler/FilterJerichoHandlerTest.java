@@ -85,48 +85,48 @@ public class FilterJerichoHandlerTest {
         filterJerichoHandler = new FilterJerichoHandler(100000, htmlServiceImpl);
     }
 
-    @Test
-    public void testSetMaxContentSize_infiniteWithMinusOne_setInfinite() {
+     @Test
+     public void testSetMaxContentSize_infiniteWithMinusOne_setInfinite() {
         filterJerichoHandler.setMaxContentSize(-1);
 
         int valueFromField = (Integer)MockUtils.getValueFromField(filterJerichoHandler, "maxContentSize");
         Assert.assertEquals(-1, valueFromField);
     }
 
-    @Test
-    public void testSetMaxContentSize_infiniteWithMinusZero_setInfinite() {
+     @Test
+     public void testSetMaxContentSize_infiniteWithMinusZero_setInfinite() {
         filterJerichoHandler.setMaxContentSize(0);
 
         int valueFromField = (Integer) MockUtils.getValueFromField(filterJerichoHandler, "maxContentSize");
         Assert.assertEquals(0, valueFromField);
     }
 
-    @Test
-    public void testSetMaxContentSize_lessThanMinimum_setMinimum10000() {
+     @Test
+     public void testSetMaxContentSize_lessThanMinimum_setMinimum10000() {
         filterJerichoHandler.setMaxContentSize(555);
 
         int valueFromField = (Integer) MockUtils.getValueFromField(filterJerichoHandler, "maxContentSize");
         Assert.assertEquals(10000, valueFromField);
     }
 
-    @Test
-    public void testSetMaxContentSize_validMaxSize_setMaxSize() {
+     @Test
+     public void testSetMaxContentSize_validMaxSize_setMaxSize() {
         filterJerichoHandler.setMaxContentSize(22222);
 
         int valueFromField = (Integer) MockUtils.getValueFromField(filterJerichoHandler, "maxContentSize");
         Assert.assertEquals(22222, valueFromField);
     }
 
-    @Test
-    public void testHandleTableCellpaddingAttribute_mapNull_return() {
+     @Test
+     public void testHandleTableCellpaddingAttribute_mapNull_return() {
         filterJerichoHandler.handleTableCellpaddingAttribute(null);
 
         LinkedList<CellPadding> tablePaddings = (LinkedList<CellPadding>) MockUtils.getValueFromField(filterJerichoHandler, "tablePaddings");
         Assert.assertEquals(0, tablePaddings.size());
     }
 
-    @Test
-    public void testHandleTableCellpaddingAttribute_emptyMap_addEmptyCellpadding() {
+     @Test
+     public void testHandleTableCellpaddingAttribute_emptyMap_addEmptyCellpadding() {
         Map<String, String> map = new LinkedHashMap<String, String>();
 
         filterJerichoHandler.handleTableCellpaddingAttribute(map);
@@ -137,8 +137,8 @@ public class FilterJerichoHandlerTest {
         Assert.assertEquals(0, map.size());
     }
 
-    @Test
-    public void testHandleTableCellpaddingAttribute_cellpaddingInAttributes_addCellpadding() {
+     @Test
+     public void testHandleTableCellpaddingAttribute_cellpaddingInAttributes_addCellpadding() {
         Map<String, String> map = new LinkedHashMap<String, String>();
         map.put("cellpadding", "10");
 
@@ -149,8 +149,8 @@ public class FilterJerichoHandlerTest {
         Assert.assertEquals("10", tablePaddings.getFirst().cellPadding);
     }
 
-    @Test
-    public void testHandleTableCellpaddingAttribute_cellpaddingZero_addCellpadding() {
+     @Test
+     public void testHandleTableCellpaddingAttribute_cellpaddingZero_addCellpadding() {
         Map<String, String> map = new LinkedHashMap<String, String>();
         map.put("cellpadding", "0");
 
@@ -161,8 +161,8 @@ public class FilterJerichoHandlerTest {
         Assert.assertEquals("0", tablePaddings.getFirst().cellPadding);
     }
 
-    @Test
-    public void testHandleTableCellpaddingAttribute_cellsapcingZero_addCellpaddingAndBorderCollapse() {
+     @Test
+     public void testHandleTableCellpaddingAttribute_cellsapcingZero_addCellpaddingAndBorderCollapse() {
         Map<String, String> map = new LinkedHashMap<String, String>();
         map.put("cellpadding", "0");
         map.put("cellspacing", "0");
@@ -175,8 +175,8 @@ public class FilterJerichoHandlerTest {
         Assert.assertEquals(3, map.size());
     }
 
-    @Test
-    public void testHandleTableCellpaddingAttribute_cellpaddingInStyle_addCellpadding() {
+     @Test
+     public void testHandleTableCellpaddingAttribute_cellpaddingInStyle_addCellpadding() {
         Map<String, String> map = new LinkedHashMap<String, String>();
         map.put("style", "border-collapse:collapse;margin:2px;padding:20;width:546px;background-color:#dbefff;");
 
@@ -188,8 +188,8 @@ public class FilterJerichoHandlerTest {
         Assert.assertEquals(1, map.size());
     }
 
-    @Test
-    public void testHandleTableCellpaddingAttribute_styleAvailableButNoCellpadding_doNotAdd() {
+     @Test
+     public void testHandleTableCellpaddingAttribute_styleAvailableButNoCellpadding_doNotAdd() {
         Map<String, String> map = new LinkedHashMap<String, String>();
         map.put("style", "border-collapse:collapse;margin:2px;width:546px;background-color:#dbefff;");
 

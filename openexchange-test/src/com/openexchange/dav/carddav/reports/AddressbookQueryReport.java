@@ -67,8 +67,7 @@ import com.openexchange.dav.PropertyNames;
  */
 public class AddressbookQueryReport implements Report, DeltaVConstants {
 
-    public static final ReportType ADDRESSBOOK_QUERY = ReportType.register(PropertyNames.ADDRESSBOOK_QUERY.getName(),
-    		PropertyNames.ADDRESSBOOK_QUERY.getNamespace(), AddressbookQueryReport.class);
+    public static final ReportType ADDRESSBOOK_QUERY = ReportType.register(PropertyNames.ADDRESSBOOK_QUERY.getName(), PropertyNames.ADDRESSBOOK_QUERY.getNamespace(), AddressbookQueryReport.class);
 
     @Override
     public ReportType getType() {
@@ -81,11 +80,10 @@ public class AddressbookQueryReport implements Report, DeltaVConstants {
     }
 
     @Override
-    public void init(DavResource dr, ReportInfo ri) throws DavException {
-    }
+    public void init(DavResource dr, ReportInfo ri) throws DavException {}
 
-	@Override
+    @Override
     public Element toXml(Document arg0) {
         throw new UnsupportedOperationException();
-	}
+    }
 }

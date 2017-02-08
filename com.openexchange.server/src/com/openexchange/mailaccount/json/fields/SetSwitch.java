@@ -379,4 +379,16 @@ public class SetSwitch implements AttributeSwitch {
         return null;
     }
 
+    @Override
+    public Object mailDisabled() {
+        desc.setMailDisabled(Boolean.parseBoolean(value.toString()));
+        return null;
+    }
+
+    @Override
+    public Object transportDisabled() {
+        desc.setTransportDisabled(Boolean.parseBoolean(value.toString()));
+        return null;
+    }
+
 }

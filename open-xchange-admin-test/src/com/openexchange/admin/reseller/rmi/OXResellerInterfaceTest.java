@@ -288,7 +288,7 @@ public class OXResellerInterfaceTest extends OXResellerAbstractTest {
     }
 
     // @Test
-    // public void testList() throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, StorageException,
+    //     public void testList() throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, StorageException,
     // InvalidCredentialsException {
     // final Credentials creds = DummyMasterCredentials();
     // ResellerAdmin[] res = oxresell.list("*", creds);

@@ -93,6 +93,8 @@ public final class MailExceptionStrings implements LocalizableStrings {
 
     public final static String COPY_TO_SENT_FOLDER_FAILED_QUOTA_MSG = "Message has been successfully sent. Due to exceeded quota a copy could not be placed in your sent folder though.";
 
+    public final static String UNABLE_TO_SAVE_DRAFT_QUOTA_MSG = "Unable to save draft, due to exceeded quota.";
+
     public final static String COPY_TO_SENT_FOLDER_FAILED_MSG = "Message has been successfully sent. A copy could not be placed in your sent folder though.";
 
     public final static String BAD_PARAM_VALUE_MSG = "Bad value \"%1$s\" in parameter \"%2$s\".";
@@ -111,7 +113,7 @@ public final class MailExceptionStrings implements LocalizableStrings {
 
     public final static String DEFAULT_FOLDER_CHECK_FAILED_MSG = "Checking default folders failed for user %2$s.";
 
-    public final static String DEFAULT_FOLDER_CHECK_FAILED_OVER_QUOTA_MSG = "Default folders cannot be created as mail system denies to create more folders. Please delete other folders first";
+    public final static String DEFAULT_FOLDER_CHECK_FAILED_OVER_QUOTA_MSG = "Default folders cannot be created as mail system denies to create more folders. Consequently, the mail module is not usable at the moment. Please delete other folders first in order to re-use the mail module again";
 
     public final static String UNSUPPORTED_DATASOURCE_MSG = "The types of specified data source are not supported.";
 
@@ -243,5 +245,11 @@ public final class MailExceptionStrings implements LocalizableStrings {
 
     // A temporary failure because a subsystem is down. Please try again later.
     public static final String SUBSYSTEM_DOWN_MSG = "A temporary failure because a subsystem is down (maybe due to maintenance). Please try again later.";
+
+    // Thrown when a mail access has been disabled. That is it exceeded the limit for failed authentication count.
+    public static final String MAIL_ACCESS_DISABLED_MSG = "Accessing server %1$s is disabled. Please update the account and enter valid credentials in order to use it again.";
+
+    // Thrown when a mail transport has been disabled. That is it exceeded the limit for failed authentication count.
+    public static final String MAIL_TRANSPORT_DISABLED_MSG = "Accessing server %1$s is disabled. Please update the account and enter valid credentials in order to use it again.";
 
 }

@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.mail;
 
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -59,6 +61,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.mail.actions.DeleteRequest;
@@ -79,24 +84,28 @@ public class Bug32351Test extends AbstractMailTest {
 
     String[][] fmid;
 
-    public Bug32351Test(final String name) {
-        super(name);
+    public Bug32351Test() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         values = getClient().getValues();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        if (null != fmid) {
-            client.execute(new DeleteRequest(fmid, true).ignoreError());
+    @After
+    public void tearDown() throws Exception {
+        try {
+            if (null != fmid) {
+                getClient().execute(new DeleteRequest(fmid, true).ignoreError());
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
+    @Test
     public void testBug32355() throws OXException, IOException, JSONException {
         StringBuilder sb = new StringBuilder(8192);
         {
@@ -114,10 +123,10 @@ public class Bug32351Test extends AbstractMailTest {
 
         JSONArray json;
         {
-            InputStream inputStream = Streams.newByteArrayInputStream(TestMails.replaceAddresses(sb.toString(), client.getValues().getSendAddress()).getBytes(com.openexchange.java.Charsets.UTF_8));
+            InputStream inputStream = Streams.newByteArrayInputStream(TestMails.replaceAddresses(sb.toString(), getClient().getValues().getSendAddress()).getBytes(com.openexchange.java.Charsets.UTF_8));
             sb = null;
             final ImportMailRequest importMailRequest = new ImportMailRequest(values.getInboxFolder(), MailFlag.SEEN.getValue(), inputStream);
-            final ImportMailResponse importResp = client.execute(importMailRequest);
+            final ImportMailResponse importResp = getClient().execute(importMailRequest);
             json = (JSONArray) importResp.getData();
             fmid = importResp.getIds();
         }
@@ -141,7 +150,7 @@ public class Bug32351Test extends AbstractMailTest {
 
         // Concurrent delete attempts
         final String[][] fmid = this.fmid;
-        final AJAXClient client = this.client;
+        final AJAXClient client = getClient();
         final CountDownLatch startLatch = new CountDownLatch(1);
         final CountDownLatch endLatch = new CountDownLatch(2);
 
@@ -152,7 +161,7 @@ public class Bug32351Test extends AbstractMailTest {
             public void run() {
                 try {
                     startLatch.await();
-                    client.execute(new DeleteRequest(fmid, false));
+                    getClient().execute(new DeleteRequest(fmid, false));
 
                     System.out.println("Thread #1 performed deletion");
 
@@ -172,7 +181,7 @@ public class Bug32351Test extends AbstractMailTest {
             public void run() {
                 try {
                     startLatch.await();
-                    client.execute(new DeleteRequest(fmid, false));
+                    getClient().execute(new DeleteRequest(fmid, false));
 
                     System.out.println("Thread #2 performed deletion");
 

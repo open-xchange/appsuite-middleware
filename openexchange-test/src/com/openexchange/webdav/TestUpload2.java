@@ -49,13 +49,15 @@
 
 package com.openexchange.webdav;
 
+import static org.junit.Assert.assertEquals;
 import java.io.ByteArrayInputStream;
 import java.util.Properties;
-import junit.framework.TestCase;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.EntityEnclosingMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
+import org.junit.Before;
+import org.junit.Test;
 import com.meterware.httpunit.Base64;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.test.WebdavInit;
@@ -64,7 +66,7 @@ import com.openexchange.test.WebdavInit;
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class TestUpload2 extends TestCase {
+public class TestUpload2 {
 
     private Properties webdavProps;
 
@@ -75,19 +77,10 @@ public class TestUpload2 extends TestCase {
     private String hostname;
 
     /**
-     * @param name
-     */
-    public TestUpload2(final String name) {
-        super(name);
-        // TODO Auto-generated constructor stub
-    }
-
-    /**
      * {@inheritDoc}
      */
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         webdavProps = WebdavInit.getWebdavProperties();
         login = AbstractConfigWrapper.parseProperty(webdavProps, "login", "");
         password = AbstractConfigWrapper.parseProperty(webdavProps, "password", "");
@@ -96,6 +89,7 @@ public class TestUpload2 extends TestCase {
 
     private static final int PAKETS = 10;
 
+    @Test
     public void testUpload() throws Throwable {
         final HttpClient client = new HttpClient();
         // TODO read home infostore dir
@@ -110,8 +104,7 @@ public class TestUpload2 extends TestCase {
         }
         put.setRequestBody(new ByteArrayInputStream(bytes));
         put.setRequestContentLength(EntityEnclosingMethod.CONTENT_LENGTH_CHUNKED);
-        put.addRequestHeader(new Header("Authorization", "Basic " + Base64
-            .encode(login + ":" + password)));
+        put.addRequestHeader(new Header("Authorization", "Basic " + Base64.encode(login + ":" + password)));
 
         client.executeMethod(put);
         assertEquals(201, put.getStatusCode());

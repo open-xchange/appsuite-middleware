@@ -57,112 +57,108 @@ import com.openexchange.groupware.container.Contact;
 
 /**
  * Stores the parameters for inserting the contact.
+ * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 public class InsertRequest extends AbstractContactRequest<InsertResponse> {
 
-	/**
-	 * Contact to insert.
-	 */
-	Contact contactObj;
+    /**
+     * Contact to insert.
+     */
+    Contact contactObj;
 
-	JSONObject jsonObj;
+    JSONObject jsonObj;
 
-	final boolean withImage;
+    final boolean withImage;
 
-	String fieldContent;
+    String fieldContent;
 
-	final int folderID;
+    final int folderID;
 
-	/**
-	 * Should the parser fail on error in server response.
-	 */
-	final boolean failOnError;
+    /**
+     * Should the parser fail on error in server response.
+     */
+    final boolean failOnError;
 
+    /**
+     * Default constructor.
+     * 
+     * @param contactObj contact to insert.
+     */
+    public InsertRequest(final Contact contactObj) {
+        this(contactObj, true);
+    }
 
-	/**
-	 * Default constructor.
-	 * @param contactObj contact to insert.
-	 */
-	public InsertRequest(final Contact contactObj) {
-		this(contactObj, true);
-	}
+    /**
+     * More detailed constructor.
+     * 
+     * @param contactObj contact to insert.
+     * @param failOnError <code>true</code> to check the response for error
+     *            messages.
+     */
+    public InsertRequest(final Contact contactObj, final boolean failOnError) {
+        super();
+        this.contactObj = contactObj;
+        this.folderID = contactObj.getParentFolderID();
+        this.jsonObj = null;
+        this.failOnError = failOnError;
+        this.withImage = contactObj.containsImage1() && (null != contactObj.getImage1());
 
-	/**
-	 * More detailed constructor.
-	 * @param contactObj contact to insert.
-	 * @param failOnError <code>true</code> to check the response for error
-	 * messages.
-	 */
-	public InsertRequest(final Contact contactObj, final boolean failOnError) {
-		super();
-		this.contactObj = contactObj;
-		this.folderID = contactObj.getParentFolderID();
-		this.jsonObj = null;
-		this.failOnError = failOnError;
-		this.withImage = contactObj.containsImage1() && (null != contactObj.getImage1());
-
-		if (withImage) {
-		    try {
+        if (withImage) {
+            try {
                 fieldContent = convert(contactObj).toString();
             } catch (final JSONException e) {
                 throw new IllegalArgumentException(e);
             }
         }
-	}
+    }
 
-	public InsertRequest(final String json) throws JSONException{
-		super();
-		this.contactObj = null;
-		this.withImage = false;
-		this.jsonObj = new JSONObject(json);
-		this.folderID = jsonObj.getInt("folder_id");
-		this.failOnError = true;
-	}
+    public InsertRequest(final String json) throws JSONException {
+        super();
+        this.contactObj = null;
+        this.withImage = false;
+        this.jsonObj = new JSONObject(json);
+        this.folderID = jsonObj.getInt("folder_id");
+        this.failOnError = true;
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public Object getBody() throws JSONException {
-		if(jsonObj != null) {
+        if (jsonObj != null) {
             return jsonObj;
         }
-		return convert(contactObj);
-	}
+        return convert(contactObj);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public Method getMethod() {
-		return withImage ? Method.UPLOAD : Method.PUT;
-	}
+        return withImage ? Method.UPLOAD : Method.PUT;
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public Parameter[] getParameters() {
-	    if (withImage) {
-	        return new Parameter[] {
-	            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW),
-	            new Parameter(AJAXServlet.PARAMETER_FOLDERID, String.valueOf(folderID)),
-	            new FieldParameter("json", fieldContent),
-	            new FileParameter("file", "open-xchange_image.jpg", new ByteArrayInputStream(contactObj.getImage1()), "image/jpg")
-	        };
+        if (withImage) {
+            return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW), new Parameter(AJAXServlet.PARAMETER_FOLDERID, String.valueOf(folderID)), new FieldParameter("json", fieldContent), new FileParameter("file", "open-xchange_image.jpg", new ByteArrayInputStream(contactObj.getImage1()), "image/jpg")
+            };
         }
-		return new Parameter[] {
-			new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW),
-			new Parameter(AJAXServlet.PARAMETER_FOLDERID, String.valueOf(folderID))
-		};
-	}
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW), new Parameter(AJAXServlet.PARAMETER_FOLDERID, String.valueOf(folderID))
+        };
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public InsertParser getParser() {
-		return new InsertParser(failOnError, withImage);
-	}
+        return new InsertParser(failOnError, withImage);
+    }
 }

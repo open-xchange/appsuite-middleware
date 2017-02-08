@@ -49,6 +49,11 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
@@ -65,14 +70,14 @@ public class Bug47012Test extends AbstractAJAXSession {
     private CalendarTestManager ctm;
     private Appointment app;
 
-    public Bug47012Test(String name) {
-        super(name);
+    public Bug47012Test() {
+        super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
-        ctm = new CalendarTestManager(client);
+        ctm = new CalendarTestManager(getClient());
         app = new Appointment();
         app.setTitle("Bug 47012 Test");
         app.setStartDate(TimeTools.D("07.07.2016 08:00"));
@@ -81,34 +86,37 @@ public class Bug47012Test extends AbstractAJAXSession {
         app.setDays(Appointment.THURSDAY);
         app.setInterval(1);
         app.setIgnoreConflicts(true);
-        app.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        app.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         ctm.insert(app);
     }
 
+    @Test
     public void testChangeStartDate() throws Exception {
         Appointment changeException = ctm.createIdentifyingCopy(app);
         changeException.setRecurrencePosition(1);
         changeException.setStartDate(TimeTools.D("07.07.2016 08:30"));
         changeException.setIgnoreConflicts(true);
         ctm.update(changeException);
-        
+
         Appointment loadedException = ctm.get(changeException.getParentFolderID(), changeException.getObjectID());
         assertEquals("Wrong start date.", changeException.getStartDate(), loadedException.getStartDate());
         assertEquals("Wrong end date.", TimeTools.D("07.07.2016 09:00"), loadedException.getEndDate());
     }
 
+    @Test
     public void testChangeEndDate() throws Exception {
         Appointment changeException = ctm.createIdentifyingCopy(app);
         changeException.setRecurrencePosition(1);
         changeException.setEndDate(TimeTools.D("07.07.2016 09:30"));
         changeException.setIgnoreConflicts(true);
         ctm.update(changeException);
-        
+
         Appointment loadedException = ctm.get(changeException.getParentFolderID(), changeException.getObjectID());
         assertEquals("Wrong start date.", TimeTools.D("07.07.2016 08:00"), loadedException.getStartDate());
         assertEquals("Wrong end date.", changeException.getEndDate(), loadedException.getEndDate());
     }
 
+    @Test
     public void testChangeStartAndEndDate() throws Exception {
         Appointment changeException = ctm.createIdentifyingCopy(app);
         changeException.setRecurrencePosition(1);
@@ -116,29 +124,33 @@ public class Bug47012Test extends AbstractAJAXSession {
         changeException.setEndDate(TimeTools.D("07.07.2016 09:30"));
         changeException.setIgnoreConflicts(true);
         ctm.update(changeException);
-        
+
         Appointment loadedException = ctm.get(changeException.getParentFolderID(), changeException.getObjectID());
         assertEquals("Wrong start date.", changeException.getStartDate(), loadedException.getStartDate());
         assertEquals("Wrong end date.", changeException.getEndDate(), loadedException.getEndDate());
     }
 
+    @Test
     public void testMakeFulltime() throws Exception {
         Appointment changeException = ctm.createIdentifyingCopy(app);
         changeException.setRecurrencePosition(1);
         changeException.setFullTime(true);
         changeException.setIgnoreConflicts(true);
         ctm.update(changeException);
-        
+
         Appointment loadedException = ctm.get(changeException.getParentFolderID(), changeException.getObjectID());
         assertTrue("Expected fulltime appointment.", loadedException.getFullTime());
         assertEquals("Wrong start date.", TimeTools.D("07.07.2016 00:00"), loadedException.getStartDate());
         assertEquals("Wrong end date.", TimeTools.D("08.07.2016 00:00"), loadedException.getEndDate());
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        ctm.cleanUp();
-        super.tearDown();
+        try {
+            ctm.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
 }

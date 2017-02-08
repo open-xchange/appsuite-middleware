@@ -242,7 +242,8 @@ public class TrustedSSLSocketFactory extends SSLSocketFactory implements Handsha
     }
 
     @Override
-    public void handshakeCompleted(HandshakeCompletedEvent event) {
-        LOG.debug("Successfully handshaked with host {}", event.getSocket().getInetAddress().getHostAddress());
+    public void handshakeCompleted(final HandshakeCompletedEvent event) {
+        Object arg = new Object() { @Override public String toString() { return event.getSocket().getInetAddress().getHostAddress(); }};
+        LOG.debug("Successfully handshaked with host {}", arg);
     }
 }

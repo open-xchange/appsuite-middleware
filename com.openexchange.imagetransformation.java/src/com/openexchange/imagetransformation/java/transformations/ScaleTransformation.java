@@ -228,7 +228,7 @@ public class ScaleTransformation implements ImageTransformation {
             case CONTAIN_FORCE_DIMENSION:
                 // fall-through
             case CONTAIN:
-                if (null != originalResolution && maxWidth >= originalResolution.getWidth() && maxHeight >= originalResolution.getHeight()) {
+                if (maxWidth >= originalResolution.getWidth() && maxHeight >= originalResolution.getHeight()) {
                     return originalResolution; // nothing to do
                 }
                 constrain = new ContainDimensionConstrain(maxWidth, maxHeight);

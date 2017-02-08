@@ -49,9 +49,13 @@
 
 package com.openexchange.ajax.importexport;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import org.json.JSONArray;
+import org.junit.Test;
 import com.openexchange.ajax.contact.AbstractManagedContactTest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.importexport.actions.CSVImportRequest;
@@ -71,60 +75,62 @@ import com.openexchange.groupware.importexport.ContactTestData;
  */
 public class Bug18482Test_ByteOrderMarkOnUtf8 extends AbstractManagedContactTest {
 
-	String csv = ContactTestData.IMPORT_MULTIPLE;
+    String csv = ContactTestData.IMPORT_MULTIPLE;
 
-	public Bug18482Test_ByteOrderMarkOnUtf8(String name) {
-		super(name);
-	}
+    @Test
+    public void testNone() throws Exception {
+        testWithBOM();
+    }
 
-	public void testNone() throws Exception{
-		testWithBOM();
-	}
+    @Test
+    public void testUTF8() throws Exception {
+        testWithBOM(0xEF, 0xBB, 0xBF);
+    }
 
-	public void testUTF8() throws Exception{
-		testWithBOM(0xEF,0xBB,0xBF);
-	}
+    @Test
+    public void testUTF16LE() throws Exception {
+        testWithBOM(0xFF, 0xFE);
+    }
 
-	public void testUTF16LE() throws Exception{
-		testWithBOM(0xFF,0xFE);
-	}
+    @Test
+    public void testUTF16BE() throws Exception {
+        testWithBOM(0xFE, 0xFF);
+    }
 
-	public void testUTF16BE() throws Exception{
-		testWithBOM(0xFE, 0xFF);
-	}
+    @Test
+    public void testUTF32LE() throws Exception {
+        testWithBOM(0xFF, 0xFE, 0x00, 0x00);
+    }
 
-	public void testUTF32LE() throws Exception{
-		testWithBOM(0xFF,0xFE, 0x00, 0x00);
-	}
+    @Test
+    public void testUTF32BE() throws Exception {
+        testWithBOM(0x00, 0x00, 0xFE, 0xFF);
+    }
 
-	public void testUTF32BE() throws Exception{
-		testWithBOM(0x00, 0x00, 0xFE, 0xFF);
-	}
-
-	private void testWithBOM(int... bom) throws Exception{
-		byte[] bytes = csv.getBytes(com.openexchange.java.Charsets.UTF_8);
-		byte[] streambase = new byte[bom.length + bytes.length];
-		for(int i = 0; i < bom.length; i++) {
+    private void testWithBOM(int... bom) throws Exception {
+        byte[] bytes = csv.getBytes(com.openexchange.java.Charsets.UTF_8);
+        byte[] streambase = new byte[bom.length + bytes.length];
+        for (int i = 0; i < bom.length; i++) {
             streambase[i] = (byte) bom[i];
         }
-		for(int i = bom.length; i < streambase.length; i++) {
+        for (int i = bom.length; i < streambase.length; i++) {
             streambase[i] = bytes[i - bom.length];
         }
 
-		InputStream stream = new ByteArrayInputStream( streambase );
-		CSVImportRequest importRequest = new CSVImportRequest(folderID, stream, false);
-		AbstractAJAXResponse response = manager.getClient().execute(importRequest);
+        InputStream stream = new ByteArrayInputStream(streambase);
+        CSVImportRequest importRequest = new CSVImportRequest(folderID, stream, false);
+        AbstractAJAXResponse response = cotm.getClient().execute(importRequest);
 
-		assertFalse(response.hasError());
-		assertFalse(response.hasConflicts());
+        assertFalse(response.hasError());
+        assertFalse(response.hasConflicts());
 
-		JSONArray data = (JSONArray) response.getData();
-		assertEquals(2, data.length());
+        JSONArray data = (JSONArray) response.getData();
+        assertEquals(2, data.length());
 
-		Contact c1 = manager.getAction(folderID, data.getJSONObject(0).getInt("id"));
-		Contact c2 = manager.getAction(folderID, data.getJSONObject(1).getInt("id"));
-		assertTrue(c1.getGivenName().equals(ContactTestData.NAME1));
-		assertTrue(c2.getGivenName().equals(ContactTestData.NAME2));
-	}
+        Contact c1 = cotm.getAction(folderID, data.getJSONObject(0).getInt("id"));
+        Contact c2 = cotm.getAction(folderID, data.getJSONObject(1).getInt("id"));
+        assertTrue(c1.getGivenName().equals(ContactTestData.NAME1));
+        assertTrue(c2.getGivenName().equals(ContactTestData.NAME2));
+    }
 
 }

@@ -54,8 +54,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import java.sql.SQLException;
 import org.junit.Test;
-import com.openexchange.rest.services.database.transactions.Transaction;
-import com.openexchange.rest.services.database.transactions.TransactionKeeper;
 
 /**
  * {@link TransactionTest}
@@ -64,8 +62,8 @@ import com.openexchange.rest.services.database.transactions.TransactionKeeper;
  */
 public class TransactionTest {
 
-    @Test
-    public void testTimeOut() throws SQLException {
+     @Test
+     public void testTimeOut() throws SQLException {
         TransactionKeeper txKeeper = mock(TransactionKeeper.class);
 
         Transaction tx = new Transaction(null, txKeeper);

@@ -1,12 +1,9 @@
 package liquibase.change;
 
-import liquibase.change.core.RawSQLChange;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.lang.reflect.Field;
-import java.util.Map;
+import liquibase.change.core.RawSQLChange;
 
 public class BaseSQLChangeTest extends StandardChangeTest {
 
@@ -15,8 +12,7 @@ public class BaseSQLChangeTest extends StandardChangeTest {
         super.testChangeInstance = new RawSQLChange();
     }
 
-    @Override
-    @Test
+     @Test
     public void getRefactoringName() throws Exception {
         assertEquals("sql", ChangeFactory.getInstance().getChangeMetaData(new RawSQLChange()).getName());
     }
@@ -25,8 +21,7 @@ public class BaseSQLChangeTest extends StandardChangeTest {
     public void generateStatement() throws Exception {
     }
 
-    @Override
-    @Test
+     @Test
     public void getConfirmationMessage() throws Exception {
         assertEquals("Custom SQL executed", testChangeInstance.getConfirmationMessage());
     }

@@ -49,7 +49,8 @@
 
 package com.openexchange.dav.carddav.bugs;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -68,34 +69,24 @@ import com.openexchange.groupware.container.Contact;
  */
 public class Bug21374Test extends CardDAVTest {
 
-	public Bug21374Test() {
-		super();
-	}
+    public Bug21374Test() {
+        super();
+    }
 
-	@Test
-	public void testCreateWithProfession() throws Exception {
-		/*
-		 * fetch sync token for later synchronization
-		 */
-		final String syncToken = super.fetchSyncToken();
-		/*
-		 * create contact
-		 */
-    	final String uid = randomUID();
-    	final String firstName = "test";
-    	final String lastName = "jupp";
-    	final String profession = "profession?";
-        final String vCard =
-        		"BEGIN:VCARD" + "\r\n" +
-   				"VERSION:3.0" + "\r\n" +
-				"N:" + lastName + ";" + firstName + ";;;" + "\r\n" +
-				"FN:" + firstName + " " + lastName + "\r\n" +
-				"ROLE:" + profession + "\r\n" +
-				"UID:" + uid + "\r\n" +
-				"REV:" + super.formatAsUTC(new Date()) + "\r\n" +
-				"PRODID:-//Apple Inc.//AddressBook 6.1//EN" + "\r\n" +
-				"END:VCARD" + "\r\n"
-		;
+    @Test
+    public void testCreateWithProfession() throws Exception {
+        /*
+         * fetch sync token for later synchronization
+         */
+        final String syncToken = super.fetchSyncToken();
+        /*
+         * create contact
+         */
+        final String uid = randomUID();
+        final String firstName = "test";
+        final String lastName = "jupp";
+        final String profession = "profession?";
+        final String vCard = "BEGIN:VCARD" + "\r\n" + "VERSION:3.0" + "\r\n" + "N:" + lastName + ";" + firstName + ";;;" + "\r\n" + "FN:" + firstName + " " + lastName + "\r\n" + "ROLE:" + profession + "\r\n" + "UID:" + uid + "\r\n" + "REV:" + super.formatAsUTC(new Date()) + "\r\n" + "PRODID:-//Apple Inc.//AddressBook 6.1//EN" + "\r\n" + "END:VCARD" + "\r\n";
         assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putVCard(uid, vCard));
         /*
          * verify contact on server
@@ -115,5 +106,5 @@ public class Bug21374Test extends CardDAVTest {
         assertEquals("N wrong", lastName, card.getFamilyName());
         assertEquals("FN wrong", firstName + " " + lastName, card.getFN());
         assertEquals("ROLE wrong", profession, card.getVCard().getRole().getRole());
-	}
+    }
 }

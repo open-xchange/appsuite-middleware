@@ -2250,7 +2250,7 @@ public class Mail extends PermissionServlet {
         }
     }
 
-    private static String sanitizeHtml(final String htmlContent, final HtmlService htmlService) {
+    private static String sanitizeHtml(final String htmlContent, final HtmlService htmlService) throws OXException {
         return htmlService.sanitize(htmlContent, null, false, null, null);
     }
 
@@ -4117,7 +4117,8 @@ public class Mail extends PermissionServlet {
                 /*
                  * Manually detect&set \Answered flag
                  */
-                if (mailAccess.getMessageStorage() instanceof IMailMessageStorageExt) {
+                IMailMessageStorageExt messageStorageExt = mailAccess.getMessageStorage().supports(IMailMessageStorageExt.class);
+                if (null != messageStorageExt) {
                     final List<String> lst = new ArrayList<String>(2);
                     {
                         final String inReplyTo = sentMail.getFirstHeader("In-Reply-To");
@@ -4133,7 +4134,6 @@ public class Mail extends PermissionServlet {
                         }
                     }
                     if (!lst.isEmpty()) {
-                        final IMailMessageStorageExt messageStorageExt = (IMailMessageStorageExt) mailAccess.getMessageStorage();
                         final MailMessage[] mails = messageStorageExt.getMessagesByMessageID(lst.toArray(new String[lst.size()]));
                         for (final MailMessage mail : mails) {
                             if (null != mail) {

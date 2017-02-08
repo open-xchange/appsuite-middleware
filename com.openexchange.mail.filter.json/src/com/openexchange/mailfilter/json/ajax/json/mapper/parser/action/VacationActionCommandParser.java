@@ -74,6 +74,7 @@ import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserJSONUtil;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.exceptions.CommandParserExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link VacationActionCommandParser}
@@ -91,11 +92,11 @@ public class VacationActionCommandParser implements CommandParser<ActionCommand>
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser#parse(org.json.JSONObject)
      */
     @Override
-    public ActionCommand parse(JSONObject jsonObject) throws JSONException, SieveException, OXException {
+    public ActionCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException {
         final ArrayList<Object> arrayList = new ArrayList<Object>();
         final String days = jsonObject.getString(VacationActionField.days.getFieldName());
         if (null != days) {
@@ -156,7 +157,7 @@ public class VacationActionCommandParser implements CommandParser<ActionCommand>
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser#parse(org.json.JSONObject, com.openexchange.jsieve.commands.ActionCommand)
      */
     @SuppressWarnings("unchecked")
@@ -189,7 +190,7 @@ public class VacationActionCommandParser implements CommandParser<ActionCommand>
 
     /**
      * Encodes the specified UTF-8 string if necessary and returns the encoded string
-     * 
+     *
      * @param string The string to encode
      * @param field The field
      * @return The encoded string
@@ -208,7 +209,7 @@ public class VacationActionCommandParser implements CommandParser<ActionCommand>
 
     /**
      * Decodes the specified UTF-8 string if necessary and returns the decoded string
-     * 
+     *
      * @param utf8 The UTF-8 encoded string
      * @param field The field
      * @return The decoded string

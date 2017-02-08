@@ -59,7 +59,7 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
  */
 public class RefreshSecretResponse extends AbstractAJAXResponse {
 
-	protected RefreshSecretResponse(Response response) {
-		super(response);
-	}
+    protected RefreshSecretResponse(Response response) {
+        super(response);
+    }
 }

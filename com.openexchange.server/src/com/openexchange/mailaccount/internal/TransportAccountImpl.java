@@ -56,6 +56,7 @@ import java.util.Map;
 import javax.mail.internet.idn.IDNA;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.Account;
 import com.openexchange.mailaccount.TransportAccount;
 import com.openexchange.mailaccount.TransportAuth;
@@ -94,7 +95,8 @@ public class TransportAccountImpl implements TransportAccount {
     private String transportServer;
     private String transportServerUrl;
     private boolean transportStartTls;
-    protected int transportOAuthId;
+    private int transportOAuthId;
+    private boolean transportDisabled;
 
     /**
      * Initializes a new {@link TransportAccountImpl}.
@@ -107,6 +109,7 @@ public class TransportAccountImpl implements TransportAccount {
         transportProtocol = "smtp";
         id = -1;
         transportOAuthId = -1;
+        transportDisabled = false;
     }
 
     @Override
@@ -138,11 +141,6 @@ public class TransportAccountImpl implements TransportAccount {
     }
 
     @Override
-    public boolean isMailAccount() {
-        return false;
-    }
-
-    @Override
     public String getLogin() {
         return this.getTransportLogin();
     }
@@ -161,7 +159,6 @@ public class TransportAccountImpl implements TransportAccount {
     public String getPrimaryAddress() {
         return this.sendAddress;
     }
-
 
     @Override
     public TransportAuth getTransportAuth() {
@@ -204,6 +201,16 @@ public class TransportAccountImpl implements TransportAccount {
     }
 
     @Override
+    public boolean isTransportDisabled() {
+        return transportDisabled;
+    }
+
+    /**
+     * Parses specified transport server URL. If the given URL is <code>null</code>, then the transport server URL will be set to <code>null</code> too.
+     *
+     * @param transportServerURL The transport server URL to parse
+     * @throws OXException if parsing the URL fails.
+     */
     public void parseTransportServerURL(String transportServerURL) {
         if (null == transportServerURL) {
             setTransportServer((String) null);
@@ -225,7 +232,6 @@ public class TransportAccountImpl implements TransportAccount {
      */
     public void setId(int id) {
         this.id = id;
-
     }
 
     /**
@@ -263,6 +269,15 @@ public class TransportAccountImpl implements TransportAccount {
     @Override
     public String getReplyTo() {
         return replyTo;
+    }
+
+    /**
+     * Sets whether mail transport is disabled
+     *
+     * @param transportDisabled <code>true</code> if disabled; otherwise <code>false</code>
+     */
+    public void setTransportDisabled(boolean transportDisabled) {
+        this.transportDisabled = transportDisabled;
     }
 
     /**

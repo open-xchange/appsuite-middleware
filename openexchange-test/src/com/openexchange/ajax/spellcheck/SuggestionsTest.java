@@ -49,7 +49,10 @@
 
 package com.openexchange.ajax.spellcheck;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
+import org.junit.Test;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.spellcheck.actions.suggestions.SuggestionsRequest;
 import com.openexchange.ajax.spellcheck.actions.suggestions.SuggestionsResponse;
@@ -62,40 +65,41 @@ import com.openexchange.ajax.spellcheck.actions.suggestions.SuggestionsResponse;
  */
 public final class SuggestionsTest extends AbstractSpellCheckTest {
 
-	/**
-	 * Initializes a new {@link SuggestionsTest}
-	 *
-	 * @param name
-	 */
-	public SuggestionsTest(final String name) {
-		super(name);
-	}
+    /**
+     * Initializes a new {@link SuggestionsTest}
+     *
+     * @param name
+     */
+    public SuggestionsTest() {
+        super();
+    }
 
-	/**
-	 * Tests the <code>action=suggestions</code> request
-	 *
-	 * @throws Throwable
-	 */
-	public void testCheck() throws Throwable {
+    /**
+     * Tests the <code>action=suggestions</code> request
+     *
+     * @throws Throwable
+     */
+    @Test
+    public void testCheck() throws Throwable {
 
-		/*
-		 * en
-		 */
-		String htmlContent = "lvoe";
-		SuggestionsResponse suggestionsResponse = (SuggestionsResponse) Executor.execute(getSession(), new SuggestionsRequest(htmlContent, "en", true));
+        /*
+         * en
+         */
+        String htmlContent = "lvoe";
+        SuggestionsResponse suggestionsResponse = (SuggestionsResponse) Executor.execute(getSession(), new SuggestionsRequest(htmlContent, "en", true));
 
-		String[] mw = suggestionsResponse.getSuggestions();
-		assertTrue("No suggestions retrieved: " + Arrays.toString(mw), mw.length > 0);
-		/*
-		 * de
-		 */
-		htmlContent = "leibe";
-		suggestionsResponse = (SuggestionsResponse) Executor.execute(getSession(), new SuggestionsRequest(htmlContent, "de", true));
-		assertFalse("Error occured!", suggestionsResponse.hasError());
+        String[] mw = suggestionsResponse.getSuggestions();
+        assertTrue("No suggestions retrieved: " + Arrays.toString(mw), mw.length > 0);
+        /*
+         * de
+         */
+        htmlContent = "leibe";
+        suggestionsResponse = (SuggestionsResponse) Executor.execute(getSession(), new SuggestionsRequest(htmlContent, "de", true));
+        assertFalse("Error occured!", suggestionsResponse.hasError());
 
-		mw = suggestionsResponse.getSuggestions();
-		assertTrue("No suggestions retrieved: " + Arrays.toString(mw), mw.length > 0);
+        mw = suggestionsResponse.getSuggestions();
+        assertTrue("No suggestions retrieved: " + Arrays.toString(mw), mw.length > 0);
 
-	}
+    }
 
 }

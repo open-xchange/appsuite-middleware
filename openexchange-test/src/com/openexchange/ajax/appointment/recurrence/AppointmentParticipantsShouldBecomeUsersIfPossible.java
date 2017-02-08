@@ -1,10 +1,14 @@
+
 package com.openexchange.ajax.appointment.recurrence;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.ajax.contact.action.GetContactForUserRequest;
 import com.openexchange.ajax.contact.action.GetResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.Participant;
@@ -12,129 +16,107 @@ import com.openexchange.groupware.container.UserParticipant;
 
 public class AppointmentParticipantsShouldBecomeUsersIfPossible extends ManagedAppointmentTest {
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-	}
+    @Test
+    public void testExternalParticipantBecomesUserParticipantIfAddressMatches() throws Exception {
+        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
+        int user2id = client2.getValues().getUserId();
+        GetResponse response = client2.execute(new GetContactForUserRequest(user2id, true, TimeZone.getDefault()));
+        String user2email = response.getContact().getEmail1();
 
-	@Override
-	protected void tearDown() throws Exception {
-		super.tearDown();
-	}
+        Appointment appointment = generateDailyAppointment();
+        appointment.addParticipant(new ExternalUserParticipant(user2email));
+        appointment.addParticipant(new UserParticipant(user2id));
 
+        catm.insert(appointment);
+        Appointment actual = catm.get(appointment);
 
-	public AppointmentParticipantsShouldBecomeUsersIfPossible(String name) {
-		super(name);
-	}
+        boolean foundAsExternal = false, foundAsInternal = false;
 
-	public void testExternalParticipantIsRemovedIfAddressMatchesCreator(){
+        Participant[] participants = actual.getParticipants();
+        for (Participant participant : participants) {
+            if (participant.getType() == Participant.EXTERNAL_USER) {
+                if (participant.getEmailAddress().equals(user2email)) {
+                    foundAsExternal = true;
+                }
+            }
+            if (participant.getType() == Participant.USER) {
+                if (participant.getIdentifier() == user2id) {
+                    foundAsInternal = true;
+                }
+            }
+        }
+        assertFalse("Should not find user listed as external participant", foundAsExternal);
+        assertTrue("Should find user listed as internal participant", foundAsInternal);
+    }
 
-	}
+    @Test
+    public void testExternalParticipantIsRemovedIfAddressMatchesUserParticipant() throws Exception {
+        GetResponse response = getClient().execute(new GetContactForUserRequest(userId, true, TimeZone.getDefault()));
+        String user1email = response.getContact().getEmail1();
 
-	public void testExternalParticipantStaysIfTwoInternalUsersHaveTheSameSecondaryAddress(){
+        Appointment appointment = generateDailyAppointment();
+        appointment.addParticipant(new ExternalUserParticipant(user1email));
 
-	}
+        catm.insert(appointment);
+        Appointment actual = catm.get(appointment);
 
-	public void testExternalParticipantBecomesUserParticipantIfAddressMatches() throws Exception{
-		AJAXClient client2 = new AJAXClient(User.User2);
-		int user2id = client2.getValues().getUserId();
-		GetResponse response = client2.execute(new GetContactForUserRequest(user2id, true, TimeZone.getDefault()));
-		String user2email = response.getContact().getEmail1();
+        boolean foundAsExternal = false;
+        int foundAsInternal = 0;
 
-		Appointment appointment = generateDailyAppointment();
-		appointment.addParticipant(new ExternalUserParticipant(user2email));
-		appointment.addParticipant(new UserParticipant(user2id));
+        Participant[] participants = actual.getParticipants();
+        for (Participant participant : participants) {
+            if (participant.getType() == Participant.EXTERNAL_USER) {
+                if (participant.getEmailAddress().equals(user1email)) {
+                    foundAsExternal = true;
+                }
+            }
+            if (participant.getType() == Participant.USER) {
+                if (participant.getIdentifier() == userId) {
+                    foundAsInternal++;
+                }
+            }
+        }
+        assertFalse("Should not find creator listed as external participant", foundAsExternal);
+        assertEquals("Should find creator listed as internal participant once and only once", 1, foundAsInternal);
+    }
 
-		calendarManager.insert(appointment);
-		Appointment actual = calendarManager.get(appointment);
+    @Test
+    public void testExternalParticipantBecomesUserParticipantIfAddressMatchesAfterUpdateToo() throws Exception {
+        int user2id = getClient2().getValues().getUserId();
+        GetResponse response = getClient2().execute(new GetContactForUserRequest(user2id, true, TimeZone.getDefault()));
+        String user2email = response.getContact().getEmail1();
 
-		boolean foundAsExternal = false, foundAsInternal = false;
+        Appointment appointment = generateDailyAppointment();
+        Appointment result = catm.insert(appointment);
 
-		Participant[] participants = actual.getParticipants();
-		for(Participant participant: participants){
-			if(participant.getType() == Participant.EXTERNAL_USER){
-				if(participant.getEmailAddress().equals(user2email)){
-					foundAsExternal = true;
-				}
-			}
-			if(participant.getType() == Participant.USER){
-				if(participant.getIdentifier() == user2id){
-					foundAsInternal = true;
-				}
-			}
-		}
-		assertFalse("Should not find user listed as external participant", foundAsExternal);
-		assertTrue("Should find user listed as internal participant", foundAsInternal);
-	}
+        Appointment update = new Appointment();
+        update.setLastModified(result.getLastModified());
+        update.setObjectID(result.getObjectID());
+        update.setParentFolderID(result.getParentFolderID());
+        update.addParticipant(new ExternalUserParticipant(user2email));
+        update.addParticipant(new UserParticipant(user2id));
 
-	public void testExternalParticipantIsRemovedIfAddressMatchesUserParticipant() throws Exception{
-		GetResponse response = getClient().execute(new GetContactForUserRequest(userId, true, TimeZone.getDefault()));
-		String user1email = response.getContact().getEmail1();
+        catm.update(update);
 
-		Appointment appointment = generateDailyAppointment();
-		appointment.addParticipant(new ExternalUserParticipant(user1email));
+        Appointment actual = catm.get(appointment);
 
-		calendarManager.insert(appointment);
-		Appointment actual = calendarManager.get(appointment);
+        boolean foundAsExternal = false, foundAsInternal = false;
 
-		boolean foundAsExternal = false;
-		int foundAsInternal = 0;
-
-		Participant[] participants = actual.getParticipants();
-		for(Participant participant: participants){
-			if(participant.getType() == Participant.EXTERNAL_USER){
-				if(participant.getEmailAddress().equals(user1email)){
-					foundAsExternal = true;
-				}
-			}
-			if(participant.getType() == Participant.USER){
-				if(participant.getIdentifier() == userId){
-					foundAsInternal++;
-				}
-			}
-		}
-		assertFalse("Should not find creator listed as external participant", foundAsExternal);
-		assertEquals("Should find creator listed as internal participant once and only once", 1, foundAsInternal);
-	}
-
-	public void testExternalParticipantBecomesUserParticipantIfAddressMatchesAfterUpdateToo() throws Exception{
-		AJAXClient client2 = new AJAXClient(User.User2);
-		int user2id = client2.getValues().getUserId();
-		GetResponse response = client2.execute(new GetContactForUserRequest(user2id, true, TimeZone.getDefault()));
-		String user2email = response.getContact().getEmail1();
-
-		Appointment appointment = generateDailyAppointment();
-		Appointment result = calendarManager.insert(appointment);
-
-		Appointment update = new Appointment();
-		update.setLastModified(result.getLastModified());
-		update.setObjectID(result.getObjectID());
-		update.setParentFolderID(result.getParentFolderID());
-		update.addParticipant(new ExternalUserParticipant(user2email));
-		update.addParticipant(new UserParticipant(user2id));
-
-		calendarManager.update(update);
-
-		Appointment actual = calendarManager.get(appointment);
-
-		boolean foundAsExternal = false, foundAsInternal = false;
-
-		Participant[] participants = actual.getParticipants();
-		for(Participant participant: participants){
-			if(participant.getType() == Participant.EXTERNAL_USER){
-				if(participant.getEmailAddress().equals(user2email)){
-					foundAsExternal = true;
-				}
-			}
-			if(participant.getType() == Participant.USER){
-				if(participant.getIdentifier() == user2id){
-					foundAsInternal = true;
-				}
-			}
-		}
-		assertFalse("Should not find user listed as external participant", foundAsExternal);
-		assertTrue("Should find user listed as internal participant", foundAsInternal);
-	}
-
+        Participant[] participants = actual.getParticipants();
+        for (Participant participant : participants) {
+            if (participant.getType() == Participant.EXTERNAL_USER) {
+                if (participant.getEmailAddress().equals(user2email)) {
+                    foundAsExternal = true;
+                }
+            }
+            if (participant.getType() == Participant.USER) {
+                if (participant.getIdentifier() == user2id) {
+                    foundAsInternal = true;
+                }
+            }
+        }
+        assertFalse("Should not find user listed as external participant", foundAsExternal);
+        assertTrue("Should find user listed as internal participant", foundAsInternal);
+    }
 
 }

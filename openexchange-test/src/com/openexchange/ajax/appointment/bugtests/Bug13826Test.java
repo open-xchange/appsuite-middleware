@@ -50,7 +50,13 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.ajax.folder.Create.ocl;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.Date;
+import java.util.UUID;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
@@ -82,18 +88,18 @@ public class Bug13826Test extends AbstractAJAXSession {
 
     private Date lastModified;
 
-    public Bug13826Test(String name) {
-        super(name);
+    public Bug13826Test() {
+        super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
         userId = getClient().getValues().getUserId();
         sourceFolderId = getClient().getValues().getPrivateAppointmentFolder();
         OCLPermission ocl = ocl(userId, false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
-        folder = Create.folder(sourceFolderId, "Folder to test bug 13826" + System.currentTimeMillis(), FolderObject.CALENDAR, FolderObject.PRIVATE, ocl);
+        folder = Create.folder(sourceFolderId, "Folder to test bug 13826-" + UUID.randomUUID().toString(), FolderObject.CALENDAR, FolderObject.PRIVATE, ocl);
         CommonInsertResponse response = getClient().execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_OLD, folder));
         response.fillObject(folder);
         targetFolderId = folder.getObjectID();
@@ -122,6 +128,7 @@ public class Bug13826Test extends AbstractAJAXSession {
         updateAppointment.setOccurrence(5);
     }
 
+    @Test
     public void testBug13826() throws Exception {
         UpdateRequest update = new UpdateRequest(sourceFolderId, updateAppointment, getClient().getValues().getTimeZone(), false);
         UpdateResponse updateResponse = getClient().execute(update);
@@ -142,15 +149,17 @@ public class Bug13826Test extends AbstractAJAXSession {
         setCurrentValues(loadedAppointment);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        if (appointment != null && lastModified != null) {
-            appointment.setLastModified(lastModified);
-            getClient().execute(new DeleteRequest(appointment.getObjectID(), currentFolder, lastModified));
+        try {
+            if (appointment != null && lastModified != null) {
+                appointment.setLastModified(lastModified);
+                getClient().execute(new DeleteRequest(appointment.getObjectID(), currentFolder, lastModified));
+            }
+            getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder.getObjectID(), folder.getLastModified()));
+        } finally {
+            super.tearDown();
         }
-        getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder.getObjectID(), folder.getLastModified()));
-
-        super.tearDown();
     }
 
     private void setCurrentValues(Appointment appointment) {

@@ -57,10 +57,10 @@ import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
-import com.openexchange.ajax.mail.filter.api.dao.MatchType;
 import com.openexchange.ajax.mail.filter.api.dao.MailFilterConfiguration;
-import com.openexchange.ajax.mail.filter.api.dao.TestCondition;
+import com.openexchange.ajax.mail.filter.api.dao.MatchType;
 import com.openexchange.ajax.mail.filter.api.dao.TestCommand;
+import com.openexchange.ajax.mail.filter.api.dao.TestCondition;
 import com.openexchange.ajax.mail.filter.api.response.ConfigResponse;
 
 /**

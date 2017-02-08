@@ -49,9 +49,9 @@
 
 package com.openexchange.ajax.advertisement;
 
-import junit.framework.JUnit4TestAdapter;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * {@link AdvertisementTestSuite}
@@ -59,16 +59,11 @@ import junit.framework.TestSuite;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.3
  */
-public class AdvertisementTestSuite extends TestSuite {
+@RunWith(ParallelSuite.class)
+@Suite.SuiteClasses({
+    AdvertisementTest.class,
 
-    private AdvertisementTestSuite() {
-        super();
-    }
-
-    public static Test suite() {
-        final TestSuite mailSuite = new TestSuite("com.openexchange.ajax.advertisement.AdvertisementTestSuite");
-        mailSuite.addTest(new JUnit4TestAdapter(AdvertisementTest.class));
-        return mailSuite;
-    }
+})
+public class AdvertisementTestSuite  {
 
 }

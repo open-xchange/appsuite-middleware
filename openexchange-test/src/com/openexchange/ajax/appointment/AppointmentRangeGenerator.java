@@ -59,17 +59,18 @@ import java.util.Random;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class AppointmentRangeGenerator {
-    
+
     /**
-     * A DateRange container consisting of a start- and endDate. 
+     * A DateRange container consisting of a start- and endDate.
      * {@link AppointmentRange}
      *
      * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
      */
-    public  class AppointmentRange {
+    public class AppointmentRange {
+
         public Date startDate;
         public Date endDate;
-        
+
         public AppointmentRange(Date startDate, Date endDate) {
             this.startDate = startDate;
             this.endDate = endDate;

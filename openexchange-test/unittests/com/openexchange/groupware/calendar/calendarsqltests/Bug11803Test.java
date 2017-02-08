@@ -50,16 +50,20 @@
 package com.openexchange.groupware.calendar.calendarsqltests;
 
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.tools.iterator.SearchIterator;
 
-
 public class Bug11803Test extends CalendarSqlTest {
     // Bug 11803
 
+    @Test
     public void testFreeBusyResultShouldOnlyContainRecurrenceInSpecifiedInterval() throws Exception {
         final Date start = D("07/02/2008 10:00");
         final Date end = D("07/02/2008 12:00");
@@ -74,11 +78,7 @@ public class Bug11803Test extends CalendarSqlTest {
 
         // Ask for freebusy information in one week containing one ocurrence
 
-        final SearchIterator<Appointment> iterator = appointments.getCurrentAppointmentSQLInterface().getFreeBusyInformation(
-            userId,
-            Participant.USER,
-            D("18/02/2008 00:00"),
-            D("25/02/2008 00:00"));
+        final SearchIterator<Appointment> iterator = appointments.getCurrentAppointmentSQLInterface().getFreeBusyInformation(userId, Participant.USER, D("18/02/2008 00:00"), D("25/02/2008 00:00"));
         // Verify only one ocurrence was returned
         try {
             assertTrue("Should find exactly one ocurrence. Found none.", iterator.hasNext());

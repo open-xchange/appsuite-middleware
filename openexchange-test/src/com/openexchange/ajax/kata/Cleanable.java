@@ -48,6 +48,7 @@
  */
 
 package com.openexchange.ajax.kata;
+
 /**
  * {@link Cleanable}
  *
@@ -55,5 +56,6 @@ package com.openexchange.ajax.kata;
  *
  */
 public interface Cleanable {
+
     public void cleanUp() throws Exception;
 }

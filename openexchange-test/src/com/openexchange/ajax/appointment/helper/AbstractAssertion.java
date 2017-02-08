@@ -84,7 +84,6 @@ public class AbstractAssertion extends Assert {
         Assert.fail(state() + message);
     }
 
-
     protected void fail2(String message, Throwable t) {
         t.printStackTrace();
         Assert.fail(state() + message);
@@ -109,7 +108,7 @@ public class AbstractAssertion extends Assert {
         Appointment app = new Appointment();
         app.setTitle("Generic recurrence test appointment");
         TimeZone utc = TimeZone.getTimeZone("UTC");
-        app.setStartDate(D("1/1/2008 1:00",utc));
+        app.setStartDate(D("1/1/2008 1:00", utc));
         app.setEndDate(D("1/1/2008 2:00", utc));
         app.setIgnoreConflicts(true);
         return app;

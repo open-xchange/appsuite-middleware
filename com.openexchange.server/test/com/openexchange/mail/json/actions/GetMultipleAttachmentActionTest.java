@@ -87,20 +87,20 @@ public class GetMultipleAttachmentActionTest {
         Mockito.when(message.getSubject()).thenReturn(subject);
     }
 
-    @Test
-    public void testGetFileName_localeNull_fileNameNotNull() {
+     @Test
+     public void testGetFileName_localeNull_fileNameNotNull() {
         String ret = action.getFileName(null, message);
         Assert.assertNotNull(ret);
     }
 
-    @Test
-    public void testGetFileName_localeNull_fileNameSet() {
+     @Test
+     public void testGetFileName_localeNull_fileNameSet() {
         String ret = action.getFileName(null, message);
         Assert.assertEquals(fileName, ret);
     }
 
-    @Test
-    public void testGetFileName_subjectNull_returnDefault() {
+     @Test
+     public void testGetFileName_subjectNull_returnDefault() {
         Mockito.when(message.getSubject()).thenReturn(null);
 
         String ret = action.getFileName(null, message);

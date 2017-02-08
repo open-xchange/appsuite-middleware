@@ -50,19 +50,21 @@
 package com.openexchange.groupware.contact;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertTrue;
 import java.util.Locale;
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.groupware.contact.helpers.DefaultContactComparator;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.search.Order;
 
-public class DefaultContactComparatorTest extends TestCase {
+public class DefaultContactComparatorTest {
 
     private Contact c1;
     private Contact c2;
 
-    @Override
+    @Before
     public void setUp() {
         c1 = new Contact();
         c2 = new Contact();
@@ -71,11 +73,13 @@ public class DefaultContactComparatorTest extends TestCase {
         c2.setObjectID(11);
     }
 
+    @Test
     public void testIntegerField() {
 
         assertBigger(c2, c1, Contact.OBJECT_ID);
     }
 
+    @Test
     public void testStringField() {
         c1.setGivenName("Alpha");
         c2.setGivenName("Beta");
@@ -83,6 +87,7 @@ public class DefaultContactComparatorTest extends TestCase {
         assertBigger(c2, c1, Contact.GIVEN_NAME);
     }
 
+    @Test
     public void testDateField() {
         c1.setBirthday(D("03.03.1981 00:00"));
         c2.setBirthday(D("04.01.1981 00:00"));
@@ -90,10 +95,12 @@ public class DefaultContactComparatorTest extends TestCase {
         assertBigger(c1, c2, Contact.BIRTHDAY);
     }
 
+    @Test
     public void testDesc() {
         assertBigger(c1, c2, Contact.OBJECT_ID, Order.DESCENDING);
     }
 
+    @Test
     public void testSpecial() {
 
         c1.setGivenName("Anne123");
@@ -102,6 +109,7 @@ public class DefaultContactComparatorTest extends TestCase {
         assertBigger(c2, c1, Contact.SPECIAL_SORTING);
     }
 
+    @Test
     public void testUseCountGlobalFirst() {
         c1.setUseCount(0);
         c1.setParentFolderID(FolderObject.SYSTEM_LDAP_FOLDER_ID);
@@ -111,8 +119,6 @@ public class DefaultContactComparatorTest extends TestCase {
 
         assertBigger(c1, c2, Contact.USE_COUNT_GLOBAL_FIRST);
     }
-
-
 
     private void assertBigger(final Contact c1, final Contact c2, final int field) {
         assertBigger(c1, c2, field, Order.ASCENDING);

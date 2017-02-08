@@ -1,12 +1,12 @@
 package liquibase.executor.jvm;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 import liquibase.database.Database;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.OracleDatabase;
-import static org.junit.Assert.*;
-
 import liquibase.executor.ExecutorService;
-import org.junit.Test;
 
 public class JdbcExecutorTest {
 

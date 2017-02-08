@@ -50,6 +50,7 @@
 package com.openexchange.subscribe.crawler;
 
 import java.util.ArrayList;
+import org.junit.Test;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.subscribe.crawler.internal.Step;
 
@@ -61,7 +62,8 @@ import com.openexchange.subscribe.crawler.internal.Step;
  */
 public class GenericSubscribeServiceForSunContactsTest extends GenericSubscribeServiceTestHelpers {
 
-    public void testContacts(){
+         @Test
+     public void testContacts(){
 
         // insert valid credentials here
         String username = "";

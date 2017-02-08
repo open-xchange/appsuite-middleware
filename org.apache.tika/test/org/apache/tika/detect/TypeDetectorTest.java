@@ -19,17 +19,18 @@ package org.apache.tika.detect;
 import java.io.IOException;
 import java.util.Map;
 import java.util.TreeMap;
-
-import junit.framework.TestCase;
-
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MediaType;
+import org.junit.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * Test cases for the {@link TypeDetector} class.
  */
-public class TypeDetectorTest extends TestCase {
-
+public class TypeDetectorTest {
     private Detector detector = new TypeDetector();
     
     private static final Map<String, String> params = new
@@ -41,7 +42,8 @@ public class TypeDetectorTest extends TestCase {
     private static final MediaType TEXT_PLAIN_A_EQ_B = 
           new MediaType("text", "plain", params);
 
-    public void testDetect() {
+         @Test
+     public void testDetect() {
         assertDetect(MediaType.TEXT_PLAIN, "text/plain");
         assertDetect(MediaType.TEXT_PLAIN, "TEXT/PLAIN");
         assertDetect(MediaType.TEXT_PLAIN, " text/\tplain\n");

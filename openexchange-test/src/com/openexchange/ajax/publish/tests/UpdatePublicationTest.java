@@ -50,8 +50,12 @@
 package com.openexchange.ajax.publish.tests;
 
 import static com.openexchange.java.Autoboxing.I;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import org.json.JSONException;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.publish.actions.NewPublicationRequest;
 import com.openexchange.ajax.publish.actions.NewPublicationResponse;
@@ -62,7 +66,6 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.SimPublicationTargetDiscoveryService;
 
-
 /**
  * {@link UpdatePublicationTest}
  *
@@ -70,19 +73,20 @@ import com.openexchange.publish.SimPublicationTargetDiscoveryService;
  */
 public class UpdatePublicationTest extends AbstractPublicationTest {
 
-    public UpdatePublicationTest(String name) {
-        super(name);
+    public UpdatePublicationTest() {
+        super();
     }
 
-    public void testShouldUpdateExistingPublication() throws OXException, IOException, SAXException, JSONException, OXException, OXException{
+    @Test
+    public void testShouldUpdateExistingPublication() throws OXException, IOException, SAXException, JSONException, OXException, OXException {
         final Contact contact = createDefaultContactFolderWithOneContact();
-        String folderID = String.valueOf(contact.getParentFolderID() );
+        String folderID = String.valueOf(contact.getParentFolderID());
         String module = "contacts";
 
         SimPublicationTargetDiscoveryService discovery = new SimPublicationTargetDiscoveryService();
         pubMgr.setPublicationTargetDiscoveryService(discovery);
 
-        Publication orignal = generatePublication(module, folderID, discovery );
+        Publication orignal = generatePublication(module, folderID, discovery);
         NewPublicationRequest newReq = new NewPublicationRequest(orignal);
         NewPublicationResponse newResp = getClient().execute(newReq);
         assertFalse("Should contain no error after creating", newResp.hasError());
@@ -98,15 +102,16 @@ public class UpdatePublicationTest extends AbstractPublicationTest {
         assertEquals("Should return 1 in case of success", I(1), updResp.getData());
     }
 
-    public void testShouldBeAbleToUpdateExistingPublicationsSiteName() throws OXException, IOException, SAXException, JSONException, OXException, OXException{
+    @Test
+    public void testShouldBeAbleToUpdateExistingPublicationsSiteName() throws OXException, IOException, SAXException, JSONException, OXException, OXException {
         SimPublicationTargetDiscoveryService discovery = new SimPublicationTargetDiscoveryService();
 
         final Contact contact = createDefaultContactFolderWithOneContact();
-        String folderID = String.valueOf(contact.getParentFolderID() );
+        String folderID = String.valueOf(contact.getParentFolderID());
 
-        Publication pub1 = generatePublication("contacts", folderID, discovery );
-        pub1.getConfiguration().put("siteName","oldName");
-        pubMgr.setPublicationTargetDiscoveryService( discovery );
+        Publication pub1 = generatePublication("contacts", folderID, discovery);
+        pub1.getConfiguration().put("siteName", "oldName");
+        pubMgr.setPublicationTargetDiscoveryService(discovery);
 
         pubMgr.newAction(pub1);
         assertFalse("Should contain no error after creating", pubMgr.getLastResponse().hasError());
@@ -127,31 +132,39 @@ public class UpdatePublicationTest extends AbstractPublicationTest {
         assertEquals("Should have updated the siteName", "newName", pub4.getConfiguration().get("siteName"));
     }
 
+    /*
+     * @Test
+     * 
+     * @Test
+     * public void testUpdatingTargetShouldCallForNewConfiguration(){
+     * fail("Implement me!");
+     * }
+     * 
+     * @Test
+     * 
+     * @Test
+     * public void testUpdatingWithActualChange(){
+     * fail("Implement me!");
+     * }
+     */
 
     /*
-    public void testUpdatingTargetShouldCallForNewConfiguration(){
-        fail("Implement me!");
-    }
-
-    public void testUpdatingWithActualChange(){
-        fail("Implement me!");
-    }
-    */
-
-    /*
-    public void testUpdatingNonExistentPublicationShouldFail() throws OXException, IOException, SAXException, JSONException{
-        final Contact contact = createDefaultContactFolderWithOneContact();
-        String folderID = String.valueOf(contact.getParentFolderID() );
-        String module = "contacts";
-
-        Publication update = generatePublication(module, folderID);
-        update.setId(Integer.MAX_VALUE);
-        UpdatePublicationRequest updReq = new UpdatePublicationRequest(update);
-        UpdatePublicationResponse updResp = getClient().execute(updReq);
-
-        assertTrue("Should contain error when updating non-existent publication ", updResp.hasError());
-        assertFalse("Should not contain the error code for 'unknown error'" , "PUBH-0001".equals(updResp.getException().getErrorCode()));
-    }
-    */
+     * @Test
+     * 
+     * @Test
+     * public void testUpdatingNonExistentPublicationShouldFail() throws OXException, IOException, SAXException, JSONException{
+     * final Contact contact = createDefaultContactFolderWithOneContact();
+     * String folderID = String.valueOf(contact.getParentFolderID() );
+     * String module = "contacts";
+     * 
+     * Publication update = generatePublication(module, folderID);
+     * update.setId(Integer.MAX_VALUE);
+     * UpdatePublicationRequest updReq = new UpdatePublicationRequest(update);
+     * UpdatePublicationResponse updResp = getClient().execute(updReq);
+     * 
+     * assertTrue("Should contain error when updating non-existent publication ", updResp.hasError());
+     * assertFalse("Should not contain the error code for 'unknown error'" , "PUBH-0001".equals(updResp.getException().getErrorCode()));
+     * }
+     */
 
 }

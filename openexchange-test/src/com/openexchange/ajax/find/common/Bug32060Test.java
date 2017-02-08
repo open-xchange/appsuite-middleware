@@ -49,11 +49,13 @@
 
 package com.openexchange.ajax.find.common;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import org.junit.Test;
 import com.openexchange.ajax.find.AbstractFindTest;
 import com.openexchange.ajax.find.actions.AutocompleteRequest;
 import com.openexchange.ajax.find.actions.AutocompleteResponse;
 import com.openexchange.exception.OXException;
-
 
 /**
  * {@link Bug32060Test}
@@ -64,17 +66,9 @@ import com.openexchange.exception.OXException;
  */
 public class Bug32060Test extends AbstractFindTest {
 
-    /**
-     * Initializes a new {@link Bug32060Test}.
-     *
-     * @param name The test name
-     */
-    public Bug32060Test(String name) {
-        super(name);
-    }
-
+    @Test
     public void testUnknownModule() throws Exception {
-        AutocompleteResponse response = client.execute(new AutocompleteRequest("", "ox-messenger", null, null, false));
+        AutocompleteResponse response = getClient().execute(new AutocompleteRequest("", "ox-messenger", null, null, false));
         OXException expectedException = response.getException();
         assertNotNull("got no exception", expectedException);
         assertEquals("SVL-0010", expectedException.getErrorCode());

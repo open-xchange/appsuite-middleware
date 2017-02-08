@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.share.tests;
 
+import static org.junit.Assert.assertNotNull;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.share.GuestClient;
@@ -72,10 +74,11 @@ public class CreateWithGuestPermissionTest extends ShareTest {
      *
      * @param name The test name
      */
-    public CreateWithGuestPermissionTest(String name) {
-        super(name);
+    public CreateWithGuestPermissionTest() {
+        super();
     }
 
+    @Test
     public void testCreateSharedFolderRandomly() throws Exception {
         int module = randomModule();
         testCreateSharedFolder(randomFolderAPI(), module, randomGuestPermission(module));
@@ -91,6 +94,7 @@ public class CreateWithGuestPermissionTest extends ShareTest {
         }
     }
 
+    @Test
     public void testCreateSharedFileRandomly() throws Exception {
         testCreateSharedFile(randomFolderAPI(), randomGuestObjectPermission());
     }
@@ -115,7 +119,7 @@ public class CreateWithGuestPermissionTest extends ShareTest {
          */
         OCLPermission matchingPermission = null;
         for (OCLPermission permission : folder.getPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
                 break;
             }
@@ -153,7 +157,7 @@ public class CreateWithGuestPermissionTest extends ShareTest {
          */
         FileStorageObjectPermission matchingPermission = null;
         for (FileStorageObjectPermission permission : file.getObjectPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
                 break;
             }

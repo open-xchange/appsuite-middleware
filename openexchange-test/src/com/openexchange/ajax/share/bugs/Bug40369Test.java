@@ -49,6 +49,11 @@
 
 package com.openexchange.ajax.share.bugs;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
@@ -72,15 +77,7 @@ public class Bug40369Test extends ShareTest {
 
     private static final int NUM_THREADS = 20;
 
-    /**
-     * Initializes a new {@link Bug40369Test}.
-     *
-     * @param name The test name
-     */
-    public Bug40369Test(String name) {
-        super(name);
-    }
-
+    @Test
     public void testCreateFolderLinkConcurrentlyRandomly() throws Exception {
         testCreateFolderLinkConcurrently(randomFolderAPI(), randomModule());
     }
@@ -97,6 +94,7 @@ public class Bug40369Test extends ShareTest {
         testCreateFolderLinkConcurrently(api, module, getDefaultFolder(module));
     }
 
+    @Test
     public void testCreateFileLinkConcurrently() throws Exception {
         /*
          * create folder and a file inside
@@ -159,7 +157,7 @@ public class Bug40369Test extends ShareTest {
         assertEquals(2, folder.getPermissions().size());
         OCLPermission matchingPermission = null;
         for (OCLPermission permission : folder.getPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
                 break;
             }
@@ -203,7 +201,7 @@ public class Bug40369Test extends ShareTest {
                 @Override
                 public void run() {
                     try {
-                        responses[index] = client.execute(request);
+                        responses[index] = getClient().execute(request);
                     } catch (Exception e) {
                         fail(e.getMessage());
                     }

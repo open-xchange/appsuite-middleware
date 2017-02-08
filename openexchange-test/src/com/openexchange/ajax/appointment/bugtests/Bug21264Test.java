@@ -49,10 +49,14 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.assertFalse;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.TimeZone;
 import org.json.JSONException;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -77,39 +81,43 @@ public final class Bug21264Test extends AbstractAJAXSession {
     private TimeZone timeZone;
     private Appointment app;
 
-    public Bug21264Test(final String name) {
-        super(name);
+    public Bug21264Test() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
-        timeZone = client.getValues().getTimeZone();
+        timeZone = getClient().getValues().getTimeZone();
         app = new Appointment();
         app.setTitle("Test for bug 21264");
         final Calendar cal = TimeTools.createCalendar(timeZone);
         app.setStartDate(cal.getTime());
         cal.add(Calendar.HOUR, 1);
         app.setEndDate(cal.getTime());
-        app.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
-        app.setParticipants(new Participant[] { new UserParticipant(client.getValues().getUserId()), new ExternalUserParticipant("user1@example.org") });
+        app.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
+        app.setParticipants(new Participant[] { new UserParticipant(getClient().getValues().getUserId()), new ExternalUserParticipant("user1@example.org") });
         app.setOrganizer("user2@example.org");
         app.setIgnoreConflicts(true);
-        final AppointmentInsertResponse response = client.execute(new com.openexchange.ajax.appointment.action.InsertRequest(app, timeZone));
+        final AppointmentInsertResponse response = getClient().execute(new com.openexchange.ajax.appointment.action.InsertRequest(app, timeZone));
         response.fillAppointment(app);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        if (null != app) {
-            client.execute(new DeleteRequest(app));
+    @After
+    public void tearDown() throws Exception {
+        try {
+            if (null != app) {
+                getClient().execute(new DeleteRequest(app));
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
+    @Test
     public void testDeleteAppointment() throws IOException, JSONException, OXException {
-        final CommonDeleteResponse response = client.execute(new DeleteRequest(app, false));
+        final CommonDeleteResponse response = getClient().execute(new DeleteRequest(app, false));
         assertFalse("Deleting appointment failed.", response.hasError());
         app = null;
     }

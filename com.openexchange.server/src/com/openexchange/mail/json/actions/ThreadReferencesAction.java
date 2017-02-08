@@ -72,10 +72,12 @@ import com.openexchange.mail.api.IMailMessageStorageThreadReferences;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailCapabilities;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailThread;
 import com.openexchange.mail.dataobjects.MailThreads;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.json.utils.ColumnCollection;
+import com.openexchange.mail.search.FlagTerm;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.server.ServiceLookup;
@@ -166,6 +168,9 @@ public class ThreadReferencesAction extends AbstractMailAction {
                     JSONArray searchArray = searchValue.toObject().getJSONArray(Mail.PARAMETER_FILTER);
                     searchTerm = mailInterface.createSearchTermFrom(SearchTermParser.parse(searchArray));
                 }
+            } else {
+                // Default is to only query undeleted messages
+                searchTerm = new FlagTerm(MailMessage.FLAG_DELETED, false);
             }
         }
 
@@ -180,11 +185,11 @@ public class ThreadReferencesAction extends AbstractMailAction {
             }
 
             IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-            if (!IMailMessageStorageThreadReferences.class.isInstance(messageStorage)) {
+            IMailMessageStorageThreadReferences threadReferencesMessageStorage = messageStorage.supports(IMailMessageStorageThreadReferences.class);
+            if (null == threadReferencesMessageStorage) {
                 throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
             }
 
-            IMailMessageStorageThreadReferences threadReferencesMessageStorage = (IMailMessageStorageThreadReferences) messageStorage;
             if (!threadReferencesMessageStorage.isThreadReferencesSupported()) {
                 throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
             }

@@ -57,6 +57,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.exception.OXException;
+import com.openexchange.html.HtmlSanitizeOptions;
 import com.openexchange.html.HtmlService;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -133,32 +134,16 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
                         final String cssPrefix = "ox-" + HtmlProcessing.getHash(Long.toString(System.currentTimeMillis()), 10);
                         final boolean externalImagesAllowed = usm.isAllowHTMLImages();
                         content = htmlService.checkBaseTag(content, externalImagesAllowed);
-                        if (HtmlProcessing.useSanitize()) {
+                        {
                             // No need to generate well-formed HTML
+                            HtmlSanitizeOptions.Builder optionsBuilder = HtmlSanitizeOptions.builder();
                             if (externalImagesAllowed) {
-                                /*
-                                 * TODO: Does not work reliably by now
-                                 */
-                                // retval = htmlService.checkExternalImages(retval);
-                                content = htmlService.sanitize(content, null, false, null, cssPrefix);
+                                optionsBuilder.setDropExternalImages(false);
                             } else {
-                                content = htmlService.sanitize(content, null, true, modified, cssPrefix);
+                                optionsBuilder.setDropExternalImages(true).setModified(modified);
                             }
-                        } else {
-                            final String charset = metaData.get("charset");
-                            content = htmlService.getConformHTML(content, charset == null ? "ISO-8859-1" : charset, false);
-                            /*
-                             * Filter according to white-list
-                             */
-                            content = htmlService.filterWhitelist(content);
-                            if (externalImagesAllowed) {
-                                /*
-                                 * TODO: Does not work reliably by now
-                                 */
-                                // retval = htmlService.checkExternalImages(retval);
-                            } else {
-                                content = htmlService.filterExternalImages(content, modified);
-                            }
+                            optionsBuilder.setCssPrefix(cssPrefix).setSuppressLinks(usm.isSuppressLinks());
+                            content = htmlService.sanitize(content, optionsBuilder.build()).getContent();
                         }
                         /*
                          * Filter inlined images

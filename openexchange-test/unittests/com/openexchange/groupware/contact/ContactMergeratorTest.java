@@ -49,13 +49,13 @@
 
 package com.openexchange.groupware.contact;
 
+import static org.junit.Assert.assertEquals;
 import java.util.LinkedList;
 import java.util.List;
+import org.junit.Test;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
-import junit.framework.TestCase;
-
 
 /**
  * {@link ContactMergeratorTest}
@@ -63,12 +63,11 @@ import junit.framework.TestCase;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class ContactMergeratorTest extends TestCase {
+public class ContactMergeratorTest {
 
-
-    private SearchIterator<Contact> contacts(int...ids) {
+    private SearchIterator<Contact> contacts(int... ids) {
         List<Contact> retval = new LinkedList<Contact>();
-        for(int id : ids) {
+        for (int id : ids) {
             Contact contact = new Contact();
             contact.setObjectID(id);
             retval.add(contact);
@@ -76,30 +75,30 @@ public class ContactMergeratorTest extends TestCase {
         return new SearchIteratorAdapter<Contact>(retval.iterator());
     }
 
-
+    @Test
     public void testSortIntegerColumn() throws Exception {
         SearchIterator<Contact> c1 = contactsWithIDs(11, 101, 1001);
-        SearchIterator<Contact> c2 = contactsWithIDs(21,22,23);
-        SearchIterator<Contact> c3 = contactsWithIDs(31,32,33);
+        SearchIterator<Contact> c2 = contactsWithIDs(21, 22, 23);
+        SearchIterator<Contact> c3 = contactsWithIDs(31, 32, 33);
         SearchIterator<Contact> c4 = contactsWithIDs();
 
         ContactMergerator merged = new ContactMergerator(new IDComparator(), c1, c2, c3, c4);
-        assertIDs(merged, 11,21,22,23,31,32,33,101,1001);
+        assertIDs(merged, 11, 21, 22, 23, 31, 32, 33, 101, 1001);
     }
 
-    private void assertIDs(ContactMergerator merged, int...ids) throws Exception {
+    private void assertIDs(ContactMergerator merged, int... ids) throws Exception {
         int index = 0;
-        while(merged.hasNext()) {
+        while (merged.hasNext()) {
             Contact c = merged.next();
             int currentId = ids[index++];
-            assertEquals("Unexpected element at index: "+(index-1), currentId, c.getObjectID());
+            assertEquals("Unexpected element at index: " + (index - 1), currentId, c.getObjectID());
         }
         assertEquals(ids.length, index);
     }
 
-    private SearchIterator<Contact> contactsWithIDs(int...ids) {
+    private SearchIterator<Contact> contactsWithIDs(int... ids) {
         List<Contact> retval = new LinkedList<Contact>();
-        for(int id : ids) {
+        for (int id : ids) {
             Contact contact = new Contact();
             contact.setObjectID(id);
             retval.add(contact);

@@ -49,19 +49,23 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import java.util.Date;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.CalendarSql;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.CalendarObject;
 
-
 public class Bug12601Test extends CalendarSqlTest {
+
     /**
      * Test for <a href= "http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=12601">bug #12601</a><br>
      * <i>Calendar: Mini-Calendar shows wrong dates for recurring full time appointments</i>
      */
+    @Test
     public void testNoShiftOfYearlyRecApp() {
         try {
             // Create yearly recurring appointment
@@ -78,9 +82,7 @@ public class Bug12601Test extends CalendarSqlTest {
             // Europe/Berlin
             final TimeZone timeZone = TimeZone.getTimeZone("Europe/Berlin");
             final AppointmentSQLInterface appointmentsql = new CalendarSql(session);
-            final boolean[] bHas = appointmentsql.hasAppointmentsBetween(applyTimeZone2Date(328147200968L, timeZone), applyTimeZone2Date(
-                331776000968L,
-                timeZone));
+            final boolean[] bHas = appointmentsql.hasAppointmentsBetween(applyTimeZone2Date(328147200968L, timeZone), applyTimeZone2Date(331776000968L, timeZone));
             assertEquals("Unexpected array length", 42, bHas.length);
             assertEquals("Index 22 is not marked true", true, bHas[22]);
         } catch (final Exception e) {

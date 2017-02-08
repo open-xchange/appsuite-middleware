@@ -49,11 +49,16 @@
 
 package com.openexchange.mail.structure;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import org.json.JSONObject;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.configuration.MailConfig;
 import com.openexchange.configuration.MailConfig.Property;
 import com.openexchange.mail.AbstractMailTest;
@@ -71,12 +76,8 @@ public class SMIMEStructureTest2 extends AbstractMailTest {
 
     private byte[] smime;
 
-    public SMIMEStructureTest2(final String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         final String testMailDir = MailConfig.getProperty(Property.TEST_MAIL_DIR);
         final InputStream is = new FileInputStream(new File(testMailDir, "smimeStructureTest2.eml"));
@@ -87,6 +88,7 @@ public class SMIMEStructureTest2 extends AbstractMailTest {
         baos.close();
     }
 
+    @Test
     public void testMIMEStructure() {
         try {
             getSession();

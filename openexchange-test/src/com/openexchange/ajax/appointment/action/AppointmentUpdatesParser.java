@@ -63,7 +63,6 @@ public class AppointmentUpdatesParser extends CommonUpdatesParser<AppointmentUpd
         super(true, columns);
     }
 
-
     @Override
     protected AppointmentUpdatesResponse createResponse(Response response) throws JSONException {
         /*
@@ -71,7 +70,6 @@ public class AppointmentUpdatesParser extends CommonUpdatesParser<AppointmentUpd
          */
         return super.createResponse(response);
     }
-
 
     @Override
     protected AppointmentUpdatesResponse instantiateResponse(Response response) {

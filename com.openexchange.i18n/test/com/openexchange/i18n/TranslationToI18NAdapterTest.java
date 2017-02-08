@@ -49,14 +49,16 @@
 
 package com.openexchange.i18n;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.i18n.impl.TranslationsI18N;
 import com.openexchange.i18n.parsing.Translations;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class TranslationToI18NAdapterTest extends TestCase {
+public class TranslationToI18NAdapterTest {
 
     private I18nService i18n;
 
@@ -64,17 +66,19 @@ public class TranslationToI18NAdapterTest extends TestCase {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() {
         final Translations tr = new Translations();
         tr.setTranslation("Key", "Schluessel");
         i18n = new TranslationsI18N(tr);
     }
 
-    public void testShouldPassAlongTranslation(){
+    @Test
+    public void testShouldPassAlongTranslation() {
         assertEquals(i18n.getLocalized("Key"), "Schluessel");
     }
 
+    @Test
     public void testShoulPassKeyOnMissingTranslation() {
         assertEquals(i18n.getLocalized("Nonexisting Key"), "Nonexisting Key");
     }

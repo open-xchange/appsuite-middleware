@@ -86,8 +86,8 @@ public class FileHandlerTest {
         rootFolder = Mockito.mock(File.class);
     }
 
-    @Test
-    public void testReadConfFiles_noConfigurationFileProvider_doNothing() throws IOException, TooManyFilesException {
+     @Test
+     public void testReadConfFiles_noConfigurationFileProvider_doNothing() throws IOException, TooManyFilesException {
         Mockito.doNothing().when(fileHandler).validateDirectory((File) Matchers.any());
 
         fileHandler.readConfFiles(new DiffResult(), rootFolder, isOriginal, null);
@@ -96,8 +96,8 @@ public class FileHandlerTest {
         Mockito.verify(configurationFileProvider, Mockito.never()).readConfigurationFiles(Matchers.<DiffResult> any(), (File) Matchers.any(), Matchers.any(String[].class));
     }
 
-    @Test
-    public void testReadConfFiles_configurationFileProvider_readAndAddFiles() throws IOException, TooManyFilesException {
+     @Test
+     public void testReadConfFiles_configurationFileProvider_readAndAddFiles() throws IOException, TooManyFilesException {
         Mockito.doNothing().when(fileHandler).validateDirectory((File) Matchers.any());
 
         fileHandler.readConfFiles(new DiffResult(), rootFolder, isOriginal, configurationFileProvider);

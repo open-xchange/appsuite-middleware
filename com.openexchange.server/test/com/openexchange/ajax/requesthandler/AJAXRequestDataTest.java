@@ -77,8 +77,8 @@ public class AJAXRequestDataTest {
         group.setSimpleName("theSimpleName");
     }
 
-    @Test
-    public void testGetDataFromObject() throws OXException {
+     @Test
+     public void testGetDataFromObject() throws OXException {
         AJAXRequestData requestData = new AJAXRequestData(group);
         Group data = requestData.getData(Group.class);
 
@@ -88,14 +88,14 @@ public class AJAXRequestDataTest {
     }
 
     @Test(expected = OXException.class)
-    public void testGetDataFromObject_wrongClassDefinition_throwsException() throws OXException {
+     public void testGetDataFromObject_wrongClassDefinition_throwsException() throws OXException {
         AJAXRequestData requestData = new AJAXRequestData(group);
 
         requestData.getData(MailFolderImpl.class);
     }
 
-    @Test
-    public void testGetDataFromObject_classDefNull_returnNull() throws OXException {
+     @Test
+     public void testGetDataFromObject_classDefNull_returnNull() throws OXException {
         AJAXRequestData requestData = new AJAXRequestData(group);
 
         Group data = requestData.getData(null);
@@ -103,8 +103,8 @@ public class AJAXRequestDataTest {
         assertNull(data);
     }
 
-    @Test
-    public void testGetDataFromObject_dataNull_returnNull() throws OXException {
+     @Test
+     public void testGetDataFromObject_dataNull_returnNull() throws OXException {
         AJAXRequestData requestData = new AJAXRequestData();
 
         Group data = requestData.getData(Group.class);
@@ -112,8 +112,8 @@ public class AJAXRequestDataTest {
         assertNull(data);
     }
 
-    @Test
-    public void testGetDataFromJSON_mostSet_returnPOJO() throws OXException {
+     @Test
+     public void testGetDataFromJSON_mostSet_returnPOJO() throws OXException {
         String groupJson = "{\"identifier\":1111,\"identifierSet\":true,\"simpleName\":\"theSimpleName\",\"simpleNameSet\":true,\"member\":[],\"memberSet\":false,\"displayName\":\"theDisplayName\",\"displayNameSet\":true,\"lastModified\":1111111111,\"lastModifiedSet\":true}";
 
         AJAXRequestData requestData = new AJAXRequestData(groupJson);
@@ -131,8 +131,8 @@ public class AJAXRequestDataTest {
         assertTrue(data.isSimpleNameSet());
     }
 
-    @Test
-    public void testGetDataFromJSON_onlyLastModifiedSet_returnPOJO() throws OXException {
+     @Test
+     public void testGetDataFromJSON_onlyLastModifiedSet_returnPOJO() throws OXException {
         String groupJson = "{\"lastModified\":1111111111}";
 
         AJAXRequestData requestData = new AJAXRequestData(groupJson);

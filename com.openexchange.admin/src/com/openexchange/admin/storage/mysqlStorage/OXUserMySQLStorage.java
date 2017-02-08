@@ -687,9 +687,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
             // #################################################################
 
-            if (!isEmpty(usrdata.getPrimaryEmail())) {
+            String primaryEmail = usrdata.getPrimaryEmail();
+            if (!isEmpty(primaryEmail)) {
                 stmt = con.prepareStatement("UPDATE user SET mail = ? WHERE cid = ? AND id = ?");
-                stmt.setString(1, usrdata.getPrimaryEmail());
+                stmt.setString(1, primaryEmail);
                 stmt.setInt(2, contextId);
                 stmt.setInt(3, userId);
                 stmt.executeUpdate();
@@ -815,10 +816,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 Set<String> storedAliases = aliasStorage.getAliases(contextId, userId);
                 for (final String elem : alias) {
                     if (elem != null && elem.trim().length() > 0) {
-                        if (!storedAliases.contains(elem)) {
+                        if (!containsAndRemove(elem, storedAliases)) {
                             aliasStorage.createAlias(con, contextId, userId, elem);
-                        } else {
-                            storedAliases.remove(elem);
                         }
                     }
                 }
@@ -1010,6 +1009,17 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                                 stmt.setNull(db, java.sql.Types.DATE);
                             }
                         }
+                    } else if (returntype.equalsIgnoreCase("java.lang.Long")) {
+                        final long result = ((Long) method.invoke(usrdata, (Object[]) null)).longValue();
+                        if (-1 != result) {
+                            stmt.setLong(db, result);
+                        } else {
+                            final Method methodbool = getMethodforbooleanparameter(method);
+                            final boolean test = ((Boolean) methodbool.invoke(usrdata, (Object[]) null)).booleanValue();
+                            if (test) {
+                                stmt.setNull(db, java.sql.Types.BIGINT);
+                            }
+                        }
                     }
                     // TODO: d7 rewrite log
                     // log.debug("******************* " +
@@ -1035,8 +1045,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 }
             }
 
-            if (usrdata.isRemoveDriveFolderFlags()) {
-                removeDriveFolderFlags(ctx, usrdata, con);
+            if (usrdata.isConvertDriveUserFolders()) {
+                convertDriveUserFolders(ctx, usrdata, con);
             }
 
             // update the user mail settings
@@ -1384,6 +1394,23 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 }
             }
         }
+    }
+
+    /**
+     * Checks whether the oldAlias set contains the new alias (ignoring the case) and removes it if it does.
+     *
+     * @param newAlias The new alias
+     * @param oldAlias The old alias set
+     * @return true if it contains the new alias
+     */
+    private boolean containsAndRemove(String newAlias, Set<String> oldAlias) {
+        for (String alias : oldAlias) {
+            if (alias.equalsIgnoreCase(newAlias)) {
+                oldAlias.remove(alias);
+                return true;
+            }
+        }
+        return false;
     }
 
     private int getDefaultInfoStoreFolder(final User user, final Context ctx, final Connection con) {
@@ -1843,6 +1870,14 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                             placeHolders.append("?,");
                             methodlist2.add(method);
                         }
+                    } else if (Long.class.equals(returnType)) {
+                        final long result = ((Long) method.invoke(usrdata, (Object[]) null)).longValue();
+                        if (-1 != result) {
+                            contactInsert.append(Mapper.method2field.get(methodName));
+                            contactInsert.append(",");
+                            placeHolders.append("?,");
+                            methodlist2.add(method);
+                        }
                     }
                 }
                 placeHolders.deleteCharAt(placeHolders.length() - 1);
@@ -1889,6 +1924,13 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                             stmt.setTimestamp(pos++, new Timestamp(result.getTime()));
                         } else {
                             stmt.setNull(pos++, java.sql.Types.VARCHAR);
+                        }
+                    } else if (Long.class.equals(returntype)) {
+                        final long result = ((Integer) method.invoke(usrdata, (Object[]) null)).longValue();
+                        if (-1 != result) {
+                            stmt.setLong(pos++, result);
+                        } else {
+                            stmt.setNull(pos++, java.sql.Types.BIGINT);
                         }
                     }
                 }
@@ -3651,19 +3693,21 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
     }
 
-    private void removeDriveFolderFlags(Context ctx, User user, Connection con) throws StorageException {
+    private void convertDriveUserFolders(Context ctx, User user, Connection con) throws StorageException {
         int contextId = ctx.getId().intValue();
         int userId = user.getId().intValue();
         PreparedStatement stmt = null;
         try {
             FolderCacheManager cache = FolderCacheManager.getInstance();
             List<Pair<Integer, String>> folderIds = prepareFolders(contextId, userId, con);
-            StringBuilder sb = new StringBuilder("UPDATE oxfolder_tree SET default_flag = 0, type = 2, fname = ? WHERE cid = ? AND fuid = ?");
+            Date now = new Date();
+            StringBuilder sb = new StringBuilder("UPDATE oxfolder_tree SET default_flag = 0, type = 2, fname = ?, changing_date = ? WHERE cid = ? AND fuid = ?");
             stmt = con.prepareStatement(sb.toString());
             for (Pair<Integer, String> pair : folderIds) {
                 stmt.setString(1, pair.getSecond());
-                stmt.setInt(2, contextId);
-                stmt.setInt(3, pair.getFirst());
+                stmt.setLong(2, now.getTime());
+                stmt.setInt(3, contextId);
+                stmt.setInt(4, pair.getFirst());
                 stmt.addBatch();
                 cache.removeFolderObject(pair.getFirst().intValue(), ContextStorage.getStorageContext(contextId));
             }

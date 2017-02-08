@@ -52,7 +52,6 @@ package com.openexchange.ajax.tokenloginV2;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
-
 /**
  * {@link AcquireTokenResponse}
  *
@@ -64,16 +63,17 @@ public class AcquireTokenResponse extends AbstractAJAXResponse {
 
     /**
      * Initializes a new {@link AcquireTokenResponse}.
+     * 
      * @param response
      */
     public AcquireTokenResponse(Response response) {
         super(response);
     }
-    
+
     public void setToken(String token) {
         this.token = token;
     }
-    
+
     public String getToken() {
         return token;
     }

@@ -49,38 +49,37 @@
 
 package com.openexchange.dav;
 
-
 /**
  * {@link ThrowableHolder} - Holds a {@link Throwable}.
  * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class ThrowableHolder {
-	
-	private Throwable throwable;
-	
-	public ThrowableHolder() {
-		super();
-		this.setThrowable(null);
-	}
-	
-	public void reThrowIfSet() throws Throwable {
-		if (null != this.getThrowable()) {
-			throw getThrowable();
-		}
-	}
 
-	/**
-	 * @return the throwable
-	 */
-	public Throwable getThrowable() {
-		return throwable;
-	}
+    private Throwable throwable;
 
-	/**
-	 * @param t the throwable to set
-	 */
-	public void setThrowable(Throwable t) {
-		this.throwable = t;
-	}
+    public ThrowableHolder() {
+        super();
+        this.setThrowable(null);
+    }
+
+    public void reThrowIfSet() throws Throwable {
+        if (null != this.getThrowable()) {
+            throw getThrowable();
+        }
+    }
+
+    /**
+     * @return the throwable
+     */
+    public Throwable getThrowable() {
+        return throwable;
+    }
+
+    /**
+     * @param t the throwable to set
+     */
+    public void setThrowable(Throwable t) {
+        this.throwable = t;
+    }
 }

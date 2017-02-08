@@ -49,10 +49,13 @@
 
 package com.openexchange.templating.impl;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
-import com.openexchange.templating.impl.DocumentMetadataMatcher;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 
 /**
@@ -61,9 +64,9 @@ import com.openexchange.templating.impl.DocumentMetadataMatcher;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class DocumentMetadataMatcherTest extends TestCase {
-
-    public void testFilenameMatchesExactlyGivesPerfectMatch() {
+public class DocumentMetadataMatcherTest {
+         @Test
+     public void testFilenameMatchesExactlyGivesPerfectMatch() {
 
         DocumentMetadataMatcher matcher = new DocumentMetadataMatcher("test-template.tmpl");
 
@@ -75,7 +78,8 @@ public class DocumentMetadataMatcherTest extends TestCase {
 
     }
 
-    public void testMatchFilenameWithoutExtension() {
+         @Test
+     public void testMatchFilenameWithoutExtension() {
         DocumentMetadataMatcher matcher = new DocumentMetadataMatcher("test-template");
 
         matcher.propose(doc(1, "Some Template", "not-test-template.tmpl"));
@@ -85,7 +89,8 @@ public class DocumentMetadataMatcherTest extends TestCase {
         assertEquals(23, matcher.getBestMatch().getId());
     }
 
-    public void testMatchTitle() {
+         @Test
+     public void testMatchTitle() {
         DocumentMetadataMatcher matcher = new DocumentMetadataMatcher("test-template");
 
         matcher.propose(doc(1, "Some Template", "not-test-template.tmpl"));
@@ -96,7 +101,8 @@ public class DocumentMetadataMatcherTest extends TestCase {
 
     }
 
-    public void testPreferDirectTitleMatchBeforeFilenameWithoutExtensionMatch() {
+         @Test
+     public void testPreferDirectTitleMatchBeforeFilenameWithoutExtensionMatch() {
         DocumentMetadataMatcher matcher = new DocumentMetadataMatcher("test-template");
 
         matcher.propose(doc(1, "Some Template", "test-template.tmpl"));

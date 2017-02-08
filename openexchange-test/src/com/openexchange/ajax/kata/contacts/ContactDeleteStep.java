@@ -53,13 +53,12 @@ import com.openexchange.ajax.kata.NeedExistingStep;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.test.ContactTestManager;
 
-
 /**
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class ContactDeleteStep extends NeedExistingStep<Contact> {
 
-	private final Contact entry;
+    private final Contact entry;
 
     public ContactDeleteStep(Contact entry, String name, String expectedError) {
         super(name, expectedError);
@@ -67,19 +66,17 @@ public class ContactDeleteStep extends NeedExistingStep<Contact> {
     }
 
     @Override
-    public void cleanUp() throws Exception {
-    }
+    public void cleanUp() throws Exception {}
 
     @Override
     public void perform(AJAXClient client) throws Exception {
         assumeIdentity(entry);
         ContactTestManager manager = new ContactTestManager(client);
         manager.setFailOnError(false);
-        Assert.assertNotNull("Should have found contact before deletion" , manager.getAction(this.entry) );
+        Assert.assertNotNull("Should have found contact before deletion", manager.getAction(this.entry));
         manager.deleteAction(this.entry);
-        Assert.assertNull("Should not have found contact after deletion" , manager.getAction(this.entry) );
+        Assert.assertNull("Should not have found contact after deletion", manager.getAction(this.entry));
         forgetIdentity(entry);
     }
-
 
 }

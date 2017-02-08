@@ -1,15 +1,16 @@
 package liquibase.sqlgenerator;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import java.sql.SQLException;
+import org.junit.Test;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.test.TestContext;
-import static org.junit.Assert.*;
-import org.junit.Test;
-
-import java.sql.SQLException;
 
 public abstract class AbstractSqlGeneratorTest<T extends SqlStatement> {
 

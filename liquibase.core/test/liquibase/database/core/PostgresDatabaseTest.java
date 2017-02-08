@@ -1,10 +1,12 @@
 package liquibase.database.core;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import org.junit.Assert;
+import org.junit.Test;
 import liquibase.database.AbstractJdbcDatabaseTest;
 import liquibase.database.Database;
-import org.junit.Assert;
-import static org.junit.Assert.*;
-import org.junit.Test;
 
 /**
  * Tests for {@link PostgresDatabase}
@@ -20,31 +22,30 @@ public class PostgresDatabaseTest extends AbstractJdbcDatabaseTest {
         return "PostgreSQL";
     }
 
-    @Override
-    @Test
+     @Test
     public void supportsInitiallyDeferrableColumns() {
         assertTrue(getDatabase().supportsInitiallyDeferrableColumns());
     }
 
 
 
-    @Override
-    @Test
+     @Test
     public void getCurrentDateTimeFunction() {
         Assert.assertEquals("NOW()", getDatabase().getCurrentDateTimeFunction());
     }
 
-    @Test
-    public void testDropDatabaseObjects() throws Exception {
+     @Test
+     public void testDropDatabaseObjects() throws Exception {
         ; //TODO: test has troubles, fix later
     }
 
-    @Test
-    public void testCheckDatabaseChangeLogTable() throws Exception {
+     @Test
+     public void testCheckDatabaseChangeLogTable() throws Exception {
         ; //TODO: test has troubles, fix later
     }
 
-    public void testGetDefaultDriver() {
+         @Test
+     public void testGetDefaultDriver() {
         Database database = new PostgresDatabase();
 
         assertEquals("org.postgresql.Driver", database.getDefaultDriver("jdbc:postgresql://localhost/liquibase"));
@@ -54,8 +55,7 @@ public class PostgresDatabaseTest extends AbstractJdbcDatabaseTest {
 
  
 
-    @Override
-    @Test
+     @Test
     public void escapeTableName_noSchema() {
         Database database = getDatabase();
         assertEquals("\"tableName\"", database.escapeTableName(null, null, "tableName"));
@@ -67,8 +67,7 @@ public class PostgresDatabaseTest extends AbstractJdbcDatabaseTest {
          assertEquals("\"user\"", database.escapeTableName(null, null, "user"));
      }
 
-    @Override
-    @Test
+     @Test
     public void escapeTableName_withSchema() {
         Database database = getDatabase();
         assertEquals("\"schemaName\".\"tableName\"", database.escapeTableName("catalogName", "schemaName", "tableName"));

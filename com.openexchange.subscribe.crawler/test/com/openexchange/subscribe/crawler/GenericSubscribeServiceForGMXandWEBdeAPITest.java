@@ -51,6 +51,7 @@ package com.openexchange.subscribe.crawler;
 
 import java.util.ArrayList;
 import org.apache.commons.httpclient.NameValuePair;
+import org.junit.Test;
 import com.openexchange.subscribe.crawler.internal.Step;
 
 
@@ -61,7 +62,8 @@ import com.openexchange.subscribe.crawler.internal.Step;
  */
 public class GenericSubscribeServiceForGMXandWEBdeAPITest extends GenericSubscribeServiceTestHelpers {
 
-    public void testGMXdeAddressbook(){
+         @Test
+     public void testGMXdeAddressbook(){
         String username = "";
         String password = "";
         String serviceID = "coms.homenet.gmxde";
@@ -93,7 +95,8 @@ public class GenericSubscribeServiceForGMXandWEBdeAPITest extends GenericSubscri
         // dumpThis(crawler, crawler.getDisplayName());
     }
 
-    public void testWebDeAddressbook(){
+         @Test
+     public void testWebDeAddressbook(){
         String username = "";
         String password = "";
         String serviceID = "coms.homenet.webde";
@@ -125,7 +128,8 @@ public class GenericSubscribeServiceForGMXandWEBdeAPITest extends GenericSubscri
         // dumpThis(crawler, crawler.getDisplayName());
     }
 
-    public void testGMXComAddressbook(){
+         @Test
+     public void testGMXComAddressbook(){
         String username = "";
         String password = "";
         String serviceID = "coms.homenet.gmxcom";

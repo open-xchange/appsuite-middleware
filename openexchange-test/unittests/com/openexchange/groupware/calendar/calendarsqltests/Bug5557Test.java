@@ -49,19 +49,23 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
-import com.openexchange.exception.OXException;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import org.junit.Test;
 import com.openexchange.event.CommonEvent;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.tools.events.TestEventAdmin;
 
-
 public class Bug5557Test extends CalendarSqlTest {
+
     // Bug 5557
     /**
      * Test for <a href= "http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=5557">bug #5557</a>
      */
+    @Test
     public void testUpdateToAppointmentShouldThrowEventIncludingPrivateFolderIds() throws OXException {
         final CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(participant1, participant2, participant3);
         appointments.save(appointment);

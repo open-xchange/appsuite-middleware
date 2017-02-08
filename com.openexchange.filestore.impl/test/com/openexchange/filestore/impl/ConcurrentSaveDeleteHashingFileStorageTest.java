@@ -49,11 +49,15 @@
 
 package com.openexchange.filestore.impl;
 
+import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 
 /**
@@ -77,7 +81,7 @@ public class ConcurrentSaveDeleteHashingFileStorageTest extends AbstractHashingF
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         for (int i = 1; i <= NUM_FILES_INIT; i++) {
@@ -86,12 +90,13 @@ public class ConcurrentSaveDeleteHashingFileStorageTest extends AbstractHashingF
         }
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         fs.remove();
         super.tearDown();
     }
 
+    @Test
     public void testBug34249ConcurrentThreads() throws Exception {
         FsThread save = new FsThread(true);
         FsThread delete = new FsThread(false);

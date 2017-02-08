@@ -1,87 +1,78 @@
+
 package com.openexchange.ajax.appointment;
 
 import java.util.Date;
+import java.util.UUID;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
-import com.openexchange.ajax.framework.AJAXClient.User;
-import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.test.FolderTestManager;
 
 public class MoveTest extends AppointmentTest {
 
-	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MoveTest.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MoveTest.class);
     private String login;
     private String password;
     private String context;
-    private int targetFolder;
     private int objectId;
 
-	public MoveTest(final String name) {
-		super(name);
-	}
+    public MoveTest() {
+        super();
+    }
 
-	@Override
-	protected void setUp() throws Exception {
-	    super.setUp();
-	    login = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "login", "");
-	    context = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "contextName", "defaultcontext");
-	    password = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "password", "");
-	    targetFolder = 0;
-	}
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+        login = testUser.getLogin();
+        context = testUser.getContext();
+        password = testUser.getPassword();
+    }
 
-	@Override
-	protected void tearDown() throws Exception {
-        if (0 != objectId) {
-            deleteAppointment(getWebConversation(), objectId, targetFolder, PROTOCOL + getHostName(), getSessionId(), false);
-        }
-	    if (0 != targetFolder) {
-	        com.openexchange.webdav.xml.FolderTest.deleteFolder(getWebConversation(), new int[] { targetFolder }, PROTOCOL + getHostName(), login, password, context);
-	    }
-	    super.tearDown();
-	}
+    @Test
+    public void testMove2PrivateFolder() throws Exception {
+        final Appointment appointmentObj = new Appointment();
+        final String date = String.valueOf(System.currentTimeMillis());
+        appointmentObj.setTitle("testMove2PrivateFolder" + date);
+        appointmentObj.setStartDate(new Date(startTime));
+        appointmentObj.setEndDate(new Date(endTime));
+        appointmentObj.setOrganizer(testUser.getUser());
+        appointmentObj.setParentFolderID(appointmentFolderId);
+        appointmentObj.setIgnoreConflicts(true);
+        appointmentObj.setShownAs(Appointment.RESERVED);
+        objectId = catm.insert(appointmentObj).getObjectID();
 
-	public void testMove2PrivateFolder() throws Exception {
-		final Appointment appointmentObj = new Appointment();
-		final String date = String.valueOf(System.currentTimeMillis());
-		appointmentObj.setTitle("testMove2PrivateFolder" + date);
-		appointmentObj.setStartDate(new Date(startTime));
-		appointmentObj.setEndDate(new Date(endTime));
-		appointmentObj.setOrganizer(User.User1.name());
-		appointmentObj.setParentFolderID(appointmentFolderId);
-		appointmentObj.setIgnoreConflicts(true);
-		appointmentObj.setShownAs(Appointment.RESERVED);
-		objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+        final FolderObject folderObj = FolderTestManager.createNewFolderObject("testMove2PrivateFolder" + UUID.randomUUID().toString(), FolderObject.CALENDAR, FolderObject.PRIVATE, userId, 1);
+        int targetFolder = ftm.insertFolderOnServer(folderObj).getObjectID();
 
-		final FolderObject folderObj = com.openexchange.webdav.xml.FolderTest.createFolderObject(userId, "testMove2PrivateFolder" + System.currentTimeMillis(), FolderObject.CALENDAR, false);
-		targetFolder = com.openexchange.webdav.xml.FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), login, password, context);
+        appointmentObj.setParentFolderID(targetFolder);
+        catm.update(appointmentFolderId, appointmentObj);
+        final Appointment loadAppointment = catm.get(targetFolder, objectId);
+        appointmentObj.setObjectID(objectId);
+        compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
+    }
 
-		appointmentObj.setParentFolderID(targetFolder);
-		updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
-		final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, targetFolder, timeZone, PROTOCOL + getHostName(), getSessionId());
-		appointmentObj.setObjectID(objectId);
-		compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
-	}
+    @Test
+    public void testMove2PublicFolder() throws Exception {
+        final Appointment appointmentObj = new Appointment();
+        final String date = String.valueOf(System.currentTimeMillis());
+        appointmentObj.setTitle("testMove2PublicFolder" + date);
+        appointmentObj.setStartDate(new Date(startTime));
+        appointmentObj.setEndDate(new Date(endTime));
+        appointmentObj.setOrganizer(testUser.getUser());
+        appointmentObj.setParentFolderID(appointmentFolderId);
+        appointmentObj.setIgnoreConflicts(true);
+        appointmentObj.setShownAs(Appointment.RESERVED);
+        objectId = catm.insert(appointmentObj).getObjectID();
 
-	public void testMove2PublicFolder() throws Exception {
-		final Appointment appointmentObj = new Appointment();
-		final String date = String.valueOf(System.currentTimeMillis());
-		appointmentObj.setTitle("testMove2PublicFolder" + date);
-		appointmentObj.setStartDate(new Date(startTime));
-		appointmentObj.setEndDate(new Date(endTime));
-		appointmentObj.setOrganizer(User.User1.name());
-		appointmentObj.setParentFolderID(appointmentFolderId);
-		appointmentObj.setIgnoreConflicts(true);
-		appointmentObj.setShownAs(Appointment.RESERVED);
-		objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+        final FolderObject folderObj = FolderTestManager.createNewFolderObject("testMove2PublicFolder" + UUID.randomUUID().toString(), FolderObject.CALENDAR, FolderObject.PUBLIC, userId, 2);
+        int targetFolder = ftm.insertFolderOnServer(folderObj).getObjectID();
 
-		final FolderObject folderObj = com.openexchange.webdav.xml.FolderTest.createFolderObject(userId, "testMove2PublicFolder" + System.currentTimeMillis(), FolderObject.CALENDAR, true);
-		targetFolder = com.openexchange.webdav.xml.FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), login, password, context);
-
-		appointmentObj.setParentFolderID(targetFolder);
-		updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
-		final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, targetFolder, timeZone, PROTOCOL + getHostName(), getSessionId());
-		appointmentObj.setObjectID(objectId);
-		compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
-	}
+        appointmentObj.setParentFolderID(targetFolder);
+        catm.update(appointmentFolderId, appointmentObj);
+        final Appointment loadAppointment = catm.get(targetFolder, objectId);
+        appointmentObj.setObjectID(objectId);
+        compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
+    }
 }
-

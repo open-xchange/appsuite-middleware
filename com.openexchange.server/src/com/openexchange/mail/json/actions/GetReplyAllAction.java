@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.json.actions;
 
-import java.util.Iterator;
+import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -96,25 +96,25 @@ public final class GetReplyAllAction extends AbstractMailAction {
 
     private AJAXRequestResult performPut(final MailRequest req, final JSONArray paths) throws OXException {
         try {
-            final int length = paths.length();
+            int length = paths.length();
             if (length != 1) {
                 throw new IllegalArgumentException("JSON array's length is not 1");
             }
-            final AJAXRequestData requestData = new AJAXRequestData();
-            final AJAXRequestData request = req.getRequest();
-            for (final Iterator<String> it = request.getParameterNames(); it.hasNext();) {
-                final String name = it.next();
-                requestData.putParameter(name, request.getParameter(name));
+
+            // Compile a new request instance...
+            AJAXRequestData requestData = new AJAXRequestData();
+            AJAXRequestData request = req.getRequest();
+            for (Map.Entry<String, String> entry : request.getParameters().entrySet()) {
+                requestData.putParameter(entry.getKey(), entry.getValue());
             }
             for (int i = 0; i < length; i++) {
-                final JSONObject folderAndID = paths.getJSONObject(i);
+                JSONObject folderAndID = paths.getJSONObject(i);
                 requestData.putParameter(AJAXServlet.PARAMETER_FOLDERID, folderAndID.getString(AJAXServlet.PARAMETER_FOLDERID));
                 requestData.putParameter(AJAXServlet.PARAMETER_ID, folderAndID.get(AJAXServlet.PARAMETER_ID).toString());
             }
             requestData.setState(request.getState());
-            /*
-             * ... and fake a GET request
-             */
+
+            // ... and fake a GET request
             return performGet(new MailRequest(requestData, req.getSession()));
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());

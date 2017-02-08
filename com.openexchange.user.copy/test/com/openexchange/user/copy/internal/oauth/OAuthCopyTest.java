@@ -98,7 +98,8 @@ public class OAuthCopyTest extends AbstractUserCopyTest {
         dstCtxId = getDestinationContext().getContextId(); 
     }
     
-    public void testOAuthCopy() throws Exception {
+         @Test
+     public void testOAuthCopy() throws Exception {
         final IDGeneratorService idService = new SimIDGenerator();
         final OAuthCopyTask copyTask = new OAuthCopyTask(idService);
         final List<OAuthAccount> originAccounts = copyTask.loadOAuthAccountsFromDB(srcCon, srcUsrId, srcCtxId);
@@ -130,8 +131,9 @@ public class OAuthCopyTest extends AbstractUserCopyTest {
         return null;
     }
     
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown()
+ throws Exception {
         DBUtils.autocommit(dstCon);
         deleteAllFromTablesForCid(dstCtxId, "cid", dstCon, "oauthAccounts");
         super.tearDown();

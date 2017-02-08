@@ -50,9 +50,8 @@
 package com.openexchange.test;
 
 import java.util.Locale;
-import junit.framework.JUnit4TestAdapter;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 import com.openexchange.i18n.Bug14154Test;
 import com.openexchange.i18n.TranslatedTest;
 
@@ -61,21 +60,13 @@ import com.openexchange.i18n.TranslatedTest;
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    TranslatedTest.class,
+    Bug14154Test.class,
+})
 public final class I18nTests {
 
-    public static final Locale[] LOCALES = new Locale[] {
-        Locale.GERMANY,
-        Locale.FRANCE
-    };
+    public static final Locale[] LOCALES = new Locale[] { Locale.GERMANY, Locale.FRANCE };
 
-    private I18nTests() {
-        super();
-    }
-
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTest(new JUnit4TestAdapter(TranslatedTest.class));
-        tests.addTest(new JUnit4TestAdapter(Bug14154Test.class));
-        return tests;
-    }
 }

@@ -49,76 +49,70 @@
 
 package com.openexchange.ajax.appointment;
 
+import static org.junit.Assert.*;
+import java.io.StringWriter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.TimeZone;
+import java.util.UUID;
+import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
-import com.openexchange.ajax.ContactTest;
-import com.openexchange.ajax.FolderTest;
-import com.openexchange.ajax.ResourceTest;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.group.GroupTest;
 import com.openexchange.ajax.resource.ResourceTools;
-import com.openexchange.exception.OXException;
+import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.test.CalendarTestManager;
+import com.openexchange.test.FolderTestManager;
 
 public class NewTest extends AppointmentTest {
 
-    private int targetFolder;
-    private int objectId;
-    private int objectId2;
-    private int folderId;
-    private int folderId2;
-
-    public NewTest(final String name) {
-        super(name);
-    }
+    private CalendarTestManager ctm2;
 
     @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
-        targetFolder = 0;
-        objectId = 0;
-        objectId2 = 0;
+        ctm2 = new CalendarTestManager(getClient2());
+        ctm2.setFailOnError(true);
     }
 
     @Override
-    protected void tearDown() throws Exception {
-        if (0 != objectId) {
-            deleteAppointment(getWebConversation(), objectId, folderId, PROTOCOL + getHostName(), getSessionId(), false);
+    @After
+    public void tearDown() throws Exception {
+        try {
+            ctm2.cleanUp();
+        } finally {
+            super.tearDown();
         }
-        if (0 != objectId2) {
-            deleteAppointment(getWebConversation(), objectId2, folderId2, PROTOCOL + getHostName(), getSessionId(), false);
-        }
-        if (0 != targetFolder) {
-            com.openexchange.webdav.xml.FolderTest.deleteFolder(getWebConversation(), new int[] { targetFolder }, PROTOCOL + getHostName(), getLogin(), getPassword(), "");
-        }
-        super.tearDown();
     }
 
+    @Test
     public void testSimple() throws Exception {
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testSimple");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
-        appointmentObj.setOrganizer(User.User1.name());
+        appointmentObj.setOrganizer(testUser.getUser());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
-        objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-        folderId = appointmentFolderId;
+        int objectId = catm.insert(appointmentObj).getObjectID();
         appointmentObj.setObjectID(objectId);
-        final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+        final Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
         compareObject(appointmentObj, loadAppointment, startTime, endTime);
     }
 
+    @Test
     public void testFullTime() throws Exception {
         final Calendar c = Calendar.getInstance();
         c.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -137,20 +131,19 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testFullTime");
         appointmentObj.setStartDate(start);
         appointmentObj.setEndDate(end);
-        appointmentObj.setOrganizer(User.User1.name());
+        appointmentObj.setOrganizer(testUser.getUser());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
         appointmentObj.setFullTime(true);
 
-        objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-        folderId = appointmentFolderId;
+        int objectId = catm.insert(appointmentObj).getObjectID();
         appointmentObj.setObjectID(objectId);
-        final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+        final Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
         compareObject(appointmentObj, loadAppointment, start.getTime(), end.getTime());
     }
 
-
+    @Test
     public void testFullTimeOverTwoDays() throws Exception {
         final Calendar c = Calendar.getInstance();
         c.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -169,20 +162,19 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testFullTime");
         appointmentObj.setStartDate(start);
         appointmentObj.setEndDate(end);
-        appointmentObj.setOrganizer(User.User1.name());
+        appointmentObj.setOrganizer(testUser.getUser());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
         appointmentObj.setFullTime(true);
 
-        objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-        folderId = appointmentFolderId;
+        int objectId = catm.insert(appointmentObj).getObjectID();
         appointmentObj.setObjectID(objectId);
-        final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+        final Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
         compareObject(appointmentObj, loadAppointment, start.getTime(), end.getTime());
     }
 
-
+    @Test
     public void testServerShouldRoundDownFullTimeAppointments() throws Exception {
         final Calendar c = Calendar.getInstance();
         c.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -213,16 +205,15 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testFullTime rounds down");
         appointmentObj.setStartDate(start);
         appointmentObj.setEndDate(end);
-        appointmentObj.setOrganizer(User.User1.name());
+        appointmentObj.setOrganizer(testUser.getUser());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
         appointmentObj.setFullTime(true);
 
-        objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-        folderId = appointmentFolderId;
+        int objectId = catm.insert(appointmentObj).getObjectID();
         appointmentObj.setObjectID(objectId);
-        final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, c.getTimeZone(), PROTOCOL + getHostName(), getSessionId());
+        final Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
 
         appointmentObj.setStartDate(expectedStart);
         appointmentObj.setEndDate(expectedEnd);
@@ -230,6 +221,7 @@ public class NewTest extends AppointmentTest {
         compareObject(appointmentObj, loadAppointment, expectedStart.getTime(), expectedEnd.getTime());
     }
 
+    @Test
     public void testShouldRoundFullTimeSeriesAsWell() throws Exception {
         final Calendar c = Calendar.getInstance();
         c.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -262,7 +254,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testFullTime rounds down");
         appointmentObj.setStartDate(start);
         appointmentObj.setEndDate(end);
-        appointmentObj.setOrganizer(User.User1.name());
+        appointmentObj.setOrganizer(testUser.getUser());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
@@ -272,10 +264,9 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setDayInMonth(1);
         appointmentObj.setMonth(Calendar.APRIL);
 
-        objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-        folderId = appointmentFolderId;
+        int objectId = catm.insert(appointmentObj).getObjectID();
         appointmentObj.setObjectID(objectId);
-        Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, c.getTimeZone(), PROTOCOL + getHostName(), getSessionId());
+        Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
 
         appointmentObj.setStartDate(expectedStart);
         appointmentObj.setEndDate(expectedEnd);
@@ -284,7 +275,7 @@ public class NewTest extends AppointmentTest {
 
         // load a recurrence
 
-        loadAppointment = loadAppointment(getWebConversation(), objectId, 2, appointmentFolderId, c.getTimeZone(), PROTOCOL + getHostName(), getSessionId());
+        loadAppointment = catm.get(appointmentFolderId, objectId, 2);
 
         final Calendar check = new GregorianCalendar();
         check.setTimeZone(c.getTimeZone());
@@ -303,6 +294,7 @@ public class NewTest extends AppointmentTest {
         assertEquals(0, check.get(Calendar.MILLISECOND));
     }
 
+    @Test
     public void testUserParticipant() throws Exception {
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testUserParticipant");
@@ -312,21 +304,28 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
 
-        final int userParticipantId = ContactTest.searchContact(getWebConversation(), userParticipant2, FolderObject.SYSTEM_LDAP_FOLDER_ID, new int[] { Contact.INTERNAL_USERID }, PROTOCOL + getHostName(), getSessionId())[0].getInternalUserId();
+        final int userParticipantId = getClient2().getValues().getUserId();
 
         final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[2];
         participants[0] = new UserParticipant(userId);
-        participants[1] = new UserParticipant(userParticipantId);
-
+        UserParticipant userParticipant = new UserParticipant(userParticipantId);
+        participants[1] = userParticipant;
         appointmentObj.setParticipants(participants);
 
-        objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-        folderId = appointmentFolderId;
+        final StringWriter stringWriter = new StringWriter();
+        final JSONObject jsonObj = new JSONObject();
+        final AppointmentWriter appointmentwriter = new AppointmentWriter(getClient().getValues().getTimeZone());
+        appointmentwriter.writeAppointment(appointmentObj, jsonObj);
+        stringWriter.write(jsonObj.toString());
+        stringWriter.flush();
+
+        int objectId = catm.insert(appointmentObj).getObjectID();
         appointmentObj.setObjectID(objectId);
-        final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+        final Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
         compareObject(appointmentObj, loadAppointment, startTime, endTime);
     }
 
+    @Test
     public void testGroupParticipant() throws Exception {
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testGroupParticipant");
@@ -336,8 +335,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
 
-        ContactTest.searchContact(getWebConversation(), userParticipant2, FolderObject.SYSTEM_LDAP_FOLDER_ID, new int[] { Contact.INTERNAL_USERID }, PROTOCOL + getHostName(), getSessionId())[0].getInternalUserId();
-        final int groupParticipantId = GroupTest.searchGroup(getWebConversation(), groupParticipant, PROTOCOL, getHostName(), getSessionId())[0].getIdentifier();
+        final int groupParticipantId = GroupTest.searchGroup(getClient(), testContext.getGroupParticipants().get(0))[0].getIdentifier();
 
         final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[2];
         participants[0] = new UserParticipant(userId);
@@ -345,13 +343,13 @@ public class NewTest extends AppointmentTest {
 
         appointmentObj.setParticipants(participants);
 
-        objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-        folderId = appointmentFolderId;
+        int objectId = catm.insert(appointmentObj).getObjectID();
         appointmentObj.setObjectID(objectId);
-        final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, folderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+        final Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
         compareObject(appointmentObj, loadAppointment, startTime, endTime);
     }
 
+    @Test
     public void testResourceParticipant() throws Exception {
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testResourceParticipant");
@@ -361,7 +359,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
 
-        final int resourceParticipantId = ResourceTest.searchResource(getWebConversation(), resourceParticipant, PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
+        final int resourceParticipantId = resTm.search(testContext.getResourceParticipants().get(0)).get(0).getIdentifier();
 
         final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[2];
         participants[0] = new UserParticipant(userId);
@@ -369,13 +367,15 @@ public class NewTest extends AppointmentTest {
 
         appointmentObj.setParticipants(participants);
 
-        objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-        folderId = appointmentFolderId;
+        int objectId = catm.insert(appointmentObj).getObjectID();
+        assertFalse(catm.getLastResponse().hasConflicts());
         appointmentObj.setObjectID(objectId);
-        final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, folderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+        final Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
+        assertFalse(catm.getLastResponse().hasConflicts());
         compareObject(appointmentObj, loadAppointment, startTime, endTime);
     }
 
+    @Test
     public void testAllParticipants() throws Exception {
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testAllParticipants");
@@ -385,9 +385,8 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
 
-        ContactTest.searchContact(getWebConversation(), userParticipant2, FolderObject.SYSTEM_LDAP_FOLDER_ID, new int[] { Contact.INTERNAL_USERID }, PROTOCOL + getHostName(), getSessionId())[0].getInternalUserId();
-        final int groupParticipantId = GroupTest.searchGroup(getWebConversation(), groupParticipant, PROTOCOL, getHostName(), getSessionId())[0].getIdentifier();
-        final int resourceParticipantId = ResourceTest.searchResource(getWebConversation(), resourceParticipant, PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
+        final int groupParticipantId = GroupTest.searchGroup(getClient(), testContext.getGroupParticipants().get(0))[0].getIdentifier();
+        final int resourceParticipantId = resTm.search(testContext.getResourceParticipants().get(0)).get(0).getIdentifier();
 
         final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[3];
         participants[0] = new UserParticipant(userId);
@@ -396,99 +395,97 @@ public class NewTest extends AppointmentTest {
 
         appointmentObj.setParticipants(participants);
 
-        objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-        folderId = appointmentFolderId;
+        int objectId = catm.insert(appointmentObj).getObjectID();
         appointmentObj.setObjectID(objectId);
-        final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, folderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+
+        final Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
+        assertFalse(catm.getLastResponse().hasConflicts());
         compareObject(appointmentObj, loadAppointment, startTime, endTime);
     }
 
+    @Test
     public void testSpecialCharacters() throws Exception {
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testSpecialCharacters - \u00F6\u00E4\u00FC-:,;.#?!\u00A7$%&/()=\"<>");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
-        appointmentObj.setOrganizer(User.User1.name());
+        appointmentObj.setOrganizer(testUser.getUser());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
-        objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-        folderId = appointmentFolderId;
+        int objectId = catm.insert(appointmentObj).getObjectID();
         appointmentObj.setObjectID(objectId);
-        final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, folderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+        final Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
         compareObject(appointmentObj, loadAppointment, startTime, endTime);
     }
 
+    @Test
     public void testPrivateFolder() throws Exception {
-        final FolderObject folderObj = com.openexchange.webdav.xml.FolderTest.createFolderObject(userId, "testPrivateFolder" + System.currentTimeMillis(), FolderObject.CALENDAR, false);
-        targetFolder = com.openexchange.webdav.xml.FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword(), "");
+        final FolderObject folderObj = FolderTestManager.createNewFolderObject("testPrivateFolder" + UUID.randomUUID().toString(), FolderObject.CALENDAR, FolderObject.PRIVATE, userId, 1);
+        int targetFolder = ftm.insertFolderOnServer(folderObj).getObjectID();
 
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testPrivateFolder");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
-        appointmentObj.setOrganizer(User.User1.name());
+        appointmentObj.setOrganizer(testUser.getUser());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(targetFolder);
         appointmentObj.setIgnoreConflicts(true);
 
-        objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-        folderId = targetFolder;
+        int objectId = catm.insert(appointmentObj).getObjectID();
         appointmentObj.setObjectID(objectId);
-        final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, targetFolder, timeZone, PROTOCOL + getHostName(), getSessionId());
+        final Appointment loadAppointment = catm.get(targetFolder, objectId);
         compareObject(appointmentObj, loadAppointment, startTime, endTime);
     }
 
+    @Test
     public void testPublicFolder() throws Exception {
-        final FolderObject folderObj = com.openexchange.webdav.xml.FolderTest.createFolderObject(userId, "testPublicFolder" + System.currentTimeMillis(), FolderObject.CALENDAR, true);
-        targetFolder = com.openexchange.webdav.xml.FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword(), "");
+        final FolderObject folderObj = FolderTestManager.createNewFolderObject("testPublicFolder" + UUID.randomUUID().toString(), FolderObject.CALENDAR, FolderObject.PUBLIC, userId, 2);
+        int targetFolder = ftm.insertFolderOnServer(folderObj).getObjectID();
 
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testPrivateFolder");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
-        appointmentObj.setOrganizer(User.User1.name());
+        appointmentObj.setOrganizer(testUser.getUser());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(targetFolder);
         appointmentObj.setIgnoreConflicts(true);
 
-        objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-        folderId = targetFolder;
+        int objectId = catm.insert(appointmentObj).getObjectID();
         appointmentObj.setObjectID(objectId);
-        final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, targetFolder, timeZone, PROTOCOL + getHostName(), getSessionId());
+        final Appointment loadAppointment = catm.get(targetFolder, objectId);
         compareObject(appointmentObj, loadAppointment, startTime, endTime);
     }
 
+    @Test
     public void testSharedFolder() throws Exception {
-        final FolderObject sharedFolderObject = FolderTest.getStandardCalendarFolder(getSecondWebConversation(), getHostName(), getSecondSessionId());
-        final int secondUserId = sharedFolderObject.getCreatedBy();
+        final int secondUserId = getClient2().getValues().getUserId();
 
-        final FolderObject folderObj = com.openexchange.webdav.xml.FolderTest.createFolderObject(userId, "testSharedFolder" + System.currentTimeMillis(), FolderObject.CALENDAR, false);
-        final OCLPermission[] permission = new OCLPermission[] {
-            com.openexchange.webdav.xml.FolderTest.createPermission( userId, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION),
-            com.openexchange.webdav.xml.FolderTest.createPermission( secondUserId, false, OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, false)
-        };
+        final FolderObject folderObj = FolderTestManager.createNewFolderObject("testSharedFolder" + UUID.randomUUID().toString(), FolderObject.CALENDAR, FolderObject.PRIVATE, userId, getClient().getValues().getPrivateAppointmentFolder());
+        List<OCLPermission> permissions = folderObj.getPermissions();
+        permissions.add(FolderTestManager.createPermission(secondUserId, false, OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, false));
+        permissions.add(FolderTestManager.createPermission(userId, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION));
+        folderObj.setPermissions(permissions);
 
-        folderObj.setPermissionsAsArray(permission);
-
-        targetFolder = com.openexchange.webdav.xml.FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword(), "");
+        int targetFolder = ftm.insertFolderOnServer(folderObj).getObjectID();
 
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testSharedFolder");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
-        appointmentObj.setOrganizer(User.User1.name());
+        appointmentObj.setOrganizer(testUser.getUser());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(targetFolder);
         appointmentObj.setIgnoreConflicts(true);
 
-        objectId = insertAppointment(getSecondWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSecondSessionId());
-        folderId = targetFolder;
-        appointmentObj.setObjectID(objectId);
-        final Appointment loadAppointment = loadAppointment(getSecondWebConversation(), objectId, targetFolder, timeZone, PROTOCOL + getHostName(), getSecondSessionId());
+        int objectId = ctm2.insert(appointmentObj).getObjectID();
+        final Appointment loadAppointment = ctm2.get(targetFolder, objectId);
         compareObject(appointmentObj, loadAppointment, startTime, endTime);
     }
 
+    @Test
     public void testDailyRecurrence() throws Exception {
         final Calendar c = Calendar.getInstance();
         c.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -497,27 +494,27 @@ public class NewTest extends AppointmentTest {
         c.set(Calendar.SECOND, 0);
         c.set(Calendar.MILLISECOND, 0);
 
-        final Date until = new Date(c.getTimeInMillis() + (15*dayInMillis));
+        final Date until = new Date(c.getTimeInMillis() + (15 * dayInMillis));
 
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testDailyRecurrence");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
-        appointmentObj.setOrganizer(User.User1.name());
+        appointmentObj.setOrganizer(testUser.getUser());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setRecurrenceType(Appointment.DAILY);
         appointmentObj.setInterval(1);
         appointmentObj.setUntil(until);
         appointmentObj.setIgnoreConflicts(true);
-        objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+        int objectId = catm.insert(appointmentObj).getObjectID();
 
-        folderId = appointmentFolderId;
         appointmentObj.setObjectID(objectId);
-        final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, folderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+        final Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
         compareObject(appointmentObj, loadAppointment, startTime, endTime);
     }
 
+    @Test
     public void testWeeklyRecurrence() throws Exception {
         final Calendar c = Calendar.getInstance();
         c.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -526,13 +523,13 @@ public class NewTest extends AppointmentTest {
         c.set(Calendar.SECOND, 0);
         c.set(Calendar.MILLISECOND, 0);
 
-        final Date until = new Date(c.getTimeInMillis() + (10*dayInMillis));
+        final Date until = new Date(c.getTimeInMillis() + (10 * dayInMillis));
 
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testWeeklyRecurrence");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
-        appointmentObj.setOrganizer(User.User1.name());
+        appointmentObj.setOrganizer(testUser.getUser());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setRecurrenceType(Appointment.WEEKLY);
@@ -540,13 +537,13 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setInterval(1);
         appointmentObj.setUntil(until);
         appointmentObj.setIgnoreConflicts(true);
-        objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-        folderId = appointmentFolderId;
+        int objectId = catm.insert(appointmentObj).getObjectID();
         appointmentObj.setObjectID(objectId);
-        final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, folderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+        final Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
         compareObject(appointmentObj, loadAppointment, startTime, endTime);
     }
 
+    @Test
     public void testMonthlyRecurrenceDayInMonth() throws Exception {
         final Calendar c = Calendar.getInstance();
         c.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -555,13 +552,13 @@ public class NewTest extends AppointmentTest {
         c.set(Calendar.SECOND, 0);
         c.set(Calendar.MILLISECOND, 0);
 
-        final Date until = new Date(c.getTimeInMillis() + (60*dayInMillis));
+        final Date until = new Date(c.getTimeInMillis() + (60 * dayInMillis));
 
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testMonthlyRecurrenceDayInMonth");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
-        appointmentObj.setOrganizer(User.User1.name());
+        appointmentObj.setOrganizer(testUser.getUser());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setRecurrenceType(Appointment.MONTHLY);
@@ -569,13 +566,13 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setInterval(1);
         appointmentObj.setUntil(until);
         appointmentObj.setIgnoreConflicts(true);
-        objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-        folderId = appointmentFolderId;
+        int objectId = catm.insert(appointmentObj).getObjectID();
         appointmentObj.setObjectID(objectId);
-        final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, folderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+        final Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
         compareObject(appointmentObj, loadAppointment, loadAppointment.getStartDate().getTime(), loadAppointment.getEndDate().getTime());
     }
 
+    @Test
     public void testMonthlyRecurrenceDays() throws Exception {
         final Calendar c = Calendar.getInstance();
         c.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -584,13 +581,13 @@ public class NewTest extends AppointmentTest {
         c.set(Calendar.SECOND, 0);
         c.set(Calendar.MILLISECOND, 0);
 
-        final Date until = new Date(c.getTimeInMillis() + (90*dayInMillis));
+        final Date until = new Date(c.getTimeInMillis() + (90 * dayInMillis));
 
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testMonthlyRecurrenceDays");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
-        appointmentObj.setOrganizer(User.User1.name());
+        appointmentObj.setOrganizer(testUser.getUser());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setRecurrenceType(Appointment.MONTHLY);
@@ -599,13 +596,13 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setInterval(2);
         appointmentObj.setUntil(until);
         appointmentObj.setIgnoreConflicts(true);
-        objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-        folderId = appointmentFolderId;
+        int objectId = catm.insert(appointmentObj).getObjectID();
         appointmentObj.setObjectID(objectId);
-        final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, folderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+        final Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
         compareObject(appointmentObj, loadAppointment, loadAppointment.getStartDate().getTime(), loadAppointment.getEndDate().getTime());
     }
 
+    @Test
     public void testYearlyRecurrenceDayInMonth() throws Exception {
         final Calendar c = Calendar.getInstance();
         c.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -614,13 +611,13 @@ public class NewTest extends AppointmentTest {
         c.set(Calendar.SECOND, 0);
         c.set(Calendar.MILLISECOND, 0);
 
-        final Date until = new Date(c.getTimeInMillis() + (800*dayInMillis));
+        final Date until = new Date(c.getTimeInMillis() + (800 * dayInMillis));
 
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testYearlyRecurrenceDayInMonth");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
-        appointmentObj.setOrganizer(User.User1.name());
+        appointmentObj.setOrganizer(testUser.getUser());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setRecurrenceType(Appointment.YEARLY);
@@ -629,13 +626,13 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setInterval(1);
         appointmentObj.setUntil(until);
         appointmentObj.setIgnoreConflicts(true);
-        objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-        folderId = appointmentFolderId;
+        int objectId = catm.insert(appointmentObj).getObjectID();
         appointmentObj.setObjectID(objectId);
-        final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, folderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+        final Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
         compareObject(appointmentObj, loadAppointment, loadAppointment.getStartDate().getTime(), loadAppointment.getEndDate().getTime());
     }
 
+    @Test
     public void testYearlyRecurrenceDays() throws Exception {
         final Calendar c = Calendar.getInstance();
         c.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -644,13 +641,13 @@ public class NewTest extends AppointmentTest {
         c.set(Calendar.SECOND, 0);
         c.set(Calendar.MILLISECOND, 0);
 
-        final Date until = new Date(c.getTimeInMillis() + (800*dayInMillis));
+        final Date until = new Date(c.getTimeInMillis() + (800 * dayInMillis));
 
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testYearlyRecurrenceDays");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
-        appointmentObj.setOrganizer(User.User1.name());
+        appointmentObj.setOrganizer(testUser.getUser());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setRecurrenceType(Appointment.YEARLY);
@@ -660,49 +657,39 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setInterval(2);
         appointmentObj.setUntil(until);
         appointmentObj.setIgnoreConflicts(true);
-        objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-        folderId = appointmentFolderId;
+        int objectId = catm.insert(appointmentObj).getObjectID();
         appointmentObj.setObjectID(objectId);
-        final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, folderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+        final Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
         compareObject(appointmentObj, loadAppointment, loadAppointment.getStartDate().getTime(), loadAppointment.getEndDate().getTime());
     }
 
+    @Test
     public void testConflict() throws Exception {
-        final Appointment appointmentObj = new Appointment();
-        appointmentObj.setTitle("testConflict");
-        appointmentObj.setStartDate(new Date(startTime));
-        appointmentObj.setEndDate(new Date(endTime));
-        appointmentObj.setShownAs(Appointment.ABSENT);
-        appointmentObj.setParentFolderID(appointmentFolderId);
-        appointmentObj.setIgnoreConflicts(true);
-        objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-        folderId = appointmentFolderId;
+        Appointment appointment = CalendarTestManager.createAppointmentObject(appointmentFolderId, "testConflict", new Date(startTime), new Date(endTime));
+        appointment.setShownAs(Appointment.ABSENT);
+        appointment.setIgnoreConflicts(true);
+        catm.insert(appointment);
 
-        try {
-            appointmentObj.setIgnoreConflicts(false);
-            objectId2 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-            folderId2 = appointmentFolderId;
-            deleteAppointment(getWebConversation(), objectId2, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), true);
-            objectId2 = 0;
-            folderId2 = 0;;
-            fail("conflict exception expected here!");
-        } catch (final OXException exc) {
-            assertTrue(true);
-        }
+        appointment = CalendarTestManager.createAppointmentObject(appointmentFolderId, "testConflict", new Date(startTime), new Date(endTime));
+        appointment.setIgnoreConflicts(false);
 
-        appointmentObj.setIgnoreConflicts(true);
-        objectId2 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-        folderId2 = appointmentFolderId;
+        int objectId = catm.insert(appointment).getObjectID();
+        assertTrue(objectId == 0);
+        assertTrue(catm.getLastResponse().hasConflicts());
+
+        appointment = CalendarTestManager.createAppointmentObject(appointmentFolderId, "testConflict", new Date(startTime), new Date(endTime));
+        appointment.setIgnoreConflicts(true);
+        int objectId2 = catm.insert(appointment).getObjectID();
+        assertTrue(objectId2 != 0);
+        assertFalse(catm.getLastResponse().hasConflicts());
+
     }
 
+    @Test
     public void testConflictWithResource() throws Exception {
-        final Appointment appointmentObj = new Appointment();
-        appointmentObj.setTitle("testConflictWithResource");
-        appointmentObj.setStartDate(new Date(startTime));
-        appointmentObj.setEndDate(new Date(endTime));
-        appointmentObj.setShownAs(Appointment.ABSENT);
-        appointmentObj.setParentFolderID(appointmentFolderId);
-        appointmentObj.setIgnoreConflicts(true);
+        Appointment appointment = CalendarTestManager.createAppointmentObject(appointmentFolderId, "testConflictWithResource", new Date(startTime), new Date(endTime));
+        appointment.setShownAs(Appointment.ABSENT);
+        appointment.setIgnoreConflicts(true);
 
         final int resourceParticipantId = ResourceTools.getSomeResource(getClient());
 
@@ -710,33 +697,25 @@ public class NewTest extends AppointmentTest {
         participants[0] = new UserParticipant(userId);
         participants[1] = new ResourceParticipant(resourceParticipantId);
 
-        appointmentObj.setParticipants(participants);
+        appointment.setParticipants(participants);
 
-        objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-        folderId = appointmentFolderId;
+        int objectId = catm.insert(appointment).getObjectID();
+        assertTrue(objectId != 0);
 
-        appointmentObj.setIgnoreConflicts(false);
-        try {
-            objectId2 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-            folderId2 = appointmentFolderId;
-            deleteAppointment(getWebConversation(), objectId2, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), true);
-            objectId2 = 0;
-            folderId2 = 0;
-            assertEquals("conflict expected here object id should be 0", 0, objectId2);
-        } catch (final OXException exc) {
-            // Exception is expected
-        }
+        appointment = CalendarTestManager.createAppointmentObject(appointmentFolderId, "testConflictWithResource", new Date(startTime), new Date(endTime));
+        appointment.setIgnoreConflicts(false);
+        appointment.setParticipants(participants);
 
-        appointmentObj.setIgnoreConflicts(true);
-        try {
-            objectId2 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-            folderId2 = appointmentFolderId;
-            deleteAppointment(getWebConversation(), objectId2, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), true);
-            objectId2 = 0;
-            folderId2 = 0;
-            assertEquals("conflict expected here object id should be 0", 0, objectId2);
-        } catch (final OXException exc) {
-            assertTrue(true);
-        }
+        int objectId2 = catm.insert(appointment).getObjectID();
+        assertTrue(catm.getLastResponse().hasConflicts());
+        assertEquals("conflict expected here object id should be 0", 0, objectId2);
+
+        appointment = CalendarTestManager.createAppointmentObject(appointmentFolderId, "testConflictWithResource", new Date(startTime), new Date(endTime));
+        appointment.setIgnoreConflicts(true);
+        appointment.setParticipants(participants);
+
+        objectId2 = catm.insert(appointment).getObjectID();
+        assertTrue(catm.getLastResponse().hasConflicts());
+        assertEquals("conflict expected here object id should be 0", 0, objectId2);
     }
 }

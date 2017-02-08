@@ -79,43 +79,56 @@ public class CustomTrustManager extends AbstractTrustManager {
     }
 
     private static X509ExtendedTrustManager initCustomTrustManager() {
-        SSLConfigurationService sslConfigurationService = Services.getService(SSLConfigurationService.class);
-
-        if (sslConfigurationService.isCustomTruststoreEnabled()) {
-            String trustStoreFile = sslConfigurationService.getCustomTruststoreLocation();
-            if (Strings.isEmpty(trustStoreFile)) {
-                LOG.error("Cannot load custom truststore file from location " + trustStoreFile);
-                return null;
-            }
-
-            File file = new File(trustStoreFile);
-            if (!file.exists()) {
-                LOG.error("Cannot find custom truststore file from location " + trustStoreFile + ". The file does not exist.");
-                return null;
-            }
-            String password = sslConfigurationService.getCustomTruststorePassword();
-            try (InputStream in = new FileInputStream(file)) {
-                KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
-                ks.load(in, password.toCharArray());
-
-                TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-                tmf.init(ks);
-
-                for (TrustManager tm : tmf.getTrustManagers()) {
-                    if (tm instanceof X509ExtendedTrustManager) {
-                        return (X509ExtendedTrustManager) tm;
-                    }
-                }
-            } catch (IOException e) {
-                LOG.error("Unable to read custom truststore file from " + file.getAbsolutePath(), e);
-                //TODO re-throw or OXException?
-            } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException e) {
-                LOG.error("Unable to initialize custom truststore file from " + file.getAbsolutePath(), e);
-                //TODO re-throw or OXException?
-            }
-        } else {
-            LOG.info("Using custom truststore is disabled by configuration.");
+        SSLConfigurationService sslConfigService = Services.getService(SSLConfigurationService.class);
+        if (null == sslConfigService) {
+            LOG.warn("Absent service " + SSLConfigurationService.class.getName() + ". Assuming custom truststore is NOT supposed to be used.");
+            return null;
         }
+
+        boolean useCustomTruststore = sslConfigService.isCustomTruststoreEnabled();
+        if (false == useCustomTruststore) {
+            LOG.info("Using custom truststore is disabled.");
+            return null;
+        }
+
+        String trustStoreFile = sslConfigService.getCustomTruststoreLocation();
+        if (Strings.isEmpty(trustStoreFile)) {
+            LOG.error("Cannot load custom truststore file from empty location.");
+            return null;
+        }
+
+        String password = sslConfigService.getCustomTruststorePassword();
+        if (null == password) {
+            LOG.error("Cannot load custom truststore file with empty password from location \"" + trustStoreFile + "\"");
+            return null;
+        }
+
+        File file = new File(trustStoreFile);
+        if (!file.exists()) {
+            LOG.error("Cannot load custom truststore from location \"" + trustStoreFile + "\". The file does not exist.");
+            return null;
+        }
+
+        try (InputStream in = new FileInputStream(file)) {
+            KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+            ks.load(in, password.toCharArray());
+
+            TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            tmf.init(ks);
+
+            for (TrustManager tm : tmf.getTrustManagers()) {
+                if (tm instanceof X509ExtendedTrustManager) {
+                    return (X509ExtendedTrustManager) tm;
+                }
+            }
+        } catch (IOException e) {
+            LOG.error("Unable to read custom truststore file from " + file.getAbsolutePath(), e);
+            //TODO re-throw or OXException?
+        } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException e) {
+            LOG.error("Unable to initialize custom truststore file from " + file.getAbsolutePath(), e);
+            //TODO re-throw or OXException?
+        }
+
         return null;
     }
 }

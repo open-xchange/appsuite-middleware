@@ -51,14 +51,12 @@ package com.openexchange.pubsub;
 
 import com.openexchange.templating.OXTemplate;
 
-
 /**
  * {@link FullOXMFContactTemplateTest}
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class FullOXMFContactTemplateTest extends BasicContactTemplateTest {
-
 
     @Override
     protected OXTemplate getTemplate() throws Exception {

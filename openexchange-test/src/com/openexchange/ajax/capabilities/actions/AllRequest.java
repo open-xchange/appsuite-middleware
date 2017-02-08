@@ -56,7 +56,6 @@ import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Header;
 
-
 /**
  * {@link AllRequest}
  *
@@ -96,8 +95,10 @@ public class AllRequest implements AJAXRequest<AllResponse> {
     }
 
     private static final class Parser extends AbstractAJAXParser<AllResponse> {
+
         /**
          * Initializes a new {@link Parser}.
+         * 
          * @param failOnError
          */
         protected Parser(boolean failOnError) {

@@ -49,7 +49,17 @@
 
 package com.openexchange.test;
 
-import static com.openexchange.server.impl.OCLPermission.*;
+import static com.openexchange.server.impl.OCLPermission.ADMIN_PERMISSION;
+import static com.openexchange.server.impl.OCLPermission.CREATE_OBJECTS_IN_FOLDER;
+import static com.openexchange.server.impl.OCLPermission.CREATE_SUB_FOLDERS;
+import static com.openexchange.server.impl.OCLPermission.DELETE_ALL_OBJECTS;
+import static com.openexchange.server.impl.OCLPermission.DELETE_OWN_OBJECTS;
+import static com.openexchange.server.impl.OCLPermission.NO_PERMISSIONS;
+import static com.openexchange.server.impl.OCLPermission.READ_ALL_OBJECTS;
+import static com.openexchange.server.impl.OCLPermission.READ_FOLDER;
+import static com.openexchange.server.impl.OCLPermission.READ_OWN_OBJECTS;
+import static com.openexchange.server.impl.OCLPermission.WRITE_ALL_OBJECTS;
+import static com.openexchange.server.impl.OCLPermission.WRITE_OWN_OBJECTS;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.server.impl.OCLPermission;
@@ -76,7 +86,7 @@ public class PermissionTools {
      * 'v' -> View Folder
      * 'c' -> Create Objects in Folder
      * 's' -> Create Subfolders
-     *  omitted -> no permissions
+     * omitted -> no permissions
      *
      * Read Permission
      * 'r' -> read all
@@ -94,9 +104,9 @@ public class PermissionTools {
      * 'd' -> delete all
      * 'do' -> delete own
      * 'da' -> Admin
-     *  omitted -> no permissions
+     * omitted -> no permissions
      *
-     *  The options are:
+     * The options are:
      * 'a' -> Admin Flag
      * 'g' -> Group Flag
      */
@@ -131,7 +141,7 @@ public class PermissionTools {
      * 'v' -> View Folder
      * 'c' -> Create Objects in Folder
      * 's' -> Create Subfolders
-     *  omitted -> no permissions
+     * omitted -> no permissions
      *
      * Read Permission
      * 'r' -> read all
@@ -149,9 +159,9 @@ public class PermissionTools {
      * 'd' -> delete all
      * 'do' -> delete own
      * 'da' -> Admin
-     *  omitted -> no permissions
+     * omitted -> no permissions
      *
-     *  The options are:
+     * The options are:
      * 'a' -> Admin Flag
      * 'g' -> Group Flag
      *
@@ -217,68 +227,68 @@ public class PermissionTools {
         private void lookupNext() {
 
             switch (mode) {
-            case PERMISSIONS_MODE:
-                parsePermission();
-                break;
-            case OPTIONS_MODE:
-                parseOptions();
-                break;
+                case PERMISSIONS_MODE:
+                    parsePermission();
+                    break;
+                case OPTIONS_MODE:
+                    parseOptions();
+                    break;
             }
 
         }
 
         private void parseOptions() {
             switch (lookahead()) {
-            case 'a':
-                consume();
-                options[0] = true;
-                break;
-            case 'g':
-                consume();
-                options[1] = true;
-                break;
-            default:
-                consume();
+                case 'a':
+                    consume();
+                    options[0] = true;
+                    break;
+                case 'g':
+                    consume();
+                    options[1] = true;
+                    break;
+                default:
+                    consume();
             }
         }
 
         private void parsePermission() {
             switch (lookahead()) {
-            case 'a':
-                consume();
-                permissions[0] = ADMIN_PERMISSION;
-                break;
-            case 'r':
-                consume();
-                permissions[1] = (own()) ? READ_OWN_OBJECTS : (admin()) ? ADMIN_PERMISSION : READ_ALL_OBJECTS;
-                break;
-            case 'w':
-                consume();
-                permissions[2] = (own()) ? WRITE_OWN_OBJECTS : (admin()) ? ADMIN_PERMISSION : WRITE_ALL_OBJECTS;
-                break;
-            case 'd':
-                consume();
-                permissions[3] = (own()) ? DELETE_OWN_OBJECTS : (admin()) ? ADMIN_PERMISSION : DELETE_ALL_OBJECTS;
-                break;
-            case 'v':
-                consume();
-                permissions[0] = READ_FOLDER;
-                break;
-            case 'c':
-                consume();
-                permissions[0] = CREATE_OBJECTS_IN_FOLDER;
-                break;
-            case 's':
-                consume();
-                permissions[0] = CREATE_SUB_FOLDERS;
-                break;
-            case '/':
-                consume();
-                mode = OPTIONS_MODE;
-                break;
-            default:
-                consume();
-                break;
+                case 'a':
+                    consume();
+                    permissions[0] = ADMIN_PERMISSION;
+                    break;
+                case 'r':
+                    consume();
+                    permissions[1] = (own()) ? READ_OWN_OBJECTS : (admin()) ? ADMIN_PERMISSION : READ_ALL_OBJECTS;
+                    break;
+                case 'w':
+                    consume();
+                    permissions[2] = (own()) ? WRITE_OWN_OBJECTS : (admin()) ? ADMIN_PERMISSION : WRITE_ALL_OBJECTS;
+                    break;
+                case 'd':
+                    consume();
+                    permissions[3] = (own()) ? DELETE_OWN_OBJECTS : (admin()) ? ADMIN_PERMISSION : DELETE_ALL_OBJECTS;
+                    break;
+                case 'v':
+                    consume();
+                    permissions[0] = READ_FOLDER;
+                    break;
+                case 'c':
+                    consume();
+                    permissions[0] = CREATE_OBJECTS_IN_FOLDER;
+                    break;
+                case 's':
+                    consume();
+                    permissions[0] = CREATE_SUB_FOLDERS;
+                    break;
+                case '/':
+                    consume();
+                    mode = OPTIONS_MODE;
+                    break;
+                default:
+                    consume();
+                    break;
             }
         }
 

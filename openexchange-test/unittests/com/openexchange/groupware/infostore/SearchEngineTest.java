@@ -46,11 +46,16 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.groupware.infostore;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
@@ -71,12 +76,11 @@ import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionFactory;
-import junit.framework.TestCase;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class SearchEngineTest extends TestCase {
+public class SearchEngineTest {
 
     private SearchEngineImpl searchEngine;
     private Context ctx = null;
@@ -87,7 +91,7 @@ public class SearchEngineTest extends TestCase {
     private DBProvider provider = null;
     private InfostoreFacade infostore = null;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         clean = new ArrayList<DocumentMetadata>();
         TestInit.loadTestProperties();
@@ -98,7 +102,7 @@ public class SearchEngineTest extends TestCase {
         ctx = ctxstor.getContext(contextId);
         user = UserStorage.getInstance().getUser(UserStorage.getInstance().getUserId(config.getUser(), ctx), ctx); //FIXME
         session = ServerSessionFactory.createServerSession(user.getId(), ctx, "blupp");
-        folderId = _getPrivateInfostoreFolder(ctx,user,session);
+        folderId = _getPrivateInfostoreFolder(ctx, user, session);
         provider = new DBPoolProvider();
         searchEngine = new SearchEngineImpl(provider);
         infostore = new InfostoreFacadeImpl(provider);
@@ -111,21 +115,23 @@ public class SearchEngineTest extends TestCase {
 
     // Bug 10968
 
+    @Test
     public void testRequestedFieldOrderMayVary() {
-        assertSurvivesOrder(new Metadata[]{Metadata.ID_LITERAL, Metadata.FOLDER_ID_LITERAL, Metadata.TITLE_LITERAL});
-        assertSurvivesOrder(new Metadata[]{Metadata.FOLDER_ID_LITERAL, Metadata.ID_LITERAL, Metadata.TITLE_LITERAL});
-        assertSurvivesOrder(new Metadata[]{Metadata.FOLDER_ID_LITERAL, Metadata.TITLE_LITERAL, Metadata.ID_LITERAL});
-        assertSurvivesOrder(new Metadata[]{Metadata.FOLDER_ID_LITERAL, Metadata.TITLE_LITERAL});
+        assertSurvivesOrder(new Metadata[] { Metadata.ID_LITERAL, Metadata.FOLDER_ID_LITERAL, Metadata.TITLE_LITERAL });
+        assertSurvivesOrder(new Metadata[] { Metadata.FOLDER_ID_LITERAL, Metadata.ID_LITERAL, Metadata.TITLE_LITERAL });
+        assertSurvivesOrder(new Metadata[] { Metadata.FOLDER_ID_LITERAL, Metadata.TITLE_LITERAL, Metadata.ID_LITERAL });
+        assertSurvivesOrder(new Metadata[] { Metadata.FOLDER_ID_LITERAL, Metadata.TITLE_LITERAL });
     }
 
     // Bug 11569
 
+    @Test
     public void testSearchForPercent() throws OXException, OXException {
         final DocumentMetadata doc1 = createWithTitle("100%");
         createWithTitle("Hallo");
 
         List<Integer> folderIDs = Collections.singletonList(Integer.valueOf(folderId));
-        SearchIterator<DocumentMetadata> iter = searchEngine.search(session, "%", folderIDs, Collections.<Integer>emptyList(), new Metadata[] { Metadata.ID_LITERAL, Metadata.TITLE_LITERAL }, Metadata.TITLE_LITERAL, InfostoreSearchEngine.ASC, 0, 10);
+        SearchIterator<DocumentMetadata> iter = searchEngine.search(session, "%", folderIDs, Collections.<Integer> emptyList(), new Metadata[] { Metadata.ID_LITERAL, Metadata.TITLE_LITERAL }, Metadata.TITLE_LITERAL, InfostoreSearchEngine.ASC, 0, 10);
 
         List<DocumentMetadata> documents = SearchIterators.asList(iter);
         assertTrue(0 < documents.size());
@@ -140,14 +146,14 @@ public class SearchEngineTest extends TestCase {
     }
 
     private DocumentMetadata createWithTitle(final String title) throws OXException {
-        final DocumentMetadata metadata = new DocumentMetadataImpl() ;
+        final DocumentMetadata metadata = new DocumentMetadataImpl();
         metadata.setTitle(title);
         metadata.setFolderId(folderId);
         try {
             infostore.startTransaction();
             infostore.saveDocumentMetadata(metadata, InfostoreFacade.NEW, session);
             infostore.commit();
-            clean.add( metadata );
+            clean.add(metadata);
         } catch (final OXException x) {
             try {
                 infostore.rollback();
@@ -167,14 +173,13 @@ public class SearchEngineTest extends TestCase {
     }
 
     private void assertSurvivesOrder(final Metadata[] metadata) {
-        List<Integer> folderIDs = Collections.<Integer>singletonList(Integer.valueOf(folderId));
+        List<Integer> folderIDs = Collections.<Integer> singletonList(Integer.valueOf(folderId));
         try {
-           searchEngine.search(session, "*", folderIDs, Collections.<Integer>emptyList(), metadata, metadata[0], InfostoreSearchEngine.ASC, 0, 10);
+            searchEngine.search(session, "*", folderIDs, Collections.<Integer> emptyList(), metadata, metadata[0], InfostoreSearchEngine.ASC, 0, 10);
         } catch (final Exception x) {
             fail(x.getMessage());
             x.printStackTrace();
         }
     }
-
 
 }

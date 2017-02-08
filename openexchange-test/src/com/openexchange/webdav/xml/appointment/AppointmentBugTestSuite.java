@@ -49,28 +49,29 @@
 
 package com.openexchange.webdav.xml.appointment;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import com.openexchange.test.concurrent.ParallelSuite;
 
+@RunWith(ParallelSuite.class)
+@Suite.SuiteClasses({
+    Bug4395Test.class,
+    Bug5933Test.class,
+    Bug6056Test.class,
+    Bug6535Test.class,
+    Bug8123Test.class,
+    Bug8196Test.class,
+    Bug8453Test.class,
+    Bug6455Test.class,
+    Bug12494Test.class,
+    Bug12553Test.class,
+    Bug11835Test.class,
+    Bug13260Test.class,
+    Bug13262Test.class,
+    Bug12050Test.class,
+    Bug15491Test.class,
+
+})
 public class AppointmentBugTestSuite {
 
-	public static Test suite() {
-		final TestSuite tests = new TestSuite();
-		tests.addTestSuite(Bug4395Test.class);
-		tests.addTestSuite(Bug5933Test.class);
-        tests.addTestSuite(Bug6056Test.class);
-		tests.addTestSuite(Bug6535Test.class);
-		tests.addTestSuite(Bug8123Test.class);
-		tests.addTestSuite(Bug8196Test.class);
-		tests.addTestSuite(Bug8453Test.class);
-		tests.addTestSuite(Bug6455Test.class);
-        tests.addTestSuite(Bug12494Test.class);
-        tests.addTestSuite(Bug12553Test.class);
-        tests.addTestSuite(Bug11835Test.class);
-        tests.addTestSuite(Bug13260Test.class);
-        tests.addTestSuite(Bug13262Test.class);
-        tests.addTestSuite(Bug12050Test.class);
-        tests.addTestSuite(Bug15491Test.class);
-        return tests;
-	}
 }

@@ -49,10 +49,12 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
+import static org.junit.Assert.assertEquals;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 
 /**
@@ -60,6 +62,7 @@ import com.openexchange.groupware.calendar.CalendarDataObject;
  */
 public class FullTimeSeries extends CalendarSqlTest {
 
+    @Test
     public void testFullTimeSeries() throws Throwable {
         CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(user);
         appointment.setTitle("Test Full Time Series");

@@ -61,42 +61,43 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.test.fixtures.GroupResolver;
 
 public class AJAXGroupResolver implements GroupResolver {
-	private final AJAXClient client;
-	private final AJAXContactFinder contactFinder;
 
-	public AJAXGroupResolver(AJAXClient client) {
-		super();
-		this.client = client;
-		this.contactFinder = new AJAXContactFinder(client);
-	}
+    private final AJAXClient client;
+    private final AJAXContactFinder contactFinder;
 
-	@Override
+    public AJAXGroupResolver(AJAXClient client) {
+        super();
+        this.client = client;
+        this.contactFinder = new AJAXContactFinder(client);
+    }
+
+    @Override
     public Contact[] resolveGroup(String simpleName) {
-		// Nothing to do
-		return null;
-	}
+        // Nothing to do
+        return null;
+    }
 
-	@Override
+    @Override
     public Contact[] resolveGroup(int groupId) {
-		GetRequest group = new GetRequest(groupId);
-		try {
-			AbstractAJAXResponse response = client.execute(group);
-			JSONObject data = (JSONObject) response.getData();
-			JSONArray members = data.getJSONArray("members");
-			Contact[] groupMembers = new Contact[members.length()];
-			for(int i = 0; i < groupMembers.length; i++){
-				int userId = members.getInt(i);
-				groupMembers[i] = contactFinder.getContact(userId);
-			}
-			return groupMembers;
-		} catch (OXException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
+        GetRequest group = new GetRequest(groupId);
+        try {
+            AbstractAJAXResponse response = client.execute(group);
+            JSONObject data = (JSONObject) response.getData();
+            JSONArray members = data.getJSONArray("members");
+            Contact[] groupMembers = new Contact[members.length()];
+            for (int i = 0; i < groupMembers.length; i++) {
+                int userId = members.getInt(i);
+                groupMembers[i] = contactFinder.getContact(userId);
+            }
+            return groupMembers;
+        } catch (OXException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
 }

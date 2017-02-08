@@ -52,7 +52,6 @@ package com.openexchange.ajax.drive.updater;
 import java.io.IOException;
 import org.json.JSONException;
 
-
 /**
  * {@link UpdateXMLRequest}
  *
@@ -62,6 +61,7 @@ public class UpdateXMLRequest extends AbstractUpdaterRequest<UpdateXMLResponse> 
 
     /**
      * Initializes a new {@link UpdateXMLRequest}.
+     * 
      * @param servletPath
      */
     public UpdateXMLRequest() {

@@ -51,10 +51,11 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import java.util.Date;
 import java.util.TimeZone;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.test.CalendarTestManager;
 
 /**
  * {@link Bug37198Test}
@@ -64,19 +65,12 @@ import com.openexchange.test.CalendarTestManager;
  */
 public class Bug37198Test extends AbstractAJAXSession {
 
-    private CalendarTestManager ctm;
     private Appointment app;
     private TimeZone utc;
 
-    public Bug37198Test(String name) {
-        super(name);
-    }
-
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
-
-        ctm = new CalendarTestManager(client);
 
         app = new Appointment();
         app.setTitle("Bug 37198 Test");
@@ -87,13 +81,13 @@ public class Bug37198Test extends AbstractAJAXSession {
         app.setRecurrenceType(Appointment.DAILY);
         app.setUntil(TimeTools.D("13.03.2015 00:00", utc));
         app.setInterval(1);
-        app.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        app.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         app.setIgnoreConflicts(true);
     }
 
+    @Test
     public void testBug37198() throws Exception {
-        ctm.setFailOnError(true);
-        ctm.insert(app);
+        catm.insert(app);
 
         Appointment update = new Appointment();
         update.setObjectID(app.getObjectID());
@@ -103,13 +97,6 @@ public class Bug37198Test extends AbstractAJAXSession {
         update.setLastModified(new Date(Long.MAX_VALUE));
         update.setIgnoreConflicts(true);
 
-        ctm.update(update);
+        catm.update(update);
     }
-
-    @Override
-    public void tearDown() throws Exception {
-        ctm.cleanUp();
-        super.tearDown();
-    }
-
 }

@@ -105,7 +105,8 @@ public class SubscriptionCopyTest extends AbstractUserCopyTest {
         dstCtxId = getDestinationContext().getContextId(); 
     }
     
-    public void testSubscriptionCopy() throws Exception {
+         @Test
+     public void testSubscriptionCopy() throws Exception {
         final SubscriptionCopyTask copyTask = new SubscriptionCopyTask();
         final Map<Integer, Subscription> originSubscriptions = copyTask.loadSubscriptionsFromDB(srcCon, srcUsrId, srcCtxId);
         copyTask.fillSubscriptionsWithAttributes(originSubscriptions, srcCon, srcCtxId);
@@ -172,8 +173,9 @@ public class SubscriptionCopyTest extends AbstractUserCopyTest {
     /**
      * @see com.openexchange.user.copy.internal.AbstractUserCopyTest#tearDown()
      */
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown()
+ throws Exception {
         DBUtils.autocommit(dstCon);
         deleteAllFromTablesForCid(dstCtxId, "cid", dstCon, "subscriptions", "genconf_attributes_strings", "genconf_attributes_bools");
         super.tearDown();

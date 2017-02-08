@@ -49,7 +49,9 @@
 
 package com.openexchange.dav.caldav.bugs;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -70,7 +72,7 @@ import com.openexchange.dav.caldav.CalDAVTest;
  */
 public class Bug30359Test extends CalDAVTest {
 
-	@Test
+    @Test
     public void testExternalEntities() throws Exception {
         String uri = getBaseUri() + "/caldav/" + getDefaultFolderID() + "/";
         EntityEnclosingMethod m = new EntityEnclosingMethod(uri) {
@@ -89,9 +91,7 @@ public class Bug30359Test extends CalDAVTest {
         writer.close();
         String path = file.toURI().toURL().toExternalForm();
 
-        final String body = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><!DOCTYPE C:calendar-multiget [<!ENTITY foo SYSTEM \"" + path +
-            "\">]><C:calendar-multiget xmlns:D=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\"><D:prop><D:getetag/><C:calendar-d" +
-            "ata/></D:prop><D:href>/caldav/" + getDefaultFolderID() + "/&foo;</D:href></C:calendar-multiget>";
+        final String body = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><!DOCTYPE C:calendar-multiget [<!ENTITY foo SYSTEM \"" + path + "\">]><C:calendar-multiget xmlns:D=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\"><D:prop><D:getetag/><C:calendar-d" + "ata/></D:prop><D:href>/caldav/" + getDefaultFolderID() + "/&foo;</D:href></C:calendar-multiget>";
         m.setRequestEntity(new RequestEntity() {
 
             @Override

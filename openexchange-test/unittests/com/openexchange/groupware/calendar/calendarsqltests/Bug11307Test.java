@@ -49,16 +49,18 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
+import static org.junit.Assert.assertEquals;
 import java.sql.SQLException;
 import java.util.Date;
+import org.junit.Test;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-
 
 public class Bug11307Test extends CalendarSqlTest {
     // Bug 11307
 
+    @Test
     public void testRecurringAppointmentShouldBeConvertibleToSingleAppointment() throws OXException, SQLException {
         final Date start = D("24/02/1981 10:00");
         final Date end = D("24/02/1981 12:00");

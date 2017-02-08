@@ -69,7 +69,6 @@ import org.osgi.framework.ServiceRegistration;
 import com.openexchange.osgi.util.ServiceCallWrapper.BundleContextProvider;
 import com.openexchange.osgi.util.ServiceCallWrapper.ServiceException;
 
-
 /**
  * {@link ServiceCallWrapperModifier}
  *
@@ -80,6 +79,7 @@ public class ServiceCallWrapperModifier {
     public static void initTestRun(Map<Class<?>, Object> availableServices) {
         final BundleContext contextMock = new TestableBundleContext(availableServices);
         ServiceCallWrapper.BC_PROVIDER_REF.set(new BundleContextProvider() {
+
             @Override
             BundleContext getBundleContext(Class<?> caller, Class<?> serviceClass) throws ServiceException {
                 return contextMock;

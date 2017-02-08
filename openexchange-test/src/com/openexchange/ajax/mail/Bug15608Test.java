@@ -51,8 +51,12 @@ package com.openexchange.ajax.mail;
 
 import static com.openexchange.mail.MailListField.FLAGS;
 import static com.openexchange.mail.MailListField.ID;
+import static org.junit.Assert.assertEquals;
 import java.io.ByteArrayInputStream;
 import java.util.TimeZone;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonListResponse;
@@ -79,37 +83,41 @@ public class Bug15608Test extends AbstractAJAXSession {
     private String address;
     private String[][] ids;
 
-    public Bug15608Test(final String name) {
-        super(name);
+    public Bug15608Test() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
-        timeZone = client.getValues().getTimeZone();
-        folder = client.getValues().getInboxFolder();
-        address = client.getValues().getSendAddress();
+        timeZone = getClient().getValues().getTimeZone();
+        folder = getClient().getValues().getInboxFolder();
+        address = getClient().getValues().getSendAddress();
         final String mail = TestMails.replaceAddresses(TestMails.UMLAUT_MAIL, address);
         final ByteArrayInputStream[] massMails = new ByteArrayInputStream[100];
         for (int i = 0; i < massMails.length; i++) {
             massMails[i] = new ByteArrayInputStream(mail.getBytes(com.openexchange.java.Charsets.UTF_8));
         }
         final ImportMailRequest request = new ImportMailRequest(folder, ORIG_FLAGS, massMails);
-        final ImportMailResponse response = client.execute(request);
+        final ImportMailResponse response = getClient().execute(request);
         ids = response.getIds();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        client.execute(new DeleteRequest(ids, true));
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
+        try {
+            getClient().execute(new DeleteRequest(ids, true));
+        } finally {
+            super.tearDown();
+        }
     }
 
+    @Test
     public void testFlags() throws Throwable {
         {
             final ListRequest request = new ListRequest(ids, ATTRIBUTES);
-            final CommonListResponse response = client.execute(request);
+            final CommonListResponse response = getClient().execute(request);
             final int flagsPos = response.getColumnPos(FLAGS.getField());
             for (final Object[] mail : response) {
                 final int testFlags = ((Integer) mail[flagsPos]).intValue();
@@ -121,7 +129,7 @@ public class Bug15608Test extends AbstractAJAXSession {
             if (null != mailId) {
                 final GetRequest request = new GetRequest(folder, mailId);
                 request.setUnseen(true);
-                final GetResponse response = client.execute(request);
+                final GetResponse response = getClient().execute(request);
                 final MailMessage mail = response.getMail(timeZone);
                 final int testFlags = mail.getFlags();
                 assertEquals("Wanted flags are not set.", ORIG_FLAGS, testFlags);

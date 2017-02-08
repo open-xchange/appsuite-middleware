@@ -70,8 +70,7 @@ public final class InsertParser extends AbstractInsertParser<InsertResponse> {
     }
 
     @Override
-    protected InsertResponse instantiateResponse(final Document document,
-        final Response[] responses) {
+    protected InsertResponse instantiateResponse(final Document document, final Response[] responses) {
         return new InsertResponse(document, responses);
     }
 }

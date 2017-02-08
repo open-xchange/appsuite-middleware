@@ -176,25 +176,27 @@ public class CrawlersActivator implements BundleActivator {
         final String dirName = config.getProperty(DIR_NAME_PROPERTY);
         if (dirName != null) {
             final File directory = config.getDirectory(dirName);
-            final File[] files = directory.listFiles();
-            if (files != null) {
-                for (final File file : files) {
-                    try {
-                        if (file.isFile() && file.getPath().endsWith(".yml")) {
-                            Reader reader = null;
-                            try {
-                                reader = new FileReader(file);
-                                Yaml yaml = new Yaml();
-                                CrawlerDescription crawler = yaml.loadAs(reader, CrawlerDescription.class);
-                                if (crawler.getId().equals(crawlerIdToDelete)) {
-                                    return file.delete();
+            if (null != directory) {
+                final File[] files = directory.listFiles();
+                if (files != null) {
+                    for (final File file : files) {
+                        try {
+                            if (file.isFile() && file.getPath().endsWith(".yml")) {
+                                Reader reader = null;
+                                try {
+                                    reader = new FileReader(file);
+                                    Yaml yaml = new Yaml();
+                                    CrawlerDescription crawler = yaml.loadAs(reader, CrawlerDescription.class);
+                                    if (crawler.getId().equals(crawlerIdToDelete)) {
+                                        return file.delete();
+                                    }
+                                } finally {
+                                    Streams.close(reader);
                                 }
-                            } finally {
-                                Streams.close(reader);
                             }
+                        } catch (final FileNotFoundException e) {
+                            // Should not appear because file existence is checked before.
                         }
-                    } catch (final FileNotFoundException e) {
-                        // Should not appear because file existence is checked before.
                     }
                 }
             }

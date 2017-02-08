@@ -49,11 +49,17 @@
 
 package com.openexchange.datatypes.genericonf.storage;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.datatypes.genericonf.storage.impl.MySQLGenericConfigurationStorage;
 import com.openexchange.exception.OXException;
@@ -71,7 +77,7 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
 
     private MySQLGenericConfigurationStorage storage = null;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         loadProperties();
         super.setUp();
@@ -80,20 +86,18 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
         storage.setDBProvider(provider);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         exec("DELETE FROM genconf_attributes_strings");
         exec("DELETE FROM genconf_attributes_bools");
-
-        super.tearDown();
     }
 
+    @Test
     public void testSaveDynamicConfiguration() throws OXException, SQLException {
         final Map<String, Object> content = new HashMap<String, Object>();
         content.put("login", "loginname");
         content.put("otherValue", "other");
         content.put("booleanValue", true);
-
 
         final int contextId = 1;
         final Context ctx = new SimContext(contextId);
@@ -107,6 +111,7 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
 
     }
 
+    @Test
     public void testLoadDynamicConfiguration() throws SQLException, OXException {
         byte[] uuid = getUUID();
         exec("INSERT INTO genconf_attributes_strings (cid, id, name, value, uuid) VALUES (1002,1001,'field', 'value')");
@@ -122,7 +127,6 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
 
         storage.fill(ctx, 1001, content);
 
-
         assertNotNull("Expected a value under key 'field", content.get("field"));
         assertEquals("Excpected value 'value' under key 'field'", "value", content.get("field"));
         assertNotNull("Expected a value under key 'otherField", content.get("otherField"));
@@ -132,6 +136,7 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
 
     }
 
+    @Test
     public void testUpdateDynamicConfiguration() throws SQLException, OXException {
         byte[] uuid = getUUID();
         exec("INSERT INTO genconf_attributes_strings (cid, id, name, value, uuid) VALUES (1002,1001,'field', 'value', " + uuid + ")");
@@ -147,7 +152,6 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
         exec("INSERT INTO genconf_attributes_bools (cid, id, name, value, uuid) VALUES (1002,1001,'thirdBool', 0, " + uuid + ")");
 
         final Map<String, Object> content = new HashMap<String, Object>();
-
 
         content.put("field", "updatedValue");
         content.put("fourthField", "newValue");
@@ -175,6 +179,7 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
 
     }
 
+    @Test
     public void testDeleteDynamicConfiguration() throws SQLException, OXException {
         byte[] uuid = getUUID();
         exec("INSERT INTO genconf_attributes_strings (cid, id, name, value, uuid) VALUES (1002,1001,'field', 'value', " + uuid + ")");
@@ -193,7 +198,6 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
         uuid = getUUID();
         exec("INSERT INTO genconf_attributes_bools (cid, id, name, value, uuid) VALUES (1002,1004,'otherBoolID', 1, " + uuid + ")");
 
-
         final int id = 1001;
         final int contextId = 1002;
         final Context ctx = new SimContext(contextId);
@@ -208,6 +212,7 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
 
     }
 
+    @Test
     public void testSearchDynamicConfiguration() throws SQLException, OXException {
         byte[] uuid = getUUID();
         exec("INSERT INTO genconf_attributes_strings (cid, id, name, value, uuid) VALUES (1002,1001,'field', 'value', " + uuid + ")");
@@ -225,7 +230,6 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
         exec("INSERT INTO genconf_attributes_bools (cid, id, name, value, uuid) VALUES (1002,1001,'thirdBool', 1, " + uuid + ")");
         uuid = getUUID();
         exec("INSERT INTO genconf_attributes_bools (cid, id, name, value, uuid) VALUES (1002,1004,'otherBoolID', 1, " + uuid + ")");
-
 
         final Map<String, Object> query = new HashMap<String, Object>();
         query.put("field", "value");
@@ -246,13 +250,12 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
     }
 
     // Save encrypted passwords
-    
+
     //Generate uuid
     private byte[] getUUID() {
         UUID uuid = UUID.randomUUID();
         byte[] uuidBinary = UUIDs.toByteArray(uuid);
         return uuidBinary;
     }
-
 
 }

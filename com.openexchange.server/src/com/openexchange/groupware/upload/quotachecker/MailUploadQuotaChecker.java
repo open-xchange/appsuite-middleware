@@ -88,7 +88,7 @@ public final class MailUploadQuotaChecker extends UploadQuotaChecker {
 
         long quota = settings.getUploadQuota();
         if (quota >= 0) {
-            uploadQuota = quota;
+            uploadQuota = 0 == quota ? -1 : quota;
         } else {
             LOG.debug("Upload quota is less than zero. Using global server property \"MAX_UPLOAD_SIZE\" instead.");
             Long globalQuota;

@@ -114,8 +114,8 @@ public class CapabilitiesActivatorTest {
         MockUtils.injectValueIntoPrivateField(this.capabilitiesActivator, InjectionFieldConstants.CONTEXT, bundleContext);
     }
 
-    @Test
-    public void testStopBundle_EverythingFine_AllTrackersClosed() throws Exception {
+     @Test
+     public void testStopBundle_EverythingFine_AllTrackersClosed() throws Exception {
         final List<ServiceTracker<?, ?>> serviceTrackers = new LinkedList<ServiceTracker<?, ?>>();
         ServiceTracker<?, ?> serviceTracker = PowerMockito.mock(ServiceTracker.class);
         serviceTrackers.add(serviceTracker);
@@ -126,8 +126,8 @@ public class CapabilitiesActivatorTest {
         ServiceMockActivatorAsserter.verifyAllServiceTrackersClosed(this.capabilitiesActivator);
     }
 
-    @Test
-    public void testStopBundle_EverythingFine_AllServicesClosed() throws Exception {
+     @Test
+     public void testStopBundle_EverythingFine_AllServicesClosed() throws Exception {
         final Multimap<Object, ServiceRegistration<?>> serviceRegistrations = HashMultimap.create(6,2);
         ServiceRegistration<?> serviceRegistration = PowerMockito.mock(ServiceRegistration.class);
         serviceRegistrations.put(CapabilityService.class, serviceRegistration);

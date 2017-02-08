@@ -64,6 +64,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpHost;
@@ -132,25 +133,38 @@ public class HttpDoveAdmClient implements DoveAdmClient {
          * @throws OXException If an Open-Xchange error is yielded from status
          * @throws HttpResponseException If status is interpreted as an error
          */
-        void handleStatusCode(HttpResponse httpResponse) throws OXException, HttpResponseException;
+        void handleStatusCode(HttpResponse httpResponse, StringBuilder traceBuilder) throws OXException, HttpResponseException;
     }
 
     /** The default status code policy; accepting greater than/equal to <code>200</code> and lower than <code>300</code> */
     public static final StatusCodePolicy STATUS_CODE_POLICY_DEFAULT = new StatusCodePolicy() {
 
         @Override
-        public void handleStatusCode(HttpResponse httpResponse) throws OXException, HttpResponseException {
+        public void handleStatusCode(HttpResponse httpResponse, StringBuilder traceBuilder) throws OXException, HttpResponseException {
             final StatusLine statusLine = httpResponse.getStatusLine();
             final int statusCode = statusLine.getStatusCode();
             if (statusCode < 200 || statusCode >= 300) {
+                String body = null;
+                if (null != traceBuilder) {
+                    try {
+                        body = Streams.reader2string(new InputStreamReader(httpResponse.getEntity().getContent(), Charsets.UTF_8));
+                        traceBuilder.append(body);
+                    } catch (Exception x) {
+                        // ignore
+                    }
+                }
+
                 if (404 == statusCode) {
                     throw DoveAdmClientExceptionCodes.NOT_FOUND_SIMPLE.create();
                 }
                 String reason;
                 try {
-                    InputStreamReader reader = new InputStreamReader(httpResponse.getEntity().getContent(), Charsets.UTF_8);
-                    String sResponse = Streams.reader2string(reader);
-                    JSONObject jsonObject = new JSONObject(sResponse);
+                    JSONObject jsonObject;
+                    if (null != body) {
+                        jsonObject = new JSONObject(body);
+                    } else {
+                        jsonObject = new JSONObject(new InputStreamReader(httpResponse.getEntity().getContent(), Charsets.UTF_8));
+                    }
                     reason = jsonObject.getString("reason");
                 } catch (final Exception e) {
                     reason = statusLine.getReasonPhrase();
@@ -164,13 +178,28 @@ public class HttpDoveAdmClient implements DoveAdmClient {
     public static final StatusCodePolicy STATUS_CODE_POLICY_IGNORE_NOT_FOUND = new StatusCodePolicy() {
 
         @Override
-        public void handleStatusCode(HttpResponse httpResponse) throws HttpResponseException {
+        public void handleStatusCode(HttpResponse httpResponse, StringBuilder traceBuilder) throws HttpResponseException {
             final StatusLine statusLine = httpResponse.getStatusLine();
             final int statusCode = statusLine.getStatusCode();
             if ((statusCode < 200 || statusCode >= 300) && statusCode != 404) {
+                String body = null;
+                if (null != traceBuilder) {
+                    try {
+                        body = Streams.reader2string(new InputStreamReader(httpResponse.getEntity().getContent(), Charsets.UTF_8));
+                        traceBuilder.append(body);
+                    } catch (Exception x) {
+                        // ignore
+                    }
+                }
+
                 String reason;
                 try {
-                    final JSONObject jsonObject = new JSONObject(new InputStreamReader(httpResponse.getEntity().getContent(), Charsets.UTF_8));
+                    JSONObject jsonObject;
+                    if (null != body) {
+                        jsonObject = new JSONObject(body);
+                    } else {
+                        jsonObject = new JSONObject(new InputStreamReader(httpResponse.getEntity().getContent(), Charsets.UTF_8));
+                    }
                     reason = jsonObject.getJSONObject("error").getString("message");
                 } catch (final Exception e) {
                     reason = statusLine.getReasonPhrase();
@@ -357,10 +386,17 @@ public class HttpDoveAdmClient implements DoveAdmClient {
 
     // ------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    private void setCommonHeaders(HttpRequestBase request) {
+    private void setCommonHeaders(HttpRequestBase request, StringBuilder traceBuilder) {
         request.setHeader(HttpHeaders.AUTHORIZATION, authorizationHeaderValue);
         request.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
         request.setHeader(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.getMimeType());
+
+        if (null != traceBuilder) {
+            String lineSeparator = Strings.getLineSeparator();
+            traceBuilder.append(lineSeparator).append(HttpHeaders.AUTHORIZATION).append(": ").append(authorizationHeaderValue);
+            traceBuilder.append(lineSeparator).append(HttpHeaders.CONTENT_TYPE).append(": ").append(ContentType.APPLICATION_JSON.getMimeType());
+            traceBuilder.append(lineSeparator).append(HttpHeaders.ACCEPT).append(": ").append(ContentType.APPLICATION_JSON.getMimeType());
+        }
     }
 
     private <R> R executePost(HttpDoveAdmCall call, String path, Map<String, String> parameters, JSONValue jBody, ResultType<R> resultType) throws OXException {
@@ -370,19 +406,42 @@ public class HttpDoveAdmClient implements DoveAdmClient {
         try {
             URI uri = buildUri(callProperties.uri, toQueryString(parameters), path);
             post = new HttpPost(uri);
-            setCommonHeaders(post);
-            post.setEntity(new InputStreamEntity(new JSONInputStream(jBody, "UTF-8"), -1L, ContentType.APPLICATION_JSON));
 
-            return handleHttpResponse(execute(post, callProperties.targetHost, callProperties.httpClient), resultType);
-        } catch (final HttpResponseException e) {
-            if (400 == e.getStatusCode() || 401 == e.getStatusCode()) {
-                // Authentication failed
-                throw DoveAdmClientExceptionCodes.AUTH_ERROR.create(e, e.getMessage());
+            StringBuilder traceBuilder = null;
+            if (LOG.isTraceEnabled()) {
+                traceBuilder = new StringBuilder(2084);
+                traceBuilder.append("Request:").append(Strings.getLineSeparator());
+                traceBuilder.append("POST ").append(uri);
             }
-            throw handleHttpResponseError(null, e);
-        } catch (final IOException e) {
-            throw handleIOError(e, callProperties.endpoint, call);
-        } catch (final RuntimeException e) {
+
+            setCommonHeaders(post, traceBuilder);
+            post.setEntity(new InputStreamEntity(new JSONInputStream(jBody, "UTF-8"), -1L, ContentType.APPLICATION_JSON));
+            if (null != traceBuilder) {
+                traceBuilder.append(Strings.getLineSeparator()).append(jBody);
+            }
+
+            try {
+                R response = handleHttpResponse(execute(post, callProperties.targetHost, callProperties.httpClient), resultType, traceBuilder);
+                if (null != traceBuilder) {
+                    LOG.trace(traceBuilder.toString());
+                }
+                return response;
+            } catch (final HttpResponseException e) {
+                if (400 == e.getStatusCode() || 401 == e.getStatusCode()) {
+                    // Authentication failed
+                    throw DoveAdmClientExceptionCodes.AUTH_ERROR.create(e, e.getMessage());
+                }
+                throw handleHttpResponseError(null, e);
+            } catch (final IOException e) {
+                if (null != traceBuilder) {
+                    String separator = Strings.getLineSeparator();
+                    traceBuilder.append(separator).append(separator).append("Response:").append(separator);
+                    traceBuilder.append("Encountered an I/O error: ").append(e.getMessage());
+                    LOG.trace(traceBuilder.toString());
+                }
+                throw handleIOError(e, callProperties.endpoint, call);
+            }
+        } catch (RuntimeException e) {
             throw DoveAdmClientExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             reset(post);
@@ -567,8 +626,8 @@ public class HttpDoveAdmClient implements DoveAdmClient {
      * @throws ClientProtocolException If a client protocol error occurs
      * @throws IOException If an I/O error occurs
      */
-    protected <R> R handleHttpResponse(HttpResponse httpResponse, ResultType<R> type) throws OXException, ClientProtocolException, IOException {
-        return handleHttpResponse(httpResponse, STATUS_CODE_POLICY_DEFAULT, type);
+    protected <R> R handleHttpResponse(HttpResponse httpResponse, ResultType<R> type, StringBuilder traceBuilder) throws OXException, ClientProtocolException, IOException {
+        return handleHttpResponse(httpResponse, STATUS_CODE_POLICY_DEFAULT, type, traceBuilder);
     }
 
     /**
@@ -583,13 +642,27 @@ public class HttpDoveAdmClient implements DoveAdmClient {
      * @throws IOException If an I/O error occurs
      * @throws IllegalStateException If content stream cannot be created
      */
-    protected <R> R handleHttpResponse(HttpResponse httpResponse, StatusCodePolicy policy, ResultType<R> type) throws OXException, ClientProtocolException, IOException {
-        policy.handleStatusCode(httpResponse);
+    protected <R> R handleHttpResponse(HttpResponse httpResponse, StatusCodePolicy policy, ResultType<R> type, StringBuilder traceBuilder) throws OXException, ClientProtocolException, IOException {
+        if (null != traceBuilder) {
+            String separator = Strings.getLineSeparator();
+            traceBuilder.append(separator).append(separator).append("Response:").append(separator);
+            traceBuilder.append(httpResponse.getStatusLine()).append(separator);
+
+            for (Header hdr : httpResponse.getAllHeaders()) {
+                traceBuilder.append(hdr.getName()).append(": ").append(hdr.getValue()).append(separator);
+            }
+        }
+
+        policy.handleStatusCode(httpResponse, traceBuilder);
 
         // OK, continue
         if (ResultType.JSON == type) {
             try {
-                return (R) JSONObject.parse(new InputStreamReader(httpResponse.getEntity().getContent(), Charsets.UTF_8));
+                JSONValue jResponse = JSONObject.parse(new InputStreamReader(httpResponse.getEntity().getContent(), Charsets.UTF_8));
+                if (null != traceBuilder) {
+                    traceBuilder.append(jResponse);
+                }
+                return (R) jResponse;
             } catch (final JSONException e) {
                 throw DoveAdmClientExceptionCodes.JSON_ERROR.create(e, e.getMessage());
             } finally {
@@ -668,8 +741,12 @@ public class HttpDoveAdmClient implements DoveAdmClient {
             return DoveAdmClientExceptionCodes.AUTH_ERROR.create(cause, cause.getMessage());
         }
 
-        LOG.warn("Encountered I/O error \"{}\" ({}) while trying to access DoveAdm end-point {}. End-point will therefore be added to black-list until re-available", e.getMessage(), e.getClass().getName(), endpoint.getBaseUri());
-        endpointManager.blacklist(call, endpoint);
+        boolean blacklisted = endpointManager.blacklist(call, endpoint);
+        if (blacklisted) {
+            LOG.warn("Encountered I/O error \"{}\" ({}) while trying to access DoveAdm end-point {}. End-point is therefore added to black-list until re-available", e.getMessage(), e.getClass().getName(), endpoint.getBaseUri());
+        } else {
+            LOG.warn("Encountered I/O error \"{}\" ({}) while trying to access DoveAdm end-point {}.", e.getMessage(), e.getClass().getName(), endpoint.getBaseUri());
+        }
         return DoveAdmClientExceptionCodes.IO_ERROR.create(e, e.getMessage());
     }
 

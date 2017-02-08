@@ -49,6 +49,9 @@
 
 package com.openexchange.groupware.calendar;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -56,6 +59,7 @@ import java.util.Collections;
 import java.util.Date;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.request.AppointmentRequest;
@@ -69,7 +73,6 @@ import com.openexchange.groupware.search.Order;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
-
 /**
  * {@link SlowCalendarTests}
  *
@@ -77,7 +80,9 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  *
  */
 public class SlowCalendarTests extends AbstractCalendarTest {
+
     // Bug #11148
+    @Test
     public void testShouldSurviveLoadingInvalidPattern() throws Exception {
         final CalendarDataObject cdao = appointments.buildRecurringAppointment();
 
@@ -95,9 +100,7 @@ public class SlowCalendarTests extends AbstractCalendarTest {
             final AppointmentSQLInterface sqlInterface = appointments.getCurrentAppointmentSQLInterface();
             final Date SUPER_START = new Date(-2);
             final Date SUPER_END = new Date(Long.MAX_VALUE);
-            final int[] COLS = new int[] {
-                CalendarDataObject.OBJECT_ID, CalendarDataObject.START_DATE, CalendarDataObject.END_DATE, CalendarDataObject.FOLDER_ID,
-                CalendarDataObject.USERS };
+            final int[] COLS = new int[] { CalendarDataObject.OBJECT_ID, CalendarDataObject.START_DATE, CalendarDataObject.END_DATE, CalendarDataObject.FOLDER_ID, CalendarDataObject.USERS };
             final int USER_ID = userId;
             final int FOLDER_ID = cdao.getParentFolderID();
             SearchIterator iter = sqlInterface.getActiveAppointments(USER_ID, SUPER_START, SUPER_END, COLS);
@@ -118,14 +121,7 @@ public class SlowCalendarTests extends AbstractCalendarTest {
             iter = sqlInterface.getFreeBusyInformation(USER_ID, Participant.USER, SUPER_START, SUPER_END);
             assertContains(iter, cdao);
 
-            iter = sqlInterface.getModifiedAppointmentsBetween(
-                USER_ID,
-                SUPER_START,
-                SUPER_END,
-                COLS,
-                SUPER_START,
-                Appointment.OBJECT_ID,
-                Order.NO_ORDER);
+            iter = sqlInterface.getModifiedAppointmentsBetween(USER_ID, SUPER_START, SUPER_END, COLS, SUPER_START, Appointment.OBJECT_ID, Order.NO_ORDER);
             assertContains(iter, cdao);
 
             iter = sqlInterface.getObjectsById(new int[][] { { cdao.getObjectID(), cdao.getParentFolderID() } }, COLS);
@@ -150,15 +146,7 @@ public class SlowCalendarTests extends AbstractCalendarTest {
 
             // ALL
             final AppointmentRequest req = new AppointmentRequest(ServerSessionAdapter.valueOf(session));
-            JSONObject requestData = json(
-                AJAXServlet.PARAMETER_COLUMNS,
-                COLS_STRING,
-                AJAXServlet.PARAMETER_FOLDERID,
-                String.valueOf(cdao.getParentFolderID()),
-                AJAXServlet.PARAMETER_START,
-                String.valueOf(SUPER_START.getTime()),
-                AJAXServlet.PARAMETER_END,
-                String.valueOf(SUPER_END.getTime()));
+            JSONObject requestData = json(AJAXServlet.PARAMETER_COLUMNS, COLS_STRING, AJAXServlet.PARAMETER_FOLDERID, String.valueOf(cdao.getParentFolderID()), AJAXServlet.PARAMETER_START, String.valueOf(SUPER_START.getTime()), AJAXServlet.PARAMETER_END, String.valueOf(SUPER_END.getTime()));
             JSONArray arr = req.actionAll(requestData);
             assertContains(arr, cdao);
 
@@ -168,31 +156,15 @@ public class SlowCalendarTests extends AbstractCalendarTest {
             assertContains(arr, cdao);
 
             // Freebusy
-            arr = req.actionFreeBusy(json(
-                AJAXServlet.PARAMETER_ID,
-                Integer.toString(userId),
-                "type",
-                Integer.toString(Participant.USER),
-                AJAXServlet.PARAMETER_START,
-                String.valueOf(SUPER_START.getTime()),
-                AJAXServlet.PARAMETER_END,
-                String.valueOf(SUPER_END.getTime())));
+            arr = req.actionFreeBusy(json(AJAXServlet.PARAMETER_ID, Integer.toString(userId), "type", Integer.toString(Participant.USER), AJAXServlet.PARAMETER_START, String.valueOf(SUPER_START.getTime()), AJAXServlet.PARAMETER_END, String.valueOf(SUPER_END.getTime())));
             assertContainsAsJSONObject(arr, cdao);
 
             // Get
-            final JSONObject loaded = req.actionGet(json(
-                AJAXServlet.PARAMETER_ID,
-                Integer.toString(cdao.getObjectID()),
-                AJAXServlet.PARAMETER_FOLDERID,
-                Integer.toString(cdao.getParentFolderID())));
+            final JSONObject loaded = req.actionGet(json(AJAXServlet.PARAMETER_ID, Integer.toString(cdao.getObjectID()), AJAXServlet.PARAMETER_FOLDERID, Integer.toString(cdao.getParentFolderID())));
             assertEquals(loaded.getInt("id"), cdao.getObjectID());
 
             // Has
-            req.actionHas(json(
-                AJAXServlet.PARAMETER_START,
-                String.valueOf(SUPER_START.getTime()),
-                AJAXServlet.PARAMETER_END,
-                String.valueOf(SUPER_START.getTime() + 3600000L * 24 * 30)));
+            req.actionHas(json(AJAXServlet.PARAMETER_START, String.valueOf(SUPER_START.getTime()), AJAXServlet.PARAMETER_END, String.valueOf(SUPER_START.getTime() + 3600000L * 24 * 30)));
 
             // List
             final JSONArray idArray = new JSONArray();
@@ -206,23 +178,11 @@ public class SlowCalendarTests extends AbstractCalendarTest {
             assertContains(arr, cdao);
 
             // New Appointments Search
-            arr = req.actionNewAppointmentsSearch(json(
-                AJAXServlet.PARAMETER_COLUMNS,
-                COLS_STRING,
-                AJAXServlet.PARAMETER_START,
-                String.valueOf(SUPER_START.getTime()),
-                AJAXServlet.PARAMETER_END,
-                String.valueOf(SUPER_END.getTime()),
-                "limit",
-                Integer.MAX_VALUE));
+            arr = req.actionNewAppointmentsSearch(json(AJAXServlet.PARAMETER_COLUMNS, COLS_STRING, AJAXServlet.PARAMETER_START, String.valueOf(SUPER_START.getTime()), AJAXServlet.PARAMETER_END, String.valueOf(SUPER_END.getTime()), "limit", Integer.MAX_VALUE));
             assertContains(arr, cdao);
 
             // Search
-            requestData = json(AJAXServlet.PARAMETER_COLUMNS, COLS_STRING, AJAXServlet.PARAMETER_DATA, json(
-                SearchFields.PATTERN,
-                "*",
-                AJAXServlet.PARAMETER_INFOLDER,
-                cdao.getParentFolderID()), AJAXServlet.PARAMETER_SORT, Appointment.START_DATE, AJAXServlet.PARAMETER_ORDER, "ASC");
+            requestData = json(AJAXServlet.PARAMETER_COLUMNS, COLS_STRING, AJAXServlet.PARAMETER_DATA, json(SearchFields.PATTERN, "*", AJAXServlet.PARAMETER_INFOLDER, cdao.getParentFolderID()), AJAXServlet.PARAMETER_SORT, Appointment.START_DATE, AJAXServlet.PARAMETER_ORDER, "ASC");
             arr = req.actionSearch(requestData);
             assertContains(arr, cdao);
 
@@ -247,17 +207,7 @@ public class SlowCalendarTests extends AbstractCalendarTest {
 
             // Updates
 
-            requestData = json(
-                AJAXServlet.PARAMETER_COLUMNS,
-                COLS_STRING,
-                AJAXServlet.PARAMETER_START,
-                String.valueOf(SUPER_START.getTime()),
-                AJAXServlet.PARAMETER_END,
-                String.valueOf(SUPER_END.getTime()),
-                AJAXServlet.PARAMETER_TIMESTAMP,
-                0,
-                AJAXServlet.PARAMETER_FOLDERID,
-                cdao.getParentFolderID());
+            requestData = json(AJAXServlet.PARAMETER_COLUMNS, COLS_STRING, AJAXServlet.PARAMETER_START, String.valueOf(SUPER_START.getTime()), AJAXServlet.PARAMETER_END, String.valueOf(SUPER_END.getTime()), AJAXServlet.PARAMETER_TIMESTAMP, 0, AJAXServlet.PARAMETER_FOLDERID, cdao.getParentFolderID());
             arr = req.actionUpdates(requestData);
             assertContains(arr, cdao);
 

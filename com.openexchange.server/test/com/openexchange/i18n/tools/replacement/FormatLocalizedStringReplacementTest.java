@@ -111,8 +111,8 @@ public class FormatLocalizedStringReplacementTest {
         PowerMockito.when(I18nServices.getInstance()).thenReturn(i18nServices);
     }
 
-    @Test
-    public void testGetReplacement_replacementObjectStateFine_returnTranslatedPrioritySentence() {
+     @Test
+     public void testGetReplacement_replacementObjectStateFine_returnTranslatedPrioritySentence() {
         String replacedString = formatLocalizedStringReplacement.getReplacement();
         Assert.assertEquals("String not localized", result, replacedString);
     }

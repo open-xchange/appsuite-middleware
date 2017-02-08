@@ -49,7 +49,13 @@
 
 package com.openexchange.ajax.importexport;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
+import org.json.JSONArray;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.importexport.actions.CSVImportRequest;
@@ -60,11 +66,11 @@ import com.openexchange.ajax.importexport.actions.OutlookCSVImportRequest;
 import com.openexchange.ajax.importexport.actions.OutlookCSVImportResponse;
 import com.openexchange.ajax.importexport.actions.VCardImportRequest;
 import com.openexchange.ajax.importexport.actions.VCardImportResponse;
-import org.json.JSONArray;
 
 /**
  * This test verifies if the problem described in bug 9209 does not appear
  * anymore.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Bug9209Test extends AbstractAJAXSession {
@@ -76,60 +82,61 @@ public final class Bug9209Test extends AbstractAJAXSession {
 
     /**
      * Default constructor.
+     * 
      * @param name name of the test.
      */
-    public Bug9209Test(final String name) {
-        super(name);
+    public Bug9209Test() {
+        super();
     }
 
     /**
      * Verifies if bug 9209 appears again for CSV files.
+     * 
      * @throws Throwable if an exception occurs.
      */
+    @Test
     public void test9209CSV() throws Throwable {
         final AJAXClient client = getClient();
-        final CSVImportResponse iResponse = Tools.importCSV(client,
-            new CSVImportRequest(client.getValues().getPrivateContactFolder(),
-            new ByteArrayInputStream(TEST_BYTES), false));
+        final CSVImportResponse iResponse = Tools.importCSV(client, new CSVImportRequest(client.getValues().getPrivateContactFolder(), new ByteArrayInputStream(TEST_BYTES), false));
         assertTrue("CSV importer does not give an error.", iResponse.hasError());
     }
 
     /**
      * Verifies if bug 9209 appears again for iCal files.
+     * 
      * @throws Throwable if an exception occurs.
      */
+    @Test
     public void test9209ICal() throws Throwable {
         final AJAXClient client = getClient();
-        final ICalImportResponse iResponse = Tools.importICal(client,
-            new ICalImportRequest(client.getValues().getPrivateAppointmentFolder(),
-            new ByteArrayInputStream(TEST_BYTES), false));
+        final ICalImportResponse iResponse = Tools.importICal(client, new ICalImportRequest(client.getValues().getPrivateAppointmentFolder(), new ByteArrayInputStream(TEST_BYTES), false));
         //the last version of the ical4j parser does not fail on weird inputs, but does nothing
-        assertEquals("Response data should be empty", 0, ((JSONArray)iResponse.getData()).length());
+        assertEquals("Response data should be empty", 0, ((JSONArray) iResponse.getData()).length());
         assertNull("No conflicts should be found", iResponse.getConflicts());
         assertFalse("ICal importer should not give an error.", iResponse.hasError());
     }
 
     /**
      * Verifies if bug 9209 appears again for vCard files.
+     * 
      * @throws Throwable if an exception occurs.
      */
+    @Test
     public void test9209VCard() throws Throwable {
         final AJAXClient client = getClient();
-        final VCardImportResponse iResponse = Tools.importVCard(client,
-            new VCardImportRequest(client.getValues().getPrivateContactFolder(),
-            new ByteArrayInputStream(TEST_BYTES), false));
+        final VCardImportResponse iResponse = Tools.importVCard(client, new VCardImportRequest(client.getValues().getPrivateContactFolder(), new ByteArrayInputStream(TEST_BYTES), false));
         assertTrue("VCard importer does not give an error.", iResponse.hasError());
     }
 
     /**
      * Verifies if bug 9209 appears again for Outlook CSV files.
+     * 
      * @throws Throwable if an exception occurs.
      */
+    @Test
     public void test9209OutlookCSV() throws Throwable {
         final AJAXClient client = getClient();
-        final OutlookCSVImportResponse iResponse = Tools.importOutlookCSV(client,
-            new OutlookCSVImportRequest(client.getValues().getPrivateContactFolder(),
-            new ByteArrayInputStream(TEST_BYTES), false));
+        final OutlookCSVImportResponse iResponse = Tools.importOutlookCSV(client, new OutlookCSVImportRequest(client.getValues().getPrivateContactFolder(), new ByteArrayInputStream(TEST_BYTES), false));
         assertTrue("Outlook CSV importer does not give an error.", iResponse.hasError());
     }
 }

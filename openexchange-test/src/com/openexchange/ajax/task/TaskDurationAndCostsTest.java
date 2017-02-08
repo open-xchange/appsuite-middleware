@@ -50,10 +50,14 @@
 package com.openexchange.ajax.task;
 
 import static com.openexchange.java.Autoboxing.L;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.TimeZone;
-import junit.framework.AssertionFailedError;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.task.actions.DeleteRequest;
@@ -82,11 +86,11 @@ public class TaskDurationAndCostsTest extends AbstractAJAXSession {
     /**
      * Initializes a new {@link TaskDurationAndCostsTest}.
      */
-    public TaskDurationAndCostsTest(String name) {
-        super(name);
+    public TaskDurationAndCostsTest() {
+        super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         client = getClient();
@@ -103,12 +107,17 @@ public class TaskDurationAndCostsTest extends AbstractAJAXSession {
         response.fillTask(task);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        DeleteRequest req = new DeleteRequest(task);
-        client.execute(req);
+        try {
+            DeleteRequest req = new DeleteRequest(task);
+            client.execute(req);
+        } finally {
+            super.tearDown();
+        }
     }
 
+    @Test
     public void testDurationAndCosts() throws Exception {
         task.setTargetCosts(new BigDecimal("11.5"));
         task.setActualCosts(new BigDecimal("4.728"));
@@ -118,7 +127,7 @@ public class TaskDurationAndCostsTest extends AbstractAJAXSession {
         try {
             UpdateResponse response = client.execute(req);
             task.setLastModified(response.getTimestamp());
-        } catch (AssertionFailedError e) {
+        } catch (Exception e) {
             fail("Setting costs and duration failed!");
         }
         GetRequest request = new GetRequest(task);

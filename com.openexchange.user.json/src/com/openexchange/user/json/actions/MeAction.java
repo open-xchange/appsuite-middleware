@@ -57,6 +57,7 @@ import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.mail.service.MailService;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -91,6 +92,15 @@ public final class MeAction extends AbstractUserAction {
             // Obtain user's contact
             Contact contact = services.getService(ContactService.class).getUser(session, userId);
 
+            // Obtain mail login
+            String mailLogin = null;
+            {
+                MailService mailService = services.getOptionalService(MailService.class);
+                if (null != mailService) {
+                    mailLogin = mailService.getMailLoginFor(session.getUserId(), session.getContextId(), 0);
+                }
+            }
+
             // Craft JSON result
             JSONObject jReturn = new JSONObject(8);
             jReturn.put("context_id", session.getContextId());
@@ -100,6 +110,10 @@ public final class MeAction extends AbstractUserAction {
             jReturn.put("login_name", str == null ? "<unknown>" : str);
             str = contact.getDisplayName();
             jReturn.put("display_name", str == null ? "<unknown>" : str);
+            if (null != mailLogin) {
+                jReturn.put("mail_login", mailLogin);
+            }
+
 
             // Return appropriate result
             return new AJAXRequestResult(jReturn, contact.getLastModified(), "json");

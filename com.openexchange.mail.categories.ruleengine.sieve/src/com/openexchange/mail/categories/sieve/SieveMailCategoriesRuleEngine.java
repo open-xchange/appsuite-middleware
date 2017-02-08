@@ -184,7 +184,7 @@ public class SieveMailCategoriesRuleEngine implements MailCategoriesRuleEngine {
             loginName = MailFilterProperties.CredSrc.SESSION_FULL_LOGIN.name.equals(credsrc) ? session.getLogin() : session.getLoginName();
         }
         Subject subject = (Subject) session.getParameter("kerberosSubject");
-        String oauthToken = (String) session.getParameter(Session.PARAM_OAUTH_TOKEN);
+        String oauthToken = (String) session.getParameter(Session.PARAM_OAUTH_ACCESS_TOKEN);
         return new Credentials(loginName, session.getPassword(), session.getUserId(), session.getContextId(), null, subject, oauthToken);
     }
 
@@ -358,8 +358,9 @@ public class SieveMailCategoriesRuleEngine implements MailCategoriesRuleEngine {
             if (removed) {
                 rules2update.add(rule);
             }
-            for (TestCommand parent : toDeleteMap.keySet()) {
-                for (TestCommand deleteEntry : toDeleteMap.get(parent)) {
+            for (Map.Entry<TestCommand, List<TestCommand>> entry : toDeleteMap.entrySet()) {
+                TestCommand parent = entry.getKey();
+                for (TestCommand deleteEntry : entry.getValue()) {
                     parent.removeTestCommand(deleteEntry);
                 }
             }

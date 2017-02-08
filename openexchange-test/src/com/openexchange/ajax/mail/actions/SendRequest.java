@@ -149,7 +149,7 @@ public class SendRequest implements AJAXRequest<SendResponse> {
             final int size = uploads.size();
             for (int i = 0; i < size; i++) {
                 final String sNum = Integer.toString(i + 1);
-                params.add(new FileParameter("file_" + sNum, "text"+sNum+".txt", uploads.get(i), "text/plain; charset=us-ascii"));
+                params.add(new FileParameter("file_" + sNum, "text" + sNum + ".txt", uploads.get(i), "text/plain; charset=us-ascii"));
             }
         }
         return params.toArray(new Parameter[params.size()]);

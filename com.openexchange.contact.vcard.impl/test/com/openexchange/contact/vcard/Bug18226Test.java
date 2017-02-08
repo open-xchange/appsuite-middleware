@@ -49,10 +49,6 @@
 
 package com.openexchange.contact.vcard;
 
-import java.awt.image.BufferedImage;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.java.Streams;
-
 /**
  * {@link Bug18226Test}
  *
@@ -60,6 +56,13 @@ import com.openexchange.java.Streams;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import java.awt.image.BufferedImage;
+import org.junit.Assert;
+import org.junit.Test;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.java.Streams;
 public class Bug18226Test extends VCardTest {
 
     /**
@@ -69,7 +72,8 @@ public class Bug18226Test extends VCardTest {
         super();
     }
 
-    public void testImportVCard() throws Exception {
+         @Test
+     public void testImportVCard() throws Exception {
         /*
          * import vCard
          */
@@ -105,11 +109,11 @@ public class Bug18226Test extends VCardTest {
          * verify imported contact
          */
         assertNotNull(contact);
-        assertEquals("Wurst, Hans", contact.getDisplayName());
-        assertEquals("Wurst", contact.getSurName());
-        assertEquals("Hans", contact.getGivenName());
-        assertEquals("7@debian5x64.netline.de", contact.getUid());
-        assertEquals("image/gif", contact.getImageContentType());
+        Assert.assertEquals("Wurst, Hans", contact.getDisplayName());
+        Assert.assertEquals("Wurst", contact.getSurName());
+        Assert.assertEquals("Hans", contact.getGivenName());
+        Assert.assertEquals("7@debian5x64.netline.de", contact.getUid());
+        Assert.assertEquals("image/gif", contact.getImageContentType());
         assertNotNull(contact.getImage1());
         BufferedImage bufferedImage = javax.imageio.ImageIO.read(Streams.newByteArrayInputStream(contact.getImage1()));
         assertNotNull(bufferedImage);

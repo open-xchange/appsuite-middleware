@@ -47,7 +47,6 @@
  *
  */
 
-
 package com.openexchange.ajax.mail.actions;
 
 import org.json.JSONException;
@@ -62,7 +61,7 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  *
  */
-public class CountRequest extends AbstractMailRequest<CountResponse>{
+public class CountRequest extends AbstractMailRequest<CountResponse> {
 
     private final String folderID;
 
@@ -83,15 +82,14 @@ public class CountRequest extends AbstractMailRequest<CountResponse>{
 
     @Override
     public Parameter[] getParameters() {
-        return  new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_COUNT),
-            new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderID)
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_COUNT), new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderID)
         };
     }
 
     @Override
     public AbstractAJAXParser getParser() {
         return new AbstractAJAXParser<CountResponse>(false) {
+
             @Override
             protected CountResponse createResponse(final Response response) throws JSONException {
                 return new CountResponse(response);

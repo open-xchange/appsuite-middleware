@@ -60,8 +60,8 @@ import com.openexchange.html.AbstractSanitizing;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class Bug23368Test extends AbstractSanitizing {
-    @Test
-    public void testHtmlTextConversionOfHorizontalRule() {
+     @Test
+     public void testHtmlTextConversionOfHorizontalRule() {
         String content = getHtmlService().html2text("Some text <hr> more text", false);
         assertEquals("Unexpected return value", "Some text\r\n" +
             "---------------------------------------------\r\n" +

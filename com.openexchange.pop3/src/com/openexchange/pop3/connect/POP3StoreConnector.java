@@ -79,6 +79,7 @@ import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.MimeSessionPropertyNames;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.net.ssl.exception.SSLExceptionCode;
@@ -92,6 +93,8 @@ import com.openexchange.pop3.services.POP3ServiceRegistry;
 import com.openexchange.pop3.util.POP3CapabilityCache;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.ThreadPools;
 import com.sun.mail.pop3.POP3Folder;
 import com.sun.mail.pop3.POP3Prober;
 import com.sun.mail.pop3.POP3Store;
@@ -243,7 +246,7 @@ public final class POP3StoreConnector {
      * @return A connected instance of {@link POP3Store}
      * @throws OXException If establishing a connected instance of {@link POP3Store} fails
      */
-    public static POP3StoreResult getPOP3Store(POP3Config pop3Config, Properties pop3Properties, boolean monitorFailedAuthentication, int accountId, Session session, boolean errorOnMissingUIDL, boolean forceSecure) throws OXException {
+    public static POP3StoreResult getPOP3Store(POP3Config pop3Config, Properties pop3Properties, boolean monitorFailedAuthentication, final int accountId, final Session session, boolean errorOnMissingUIDL, boolean forceSecure) throws OXException {
         try {
             final boolean tmpDownEnabled = (POP3Properties.getInstance().getPOP3TemporaryDown() > 0);
             if (tmpDownEnabled) {
@@ -457,6 +460,20 @@ public final class POP3StoreConnector {
                     }
                     throw POP3ExceptionCode.LOGIN_DELAY2.create(e, server, login, Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), Integer.valueOf(seconds), e.getMessage());
                 }
+                if (accountId != MailAccount.DEFAULT_ID) {
+                    AbstractTask<Void> task = new AbstractTask<Void>() {
+
+                        @Override
+                        public Void call() throws Exception {
+                            MailAccountStorageService mass = POP3ServiceRegistry.getServiceRegistry().getOptionalService(MailAccountStorageService.class);
+                            if (null != mass) {
+                                mass.incrementFailedMailAuthCount(accountId, session.getUserId(), session.getContextId());
+                            }
+                            return null;
+                        }
+                    };
+                    ThreadPools.getThreadPool().submit(task);
+                }
                 throw e;
             } catch (final MessagingException e) {
                 if (MimeMailException.isSSLHandshakeException(e)) {
@@ -578,25 +595,27 @@ public final class POP3StoreConnector {
     private static final class LoginAndPass {
 
         private final String login;
-
         private final String pass;
-
-        private final int hashCode;
+        private final int hash;
 
         public LoginAndPass(final String login, final String pass) {
             super();
             this.login = login;
             this.pass = pass;
-            hashCode = (login.hashCode()) ^ (pass.hashCode());
+            int prime = 31;
+            int result = 1;
+            result = prime * result + ((login == null) ? 0 : login.hashCode());
+            result = prime * result + ((pass == null) ? 0 : pass.hashCode());
+            hash = result;
         }
 
         @Override
         public int hashCode() {
-            return hashCode;
+            return hash;
         }
 
         @Override
-        public boolean equals(final Object obj) {
+        public boolean equals(Object obj) {
             if (this == obj) {
                 return true;
             }
@@ -606,7 +625,7 @@ public final class POP3StoreConnector {
             if (getClass() != obj.getClass()) {
                 return false;
             }
-            final LoginAndPass other = (LoginAndPass) obj;
+            LoginAndPass other = (LoginAndPass) obj;
             if (login == null) {
                 if (other.login != null) {
                     return false;

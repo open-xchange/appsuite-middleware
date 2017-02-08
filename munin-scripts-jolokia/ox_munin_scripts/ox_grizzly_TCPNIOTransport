@@ -75,7 +75,11 @@ sub callUrl {
 		my $json = decode_json($response->decoded_content);
 		if (defined $json->{value}){
 			print "$_[0].value ";
-			print $json->{value},"\n";
+			if($json->{value} =~ /N\/A/ ) {
+    	    	print 0, "\n";
+  		   	} else {
+  		    	print $json->{value},"\n";
+			}
 		}
 	}
 	else {

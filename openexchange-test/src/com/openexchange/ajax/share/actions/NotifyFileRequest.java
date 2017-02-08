@@ -90,7 +90,7 @@ public class NotifyFileRequest extends AbstractInfostoreRequest<AbstractAJAXResp
      * @param id The file identifier
      * @param entities The entities to notify
      */
-    public NotifyFileRequest(String id, int...entities) {
+    public NotifyFileRequest(String id, int... entities) {
         this(id, entities, true);
     }
 
@@ -112,9 +112,7 @@ public class NotifyFileRequest extends AbstractInfostoreRequest<AbstractAJAXResp
 
     @Override
     public Parameter[] getParameters() throws IOException, JSONException {
-        return new Parameter[] {
-            new URLParameter(AJAXServlet.PARAMETER_ID, id),
-            new URLParameter(AJAXServlet.PARAMETER_ACTION, "notify")
+        return new Parameter[] { new URLParameter(AJAXServlet.PARAMETER_ID, id), new URLParameter(AJAXServlet.PARAMETER_ACTION, "notify")
         };
     }
 
@@ -124,7 +122,7 @@ public class NotifyFileRequest extends AbstractInfostoreRequest<AbstractAJAXResp
 
             @Override
             protected AbstractAJAXResponse createResponse(Response response) throws JSONException {
-                return new AbstractAJAXResponse(response) { };
+                return new AbstractAJAXResponse(response) {};
             }
         };
     }

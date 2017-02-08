@@ -74,14 +74,14 @@ public class MailAccountListRequest implements AJAXRequest<MailAccountListRespon
         this.cols = cols;
 
         StringBuilder bob = new StringBuilder();
-        for(int colId : cols) {
+        for (int colId : cols) {
             bob.append(colId).append(',');
         }
-        bob.setLength(bob.length()-1);
+        bob.setLength(bob.length() - 1);
         this.columns = bob.toString();
 
         this.idArray = new JSONArray();
-        for(int id : ids) {
+        for (int id : ids) {
             idArray.put(id);
         }
     }
@@ -107,9 +107,7 @@ public class MailAccountListRequest implements AJAXRequest<MailAccountListRespon
 
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
-        return new Parameter[]{
-            new Parameter("action", "list"),
-            new Parameter("columns", columns)
+        return new Parameter[] { new Parameter("action", "list"), new Parameter("columns", columns)
         };
     }
 

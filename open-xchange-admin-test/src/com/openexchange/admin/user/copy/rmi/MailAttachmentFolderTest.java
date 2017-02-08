@@ -55,6 +55,7 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.IOException;
 import org.json.JSONException;
+import org.junit.After;
 import org.junit.Test;
 import com.openexchange.admin.rmi.AbstractRMITest;
 import com.openexchange.admin.rmi.AbstractTest;
@@ -208,8 +209,8 @@ public class MailAttachmentFolderTest extends AbstractRMITest {
         client.logout();
     }
 
-    @Test
-    public void testCopyWrongMailAttachments() throws Exception {
+     @Test
+     public void testCopyWrongMailAttachments() throws Exception {
         OXUserCopyInterface umi = getUserCopyClient();
         User dstUser = umi.copyUser(srcUser, srcCtx, dstCtx, superAdminCredentials);
         dstUser = ui.getData(dstCtx, dstUser, getCredentials());
@@ -246,8 +247,9 @@ public class MailAttachmentFolderTest extends AbstractRMITest {
         }
     }
 
-    @Override
-    public void tearDown() throws Exception {
+    @After
+    public void tearDown()
+ throws Exception {
         try {
             if (ui != null && srcCtx != null) {
                 ui.delete(srcCtx, srcUser, null, getCredentials());
@@ -270,8 +272,6 @@ public class MailAttachmentFolderTest extends AbstractRMITest {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        super.tearDown();
     }
 
     private AJAXSession performLogin(final String login, final String password) throws OXException, IOException, JSONException {

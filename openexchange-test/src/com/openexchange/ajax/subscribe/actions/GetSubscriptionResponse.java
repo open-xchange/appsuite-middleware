@@ -56,7 +56,6 @@ import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.json.SubscriptionJSONParser;
 
-
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
@@ -69,7 +68,7 @@ public class GetSubscriptionResponse extends AbstractSubscriptionResponse {
     public Subscription getSubscription(SubscriptionSourceDiscoveryService discovery) throws JSONException {
         SubscriptionJSONParser parser = new SubscriptionJSONParser(discovery);
         JSONObject data = (JSONObject) getData();
-        return parser.parse( data );
+        return parser.parse(data);
     }
 
 }

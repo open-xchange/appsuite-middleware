@@ -49,10 +49,13 @@
 
 package com.openexchange.webdav.action.ifheader;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import org.junit.Test;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavLock;
@@ -61,15 +64,15 @@ import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
-import junit.framework.TestCase;
 
 /**
  * {@link StandardIfHeaderApplyTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class StandardIfHeaderApplyTest extends TestCase {
+public class StandardIfHeaderApplyTest {
 
+    @Test
     public void testETagMustMatch() throws WebdavProtocolException {
         IfHeaderApply apply = getApply();
 
@@ -90,6 +93,7 @@ public class StandardIfHeaderApplyTest extends TestCase {
         return new StandardIfHeaderApply();
     }
 
+    @Test
     public void testETagMustNotMatch() throws WebdavProtocolException {
         IfHeaderApply apply = getApply();
 
@@ -105,6 +109,7 @@ public class StandardIfHeaderApplyTest extends TestCase {
         assertTrue(apply.matches(entity, resource));
     }
 
+    @Test
     public void testLockMustMatch() throws WebdavProtocolException {
         IfHeaderApply apply = getApply();
 
@@ -120,6 +125,7 @@ public class StandardIfHeaderApplyTest extends TestCase {
         assertFalse(apply.matches(entity, resource));
     }
 
+    @Test
     public void testLockMustNotMatch() throws WebdavProtocolException {
         IfHeaderApply apply = getApply();
 
@@ -154,12 +160,10 @@ public class StandardIfHeaderApplyTest extends TestCase {
             }
 
             @Override
-            public void create() throws WebdavProtocolException {
-            }
+            public void create() throws WebdavProtocolException {}
 
             @Override
-            public void delete() throws WebdavProtocolException {
-            }
+            public void delete() throws WebdavProtocolException {}
 
             @Override
             public boolean exists() throws WebdavProtocolException {
@@ -262,8 +266,7 @@ public class StandardIfHeaderApplyTest extends TestCase {
             }
 
             @Override
-            public void lock(WebdavLock lock) throws WebdavProtocolException {
-            }
+            public void lock(WebdavLock lock) throws WebdavProtocolException {}
 
             @Override
             public WebdavResource move(WebdavPath newUri) throws WebdavProtocolException {
@@ -276,16 +279,13 @@ public class StandardIfHeaderApplyTest extends TestCase {
             }
 
             @Override
-            public void putBody(InputStream data) throws WebdavProtocolException {
-            }
+            public void putBody(InputStream data) throws WebdavProtocolException {}
 
             @Override
-            public void putBodyAndGuessLength(InputStream body) throws WebdavProtocolException {
-            }
+            public void putBodyAndGuessLength(InputStream body) throws WebdavProtocolException {}
 
             @Override
-            public void putProperty(WebdavProperty prop) throws WebdavProtocolException {
-            }
+            public void putProperty(WebdavProperty prop) throws WebdavProtocolException {}
 
             @Override
             public WebdavResource reload() throws WebdavProtocolException {
@@ -293,32 +293,25 @@ public class StandardIfHeaderApplyTest extends TestCase {
             }
 
             @Override
-            public void removeProperty(String namespace, String name) throws WebdavProtocolException {
-            }
+            public void removeProperty(String namespace, String name) throws WebdavProtocolException {}
 
             @Override
-            public void save() throws WebdavProtocolException {
-            }
+            public void save() throws WebdavProtocolException {}
 
             @Override
-            public void setContentType(String type) throws WebdavProtocolException {
-            }
+            public void setContentType(String type) throws WebdavProtocolException {}
 
             @Override
-            public void setDisplayName(String displayName) throws WebdavProtocolException {
-            }
+            public void setDisplayName(String displayName) throws WebdavProtocolException {}
 
             @Override
-            public void setLanguage(String language) throws WebdavProtocolException {
-            }
+            public void setLanguage(String language) throws WebdavProtocolException {}
 
             @Override
-            public void setLength(Long length) throws WebdavProtocolException {
-            }
+            public void setLength(Long length) throws WebdavProtocolException {}
 
             @Override
-            public void setSource(String source) throws WebdavProtocolException {
-            }
+            public void setSource(String source) throws WebdavProtocolException {}
 
             @Override
             public WebdavCollection toCollection() {
@@ -326,8 +319,7 @@ public class StandardIfHeaderApplyTest extends TestCase {
             }
 
             @Override
-            public void unlock(String token) throws WebdavProtocolException {
-            }
+            public void unlock(String token) throws WebdavProtocolException {}
 
             @Override
             public Protocol getProtocol() {
@@ -348,7 +340,7 @@ public class StandardIfHeaderApplyTest extends TestCase {
 
             @Override
             public WebdavLock getLock(String token) throws WebdavProtocolException {
-                if(!lock.equals(token)) {
+                if (!lock.equals(token)) {
                     return null;
                 }
                 WebdavLock webdavLock = new WebdavLock();
@@ -360,7 +352,6 @@ public class StandardIfHeaderApplyTest extends TestCase {
             public List<WebdavLock> getLocks() throws WebdavProtocolException {
                 return Arrays.asList(getLock(lock));
             }
-
 
             @Override
             public String getETag() throws WebdavProtocolException {
@@ -378,12 +369,10 @@ public class StandardIfHeaderApplyTest extends TestCase {
             }
 
             @Override
-            public void create() throws WebdavProtocolException {
-            }
+            public void create() throws WebdavProtocolException {}
 
             @Override
-            public void delete() throws WebdavProtocolException {
-            }
+            public void delete() throws WebdavProtocolException {}
 
             @Override
             public boolean exists() throws WebdavProtocolException {
@@ -429,6 +418,7 @@ public class StandardIfHeaderApplyTest extends TestCase {
             public Long getLength() throws WebdavProtocolException {
                 return null;
             }
+
             @Override
             public WebdavMethod[] getOptions() throws WebdavProtocolException {
                 return null;
@@ -475,8 +465,7 @@ public class StandardIfHeaderApplyTest extends TestCase {
             }
 
             @Override
-            public void lock(WebdavLock lock) throws WebdavProtocolException {
-            }
+            public void lock(WebdavLock lock) throws WebdavProtocolException {}
 
             @Override
             public WebdavResource move(WebdavPath newUri) throws WebdavProtocolException {
@@ -489,16 +478,13 @@ public class StandardIfHeaderApplyTest extends TestCase {
             }
 
             @Override
-            public void putBody(InputStream data) throws WebdavProtocolException {
-            }
+            public void putBody(InputStream data) throws WebdavProtocolException {}
 
             @Override
-            public void putBodyAndGuessLength(InputStream body) throws WebdavProtocolException {
-            }
+            public void putBodyAndGuessLength(InputStream body) throws WebdavProtocolException {}
 
             @Override
-            public void putProperty(WebdavProperty prop) throws WebdavProtocolException {
-            }
+            public void putProperty(WebdavProperty prop) throws WebdavProtocolException {}
 
             @Override
             public WebdavResource reload() throws WebdavProtocolException {
@@ -506,32 +492,25 @@ public class StandardIfHeaderApplyTest extends TestCase {
             }
 
             @Override
-            public void removeProperty(String namespace, String name) throws WebdavProtocolException {
-            }
+            public void removeProperty(String namespace, String name) throws WebdavProtocolException {}
 
             @Override
-            public void save() throws WebdavProtocolException {
-            }
+            public void save() throws WebdavProtocolException {}
 
             @Override
-            public void setContentType(String type) throws WebdavProtocolException {
-            }
+            public void setContentType(String type) throws WebdavProtocolException {}
 
             @Override
-            public void setDisplayName(String displayName) throws WebdavProtocolException {
-            }
+            public void setDisplayName(String displayName) throws WebdavProtocolException {}
 
             @Override
-            public void setLanguage(String language) throws WebdavProtocolException {
-            }
+            public void setLanguage(String language) throws WebdavProtocolException {}
 
             @Override
-            public void setLength(Long length) throws WebdavProtocolException {
-            }
+            public void setLength(Long length) throws WebdavProtocolException {}
 
             @Override
-            public void setSource(String source) throws WebdavProtocolException {
-            }
+            public void setSource(String source) throws WebdavProtocolException {}
 
             @Override
             public WebdavCollection toCollection() {
@@ -539,8 +518,7 @@ public class StandardIfHeaderApplyTest extends TestCase {
             }
 
             @Override
-            public void unlock(String token) throws WebdavProtocolException {
-            }
+            public void unlock(String token) throws WebdavProtocolException {}
 
             @Override
             public Protocol getProtocol() {

@@ -50,25 +50,16 @@
 package com.openexchange.dav.caldav.tests;
 
 import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * {@link CalDAVTestSuite} - Testsuite for the CalDAV interface.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    NewTest.class,
-    FreeBusyTest.class,
-    MkCalendarTest.class,
-    CookieTest.class,
-    ConfirmationTest.class,
-    AlarmTestEMClient.class,
-    AlarmTestMacCalendar.class,
-    AlarmTestLightning.class,
-    AlarmTestIOSCalendar.class
+@RunWith(ParallelSuite.class)
+@SuiteClasses({ NewTest.class, FreeBusyTest.class, MkCalendarTest.class, CookieTest.class, ConfirmationTest.class, AlarmTestEMClient.class, AlarmTestMacCalendar.class, AlarmTestLightning.class, AlarmTestIOSCalendar.class
 })
 public final class CalDAVTestSuite {
 

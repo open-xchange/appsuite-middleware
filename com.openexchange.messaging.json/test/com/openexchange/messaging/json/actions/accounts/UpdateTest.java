@@ -49,9 +49,9 @@
 
 package com.openexchange.messaging.json.actions.accounts;
 
-import junit.framework.TestCase;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
@@ -62,6 +62,10 @@ import com.openexchange.messaging.SimAccountManager;
 import com.openexchange.messaging.SimMessagingService;
 import com.openexchange.messaging.registry.SimMessagingServiceRegistry;
 import com.openexchange.tools.session.SimServerSession;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 
 /**
@@ -69,10 +73,10 @@ import com.openexchange.tools.session.SimServerSession;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class UpdateTest extends TestCase {
-    // Success Case
+public class UpdateTest {    // Success Case
 
-    public void testUpdate() throws JSONException, OXException {
+         @Test
+     public void testUpdate() throws JSONException, OXException {
         final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
 
         final SimAccountManager accManager = new SimAccountManager();
@@ -108,7 +112,8 @@ public class UpdateTest extends TestCase {
 
     // Error Cases
 
-    public void testMissingID() throws JSONException, OXException {
+         @Test
+     public void testMissingID() throws JSONException, OXException {
         final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
 
         final SimAccountManager accManager = new SimAccountManager();
@@ -142,7 +147,8 @@ public class UpdateTest extends TestCase {
     }
 
 
-    public void testMessagingExceptionFromRegistry() throws JSONException, OXException {
+         @Test
+     public void testMessagingExceptionFromRegistry() throws JSONException, OXException {
         final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
         registry.setException(new OXException(-1));
 
@@ -175,7 +181,8 @@ public class UpdateTest extends TestCase {
 
     }
 
-    public void testMessagingExceptionFromAccManager() throws JSONException, OXException {
+         @Test
+     public void testMessagingExceptionFromAccManager() throws JSONException, OXException {
         final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
 
         final SimAccountManager accManager = new SimAccountManager();

@@ -49,10 +49,10 @@
 
 package com.openexchange.webdav.protocol.util;
 
-import java.util.Date;
-import junit.framework.TestCase;
-
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
+import java.util.Date;
+import org.junit.Test;
 
 /**
  * {@link UtilsTest}
@@ -60,9 +60,10 @@ import static com.openexchange.groupware.calendar.TimeTools.D;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class UtilsTest extends TestCase {
+public class UtilsTest {
 
     // Bug 13465
+    @Test
     public void testConvertToStringInUTCTimeZone() {
         Date d = D("24/03/2009 10:00");
         String converted = Utils.convert(d);

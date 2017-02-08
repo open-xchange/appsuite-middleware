@@ -136,9 +136,7 @@ public final class NetsolGetRequest extends AbstractMailRequest<NetsolGetRespons
      */
     @Override
     public Parameter[] getParameters() {
-        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET),
-                new Parameter(AJAXServlet.PARAMETER_FOLDERID, mailPath.folderId),
-                new Parameter(AJAXServlet.PARAMETER_ID, mailPath.id) };
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET), new Parameter(AJAXServlet.PARAMETER_FOLDERID, mailPath.folderId), new Parameter(AJAXServlet.PARAMETER_ID, mailPath.id) };
     }
 
     /*

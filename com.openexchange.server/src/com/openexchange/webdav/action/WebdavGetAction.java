@@ -95,6 +95,10 @@ public class WebdavGetAction extends WebdavHeadAction {
 		try {
 			out = new BufferedOutputStream(res.getOutputStream());
 			in = resource.getBody();
+            if (in == null) {
+                LOG.error("The body of the webdav ressource at " + resource.getUrl() + " is null!");
+                throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            }
 			final byte[] chunk = new byte[200];
 			offset = 0;
 			for(final ByteRange range : ranges) {

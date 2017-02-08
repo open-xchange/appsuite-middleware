@@ -53,7 +53,6 @@ import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
-
 /**
  * {@link DeleteRequest}
  *
@@ -84,6 +83,7 @@ public class DeleteRequest extends AbstractResourceCacheRequest<DeleteResponse> 
     @Override
     public AbstractAJAXParser<DeleteResponse> getParser() {
         return new AbstractAJAXParser<DeleteResponse>(true) {
+
             @Override
             protected DeleteResponse createResponse(Response response) throws JSONException {
                 return new DeleteResponse(response);

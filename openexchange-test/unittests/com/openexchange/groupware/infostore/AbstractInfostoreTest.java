@@ -52,7 +52,8 @@ package com.openexchange.groupware.infostore;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
@@ -73,14 +74,14 @@ import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionFactory;
 
-
 /**
  * {@link AbstractInfostoreTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class AbstractInfostoreTest extends TestCase{
+public class AbstractInfostoreTest {
+
     protected InfostoreFacade infostore;
 
     protected Context ctx = null;
@@ -101,7 +102,7 @@ public class AbstractInfostoreTest extends TestCase{
 
     protected DBProvider provider = null;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         clean = new ArrayList<DocumentMetadata>();
         cleanFolders = new ArrayList<FolderObject>();
@@ -120,14 +121,13 @@ public class AbstractInfostoreTest extends TestCase{
         user = UserStorage.getInstance().getUser(tools.resolveUser(userName, ctx), ctx);
         user2 = UserStorage.getInstance().getUser(tools.resolveUser(userName2, ctx), ctx);
 
-
         session = ServerSessionFactory.createServerSession(user.getId(), ctx, "blupp");
         session2 = ServerSessionFactory.createServerSession(user2.getId(), ctx, "blupp2");
 
         permissionBits = session.getUserPermissionBits();
         permissionBits2 = session2.getUserPermissionBits();
 
-        folderId = getPrivateInfostoreFolder(ctx,user,session);
+        folderId = getPrivateInfostoreFolder(ctx, user, session);
         folderId2 = getPrivateInfostoreFolder(ctx, user2, session2);
 
         provider = new DBPoolProvider();
@@ -140,22 +140,22 @@ public class AbstractInfostoreTest extends TestCase{
         return oxfa.getDefaultFolder(usr.getId(), FolderObject.INFOSTORE).getObjectID();
     }
 
-    @Override
-    public void tearDown() throws Exception{
-        for(final DocumentMetadata dm : clean) {
+    @After
+    public void tearDown() throws Exception {
+        for (final DocumentMetadata dm : clean) {
             IDTuple idTuple = new IDTuple(Long.toString(dm.getFolderId()), Integer.toString(dm.getId()));
             infostore.removeDocument(Collections.singletonList(idTuple), System.currentTimeMillis(), session);
         }
 
         final OXFolderManager oxma = OXFolderManager.getInstance(session);
-        for(final FolderObject folder : cleanFolders) {
+        for (final FolderObject folder : cleanFolders) {
             oxma.deleteFolder(folder, false, System.currentTimeMillis());
         }
 
         Init.stopServer();
     }
 
-    protected InfostoreFacade getInfostore(){
+    protected InfostoreFacade getInfostore() {
         return infostore;
     }
 
@@ -198,6 +198,5 @@ public class AbstractInfostoreTest extends TestCase{
     public DBProvider getProvider() {
         return provider;
     }
-
 
 }

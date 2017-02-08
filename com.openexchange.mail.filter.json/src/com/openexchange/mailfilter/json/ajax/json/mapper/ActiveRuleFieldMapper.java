@@ -54,6 +54,7 @@ import org.json.JSONException;
 import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.Rule;
 import com.openexchange.mailfilter.json.ajax.json.fields.RuleField;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ActiveRuleFieldMapper}
@@ -71,7 +72,7 @@ public class ActiveRuleFieldMapper implements RuleFieldMapper {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mailfilter.json.ajax.json.RuleFieldMapper#getAttributeName()
      */
     @Override
@@ -81,7 +82,7 @@ public class ActiveRuleFieldMapper implements RuleFieldMapper {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mailfilter.json.ajax.json.RuleFieldMapper#isNull(com.openexchange.jsieve.commands.Rule)
      */
     @Override
@@ -91,7 +92,7 @@ public class ActiveRuleFieldMapper implements RuleFieldMapper {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mailfilter.json.ajax.json.RuleFieldMapper#getAttribute(com.openexchange.jsieve.commands.Rule)
      */
     @Override
@@ -101,11 +102,11 @@ public class ActiveRuleFieldMapper implements RuleFieldMapper {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mailfilter.json.ajax.json.RuleFieldMapper#setAttribute(com.openexchange.jsieve.commands.Rule, java.lang.Object)
      */
     @Override
-    public void setAttribute(Rule rule, Object attribute) throws JSONException, SieveException, OXException {
+    public void setAttribute(Rule rule, Object attribute, ServerSession session) throws JSONException, SieveException, OXException {
         rule.setCommented(!((Boolean) attribute).booleanValue());
     }
 

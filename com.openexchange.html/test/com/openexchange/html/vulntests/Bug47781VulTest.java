@@ -64,8 +64,8 @@ public class Bug47781VulTest extends AbstractSanitizing {
         super();
     }
 
-    @Test
-    public void testScriptTagSanitizing() {
+     @Test
+     public void testScriptTagSanitizing() {
         String content = "<!DOCTYPE html>\n" +
             "<html><head>\n" +
             "    <meta charset=\"UTF-8\">\n" +

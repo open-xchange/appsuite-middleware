@@ -2834,7 +2834,7 @@ public class Contact extends CommonObject {
                 setStateBusiness((String) value);
                 break;
             case NUMBER_OF_IMAGES:
-                setNumberOfImages(((Integer) value).intValue());
+                setNumberOfImages(null == value ? 0 : ((Integer) value).intValue());
                 break;
             case IMAGE1_CONTENT_TYPE:
                 setImageContentType((String) value);
@@ -2951,7 +2951,7 @@ public class Contact extends CommonObject {
                 setStateOther((String) value);
                 break;
             case INTERNAL_USERID:
-                setInternalUserId(((Integer) value).intValue());
+                setInternalUserId(null == value ? 0 : ((Integer) value).intValue());
                 break;
             case CELLULAR_TELEPHONE1:
                 setCellularTelephone1((String) value);
@@ -2993,10 +2993,10 @@ public class Contact extends CommonObject {
                 setStreetBusiness((String) value);
                 break;
             case DEFAULT_ADDRESS:
-                setDefaultAddress(((Integer) value).intValue());
+                setDefaultAddress(null == value ? 0 : ((Integer) value).intValue());
                 break;
             case MARK_AS_DISTRIBUTIONLIST:
-                setMarkAsDistributionlist(((Boolean) value).booleanValue());
+                setMarkAsDistributionlist(null == value ? false : ((Boolean) value).booleanValue());
                 break;
             case TELEPHONE_ISDN:
                 setTelephoneISDN((String) value);
@@ -3116,10 +3116,10 @@ public class Contact extends CommonObject {
                 setDistributionList((DistributionListEntryObject[]) value);
                 break;
             case NUMBER_OF_DISTRIBUTIONLIST:
-                setNumberOfDistributionLists(((Integer) value).intValue());
+                setNumberOfDistributionLists(null == value ? 0 : ((Integer) value).intValue());
                 break;
             case USE_COUNT:
-                setUseCount(((Integer) value).intValue());
+                setUseCount(null == value ? 0 : ((Integer) value).intValue());
                 break;
             case YOMI_FIRST_NAME:
                 setYomiFirstName((String) value);

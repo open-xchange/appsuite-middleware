@@ -17,22 +17,24 @@
 package org.apache.tika.config;
 
 import java.net.URL;
-
-import junit.framework.TestCase;
-
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.DefaultParser;
+import org.junit.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
-public class TikaConfigTest extends TestCase {
-
+public class TikaConfigTest {
     /**
      * Make sure that a configuration file can't reference the
      * {@link AutoDetectParser} class a &lt;parser&gt; configuration element.
      *
      * @see <a href="https://issues.apache.org/jira/browse/TIKA-866">TIKA-866</a>
      */
-    public void testInvalidParser() throws Exception {
+         @Test
+     public void testInvalidParser() throws Exception {
         URL url = TikaConfigTest.class.getResource("TIKA-866-invalid.xml");
         System.setProperty("tika.config", url.toExternalForm());
         try {
@@ -51,7 +53,8 @@ public class TikaConfigTest extends TestCase {
      *
      * @see <a href="https://issues.apache.org/jira/browse/TIKA-866">TIKA-866</a>
      */
-    public void testCompositeParser() throws Exception {
+         @Test
+     public void testCompositeParser() throws Exception {
         URL url = TikaConfigTest.class.getResource("TIKA-866-composite.xml");
         System.setProperty("tika.config", url.toExternalForm());
         try {
@@ -69,7 +72,8 @@ public class TikaConfigTest extends TestCase {
      *
      * @see <a href="https://issues.apache.org/jira/browse/TIKA-866">TIKA-866</a>
      */
-    public void testValidParser() throws Exception {
+         @Test
+     public void testValidParser() throws Exception {
         URL url = TikaConfigTest.class.getResource("TIKA-866-valid.xml");
         System.setProperty("tika.config", url.toExternalForm());
         try {

@@ -127,6 +127,7 @@ import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced;
+import com.openexchange.mail.api.IMailFolderStorageEnhanced2;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailMessageStorageBatch;
 import com.openexchange.mail.api.IMailMessageStorageBatchCopyMove;
@@ -289,6 +290,35 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         checkParameters = false;
     }
 
+    @Override
+    public Session getSession() {
+        return session;
+    }
+
+    @Override
+    public char getSeparator(int acccountId) throws OXException {
+        return getSeparator(acccountId, session).charValue();
+    }
+
+    private Character getSeparator(final int accountId, final Session session) throws OXException {
+        final MailSessionCache sessionCache = MailSessionCache.getInstance(session);
+        Character sep = (Character) sessionCache.getParameter(accountId, MailSessionParameterNames.getParamSeparator());
+        if (null == sep) {
+            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> ma = null;
+            try {
+                ma = MailAccess.getInstance(session, accountId);
+                ma.connect(false);
+                sep = Character.valueOf(ma.getFolderStorage().getFolder("INBOX").getSeparator());
+                sessionCache.putParameter(accountId, MailSessionParameterNames.getParamSeparator(), sep);
+            } finally {
+                if (null != ma) {
+                    ma.close(true);
+                }
+            }
+        }
+        return sep;
+    }
+
     private User getUser() throws OXException {
         if (null == user) {
             user = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
@@ -345,8 +375,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         initConnection(accountId);
         String fullName = fullnameArgument.getFullname();
         IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
-        if (folderStorage instanceof IMailFolderStorageEnhanced) {
-            ((IMailFolderStorageEnhanced) folderStorage).expungeFolder(fullName, hardDelete);
+
+        IMailFolderStorageEnhanced storageEnhanced = folderStorage.supports(IMailFolderStorageEnhanced.class);
+        if (null != storageEnhanced) {
+            storageEnhanced.expungeFolder(fullName, hardDelete);
         } else {
             IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
             MailMessage[] messages = messageStorage.searchMessages(
@@ -706,8 +738,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 }
             }
 
-            if (messageStorage instanceof IMailMessageStorageBatchCopyMove) {
-                IMailMessageStorageBatchCopyMove batchCopyMove = (IMailMessageStorageBatchCopyMove) messageStorage;
+            IMailMessageStorageBatchCopyMove batchCopyMove = messageStorage.supports(IMailMessageStorageBatchCopyMove.class);
+            if (null != batchCopyMove) {
                 if (move) {
                     batchCopyMove.moveMessages(sourceFullname, destFullname);
                     postEvent(sourceAccountId, sourceFullname, true, true);
@@ -1001,13 +1033,22 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         String fullName = argument.getFullname();
         IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
         MailFolder f = folderStorage.getFolder(fullName);
-        if (folderStorage instanceof IMailFolderStorageEnhanced) {
-            IMailFolderStorageEnhanced storageEnhanced = (IMailFolderStorageEnhanced) folderStorage;
+
+        IMailFolderStorageEnhanced2 storageEnhanced2 = folderStorage.supports(IMailFolderStorageEnhanced2.class);
+        if (null != storageEnhanced2) {
+            int[] totalAndUnread = storageEnhanced2.getTotalAndUnreadCounter(fullName);
+            int newCounter = storageEnhanced2.getNewCounter(fullName);
+            return new int[] { totalAndUnread[0], newCounter, totalAndUnread[1], f.getDeletedMessageCount() };
+        }
+
+        IMailFolderStorageEnhanced storageEnhanced = folderStorage.supports(IMailFolderStorageEnhanced.class);
+        if (null != storageEnhanced) {
             int totalCounter = storageEnhanced.getTotalCounter(fullName);
             int unreadCounter = storageEnhanced.getUnreadCounter(fullName);
             int newCounter = storageEnhanced.getNewCounter(fullName);
             return new int[] { totalCounter, newCounter, unreadCounter, f.getDeletedMessageCount() };
         }
+
         int totalCounter = mailAccess.getMessageStorage().searchMessages(fullName, IndexRange.NULL, MailSortField.RECEIVED_DATE, OrderDirection.ASC, null, FIELDS_ID).length;
         int unreadCounter = mailAccess.getMessageStorage().getUnreadMessages(fullName, MailSortField.RECEIVED_DATE, OrderDirection.DESC, FIELDS_ID, -1).length;
         return new int[] { totalCounter, f.getNewMessageCount(), unreadCounter, f.getDeletedMessageCount() };
@@ -1030,12 +1071,13 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         final MailFields mailFields = new MailFields(MailField.getFields(fields));
         mailFields.add(MailField.FOLDER_ID);
         mailFields.add(MailField.toField(MailListField.getField(sortCol)));
+        checkFieldsForColorCheck(mailFields);
 
         // Check message storage
         final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
 
-        if (messageStorage instanceof ISimplifiedThreadStructureEnhanced) {
-            ISimplifiedThreadStructureEnhanced stse = (ISimplifiedThreadStructureEnhanced) messageStorage;
+        ISimplifiedThreadStructureEnhanced stse = messageStorage.supports(ISimplifiedThreadStructureEnhanced.class);
+        if (null != stse) {
             try {
                 List<List<MailMessage>> result = stse.getThreadSortedMessages(
                     fullName,
@@ -1052,6 +1094,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 if (!mailAccess.getWarnings().isEmpty()) {
                     warnings.addAll(mailAccess.getWarnings());
                 }
+
+                checkMailsForColor(result);
                 return result;
             } catch (OXException e) {
                 // Check for missing "THREAD=REFERENCES" capability
@@ -1061,8 +1105,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             }
         }
 
-        if (messageStorage instanceof ISimplifiedThreadStructure) {
-            ISimplifiedThreadStructure sts = (ISimplifiedThreadStructure) messageStorage;
+        ISimplifiedThreadStructure sts = messageStorage.supports(ISimplifiedThreadStructure.class);
+        if (null != sts) {
             try {
                 List<List<MailMessage>> mails = sts.getThreadSortedMessages(
                     fullName,
@@ -1082,6 +1126,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 if (!mailAccess.getWarnings().isEmpty()) {
                     warnings.addAll(mailAccess.getWarnings());
                 }
+                checkMailsForColor(mails);
                 return mails;
             } catch (OXException e) {
                 // Check for missing "THREAD=REFERENCES" capability
@@ -1166,6 +1211,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         if (!mailAccess.getWarnings().isEmpty()) {
             warnings.addAll(mailAccess.getWarnings());
         }
+        checkMailsForColor(list);
         return list;
     }
 
@@ -1360,22 +1406,16 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     private String getDefaultMailFolder(int index, int accountId) {
-        String[] arr = MailSessionCache.getInstance(session).getParameter(
-            accountId,
-            MailSessionParameterNames.getParamDefaultFolderArray());
-        return arr == null ? null : arr[index];
+        String[] arr = MailSessionCache.getInstance(session).getParameter(accountId, MailSessionParameterNames.getParamDefaultFolderArray());
+        return arr == null ? null : (index < arr.length ? arr[index] : null);
     }
 
     private String[] getSortedDefaultMailFolders(int accountId) {
-        String[] arr = MailSessionCache.getInstance(session).getParameter(
-            accountId,
-            MailSessionParameterNames.getParamDefaultFolderArray());
+        String[] arr = MailSessionCache.getInstance(session).getParameter(accountId, MailSessionParameterNames.getParamDefaultFolderArray());
         if (arr == null) {
             return new String[0];
         }
-        return new String[] {
-            INBOX_ID, arr[StorageUtility.INDEX_DRAFTS], arr[StorageUtility.INDEX_SENT], arr[StorageUtility.INDEX_SPAM],
-            arr[StorageUtility.INDEX_TRASH] };
+        return new String[] { INBOX_ID, arr[StorageUtility.INDEX_DRAFTS], arr[StorageUtility.INDEX_SENT], arr[StorageUtility.INDEX_SPAM], arr[StorageUtility.INDEX_TRASH] };
     }
 
     @Override
@@ -1583,6 +1623,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             if (mail.containsPrevSeen() && !mail.isPrevSeen()) {
                 postEvent(PushEventConstants.TOPIC_ATTR, accountId, fullName, true, true);
             }
+
             /*
              * Update cache since \Seen flag is possibly changed
              */
@@ -1604,7 +1645,26 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             } catch (OXException e) {
                 LOG.error("", e);
             }
+            /*
+             * Check color label vs. \Flagged flag
+             */
+            if (mail.getColorLabel() == 0) {
+                // No color label set; check if \Flagged
+                if (mail.isFlagged()) {
+                    FlaggingMode mode = FlaggingMode.getFlaggingMode(session);
+                    if (mode.equals(FlaggingMode.FLAGGED_IMPLICIT)) {
+                        mail.setColorLabel(FlaggingMode.getFlaggingColor(session));
+                    }
+                }
+            } else {
+                // Color label set. Check whether to swallow that information in case only \Flagged should be advertised
+                FlaggingMode mode = FlaggingMode.getFlaggingMode(session);
+                if (mode.equals(FlaggingMode.FLAGGED_ONLY)) {
+                    mail.setColorLabel(0);
+                }
+            }
         }
+
         return mail;
     }
 
@@ -1647,6 +1707,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         for (int i = 0; i < msgIds.length; i++) {
             mails[i] = mailAccess.getMessageStorage().getMessage(fullName, msgIds[i], false);
         }
+
         /*
          * Store them temporary to files
          */
@@ -1892,9 +1953,12 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         initConnection(accountId);
         String fullName = argument.getFullname();
         IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
-        if (folderStorage instanceof IMailFolderStorageEnhanced) {
-            return ((IMailFolderStorageEnhanced) folderStorage).getTotalCounter(fullName);
+
+        IMailFolderStorageEnhanced storageEnhanced = folderStorage.supports(IMailFolderStorageEnhanced.class);
+        if (null != storageEnhanced) {
+            return storageEnhanced.getTotalCounter(fullName);
         }
+
         return folderStorage.getFolder(fullName).getMessageCount();
     }
 
@@ -1905,6 +1969,84 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         initConnection(accountId);
         String fullName = argument.getFullname();
         return mailAccess.getMessageStorage().getImageAttachment(fullName, msgUID, cid);
+    }
+
+    /**
+     * Adds the configured color to colorless flagged mails in case the flagging mode is {@link FlaggingMode.FLAGGED_IMPLICIT} and
+     * removes the color in case the mode is {@link FlaggingMode.FLAGGED_ONLY}.
+     *
+     *
+     * @param threads The mail threads to check
+     */
+    private void checkMailsForColor(List<List<MailMessage>> threads) {
+        FlaggingMode mode = FlaggingMode.getFlaggingMode(session);
+        for(List<MailMessage> mails: threads){
+            checkMailsForColor(mails, mode);
+        }
+    }
+
+    /**
+     * Adds the configured color to colorless flagged mails in case the flagging mode is {@link FlaggingMode.FLAGGED_IMPLICIT} and
+     * removes the color in case the mode is {@link FlaggingMode.FLAGGED_ONLY}.
+     *
+     *
+     * @param mails The mails to check
+     */
+    private void checkMailsForColor(MailMessage[] mails) {
+        FlaggingMode mode = FlaggingMode.getFlaggingMode(session);
+        checkMailsForColor(Arrays.asList(mails), mode);
+    }
+
+    /**
+     * Adds the configured color to colorless flagged mails in case the flagging mode is {@link FlaggingMode.FLAGGED_IMPLICIT} and
+     * removes the color in case the mode is {@link FlaggingMode.FLAGGED_ONLY}.
+     *
+     *
+     * @param mails The mails to check
+     * @param mode The current {@link FlaggingMode} of the user
+     */
+    private void checkMailsForColor(Iterable<MailMessage> mails, FlaggingMode mode) {
+        if (mode.equals(FlaggingMode.FLAGGED_IMPLICIT)) {
+            int color = FlaggingMode.getFlaggingColor(session);
+            for (MailMessage mail : mails) {
+                if (mail != null && mail.getColorLabel() == 0 && mail.isFlagged()) {
+                    mail.setColorLabel(color);
+                }
+            }
+            return;
+        }
+        if (mode.equals(FlaggingMode.FLAGGED_ONLY)) {
+            for (MailMessage mail : mails) {
+                if (mail != null && mail.getColorLabel() != 0) {
+                    mail.setColorLabel(0);
+                }
+            }
+            return;
+        }
+    }
+
+    /**
+     * Checks whether the given fields object contains all necessary fields for the color check
+     *
+     * @param fields The fields to check
+     * @return true if fields was changed, false otherwise
+     */
+    private boolean checkFieldsForColorCheck(MailFields fields){
+        FlaggingMode mode = FlaggingMode.getFlaggingMode(session);
+        if (mode.equals(FlaggingMode.FLAGGED_IMPLICIT)) {
+            if (fields.contains(MailField.COLOR_LABEL)) {
+                if (!fields.contains(MailField.FLAGS)) {
+                    fields.add(MailField.FLAGS);
+                    return true;
+                }
+            } else {
+                if (fields.contains(MailField.FLAGS)) {
+                    fields.add(MailField.COLOR_LABEL);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override
@@ -1952,8 +2094,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     if (!loadMe.isEmpty()) {
                         initConnection(accountId);
                         IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-                        if (messageStorage instanceof IMailMessageStorageExt) {
-                            IMailMessageStorageExt messageStorageExt = (IMailMessageStorageExt) messageStorage;
+
+                        IMailMessageStorageExt messageStorageExt = messageStorage.supports(IMailMessageStorageExt.class);
+                        if (null != messageStorageExt) {
                             for (MailMessage header : messageStorageExt.getMessages(fullName, loadMe.toArray(new String[loadMe.size()]), FIELDS_ID_INFO, headerFields)) {
                                 if (null != header) {
                                     MailMessage mailMessage = finder.get(header.getMailId());
@@ -1974,6 +2117,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                         }
                     }
                 }
+
+                checkMailsForColor(mails);
                 return mails;
             }
         } catch (OXException e) {
@@ -1985,15 +2130,24 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         initConnection(accountId);
         boolean cachable = uids.length < mailAccess.getMailConfig().getMailProperties().getMailFetchLimit();
         MailField[] useFields = MailField.getFields(fields);
+
         if (cachable) {
             useFields = MailFields.addIfAbsent(useFields, MimeStorageUtility.getCacheFieldsArray());
             useFields = MailFields.addIfAbsent(useFields, MailField.ID, MailField.FOLDER_ID);
         }
+
+        MailFields mailFieldsForCheck = new MailFields(useFields);
+        if(checkFieldsForColorCheck(mailFieldsForCheck)){
+            useFields = mailFieldsForCheck.toArray();
+        }
+
         MailMessage[] mails;
         {
             IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-            if (messageStorage instanceof IMailMessageStorageExt) {
-                mails = ((IMailMessageStorageExt) messageStorage).getMessages(fullName, uids, useFields, headerFields);
+
+            IMailMessageStorageExt messageStorageExt = messageStorage.supports(IMailMessageStorageExt.class);
+            if (null != messageStorageExt) {
+                mails = messageStorageExt.getMessages(fullName, uids, useFields, headerFields);
             } else {
                 /*
                  * Get appropriate mail fields
@@ -2024,6 +2178,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             warnings.addAll(mailAccess.getWarnings());
         }
 
+        checkMailsForColor(mails);
         return mails;
     }
 
@@ -2118,6 +2273,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 useFields = mfs.toArray();
             }
         }
+
+        MailFields mailFields = new MailFields(useFields);
+        if(checkFieldsForColorCheck(mailFields)){
+            useFields = mailFields.toArray();
+        }
         /*-
          * More than ID and folder requested?
          *  AND
@@ -2139,8 +2299,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
              */
             if (null != headerNames && 0 < headerNames.length) {
                 IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-                if (messageStorage instanceof IMailMessageStorageExt) {
-                    mails = ((IMailMessageStorageExt) messageStorage).getMessages(fullName, mailIds, useFields, headerNames);
+
+                IMailMessageStorageExt messageStorageExt = messageStorage.supports(IMailMessageStorageExt.class);
+                if (null != messageStorageExt) {
+                    mails = messageStorageExt.getMessages(fullName, mailIds, useFields, headerNames);
                 } else {
                     useFields = MailFields.addIfAbsent(useFields, MailField.ID);
                     mails = messageStorage.getMessages(fullName, mailIds, useFields);
@@ -2153,18 +2315,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 return SearchIteratorAdapter.emptyIterator();
             }
         }
-        /*
-         * Set account information
-         */
-        List<MailMessage> l = new LinkedList<>();
-        for (MailMessage mail : mails) {
-            if (mail != null) {
-                if (!mail.containsAccountId() || mail.getAccountId() < 0) {
-                    mail.setAccountId(accountId);
-                }
-                l.add(mail);
-            }
-        }
+
         /*
          * Put message information into cache
          */
@@ -2182,6 +2333,21 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         } catch (OXException e) {
             LOG.error("", e);
         }
+
+        checkMailsForColor(mails);
+
+        /*
+         * Set account information
+         */
+        List<MailMessage> l = new LinkedList<>();
+        for (MailMessage mail : mails) {
+            if (mail != null) {
+                if (!mail.containsAccountId() || mail.getAccountId() < 0) {
+                    mail.setAccountId(accountId);
+                }
+                l.add(mail);
+            }
+        }
         return new SearchIteratorDelegator<>(l);
     }
 
@@ -2192,11 +2358,17 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             useFields = MailFields.addIfAbsent(useFields, MimeStorageUtility.getCacheFieldsArray());
             useFields = MailFields.addIfAbsent(useFields, MailField.ID, MailField.FOLDER_ID);
         }
+        MailFields mailFields = new MailFields(useFields);
+        if(checkFieldsForColorCheck(mailFields)){
+            useFields = mailFields.toArray();
+        }
         MailMessage[] mails;
         if (null != headerNames && 0 < headerNames.length) {
             IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-            if (messageStorage instanceof IMailMessageStorageExt) {
-                mails = ((IMailMessageStorageExt) messageStorage).searchMessages(fullName, indexRange, sortField, orderDir, searchTerm, useFields, headerNames);
+
+            IMailMessageStorageExt messageStorageExt = messageStorage.supports(IMailMessageStorageExt.class);
+            if (null != messageStorageExt) {
+                mails = messageStorageExt.searchMessages(fullName, indexRange, sortField, orderDir, searchTerm, useFields, headerNames);
             } else {
                 mails = mailAccess.getMessageStorage().searchMessages(fullName, indexRange, sortField, orderDir, searchTerm, useFields);
                 MessageUtility.enrichWithHeaders(fullName, mails, headerNames, messageStorage);
@@ -2263,6 +2435,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         } catch (OXException e) {
             LOG.error("", e);
         }
+
+        checkMailsForColor(mails);
         return new ArrayIterator<>(mails);
     }
 
@@ -2620,6 +2794,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             useFields = MailField.toFields(MailListField.getFields(fields));
             onlyFolderAndID = onlyFolderAndID(useFields);
         }
+
+        MailFields mailFields = new MailFields(useFields);
+        if(checkFieldsForColorCheck(mailFields)){
+            useFields = mailFields.toArray();
+        }
         if (!onlyFolderAndID) {
             /*
              * Extract IDs
@@ -2665,6 +2844,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         } catch (OXException e) {
             LOG.error("", e);
         }
+        checkMailsForColor(mails);
         return SearchIteratorAdapter.createArrayIterator(mails);
     }
 
@@ -3178,13 +3358,21 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     @Override
     public List<String> sendMessages(List<? extends ComposedMailMessage> transportMails, ComposedMailMessage mailToAppend, boolean transportEqualToSent, ComposeType type, int accountId, UserSettingMail optUserSetting, MtaStatusInfo statusInfo, String remoteAddress) throws OXException {
         // Initialize
-        initConnection(isTransportOnly(accountId) ? MailAccount.DEFAULT_ID : accountId);
+        boolean accessAvailable = true;
+        try {
+            initConnection(isTransportOnly(accountId) ? MailAccount.DEFAULT_ID : accountId);
+        } catch (OXException e) {
+            if (false == MailExceptionCode.MAIL_ACCESS_DISABLED.equals(e)) {
+                throw e;
+            }
+            accessAvailable = false;
+        }
         MailTransport transport = MailTransport.getInstance(session, accountId);
         try {
             // Invariants
             UserSettingMail usm = null == optUserSetting ? UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx) : optUserSetting;
             List<String> ids = new ArrayList<>(transportMails.size());
-            boolean settingsAllowAppendToSend = !usm.isNoCopyIntoStandardSentFolder();
+            boolean settingsAllowAppendToSend = accessAvailable && !usm.isNoCopyIntoStandardSentFolder();
 
             // State variables
             OXException failedAppend2Sent = null;
@@ -3288,7 +3476,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     }
 
                     // Check for a reply/forward
-                    if (first) {
+                    if (first && accessAvailable) {
                         try {
                             if (ComposeType.REPLY.equals(type)) {
                                 setFlagReply(composedMail.getMsgref());
@@ -3351,6 +3539,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     warnings.add(oxe);
                 }
                 first = false;
+            }
+
+            if (!accessAvailable) {
+                throw MailExceptionCode.COPY_TO_SENT_FOLDER_FAILED.create(new Object[0]);
             }
 
             if (null != failedAppend2Sent) {
@@ -3454,18 +3646,22 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 mailAccess.getMessageStorage().updateMessageUserFlags(sentFullname, uidArr, userFlags, true);
             }
         }
-        MailPath retval = new MailPath(mailAccess.getAccountId(), sentFullname, uidArr[0]);
+        MailPath retval = new MailPath(mailAccess.getAccountId(), sentFullname, (uidArr == null || uidArr.length == 0) ? null : uidArr[0]);
         LOG.debug("Mail copy ({}) appended in {}msec", retval, System.currentTimeMillis() - start);
         return retval;
     }
 
     private String[] doAppend2SentFolder(MailMessage sentMail, String sentFullname, IMailMessageStorage messageStorage, boolean retryOnCommunicationError) throws OXException {
         try {
-            if (!(sentMail instanceof MimeRawSource) || !(messageStorage instanceof IMailMessageStorageMimeSupport)) {
+            if (!(sentMail instanceof MimeRawSource)) {
                 return messageStorage.appendMessages(sentFullname, new MailMessage[] { sentMail });
             }
 
-            IMailMessageStorageMimeSupport mimeSupport = (IMailMessageStorageMimeSupport) messageStorage;
+            IMailMessageStorageMimeSupport mimeSupport = messageStorage.supports(IMailMessageStorageMimeSupport.class);
+            if (null == mimeSupport) {
+                return messageStorage.appendMessages(sentFullname, new MailMessage[] { sentMail });
+            }
+
             if (mimeSupport.isMimeSupported()) {
                 return mimeSupport.appendMimeMessages(sentFullname, new Message[] { (Message) ((MimeRawSource) sentMail).getPart() });
             }
@@ -3838,10 +4034,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
         String[] ids;
         if (null == mailIDs) {
-            if (messageStorage instanceof IMailMessageStorageBatch) {
-                IMailMessageStorageBatch batch = (IMailMessageStorageBatch) messageStorage;
+            IMailMessageStorageBatch messageStorageBatch = messageStorage.supports(IMailMessageStorageBatch.class);
+            if (null != messageStorageBatch) {
                 ids = null;
-                batch.updateMessageColorLabel(fullName, newColorLabel);
+                messageStorageBatch.updateMessageColorLabel(fullName, newColorLabel);
             } else {
                 ids = getAllMessageIDs(argument);
                 messageStorage.updateMessageColorLabel(fullName, ids, newColorLabel);
@@ -3870,6 +4066,12 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             }
         } catch (OXException e) {
             LOG.error("", e);
+        }
+
+        FlaggingMode mode = FlaggingMode.getFlaggingMode(session);
+        if (mode.equals(FlaggingMode.FLAGGED_IMPLICIT)) {
+            int flags = MailMessage.FLAG_FLAGGED;
+            updateMessageFlags(folder, mailIDs, flags, newColorLabel != 0);
         }
     }
 
@@ -3913,13 +4115,13 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
         String[] ids;
         if (null == mailIDs) {
-            if (messageStorage instanceof IMailMessageStorageBatch) {
-                IMailMessageStorageBatch batch = (IMailMessageStorageBatch) messageStorage;
+            IMailMessageStorageBatch messageStorageBatch = messageStorage.supports(IMailMessageStorageBatch.class);
+            if (null != messageStorageBatch) {
                 ids = null;
                 if (ArrayUtils.isEmpty(userFlags)) {
-                    batch.updateMessageFlags(fullName, flagBits, flagVal);
+                    messageStorageBatch.updateMessageFlags(fullName, flagBits, flagVal);
                 } else {
-                    batch.updateMessageFlags(fullName, flagBits, userFlags, flagVal);
+                    messageStorageBatch.updateMessageFlags(fullName, flagBits, userFlags, flagVal);
                 }
             } else {
                 ids = getAllMessageIDs(argument);
@@ -3985,7 +4187,14 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         int accountId = argument.getAccountId();
         initConnection(accountId);
         String fullName = argument.getFullname();
-        return mailAccess.getMessageStorage().getNewAndModifiedMessages(fullName, MailField.getFields(fields));
+        MailField[] mailFieldsArray = MailField.getFields(fields);
+        MailFields mailFields = new MailFields(mailFieldsArray);
+        if(checkFieldsForColorCheck(mailFields)){
+            mailFieldsArray = mailFields.toArray();
+        }
+        MailMessage[] mails = mailAccess.getMessageStorage().getNewAndModifiedMessages(fullName,mailFieldsArray);
+        checkMailsForColor(mails);
+        return mails;
     }
 
     @Override
@@ -3994,7 +4203,14 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         int accountId = argument.getAccountId();
         initConnection(accountId);
         String fullName = argument.getFullname();
-        return mailAccess.getMessageStorage().getDeletedMessages(fullName, MailField.getFields(fields));
+        MailField[] mailFieldsArray = MailField.getFields(fields);
+        MailFields mailFields = new MailFields(mailFieldsArray);
+        if(checkFieldsForColorCheck(mailFields)){
+            mailFieldsArray = mailFields.toArray();
+        }
+        MailMessage[] mails = mailAccess.getMessageStorage().getDeletedMessages(fullName, mailFieldsArray);
+        checkMailsForColor(mails);
+        return mails;
     }
 
     /*-

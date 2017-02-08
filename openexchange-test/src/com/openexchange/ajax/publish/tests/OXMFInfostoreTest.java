@@ -50,10 +50,11 @@
 package com.openexchange.ajax.publish.tests;
 
 import static com.openexchange.test.OXTestToolkit.assertSameStream;
+import static org.junit.Assert.assertTrue;
 import java.io.FileInputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
+import org.junit.Test;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.groupware.container.FolderObject;
@@ -66,12 +67,12 @@ import com.openexchange.test.TestInit;
  */
 public class OXMFInfostoreTest extends AbstractPublicationTest {
 
-    public OXMFInfostoreTest(String name) {
-        super(name);
+    public OXMFInfostoreTest() {
+        super();
     }
 
+    @Test
     public void testLifeCycleOfInfostoreFolderPublication() throws Exception {
-        InfostoreTestManager infoMgr = getInfostoreManager();
         FolderObject folder = createDefaultInfostoreFolder();
 
         File data = new DefaultFile();
@@ -82,7 +83,7 @@ public class OXMFInfostoreTest extends AbstractPublicationTest {
         java.io.File upload = new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile"));
         data.setFileName(upload.getName());
 
-        infoMgr.newAction(data, upload);
+        itm.newAction(data, upload);
 
         SimPublicationTargetDiscoveryService pubDiscovery = new SimPublicationTargetDiscoveryService();
 
@@ -102,8 +103,8 @@ public class OXMFInfostoreTest extends AbstractPublicationTest {
         assertSameStream(new FileInputStream(upload), getDownload(downloadUrl));
     }
 
+    @Test
     public void testLifeCycleOfInfostoreItemPublication() throws Exception {
-        InfostoreTestManager infoMgr = getInfostoreManager();
         FolderObject folder = createDefaultInfostoreFolder();
 
         File data = new DefaultFile();
@@ -114,7 +115,7 @@ public class OXMFInfostoreTest extends AbstractPublicationTest {
         java.io.File upload = new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile"));
         data.setFileName(upload.getName());
 
-        infoMgr.newAction(data, upload);
+        itm.newAction(data, upload);
 
         SimPublicationTargetDiscoveryService pubDiscovery = new SimPublicationTargetDiscoveryService();
 

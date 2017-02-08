@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.mail;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.mail.actions.DeleteRequest;
 import com.openexchange.ajax.mail.actions.GetRequest;
 import com.openexchange.ajax.mail.actions.ImportMailRequest;
@@ -71,26 +74,28 @@ public final class Bug19696Test extends AbstractMailTest {
      *
      * @param name Name of this test.
      */
-    public Bug19696Test(final String name) {
-        super(name);
+    public Bug19696Test() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
-        client = getClient();
-        folder = client.getValues().getInboxFolder();
-        address = client.getValues().getSendAddress();
+        folder = getClient().getValues().getInboxFolder();
+        address = getClient().getValues().getSendAddress();
         final String mail = TestMails.BUG_19696_MAIL;
         final ImportMailRequest request = new ImportMailRequest(folder, 0, Charsets.UTF_8, mail);
-        final ImportMailResponse response = client.execute(request);
+        final ImportMailResponse response = getClient().execute(request);
         ids = response.getIds()[0];
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        client.execute(new DeleteRequest(ids, true));
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
+        try {
+            getClient().execute(new DeleteRequest(ids, true));
+        } finally {
+            super.tearDown();
+        }
     }
 
     /**
@@ -98,13 +103,14 @@ public final class Bug19696Test extends AbstractMailTest {
      *
      * @throws Throwable
      */
+    @Test
     public void testGet() throws Throwable {
         {
             final GetRequest request = new GetRequest(folder, ids[1]);
             request.setUnseen(true);
             request.setSource(true);
             request.setSave(true);
-            client.execute(request);
+            getClient().execute(request);
         }
     }
 

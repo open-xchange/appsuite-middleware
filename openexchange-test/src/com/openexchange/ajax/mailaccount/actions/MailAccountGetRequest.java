@@ -89,9 +89,7 @@ public class MailAccountGetRequest implements AJAXRequest<MailAccountGetResponse
 
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
-        return new Parameter[]{
-            new Parameter("id", id),
-            new Parameter("action", "get")
+        return new Parameter[] { new Parameter("id", id), new Parameter("action", "get")
         };
     }
 

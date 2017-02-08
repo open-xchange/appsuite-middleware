@@ -2,10 +2,10 @@ package liquibase.sqlgenerator.core;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 import liquibase.database.core.OracleDatabase;
 import liquibase.sql.Sql;
 import liquibase.statement.core.InsertOrUpdateStatement;
-import org.junit.Test;
 
 
 public class InsertOrUpdateGeneratorOracleTest {

@@ -59,11 +59,11 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
  */
 public class ZipDocumentsResponse extends AbstractAJAXResponse {
 
-	/**
-	 * @param response
-	 */
-	ZipDocumentsResponse(final Response response) {
-		super(response);
-	}
+    /**
+     * @param response
+     */
+    ZipDocumentsResponse(final Response response) {
+        super(response);
+    }
 
 }

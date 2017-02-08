@@ -97,14 +97,17 @@
 
 package com.openexchange.ajax.conversion;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.util.TimeZone;
 import java.util.UUID;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.conversion.actions.ConvertRequest;
 import com.openexchange.ajax.conversion.actions.ConvertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.FolderAndID;
 import com.openexchange.ajax.mail.contenttypes.MailContentType;
@@ -133,80 +136,20 @@ public class Bug20758Test extends AbstractConversionTest {
     private String ical1;
     private String ical2;
 
-    public Bug20758Test(String name) {
-        super(name);
-    }
-
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
         client1 = getClient();
-        client2 = new AJAXClient(User.User1);
+        client2 = new AJAXClient(testContext.acquireUser());
 
         client1.getValues().setTimeZone(TimeZone.getTimeZone("Europe/Berlin"));
 
         uuid = UUID.randomUUID().toString();
 
-        ical1 = new StringBuilder()
-        .append("BEGIN:VCALENDAR\n")
-        .append("VERSION:2.0\n")
-        .append("METHOD:REQUEST\n")
-        .append("BEGIN:VEVENT\n")
-        .append("ORGANIZER:").append(client1.getValues().getSendAddress()).append('\n')
-        .append("ATTENDEE;PARTSTAT=ACCEPTED;CN=Da Organiza:Mailto:").append(client1.getValues().getSendAddress()).append('\n')
-        .append("ATTENDEE;RSVP=TRUE;TYPE=INDIVIDUAL;CN=First User:Mailto:").append(client1.getValues().getSendAddress()).append('\n')
-        .append("ATTENDEE;RSVP=TRUE;TYPE=INDIVIDUAL;CN=Second User:Mailto:").append(client2.getValues().getSendAddress()).append('\n')
-        .append("DTSTART:20111115T133000Z\n")
-        .append("DTEND:20111115T143000Z\n")
-        .append("SUMMARY:Weihnachtsferien\n")
-        .append("UID:ls0h48paommdkntd8ekdfquqbs@google.com\n")
-        .append("SEQUENCE:0\n")
-        .append("DTSTAMP:20111115T110530Z\n")
-        .append("END:VEVENT\n")
-        .append("END:VCALENDAR")
-        .toString();
+        ical1 = new StringBuilder().append("BEGIN:VCALENDAR\n").append("VERSION:2.0\n").append("METHOD:REQUEST\n").append("BEGIN:VEVENT\n").append("ORGANIZER:").append(client1.getValues().getSendAddress()).append('\n').append("ATTENDEE;PARTSTAT=ACCEPTED;CN=Da Organiza:Mailto:").append(client1.getValues().getSendAddress()).append('\n').append("ATTENDEE;RSVP=TRUE;TYPE=INDIVIDUAL;CN=First User:Mailto:").append(client1.getValues().getSendAddress()).append('\n').append("ATTENDEE;RSVP=TRUE;TYPE=INDIVIDUAL;CN=Second User:Mailto:").append(client2.getValues().getSendAddress()).append('\n').append("DTSTART:20111115T133000Z\n").append("DTEND:20111115T143000Z\n").append("SUMMARY:Weihnachtsferien\n").append("UID:ls0h48paommdkntd8ekdfquqbs@google.com\n").append("SEQUENCE:0\n").append("DTSTAMP:20111115T110530Z\n").append("END:VEVENT\n").append("END:VCALENDAR").toString();
 
-        ical2 = "BEGIN:VCALENDAR\n" +
-        "PRODID:Open-Xchange\n" +
-        "VERSION:2.0\n" +
-        "CALSCALE:GREGORIAN\n" +
-        "METHOD:REQUEST\n" +
-        "BEGIN:VEVENT\n" +
-        "DTSTAMP:20111201T082524Z\n" +
-        "SUMMARY:Test 20829\n" +
-        "DTSTART;TZID=Europe/Berlin:20111202T123000\n" +
-        "DTEND;TZID=Europe/Berlin:20111202T133000\n" +
-        "CLASS:PUBLIC\n" +
-        "LOCATION:12:30\n" +
-        "TRANSP:OPAQUE\n" +
-        "UID:6f7d7ef0-8def-4997-8427-2612b7095865\n" +
-        "CREATED:20111201T082524Z\n" +
-        "LAST-MODIFIED:20111201T082524Z\n" +
-        "ORGANIZER:" + client1.getValues().getSendAddress() + "\n" +
-        "ATTENDEE;ROLE=REQ-PARTICIPANT;CUTYPE=INDIVIDUAL:mailto:" + client1.getValues().getSendAddress() + "\n" +
-        "ATTENDEE;CUTYPE=INDIVIDUAL;PARTSTAT=NEEDS-ACTION;ROLE=REQ-PARTICIPANT;RSVP=TRUE:mailto:" + client2.getValues().getSendAddress() + "\n" +
-        "END:VEVENT\n" +
-        "BEGIN:VTIMEZONE\n" +
-        "TZID:Europe/Berlin\n" +
-        "TZURL:http://tzurl.org/zoneinfo-outlook/Europe/Berlin\n" +
-        "X-LIC-LOCATION:Europe/Berlin\n" +
-        "BEGIN:DAYLIGHT\n" +
-        "TZOFFSETFROM:+0100\n" +
-        "TZOFFSETTO:+0200\n" +
-        "TZNAME:CEST\n" +
-        "DTSTART:19700329T020000\n" +
-        "RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU\n" +
-        "END:DAYLIGHT\n" +
-        "BEGIN:STANDARD\n" +
-        "TZOFFSETFROM:+0200\n" +
-        "TZOFFSETTO:+0100\n" +
-        "TZNAME:CET\n" +
-        "DTSTART:19701025T030000\n" +
-        "RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU\n" +
-        "END:STANDARD\n" +
-        "END:VTIMEZONE\n" +
-        "END:VCALENDAR";
+        ical2 = "BEGIN:VCALENDAR\n" + "PRODID:Open-Xchange\n" + "VERSION:2.0\n" + "CALSCALE:GREGORIAN\n" + "METHOD:REQUEST\n" + "BEGIN:VEVENT\n" + "DTSTAMP:20111201T082524Z\n" + "SUMMARY:Test 20829\n" + "DTSTART;TZID=Europe/Berlin:20111202T123000\n" + "DTEND;TZID=Europe/Berlin:20111202T133000\n" + "CLASS:PUBLIC\n" + "LOCATION:12:30\n" + "TRANSP:OPAQUE\n" + "UID:6f7d7ef0-8def-4997-8427-2612b7095865\n" + "CREATED:20111201T082524Z\n" + "LAST-MODIFIED:20111201T082524Z\n" + "ORGANIZER:" + client1.getValues().getSendAddress() + "\n" + "ATTENDEE;ROLE=REQ-PARTICIPANT;CUTYPE=INDIVIDUAL:mailto:" + client1.getValues().getSendAddress() + "\n" + "ATTENDEE;CUTYPE=INDIVIDUAL;PARTSTAT=NEEDS-ACTION;ROLE=REQ-PARTICIPANT;RSVP=TRUE:mailto:" + client2.getValues().getSendAddress() + "\n" + "END:VEVENT\n" + "BEGIN:VTIMEZONE\n" + "TZID:Europe/Berlin\n" + "TZURL:http://tzurl.org/zoneinfo-outlook/Europe/Berlin\n" + "X-LIC-LOCATION:Europe/Berlin\n" + "BEGIN:DAYLIGHT\n" + "TZOFFSETFROM:+0100\n" + "TZOFFSETTO:+0200\n" + "TZNAME:CEST\n" + "DTSTART:19700329T020000\n" + "RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU\n" + "END:DAYLIGHT\n" + "BEGIN:STANDARD\n" + "TZOFFSETFROM:+0200\n" + "TZOFFSETTO:+0100\n" + "TZNAME:CET\n" + "DTSTART:19701025T030000\n" + "RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU\n" + "END:STANDARD\n" + "END:VTIMEZONE\n" + "END:VCALENDAR";
 
         mailFolderAndMailID1 = createMail(ical1);
         sequenceId1 = getSequenceIdForMail(client1, mailFolderAndMailID1);
@@ -215,6 +158,7 @@ public class Bug20758Test extends AbstractConversionTest {
         sequenceId2 = getSequenceIdForMail(client1, mailFolderAndMailID2);
     }
 
+    @Test
     public void testWithoutTimeZone() throws Exception {
         JSONObject jsonObject = internal(mailFolderAndMailID1, sequenceId1, new JSONArray());
         assertEquals("Wrong timezone", "Europe/Berlin", jsonObject.get("timezone"));
@@ -225,6 +169,7 @@ public class Bug20758Test extends AbstractConversionTest {
         assertEquals("Wrong start date", 1322829000000L, jsonObject.get("start_date")); //02.12.2011 12:30
     }
 
+    @Test
     public void testWithTimeZone() throws Exception {
         JSONObject jsonObject = internal(mailFolderAndMailID2, sequenceId2, new JSONArray().put(new JSONObject().put("com.openexchange.groupware.calendar.timezone", "UTC")));
         assertEquals("Wrong timezone", "America/New_York", jsonObject.get("timezone"));
@@ -238,10 +183,7 @@ public class Bug20758Test extends AbstractConversionTest {
     private JSONObject internal(String[] mail, Object sequenceId, JSONArray args) throws Exception {
         JSONObject jsonBody = new JSONObject();
         JSONObject jsonSource = new JSONObject().put("identifier", "com.openexchange.mail.ical");
-        jsonSource.put("args", new JSONArray().put(
-                new JSONObject().put("com.openexchange.mail.conversion.fullname", mail[0])).put(
-                new JSONObject().put("com.openexchange.mail.conversion.mailid", mail[1])).put(
-                new JSONObject().put("com.openexchange.mail.conversion.sequenceid", sequenceId)));
+        jsonSource.put("args", new JSONArray().put(new JSONObject().put("com.openexchange.mail.conversion.fullname", mail[0])).put(new JSONObject().put("com.openexchange.mail.conversion.mailid", mail[1])).put(new JSONObject().put("com.openexchange.mail.conversion.sequenceid", sequenceId)));
         jsonBody.put("datasource", jsonSource);
         JSONObject jsonHandler = new JSONObject().put("identifier", "com.openexchange.ical.json");
         jsonHandler.put("args", args);
@@ -300,4 +242,3 @@ public class Bug20758Test extends AbstractConversionTest {
     }
 
 }
-

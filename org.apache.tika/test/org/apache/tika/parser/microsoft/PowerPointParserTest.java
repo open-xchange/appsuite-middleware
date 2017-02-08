@@ -16,9 +16,10 @@
  */
 package org.apache.tika.parser.microsoft;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.io.InputStream;
 import java.util.Locale;
-
 import org.apache.tika.TikaTest;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.Office;
@@ -26,11 +27,13 @@ import org.apache.tika.metadata.OfficeOpenXMLCore;
 import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.sax.BodyContentHandler;
+import org.junit.Test;
 import org.xml.sax.ContentHandler;
 
 public class PowerPointParserTest extends TikaTest {
 
-    public void testPowerPointParser() throws Exception {
+         @Test
+     public void testPowerPointParser() throws Exception {
         InputStream input = PowerPointParserTest.class.getResourceAsStream(
                 "/test-documents/testPPT.ppt");
         try {
@@ -52,7 +55,8 @@ public class PowerPointParserTest extends TikaTest {
         }
     }
 
-    public void testVarious() throws Exception {
+         @Test
+     public void testVarious() throws Exception {
         ContentHandler handler = new BodyContentHandler();
         Metadata metadata = new Metadata();
 
@@ -123,7 +127,8 @@ public class PowerPointParserTest extends TikaTest {
         assertContains("\uD800\uDF32\uD800\uDF3f\uD800\uDF44\uD800\uDF39\uD800\uDF43\uD800\uDF3A", content);
     }
 
-    public void testMasterFooter() throws Exception {
+         @Test
+     public void testMasterFooter() throws Exception {
         ContentHandler handler = new BodyContentHandler();
         Metadata metadata = new Metadata();
 
@@ -143,7 +148,8 @@ public class PowerPointParserTest extends TikaTest {
     }
 
     // TODO: once we fix TIKA-712, re-enable this
-    public void testMasterText() throws Exception {
+         @Test
+     public void testMasterText() throws Exception {
         ContentHandler handler = new BodyContentHandler();
         Metadata metadata = new Metadata();
 
@@ -163,7 +169,8 @@ public class PowerPointParserTest extends TikaTest {
     }
 
     // TODO: once we fix TIKA-712, re-enable this
-    public void testMasterText2() throws Exception {
+         @Test
+     public void testMasterText2() throws Exception {
         ContentHandler handler = new BodyContentHandler();
         Metadata metadata = new Metadata();
 
@@ -185,7 +192,8 @@ public class PowerPointParserTest extends TikaTest {
     /**
      * Ensures that custom OLE2 (HPSF) properties are extracted
      */
-    public void testCustomProperties() throws Exception {
+         @Test
+     public void testCustomProperties() throws Exception {
        InputStream input = PowerPointParserTest.class.getResourceAsStream(
              "/test-documents/testPPT_custom_props.ppt");
        Metadata metadata = new Metadata();
@@ -218,7 +226,8 @@ public class PowerPointParserTest extends TikaTest {
     }
 
     // TIKA-1025
-    public void testEmbeddedPlacedholder() throws Exception {
+         @Test
+     public void testEmbeddedPlacedholder() throws Exception {
        XMLResult result = getXML("testPPT_embedded2.ppt");
        assertContains("<div class=\"embedded\" id=\"1\"/>", result.xml);
        assertContains("<div class=\"embedded\" id=\"14\"/>", result.xml);

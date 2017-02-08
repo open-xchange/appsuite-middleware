@@ -51,17 +51,21 @@ package com.openexchange.filestore.sproxyd;
 
 import static com.openexchange.filestore.sproxyd.SproxydBufferedInputStream.getRelativeRange;
 import java.util.Arrays;
-import junit.framework.TestCase;
+import org.junit.Test;
 import com.openexchange.filestore.sproxyd.chunkstorage.Chunk;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * {@link SproxydBufferedInputStreamTest}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class SproxydBufferedInputStreamTest extends TestCase {
-
-    public void testFirstChunk() {
+public class SproxydBufferedInputStreamTest {
+         @Test
+     public void testFirstChunk() {
         Chunk chunk = new Chunk(null, null, 0, 1000);
 
         assertNull(getRelativeRange(chunk, 1000, 1000));
@@ -103,7 +107,8 @@ public class SproxydBufferedInputStreamTest extends TestCase {
         assertEquals(999, getRelativeRange(chunk, 500, 1500)[1]);
     }
 
-    public void testMiddleChunk() {
+         @Test
+     public void testMiddleChunk() {
         Chunk chunk = new Chunk(null, null, 1000, 1000);
 
         assertNull(getRelativeRange(chunk, 2000, 2000));
@@ -145,7 +150,8 @@ public class SproxydBufferedInputStreamTest extends TestCase {
         assertEquals(999, getRelativeRange(chunk, 1500, 2500)[1]);
     }
 
-    public void testRandomChunks() {
+         @Test
+     public void testRandomChunks() {
         Chunk chunk = new Chunk(null, null, 130, 148);
         assertNotNull(getRelativeRange(chunk, 0, 138));
         assertEquals(0, getRelativeRange(chunk, 0, 138)[0]);

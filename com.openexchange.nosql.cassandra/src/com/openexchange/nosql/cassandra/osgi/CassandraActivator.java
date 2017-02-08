@@ -67,6 +67,9 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public class CassandraActivator extends HousekeepingActivator {
 
+    private CassandraService cassandraService;
+    private ObjectName objectName;
+
     /**
      * Initialises a new {@link CassandraActivator}.
      */
@@ -74,58 +77,50 @@ public class CassandraActivator extends HousekeepingActivator {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
-     */
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ConfigurationService.class, ManagementService.class };
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.osgi.DeferredActivator#startBundle()
-     */
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         CassandraService cassandraService = new CassandraServiceImpl(this);
         registerService(CassandraService.class, cassandraService);
-        trackService(CassandraService.class);
-        openTrackers();
+        addService(CassandraService.class, cassandraService);
+        this.cassandraService = cassandraService;
 
         // Register the cluster mbean
         ObjectName objectName = new ObjectName(CassandraClusterMBean.DOMAIN, "name", CassandraClusterMBean.NAME);
         CassandraClusterMBean mbean = new CassandraClusterMBeanImpl(this);
         ManagementService managementService = getService(ManagementService.class);
         managementService.registerMBean(objectName, mbean);
+        this.objectName = objectName;
 
         final Logger logger = LoggerFactory.getLogger(CassandraActivator.class);
         logger.info("Cassandra service was successfully registered");
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.osgi.HousekeepingActivator#stopBundle()
-     */
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         // Unregister cluster mbean
-        ManagementService managementService = getService(ManagementService.class);
-        ObjectName objectName = new ObjectName(CassandraClusterMBean.DOMAIN, "name", CassandraClusterMBean.NAME);
-        managementService.unregisterMBean(objectName);
+        ObjectName objectName = this.objectName;
+        if (null != objectName) {
+            this.objectName = null;
+            ManagementService managementService = getService(ManagementService.class);
+            managementService.unregisterMBean(objectName);
+        }
+
 
         // Unregister cassandra service
-        CassandraService cassandraService = getService(CassandraService.class);
-        if (cassandraService == null) {
-            return;
+        CassandraService cassandraService = this.cassandraService;
+        if (cassandraService != null) {
+            this.cassandraService = null;
+            unregisterService(CassandraService.class);
+            // Shutdown the service
+            ((CassandraServiceImpl) cassandraService).shutdown();
         }
-        unregisterService(CassandraService.class);
-        // Shutdown the service
-        ((CassandraServiceImpl) cassandraService).shutdown();
+
+        super.stopBundle();
 
         final Logger logger = LoggerFactory.getLogger(CassandraActivator.class);
         logger.info("Cassandra service was successfully shutdown and unregistered");

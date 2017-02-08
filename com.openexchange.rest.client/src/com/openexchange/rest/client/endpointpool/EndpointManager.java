@@ -100,4 +100,11 @@ public interface EndpointManager {
      */
     List<Endpoint> getBlacklist();
 
+    /**
+     * Gets the number of total end-points.
+     *
+     * @return The number of total end-points
+     */
+    int getNumberOfEndpoints();
+
 }

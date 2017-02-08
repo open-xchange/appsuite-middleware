@@ -49,8 +49,10 @@
 
 package com.openexchange.calendar.printing;
 
+import static org.junit.Assert.assertEquals;
 import java.util.Calendar;
 import java.util.List;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.groupware.container.Appointment;
 
@@ -63,20 +65,14 @@ public class CPToolTest extends AbstractDateTest {
 
     private final CPType[] nonBlockTypes = new CPType[] { CPType.DAYVIEW, CPType.WEEKVIEW, CPType.MONTHLYVIEW, CPType.YEARLYVIEW };
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         tool = new CPTool();
         tool.setCalendar(CPCalendar.getCalendar());
-        super.setUp();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
-
-    @Test
-    public void testShouldRecognizeLegitimateTemplateTypes() {
+     @Test
+     public void testShouldRecognizeLegitimateTemplateTypes() {
         for (CPType type : nonBlockTypes) {
             checkBlockTemplate(false, type.getName() + "/someTemplate");
             checkBlockTemplate(false, type.getNumber() + "/someTemplate");
@@ -87,8 +83,8 @@ public class CPToolTest extends AbstractDateTest {
         checkBlockTemplate(true, type.getNumber() + "/someTemplate");
     }
 
-    @Test
-    public void testShouldNotBeConfusedByMisleadingTemplateNames() {
+     @Test
+     public void testShouldNotBeConfusedByMisleadingTemplateNames() {
         CPType evil = CPType.WORKWEEKVIEW;
         for (CPType type : nonBlockTypes) {
             checkBlockTemplate(false, type.getName() + "/" + evil.getName() + "someTemplate");
@@ -107,8 +103,8 @@ public class CPToolTest extends AbstractDateTest {
         }
     }
 
-    @Test
-    public void testShouldSplitAHundredDayAppointment() {
+     @Test
+     public void testShouldSplitAHundredDayAppointment() {
         final int amount = 5, offset = 10;
 
         Appointment app = new Appointment();
@@ -136,8 +132,8 @@ public class CPToolTest extends AbstractDateTest {
         }
     }
 
-    @Test
-    public void testShouldWorkWithoutSeriesAlso() {
+     @Test
+     public void testShouldWorkWithoutSeriesAlso() {
         Appointment app = new Appointment();
         app.setTitle("Single day appointment");
 
@@ -156,8 +152,8 @@ public class CPToolTest extends AbstractDateTest {
         assertEquals("Should not change end date", app.getEndDate(), actual.getEndDate());
     }
 
-    @Test
-    public void testShouldSplitAnAppointmentSpanningNewYear() {
+     @Test
+     public void testShouldSplitAnAppointmentSpanningNewYear() {
         Appointment app = new Appointment();
         app.setTitle("Single day appointment");
 
@@ -172,8 +168,8 @@ public class CPToolTest extends AbstractDateTest {
         assertEquals("Should only produce one appointment", 2, apps.size());
     }
 
-    @Test
-    public void testShouldSplitEvenWhenDayOfYearForStartDateIsBiggerThanForEndDate() {
+     @Test
+     public void testShouldSplitEvenWhenDayOfYearForStartDateIsBiggerThanForEndDate() {
         Appointment app = new Appointment();
         app.setTitle("Appointment starting late in one year and ending early in the following");
 
@@ -189,8 +185,8 @@ public class CPToolTest extends AbstractDateTest {
 
     }
 
-    @Test
-    public void testShouldSplitReallyLongAppointment() {
+     @Test
+     public void testShouldSplitReallyLongAppointment() {
         Appointment app = new Appointment();
         app.setTitle("Long appointment");
 
@@ -206,8 +202,8 @@ public class CPToolTest extends AbstractDateTest {
 
     }
 
-    @Test
-    public void testShouldRetainDayTimeForFirstAndLastAppointmentInExpandedSeries() {
+     @Test
+     public void testShouldRetainDayTimeForFirstAndLastAppointmentInExpandedSeries() {
         Appointment app = new Appointment();
         app.setTitle("Single day appointment");
 
@@ -228,8 +224,8 @@ public class CPToolTest extends AbstractDateTest {
         assertEquals("Should not change end date on last", app.getEndDate(), actual.getEndDate());
     }
 
-    @Test
-    public void testShouldSplit23HourTwoDayAppointmentProperly() {
+     @Test
+     public void testShouldSplit23HourTwoDayAppointmentProperly() {
         Appointment app = new Appointment();
         app.setTitle("Two-day long appointment");
 
@@ -246,8 +242,8 @@ public class CPToolTest extends AbstractDateTest {
         assertEquals("Should produce two appointments", 2, apps.size());
     }
 
-    @Test
-    public void testShouldSplit47HourThreeDayAppointmentProperly() {
+     @Test
+     public void testShouldSplit47HourThreeDayAppointmentProperly() {
         Appointment app = new Appointment();
         app.setTitle("Two-day long appointment");
 

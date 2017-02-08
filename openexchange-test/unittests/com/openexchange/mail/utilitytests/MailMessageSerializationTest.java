@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.utilitytests;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -56,7 +58,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-
+import org.junit.Test;
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -70,127 +72,113 @@ import com.openexchange.mail.mime.MimeTypes;
  */
 public final class MailMessageSerializationTest extends AbstractMailTest {
 
-	/**
-	 *
-	 */
-	public MailMessageSerializationTest() {
-		super();
-	}
+    @Test
+    public void testMailSerialization() {
+        try {
+            final MailMessage[] mails = getMessages(getTestMailDir(), -1);
 
-	/**
-	 * @param name
-	 */
-	public MailMessageSerializationTest(final String name) {
-		super(name);
-	}
+            final File file = new File("/tmp/dummy" + System.currentTimeMillis() + ".dat");
+            if (file.createNewFile()) {
+                file.deleteOnExit();
+            }
 
-	public void testMailSerialization() {
-		try {
-			final MailMessage[] mails = getMessages(getTestMailDir(), -1);
+            for (final MailMessage mail : mails) {
+                if (mail.getContentType().isMimeType(MimeTypes.MIME_MULTIPART_ALL)) {
+                    /*
+                     * Serialize to file
+                     */
+                    final OutputStream out = new FileOutputStream(file, false);
+                    final ObjectOutputStream outputStream = new ObjectOutputStream(out);
+                    try {
+                        outputStream.writeObject(mail);
+                        outputStream.flush();
+                    } finally {
+                        outputStream.close();
+                        out.close();
+                    }
+                    /*
+                     * Check serialized object, if content still accessible
+                     */
+                    final int count = mail.getEnclosedCount();
+                    for (int i = 0; i < count; i++) {
+                        final MailPart part = mail.getEnclosedMailPart(i);
+                        if (part.getContentType().isMimeType(MimeTypes.MIME_MULTIPART_ALL)) {
+                            final int c = part.getEnclosedCount();
+                            assertTrue("Count not available from multipart part", c != MailPart.NO_ENCLOSED_PARTS);
+                        } else {
+                            final Object content = part.getContent();
+                            assertTrue("Content object not available from part", content != null);
+                        }
+                    }
+                    /*
+                     * Deserialize from file
+                     */
+                    final MailMessage clone;
+                    final InputStream in = new FileInputStream(file);
+                    final ObjectInputStream inputStream = new ObjectInputStream(in);
+                    try {
+                        clone = (MailMessage) inputStream.readObject();
+                    } finally {
+                        inputStream.close();
+                        in.close();
+                    }
+                    /*
+                     * Check deserialized object, if content still accessible
+                     */
+                    final int cloneCount = clone.getEnclosedCount();
+                    assertTrue("Enclosed part count does not match", cloneCount == count);
+                    for (int i = 0; i < cloneCount; i++) {
+                        final MailPart part = clone.getEnclosedMailPart(i);
+                        if (part.getContentType().isMimeType(MimeTypes.MIME_MULTIPART_ALL)) {
+                            final int c = part.getEnclosedCount();
+                            assertTrue("Count not available from multipart part", c != MailPart.NO_ENCLOSED_PARTS);
+                        } else {
+                            final Object content = part.getContent();
+                            assertTrue("Content object not available from part", content != null);
+                        }
+                    }
+                } else {
+                    /*
+                     * Serialize to file
+                     */
+                    final OutputStream out = new FileOutputStream(file);
+                    final ObjectOutputStream outputStream = new ObjectOutputStream(out);
+                    try {
+                        outputStream.writeObject(mail);
+                        outputStream.flush();
+                    } finally {
+                        outputStream.close();
+                        out.close();
+                    }
+                    /*
+                     * Check serialized object, if content still accessible
+                     */
+                    final Object origContent = mail.getContent();
+                    assertTrue("Original content not available after serialization", origContent != null);
+                    /*
+                     * Deserialize from file
+                     */
+                    final MailMessage clone;
+                    final InputStream in = new FileInputStream(file);
+                    final ObjectInputStream inputStream = new ObjectInputStream(in);
+                    try {
+                        clone = (MailMessage) inputStream.readObject();
+                    } finally {
+                        inputStream.close();
+                        in.close();
+                    }
+                    final Object cloneContent = clone.getContent();
+                    assertTrue("Cloned content not available after serialization", cloneContent != null);
+                    /*
+                     * Check some conditions
+                     */
+                    assertTrue("Original content class and cloned content class are not equal", origContent.getClass().isInstance(cloneContent));
+                }
+            }
 
-			final File file = new File("/tmp/dummy" + System.currentTimeMillis() + ".dat");
-			if (file.createNewFile()) {
-				file.deleteOnExit();
-			}
-
-			for (final MailMessage mail : mails) {
-				if (mail.getContentType().isMimeType(MimeTypes.MIME_MULTIPART_ALL)) {
-					/*
-					 * Serialize to file
-					 */
-					final OutputStream out = new FileOutputStream(file, false);
-					final ObjectOutputStream outputStream = new ObjectOutputStream(out);
-					try {
-						outputStream.writeObject(mail);
-						outputStream.flush();
-					} finally {
-						outputStream.close();
-						out.close();
-					}
-					/*
-					 * Check serialized object, if content still accessible
-					 */
-					final int count = mail.getEnclosedCount();
-					for (int i = 0; i < count; i++) {
-						final MailPart part = mail.getEnclosedMailPart(i);
-						if (part.getContentType().isMimeType(MimeTypes.MIME_MULTIPART_ALL)) {
-							final int c = part.getEnclosedCount();
-							assertTrue("Count not available from multipart part", c != MailPart.NO_ENCLOSED_PARTS);
-						} else {
-							final Object content = part.getContent();
-							assertTrue("Content object not available from part", content != null);
-						}
-					}
-					/*
-					 * Deserialize from file
-					 */
-					final MailMessage clone;
-					final InputStream in = new FileInputStream(file);
-					final ObjectInputStream inputStream = new ObjectInputStream(in);
-					try {
-						clone = (MailMessage) inputStream.readObject();
-					} finally {
-						inputStream.close();
-						in.close();
-					}
-					/*
-					 * Check deserialized object, if content still accessible
-					 */
-					final int cloneCount = clone.getEnclosedCount();
-					assertTrue("Enclosed part count does not match", cloneCount == count);
-					for (int i = 0; i < cloneCount; i++) {
-						final MailPart part = clone.getEnclosedMailPart(i);
-						if (part.getContentType().isMimeType(MimeTypes.MIME_MULTIPART_ALL)) {
-							final int c = part.getEnclosedCount();
-							assertTrue("Count not available from multipart part", c != MailPart.NO_ENCLOSED_PARTS);
-						} else {
-							final Object content = part.getContent();
-							assertTrue("Content object not available from part", content != null);
-						}
-					}
-				} else {
-					/*
-					 * Serialize to file
-					 */
-					final OutputStream out = new FileOutputStream(file);
-					final ObjectOutputStream outputStream = new ObjectOutputStream(out);
-					try {
-						outputStream.writeObject(mail);
-						outputStream.flush();
-					} finally {
-						outputStream.close();
-						out.close();
-					}
-					/*
-					 * Check serialized object, if content still accessible
-					 */
-					final Object origContent = mail.getContent();
-					assertTrue("Original content not available after serialization", origContent != null);
-					/*
-					 * Deserialize from file
-					 */
-					final MailMessage clone;
-					final InputStream in = new FileInputStream(file);
-					final ObjectInputStream inputStream = new ObjectInputStream(in);
-					try {
-						clone = (MailMessage) inputStream.readObject();
-					} finally {
-						inputStream.close();
-						in.close();
-					}
-					final Object cloneContent = clone.getContent();
-					assertTrue("Cloned content not available after serialization", cloneContent != null);
-					/*
-					 * Check some conditions
-					 */
-					assertTrue("Original content class and cloned content class are not equal", origContent.getClass()
-							.isInstance(cloneContent));
-				}
-			}
-
-		} catch (final Exception e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
-	}
+        } catch (final Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
 }

@@ -51,19 +51,16 @@ package com.openexchange.tools.collections;
 
 import java.util.ArrayList;
 import java.util.List;
-import junit.framework.TestCase;
+import org.junit.Test;
 
 /**
  * {@link OXCollectionsTest}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class OXCollectionsTest extends TestCase {
+public class OXCollectionsTest {
 
-    public OXCollectionsTest(String name) {
-        super(name);
-    }
-
+    @Test
     public void testInject() {
         OXCollections.inject(new ArrayList<String>(), new ArrayList<String>(), new Injector<List<String>, String>() {
 

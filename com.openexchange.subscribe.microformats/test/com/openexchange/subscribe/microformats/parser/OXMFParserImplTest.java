@@ -51,6 +51,7 @@ package com.openexchange.subscribe.microformats.parser;
 
 import java.util.List;
 import java.util.Map;
+import org.junit.Before;
 import com.openexchange.exception.OXException;
 
 
@@ -64,7 +65,7 @@ public class OXMFParserImplTest extends ParserTest {
 
     private OXMFParserImpl parser;
 
-    @Override
+    @Before
     public void setUp() {
         parser = new OXMFParserImpl();
         parser.addContainerElement("ox_contact");

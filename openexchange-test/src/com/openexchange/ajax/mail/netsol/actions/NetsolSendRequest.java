@@ -65,113 +65,112 @@ import com.openexchange.ajax.framework.Header;
  */
 public class NetsolSendRequest implements AJAXRequest<NetsolSendResponse> {
 
-	/**
-	 * URL of the tasks AJAX interface.
-	 */
-	public static final String MAIL_URL = "/ajax/mail";
+    /**
+     * URL of the tasks AJAX interface.
+     */
+    public static final String MAIL_URL = "/ajax/mail";
 
-	private final String mailStr;
+    private final String mailStr;
 
-	private final InputStream upload;
+    private final InputStream upload;
 
-	private final String uploadContentType;
+    private final String uploadContentType;
 
-	private final String uploadFilename;
+    private final String uploadFilename;
 
-	/*
-	 * Mail object settings
-	 */
-	private String recipientTo;
+    /*
+     * Mail object settings
+     */
+    private String recipientTo;
 
-	/**
-	 * Initializes a new {@link NetsolSendRequest}
-	 *
-	 * @param mailStr
-	 *            The mail string (JSON)
-	 */
-	public NetsolSendRequest(final String mailStr) {
-		this(mailStr, null);
-	}
+    /**
+     * Initializes a new {@link NetsolSendRequest}
+     *
+     * @param mailStr
+     *            The mail string (JSON)
+     */
+    public NetsolSendRequest(final String mailStr) {
+        this(mailStr, null);
+    }
 
-	/**
-	 * Initializes a new {@link NetsolSendRequest}
-	 *
-	 * @param mailStr
-	 *            The mail string (JSON)
-	 * @param upload
-	 *            The upload input stream
-	 */
-	public NetsolSendRequest(final String mailStr, final InputStream upload) {
-		this(mailStr, upload, "text/plain; charset=us-ascii", "text.txt");
-	}
+    /**
+     * Initializes a new {@link NetsolSendRequest}
+     *
+     * @param mailStr
+     *            The mail string (JSON)
+     * @param upload
+     *            The upload input stream
+     */
+    public NetsolSendRequest(final String mailStr, final InputStream upload) {
+        this(mailStr, upload, "text/plain; charset=us-ascii", "text.txt");
+    }
 
-	/**
-	 * Initializes a new {@link NetsolSendRequest}
-	 *
-	 * @param mailStr
-	 *            The mail string (JSON)
-	 * @param upload
-	 *            The upload input stream
-	 * @param uploadContentType
-	 *            The upload's content type
-	 * @param uploadFilename
-	 *            The upload's filename
-	 */
-	public NetsolSendRequest(final String mailStr, final InputStream upload, final String uploadContentType,
-			final String uploadFilename) {
-		super();
-		this.mailStr = mailStr;
-		this.upload = upload;
-		this.uploadContentType = uploadContentType;
-		this.uploadFilename = uploadFilename;
-	}
+    /**
+     * Initializes a new {@link NetsolSendRequest}
+     *
+     * @param mailStr
+     *            The mail string (JSON)
+     * @param upload
+     *            The upload input stream
+     * @param uploadContentType
+     *            The upload's content type
+     * @param uploadFilename
+     *            The upload's filename
+     */
+    public NetsolSendRequest(final String mailStr, final InputStream upload, final String uploadContentType, final String uploadFilename) {
+        super();
+        this.mailStr = mailStr;
+        this.upload = upload;
+        this.uploadContentType = uploadContentType;
+        this.uploadFilename = uploadFilename;
+    }
 
-	@Override
+    @Override
     public Object getBody() {
-		return null;
-	}
+        return null;
+    }
 
-	@Override
+    @Override
     public Method getMethod() {
-		return Method.UPLOAD;
-	}
+        return Method.UPLOAD;
+    }
 
     @Override
     public Header[] getHeaders() {
         return NO_HEADER;
     }
 
-	@Override
+    @Override
     public Parameter[] getParameters() {
-		final Parameter[] retval = new Parameter[upload == null ? 2 : 3];
-		retval[0] = new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW);
-		retval[1] = new FieldParameter("json_0", mailStr);
-		if (upload != null) {
-			retval[2] = new FileParameter("file_0", uploadFilename, upload, uploadContentType);
-		}
-		return retval;
-	}
+        final Parameter[] retval = new Parameter[upload == null ? 2 : 3];
+        retval[0] = new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW);
+        retval[1] = new FieldParameter("json_0", mailStr);
+        if (upload != null) {
+            retval[2] = new FileParameter("file_0", uploadFilename, upload, uploadContentType);
+        }
+        return retval;
+    }
 
-	@Override
+    @Override
     public String getServletPath() {
-		return MAIL_URL;
-	}
+        return MAIL_URL;
+    }
 
-	@Override
+    @Override
     public SendParser getParser() {
-		return new SendParser(true);
-	}
+        return new SendParser(true);
+    }
 
-	class SendParser extends AbstractUploadParser<NetsolSendResponse> {
+    class SendParser extends AbstractUploadParser<NetsolSendResponse> {
 
-		public SendParser(final boolean failOnError) {
-			super(failOnError);
-		}
+        public SendParser(final boolean failOnError) {
+            super(failOnError);
+        }
 
-		@Override
-		protected NetsolSendResponse createResponse(final Response response) throws JSONException {
-			return new NetsolSendResponse(response);
-		}
+        @Override
+        protected NetsolSendResponse createResponse(final Response response) throws JSONException {
+            return new NetsolSendResponse(response);
+        }
 
-	}
+    }
 }

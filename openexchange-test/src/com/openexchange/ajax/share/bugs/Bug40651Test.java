@@ -52,6 +52,7 @@ package com.openexchange.ajax.share.bugs;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Assert;
+import org.junit.Test;
 import com.openexchange.ajax.find.AbstractFindTest;
 import com.openexchange.ajax.find.PropDocument;
 import com.openexchange.ajax.folder.actions.EnumAPI;
@@ -69,7 +70,6 @@ import com.openexchange.find.facet.SimpleFacet;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.share.ShareTarget;
 
-
 /**
  * {@link Bug40651Test}
  *
@@ -80,19 +80,21 @@ public class Bug40651Test extends ShareTest {
 
     /**
      * Initializes a new {@link Bug40651Test}.
+     * 
      * @param name
      */
-    public Bug40651Test(String name) {
-        super(name);
+    public Bug40651Test() {
+        super();
     }
 
+    @Test
     public void testShareFileLinkAndSearchForItAsGuest() throws Exception {
-        FolderObject folder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, client.getValues().getPrivateInfostoreFolder());
+        FolderObject folder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder());
         File file = insertFile(folder.getObjectID(), "Tests.zip");
 
         ShareTarget target = new ShareTarget(FolderObject.INFOSTORE, Integer.toString(folder.getObjectID()), file.getId());
-        GetLinkRequest getLinkRequest = new GetLinkRequest(target, client.getValues().getTimeZone());
-        GetLinkResponse getLinkResponse = client.execute(getLinkRequest);
+        GetLinkRequest getLinkRequest = new GetLinkRequest(target, getClient().getValues().getTimeZone());
+        GetLinkResponse getLinkResponse = getClient().execute(getLinkRequest);
         String url = getLinkResponse.getShareLink().getShareURL();
 
         GuestClient guestClient = resolveShare(url);
@@ -107,13 +109,14 @@ public class Bug40651Test extends ShareTest {
         Assert.assertNotNull("Found no document with ID " + expectedId.toUniqueID(), expectedDoc);
     }
 
+    @Test
     public void testShareFolderLinkAndSearchForContainedItemAsGuest() throws Exception {
-        FolderObject folder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, client.getValues().getPrivateInfostoreFolder());
+        FolderObject folder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder());
         File file = insertFile(folder.getObjectID(), "Tests.zip");
 
         ShareTarget target = new ShareTarget(FolderObject.INFOSTORE, Integer.toString(folder.getObjectID()));
-        GetLinkRequest getLinkRequest = new GetLinkRequest(target, client.getValues().getTimeZone());
-        GetLinkResponse getLinkResponse = client.execute(getLinkRequest);
+        GetLinkRequest getLinkRequest = new GetLinkRequest(target, getClient().getValues().getTimeZone());
+        GetLinkResponse getLinkResponse = getClient().execute(getLinkRequest);
         String url = getLinkResponse.getShareLink().getShareURL();
 
         GuestClient guestClient = resolveShare(url);

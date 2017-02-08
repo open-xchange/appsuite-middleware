@@ -412,7 +412,11 @@ public class StrictValidationStrategy implements ValidationStrategy {
          * [profiles 06 - 4.1.4.2p20]
          */
         DateTime now = new DateTime();
-        SubjectConfirmationData confirmationData = findBearerConfirmation(bearerAssertion.getSubject()).getSubjectConfirmationData();
+        SubjectConfirmation findBearerConfirmation = findBearerConfirmation(bearerAssertion.getSubject());
+        if (findBearerConfirmation == null) {
+            throw new ValidationException(ValidationFailedReason.MISSING_ATTRIBUTE, "SubjectConfirmation is missing");
+        }
+        SubjectConfirmationData confirmationData = findBearerConfirmation.getSubjectConfirmationData();
         DateTime scNotOnOrAfter = confirmationData.getNotOnOrAfter();
         if (scNotOnOrAfter == null) {
             throw new ValidationException(ValidationFailedReason.MISSING_ATTRIBUTE, "SubjectConfirmationData contains no 'NotOnOrAfter' attribute");

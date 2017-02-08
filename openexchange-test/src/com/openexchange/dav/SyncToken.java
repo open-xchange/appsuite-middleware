@@ -49,36 +49,35 @@
 
 package com.openexchange.dav;
 
-
 /**
  * {@link SyncToken} - Holds the sync token
  * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class SyncToken {
-	
-	private String token;
 
-	public SyncToken() {
-		this(null);
-	}
+    private String token;
 
-	public SyncToken(String token) {
-		super();
-		this.token = token;		
-	}
-	
-	/**
-	 * @return the token
-	 */
-	public String getToken() {
-		return token;
-	}
+    public SyncToken() {
+        this(null);
+    }
 
-	/**
-	 * @param token the token to set
-	 */
-	public void setToken(String token) {
-		this.token = token;
-	}
+    public SyncToken(String token) {
+        super();
+        this.token = token;
+    }
+
+    /**
+     * @return the token
+     */
+    public String getToken() {
+        return token;
+    }
+
+    /**
+     * @param token the token to set
+     */
+    public void setToken(String token) {
+        this.token = token;
+    }
 }

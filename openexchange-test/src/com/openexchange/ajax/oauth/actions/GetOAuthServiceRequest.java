@@ -54,7 +54,6 @@ import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
-
 /**
  * {@link GetOAuthServiceRequest}
  *
@@ -83,9 +82,7 @@ public class GetOAuthServiceRequest extends AbstractOAuthServiceRequest<OAuthSer
 
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET),
-            new Parameter("id", serviceId)
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET), new Parameter("id", serviceId)
         };
     }
 

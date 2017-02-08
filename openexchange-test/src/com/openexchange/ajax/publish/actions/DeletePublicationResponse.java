@@ -51,7 +51,6 @@ package com.openexchange.ajax.publish.actions;
 
 import com.openexchange.ajax.container.Response;
 
-
 /**
  * {@link DeletePublicationResponse}
  *

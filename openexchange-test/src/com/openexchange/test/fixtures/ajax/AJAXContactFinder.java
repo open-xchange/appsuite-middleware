@@ -66,49 +66,49 @@ import com.openexchange.test.fixtures.SimpleCredentials;
 
 public class AJAXContactFinder implements ContactFinder {
 
-	private final AJAXClient client;
-	private HashMap<Integer, Contact> globalAddressBook;
+    private final AJAXClient client;
+    private HashMap<Integer, Contact> globalAddressBook;
 
-	public AJAXContactFinder(AJAXClient client) {
-		this.client = client;
-	}
+    public AJAXContactFinder(AJAXClient client) {
+        this.client = client;
+    }
 
-	private void loadGlobalAddressBook() {
-		AllRequest all = new AllRequest(FolderObject.SYSTEM_LDAP_FOLDER_ID, Contact.ALL_COLUMNS);
+    private void loadGlobalAddressBook() {
+        AllRequest all = new AllRequest(FolderObject.SYSTEM_LDAP_FOLDER_ID, Contact.ALL_COLUMNS);
 
-		try {
-			CommonAllResponse response = client.execute(all);
-			globalAddressBook = new HashMap<Integer, Contact>();
-			JSONArray rows = (JSONArray) response.getData();
-			for(int i = 0, size = rows.length(); i < size; i++) {
-				JSONArray row = rows.getJSONArray(i);
-				Contact contact = new Contact();
-				ContactSetter setter = new ContactSetter();
-				for(int index = 0; index < Contact.ALL_COLUMNS.length; index++) {
-					int column = Contact.ALL_COLUMNS[index];
-					ContactField field = ContactField.getByValue(column);
-					field.doSwitch(setter, contact, row.get(index));
-				}
-				globalAddressBook.put(contact.getInternalUserId(), contact);
-			}
-		} catch (OXException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-	}
+        try {
+            CommonAllResponse response = client.execute(all);
+            globalAddressBook = new HashMap<Integer, Contact>();
+            JSONArray rows = (JSONArray) response.getData();
+            for (int i = 0, size = rows.length(); i < size; i++) {
+                JSONArray row = rows.getJSONArray(i);
+                Contact contact = new Contact();
+                ContactSetter setter = new ContactSetter();
+                for (int index = 0; index < Contact.ALL_COLUMNS.length; index++) {
+                    int column = Contact.ALL_COLUMNS[index];
+                    ContactField field = ContactField.getByValue(column);
+                    field.doSwitch(setter, contact, row.get(index));
+                }
+                globalAddressBook.put(contact.getInternalUserId(), contact);
+            }
+        } catch (OXException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
 
-	@Override
+    @Override
     public Contact getContact(SimpleCredentials credentials) {
-		return getContact( credentials.getUserId() );
-	}
+        return getContact(credentials.getUserId());
+    }
 
-	public Contact getContact(int userId){
-		if(globalAddressBook == null) {
-			loadGlobalAddressBook();
-		}
-		return globalAddressBook.get(userId);
-	}
+    public Contact getContact(int userId) {
+        if (globalAddressBook == null) {
+            loadGlobalAddressBook();
+        }
+        return globalAddressBook.get(userId);
+    }
 }

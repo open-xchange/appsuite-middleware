@@ -96,7 +96,8 @@ public class UWACopyTest extends AbstractUserCopyTest {
         dstUsrId = getDestinationUserId();
     }
     
-    public void testCopyWidgets() throws Exception {
+         @Test
+     public void testCopyWidgets() throws Exception {
         final UWACopyTask copyTask = new UWACopyTask();
         final List<Widget> sourceWidgets = copyTask.loadWidgetsFromDB(srcCon, srcCtx.getContextId(), srcUsrId);
         
@@ -114,8 +115,9 @@ public class UWACopyTest extends AbstractUserCopyTest {
         checkAndGetMatchingObjects(sourceWidgets, targetWidgets); 
     }
     
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown()
+ throws Exception {
         DBUtils.autocommit(dstCon);
         deleteAllFromTablesForCid(dstCtx.getContextId(), "cid", dstCon, "uwaWidget", "uwaWidgetPosition");
         super.tearDown();

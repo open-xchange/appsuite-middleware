@@ -54,7 +54,6 @@ import java.rmi.Naming;
 import java.util.List;
 import org.json.JSONException;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -63,7 +62,7 @@ import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
+import com.openexchange.ajax.framework.ProvisioningSetup;
 import com.openexchange.ajax.oauth.actions.AllOAuthServicesRequest;
 import com.openexchange.ajax.oauth.actions.GetOAuthServiceRequest;
 import com.openexchange.ajax.oauth.actions.OAuthServicesResponse;
@@ -71,6 +70,9 @@ import com.openexchange.ajax.oauth.types.OAuthService;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.exception.OXException;
+import com.openexchange.test.pool.TestContext;
+import com.openexchange.test.pool.TestContextPool;
+import com.openexchange.test.pool.TestUser;
 
 /**
  * Instances of com.openexchange.oauth.OAuthServiceMetaData should be invisible if their according
@@ -86,49 +88,52 @@ public class OAuthServiceTest {
 
     private AJAXClient client;
 
-    /**
-     * Initializes a new {@link OAuthServiceTest}.
-     *
-     * @param name
-     */
-    public OAuthServiceTest() {
-        super();
-    }
+    private TestContext testContext;
+
+    private TestUser oxadmin;
+
+    private TestUser user2;
 
     @BeforeClass
-    public static void beforeClass() throws Exception {
-        User oxadmin = AJAXClient.User.OXAdmin;
-        AJAXClient client2 = new AJAXClient(AJAXClient.User.User2);
-        com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(client2.getValues().getUserId());
-        user.setUserAttribute("config", "com.openechange.oauth.testservice.enabled", "false");
-        Credentials credentials = new Credentials(AJAXConfig.getProperty(oxadmin.getLogin()), AJAXConfig.getProperty(oxadmin.getPassword()));
-        OXUserInterface iface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
-        iface.change(new Context(client2.getValues().getContextId()), user, credentials);
-        client2.logout();
-    }
-
-    @AfterClass
-    public static void afterClass() throws Exception {
-        User oxadmin = AJAXClient.User.OXAdmin;
-        AJAXClient client2 = new AJAXClient(AJAXClient.User.User2);
-        com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(client2.getValues().getUserId());
-        user.setUserAttribute("config", "com.openechange.oauth.testservice.enabled", null);
-        Credentials credentials = new Credentials(AJAXConfig.getProperty(oxadmin.getLogin()), AJAXConfig.getProperty(oxadmin.getPassword()));
-        OXUserInterface iface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
-        iface.change(new Context(client2.getValues().getContextId()), user, credentials);
-        client2.logout();
+    public static void before() throws Exception {
+        ProvisioningSetup.init();
     }
 
     @Before
     public void setUp() throws Exception {
-        client = new AJAXClient(User.User1);
+        testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
+        oxadmin = testContext.getAdmin();
+        user2 = testContext.acquireUser();
+        AJAXClient client2 = new AJAXClient(user2);
+        com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(client2.getValues().getUserId());
+        user.setUserAttribute("config", "com.openechange.oauth.testservice.enabled", "false");
+        Credentials credentials = new Credentials(oxadmin.getUser(), oxadmin.getPassword());
+        OXUserInterface iface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
+        iface.change(new Context(client2.getValues().getContextId()), user, credentials);
+        client2.logout();
+
+        TestUser user1 = testContext.acquireUser();
+        client = new AJAXClient(user1);
     }
 
     @After
     public void tearDown() throws Exception {
-        if (client != null) {
-            client.logout();
+        try {
+            if (client != null) {
+                client.logout();
+            }
+            AJAXClient client2 = new AJAXClient(user2);
+
+            com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(client2.getValues().getUserId());
+            user.setUserAttribute("config", "com.openechange.oauth.testservice.enabled", null);
+            Credentials credentials = new Credentials(oxadmin.getUser(), oxadmin.getPassword());
+            OXUserInterface iface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
+            iface.change(new Context(client2.getValues().getContextId()), user, credentials);
+            client2.logout();
+        } finally {
+            TestContextPool.backContext(testContext);
         }
+
     }
 
     @Test
@@ -159,7 +164,8 @@ public class OAuthServiceTest {
     public void testGetAllServicesWithoutPermission() throws Exception {
         AJAXClient client2 = null;
         try {
-            client2 = new AJAXClient(AJAXClient.User.User2);
+            client2 = new AJAXClient(user2);
+
             OAuthServicesResponse response = client2.execute(new AllOAuthServicesRequest());
             List<OAuthService> services = response.getServices();
             boolean found = false;
@@ -182,7 +188,7 @@ public class OAuthServiceTest {
     public void testGetTestServiceWithoutPermission() throws Exception {
         AJAXClient client2 = null;
         try {
-            client2 = new AJAXClient(AJAXClient.User.User2);
+            client2 = new AJAXClient(user2);
             OAuthServicesResponse response = client2.execute(new GetOAuthServiceRequest(TESTSERVICE, false));
             Assert.assertTrue("Response should contain error", response.hasError());
             // We expect com.openexchange.oauth.OAuthExceptionCodes.UNKNOWN_OAUTH_SERVICE_META_DATA

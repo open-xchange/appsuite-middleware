@@ -63,6 +63,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactDatabaseGetter;
@@ -174,8 +175,9 @@ public class ContactCopyTask implements CopyUserTaskService {
             writeContactsToDB(contacts, contactFields, dstCon, i(dstCtxId), i(dstUsrId));
             writeAdditionalContentsToDB(contacts, dstCon, i(dstCtxId));
 
-            for (final Integer contactId : contacts.keySet()) {
-                final Contact contact = contacts.get(contactId);
+            for (Map.Entry<Integer, Contact> entry : contacts.entrySet()) {
+                Integer contactId = entry.getKey();
+                Contact contact = entry.getValue();
                 mapping.addMapping(contactId, contact.getObjectID());
             }
         }
@@ -261,8 +263,7 @@ public class ContactCopyTask implements CopyUserTaskService {
         try {
             final ContactSwitcher getter = new ContactDatabaseGetter();
             stmt = con.prepareStatement(insertSql);
-            for (final Integer contactId : contacts.keySet()) {
-                final Contact contact = contacts.get(contactId);
+            for (Contact contact : contacts.values()) {
                 int i = 1;
                 for (final ContactField field : contactFields) {
                     if (field.isDBField() && !field.getDbName().equals("value")) {
@@ -285,8 +286,7 @@ public class ContactCopyTask implements CopyUserTaskService {
     }
 
     private void exchangeIds(final Map<Integer, Contact> contacts, final ObjectMapping<FolderObject> folderMapping, final Connection con, final int cid, final int oldUid, final int newUid) throws OXException {
-        for (final Integer contactId : contacts.keySet()) {
-            final Contact contact = contacts.get(contactId);
+        for (Contact contact : contacts.values()) {
             try {
                 final int newContactId = IDGenerator.getId(cid, com.openexchange.groupware.Types.CONTACT, con);
                 contact.setObjectID(newContactId);
@@ -323,8 +323,7 @@ public class ContactCopyTask implements CopyUserTaskService {
             }
         }
 
-        for (final Integer contactId : contacts.keySet()) {
-            final Contact contact = contacts.get(contactId);
+        for (Contact contact : contacts.values()) {
             if (contact.containsDistributionLists()) {
                 final DistributionListEntryObject[] distributionList = contact.getDistributionList();
                 for (final DistributionListEntryObject entry : distributionList) {
@@ -357,8 +356,9 @@ public class ContactCopyTask implements CopyUserTaskService {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            for (final Integer contactId : contacts.keySet()) {
-                final Contact contact = contacts.get(contactId);
+            for (Entry<Integer, Contact> entry : contacts.entrySet()) {
+                Integer contactId = entry.getKey();
+                Contact contact = entry.getValue();
                 stmt = con.prepareStatement(SELECT_IMAGE);
                 stmt.setInt(1, cid);
                 stmt.setInt(2, i(contactId));
@@ -419,11 +419,12 @@ public class ContactCopyTask implements CopyUserTaskService {
             DBUtils.closeSQLStuff(rs, stmt);
         }
 
-        for (final Integer contactId : dlistMap.keySet()) {
-            final List<DistributionListEntryObject> list = dlistMap.get(contactId);
-            final DistributionListEntryObject[] entryArray = list.toArray(new DistributionListEntryObject[list.size()]);
+        for (Map.Entry<Integer, List<DistributionListEntryObject>> entry : dlistMap.entrySet()) {
+            Integer contactId = entry.getKey();
+            List<DistributionListEntryObject> list = entry.getValue();
+            DistributionListEntryObject[] entryArray = list.toArray(new DistributionListEntryObject[list.size()]);
 
-            final Contact contact = contacts.get(contactId);
+            Contact contact = contacts.get(contactId);
             contact.setDistributionList(entryArray);
         }
     }

@@ -46,16 +46,19 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.test.fixtures.transformators;
 
 import com.openexchange.exception.OXException;
+
 /**
  * @author Martin Braun <martin.braun@open-xchange.com>
  */
-public class FloatTransformator implements Transformator{
+public class FloatTransformator implements Transformator {
+
     @Override
     public Object transform(final String value) throws OXException {
-        if(value == null) {
+        if (value == null) {
             return 0;
         }
         try {

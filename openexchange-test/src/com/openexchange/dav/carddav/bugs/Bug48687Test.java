@@ -49,7 +49,9 @@
 
 package com.openexchange.dav.carddav.bugs;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import org.apache.commons.httpclient.HttpConnection;
 import org.apache.commons.httpclient.HttpState;
 import org.apache.jackrabbit.webdav.client.methods.ReportMethod;
@@ -112,7 +114,6 @@ public class Bug48687Test extends CardDAVTest {
                 protected void processResponseBody(HttpState httpState, HttpConnection httpConnection) {
                     // prevent premature response body processing
                 }
-
 
             };
             assertEquals("unexpected http status", StatusCodes.SC_MULTISTATUS, getWebDAVClient().executeMethod(report));

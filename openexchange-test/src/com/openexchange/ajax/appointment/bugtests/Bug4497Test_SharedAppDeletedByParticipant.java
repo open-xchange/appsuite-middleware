@@ -46,49 +46,44 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
-
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.helper.AbstractAssertion;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.UserParticipant;
 
-public class Bug4497Test_SharedAppDeletedByParticipant extends	ManagedAppointmentTest {
+public class Bug4497Test_SharedAppDeletedByParticipant extends ManagedAppointmentTest {
 
-	public Bug4497Test_SharedAppDeletedByParticipant(String name) {
-		super(name);
-	}
-	
-	public void testIt() throws Exception{
-		AJAXClient client2 = new AJAXClient(User.User2);
-		
-		UserParticipant other = new UserParticipant(client2.getValues().getUserId());
-		assertTrue(other.getIdentifier() > 0);
-		int fid1 = folder.getObjectID();
-		
-		Appointment app = AbstractAssertion.generateDefaultAppointment(fid1);
-		app.addParticipant(other);
-		
-		calendarManager.insert(app);
-		
-		int appId = app.getObjectID();
-		int fid2 = client2.getValues().getPrivateAppointmentFolder();
-		
-		GetResponse getResponse = client2.execute(new GetRequest(fid2,appId));
-		Date lastMod = getResponse.getTimestamp();
+    @Test
+    public void testIt() throws Exception {
+        UserParticipant other = new UserParticipant(getClient2().getValues().getUserId());
+        assertTrue(other.getIdentifier() > 0);
+        int fid1 = folder.getObjectID();
 
-		CommonDeleteResponse deleteResponse = client2.execute(new DeleteRequest(appId, fid2, lastMod));
-		
-		assertFalse(deleteResponse.hasError() || deleteResponse.hasConflicts());
-	}
+        Appointment app = AbstractAssertion.generateDefaultAppointment(fid1);
+        app.addParticipant(other);
+
+        catm.insert(app);
+
+        int appId = app.getObjectID();
+        int fid2 = getClient2().getValues().getPrivateAppointmentFolder();
+
+        GetResponse getResponse = getClient2().execute(new GetRequest(fid2, appId));
+        Date lastMod = getResponse.getTimestamp();
+
+        CommonDeleteResponse deleteResponse = getClient2().execute(new DeleteRequest(appId, fid2, lastMod));
+
+        assertFalse(deleteResponse.hasError() || deleteResponse.hasConflicts());
+    }
 
 }
-

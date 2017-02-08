@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.find.tasks;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -62,7 +65,6 @@ import com.openexchange.ajax.find.actions.AutocompleteResponse;
 import com.openexchange.ajax.find.actions.QueryRequest;
 import com.openexchange.ajax.find.actions.QueryResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.Document;
 import com.openexchange.find.Module;
@@ -78,8 +80,6 @@ import com.openexchange.find.facet.SimpleFacet;
 import com.openexchange.find.tasks.TasksFacetType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.test.TaskTestManager;
-
 
 /**
  * {@link FindTasksQueryTests}
@@ -87,13 +87,6 @@ import com.openexchange.test.TaskTestManager;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class FindTasksQueryTests extends AbstractFindTasksTest {
-
-    /**
-     * Initializes a new {@link FindTasksQueryTests}.
-     */
-    public FindTasksQueryTests(String name) {
-        super(name);
-    }
 
     /**
      * Test with simple query with no filters
@@ -107,7 +100,7 @@ public class FindTasksQueryTests extends AbstractFindTasksTest {
      */
     @Test
     public void testWithSimpleQuery() throws OXException, IOException, JSONException {
-        assertResults(30, Collections.<ActiveFacet>emptyList(), -1, 30);
+        assertResults(30, Collections.<ActiveFacet> emptyList(), -1, 30);
     }
 
     /**
@@ -119,7 +112,7 @@ public class FindTasksQueryTests extends AbstractFindTasksTest {
      */
     @Test
     public void testPagination() throws OXException, IOException, JSONException {
-        assertResults(5, Collections.<ActiveFacet>emptyList(), 5, 10);
+        assertResults(5, Collections.<ActiveFacet> emptyList(), 5, 10);
     }
 
     /**
@@ -138,105 +131,80 @@ public class FindTasksQueryTests extends AbstractFindTasksTest {
 
     @Test
     public void testTokenizedQuery() throws Exception {
-        TaskTestManager manager = new TaskTestManager(client);
-        try {
-            String t1 = randomUID();
-            String t2 = randomUID();
-            String t3 = randomUID();
-            Task task = manager.insertTaskOnServer(manager.newTask(t1 + " " + t2 + " " + t3));
+        String t1 = randomUID();
+        String t2 = randomUID();
+        String t3 = randomUID();
+        Task task = ttm.insertTaskOnServer(ttm.newTask(t1 + " " + t2 + " " + t3));
 
-            SimpleFacet globalFacet = (SimpleFacet) findByType(CommonFacetType.GLOBAL, autocomplete(Module.TASKS, t1 + " " + t3));
-            List<PropDocument> documents = query(client, Collections.singletonList(createActiveFacet(globalFacet)));
-            assertTrue("no task found", 0 < documents.size());
-            assertNotNull("task not found", findByProperty(documents, "title", task.getTitle()));
+        SimpleFacet globalFacet = (SimpleFacet) findByType(CommonFacetType.GLOBAL, autocomplete(Module.TASKS, t1 + " " + t3));
+        List<PropDocument> documents = query(getClient(), Collections.singletonList(createActiveFacet(globalFacet)));
+        assertTrue("no task found", 0 < documents.size());
+        assertNotNull("task not found", findByProperty(documents, "title", task.getTitle()));
 
-            globalFacet = (SimpleFacet) findByType(CommonFacetType.GLOBAL, autocomplete(Module.TASKS, "\"" + t1 + " " + t2 + "\""));
-            documents = query(client, Collections.singletonList(createActiveFacet(globalFacet)));
-            assertTrue("no task found", 0 < documents.size());
-            assertNotNull("task not found", findByProperty(documents, "title", task.getTitle()));
+        globalFacet = (SimpleFacet) findByType(CommonFacetType.GLOBAL, autocomplete(Module.TASKS, "\"" + t1 + " " + t2 + "\""));
+        documents = query(getClient(), Collections.singletonList(createActiveFacet(globalFacet)));
+        assertTrue("no task found", 0 < documents.size());
+        assertNotNull("task not found", findByProperty(documents, "title", task.getTitle()));
 
-            globalFacet = (SimpleFacet) findByType(CommonFacetType.GLOBAL, autocomplete(Module.TASKS, "\"" + t1 + " " + t3 + "\""));
-            documents = query(client, Collections.singletonList(createActiveFacet(globalFacet)));
-            assertTrue("task found", 0 == documents.size());
-        } finally {
-            manager.cleanUp();
-        }
+        globalFacet = (SimpleFacet) findByType(CommonFacetType.GLOBAL, autocomplete(Module.TASKS, "\"" + t1 + " " + t3 + "\""));
+        documents = query(getClient(), Collections.singletonList(createActiveFacet(globalFacet)));
+        assertTrue("task found", 0 == documents.size());
     }
 
     @Test
     public void testFolderTypeFacet() throws Exception {
-        AJAXClient client2 = new AJAXClient(User.User2);
-        TaskTestManager manager = new TaskTestManager(client);
-        try {
-            FolderType[] typesInOrder = new FolderType[] { FolderType.PRIVATE, FolderType.PUBLIC, FolderType.SHARED };
-            AJAXClient[] clients = new AJAXClient[] { client, client, client2 };
-            FolderObject[] folders = new FolderObject[3];
-            folders[0] = folderManager.insertFolderOnServer(folderManager.generatePrivateFolder(
-                randomUID(),
-                FolderObject.TASK,
-                client.getValues().getPrivateTaskFolder(),
-                client.getValues().getUserId()));
-            folders[1] = folderManager.insertFolderOnServer(folderManager.generatePublicFolder(
-                randomUID(),
-                FolderObject.TASK,
-                FolderObject.SYSTEM_PUBLIC_FOLDER_ID,
-                client.getValues().getUserId()));
-            folders[2] = folderManager.insertFolderOnServer(folderManager.generateSharedFolder(
-                randomUID(),
-                FolderObject.TASK,
-                client.getValues().getPrivateTaskFolder(),
-                client.getValues().getUserId(),
-                client2.getValues().getUserId()));
+        FolderType[] typesInOrder = new FolderType[] { FolderType.PRIVATE, FolderType.PUBLIC, FolderType.SHARED };
+        AJAXClient[] clients = new AJAXClient[] { getClient(), getClient(), client2 };
+        FolderObject[] folders = new FolderObject[3];
+        folders[0] = ftm.insertFolderOnServer(ftm.generatePrivateFolder(randomUID(), FolderObject.TASK, getClient().getValues().getPrivateTaskFolder(), getClient().getValues().getUserId()));
+        folders[1] = ftm.insertFolderOnServer(ftm.generatePublicFolder(randomUID(), FolderObject.TASK, FolderObject.SYSTEM_PUBLIC_FOLDER_ID, getClient().getValues().getUserId()));
+        folders[2] = ftm.insertFolderOnServer(ftm.generateSharedFolder(randomUID(), FolderObject.TASK, getClient().getValues().getPrivateTaskFolder(), getClient().getValues().getUserId(), client2.getValues().getUserId()));
 
-            Task[] tasks = new Task[3];
-            tasks[0] = manager.insertTaskOnServer(manager.newTask(randomUID(), folders[0].getObjectID()));
-            tasks[1] = manager.insertTaskOnServer(manager.newTask(randomUID(), folders[1].getObjectID()));
-            tasks[2] = manager.insertTaskOnServer(manager.newTask(randomUID(), folders[2].getObjectID()));
+        Task[] tasks = new Task[3];
+        tasks[0] = ttm.insertTaskOnServer(ttm.newTask(randomUID(), folders[0].getObjectID()));
+        tasks[1] = ttm.insertTaskOnServer(ttm.newTask(randomUID(), folders[1].getObjectID()));
+        tasks[2] = ttm.insertTaskOnServer(ttm.newTask(randomUID(), folders[2].getObjectID()));
 
-            for (int i = 0; i < 3; i++) {
-                FolderType folderType = typesInOrder[i];
-                List<Facet> facets = autocomplete(clients[i], "");
-                ExclusiveFacet folderTypeFacet = (ExclusiveFacet) findByType(CommonFacetType.FOLDER_TYPE, facets);
-                FacetValue typeValue = findByValueId(folderType.getIdentifier(), folderTypeFacet);
-                List<PropDocument> docs = query(clients[i], Collections.singletonList(createActiveFacet(folderTypeFacet, typeValue)));
-                PropDocument[] foundDocs = new PropDocument[3];
-                for (PropDocument doc : docs) {
-                    Map<String, Object> props = doc.getProps();
-                    if (tasks[0].getTitle().equals(props.get("title"))) {
-                        foundDocs[0] = doc;
-                        continue;
-                    } else if (tasks[1].getTitle().equals(props.get("title"))) {
-                        foundDocs[1] = doc;
-                        continue;
-                    } else if (tasks[2].getTitle().equals(props.get("title"))) {
-                        foundDocs[2] = doc;
-                        continue;
-                    }
-                }
-
-                switch (folderType) {
-                    case PRIVATE:
-                        assertNotNull("Private task not found", foundDocs[0]);
-                        assertNull("Public task found but should not", foundDocs[1]);
-                        assertNotNull("Shared task not found", foundDocs[2]);
-                        break;
-
-                    case PUBLIC:
-                        assertNull("Private task found but should not", foundDocs[0]);
-                        assertNotNull("Public task not found", foundDocs[1]);
-                        assertNull("Shared task found but should not", foundDocs[2]);
-                        break;
-
-                    case SHARED:
-                        assertNull("Private task found but should not", foundDocs[0]);
-                        assertNull("Public task found but should not", foundDocs[1]);
-                        assertNotNull("Shared task not found", foundDocs[2]);
-                        break;
+        for (int i = 0; i < 3; i++) {
+            FolderType folderType = typesInOrder[i];
+            List<Facet> facets = autocomplete(clients[i], "");
+            ExclusiveFacet folderTypeFacet = (ExclusiveFacet) findByType(CommonFacetType.FOLDER_TYPE, facets);
+            FacetValue typeValue = findByValueId(folderType.getIdentifier(), folderTypeFacet);
+            List<PropDocument> docs = query(clients[i], Collections.singletonList(createActiveFacet(folderTypeFacet, typeValue)));
+            PropDocument[] foundDocs = new PropDocument[3];
+            for (PropDocument doc : docs) {
+                Map<String, Object> props = doc.getProps();
+                if (tasks[0].getTitle().equals(props.get("title"))) {
+                    foundDocs[0] = doc;
+                    continue;
+                } else if (tasks[1].getTitle().equals(props.get("title"))) {
+                    foundDocs[1] = doc;
+                    continue;
+                } else if (tasks[2].getTitle().equals(props.get("title"))) {
+                    foundDocs[2] = doc;
+                    continue;
                 }
             }
-        } finally {
-            manager.cleanUp();
-            client2.logout();
+
+            switch (folderType) {
+                case PRIVATE:
+                    assertNotNull("Private task not found", foundDocs[0]);
+                    assertNull("Public task found but should not", foundDocs[1]);
+                    assertNotNull("Shared task not found", foundDocs[2]);
+                    break;
+
+                case PUBLIC:
+                    assertNull("Private task found but should not", foundDocs[0]);
+                    assertNotNull("Public task not found", foundDocs[1]);
+                    assertNull("Shared task found but should not", foundDocs[2]);
+                    break;
+
+                case SHARED:
+                    assertNull("Private task found but should not", foundDocs[0]);
+                    assertNull("Public task found but should not", foundDocs[1]);
+                    assertNotNull("Shared task not found", foundDocs[2]);
+                    break;
+            }
         }
     }
 

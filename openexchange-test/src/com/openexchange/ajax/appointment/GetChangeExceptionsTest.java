@@ -49,25 +49,31 @@
 
 package com.openexchange.ajax.appointment;
 
+import static com.openexchange.ajax.folder.Create.ocl;
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.*;
 import java.util.Date;
 import java.util.List;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetChangeExceptionsRequest;
 import com.openexchange.ajax.appointment.action.GetChangeExceptionsResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
-import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.cache.OXCachingExceptionCode;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.server.impl.OCLPermission;
 
 /**
  * {@link GetChangeExceptionsTest}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class GetChangeExceptionsTest extends AbstractAJAXSession {
@@ -78,13 +84,24 @@ public class GetChangeExceptionsTest extends AbstractAJAXSession {
 
     private Appointment exception2;
 
-    public GetChangeExceptionsTest(String name) {
-        super(name);
-    }
-
     @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
+
+        /*
+         * reset permissions in default calendar folder of user a if required
+         */
+        com.openexchange.ajax.folder.actions.GetResponse folderGetResponse = getClient().execute(
+            new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_OLD, getClient().getValues().getPrivateAppointmentFolder()));
+        FolderObject calendarFolder = folderGetResponse.getFolder();
+        if (1 < calendarFolder.getPermissions().size()) {
+            FolderObject folderUpdate = new FolderObject(calendarFolder.getObjectID());
+            folderUpdate.setLastModified(folderGetResponse.getTimestamp());
+            folderUpdate.setPermissionsAsArray(new OCLPermission[] { ocl(
+                getClient().getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION) });
+            getClient().execute(new com.openexchange.ajax.folder.actions.UpdateRequest(EnumAPI.OX_OLD, folderUpdate)).getResponse();
+        }
 
         appointment = new Appointment();
         appointment.setStartDate(D("01.05.2013 08:00"));
@@ -127,12 +144,10 @@ public class GetChangeExceptionsTest extends AbstractAJAXSession {
         getClient().execute(updateRequest);
     }
 
+    @Test
     public void testGetChangeExceptions() throws Exception {
         int[] columns = new int[] { Appointment.OBJECT_ID, Appointment.RECURRENCE_ID, Appointment.TITLE, Appointment.ALARM };
-        GetChangeExceptionsRequest request = new GetChangeExceptionsRequest(
-            appointment.getParentFolderID(),
-            appointment.getObjectID(),
-            columns);
+        GetChangeExceptionsRequest request = new GetChangeExceptionsRequest(appointment.getParentFolderID(), appointment.getObjectID(), columns);
         GetChangeExceptionsResponse response = getClient().execute(request);
 
         List<Appointment> exceptions = response.getAppointments(getClient().getValues().getTimeZone());
@@ -155,27 +170,28 @@ public class GetChangeExceptionsTest extends AbstractAJAXSession {
         assertTrue("Missing exception.", foundSecond);
     }
 
+    @Test
     public void testPermission() throws Exception {
         int[] columns = new int[] { Appointment.OBJECT_ID, Appointment.RECURRENCE_ID, Appointment.TITLE };
-        GetChangeExceptionsRequest request = new GetChangeExceptionsRequest(
-            appointment.getParentFolderID(),
-            appointment.getObjectID(),
-            columns,
-            false);
+        GetChangeExceptionsRequest request = new GetChangeExceptionsRequest(appointment.getParentFolderID(), appointment.getObjectID(), columns, false);
 
-        GetChangeExceptionsResponse response = new AJAXClient(User.User4).execute(request);
+        GetChangeExceptionsResponse response = getClient2().execute(request);
         assertTrue("Missing error.", response.hasError());
         OXException oxException = response.getException();
         assertEquals("Wrong error.", OXCachingExceptionCode.CATEGORY_PERMISSION_DENIED, oxException.getCategory());
     }
 
     @Override
-    protected void tearDown() throws Exception {
-        if (appointment != null) {
-            appointment.setLastModified(new Date(Long.MAX_VALUE));
-            getClient().execute(new DeleteRequest(appointment));
+    @After
+    public void tearDown() throws Exception {
+        try {
+            if (appointment != null) {
+                appointment.setLastModified(new Date(Long.MAX_VALUE));
+                getClient().execute(new DeleteRequest(appointment));
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
 }

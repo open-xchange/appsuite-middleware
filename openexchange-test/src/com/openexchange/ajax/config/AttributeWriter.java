@@ -5,8 +5,8 @@ import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.SetResponse;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.exception.OXException;
+import com.openexchange.test.pool.TestUser;
 
 public abstract class AttributeWriter implements Runnable {
 
@@ -14,13 +14,13 @@ public abstract class AttributeWriter implements Runnable {
 
     private Tree param;
 
-    private final User user;
+    private final TestUser user;
 
     private boolean run = true;
 
     private Throwable t;
 
-    public AttributeWriter(Tree param, User user) {
+    public AttributeWriter(Tree param, TestUser user) {
         super();
         this.param = param;
         this.user = user;
@@ -70,6 +70,7 @@ public abstract class AttributeWriter implements Runnable {
 
     /**
      * Can be overridden for custom exception handling.
+     * 
      * @param t The exception
      * @return The exception to stop execution immediately and to preserve it for {@link AttributeWriter#getThrowable()}.
      *         If <code>null</code>, the execution continues.

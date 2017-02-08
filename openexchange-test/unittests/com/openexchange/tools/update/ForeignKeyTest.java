@@ -46,41 +46,48 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.tools.update;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.setuptools.TestConfig;
-import junit.framework.TestCase;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class ForeignKeyTest extends TestCase {
+public class ForeignKeyTest {
+
     private Context ctx;
     private Connection con;
 
-    @Override
-	public void setUp() throws Exception {
-		Init.startServer();
-		final ContextStorage ctxstor = ContextStorage.getInstance();
+    @Before
+    public void setUp() throws Exception {
+        Init.startServer();
+        final ContextStorage ctxstor = ContextStorage.getInstance();
         final TestConfig config = new TestConfig();
         final int contextId = ctxstor.getContextId(config.getContextName());
         ctx = ctxstor.getContext(contextId);
-		con = DBPool.pickupWriteable(ctx);
+        con = DBPool.pickupWriteable(ctx);
 
-		_sql_update("CREATE TABLE test_parent (id int, PRIMARY KEY (id)) ENGINE=InnoDB");
+        _sql_update("CREATE TABLE test_parent (id int, PRIMARY KEY (id)) ENGINE=InnoDB");
         _sql_update("CREATE TABLE test_child (parent_id int, FOREIGN KEY (parent_id) REFERENCES test_parent(id)) ENGINE=InnoDB");
 
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         _sql_update("DROP TABLE test_child");
         _sql_update("DROP TABLE test_parent");
@@ -88,7 +95,7 @@ public class ForeignKeyTest extends TestCase {
         Init.stopServer();
     }
 
-
+    @Test
     public void testDiscoverForeignKeys() throws SQLException {
         List<ForeignKeyOld> foreignKeys = ForeignKeyOld.getForeignKeys(con, "test_child");
 
@@ -103,15 +110,16 @@ public class ForeignKeyTest extends TestCase {
         assertEquals("id", key.getTargetColumn());
         assertNotNull(key.getName());
 
-
     }
 
+    @Test
     public void testDropForeignKey() throws SQLException {
         new ForeignKeyOld("test_child", "parent_id", "test_parent", "id").drop(con);
         List<ForeignKeyOld> foreignKeys = ForeignKeyOld.getForeignKeys(con, "test_child");
         assertTrue(foreignKeys.isEmpty());
     }
 
+    @Test
     public void testCreateForeignKey() throws SQLException {
         ForeignKeyOld key = new ForeignKeyOld("test_child", "parent_id", "test_parent", "id");
         key.drop(con);
@@ -124,6 +132,7 @@ public class ForeignKeyTest extends TestCase {
         assertEquals(key, foreignKeys.get(0));
     }
 
+    @Test
     public void testCreateIfNotExists() throws SQLException {
         ForeignKeyOld key = new ForeignKeyOld("test_child", "parent_id", "test_parent", "id");
         key.createIfNotExists(con);
@@ -134,16 +143,15 @@ public class ForeignKeyTest extends TestCase {
         assertEquals(key, foreignKeys.get(0));
     }
 
-
     public void _sql_update(final String sql) throws Exception {
-		Statement stmt = null;
-		try {
-			stmt = con.createStatement();
-			stmt.executeUpdate(sql);
-		} finally {
-			if(stmt != null) {
-				stmt.close();
-			}
-		}
-	}
+        Statement stmt = null;
+        try {
+            stmt = con.createStatement();
+            stmt.executeUpdate(sql);
+        } finally {
+            if (stmt != null) {
+                stmt.close();
+            }
+        }
+    }
 }

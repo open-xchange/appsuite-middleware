@@ -52,7 +52,6 @@ package com.openexchange.ajax.pop3.actions;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
-
 /**
  * {@link StopPOP3ServerResponse}
  *
@@ -63,6 +62,7 @@ public class StopPOP3ServerResponse extends AbstractAJAXResponse {
 
     /**
      * Initializes a new {@link StopPOP3ServerResponse}.
+     * 
      * @param response
      */
     protected StopPOP3ServerResponse(Response response) {

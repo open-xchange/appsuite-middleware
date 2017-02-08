@@ -125,8 +125,7 @@ public class GetResponse extends AbstractAJAXResponse {
         return attachments;
     }
 
-    private static void parse(final JSONObject jsonObj, final MailMessage mail, final TimeZone timeZone)
-            throws OXException {
+    private static void parse(final JSONObject jsonObj, final MailMessage mail, final TimeZone timeZone) throws OXException {
         try {
             /*
              * System flags
@@ -137,8 +136,7 @@ public class GetResponse extends AbstractAJAXResponse {
             /*
              * Thread level
              */
-            if (jsonObj.has(MailJSONField.THREAD_LEVEL.getKey())
-                    && !jsonObj.isNull(MailJSONField.THREAD_LEVEL.getKey())) {
+            if (jsonObj.has(MailJSONField.THREAD_LEVEL.getKey()) && !jsonObj.isNull(MailJSONField.THREAD_LEVEL.getKey())) {
                 mail.setThreadLevel(jsonObj.getInt(MailJSONField.THREAD_LEVEL.getKey()));
             }
             /*
@@ -186,8 +184,7 @@ public class GetResponse extends AbstractAJAXResponse {
             /*
              * Disposition notification
              */
-            if (jsonObj.has(MailJSONField.DISPOSITION_NOTIFICATION_TO.getKey())
-                    && !jsonObj.isNull(MailJSONField.DISPOSITION_NOTIFICATION_TO.getKey())) {
+            if (jsonObj.has(MailJSONField.DISPOSITION_NOTIFICATION_TO.getKey()) && !jsonObj.isNull(MailJSONField.DISPOSITION_NOTIFICATION_TO.getKey())) {
                 /*
                  * Ok, disposition-notification-to is set. Check if its value is
                  * a valid email address
@@ -262,9 +259,9 @@ public class GetResponse extends AbstractAJAXResponse {
                     Object object = jsonObj.get(MailJSONField.RECEIVED_DATE.getKey());
                     final Date date;
                     if (object instanceof JSONObject) {
-                        date = new Date(((JSONObject)object).getLong("utc"));
+                        date = new Date(((JSONObject) object).getLong("utc"));
                     } else {
-                        date = new Date((Long)object);
+                        date = new Date((Long) object);
                     }
                     final int offset = timeZone.getOffset(date.getTime());
                     mail.setReceivedDate(new Date(date.getTime() - offset));

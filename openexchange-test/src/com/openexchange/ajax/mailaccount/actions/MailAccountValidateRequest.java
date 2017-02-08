@@ -108,9 +108,7 @@ public class MailAccountValidateRequest implements AJAXRequest<MailAccountValida
 
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter("action", "validate"),
-            new Parameter("tree", String.valueOf(tree))
+        return new Parameter[] { new Parameter("action", "validate"), new Parameter("tree", String.valueOf(tree))
         };
     }
 
@@ -145,11 +143,6 @@ public class MailAccountValidateRequest implements AJAXRequest<MailAccountValida
             @Override
             public int getId() {
                 return acc.getId();
-            }
-
-            @Override
-            public boolean isMailAccount() {
-                return true;
             }
 
             @Override
@@ -383,6 +376,16 @@ public class MailAccountValidateRequest implements AJAXRequest<MailAccountValida
             @Override
             public String getRootFolder() {
                 return null;
+            }
+
+            @Override
+            public boolean isMailDisabled() {
+                return acc.isMailDisabled();
+            }
+
+            @Override
+            public boolean isTransportDisabled() {
+                return acc.isTransportDisabled();
             }
         };
     }

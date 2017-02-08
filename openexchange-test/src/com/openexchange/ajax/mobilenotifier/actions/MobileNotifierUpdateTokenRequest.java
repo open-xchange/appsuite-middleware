@@ -57,7 +57,6 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
-
 /**
  * {@link MobileNotifierUpdateTokenRequest}
  *

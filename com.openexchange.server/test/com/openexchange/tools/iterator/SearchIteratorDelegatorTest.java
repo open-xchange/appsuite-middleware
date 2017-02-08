@@ -49,25 +49,26 @@
 
 package com.openexchange.tools.iterator;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import junit.framework.TestCase;
+import org.junit.Test;
 
 /**
  * {@link SearchIteratorDelegatorTest}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class SearchIteratorDelegatorTest extends TestCase {
-
-    public SearchIteratorDelegatorTest(String name) {
-        super(name);
-    }
+public class SearchIteratorDelegatorTest {
 
     /**
      * Tests if bug 16420 appears again.
      */
+    @Test
     public void testZeroSizeCollection() throws Throwable {
         List<Object> list = new ArrayList<Object>();
         SearchIteratorDelegator<Object> delegator = new SearchIteratorDelegator<Object>(list);

@@ -1,3 +1,4 @@
+
 package com.openexchange.webdav.action;
 
 import java.io.ByteArrayOutputStream;
@@ -9,53 +10,53 @@ import java.util.Map;
 
 public class MockWebdavResponse implements WebdavResponse {
 
-	private final ByteArrayOutputStream out = new ByteArrayOutputStream();
+    private final ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-	private final Map<String,String> headers = new HashMap<String,String>();
+    private final Map<String, String> headers = new HashMap<String, String>();
 
-	private int status;
+    private int status;
 
-	public String getResponseBodyAsString() {
-		try {
-			return new String(out.toByteArray(),"UTF-8");
-		} catch (final UnsupportedEncodingException e) {
-			e.printStackTrace();
-			return e.toString();
-		}
-	}
+    public String getResponseBodyAsString() {
+        try {
+            return new String(out.toByteArray(), "UTF-8");
+        } catch (final UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return e.toString();
+        }
+    }
 
-	public String getHeader(final String headerName) {
-		return headers.get(headerName.toUpperCase());
-	}
+    public String getHeader(final String headerName) {
+        return headers.get(headerName.toUpperCase());
+    }
 
-	@Override
+    @Override
     public OutputStream getOutputStream() {
-		return out;
-	}
+        return out;
+    }
 
-	@Override
+    @Override
     public void setHeader(final String header, final String value) {
-		headers.put(header.toUpperCase(),value);
-	}
+        headers.put(header.toUpperCase(), value);
+    }
 
-	@Override
+    @Override
     public int getStatus() {
-		return status;
-	}
+        return status;
+    }
 
-	@Override
+    @Override
     public void setStatus(final int status) {
-		this.status = status;
-	}
+        this.status = status;
+    }
 
-	public byte[] getResponseBytes() {
-		return out.toByteArray();
-	}
+    public byte[] getResponseBytes() {
+        return out.toByteArray();
+    }
 
-	@Override
+    @Override
     public void setContentType(final String s) {
-		setHeader("Content-Type", s);
-	}
+        setHeader("Content-Type", s);
+    }
 
     @Override
     public void sendString(final String notFound) throws IOException {

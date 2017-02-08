@@ -50,9 +50,14 @@
 package com.openexchange.webdav.xml.task;
 
 import static com.openexchange.java.Autoboxing.L;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Locale;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.webdav.xml.TaskTest;
@@ -60,10 +65,11 @@ import com.openexchange.webdav.xml.XmlServlet;
 
 public class ListTest extends TaskTest {
 
-    public ListTest(final String name) {
-        super(name);
+    public ListTest() {
+        super();
     }
 
+    @Test
     public void testPropFindWithModified() throws Exception {
         final Task taskObj = createTask("testPropFindWithModified");
         final int objectId1 = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password, context);
@@ -80,6 +86,7 @@ public class ListTest extends TaskTest {
         assertTrue("check response", taskArray.length >= 2);
     }
 
+    @Test
     public void testPropFindWithDelete() throws Exception {
         final Task taskObj = createTask("testPropFindWithModified");
         final int objectId1 = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password, context);
@@ -100,6 +107,7 @@ public class ListTest extends TaskTest {
         assertTrue("wrong response array length", taskArray.length >= 2);
     }
 
+    @Test
     public void testPropFindWithObjectId() throws Exception {
         final Task taskObj = createTask("testPropFindWithObjectId");
         final int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password, context);
@@ -107,21 +115,23 @@ public class ListTest extends TaskTest {
         loadTask(webCon, objectId, taskFolderId, PROTOCOL + hostName, login, password, context);
     }
 
+    @Test
     public void testObjectNotFound() throws Exception {
         final Task taskObj = createTask("testObjectNotFound");
         final int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password, context);
 
         try {
-            loadTask(webCon, (objectId+1000), taskFolderId, PROTOCOL + hostName, login, password, context);
+            loadTask(webCon, (objectId + 1000), taskFolderId, PROTOCOL + hostName, login, password, context);
             fail("object not found exception expected!");
         } catch (final OXException exc) {
             assertExceptionMessage(exc.getDisplayMessage(Locale.ENGLISH), XmlServlet.OBJECT_NOT_FOUND_STATUS);
         }
 
-        final int[][] objectIdAndFolderId = { { objectId ,taskFolderId } };
-        deleteTask(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password, context );
+        final int[][] objectIdAndFolderId = { { objectId, taskFolderId } };
+        deleteTask(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password, context);
     }
 
+    @Test
     public void testListWithAllFields() throws Exception {
         final Task taskObj = new Task();
         taskObj.setTitle("testListWithAllFields");
@@ -165,6 +175,7 @@ public class ListTest extends TaskTest {
         compareObject(taskObj, loadTask);
     }
 
+    @Test
     public void testListWithAllFieldsOnUpdate() throws Exception {
         Task taskObj = createTask("testListWithAllFieldsOnUpdate");
         final int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password, context);
@@ -213,6 +224,7 @@ public class ListTest extends TaskTest {
         compareObject(taskObj, loadTask);
     }
 
+    @Test
     public void testList() throws Exception {
         final Task taskObj = createTask("testList");
         final int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password, context);

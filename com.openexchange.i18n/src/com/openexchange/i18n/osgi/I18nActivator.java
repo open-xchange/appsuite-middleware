@@ -76,6 +76,7 @@ import com.openexchange.i18n.impl.TranslationsI18N;
 import com.openexchange.i18n.parsing.Translations;
 import com.openexchange.osgi.BundleServiceTracker;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceHolderListener;
 
 /**
@@ -109,6 +110,9 @@ public class I18nActivator extends HousekeepingActivator {
         public void onServiceAvailable(final ConfigurationService service) throws Exception {
             unregisterAll();
             final ConfigurationService config = csh.getService();
+            if (null == config) {
+                throw ServiceExceptionCode.absentService(ConfigurationService.class);
+            }
             try {
                 serviceRegistrations = initI18nServices(context, config);
             } finally {

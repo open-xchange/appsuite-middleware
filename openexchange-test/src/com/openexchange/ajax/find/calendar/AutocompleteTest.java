@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.find.calendar;
 
+import static org.junit.Assert.assertNotNull;
+import org.junit.After;
+import org.junit.Before;
 import com.openexchange.ajax.find.actions.AutocompleteRequest;
 import com.openexchange.ajax.find.actions.AutocompleteResponse;
 import com.openexchange.find.Module;
@@ -65,16 +68,19 @@ public class AutocompleteTest extends CalendarFindTest {
 
     private ContactTestManager contactManager;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
-        contactManager = new ContactTestManager(client);
+        contactManager = new ContactTestManager(getClient());
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        contactManager.cleanUp();
-        super.tearDown();
+        try {
+            contactManager.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
     /**
@@ -82,18 +88,18 @@ public class AutocompleteTest extends CalendarFindTest {
      *
      * @param name The test name
      */
-    public AutocompleteTest(String name) {
-        super(name);
+    public AutocompleteTest() {
+        super();
     }
 
     public void noTestAutocompleteCurrentUser() throws Exception {
-        String defaultAddress = client.getValues().getDefaultAddress();
+        String defaultAddress = getClient().getValues().getDefaultAddress();
         assertFoundFacetInAutocomplete(defaultAddress.substring(0, 3), defaultAddress);
     }
 
     public void noTestAutocompleteOtherContact() throws Exception {
         Contact contact = new Contact();
-        contact.setParentFolderID(client.getValues().getPrivateContactFolder());
+        contact.setParentFolderID(getClient().getValues().getPrivateContactFolder());
         contact.setSurName(randomUID());
         contact.setGivenName(randomUID());
         contact.setDisplayName(contact.getGivenName() + " " + contact.getSurName());
@@ -112,7 +118,7 @@ public class AutocompleteTest extends CalendarFindTest {
 
     private FacetValue assertFoundFacetInAutocomplete(String prefix, String expectedEmail1) throws Exception {
         AutocompleteRequest autocompleteRequest = new AutocompleteRequest(prefix, Module.CALENDAR.getIdentifier());
-        AutocompleteResponse autocompleteResponse = client.execute(autocompleteRequest);
+        AutocompleteResponse autocompleteResponse = getClient().execute(autocompleteRequest);
         FacetValue foundFacetValue = findByDisplayName(autocompleteResponse.getFacets(), expectedEmail1);
         assertNotNull("no facet value found for: " + expectedEmail1, foundFacetValue);
         return foundFacetValue;

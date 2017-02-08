@@ -4,13 +4,16 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
-import junit.framework.TestCase;
+import org.junit.Test;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.subscribe.parser.MicroformatAppointmentParser;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 
-public class MicroformatAppointmentParserTest extends TestCase {
-    public Date defaultStartDate;
+public class MicroformatAppointmentParserTest {    public Date defaultStartDate;
     public Date defaultEndDate;
     public SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd, HH:mm:ss z");
 
@@ -36,7 +39,8 @@ public class MicroformatAppointmentParserTest extends TestCase {
 
     }
 
-    public void testShouldWorkUnderBestPossibleCircumstances(){
+         @Test
+     public void testShouldWorkUnderBestPossibleCircumstances(){
         final MicroformatAppointmentParser parser = new MicroformatAppointmentParser();
         parser.parse(wellBehavedHtml);
         final Collection<CalendarDataObject> appointments = parser.getAppointments();

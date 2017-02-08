@@ -59,8 +59,8 @@ import com.openexchange.html.AbstractSanitizing;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class Bug22072Test extends AbstractSanitizing {
-    @Test
-    public void testPunycodeLinkGeneration() {
+     @Test
+     public void testPunycodeLinkGeneration() {
         String htmlWithBasePath = "<html><head><base href=\"http://foo.bar\"></head><body><img src=\"subpath\" />";
         String ret = getHtmlService().checkBaseTag(htmlWithBasePath, true);
         assertEquals("Unexpected return value", ret, "<html><head></head><body><img src=\"http://foo.bar/subpath\"\" />");

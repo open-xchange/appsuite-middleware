@@ -49,8 +49,13 @@
 
 package com.openexchange.ajax.mail;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.ListRequest;
 import com.openexchange.ajax.folder.actions.ListResponse;
@@ -74,53 +79,49 @@ public class Bug30703Test extends AbstractAJAXSession {
 
     private MailAccountDescription mailAccountDescription;
 
-    public Bug30703Test(String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         try {
-            StopPOP3ServerRequest stopReq = new StopPOP3ServerRequest();
-            client.execute(stopReq);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        try {
-            if (mailAccountDescription != null) {
-                client.execute(new MailAccountDeleteRequest(mailAccountDescription.getId()));
+            try {
+                StopPOP3ServerRequest stopReq = new StopPOP3ServerRequest();
+                getClient().execute(stopReq);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
-        super.tearDown();
+            try {
+                if (mailAccountDescription != null) {
+                    getClient().execute(new MailAccountDeleteRequest(mailAccountDescription.getId()));
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } finally {
+            super.tearDown();
+        }
     }
 
+    @Test
     public void testProtocolError() throws Exception {
         setupServerAndAccount(true, false);
         ListRequest listRequest = new ListRequest(EnumAPI.OX_NEW, "default" + mailAccountDescription.getId());
-        ListResponse listResponse = client.execute(listRequest);
+        ListResponse listResponse = getClient().execute(listRequest);
         assertException(ResponseWriter.getJSON(listResponse.getResponse()), MimeMailExceptionCode.CONNECT_ERROR);
     }
 
+    @Test
     public void testWrongCredentials() throws Exception {
         setupServerAndAccount(false, true);
         ListRequest listRequest = new ListRequest(EnumAPI.OX_NEW, "default" + mailAccountDescription.getId());
-        ListResponse listResponse = client.execute(listRequest);
+        ListResponse listResponse = getClient().execute(listRequest);
         assertException(ResponseWriter.getJSON(listResponse.getResponse()), MimeMailExceptionCode.INVALID_CREDENTIALS_EXT);
     }
 
+    @Test
     public void testServerOffline() throws Exception {
         setupAccount("localhost", 1234);
         ListRequest listRequest = new ListRequest(EnumAPI.OX_NEW, "default" + mailAccountDescription.getId());
-        ListResponse listResponse = client.execute(listRequest);
+        ListResponse listResponse = getClient().execute(listRequest);
         assertException(ResponseWriter.getJSON(listResponse.getResponse()), MimeMailExceptionCode.CONNECT_ERROR);
     }
 
@@ -136,7 +137,7 @@ public class Bug30703Test extends AbstractAJAXSession {
 
     private void setupServerAndAccount(boolean failOnConnect, boolean failOnAuth) throws Exception {
         StartPOP3ServerRequest startReq = new StartPOP3ServerRequest(failOnConnect, failOnAuth);
-        StartPOP3ServerResponse startResp = client.execute(startReq);
+        StartPOP3ServerResponse startResp = getClient().execute(startReq);
         String host = startResp.getHost();
         int port = startResp.getPort();
         setupAccount(host, port);
@@ -160,7 +161,7 @@ public class Bug30703Test extends AbstractAJAXSession {
         mailAccountDescription.setTrash("Trash");
         mailAccountDescription.setSpam("Spam");
         mailAccountDescription.setSpamHandler("NoSpamHandler");
-        MailAccountInsertResponse response = client.execute(new MailAccountInsertRequest(mailAccountDescription));
+        MailAccountInsertResponse response = getClient().execute(new MailAccountInsertRequest(mailAccountDescription));
         assertFalse("Warning during account creation: " + response.getResponse().getWarnings().toString(), response.hasWarnings());
         response.fillObject(mailAccountDescription);
     }

@@ -52,7 +52,6 @@ package com.openexchange.ajax.mail.filter.api.conversion.parser.comparison;
 import java.util.HashMap;
 import com.openexchange.ajax.mail.filter.api.dao.MatchType;
 
-
 /**
  * ComparisonParserFactory
  *
@@ -60,17 +59,17 @@ import com.openexchange.ajax.mail.filter.api.dao.MatchType;
  */
 public class ComparisonParserRegistry {
 
-	final static HashMap<MatchType, ComparisonParser> parseMap = new HashMap<>();
+    final static HashMap<MatchType, ComparisonParser> parseMap = new HashMap<>();
 
-	public ComparisonParserRegistry() {
+    public ComparisonParserRegistry() {
 
-	}
+    }
 
-	public static void addParser(final MatchType name, final ComparisonParser comparisonParser) {
-		parseMap.put(name, comparisonParser);
-	}
+    public static void addParser(final MatchType name, final ComparisonParser comparisonParser) {
+        parseMap.put(name, comparisonParser);
+    }
 
-	public static ComparisonParser getParser(MatchType name) {
-		return parseMap.get(name);
-	}
+    public static ComparisonParser getParser(MatchType name) {
+        return parseMap.get(name);
+    }
 }

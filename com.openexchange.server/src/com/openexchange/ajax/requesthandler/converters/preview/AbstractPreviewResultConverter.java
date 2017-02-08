@@ -527,7 +527,9 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
             return true;
         }
         pin.unread(read);
-        ref.setValue(pin);
+        if (ref != null) {
+            ref.setValue(pin);
+        }
         return false;
     }
 

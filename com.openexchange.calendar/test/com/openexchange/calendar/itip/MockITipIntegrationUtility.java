@@ -51,7 +51,6 @@ package com.openexchange.calendar.itip;
 
 import java.util.Date;
 import java.util.List;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;

@@ -86,5 +86,5 @@ public class EmptyHttpAuthRequest extends HttpAuthRequest {
     public HttpAuthParser getParser() {
         return new HttpAuthParser(cookiesNeeded, locationNeeded, failOnNonRedirect);
     }
-    
+
 }

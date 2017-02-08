@@ -49,9 +49,12 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import org.junit.Test;
 import com.openexchange.calendar.CalendarAdministration;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -60,9 +63,10 @@ import com.openexchange.server.impl.DBPool;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 
-
 public class Bug12466Test extends CalendarSqlTest {
+
     // Bug12466
+    @Test
     public void testAutoDeletionOfAppointmentsWithResources() throws Throwable {
         Connection readcon = null;
         Connection writecon = null;
@@ -90,11 +94,7 @@ public class Bug12466Test extends CalendarSqlTest {
             writecon = DBPool.pickupWriteable(ctx);
             final SessionObject so = SessionObjectWrapper.createSessionObject(userId, ctx.getContextId(), "deleteAllUserApps");
 
-            final DeleteEvent delEvent = new DeleteEvent(
-                this,
-                so.getUserId(),
-                DeleteEvent.TYPE_USER,
-                ContextStorage.getInstance().getContext(so.getContextId()));
+            final DeleteEvent delEvent = new DeleteEvent(this, so.getUserId(), DeleteEvent.TYPE_USER, ContextStorage.getInstance().getContext(so.getContextId()));
 
             final CalendarAdministration ca = new CalendarAdministration();
             ca.deletePerformed(delEvent, readcon, writecon);

@@ -1181,6 +1181,9 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
                 throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(contactId, contextId);
             }
             final Contact c = executor.selectSingle(connection, Table.CONTACTS, contextId, contactId, new ContactField[] { ContactField.INTERNAL_USERID, ContactField.FOLDER_ID, ContactField.LAST_MODIFIED });
+            if (c == null) {
+                throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(contactId, contextId);
+            }
             if (!c.containsInternalUserId() || userId != c.getInternalUserId()) {
                 throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(contactId, contextId);
             }

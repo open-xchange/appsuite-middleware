@@ -55,7 +55,6 @@ import static com.openexchange.ajax.fields.LoginFields.AUTHID_PARAM;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
-
 /**
  * {@link TokenLoginV2Request}
  *
@@ -68,14 +67,7 @@ public class TokenLoginV2Request extends AbstractRequest<TokenLoginV2Response> {
      * Initializes a new {@link TokenLoginV2Request}.
      */
     public TokenLoginV2Request(String token, String secret, String authId, String client, String version, String redirectUrl) {
-        super(new Parameter[] {
-            new URLParameter(PARAMETER_ACTION, ACTION_REDEEM_TOKEN),
-            new URLParameter(AUTHID_PARAM, authId),
-            new FieldParameter(LoginFields.TOKEN, token),
-            new FieldParameter(LoginFields.APPSECRET, secret),
-            new FieldParameter(LoginFields.CLIENT_PARAM, client),
-            new FieldParameter(LoginFields.VERSION_PARAM, version),
-            new FieldParameter(LoginFields.REDIRECT_URL, redirectUrl)
+        super(new Parameter[] { new URLParameter(PARAMETER_ACTION, ACTION_REDEEM_TOKEN), new URLParameter(AUTHID_PARAM, authId), new FieldParameter(LoginFields.TOKEN, token), new FieldParameter(LoginFields.APPSECRET, secret), new FieldParameter(LoginFields.CLIENT_PARAM, client), new FieldParameter(LoginFields.VERSION_PARAM, version), new FieldParameter(LoginFields.REDIRECT_URL, redirectUrl)
         });
     }
 

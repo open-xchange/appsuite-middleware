@@ -56,7 +56,6 @@ import java.util.List;
 import com.openexchange.ajax.framework.Header;
 import com.openexchange.ajax.framework.Header.SimpleHeader;
 
-
 /**
  * {@link UploadRequest}
  *

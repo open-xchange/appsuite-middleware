@@ -49,12 +49,13 @@
 
 package com.openexchange.grizzly;
 
+import static org.junit.Assert.assertEquals;
 import java.util.Map;
 import org.json.JSONObject;
 import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.simple.AbstractSimpleClientTest;
 import com.openexchange.ajax.simple.SimpleResponse;
-
 
 /**
  * {@link ProcessingTest} - Simple test that exceeds the default apache timeout of 100s and thus triggers the http processing ping
@@ -69,6 +70,7 @@ public class ProcessingTest extends AbstractSimpleClientTest {
     private final int value1 = 1;
     private final String key2 = "b";
     private final int value2 = 2;
+
     /**
      * @throws java.lang.Exception
      */
@@ -80,12 +82,14 @@ public class ProcessingTest extends AbstractSimpleClientTest {
     }
 
     /**
-     * Tests that the connection isn't closed by apache and we receive bac the payload we initially provided. 
+     * Tests that the connection isn't closed by apache and we receive bac the payload we initially provided.
+     * 
      * @throws Exception
      */
+    @Test
     public void testSimpleProcessing() throws Exception {
         as(USER1);
-        SimpleResponse response = callGeneral("grizzlytest", "processing", "timeout", TIMEOUT, "payload", simplePayload );
+        SimpleResponse response = callGeneral("grizzlytest", "processing", "timeout", TIMEOUT, "payload", simplePayload);
         Map<String, Object> objectData = response.getObjectData();
         Map<String, Object> payloadData = (Map<String, Object>) objectData.get("payload");
         Object responseValue1 = payloadData.get(key1);

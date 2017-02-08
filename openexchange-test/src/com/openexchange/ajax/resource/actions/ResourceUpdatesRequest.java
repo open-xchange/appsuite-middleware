@@ -55,23 +55,22 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Params;
 
-
 /**
  * {@link ResourceUpdatesRequest}
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class ResourceUpdatesRequest  extends AbstractResourceRequest<ResourceUpdatesResponse>{
+public class ResourceUpdatesRequest extends AbstractResourceRequest<ResourceUpdatesResponse> {
 
     private final boolean failOnError;
     private final Date lastModified;
 
     @Override
-    public Object getBody(){
+    public Object getBody() {
         return null;
     }
 
-    public ResourceUpdatesRequest(Date since, boolean failOnError){
+    public ResourceUpdatesRequest(Date since, boolean failOnError) {
         this.failOnError = failOnError;
         this.lastModified = since;
     }
@@ -82,16 +81,14 @@ public class ResourceUpdatesRequest  extends AbstractResourceRequest<ResourceUpd
     }
 
     @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters(){
-        return new Params(
-            AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATES,
-            AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(this.lastModified.getTime())
-        ).toArray();
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
+        return new Params(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATES, AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(this.lastModified.getTime())).toArray();
     }
 
     @Override
     public AbstractAJAXParser<? extends ResourceUpdatesResponse> getParser() {
-        return new AbstractAJAXParser<ResourceUpdatesResponse>(this.failOnError){
+        return new AbstractAJAXParser<ResourceUpdatesResponse>(this.failOnError) {
+
             @Override
             protected ResourceUpdatesResponse createResponse(Response response) {
                 return new ResourceUpdatesResponse(response);

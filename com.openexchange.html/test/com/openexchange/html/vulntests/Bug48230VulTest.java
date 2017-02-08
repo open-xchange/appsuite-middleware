@@ -66,8 +66,8 @@ public class Bug48230VulTest extends AbstractSanitizing {
         super();
     }
 
-    @Test
-    public void testDataUriSanitizing() {
+     @Test
+     public void testDataUriSanitizing() throws Exception {
         String content = "<!DOCTYPE html>\n" +
             "<html><head>\n" +
             "    <meta charset=\"UTF-8\">\n" +

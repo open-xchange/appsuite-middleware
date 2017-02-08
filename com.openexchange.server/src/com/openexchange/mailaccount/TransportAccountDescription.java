@@ -84,6 +84,7 @@ public class TransportAccountDescription {
     private String transportUrl;
     private Map<String, String> transportProperties;
     private int transportOAuthId;
+    private boolean transportDisabled;
 
     /**
      * Initializes a new {@link TransportAccountDescription}.
@@ -96,10 +97,11 @@ public class TransportAccountDescription {
         transportProtocol = "smtp";
         id = -1;
         transportOAuthId = -1;
+        transportDisabled = false;
     }
 
     /**
-     * Parses specified transport server URL. If the given url is <code>null</code>, then the transportserver url will be set to <code>null</code> too.
+     * Parses specified transport server URL. If the given URL is <code>null</code>, then the transport server URL will be set to <code>null</code> too.
      *
      * @param mailServerURL The transport server URL to parse
      * @throws OXException If URL cannot be parsed
@@ -271,6 +273,24 @@ public class TransportAccountDescription {
     }
 
     /**
+     * Checks whether mail transport is disabled
+     *
+     * @return <code>true</code> if disabled; otherwise <code>false</code>
+     */
+    public boolean isTransportDisabled() {
+        return transportDisabled;
+    }
+
+    /**
+     * Sets whether mail transport is disabled
+     *
+     * @param transportDisabled <code>true</code> if disabled; otherwise <code>false</code>
+     */
+    public void setTransportDisabled(boolean transportDisabled) {
+        this.transportDisabled = transportDisabled;
+    }
+
+    /**
      * Gets the transport authentication information
      *
      * @return The transport authentication information
@@ -424,6 +444,15 @@ public class TransportAccountDescription {
     public void setTransportSecure(final boolean transportSecure) {
         transportUrl = null;
         this.transportSecure = transportSecure;
+    }
+
+    /**
+     * Gets the transport secure flag
+     *
+     * @return The transport secure flag
+     */
+    public boolean isTransportSecure() {
+        return transportSecure;
     }
 
     /**

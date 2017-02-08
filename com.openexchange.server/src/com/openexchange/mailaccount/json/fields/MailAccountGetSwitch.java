@@ -310,4 +310,14 @@ public class MailAccountGetSwitch implements AttributeSwitch {
         return account.getRootFolder();
     }
 
+    @Override
+    public Object mailDisabled() {
+        return Boolean.valueOf(account.isMailDisabled());
+    }
+
+    @Override
+    public Object transportDisabled() {
+        return Boolean.valueOf(account.isTransportDisabled());
+    }
+
 }

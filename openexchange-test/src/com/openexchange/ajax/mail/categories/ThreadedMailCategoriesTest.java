@@ -53,7 +53,6 @@ import static org.junit.Assert.assertTrue;
 import java.util.List;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.mail.MailTestManager;
 import com.openexchange.ajax.mail.actions.NewMailRequest;
 import com.openexchange.groupware.search.Order;
@@ -66,53 +65,28 @@ import com.openexchange.mail.dataobjects.ThreadSortMailMessage;
  * @since v7.8.3
  */
 public class ThreadedMailCategoriesTest extends AbstractMailCategoriesTest {
-    
-    
+
     private int[] columns = new int[] { 102, 600, 601, 602, 603, 604, 605, 606, 607, 608, 610, 611, 614, 652, 656 };
-    
+
     @Test
     public void conversationTest() throws Exception {
-        MailTestManager manager = new MailTestManager(client, false);
-        AJAXClient user2Client = new AJAXClient(User.User2);
+        MailTestManager manager = new MailTestManager(getClient(), false);
+        AJAXClient user2Client = new AJAXClient(testContext.acquireUser());
         String send2 = getSendAddress(user2Client);
-        
+
         /*
          * Insert <numOfMails> mails through a send request
          */
         final int numOfMails = 1;
-        final String eml =
-            "Message-Id: <4A002517.4650.0059.1@foobar.com>\n" +
-            "Date: Tue, 05 May 2009 11:37:58 -0500\n" +
-            "From: " + getSendAddress() + "\n" +
-            "To: " + getSendAddress() + "\n" +
-            "Subject: Invitation for launch\n" +
-            "Mime-Version: 1.0\n" +
-            "Content-Type: text/plain; charset=\"UTF-8\"\n" +
-            "Content-Transfer-Encoding: 8bit\n" +
-            "\n" +
-            "This is a MIME message. If you are reading this text, you may want to \n" +
-            "consider changing to a mail reader or gateway that understands how to \n" +
-            "properly handle MIME multipart messages.";
-        
-        final String eml2 =
-            "Message-Id: <4A002517.4650.0059.1@foobar.com>\n" +
-            "Date: Tue, 05 May 2009 11:37:58 -0500\n" +
-            "From: " + send2 + "\n" +
-            "To: " + getSendAddress() + "\n" +
-            "Subject: Invitation for launch\n" +
-            "Mime-Version: 1.0\n" +
-            "Content-Type: text/plain; charset=\"UTF-8\"\n" +
-            "Content-Transfer-Encoding: 8bit\n" +
-            "\n" +
-            "This is a MIME message. If you are reading this text, you may want to \n" +
-            "consider changing to a mail reader or gateway that understands how to \n" +
-            "properly handle MIME multipart messages.";
-        
+        final String eml = "Message-Id: <4A002517.4650.0059.1@foobar.com>\n" + "Date: Tue, 05 May 2009 11:37:58 -0500\n" + "From: " + getSendAddress() + "\n" + "To: " + getSendAddress() + "\n" + "Subject: Invitation for launch\n" + "Mime-Version: 1.0\n" + "Content-Type: text/plain; charset=\"UTF-8\"\n" + "Content-Transfer-Encoding: 8bit\n" + "\n" + "This is a MIME message. If you are reading this text, you may want to \n" + "consider changing to a mail reader or gateway that understands how to \n" + "properly handle MIME multipart messages.";
+
+        final String eml2 = "Message-Id: <4A002517.4650.0059.1@foobar.com>\n" + "Date: Tue, 05 May 2009 11:37:58 -0500\n" + "From: " + send2 + "\n" + "To: " + getSendAddress() + "\n" + "Subject: Invitation for launch\n" + "Mime-Version: 1.0\n" + "Content-Type: text/plain; charset=\"UTF-8\"\n" + "Content-Transfer-Encoding: 8bit\n" + "\n" + "This is a MIME message. If you are reading this text, you may want to \n" + "consider changing to a mail reader or gateway that understands how to \n" + "properly handle MIME multipart messages.";
+
         for (int i = 0; i < numOfMails; i++) {
-            getClient().execute(new NewMailRequest(client.getValues().getInboxFolder(), eml, -1, true));
-            user2Client.execute(new NewMailRequest(client.getValues().getInboxFolder(), eml2, -1, true));
+            getClient().execute(new NewMailRequest(getClient().getValues().getInboxFolder(), eml, -1, true));
+            user2Client.execute(new NewMailRequest(getClient().getValues().getInboxFolder(), eml2, -1, true));
         }
-        
+
         String origin = values.getInboxFolder();
 
         // check general - should contain the thread
@@ -136,10 +110,6 @@ public class ThreadedMailCategoriesTest extends AbstractMailCategoriesTest {
         assertTrue("The number of messages is incorrect.", messages.size() == 1);
         assertTrue("The message does not contain any child messages.", messages.get(0).getChildMessages().size() != 0);
 
-
     }
-    
-    
-    
 
 }

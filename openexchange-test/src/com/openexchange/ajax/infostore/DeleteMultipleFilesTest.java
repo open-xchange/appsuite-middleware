@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.infostore;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -57,10 +59,10 @@ import java.util.Date;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.infostore.actions.DeleteInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.DeleteInfostoreResponse;
 import com.openexchange.ajax.infostore.actions.GetInfostoreRequest;
@@ -68,7 +70,6 @@ import com.openexchange.ajax.infostore.actions.NewInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.NewInfostoreResponse;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
-
 
 /**
  * {@link DeleteMultipleFilesTest}
@@ -83,17 +84,18 @@ public class DeleteMultipleFilesTest extends InfostoreAJAXTest {
 
     /**
      * Initializes a new {@link DeleteMultipleFilesTest}.
+     * 
      * @param name
      */
-    public DeleteMultipleFilesTest(final String name) {
-        super(name);
+    public DeleteMultipleFilesTest() {
+        super();
 
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
-        client = new AJAXClient(User.User1);
+        client = getClient();
         itemIds = new ArrayList<String>();
         folderIds = new ArrayList<String>();
         java.io.File f1 = java.io.File.createTempFile("file1", "txt");
@@ -101,10 +103,10 @@ public class DeleteMultipleFilesTest extends InfostoreAJAXTest {
 
         final File data1 = new DefaultFile();
         data1.setFileName(f1.getName());
-        data1.setFolderId(String.valueOf(client.getValues().getPrivateInfostoreFolder()));
+        data1.setFolderId(String.valueOf(getClient().getValues().getPrivateInfostoreFolder()));
         data1.setCreated(new Date());
         final NewInfostoreRequest newReq1 = new NewInfostoreRequest(data1, f1);
-        final NewInfostoreResponse newRes1 = client.execute(newReq1);
+        final NewInfostoreResponse newRes1 = getClient().execute(newReq1);
         itemIds.add(newRes1.getID());
         folderIds.add(data1.getFolderId());
 
@@ -113,30 +115,27 @@ public class DeleteMultipleFilesTest extends InfostoreAJAXTest {
 
         final File data2 = new DefaultFile();
         data2.setFileName(f2.getName());
-        data2.setFolderId(String.valueOf(client.getValues().getPrivateInfostoreFolder()));
+        data2.setFolderId(String.valueOf(getClient().getValues().getPrivateInfostoreFolder()));
         data2.setCreated(new Date());
         final NewInfostoreRequest newReq2 = new NewInfostoreRequest(data2, f2);
-        final NewInfostoreResponse newRes2 = client.execute(newReq2);
+        final NewInfostoreResponse newRes2 = getClient().execute(newReq2);
         itemIds.add(newRes2.getID());
         folderIds.add(data2.getFolderId());
     }
 
     private void writeBytes(final String string, final java.io.File ods) {
-    	PrintWriter p = null;
-    	try {
-			p = new PrintWriter(new FileWriter(ods));
-			p.write(string);
-		} catch (final IOException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		} finally {
-			if (p != null) { p.close(); }
-		}
-	}
-
-	@Override
-    public void tearDown() throws Exception {
-        super.tearDown();
+        PrintWriter p = null;
+        try {
+            p = new PrintWriter(new FileWriter(ods));
+            p.write(string);
+        } catch (final IOException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        } finally {
+            if (p != null) {
+                p.close();
+            }
+        }
     }
 
     @Test
@@ -145,17 +144,17 @@ public class DeleteMultipleFilesTest extends InfostoreAJAXTest {
         {
             final GetInfostoreRequest get = new GetInfostoreRequest(itemIds.get(0));
             get.setFailOnError(true);
-            lastModified = client.execute(get).getTimestamp();
+            lastModified = getClient().execute(get).getTimestamp();
         }
         {
             final GetInfostoreRequest get = new GetInfostoreRequest(itemIds.get(1));
             get.setFailOnError(true);
-            final Date tmp = client.execute(get).getTimestamp();
+            final Date tmp = getClient().execute(get).getTimestamp();
             lastModified = lastModified.before(tmp) ? tmp : lastModified;
         }
 
         final DeleteInfostoreRequest delReq = new DeleteInfostoreRequest(itemIds, folderIds, lastModified);
-        final DeleteInfostoreResponse delRes = client.execute(delReq);
+        final DeleteInfostoreResponse delRes = getClient().execute(delReq);
         final JSONArray json = (JSONArray) delRes.getData();
         final int len = json.length();
         for (int i = 0; i < len; i++) {

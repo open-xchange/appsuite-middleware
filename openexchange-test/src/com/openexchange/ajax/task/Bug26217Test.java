@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.task;
 
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.TimeZone;
@@ -85,13 +86,12 @@ public final class Bug26217Test extends AbstractTaskTest {
     private TimeZone tz;
     private FolderObject moveTo;
 
-    public Bug26217Test(String name) {
-        super(name);
+    public Bug26217Test() {
+        super();
     }
 
     @Before
-    @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         tz = getTimeZone();
@@ -106,18 +106,19 @@ public final class Bug26217Test extends AbstractTaskTest {
 
         moveTo = com.openexchange.ajax.folder.Create.createPrivateFolder("Bug 26217 test", FolderObject.TASK, client.getValues().getUserId());
         moveTo.setParentFolderID(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
-        com.openexchange.ajax.folder.actions.InsertResponse response2 = client.execute(
-            new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_OLD, moveTo));
+        com.openexchange.ajax.folder.actions.InsertResponse response2 = client.execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_OLD, moveTo));
         moveTo.setObjectID(response2.getId());
         moveTo.setLastModified(response2.getTimestamp());
     }
 
     @After
-    @Override
-    protected void tearDown() throws Exception {
-        client.execute(new DeleteRequest(task));
-        client.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, moveTo));
-        super.tearDown();
+    public void tearDown() throws Exception {
+        try {
+            client.execute(new DeleteRequest(task));
+            client.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, moveTo));
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

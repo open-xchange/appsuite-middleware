@@ -49,9 +49,13 @@
 
 package com.openexchange.ajax.mail;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import javax.mail.internet.AddressException;
 import org.json.JSONException;
+import org.junit.Before;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.actions.AllRequest;
@@ -70,11 +74,11 @@ public class CopyTest extends AbstractMailTest {
 
     private String mailObject_25kb;
 
-    public CopyTest(String name) {
-        super(name);
+    public CopyTest() {
+        super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         /*
@@ -91,18 +95,7 @@ public class CopyTest extends AbstractMailTest {
         mailObject_25kb = createSelfAddressed25KBMailObject().toString();
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        /*
-         * Clean everything
-         */
-        // clearFolder(getInboxFolder());
-        // clearFolder(getSentFolder());
-        // clearFolder(getTrashFolder());
-        // clearFolder(getDraftsFolder());
-        super.tearDown();
-    }
-
+    @Test
     public void testCopyingOneFolder() throws IOException, SAXException, JSONException, AddressException, OXException {
         String destinationFolderID = getDraftsFolder();
 

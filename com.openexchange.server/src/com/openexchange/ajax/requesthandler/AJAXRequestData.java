@@ -812,12 +812,12 @@ public class AJAXRequestData {
     }
 
     /**
-     * Gets this request's parameters as a {@link Map map}
+     * Gets this request's parameters as an unmodifiable {@link Map map}
      *
-     * @return The parameters as a {@link Map map}
+     * @return The parameters as an unmodifiable {@link Map map}
      */
     public @NonNull Map<String, String> getParameters() {
-        return new HashMap<String, String>(params);
+        return Collections.unmodifiableMap(params);
     }
 
     /**

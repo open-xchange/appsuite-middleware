@@ -49,17 +49,19 @@
 
 package com.openexchange.ajax.onboarding.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.List;
 import org.json.JSONObject;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
+import org.junit.Test;
+import com.openexchange.ajax.framework.AbstractSmtpAJAXSession;
 import com.openexchange.ajax.onboarding.actions.ExecuteRequest;
 import com.openexchange.ajax.onboarding.actions.OnboardingTestResponse;
-import com.openexchange.ajax.onboarding.actions.StartSMTPRequest;
-import com.openexchange.ajax.onboarding.actions.StopSMTPRequest;
 import com.openexchange.ajax.smtptest.actions.GetMailsRequest;
 import com.openexchange.ajax.smtptest.actions.GetMailsResponse;
 import com.openexchange.ajax.smtptest.actions.GetMailsResponse.Message;
-
 
 /**
  * {@link EASSyncProfileTest}
@@ -67,44 +69,26 @@ import com.openexchange.ajax.smtptest.actions.GetMailsResponse.Message;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.8.1
  */
-public class EASSyncProfileTest extends AbstractAJAXSession {
+public class EASSyncProfileTest extends AbstractSmtpAJAXSession {
 
-    public EASSyncProfileTest(String name) {
-        super(name);
-    }
-
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-        StartSMTPRequest req = new StartSMTPRequest(true);
-        req.setUpdateNoReplyForContext(client.getValues().getContextId());
-        client.execute(req);
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        if (null != client) {
-            client.execute(new StopSMTPRequest());
-        }
-        super.tearDown();
-    }
-
+    @Test
     public void testEASSyncProfileViaEmail() throws Exception {
         JSONObject body = new JSONObject();
-        body.put("email", client.getValues().getDefaultAddress());
+        body.put("email", getClient().getValues().getDefaultAddress());
         ExecuteRequest req = new ExecuteRequest("apple.iphone/eassync", "email", body, false);
-        OnboardingTestResponse resp = client.execute(req);
+        OnboardingTestResponse resp = getClient().execute(req);
         assertFalse(resp.hasError());
         GetMailsRequest mailReq = new GetMailsRequest();
-        GetMailsResponse mailResp = client.execute(mailReq);
+        GetMailsResponse mailResp = getNoReplyClient().execute(mailReq);
         List<Message> messages = mailResp.getMessages();
         assertNotNull(messages);
         assertEquals(1, messages.size());
     }
 
+    @Test
     public void testEASSyncProfileViaDisplay() throws Exception {
         ExecuteRequest req = new ExecuteRequest("apple.iphone/easmanual", "display", null, false);
-        OnboardingTestResponse resp = client.execute(req);
+        OnboardingTestResponse resp = getClient().execute(req);
         assertFalse(resp.hasError());
         JSONObject json = (JSONObject) resp.getData();
         assertTrue(json.hasAndNotNull("eas_url"));

@@ -60,5 +60,4 @@ import com.openexchange.ajax.mail.filter.api.dao.test.argument.TestArgument;
  */
 public interface TestJSONParser extends JSONParser<Test<? extends TestArgument>> {
 
-    
 }

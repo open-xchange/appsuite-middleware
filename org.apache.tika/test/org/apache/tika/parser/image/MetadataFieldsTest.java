@@ -18,12 +18,15 @@ package org.apache.tika.parser.image;
 
 import org.apache.tika.metadata.TIFF;
 import org.apache.tika.metadata.TikaCoreProperties;
+import org.junit.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
-import junit.framework.TestCase;
-
-public class MetadataFieldsTest extends TestCase {
-
-    public void testIsMetadataField() {
+public class MetadataFieldsTest {
+         @Test
+     public void testIsMetadataField() {
         assertFalse(MetadataFields.isMetadataField("random string that is not a field"));
         assertFalse(MetadataFields.isMetadataField("xyz"));
         assertTrue(MetadataFields.isMetadataField(TikaCoreProperties.KEYWORDS));

@@ -250,7 +250,7 @@ public class AddressbookQueryTest extends CardDAVTest {
         return assertQueryMatch(folderID, Collections.singletonList(filter), null, expectedUID);
     }
 
-	private VCardResource assertQueryMatch(int folderID, List<PropFilter> filters, String filterTest, String expectedUID) throws Exception {
+    private VCardResource assertQueryMatch(int folderID, List<PropFilter> filters, String filterTest, String expectedUID) throws Exception {
         /*
          * construct query
          */
@@ -283,6 +283,6 @@ public class AddressbookQueryTest extends CardDAVTest {
         }
         assertNotNull("no matching vcard resource found", matchingResource);
         return matchingResource;
-	}
+    }
 
 }
