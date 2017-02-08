@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The chronos implementation bundle
 Bundle-SymbolicName: com.openexchange.chronos.impl
-Bundle-Version: 7.10.0
+Bundle-Version: 7.8.4
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.chronos,
@@ -29,6 +29,7 @@ Import-Package: com.openexchange.chronos,
  com.openexchange.groupware.ldap,
  com.openexchange.groupware.notify.hostname,
  com.openexchange.groupware.tools.mappings,
+ com.openexchange.groupware.userconfiguration,
  com.openexchange.i18n,
  com.openexchange.i18n.tools,
  com.openexchange.java,

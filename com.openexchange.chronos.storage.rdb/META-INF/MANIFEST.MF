@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The chronos RDB storage bundle
 Bundle-SymbolicName: com.openexchange.chronos.storage.rdb
-Bundle-Version: 7.10.0
+Bundle-Version: 7.8.4
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.mysql.jdbc,
