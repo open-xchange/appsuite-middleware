@@ -276,7 +276,7 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
 		if (null == columnIDs) {
 			throw new IllegalArgumentException("columnIDs");
 		}
-		final List<E> fields = new ArrayList<E>();
+		final List<E> fields = new ArrayList<E>(columnIDs.length);
 		for (final int columnID : columnIDs) {
 			final E field = this.getMappedField(columnID);
 			if (null != field && (null == illegalFields || false == illegalFields.contains(field))) {

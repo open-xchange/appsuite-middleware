@@ -330,12 +330,12 @@ specific field data of single or multiple objects.
 |605 |Default address |	default_address | Number ||
 |606 ||	image1_url | String ||
 |608 ||	useCount | Number |	In case of sorting purposes the column 609 is also available, which places global address book contacts at the beginning of the result. If 609 is used, the order direction (ASC, DESC) is ignored.||
-|610 ||	yomiFirstName | String | Kana based representation for the First Name. Commonly used in japanese environments for searchin/sorting issues. (since 6.20)||
-|611 ||	yomiLastName | String |	Kana based representation for the Last Name. Commonly used in japanese environments for searchin/sorting issues. (since 6.20)||
-|612 ||	yomiCompany | String | Kana based representation for the Company. Commonly used in japanese environments for searchin/sorting issues. (since 6.20)||
-|613 ||	addressHome | String | Support for Outlook 'home' address field. (since 6.20.1)||
-|614 ||	addressBusiness | String | Support for Outlook 'business' address field. (since 6.20.1)||
-|615 ||	addressOther | String |	Support for Outlook 'other' address field. (since 6.20.1)||
+|616 ||	yomiFirstName | String | Kana based representation for the First Name. Commonly used in japanese environments for searchin/sorting issues. (since 6.20)||
+|617 ||	yomiLastName | String |	Kana based representation for the Last Name. Commonly used in japanese environments for searchin/sorting issues. (since 6.20)||
+|618 ||	yomiCompany | String | Kana based representation for the Company. Commonly used in japanese environments for searchin/sorting issues. (since 6.20)||
+|619 ||	addressHome | String | Support for Outlook 'home' address field. (since 6.20.1)||
+|620 ||	addressBusiness | String | Support for Outlook 'business' address field. (since 6.20.1)||
+|621 ||	addressOther | String |	Support for Outlook 'other' address field. (since 6.20.1)||
 
 
 

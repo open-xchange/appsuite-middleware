@@ -816,10 +816,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 Set<String> storedAliases = aliasStorage.getAliases(contextId, userId);
                 for (final String elem : alias) {
                     if (elem != null && elem.trim().length() > 0) {
-                        if (!storedAliases.contains(elem)) {
+                        if (!containsAndRemove(elem, storedAliases)) {
                             aliasStorage.createAlias(con, contextId, userId, elem);
-                        } else {
-                            storedAliases.remove(elem);
                         }
                     }
                 }
@@ -1047,8 +1045,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 }
             }
 
-            if (usrdata.isRemoveDriveFolderFlags()) {
-                removeDriveFolderFlags(ctx, usrdata, con);
+            if (usrdata.isConvertDriveUserFolders()) {
+                convertDriveUserFolders(ctx, usrdata, con);
             }
 
             // update the user mail settings
@@ -1396,6 +1394,23 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 }
             }
         }
+    }
+
+    /**
+     * Checks whether the oldAlias set contains the new alias (ignoring the case) and removes it if it does.
+     *
+     * @param newAlias The new alias
+     * @param oldAlias The old alias set
+     * @return true if it contains the new alias
+     */
+    private boolean containsAndRemove(String newAlias, Set<String> oldAlias) {
+        for (String alias : oldAlias) {
+            if (alias.equalsIgnoreCase(newAlias)) {
+                oldAlias.remove(alias);
+                return true;
+            }
+        }
+        return false;
     }
 
     private int getDefaultInfoStoreFolder(final User user, final Context ctx, final Connection con) {
@@ -3678,7 +3693,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
     }
 
-    private void removeDriveFolderFlags(Context ctx, User user, Connection con) throws StorageException {
+    private void convertDriveUserFolders(Context ctx, User user, Connection con) throws StorageException {
         int contextId = ctx.getId().intValue();
         int userId = user.getId().intValue();
         PreparedStatement stmt = null;

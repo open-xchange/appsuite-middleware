@@ -67,6 +67,11 @@ public interface ClientDevice {
         }
 
         @Override
+        public boolean matches(Device device) {
+            return false;
+        }
+
+        @Override
         public String toString() {
             return "IMPLIES_ALL";
         }
@@ -79,5 +84,13 @@ public interface ClientDevice {
      * @return <code>true</code> if specified device is implied; otherwise <code>false</code>
      */
     boolean implies(Device device);
+
+    /**
+     * Checks if this client device matches the specified device.
+     *
+     * @param device The device that might match
+     * @return <code>true</code> if specified device matches; otherwise <code>false</code>
+     */
+    boolean matches(Device device);
 
 }

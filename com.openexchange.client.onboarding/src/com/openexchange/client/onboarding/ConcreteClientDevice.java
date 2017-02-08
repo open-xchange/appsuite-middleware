@@ -97,4 +97,9 @@ public class ConcreteClientDevice implements ClientDevice {
         return this.device == device;
     }
 
+    @Override
+    public boolean matches(Device device) {
+        return this.device == device;
+    }
+
 }

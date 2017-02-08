@@ -122,13 +122,46 @@ public class CSVContactExporter implements Exporter {
         ContactField.USERFIELD06, ContactField.USERFIELD07, ContactField.USERFIELD08, ContactField.USERFIELD09, ContactField.USERFIELD10,
         ContactField.USERFIELD11, ContactField.USERFIELD12, ContactField.USERFIELD13, ContactField.USERFIELD14, ContactField.USERFIELD15,
         ContactField.USERFIELD16, ContactField.USERFIELD17, ContactField.USERFIELD18, ContactField.USERFIELD19, ContactField.USERFIELD20,
+        ContactField.DEFAULT_ADDRESS, ContactField.YOMI_FIRST_NAME, ContactField.YOMI_LAST_NAME, ContactField.YOMI_COMPANY,
+        ContactField.HOME_ADDRESS, ContactField.BUSINESS_ADDRESS, ContactField.OTHER_ADDRESS
+    );
+
+    /**
+     * The default columns
+     */
+    protected static final EnumSet<ContactField> DEFAULT_FIELDS = EnumSet.of(
+        ContactField.OBJECT_ID, ContactField.CREATED_BY, ContactField.CREATION_DATE, ContactField.LAST_MODIFIED, ContactField.MODIFIED_BY,
+        ContactField.CATEGORIES,
+        ContactField.SUR_NAME, ContactField.ANNIVERSARY, ContactField.ASSISTANT_NAME, ContactField.BIRTHDAY, ContactField.BRANCHES,
+        ContactField.BUSINESS_CATEGORY, ContactField.CATEGORIES, ContactField.CELLULAR_TELEPHONE1, ContactField.CELLULAR_TELEPHONE2,
+        ContactField.CITY_BUSINESS, ContactField.CITY_HOME, ContactField.CITY_OTHER, ContactField.COMMERCIAL_REGISTER,
+        ContactField.COMPANY, ContactField.COUNTRY_BUSINESS, ContactField.COUNTRY_HOME, ContactField.COUNTRY_OTHER,
+        ContactField.DEPARTMENT, ContactField.DISPLAY_NAME, ContactField.DISTRIBUTIONLIST, ContactField.EMAIL1, ContactField.EMAIL2,
+        ContactField.EMAIL3, ContactField.EMPLOYEE_TYPE, ContactField.FAX_BUSINESS, ContactField.FAX_HOME, ContactField.FAX_OTHER,
+        ContactField.FOLDER_ID, ContactField.GIVEN_NAME,
+        ContactField.INFO, ContactField.INSTANT_MESSENGER1, ContactField.INSTANT_MESSENGER2,
+        ContactField.MARK_AS_DISTRIBUTIONLIST,
+        ContactField.MANAGER_NAME, ContactField.MARITAL_STATUS, ContactField.MIDDLE_NAME, ContactField.NICKNAME, ContactField.NOTE,
+        ContactField.NUMBER_OF_CHILDREN, ContactField.NUMBER_OF_EMPLOYEE, ContactField.POSITION, ContactField.POSTAL_CODE_BUSINESS,
+        ContactField.POSTAL_CODE_HOME, ContactField.POSTAL_CODE_OTHER,
+        ContactField.PROFESSION, ContactField.ROOM_NUMBER, ContactField.SALES_VOLUME, ContactField.SPOUSE_NAME,
+        ContactField.STATE_BUSINESS,  ContactField.STATE_HOME, ContactField.STATE_OTHER, ContactField.STREET_BUSINESS,
+        ContactField.STREET_HOME, ContactField.STREET_OTHER, ContactField.SUFFIX, ContactField.TAX_ID, ContactField.TELEPHONE_ASSISTANT,
+        ContactField.TELEPHONE_BUSINESS1, ContactField.TELEPHONE_BUSINESS2, ContactField.TELEPHONE_CALLBACK, ContactField.TELEPHONE_CAR,
+        ContactField.TELEPHONE_COMPANY, ContactField.TELEPHONE_HOME1, ContactField.TELEPHONE_HOME2, ContactField.TELEPHONE_IP,
+        ContactField.TELEPHONE_ISDN, ContactField.TELEPHONE_OTHER, ContactField.TELEPHONE_PAGER, ContactField.TELEPHONE_PRIMARY,
+        ContactField.TELEPHONE_RADIO, ContactField.TELEPHONE_TELEX, ContactField.TELEPHONE_TTYTDD, ContactField.TITLE, ContactField.URL,
+        ContactField.USERFIELD01, ContactField.USERFIELD02, ContactField.USERFIELD03, ContactField.USERFIELD04, ContactField.USERFIELD05,
+        ContactField.USERFIELD06, ContactField.USERFIELD07, ContactField.USERFIELD08, ContactField.USERFIELD09, ContactField.USERFIELD10,
+        ContactField.USERFIELD11, ContactField.USERFIELD12, ContactField.USERFIELD13, ContactField.USERFIELD14, ContactField.USERFIELD15,
+        ContactField.USERFIELD16, ContactField.USERFIELD17, ContactField.USERFIELD18, ContactField.USERFIELD19, ContactField.USERFIELD20,
         ContactField.DEFAULT_ADDRESS
     );
 
     /**
      * The possible contact fields as array
      */
-    protected static final ContactField[] POSSIBLE_FIELDS_ARRAY = POSSIBLE_FIELDS.toArray(new ContactField[POSSIBLE_FIELDS.size()]);
+    protected static final ContactField[] DEFAULT_FIELDS_ARRAY = DEFAULT_FIELDS.toArray(new ContactField[DEFAULT_FIELDS.size()]);
 
 
     @Override
@@ -167,7 +200,7 @@ public class CSVContactExporter implements Exporter {
 
         ContactField[] fields;
         if (fieldsToBeExported == null || fieldsToBeExported.length == 0) {
-            fields = POSSIBLE_FIELDS_ARRAY;
+            fields = DEFAULT_FIELDS_ARRAY;
         } else {
             EnumSet<ContactField> illegalFields = EnumSet.complementOf(POSSIBLE_FIELDS);
             fields = ContactMapper.getInstance().getFields(fieldsToBeExported, illegalFields, (ContactField[])null);
@@ -257,7 +290,7 @@ public class CSVContactExporter implements Exporter {
         final int folderId = getFolderId(folder);
         ContactField[] fields;
         if (fieldsToBeExported == null || fieldsToBeExported.length == 0) {
-            fields = POSSIBLE_FIELDS_ARRAY;
+            fields = DEFAULT_FIELDS_ARRAY;
         } else {
             EnumSet<ContactField> illegalFields = EnumSet.complementOf(POSSIBLE_FIELDS);
             fields = ContactMapper.getInstance().getFields(fieldsToBeExported, illegalFields, (ContactField[])null);
