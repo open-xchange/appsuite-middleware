@@ -1272,6 +1272,9 @@ fi
 ox_comment html.tag.form add /opt/open-xchange/etc/whitelist.properties
 ox_comment html.tag.input add /opt/open-xchange/etc/whitelist.properties
 
+# SoftwareChange_Request-3934
+ox_comment html.style.list-style-image add /opt/open-xchange/etc/whitelist.properties
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
