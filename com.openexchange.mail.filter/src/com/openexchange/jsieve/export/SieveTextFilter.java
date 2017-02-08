@@ -878,39 +878,39 @@ public final class SieveTextFilter {
     }
 
     /**
-     * @param finalrules
-     * @param wholetext
-     * @param commentedtext
+     * @param finalRules
+     * @param wholeText
+     * @param commentedText
      * @return The next uid
      */
-    private NextUidAndError setPosAndMissingErrortextsAndIds(final ArrayList<Rule> finalrules, final String wholetext, final String commentedtext) {
-        final List<Integer> uniqueids = new ArrayList<Integer>();
+    private NextUidAndError setPosAndMissingErrortextsAndIds(final ArrayList<Rule> finalRules, final String wholeText, final String commentedText) {
+        final List<Integer> uniqueIds = new ArrayList<Integer>();
         int max = -1;
         int i = 0;
-        boolean errortext = false;
-        for (int o = 0; o < finalrules.size(); o++) {
-            final Rule rule = finalrules.get(o);
+        boolean errorText = false;
+        for (int o = 0; o < finalRules.size(); o++) {
+            final Rule rule = finalRules.get(o);
             if (null == rule.getRequireCommand()) {
                 final RuleComment ruleComment = rule.getRuleComment();
-                int uniqueid = -1;
-                if (null != ruleComment && -1 != (uniqueid = ruleComment.getUniqueid())) {
-                    if (uniqueid > max) {
-                        max = uniqueid;
+                int uniqueId = -1;
+                if (null != ruleComment && -1 != (uniqueId = ruleComment.getUniqueid())) {
+                    if (uniqueId > max) {
+                        max = uniqueId;
                     }
                 } else {
-                    uniqueids.add(o);
+                    uniqueIds.add(o);
                 }
                 rule.setPosition(i++);
                 if (null != rule.getErrormsg() && null == rule.getText()) {
-                    if (handleRuleError(wholetext, commentedtext, null, rule)) {
-                        errortext = true;
+                    if (handleRuleError(wholeText, commentedText, null, rule)) {
+                        errorText = true;
                     }
                 }
             }
         }
         // Now we go through all the rules which have to unique id
-        for (final Integer id : uniqueids) {
-            final Rule rule = finalrules.get(id);
+        for (final Integer id : uniqueIds) {
+            final Rule rule = finalRules.get(id);
             final RuleComment ruleComment = rule.getRuleComment();
             if (null != ruleComment) {
                 ruleComment.setUniqueid(++max);
@@ -918,30 +918,30 @@ public final class SieveTextFilter {
                 rule.setRuleComments(new RuleComment(++max));
             }
         }
-        return new NextUidAndError(++max, errortext);
+        return new NextUidAndError(++max, errorText);
     }
 
     /**
      * This method splits the given list of rules into two separate lists one
      * for the commented rules and one for the uncommented
      *
-     * @param totalrules
+     * @param totalRules
      *            A list containing all rules
-     * @param noncommented
+     * @param nonCommented
      *            The list which will contain all non-commented rules
      *            afterwards
      * @param commented
      *            The list which will contain all commented rules afterwards
      */
-    private void splitRules(final ArrayList<Rule> totalrules, final ArrayList<Rule> noncommented, final ArrayList<Rule> commented) {
+    private void splitRules(final ArrayList<Rule> totalRules, final ArrayList<Rule> nonCommented, final ArrayList<Rule> commented) {
         // First clear the two output lists
-        noncommented.clear();
+        nonCommented.clear();
         commented.clear();
-        for (final Rule rule : totalrules) {
+        for (final Rule rule : totalRules) {
             if (rule.isCommented()) {
                 commented.add(rule);
             } else {
-                noncommented.add(rule);
+                nonCommented.add(rule);
             }
         }
     }
