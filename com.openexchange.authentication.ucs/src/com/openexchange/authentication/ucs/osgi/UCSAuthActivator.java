@@ -47,112 +47,70 @@
  *
  */
 
-package com.openexchange.admin.rmi.exceptions;
 
-import java.util.ArrayList;
 
-/**
- * Is thrown when user sends invalid data to the server.
- *
- * @author cutmasta
- *
- */
-public class InvalidDataException extends Exception {
+package com.openexchange.authentication.ucs.osgi;
 
-    /**
-     * IF we need more granular exceptions for invalid filestore url or invalid
-     * username for example, the new Exception must extend this exception.
-     */
+import java.util.Properties;
+import org.osgi.framework.ServiceRegistration;
+import com.openexchange.authentication.AuthenticationService;
+import com.openexchange.authentication.ucs.impl.UCSAuthentication;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
+import com.openexchange.osgi.DeferredActivator;
 
-    /**
-     * Contains the name of the object which is affected by this exception
-     */
-    private String objectname = null;
+public class UCSAuthActivator extends DeferredActivator {
+
+    private static transient final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UCSAuthActivator.class);
 
     /**
-     * Contains the fieldnames in the object (if available) which are not correct
+     * Reference to the service registration.
      */
-    private ArrayList<String> fieldnames = null;
-    /**
-     * For serialization
-     */
-    private static final long serialVersionUID = 5803502090025698411L;
+    private ServiceRegistration<AuthenticationService> registration;
+    private ServiceRegistration<Reloadable> reloadable;
 
-    /**
-     *
-     */
-    public InvalidDataException() {
-        super("Invalid data sent!");
-    }
-
-    /**
-     * @param message
-     */
-    public InvalidDataException(String message) {
-        super(message);
-
-    }
-
-    /**
-     * @param cause
-     */
-    public InvalidDataException(Throwable cause) {
-        super(cause);
-
-    }
-
-    /**
-     * @param message
-     * @param cause
-     */
-    public InvalidDataException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    /**
-     * Set the fieldname which are not correct in the object
-     *
-     * @return
-     */
-    public final ArrayList<String> getFieldnames() {
-        return fieldnames;
-    }
-
-    /**
-     * Get the fieldnames of the object which aren't correct (maybe null if no fieldnames can be specified)
-     *
-     * @param fieldnames
-     */
-    public final void setFieldnames(ArrayList<String> fieldnames) {
-        this.fieldnames = fieldnames;
-    }
-
-    /**
-     * Get the Name of the object which is affected by this exception
-     *
-     * @return
-     */
-    public final String getObjectname() {
-        return objectname;
-    }
-
-    /**
-     *
-     *
-     * @param objectname
-     */
-    public final void setObjectname(String objectname) {
-        this.objectname = objectname;
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ConfigurationService.class };
     }
 
     @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder(super.toString());
-        if (null != fieldnames) {
-            sb.append("The following field are invalid:\n");
-            sb.append(fieldnames);
-        }
-        return super.toString();
+    protected void handleUnavailability(Class<?> clazz) {
+        // TODO Auto-generated method stub
+        
     }
 
+    @Override
+    protected void handleAvailability(Class<?> clazz) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        LOG.info("starting bundle: com.openexchange.authentication.ucs");
+        final ConfigurationService config = getService(ConfigurationService.class);
+        final Properties props = config.getFile(UCSAuthentication.CONFIGFILE);
+
+        if (null == registration) {
+            final UCSAuthentication impl = new UCSAuthentication(props);
+            registration = context.registerService(AuthenticationService.class, impl, null);
+            reloadable = context.registerService(Reloadable.class, impl, null);
+        } else {
+            LOG.error("Duplicate startup of deferred activator.");
+        }
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        LOG.info("Stopping bundle: com.openexchange.authentication.ucs");
+        if (null != registration) {
+            registration.unregister();
+            registration = null;
+        }
+        if (null != reloadable) {
+            reloadable.unregister();
+            reloadable = null;
+        }
+    }
 }

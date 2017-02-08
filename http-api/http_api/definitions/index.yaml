@@ -503,6 +503,8 @@ FindQueryBody:
   $ref: ./find/FindQueryBody.yaml
 FindQueryResponse:
   $ref: ./find/FindQueryResponse.yaml
+FindQueryResponseData:
+  $ref: ./find/FindQueryResponseData.yaml
 # Module: share/management
 ShareTargetData:
   $ref: ./sharemanagement/ShareTargetData.yaml
