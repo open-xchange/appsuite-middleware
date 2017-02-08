@@ -656,7 +656,8 @@ public final class LoginPerformer {
 
         AuditLogService auditLogService = ServerServiceRegistry.getInstance().getService(AuditLogService.class);
         if (null != auditLogService) {
-            String login = request.getLogin();
+            Session session = result.getSession();
+            String login = null == session ? request.getLogin() : session.getLoginName();
             if (null != login) {
                 String client = request.getClient();
                 auditLogService.log("ox.login", DefaultAttribute.valueFor(Name.LOGIN, login, 256), DefaultAttribute.valueFor(Name.IP_ADDRESS, request.getClientIP()), DefaultAttribute.timestampFor(new Date()), DefaultAttribute.valueFor(Name.CLIENT, null == client ? "<none>" : client));
