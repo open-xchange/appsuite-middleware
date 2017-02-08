@@ -51,22 +51,23 @@
 
 package com.openexchange.authentication.ucs.osgi;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
+import java.util.Properties;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.ucs.impl.UCSAuthentication;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.config.Reloadable;
+import com.openexchange.osgi.DeferredActivator;
 
-public class Activator extends HousekeepingActivator {
+public class UCSAuthActivator extends DeferredActivator {
+
+    private static transient final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UCSAuthActivator.class);
 
     /**
-     * Initializes a new {@link Activator}.
+     * Reference to the service registration.
      */
-    public Activator() {
-        super();
-    }
+    private ServiceRegistration<AuthenticationService> registration;
+    private ServiceRegistration<Reloadable> reloadable;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -74,14 +75,42 @@ public class Activator extends HousekeepingActivator {
     }
 
     @Override
+    protected void handleUnavailability(Class<?> clazz) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    protected void handleAvailability(Class<?> clazz) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
     protected void startBundle() throws Exception {
-        org.slf4j.LoggerFactory.getLogger(Activator.class).info("starting bundle: com.openexchange.authentication.ucs");
-        registerService(AuthenticationService.class, new UCSAuthentication(getService(ConfigurationService.class)));
+        LOG.info("starting bundle: com.openexchange.authentication.ucs");
+        final ConfigurationService config = getService(ConfigurationService.class);
+        final Properties props = config.getFile(UCSAuthentication.CONFIGFILE);
+
+        if (null == registration) {
+            final UCSAuthentication impl = new UCSAuthentication(props);
+            registration = context.registerService(AuthenticationService.class, impl, null);
+            reloadable = context.registerService(Reloadable.class, impl, null);
+        } else {
+            LOG.error("Duplicate startup of deferred activator.");
+        }
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        org.slf4j.LoggerFactory.getLogger(Activator.class).info("stopping bundle: com.openexchange.authentication.ucs");
-        super.stopBundle();
+        LOG.info("Stopping bundle: com.openexchange.authentication.ucs");
+        if (null != registration) {
+            registration.unregister();
+            registration = null;
+        }
+        if (null != reloadable) {
+            reloadable.unregister();
+            reloadable = null;
+        }
     }
 }
