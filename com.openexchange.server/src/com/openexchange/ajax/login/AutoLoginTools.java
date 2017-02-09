@@ -150,7 +150,7 @@ public class AutoLoginTools {
      * @return The login result if a valid session was found, or <code>null</code>, otherwise
      */
     public static LoginResult tryAutologin(LoginConfiguration loginConfig, HttpServletRequest request, HttpServletResponse response, String hash) throws OXException {
-        if (loginConfig.isSessiondAutoLogin()) {
+        if (loginConfig.isSessiondAutoLogin(request.getServerName())) {
             Map<String, Cookie> cookies = Cookies.cookieMapFor(request);
             if (null != cookies) {
                 // Extract session & secret from supplied cookies
@@ -198,7 +198,7 @@ public class AutoLoginTools {
      */
     public static LoginResult tryGuestAutologin(LoginConfiguration loginConfig, HttpServletRequest request, HttpServletResponse response) throws OXException {
         Cookie[] cookies = request.getCookies();
-        if (loginConfig.isSessiondAutoLogin() && null != cookies && 0 < cookies.length) {
+        if (loginConfig.isSessiondAutoLogin(request.getServerName()) && null != cookies && 0 < cookies.length) {
             /*
              * extract share token from supplied cookies, based on the "plain" request hash
              */

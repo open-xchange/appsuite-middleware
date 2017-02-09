@@ -84,7 +84,7 @@ public final class HasAutoLogin implements LoginRequestHandler {
         resp.setContentType(LoginServlet.CONTENTTYPE_JAVASCRIPT);
         try {
             final JSONObject json = new JSONObject(2);
-            json.put(ACTION_AUTOLOGIN, conf.isSessiondAutoLogin());
+            json.put(ACTION_AUTOLOGIN, conf.isSessiondAutoLogin(req.getServerName()));
             json.write(resp.getWriter());
         } catch (JSONException e) {
             LOG.error(LoginServlet.RESPONSE_ERROR, e);

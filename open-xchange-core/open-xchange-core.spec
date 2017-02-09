@@ -1434,6 +1434,9 @@ ox_comment html.tag.input add /opt/open-xchange/etc/whitelist.properties
 # SoftwareChange_Request-3882
 ox_add_property NPROC 65536 /opt/open-xchange/etc/ox-scriptconf.sh
 
+# SoftwareChange_Request-3934
+ox_comment html.style.list-style-image add /opt/open-xchange/etc/whitelist.properties
+
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
 for FILE in "${PROTECT[@]}"
 do

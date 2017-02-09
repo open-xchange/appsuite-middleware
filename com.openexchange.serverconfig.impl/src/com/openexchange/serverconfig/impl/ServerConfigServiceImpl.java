@@ -53,6 +53,7 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
@@ -83,9 +84,12 @@ import com.openexchange.session.Session;
 public class ServerConfigServiceImpl implements ServerConfigService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ServerConfigService.class);
+
     private final static String SERVERCONFIG_PREFIX = "com.openexchange.appsuite.serverConfig.";
     private final static String SERVER_PREFIX = "com.openexchange.appsuite.server";
-    private final static String[] prefixes = {SERVERCONFIG_PREFIX, SERVER_PREFIX};
+    private final static String[] PREFIXES = {SERVERCONFIG_PREFIX, SERVER_PREFIX};
+
+    // --------------------------------------------------------------------------------------------------------------------------------
 
     private final ServiceLookup serviceLookup;
     private final ServerConfigServicesLookup serverConfigServicesLookup;
@@ -100,36 +104,14 @@ public class ServerConfigServiceImpl implements ServerConfigService {
     }
 
     @Override
-    public ServerConfig getServerConfig(String hostName, int userID, int contextID) throws OXException {
-        return createNewServerConfig0(hostName, userID, contextID, null);
-    }
-
-    @Override
-    public ServerConfig getServerConfig(String hostName, Session session) throws OXException {
-        return createNewServerConfig0(hostName, session.getUserId(), session.getContextId(), session);
-    }
-
-    @SuppressWarnings("unchecked")
-    private ServerConfig createNewServerConfig0(String hostName, int userID, int contextID, Session session) throws OXException {
-        ConfigurationService configService = serviceLookup.getService(ConfigurationService.class);
-
-        // The resulting brand/server configuration
-        Map<String, Object> serverConfiguration = new HashMap<String, Object>(32, 0.9F);
-
+    public List<Map<String, Object>> getCustomHostConfigurations(String hostName, int userID, int contextID) throws OXException {
         // Get configured brands/server configurations
-        Map<String, Object> configurations = (Map<String, Object>)configService.getYaml("as-config.yml");
-        debugOut("as-config.yml", configurations);
+        ConfigurationService configService = serviceLookup.getService(ConfigurationService.class);
+        Map<String, Object> configurations = (Map<String, Object>) configService.getYaml("as-config.yml");
 
-        Map<String, Object> defaults = (Map<String, Object>) configService.getYaml("as-config-defaults.yml");
-        if (defaults != null) {
-            serverConfiguration.putAll((Map<String, Object>) defaults.get("default"));
-            debugOut("as-config-defaults.yml", defaults);
-        }
+        LinkedList<Map<String, Object>> applicableConfigs = new LinkedList<Map<String, Object>>();
 
-        // Find other applicable brands/server configurations
         if (configurations != null) {
-            boolean empty = true;
-            LinkedList<Map<String, Object>> applicableConfigs = new LinkedList<Map<String,Object>>();
             for (Map.Entry<String, Object> configEntry : configurations.entrySet()) {
                 Map<String, Object> possibleConfiguration = (Map<String, Object>) configEntry.getValue();
                 if (looksApplicable(possibleConfiguration, hostName)) {
@@ -139,7 +121,6 @@ public class ServerConfigServiceImpl implements ServerConfigService {
                     } else {
                         applicableConfigs.add(possibleConfiguration);
                     }
-                    empty = false;
                 } else {
                     final String configName = configEntry.getKey();
                     if (null == possibleConfiguration) {
@@ -150,22 +131,17 @@ public class ServerConfigServiceImpl implements ServerConfigService {
                 }
             }
 
-
-            /*
-             * Add key/value pairs that start with SERVER_PREFIX or SERVERCONFIG_PREFIX to the serverconfig. The mentioned prefix is
-             * stripped from resulting name and entries are only added if the session is not anonymous.
-             */
+            // Add key/value pairs that start with SERVER_PREFIX or SERVERCONFIG_PREFIX to the applicableConfigs.
             Map<String, Object> ccValues = new HashMap<String, Object>();
-            ConfigView configView = null;
             ConfigViewFactory configViewFactory = serviceLookup.getService(ConfigViewFactory.class);
-            configView = configViewFactory.getView(userID, contextID);
+            ConfigView configView = configViewFactory.getView(userID, contextID);
 
             Map<String, ComposedConfigProperty<String>> allProperties = configView.all();
-            for(Map.Entry<String, ComposedConfigProperty<String>> entry: allProperties.entrySet()) {
+            for (Map.Entry<String, ComposedConfigProperty<String>> entry : allProperties.entrySet()) {
 
                 String propName = entry.getKey();
-                for (String prefix : prefixes) {
-                    if(propName.startsWith(prefix)) {
+                for (String prefix : PREFIXES) {
+                    if (propName.startsWith(prefix)) {
                         String value = entry.getValue().get();
                         //Allow to keep value from global config if specified as "<as-config>"
                         if (!value.equals("<as-config>")) {
@@ -175,55 +151,9 @@ public class ServerConfigServiceImpl implements ServerConfigService {
                 }
             }
             applicableConfigs.add(ccValues);
-
-            if (!empty) {
-                for (Map<String, Object> config : applicableConfigs) {
-                    serverConfiguration.putAll(config);
-                }
-            }
         }
 
-        /*
-         * Add computed values after configview values
-         */
-        for (ComputedServerConfigValueService computed : serverConfigServicesLookup.getComputed()) {
-            try {
-                computed.addValue(serverConfiguration, hostName, userID, contextID, session);
-            } catch (Throwable t) {
-                ExceptionUtils.handleThrowable(t);
-                LOG.error("Failed to add value from '{}' to server configuration", computed.getClass().getName(), t);
-            }
-        }
-
-        serverConfiguration = correctLanguageConfiguration(serverConfiguration);
-
-        return new ServerConfigImpl(serverConfiguration, serverConfigServicesLookup.getClientFilters());
-    }
-
-    /**
-     * The languages config item in the as-config.yml can be:
-     *  - A String "all" which then gets replaced with an ArrayList containing all installed languages
-     *  - A Hash as shown in Bug 24171, 41992 specifying a set of languages
-     *  - Missing which gets replaced with an ArrayList containing all installed languages
-     *
-     * What we have to deliver is an ArrayList of entries like [{de_DE=Deutsch},{en_US=English}]. As customers might be using this kind
-     * of configuration already we have to stay backwards compatible and thus rewrite the entry as workaround.
-     *
-     * @param serverConfiguration The configuration that might contain the languages entry.
-     * @return The configuration with the adjusted languages entry.
-     */
-    private Map<String, Object> correctLanguageConfiguration(Map<String, Object> serverConfiguration) {
-        Object languagesConfig = serverConfiguration.get("languages");
-
-        if (languagesConfig instanceof Map) {
-            ArrayList<SimpleEntry<String, String>> languageList = new ArrayList<SimpleEntry<String, String>>();
-            Map<String, String> languageMap = (Map<String, String>) languagesConfig;
-            for (Entry<String, String> entry : languageMap.entrySet()) {
-                languageList.add(new SimpleEntry<>(entry));
-            }
-            serverConfiguration.put("languages", languageList);
-        }
-        return serverConfiguration;
+        return applicableConfigs;
     }
 
     /**
@@ -288,6 +218,93 @@ public class ServerConfigServiceImpl implements ServerConfigService {
         return false;
     }
 
+    private String prettyPrint(final String configName, Map<String, Object> configuration) {
+        if (null == configuration) {
+            return "<not-set>";
+        }
+
+        final StringBuilder sb = new StringBuilder(configuration.size() << 4);
+        final String indent = "    ";
+        final String sep = Strings.getLineSeparator();
+
+        sb.append(sep);
+        prettyPrint(configName, configuration, indent, sep, sb);
+        return sb.toString();
+    }
+
+    @Override
+    public ServerConfig getServerConfig(String hostName, int userID, int contextID) throws OXException {
+        return createNewServerConfig0(hostName, userID, contextID, null);
+    }
+
+    @Override
+    public ServerConfig getServerConfig(String hostName, Session session) throws OXException {
+        return createNewServerConfig0(hostName, session.getUserId(), session.getContextId(), session);
+    }
+
+    @SuppressWarnings("unchecked")
+    private ServerConfig createNewServerConfig0(String hostName, int userID, int contextID, Session session) throws OXException {
+        ConfigurationService configService = serviceLookup.getService(ConfigurationService.class);
+
+        // The resulting brand/server configuration
+        Map<String, Object> serverConfiguration = new HashMap<String, Object>(32, 0.9F);
+
+        Map<String, Object> defaults = (Map<String, Object>) configService.getYaml("as-config-defaults.yml");
+        if (defaults != null) {
+            serverConfiguration.putAll((Map<String, Object>) defaults.get("default"));
+            debugOut("as-config-defaults.yml", defaults);
+        }
+
+        List<Map<String, Object>> applicableConfigs = getCustomHostConfigurations(hostName, userID, contextID);
+        for (Map<String, Object> config : applicableConfigs) {
+            serverConfiguration.putAll(config);
+        }
+
+        /*
+         * Add computed values after configview values
+         */
+        for (ComputedServerConfigValueService computed : serverConfigServicesLookup.getComputed()) {
+            try {
+                computed.addValue(serverConfiguration, hostName, userID, contextID, session);
+            } catch (Throwable t) {
+                ExceptionUtils.handleThrowable(t);
+                LOG.error("Failed to add value from '{}' to server configuration", computed.getClass().getName(), t);
+            }
+        }
+
+        serverConfiguration = correctLanguageConfiguration(serverConfiguration);
+
+        return new ServerConfigImpl(serverConfiguration, serverConfigServicesLookup.getClientFilters());
+    }
+
+
+    /**
+     * The languages config item in the as-config.yml can be:
+     *  - A String "all" which then gets replaced with an ArrayList containing all installed languages
+     *  - A Hash as shown in Bug 24171, 41992 specifying a set of languages
+     *  - Missing which gets replaced with an ArrayList containing all installed languages
+     *
+     * What we have to deliver is an ArrayList of entries like [{de_DE=Deutsch},{en_US=English}]. As customers might be using this kind
+     * of configuration already we have to stay backwards compatible and thus rewrite the entry as workaround.
+     *
+     * @param serverConfiguration The configuration that might contain the languages entry.
+     * @return The configuration with the adjusted languages entry.
+     */
+    private Map<String, Object> correctLanguageConfiguration(Map<String, Object> serverConfiguration) {
+        Object languagesConfig = serverConfiguration.get("languages");
+
+        if (languagesConfig instanceof Map) {
+            ArrayList<SimpleEntry<String, String>> languageList = new ArrayList<SimpleEntry<String, String>>();
+            Map<String, String> languageMap = (Map<String, String>) languagesConfig;
+            for (Entry<String, String> entry : languageMap.entrySet()) {
+                languageList.add(new SimpleEntry<>(entry));
+            }
+            serverConfiguration.put("languages", languageList);
+        }
+        return serverConfiguration;
+    }
+
+
     // ---------------------------------------------------- DEBUG STUFF --------------------------------------------------------------- //
 
     /**
@@ -336,20 +353,6 @@ public class ServerConfigServiceImpl implements ServerConfigService {
             return "<not-set>";
         }
 
-        return sb.toString();
-    }
-
-    String prettyPrint(final String configName, Map<String, Object> configuration) {
-        if (null == configuration) {
-            return "<not-set>";
-        }
-
-        final StringBuilder sb = new StringBuilder(configuration.size() << 4);
-        final String indent = "    ";
-        final String sep = Strings.getLineSeparator();
-
-        sb.append(sep);
-        prettyPrint(configName, configuration, indent, sep, sb);
         return sb.toString();
     }
 
