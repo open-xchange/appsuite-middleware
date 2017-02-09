@@ -283,9 +283,6 @@ public final class SieveTextFilter {
         // manipulates rules and rules2
         final ArrayList<Rule> finalRules = mergeRules(uncommentedRules, commentedRules);
 
-        MailFilterInterceptorRegistry interceptorRegistry = Services.getService(MailFilterInterceptorRegistry.class);
-        interceptorRegistry.executeBefore(finalRules);
-
         if (addRulenameToFittingCommandAndSetErrors(ruleNames, finalRules, readFileToString, commentedLines)) {
             errorsInScript = true;
         }
@@ -293,7 +290,10 @@ public final class SieveTextFilter {
         if (nextUidAndError.isError()) {
             errorsInScript = true;
         }
-
+        
+        MailFilterInterceptorRegistry interceptorRegistry = Services.getService(MailFilterInterceptorRegistry.class);
+        interceptorRegistry.executeBefore(finalRules);
+        
         return new RuleListAndNextUid(finalRules, nextUidAndError.getNextuid(), errorsInScript);
     }
 
