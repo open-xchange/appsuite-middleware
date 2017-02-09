@@ -97,26 +97,6 @@ public abstract class DelegatingAlarm extends Alarm {
     }
 
     @Override
-    public int getEventId() {
-        return delegate.getEventId();
-    }
-
-    @Override
-    public void setEventId(int eventId) {
-        delegate.setEventId(eventId);
-    }
-
-    @Override
-    public String getiCalId() {
-        return delegate.getiCalId();
-    }
-
-    @Override
-    public void setiCalId(String iCalId) {
-        delegate.setiCalId(iCalId);
-    }
-
-    @Override
     public RelatedTo getRelatedTo() {
         return delegate.getRelatedTo();
     }

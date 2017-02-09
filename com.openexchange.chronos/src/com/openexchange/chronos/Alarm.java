@@ -62,8 +62,6 @@ public class Alarm {
 
     int id;
     String uid;
-    int eventId;
-    String iCalId;
     RelatedTo relatedTo;
 
     Trigger trigger;
@@ -126,42 +124,6 @@ public class Alarm {
      */
     public void setUid(String uid) {
         this.uid = uid;
-    }
-
-    /**
-     * Gets the eventId
-     *
-     * @return The eventId
-     */
-    public int getEventId() {
-        return eventId;
-    }
-
-    /**
-     * Sets the eventId
-     *
-     * @param eventId The eventId to set
-     */
-    public void setEventId(int eventId) {
-        this.eventId = eventId;
-    }
-
-    /**
-     * Gets the iCalId
-     *
-     * @return The iCalId
-     */
-    public String getiCalId() {
-        return iCalId;
-    }
-
-    /**
-     * Sets the iCalId
-     *
-     * @param iCalId The iCalId to set
-     */
-    public void setiCalId(String iCalId) {
-        this.iCalId = iCalId;
     }
 
     /**
