@@ -259,7 +259,7 @@ public final class SieveTextFilter {
      *         which contains a {@link List} of {@link Rule}s and the next unique identifier for a future {@link Rule}
      * @throws ParseException if a parsing error is occurred
      * @throws SieveException if a Sieve protocol error is occurred
-     * @throws OXException 
+     * @throws OXException
      */
     public RuleListAndNextUid readScriptFromString(final String readFileToString) throws ParseException, SieveException, OXException {
         boolean errorsInScript = false;
@@ -282,7 +282,10 @@ public final class SieveTextFilter {
         // Attention: After merging the manipulation of finalrules also
         // manipulates rules and rules2
         final ArrayList<Rule> finalRules = mergeRules(uncommentedRules, commentedRules);
-        
+
+        MailFilterInterceptorRegistry interceptorRegistry = Services.getService(MailFilterInterceptorRegistry.class);
+        interceptorRegistry.executeBefore(finalRules);
+
         if (addRulenameToFittingCommandAndSetErrors(ruleNames, finalRules, readFileToString, commentedLines)) {
             errorsInScript = true;
         }
@@ -290,7 +293,7 @@ public final class SieveTextFilter {
         if (nextUidAndError.isError()) {
             errorsInScript = true;
         }
-        
+
         return new RuleListAndNextUid(finalRules, nextUidAndError.getNextuid(), errorsInScript);
     }
 
@@ -301,9 +304,12 @@ public final class SieveTextFilter {
      * @param capabilities The SIEVE capabilities
      * @return
      * @throws SieveException
-     * @throws OXException 
+     * @throws OXException
      */
     public String writeback(final ClientRulesAndRequire clientRulesAndRequire, final Set<String> capabilities) throws SieveException, OXException {
+        MailFilterInterceptorRegistry interceptorRegistry = Services.getService(MailFilterInterceptorRegistry.class);
+        interceptorRegistry.executeAfter(clientRulesAndRequire.getRules());
+
         final ArrayList<Rule> finalRulesWithRightRequires = addRightRequires(clientRulesAndRequire, capabilities);
         addLines(finalRulesWithRightRequires);
         final ArrayList<Rule> nonCommented = new ArrayList<Rule>();
