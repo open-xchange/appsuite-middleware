@@ -83,13 +83,7 @@ public class MailFilterInterceptorRegistryImpl implements MailFilterInterceptorR
          */
         @Override
         public int compare(MailFilterInterceptor o1, MailFilterInterceptor o2) {
-            if (o1.getRank() > o2.getRank()) {
-                return -1;
-            } else if (o1.getRank() == o2.getRank()) {
-                return 0;
-            } else {
-                return 1;
-            }
+            return o1.getRank() > o2.getRank() ? -1 : 1;
         }
     }
 
@@ -108,7 +102,8 @@ public class MailFilterInterceptorRegistryImpl implements MailFilterInterceptorR
      */
     @Override
     public void register(MailFilterInterceptor interceptor) {
-        interceptors.add(interceptor);
+        boolean registered = interceptors.add(interceptor);
+        LOGGER.debug("MailFilterInterceptor '{}' with rank {} was {} registered.", interceptor.getClass().getSimpleName(), interceptor.getRank(), registered ? "sucessfully" : "not");
     }
 
     /*
