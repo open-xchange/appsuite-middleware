@@ -62,6 +62,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.UUID;
 import com.openexchange.caldav.resources.EventResource;
@@ -337,7 +338,7 @@ public class EventPatches {
                 return Collections.emptyList();
             }
             List<Event> newChangeExceptions = new ArrayList<Event>(importedChangeExceptions.size());
-            List<Date> changeExceptionDates = originalEvent.getChangeExceptionDates();
+            SortedSet<RecurrenceId> changeExceptionDates = originalEvent.getChangeExceptionDates();
             if (null == changeExceptionDates || 0 == changeExceptionDates.size()) {
                 newChangeExceptions.addAll(importedChangeExceptions);
             } else {

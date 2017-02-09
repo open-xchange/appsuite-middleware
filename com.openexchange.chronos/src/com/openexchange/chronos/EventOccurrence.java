@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,70 +47,91 @@
  *
  */
 
-package com.openexchange.chronos.common;
+package com.openexchange.chronos;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import com.openexchange.chronos.RecurrenceId;
-import com.openexchange.java.util.TimeZones;
+import java.util.SortedSet;
 
 /**
- * {@link DefaultRecurrenceId}
+ * {@link EventOccurrence}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class DefaultRecurrenceId implements RecurrenceId {
+public class EventOccurrence extends UnmodifiableEvent {
 
-    protected final long value;
-
-    /**
-     * Initializes a new {@link DefaultRecurrenceId}.
-     *
-     * @param value The recurrence-id value, represented as the number of milliseconds since January 1, 1970, 00:00:00 GMT
-     */
-    public DefaultRecurrenceId(long value) {
-        super();
-        this.value = value;
-    }
+    private final RecurrenceId recurrenceId;
+    private final Date startDate;
+    private final Date endDate;
 
     /**
-     * Initializes a new {@link DefaultRecurrenceId}.
+     * Initializes a new {@link EventOccurrence}.
      *
-     * @param value The date of the recurrence
+     * @param seriesMaster The parent series master event
+     * @param recurrenceId The occurrence's recurrence identifier
      */
-    public DefaultRecurrenceId(Date value) {
-        this(value.getTime());
+    public EventOccurrence(Event seriesMaster, RecurrenceId recurrenceId) {
+        super(seriesMaster);
+        this.recurrenceId = recurrenceId;
+        this.startDate = new Date(recurrenceId.getValue());
+        this.endDate = calculateEnd(seriesMaster, recurrenceId.getValue());
     }
 
     @Override
-    public long getValue() {
-        return value;
+    public RecurrenceId getRecurrenceId() {
+        return recurrenceId;
     }
 
     @Override
-    public int compareTo(RecurrenceId other) {
-        return null == other ? 1 : Long.compare(getValue(), other.getValue());
+    public boolean containsRecurrenceId() {
+        return true;
     }
 
     @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + (int) (value ^ (value >>> 32));
-        return result;
+    public Date getStartDate() {
+        return startDate;
     }
 
     @Override
-    public boolean equals(Object other) {
-        return null != other && RecurrenceId.class.isInstance(other) && value == ((RecurrenceId) other).getValue();
+    public boolean containsStartDate() {
+        return true;
     }
 
     @Override
-    public String toString() {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
-        dateFormat.setTimeZone(TimeZones.UTC);
-        return dateFormat.format(new Date(value));
+    public Date getEndDate() {
+        return endDate;
+    }
+
+    @Override
+    public boolean containsEndDate() {
+        return true;
+    }
+
+    @Override
+    public SortedSet<RecurrenceId> getChangeExceptionDates() {
+        return null;
+    }
+
+    @Override
+    public boolean containsChangeExceptionDates() {
+        return false;
+    }
+
+    @Override
+    public SortedSet<RecurrenceId> getDeleteExceptionDates() {
+        return null;
+    }
+
+    @Override
+    public boolean containsDeleteExceptionDates() {
+        return false;
+    }
+
+    private static Date calculateEnd(Event seriesMaster, long occurreneStart) {
+        long startMillis = seriesMaster.getStartDate().getTime();
+        long endMillis = seriesMaster.getEndDate().getTime();
+        long duration = endMillis - startMillis;
+        return new Date(occurreneStart + duration);
     }
 
 }

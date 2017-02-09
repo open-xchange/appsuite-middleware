@@ -56,7 +56,7 @@ package com.openexchange.chronos;
  * @since v7.10.0
  * @see <a href="https://tools.ietf.org/html/rfc5545#section-3.8.4.4">RFC 5545, section 3.8.4.4</a>
  */
-public interface RecurrenceId {
+public interface RecurrenceId extends Comparable<RecurrenceId> {
 
     /**
      * Gets the value, i.e. the (original) start-date of the targeted recurrence in the event series. The actual interpretation depends

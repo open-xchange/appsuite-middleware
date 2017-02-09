@@ -63,9 +63,8 @@ import static com.openexchange.folderstorage.Permission.DELETE_OWN_OBJECTS;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import static com.openexchange.java.Autoboxing.I;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
@@ -253,19 +252,19 @@ public class DeletePerformer extends AbstractUpdatePerformer {
     private void addDeleteExceptionDate(Event originalMasterEvent, RecurrenceId recurrenceID) throws OXException {
         Event eventUpdate = new Event();
         eventUpdate.setId(originalMasterEvent.getId());
-        List<Date> deleteExceptionDates = new ArrayList<Date>();
+        SortedSet<RecurrenceId> deleteExceptionDates = new TreeSet<RecurrenceId>();
         if (null != originalMasterEvent.getDeleteExceptionDates()) {
             deleteExceptionDates.addAll(originalMasterEvent.getDeleteExceptionDates());
         }
-        if (false == deleteExceptionDates.add(new Date(recurrenceID.getValue()))) {
+        if (false == deleteExceptionDates.add(recurrenceID)) {
             // TODO throw/log?
         }
         eventUpdate.setDeleteExceptionDates(deleteExceptionDates);
-        List<Date> changeExceptionDates = new ArrayList<Date>();
+        SortedSet<RecurrenceId> changeExceptionDates = new TreeSet<RecurrenceId>();
         if (null != originalMasterEvent.getChangeExceptionDates()) {
             changeExceptionDates.addAll(originalMasterEvent.getChangeExceptionDates());
         }
-        if (changeExceptionDates.remove(new Date(recurrenceID.getValue()))) {
+        if (changeExceptionDates.remove(recurrenceID)) {
             eventUpdate.setChangeExceptionDates(changeExceptionDates);
         }
         Consistency.setModified(timestamp, eventUpdate, calendarUser.getId());

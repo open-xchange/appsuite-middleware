@@ -51,6 +51,7 @@ package com.openexchange.chronos.compat;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -66,7 +67,6 @@ import com.openexchange.chronos.Trigger;
 import com.openexchange.chronos.Trigger.Related;
 import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.exception.OXException;
@@ -316,6 +316,9 @@ public class Event2Appointment {
      * @throws OXException {@link CalendarExceptionCodes#INVALID_RECURRENCE_ID}
      */
     public static int getRecurrencePosition(RecurrenceData recurrenceData, RecurrenceId recurrenceId) throws OXException {
+        if (PositionAwareRecurrenceId.class.isInstance(recurrenceId)) {
+            return ((PositionAwareRecurrenceId) recurrenceId).getRecurrencePosition();
+        }
         RecurrenceRuleIterator iterator = Recurrence.getRecurrenceIterator(recurrenceData, true);
         int position = 0;
         while (iterator.hasNext()) {
@@ -339,6 +342,9 @@ public class Event2Appointment {
      * @return The legacy recurrence date position
      */
     public static Date getRecurrenceDatePosition(RecurrenceId recurrenceId) {
+        if (PositionAwareRecurrenceId.class.isInstance(recurrenceId)) {
+            return ((PositionAwareRecurrenceId) recurrenceId).getRecurrenceDatePosition();
+        }
         return CalendarUtils.truncateTime(new Date(recurrenceId.getValue()), TimeZones.UTC);
     }
 
@@ -349,13 +355,13 @@ public class Event2Appointment {
      * @param recurrenceIDs The recurrence identifiers, i.e. the dates where the original occurrence would have been
      * @return The corresponding list of legacy recurrence date position
      */
-    public static List<Date> getRecurrenceDatePositions(List<Date> recurrenceIDs) {
+    public static List<Date> getRecurrenceDatePositions(Collection<RecurrenceId> recurrenceIDs) {
         if (null == recurrenceIDs) {
             return null;
         }
         List<Date> recurrenceDatePositions = new ArrayList<Date>(recurrenceIDs.size());
-        for (Date recurrenceID : recurrenceIDs) {
-            recurrenceDatePositions.add(getRecurrenceDatePosition(new DefaultRecurrenceId(recurrenceID)));
+        for (RecurrenceId recurrenceID : recurrenceIDs) {
+            recurrenceDatePositions.add(getRecurrenceDatePosition(recurrenceID));
         }
         return recurrenceDatePositions;
     }

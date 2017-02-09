@@ -67,7 +67,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TimeZone;
+import java.util.TreeSet;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
@@ -736,7 +738,7 @@ public class Utils {
         /*
          * lookup all known change exceptions
          */
-        List<Date> changeExceptionDates = seriesMaster.getChangeExceptionDates();
+        SortedSet<RecurrenceId> changeExceptionDates = seriesMaster.getChangeExceptionDates();
         if (null == changeExceptionDates || 0 == changeExceptionDates.size()) {
             return seriesMaster;
         }
@@ -749,13 +751,13 @@ public class Utils {
         /*
          * check which change exception the user attends
          */
-        List<Date> userizedChangeExceptions = new ArrayList<Date>(changeExceptionDates.size());
-        List<Date> userizedDeleteExceptions = new ArrayList<Date>();
+        SortedSet<RecurrenceId> userizedChangeExceptions = new TreeSet<RecurrenceId>();
+        SortedSet<RecurrenceId> userizedDeleteExceptions = new TreeSet<RecurrenceId>();
         if (null != seriesMaster.getDeleteExceptionDates()) {
             userizedDeleteExceptions.addAll(seriesMaster.getDeleteExceptionDates());
         }
         for (Event changeException : changeExceptions) {
-            Date exceptionDate = new Date(changeException.getRecurrenceId().getValue());
+            RecurrenceId exceptionDate = changeException.getRecurrenceId();
             if (CalendarUtils.contains(changeException.getAttendees(), forUser)) {
                 userizedChangeExceptions.add(exceptionDate);
             } else {
@@ -821,13 +823,13 @@ public class Utils {
      * @param updatedDates The updated dates
      * @return The collection update
      */
-    public static SimpleCollectionUpdate<Date> getExceptionDateUpdates(List<Date> originalDates, List<Date> updatedDates) {
-        return new AbstractSimpleCollectionUpdate<Date>(originalDates, updatedDates) {
+    public static SimpleCollectionUpdate<RecurrenceId> getExceptionDateUpdates(Collection<RecurrenceId> originalDates, Collection<RecurrenceId> updatedDates) {
+        return new AbstractSimpleCollectionUpdate<RecurrenceId>(originalDates, updatedDates) {
 
             @Override
-            protected boolean matches(Date item1, Date item2) {
+            protected boolean matches(RecurrenceId item1, RecurrenceId item2) {
                 if (null != item1 && null != item2) {
-                    return item1.getTime() == item2.getTime();
+                    return item1.getValue() == item2.getValue();
                 }
                 return false;
             }

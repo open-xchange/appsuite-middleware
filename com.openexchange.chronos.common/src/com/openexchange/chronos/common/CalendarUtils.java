@@ -138,19 +138,8 @@ public class CalendarUtils {
      * @return <code>true</code> if a matching recurrence identifier is contained in the collection, <code>false</code>, otherwise
      * @see CalendarUtils#matches(RecurrenceId, long)
      */
-    public static boolean contains1(Collection<RecurrenceId> recurrendeIds, RecurrenceId recurrenceId) {
+    public static boolean contains(Collection<RecurrenceId> recurrendeIds, RecurrenceId recurrenceId) {
         return null != find(recurrendeIds, recurrenceId.getValue());
-    }
-
-    public static boolean contains(Collection<Date> exceptionDates, RecurrenceId recurrenceId) {
-        if (null != exceptionDates && 0 < exceptionDates.size()) {
-            for (Date exceptionDate : exceptionDates) {
-                if (exceptionDate.getTime() == recurrenceId.getValue()) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     /**
@@ -160,7 +149,7 @@ public class CalendarUtils {
      * @param attendees The attendees to search
      * @param attendee The attendee to lookup
      * @return The matching attendee, or <code>null</code> if not found
-     * @see Utils#matches(Attendee, Attendee)
+     * @see CalendarUtils#matches(Attendee, Attendee)
      */
     public static Attendee find(List<Attendee> attendees, Attendee attendee) {
         if (null != attendees && 0 < attendees.size()) {
@@ -180,7 +169,7 @@ public class CalendarUtils {
      * @param attendees The attendees to search
      * @param attendee The attendee to lookup
      * @return <code>true</code> if the attendee is contained in the collection of attendees, <code>false</code>, otherwise
-     * @see Utils#matches(Attendee, Attendee)
+     * @see CalendarUtils#matches(Attendee, Attendee)
      */
     public static boolean contains(List<Attendee> attendees, Attendee attendee) {
         return null != find(attendees, attendee);
@@ -474,25 +463,25 @@ public class CalendarUtils {
      * the table below is satisfied:
      * <pre>
      * +---------------------------------------------------------------+
-     * | VEVENT has the DTEND property? |
-     * | +-----------------------------------------------------------+
-     * | | VEVENT has the DURATION property? |
-     * | | +-------------------------------------------------------+
-     * | | | DURATION property value is greater than 0 seconds? |
-     * | | | +---------------------------------------------------+
-     * | | | | DTSTART property is a DATE-TIME value? |
-     * | | | | +-----------------------------------------------+
-     * | | | | | Condition to evaluate |
+     * | VEVENT has the DTEND property?                                |
+     * | +-------------------------------------------------------------+
+     * | | VEVENT has the DURATION property?                           |
+     * | | +-----------------------------------------------------------+
+     * | | | DURATION property value is greater than 0 seconds?        |
+     * | | | +---------------------------------------------------------+
+     * | | | | DTSTART property is a DATE-TIME value?                  |
+     * | | | | +-------------------------------------------------------+
+     * | | | | | Condition to evaluate                                 |
      * +---+---+---+---+-----------------------------------------------+
-     * | Y | N | N | * | (start < DTEND AND end > DTSTART) |
+     * | Y | N | N | * | (start < DTEND AND end > DTSTART)             |
      * +---+---+---+---+-----------------------------------------------+
-     * | N | Y | Y | * | (start < DTSTART+DURATION AND end > DTSTART) |
-     * | | +---+---+-----------------------------------------------+
-     * | | | N | * | (start <= DTSTART AND end > DTSTART) |
+     * | N | Y | Y | * | (start < DTSTART+DURATION AND end > DTSTART)  |
+     * | | +---+---+---------------------------------------------------+
+     * | | | N | * | (start <= DTSTART AND end > DTSTART)              |
      * +---+---+---+---+-----------------------------------------------+
-     * | N | N | N | Y | (start <= DTSTART AND end > DTSTART) |
+     * | N | N | N | Y | (start <= DTSTART AND end > DTSTART)          |
      * +---+---+---+---+-----------------------------------------------+
-     * | N | N | N | N | (start < DTSTART+P1D AND end > DTSTART) |
+     * | N | N | N | N | (start < DTSTART+P1D AND end > DTSTART)       |
      * +---+---+---+---+-----------------------------------------------+
      * </pre>
      *
