@@ -76,9 +76,9 @@ public class BundleResourceAccessor implements ResourceAccessor {
     /**
      * ClassLoader of the bundle to search for migration files within
      */
-    private ClassLoader bundleClassLoader;
+    private final ClassLoader bundleClassLoader;
 
-    private BundleWiring bundleWiring;
+    private final BundleWiring bundleWiring;
 
     /**
      * Initializes a new {@link BundleResourceAccessor} for classloader bundle wiring.

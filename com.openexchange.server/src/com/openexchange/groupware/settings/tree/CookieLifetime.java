@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.settings.tree;
 
+import com.openexchange.ajax.LoginServlet;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
@@ -59,6 +60,7 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.java.Strings;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
@@ -101,16 +103,17 @@ public class CookieLifetime implements PreferencesItemService {
             @Override
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
                 final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                int maxAge = -1;
                 /*
                  * Check if auto-login is enabled
                  */
-                if (null != service && service.getBoolProperty("com.openexchange.sessiond.autologin", false)) {
-                    final int maxAge = ConfigTools.parseTimespanSecs(service.getProperty("com.openexchange.cookie.ttl", "1W"));
-                    setting.setSingleValue(Integer.valueOf(maxAge));
-                } else {
-                    setting.setSingleValue(Integer.valueOf(-1));
-                }
+                String hostName = (String) session.getParameter(Session.PARAM_HOST_NAME);
+                if (null != service && ((!Strings.isEmpty(hostName) && LoginServlet.isAutologinActivated(hostName)) || service.getBoolProperty("com.openexchange.sessiond.autologin", false))) {
+                    maxAge = ConfigTools.parseTimespanSecs(service.getProperty("com.openexchange.cookie.ttl", "1W"));
+                } 
+                setting.setSingleValue(Integer.valueOf(maxAge));
             }
+            
         };
     }
 

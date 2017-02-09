@@ -22,6 +22,7 @@ Import-Package: com.google.common.collect,
  org.apache.commons.logging,
  org.eclipse.osgi.framework.console,
  org.osgi.framework,
+ org.osgi.framework.wiring,
  org.osgi.util.tracker,
  org.slf4j
 Export-Package: com.openexchange.osgi,

@@ -72,6 +72,7 @@ public class DeleteMultipleAppointmentTest extends AppointmentTest {
 
     private Appointment appointment1, appointment2;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -79,7 +80,7 @@ public class DeleteMultipleAppointmentTest extends AppointmentTest {
         appointment1 = new Appointment();
         appointment1.setIgnoreConflicts(true);
         appointment1.setTitle("Test 1");
-        appointment1.setTimezone(timeZone.getDisplayName());
+        appointment1.setTimezone(timeZone.getID());
         appointment1.setStartDate(new Date());
         appointment1.setEndDate(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 2));
         appointment1.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
@@ -90,7 +91,7 @@ public class DeleteMultipleAppointmentTest extends AppointmentTest {
         appointment2 = new Appointment();
         appointment2.setIgnoreConflicts(true);
         appointment2.setTitle("Test 2");
-        appointment2.setTimezone(timeZone.getDisplayName());
+        appointment2.setTimezone(timeZone.getID());
         appointment2.setStartDate(new Date());
         appointment2.setEndDate(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 2));
         appointment2.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
@@ -99,6 +100,7 @@ public class DeleteMultipleAppointmentTest extends AppointmentTest {
         insRes2.fillAppointment(appointment2);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

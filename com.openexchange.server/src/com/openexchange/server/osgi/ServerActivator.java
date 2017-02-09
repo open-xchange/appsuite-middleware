@@ -77,6 +77,7 @@ import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.customizer.folder.osgi.FolderFieldCollector;
+import com.openexchange.ajax.ipcheck.IPCheckService;
 import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
 import com.openexchange.auth.Authenticator;
 import com.openexchange.auth.mbean.AuthenticatorMBean;
@@ -453,6 +454,9 @@ public final class ServerActivator extends HousekeepingActivator {
         track(MessageGeneratorRegistry.class, new RegistryCustomizer<MessageGeneratorRegistry>(context, MessageGeneratorRegistry.class));
         track(AttachmentStorageRegistry.class, new RegistryCustomizer<AttachmentStorageRegistry>(context, AttachmentStorageRegistry.class));
         track(EnabledCheckerRegistry.class, new RegistryCustomizer<EnabledCheckerRegistry>(context, EnabledCheckerRegistry.class));
+
+        // IP checker
+        track(IPCheckService.class, new RegistryCustomizer<IPCheckService>(context, IPCheckService.class));
 
         // OAuth service
         track(OAuthService.class, new RegistryCustomizer<OAuthService>(context, OAuthService.class));

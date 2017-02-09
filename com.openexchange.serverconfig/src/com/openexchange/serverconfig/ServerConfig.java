@@ -80,8 +80,9 @@ public interface ServerConfig {
     Set<Capability> getCapabilities();
 
     /**
-     * Check if the server is forced to assume https connections
-     * @return true if the server is forced to assume https connections, else false
+     * Check if the server is forced to assume HTTPS connections
+     *
+     * @return <code>true</code> if the server is forced to assume HTTPS connections, otherwise <code>false</code>
      */
     boolean isForceHttps();
 

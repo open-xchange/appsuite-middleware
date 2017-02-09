@@ -71,6 +71,7 @@ import net.sf.uadetector.UserAgentFamily;
 import org.slf4j.Logger;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.fields.Header;
+import com.openexchange.ajax.ipcheck.IPCheckService;
 import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ClientWhitelist;
@@ -380,21 +381,6 @@ public final class SessionUtility {
     }
 
     /**
-     * Performs the IP check.
-     *
-     * @param session The session to check for
-     * @param actual The current IP for given session
-     * @throws OXException If IP check fails
-     */
-    public static void checkIP(final Session session, final String actual) throws OXException {
-        checkIP(checkIP, getRanges(), session, actual, clientWhitelist);
-    }
-
-    private static Collection<IPRange> getRanges() {
-        return RANGES;
-    }
-
-    /**
      * Checks whether passed exception indicates an IP check error.
      *
      * @param e The exception to check
@@ -406,71 +392,46 @@ public final class SessionUtility {
     }
 
     /**
-     * Checks if the client IP address of the current request matches the one through that the session has been created.
+     * Checks if the client IP address of the current request matches the one associated with given session.
      *
-     * @param doCheck <code>true</code> to deny request with an exception.
-     * @param ranges The white-list ranges
-     * @param session session object
-     * @param actual IP address of the current request.
-     * @param whitelist The optional IP check whitelist (by client identifier)
-     * @throws OXException if the IP addresses don't match.
+     * @param session The session to check for
+     * @param currentIpAddress IP address of the current request.
+     * @throws OXException If the IP check denies given session
      */
-    public static void checkIP(final boolean doCheck, final Collection<IPRange> ranges, final Session session, final String actual, final ClientWhitelist whitelist) throws OXException {
-        if (null == actual || !actual.equals(session.getLocalIp())) {
-            // IP is missing or changed
-            if (doCheck && !isWhitelistedFromIPCheck(actual, ranges) && !isWhitelistedClient(session, whitelist) && !allowedSubnet.areInSameSubnet(actual, session.getLocalIp())) {
-                // kick client with changed IP address
-                {
-                    final StringBuilder sb = new StringBuilder(96);
-                    sb.append("Request to server denied (IP check activated) for session: ");
-                    sb.append(session.getSessionID());
-                    sb.append(". Client login IP changed from ");
-                    sb.append(session.getLocalIp());
-                    sb.append(" to ");
-                    sb.append((null == actual ? "<missing>" : actual));
-                    sb.append(" and is not covered by IP white-list or netmask.");
-                    LOG.info(sb.toString());
-                }
-                throw SessionExceptionCodes.WRONG_CLIENT_IP.create(session.getLocalIp(), null == actual ? "<unknown>" : actual);
-            }
-            if (null != actual) {
-                if (isWhitelistedClient(session, whitelist)) {
-                    // change IP in session so the IMAP NOOP command contains the correct client IP address (Bug #21842)
-                    session.setLocalIp(actual);
-                } else if (!doCheck) {
-                    // Do not change session's IP address anymore in case of USM/EAS (Bug #29136)
-                    if (!isUsmEas(session.getClient())) {
-                        session.setLocalIp(actual);
-                    }
-                }
-            }
-            if (LOG.isDebugEnabled() && !isWhitelistedFromIPCheck(actual, ranges) && !isWhitelistedClient(session, whitelist)) {
-                LOG.debug("Session {} requests now from {} but login came from {}", session.getSessionID(), actual, session.getLocalIp());
+    public static void checkIP(Session session, String currentIpAddress) throws OXException {
+        if (null == currentIpAddress || !currentIpAddress.equals(session.getLocalIp())) {
+            // IP is missing or has changed
+            IPCheckService ipChecker = ServerServiceRegistry.getInstance().getService(IPCheckService.class);
+            if (null != ipChecker) {
+                ipChecker.handleChangedIp(currentIpAddress, session.getLocalIp(), session);
             }
         }
-    }
-
-    private static boolean isUsmEas(final String clientId) {
-        if (Strings.isEmpty(clientId)) {
-            return false;
-        }
-        final String uc = Strings.toUpperCase(clientId);
-        return uc.startsWith("USM-EAS") || uc.startsWith("USM-JSON");
     }
 
     /**
      * White listed clients are necessary for the Mobile Web Interface. This clients often change their IP address in mobile data networks.
      */
-    private static boolean isWhitelistedClient(final Session session, final ClientWhitelist whitelist) {
+    public static boolean isWhitelistedClient(final Session session, final ClientWhitelist whitelist) {
         if (null == whitelist || whitelist.isEmpty()) {
             return false;
         }
         return whitelist.isAllowed(session.getClient());
     }
 
-    public static boolean isWhitelistedFromIPCheck(final String actual, final Collection<IPRange> ranges) {
-        for (final IPRange range : ranges) {
-            if (range.contains(actual)) {
+    /**
+     * Checks if specified IP address is contained in given IP ranges that are supposed to be white-listed.
+     *
+     * @param ipAddress The IP address to check
+     * @param ranges The IP ranges representing the white-list
+     * @return <code>true</code> if IP address is contained and therefore white-listed; otherwise <code>false</code>
+     */
+    public static boolean isWhitelistedFromIPCheck(String ipAddress, Collection<IPRange> ranges) {
+        if (null == ipAddress || null == ranges) {
+            return false;
+        }
+
+        for (IPRange range : ranges) {
+            if (range.contains(ipAddress)) {
                 return true;
             }
         }
