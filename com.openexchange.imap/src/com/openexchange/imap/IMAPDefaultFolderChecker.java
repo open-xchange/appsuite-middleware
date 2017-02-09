@@ -66,7 +66,7 @@ import javax.mail.FolderClosedException;
 import javax.mail.MessagingException;
 import javax.mail.StoreClosedException;
 import org.slf4j.Logger;
-import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.Category;
@@ -605,10 +605,12 @@ public class IMAPDefaultFolderChecker {
             ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
             if (viewFactory != null) {
                 ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
-                ComposedConfigProperty<Boolean> prop = view.property("com.openexchange.imap.initWithSpecialUse", Boolean.class);
+                ConfigProperty<Boolean> prop = view.property("user", "com.openexchange.mail.specialuse.check", Boolean.class);
+
                 if (prop.isDefined()) {
                     Boolean b = prop.get();
                     checkSpecialUseFolder = null != b && b.booleanValue();
+                    prop.set(null);
                 }
             }
 
@@ -737,14 +739,7 @@ public class IMAPDefaultFolderChecker {
                         if (null != checkedIndexes) {
                             expectedFullName = checkedIndexes.get(i);
                         }
-                        if (null == expectedFullName) {
-                            // Deduce expected full-name from namespace + name concatenation
-                            expectedFullName = namespace + names[i];
-                            if (!expectedFullName.equals(fullName)) {
-                                LOG.warn("Clearing invalid full name in settings of primary account. Should be \"{}\", but is \"{}\" (user={}, context={})", expectedFullName, fullName, Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
-                                indexes.add(i);
-                            }
-                        } else {
+                        if (null != expectedFullName) {
                             // Check against actual full-name
                             if (!expectedFullName.equals(fullName)) {
                                 LOG.warn("Clearing invalid full name in settings of primary account. Should be \"{}\", but is \"{}\" (user={}, context={})", expectedFullName, fullName, Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
