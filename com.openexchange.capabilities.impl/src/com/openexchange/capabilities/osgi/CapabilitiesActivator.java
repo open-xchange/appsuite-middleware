@@ -80,6 +80,7 @@ import com.openexchange.groupware.userconfiguration.service.PermissionAvailabili
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.timer.TimerService;
@@ -191,6 +192,8 @@ public class CapabilitiesActivator extends HousekeepingActivator {
             }
 
         });
+
+        trackService(ServerConfigService.class);
 
         /*
          * Register update task, create table job and delete listener
