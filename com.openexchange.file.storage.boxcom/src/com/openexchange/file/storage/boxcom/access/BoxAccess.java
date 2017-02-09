@@ -54,6 +54,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.BoxApi;
 import org.scribe.model.Token;
@@ -76,6 +78,7 @@ import com.openexchange.file.storage.boxcom.BoxConstants;
 import com.openexchange.file.storage.boxcom.Services;
 import com.openexchange.file.storage.boxcom.access.extended.ExtendedNonRefreshingBoxClient;
 import com.openexchange.java.Strings;
+import com.openexchange.oauth.API;
 import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
@@ -277,7 +280,34 @@ public class BoxAccess {
             try {
                 accessToken = scribeOAuthService.getAccessToken(new Token(boxOAuthAccount.getToken(), boxOAuthAccount.getSecret()), null);
             } catch (org.scribe.exceptions.OAuthException e) {
-                throw OAuthExceptionCodes.INVALID_ACCOUNT_EXTENDED.create(e, boxOAuthAccount.getDisplayName(), boxOAuthAccount.getId());
+                String message = e.getMessage();
+                if (null == message) {
+                    throw OAuthExceptionCodes.OAUTH_ERROR.create(e, "OAuth error");
+                }
+
+                // Check for JSON content
+                int startPos = message.indexOf('{');
+                if (startPos >= 0) {
+                    int endPos = message.lastIndexOf('}');
+                    if (endPos > startPos) {
+                        try {
+                            JSONObject jError = new JSONObject(message.substring(startPos, endPos + 1));
+                            String error = jError.optString("error");
+                            if (null != error) {
+                                if ("invalid_grant".equals(error)) {
+                                    API api = boxOAuthAccount.getAPI();
+                                    throw OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(e, "Box.com", boxOAuthAccount.getId(), session.getUserId(), session.getContextId());
+                                }
+
+                                throw OAuthExceptionCodes.INVALID_ACCOUNT_EXTENDED.create(e, boxOAuthAccount.getDisplayName(), boxOAuthAccount.getId());
+                            }
+                        } catch (JSONException je) {
+                            // No JSON...
+                        }
+                    }
+                }
+
+                throw OAuthExceptionCodes.OAUTH_ERROR.create(e, message);
             }
             if (Strings.isEmpty(accessToken.getSecret())) {
                 LOGGER.warn("Received invalid request_token from Box.com: {}. Response:{}{}", null == accessToken.getSecret() ? "null" : accessToken.getSecret(), Strings.getLineSeparator(), accessToken.getRawResponse());
