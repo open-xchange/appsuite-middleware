@@ -51,6 +51,7 @@ package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
+import static com.openexchange.chronos.impl.Utils.anonymizeIfNeeded;
 import static com.openexchange.chronos.impl.Utils.find;
 import static com.openexchange.chronos.impl.Utils.getTimeZone;
 import static com.openexchange.chronos.impl.Utils.i;
@@ -101,8 +102,7 @@ public class ListPerformer extends AbstractQueryPerformer {
         Map<UserizedFolder, List<EventID>> idsPerFolder = getIdsPerFolder(eventIDs);
         Map<Integer, List<Event>> eventsPerFolderId = new HashMap<Integer, List<Event>>(idsPerFolder.size());
         for (Map.Entry<UserizedFolder, List<EventID>> entry : idsPerFolder.entrySet()) {
-            List<Event> eventsInFolder = readEventsInFolder(entry.getKey(), entry.getValue());
-            eventsPerFolderId.put(I(i(entry.getKey())), postProcess(eventsInFolder, entry.getKey(), true));
+            eventsPerFolderId.put(I(i(entry.getKey())), readEventsInFolder(entry.getKey(), entry.getValue()));
         }
         List<Event> orderedEvents = new ArrayList<Event>(eventIDs.size());
         for (EventID eventID : eventIDs) {
@@ -131,6 +131,8 @@ public class ListPerformer extends AbstractQueryPerformer {
             if (null == event) {
                 continue;
             }
+            event.setFolderId(i(folder));
+            event = anonymizeIfNeeded(session, event);
             if (null != eventID.getRecurrenceID()) {
                 if (isSeriesMaster(event)) {
                     Calendar fromCalendar = initCalendar(getTimeZone(session), eventID.getRecurrenceID().getValue());
