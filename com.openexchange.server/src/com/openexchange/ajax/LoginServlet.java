@@ -755,10 +755,19 @@ public class LoginServlet extends AJAXServlet {
         }
     }
 
+    private static final Capability CAPABILITY_AUTOLOGIN = new Capability("autologin");
+
+    /**
+     * Checks if auto-login is enabled for specified host name.
+     *
+     * @param hostName The host name to check for
+     * @return <code>true</code> if auto-login is enabled; otherwise <code>false</code>
+     * @throws OXException If server configuration cannot be obtained
+     */
     public static boolean isAutologinActivated(String hostName) throws OXException {
         ServerConfigService serverConfigService = ServerServiceRegistry.getInstance().getService(ServerConfigService.class);
         com.openexchange.serverconfig.ServerConfig serverConfig = serverConfigService.getServerConfig(hostName, -1, -1);
-        return serverConfig.getCapabilities().contains(new Capability("autologin"));
+        return serverConfig.getCapabilities().contains(CAPABILITY_AUTOLOGIN);
     }
 
     private void doJSONAuth(final HttpServletRequest req, final HttpServletResponse resp, final String action) throws IOException {
