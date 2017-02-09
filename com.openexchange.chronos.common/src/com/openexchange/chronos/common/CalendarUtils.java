@@ -70,7 +70,6 @@ import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Period;
-import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.exception.OXException;
@@ -90,56 +89,13 @@ import com.openexchange.search.internal.operands.ConstantOperand;
 public class CalendarUtils {
 
     /**
-     * Gets a value indicating whether a recurrence id's value matches a specific timestamp value.
-     *
-     * @param recurrenceId The recurrence identifier to check
-     * @param value The value to check
-     * @return <code>true</code> if the recurrence id's value matches the timestamp value, <code>false</code>, otherwise
-     */
-    public static boolean matches(RecurrenceId recurrenceId, long value) {
-        return null != recurrenceId && recurrenceId.getValue() == value;
-    }
-
-    /**
-     * Looks up a specific recurrence identifier in a collection based on its timestamp value.
-     *
-     * @param recurrenceIds The recurrence id's to search
-     * @param value The timestamp value to lookup
-     * @return The matching recurrence identifier, or <code>null</code> if not found
-     * @see CalendarUtils#matches(RecurrenceId, long)
-     */
-    public static RecurrenceId find(Collection<RecurrenceId> recurrenceIds, long value) {
-        if (null != recurrenceIds && 0 < recurrenceIds.size()) {
-            for (RecurrenceId recurrenceId : recurrenceIds) {
-                if (matches(recurrenceId, value)) {
-                    return recurrenceId;
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Gets a value indicating whether a recurrence id with a specific timestamp value is present in a collection of recurrence
-     * identifiers, utilizing the {@link CalendarUtils#matches(RecurrenceId, long) routine.
-     *
-     * @param recurrenceIds The recurrence id's to search
-     * @param value The timestamp value to lookup
-     * @return <code>true</code> if a matching recurrence identifier is contained in the collection, <code>false</code>, otherwise
-     * @see CalendarUtils#matches(RecurrenceId, long)
-     */
-    public static boolean contains(Collection<RecurrenceId> recurrendeIds, long value) {
-        return null != find(recurrendeIds, value);
-    }
-
-    /**
      * Looks up a specific internal attendee in a collection of attendees, utilizing the
      * {@link CalendarUtils#matches(Attendee, Attendee)} routine.
      *
      * @param attendees The attendees to search
      * @param attendee The attendee to lookup
      * @return The matching attendee, or <code>null</code> if not found
-     * @see CalendarUtils#matches(Attendee, Attendee)
+     * @see Utils#matches(Attendee, Attendee)
      */
     public static Attendee find(List<Attendee> attendees, Attendee attendee) {
         if (null != attendees && 0 < attendees.size()) {
@@ -159,7 +115,7 @@ public class CalendarUtils {
      * @param attendees The attendees to search
      * @param attendee The attendee to lookup
      * @return <code>true</code> if the attendee is contained in the collection of attendees, <code>false</code>, otherwise
-     * @see CalendarUtils#matches(Attendee, Attendee)
+     * @see Utils#matches(Attendee, Attendee)
      */
     public static boolean contains(List<Attendee> attendees, Attendee attendee) {
         return null != find(attendees, attendee);
@@ -453,25 +409,25 @@ public class CalendarUtils {
      * the table below is satisfied:
      * <pre>
      * +---------------------------------------------------------------+
-     * | VEVENT has the DTEND property?                                |
-     * | +-------------------------------------------------------------+
-     * | | VEVENT has the DURATION property?                           |
-     * | | +-----------------------------------------------------------+
-     * | | | DURATION property value is greater than 0 seconds?        |
-     * | | | +---------------------------------------------------------+
-     * | | | | DTSTART property is a DATE-TIME value?                  |
-     * | | | | +-------------------------------------------------------+
-     * | | | | | Condition to evaluate                                 |
+     * | VEVENT has the DTEND property? |
+     * | +-----------------------------------------------------------+
+     * | | VEVENT has the DURATION property? |
+     * | | +-------------------------------------------------------+
+     * | | | DURATION property value is greater than 0 seconds? |
+     * | | | +---------------------------------------------------+
+     * | | | | DTSTART property is a DATE-TIME value? |
+     * | | | | +-----------------------------------------------+
+     * | | | | | Condition to evaluate |
      * +---+---+---+---+-----------------------------------------------+
-     * | Y | N | N | * | (start < DTEND AND end > DTSTART)             |
+     * | Y | N | N | * | (start < DTEND AND end > DTSTART) |
      * +---+---+---+---+-----------------------------------------------+
-     * | N | Y | Y | * | (start < DTSTART+DURATION AND end > DTSTART)  |
-     * | | +---+---+---------------------------------------------------+
-     * | | | N | * | (start <= DTSTART AND end > DTSTART)              |
+     * | N | Y | Y | * | (start < DTSTART+DURATION AND end > DTSTART) |
+     * | | +---+---+-----------------------------------------------+
+     * | | | N | * | (start <= DTSTART AND end > DTSTART) |
      * +---+---+---+---+-----------------------------------------------+
-     * | N | N | N | Y | (start <= DTSTART AND end > DTSTART)          |
+     * | N | N | N | Y | (start <= DTSTART AND end > DTSTART) |
      * +---+---+---+---+-----------------------------------------------+
-     * | N | N | N | N | (start < DTSTART+P1D AND end > DTSTART)       |
+     * | N | N | N | N | (start < DTSTART+P1D AND end > DTSTART) |
      * +---+---+---+---+-----------------------------------------------+
      * </pre>
      *

@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.impl.performer;
 
-import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
@@ -65,6 +64,7 @@ import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
 import static com.openexchange.folderstorage.Permission.WRITE_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.WRITE_OWN_OBJECTS;
 import static com.openexchange.java.Autoboxing.I;
+import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
 import com.openexchange.chronos.Alarm;
@@ -187,7 +187,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
 
     private void updateAttendee(Event originalEvent, Attendee originalAttendee, Attendee attendee, RecurrenceId recurrenceID) throws OXException {
         if (isSeriesMaster(originalEvent)) {
-            if (contains(originalEvent.getChangeExceptionDates(), recurrenceID.getValue())) {
+            if (null != originalEvent.getChangeExceptionDates() && originalEvent.getChangeExceptionDates().contains(new Date(recurrenceID.getValue()))) {
                 /*
                  * update for existing change exception
                  */

@@ -53,8 +53,8 @@ import static com.openexchange.chronos.impl.Utils.getCalendarUser;
 import static com.openexchange.chronos.impl.Utils.i;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
+import java.util.Date;
 import java.util.List;
-import java.util.SortedSet;
 import java.util.TimeZone;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Classification;
@@ -63,6 +63,7 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
+import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.compat.Recurrence;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.performer.ConflictCheckPerformer;
@@ -293,10 +294,10 @@ public class Check {
      * @return The passed list of recurrence identifiers, after their existence was checked
      * @throws OXException {@link CalendarExceptionCodes#INVALID_RECURRENCE_ID}
      */
-    public static SortedSet<RecurrenceId> recurrenceIdsExist(Event seriesMaster, SortedSet<RecurrenceId> recurrenceIDs) throws OXException {
+    public static List<Date> recurrenceIdsExist(Event seriesMaster, List<Date> recurrenceIDs) throws OXException {
         if (null != recurrenceIDs) {
-            for (RecurrenceId recurrenceID : recurrenceIDs) {
-                recurrenceIdExists(seriesMaster, recurrenceID);
+            for (Date recurrenceID : recurrenceIDs) {
+                recurrenceIdExists(seriesMaster, new DefaultRecurrenceId(recurrenceID));
             }
         }
         return recurrenceIDs;

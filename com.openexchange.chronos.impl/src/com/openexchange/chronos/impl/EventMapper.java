@@ -57,7 +57,6 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.SortedSet;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
@@ -779,7 +778,7 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
                 object.removeRecurrenceId();
             }
         });
-        mappings.put(EventField.CHANGE_EXCEPTION_DATES, new DefaultMapping<SortedSet<RecurrenceId>, Event>() {
+        mappings.put(EventField.CHANGE_EXCEPTION_DATES, new DefaultMapping<List<Date>, Event>() {
 
             @Override
             public boolean isSet(Event object) {
@@ -787,12 +786,12 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
             }
 
             @Override
-            public void set(Event object, SortedSet<RecurrenceId> value) throws OXException {
+            public void set(Event object, List<Date> value) throws OXException {
                 object.setChangeExceptionDates(value);
             }
 
             @Override
-            public SortedSet<RecurrenceId> get(Event object) {
+            public List<Date> get(Event object) {
                 return object.getChangeExceptionDates();
             }
 
@@ -801,7 +800,7 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
                 object.removeChangeExceptionDates();
             }
         });
-        mappings.put(EventField.DELETE_EXCEPTION_DATES, new DefaultMapping<SortedSet<RecurrenceId>, Event>() {
+        mappings.put(EventField.DELETE_EXCEPTION_DATES, new DefaultMapping<List<Date>, Event>() {
 
             @Override
             public boolean isSet(Event object) {
@@ -809,12 +808,12 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
             }
 
             @Override
-            public void set(Event object, SortedSet<RecurrenceId> value) throws OXException {
+            public void set(Event object, List<Date> value) throws OXException {
                 object.setDeleteExceptionDates(value);
             }
 
             @Override
-            public SortedSet<RecurrenceId> get(Event object) {
+            public List<Date> get(Event object) {
                 return object.getDeleteExceptionDates();
             }
 

@@ -86,15 +86,4 @@ public class StoredRecurrenceId implements RecurrenceId {
         return recurrencePosition;
     }
 
-    @Override
-    public int compareTo(RecurrenceId other) {
-        if (null == other) {
-            return 1;
-        }
-        if (StoredRecurrenceId.class.isInstance(other)) {
-            return Integer.compare(getRecurrencePosition(), ((StoredRecurrenceId) other).getRecurrencePosition());
-        }
-        throw new UnsupportedOperationException();
-    }
-
 }

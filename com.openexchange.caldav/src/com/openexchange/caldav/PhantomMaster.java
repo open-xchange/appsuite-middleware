@@ -49,12 +49,10 @@
 
 package com.openexchange.caldav;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.RecurrenceId;
 
 /**
  * {@link PhantomMaster}
@@ -85,12 +83,12 @@ public class PhantomMaster extends Event {
             setCreated(occurrence.getCreated());
             setCreatedBy(occurrence.getCreatedBy());
             setModifiedBy(occurrence.getModifiedBy());
-            SortedSet<RecurrenceId> changeExceptionDates = new TreeSet<RecurrenceId>();
+            List<Date> changeExceptionDates = new ArrayList<Date>(detachedOccurrences.size());
             Date lastModified = occurrence.getLastModified();
             for (Event event : detachedOccurrences) {
                 lastModified = Tools.getLatestModified(lastModified, event);
                 if (null != event.getRecurrenceId()) {
-                    changeExceptionDates.add(event.getRecurrenceId());
+                    changeExceptionDates.add(new Date(event.getRecurrenceId().getValue()));
                 }
             }
             setLastModified(lastModified);

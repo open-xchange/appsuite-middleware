@@ -72,7 +72,7 @@ public abstract class AbstractSimpleCollectionUpdate<O> implements SimpleCollect
      * @param originalItems The collection of items, or <code>null</code> if there is none
      * @param newItems The new collection of items, or <code>null</code> if there is none
      */
-    public AbstractSimpleCollectionUpdate(Collection<O> originalItems, Collection<O> newItems) {
+    public AbstractSimpleCollectionUpdate(List<O> originalItems, List<O> newItems) {
         super();
         if (null == originalItems || 0 == originalItems.size()) {
             removedItems = Collections.emptyList();

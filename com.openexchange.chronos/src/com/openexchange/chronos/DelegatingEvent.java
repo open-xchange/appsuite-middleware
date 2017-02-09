@@ -52,7 +52,6 @@ package com.openexchange.chronos;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.SortedSet;
 
 /**
  * {@link DelegatingEvent}
@@ -565,12 +564,12 @@ public abstract class DelegatingEvent extends Event {
     }
 
     @Override
-    public SortedSet<RecurrenceId> getChangeExceptionDates() {
+    public List<Date> getChangeExceptionDates() {
         return delegate.getChangeExceptionDates();
     }
 
     @Override
-    public void setChangeExceptionDates(SortedSet<RecurrenceId> value) {
+    public void setChangeExceptionDates(List<Date> value) {
         delegate.setChangeExceptionDates(value);
     }
 
@@ -585,12 +584,12 @@ public abstract class DelegatingEvent extends Event {
     }
 
     @Override
-    public SortedSet<RecurrenceId> getDeleteExceptionDates() {
+    public List<Date> getDeleteExceptionDates() {
         return delegate.getDeleteExceptionDates();
     }
 
     @Override
-    public void setDeleteExceptionDates(SortedSet<RecurrenceId> value) {
+    public void setDeleteExceptionDates(List<Date> value) {
         delegate.setDeleteExceptionDates(value);
     }
 

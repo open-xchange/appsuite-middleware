@@ -49,14 +49,11 @@
 
 package com.openexchange.chronos.ical.ical4j.mapping.event;
 
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.RecurrenceId;
-import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ical4j.mapping.AbstractICalMapping;
 import com.openexchange.exception.OXException;
@@ -77,18 +74,18 @@ public class ExDateMapping extends AbstractICalMapping<VEvent, Event> {
 
     @Override
     public void export(Event object, VEvent component, ICalParameters parameters, List<OXException> warnings) {
-        Collection<RecurrenceId> value = object.getDeleteExceptionDates();
+        List<Date> value = object.getDeleteExceptionDates();
         if (null == value || 0 == value.size()) {
             removeProperties(component, Property.EXDATE);
         } else {
             removeProperties(component, Property.EXDATE);
             DateList dateList = new DateList();
             dateList.setUtc(true);
-            for (RecurrenceId date : value) {
+            for (Date date : value) {
                 if (hasTime(object)) {
-                    dateList.add(new DateTime(date.getValue()));
+                    dateList.add(new DateTime(date.getTime()));
                 } else {
-                    dateList.add(new net.fortuna.ical4j.model.Date(date.getValue()));
+                    dateList.add(new net.fortuna.ical4j.model.Date(date.getTime()));
                 }
             }
             component.getProperties().add(new ExDate(dateList));
@@ -101,12 +98,12 @@ public class ExDateMapping extends AbstractICalMapping<VEvent, Event> {
         if (null == properties || 0 == properties.size()) {
             object.setDeleteExceptionDates(null);
         } else {
-            SortedSet<RecurrenceId> deleteExceptionDates = new TreeSet<RecurrenceId>();
+            List<Date> deleteExceptionDates = new ArrayList<Date>();
             for (Iterator<?> iterator = properties.iterator(); iterator.hasNext();) {
                 ExDate property = (ExDate) iterator.next();
                 for (Iterator<?> i = property.getDates().iterator(); i.hasNext();) {
                     net.fortuna.ical4j.model.Date date = (net.fortuna.ical4j.model.Date) i.next();
-                    deleteExceptionDates.add(new DefaultRecurrenceId(date.getTime()));
+                    deleteExceptionDates.add(new Date(date.getTime()));
                 }
             }
             object.setDeleteExceptionDates(deleteExceptionDates);

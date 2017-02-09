@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.impl.performer;
 
-import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
@@ -63,8 +62,9 @@ import static com.openexchange.folderstorage.Permission.DELETE_OWN_OBJECTS;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import static com.openexchange.java.Autoboxing.I;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
@@ -176,7 +176,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
              * deletion as organizer
              */
             if (isSeriesMaster(originalEvent)) {
-                if (contains(originalEvent.getChangeExceptionDates(), recurrenceID.getValue())) {
+                if (null != originalEvent.getChangeExceptionDates() && originalEvent.getChangeExceptionDates().contains(new Date(recurrenceID.getValue()))) {
                     /*
                      * deletion of existing change exception
                      */
@@ -209,7 +209,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
              * deletion as attendee
              */
             if (isSeriesMaster(originalEvent)) {
-                if (contains(originalEvent.getChangeExceptionDates(), recurrenceID.getValue())) {
+                if (null != originalEvent.getChangeExceptionDates() && originalEvent.getChangeExceptionDates().contains(new Date(recurrenceID.getValue()))) {
                     /*
                      * deletion of existing change exception
                      */
@@ -252,19 +252,19 @@ public class DeletePerformer extends AbstractUpdatePerformer {
     private void addDeleteExceptionDate(Event originalMasterEvent, RecurrenceId recurrenceID) throws OXException {
         Event eventUpdate = new Event();
         eventUpdate.setId(originalMasterEvent.getId());
-        SortedSet<RecurrenceId> deleteExceptionDates = new TreeSet<RecurrenceId>();
+        List<Date> deleteExceptionDates = new ArrayList<Date>();
         if (null != originalMasterEvent.getDeleteExceptionDates()) {
             deleteExceptionDates.addAll(originalMasterEvent.getDeleteExceptionDates());
         }
-        if (false == deleteExceptionDates.add(recurrenceID)) {
+        if (false == deleteExceptionDates.add(new Date(recurrenceID.getValue()))) {
             // TODO throw/log?
         }
         eventUpdate.setDeleteExceptionDates(deleteExceptionDates);
-        SortedSet<RecurrenceId> changeExceptionDates = new TreeSet<RecurrenceId>();
+        List<Date> changeExceptionDates = new ArrayList<Date>();
         if (null != originalMasterEvent.getChangeExceptionDates()) {
             changeExceptionDates.addAll(originalMasterEvent.getChangeExceptionDates());
         }
-        if (changeExceptionDates.remove(recurrenceID)) {
+        if (changeExceptionDates.remove(new Date(recurrenceID.getValue()))) {
             eventUpdate.setChangeExceptionDates(changeExceptionDates);
         }
         Consistency.setModified(timestamp, eventUpdate, calendarUser.getId());

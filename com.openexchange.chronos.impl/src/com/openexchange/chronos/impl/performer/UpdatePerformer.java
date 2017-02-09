@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.impl.performer;
 
-import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.filter;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.findAttachment;
@@ -81,8 +80,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Attachment;
@@ -96,6 +93,8 @@ import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.DataAwareRecurrenceId;
+import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.AlarmMapper;
 import com.openexchange.chronos.impl.AttendeeHelper;
@@ -171,10 +170,10 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
 
     private void updateEvent(Event originalEvent, Event updatedEvent, RecurrenceId recurrenceID) throws OXException {
         if (isSeriesMaster(originalEvent)) {
-            if (contains(originalEvent.getDeleteExceptionDates(), recurrenceID.getValue())) {
+            if (null != originalEvent.getDeleteExceptionDates() && originalEvent.getDeleteExceptionDates().contains(new Date(recurrenceID.getValue()))) {
                 throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(I(originalEvent.getSeriesId()), recurrenceID);
             }
-            if (contains(originalEvent.getChangeExceptionDates(), recurrenceID.getValue())) {
+            if (null != originalEvent.getChangeExceptionDates() && originalEvent.getChangeExceptionDates().contains(new Date(recurrenceID.getValue()))) {
                 /*
                  * update for existing change exception
                  */
@@ -372,7 +371,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             /*
              * recurrence rule changed, build list of possible exception dates matching the new rule
              */
-            LinkedList<RecurrenceId> exceptionDates = new LinkedList<RecurrenceId>();
+            LinkedList<Date> exceptionDates = new LinkedList<Date>();
             if (null != originalEvent.getDeleteExceptionDates()) {
                 exceptionDates.addAll(originalEvent.getDeleteExceptionDates());
             }
@@ -380,8 +379,8 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                 exceptionDates.addAll(originalEvent.getChangeExceptionDates());
             }
             Collections.sort(exceptionDates);
-            Calendar fromCalendar = initCalendar(TimeZones.UTC, exceptionDates.getFirst().getValue());
-            Calendar untilCalendar = initCalendar(TimeZones.UTC, exceptionDates.getLast().getValue());
+            Calendar fromCalendar = initCalendar(TimeZones.UTC, exceptionDates.getFirst());
+            Calendar untilCalendar = initCalendar(TimeZones.UTC, exceptionDates.getLast());
             untilCalendar.add(Calendar.DATE, 1);
             List<Date> possibleExceptionDates = new ArrayList<Date>();
             Iterator<RecurrenceId> recurrenceIterator = session.getRecurrenceService().getRecurrenceIterator(
@@ -394,18 +393,18 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
              */
             boolean wasUpdated = false;
             if (false == isNullOrEmpty(originalEvent.getDeleteExceptionDates())) {
-                SortedSet<RecurrenceId> newDeleteExceptionDates = new TreeSet<RecurrenceId>(originalEvent.getDeleteExceptionDates());
+                List<Date> newDeleteExceptionDates = new ArrayList<Date>(originalEvent.getDeleteExceptionDates());
                 if (newDeleteExceptionDates.retainAll(possibleExceptionDates)) {
                     eventUpdate.getUpdate().setDeleteExceptionDates(newDeleteExceptionDates);
                     wasUpdated |= true;
                 }
             }
             if (false == isNullOrEmpty(originalEvent.getChangeExceptionDates())) {
-                List<RecurrenceId> notMatchingChangeExceptionDates = new ArrayList<RecurrenceId>(originalEvent.getChangeExceptionDates());
+                List<Date> notMatchingChangeExceptionDates = new ArrayList<Date>(originalEvent.getChangeExceptionDates());
                 notMatchingChangeExceptionDates.removeAll(possibleExceptionDates);
                 if (0 < notMatchingChangeExceptionDates.size()) {
                     deleteExceptions(originalEvent.getSeriesId(), notMatchingChangeExceptionDates);
-                    SortedSet<RecurrenceId> newChangeExceptionDates = new TreeSet<RecurrenceId>(originalEvent.getChangeExceptionDates());
+                    List<Date> newChangeExceptionDates = new ArrayList<Date>(originalEvent.getChangeExceptionDates());
                     newChangeExceptionDates.removeAll(notMatchingChangeExceptionDates);
                     eventUpdate.getUpdate().setChangeExceptionDates(newChangeExceptionDates);
                     wasUpdated |= true;
@@ -520,14 +519,15 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             Event originalUserEvent = new Event();
             EventMapper.getInstance().copy(originalEvent, originalUserEvent, EventField.values());
             originalUserEvent = Utils.applyExceptionDates(storage, originalUserEvent, calendarUser.getId());
-            SimpleCollectionUpdate<RecurrenceId> exceptionDateUpdates = Utils.getExceptionDateUpdates(originalUserEvent.getDeleteExceptionDates(), updatedEvent.getDeleteExceptionDates());
+            SimpleCollectionUpdate<Date> exceptionDateUpdates = Utils.getExceptionDateUpdates(originalUserEvent.getDeleteExceptionDates(), updatedEvent.getDeleteExceptionDates());
             if (0 < exceptionDateUpdates.getRemovedItems().size() || null == userAttendee) {
                 throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(I(originalEvent.getId()), EventField.DELETE_EXCEPTION_DATES);
             }
             if (0 < exceptionDateUpdates.getAddedItems().size()) {
-                for (RecurrenceId newDeleteException : exceptionDateUpdates.getAddedItems()) {
-                    RecurrenceId recurrenceId = Check.recurrenceIdExists(originalEvent, newDeleteException);
-                    if (contains(originalEvent.getChangeExceptionDates(), newDeleteException.getValue())) {
+                DefaultRecurrenceData recurrenceData = new DefaultRecurrenceData(originalEvent);
+                for (Date newDeleteException : exceptionDateUpdates.getAddedItems()) {
+                    RecurrenceId recurrenceId = Check.recurrenceIdExists(originalEvent, new DataAwareRecurrenceId(recurrenceData, newDeleteException.getTime()));
+                    if (null != originalEvent.getChangeExceptionDates() && originalEvent.getChangeExceptionDates().contains(newDeleteException)) {
                         /*
                          * remove attendee from existing change exception
                          */
@@ -786,7 +786,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                     }
                     if (null != eventUpdate.getDeleteExceptionDates()) {
                         Check.recurrenceIdsExist(originalEvent, eventUpdate.getDeleteExceptionDates());
-                        SimpleCollectionUpdate<RecurrenceId> exceptionDateUpdates = Utils.getExceptionDateUpdates(originalEvent.getDeleteExceptionDates(), eventUpdate.getDeleteExceptionDates());
+                        SimpleCollectionUpdate<Date> exceptionDateUpdates = Utils.getExceptionDateUpdates(originalEvent.getDeleteExceptionDates(), eventUpdate.getDeleteExceptionDates());
                         if (0 < exceptionDateUpdates.getRemovedItems().size()) {
                             throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(I(originalEvent.getId()), field);
                         }

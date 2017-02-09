@@ -56,14 +56,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
@@ -71,7 +69,6 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.Transp;
-import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.exception.OXException;
@@ -881,27 +878,28 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
         return mappings;
 	}
 
-    private static SortedSet<RecurrenceId> deserializeExceptionDates(String timestamps) throws NumberFormatException {
+    private static List<Date> deserializeExceptionDates(String timestamps) throws NumberFormatException {
         if (null == timestamps) {
             return null;
         }
         List<String> splitted = Strings.splitAndTrim(timestamps, ",");
-        SortedSet<RecurrenceId> dates = new TreeSet<RecurrenceId>();
+        List<Date> dates = new ArrayList<Date>();
         for (String timestamp : splitted) {
-            dates.add(new DefaultRecurrenceId(Long.parseLong(timestamp)));
+            dates.add(new Date(Long.parseLong(timestamp)));
         }
         return dates;
     }
 
-    private static String serializeExceptionDates(SortedSet<RecurrenceId> dates) {
-        if (null == dates || 0 == dates.size()) {
+    private static String serializeExceptionDates(List<Date> dates) {
+        if (null == dates) {
             return null;
         }
         StringBuilder stringBuilder = new StringBuilder(15 * dates.size());
-        Iterator<RecurrenceId> iterator = dates.iterator();
-        stringBuilder.append(iterator.next().getValue());
-        while (iterator.hasNext()) {
-            stringBuilder.append(',').append(iterator.next().getValue());
+        if (0 < dates.size()) {
+            stringBuilder.append(dates.get(0).getTime());
+        }
+        for (int i = 1; i < dates.size(); i++) {
+            stringBuilder.append(',').append(dates.get(i).getTime());
         }
         return stringBuilder.toString();
     }

@@ -55,9 +55,7 @@ import java.util.Date;
 import java.util.EnumSet;
 import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.SortedSet;
 import java.util.TimeZone;
-import java.util.TreeSet;
 
 /**
  * {@link Event}
@@ -97,8 +95,8 @@ public class Event {
     private int seriesId;
     private String recurrenceRule;
     private RecurrenceId recurrenceId;
-    private SortedSet<RecurrenceId> changeExceptionDates;
-    private SortedSet<RecurrenceId> deleteExceptionDates;
+    private List<Date> changeExceptionDates;
+    private List<Date> deleteExceptionDates;
 
     private EventStatus status;
     private Organizer organizer;
@@ -1041,7 +1039,7 @@ public class Event {
      *
      * @return The change exception dates
      */
-    public SortedSet<RecurrenceId> getChangeExceptionDates() {
+    public List<Date> getChangeExceptionDates() {
         return changeExceptionDates;
     }
 
@@ -1050,7 +1048,7 @@ public class Event {
      *
      * @param value The change exception dates to set
      */
-    public void setChangeExceptionDates(SortedSet<RecurrenceId> value) {
+    public void setChangeExceptionDates(List<Date> value) {
         changeExceptionDates = value;
         setFields.add(EventField.CHANGE_EXCEPTION_DATES);
     }
@@ -1077,7 +1075,7 @@ public class Event {
      *
      * @return The delete exception dates
      */
-    public SortedSet<RecurrenceId> getDeleteExceptionDates() {
+    public List<Date> getDeleteExceptionDates() {
         return deleteExceptionDates;
     }
 
@@ -1086,7 +1084,7 @@ public class Event {
      *
      * @param value The delete exception dates to set
      */
-    public void setDeleteExceptionDates(SortedSet<RecurrenceId> value) {
+    public void setDeleteExceptionDates(List<Date> value) {
         deleteExceptionDates = value;
         setFields.add(EventField.DELETE_EXCEPTION_DATES);
     }
@@ -1370,7 +1368,7 @@ public class Event {
             clone.setCategories(cloneList(getCategories()));
         }
         if (containsChangeExceptionDates()) {
-            clone.setChangeExceptionDates(cloneSet(getChangeExceptionDates()));
+            clone.setChangeExceptionDates(cloneList(getChangeExceptionDates()));
         }
         if (containsClassification()) {
             clone.setClassification(getClassification());
@@ -1385,7 +1383,7 @@ public class Event {
             clone.setCreatedBy(getCreatedBy());
         }
         if (containsDeleteExceptionDates()) {
-            clone.setDeleteExceptionDates(cloneSet(getDeleteExceptionDates()));
+            clone.setDeleteExceptionDates(cloneList(getDeleteExceptionDates()));
         }
         if (containsDescription()) {
             clone.setDescription(getDescription());
@@ -1458,15 +1456,6 @@ public class Event {
             return null;
         }
         List<T> retval = new ArrayList<T>();
-        retval.addAll(list);
-        return retval;
-    }
-
-    private <T> SortedSet<T> cloneSet(SortedSet<T> list) {
-        if (null == list) {
-            return null;
-        }
-        SortedSet<T> retval = new TreeSet<T>();
         retval.addAll(list);
         return retval;
     }
