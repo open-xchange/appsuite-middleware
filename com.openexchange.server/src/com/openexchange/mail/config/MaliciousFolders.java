@@ -49,17 +49,11 @@
 
 package com.openexchange.mail.config;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import org.slf4j.Logger;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableList;
@@ -67,11 +61,9 @@ import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.outlook.osgi.Services;
 import com.openexchange.groupware.i18n.MailStrings;
-import com.openexchange.groupware.userconfiguration.UserPermissionBits;
-import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
@@ -84,7 +76,6 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.session.UserAndContext;
-import com.openexchange.tools.session.ServerSession;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 
@@ -104,20 +95,17 @@ public class MaliciousFolders {
         public boolean isMalicious(String fullName, int accountId, MailServletInterface mailInterface) throws OXException {
             return false;
         }
-
-        @Override
-        public List<String> getListing(MailServletInterface mailInterface) throws OXException {
-            return Collections.emptyList();
-        }
     };
 
     private static final Cache<UserAndContext, MaliciousFolders> CACHE = CacheBuilder.newBuilder().maximumSize(65536).expireAfterWrite(30, TimeUnit.MINUTES).build();
+    private static final Cache<String, MaliciousFolders> EXPRESSION_CACHE = CacheBuilder.newBuilder().maximumSize(65536).expireAfterWrite(30, TimeUnit.MINUTES).build();
 
     /**
      * Clears the cache.
      */
     public static void invalidateCache() {
         CACHE.invalidateAll();
+        EXPRESSION_CACHE.invalidateAll();
     }
 
     /**
@@ -139,15 +127,23 @@ public class MaliciousFolders {
      * @return The malicious folders
      * @throws OXException If malicious folders cannot be returned
      */
-    public static MaliciousFolders instanceFor(int userId, int contextId) throws OXException {
+    public static MaliciousFolders instanceFor(final int userId, final int contextId) throws OXException {
         UserAndContext key = UserAndContext.newInstance(userId, contextId);
         MaliciousFolders object = CACHE.getIfPresent(key);
         if (null != object) {
             return object;
         }
 
+        Callable<MaliciousFolders> loader = new Callable<MaliciousFolders>() {
+
+            @Override
+            public MaliciousFolders call() throws OXException {
+                return doInitializeFor(userId, contextId);
+            }
+        };
+
         try {
-            return CACHE.get(key, new MaliciousFoldersCallable(userId, contextId));
+            return CACHE.get(key, loader);
         } catch (ExecutionException e) {
             Throwable cause = e.getCause();
             throw cause instanceof OXException ? (OXException) cause : new OXException(null == cause ? e : cause);
@@ -155,11 +151,6 @@ public class MaliciousFolders {
     }
 
     static MaliciousFolders doInitializeFor(int userId, int contextId) throws OXException {
-        boolean disabled = true;
-        if (disabled) {
-            return new MaliciousFolders(Collections.<Checker> emptyList());
-        }
-
         ConfigViewFactory factory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
         if (null == factory) {
             throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
@@ -179,19 +170,26 @@ public class MaliciousFolders {
             return EMPTY;
         }
 
-        String listing = "$Spam, $Confirmed-spam";
+        final String listing;
         {
+            String tmp = "$Spam, $Confirmed-spam";
             ComposedConfigProperty<String> property = view.property("com.openexchange.mail.maliciousFolders.listing", String.class);
             if (property.isDefined()) {
                 String folders = property.get();
                 if (false == Strings.isEmpty(folders)) {
-                    listing = folders;
+                    tmp = folders;
                 }
             }
+            listing = tmp;
         }
 
         if (Strings.isEmpty(listing) || "none".equalsIgnoreCase(listing)) {
             return EMPTY;
+        }
+
+        MaliciousFolders object = EXPRESSION_CACHE.getIfPresent(listing);
+        if (null != object) {
+            return object;
         }
 
         TIntList indexes = null;
@@ -260,7 +258,9 @@ public class MaliciousFolders {
             }
         }
 
-        return new MaliciousFolders(builder.build());
+        object = new MaliciousFolders(builder.build());
+        EXPRESSION_CACHE.put(listing, object);
+        return object;
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -293,24 +293,6 @@ public class MaliciousFolders {
         return false;
     }
 
-    /**
-     * Gets the listing of malicious folders
-     *
-     * @param mailInterface The mail interface
-     * @return The listing of malicious folders
-     * @throws OXException If malicious folders cannot be returned
-     */
-    public List<String> getListing(MailServletInterface mailInterface) throws OXException {
-        List<String> listing = new ArrayList<>(checkers.size());
-        for (Checker checker : checkers) {
-            Collection<String> fullPaths = checker.getFullName(mailInterface);
-            if (null != fullPaths) {
-                listing.addAll(fullPaths);
-            }
-        }
-        return listing;
-    }
-
     @Override
     public String toString() {
         return checkers.toString();
@@ -318,27 +300,9 @@ public class MaliciousFolders {
 
     // -----------------------------------------------------------------------------------------------------
 
-    private static final class MaliciousFoldersCallable implements Callable<MaliciousFolders> {
-
-        private final int userId;
-        private final int contextId;
-
-        MaliciousFoldersCallable(int userId, int contextId) {
-            this.userId = userId;
-            this.contextId = contextId;
-        }
-
-        @Override
-        public MaliciousFolders call() throws OXException {
-            return doInitializeFor(userId, contextId);
-        }
-    }
-
     private static interface Checker {
 
         boolean isMalicious(String fullName, int accountId, MailServletInterface mailInterface) throws OXException;
-
-        Collection<String> getFullName(MailServletInterface mailInterface) throws OXException;
     }
 
     private static final class StandardFolderChecker implements Checker {
@@ -350,156 +314,6 @@ public class MaliciousFolders {
             super();
             this.indexes = indexes;
             protocolUnifiedMail = UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX;
-        }
-
-        @Override
-        public Collection<String> getFullName(final MailServletInterface mailInterface) throws OXException {
-            Session s = mailInterface.getSession();
-
-            MailAccountStorageService service = null;
-            {
-                UserPermissionBits userPermissionBits;
-                if (s instanceof ServerSession) {
-                    userPermissionBits = ((ServerSession) s).getUserPermissionBits();
-                } else {
-                    userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(s.getUserId(), s.getContextId());
-                }
-                if (userPermissionBits.isMultipleMailAccounts()) {
-                    service = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
-                }
-            }
-
-            if (null == service) {
-                // Only consider primary account
-                Set<String> paths = new LinkedHashSet<>(indexes.length);
-                for (int index : indexes) {
-                    String path = getForAccount(index, MailAccount.DEFAULT_ID, null, mailInterface);
-                    if (null != path) {
-                        paths.add(path);
-                    }
-                }
-                return paths;
-            }
-
-            MailAccount[] accs = service.getUserMailAccounts(s.getUserId(), s.getContextId());
-            if (null == accs || 0 == accs.length) {
-                // Only consider primary account
-                Set<String> paths = new LinkedHashSet<>(indexes.length);
-                for (int index : indexes) {
-                    String path = getForAccount(index, MailAccount.DEFAULT_ID, null, mailInterface);
-                    if (null != path) {
-                        paths.add(path);
-                    }
-                }
-                return paths;
-            }
-
-            List<MailAccount> accounts = new ArrayList<>(accs.length);
-            {
-                boolean suppressUnifiedMail = false; // TODO: Suppress?
-                if (suppressUnifiedMail) {
-                    for (MailAccount mailAccount : accs) {
-                        if (!mailAccount.isDefaultAccount() && !protocolUnifiedMail.equals(mailAccount.getMailProtocol())) {
-                            accounts.add(mailAccount);
-                        }
-                    }
-                } else {
-                    for (MailAccount mailAccount : accs) {
-                        if (mailAccount.isDefaultAccount()) {
-                            accounts.add(mailAccount);
-                        } else {
-                            if (protocolUnifiedMail.equals(mailAccount.getMailProtocol())) {
-                                // Ensure Unified Mail is enabled; meaning at least one account is subscribed to Unified Mail
-                                UnifiedInboxManagement uim = Services.getService(UnifiedInboxManagement.class);
-                                try {
-                                    if (null != uim && uim.isEnabled(s.getUserId(), s.getContextId())) {
-                                        accounts.add(mailAccount);
-                                    }
-                                } catch (Exception e) {
-                                    Logger logger = org.slf4j.LoggerFactory.getLogger(MaliciousFolders.class);
-                                    logger.error("", e);
-                                }
-                            } else {
-                                accounts.add(mailAccount);
-                            }
-                        }
-                    }
-                }
-            }
-
-            Set<String> paths = new LinkedHashSet<>(accounts.size() << 2);
-            for (MailAccount account : accounts) {
-                for (int index : indexes) {
-                    String path = getForAccount(index, account.getId(), account, mailInterface);
-                    if (null != path) {
-                        paths.add(path);
-                    }
-                }
-            }
-            return paths;
-        }
-
-        String getForAccount(int index, int accountId, MailAccount optAccount, MailServletInterface mailInterface) {
-            if (StorageUtility.INDEX_INBOX == index) {
-                return MailFolderUtility.prepareFullname(accountId, "INBOX");
-            }
-
-            MailSessionCache mailSessionCache = MailSessionCache.getInstance(mailInterface.getSession());
-            String[] arr = mailSessionCache.getParameter(accountId, MailSessionParameterNames.getParamDefaultFolderArray());
-            if (null != arr && arr.length > index && arr[index] != null) {
-                return MailFolderUtility.prepareFullname(accountId, arr[index]);
-            }
-
-            return getStandardFolderFullName(index, accountId, optAccount, mailInterface);
-        }
-
-        String getStandardFolderFullName(int index, int accountId, MailAccount optAccount, MailServletInterface mailInterface) {
-            if (MailAccount.DEFAULT_ID == accountId) {
-                // Live access only for
-            }
-            try {
-                switch (index) {
-                    case StorageUtility.INDEX_CONFIRMED_HAM:
-                        return (mailInterface.getConfirmedHamFolder(accountId));
-                    case StorageUtility.INDEX_CONFIRMED_SPAM:
-                        return (mailInterface.getConfirmedSpamFolder(accountId));
-                    case StorageUtility.INDEX_DRAFTS:
-                        return (mailInterface.getDraftsFolder(accountId));
-                    case StorageUtility.INDEX_SENT:
-                        return (mailInterface.getSentFolder(accountId));
-                    case StorageUtility.INDEX_SPAM:
-                        return (mailInterface.getSpamFolder(accountId));
-                    case StorageUtility.INDEX_TRASH:
-                        return (mailInterface.getTrashFolder(accountId));
-                    default:
-                        break;
-                }
-            } catch (OXException e) {
-                // Live access failed...
-            }
-
-            if (null == optAccount) {
-                return null;
-            }
-
-            switch (index) {
-                case StorageUtility.INDEX_CONFIRMED_HAM:
-                    return MailFolderUtility.prepareFullname(accountId,  optAccount.getConfirmedHamFullname());
-                case StorageUtility.INDEX_CONFIRMED_SPAM:
-                    return MailFolderUtility.prepareFullname(accountId,  optAccount.getConfirmedSpamFullname());
-                case StorageUtility.INDEX_DRAFTS:
-                    return MailFolderUtility.prepareFullname(accountId,  optAccount.getDraftsFullname());
-                case StorageUtility.INDEX_SENT:
-                    return MailFolderUtility.prepareFullname(accountId,  optAccount.getSentFullname());
-                case StorageUtility.INDEX_SPAM:
-                    return MailFolderUtility.prepareFullname(accountId,  optAccount.getSpamFullname());
-                case StorageUtility.INDEX_TRASH:
-                    return MailFolderUtility.prepareFullname(accountId,  optAccount.getTrashFullname());
-                default:
-                    break;
-            }
-
-            return null;
         }
 
         @Override
@@ -519,7 +333,7 @@ public class MaliciousFolders {
 
         private boolean checkForIndex(int index, String fullName, int accountId, MailServletInterface mailInterface) throws OXException {
             if (StorageUtility.INDEX_INBOX == index) {
-                return "INBOX".equals(fullName);
+                return "INBOX".equals(fullName) || fullName.startsWith("INBOX" + mailInterface.getSeparator(accountId));
             }
 
             if ("INBOX".equals(fullName)) {
@@ -527,32 +341,97 @@ public class MaliciousFolders {
                 return false;
             }
 
-            MailSessionCache mailSessionCache = MailSessionCache.getInstance(mailInterface.getSession());
+            Session session = mailInterface.getSession();
+            MailSessionCache mailSessionCache = MailSessionCache.getInstance(session);
             String[] arr = mailSessionCache.getParameter(accountId, MailSessionParameterNames.getParamDefaultFolderArray());
             if (null != arr) {
-                if (arr.length > index && fullName.equals(arr[index])) {
-                    return true;
+                if (arr.length > index) {
+                    String stdFullName = arr[index];
+                    if (null != stdFullName && (fullName.equals(stdFullName) || fullName.startsWith(stdFullName + mailInterface.getSeparator(accountId)))) {
+                        return true;
+                    }
                 }
             }
 
-            switch (index) {
-                case StorageUtility.INDEX_CONFIRMED_HAM:
-                    return fullName.equals(getFullNameFrom(mailInterface.getConfirmedHamFolder(accountId)));
-                case StorageUtility.INDEX_CONFIRMED_SPAM:
-                    return fullName.equals(getFullNameFrom(mailInterface.getConfirmedSpamFolder(accountId)));
-                case StorageUtility.INDEX_DRAFTS:
-                    return fullName.equals(getFullNameFrom(mailInterface.getDraftsFolder(accountId)));
-                case StorageUtility.INDEX_SENT:
-                    return fullName.equals(getFullNameFrom(mailInterface.getSentFolder(accountId)));
-                case StorageUtility.INDEX_SPAM:
-                    return fullName.equals(getFullNameFrom(mailInterface.getSpamFolder(accountId)));
-                case StorageUtility.INDEX_TRASH:
-                    return fullName.equals(getFullNameFrom(mailInterface.getTrashFolder(accountId)));
-                default:
-                    break;
+            String stdFullName = null;
+            char separator = '\0';
+            if (MailAccount.DEFAULT_ID != accountId) {
+                MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
+                MailAccount mailAccount = mass.getMailAccount(accountId, session.getUserId(), session.getContextId());
+                if (protocolUnifiedMail.equals(mailAccount.getMailProtocol())) {
+                    separator = MailPath.SEPERATOR;
+                    switch (index) {
+                        case StorageUtility.INDEX_CONFIRMED_HAM:
+                            break;
+                        case StorageUtility.INDEX_CONFIRMED_SPAM:
+                            break;
+                        case StorageUtility.INDEX_DRAFTS:
+                            stdFullName = UnifiedInboxManagement.DRAFTS;
+                            break;
+                        case StorageUtility.INDEX_SENT:
+                            stdFullName = UnifiedInboxManagement.SENT;
+                            break;
+                        case StorageUtility.INDEX_SPAM:
+                            stdFullName = UnifiedInboxManagement.SPAM;
+                            break;
+                        case StorageUtility.INDEX_TRASH:
+                            stdFullName = UnifiedInboxManagement.TRASH;
+                            break;
+                        default:
+                            break;
+                    }
+                } else {
+                    switch (index) {
+                        case StorageUtility.INDEX_CONFIRMED_HAM:
+                            stdFullName = getFullNameFrom(mailAccount.getConfirmedHamFullname());
+                            break;
+                        case StorageUtility.INDEX_CONFIRMED_SPAM:
+                            stdFullName = getFullNameFrom(mailAccount.getConfirmedSpamFullname());
+                            break;
+                        case StorageUtility.INDEX_DRAFTS:
+                            stdFullName = getFullNameFrom(mailAccount.getDraftsFullname());
+                            break;
+                        case StorageUtility.INDEX_SENT:
+                            stdFullName = getFullNameFrom(mailAccount.getSentFullname());
+                            break;
+                        case StorageUtility.INDEX_SPAM:
+                            stdFullName = getFullNameFrom(mailAccount.getSpamFullname());
+                            break;
+                        case StorageUtility.INDEX_TRASH:
+                            stdFullName = getFullNameFrom(mailAccount.getTrashFullname());
+                            break;
+                        default:
+                            break;
+                    }
+                }
             }
 
-            return false;
+            if (null == stdFullName) {
+                switch (index) {
+                    case StorageUtility.INDEX_CONFIRMED_HAM:
+                        stdFullName = getFullNameFrom(mailInterface.getConfirmedHamFolder(accountId));
+                        break;
+                    case StorageUtility.INDEX_CONFIRMED_SPAM:
+                        stdFullName = getFullNameFrom(mailInterface.getConfirmedSpamFolder(accountId));
+                        break;
+                    case StorageUtility.INDEX_DRAFTS:
+                        stdFullName = getFullNameFrom(mailInterface.getDraftsFolder(accountId));
+                        break;
+                    case StorageUtility.INDEX_SENT:
+                        stdFullName = getFullNameFrom(mailInterface.getSentFolder(accountId));
+                        break;
+                    case StorageUtility.INDEX_SPAM:
+                        stdFullName = getFullNameFrom(mailInterface.getSpamFolder(accountId));
+                        break;
+                    case StorageUtility.INDEX_TRASH:
+                        stdFullName = getFullNameFrom(mailInterface.getTrashFolder(accountId));
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            return (null != stdFullName && (fullName.equals(stdFullName) || fullName.startsWith(stdFullName + (separator > 0 ? separator : mailInterface.getSeparator(accountId)))));
         }
 
         private String getFullNameFrom(String preparedName) {
@@ -621,11 +500,6 @@ public class MaliciousFolders {
             }
             this.fullName = fullName;
             this.accountId = accountId;
-        }
-
-        @Override
-        public Collection<String> getFullName(MailServletInterface mailInterface) throws OXException {
-            return Collections.singleton(MailFolderUtility.prepareFullname(accountId, fullName));
         }
 
         @Override
