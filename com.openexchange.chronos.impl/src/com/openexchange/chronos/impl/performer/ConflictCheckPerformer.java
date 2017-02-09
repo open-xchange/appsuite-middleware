@@ -186,7 +186,7 @@ public class ConflictCheckPerformer extends AbstractQueryPerformer {
              * skip checks with event itself or any other event from same series
              */
             if (eventInPeriod.getId() == event.getId() || 0 < event.getSeriesId() && event.getSeriesId() == eventInPeriod.getSeriesId()) {
-                //                continue;
+                continue;
             }
             /*
              * determine intersecting attendees
