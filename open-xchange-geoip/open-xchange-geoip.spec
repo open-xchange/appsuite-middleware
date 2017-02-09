@@ -63,8 +63,6 @@ fi
 /opt/open-xchange/bundles/*
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
-%dir /opt/open-xchange/etc/
-%config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
 * Wed Feb 08 2016 Thorben Betten <thorben.betten@open-xchange.com>
