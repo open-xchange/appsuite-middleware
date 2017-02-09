@@ -87,19 +87,96 @@ public class ActionCommand extends ControlOrActionCommand {
      * </ul>
      */
     public enum Commands {
+        /**
+         * <p>The "keep" action is whatever action is taken in lieu of all other
+         * actions, if no filtering happens at all; generally, this simply means
+         * to file the message into the user's main mailbox.</p>
+         * <code>keep</code>
+         * <p><a href="https://tools.ietf.org/html/rfc5228#section-4.3">RFC-5228: Action keep</a></p>
+         */
         KEEP("keep", 0, new Hashtable<String, Integer>(), "keep", Collections.<String> emptyList()),
+        /**
+         * <p>Discard is used to silently throw away the message. It does so by
+         * simply cancelling the <a href="https://tools.ietf.org/html/rfc5228#section-2.10.2">implicit keep</a>.</p>
+         * <code>discard</code>
+         * <p><a href="https://tools.ietf.org/html/rfc5228#section-4.4">RFC-5228: Action discard</a></p>
+         */
         DISCARD("discard", 0, new Hashtable<String, Integer>(), "discard", Collections.<String> emptyList()),
+        /**
+         * <p>The "redirect" action is used to send the message to another user at
+         * a supplied address, as a mail forwarding feature does.</p>
+         * <code>redirect &lt;address: string&gt;</code>
+         * <p><a href="https://tools.ietf.org/html/rfc5228#section-4.2">RFC-5228: Action redirect</p>
+         */
         REDIRECT("redirect", 1, new Hashtable<String, Integer>(), "redirect", Collections.<String> emptyList()),
+        /**
+         * <p>The "fileinto" action delivers the message into the specified mailbox.</p>
+         * <code>fileinto &lt;mailbox: string&gt;</code>
+         * <p><a href="https://tools.ietf.org/html/rfc5228#section-4.1">RFC-5228: Action fileinto</p>
+         */
         FILEINTO("fileinto", 1, new Hashtable<String, Integer>(), "move", Collections.singletonList("fileinto")),
+        /**
+         * <p>The "reject" action cancels the implicit keep and refuses delivery of a message.</p>
+         * <code>reject &lt;reason: string&gt;</code>
+         * <p><a href="https://tools.ietf.org/html/rfc5429#section-2.2">RFC-5429: Action reject</a></p>
+         */
         REJECT("reject", 1, new Hashtable<String, Integer>(), "reject", Collections.singletonList("reject")),
+        /**
+         * <p>The "stop" action ends all processing. If the implicit keep has not
+         * been cancelled, then it is taken.</p>
+         * <code>stop</code>
+         * <p><a href="https://tools.ietf.org/html/rfc5228#section-3.3">RFC-5228: Control stop</a></p>
+         */
         STOP("stop", 0, new Hashtable<String, Integer>(), "stop", Collections.<String> emptyList()),
+        /**
+         * <p>The "vacation" action implements a vacation autoresponder similar to
+         * the vacation command available under many versions of Unix.</p>
+         * <code>vacation [":days" number] [":subject" string] [":from" string] [":addresses" string-list] [":mime"] [":handle" string] &lt;reason: string&gt;</code>
+         * <p><a href="https://tools.ietf.org/html/rfc5230#section-4">RFC-5230: Action vacation</a></p>
+         */
         VACATION("vacation", 1, vacationTags(), "vacation", Collections.singletonList("vacation")),
+        /**
+         * <p>The "notify" action specifies that a notification should be sent to a user.</p>
+         * <code>notify [":from" string] [":importance" &lt;"1" / "2" / "3"&gt;] [":options" string-list] [":message" string] &lt;method: string&gt;</code>
+         * <p><a href="https://tools.ietf.org/html/rfc5435#section-3">RFC-5435: Action notify</a></p>
+         */
         ENOTIFY("notify", 1, enotifyTags(), "notify", Collections.singletonList("enotify")),
+        /**
+         * <p>Addflag is used to add flags to a list of [IMAP] flags. It doesn't
+         * replace any previously set flags. This means that multiple
+         * occurrences of addflag are treated additively.</p>
+         * <code>addflag [&lt;variablename: string&gt;] &lt;list-of-flags: string-list&gt;</code>
+         * <p><a href="https://tools.ietf.org/html/rfc5232#section-3.2">RFC-5232: Action addflag</a></p>
+         */
         ADDFLAG("addflag", 1, new Hashtable<String, Integer>(), "addflags", java.util.Arrays.asList("imapflags", "imap4flags")),
+        /**
+         * <p>Addflag is used to add flags to a list of [IMAP] flags. It doesn't
+         * replace any previously set flags. This means that multiple
+         * occurrences of addflag are treated additively.</p>
+         * <code>removeflag [&lt;variablename: string&gt;] &lt;list-of-flags: string-list&gt;</code>
+         * <p><a href="https://tools.ietf.org/html/rfc5232#section-3.3">RFC-5232: Action removeflag</a></p>
+         */
         REMOVEFLAG("removeflag", 1, new Hashtable<String, Integer>(), "removeflags", java.util.Arrays.asList("imapflags", "imap4flags")),
         PGP_ENCRYPT("pgp_encrypt", 0, pgpEncryptTags(), "pgp", java.util.Arrays.asList("vnd.dovecot.pgp-encrypt")),
+        /**
+         * <p>The addheader action adds a header field to the existing message header.</p>
+         * <code>addheader [":last"] &lt;field-name: string&gt; &lt;value: string&gt;</code>
+         * <p><a href="https://tools.ietf.org/html/rfc5293#section-4">RFC-5293: Action addheader</a></p>
+         */
         ADDHEADER("addheader", 2, addHeaderTags(), "addheader", Collections.singletonList("editheader")),
+        /**
+         * <p>By default, the deleteheader action deletes all occurrences of the
+         * named header field. The deleteheader action does not affect Sieve's
+         * implicit keep.</p>
+         * <code>deleteheader [":index" &lt;fieldno: number&gt; [":last"]] [COMPARATOR] [MATCH-TYPE] &lt;field-name: string&gt; [&lt;value-patterns: string-list&gt;]</code>
+         * <p><a href="https://tools.ietf.org/html/rfc5293#section-5">RFC-5293: Action deleteheader</a></p>
+         */
         DELETEHEADER("deleteheader", 1, deleteHeaderTags(), "deleteheader", Collections.singletonList("editheader")),
+        /**
+         * <p> The "set" action stores the specified value in the variable identified by name.</p>
+         * <code>set [MODIFIER] &lt;name: string&gt; &lt;value: string&gt;</code>
+         * <p><a href="https://tools.ietf.org/html/rfc5229#section-4">RFC-5229: Action set</a></p>
+         */
         SET("set", 2, variablesTags(), "set", Collections.singletonList("variables"));
 
         /**
@@ -245,6 +322,15 @@ public class ActionCommand extends ControlOrActionCommand {
          */
         private final String jsonName;
 
+        /**
+         * Initialises a new {@link Commands}.
+         * 
+         * @param commandName The action command's name
+         * @param minNumberOfArguments The minimum number of arguments
+         * @param tagArgs The tag arguments
+         * @param jsonName The json mappings
+         * @param required The 'required'
+         */
         Commands(final String commandName, final int minNumberOfArguments, final Hashtable<String, Integer> tagArgs, final String jsonName, final List<String> required) {
             this.commandName = commandName;
             this.minNumberOfArguments = minNumberOfArguments;
@@ -253,29 +339,50 @@ public class ActionCommand extends ControlOrActionCommand {
             this.jsonName = jsonName;
         }
 
+        /**
+         * Returns the amount of minimum allowed arguments
+         * 
+         * @return the amount of minimum allowed arguments
+         */
         public final int getMinNumberOfArguments() {
             return minNumberOfArguments;
         }
 
+        /**
+         * Returns the command's name
+         * 
+         * @return the command's name
+         */
         public final String getCommandName() {
             return commandName;
         }
 
         /**
+         * The JSON mapping of the command
+         * 
          * @return the jsonname
          */
         public final String getJsonName() {
             return jsonName;
         }
 
+        /**
+         * Returns a {@link List} with the required plugins
+         * 
+         * @return a {@link List} with the required plugins
+         */
         public final List<String> getRequired() {
             return required;
         }
 
+        /**
+         * Returns a {@link Hashtable} with all the tag arguments
+         * 
+         * @return a {@link Hashtable} with all the tag arguments
+         */
         public final Hashtable<String, Integer> getTagArgs() {
             return tagArgs;
         }
-
     }
 
     private final Commands command;
