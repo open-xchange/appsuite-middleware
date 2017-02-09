@@ -4871,4 +4871,58 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         return (null != storageService) && (false == storageService.existsMailAccount(accountId, session.getUserId(), session.getContextId()));
     }
 
+    @Override
+    public MailMessage[] searchMails(String folder, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] mailFields, String[] headerNames) throws OXException {
+        IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
+        MailMessage[] result;
+        if (null != headerNames && 0 < headerNames.length) {
+            IMailMessageStorageExt ext = messageStorage.supports(IMailMessageStorageExt.class);
+            if (null != ext) {
+                result = ext.searchMessages(folder, indexRange, sortField, order, searchTerm, mailFields, headerNames);
+            } else {
+                result = messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, mailFields);
+                enrichWithHeaders(folder, result, headerNames, messageStorage);
+            }
+        } else {
+            result = messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, mailFields);
+        }
+
+        if (!mailAccess.getWarnings().isEmpty()) {
+            warnings.addAll(mailAccess.getWarnings());
+        }
+        checkMailsForColor(result);
+
+        return result;
+    }
+
+    private void enrichWithHeaders(String fullName, MailMessage[] mails, String[] headerNames, IMailMessageStorage messageStorage) throws OXException {
+        int length = mails.length;
+        MailMessage[] headers;
+        {
+            String[] ids = new String[length];
+            for (int i = ids.length; i-- > 0;) {
+                MailMessage m = mails[i];
+                ids[i] = null == m ? null : m.getMailId();
+            }
+            headers = messageStorage.getMessages(fullName, ids, MailFields.toArray(MailField.HEADERS));
+        }
+
+        for (int i = length; i-- > 0;) {
+            MailMessage mailMessage = mails[i];
+            if (null != mailMessage) {
+                MailMessage header = headers[i];
+                if (null != header) {
+                    for (String headerName : headerNames) {
+                        String[] values = header.getHeader(headerName);
+                        if (null != values) {
+                            for (String value : values) {
+                                mailMessage.addHeader(headerName, value);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
 }

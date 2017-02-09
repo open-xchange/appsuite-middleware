@@ -92,7 +92,6 @@ import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.tree.modules.mail.MailColorModePreferenceItem;
 import com.openexchange.groupware.settings.tree.modules.mail.MailFlaggedModePreferenceItem;
-import com.openexchange.groupware.settings.tree.modules.mail.MaliciousFoldersSetting;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.jslob.ConfigTreeEquivalent;
@@ -294,11 +293,6 @@ public final class MailJSONActivator extends AJAXModuleActivator {
         });
 
         registerService(PreferencesItemService.class, new MailCategoriesPreferenceItem(this));
-        {
-            MaliciousFoldersSetting setting = new MaliciousFoldersSetting();
-            registerService(PreferencesItemService.class, setting, null);
-            registerService(ConfigTreeEquivalent.class, setting, null);
-        }
 
         final ContactField[] fields = new ContactField[] { ContactField.OBJECT_ID, ContactField.INTERNAL_USERID, ContactField.FOLDER_ID, ContactField.NUMBER_OF_IMAGES };
         registerService(AJAXResultDecorator.class, new DecoratorImpl(converter, fields, this));

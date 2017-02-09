@@ -77,16 +77,13 @@ public final class LoginConfiguration {
     private final int cookieExpiry;
     private final boolean insecure;
     private final boolean cookieForceHTTPS;
-    private final boolean ipCheck;
-    private final ClientWhitelist ipCheckWhitelist;
     private final boolean redirectIPChangeAllowed;
-    private final List<IPRange> ranges;
     private final boolean disableTrimLogin;
     private final boolean formLoginWithoutAuthId;
     private final boolean isRandomTokenEnabled;
     private final boolean checkPunyCodeLoginString;
 
-    public LoginConfiguration(String uiWebPath, boolean sessiondAutoLogin, CookieHashSource hashSource, String httpAuthAutoLogin, String defaultClient, String clientVersion, String errorPageTemplate, int cookieExpiry, boolean cookieForceHTTPS, boolean insecure, boolean ipCheck, ClientWhitelist ipCheckWhitelist, boolean redirectIPChangeAllowed, List<IPRange> ranges, boolean disableTrimLogin, boolean formLoginWithoutAuthId, boolean isRandomTokenEnabled, boolean checkPunyCodeLoginString) {
+    public LoginConfiguration(String uiWebPath, boolean sessiondAutoLogin, CookieHashSource hashSource, String httpAuthAutoLogin, String defaultClient, String clientVersion, String errorPageTemplate, int cookieExpiry, boolean cookieForceHTTPS, boolean insecure, boolean redirectIPChangeAllowed, boolean disableTrimLogin, boolean formLoginWithoutAuthId, boolean isRandomTokenEnabled, boolean checkPunyCodeLoginString) {
         super();
         this.uiWebPath = uiWebPath;
         this.sessiondAutoLogin = sessiondAutoLogin;
@@ -98,10 +95,7 @@ public final class LoginConfiguration {
         this.cookieExpiry = cookieExpiry;
         this.cookieForceHTTPS = cookieForceHTTPS;
         this.insecure = insecure;
-        this.ipCheck = ipCheck;
-        this.ipCheckWhitelist = ipCheckWhitelist;
         this.redirectIPChangeAllowed = redirectIPChangeAllowed;
-        this.ranges = ranges;
         this.disableTrimLogin = disableTrimLogin;
         this.formLoginWithoutAuthId = formLoginWithoutAuthId;
         this.isRandomTokenEnabled = isRandomTokenEnabled;
@@ -165,20 +159,8 @@ public final class LoginConfiguration {
         return cookieForceHTTPS;
     }
 
-    public boolean isIpCheck() {
-        return ipCheck;
-    }
-
-    public ClientWhitelist getIpCheckWhitelist() {
-        return ipCheckWhitelist;
-    }
-
     public boolean isRedirectIPChangeAllowed() {
         return redirectIPChangeAllowed;
-    }
-
-    public List<IPRange> getRanges() {
-        return ranges;
     }
 
     public boolean isDisableTrimLogin() {
