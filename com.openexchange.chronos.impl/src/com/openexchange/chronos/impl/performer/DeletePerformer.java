@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.impl.performer;
 
+import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
@@ -176,7 +177,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
              * deletion as organizer
              */
             if (isSeriesMaster(originalEvent)) {
-                if (null != originalEvent.getChangeExceptionDates() && originalEvent.getChangeExceptionDates().contains(new Date(recurrenceID.getValue()))) {
+                if (contains(originalEvent.getChangeExceptionDates(), recurrenceID)) {
                     /*
                      * deletion of existing change exception
                      */
@@ -209,7 +210,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
              * deletion as attendee
              */
             if (isSeriesMaster(originalEvent)) {
-                if (null != originalEvent.getChangeExceptionDates() && originalEvent.getChangeExceptionDates().contains(new Date(recurrenceID.getValue()))) {
+                if (contains(originalEvent.getChangeExceptionDates(), recurrenceID)) {
                     /*
                      * deletion of existing change exception
                      */

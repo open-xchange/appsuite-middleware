@@ -1346,7 +1346,7 @@ public class Event {
 
     @Override
     public String toString() {
-        return "Event [id=" + id + ", summary=" + summary + ", startDate=" + startDate + ", endDate=" + endDate + "]";
+        return "Event [id=" + getId() + ", summary=" + getSummary() + ", startDate=" + getStartDate() + ", endDate=" + getEndDate() + "]";
     }
 
     @Override

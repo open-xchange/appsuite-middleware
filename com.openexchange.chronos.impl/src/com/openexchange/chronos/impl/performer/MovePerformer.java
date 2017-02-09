@@ -305,9 +305,13 @@ public class MovePerformer extends AbstractUpdatePerformer {
 
     private void updateAttendeeAlarms(Event originalEvent, List<Alarm> originalAlarms, int userId, int folderId) throws OXException {
         if (null != originalAlarms && 0 < originalAlarms.size()) {
-            Event eventData = originalEvent.clone();
-            eventData.setFolderId(folderId);
-            storage.getAlarmStorage().updateAlarms(eventData, userId, originalAlarms);
+            int oldFolderId = originalEvent.getFolderId();
+            try {
+                originalEvent.setFolderId(folderId);
+                storage.getAlarmStorage().updateAlarms(originalEvent, userId, originalAlarms);
+            } finally {
+                originalEvent.setFolderId(oldFolderId);
+            }
         }
     }
 

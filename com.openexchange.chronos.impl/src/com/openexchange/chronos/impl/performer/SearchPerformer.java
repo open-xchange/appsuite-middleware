@@ -75,6 +75,7 @@ import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.impl.Check;
+import com.openexchange.chronos.impl.EventMapper;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.SearchFilter;
@@ -144,7 +145,9 @@ public class SearchPerformer extends AbstractQueryPerformer {
                     events.addAll(postProcess(Collections.singletonList(event), foldersForEvent.get(0), false));
                 } else {
                     for (UserizedFolder folder : foldersForEvent) {
-                        events.addAll(postProcess(Collections.singletonList(event.clone()), folder, false));
+                        Event clonedEvent = new Event();
+                        EventMapper.getInstance().copy(event, clonedEvent, EventField.values());
+                        events.addAll(postProcess(Collections.singletonList(clonedEvent), folder, false));
                     }
                 }
             }

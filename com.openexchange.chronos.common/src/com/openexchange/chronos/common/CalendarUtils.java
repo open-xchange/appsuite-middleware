@@ -60,9 +60,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
 import java.util.TimeZone;
-import java.util.concurrent.TimeUnit;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUser;
@@ -70,6 +68,7 @@ import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Period;
+import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.exception.OXException;
@@ -87,6 +86,72 @@ import com.openexchange.search.internal.operands.ConstantOperand;
  * @since v7.10.0
  */
 public class CalendarUtils {
+
+    /**
+     * Gets a value indicating whether a recurrence id's value matches a specific timestamp value.
+     *
+     * @param recurrenceId The recurrence identifier to check
+     * @param value The value to check
+     * @return <code>true</code> if the recurrence id's value matches the timestamp value, <code>false</code>, otherwise
+     */
+    public static boolean matches(RecurrenceId recurrenceId, long value) {
+        return null != recurrenceId && recurrenceId.getValue() == value;
+    }
+
+    /**
+     * Looks up a specific recurrence identifier in a collection based on its timestamp value.
+     *
+     * @param recurrenceIds The recurrence id's to search
+     * @param value The timestamp value to lookup
+     * @return The matching recurrence identifier, or <code>null</code> if not found
+     * @see CalendarUtils#matches(RecurrenceId, long)
+     */
+    public static RecurrenceId find(Collection<RecurrenceId> recurrenceIds, long value) {
+        if (null != recurrenceIds && 0 < recurrenceIds.size()) {
+            for (RecurrenceId recurrenceId : recurrenceIds) {
+                if (matches(recurrenceId, value)) {
+                    return recurrenceId;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Gets a value indicating whether a recurrence id with a specific timestamp value is present in a collection of recurrence
+     * identifiers, utilizing the {@link CalendarUtils#matches(RecurrenceId, long) routine.
+     *
+     * @param recurrenceIds The recurrence id's to search
+     * @param value The timestamp value to lookup
+     * @return <code>true</code> if a matching recurrence identifier is contained in the collection, <code>false</code>, otherwise
+     * @see CalendarUtils#matches(RecurrenceId, long)
+     */
+    public static boolean contains(Collection<RecurrenceId> recurrendeIds, long value) {
+        return null != find(recurrendeIds, value);
+    }
+
+    /**
+     * Gets a value indicating whether a specific recurrence id is present in a collection of recurrence identifiers, based on its value.
+     *
+     * @param recurrenceIds The recurrence id's to search
+     * @param recurrenceId The recurrence id to lookup
+     * @return <code>true</code> if a matching recurrence identifier is contained in the collection, <code>false</code>, otherwise
+     * @see CalendarUtils#matches(RecurrenceId, long)
+     */
+    public static boolean contains1(Collection<RecurrenceId> recurrendeIds, RecurrenceId recurrenceId) {
+        return null != find(recurrendeIds, recurrenceId.getValue());
+    }
+
+    public static boolean contains(Collection<Date> exceptionDates, RecurrenceId recurrenceId) {
+        if (null != exceptionDates && 0 < exceptionDates.size()) {
+            for (Date exceptionDate : exceptionDates) {
+                if (exceptionDate.getTime() == recurrenceId.getValue()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
     /**
      * Looks up a specific internal attendee in a collection of attendees, utilizing the
@@ -523,7 +588,6 @@ public class CalendarUtils {
      */
     public static boolean isFloating(Event event) {
         // - floating events that are not "all-day"?
-        // - non floating all-day events?
         // - better rely on null == event.getStartTimeZone()?
         return event.isAllDay();
     }
@@ -607,54 +671,6 @@ public class CalendarUtils {
      */
     public static <E extends Enum<?>> SingleSearchTerm getSearchTerm(E field, SingleOperation operation) {
         return new SingleSearchTerm(operation).addOperand(new ColumnFieldOperand<E>(field));
-    }
-
-    /**
-     * Parses a trigger duration string.
-     *
-     * @param duration The duration to parse
-     * @return The total milliseconds of the parsed duration
-     * @see <a href="https://tools.ietf.org/html/rfc5545#section-3.3.6">RFC 5545, section 3.3.6</a>
-     */
-    public static long getTriggerDuration(String duration) {
-        long totalMillis = 0;
-        boolean negative = false;
-        String token = null;
-        String previousToken = null;
-        StringTokenizer tokenizer = new StringTokenizer(duration.toUpperCase(), "+-PWDTHMS", true);
-        while (tokenizer.hasMoreTokens()) {
-            token = tokenizer.nextToken();
-            switch (token) {
-                case "+":
-                    negative = false;
-                    break;
-                case "-":
-                    negative = true;
-                    break;
-                case "W":
-                    totalMillis += TimeUnit.DAYS.toMillis(7 * Long.parseLong(previousToken));
-                    break;
-                case "D":
-                    totalMillis += TimeUnit.DAYS.toMillis(Long.parseLong(previousToken));
-                    break;
-                case "H":
-                    totalMillis += TimeUnit.HOURS.toMillis(Long.parseLong(previousToken));
-                    break;
-                case "M":
-                    totalMillis += TimeUnit.MINUTES.toMillis(Long.parseLong(previousToken));
-                    break;
-                case "S":
-                    totalMillis += TimeUnit.SECONDS.toMillis(Long.parseLong(previousToken));
-                    break;
-                case "T":
-                case "P":
-                default:
-                    // skip
-                    break;
-            }
-            previousToken = token;
-        }
-        return negative ? -1 * totalMillis : totalMillis;
     }
 
     /**

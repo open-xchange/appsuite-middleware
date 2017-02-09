@@ -733,24 +733,4 @@ public abstract class DelegatingEvent extends Event {
         return delegate.containsTimeZone();
     }
 
-    @Override
-    public String toString() {
-        return delegate.toString();
-    }
-
-    @Override
-    public Event clone() {
-        return delegate.clone();
-    }
-
-    @Override
-    public int hashCode() {
-        return delegate.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return delegate.equals(obj);
-    }
-
 }

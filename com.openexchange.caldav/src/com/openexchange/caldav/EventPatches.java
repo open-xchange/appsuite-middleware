@@ -343,7 +343,7 @@ public class EventPatches {
             } else {
                 for (Event importedChangeException : importedChangeExceptions) {
                     RecurrenceId recurrenceId = importedChangeException.getRecurrenceId();
-                    if (null != recurrenceId && false == CalendarUtils.contains(changeExceptionDates, recurrenceId.getValue())) {
+                    if (null != recurrenceId && false == CalendarUtils.contains(changeExceptionDates, recurrenceId)) {
                         newChangeExceptions.add(importedChangeException);
                     }
                 }

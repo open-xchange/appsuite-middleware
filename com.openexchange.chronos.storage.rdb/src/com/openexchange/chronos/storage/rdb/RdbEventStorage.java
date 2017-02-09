@@ -689,7 +689,11 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
                 eventData.setRecurrenceRule(absoluteDuration + "~" + seriesPattern.getDatabasePattern());
             }
             /*
+<<<<<<< Updated upstream
              * transform recurrence ids to legacy "recurrence date positions" (UTC dates with truncated time fraction)
+=======
+             * transform recurrence id to legacy "recurrence position" (wrapped in stored recurrence id container)
+>>>>>>> Stashed changes
              */
             if (eventData.containsRecurrenceId() && null != eventData.getRecurrenceId()) {
                 int recurrencePosition = Event2Appointment.getRecurrencePosition(recurrenceData, eventData.getRecurrenceId());

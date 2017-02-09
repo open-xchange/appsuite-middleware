@@ -110,4 +110,8 @@
     
     <logger name="com.openexchange.file.storage.dropbox" level="DEBUG" />
 
+    <logger name="com.openexchange.chronos" level="ALL"/>
+    <logger name="com.openexchange.webdav" level="ALL"/>
+    <logger name="com.openexchange.drive" level="ALL"/>
+    
 </configuration>

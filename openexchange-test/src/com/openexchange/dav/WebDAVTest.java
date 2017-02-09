@@ -115,7 +115,7 @@ import com.openexchange.oauth.provider.rmi.client.ClientDto;
  */
 public abstract class WebDAVTest extends AbstractAJAXSession {
 
-    private static final boolean AUTODISCOVER_AUTH = false;
+    private static final boolean AUTODISCOVER_AUTH = true;
 
     protected static final int TIMEOUT = 10000;
 
@@ -206,6 +206,7 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
 
     // --- END: Optional OAuth Configuration --------------------------------------------------------------------------------
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();

@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.impl.performer;
 
+import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.filter;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.findAttachment;
@@ -170,10 +171,10 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
 
     private void updateEvent(Event originalEvent, Event updatedEvent, RecurrenceId recurrenceID) throws OXException {
         if (isSeriesMaster(originalEvent)) {
-            if (null != originalEvent.getDeleteExceptionDates() && originalEvent.getDeleteExceptionDates().contains(new Date(recurrenceID.getValue()))) {
+            if (contains(originalEvent.getDeleteExceptionDates(), recurrenceID)) {
                 throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(I(originalEvent.getSeriesId()), recurrenceID);
             }
-            if (null != originalEvent.getChangeExceptionDates() && originalEvent.getChangeExceptionDates().contains(new Date(recurrenceID.getValue()))) {
+            if (contains(originalEvent.getChangeExceptionDates(), recurrenceID)) {
                 /*
                  * update for existing change exception
                  */

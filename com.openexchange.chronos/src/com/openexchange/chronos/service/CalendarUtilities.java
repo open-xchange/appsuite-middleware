@@ -81,7 +81,7 @@ public interface CalendarUtilities {
      * @param event The event being stored
      * @return <code>true</code> if incorrect strings have been successfully replaced, <code>false</code>, otherwise
      */
-    public boolean handleIncorrectString(OXException e, Event event);
+    boolean handleIncorrectString(OXException e, Event event);
 
     /**
      * Handles a possible {@link CalendarExceptionCodes#DATA_TRUNCATION} exception that occurred when attempting to store the event data
@@ -91,6 +91,6 @@ public interface CalendarUtilities {
      * @param event The event being stored
      * @return <code>true</code> if truncated values were trimmed successfully, <code>false</code>, otherwise
      */
-    public boolean handleDataTruncation(OXException e, Event event);
+    boolean handleDataTruncation(OXException e, Event event);
 
 }

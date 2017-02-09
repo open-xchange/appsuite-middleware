@@ -51,9 +51,12 @@ package com.openexchange.chronos.compat;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
@@ -296,6 +299,36 @@ public class Appointment2Event {
                 throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create("legacy recurrence date position " + recurrenceDatePosition.getTime(), recurrenceData.getRecurrenceRule());
             }
             recurrenceIDs.add(recurrenceID);
+        }
+        return recurrenceIDs;
+    }
+
+    public static SortedSet<RecurrenceId> getRecurrenceIDs1(RecurrenceData recurrenceData, Collection<Date> recurrenceDatePositions) throws OXException {
+        if (null == recurrenceDatePositions) {
+            return null;
+        }
+        if (1 < recurrenceDatePositions.size()) {
+            List<Date> dateList = new ArrayList<Date>(recurrenceDatePositions);
+            Collections.sort(dateList);
+            recurrenceDatePositions = dateList;
+        }
+        SortedSet<RecurrenceId> recurrenceIDs = new TreeSet<RecurrenceId>();
+        RecurrenceRuleIterator iterator = Recurrence.getRecurrenceIterator(recurrenceData, true);
+        int recurrencePosition = 0;
+        nextPosition: for (Date recurrenceDatePosition : recurrenceDatePositions) {
+            while (iterator.hasNext()) {
+                long nextMillis = iterator.nextMillis();
+                recurrencePosition++;
+                long nextDatePosition = CalendarUtils.truncateTime(CalendarUtils.initCalendar(TimeZones.UTC, nextMillis)).getTimeInMillis();
+                if (recurrenceDatePosition.getTime() == nextDatePosition) {
+                    recurrenceIDs.add(new PositionAwareRecurrenceId(recurrenceData, nextMillis, recurrencePosition, recurrenceDatePosition));
+                    continue nextPosition;
+                }
+                if (nextDatePosition > recurrenceDatePosition.getTime()) {
+                    break;
+                }
+            }
+            throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create("legacy recurrence date position " + recurrenceDatePosition.getTime(), recurrenceData.getRecurrenceRule());
         }
         return recurrenceIDs;
     }

@@ -3,6 +3,77 @@ title: Calendar v2 aka Chronos
 ---
 
 
+# Workflows
+
+## Create Event
+
+1. Get & check target folder
+
+    - folder must exist
+    - user must be able to access the folder
+    - folder must be of module "calendar"
+    - user must have "create objects" permissions
+
+2. Prepare event data
+
+    1. Prepare basic data
+       - apply next object identifier
+       - take over common public folder identifier if folder is of type "public"   
+       - init sequence with 0
+       - if no UID is set by client, apply random UID
+       - if UID is set by client, check for uniqueness in context
+       - set "created by" to current calendar user, creation date to "now"
+       - set "modified by" to current calendar user, last modified date to "now"
+       - if no organizer is set by client, set organizer to current calender user
+    
+
+
+
+ (a) Prepare basic data
+   - apply next object identifier
+   - take over common public folder identifier if folder is of type "public"   
+   - init sequence with 0
+   - if no UID is set by client, apply random UID
+   - if UID is set by client, check for uniqueness in context
+   - set "created by" to current calendar user, creation date to "now"
+   - set "modified by" to current calendar user, last modified date to "now"
+   - if no organizer is set by client, set organizer to current calender user
+   
+ (b) Prepare organizer data
+   - if organizer is set by client, try and resolve to an internal entity
+   - if "internal" organizer is set by client, check that it matches the calendar user
+   - if "external" organizer is set by client, take over as-is
+   - if session user != calendar user, take over session user in "sent-by" attribute
+   
+ (c) Prepare date/time data
+   - check start- and enddate are specified, and start date is not after end date
+   - if event is marked as "all-day", truncate the time fractions from start- and end-date (in UTC)
+   - if event is marked as "all-day", and the truncated start- and endtime are equal, add one day to enddate
+   - take over start/end timezone if set
+   - if no timezone set, fallback to calendar user's configured timezone
+
+ (d) Prepare further data
+   - if classification is specified, check that it is allowed in target folder
+     (in "public" calendar folders, the classification may only by "PUBLIC")
+   - if no classification is specified, assume a PUBLIC classification
+   - take over event status if set, otherwise fall back to "confirmed"
+   - take over color if set
+   
+ (e) Prepare recurrence related data
+   - if a recurrence rule is set, check it for validity
+   - if a recurrence rule is set, take over event object identifier as series id
+   - if delete exception dates are set, take them over after checking they are valid
+   
+ (f) Prepare further data
+   - take over summary, location, description, categories, filename if set
+
+4. Prepare attendee data
+
+5. Check for conflicts
+
+6.
+
+
 # Details
 
 This section provides some deeper insights for certain topics.
