@@ -80,6 +80,7 @@ import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.CreateResultImpl;
 import com.openexchange.chronos.impl.EventMapper;
 import com.openexchange.chronos.impl.UpdateResultImpl;
+import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
@@ -286,7 +287,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
         if (PublicType.getInstance().equals(folder.getType())) {
             throw CalendarExceptionCodes.FORBIDDEN_ATTENDEE_CHANGE.create(I(originalEvent.getId()), originalAttendee, AttendeeField.FOLDER_ID);
         }
-        UserizedFolder targetFolder = getFolder(updatedFolderID);
+        UserizedFolder targetFolder = Utils.getFolder(session, updatedFolderID);
         if (folder.getCreatedBy() != targetFolder.getCreatedBy()) {
             throw CalendarExceptionCodes.FORBIDDEN_ATTENDEE_CHANGE.create(I(originalEvent.getId()), originalAttendee, AttendeeField.FOLDER_ID);
         }

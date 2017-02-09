@@ -65,6 +65,8 @@ public class CalendarExceptionMessages implements LocalizableStrings {
 
     public static final String NO_PERMISSION_MSG = "The operation could not be completed due to insufficient permissions.";
 
+    public static final String MISSING_CAPABILITY_MSG = "The operation could not be completed due to missing capabilities.";
+
     public static final String UNSUPPORTED_FOLDER_MSG = "The supplied folder is not supported. Please select a valid folder and try again.";
 
     public static final String CONCURRENT_MODIFICATION_MSG = "The operation could not be completed due to a concurrent modification. Please reload the data and try again.";
@@ -84,6 +86,8 @@ public class CalendarExceptionMessages implements LocalizableStrings {
     public static final String UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE_MSG = "Occurrences of event series must not be classified differently.";
 
     public static final String INVALID_RRULE_MSG = "The supplied recurrence rule is invalid. Please correct the rule and try again.";
+
+    public static final String INVALID_TIMEZONE_MSG = "The supplied timezone is invalid. Please select a valid timezone and try again.";
 
     public static final String UNSUPPORTED_RRULE_MSG = "The supplied recurrence rule is not supported. Please use adjust the rule and try again.";
 

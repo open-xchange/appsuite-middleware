@@ -77,12 +77,9 @@ import com.openexchange.chronos.impl.DeleteResultImpl;
 import com.openexchange.chronos.impl.EventMapper;
 import com.openexchange.chronos.impl.UpdateResultImpl;
 import com.openexchange.chronos.impl.Utils;
-import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.ldap.User;
 
@@ -376,10 +373,6 @@ public abstract class AbstractUpdatePerformer {
         exception = Utils.loadAdditionalEventData(storage, calendarUser.getId(), exception, EventField.values());
         exception.setFolderId(i(folder));
         return exception;
-    }
-
-    protected UserizedFolder getFolder(int folderID) throws OXException {
-        return Services.getService(FolderService.class).getFolder(FolderStorage.REAL_TREE_ID, String.valueOf(folderID), session.getSession(), null);
     }
 
     /**

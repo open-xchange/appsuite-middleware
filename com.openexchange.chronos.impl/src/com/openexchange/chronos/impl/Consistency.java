@@ -51,13 +51,12 @@ package com.openexchange.chronos.impl;
 
 import java.util.Calendar;
 import java.util.Date;
-import java.util.TimeZone;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.util.TimeZones;
 
 /**
  * {@link CalendarService}
@@ -73,19 +72,11 @@ public class Consistency {
      * @param event The event to set the timezones in
      * @param user The user to get the fallback timezone from
      */
-    public static void setTimeZone(Event event, User user) {
+    public static void setTimeZone(Event event, User user) throws OXException {
         String startTimezone = event.getStartTimeZone();
-        if (null == startTimezone) {
-            event.setStartTimeZone(user.getTimeZone());
-        } else {
-            //TODO: validate timezone?
-        }
+        event.setStartTimeZone(null == startTimezone ? user.getTimeZone() : Check.timeZoneExists(startTimezone));
         String endTimezone = event.getEndTimeZone();
-        if (null == endTimezone) {
-            event.setEndTimeZone(event.getStartTimeZone());
-        } else {
-            //TODO: validate timezone?
-        }
+        event.setEndTimeZone(null == endTimezone ? event.getStartTimeZone() : Check.timeZoneExists(endTimezone));
     }
 
     /**
@@ -96,18 +87,17 @@ public class Consistency {
      * @param event The event to adjust
      */
     public static void adjustAllDayDates(Event event) {
-        //TODO: non-floating all-day events (with timezone specified?)
         if (event.isAllDay()) {
             if (event.containsStartDate() && null != event.getStartDate()) {
-                Date truncatedDate = CalendarUtils.truncateTime(event.getStartDate(), TimeZone.getTimeZone("UTC"));
+                Date truncatedDate = CalendarUtils.truncateTime(event.getStartDate(), TimeZones.UTC);
                 if (false == truncatedDate.equals(event.getStartDate())) {
                     event.setStartDate(truncatedDate);
                 }
             }
             if (event.containsEndDate() && null != event.getEndDate()) {
-                Date truncatedDate = CalendarUtils.truncateTime(event.getEndDate(), TimeZone.getTimeZone("UTC"));
+                Date truncatedDate = CalendarUtils.truncateTime(event.getEndDate(), TimeZones.UTC);
                 if (truncatedDate.equals(event.getStartDate())) {
-                    Calendar calendar = CalendarUtils.initCalendar(TimeZone.getTimeZone("UTC"), truncatedDate);
+                    Calendar calendar = CalendarUtils.initCalendar(TimeZones.UTC, truncatedDate);
                     calendar.add(Calendar.DAY_OF_YEAR, 1);
                     truncatedDate = calendar.getTime();
                 }
@@ -126,93 +116,6 @@ public class Consistency {
     public static void setCreated(Date created, Event event, int createdBy) {
         event.setCreated(created);
         event.setCreatedBy(createdBy);
-    }
-
-    public static void setModifiedNow(Event event, int modifiedBy) {
-        setModified(new Date(), event, modifiedBy);
-    }
-
-    public static void setCreatedNow(Event event, int createdBy) {
-        setCreated(new Date(), event, createdBy);
-    }
-
-    public static Event prepareEventUpdate(Event originalEvent, Event updatedEvent) throws OXException {
-        Event eventUpdate = EventMapper.getInstance().getDifferences(originalEvent, updatedEvent);
-        for (EventField field : EventMapper.getInstance().getAssignedFields(eventUpdate)) {
-            switch (field) {
-                case ALL_DAY:
-                    /*
-                     * adjust start- and enddate, too, if required
-                     */
-                    EventMapper.getInstance().copyIfNotSet(originalEvent, eventUpdate, EventField.START_DATE, EventField.END_DATE);
-                    Consistency.adjustAllDayDates(eventUpdate);
-                    break;
-                case RECURRENCE_RULE:
-                    /*
-                     * deny update for change exceptions
-                     */
-                    if (CalendarUtils.isSeriesException(originalEvent)) {
-                        throw OXException.general("not allowed change");
-                    }
-                    /*
-                     * ensure all necessary recurrence related data is present in passed event update
-                     */
-                    EventMapper.getInstance().copyIfNotSet(originalEvent, eventUpdate, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY);
-                    /*
-                     * assign recurrence id when transforming a single event to a series
-                     */
-                    if (0 >= originalEvent.getSeriesId()) {
-                        eventUpdate.setSeriesId(originalEvent.getId());
-                    }
-                    break;
-                case START_DATE:
-                    /*
-                     * verify start date
-                     */
-                    if (null == eventUpdate.getStartDate()) {
-                        throw OXException.general("start date is required");
-                    }
-                    if (eventUpdate.containsEndDate() && null != eventUpdate.getEndDate()) {
-                        if (eventUpdate.getEndDate().before(eventUpdate.getStartDate())) {
-                            throw OXException.general("start date after end date");
-                        }
-                    } else if (null != originalEvent.getEndDate() && originalEvent.getEndDate().before(eventUpdate.getStartDate())) {
-                        throw OXException.general("start date after end date");
-                    }
-                    break;
-                case END_DATE:
-                    /*
-                     * verify end date
-                     */
-                    if (null == eventUpdate.getEndDate()) {
-                        if (eventUpdate.containsStartDate() && null != eventUpdate.getStartDate()) {
-                            eventUpdate.setEndDate(eventUpdate.getStartDate());
-                        } else {
-                            eventUpdate.setEndDate(originalEvent.getStartDate());
-                        }
-                    } else {
-                        if (eventUpdate.containsStartDate() && null != eventUpdate.getStartDate()) {
-                            if (eventUpdate.getStartDate().after(eventUpdate.getEndDate())) {
-                                throw OXException.general("end date before start date");
-                            }
-                        } else if (null != originalEvent.getStartDate() && originalEvent.getStartDate().after(eventUpdate.getEndDate())) {
-                            throw OXException.general("end date before start date");
-                        }
-                    }
-                    break;
-                case UID:
-                case CREATED:
-                case CREATED_BY:
-                case SEQUENCE:
-                case SERIES_ID:
-                case PUBLIC_FOLDER_ID:
-                    throw OXException.general("not allowed change");
-                default:
-                    break;
-            }
-        }
-        EventMapper.getInstance().copy(originalEvent, eventUpdate, EventField.ID);
-        return eventUpdate;
     }
 
     private Consistency() {

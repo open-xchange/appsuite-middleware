@@ -80,6 +80,7 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.compat.ShownAsTransparency;
+import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.EventMapper;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
@@ -133,6 +134,7 @@ public class FreeBusyPerformer extends AbstractQueryPerformer {
         /*
          * prepare & filter internal attendees for lookup
          */
+        Check.hasFreeBusy(session.getSession());
         attendees = session.getEntityResolver().prepare(attendees);
         attendees = filter(attendees, Boolean.TRUE, CalendarUserType.INDIVIDUAL, CalendarUserType.RESOURCE, CalendarUserType.GROUP);
         if (0 == attendees.size()) {

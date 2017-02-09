@@ -64,6 +64,7 @@ import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.Trigger;
+import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
@@ -223,12 +224,8 @@ public class Appointment2Event {
      * @return The alarm
      */
     public static Alarm getAlarm(int reminder) {
-        Alarm alarm = new Alarm();
-        alarm.setAction(AlarmAction.DISPLAY);
+        Alarm alarm = new Alarm(new Trigger(AlarmUtils.getDuration(true, 0, 0, 0, reminder, 0)), AlarmAction.DISPLAY);
         alarm.setDescription("Reminder");
-        Trigger trigger = new Trigger();
-        trigger.setDuration("-PT" + reminder + 'M');
-        alarm.setTrigger(trigger);
         return alarm;
     }
 

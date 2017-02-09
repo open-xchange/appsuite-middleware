@@ -53,6 +53,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarConfig;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -100,7 +101,7 @@ public class DefaultCalendarSession implements CalendarSession {
         super();
         this.calendarService = calendarService;
         this.parameters = new HashMap<String, Object>();
-        this.session = ServerSessionAdapter.valueOf(session);
+        this.session = Check.hasCalendar(ServerSessionAdapter.valueOf(session));
         this.entityResolver = new DefaultEntityResolver(this.session, Services.getServiceLookup());
         RequestContext requestContext = RequestContextHolder.get();
         this.hostData = null != requestContext ? requestContext.getHostData() : null;

@@ -724,4 +724,29 @@ public class CalendarUtils {
         return Collections.emptyList();
     }
 
+    /**
+     * Optionally gets the Java timezone for a given identifier.
+     *
+     * @param id The timezone identifier
+     * @return The matching Java timezone, or <code>null</code> if not found
+     */
+    public static TimeZone optTimeZone(String id) {
+        return optTimeZone(id, null);
+    }
+
+    /**
+     * Optionally gets the Java timezone for a given identifier.
+     *
+     * @param id The timezone identifier
+     * @param fallback The fallback timezone to return if no matching timezone was found
+     * @return The matching Java timezone, or the fallback if not found
+     */
+    public static TimeZone optTimeZone(String id, TimeZone fallback) {
+        TimeZone timeZone = TimeZone.getTimeZone(id);
+        if ("GMT".equals(timeZone.getID()) && false == "GMT".equalsIgnoreCase(id)) {
+            return fallback;
+        }
+        return timeZone;
+    }
+
 }

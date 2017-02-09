@@ -58,7 +58,9 @@ import static com.openexchange.chronos.exception.CalendarExceptionMessages.EVENT
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INCORRECT_STRING_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVALID_CALENDAR_USER_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVALID_RRULE_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVALID_TIMEZONE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.MANDATORY_FIELD_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.MISSING_CAPABILITY_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.MOVE_OCCURRENCE_NOT_SUPPORTED_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.MOVE_SERIES_NOT_SUPPORTED_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.NO_PERMISSION_MSG;
@@ -145,6 +147,11 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      */
     FORBIDDEN_CHANGE("Forbidden change [id %1$d, field %2$s]", NO_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 4035),
     /**
+     * <li>The operation could not be completed due to insufficient capabilities.</li>
+     * <li>Missing capability [%1$s]</li>
+     */
+    MISSING_CAPABILITY("Missing capability [%1$s]", MISSING_CAPABILITY_MSG, Category.CATEGORY_PERMISSION_DENIED, 4036),
+    /**
      * <li>The supplied folder is not supported. Please select a valid folder and try again.</li>
      * <li>Unsupported folder [id %1$s, content type %2$s]</li>
      */
@@ -185,10 +192,10 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      */
     UNSUPPORTED_CLASSIFICATION("Unsupported classification [classification %1$s, folder %2$d, type %3$s]", UNSUPPORTED_CLASSIFICATION_MSG, Category.CATEGORY_USER_INPUT, 4222),
     /**
-     * <li>The supplied recurrence rule is invalid. Please correct the rule and try again.</li>
-     * <li>Invalid recurrence rule [rule %1$s]</li>
+     * <li>The supplied recurrence rule is not supported. Please use adjust the rule and try again.</li>
+     * <li>Unsupported recurrence rule [rule %1$s, part %2$s, error %3$s]</li>
      */
-    INVALID_RRULE("Invalid recurrence rule [rule %1$s]", INVALID_RRULE_MSG, Category.CATEGORY_USER_INPUT, 4223),
+    UNSUPPORTED_RRULE("Unsupported recurrence rule [rule %1$s, part %2$s, error %3$s]", UNSUPPORTED_RRULE_MSG, Category.CATEGORY_USER_INPUT, 4223),
     /**
      * <li>Moving an event series into another folder is not supported.</li>
      * <li>Unsupported series move [id %1$d, folder %2$d, target folder %3$d]</li>
@@ -205,20 +212,20 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      */
     UNSUPPORTED_CLASSIFICATION_FOR_MOVE("Unsupported classification for move [classification %1$s, folder %2$d, type %3$s, target folder %4$d, target type %5$s]", UNSUPPORTED_CLASSIFICATION_FOR_MOVE_MSG, Category.CATEGORY_USER_INPUT, 4226),
     /**
-     * <li>The character \"%1$s\" in field \"%2$s\" can't be saved. Please remove the problematic character and try again.</li>
-     * <li>Incorrect string [string %1$s, field %2$s, column %3$s]</li>
-     */
-    INCORRECT_STRING("Incorrect string [string %1$s, field %2$s, column %3$s]", INCORRECT_STRING_MSG, Category.CATEGORY_USER_INPUT, 4227),
-    /**
      * <li>Occurrences of event series must not be classified differently.</li>
      * <li>Unsupported classification for occurrence [classification %1$s, series id %2$d, recurrence id %3$s]</li>
      */
-    UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE("Unsupported classification for occurrence [classification %1$s, series id %2$d, recurrence id %3$s]", UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE_MSG, Category.CATEGORY_USER_INPUT, 4228),
+    UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE("Unsupported classification for occurrence [classification %1$s, series id %2$d, recurrence id %3$s]", UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE_MSG, Category.CATEGORY_USER_INPUT, 4227),
     /**
-     * <li>The supplied recurrence rule is not supported. Please use adjust the rule and try again.</li>
-     * <li>Unsupported recurrence rule [rule %1$s, part %2$s, error %3$s]</li>
+     * <li>The supplied timezone is invalid. Please select a valid timezone and try again.</li>
+     * <li>Invalid timezone [timezone id %1$s]</li>
      */
-    UNSUPPORTED_RRULE("Unsupported recurrence rule [rule %1$s, part %2$s, error %3$s]", UNSUPPORTED_RRULE_MSG, Category.CATEGORY_USER_INPUT, 4229),
+    INVALID_TIMEZONE("Invalid timezone [timezone id %1$s]", INVALID_TIMEZONE_MSG, Category.CATEGORY_USER_INPUT, 4001),
+    /**
+     * <li>The supplied recurrence rule is invalid. Please correct the rule and try again.</li>
+     * <li>Invalid recurrence rule [rule %1$s]</li>
+     */
+    INVALID_RRULE("Invalid recurrence rule [rule %1$s]", INVALID_RRULE_MSG, Category.CATEGORY_USER_INPUT, 4002),
     /**
      * <li>Error while reading/writing data from/to the database.</li>
      * <li>Unexpected database error [%1$s]</li>
@@ -229,6 +236,11 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * <li>Data truncation [field %1$s, limit %2$d, current %3$d]</li>
      */
     DATA_TRUNCATION("Data truncation [field %1$s, limit %2$d, current %3$d]", DATA_TRUNCATION_MSG, Category.CATEGORY_TRUNCATED, 5070),
+    /**
+     * <li>The character \"%1$s\" in field \"%2$s\" can't be saved. Please remove the problematic character and try again.</li>
+     * <li>Incorrect string [string %1$s, field %2$s, column %3$s]</li>
+     */
+    INCORRECT_STRING("Incorrect string [string %1$s, field %2$s, column %3$s]", INCORRECT_STRING_MSG, Category.CATEGORY_USER_INPUT, 5071),
 
     ;
 

@@ -510,7 +510,7 @@ public class EventResource extends DAVObjectResource<Event> {
     private Boolean handleOnUpdate(CalDAVImport caldavImport, OXException e) {
         try {
             switch (e.getErrorCode()) {
-                case "CAL-4227": // Incorrect string [string %1$s, field %2$s, column %3$s]
+                case "CAL-5071": // Incorrect string [string %1$s, field %2$s, column %3$s]
                     return handleIncorrectString(caldavImport, e);
                 case "CAL-5070": // Data truncation [field %1$s, limit %2$d, current %3$d]
                     return handleDataTruncation(caldavImport, e);
@@ -534,7 +534,7 @@ public class EventResource extends DAVObjectResource<Event> {
             switch (e.getErrorCode()) {
                 case "CAL-4090": // UID conflict [uid %1$s, conflicting id %2$d]
                     return handleUIDConflict(caldavImport, e);
-                case "CAL-4227": // Incorrect string [string %1$s, field %2$s, column %3$s]
+                case "CAL-5071": // Incorrect string [string %1$s, field %2$s, column %3$s]
                     return handleIncorrectString(caldavImport, e);
                 case "CAL-5070": // Data truncation [field %1$s, limit %2$d, current %3$d]
                     return handleDataTruncation(caldavImport, e);

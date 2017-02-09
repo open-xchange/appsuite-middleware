@@ -55,6 +55,7 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import java.util.List;
 import java.util.SortedSet;
+import java.util.TimeZone;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
@@ -77,6 +78,7 @@ import com.openexchange.folderstorage.database.contentType.CalendarContentType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.tools.mappings.Mapping;
 import com.openexchange.java.Strings;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link CalendarService}
@@ -85,6 +87,34 @@ import com.openexchange.java.Strings;
  * @since v7.10.0
  */
 public class Check {
+
+    /**
+     * Checks that the session's user has permissions for the <i>calendar</i> module.
+     *
+     * @param session The session to check
+     * @return The passed session, after the capability was checked
+     * @throws OXException {@link CalendarExceptionCodes#MISSING_CAPABILITY}
+     */
+    public static ServerSession hasCalendar(ServerSession session) throws OXException {
+        if (false == session.getUserConfiguration().hasCalendar()) {
+            throw CalendarExceptionCodes.MISSING_CAPABILITY.create(com.openexchange.groupware.userconfiguration.Permission.CALENDAR.getCapabilityName());
+        }
+        return session;
+    }
+
+    /**
+     * Checks that the session's user has permissions for the <i>calendar_freebusy</i> module.
+     *
+     * @param session The session to check
+     * @return The passed session, after the capability was checked
+     * @throws OXException {@link CalendarExceptionCodes#MISSING_CAPABILITY}
+     */
+    public static ServerSession hasFreeBusy(ServerSession session) throws OXException {
+        if (false == session.getUserConfiguration().hasFreeBusy()) {
+            throw CalendarExceptionCodes.MISSING_CAPABILITY.create("calendar_freebusy");
+        }
+        return session;
+    }
 
     /**
      * Checks that the required permissions are fulfilled in a specific userized folder.
@@ -353,6 +383,21 @@ public class Check {
             }
             throw conflictException;
         }
+    }
+
+    /**
+     * Checks that the supplied timezone identifier is valid, i.e. a corresponding timezone exists.
+     *
+     * @param timeZoneID The timezone identifier to check, or <code>null</code> to skip the check
+     * @return The identifier of the matching timezone
+     * @throws OXException {@link CalendarExceptionCodes#INVALID_TIMEZONE}
+     */
+    public static String timeZoneExists(String timeZoneID) throws OXException {
+        TimeZone timeZone = CalendarUtils.optTimeZone(timeZoneID, null);
+        if (null == timeZone) {
+            throw CalendarExceptionCodes.INVALID_TIMEZONE.create(timeZoneID);
+        }
+        return timeZone.getID();
     }
 
     /**

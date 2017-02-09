@@ -179,7 +179,7 @@ public class ConflictCheckPerformer extends AbstractQueryPerformer {
         /*
          * check against each event in period
          */
-        TimeZone eventTimeZone = isFloating(event) || null == event.getTimeZone() ? getTimeZone(session) : TimeZone.getTimeZone(event.getTimeZone());
+        TimeZone eventTimeZone = isFloating(event) || null == event.getStartTimeZone() ? getTimeZone(session) : TimeZone.getTimeZone(event.getStartTimeZone());
         List<EventConflict> conflicts = new ArrayList<EventConflict>();
         for (Event eventInPeriod : eventsInPeriod) {
             /*

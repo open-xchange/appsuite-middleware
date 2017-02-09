@@ -703,6 +703,23 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                         throw CalendarExceptionCodes.UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE.create(String.valueOf(eventUpdate.getClassification()), I(originalEvent.getSeriesId()), String.valueOf(originalEvent.getRecurrenceId()));
                     }
                     break;
+                case START_TIMEZONE:
+                    /*
+                     * deny removal & check timezone validity
+                     */
+                    if (null == updatedEvent.getStartTimeZone()) {
+                        throw CalendarExceptionCodes.INVALID_TIMEZONE.create("");
+                    }
+                    updatedEvent.setStartTimeZone(Check.timeZoneExists(updatedEvent.getStartTimeZone()));
+                    break;
+                case END_TIMEZONE:
+                    /*
+                     * check timezone validity
+                     */
+                    if (null != updatedEvent.getEndTimeZone()) {
+                        updatedEvent.setEndTimeZone(Check.timeZoneExists(updatedEvent.getEndTimeZone()));
+                    }
+                    break;
                 case ALL_DAY:
                     /*
                      * adjust start- and enddate, too, if required
