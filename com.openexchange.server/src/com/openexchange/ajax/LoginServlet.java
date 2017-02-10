@@ -734,12 +734,12 @@ public class LoginServlet extends AJAXServlet {
         try {
             final String action = req.getParameter(PARAMETER_ACTION);
             final String subPath = getServletSpecificURI(req);
-            
+
             String serverName = req.getServerName();
-            if (action.equals("autologin") && null != serverName && !isAutologinActivated(serverName)) {
+            if ("autologin".equals(action) && null != serverName && !isAutologinActivated(serverName)) {
                 return;
-            } 
-            
+            }
+
             if (null != subPath && subPath.startsWith("/httpAuth")) {
                 handlerMap.get("/httpAuth").handleRequest(req, resp);
             } else {
@@ -754,15 +754,29 @@ public class LoginServlet extends AJAXServlet {
             LogProperties.removeProperties(LOG_PROPERTIES);
         }
     }
-    
+
+    private static final Capability CAPABILITY_AUTOLOGIN = new Capability("autologin");
+
+    /**
+     * Checks if auto-login is enabled for specified host name.
+     *
+     * @param hostName The host name to check for
+     * @return <code>true</code> if auto-login is enabled; otherwise <code>false</code>
+     * @throws OXException If server configuration cannot be obtained
+     */
     public static boolean isAutologinActivated(String hostName) throws OXException {
         ServerConfigService serverConfigService = ServerServiceRegistry.getInstance().getService(ServerConfigService.class);
         com.openexchange.serverconfig.ServerConfig serverConfig = serverConfigService.getServerConfig(hostName, -1, -1);
-        return serverConfig.getCapabilities().contains(new Capability("autologin"));
+        return serverConfig.getCapabilities().contains(CAPABILITY_AUTOLOGIN);
     }
 
     private void doJSONAuth(final HttpServletRequest req, final HttpServletResponse resp, final String action) throws IOException {
-        final LoginRequestHandler handler = handlerMap.get(action);
+        if (null == action) {
+            logAndSendException(resp, AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_ACTION));
+            return;
+        }
+
+        LoginRequestHandler handler = handlerMap.get(action);
         if (null == handler) {
             logAndSendException(resp, AjaxExceptionCodes.UNKNOWN_ACTION.create(action));
             return;

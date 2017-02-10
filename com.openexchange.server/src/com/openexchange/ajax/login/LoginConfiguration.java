@@ -49,16 +49,13 @@
 
 package com.openexchange.ajax.login;
 
-import java.util.List;
 import com.openexchange.capabilities.Capability;
-import com.openexchange.configuration.ClientWhitelist;
 import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.LogProperties;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.serverconfig.ServerConfig;
 import com.openexchange.serverconfig.ServerConfigService;
-import com.openexchange.sessiond.impl.IPRange;
 
 /**
  * Object to store the configuration parameters for the different login process mechanisms.
@@ -106,6 +103,14 @@ public final class LoginConfiguration {
         return uiWebPath;
     }
 
+    /**
+     * Checks if auto-login is enabled.
+     * <p>
+     * This routine tries to determine the host name associated with calling thread in order to check reliably using {@link #isSessiondAutoLogin(String)} method.
+     * If host name cannot be determined, global auto-login property is considered.
+     *
+     * @return <code>true</code> if auto-login is enabled; otherwise <code>false</code>
+     */
     public boolean isSessiondAutoLogin() {
         String hostname = LogProperties.getHostName();
         if (hostname != null) {
@@ -114,13 +119,19 @@ public final class LoginConfiguration {
         return sessiondAutoLogin;
     }
 
-    private static final Capability AUTO_LOGIN = new Capability("autologin");
+    private static final Capability CAPABILITY_AUTOLOGIN = new Capability("autologin");
 
-    public boolean isSessiondAutoLogin(String hostname) {
+    /**
+     * Checks if auto-login is enabled for given host name
+     *
+     * @param hostName The host name to check for
+     * @return <code>true</code> if auto-login is enabled; otherwise <code>false</code>
+     */
+    public boolean isSessiondAutoLogin(String hostName) {
         try {
             ServerConfigService configService = ServerServiceRegistry.getInstance().getService(ServerConfigService.class);
-            ServerConfig config = configService.getServerConfig(hostname, -1, -1);
-            return config.getCapabilities().contains(AUTO_LOGIN);
+            ServerConfig config = configService.getServerConfig(hostName, -1, -1);
+            return config.getCapabilities().contains(CAPABILITY_AUTOLOGIN);
         } catch (OXException e) {
             // fallback to default
         }
