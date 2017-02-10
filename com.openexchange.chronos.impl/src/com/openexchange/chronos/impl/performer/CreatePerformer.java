@@ -187,8 +187,7 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         /*
          * copy over further (unchecked) event fields
          */
-        EventMapper.getInstance().copy(eventData, event, EventField.SUMMARY, EventField.LOCATION, EventField.DESCRIPTION, EventField.CATEGORIES, EventField.FILENAME);
-        return event;
+        return EventMapper.getInstance().copy(eventData, event, EventField.SUMMARY, EventField.LOCATION, EventField.DESCRIPTION, EventField.CATEGORIES, EventField.FILENAME);
     }
 
     /**
@@ -212,7 +211,7 @@ public class CreatePerformer extends AbstractUpdatePerformer {
                 /*
                  * take over external organizer as-is
                  */
-                return organizer;
+                return session.getConfig().isSkipExternalAttendeeURIChecks() ? organizer : Check.requireValidEMail(organizer);
             }
         } else {
             /*

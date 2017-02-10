@@ -51,6 +51,9 @@ package com.openexchange.chronos.common;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
+import static org.slf4j.LoggerFactory.getLogger;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -61,6 +64,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import javax.mail.internet.idn.IDNA;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUser;
@@ -708,6 +712,44 @@ public class CalendarUtils {
             return fallback;
         }
         return timeZone;
+    }
+
+    /**
+     * Extracts an e-mail address from the supplied URI string. Decoding of sequences of escaped octets is performed implicitly, which
+     * includes decoding of percent-encoded scheme-specific parts. Additionally, any ASCII-encoded parts of the address string are decoded
+     * back to their unicode representation.
+     * <p/>
+     * Examples:<br/>
+     * <ul>
+     * <li>For input string <code>horst@xn--mller-kva.de</code>, the mail address <code>horst@m&uuml;ller.de</code> is extracted</li>
+     * <li>For input string <code>mailto:horst@m%C3%BCller.de</code>, the mail address <code>horst@m&uuml;ller</code> is extracted</li>
+     * </ul>
+     *
+     * @param value The URI address string to extract the e-mail address from
+     * @return The extracted e-mail address, or the value as-is if no further extraction/decoding was possible or necessary
+     */
+    public static String extractEMailAddress(String value) {
+        URI uri = null;
+        try {
+            uri = new URI(value);
+        } catch (URISyntaxException e) {
+            getLogger(CalendarUtils.class).debug("Error interpreting \"{}\" as URI, assuming \"mailto:\" protocol as fallback.", value, e);
+            try {
+                uri = new URI("mailto", value, null);
+            } catch (URISyntaxException e2) {
+                getLogger(CalendarUtils.class).debug("Error constructing \"mailto:\" URI for \"{}\", interpreting directly as fallback.", value, e2);
+            }
+        }
+        /*
+         * prefer scheme-specific part from "mailto:"-URI if possible
+         */
+        if (null != uri && "mailto".equalsIgnoreCase(uri.getScheme())) {
+            value = uri.getSchemeSpecificPart();
+        }
+        /*
+         * decode any punycoded names, too
+         */
+        return IDNA.toIDN(value);
     }
 
 }

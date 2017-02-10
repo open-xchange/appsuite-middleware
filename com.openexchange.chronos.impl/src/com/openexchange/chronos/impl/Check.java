@@ -56,7 +56,9 @@ import static com.openexchange.java.Autoboxing.L;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TimeZone;
+import javax.mail.internet.AddressException;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -78,6 +80,7 @@ import com.openexchange.folderstorage.database.contentType.CalendarContentType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.tools.mappings.Mapping;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -398,6 +401,28 @@ public class Check {
             throw CalendarExceptionCodes.INVALID_TIMEZONE.create(timeZoneID);
         }
         return timeZone.getID();
+    }
+
+    /**
+     * Checks that the supplied calendar user's URI denotes a valid e-mail address.
+     * <p/>
+     * This method should only be invoked for <i>external</i> calendar users.
+     *
+     * @param calendarUser The (external) calendar user to check
+     * @return The calendar user, after its URI has been checked for validity
+     * @throws OXException {@link CalendarExceptionCodes#INVALID_CALENDAR_USER}
+     */
+    public static <T extends CalendarUser> T requireValidEMail(T calendarUser) throws OXException {
+        String address = CalendarUtils.extractEMailAddress(calendarUser.getUri());
+        if (null == address) {
+            throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(calendarUser.getUri(), I(calendarUser.getEntity()), "");
+        }
+        try {
+            new QuotedInternetAddress(address);
+        } catch (AddressException e) {
+            throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(e, calendarUser.getUri(), I(calendarUser.getEntity()), "");
+        }
+        return calendarUser;
     }
 
     /**

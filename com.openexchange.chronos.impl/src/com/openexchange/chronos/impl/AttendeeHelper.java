@@ -63,6 +63,7 @@ import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.exception.OXException;
@@ -264,6 +265,9 @@ public class AttendeeHelper {
             Attendee attendee = new Attendee();
             AttendeeMapper.getInstance().copy(attendeeUpdate.getOriginal(), attendee, AttendeeField.ENTITY, AttendeeField.MEMBER, AttendeeField.CU_TYPE, AttendeeField.URI);
             AttendeeMapper.getInstance().copy(attendeeUpdate.getUpdate(), attendee, AttendeeField.RSVP, AttendeeField.COMMENT, AttendeeField.PARTSTAT, AttendeeField.ROLE);
+            if (false == CalendarUtils.isInternal(attendee) && false == session.getConfig().isSkipExternalAttendeeURIChecks()) {
+                attendee = Check.requireValidEMail(attendee);
+            }
             attendeesToUpdate.add(attendee);
         }
         /*
@@ -341,8 +345,7 @@ public class AttendeeHelper {
                 LOG.debug("Skipping duplicate external attendee {}", attendee);
                 continue;
             }
-            //TODO checks? resolve to internal? generate synthetic id?
-            attendees.add(attendee);
+            attendees.add(session.getConfig().isSkipExternalAttendeeURIChecks() ? attendee : Check.requireValidEMail(attendee));
         }
         return attendees;
     }

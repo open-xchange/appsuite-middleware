@@ -89,35 +89,16 @@ public class CalendarConfigImpl implements CalendarConfig {
         this.session = session;
     }
 
-    /**
-     * Gets a value indicating whether newly added group attendees should be resolved to their individual members, without preserving the
-     * group reference, or not.
-     *
-     * @return <code>true</code> if group attendees should be resolved, <code>false</code>, otherwise
-     */
     @Override
     public boolean isResolveGroupAttendees() {
-        return getConfigValue("com.openexchange.chronos.resolveGroupAttendees", Boolean.class, Boolean.FALSE);
+        return getConfigValue("com.openexchange.chronos.resolveGroupAttendees", Boolean.class, Boolean.FALSE).booleanValue();
     }
 
-    /**
-     * Gets the identifier of a specific user's default personal calendar folder.
-     *
-     * @param userID The identifier of the user to retrieve the default calendar identifier for
-     * @return The default calendar folder identifier
-     */
     @Override
     public int getDefaultFolderID(int userID) throws OXException {
         return getFolderAccess().getDefaultFolderID(userID, FolderObject.CALENDAR);
     }
 
-    /**
-     * Gets the initial participation status to use for new events in a specific folder.
-     *
-     * @param folderType The folder type where the new event is located in
-     * @param userID The identifier of the user to get the participation status for
-     * @return The initial participation status, or {@link ParticipationStatus#NEEDS_ACTION} if not defined
-     */
     @Override
     public ParticipationStatus getInitialPartStat(Type folderType, int userID) {
         Integer defaultStatus = null;
@@ -134,76 +115,44 @@ public class CalendarConfigImpl implements CalendarConfig {
         return null != defaultStatus ? Appointment2Event.getParticipationStatus(defaultStatus.intValue()) : ParticipationStatus.NEEDS_ACTION;
     }
 
-    /**
-     * Gets the configured minimum search pattern length.
-     *
-     * @return The minimum search pattern length, or <code>0</code> for no limitation
-     */
     @Override
     public int getMinimumSearchPatternLength() throws OXException {
         return ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
     }
 
-    /**
-     * Gets a value indicating whether the legacy stack (with the entry point <code>com.openexchange.api2.AppointmentSQLInterface</code>)
-     * stack should be used or not.
-     *
-     * @return <code>true</code> if the legacy stack should be used, <code>false</code>, otherwise
-     */
     @Override
     public boolean isUseLegacyStack() {
-        return getConfigValue("com.openexchange.chronos.useLegacyStack", Boolean.class, Boolean.FALSE);
+        return 1 == 2 || getConfigValue("com.openexchange.chronos.useLegacyStack", Boolean.class, Boolean.FALSE).booleanValue();
     }
 
-    /**
-     * Gets the configured limit for the maximum calculated occurrences when expanding event series.
-     *
-     * @return The recurrence calculation limit
-     */
     @Override
     public int getRecurrenceCalculationLimit() {
         return getConfigValue("com.openexchange.chronos.recurrenceCalculationLimit", Integer.class, I(1000)).intValue();
     }
 
-    /**
-     * Gets a value indicating whether <i>old</i> event series can be ignored when fetching events from the storage or not, i.e. series
-     * where the recurrence calculation limit kicks in prior the actually requested timeframe.
-     *
-     * @return <code>true</code> if old event series can be ignored, <code>false</code>, otherwise
-     */
     @Override
     public boolean isIgnoreSeriesPastCalculationLimit() {
-        return getConfigValue("com.openexchange.chronos.ignoreSeriesPastCalculationLimit", Boolean.class, Boolean.FALSE);
+        return getConfigValue("com.openexchange.chronos.ignoreSeriesPastCalculationLimit", Boolean.class, Boolean.FALSE).booleanValue();
     }
 
-    /**
-     * Gets the configured maximum number of conflicts between two recurring event series.
-     *
-     * @return The maximum conflicts per recurrence
-     */
     @Override
     public int getMaxConflictsPerRecurrence() {
         return getConfigValue("com.openexchange.chronos.maxConflictsPerRecurrence", Integer.class, I(5)).intValue();
     }
 
-    /**
-     * Gets the configured maximum number of attendees to indicate per conflict.
-     *
-     * @return The the maximum number of attendees to indicate per conflict
-     */
     @Override
     public int getMaxAttendeesPerConflict() {
         return getConfigValue("com.openexchange.chronos.maxAttendeesPerConflict", Integer.class, I(5)).intValue();
     }
 
-    /**
-     * Gets the overall maximum number of conflicts to return.
-     *
-     * @return The the maximum number of conflicts to return
-     */
     @Override
     public int getMaxConflicts() {
         return getConfigValue("com.openexchange.chronos.maxConflicts", Integer.class, I(999)).intValue();
+    }
+
+    @Override
+    public boolean isSkipExternalAttendeeURIChecks() {
+        return getConfigValue("com.openexchange.chronos.skipExternalAttendeeURIChecks", Boolean.class, Boolean.FALSE).booleanValue();
     }
 
     private OXFolderAccess getFolderAccess() {

@@ -49,6 +49,9 @@
 
 package com.openexchange.chronos.compat;
 
+import static org.slf4j.LoggerFactory.getLogger;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -57,7 +60,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import javax.mail.internet.idn.IDNA;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
@@ -161,16 +163,24 @@ public class Appointment2Event {
     }
 
     /**
-     * Gets an <code>mailto</code>-URI for the supplied e-mail address.
+     * Gets a string representation of the <code>mailto</code>-URI for the supplied e-mail address.
+     * <p/>
+     * Non-ASCII characters are encoded implicitly as per {@link URI#toASCIIString()}.
      *
      * @param emailAddress The e-mail address to get the URI for
      * @return The <code>mailto</code>-URI, or <code>null</code> if no address was passed
+     * @see {@link URI#toASCIIString()}
      */
     public static String getURI(String emailAddress) {
         if (Strings.isNotEmpty(emailAddress)) {
-            return "mailto:" + emailAddress;
+            try {
+                return new URI("mailto", CalendarUtils.extractEMailAddress(emailAddress), null).toASCIIString();
+            } catch (URISyntaxException e) {
+                getLogger(Appointment2Event.class).debug(
+                    "Error constructing \"mailto:\" URI for \"{}\", passign value as-is as fallback.", emailAddress, e);
+            }
         }
-        return null;
+        return emailAddress;
     }
 
     /**

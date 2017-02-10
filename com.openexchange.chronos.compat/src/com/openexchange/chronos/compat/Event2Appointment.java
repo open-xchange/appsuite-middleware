@@ -55,7 +55,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import javax.mail.internet.idn.IDNA;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
@@ -186,15 +185,16 @@ public class Event2Appointment {
 
     /**
      * Gets an e-mail address string based on the supplied URI.
+     * <p/>
+     * ASCII-encoded (punycode) addresses with international domain names (IDN) are converted back to their unicode representation
+     * implicitly.
      *
      * @param uri The URI string, e.g. <code>mailto:horst@example.org</code>
      * @return The e-mail address string, or the passed URI as-is in case of no <code>mailto</code>-protocol
+     * @see {@link CalendarUtils#extractEMailAddress(String)}
      */
     public static String getEMailAddress(String uri) {
-        if (Strings.isNotEmpty(uri) && uri.toLowerCase().startsWith("mailto:")) {
-            return uri.substring(7);
-        }
-        return uri;
+        return CalendarUtils.extractEMailAddress(uri);
     }
 
     /**
