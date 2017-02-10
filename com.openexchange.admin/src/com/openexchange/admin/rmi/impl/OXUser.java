@@ -1107,7 +1107,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             userid = usrdata.getId();
 
             if (!cache.contextAuthenticationDisabled()) {
-                if( basicauth.isMasterOfContext(credentials, ctx) ) {
+                if( basicauth.isMasterOfContext(auth, ctx) ) {
                     basicauth.doAuthentication(auth, ctx);
                 } else {
                     final int auth_user_id = tool.getUserIDByUsername(ctx, auth.getLogin());
@@ -1164,7 +1164,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     throw inde;
                 }
 
-                Integer fsId = getData(ctx, usrdata, credentials).getFilestoreId();
+                Integer fsId = getData(ctx, usrdata, auth).getFilestoreId();
                 if (fsId == null || fsId.intValue() <= 0) {
                     final InvalidDataException inde = new InvalidDataException("Not allowed to change the filestore for user " + userid + " in context " + ctx.getId() + ". Please use appropriate method instead.");
                     LOGGER.error("", inde);
@@ -1186,7 +1186,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             long quota_max_temp = maxQuota.longValue();
             if (quota_max_temp != -1) {
                 // A valid quota is specified - ensure an appropriate file storage is set
-                Integer fsId = getData(ctx, usrdata, credentials).getFilestoreId();
+                Integer fsId = getData(ctx, usrdata, auth).getFilestoreId();
                 if (fsId == null || fsId.intValue() <= 0) {
                     if (!allowChangingQuotaIfNoFileStorageSet) {
                         throw new StorageException("Quota cannot be changed for user " + userid + " in context " + ctx.getId() + " since that user has no file storage set. See \"ALLOW_CHANGING_QUOTA_IF_NO_FILESTORE_SET\".");
@@ -1208,7 +1208,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
                     // (Synchronous) Move from context to individual user file storage
                     try {
-                        moveFromContextToUserFilestore(ctx, usrdata, filestoreForUser, quota_max_temp, credentials, true);
+                        moveFromContextToUserFilestore(ctx, usrdata, filestoreForUser, quota_max_temp, auth, true);
                     } catch (RemoteException e) {
                         throw new StorageException(e);
                     } catch (NoSuchFilestoreException e) {
