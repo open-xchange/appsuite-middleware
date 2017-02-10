@@ -60,8 +60,21 @@ import java.util.Date;
  */
 public class Trigger {
 
+    /**
+     * {@link Related}
+     *
+     * @see <a href="https://tools.ietf.org/html/rfc5545#section-3.2.14">RFC 5545, section 3.2.14</a>
+     */
 	public enum Related {
+
+        /**
+         * Sets the alarm to trigger off the start of the corresponding calendar component.
+         */
 		START,
+
+        /**
+         * Sets the alarm to trigger off the end of the corresponding calendar component.
+         */
 		END
 	}
 
@@ -74,6 +87,18 @@ public class Trigger {
      */
     public Trigger() {
         super();
+    }
+
+    /**
+     * Initializes a new {@link Trigger}.
+     *
+     * @param trigger The trigger to use for initialization
+     */
+    public Trigger(Trigger trigger) {
+        super();
+        this.duration = trigger.getDuration();
+        this.related = trigger.getRelated();
+        this.dateTime = trigger.getDateTime();
     }
 
     /**
@@ -96,26 +121,56 @@ public class Trigger {
         this.dateTime = dateTime;
     }
 
+    /**
+     * Gets the trigger's duration.
+     *
+     * @return The duration, or <code>null</code> if not set
+     */
 	public String getDuration() {
 		return duration;
 	}
 
+    /**
+     * Sets the trigger duration.
+     *
+     * @param duration The duration to set
+     */
 	public void setDuration(String duration) {
 		this.duration = duration;
 	}
 
+    /**
+     * Gets the <i>related</i> attribute indicating the relationship to the parent calendar component of the trigger.
+     * 
+     * @return The <i>related</i> attribute, or <code>null</code> if not set
+     */
 	public Related getRelated() {
 		return related;
 	}
 
+    /**
+     * Sets the <i>related</i> attribute indicating the relationship to the parent calendar component of the trigger.
+     *
+     * @return The <i>related</i> attribute to set
+     */
 	public void setRelated(Related related) {
 		this.related = related;
 	}
 
+    /**
+     * Gets the fixed date-time of the trigger.
+     * 
+     * @return The date-time, or <code>null</code> if no set
+     */
 	public Date getDateTime() {
 		return dateTime;
 	}
 
+    /**
+     * Sets the fixed date-time of the trigger.
+     *
+     * @return The date-time value to set
+     */
 	public void setDateTime(Date dateTime) {
 		this.dateTime = dateTime;
 	}
