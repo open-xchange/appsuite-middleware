@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.dataobjects;
 
-import java.util.ArrayList;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -57,15 +56,16 @@ import org.json.JSONObject;
  * {@link SecurityResult}
  *
  * @author <a href="mailto:greg.hill@open-xchange.com">Greg Hill</a>
- * @since v2.8.0
+ * @since v7.8.4
  */
 public interface SecurityResult {
 
     /**
-     * Returns the Security Object as a JSON
-     * @return
-     * @throws JSONException
+     * Gets the JSON representation of the security object
+     *
+     * @return The JSON representation of the security object
+     * @throws JSONException If JSON representation cannot be returned
      */
-    public JSONObject toJSON () throws JSONException;
+    JSONObject toJSON() throws JSONException;
 
 }

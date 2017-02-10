@@ -135,6 +135,7 @@ import com.openexchange.mail.mime.filler.SessionCompositionParameters;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -2044,16 +2045,27 @@ public final class MimeMessageConverter {
     }
 
     /**
-     * Checks if the email is an encrypted PGP email
-     * @return
-     * @throws OXException
+     * Checks if given mail is an encrypted PGP email
+     *
+     * @return <code>true</code> if mail is an encrypted; otherwise <code>false</code>
      */
-    private static boolean isEncrypted (MimeMailMessage mail) throws OXException {
-        PGPMailRecognizer recognizer = MailJSONActivator.SERVICES.get().getOptionalService(PGPMailRecognizer.class);
-        if (recognizer != null) {
-            return recognizer.isPGPMessage(mail);
+    private static boolean isEncrypted (MimeMailMessage mail) {
+        ServiceLookup services = MailJSONActivator.SERVICES.get();
+        if (null == services) {
+            return false;
         }
-        return false;
+
+        PGPMailRecognizer recognizer = services.getOptionalService(PGPMailRecognizer.class);
+        if (null == recognizer) {
+            return false;
+        }
+
+        try {
+            return recognizer.isPGPMessage(mail);
+        } catch (OXException e) {
+            LOG.warn("Failed to check if mail is encrypted", e);
+            return false;
+        }
     }
 
     private static void examineAttachmentPresence(MimeMailMessage mail, ContentType ct) throws IOException, OXException {

@@ -58,127 +58,97 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.8.4
  */
-public class DelegatingMailAccess extends MailAccess<IMailFolderStorage,IMailMessageStorage> {
+public abstract class DelegatingMailAccess extends MailAccess<IMailFolderStorage,IMailMessageStorage> {
 
     private static final long serialVersionUID = -4906495158045777677L;
+
     private final MailAccess<IMailFolderStorage,IMailMessageStorage> delegate;
 
     /**
-     * Initializes a new {@link DelegatingMailAccess}.
-     * @param session
+     * Initializes a new {@link DelegatingMailAccess} for the default mail account of the session-associated user.
+     * <p>
+     * THis is the same as calling {@link #DelegatingMailAccess(MailAccess, Session, int)} with <code>accountId</code> set to {@link com.openexchange.mailaccount.Account#DEFAULT_ID default identifier}.
+     *
+     * @param delegate The mail access to delegate to
+     * @param session The associated session
      */
-    public DelegatingMailAccess(final MailAccess<IMailFolderStorage,IMailMessageStorage> delegate, final Session session) {
+    protected DelegatingMailAccess(final MailAccess<IMailFolderStorage,IMailMessageStorage> delegate, final Session session) {
         super(session);
         this.delegate = delegate;
     }
 
     /**
-     * Initializes a new {@link DelegatingMailAccess}.
+     * Initializes a new {@link DelegatingMailAccess} for denoted mail account of the session-associated user.
+     *
+     * @param delegate The mail access to delegate to
+     * @param session The associated session
+     * @param accountId The account identifier
      */
-    public DelegatingMailAccess(final MailAccess<IMailFolderStorage,IMailMessageStorage> delegate, final Session session, final int accountId) {
+    protected DelegatingMailAccess(final MailAccess<IMailFolderStorage,IMailMessageStorage> delegate, final Session session, final int accountId) {
         super(session,accountId);
         this.delegate = delegate;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.api.MailAccess#connectInternal()
-     */
     @Override
     protected void connectInternal() throws OXException {
         delegate.connectInternal();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.api.MailAccess#createNewMailConfig()
-     */
     @Override
     protected MailConfig createNewMailConfig() {
         return delegate.createNewMailConfig();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.api.MailAccess#createNewMailProperties()
-     */
     @Override
     protected IMailProperties createNewMailProperties() throws OXException {
         return delegate.createNewMailProperties();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.api.MailAccess#checkMailServerPort()
-     */
     @Override
     protected boolean checkMailServerPort() {
         return delegate.checkMailServerPort();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.api.MailAccess#releaseResources()
-     */
     @Override
     protected void releaseResources() {
         delegate.releaseResources();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.api.MailAccess#closeInternal()
-     */
     @Override
     protected void closeInternal() {
         delegate.closeInternal();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.api.MailAccess#getFolderStorage()
-     */
     @Override
     public IMailFolderStorage getFolderStorage() throws OXException {
         return delegate.getFolderStorage();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.api.MailAccess#getMessageStorage()
-     */
     @Override
     public IMailMessageStorage getMessageStorage() throws OXException {
         return delegate.getMessageStorage();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.api.MailAccess#getLogicTools()
-     */
     @Override
     public MailLogicTools getLogicTools() throws OXException {
         return delegate.getLogicTools();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.api.MailAccess#isConnected()
-     */
     @Override
     public boolean isConnected() {
         return delegate.isConnected();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.api.MailAccess#isConnectedUnsafe()
-     */
     @Override
     public boolean isConnectedUnsafe() {
         return delegate.isConnectedUnsafe();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.api.MailAccess#startup()
-     */
     @Override
     protected void startup() throws OXException {
         delegate.startup();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.api.MailAccess#shutdown()
-     */
     @Override
     protected void shutdown() throws OXException {
         delegate.shutdown();
