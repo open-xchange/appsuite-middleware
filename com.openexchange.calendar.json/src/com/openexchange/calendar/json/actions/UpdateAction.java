@@ -198,21 +198,23 @@ public final class UpdateAction extends ChronosAction {
         /*
          * update event & return result, preferring the identifier of a created change exception if present
          */
+        CalendarResult result;
         try {
-            CalendarResult result = session.getCalendarService().updateEvent(session, eventID, event);
-            JSONObject resultObject = new JSONObject(1);
-            if (0 < result.getCreations().size()) {
-                resultObject.put(DataFields.ID, result.getCreations().get(0).getCreatedEvent().getId());
-            } else if (0 < result.getUpdates().size()) {
-                resultObject.put(DataFields.ID, result.getUpdates().get(0).getUpdate().getId());
-            }
-            return new AJAXRequestResult(resultObject, result.getTimestamp(), "json");
+            result = session.getCalendarService().updateEvent(session, eventID, event);
         } catch (OXException e) {
             if (CalendarExceptionCodes.EVENT_CONFLICTS.equals(e) || CalendarExceptionCodes.HARD_EVENT_CONFLICTS.equals(e)) {
                 return getAppointmentConflictResult(session, CalendarUtils.extractEventConflicts(e));
             }
             throw e;
         }
+        incrementUseCount(session, result);
+        JSONObject resultObject = new JSONObject(1);
+        if (0 < result.getCreations().size()) {
+            resultObject.put(DataFields.ID, result.getCreations().get(0).getCreatedEvent().getId());
+        } else if (0 < result.getUpdates().size()) {
+            resultObject.put(DataFields.ID, result.getUpdates().get(0).getUpdate().getId());
+        }
+        return new AJAXRequestResult(resultObject, result.getTimestamp(), "json");
     }
 
 }

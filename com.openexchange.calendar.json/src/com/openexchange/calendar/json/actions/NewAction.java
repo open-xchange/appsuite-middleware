@@ -177,19 +177,21 @@ public final class NewAction extends ChronosAction {
         session.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.valueOf(appointment.getIgnoreConflicts()));
         Event event = getEventConverter().getEvent(session.getSession(), appointment, null);
         int folderID = appointment.getParentFolderID();
+        CalendarResult result;
         try {
-            CalendarResult result = session.getCalendarService().createEvent(session, folderID, event);
-            JSONObject resultObject = new JSONObject(1);
-            if (0 < result.getCreations().size()) {
-                resultObject.put(DataFields.ID, result.getCreations().get(0).getCreatedEvent().getId());
-            }
-            return new AJAXRequestResult(resultObject, result.getTimestamp(), "json");
+            result = session.getCalendarService().createEvent(session, folderID, event);
         } catch (OXException e) {
             if (CalendarExceptionCodes.EVENT_CONFLICTS.equals(e) || CalendarExceptionCodes.HARD_EVENT_CONFLICTS.equals(e)) {
                 return getAppointmentConflictResult(session, CalendarUtils.extractEventConflicts(e));
             }
             throw e;
         }
+        incrementUseCount(session, result);
+        JSONObject resultObject = new JSONObject(1);
+        if (0 < result.getCreations().size()) {
+            resultObject.put(DataFields.ID, result.getCreations().get(0).getCreatedEvent().getId());
+        }
+        return new AJAXRequestResult(resultObject, result.getTimestamp(), "json");
     }
 
 }

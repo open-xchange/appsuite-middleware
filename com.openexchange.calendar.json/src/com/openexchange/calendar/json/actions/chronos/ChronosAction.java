@@ -50,6 +50,7 @@
 package com.openexchange.calendar.json.actions.chronos;
 
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
+import static org.slf4j.LoggerFactory.getLogger;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -72,15 +73,21 @@ import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentAJAXRequestFactory;
 import com.openexchange.calendar.json.actions.AppointmentAction;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.CollectionUpdate;
+import com.openexchange.chronos.service.CreateResult;
 import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
@@ -93,6 +100,8 @@ import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 import com.openexchange.groupware.results.CollectionDelta;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Strings;
+import com.openexchange.objectusecount.IncrementArguments;
+import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -220,6 +229,73 @@ public abstract class ChronosAction extends AppointmentAction {
      */
     protected abstract AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException;
 
+    private static List<IncrementArguments> getIncrementArguments(CalendarSession session, List<Attendee> attendees) {
+        if (null == attendees || 0 == attendees.size()) {
+            return Collections.emptyList();
+        }
+        List<IncrementArguments> argumentsList = new ArrayList<IncrementArguments>(attendees.size());
+        for (Attendee attendee : attendees) {
+            IncrementArguments arguments = getIncrementArguments(session, attendee);
+            if (null != arguments) {
+                argumentsList.add(arguments);
+            }
+        }
+        return argumentsList;
+    }
+
+    private static IncrementArguments getIncrementArguments(CalendarSession session, Attendee attendee) {
+        if (attendee.getEntity() != session.getUser().getId() && null == attendee.getMember() &&
+            CalendarUserType.INDIVIDUAL.equals(attendee.getCuType())) {
+            /*
+             * only consider individual calendar users that are not group members
+             */
+            if (0 < attendee.getEntity()) {
+                return new IncrementArguments.Builder(attendee.getEntity()).build();
+            } else if (null != attendee.getUri()) {
+                return new IncrementArguments.Builder(CalendarUtils.extractEMailAddress(attendee.getUri())).build();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Increments the use count for newly added attendees in created or updated events.
+     *
+     * @param session The calendar session
+     * @param result The calendar result
+     */
+    protected void incrementUseCount(CalendarSession session, CalendarResult result) {
+        if (null == result || result.getCreations().isEmpty() && result.getUpdates().isEmpty()) {
+            return;
+        }
+        ObjectUseCountService useCountService = getService(ObjectUseCountService.class);
+        if (null == useCountService) {
+            getLogger(ChronosAction.class).debug("{} not available, skipping use count incrementation.");
+            return;
+        }
+        /*
+         * build increment arguments for all added attendees
+         */
+        List<IncrementArguments> argumentsList = new ArrayList<IncrementArguments>();
+        for (CreateResult createResult : result.getCreations()) {
+            argumentsList.addAll(getIncrementArguments(session, createResult.getCreatedEvent().getAttendees()));
+        }
+        for (UpdateResult updateResult : result.getUpdates()) {
+            CollectionUpdate<Attendee, AttendeeField> attendeeUpdates = updateResult.getAttendeeUpdates();
+            argumentsList.addAll(getIncrementArguments(session, attendeeUpdates.getAddedItems()));
+        }
+        /*
+         * do increment each use count
+         */
+        try {
+            for (IncrementArguments arguments : argumentsList) {
+                useCountService.incrementObjectUseCount(session.getSession(), arguments);
+            }
+        } catch (OXException e) {
+            getLogger(ChronosAction.class).warn("Error incrementing object use count", e);
+        }
+    }
+
     protected AJAXRequestResult getAppointmentResultWithTimestamp(CalendarSession session, List<Event> events) throws OXException {
         Date timestamp = new Date(0L);
         List<Appointment> appointments = new ArrayList<Appointment>(events.size());
@@ -239,7 +315,7 @@ public abstract class ChronosAction extends AppointmentAction {
         for (int i = 0; i < requestedIDs.size(); i++) {
             Event event = events.get(i);
             if (null == event) {
-                org.slf4j.LoggerFactory.getLogger(ChronosAction.class).info("Requested object {} not found in results; skipping silently.", Autoboxing.I(i));
+                getLogger(ChronosAction.class).info("Requested object {} not found in results; skipping silently.", Autoboxing.I(i));
                 continue;
             }
             appointments.add(getEventConverter().getAppointment(session.getSession(), event));
