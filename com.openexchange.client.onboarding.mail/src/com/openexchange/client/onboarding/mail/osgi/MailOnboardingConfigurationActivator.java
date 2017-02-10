@@ -87,10 +87,4 @@ public class MailOnboardingConfigurationActivator extends HousekeepingActivator 
         openTrackers();
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        unregisterServices();
-        closeTrackers();
-    }
-
 }
