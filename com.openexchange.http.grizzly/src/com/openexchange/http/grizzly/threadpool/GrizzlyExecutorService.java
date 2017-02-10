@@ -71,7 +71,7 @@ public class GrizzlyExecutorService implements ExecutorService {
     /**
      * Initializes a new {@link GrizzlyExecutorService}.
      *
-     * @param config
+     * @param threadPool The thread pool service to use
      */
     public GrizzlyExecutorService(ThreadPoolService threadPool) {
         super();

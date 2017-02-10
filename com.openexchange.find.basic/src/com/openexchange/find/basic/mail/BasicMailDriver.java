@@ -134,12 +134,11 @@ import com.openexchange.java.util.TimeZones;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
-import com.openexchange.mail.api.IMailMessageStorageExt;
-import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.search.ANDTerm;
@@ -157,9 +156,7 @@ import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.search.SentDateTerm;
 import com.openexchange.mail.search.SubjectTerm;
 import com.openexchange.mail.search.ToTerm;
-import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.utils.MailFolderUtility;
-import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -229,13 +226,13 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         int minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
 
         final boolean prefixAvailable = Strings.isNotEmpty(prefix) && prefix.length() >= minimumSearchCharacters;
-        Object[] values = accessMailStorage(autocompleteRequest, session, new MailAccessClosure<Object[]>() {
+        Object[] values = accessMailStorage(autocompleteRequest, session, new MailServletClosure<Object[]>() {
 
             @Override
-            public Object[] call(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, MailFolder folder) throws OXException {
+            public Object[] call(MailServletInterface mailServletInterface, MailFolder folder) throws OXException {
                 Object[] vals = new Object[2];
                 vals[0] = folder;
-                vals[1] = prefixAvailable ? Boolean.valueOf(mailAccess.getMailConfig().getCapabilities().hasFileNameSearch()) : Boolean.FALSE;
+                vals[1] = prefixAvailable ? Boolean.valueOf(mailServletInterface.getMailConfig().getCapabilities().hasFileNameSearch()) : Boolean.FALSE;
                 return vals;
             }
         });
@@ -276,13 +273,12 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             headers = searchRequest.getColumns().getStringColumns();
         }
 
-        List<MailMessage> messages = accessMailStorage(searchRequest, session, new MailAccessClosure<List<MailMessage>>() {
+        List<MailMessage> messages = accessMailStorage(searchRequest, session, new MailServletClosure<List<MailMessage>>() {
             @Override
-            public List<MailMessage> call(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, MailFolder folder) throws OXException {
+            public List<MailMessage> call(MailServletInterface mailServletInterface, MailFolder folder) throws OXException {
                 SearchTerm<?> searchTerm = prepareSearchTerm(folder, searchRequest);
-                IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
                 List<MailMessage> messages = searchMessages(
-                    messageStorage,
+                    mailServletInterface,
                     folder,
                     searchTerm,
                     mailFields,
@@ -301,27 +297,25 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         return new SearchResult(-1, searchRequest.getStart(), documents, searchRequest.getActiveFacets());
     }
 
-    private <R> R accessMailStorage(AbstractFindRequest request, ServerSession session, MailAccessClosure<R> closure) throws OXException {
+    private <R> R accessMailStorage(AbstractFindRequest request, ServerSession session, MailServletClosure<R> closure) throws OXException {
         long start = System.currentTimeMillis();
         FullnameArgument fullnameArgument = determineFolder(session, request);
-        MailService mailService = Services.getMailService();
-        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+        MailServletInterface mailServletInterface = MailServletInterface.getInstance(session);
         try {
-            mailAccess = mailService.getMailAccess(session, fullnameArgument.getAccountId());
-            mailAccess.connect(false);
-            IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
+            mailServletInterface.openFor(fullnameArgument.getFullName());
+            IMailFolderStorage folderStorage = mailServletInterface.getMailAccess().getFolderStorage();
             MailFolder folder = folderStorage.getFolder(fullnameArgument.getFullname());
-            return closure.call(mailAccess, folder);
+            return closure.call(mailServletInterface, folder);
         } finally {
-            MailAccess.closeInstance(mailAccess);
+            mailServletInterface.close(true);
             long diff = System.currentTimeMillis() - start;
             LOG.debug("Transaction for MailAccess lasted {}ms. Request type: {}", Long.valueOf(diff), request.getClass().getSimpleName());
         }
     }
 
-    private static interface MailAccessClosure<R> {
+    private static interface MailServletClosure<R> {
 
-        R call(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, MailFolder folder) throws OXException;
+        R call(MailServletInterface mailServletInterface, MailFolder folder) throws OXException;
 
     }
 
@@ -433,25 +427,13 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             .build();
     }
 
-    static List<MailMessage> searchMessages(IMailMessageStorage messageStorage, MailFolder folder, SearchTerm<?> searchTerm, MailField[] fields, String headers[], int start, int size) throws OXException {
+    static List<MailMessage> searchMessages(MailServletInterface mailServletInterface, MailFolder folder, SearchTerm<?> searchTerm, MailField[] fields, String headers[], int start, int size) throws OXException {
         MailSortField sortField = folder.isSent() ? MailSortField.SENT_DATE : MailSortField.RECEIVED_DATE;
         IndexRange indexRange = new IndexRange(start, start + size);
         OrderDirection orderDirection = OrderDirection.DESC;
         String fullname = folder.getFullname();
 
-        MailMessage[] messages;
-        if (null != headers && 0 < headers.length) {
-            IMailMessageStorageExt ext = messageStorage.supports(IMailMessageStorageExt.class);
-            if (null != ext) {
-                messages = ext.searchMessages(fullname, indexRange, sortField, orderDirection, searchTerm, fields, headers);
-            } else {
-                messages = messageStorage.searchMessages(fullname, indexRange, sortField, orderDirection, searchTerm, fields);
-                MessageUtility.enrichWithHeaders(fullname, messages, headers, messageStorage);
-            }
-        } else {
-            messages = messageStorage.searchMessages(fullname, indexRange, sortField, orderDirection, searchTerm, fields);
-        }
-
+        MailMessage[] messages = mailServletInterface.searchMails(fullname, indexRange, sortField, orderDirection, searchTerm, fields, headers);
         List<MailMessage> resultMessages = new ArrayList<MailMessage>(messages.length);
         Collections.addAll(resultMessages, messages);
         return resultMessages;
