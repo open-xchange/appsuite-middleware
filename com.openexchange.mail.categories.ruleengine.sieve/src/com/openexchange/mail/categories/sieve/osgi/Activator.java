@@ -88,6 +88,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
+        super.stopBundle();
         Logger logger = org.slf4j.LoggerFactory.getLogger(Activator.class);
         logger.info("Bundle successfully stopped: {}", context.getBundle().getSymbolicName());
     }
