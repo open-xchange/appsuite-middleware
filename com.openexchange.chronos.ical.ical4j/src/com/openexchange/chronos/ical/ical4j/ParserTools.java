@@ -49,6 +49,8 @@
 
 package com.openexchange.chronos.ical.ical4j;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.LinkedList;
@@ -56,10 +58,12 @@ import java.util.List;
 import java.util.TimeZone;
 import org.apache.commons.collections.BidiMap;
 import org.apache.commons.collections.bidimap.TreeBidiMap;
+import com.openexchange.java.Strings;
 import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.Parameter;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.CalendarComponent;
+import net.fortuna.ical4j.model.parameter.Value;
 import net.fortuna.ical4j.model.property.DateProperty;
 
 /**
@@ -289,6 +293,46 @@ public final class ParserTools {
             tz = inTZID;
         }
         return tz;
+    }
+
+    /**
+     * Gets a value indicating whether the supplied {@link DateProperty} holds a value that appears to be a date or it's time part refers
+     * to midnight (<code>00:00:00</code>). In particular, this method returns <code>true</code> if
+     * <ul>
+     * <li>The property is marked as date explicitly (via <code>VALUE=DATE</code> parameter)</li>
+     * <li>The property's value matches the date format <code>yyyyMMdd'T000000'</code></li>
+     * <li>The property's value matches the date format <code>yyyyMMdd</code> <i>and</i> has a length of <code>8</code></li>
+     * </ul>
+     * <p/>
+     * This method might be used to double-check the plausibility of the <code>X-MICROSOFT-CDO-ALLDAYEVENT</code> property.
+     *
+     * @param dateProperty The date property to check
+     * @return <code>true</code> if the date property's value is either marked as date or is a date with time at 00:00:00
+     */
+    public static boolean isDateOrMidnight(Property dateProperty) {
+        if (null != dateProperty) {
+            if (Value.DATE.equals(dateProperty.getParameter(Parameter.VALUE))) {
+                return true;
+            }
+            String value = dateProperty.getValue();
+            if (Strings.isNotEmpty(value)) {
+                try {
+                    new SimpleDateFormat("yyyyMMdd'T000000'").parse(value);
+                    return true;
+                } catch (ParseException e) {
+                    // not midnight
+                }
+                try {
+                    new SimpleDateFormat("yyyyMMdd").parse(value);
+                    if (8 == value.length()) {
+                        return true;
+                    }
+                } catch (ParseException e) {
+                    // not date only
+                }
+            }
+        }
+        return false;
     }
 
 }

@@ -52,6 +52,7 @@ package com.openexchange.chronos.ical.ical4j.mapping.event;
 import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ical.ICalParameters;
+import com.openexchange.chronos.ical.ical4j.ParserTools;
 import com.openexchange.chronos.ical.ical4j.mapping.AbstractICalMapping;
 import com.openexchange.exception.OXException;
 import net.fortuna.ical4j.extensions.outlook.AllDayEvent;
@@ -88,7 +89,8 @@ public class XMicrosoftAllDayEventMapping extends AbstractICalMapping<VEvent, Ev
     @Override
     public void importICal(VEvent component, Event object, ICalParameters parameters, List<OXException> warnings) {
         Property property = component.getProperty(AllDayEvent.PROPERTY_NAME);
-        if (null != property && Boolean.valueOf(property.getValue()) && isNotIgnored(parameters, AllDayEvent.PROPERTY_NAME)) {
+        if (null != property && Boolean.valueOf(property.getValue()) && isNotIgnored(parameters, AllDayEvent.PROPERTY_NAME) &&
+            ParserTools.isDateOrMidnight(component.getStartDate()) && ParserTools.isDateOrMidnight(component.getEndDate())) {
             object.setAllDay(true);
         }
     }
