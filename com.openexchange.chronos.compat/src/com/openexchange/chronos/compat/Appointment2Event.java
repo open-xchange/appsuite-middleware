@@ -49,9 +49,7 @@
 
 package com.openexchange.chronos.compat;
 
-import static org.slf4j.LoggerFactory.getLogger;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -172,15 +170,7 @@ public class Appointment2Event {
      * @see {@link URI#toASCIIString()}
      */
     public static String getURI(String emailAddress) {
-        if (Strings.isNotEmpty(emailAddress)) {
-            try {
-                return new URI("mailto", CalendarUtils.extractEMailAddress(emailAddress), null).toASCIIString();
-            } catch (URISyntaxException e) {
-                getLogger(Appointment2Event.class).debug(
-                    "Error constructing \"mailto:\" URI for \"{}\", passign value as-is as fallback.", emailAddress, e);
-            }
-        }
-        return emailAddress;
+        return CalendarUtils.getURI(emailAddress);
     }
 
     /**

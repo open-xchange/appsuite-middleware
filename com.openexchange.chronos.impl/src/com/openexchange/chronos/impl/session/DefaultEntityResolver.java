@@ -53,8 +53,6 @@ import static com.openexchange.chronos.common.CalendarUtils.isInternal;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.java.Autoboxing.i2I;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -530,7 +528,7 @@ public class DefaultEntityResolver implements EntityResolver {
         /*
          * try lookup by e-mail address, otherwise
          */
-        String mail = extractMail(uri);
+        String mail = CalendarUtils.extractEMailAddress(uri);
         for (User knownUser : knownUsers.values()) {
             if (mail.equals(knownUser.getMail()) || considerAliases && Arrays.contains(knownUser.getAliases(), mail)) {
                 return new ResourceId(context.getContextId(), knownUser.getId(), CalendarUserType.INDIVIDUAL);
@@ -609,27 +607,7 @@ public class DefaultEntityResolver implements EntityResolver {
      * @return The calendar address
      */
     private static String getCalAddress(User user) {
-        return "mailto:" + user.getMail(); // TODO: IDNA.toACE?
-    }
-
-    private static String extractMail(String value) {
-        URI uri;
-        try {
-            uri = new URI(value);
-        } catch (URISyntaxException e) {
-            LOG.debug("Error parsing URI \"{}\", assuming \"mailto:\" protocol as fallback.", value, e);
-            try {
-                uri = new URI("mailto", value, null);
-            } catch (URISyntaxException e2) {
-                LOG.debug("Error constructing \"mailto:\" URI for \"{}\", interpreting directly as fallback.", value, e2);
-                return value;
-            }
-        }
-        String specificPart = uri.getSchemeSpecificPart();
-        if (Strings.isNotEmpty(specificPart) && "mailto".equalsIgnoreCase(uri.getScheme())) {
-            return uri.getSchemeSpecificPart();
-        }
-        return value;
+        return CalendarUtils.getURI(user.getMail());
     }
 
 }

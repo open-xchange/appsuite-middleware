@@ -77,6 +77,7 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.ProblematicAttribute;
+import com.openexchange.java.Strings;
 import com.openexchange.search.Operand;
 import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
@@ -750,6 +751,27 @@ public class CalendarUtils {
          * decode any punycoded names, too
          */
         return IDNA.toIDN(value);
+    }
+
+    /**
+     * Gets a string representation of the <code>mailto</code>-URI for the supplied e-mail address.
+     * <p/>
+     * Non-ASCII characters are encoded implicitly as per {@link URI#toASCIIString()}.
+     *
+     * @param emailAddress The e-mail address to get the URI for
+     * @return The <code>mailto</code>-URI, or <code>null</code> if no address was passed
+     * @see {@link URI#toASCIIString()}
+     */
+    public static String getURI(String emailAddress) {
+        if (Strings.isNotEmpty(emailAddress)) {
+            try {
+                return new URI("mailto", CalendarUtils.extractEMailAddress(emailAddress), null).toASCIIString();
+            } catch (URISyntaxException e) {
+                getLogger(CalendarUtils.class).debug(
+                    "Error constructing \"mailto:\" URI for \"{}\", passign value as-is as fallback.", emailAddress, e);
+            }
+        }
+        return emailAddress;
     }
 
 }
