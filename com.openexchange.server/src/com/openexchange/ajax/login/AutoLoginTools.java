@@ -283,9 +283,7 @@ public class AutoLoginTools {
          * check & take over remote IP
          */
         String remoteAddress = request.getRemoteAddr();
-        if (loginConfig.isIpCheck()) {
-            SessionUtility.checkIP(true, loginConfig.getRanges(), session, remoteAddress, loginConfig.getIpCheckWhitelist());
-        }
+        SessionUtility.checkIP(session, remoteAddress);
         updateIPAddress(loginConfig, remoteAddress, session);
         /*
          * ensure user & context are enabled

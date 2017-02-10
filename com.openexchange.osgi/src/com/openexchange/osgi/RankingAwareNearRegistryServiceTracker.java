@@ -188,7 +188,7 @@ public class RankingAwareNearRegistryServiceTracker<S> extends ServiceTracker<S,
             return null;
         }
 
-        final RankedService<S> rankedService = new RankedService<S>(service, getRanking(reference, defaultRanking));
+        final RankedService<S> rankedService = new RankedService<S>(service, getRanking(service, reference, defaultRanking));
         if (services.addAndSort(rankedService)) { // Append
             empty = false;
             onServiceAdded(service);
@@ -201,7 +201,7 @@ public class RankingAwareNearRegistryServiceTracker<S> extends ServiceTracker<S,
     @Override
     public synchronized void removedService(final ServiceReference<S> reference, final S service) {
         onServiceDisappeared(service);
-        if (services.remove(new RankedService<S>(service, getRanking(reference, defaultRanking)))) {
+        if (services.remove(new RankedService<S>(service, getRanking(service, reference, defaultRanking)))) {
             empty = services.isEmpty();
             onServiceRemoved(service);
         }

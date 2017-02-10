@@ -99,6 +99,7 @@ public class WrappingFilter implements Filter {
     private final String echoHeaderName;
     private final boolean considerEchoHeader;
     private final String contentSecurityPolicy;
+    private final boolean considerContentSecurityPolicy;
     private final boolean checkTrackingIdInRequestParameters;
 
     /**
@@ -113,6 +114,8 @@ public class WrappingFilter implements Filter {
         this.echoHeaderName = config.getEchoHeader();
         this.considerEchoHeader = !Strings.isEmpty(echoHeaderName);
         this.contentSecurityPolicy = config.getContentSecurityPolicy();
+        this.considerContentSecurityPolicy = !Strings.isEmpty(contentSecurityPolicy);
+
         this.checkTrackingIdInRequestParameters = config.isCheckTrackingIdInRequestParameters();
     }
 
@@ -134,13 +137,11 @@ public class WrappingFilter implements Filter {
         }
 
         // Set Content-Security-Policy header
-        {
+        if (considerContentSecurityPolicy) {
             String contentSecurityPolicy = this.contentSecurityPolicy;
-            if (!Strings.isEmpty(contentSecurityPolicy)) {
-                httpResponse.setHeader("Content-Security-Policy", contentSecurityPolicy);
-                httpResponse.setHeader("X-WebKit-CSP", contentSecurityPolicy);
-                httpResponse.setHeader("X-Content-Security-Policy", contentSecurityPolicy);
-            }
+            httpResponse.setHeader("Content-Security-Policy", contentSecurityPolicy);
+            httpResponse.setHeader("X-WebKit-CSP", contentSecurityPolicy);
+            httpResponse.setHeader("X-Content-Security-Policy", contentSecurityPolicy);
         }
 
         // Inspect X-Forwarded headers and create HttpServletRequestWrapper accordingly
@@ -167,19 +168,13 @@ public class WrappingFilter implements Filter {
             LogProperties.put(LogProperties.Name.GRIZZLY_REMOTE_ADDRESS, httpRequest.getRemoteAddr());
 
             // Names, addresses
-            final Thread currentThread = Thread.currentThread();
+            Thread currentThread = Thread.currentThread();
             LogProperties.put(LogProperties.Name.GRIZZLY_THREAD_NAME, currentThread.getName());
             LogProperties.put(LogProperties.Name.THREAD_ID, Long.toString(currentThread.getId()));
             LogProperties.put(LogProperties.Name.GRIZZLY_SERVER_NAME, httpRequest.getServerName());
             {
                 String userAgent = httpRequest.getHeader("User-Agent");
                 LogProperties.put(LogProperties.Name.GRIZZLY_USER_AGENT, null == userAgent ? "<unknown>" : userAgent);
-            }
-
-            boolean b = false;
-            if (b) {
-                chain.doFilter(httpRequest, httpResponse);
-                return;
             }
 
             // Tracking identifier

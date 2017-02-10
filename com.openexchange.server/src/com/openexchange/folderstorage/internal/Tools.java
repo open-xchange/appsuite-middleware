@@ -254,6 +254,7 @@ public final class Tools {
             if (session != null) {
                 return (HostData) session.getParameter(HostnameService.PARAM_HOST_DATA);
             }
+            return null;
         }
 
         return requestContext.getHostData();

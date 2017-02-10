@@ -230,9 +230,7 @@ public final class HTTPAuthLogin implements LoginRequestHandler {
          * check & take over remote IP
          */
         String remoteAddress = request.getRemoteAddr();
-        if (conf.isIpCheck()) {
-            SessionUtility.checkIP(true, conf.getRanges(), session, remoteAddress, conf.getIpCheckWhitelist());
-        }
+        SessionUtility.checkIP(session, remoteAddress);
         LoginTools.updateIPAddress(conf, remoteAddress, session);
         /*
          * ensure user & context are enabled

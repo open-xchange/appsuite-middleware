@@ -114,19 +114,17 @@ public final class Tokens implements LoginRequestHandler {
 
         // IP check if enabled; otherwise update session's IP address if different to request's IP address. Insecure check is done in
         // updateIPAddress method.
-        if (!conf.isIpCheck()) {
-            // Update IP address if necessary
-            LoginTools.updateIPAddress(conf, req.getRemoteAddr(), session);
-        } else {
-            final String newIP = req.getRemoteAddr();
-            SessionUtility.checkIP(true, conf.getRanges(), session, newIP, conf.getIpCheckWhitelist());
+        {
+            String newIP = req.getRemoteAddr();
+            SessionUtility.checkIP(session, newIP);
+
             // IP check passed: update IP address if necessary
             LoginTools.updateIPAddress(conf, newIP, session);
         }
-        SessiondService service = ServerServiceRegistry.getInstance().getService(SessiondService.class);
 
         // Update client, which is necessary for hash calculation. OXNotifier must not know which client will be used - maybe
         // com.openexchange.ox.gui.dhtml or open-xchange-appsuite.
+        SessiondService service = ServerServiceRegistry.getInstance().getService(SessiondService.class);
         if (null != service) {
             service.setClient(session.getSessionID(), client);
         }

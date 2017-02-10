@@ -89,7 +89,6 @@ import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.login.LoginTools;
 import com.openexchange.authentication.SessionEnhancement;
-import com.openexchange.configuration.ClientWhitelist;
 import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.contexts.Context;
@@ -115,7 +114,6 @@ import com.openexchange.session.reservation.SimSessionReservationService;
 import com.openexchange.sessiond.AddSessionParameter;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.SimSessiondService;
-import com.openexchange.sessiond.impl.IPRange;
 import com.openexchange.user.SimUserService;
 import com.openexchange.user.UserService;
 
@@ -1242,9 +1240,6 @@ public class SAMLWebSSOProviderTest {
                 false,
                 false,
                 false,
-                new ClientWhitelist(),
-                false,
-                Collections.<IPRange>emptyList(),
                 true,
                 true,
                 false,
