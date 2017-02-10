@@ -49,34 +49,37 @@
 
 package com.openexchange.antiabuse;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.osgi.annotation.SingletonService;
-
 /**
- * {@link AntiAbuseService} - The service for anti-abuse checking and reporting.
+ * {@link Protocol} - The protocol that was used to authenticate against the authority.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.2
+ * @since v7.8.4
  */
-@SingletonService
-public interface AntiAbuseService {
+public enum Protocol {
 
     /**
-     * Performs the <code>"allow"</code> request.
-     *
-     * @param parameters The parameters to use
-     * @return The status response
-     * @throws OXException If allow request fails
+     * The HTTP protocol.
      */
-    Status allow(AllowParameters parameters) throws OXException;
+    HTTP("http"),
+    /**
+     * The HTTPS protocol.
+     */
+    HTTPS("https"),
+
+    ;
+
+    private final String name;
+
+    private Protocol(String name) {
+        this.name = name;
+    }
 
     /**
-     * Performs the <code>"report"</code> request.
+     * Gets the protocol name
      *
-     * @param parameters The parameters to use
-     * @return The status response
-     * @throws OXException If report request fails
+     * @return The protocol name
      */
-    void report(ReportParameters parameters) throws OXException;
-
+    public String getName() {
+        return name;
+    }
 }
