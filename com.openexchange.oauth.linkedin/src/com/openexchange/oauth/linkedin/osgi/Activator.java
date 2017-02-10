@@ -131,12 +131,6 @@ public class Activator extends HousekeepingActivator {
         scopeRegistry.registerScope(linkedInMetaDataService.getAPI(), LinkedInOAuthScope.contacts_ro);
     }
 
-    @Override
-    protected void stopBundle() {
-        closeTrackers();
-        cleanUp();
-    }
-
     public void setOauthService(OAuthService service) {
         this.oauthService = service;
     }
