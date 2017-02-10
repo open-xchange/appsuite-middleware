@@ -76,9 +76,16 @@ public class MailFilterInterceptorRegistryImpl implements MailFilterInterceptorR
      */
     private class MailFilterInterceptorComparator implements Comparator<MailFilterInterceptor> {
 
+        /**
+         * Initializes a new {@link MailFilterInterceptorComparator}.
+         */
+        MailFilterInterceptorComparator() {
+            super();
+        }
+
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
          */
         @Override
@@ -97,7 +104,7 @@ public class MailFilterInterceptorRegistryImpl implements MailFilterInterceptorR
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mailfilter.MailFilterInterceptorRegistry#register(com.openexchange.mailfilter.MailFilterInterceptor, int)
      */
     @Override
@@ -108,7 +115,7 @@ public class MailFilterInterceptorRegistryImpl implements MailFilterInterceptorR
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mailfilter.MailFilterInterceptorRegistry#execute(java.util.List)
      */
     @Override
@@ -122,7 +129,7 @@ public class MailFilterInterceptorRegistryImpl implements MailFilterInterceptorR
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mailfilter.MailFilterInterceptorRegistry#executeAfter(java.util.List)
      */
     @Override
