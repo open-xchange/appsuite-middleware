@@ -106,11 +106,4 @@ public class Activator extends HousekeepingActivator {
         registerService(ITipParser.class, new ICal4JITipParser(), null);
         registerService(ITipEmitter.class, new ICal4JITipEmitter(), null);
     }
-
-    @Override
-    public void stopBundle() {
-        unregisterServices();
-        closeTrackers();
-        cleanUp();
-    }
 }
