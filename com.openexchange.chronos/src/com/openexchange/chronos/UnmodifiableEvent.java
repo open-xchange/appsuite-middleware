@@ -380,13 +380,4 @@ public class UnmodifiableEvent extends DelegatingEvent {
         throw new UnsupportedOperationException();
     }
 
-    @Override
-    public void setTimeZone(String timeZone) {
-        throw new UnsupportedOperationException();
-    }
-    @Override
-    public void removeTimeZone() {
-        throw new UnsupportedOperationException();
-    }
-
 }

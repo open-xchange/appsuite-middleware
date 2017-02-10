@@ -76,7 +76,7 @@ public class RecurrenceDatePositionTest extends AbstractSingleTimeZoneTest {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         master.setStartDate(TimeTools.D("01.10.2008 14:45:00", TimeZone.getTimeZone(timeZone)));
-        master.setTimeZone(timeZone);
+        setTimeZone(master, timeZone);
         assertEquals("Wrong date position.", getCal("01.10.2008 14:45:00"), service.calculateRecurrenceDatePosition(master, 1));
         assertNull("Wrong date position.", service.calculateRecurrenceDatePosition(master, 0));
         assertEquals("Wrong date position.", getCal("02.10.2008 14:45:00"), service.calculateRecurrenceDatePosition(master, 2));
@@ -88,7 +88,7 @@ public class RecurrenceDatePositionTest extends AbstractSingleTimeZoneTest {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1;COUNT=3");
         master.setStartDate(TimeTools.D("01.10.2008 14:45:00", TimeZone.getTimeZone(timeZone)));
-        master.setTimeZone(timeZone);
+        setTimeZone(master, timeZone);
         assertEquals("Wrong date position.", getCal("01.10.2008 14:45:00"), service.calculateRecurrenceDatePosition(master, 1));
         assertEquals("Wrong date position.", getCal("02.10.2008 14:45:00"), service.calculateRecurrenceDatePosition(master, 2));
         assertEquals("Wrong date position.", getCal("03.10.2008 14:45:00"), service.calculateRecurrenceDatePosition(master, 3));
@@ -100,7 +100,7 @@ public class RecurrenceDatePositionTest extends AbstractSingleTimeZoneTest {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1;UNTIL=" + getUntilZulu(getCal("12.10.2008 14:45:00")));
         master.setStartDate(TimeTools.D("01.10.2008 14:45:00", TimeZone.getTimeZone(timeZone)));
-        master.setTimeZone(timeZone);
+        setTimeZone(master, timeZone);
         assertEquals("Wrong date position.", getCal("01.10.2008 14:45:00"), service.calculateRecurrenceDatePosition(master, 1));
         assertEquals("Wrong date position.", getCal("12.10.2008 14:45:00"), service.calculateRecurrenceDatePosition(master, 12));
         assertNull("Wrong date position.", service.calculateRecurrenceDatePosition(master, 13));
@@ -111,7 +111,7 @@ public class RecurrenceDatePositionTest extends AbstractSingleTimeZoneTest {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=WEEKLY;BYDAY=WE;INTERVAL=1");
         master.setStartDate(TimeTools.D("01.10.2008 08:00:00", TimeZone.getTimeZone(timeZone)));
-        master.setTimeZone(timeZone);
+        setTimeZone(master, timeZone);
         assertEquals("Wrong date position.", getCal("01.10.2008 08:00:00"), service.calculateRecurrenceDatePosition(master, 1));
         assertEquals("Wrong date position.", getCal("08.10.2008 08:00:00"), service.calculateRecurrenceDatePosition(master, 2));
         assertEquals("Wrong date position.", getCal("15.10.2008 08:00:00"), service.calculateRecurrenceDatePosition(master, 3));
@@ -125,7 +125,7 @@ public class RecurrenceDatePositionTest extends AbstractSingleTimeZoneTest {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=WEEKLY;BYDAY=TH;INTERVAL=1;COUNT=3");
         master.setStartDate(TimeTools.D("01.10.2008 08:00:00", TimeZone.getTimeZone(timeZone)));
-        master.setTimeZone(timeZone);
+        setTimeZone(master, timeZone);
         assertEquals("Wrong date position.", getCal("01.10.2008 08:00:00"), service.calculateRecurrenceDatePosition(master, 1));
         assertEquals("Wrong date position.", getCal("02.10.2008 08:00:00"), service.calculateRecurrenceDatePosition(master, 2));
         assertEquals("Wrong date position.", getCal("09.10.2008 08:00:00"), service.calculateRecurrenceDatePosition(master, 3));
@@ -137,7 +137,7 @@ public class RecurrenceDatePositionTest extends AbstractSingleTimeZoneTest {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR;INTERVAL=2;UNTIL=" + getUntilZulu(getCal("27.10.2008 08:00:00")));
         master.setStartDate(TimeTools.D("01.10.2008 08:00:00", TimeZone.getTimeZone(timeZone)));
-        master.setTimeZone(timeZone);
+        setTimeZone(master, timeZone);
         assertEquals("Wrong date position.", getCal("01.10.2008 08:00:00"), service.calculateRecurrenceDatePosition(master, 1));
         assertEquals("Wrong date position.", getCal("02.10.2008 08:00:00"), service.calculateRecurrenceDatePosition(master, 2));
         assertEquals("Wrong date position.", getCal("03.10.2008 08:00:00"), service.calculateRecurrenceDatePosition(master, 3));

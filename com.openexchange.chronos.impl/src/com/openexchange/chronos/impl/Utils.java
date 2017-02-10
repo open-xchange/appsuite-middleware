@@ -372,8 +372,7 @@ public class Utils {
         if (false == isClassifiedFor(event, session.getUser().getId())) {
             return event;
         }
-        Event anonymizedEvent = new Event();
-        EventMapper.getInstance().copy(event, anonymizedEvent, NON_CLASSIFIED_FIELDS);
+        Event anonymizedEvent = EventMapper.getInstance().copy(event, new Event(), NON_CLASSIFIED_FIELDS);
         anonymizedEvent.setSummary(StringHelper.valueOf(session.getUser().getLocale()).getString(CalendarStrings.SUMMARY_PRIVATE));
         return anonymizedEvent;
     }

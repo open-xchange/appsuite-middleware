@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.tools.mappings;
 
+import java.util.List;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 
@@ -132,9 +133,19 @@ public interface Mapper<O, E extends Enum<E>> extends Factory<O>, ArrayFactory<E
      * Copies data from on object to another. Only <i>set</i> fields are transferred.
      *
      * @param from The source object
-     * @param to The destination object
-     * @param fields The fields to copy
+     * @param to The destination object, or <code>null</code> to copy into a newly created instance
+     * @param fields The fields to copy, or <code>null</code> to copy known field mappings
+     * @return The copied object
      */
-    void copy(O from, O to, E... fields) throws OXException;
+    O copy(O from, O to, E... fields) throws OXException;
+
+    /**
+     * Copies the data from a list of objects into a list of new objects. Only <i>set</i> fields are transferred.
+     *
+     * @param objects The source objects to copy
+     * @param fields The fields to copy, or <code>null</code> to copy known field mappings
+     * @return The copied list of objects
+     */
+    List<O> copy(List<O> objects, E... fields) throws OXException;
 
 }

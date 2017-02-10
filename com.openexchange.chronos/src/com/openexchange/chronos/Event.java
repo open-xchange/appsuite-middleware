@@ -50,13 +50,10 @@
 package com.openexchange.chronos;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.EnumSet;
-import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.SortedSet;
-import java.util.TimeZone;
 import java.util.TreeSet;
 
 /**
@@ -1286,64 +1283,6 @@ public class Event {
      */
     public boolean containsAlarms() {
         return setFields.contains(EventField.ALARMS);
-    }
-
-    /**
-     * Returns the Start of the event as Calendar with appropriate TimeZone.
-     *
-     * @return The Start of the event
-     */
-    public Calendar getStart() {
-        Calendar retval = GregorianCalendar.getInstance(TimeZone.getTimeZone(getStartTimeZone()));
-        retval.setTime(getStartDate());
-        return retval;
-    }
-
-    /**
-     * Returns the End of the event as Calendar with appropriate TimeZone.
-     *
-     * @return The End of the event
-     */
-    public Calendar getEnd() {
-        Calendar retval = GregorianCalendar.getInstance(TimeZone.getTimeZone(getStartTimeZone()));
-        retval.setTime(getEndDate());
-        return retval;
-    }
-
-    /**
-     * Sets the timezone of the start and end date.
-     *
-     * @param timeZone The timezone
-     */
-    public void setTimeZone(String timeZone) {
-        setStartTimeZone(timeZone);
-        setEndTimeZone(timeZone);
-    }
-
-    /**
-     * Returns the start timezone, ignoring whatever the end timezone ist.
-     *
-     * @return The start timezon
-     */
-    public String getTimeZone() {
-        return getStartTimeZone();
-    }
-
-    /**
-     * Removes the start and end timezone.
-     */
-    public void removeTimeZone() {
-        removeStartTimeZone();
-        removeEndTimeZone();
-    }
-
-    /**
-     * Gets a value indicating whether the start and end timezone are set or not.
-     *
-     * @return
-     */
-    public boolean containsTimeZone() {
-        return containsStartTimeZone() && containsEndTimeZone();
     }
 
     @Override

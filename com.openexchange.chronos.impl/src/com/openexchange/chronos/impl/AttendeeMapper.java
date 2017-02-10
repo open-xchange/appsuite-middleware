@@ -137,23 +137,6 @@ public class AttendeeMapper extends DefaultMapper<Attendee, AttendeeField> {
         return tombstone;
     }
 
-    /**
-     * Copies data from one attendee to another. Only <i>set</i> fields are transferred.
-     *
-     * @param from The source attendee
-     * @param to The destination attendee
-     * @param fields The fields to copy
-     */
-    @Override
-    public void copy(Attendee from, Attendee to, AttendeeField... fields) throws OXException {
-        for (AttendeeField field : fields) {
-            Mapping<? extends Object, Attendee> mapping = get(field);
-            if (mapping.isSet(from)) {
-                mapping.copy(from, to);
-            }
-        }
-    }
-
     @Override
     public Attendee newInstance() {
         return new Attendee();

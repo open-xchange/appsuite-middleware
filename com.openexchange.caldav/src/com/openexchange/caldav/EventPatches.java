@@ -300,6 +300,7 @@ public class EventPatches {
                     if (null != originalOccurrence) {
                         if (null != originalOccurrence.getAlarms() && 1 == originalOccurrence.getAlarms().size() && snoozedAlarm.getTrigger().equals(originalOccurrence.getAlarms().get(0).getTrigger())) {
                             Alarm originalAlarm = originalOccurrence.getAlarms().get(0);
+                            originalOccurrence = resource.getCalendarSession().getUtilities().copyEvent(originalOccurrence, (EventField[]) null);
                             originalOccurrence = EventPatches.Outgoing.applyAll(resource, originalOccurrence);
                             EventUpdate eventUpdate = resource.getCalendarSession().getUtilities().compare(
                                 originalOccurrence, newChangeException, true, EventField.LAST_MODIFIED, EventField.RECURRENCE_RULE, EventField.CREATED, EventField.ALARMS);

@@ -259,8 +259,8 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
              */
             requireWritePermissions(originalEvent);
             if (needsConflictCheck(eventUpdate)) {
-                Event changedEvent = originalEvent.clone();
-                EventMapper.getInstance().copy(eventUpdate.getUpdate(), changedEvent, EventField.values());
+                Event changedEvent = EventMapper.getInstance().copy(originalEvent, new Event(), (EventField[]) null);
+                changedEvent = EventMapper.getInstance().copy(eventUpdate.getUpdate(), changedEvent, (EventField[]) null);
                 List<Attendee> changedAttendees;
                 if (updatedEvent.containsAttendees()) {
                     changedAttendees = AttendeeHelper.onUpdatedEvent(session, folder, originalEvent.getAttendees(), updatedEvent.getAttendees()).previewChanges();
@@ -314,8 +314,8 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         if (null != eventUpdate && needsAlarmTriggerUpdate(eventUpdate)) {
             Map<Integer, List<Alarm>> alarmsByUserID = storage.getAlarmStorage().loadAlarms(originalEvent);
             if (null != alarmsByUserID && 0 < alarmsByUserID.size()) {
-                Event changedEvent = originalEvent.clone();
-                EventMapper.getInstance().copy(eventUpdate.getUpdate(), changedEvent, EventField.values());
+                Event changedEvent = EventMapper.getInstance().copy(originalEvent, new Event(), (EventField[]) null);
+                changedEvent = EventMapper.getInstance().copy(eventUpdate.getUpdate(), changedEvent, (EventField[]) null);
                 for (Attendee attendee : filter(originalEvent.getAttendees(), Boolean.TRUE, CalendarUserType.INDIVIDUAL)) {
                     List<Alarm> alarms = alarmsByUserID.get(I(attendee.getEntity()));
                     if (null != alarms && 0 < alarms.size()) {
@@ -517,8 +517,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
              * check for newly indicated delete exceptions, from the calendar user's point of view
              */
             Attendee userAttendee = find(originalEvent.getAttendees(), calendarUser.getId());
-            Event originalUserEvent = new Event();
-            EventMapper.getInstance().copy(originalEvent, originalUserEvent, EventField.values());
+            Event originalUserEvent = EventMapper.getInstance().copy(originalEvent, new Event(), (EventField[]) null);
             originalUserEvent = Utils.applyExceptionDates(storage, originalUserEvent, calendarUser.getId());
             SimpleCollectionUpdate<RecurrenceId> exceptionDateUpdates = Utils.getExceptionDateUpdates(originalUserEvent.getDeleteExceptionDates(), updatedEvent.getDeleteExceptionDates());
             if (0 < exceptionDateUpdates.getRemovedItems().size() || null == userAttendee) {

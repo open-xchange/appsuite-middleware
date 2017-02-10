@@ -50,12 +50,10 @@
 package com.openexchange.chronos.recurrence;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.TimeZone;
 import org.junit.runners.Parameterized.Parameters;
-import com.openexchange.time.TimeTools;
+import com.openexchange.chronos.Event;
 
 /**
  * {@link AbstractSingleTimeZoneTest}
@@ -77,6 +75,17 @@ public abstract class AbstractSingleTimeZoneTest extends RecurrenceServiceTest {
             retval.add(new Object[] { tzId });
         }
         return retval;
+    }
+
+    /**
+     * Sets the timezone of the start and end date.
+     *
+     * @param event The event to set the timezone in
+     * @param timeZoneID The timezone identifier to set
+     */
+    protected static void setTimeZone(Event event, String timeZoneID) {
+        event.setStartTimeZone(timeZoneID);
+        event.setEndTimeZone(timeZoneID);
     }
 
 }

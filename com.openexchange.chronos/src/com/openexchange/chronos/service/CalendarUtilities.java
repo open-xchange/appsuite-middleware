@@ -74,6 +74,15 @@ public interface CalendarUtilities {
     EventUpdate compare(Event original, Event update, boolean considerUnset, EventField... ignoredFields) throws OXException;
 
     /**
+     * Initializes a new event and copies some or all fields over from another event.
+     *
+     * @param event The event to copy
+     * @param fields The fields to copy, or <code>null</code> to copy all event fields
+     * @return The copied event
+     */
+    Event copyEvent(Event event, EventField... fields) throws OXException;
+
+    /**
      * Handles a possible {@link CalendarExceptionCodes#INCORRECT_STRING} exception that occurred when attempting to store the event data
      * by removing any character sequences that are indicated in the exception's <i>problematics</i>.
      *

@@ -145,9 +145,8 @@ public class SearchPerformer extends AbstractQueryPerformer {
                     events.addAll(postProcess(Collections.singletonList(event), foldersForEvent.get(0), false));
                 } else {
                     for (UserizedFolder folder : foldersForEvent) {
-                        Event clonedEvent = new Event();
-                        EventMapper.getInstance().copy(event, clonedEvent, EventField.values());
-                        events.addAll(postProcess(Collections.singletonList(clonedEvent), folder, false));
+                        Event copiedEvent = EventMapper.getInstance().copy(event, new Event(), (EventField[]) null);
+                        events.addAll(postProcess(Collections.singletonList(copiedEvent), folder, false));
                     }
                 }
             }

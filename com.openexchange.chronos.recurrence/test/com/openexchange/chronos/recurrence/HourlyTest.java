@@ -207,7 +207,7 @@ public class HourlyTest extends AbstractSingleTimeZoneTest {
         master.setStartDate(s.getTime());
         master.setEndDate(e.getTime());
         master.setAllDay(true);
-        master.setTimeZone(timeZone);
+        setTimeZone(master, timeZone);
 
         Iterator<Event> instances = service.calculateInstances(master, null, null, null);
 
@@ -249,7 +249,7 @@ public class HourlyTest extends AbstractSingleTimeZoneTest {
         e.setTimeInMillis(s.getTimeInMillis() + 3600000L * 36);
         master.setStartDate(s.getTime());
         master.setEndDate(e.getTime());
-        master.setTimeZone(timeZone);
+        setTimeZone(master, timeZone);
 
         Iterator<Event> instances = service.calculateInstances(master, null, null, null);
 
@@ -284,7 +284,7 @@ public class HourlyTest extends AbstractSingleTimeZoneTest {
         e.setTimeInMillis(s.getTimeInMillis() + 3600000L);
         master.setStartDate(s.getTime());
         master.setEndDate(e.getTime());
-        master.setTimeZone(timeZone);
+        setTimeZone(master, timeZone);
 
         Iterator<Event> instances = service.calculateInstances(master, null, null, null);
 

@@ -55,6 +55,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import javax.mail.internet.idn.IDNA;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
@@ -312,6 +313,7 @@ public class Event2Appointment {
      * would have been.
      *
      * @param recurrenceData The recurrence data
+     * @param recurrenceId The recurrence identifier
      * @return The recurrence position
      * @throws OXException {@link CalendarExceptionCodes#INVALID_RECURRENCE_ID}
      */

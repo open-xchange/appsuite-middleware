@@ -53,6 +53,7 @@ import java.util.List;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.impl.EventMapper;
 import com.openexchange.chronos.impl.EventUpdateImpl;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.EventUpdate;
@@ -124,6 +125,11 @@ public class DefaultCalendarUtilities implements CalendarUtilities {
             }
         }
         return hasTrimmed;
+    }
+
+    @Override
+    public Event copyEvent(Event event, EventField... fields) throws OXException {
+        return EventMapper.getInstance().copy(event, null, fields);
     }
 
 }

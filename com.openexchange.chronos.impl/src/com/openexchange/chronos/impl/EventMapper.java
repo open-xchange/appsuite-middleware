@@ -53,14 +53,18 @@ import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.b;
 import static com.openexchange.java.Autoboxing.i;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.SortedSet;
+import java.util.TreeSet;
 import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -158,23 +162,6 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
     }
 
     /**
-     * Copies data from one event to another. Only <i>set</i> fields are transferred.
-     *
-     * @param from The source event
-     * @param to The destination event
-     * @param fields The fields to copy
-     */
-    @Override
-    public void copy(Event from, Event to, EventField... fields) throws OXException {
-        for (EventField field : fields) {
-            Mapping<? extends Object, Event> mapping = get(field);
-            if (mapping.isSet(from)) {
-                mapping.copy(from, to);
-            }
-        }
-    }
-
-    /**
      * Copies data from one event to another. Only <i>set</i> fields of the source event are transferred, unless they're not already
      * <i>set</i> in the target event.
      *
@@ -200,8 +187,7 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
      * @return The tombstone event
      */
     public Event getTombstone(Event event, Date lastModified, int modifiedBy) throws OXException {
-        Event tombstone = new Event();
-        copy(event, tombstone, TOMBSTONE_FIELDS);
+        Event tombstone = copy(event, newInstance(), TOMBSTONE_FIELDS);
         Consistency.setModified(lastModified, tombstone, modifiedBy);
         return tombstone;
     }
@@ -509,6 +495,12 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
         mappings.put(EventField.CATEGORIES, new DefaultMapping<List<String>, Event>() {
 
             @Override
+            public void copy(Event from, Event to) throws OXException {
+                List<String> value = get(from);
+                set(to, null == value ? null : new ArrayList<String>(value));
+            }
+
+            @Override
             public boolean isSet(Event object) {
                 return object.containsCategories();
             }
@@ -782,6 +774,12 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
         mappings.put(EventField.CHANGE_EXCEPTION_DATES, new DefaultMapping<SortedSet<RecurrenceId>, Event>() {
 
             @Override
+            public void copy(Event from, Event to) throws OXException {
+                SortedSet<RecurrenceId> value = get(from);
+                set(to, null == value ? null : new TreeSet<RecurrenceId>(value));
+            }
+
+            @Override
             public boolean isSet(Event object) {
                 return object.containsChangeExceptionDates();
             }
@@ -802,6 +800,12 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
             }
         });
         mappings.put(EventField.DELETE_EXCEPTION_DATES, new DefaultMapping<SortedSet<RecurrenceId>, Event>() {
+
+            @Override
+            public void copy(Event from, Event to) throws OXException {
+                SortedSet<RecurrenceId> value = get(from);
+                set(to, null == value ? null : new TreeSet<RecurrenceId>(value));
+            }
 
             @Override
             public boolean isSet(Event object) {
@@ -870,6 +874,12 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
         mappings.put(EventField.ATTENDEES, new DefaultMapping<List<Attendee>, Event>() {
 
             @Override
+            public void copy(Event from, Event to) throws OXException {
+                List<Attendee> value = get(from);
+                set(to, null == value ? null : AttendeeMapper.getInstance().copy(value, (AttendeeField[]) null));
+            }
+
+            @Override
             public boolean isSet(Event object) {
                 return object.containsAttendees();
             }
@@ -892,6 +902,12 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
         mappings.put(EventField.ATTACHMENTS, new DefaultMapping<List<Attachment>, Event>() {
 
             @Override
+            public void copy(Event from, Event to) throws OXException {
+                List<Attachment> value = get(from);
+                set(to, null == value ? null : new ArrayList<Attachment>(value)); //TODO deep copy
+            }
+
+            @Override
             public boolean isSet(Event object) {
                 return object.containsAttachments();
             }
@@ -912,6 +928,12 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
             }
         });
         mappings.put(EventField.ALARMS, new DefaultMapping<List<Alarm>, Event>() {
+
+            @Override
+            public void copy(Event from, Event to) throws OXException {
+                List<Alarm> value = get(from);
+                set(to, null == value ? null : AlarmMapper.getInstance().copy(value, (AlarmField[]) null));
+            }
 
             @Override
             public boolean isSet(Event object) {

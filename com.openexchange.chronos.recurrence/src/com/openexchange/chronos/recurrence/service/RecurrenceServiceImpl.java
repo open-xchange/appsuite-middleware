@@ -107,7 +107,7 @@ public class RecurrenceServiceImpl implements RecurrenceService {
         if (!master.containsRecurrenceRule()) {
             return 0;
         }
-        if (datePosition.compareTo(master.getStart()) < 0) {
+        if (datePosition.getTimeInMillis() < master.getStartDate().getTime()) {
             return 0;
         }
         int position = 1;

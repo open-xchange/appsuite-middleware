@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos;
 
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.SortedSet;
@@ -702,36 +701,6 @@ public abstract class DelegatingEvent extends Event {
     @Override
     public boolean containsAlarms() {
         return delegate.containsAlarms();
-    }
-
-    @Override
-    public Calendar getStart() {
-        return delegate.getStart();
-    }
-
-    @Override
-    public Calendar getEnd() {
-        return delegate.getEnd();
-    }
-
-    @Override
-    public void setTimeZone(String timeZone) {
-        delegate.setTimeZone(timeZone);
-    }
-
-    @Override
-    public String getTimeZone() {
-        return delegate.getTimeZone();
-    }
-
-    @Override
-    public void removeTimeZone() {
-        delegate.removeTimeZone();
-    }
-
-    @Override
-    public boolean containsTimeZone() {
-        return delegate.containsTimeZone();
     }
 
 }

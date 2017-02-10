@@ -123,8 +123,7 @@ public abstract class AbstractUpdatePerformer {
      * @return The prepared exception event
      */
     protected Event prepareException(Event originalMasterEvent, RecurrenceId recurrenceID) throws OXException {
-        Event exceptionEvent = new Event();
-        EventMapper.getInstance().copy(originalMasterEvent, exceptionEvent, EventField.values());
+        Event exceptionEvent = EventMapper.getInstance().copy(originalMasterEvent, new Event(), (EventField[]) null);
         exceptionEvent.setId(storage.nextObjectID());
         exceptionEvent.setRecurrenceId(recurrenceID);
         exceptionEvent.setChangeExceptionDates(new TreeSet<RecurrenceId>(Collections.singleton(recurrenceID)));

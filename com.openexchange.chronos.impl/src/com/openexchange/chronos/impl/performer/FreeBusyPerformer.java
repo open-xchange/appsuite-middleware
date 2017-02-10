@@ -226,14 +226,12 @@ public class FreeBusyPerformer extends AbstractQueryPerformer {
      * @return The resulting event representing the free/busy slot
      */
     private Event getResultingEvent(Event event, int folderID) throws OXException {
-        Event resultingEvent = new Event();
         if (0 < folderID) {
-            EventMapper.getInstance().copy(event, resultingEvent, FREEBUSY_FIELDS);
+            Event resultingEvent = EventMapper.getInstance().copy(event, new Event(), FREEBUSY_FIELDS);
             resultingEvent.setFolderId(folderID);
             return anonymizeIfNeeded(session, resultingEvent);
         } else {
-            EventMapper.getInstance().copy(event, resultingEvent, RESTRICTED_FREEBUSY_FIELDS);
-            return resultingEvent;
+            return EventMapper.getInstance().copy(event, new Event(), RESTRICTED_FREEBUSY_FIELDS);
         }
     }
 

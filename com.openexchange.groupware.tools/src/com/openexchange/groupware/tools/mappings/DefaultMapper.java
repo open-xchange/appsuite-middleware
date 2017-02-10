@@ -49,8 +49,10 @@
 
 package com.openexchange.groupware.tools.mappings;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import com.openexchange.exception.OXException;
@@ -168,19 +170,47 @@ public abstract class DefaultMapper<O, E extends Enum<E>> implements Mapper<O, E
 	}
 
     @Override
-    public void copy(O from, O to, E... fields) throws OXException {
+    public O copy(O from, O to, E... fields) throws OXException {
         if (null == from) {
             throw new IllegalArgumentException("from");
         }
         if (null == to) {
-            throw new IllegalArgumentException("to");
+            to = newInstance();
         }
-        for (E field : fields) {
-            Mapping<? extends Object, O> mapping = get(field);
-            if (mapping.isSet(from)) {
-                mapping.copy(from, to);
+        if (null == fields) {
+            for (Mapping<? extends Object, O> mapping : getMappings().values()) {
+                if (mapping.isSet(from)) {
+                    mapping.copy(from, to);
+                }
+            }
+        } else {
+            for (E field : fields) {
+                Mapping<? extends Object, O> mapping = get(field);
+                if (mapping.isSet(from)) {
+                    mapping.copy(from, to);
+                }
             }
         }
+        return to;
+    }
+
+    /**
+     * Copies the data from a list of alarms. Only <i>set</i> fields are transferred.
+     *
+     * @param alarms The alarms to copy
+     * @param fields The fields to copy
+     * @return The copied alarm list
+     */
+    @Override
+    public List<O> copy(List<O> objects, E... fields) throws OXException {
+        if (null == objects) {
+            return null;
+        }
+        List<O> copiedObjects = new ArrayList<O>(objects.size());
+        for (O object : objects) {
+            copiedObjects.add(copy(object, newInstance(), fields));
+        }
+        return copiedObjects;
     }
 
 	/**

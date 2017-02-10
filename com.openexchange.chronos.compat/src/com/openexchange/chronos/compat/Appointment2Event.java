@@ -57,6 +57,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import javax.mail.internet.idn.IDNA;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;

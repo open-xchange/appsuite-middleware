@@ -99,7 +99,7 @@ public class DSTShiftTest extends AbstractSingleTimeZoneTest {
         TimeZone tz = TimeZone.getTimeZone(timeZone);
         master.setStartDate(TimeTools.D("24.10.2008 01:00:00", tz));
         master.setEndDate(TimeTools.D("24.10.2008 05:00:00", tz));
-        master.setTimeZone(timeZone);
+        setTimeZone(master, timeZone);
 
         Iterator<Event> instances = service.calculateInstances(master, null, null, null);
         int count = 0;
@@ -134,7 +134,7 @@ public class DSTShiftTest extends AbstractSingleTimeZoneTest {
         TimeZone tz = TimeZone.getTimeZone(timeZone);
         master.setStartDate(TimeTools.D("27.03.2009 01:00:00", tz));
         master.setEndDate(TimeTools.D("27.03.2009 05:00:00", tz));
-        master.setTimeZone(timeZone);
+        setTimeZone(master, timeZone);
 
         Iterator<Event> instances = service.calculateInstances(master, null, null, null);
         int count = 0;
@@ -169,7 +169,7 @@ public class DSTShiftTest extends AbstractSingleTimeZoneTest {
         TimeZone tz = TimeZone.getTimeZone(timeZone);
         master.setStartDate(TimeTools.D("28.03.2009 02:15:00", tz));
         master.setEndDate(TimeTools.D("28.03.2009 02:45:00", tz));
-        master.setTimeZone(timeZone);
+        setTimeZone(master, timeZone);
 
         Iterator<Event> instances = service.calculateInstances(master, null, null, null);
         int count = 0;
@@ -198,7 +198,7 @@ public class DSTShiftTest extends AbstractSingleTimeZoneTest {
         TimeZone tz = TimeZone.getTimeZone(timeZone);
         master.setStartDate(TimeTools.D("25.10.2008 02:00:00", tz));
         master.setEndDate(TimeTools.D("25.10.2008 03:00:00", tz));
-        master.setTimeZone(timeZone);
+        setTimeZone(master, timeZone);
 
         Iterator<Event> instances = service.calculateInstances(master, null, null, null);
         int count = 0;
@@ -227,7 +227,7 @@ public class DSTShiftTest extends AbstractSingleTimeZoneTest {
         TimeZone tz = TimeZone.getTimeZone(timeZone);
         master.setStartDate(TimeTools.D("25.10.2008 01:00:00", tz));
         master.setEndDate(TimeTools.D("25.10.2008 02:00:00", tz));
-        master.setTimeZone(timeZone);
+        setTimeZone(master, timeZone);
 
         Iterator<Event> instances = service.calculateInstances(master, null, null, null);
         int count = 0;

@@ -105,23 +105,6 @@ public class AlarmMapper extends DefaultMapper<Alarm, AlarmField> {
         };
     }
 
-    /**
-     * Copies data from one Alarm to another. Only <i>set</i> fields are transferred.
-     *
-     * @param from The source Alarm
-     * @param to The destination Alarm
-     * @param fields The fields to copy
-     */
-    @Override
-    public void copy(Alarm from, Alarm to, AlarmField... fields) throws OXException {
-        for (AlarmField field : fields) {
-            Mapping<? extends Object, Alarm> mapping = get(field);
-            if (mapping.isSet(from)) {
-                mapping.copy(from, to);
-            }
-        }
-    }
-
     @Override
     public Alarm newInstance() {
         return new Alarm();
@@ -136,6 +119,12 @@ public class AlarmMapper extends DefaultMapper<Alarm, AlarmField> {
     protected EnumMap<AlarmField, ? extends Mapping<? extends Object, Alarm>> getMappings() {
         EnumMap<AlarmField, Mapping<? extends Object, Alarm>> mappings = new EnumMap<AlarmField, Mapping<? extends Object, Alarm>>(AlarmField.class);
         mappings.put(AlarmField.TRIGGER, new DefaultMapping<Trigger, Alarm>() {
+
+            @Override
+            public void copy(Alarm from, Alarm to) throws OXException {
+                Trigger value = get(from);
+                set(to, null == value ? null : new Trigger(value));
+            }
 
             @Override
             public boolean isSet(Alarm object) {
