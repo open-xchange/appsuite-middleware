@@ -73,7 +73,6 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
@@ -115,7 +114,7 @@ public abstract class AppointmentAction implements AJAXActionService {
     }
 
     private final ServiceLookup services;
-    
+
     private static final AtomicReference<ObjectUseCountService> OBJECT_USE_COUNT_SERVICE = new AtomicReference<ObjectUseCountService>();
     public static final void setObjectUseCountService(ObjectUseCountService service) {
         OBJECT_USE_COUNT_SERVICE.set(service);
@@ -296,7 +295,7 @@ public abstract class AppointmentAction implements AJAXActionService {
 
     /**
      * Increments the object use count
-     * 
+     *
      * @param session The {@link Session}
      * @param cdao The {@link CalendarDataObject}
      * @throws OXException if the object count cannot be incremented
@@ -317,7 +316,7 @@ public abstract class AppointmentAction implements AJAXActionService {
             switch (p.getType()) {
                 case Participant.USER:
                     if (p.getIdentifier() != session.getUserId()) {
-                        IncrementArguments arguments = new IncrementArguments.Builder(p.getIdentifier(), FolderObject.SYSTEM_LDAP_FOLDER_ID).build();
+                        IncrementArguments arguments = new IncrementArguments.Builder(p.getIdentifier()).build();
                         service.incrementObjectUseCount(session, arguments);
                     }
                     break;
