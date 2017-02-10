@@ -275,8 +275,8 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
     }
 
     private static final ConcurrentTIntObjectHashMap<Long> STAMPS = new ConcurrentTIntObjectHashMap<Long>(128);
-    private static final long DELAY = 60 * 60 * 1000;
-    private static final int MAX = 3;
+    private static final long                              DELAY  = 60 * 60 * 1000;
+    private static final int                               MAX    = 3;
 
     @Override
     public void checkConsistency(final String treeId, final StorageParameters storageParameters) throws OXException {
@@ -1750,17 +1750,29 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                 }
             }
             // Permissions
-            final Permission[] perms = folder.getPermissions();
+            Permission[] perms = folder.getPermissions();
+            final OXFolderManager folderManager = OXFolderManager.getInstance(session, con, con);
             if (null != perms) {
                 final OCLPermission[] oclPermissions = new OCLPermission[perms.length];
                 for (int i = 0; i < perms.length; i++) {
                     oclPermissions[i] = newOCLPermissionFor(perms[i]);
                 }
                 updateMe.setPermissionsAsArray(oclPermissions);
+                // Do update
+                folderManager.updateFolder(updateMe, true, StorageParametersUtility.isHandDownPermissions(storageParameters), millis.getTime());
+            } else {
+                // TODO: Get recursive property
+                boolean resursive = true;
+                FolderObject parent = getFolderObject(updateMe.getParentFolderID(), context, con, storageParameters);
+                if (FolderObject.PUBLIC == parent.getType() || FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_NAME.equals(parent.getFolderName())) {
+                    List<FolderObject> toUpdate = inheritPublicFolderPermissions(updateMe, parent, resursive, context, con, storageParameters);
+                    // Do update all
+                    for (FolderObject update : toUpdate) {
+                        folderManager.updateFolder(update, false, false, millis.getTime());
+                    }
+                }
             }
-            // Do update
-            final OXFolderManager folderManager = OXFolderManager.getInstance(session, con, con);
-            folderManager.updateFolder(updateMe, true, StorageParametersUtility.isHandDownPermissions(storageParameters), millis.getTime());
+
             // Handle warnings
             final List<OXException> warnings = folderManager.getWarnings();
             if (null != warnings) {
@@ -1771,6 +1783,46 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
         } finally {
             provider.close();
         }
+    }
+
+    private List<FolderObject> inheritPublicFolderPermissions(FolderObject folder, FolderObject parent, boolean recursive, Context context, Connection con, StorageParameters storageParameters) throws OXException {
+        List<FolderObject> result = new ArrayList<>();
+        OCLPermission[] perms = folder.getPermissionsAsArray();
+        OCLPermission[] parentPerms = parent.getPermissionsAsArray();
+        Map<Integer, OCLPermission> permsMappingPerEntity = new HashMap<>();
+        Map<Integer, OCLPermission> parentMappingPerEntity = new HashMap<>();
+        for (OCLPermission p : perms) {
+            permsMappingPerEntity.put(Integer.valueOf(p.getEntity()), p);
+        }
+        for (OCLPermission p : parentPerms) {
+            parentMappingPerEntity.put(Integer.valueOf(p.getEntity()), p);
+        }
+
+        for (Integer entity : parentMappingPerEntity.keySet()) {
+            if (OCLPermission.ALL_GUESTS == entity.intValue()) {
+                continue;
+            }
+            OCLPermission parentPerm = parentMappingPerEntity.get(entity);
+            if (permsMappingPerEntity.containsKey(entity)) {
+                OCLPermission folderPerm = permsMappingPerEntity.remove(entity);
+                folderPerm.setAllPermission(folderPerm.getFolderPermission() | parentPerm.getFolderPermission(), folderPerm.getReadPermission() | parentPerm.getReadPermission(), folderPerm.getWritePermission() | parentPerm.getWritePermission(), folderPerm.getDeletePermission() | parentPerm.getDeletePermission());
+                folderPerm.setEntity(entity);
+                folderPerm.setFuid(folder.getObjectID());
+                permsMappingPerEntity.put(entity, folderPerm);
+            } else {
+                permsMappingPerEntity.put(entity, parentPerm);
+            }
+        }
+        folder.setPermissions(new ArrayList<>(permsMappingPerEntity.values()));
+        result.add(folder);
+        if (recursive && folder.hasSubfolders()) {
+            List<Integer> subfolderIds = folder.getSubfolderIds();
+            for (Integer subfolderId : subfolderIds) {
+                FolderObject subfolder = getFolderObject(subfolderId, context, con, storageParameters);
+                result.addAll(inheritPublicFolderPermissions(subfolder, folder, recursive, context, con, storageParameters));
+            }
+        }
+        return result;
     }
 
     @Override
@@ -1896,8 +1948,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
             Connection connection = provider.getConnection();
             User user = storageParameters.getUser();
             UserPermissionBits userPermissionBits = getUserPermissionBits(connection, storageParameters);
-            searchIterator = OXFolderIteratorSQL.getDeletedFoldersSince(
-                since, user.getId(), user.getGroups(), userPermissionBits.getAccessibleModules(), storageParameters.getContext(), connection);
+            searchIterator = OXFolderIteratorSQL.getDeletedFoldersSince(since, user.getId(), user.getGroups(), userPermissionBits.getAccessibleModules(), storageParameters.getContext(), connection);
             return filterByContentType(searchIterator, includeContentTypes);
         } finally {
             SearchIterators.close(searchIterator);
@@ -2167,7 +2218,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
     private static final class FolderObjectComparator implements Comparator<FolderObject> {
 
         private final Collator collator;
-        private final Context context;
+        private final Context  context;
 
         FolderObjectComparator(Locale locale, Context context) {
             super();
@@ -2221,7 +2272,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
     private static final class FolderNameComparator implements Comparator<FolderObject> {
 
         private final Collator collator;
-        private final Context context;
+        private final Context  context;
 
         FolderNameComparator(Locale locale, Context context) {
             super();
