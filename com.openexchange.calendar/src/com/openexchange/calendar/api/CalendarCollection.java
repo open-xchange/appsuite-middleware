@@ -52,7 +52,6 @@ package com.openexchange.calendar.api;
 
 import static com.openexchange.calendar.Tools.getSqlInString;
 import static com.openexchange.java.Autoboxing.I;
-import gnu.trove.set.TIntSet;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -126,6 +125,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
+import gnu.trove.set.TIntSet;
 
 /**
  * {@link CalendarCollection} - Provides calculation routines for recurring calendar items.
@@ -1744,15 +1744,6 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
             // int type = OXFolderTools.getFolderType(fid,
             // so.getUserObject().getId(), so.getContext());
             if (type != FolderObject.SHARED) {
-                EffectivePermission oclp = null;
-                oclp = access.getFolderPermission(fid, so.getUserId(), UserConfigurationStorage.getInstance()
-                        .getUserConfigurationSafe(so.getUserId(), ctx));
-                // oclp = OXFolderTools.getEffectiveFolderOCL(fid,
-                // so.getUserObject().getId(), so.getUserObject().getGroups(),
-                // so.getContext(), so.getUserConfiguration());
-                if (oclp.canReadAllObjects()) {
-                    return true;
-                }
                 return loadObjectAndCheckPermisions(oid, fid, so, ctx, CalendarOperation.READ);
             }
             return loadObjectAndCheckPermisions(oid, fid, so, ctx, CalendarOperation.READ);
@@ -1772,15 +1763,6 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
             // int type = OXFolderTools.getFolderType(fid,
             // so.getUserObject().getId(), so.getContext());
             if (type != FolderObject.SHARED) {
-                EffectivePermission oclp = null;
-                oclp = access.getFolderPermission(fid, so.getUserId(), UserConfigurationStorage.getInstance()
-                        .getUserConfigurationSafe(so.getUserId(), ctx));
-                // oclp = OXFolderTools.getEffectiveFolderOCL(fid,
-                // so.getUserObject().getId(), so.getUserObject().getGroups(),
-                // so.getContext(), so.getUserConfiguration());
-                if (oclp.canWriteAllObjects()) {
-                    return true;
-                }
                 return loadObjectAndCheckPermisions(oid, fid, so, ctx, CalendarOperation.UPDATE);
             }
             return loadObjectAndCheckPermisions(oid, fid, so, ctx, CalendarOperation.UPDATE);
