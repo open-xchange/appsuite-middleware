@@ -1,3 +1,9 @@
+open-xchange-imageserver (7.8.2-18) stable; urgency=medium
+
+  * Build for patch 2017-02-20 (3952)
+
+ -- Kai Ahrens <kai.ahrens@open-xchange.com>  Fri, 10 Feb 2017 13:36:04 +0100
+
 open-xchange-imageserver (7.8.2-17) stable; urgency=medium
 
   * Build for patch 2017-02-06 (3918)

@@ -15,7 +15,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 13
+%define        ox_release 14
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -76,6 +76,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Fri Feb 10 2017 Markus Wagner <markus.wagner@open-xchange.com>
+Build for patch 2017-02-20 (3952)
 * Tue Jan 31 2017 Markus Wagner <markus.wagner@open-xchange.com>
 Build for patch 2017-02-06 (3918)
 * Thu Jan 26 2017 Markus Wagner <markus.wagner@open-xchange.com>
