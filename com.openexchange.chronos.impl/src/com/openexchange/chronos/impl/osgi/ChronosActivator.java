@@ -60,9 +60,11 @@ import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.group.GroupService;
+import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceSet;
 import com.openexchange.resource.ResourceService;
@@ -94,13 +96,13 @@ public class ChronosActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getOptionalServices() {
-        return new Class<?>[] { FreeBusyService.class };
+        return new Class<?>[] { FreeBusyService.class, ContactCollectorService.class, ObjectUseCountService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         try {
-            LOG.info("starting bundle: \"com.openexchange.chronos.impl\"");
+            LOG.info("starting bundle {}", context.getBundle());
             Services.setServiceLookup(this);
             /*
              * track calendar handlers
@@ -114,14 +116,14 @@ public class ChronosActivator extends HousekeepingActivator {
             registerService(CalendarService.class, new CalendarServiceImpl(calendarHandlers));
             registerService(FreeBusyService.class, new FreeBusyServiceImpl());
         } catch (Exception e) {
-            LOG.error("error starting \"com.openexchange.chronos.impl\"", e);
+            LOG.error("error starting {}", context.getBundle(), e);
             throw e;
         }
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: \"com.openexchange.chronos.impl\"");
+        LOG.info("stopping bundle {}", context.getBundle());
         Services.setServiceLookup(null);
         super.stopBundle();
     }

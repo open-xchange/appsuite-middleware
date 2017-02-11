@@ -186,7 +186,7 @@ public final class NewAction extends ChronosAction {
             }
             throw e;
         }
-        incrementUseCount(session, result);
+        session.getEntityResolver().incrementUseCount(result);
         JSONObject resultObject = new JSONObject(1);
         if (0 < result.getCreations().size()) {
             resultObject.put(DataFields.ID, result.getCreations().get(0).getCreatedEvent().getId());

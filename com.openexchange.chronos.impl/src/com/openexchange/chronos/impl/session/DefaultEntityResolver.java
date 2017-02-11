@@ -53,6 +53,8 @@ import static com.openexchange.chronos.common.CalendarUtils.isInternal;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.java.Autoboxing.i2I;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -67,13 +69,20 @@ import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.ResourceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.impl.osgi.Services;
+import com.openexchange.chronos.service.CalendarResult;
+import com.openexchange.chronos.service.CreateResult;
 import com.openexchange.chronos.service.EntityResolver;
+import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
+import com.openexchange.objectusecount.IncrementArguments;
+import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.server.ServiceLookup;
@@ -93,6 +102,7 @@ public class DefaultEntityResolver implements EntityResolver {
 
     private final ServiceLookup services;
     private final Context context;
+    private final ServerSession session;
     private final Map<Integer, Group> knownGroups;
     private final Map<Integer, User> knownUsers;
     private final Map<Integer, Resource> knownResources;
@@ -106,6 +116,7 @@ public class DefaultEntityResolver implements EntityResolver {
     public DefaultEntityResolver(ServerSession session, ServiceLookup services) {
         super();
         this.services = services;
+        this.session = session;
         this.context = session.getContext();
         knownUsers = new HashMap<Integer, User>();
         knownUsers.put(I(session.getUserId()), session.getUser());
@@ -297,6 +308,38 @@ public class DefaultEntityResolver implements EntityResolver {
         knownGroups.clear();
         knownResources.clear();
         knownUsers.clear();
+    }
+
+    @Override
+    public void incrementUseCount(CalendarResult result) {
+        if (null == result || result.getCreations().isEmpty() && result.getUpdates().isEmpty()) {
+            return;
+        }
+        ObjectUseCountService useCountService = Services.getService(ObjectUseCountService.class);
+        if (null == useCountService) {
+            LOG.debug("{} not available, skipping use count incrementation.");
+            return;
+        }
+        /*
+         * build increment arguments for all added attendees
+         */
+        List<IncrementArguments> argumentsList = new ArrayList<IncrementArguments>();
+        for (CreateResult createResult : result.getCreations()) {
+            argumentsList.addAll(getUseCountIncrementArguments(createResult.getCreatedEvent().getAttendees()));
+        }
+        for (UpdateResult updateResult : result.getUpdates()) {
+            argumentsList.addAll(getUseCountIncrementArguments(updateResult.getAttendeeUpdates().getAddedItems()));
+        }
+        /*
+         * do increment each use count
+         */
+        try {
+            for (IncrementArguments arguments : argumentsList) {
+                useCountService.incrementObjectUseCount(session, arguments);
+            }
+        } catch (OXException e) {
+            LOG.warn("Error incrementing object use count", e);
+        }
     }
 
     private Group getGroup(int entity) throws OXException {
@@ -598,6 +641,46 @@ public class DefaultEntityResolver implements EntityResolver {
             }
             throw e;
         }
+    }
+
+    /**
+     * Prepares a list of increment arguments for the supplied list of attendees for use with the object use count service.
+     *
+     * @param attendees The attendees to get the increment arguments for
+     * @return The increment arguments, or an empty list if no suitable attendees contained
+     */
+    private List<IncrementArguments> getUseCountIncrementArguments(List<Attendee> attendees) {
+        if (null == attendees || 0 == attendees.size()) {
+            return Collections.emptyList();
+        }
+        List<IncrementArguments> argumentsList = new ArrayList<IncrementArguments>(attendees.size());
+        for (Attendee attendee : attendees) {
+            IncrementArguments arguments = getUseCountIncrementArguments(attendee);
+            if (null != arguments) {
+                argumentsList.add(arguments);
+            }
+        }
+        return argumentsList;
+    }
+
+    private IncrementArguments getUseCountIncrementArguments(Attendee attendee) {
+        if (attendee.getEntity() != session.getUserId() && null == attendee.getMember() &&
+            CalendarUserType.INDIVIDUAL.equals(attendee.getCuType())) {
+            /*
+             * only consider individual calendar users that are not group members
+             */
+            if (0 < attendee.getEntity()) {
+                try {
+                    User user = getUser(attendee.getEntity());
+                    return new IncrementArguments.Builder(user.getContactId(), FolderObject.SYSTEM_LDAP_FOLDER_ID).build();
+                } catch (OXException e) {
+                    LOG.warn("Error retrieving internal user {} for use count increment; skipping.", I(attendee.getEntity()));
+                }
+            } else if (null != attendee.getUri()) {
+                return new IncrementArguments.Builder(CalendarUtils.extractEMailAddress(attendee.getUri())).build();
+            }
+        }
+        return null;
     }
 
     /**

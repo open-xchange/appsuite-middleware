@@ -125,6 +125,13 @@ public interface EntityResolver {
     TimeZone getTimeZone(int userID) throws OXException;;
 
     /**
+     * Increments the use count for newly added attendees in created or updated events.
+     *
+     * @param result The calendar result
+     */
+    void incrementUseCount(CalendarResult result);
+
+    /**
      * Prepares a new attendee representing the internal user with the supplied identifier.
      *
      * @param userID The identifier of the user to prepare the attendee for
