@@ -396,9 +396,9 @@ public class ConflictCheckPerformer extends AbstractQueryPerformer {
         List<Attendee> allAttendees = conflictingEvent.containsAttendees() ? conflictingEvent.getAttendees() : storage.getAttendeeStorage().loadAttendees(conflictingEvent.getId());
         for (Attendee checkedAttendee : checkedAttendees) {
             if (isHardConflict(checkedAttendee)) {
-                hardConflict.setValue(Boolean.TRUE);
                 Attendee matchingAttendee = find(allAttendees, checkedAttendee);
                 if (null != matchingAttendee && false == ParticipationStatus.DECLINED.equals(matchingAttendee.getPartStat())) {
+                    hardConflict.setValue(Boolean.TRUE);
                     conflictingAttendees.add(0, matchingAttendee);
                 }
             } else if (maxAttendeesPerConflict > conflictingAttendees.size()) {
