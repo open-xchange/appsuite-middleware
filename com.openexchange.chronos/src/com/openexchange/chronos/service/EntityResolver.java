@@ -125,11 +125,15 @@ public interface EntityResolver {
     TimeZone getTimeZone(int userID) throws OXException;;
 
     /**
-     * Increments the use count for newly added attendees in created or updated events.
+     * Tracks newly added attendees from creations and updates found in the supplied calendar result.
+     * <p/>
+     * This includes adding new entries in the collected contacts folder for new external calendar users (utilizing the contact collector
+     * service), as well as incrementing the use counts for already known internal and external entities (using the object use count
+     * service).
      *
      * @param result The calendar result
      */
-    void incrementUseCount(CalendarResult result);
+    void trackAttendeeUsage(CalendarResult result);
 
     /**
      * Prepares a new attendee representing the internal user with the supplied identifier.

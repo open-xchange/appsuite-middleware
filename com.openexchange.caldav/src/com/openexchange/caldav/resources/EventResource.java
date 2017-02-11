@@ -438,7 +438,7 @@ public class EventResource extends DAVObjectResource<Event> {
                 LOG.debug("{}: Master event {} not updated.", getUrl(), eventID);
             }
             calendarSession.set(CalendarParameters.PARAMETER_TIMESTAMP, Long.valueOf(result.getTimestamp().getTime()));
-            calendarSession.getEntityResolver().incrementUseCount(result);
+            calendarSession.getEntityResolver().trackAttendeeUsage(result);
         }
         /*
          * update exceptions
@@ -450,7 +450,7 @@ public class EventResource extends DAVObjectResource<Event> {
                 LOG.debug("{}: Exception {} not updated.", getUrl(), eventID);
             }
             calendarSession.set(CalendarParameters.PARAMETER_TIMESTAMP, Long.valueOf(result.getTimestamp().getTime()));
-            calendarSession.getEntityResolver().incrementUseCount(result);
+            calendarSession.getEntityResolver().trackAttendeeUsage(result);
         }
     }
 
@@ -474,7 +474,7 @@ public class EventResource extends DAVObjectResource<Event> {
         }
         Event createdEvent = result.getCreations().get(0).getCreatedEvent();
         calendarSession.set(CalendarParameters.PARAMETER_TIMESTAMP, Long.valueOf(result.getTimestamp().getTime()));
-        calendarSession.getEntityResolver().incrementUseCount(result);
+        calendarSession.getEntityResolver().trackAttendeeUsage(result);
         /*
          * create exceptions
          */
@@ -486,7 +486,7 @@ public class EventResource extends DAVObjectResource<Event> {
                 throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "valid-calendar-object-resource", url, HttpServletResponse.SC_FORBIDDEN);
             }
             calendarSession.set(CalendarParameters.PARAMETER_TIMESTAMP, Long.valueOf(result.getTimestamp().getTime()));
-            calendarSession.getEntityResolver().incrementUseCount(result);
+            calendarSession.getEntityResolver().trackAttendeeUsage(result);
         }
         return createdEvent;
     }

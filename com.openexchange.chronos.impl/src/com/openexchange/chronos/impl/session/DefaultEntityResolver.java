@@ -53,6 +53,7 @@ import static com.openexchange.chronos.common.CalendarUtils.isInternal;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.java.Autoboxing.i2I;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -61,6 +62,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUser;
@@ -74,6 +77,7 @@ import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CreateResult;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.UpdateResult;
+import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
@@ -310,35 +314,84 @@ public class DefaultEntityResolver implements EntityResolver {
         knownUsers.clear();
     }
 
+
     @Override
-    public void incrementUseCount(CalendarResult result) {
+    public void trackAttendeeUsage(CalendarResult result) {
+        /*
+         * collect newly added attendees
+         */
         if (null == result || result.getCreations().isEmpty() && result.getUpdates().isEmpty()) {
             return;
         }
-        ObjectUseCountService useCountService = Services.getService(ObjectUseCountService.class);
-        if (null == useCountService) {
-            LOG.debug("{} not available, skipping use count incrementation.");
+        List<Attendee> attendees = new ArrayList<Attendee>();
+        for (CreateResult createResult : result.getCreations()) {
+            attendees.addAll(createResult.getCreatedEvent().getAttendees());
+        }
+        for (UpdateResult updateResult : result.getUpdates()) {
+            attendees.addAll(updateResult.getAttendeeUpdates().getAddedItems());
+        }
+        if (attendees.isEmpty()) {
             return;
         }
         /*
-         * build increment arguments for all added attendees
+         * build increment arguments for the use count service for all added attendees
          */
-        List<IncrementArguments> argumentsList = new ArrayList<IncrementArguments>();
-        for (CreateResult createResult : result.getCreations()) {
-            argumentsList.addAll(getUseCountIncrementArguments(createResult.getCreatedEvent().getAttendees()));
-        }
-        for (UpdateResult updateResult : result.getUpdates()) {
-            argumentsList.addAll(getUseCountIncrementArguments(updateResult.getAttendeeUpdates().getAddedItems()));
+        List<IncrementArguments> incrementArguments = getUseCountIncrementArguments(attendees);
+        if (0 < incrementArguments.size()) {
+            ObjectUseCountService useCountService = Services.getService(ObjectUseCountService.class);
+            if (null == useCountService) {
+                LOG.debug("{} not available, skipping use count incrementation.", ObjectUseCountService.class);
+            } else {
+                /*
+                 * do increment each use count
+                 */
+                try {
+                    for (IncrementArguments arguments : incrementArguments) {
+                        useCountService.incrementObjectUseCount(session, arguments);
+                    }
+                } catch (OXException e) {
+                    LOG.warn("Error incrementing object use count", e);
+                }
+            }
         }
         /*
-         * do increment each use count
+         * gather collectible addresses & pass to contact collector
          */
-        try {
-            for (IncrementArguments arguments : argumentsList) {
-                useCountService.incrementObjectUseCount(session, arguments);
+        List<InternetAddress> collectibleAddresses = getCollectibleAddresses(attendees);
+        if (0 < collectibleAddresses.size()) {
+            ContactCollectorService contactCollectorService = Services.getService(ContactCollectorService.class);
+            if (null == contactCollectorService) {
+                LOG.debug("{} not available, skipping use count incrementation.", ContactCollectorService.class);
+            } else {
+                contactCollectorService.memorizeAddresses(collectibleAddresses, false, session);
             }
-        } catch (OXException e) {
-            LOG.warn("Error incrementing object use count", e);
+        }
+    }
+
+    public void collectAddresses(CalendarResult result) {
+        if (null == result || result.getCreations().isEmpty() && result.getUpdates().isEmpty()) {
+            return;
+        }
+        ContactCollectorService contactCollectorService = Services.getService(ContactCollectorService.class);
+        if (null == contactCollectorService) {
+            LOG.debug("{} not available, skipping use count incrementation.", ContactCollectorService.class);
+            return;
+        }
+        /*
+         * gather collectible addresses
+         */
+        List<InternetAddress> collectibleAddresses = new ArrayList<InternetAddress>();
+        for (CreateResult createResult : result.getCreations()) {
+            collectibleAddresses.addAll(getCollectibleAddresses(createResult.getCreatedEvent().getAttendees()));
+        }
+        for (UpdateResult updateResult : result.getUpdates()) {
+            collectibleAddresses.addAll(getCollectibleAddresses(updateResult.getAttendeeUpdates().getAddedItems()));
+        }
+        /*
+         * pass to contact collector
+         */
+        if (0 < collectibleAddresses.size()) {
+            contactCollectorService.memorizeAddresses(collectibleAddresses, false, session);
         }
     }
 
@@ -641,6 +694,33 @@ public class DefaultEntityResolver implements EntityResolver {
             }
             throw e;
         }
+    }
+
+    /**
+     * Prepares a list of internet addresses for use with the contact collector service.
+     *
+     * @param attendees The attendees to get the addresses for
+     * @return The list of addresses, or an empty list if no suitable attendees contained
+     */
+    private List<InternetAddress> getCollectibleAddresses(List<Attendee> attendees) {
+        if (null == attendees || 0 == attendees.size()) {
+            return Collections.emptyList();
+        }
+        List<InternetAddress> addresses = new ArrayList<InternetAddress>(attendees.size());
+        for (Attendee attendee : attendees) {
+            if (0 == attendee.getEntity() && CalendarUserType.INDIVIDUAL.equals(attendee.getCuType())) {
+                try {
+                    InternetAddress address = new InternetAddress(CalendarUtils.extractEMailAddress(attendee.getUri()));
+                    if (null != attendee.getCn()) {
+                        address.setPersonal(attendee.getCn());
+                    }
+                    addresses.add(address);
+                } catch (AddressException | UnsupportedEncodingException e) {
+                    LOG.warn("Error constructing internet address for attendee {}, skipping contact collection.", attendee, e);
+                }
+            }
+        }
+        return addresses;
     }
 
     /**
