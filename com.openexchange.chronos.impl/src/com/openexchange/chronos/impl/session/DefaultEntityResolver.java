@@ -49,6 +49,8 @@
 
 package com.openexchange.chronos.impl.session;
 
+import static com.openexchange.chronos.common.CalendarUtils.extractEMailAddress;
+import static com.openexchange.chronos.common.CalendarUtils.filter;
 import static com.openexchange.chronos.common.CalendarUtils.isInternal;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
@@ -85,6 +87,8 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
+import com.openexchange.objectusecount.BatchIncrementArguments;
+import com.openexchange.objectusecount.BatchIncrementArguments.Builder;
 import com.openexchange.objectusecount.IncrementArguments;
 import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.resource.Resource;
@@ -314,29 +318,17 @@ public class DefaultEntityResolver implements EntityResolver {
         knownUsers.clear();
     }
 
-
     @Override
     public void trackAttendeeUsage(CalendarResult result) {
-        /*
-         * collect newly added attendees
-         */
-        if (null == result || result.getCreations().isEmpty() && result.getUpdates().isEmpty()) {
-            return;
-        }
-        List<Attendee> attendees = new ArrayList<Attendee>();
-        for (CreateResult createResult : result.getCreations()) {
-            attendees.addAll(createResult.getCreatedEvent().getAttendees());
-        }
-        for (UpdateResult updateResult : result.getUpdates()) {
-            attendees.addAll(updateResult.getAttendeeUpdates().getAddedItems());
-        }
-        if (attendees.isEmpty()) {
+        List<Attendee> attendees = getAddedAttendees(result);
+        if (null == attendees || attendees.isEmpty()) {
             return;
         }
         /*
          * build increment arguments for the use count service for all added attendees
          */
-        List<IncrementArguments> incrementArguments = getUseCountIncrementArguments(attendees);
+        boolean collectEmailAddresses = session.getUserConfiguration().isCollectEmailAddresses();
+        List<IncrementArguments> incrementArguments = getUseCountIncrementArguments(attendees, collectEmailAddresses);
         if (0 < incrementArguments.size()) {
             ObjectUseCountService useCountService = Services.getService(ObjectUseCountService.class);
             if (null == useCountService) {
@@ -354,44 +346,20 @@ public class DefaultEntityResolver implements EntityResolver {
                 }
             }
         }
-        /*
-         * gather collectible addresses & pass to contact collector
-         */
-        List<InternetAddress> collectibleAddresses = getCollectibleAddresses(attendees);
-        if (0 < collectibleAddresses.size()) {
-            ContactCollectorService contactCollectorService = Services.getService(ContactCollectorService.class);
-            if (null == contactCollectorService) {
-                LOG.debug("{} not available, skipping use count incrementation.", ContactCollectorService.class);
-            } else {
-                contactCollectorService.memorizeAddresses(collectibleAddresses, false, session);
+        if (collectEmailAddresses) {
+            /*
+             * gather collectible addresses from external attendees & pass to contact collector (use count incrementation for already
+             * existing contacts can be performed from there)
+             */
+            List<InternetAddress> collectibleAddresses = getCollectibleAddresses(attendees);
+            if (0 < collectibleAddresses.size()) {
+                ContactCollectorService contactCollectorService = Services.getService(ContactCollectorService.class);
+                if (null == contactCollectorService) {
+                    LOG.debug("{} not available, skipping use count incrementation.", ContactCollectorService.class);
+                } else {
+                    contactCollectorService.memorizeAddresses(collectibleAddresses, true, session);
+                }
             }
-        }
-    }
-
-    public void collectAddresses(CalendarResult result) {
-        if (null == result || result.getCreations().isEmpty() && result.getUpdates().isEmpty()) {
-            return;
-        }
-        ContactCollectorService contactCollectorService = Services.getService(ContactCollectorService.class);
-        if (null == contactCollectorService) {
-            LOG.debug("{} not available, skipping use count incrementation.", ContactCollectorService.class);
-            return;
-        }
-        /*
-         * gather collectible addresses
-         */
-        List<InternetAddress> collectibleAddresses = new ArrayList<InternetAddress>();
-        for (CreateResult createResult : result.getCreations()) {
-            collectibleAddresses.addAll(getCollectibleAddresses(createResult.getCreatedEvent().getAttendees()));
-        }
-        for (UpdateResult updateResult : result.getUpdates()) {
-            collectibleAddresses.addAll(getCollectibleAddresses(updateResult.getAttendeeUpdates().getAddedItems()));
-        }
-        /*
-         * pass to contact collector
-         */
-        if (0 < collectibleAddresses.size()) {
-            contactCollectorService.memorizeAddresses(collectibleAddresses, false, session);
         }
     }
 
@@ -707,17 +675,15 @@ public class DefaultEntityResolver implements EntityResolver {
             return Collections.emptyList();
         }
         List<InternetAddress> addresses = new ArrayList<InternetAddress>(attendees.size());
-        for (Attendee attendee : attendees) {
-            if (0 == attendee.getEntity() && CalendarUserType.INDIVIDUAL.equals(attendee.getCuType())) {
-                try {
-                    InternetAddress address = new InternetAddress(CalendarUtils.extractEMailAddress(attendee.getUri()));
-                    if (null != attendee.getCn()) {
-                        address.setPersonal(attendee.getCn());
-                    }
-                    addresses.add(address);
-                } catch (AddressException | UnsupportedEncodingException e) {
-                    LOG.warn("Error constructing internet address for attendee {}, skipping contact collection.", attendee, e);
+        for (Attendee attendee : filter(attendees, Boolean.FALSE, CalendarUserType.INDIVIDUAL)) {
+            try {
+                InternetAddress address = new InternetAddress(extractEMailAddress(attendee.getUri()));
+                if (null != attendee.getCn()) {
+                    address.setPersonal(attendee.getCn());
                 }
+                addresses.add(address);
+            } catch (AddressException | UnsupportedEncodingException e) {
+                LOG.warn("Error constructing internet address for attendee {}, skipping contact collection.", attendee, e);
             }
         }
         return addresses;
@@ -727,40 +693,40 @@ public class DefaultEntityResolver implements EntityResolver {
      * Prepares a list of increment arguments for the supplied list of attendees for use with the object use count service.
      *
      * @param attendees The attendees to get the increment arguments for
+     * @param skipExternals <code>true</code> to only consider <i>internal</i> attendees, <code>false</code>, otherwise
      * @return The increment arguments, or an empty list if no suitable attendees contained
      */
-    private List<IncrementArguments> getUseCountIncrementArguments(List<Attendee> attendees) {
+    private List<IncrementArguments> getUseCountIncrementArguments(List<Attendee> attendees, boolean skipExternals) {
         if (null == attendees || 0 == attendees.size()) {
             return Collections.emptyList();
         }
         List<IncrementArguments> argumentsList = new ArrayList<IncrementArguments>(attendees.size());
-        for (Attendee attendee : attendees) {
-            IncrementArguments arguments = getUseCountIncrementArguments(attendee);
-            if (null != arguments) {
-                argumentsList.add(arguments);
-            }
-        }
-        return argumentsList;
-    }
-
-    private IncrementArguments getUseCountIncrementArguments(Attendee attendee) {
-        if (attendee.getEntity() != session.getUserId() && null == attendee.getMember() &&
-            CalendarUserType.INDIVIDUAL.equals(attendee.getCuType())) {
-            /*
-             * only consider individual calendar users that are not group members
-             */
-            if (0 < attendee.getEntity()) {
+        /*
+         * add arguments for all internal attendees (by global addressbook entry)
+         */
+        Builder batchIncrementArgumentsBuilder = new BatchIncrementArguments.Builder();
+        for (Attendee attendee : filter(attendees, Boolean.TRUE, CalendarUserType.INDIVIDUAL)) {
+            if (session.getUserId() != attendee.getEntity() && null == attendee.getMember()) {
                 try {
-                    User user = getUser(attendee.getEntity());
-                    return new IncrementArguments.Builder(user.getContactId(), FolderObject.SYSTEM_LDAP_FOLDER_ID).build();
+                    batchIncrementArgumentsBuilder.add(getUser(attendee.getEntity()).getContactId(), FolderObject.SYSTEM_LDAP_FOLDER_ID);
                 } catch (OXException e) {
                     LOG.warn("Error retrieving internal user {} for use count increment; skipping.", I(attendee.getEntity()));
                 }
-            } else if (null != attendee.getUri()) {
-                return new IncrementArguments.Builder(CalendarUtils.extractEMailAddress(attendee.getUri())).build();
             }
         }
-        return null;
+        BatchIncrementArguments batchIncrementArguments = batchIncrementArgumentsBuilder.build();
+        if (false == batchIncrementArguments.getCounts().isEmpty()) {
+            argumentsList.add(batchIncrementArguments);
+        }
+        /*
+         * add arguments for all external attendees (by e-mail address)
+         */
+        if (false == skipExternals) {
+            for (Attendee attendee : filter(attendees, Boolean.FALSE, CalendarUserType.INDIVIDUAL)) {
+                argumentsList.add(new IncrementArguments.Builder(extractEMailAddress(attendee.getUri())).build());
+            }
+        }
+        return argumentsList;
     }
 
     /**
@@ -771,6 +737,26 @@ public class DefaultEntityResolver implements EntityResolver {
      */
     private static String getCalAddress(User user) {
         return CalendarUtils.getURI(user.getMail());
+    }
+
+    /**
+     * Gets a list of newly added attendees from each "create"- and "update" result included in the supplied calendar result.
+     *
+     * @param result The calendar result to extract the new attendees from
+     * @return The newly added attendees, or <code>null</code> if there are none
+     */
+    private static List<Attendee> getAddedAttendees(CalendarResult result) {
+        if (null == result || result.getCreations().isEmpty() && result.getUpdates().isEmpty()) {
+            return null;
+        }
+        List<Attendee> attendees = new ArrayList<Attendee>();
+        for (CreateResult createResult : result.getCreations()) {
+            attendees.addAll(createResult.getCreatedEvent().getAttendees());
+        }
+        for (UpdateResult updateResult : result.getUpdates()) {
+            attendees.addAll(updateResult.getAttendeeUpdates().getAddedItems());
+        }
+        return attendees.isEmpty() ? null : attendees;
     }
 
 }
