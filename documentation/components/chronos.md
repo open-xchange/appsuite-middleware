@@ -3,77 +3,6 @@ title: Calendar v2 aka Chronos
 ---
 
 
-# Workflows
-
-## Create Event
-
-1. Get & check target folder
-
-    - folder must exist
-    - user must be able to access the folder
-    - folder must be of module "calendar"
-    - user must have "create objects" permissions
-
-2. Prepare event data
-
-    1. Prepare basic data
-       - apply next object identifier
-       - take over common public folder identifier if folder is of type "public"   
-       - init sequence with 0
-       - if no UID is set by client, apply random UID
-       - if UID is set by client, check for uniqueness in context
-       - set "created by" to current calendar user, creation date to "now"
-       - set "modified by" to current calendar user, last modified date to "now"
-       - if no organizer is set by client, set organizer to current calender user
-    
-
-
-
- (a) Prepare basic data
-   - apply next object identifier
-   - take over common public folder identifier if folder is of type "public"   
-   - init sequence with 0
-   - if no UID is set by client, apply random UID
-   - if UID is set by client, check for uniqueness in context
-   - set "created by" to current calendar user, creation date to "now"
-   - set "modified by" to current calendar user, last modified date to "now"
-   - if no organizer is set by client, set organizer to current calender user
-   
- (b) Prepare organizer data
-   - if organizer is set by client, try and resolve to an internal entity
-   - if "internal" organizer is set by client, check that it matches the calendar user
-   - if "external" organizer is set by client, take over as-is
-   - if session user != calendar user, take over session user in "sent-by" attribute
-   
- (c) Prepare date/time data
-   - check start- and enddate are specified, and start date is not after end date
-   - if event is marked as "all-day", truncate the time fractions from start- and end-date (in UTC)
-   - if event is marked as "all-day", and the truncated start- and endtime are equal, add one day to enddate
-   - take over start/end timezone if set
-   - if no timezone set, fallback to calendar user's configured timezone
-
- (d) Prepare further data
-   - if classification is specified, check that it is allowed in target folder
-     (in "public" calendar folders, the classification may only by "PUBLIC")
-   - if no classification is specified, assume a PUBLIC classification
-   - take over event status if set, otherwise fall back to "confirmed"
-   - take over color if set
-   
- (e) Prepare recurrence related data
-   - if a recurrence rule is set, check it for validity
-   - if a recurrence rule is set, take over event object identifier as series id
-   - if delete exception dates are set, take them over after checking they are valid
-   
- (f) Prepare further data
-   - take over summary, location, description, categories, filename if set
-
-4. Prepare attendee data
-
-5. Check for conflicts
-
-6.
-
-
 # Details
 
 This section provides some deeper insights for certain topics.
@@ -287,6 +216,7 @@ Internally, these kind of checks are performed along with each event update is c
 - https://tools.ietf.org/html/rfc6638#section-3.2.8
 - com.openexchange.chronos.impl.performer.UpdatePerformer.needsParticipationStatusReset
 
+
 ## Reset of Change Exceptions
 
 When an event series is updated, there are situations where all previously created change exceptions need to be reset, i.e. they get removed so that there are only regular occurrences again. In the legacy implementation, this has always been the case whenever the series pattern is changed (in any way), or the recurring master's start-/endtime are updated. Implicitly, this would also reset any participation status of the attendees, see above. 
@@ -297,3 +227,26 @@ In the Chronos stack, a slightly enhanced approach is used so that not necessari
 - com.openexchange.calendar.api.CalendarCollection.detectTimeChange
 - com.openexchange.calendar.CalendarOperation.checkPatternChange
 - com.openexchange.calendar.CalendarMySQL.deleteAllRecurringExceptions
+
+
+## External Calendar Users
+
+At many places, one needs to differentiate between *internal* and *external* calendar users. Internal calendar users are all provisioned groupware entities within the same context, i.e. all resources, users and groups. All other calendar users are treated as external entities. This is especially also true for entities from other contexts of the same installation.
+
+Currently, all external calendar users require a valid e-mail address that can be used for scheduling via iMIP. This is enforced by validating the URIs of external attendees prior saving.  
+
+### URI Encoding / International Domain Names (IDN)
+
+E-Mail addresses of calendar users may contain non-ASCII characters, e.g. from international domain names like *müller.com*. When being used in a calendar user's URI along with the ``mailto:`` scheme, they are usually transferred as percent-encoded UTF-8. For example, for an attendee with e-mail address "horst@müller.com", the value of the corresponding ``ATTENDEE`` property would look like the following (while the ``CN`` parameter would still just use the UTF-8 string as-is):
+
+> ``ATTENDEE;CN="Horst Müller";CUTYPE=INDIVIDUAL;PARTSTAT=NEEDS-ACTION:mailto:horst@m%C3%BCller.com``
+
+Internally within the Chronos stack, all URIs are kept as (escaped) URI string, which would match the representation of the corresponding value in an iCalendar ``ATTENDEE`` or ``ORGANIZER`` property.
+
+When being converted back to a plain e-mail address string (as used for external participants in the legacy stack), such URIs are decoded implicitly; additionally, ASCII-encoded (punycode) addresses with international domain names (IDN) are converted back to their unicode representation, too. This is the case when converting to an external participant in the legacy HTTP API, as well as when storing such an attendee in the ``dateExternal`` table. 
+
+### References / further reading
+- https://tools.ietf.org/html/rfc5545#section-3.3.3
+- com.openexchange.chronos.common.CalendarUtils.extractEMailAddress(String)
+- com.openexchange.chronos.impl.Check.requireValidEMail(T)
+
