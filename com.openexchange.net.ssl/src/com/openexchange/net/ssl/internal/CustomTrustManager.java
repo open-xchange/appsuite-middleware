@@ -86,7 +86,7 @@ public class CustomTrustManager extends AbstractTrustManager {
 
     /**
      * Initialises the {@link CustomTrustManager}
-     * 
+     *
      * @return An {@link X509ExtendedTrustManager}
      */
     private static X509ExtendedTrustManager initCustomTrustManager() {
@@ -126,7 +126,8 @@ public class CustomTrustManager extends AbstractTrustManager {
 
             TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
             tmf.init(ks);
-            params = new PKIXParameters(ks);
+
+            setParameters(new PKIXParameters(ks));
 
             for (TrustManager tm : tmf.getTrustManagers()) {
                 if (tm instanceof X509ExtendedTrustManager) {

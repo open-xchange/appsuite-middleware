@@ -62,6 +62,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.naming.InvalidNameException;
 import javax.naming.ldap.LdapName;
 import javax.naming.ldap.Rdn;
@@ -90,10 +91,29 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractTrustManager.class);
 
+    private static final AtomicReference<PKIXParameters> PARAMETERS_REFERENCE = new AtomicReference<>();
+
+    /**
+     * Sets the specified instance as this trust manager's static PKIX validation parameters.
+     *
+     * @param parameters The parameters to set
+     */
+    protected static void setParameters(PKIXParameters parameters) {
+        PARAMETERS_REFERENCE.set(parameters);
+    }
+
+    /**
+     * Gets the currently enabled static PKIX validation parameters.
+     *
+     * @return The PKIX validation parameters or <code>null</code>
+     */
+    protected static PKIXParameters getParameters() {
+        return PARAMETERS_REFERENCE.get();
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------------
+
     protected final X509ExtendedTrustManager trustManager;
-
-    protected static PKIXParameters params;
-
     private final MessageDigest sha256;
 
     /**
@@ -369,7 +389,12 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
      * @throws CertificateException if the root CA is not trusted by the user
      */
     private void checkRootCATrusted(int userId, int contextId, X509Certificate[] chain) throws CertificateException {
-        Set<TrustAnchor> anchors = params.getTrustAnchors();
+        PKIXParameters parameters = PARAMETERS_REFERENCE.get();
+        if (null == parameters) {
+            throw new CertificateException("Trust manager not properly initialized.");
+        }
+
+        Set<TrustAnchor> anchors = parameters.getTrustAnchors();
 
         //The root CA certificate is always the last element in the chain
         X509Certificate rootCert = chain[chain.length - 1];

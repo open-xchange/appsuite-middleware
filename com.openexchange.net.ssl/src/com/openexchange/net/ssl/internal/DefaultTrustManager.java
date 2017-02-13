@@ -84,7 +84,7 @@ public class DefaultTrustManager extends AbstractTrustManager {
 
     /**
      * Initialises the {@link CustomTrustManager}
-     * 
+     *
      * @return An {@link X509ExtendedTrustManager}
      */
     private static X509ExtendedTrustManager initDefaultTrustManager() {
@@ -112,7 +112,8 @@ public class DefaultTrustManager extends AbstractTrustManager {
             FileInputStream is = new FileInputStream(filename);
             KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
             keystore.load(is, password.toCharArray());
-            params = new PKIXParameters(keystore);
+
+            setParameters(new PKIXParameters(keystore));
 
             TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
             tmf.init((KeyStore) null); // Using null here initialises the TMF with the default trust store.
