@@ -3,8 +3,8 @@ array:
       Key: com.openexchange.spamhandler.enabled
       Description: >
 Allows to enable/disable spam handling per user/context/server via ConfigCascade (based on the configured spam handler).
-This property will only be taken into account when the users configuration for 'gui_spam_filter_capabilities_enabled' is set to 'false' (default for createuser). If the user has been 
-provisioned with gui_spam_filter_capabilities_enabled = true changing the described property will be ignored. If the setting isn't defined the user configuration from database will be used.
+If no configuration is available (for the mentioned property) the previously configured user setting mail permission bit will be taken into account. If there is a configuration for "com.openexchange.spamhandler.enabled" available these will be used for the defined scope 
+<b>Caution:</b> if the property has once been set via ConfigCascade only these source will be used. Changing the user configuration afterwards via /opt/open-xchange/sbin/changeuser ... --gui_spam_filter_capabilities_enabled true/false will have no effect! You can change it for instance on a user base as described here: http://oxpedia.org/wiki/index.php?title=ConfigCascade .
       Default: UserSettingMail permission bit from database
       Version: 7.8.3
       Reloadable: true

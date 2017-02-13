@@ -395,8 +395,6 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 
     protected static final String SPAM_ENABLED = "com.openexchange.spamhandler.enabled";
 
-    protected static final String SPAM_FILTER_USER_SETTING_MAIL_ORIG_BIT = "gui_spam_filter_capabilities_enabled_org";
-
     protected void applyConfigCascadeSettings(UserSettingMail userSettingMail, int userId, Context ctx) throws OXException {
         ConfigViewFactory configViewFactory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
         if (configViewFactory == null) {
@@ -412,19 +410,16 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
     }
 
     protected void updateSpamSetting(UserSettingMail userSettingMail, int userId, Context ctx, ConfigView configView) throws OXException {
-        Boolean overwritten = configView.get(SPAM_FILTER_USER_SETTING_MAIL_ORIG_BIT, Boolean.class);
-        if (((!userSettingMail.isSpamOptionEnabled()) && (overwritten == null)) || (overwritten != null)) {
-            Boolean spamEnabledByConfig = configView.get(SPAM_ENABLED, Boolean.class);
-            if (spamEnabledByConfig == null) {
-                LOG.debug("Unable to update 'spam enabled' user permission bit. No config for user {} in context {} available. Spam handling will be disabled.", userId, ctx.getContextId());
-                return;
-            }
-            boolean boolSpamEnabledByConfig = spamEnabledByConfig.booleanValue();
-            if (userSettingMail.isSpamOptionEnabled() != boolSpamEnabledByConfig) {
-                userSettingMail.setSpamEnabled(boolSpamEnabledByConfig);
-                this.saveUserSettingMail(userSettingMail, userId, ctx);
-                configView.set("user", SPAM_FILTER_USER_SETTING_MAIL_ORIG_BIT, userSettingMail.isSpamOptionEnabled()); // remember
-            }
+        Boolean spamEnabledByConfig = configView.get(SPAM_ENABLED, Boolean.class);
+        if (spamEnabledByConfig == null) {
+            LOG.debug("No config for user {} in context {} found. Falling back to user permission bit for spam handling.", userId, ctx.getContextId());
+            return;
+        }
+        boolean boolSpamEnabledByConfig = spamEnabledByConfig.booleanValue();
+        if (userSettingMail.isSpamOptionEnabled() != boolSpamEnabledByConfig) {
+            userSettingMail.setSpamEnabled(boolSpamEnabledByConfig);
+            this.saveUserSettingMail(userSettingMail, userId, ctx);
+            LOG.debug("Updated spam configuration for user {} in context {} to '{}' based on ConfigCascade setting.", userId, ctx.getContextId(), boolSpamEnabledByConfig);
         }
     }
 
