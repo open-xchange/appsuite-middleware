@@ -61,7 +61,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.DataObject;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
@@ -158,7 +157,7 @@ public abstract class TaskAction implements AJAXActionService {
     /**
      * Gets the column identifier to use for sorting the results if defined. If a virtual identifier is passed from the client, it is
      * implicitly mapped to the corresponding real column identifier.
-     * 
+     *
      * @param request The task request to get the order by information
      * @return The column identifier to use for sorting the results, or {@link TaskRequest#NOT_FOUND} if not set
      */
@@ -212,7 +211,7 @@ public abstract class TaskAction implements AJAXActionService {
 
     /**
      * Increments the object use count
-     * 
+     *
      * @param session The {@link Session}
      * @param task The {@link Task}
      * @throws OXException if the object count cannot be incremented
@@ -233,8 +232,7 @@ public abstract class TaskAction implements AJAXActionService {
             switch (p.getType()) {
                 case Participant.USER:
                     if (p.getIdentifier() != session.getUserId()) {
-                        //TODO Get contact id
-                        IncrementArguments arguments = new IncrementArguments.Builder(p.getIdentifier(), FolderObject.SYSTEM_LDAP_FOLDER_ID).build();
+                        IncrementArguments arguments = new IncrementArguments.Builder(p.getIdentifier()).build();
                         service.incrementObjectUseCount(session, arguments);
                     }
                     break;

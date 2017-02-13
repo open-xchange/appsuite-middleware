@@ -436,8 +436,10 @@ public class ContactResource extends CommonResource<Contact> {
             /*
              * image problem, handle by create without image
              */
-            LOG.warn("{}: {} - removing image and trying again.", getUrl(), e.getMessage());
-            object.removeImage1();
+            if(object!=null){
+                LOG.warn("{}: {} - removing image and trying again.", getUrl(), e.getMessage());
+                object.removeImage1();
+            }
             return true;
         } else if (Tools.isDataTruncation(e)) {
             /*

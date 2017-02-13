@@ -49,7 +49,6 @@
 
 package com.openexchange.antiabuse;
 
-import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
 
@@ -65,25 +64,19 @@ public interface AntiAbuseService {
     /**
      * Performs the <code>"allow"</code> request.
      *
-     * @param login The login string
-     * @param password The password
-     * @param remoteAddress The remote address
-     * @param attributes The optional attributes
+     * @param parameters The parameters to use
      * @return The status response
      * @throws OXException If allow request fails
      */
-    Status allow(String login, String password, String remoteAddress, Map<String, String> attributes) throws OXException;
+    Status allow(AllowParameters parameters) throws OXException;
 
     /**
      * Performs the <code>"report"</code> request.
      *
-     * @param reportValue The report value to advertise to Anti-Abuse service
-     * @param login The login string
-     * @param password The password
-     * @param remoteAddress The remote address
+     * @param parameters The parameters to use
      * @return The status response
      * @throws OXException If report request fails
      */
-    void report(ReportValue reportValue, String login, String password, String remoteAddress) throws OXException;
+    void report(ReportParameters parameters) throws OXException;
 
 }

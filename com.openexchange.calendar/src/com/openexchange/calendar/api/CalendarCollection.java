@@ -1748,15 +1748,6 @@ public final class CalendarCollection implements CalendarCollectionService {
             // int type = OXFolderTools.getFolderType(fid,
             // so.getUserObject().getId(), so.getContext());
             if (type != FolderObject.SHARED) {
-                EffectivePermission oclp = null;
-                oclp = access.getFolderPermission(fid, so.getUserId(), UserConfigurationStorage.getInstance()
-                    .getUserConfigurationSafe(so.getUserId(), ctx));
-                // oclp = OXFolderTools.getEffectiveFolderOCL(fid,
-                // so.getUserObject().getId(), so.getUserObject().getGroups(),
-                // so.getContext(), so.getUserConfiguration());
-                if (oclp.canReadAllObjects()) {
-                    return true;
-                }
                 return loadObjectAndCheckPermisions(oid, fid, so, ctx, CalendarOperation.READ);
             }
             return loadObjectAndCheckPermisions(oid, fid, so, ctx, CalendarOperation.READ);
@@ -1776,15 +1767,6 @@ public final class CalendarCollection implements CalendarCollectionService {
             // int type = OXFolderTools.getFolderType(fid,
             // so.getUserObject().getId(), so.getContext());
             if (type != FolderObject.SHARED) {
-                EffectivePermission oclp = null;
-                oclp = access.getFolderPermission(fid, so.getUserId(), UserConfigurationStorage.getInstance()
-                    .getUserConfigurationSafe(so.getUserId(), ctx));
-                // oclp = OXFolderTools.getEffectiveFolderOCL(fid,
-                // so.getUserObject().getId(), so.getUserObject().getGroups(),
-                // so.getContext(), so.getUserConfiguration());
-                if (oclp.canWriteAllObjects()) {
-                    return true;
-                }
                 return loadObjectAndCheckPermisions(oid, fid, so, ctx, CalendarOperation.UPDATE);
             }
             return loadObjectAndCheckPermisions(oid, fid, so, ctx, CalendarOperation.UPDATE);
