@@ -47,50 +47,82 @@
  *
  */
 
-package com.openexchange.mail.categories.sieve.osgi;
+package com.openexchange.groupware.settings.tree.modules.mail;
 
-import org.slf4j.Logger;
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.mail.categories.ruleengine.MailCategoriesRuleEngine;
-import com.openexchange.mail.categories.sieve.SieveMailCategoriesRuleEngine;
-import com.openexchange.mailfilter.MailFilterService;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.ReadOnlyValue;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.jslob.ConfigTreeEquivalent;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
 
 /**
- * {@link Activator}
+ * {@link MaliciousCheck}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.2
+ * @since v7.8.4
  */
-public class Activator extends HousekeepingActivator {
+public class MaliciousCheck implements PreferencesItemService, ConfigTreeEquivalent {
 
     /**
-     * Initializes a new {@link Activator}.
+     * Initializes a new {@link MaliciousCheck}.
      */
-    public Activator() {
+    public MaliciousCheck() {
         super();
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { MailFilterService.class, ConfigurationService.class, ConfigViewFactory.class };
+    public String[] getPath() {
+        return new String[] { "modules", "mail", "maliciouscheck" };
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        registerService(MailCategoriesRuleEngine.class, new SieveMailCategoriesRuleEngine(this));
-        Logger logger = org.slf4j.LoggerFactory.getLogger(Activator.class);
-        logger.info("Bundle successfully started: {}", context.getBundle().getSymbolicName());
+    public IValueHandler getSharedValue() {
+        return new ReadOnlyValue() {
+
+            @Override
+            public boolean isAvailable(UserConfiguration userConfig) {
+                return true;
+            }
+
+            @Override
+            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
+                ConfigViewFactory factory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+                if (factory == null) {
+                    setting.setSingleValue(Boolean.FALSE);
+                    return;
+                }
+
+                boolean enabled = true;
+                {
+                    ConfigView view = factory.getView(session.getUserId(), session.getContextId());
+                    ComposedConfigProperty<Boolean> property = view.property("com.openexchange.mail.maliciousFolders.enabled", Boolean.class);
+                    if (property.isDefined()) {
+                        enabled = property.get().booleanValue();
+                    }
+                }
+
+                setting.setSingleValue(Boolean.valueOf(enabled));
+            }
+        };
     }
 
+    @Override
+    public String getConfigTreePath() {
+        return "modules/mail/maliciouscheck";
+    }
 
     @Override
-    protected void stopBundle() throws Exception {
-        super.stopBundle();
-        Logger logger = org.slf4j.LoggerFactory.getLogger(Activator.class);
-        logger.info("Bundle successfully stopped: {}", context.getBundle().getSymbolicName());
+    public String getJslobPath() {
+        return "io.ox/mail//maliciousCheck";
     }
 
 }

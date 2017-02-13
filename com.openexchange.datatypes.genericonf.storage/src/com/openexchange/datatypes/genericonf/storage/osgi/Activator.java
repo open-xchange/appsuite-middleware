@@ -82,10 +82,9 @@ public class Activator extends HousekeepingActivator {
     }
 
     @Override
-    public void stopBundle() {
+    public void stopBundle() throws Exception {
         REF.set(null);
-        unregisterServices();
-        cleanUp();
+        super.stopBundle();
     }
 
 }

@@ -150,12 +150,6 @@ public class SubscriptionServicesActivator extends HousekeepingActivator {
     }
 
     @Override
-    public void stopBundle() throws Exception {
-        unregisterServices();
-        closeTrackers();
-    }
-
-    @Override
     protected Class<?>[] getNeededServices() {
         // Nothing to do
         return null;

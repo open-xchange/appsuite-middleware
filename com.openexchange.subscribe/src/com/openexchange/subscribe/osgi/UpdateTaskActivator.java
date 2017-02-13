@@ -70,11 +70,6 @@ public final class UpdateTaskActivator extends HousekeepingActivator {
     }
 
     @Override
-    public void stopBundle() throws Exception {
-        closeTrackers();
-    }
-
-    @Override
     protected Class<?>[] getNeededServices() {
         return EMPTY_CLASSES;
     }

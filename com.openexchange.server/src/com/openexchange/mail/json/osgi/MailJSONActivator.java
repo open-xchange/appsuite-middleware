@@ -92,6 +92,7 @@ import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.tree.modules.mail.MailColorModePreferenceItem;
 import com.openexchange.groupware.settings.tree.modules.mail.MailFlaggedModePreferenceItem;
+import com.openexchange.groupware.settings.tree.modules.mail.MaliciousCheck;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.jslob.ConfigTreeEquivalent;
@@ -312,6 +313,10 @@ public final class MailJSONActivator extends AJAXModuleActivator {
         MailFlaggedModePreferenceItem flaggedItem = new MailFlaggedModePreferenceItem();
         registerService(PreferencesItemService.class, flaggedItem);
         registerService(ConfigTreeEquivalent.class, flaggedItem);
+
+        MaliciousCheck maliciousCheck = new MaliciousCheck();
+        registerService(PreferencesItemService.class, maliciousCheck);
+        registerService(ConfigTreeEquivalent.class, maliciousCheck);
     }
 
     @Override
