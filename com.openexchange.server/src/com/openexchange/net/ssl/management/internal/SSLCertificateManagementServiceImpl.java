@@ -50,8 +50,6 @@
 package com.openexchange.net.ssl.management.internal;
 
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -75,7 +73,7 @@ public class SSLCertificateManagementServiceImpl implements SSLCertificateManage
 
     /**
      * Initialises a new {@link SSLCertificateManagementServiceImpl}.
-     * 
+     *
      * @param services The {@link ServiceLookup} instance
      */
     public SSLCertificateManagementServiceImpl(ServiceLookup services) {
@@ -86,7 +84,7 @@ public class SSLCertificateManagementServiceImpl implements SSLCertificateManage
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.net.ssl.management.SSLCertificateManagementService#isTrusted(int, int, java.lang.String)
      */
     @Override
@@ -96,7 +94,7 @@ public class SSLCertificateManagementServiceImpl implements SSLCertificateManage
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.net.ssl.management.SSLCertificateManagementService#get(int, int, java.lang.String)
      */
     @Override
@@ -106,7 +104,7 @@ public class SSLCertificateManagementServiceImpl implements SSLCertificateManage
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.net.ssl.management.SSLCertificateManagementService#get(int, int, java.lang.String)
      */
     @Override
@@ -116,7 +114,7 @@ public class SSLCertificateManagementServiceImpl implements SSLCertificateManage
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.net.ssl.management.SSLCertificateManagementService#getAll(int, int)
      */
     @Override
@@ -126,7 +124,7 @@ public class SSLCertificateManagementServiceImpl implements SSLCertificateManage
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.net.ssl.management.SSLCertificateManagementService#contains(int, int, java.lang.String)
      */
     @Override
@@ -136,7 +134,7 @@ public class SSLCertificateManagementServiceImpl implements SSLCertificateManage
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.net.ssl.management.SSLCertificateManagementService#store(int, int, com.openexchange.net.ssl.management.Certificate)
      */
     @Override
@@ -147,7 +145,7 @@ public class SSLCertificateManagementServiceImpl implements SSLCertificateManage
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.net.ssl.management.SSLCertificateManagementService#delete(int, int, java.lang.String)
      */
     @Override
@@ -157,7 +155,7 @@ public class SSLCertificateManagementServiceImpl implements SSLCertificateManage
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.net.ssl.management.SSLCertificateManagementService#delete(int, int, java.lang.String)
      */
     @Override
@@ -167,28 +165,17 @@ public class SSLCertificateManagementServiceImpl implements SSLCertificateManage
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.net.ssl.management.SSLCertificateManagementService#cache(int, int, com.openexchange.net.ssl.management.Certificate)
      */
     @Override
     public void cache(int userId, int contextId, final Certificate certificate) throws OXException {
-        try {
-            certificateCache.get(new CertificateKey(userId, contextId, certificate.getFingerprint()), new Callable<Certificate>() {
-
-                @Override
-                public Certificate call() throws Exception {
-                    return certificate;
-                }
-
-            });
-        } catch (ExecutionException e) {
-            throw SSLCertificateManagementExceptionCode.UNEXPECTED_ERROR.create(e.getMessage(), e);
-        }
+        certificateCache.put(new CertificateKey(userId, contextId, certificate.getFingerprint()), certificate);
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.net.ssl.management.SSLCertificateManagementService#getCached(int, int, java.lang.String)
      */
     @Override
