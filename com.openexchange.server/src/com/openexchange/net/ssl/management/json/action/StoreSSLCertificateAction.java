@@ -76,7 +76,7 @@ public class StoreSSLCertificateAction extends AbstractSSLCertificateManagementA
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.ajax.requesthandler.AJAXActionService#perform(com.openexchange.ajax.requesthandler.AJAXRequestData, com.openexchange.tools.session.ServerSession)
      */
     @Override
@@ -89,10 +89,8 @@ public class StoreSSLCertificateAction extends AbstractSSLCertificateManagementA
 
             SSLCertificateManagementService managementService = getService(SSLCertificateManagementService.class);
 
-            Certificate certificate;
-            try {
-                certificate = managementService.getCached(session.getUserId(), session.getContextId(), fingerprint);
-            } catch (OXException e) {
+            Certificate certificate = managementService.optCached(session.getUserId(), session.getContextId(), fingerprint);
+            if (null == certificate) {
                 // Cache miss; everything is OK, we have all necessary information to proceed
                 certificate = new Certificate(fingerprint);
             }

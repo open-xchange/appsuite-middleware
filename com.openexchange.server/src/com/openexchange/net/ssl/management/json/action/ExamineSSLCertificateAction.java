@@ -66,7 +66,7 @@ public class ExamineSSLCertificateAction extends AbstractSSLCertificateManagemen
 
     /**
      * Initialises a new {@link ExamineSSLCertificateAction}.
-     * 
+     *
      * @param services The {@link ServiceLookup} instance
      */
     public ExamineSSLCertificateAction(ServiceLookup services) {
@@ -75,14 +75,14 @@ public class ExamineSSLCertificateAction extends AbstractSSLCertificateManagemen
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.ajax.requesthandler.AJAXActionService#perform(com.openexchange.ajax.requesthandler.AJAXRequestData, com.openexchange.tools.session.ServerSession)
      */
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         String fingerprint = requestData.getParameter("fingerprint", String.class, false);
         SSLCertificateManagementService managementService = getService(SSLCertificateManagementService.class);
-        Certificate certificate = managementService.getCached(session.getUserId(), session.getContextId(), fingerprint);
+        Certificate certificate = managementService.requireCached(session.getUserId(), session.getContextId(), fingerprint);
         return new AJAXRequestResult(parse(certificate));
     }
 }
