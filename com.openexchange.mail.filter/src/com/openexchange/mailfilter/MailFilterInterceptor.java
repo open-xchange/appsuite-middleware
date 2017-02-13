@@ -62,7 +62,7 @@ public interface MailFilterInterceptor {
 
     /**
      * Returns the rank of this {@link MailFilterInterceptor}. The rank defines the execution
-     * order with in a chain of multiple {@link MailFilterInterceptor}s.
+     * order within a chain of multiple {@link MailFilterInterceptor}s.
      * 
      * @return the rank of this {@link MailFilterInterceptor}
      */
