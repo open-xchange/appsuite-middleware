@@ -108,6 +108,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class AbstractFolderAction implements AJAXActionService {
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractFolderAction.class);
+
     /**
      * <code>"ignoreTranslation"</code>.
      */
@@ -172,7 +174,11 @@ public abstract class AbstractFolderAction implements AJAXActionService {
             return null;
         }
 
-        return LocaleTools.getLocale(sLocale);
+        Locale locale = LocaleTools.getLocale(sLocale);
+        if (null == locale) {
+            LOG.warn("Specified \"language\" parameter (\"{}\") cannot be parsed to a locale. Using user's locale instead.", sLocale);
+        }
+        return locale;
     }
 
     /**
