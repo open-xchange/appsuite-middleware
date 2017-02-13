@@ -142,6 +142,13 @@ public class ActionCommand extends ControlOrActionCommand {
          */
         ENOTIFY("notify", 1, enotifyTags(), "notify", Collections.singletonList("enotify")),
         /**
+         * <p>Setflag is used for setting [IMAP] system flags or keywords.
+         * Setflag replaces any previously set flags.
+         * <code>setflag [&lt;variablename: string&gt;] &lt;list-of-flags: string-list&gt;</code>
+         * <p><a href="https://tools.ietf.org/html/rfc5232#section-3.1">RFC-5232: Action setflag</a></p>
+         */
+        SETFLAG("setflag", 1, new Hashtable<String, Integer>(), "setflags", java.util.Arrays.asList("imapflags", "imap4flags")),
+        /**
          * <p>Addflag is used to add flags to a list of [IMAP] flags. It doesn't
          * replace any previously set flags. This means that multiple
          * occurrences of addflag are treated additively.</p>
@@ -185,7 +192,7 @@ public class ActionCommand extends ControlOrActionCommand {
          * tag as described in <a href="https://tools.ietf.org/html/rfc5293#secion-4">https://tools.ietf.org/html/rfc5293#section-4</a>:
          * </p>
          * <pre>"addheader" [":last"] &lt;field-name: string&gt; &lt;value: string&gt;</pre>
-         * 
+         *
          * @return a {@link Hashtable} With the ':last' tag
          */
         private static Hashtable<String, Integer> addHeaderTags() {
@@ -208,7 +215,7 @@ public class ActionCommand extends ControlOrActionCommand {
          *          [&lt;value-patterns: string-list&gt;]
          * </pre>
          * <!-- @formatter:on -->
-         * 
+         *
          * @return an empty {@link Hashtable}
          */
         private static Hashtable<String, Integer> deleteHeaderTags() {
@@ -223,7 +230,7 @@ public class ActionCommand extends ControlOrActionCommand {
          * </p>
          *
          * <pre>Usage: ":lower" / ":upper" / ":lowerfirst" / ":upperfirst" / ":quotewildcard" / ":length"</pre>
-         * 
+         *
          * @return an empty {@link Hashtable}
          */
         private static Hashtable<String, Integer> variablesTags() {
@@ -237,7 +244,7 @@ public class ActionCommand extends ControlOrActionCommand {
          * '<code>:addresses</code>', '<code>:subject</code>' and '<code>:from</code>' tags
          * tag as described in <a href="https://tools.ietf.org/html/rfc5230#section-4">https://tools.ietf.org/html/rfc5230#section-4</a>:
          * </p>
-         * 
+         *
          * <!-- @formatter:off -->
          * <pre>
          *   Usage:   vacation [":days" number] [":subject" string]
@@ -248,7 +255,7 @@ public class ActionCommand extends ControlOrActionCommand {
          *
          * Note: The tags :handle and :mime are intentionally left out because there's no way to deal with that
          * later in the frontend
-         * 
+         *
          * @return
          */
         private static Hashtable<String, Integer> vacationTags() {
@@ -270,7 +277,7 @@ public class ActionCommand extends ControlOrActionCommand {
          * Syntax of the '<code>notify</code>' action command and the positions of the '<code>:message</code>'
          * tag as described in <a href="https://tools.ietf.org/html/rfc5435#section-3">https://tools.ietf.org/html/rfc5435#section-3</a>:
          * </p>
-         * 
+         *
          * <!-- @formatter:off -->
          * <pre>
          *    Usage:  notify [":from" string]
@@ -324,7 +331,7 @@ public class ActionCommand extends ControlOrActionCommand {
 
         /**
          * Initialises a new {@link Commands}.
-         * 
+         *
          * @param commandName The action command's name
          * @param minNumberOfArguments The minimum number of arguments
          * @param tagArgs The tag arguments
@@ -341,7 +348,7 @@ public class ActionCommand extends ControlOrActionCommand {
 
         /**
          * Returns the amount of minimum allowed arguments
-         * 
+         *
          * @return the amount of minimum allowed arguments
          */
         public final int getMinNumberOfArguments() {
@@ -350,7 +357,7 @@ public class ActionCommand extends ControlOrActionCommand {
 
         /**
          * Returns the command's name
-         * 
+         *
          * @return the command's name
          */
         public final String getCommandName() {
@@ -359,7 +366,7 @@ public class ActionCommand extends ControlOrActionCommand {
 
         /**
          * The JSON mapping of the command
-         * 
+         *
          * @return the jsonname
          */
         public final String getJsonName() {
@@ -368,7 +375,7 @@ public class ActionCommand extends ControlOrActionCommand {
 
         /**
          * Returns a {@link List} with the required plugins
-         * 
+         *
          * @return a {@link List} with the required plugins
          */
         public final List<String> getRequired() {
@@ -377,7 +384,7 @@ public class ActionCommand extends ControlOrActionCommand {
 
         /**
          * Returns a {@link Hashtable} with all the tag arguments
-         * 
+         *
          * @return a {@link Hashtable} with all the tag arguments
          */
         public final Hashtable<String, Integer> getTagArgs() {
@@ -400,7 +407,7 @@ public class ActionCommand extends ControlOrActionCommand {
 
     /**
      * Initialises a new {@link ActionCommand}.
-     * 
+     *
      * @param command The {@link Commands}
      * @param arguments An {@link ArrayList} with arguments
      * @throws SieveException if the arguments are incorrect
