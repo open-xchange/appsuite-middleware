@@ -251,6 +251,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         }
         String path = toPath(source.getFolder(), source.getId());
         String destName = null != update && null != modifiedFields && modifiedFields.contains(Field.FILENAME) ? update.getFileName() : source.getId();
+        checkFolderExistence(destFolder);
         try {
             /*
              * ensure filename uniqueness in target folder
