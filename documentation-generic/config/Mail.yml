@@ -108,7 +108,7 @@ Such tokens starting with the '$' character refer to a standard folder. Currentl
 
 Example: $Spam, INBOX/Malware
 Special treatment happens for standard Spam folder and for the "INBOX/Malware" folder in primary account's folder tree hierarchy.
-      Default: $Spam
+      Default: $Spam, $Confirmed-spam
       Version: 7.8.4
       Reloadable: true
       Configcascade_Aware: true
