@@ -142,7 +142,7 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
                 PrivateType.getInstance(),
                 all,
                 session,
-                new FolderServiceDecorator().setTimeZone(timeZone).setAllowedContentTypes(allowedContentTypes).put(
+                new FolderServiceDecorator().setLocale(optLocale(request)).setTimeZone(timeZone).setAllowedContentTypes(allowedContentTypes).put(
                     "mailRootFolders", mailRootFolders).put(sAltNames, altNames).put(sSuppressUnifiedMail, suppressUnifiedMail));
         /*
          * Get all shared folders
@@ -154,7 +154,7 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
                 SharedType.getInstance(),
                 all,
                 session,
-                new FolderServiceDecorator().setTimeZone(timeZone).setAllowedContentTypes(allowedContentTypes).put(sAltNames, altNames).put(sSuppressUnifiedMail, suppressUnifiedMail));
+                new FolderServiceDecorator().setLocale(optLocale(request)).setTimeZone(timeZone).setAllowedContentTypes(allowedContentTypes).put(sAltNames, altNames).put(sSuppressUnifiedMail, suppressUnifiedMail));
         /*
          * Get all public folders
          */
@@ -165,7 +165,7 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
                 PublicType.getInstance(),
                 all,
                 session,
-                new FolderServiceDecorator().setTimeZone(timeZone).setAllowedContentTypes(allowedContentTypes).put(sAltNames, altNames).put(sSuppressUnifiedMail, suppressUnifiedMail));
+                new FolderServiceDecorator().setLocale(optLocale(request)).setTimeZone(timeZone).setAllowedContentTypes(allowedContentTypes).put(sAltNames, altNames).put(sSuppressUnifiedMail, suppressUnifiedMail));
         /*
          * Determine max. last-modified time stamp
          */
