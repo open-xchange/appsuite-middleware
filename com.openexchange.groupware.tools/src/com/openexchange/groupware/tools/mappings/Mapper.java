@@ -122,11 +122,11 @@ public interface Mapper<O, E extends Enum<E>> extends Factory<O>, ArrayFactory<E
     Set<E> getDifferentFields(O original, O update, boolean considerUnset, E... ignoredFields) throws OXException;
 
 	/**
-	 * Gets an array of all mapped fields that are set in the supplied object.
-	 *
-	 * @param object the object
-	 * @return the set fields
-	 */
+     * Gets an array of all mapped fields that are set in the supplied object.
+     *
+     * @param object The object
+     * @return The set fields
+     */
 	E[] getAssignedFields(O object);
 
     /**
@@ -134,7 +134,7 @@ public interface Mapper<O, E extends Enum<E>> extends Factory<O>, ArrayFactory<E
      *
      * @param from The source object
      * @param to The destination object, or <code>null</code> to copy into a newly created instance
-     * @param fields The fields to copy, or <code>null</code> to copy known field mappings
+     * @param fields The fields to copy, or <code>null</code> to copy all known field mappings
      * @return The copied object
      */
     O copy(O from, O to, E... fields) throws OXException;
@@ -143,7 +143,7 @@ public interface Mapper<O, E extends Enum<E>> extends Factory<O>, ArrayFactory<E
      * Copies the data from a list of objects into a list of new objects. Only <i>set</i> fields are transferred.
      *
      * @param objects The source objects to copy
-     * @param fields The fields to copy, or <code>null</code> to copy known field mappings
+     * @param fields The fields to copy, or <code>null</code> to copy all known field mappings
      * @return The copied list of objects
      */
     List<O> copy(List<O> objects, E... fields) throws OXException;

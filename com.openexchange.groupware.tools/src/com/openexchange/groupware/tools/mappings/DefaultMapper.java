@@ -194,13 +194,6 @@ public abstract class DefaultMapper<O, E extends Enum<E>> implements Mapper<O, E
         return to;
     }
 
-    /**
-     * Copies the data from a list of alarms. Only <i>set</i> fields are transferred.
-     *
-     * @param alarms The alarms to copy
-     * @param fields The fields to copy
-     * @return The copied alarm list
-     */
     @Override
     public List<O> copy(List<O> objects, E... fields) throws OXException {
         if (null == objects) {

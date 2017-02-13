@@ -132,9 +132,7 @@ public class AttendeeMapper extends DefaultMapper<Attendee, AttendeeField> {
      * @return The tombstone attendee
      */
     public Attendee getTombstone(Attendee attendee) throws OXException {
-        Attendee tombstone = new Attendee();
-        copy(attendee, tombstone, TOMBSTONE_FIELDS);
-        return tombstone;
+        return copy(attendee, null, TOMBSTONE_FIELDS);
     }
 
     @Override

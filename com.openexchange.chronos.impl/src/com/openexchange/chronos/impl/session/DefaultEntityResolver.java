@@ -730,7 +730,7 @@ public class DefaultEntityResolver implements EntityResolver {
     }
 
     /**
-     * Gets the calendar address for a user (as mailto URI).
+     * Gets the calendar address for a user (as <code>mailto</code>-URI).
      *
      * @param user The user
      * @return The calendar address
