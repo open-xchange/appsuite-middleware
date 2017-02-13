@@ -128,7 +128,7 @@ public class DateTestCommandParser implements CommandParser<TestCommand> {
         }
 
         // Parse the header
-        String header = CommandParserJSONUtil.getString(jsonObject, DateTestField.headers.name(), commandName);
+        String header = CommandParserJSONUtil.getString(jsonObject, DateTestField.header.name(), commandName);
         argList.add(CommandParserJSONUtil.stringToList(header));
 
         // Parse the date part
@@ -168,7 +168,7 @@ public class DateTestCommandParser implements CommandParser<TestCommand> {
 
         final List<String> headers = (List<String>) command.getArguments().get(command.getArguments().size() - 3);
         String header = headers.get(0);
-        jsonObject.put(DateTestField.headers.name(), header);
+        jsonObject.put(DateTestField.header.name(), header);
 
         final List<String> value = (List<String>) command.getArguments().get(command.getArguments().size() - 2);
         String datepart = value.get(0);

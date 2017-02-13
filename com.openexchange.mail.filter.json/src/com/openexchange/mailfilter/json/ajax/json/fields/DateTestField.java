@@ -57,7 +57,7 @@ package com.openexchange.mailfilter.json.ajax.json.fields;
 public enum DateTestField {
 
     comparison,
-    headers,
+    header,
     datepart,
     datevalue;
 }
