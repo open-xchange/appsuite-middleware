@@ -378,13 +378,32 @@ public class OXContextMySQLStorageCommon {
     public final void deleteContextFromConfigDB(Connection con, int contextId) throws StorageException {
         OXAdminPoolInterface pool = ClientAdminThread.cache.getPool();
         PreparedStatement stmt = null;
+        ResultSet rs = null;
         try {
             // This creates a lock on context_server2db_pool on the rows with contexts in the same schema. Concurrent create and delete of
             // context can cause removed schemas while creating a context in it. This can not happen anymore with the introduced lock.
             final int poolId = pool.getWritePool(contextId);
             pool.lock(con, poolId);
+            stmt = con.prepareCall("SELECT filestore_id FROM context WHERE cid=?");
+            stmt.setInt(1, contextId);
+            rs = stmt.executeQuery();
+            int filestoreId = 0;
+            if ( rs.next() ) {
+                filestoreId = rs.getInt(1);
+            }
+            stmt.close();
+            if ( 0 != filestoreId ) {
+                stmt = con.prepareStatement("UPDATE contexts_per_filestore SET count=count-1 WHERE filestore_id=?");
+                stmt.setInt(1, filestoreId);
+                stmt.executeUpdate();
+                stmt.close();
+            }
             final String dbSchema = pool.getSchemaName(contextId);
             pool.deleteAssignment(con, contextId);
+            stmt = con.prepareStatement("UPDATE contexts_per_dbpool SET count=count-1 WHERE db_pool_id=?");
+            stmt.setInt(1, poolId);
+            stmt.executeUpdate();
+            stmt.close();
             deleteEmptySchema(con, poolId, dbSchema);
             log.debug("Deleting login2context entries for context {}", I(contextId));
             stmt = con.prepareStatement("DELETE FROM login2context WHERE cid=?");
@@ -403,7 +422,7 @@ public class OXContextMySQLStorageCommon {
             log.error(e.getMessage(), e);
             throw new StorageException(e.getMessage(), e);
         } finally {
-            Databases.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(rs,stmt);
         }
     }
 
@@ -444,6 +463,21 @@ public class OXContextMySQLStorageCommon {
             db.setRead_id(db.getId());
         }
         fillContextTable(ctx, con);
+        
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("UPDATE contexts_per_dbpool SET count=count+1 WHERE db_pool_id=?");
+            stmt.setInt(1, db.getId());
+            stmt.executeUpdate();
+            stmt.close();
+            stmt = con.prepareStatement("UPDATE contexts_per_filestore SET count=count+1 WHERE filestore_id=?");
+            stmt.setInt(1, ctx.getFilestoreId());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new StorageException(e.getMessage(), e);
+        } finally {
+            Databases.closeSQLStuff(stmt);
+        }
 
         try {
             final int serverId = ClientAdminThread.cache.getServerId();
