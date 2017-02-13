@@ -1747,9 +1747,9 @@ public final class CalendarCollection implements CalendarCollectionService {
             final int type = access.getFolderType(fid, so.getUserId());
             // int type = OXFolderTools.getFolderType(fid,
             // so.getUserObject().getId(), so.getContext());
-            if (type != FolderObject.SHARED) {
-                return loadObjectAndCheckPermisions(oid, fid, so, ctx, CalendarOperation.READ);
-            }
+            // if (type != FolderObject.SHARED) {
+            //     return loadObjectAndCheckPermisions(oid, fid, so, ctx, CalendarOperation.READ);
+            // }
             return loadObjectAndCheckPermisions(oid, fid, so, ctx, CalendarOperation.READ);
         } catch (final OXException e) {
             throw e;
@@ -1766,9 +1766,9 @@ public final class CalendarCollection implements CalendarCollectionService {
             final int type = access.getFolderType(fid, so.getUserId());
             // int type = OXFolderTools.getFolderType(fid,
             // so.getUserObject().getId(), so.getContext());
-            if (type != FolderObject.SHARED) {
-                return loadObjectAndCheckPermisions(oid, fid, so, ctx, CalendarOperation.UPDATE);
-            }
+            // if (type != FolderObject.SHARED) {
+            //     return loadObjectAndCheckPermisions(oid, fid, so, ctx, CalendarOperation.UPDATE);
+            // }
             return loadObjectAndCheckPermisions(oid, fid, so, ctx, CalendarOperation.UPDATE);
         } catch (final OXException e) {
             throw e;

@@ -51,11 +51,15 @@ package com.openexchange.http.testservlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.Charset;
 import java.security.Provider;
 import java.security.Security;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -113,6 +117,40 @@ public class DiagnosticServlet extends HttpServlet {
             page.append("<p>Missing \"param\" URL parameter. Possible value(s):</p>\n<ul>\n");
             page.append("<li>ciphersuites</li>\n");
             page.append("<li>version</li>\n");
+            page.append("</ul>\n");
+            page.append("</body>\n</html>");
+            writer.write(page.toString());
+            writer.flush();
+            return;
+        }
+
+        if ("charsets".equalsIgnoreCase(parameter)) {
+            SortedMap<String, Charset> availableCharsets = Charset.availableCharsets();
+
+            resp.setStatus(HttpServletResponse.SC_OK);
+            resp.setContentType("text/html");
+            PrintWriter writer = resp.getWriter();
+            final StringBuilder page = new StringBuilder(1024);
+            page.append("<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n");
+            page.append("<html>\n");
+            page.append("<head><title>Diagnostic</title></head>\n");
+            page.append("<body>\n");
+            page.append("<h1>Character Sets</h1><hr/>\n");
+            page.append("<ul>\n");
+
+            for (Map.Entry<String, Charset> charset : availableCharsets.entrySet()) {
+                Charset cs = charset.getValue();
+                Set<String> aliases = cs.aliases();
+                page.append("<li>");
+                page.append(charset.getKey());
+                if (null != aliases && !aliases.isEmpty()) {
+                    for (String alias : aliases) {
+                        page.append(", ").append(alias);
+                    }
+                }
+                page.append("<li>").append(charset.getKey()).append("</li>\n");
+            }
+
             page.append("</ul>\n");
             page.append("</body>\n</html>");
             writer.write(page.toString());
