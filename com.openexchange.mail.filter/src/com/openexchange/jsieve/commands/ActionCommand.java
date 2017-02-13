@@ -108,13 +108,13 @@ public class ActionCommand extends ControlOrActionCommand {
          * <code>redirect &lt;address: string&gt;</code>
          * <p><a href="https://tools.ietf.org/html/rfc5228#section-4.2">RFC-5228: Action redirect</p>
          */
-        REDIRECT("redirect", 1, new Hashtable<String, Integer>(), "redirect", Collections.<String> emptyList()),
+        REDIRECT("redirect", 1, redirectTags(), "redirect", null),
         /**
          * <p>The "fileinto" action delivers the message into the specified mailbox.</p>
          * <code>fileinto &lt;mailbox: string&gt;</code>
          * <p><a href="https://tools.ietf.org/html/rfc5228#section-4.1">RFC-5228: Action fileinto</p>
          */
-        FILEINTO("fileinto", 1, new Hashtable<String, Integer>(), "move", Collections.singletonList("fileinto")),
+        FILEINTO("fileinto", 1, fileintoTags(), "move", Collections.singletonList("fileinto")),
         /**
          * <p>The "reject" action cancels the implicit keep and refuses delivery of a message.</p>
          * <code>reject &lt;reason: string&gt;</code>
@@ -295,6 +295,18 @@ public class ActionCommand extends ControlOrActionCommand {
             return retval;
         }
 
+        private static Hashtable<String, Integer> redirectTags() {
+            final Hashtable<String, Integer> retval = new Hashtable<String, Integer>();
+            retval.put(":copy", Integer.valueOf(0));
+            return retval;
+        }
+
+        private static Hashtable<String, Integer> fileintoTags() {
+            final Hashtable<String, Integer> retval = new Hashtable<String, Integer>();
+            retval.put(":copy", Integer.valueOf(0));
+            return retval;
+        }
+
         /**
          * @return a {@link Hashtable} with the '<code>:keys</code>' tag
          */
@@ -393,6 +405,8 @@ public class ActionCommand extends ControlOrActionCommand {
     }
 
     private final Commands command;
+
+    private final List<String> optRequired = new ArrayList<>();
 
     /**
      * This Hashtable contains the tagargument and the corresponding value
@@ -535,6 +549,13 @@ public class ActionCommand extends ControlOrActionCommand {
 
     @Override
     public HashSet<String> getRequired() {
-        return new HashSet<String>(this.command.getRequired());
+        HashSet<String> result =  new HashSet<String>(this.command.getRequired());
+        result.addAll(optRequired);
+        return result;
+    }
+
+    @Override
+    public void addOptionalRequired(String required){
+        this.optRequired.add(required);
     }
 }

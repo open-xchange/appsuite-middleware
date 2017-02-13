@@ -531,6 +531,8 @@ public class TestCommand extends Command {
 
     private final List<TestCommand> testCommands;
 
+    private final List<String> optRequired = new ArrayList<>();
+
     private final int indexOfComparator = -1;
 
     /**
@@ -766,6 +768,14 @@ public class TestCommand extends Command {
                 retval.add(string);
             }
         }
+
+        retval.addAll(optRequired);
+
         return retval;
+    }
+
+    @Override
+    public void addOptionalRequired(String required){
+        optRequired.add(required);
     }
 }
