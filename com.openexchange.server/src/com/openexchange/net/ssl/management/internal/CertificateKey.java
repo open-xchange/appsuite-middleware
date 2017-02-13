@@ -73,8 +73,8 @@ public class CertificateKey {
         final int prime = 31;
         int result = 1;
         result = prime * result + contextId;
-        result = prime * result + ((fingerprint == null) ? 0 : fingerprint.hashCode());
         result = prime * result + userId;
+        result = prime * result + ((fingerprint == null) ? 0 : fingerprint.hashCode());
         hashCode = result;
     }
 
@@ -107,7 +107,7 @@ public class CertificateKey {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#hashCode()
      */
     @Override
@@ -117,7 +117,7 @@ public class CertificateKey {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
@@ -135,14 +135,14 @@ public class CertificateKey {
         if (contextId != other.contextId) {
             return false;
         }
+        if (userId != other.userId) {
+            return false;
+        }
         if (fingerprint == null) {
             if (other.fingerprint != null) {
                 return false;
             }
         } else if (!fingerprint.equals(other.fingerprint)) {
-            return false;
-        }
-        if (userId != other.userId) {
             return false;
         }
         return true;
