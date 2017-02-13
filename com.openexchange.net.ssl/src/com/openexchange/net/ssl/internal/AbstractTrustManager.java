@@ -123,7 +123,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.net.ssl.X509ExtendedTrustManager#checkServerTrusted(java.security.cert.X509Certificate[], java.lang.String, java.net.Socket)
      */
     @Override
@@ -142,7 +142,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.net.ssl.X509TrustManager#checkServerTrusted(java.security.cert.X509Certificate[], java.lang.String)
      */
     @Override
@@ -177,7 +177,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.net.ssl.X509ExtendedTrustManager#checkServerTrusted(java.security.cert.X509Certificate[], java.lang.String, javax.net.ssl.SSLEngine)
      */
     @Override
@@ -213,7 +213,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
 
     /**
      * Returns the hostname from the specified {@link X509Certificate}
-     * 
+     *
      * @param x509Certificate the {@link X509Certificate}
      * @return The hostname or <code>null</code> if none could be found
      */
@@ -234,7 +234,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
 
     /**
      * Retrieves the hostname from the specified {@link Socket}
-     * 
+     *
      * @param socket The {@link Socket} from which to retrieve the hostname
      * @return The hostname or <code>null</code> if the socket is <code>null</code>,
      *         or not connected
@@ -255,7 +255,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
     /**
      * Handles the specified {@link CertificateException}. It first verifies whether the issuer of the
      * specified {@link X509Certificate} chain is trusted, then whether the user trusts the certificate
-     * 
+     *
      * @param chain The {@link X509Certificate} chain
      * @param e The {@link CertificateException} to handle/or re-throw
      * @throws CertificateException if the specified {@link X509Certificate} chain is not trusted by the user
@@ -267,7 +267,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
     /**
      * Handles the specified {@link CertificateException}. It first verifies whether the issuer of the
      * specified {@link X509Certificate} chain is trusted, then whether the user trusts the certificate
-     * 
+     *
      * @param chain The {@link X509Certificate} chain
      * @param e The {@link CertificateException} to handle/or re-throw
      * @throws CertificateException if the specified {@link X509Certificate} chain is not trusted by the user
@@ -284,7 +284,15 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
 
         // Fetch user details
         int user = Tools.getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_USER_ID));
+        if (user < 0) {
+            // Missing user information
+            throw e;
+        }
         int context = Tools.getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_CONTEXT_ID));
+        if (context < 0) {
+            // Missing context information
+            throw e;
+        }
 
         // Check if the user is allowed to accept untrusted certificates
         UserAwareSSLConfigurationService sslConfigurationService = Services.getService(UserAwareSSLConfigurationService.class);
@@ -298,7 +306,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
 
     /**
      * Checks whether the user trusts the specified {@link X509Certificate}
-     * 
+     *
      * @param chain The certificate to check
      */
     private void checkUserTrustsServer(int userId, int contextId, X509Certificate[] chain, Socket socket) throws CertificateException {
@@ -342,7 +350,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
 
     /**
      * Checks whether the specified {@link X509Certificate} chain is a self-signed certificate
-     * 
+     *
      * @param chain The {@link X509Certificate} chain
      * @throws CertificateException If the specified {@link X509Certificate} is self-signed
      */
@@ -356,7 +364,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
 
     /**
      * Checks whether the issuer of the specified {@link X509Certificate} chain is a trusted root CA
-     * 
+     *
      * @param chain The {@link X509Certificate} chain
      * @throws CertificateException if the root CA is not trusted by the user
      */
@@ -379,7 +387,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
     /**
      * Checks the common name for which the specified {@link X509Certificate} was issued against the hostname
      * used in the specified {@link Socket}
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param chain The {@link X509Certificate} chain
@@ -409,7 +417,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
 
     /**
      * Checks if the certificate is expired
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param chain The {@link X509Certificate} chain
@@ -425,7 +433,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
 
     /**
      * Caches the specified {@link X509Certificate} for future reference
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param chain The {@link X509Certificate}
@@ -460,7 +468,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
 
     /**
      * Retrieves the SHA-256 fingerprint from the specified {@link X509Certificate}
-     * 
+     *
      * @param certificate The certificate from which to retrieve the fingerprint
      * @return The SHA-256 fingerprint of the specified {@link X509Certificate}
      * @throws NoSuchAlgorithmException
@@ -475,7 +483,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
 
     /**
      * Converts the specified byte array to a hexadecimal string
-     * 
+     *
      * @param bytes The byte array to convert
      * @return The hexadecimal representation of the byte array
      * @throws IllegalArgumentException if the specified byte array is empty
