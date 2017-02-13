@@ -75,8 +75,6 @@ import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -383,12 +381,8 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             Calendar fromCalendar = initCalendar(TimeZones.UTC, exceptionDates.getFirst().getValue());
             Calendar untilCalendar = initCalendar(TimeZones.UTC, exceptionDates.getLast().getValue());
             untilCalendar.add(Calendar.DATE, 1);
-            List<Date> possibleExceptionDates = new ArrayList<Date>();
-            Iterator<RecurrenceId> recurrenceIterator = session.getRecurrenceService().getRecurrenceIterator(
-                eventUpdate.getUpdate(), fromCalendar, untilCalendar, true);
-            while (recurrenceIterator.hasNext()) {
-                possibleExceptionDates.add(new Date(recurrenceIterator.next().getValue()));
-            }
+            List<RecurrenceId> possibleExceptionDates = Utils.asList(session.getRecurrenceService().getRecurrenceIterator(
+                eventUpdate.getUpdate(), fromCalendar, untilCalendar, true));
             /*
              * reset no longer matching delete- and change exceptions if recurrence rule changes
              */
