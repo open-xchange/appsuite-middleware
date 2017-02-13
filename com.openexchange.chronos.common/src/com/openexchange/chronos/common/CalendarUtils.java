@@ -730,6 +730,9 @@ public class CalendarUtils {
      * @return The extracted e-mail address, or the value as-is if no further extraction/decoding was possible or necessary
      */
     public static String extractEMailAddress(String value) {
+        if (Strings.isEmpty(value)) {
+            return value;
+        }
         URI uri = null;
         try {
             uri = new URI(value);
