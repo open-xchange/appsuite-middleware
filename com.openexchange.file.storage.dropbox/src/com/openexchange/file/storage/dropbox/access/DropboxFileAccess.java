@@ -260,7 +260,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             // can only copy the current revision
             throw FileStorageExceptionCodes.VERSIONING_NOT_SUPPORTED.create(DropboxConstants.ID);
         }
-
+        checkFolderExistence(destFolder);
         String path = toPath(source.getFolder(), source.getId());
         String destName = null != update && null != modifiedFields && modifiedFields.contains(Field.FILENAME) ? update.getFileName() : source.getId();
 
