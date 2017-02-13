@@ -62,7 +62,7 @@ public interface SSLCertificateManagementService {
     /**
      * Checks whether the SSL {@link Certificate} with the specified fingerprint
      * is already trusted by the specified user in the specified context
-     * 
+     *
      * @param userId The user's identifier
      * @param contextId The context's identifier
      * @param fingerprint The SSL {@link Certificate}'s fingerprint
@@ -73,7 +73,7 @@ public interface SSLCertificateManagementService {
 
     /**
      * Retrieves the {@link Certificate} with the specified fingerprint from the storage
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param fingerprint The fingerprint of the {@link Certificate}
@@ -85,7 +85,7 @@ public interface SSLCertificateManagementService {
     /**
      * Returns an unmodifiable {@link List} with all trusted/untrusted hostname/certificate combinations
      * for the specified certificate fingerprint
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param fingerprint The fingerprint of the {@link Certificate}
@@ -97,7 +97,7 @@ public interface SSLCertificateManagementService {
     /**
      * Returns an unmodifiable {@link List} with all managed {@link Certificate}s for the specified
      * user in the specified context
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      * @return an unmodifiable {@link List} with all managed {@link Certificate}s for the specified
@@ -109,7 +109,7 @@ public interface SSLCertificateManagementService {
     /**
      * Checks whether the SSL {@link Certificate} with the specified fingerprint
      * already exists for the specified user in the specified context
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param fingerprint The SSL {@link Certificate}'s fingerprint
@@ -122,7 +122,7 @@ public interface SSLCertificateManagementService {
      * Stores the specified {@link Certificate} for the specified user in the specified context
      * If a certificate with the same fingerprint exists for the same user, then the certificate
      * is updated instead.
-     * 
+     *
      * @param userId The user's identifier
      * @param contextId The context's identifier
      * @param certificate The SSL {@link Certificate} to store
@@ -133,7 +133,7 @@ public interface SSLCertificateManagementService {
     /**
      * Deletes all hostname exceptions for the SSL {@link Certificate} with the specified fingerprint
      * for the specified user in the specified context
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param fingerprint The SSL {@link Certificate}'s fingerprint
@@ -144,7 +144,7 @@ public interface SSLCertificateManagementService {
     /**
      * Deletes the SSL {@link Certificate} with the specified fingerprint for the specified
      * user in the specified context
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param hostname The hostname
@@ -156,7 +156,7 @@ public interface SSLCertificateManagementService {
     /**
      * Caches the specified {@link Certificate} temporarily for the specified user in the
      * specified context
-     * 
+     *
      * @param userId the user identifier
      * @param contextId the context identifier
      * @param certificate The SSL {@link Certificate}
@@ -166,12 +166,23 @@ public interface SSLCertificateManagementService {
 
     /**
      * Returns the cached {@link Certificate}
-     * 
+     *
      * @param userId the user identifier
      * @param contextId the context identifier
      * @param fingerprint The fingerprint of the {@link Certificate}
      * @return The cached {@link Certificate}
      * @throws OXException if an error is occurred
      */
-    Certificate getCached(int userId, int contextId, String fingerprint) throws OXException;
+    Certificate requireCached(int userId, int contextId, String fingerprint) throws OXException;
+
+    /**
+     * Returns the cached {@link Certificate}
+     *
+     * @param userId the user identifier
+     * @param contextId the context identifier
+     * @param fingerprint The fingerprint of the {@link Certificate}
+     * @return The cached {@link Certificate} or <code>null</code>
+     * @throws OXException if an error is occurred
+     */
+    Certificate optCached(int userId, int contextId, String fingerprint) throws OXException;
 }

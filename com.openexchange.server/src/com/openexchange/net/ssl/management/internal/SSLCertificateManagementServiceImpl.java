@@ -179,11 +179,16 @@ public class SSLCertificateManagementServiceImpl implements SSLCertificateManage
      * @see com.openexchange.net.ssl.management.SSLCertificateManagementService#getCached(int, int, java.lang.String)
      */
     @Override
-    public Certificate getCached(int userId, int contextId, String fingerprint) throws OXException {
+    public Certificate requireCached(int userId, int contextId, String fingerprint) throws OXException {
         Certificate certificate = certificateCache.getIfPresent(new CertificateKey(userId, contextId, fingerprint));
         if (certificate == null) {
             throw SSLCertificateManagementExceptionCode.NOT_CACHED.create(fingerprint);
         }
         return certificate;
+    }
+
+    @Override
+    public Certificate optCached(int userId, int contextId, String fingerprint) throws OXException {
+        return certificateCache.getIfPresent(new CertificateKey(userId, contextId, fingerprint));
     }
 }
