@@ -77,7 +77,6 @@ postFix() {
         VALUE=$(ox_read_property ${NAME} ${PFILE})
         if [ "${OLDVALUE}" == "${VALUE}" ]; then
             ox_set_property ${NAME} "${NEWVALUE}" $PFILE
-            echo "Replaced $NAME"
         fi
     done
 }

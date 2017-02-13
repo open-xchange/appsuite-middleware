@@ -100,7 +100,6 @@ if [ ${1:-0} -eq 2 ]; then # only when updating
         VALUE=$(ox_read_property ${NAME} ${PFILE})
         if [ "${OLDVALUE}" == "${VALUE}" ]; then
             ox_set_property ${NAME} "${NEWVALUE}" $PFILE
-            echo "Replaced $NAME"
         fi
     done
 fi
