@@ -626,7 +626,7 @@ If you would like to add a reference to another property use the following appro
 | Key | <span style="font-weight:normal">com.openexchange.mail.maliciousFolders.listing</span> |
 |:----------------|:--------|
 | __Description__ | Specifies the full paths for such mail folders in the primary account's folder tree that are supposed being considered as malicious<br>and therefore a special treatment happens; e.g. hyper-links that occur in mail content are not displayed and/or are not clickable.<br><br>The value is supposed to be comma-separated list of folder paths.<br>Such tokens starting with the '$' character refer to a standard folder. Currently supported: $Spam, $Drafts, $Inbox, $Sent, $Trash, $Confirmed-Spam, $Confirmed-Ham<br><br> Example $Spam, INBOX/Malware<br>Special treatment happens for standard Spam folder and for the "INBOX/Malware" folder in primary account's folder tree hierarchy.<br> |
-| __Default__ | $Spam  |
+| __Default__ | $Spam, $Confirmed-spam  |
 | __Version__ | 7.8.4  |
 | __Reloadable__ | true  |
 | __Configcascade Aware__ | true  |
