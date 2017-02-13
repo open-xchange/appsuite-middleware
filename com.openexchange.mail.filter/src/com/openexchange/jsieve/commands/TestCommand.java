@@ -90,7 +90,7 @@ public class TestCommand extends Command {
 
     /**
      * {@link Commands} - Supported sieve test commands
-     * 
+     *
      * <p>Order of arguments:</p>
      * <ul>
      * <li>command name</li>
@@ -121,7 +121,12 @@ public class TestCommand extends Command {
          * <p><a href="https://tools.ietf.org/html/rfc5228#section-5.4">RFC-5228: Test envelope</a></p>
          */
         ENVELOPE("envelope", 2, Integer.MAX_VALUE, standardAddressPart(), standardComparators(), standardMatchTypes(), standardJSONMatchTypes(), "envelope", null),
-        //        EXITS("exists", 1, 1, null, null, null, null, null),
+        /**
+         * <p>The "exists" test is true if the headers listed in the header-names argument exist within the message. All of the headers must exist or the test is false.
+         * <code>exists &lt;header-names: string-list&gt;</code>
+         * <p><a href="https://tools.ietf.org/html/rfc5228#section-5.5">RFC-5228: Test exists</a></p>
+         */
+        EXISTS("exists", 1, 1, null, null, null, null, null, null),
         /**
          * <p>The "false" test always evaluates to false.</p>
          * <code>false</code>
@@ -174,7 +179,18 @@ public class TestCommand extends Command {
          * <p><a href="https://tools.ietf.org/html/rfc5173#section-4">RFC-5173: Test body</a></p>
          */
         BODY("body", 1, 1, standardBodyPart(), null, standardMatchTypes(), standardJSONMatchTypes(), "body", null),
-        //DATE("date", 3, null, null, date_match_types(), "date"),
+        /**
+         * <p>The date test matches date/time information derived from headers
+         * containing [RFC2822] date-time values.  The date/time information is
+         * extracted from the header, shifted to the specified time zone, and
+         * the value of the given date-part is determined.  The test returns
+         * true if the resulting string matches any of the strings specified in
+         * the key-list, as controlled by the comparator and match keywords.</p>
+         * <code>date [&lt;":zone" &lt;time-zone: string&gt;&gt; / ":originalzone"] [COMPARATOR] [MATCH-TYPE] &lt;header-name: string&gt; &lt;date-part: string&gt; &lt;key-list: string-list&gt;
+         * <p><a href="https://tools.ietf.org/html/rfc5260#section-4">RFC-5260: Date Test</a></p>
+         *
+         */
+        DATE("date", 3, Integer.MAX_VALUE, null, null, dateMatchTypes(), null, "date", dateOtherArguments()),
         /**
          * <p>The currentdate test is similar to the date test, except that it
          * operates on the current date/time rather than a value extracted from
@@ -195,7 +211,7 @@ public class TestCommand extends Command {
         /**
          * <p>Specifies the match types ':over' and ':under' as described
          * in <a href="https://tools.ietf.org/html/rfc5228#section-5.9">RFC-5228: Test size</a>.</p>
-         * 
+         *
          * @return A {@link Hashtable} with the size match types
          */
         private static Hashtable<String, String> matchTypeSize() {
@@ -208,7 +224,7 @@ public class TestCommand extends Command {
         /**
          * <p>Specifies the comparison optional arguments ':localpart', ':domain', ':all' as described
          * in <a href="href=https://tools.ietf.org/html/rfc5228#section-2.7.4">RFC-5228</a>.</p>
-         * 
+         *
          * @return A {@link Hashtable} with the standard match types
          */
         private static Hashtable<String, String> standardAddressPart() {
@@ -223,7 +239,7 @@ public class TestCommand extends Command {
         /**
          * <p>Specifies the match types ':content' and ':text' as described
          * in <a https://tools.ietf.org/html/rfc5173#section-5">RFC-5173: Body transform</a>.</p>
-         * 
+         *
          * @return A {@link Hashtable} with the body match types
          */
         private static Hashtable<String, String> standardBodyPart() {
@@ -238,7 +254,7 @@ public class TestCommand extends Command {
         /**
          * <p>Specifies the match types ':user' and ':detail' as described
          * in <a href="https://tools.ietf.org/html/rfc5233#section-4">RFC-5233: Subaddress Comparisons</a>.</p>
-         * 
+         *
          * @return A {@link Hashtable} with the subaddress match types
          */
         private static Hashtable<String, String> standardAddressMatchTypes() {
@@ -252,7 +268,7 @@ public class TestCommand extends Command {
         /**
          * <p>Specifies the standard match types ':is', ':contains', ':matches' as described
          * in <a href=https://tools.ietf.org/html/rfc5228#section-2.7.1">RFC-5228</a>.</p>
-         * 
+         *
          * @return A {@link Hashtable} with tthe standard match types
          */
         private static Hashtable<String, String> standardMatchTypes() {
@@ -268,7 +284,7 @@ public class TestCommand extends Command {
 
         /**
          * The match types that are applicable to dates
-         * 
+         *
          * @return A {@link Hashtable} with the match types
          */
         private static Hashtable<String, String> dateMatchTypes() {
@@ -283,7 +299,7 @@ public class TestCommand extends Command {
         /**
          * Specifies the ':zone' argument as described in
          * <a href="https://tools.ietf.org/html/rfc5260#section-4.1">RFC-5260: Zone and Originalzone Arguments</a>
-         * 
+         *
          * @return A hashtable with the argument
          */
         private static Hashtable<String, String> dateOtherArguments() {
@@ -296,7 +312,7 @@ public class TestCommand extends Command {
 
         /**
          * The JSON mapping of the size match types ({@link #matchTypeSize()})
-         * 
+         *
          * @return A {@link List} with the mappings
          */
         private static List<String[]> standardJSONSizeMatchTypes() {
@@ -308,7 +324,7 @@ public class TestCommand extends Command {
 
         /**
          * The JSON mappings of all address match types ({@link #standardAddressMatchTypes()})
-         * 
+         *
          * @return A {@link List} with the mappings
          */
         private static List<String[]> standardJSONAddressMatchTypes() {
@@ -323,7 +339,7 @@ public class TestCommand extends Command {
 
         /**
          * The JSON mappings for the standard match types ({@link #standardMatchTypes()})
-         * 
+         *
          * @return A {@link List} with the mappings
          */
         private static List<String[]> standardJSONMatchTypes() {
@@ -337,7 +353,7 @@ public class TestCommand extends Command {
 
         /**
          * The JSON mappings for dates
-         * 
+         *
          * @return A {@link List} with the mappings
          */
         private static List<String[]> dateJSONMatchTypes() {
@@ -354,7 +370,7 @@ public class TestCommand extends Command {
 
         /**
          * Specifies the standard comparators used for matching.
-         * 
+         *
          * @return A {@link Hashtable} with the comparators
          */
         private static Hashtable<String, String> standardComparators() {
@@ -414,7 +430,7 @@ public class TestCommand extends Command {
 
         /**
          * Initialises a new {@link Commands}.
-         * 
+         *
          * @param commandName The command's name
          * @param numberOfArguments The minimum number of arguments
          * @param maxNumberOfArguments The maximum number of arguments
@@ -529,7 +545,7 @@ public class TestCommand extends Command {
 
     /**
      * Initialises a new {@link TestCommand}.
-     * 
+     *
      * @param command The {@link ITestCommand}
      * @param arguments A {@link List} with arguments
      * @param testcommands A {@link List} with {@link TestCommand}s
@@ -551,7 +567,7 @@ public class TestCommand extends Command {
 
     /**
      * Checks the {@link TestCommand} for validity
-     * 
+     *
      * @throws SieveException If the command structure is invalid
      */
     private void checkCommand() throws SieveException {
@@ -633,7 +649,7 @@ public class TestCommand extends Command {
 
     /**
      * Returns the {@link ITestCommand}
-     * 
+     *
      * @return the {@link ITestCommand}
      */
     public final ITestCommand getCommand() {
@@ -642,7 +658,7 @@ public class TestCommand extends Command {
 
     /**
      * Sets the {@link TestCommand}
-     * 
+     *
      * @param command the command to set
      */
     public final void setCommand(final Commands command) {
@@ -651,7 +667,7 @@ public class TestCommand extends Command {
 
     /**
      * Returns a {@link List} with all the tag arguments
-     * 
+     *
      * @return a {@link List} with all the tag arguments
      */
     public final List<String> getTagArguments() {
@@ -660,7 +676,7 @@ public class TestCommand extends Command {
 
     /**
      * Adds a tag argument
-     * 
+     *
      * @param o The tag argument to add
      * @return <code>true</code if the argument was added to the {@link List}; false otherwise
      * @see java.util.List#add(java.lang.Object)
@@ -671,7 +687,7 @@ public class TestCommand extends Command {
 
     /**
      * Returns a {@link List} with all the arguments
-     * 
+     *
      * @return a {@link List} with all the arguments
      */
     public final List<Object> getArguments() {
@@ -695,7 +711,7 @@ public class TestCommand extends Command {
 
     /**
      * Returns a {@link List} with all the {@link TestCommand}s
-     * 
+     *
      * @return a {@link List} with all the {@link TestCommand}s
      */
     public final List<TestCommand> getTestCommands() {
@@ -704,7 +720,7 @@ public class TestCommand extends Command {
 
     /**
      * Removes the specified {@link TestCommand}
-     * 
+     *
      * @param command The {@link TestCommand} to remove
      */
     public final void removeTestCommand(TestCommand command) {
@@ -713,7 +729,7 @@ public class TestCommand extends Command {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#toString()
      */
     @Override
@@ -723,7 +739,7 @@ public class TestCommand extends Command {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.jsieve.commands.Command#getRequired()
      */
     @Override
