@@ -76,10 +76,25 @@ public class DefaultTrustManager extends AbstractTrustManager {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultTrustManager.class);
 
     /**
-     * Initialises a new {@link CustomTrustManager}.
+     * Creates a new {@link DefaultTrustManager} instance.
+     *
+     * @return The new instance
      */
-    public DefaultTrustManager() {
-        super(initDefaultTrustManager());
+    public static DefaultTrustManager newInstance() {
+        TrustManagerAndParameters managerAndParameters = initDefaultTrustManager();
+        if (null == managerAndParameters) {
+            return new DefaultTrustManager(null, null);
+        }
+        return new DefaultTrustManager(managerAndParameters.trustManager, managerAndParameters.parameters);
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    /**
+     * Initializes a new {@link CustomTrustManager}.
+     */
+    private DefaultTrustManager(X509ExtendedTrustManager trustManager, PKIXParameters parameters) {
+        super(trustManager, parameters);
     }
 
     /**
@@ -87,7 +102,7 @@ public class DefaultTrustManager extends AbstractTrustManager {
      *
      * @return An {@link X509ExtendedTrustManager}
      */
-    private static X509ExtendedTrustManager initDefaultTrustManager() {
+    private static TrustManagerAndParameters initDefaultTrustManager() {
         boolean useDefaultTruststore;
         SSLConfigurationService sslConfigService = Services.getService(SSLConfigurationService.class);
         String password;
@@ -113,14 +128,14 @@ public class DefaultTrustManager extends AbstractTrustManager {
             KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
             keystore.load(is, password.toCharArray());
 
-            setParameters(new PKIXParameters(keystore));
+            PKIXParameters parameters = new PKIXParameters(keystore);
 
             TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            tmf.init((KeyStore) null); // Using null here initialises the TMF with the default trust store.
+            tmf.init((KeyStore) null); // Using null here initializes the TMF with the default trust store.
 
             for (TrustManager tm : tmf.getTrustManagers()) {
                 if (tm instanceof X509ExtendedTrustManager) {
-                    return (X509ExtendedTrustManager) tm;
+                    return new TrustManagerAndParameters((X509ExtendedTrustManager) tm, parameters);
                 }
             }
         } catch (IOException e) {

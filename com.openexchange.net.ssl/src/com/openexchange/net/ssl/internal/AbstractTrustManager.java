@@ -62,7 +62,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
 import javax.naming.InvalidNameException;
 import javax.naming.ldap.LdapName;
 import javax.naming.ldap.Rdn;
@@ -92,38 +91,23 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractTrustManager.class);
 
-    private static final AtomicReference<PKIXParameters> PARAMETERS_REFERENCE = new AtomicReference<>();
-
-    /**
-     * Sets the specified instance as this trust manager's static PKIX validation parameters.
-     *
-     * @param parameters The parameters to set
-     */
-    protected static void setParameters(PKIXParameters parameters) {
-        PARAMETERS_REFERENCE.set(parameters);
-    }
-
-    /**
-     * Gets the currently enabled static PKIX validation parameters.
-     *
-     * @return The PKIX validation parameters or <code>null</code>
-     */
-    protected static PKIXParameters getParameters() {
-        return PARAMETERS_REFERENCE.get();
-    }
-
     // ---------------------------------------------------------------------------------------------------------------------
 
+    /** The associated X509 trust manager */
     protected final X509ExtendedTrustManager trustManager;
+
+    /** The PKIX validation parameters */
+    protected final PKIXParameters parameters;
 
     /**
      * Initializes a new {@link AbstractTrustManager}.
      *
      * @param trustManager The trust manager
      */
-    protected AbstractTrustManager(X509ExtendedTrustManager trustManager) {
+    protected AbstractTrustManager(X509ExtendedTrustManager trustManager, PKIXParameters parameters) {
         super();
         this.trustManager = trustManager;
+        this.parameters = parameters;
     }
 
     /**
@@ -388,7 +372,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
      * @throws CertificateException if the root CA is not trusted by the user
      */
     private void checkRootCATrusted(int userId, int contextId, X509Certificate[] chain) throws CertificateException {
-        PKIXParameters parameters = PARAMETERS_REFERENCE.get();
+        PKIXParameters parameters = this.parameters;
         if (null == parameters) {
             throw new CertificateException("Trust manager not properly initialized.");
         }

@@ -78,10 +78,25 @@ public class CustomTrustManager extends AbstractTrustManager {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CustomTrustManager.class);
 
     /**
-     * Initialises a new {@link CustomTrustManager}.
+     * Creates a new {@link CustomTrustManager} instance.
+     *
+     * @return The new instance
      */
-    public CustomTrustManager() {
-        super(initCustomTrustManager());
+    public static CustomTrustManager newInstance() {
+        TrustManagerAndParameters managerAndParameters = initCustomTrustManager();
+        if (null == managerAndParameters) {
+            return new CustomTrustManager(null, null);
+        }
+        return new CustomTrustManager(managerAndParameters.trustManager, managerAndParameters.parameters);
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    /**
+     * Initializes a new {@link CustomTrustManager}.
+     */
+    private CustomTrustManager(X509ExtendedTrustManager trustManager, PKIXParameters parameters) {
+        super(trustManager, parameters);
     }
 
     /**
@@ -89,7 +104,7 @@ public class CustomTrustManager extends AbstractTrustManager {
      *
      * @return An {@link X509ExtendedTrustManager}
      */
-    private static X509ExtendedTrustManager initCustomTrustManager() {
+    private static TrustManagerAndParameters initCustomTrustManager() {
         SSLConfigurationService sslConfigService = Services.getService(SSLConfigurationService.class);
         if (null == sslConfigService) {
             LOG.warn("Absent service " + SSLConfigurationService.class.getName() + ". Assuming custom truststore is NOT supposed to be used.");
@@ -127,11 +142,11 @@ public class CustomTrustManager extends AbstractTrustManager {
             TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
             tmf.init(ks);
 
-            setParameters(new PKIXParameters(ks));
+            PKIXParameters parameters = new PKIXParameters(ks);
 
             for (TrustManager tm : tmf.getTrustManagers()) {
                 if (tm instanceof X509ExtendedTrustManager) {
-                    return (X509ExtendedTrustManager) tm;
+                    return new TrustManagerAndParameters((X509ExtendedTrustManager) tm, parameters);
                 }
             }
         } catch (IOException e) {
