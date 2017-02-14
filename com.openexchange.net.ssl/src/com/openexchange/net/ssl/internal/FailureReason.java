@@ -53,6 +53,7 @@ package com.openexchange.net.ssl.internal;
  * {@link FailureReason}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since 7.8.4
  */
 public enum FailureReason {
     UNTRUSTED_CERTIFICATE(FailureReasonMessage.UNTRUSTED_CERTIFICATE),
@@ -66,7 +67,7 @@ public enum FailureReason {
 
     /**
      * Initialises a new {@link FailureReason}.
-     * 
+     *
      * @param detail The detail message for the failure reason
      */
     private FailureReason(String detail) {

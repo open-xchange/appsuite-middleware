@@ -55,6 +55,7 @@ import com.openexchange.i18n.LocalizableStrings;
  * {@link FailureReasonMessage}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since 7.8.4
  */
 public class FailureReasonMessage implements LocalizableStrings {
 

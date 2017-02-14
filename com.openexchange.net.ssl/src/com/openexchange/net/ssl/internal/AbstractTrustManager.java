@@ -117,7 +117,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
     protected final X509ExtendedTrustManager trustManager;
 
     /**
-     * Initialises a new {@link AbstractTrustManager}.
+     * Initializes a new {@link AbstractTrustManager}.
      *
      * @param trustManager The trust manager
      */
@@ -126,6 +126,11 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         this.trustManager = trustManager;
     }
 
+    /**
+     * Checks if this trust manager has been properly initialized
+     *
+     * @return <code>true</code> if properly initialized; otherwise <code>false</code>
+     */
     public boolean isInitialized() {
         return this.trustManager != null;
     }
