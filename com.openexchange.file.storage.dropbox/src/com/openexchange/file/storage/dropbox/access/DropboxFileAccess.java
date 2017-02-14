@@ -880,7 +880,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         try {
             if (Strings.isEmpty(pattern) || pattern.equals("*")) {
                 // Return everything
-                return getAllFiles(folderId, true);
+                return getAllFiles(folderId, includeSubfolders);
             } else {
                 // Search
                 return fireSearch(folderId, pattern, includeSubfolders);
