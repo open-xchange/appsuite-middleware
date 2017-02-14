@@ -198,7 +198,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
                 /*
                  * update for new change exception, prepare & insert the exception
                  */
-                Event exceptionEvent = prepareException(originalEvent, Check.recurrenceIdExists(originalEvent, recurrenceID));
+                Event exceptionEvent = prepareException(originalEvent, Check.recurrenceIdExists(session.getRecurrenceService(), originalEvent, recurrenceID));
                 storage.getEventStorage().insertEvent(exceptionEvent);
                 /*
                  * take over all original attendees, attachments & alarms

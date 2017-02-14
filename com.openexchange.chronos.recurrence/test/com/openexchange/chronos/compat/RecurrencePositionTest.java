@@ -60,6 +60,8 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
+import com.openexchange.chronos.recurrence.service.RecurrenceServiceImpl;
+import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.java.util.TimeZones;
 
 /**
@@ -69,6 +71,8 @@ import com.openexchange.java.util.TimeZones;
  * @since v7.10.0
  */
 public class RecurrencePositionTest {
+
+    private RecurrenceService recurrenceService = new RecurrenceServiceImpl();
 
     @Test
     public void testPacificHonolulu() throws Exception {
@@ -127,15 +131,15 @@ public class RecurrencePositionTest {
          * check recurrence position conversion
          */
         int position = 8;
-        RecurrenceId recurrenceID = Appointment2Event.getRecurrenceID(recurrenceData, position);
-        assertEquals(position, Event2Appointment.getRecurrencePosition(recurrenceData, new DefaultRecurrenceId(recurrenceID.getValue())));
+        RecurrenceId recurrenceID = Appointment2Event.getRecurrenceID(recurrenceService, recurrenceData, position);
+        assertEquals(position, Event2Appointment.getRecurrencePosition(recurrenceService, recurrenceData, new DefaultRecurrenceId(recurrenceID.getValue())));
         /*
          * check recurrence date position conversion
          */
         Calendar calendar = CalendarUtils.initCalendar(TimeZones.UTC, event.getStartDate());
         calendar.add(Calendar.DATE, 17);
         Date datePosition = calendar.getTime();
-        recurrenceID = Appointment2Event.getRecurrenceID(recurrenceData, datePosition);
+        recurrenceID = Appointment2Event.getRecurrenceID(recurrenceService, recurrenceData, datePosition);
         assertEquals(datePosition, Event2Appointment.getRecurrenceDatePosition(new DefaultRecurrenceId(recurrenceID.getValue())));
     }
 
@@ -149,15 +153,15 @@ public class RecurrencePositionTest {
          * check recurrence position conversion
          */
         int position = 35;
-        RecurrenceId recurrenceID = Appointment2Event.getRecurrenceID(recurrenceData, position);
-        assertEquals(position, Event2Appointment.getRecurrencePosition(recurrenceData, recurrenceID));
+        RecurrenceId recurrenceID = Appointment2Event.getRecurrenceID(recurrenceService, recurrenceData, position);
+        assertEquals(position, Event2Appointment.getRecurrencePosition(recurrenceService, recurrenceData, recurrenceID));
         /*
          * check recurrence date position conversion
          */
         Calendar calendar = CalendarUtils.initCalendar(TimeZones.UTC, event.getStartDate());
         calendar.add(Calendar.WEEK_OF_YEAR, 8);
         Date datePosition = calendar.getTime();
-        recurrenceID = Appointment2Event.getRecurrenceID(recurrenceData, datePosition);
+        recurrenceID = Appointment2Event.getRecurrenceID(recurrenceService, recurrenceData, datePosition);
         assertEquals(datePosition, Event2Appointment.getRecurrenceDatePosition(new DefaultRecurrenceId(recurrenceID.getValue())));
     }
 
@@ -171,15 +175,15 @@ public class RecurrencePositionTest {
          * check recurrence position conversion
          */
         int position = 8;
-        RecurrenceId recurrenceID = Appointment2Event.getRecurrenceID(recurrenceData, position);
-        assertEquals(position, Event2Appointment.getRecurrencePosition(recurrenceData, new DefaultRecurrenceId(recurrenceID.getValue())));
+        RecurrenceId recurrenceID = Appointment2Event.getRecurrenceID(recurrenceService, recurrenceData, position);
+        assertEquals(position, Event2Appointment.getRecurrencePosition(recurrenceService, recurrenceData, new DefaultRecurrenceId(recurrenceID.getValue())));
         /*
          * check recurrence date position conversion
          */
         Calendar calendar = CalendarUtils.initCalendar(timeZone, event.getStartDate());
         calendar.add(Calendar.DATE, 17);
         Date datePosition = CalendarUtils.truncateTime(calendar.getTime(), TimeZones.UTC);
-        recurrenceID = Appointment2Event.getRecurrenceID(recurrenceData, datePosition);
+        recurrenceID = Appointment2Event.getRecurrenceID(recurrenceService, recurrenceData, datePosition);
         assertEquals(datePosition, Event2Appointment.getRecurrenceDatePosition(new DefaultRecurrenceId(recurrenceID.getValue())));
     }
 
@@ -193,15 +197,15 @@ public class RecurrencePositionTest {
          * check recurrence position conversion
          */
         int position = 8;
-        RecurrenceId recurrenceID = Appointment2Event.getRecurrenceID(recurrenceData, position);
-        assertEquals(position, Event2Appointment.getRecurrencePosition(recurrenceData, new DefaultRecurrenceId(recurrenceID.getValue())));
+        RecurrenceId recurrenceID = Appointment2Event.getRecurrenceID(recurrenceService, recurrenceData, position);
+        assertEquals(position, Event2Appointment.getRecurrencePosition(recurrenceService, recurrenceData, new DefaultRecurrenceId(recurrenceID.getValue())));
         /*
          * check recurrence date position conversion
          */
         Calendar calendar = CalendarUtils.initCalendar(timeZone, event.getStartDate());
         calendar.add(Calendar.DATE, 17);
         Date datePosition = CalendarUtils.truncateTime(calendar.getTime(), TimeZones.UTC);
-        recurrenceID = Appointment2Event.getRecurrenceID(recurrenceData, datePosition);
+        recurrenceID = Appointment2Event.getRecurrenceID(recurrenceService, recurrenceData, datePosition);
         assertEquals(datePosition, Event2Appointment.getRecurrenceDatePosition(new DefaultRecurrenceId(recurrenceID.getValue())));
     }
 
@@ -215,15 +219,15 @@ public class RecurrencePositionTest {
          * check recurrence position conversion
          */
         int position = 8;
-        RecurrenceId recurrenceID = Appointment2Event.getRecurrenceID(recurrenceData, position);
-        assertEquals(position, Event2Appointment.getRecurrencePosition(recurrenceData, new DefaultRecurrenceId(recurrenceID.getValue())));
+        RecurrenceId recurrenceID = Appointment2Event.getRecurrenceID(recurrenceService, recurrenceData, position);
+        assertEquals(position, Event2Appointment.getRecurrencePosition(recurrenceService, recurrenceData, new DefaultRecurrenceId(recurrenceID.getValue())));
         /*
          * check recurrence date position conversion
          */
         Calendar calendar = CalendarUtils.initCalendar(timeZone, event.getStartDate());
         calendar.add(Calendar.DATE, 17);
         Date datePosition = CalendarUtils.truncateTime(calendar.getTime(), TimeZones.UTC);
-        recurrenceID = Appointment2Event.getRecurrenceID(recurrenceData, datePosition);
+        recurrenceID = Appointment2Event.getRecurrenceID(recurrenceService, recurrenceData, datePosition);
         assertEquals(datePosition, Event2Appointment.getRecurrenceDatePosition(new DefaultRecurrenceId(recurrenceID.getValue())));
     }
 
@@ -237,15 +241,15 @@ public class RecurrencePositionTest {
          * check recurrence position conversion
          */
         int position = 8;
-        RecurrenceId recurrenceID = Appointment2Event.getRecurrenceID(recurrenceData, position);
-        assertEquals(position, Event2Appointment.getRecurrencePosition(recurrenceData, new DefaultRecurrenceId(recurrenceID.getValue())));
+        RecurrenceId recurrenceID = Appointment2Event.getRecurrenceID(recurrenceService, recurrenceData, position);
+        assertEquals(position, Event2Appointment.getRecurrencePosition(recurrenceService, recurrenceData, new DefaultRecurrenceId(recurrenceID.getValue())));
         /*
          * check recurrence date position conversion
          */
         Calendar calendar = CalendarUtils.initCalendar(timeZone, event.getStartDate());
         calendar.add(Calendar.DATE, 17);
         Date datePosition = CalendarUtils.truncateTime(calendar.getTime(), TimeZones.UTC);
-        recurrenceID = Appointment2Event.getRecurrenceID(recurrenceData, datePosition);
+        recurrenceID = Appointment2Event.getRecurrenceID(recurrenceService, recurrenceData, datePosition);
         assertEquals(datePosition, Event2Appointment.getRecurrenceDatePosition(new DefaultRecurrenceId(recurrenceID.getValue())));
     }
 
@@ -259,15 +263,15 @@ public class RecurrencePositionTest {
          * check recurrence position conversion
          */
         int position = 8;
-        RecurrenceId recurrenceID = Appointment2Event.getRecurrenceID(recurrenceData, position);
-        assertEquals(position, Event2Appointment.getRecurrencePosition(recurrenceData, new DefaultRecurrenceId(recurrenceID.getValue())));
+        RecurrenceId recurrenceID = Appointment2Event.getRecurrenceID(recurrenceService, recurrenceData, position);
+        assertEquals(position, Event2Appointment.getRecurrencePosition(recurrenceService, recurrenceData, new DefaultRecurrenceId(recurrenceID.getValue())));
         /*
          * check recurrence date position conversion
          */
         Calendar calendar = CalendarUtils.initCalendar(timeZone, event.getStartDate());
         calendar.add(Calendar.DATE, 17);
         Date datePosition = CalendarUtils.truncateTime(calendar.getTime(), TimeZones.UTC);
-        recurrenceID = Appointment2Event.getRecurrenceID(recurrenceData, datePosition);
+        recurrenceID = Appointment2Event.getRecurrenceID(recurrenceService, recurrenceData, datePosition);
         assertEquals(datePosition, Event2Appointment.getRecurrenceDatePosition(new DefaultRecurrenceId(recurrenceID.getValue())));
     }
 

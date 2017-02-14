@@ -50,7 +50,6 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.find;
-import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
 import static com.openexchange.chronos.common.CalendarUtils.isAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isFloating;
 import static com.openexchange.chronos.common.CalendarUtils.isInRange;
@@ -92,7 +91,6 @@ import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Reference;
-import com.openexchange.java.util.TimeZones;
 
 /**
  * {@link ConflictCheckPerformer}
@@ -201,8 +199,7 @@ public class ConflictCheckPerformer extends AbstractQueryPerformer {
                  * expand & check all occurrences of event series in period
                  */
                 long duration = eventInPeriod.getEndDate().getTime() - eventInPeriod.getStartDate().getTime();
-                Iterator<RecurrenceId> iterator = session.getRecurrenceService()
-                    .getRecurrenceIterator(eventInPeriod, initCalendar(TimeZones.UTC, from), initCalendar(TimeZones.UTC, until), false);
+                Iterator<RecurrenceId> iterator = session.getRecurrenceService().iterateRecurrenceIds(eventInPeriod, from, until);
                 while (iterator.hasNext()) {
                     RecurrenceId recurrenceId = iterator.next();
                     if (event.getStartDate().getTime() < recurrenceId.getValue() + duration && event.getEndDate().getTime() > recurrenceId.getValue()) {
@@ -235,8 +232,7 @@ public class ConflictCheckPerformer extends AbstractQueryPerformer {
         /*
          * resolve occurrences for event series & derive checked period
          */
-        List<RecurrenceId> eventRecurrenceIds = asList(session.getRecurrenceService()
-            .getRecurrenceIterator(masterEvent, initCalendar(TimeZones.UTC, today), null, false));
+        List<RecurrenceId> eventRecurrenceIds = asList(session.getRecurrenceService().iterateRecurrenceIds(masterEvent, today, null));
         if (0 == eventRecurrenceIds.size()) {
             return Collections.emptyList();
         }
@@ -278,8 +274,7 @@ public class ConflictCheckPerformer extends AbstractQueryPerformer {
                  */
                 int count = 0;
                 long duration = eventInPeriod.getEndDate().getTime() - eventInPeriod.getStartDate().getTime();
-                Iterator<RecurrenceId> iterator = session.getRecurrenceService()
-                    .getRecurrenceIterator(eventInPeriod, initCalendar(TimeZones.UTC, from), initCalendar(TimeZones.UTC, until), false);
+                Iterator<RecurrenceId> iterator = session.getRecurrenceService().iterateRecurrenceIds(eventInPeriod, from, until);
                 while (iterator.hasNext() && count < maxConflictsPerRecurrence) {
                     RecurrenceId recurrenceId = iterator.next();
                     for (RecurrenceId eventRecurrenceId : eventRecurrenceIds) {

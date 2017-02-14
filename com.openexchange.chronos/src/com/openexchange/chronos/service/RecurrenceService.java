@@ -50,10 +50,12 @@
 package com.openexchange.chronos.service;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.exception.OXException;
 
 /**
@@ -109,6 +111,53 @@ public interface RecurrenceService {
      */
     public int calculateRecurrencePosition(Event master, Calendar datePosition) throws OXException;
 
-    Iterator<RecurrenceId> getRecurrenceIterator(Event master, Calendar start, Calendar end, boolean ignoreExceptions) throws OXException;
+    /**
+     * Initializes a new recurrence iterator for the occurrences of an event series.
+     * <p/>
+     * Any change- and delete exceptions (as found in the corresponding properties of the series master event) are ignored implicitly,
+     * and won't be contained in the resulting iterator. Iteration starts with the first occurrence matching the recurrence rule, i.e. the
+     * iterator is forwarded to the first occurrence automatically if the series master event's start does not fall into the pattern.
+     *
+     * @param seriesMaster The series master event
+     * @param from The left side (inclusive) boundary for the calculation, or <code>null</code> to start with the first occurrence
+     * @param until The right side (exclusive) boundary for the calculation, or <code>null</code> for no limitation
+     * @return The resulting event occurrence iterator
+     */
+    RecurrenceIterator<Event> iterateEventOccurrences(Event seriesMaster, Date from, Date until) throws OXException;
+
+    /**
+     * Initializes a new recurrence iterator for the recurrence identifiers of an event series.
+     * <p/>
+     * Any change- and delete exceptions (as found in the corresponding properties of the series master event) are ignored implicitly,
+     * and won't be contained in the resulting iterator. Iteration starts with the first occurrence matching the recurrence rule, i.e. the
+     * iterator is forwarded to the first occurrence automatically if the series master event's start does not fall into the pattern.
+     *
+     * @param seriesMaster The series master event
+     * @param from The left side (inclusive) boundary for the calculation, or <code>null</code> to start with the first occurrence
+     * @param until The right side (exclusive) boundary for the calculation, or <code>null</code> for no limitation
+     * @return The resulting event occurrence iterator
+     */
+    RecurrenceIterator<RecurrenceId> iterateRecurrenceIds(Event seriesMaster, Date from, Date until) throws OXException;
+
+    /**
+     * Initializes a new recurrence iterator for the recurrence identifiers of a recurrence data object.
+     * <p/>
+     * Iteration starts with the first occurrence matching the recurrence rule, i.e. the iterator is forwarded to the first occurrence
+     * automatically if the series master event's start does not fall into the pattern.
+     *
+     * @param recurrenceData The recurrence data
+     * @param from The left side (inclusive) boundary for the calculation, or <code>null</code> to start with the first occurrence
+     * @param until The right side (exclusive) boundary for the calculation, or <code>null</code> for no limitation
+     * @return The resulting event occurrence iterator
+     */
+    RecurrenceIterator<RecurrenceId> iterateRecurrenceIds(RecurrenceData recurrenceData, Date from, Date until) throws OXException;
+
+    /**
+     * Checks the recurrence data for validity.
+     *
+     * @param recurrenceData The recurrence data to check
+     * @throws OXException {@link CalendarExceptionCodes#INVALID_RRULE}
+     */
+    void validate(RecurrenceData recurrenceData) throws OXException;
 
 }

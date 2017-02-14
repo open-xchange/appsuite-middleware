@@ -75,6 +75,7 @@ import com.openexchange.chronos.Period;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.EventConflict;
+import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.ProblematicAttribute;
 import com.openexchange.java.Strings;
@@ -775,6 +776,23 @@ public class CalendarUtils {
             }
         }
         return emailAddress;
+    }
+
+    /**
+     * Gets a value indicating whether an event series lies in the past or not, i.e. the end-time of its last occurrence is before the
+     * <i>current</i> time.
+     * <p/>
+     * Therefore, the recurrence rule's <code>UNTIL</code>- and <code>COUNT</code>-parameters are evaluated accordingly; for
+     * <i>never-ending</i> event series, this method always returns <code>false</code>;
+     *
+     * @param recurrenceService A reference to the recurrence service
+     * @param seriesMaster The series master event to check
+     * @param now The date to consider as <i>now</i> in the comparison
+     * @param timeZone The timezone to consider if the event has <i>floating</i> dates
+     * @return <code>true</code> if the event series is in the past, <code>false</code>, otherwise
+     */
+    public static boolean isInPast(RecurrenceService recurrenceService, Event seriesMaster, Date now, TimeZone timeZone) throws OXException {
+        return false == recurrenceService.iterateRecurrenceIds(seriesMaster, now, null).hasNext();
     }
 
 }

@@ -62,8 +62,6 @@ import java.util.TimeZone;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.common.DefaultRecurrenceData;
-import com.openexchange.chronos.compat.Recurrence;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
@@ -170,23 +168,19 @@ public class BasicEventDriver extends BasicCalendarDriver {
         if (CalendarUtils.isSeriesMaster(event)) {
             Event occurrence = null;
             Date now = new Date();
-            TimeZone timeZone = session.get(CalendarParameters.PARAMETER_TIMEZONE, TimeZone.class, TimeZone.getTimeZone(session.getUser().getTimeZone()));
-            DefaultRecurrenceData recurrenceData = new DefaultRecurrenceData(event);
-            if (Recurrence.isInPast(recurrenceData, now, timeZone)) {
+
+            /*
+             * prefer the "next" occurrence if possible
+             */
+            Iterator<Event> iterator = session.getRecurrenceService().iterateEventOccurrences(event, now, null);
+            if (iterator.hasNext()) {
+                occurrence = iterator.next();
+            } else {
                 /*
                  * prefer the "last" occurrence
                  */
-                Iterator<Event> iterator = session.getRecurrenceService().calculateInstancesRespectExceptions(event, null, CalendarUtils.initCalendar(timeZone, now), null, null);
+                iterator = session.getRecurrenceService().iterateEventOccurrences(event, null, now);
                 while (iterator.hasNext()) {
-                    occurrence = iterator.next();
-                }
-            } else {
-                /*
-                 * prefer the "next" occurrence
-                 */
-                Iterator<Event> iterator = session.getRecurrenceService().calculateInstancesRespectExceptions(
-                    event, CalendarUtils.initCalendar(timeZone, now), null, Autoboxing.I(1), null);
-                if (iterator.hasNext()) {
                     occurrence = iterator.next();
                 }
             }
@@ -194,9 +188,9 @@ public class BasicEventDriver extends BasicCalendarDriver {
                 return occurrence;
             } else {
                 /*
-                 * fall back to first occurrence
+                 * fall back to very first occurrence
                  */
-                Iterator<Event> iterator = session.getRecurrenceService().calculateInstancesRespectExceptions(event, null, null, Autoboxing.I(1), null);
+                iterator = session.getRecurrenceService().iterateEventOccurrences(event, null, null);
                 if (iterator.hasNext()) {
                     return iterator.next();
                 }

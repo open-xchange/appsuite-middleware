@@ -292,8 +292,7 @@ public class EventPatches {
                     calendarSession.set(CalendarParameters.PARAMETER_FIELDS, null);
                     Event masterEvent = calendarSession.getCalendarService().getEvent(calendarSession, resource.getEvent().getFolderId(), resource.getEvent().getId());
                     Event originalOccurrence = null;
-                    Iterator<Event> iterator = resource.getCalendarSession().getRecurrenceService().calculateInstances(
-                        masterEvent, initCalendar(TimeZones.UTC, recurrenceId.getValue()), null, null);
+                    Iterator<Event> iterator = resource.getCalendarSession().getRecurrenceService().iterateEventOccurrences(masterEvent, new Date(recurrenceId.getValue()), null);
                     if (iterator.hasNext()) {
                         originalOccurrence = iterator.next();
                     }
@@ -664,9 +663,8 @@ public class EventPatches {
                             }
                             if (isSeriesMaster(exportedEvent) && null != snoozedAlarm.getAcknowledged()) {
                                 try {
-                                    RecurrenceService recurrenceService = resource.getFactory().requireService(RecurrenceService.class);
-                                    Iterator<Event> iterator = recurrenceService.calculateInstancesRespectExceptions(
-                                        exportedEvent, initCalendar(TimeZones.UTC, snoozedAlarm.getAcknowledged()), null, null, null);
+                                    Iterator<Event> iterator = resource.getCalendarSession().getRecurrenceService().iterateEventOccurrences(
+                                        exportedEvent, snoozedAlarm.getAcknowledged(), null);
                                     if (iterator.hasNext()) {
                                         Date relatedDate = AlarmUtils.getRelatedDate(alarm.getTrigger().getRelated(), iterator.next());
                                         String propertyName = "X-MOZ-SNOOZE-TIME-" + String.valueOf(relatedDate.getTime()) + "000";

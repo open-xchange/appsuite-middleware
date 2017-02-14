@@ -54,6 +54,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
+import com.openexchange.chronos.recurrence.service.RecurrenceServiceImpl;
+import com.openexchange.chronos.service.RecurrenceService;
 
 /**
  * {@link RecurrenceTests}
@@ -62,6 +64,8 @@ import com.openexchange.chronos.common.DefaultRecurrenceData;
  * @since v7.10.0
  */
 public class RecurrenceTests {
+
+    private RecurrenceService recurrenceService = new RecurrenceServiceImpl();
 
     private class Validator {
 
@@ -104,7 +108,7 @@ public class RecurrenceTests {
     public void setUp() {}
 
     @Test
-    public void testSimpleRecurringRules() {
+    public void testSimpleRecurringRules() throws Exception {
         TimeZone tz = TimeZone.getTimeZone("UTC");
         Validator v = new Validator(Recurrence.getRecurrenceRule("t|1|i|1|s|1222865100000|", tz, false));
         v._("FREQ=DAILY")._("INTERVAL=1").assertlength();
@@ -144,24 +148,24 @@ public class RecurrenceTests {
     public void testSimpleRecurringRulesToPattern() throws Exception {
         String tz = TimeZone.getDefault().getID();
 
-        SeriesPattern pattern = Recurrence.getSeriesPattern(new DefaultRecurrenceData("FREQ=DAILY;INTERVAL=1", false, tz, 1222865100000L));
+        SeriesPattern pattern = Recurrence.getSeriesPattern(recurrenceService, new DefaultRecurrenceData("FREQ=DAILY;INTERVAL=1", false, tz, 1222865100000L));
         Assert.assertEquals("Wrong pattern.", "t|1|i|1|s|1222865100000|", pattern.toString());
 
-        pattern = Recurrence.getSeriesPattern(new DefaultRecurrenceData("FREQ=DAILY;INTERVAL=1;COUNT=3", false, tz, 1222865100000L));
+        pattern = Recurrence.getSeriesPattern(recurrenceService, new DefaultRecurrenceData("FREQ=DAILY;INTERVAL=1;COUNT=3", false, tz, 1222865100000L));
         Assert.assertEquals("Wrong pattern.", "t|1|i|1|o|3|s|1222865100000|e|1222992000000|", pattern.toString());
 
-        pattern = Recurrence.getSeriesPattern(new DefaultRecurrenceData("FREQ=DAILY;INTERVAL=1;UNTIL=20081012T124500Z", false, tz, 1222865100000L));
+        pattern = Recurrence.getSeriesPattern(recurrenceService, new DefaultRecurrenceData("FREQ=DAILY;INTERVAL=1;UNTIL=20081012T124500Z", false, tz, 1222865100000L));
         Assert.assertEquals("Wrong pattern.", "t|1|i|1|s|1222865100000|e|1223769600000|", pattern.toString());
 
-        pattern = Recurrence.getSeriesPattern(new DefaultRecurrenceData("FREQ=WEEKLY;INTERVAL=1;BYDAY=WE", false, tz, 1222840800000L));
+        pattern = Recurrence.getSeriesPattern(recurrenceService, new DefaultRecurrenceData("FREQ=WEEKLY;INTERVAL=1;BYDAY=WE", false, tz, 1222840800000L));
         Assert.assertEquals("Wrong pattern.", "t|2|i|1|a|8|s|1222840800000|", pattern.toString());
 
-        pattern = Recurrence.getSeriesPattern(new DefaultRecurrenceData("FREQ=WEEKLY;INTERVAL=1;COUNT=5;BYDAY=WE,FR", false, tz, 1222840800000L));
+        pattern = Recurrence.getSeriesPattern(recurrenceService, new DefaultRecurrenceData("FREQ=WEEKLY;INTERVAL=1;COUNT=5;BYDAY=WE,FR", false, tz, 1222840800000L));
         Assert.assertEquals("Wrong pattern.", "t|2|i|1|a|40|o|5|s|1222840800000|e|1224028800000|", pattern.toString());
     }
 
     @Test
-    public void testTimeZoneRecurringRules() {
+    public void testTimeZoneRecurringRules() throws Exception {
         java.util.TimeZone tz = TimeZone.getTimeZone("Europe/Berlin");
         Validator v = new Validator(Recurrence.getRecurrenceRule("t|1|i|1|s|1222865100000|", tz, false));
         v._("FREQ=DAILY")._("INTERVAL=1").assertlength();
@@ -170,7 +174,7 @@ public class RecurrenceTests {
         v._("FREQ=DAILY")._("INTERVAL=1")._("COUNT=3").assertlength();
 
         v = new Validator(Recurrence.getRecurrenceRule("t|1|i|1|s|1222865100000|e|1223769600000|", tz, false));
-        v._("FREQ=DAILY")._("INTERVAL=1")._("UNTIL=20081012T104500Z").assertlength();
+        v._("FREQ=DAILY")._("INTERVAL=1")._("UNTIL=20081012T124500Z").assertlength();
 
         v = new Validator(Recurrence.getRecurrenceRule("t|2|i|1|a|8|s|1222840800000|", tz, false));
         v._("FREQ=WEEKLY")._("BYDAY=WE")._("INTERVAL=1").assertlength();
@@ -179,13 +183,13 @@ public class RecurrenceTests {
         v._("FREQ=WEEKLY")._("BYDAY=WE,FR")._("INTERVAL=1")._("COUNT=5").assertlength();
 
         v = new Validator(Recurrence.getRecurrenceRule("t|2|i|2|a|62|s|1222840800000|e|1224460800000|", tz, false));
-        v._("FREQ=WEEKLY")._("BYDAY=MO,TU,WE,TH,FR")._("INTERVAL=2")._("UNTIL=20081020T040000Z").assertlength();
+        v._("FREQ=WEEKLY")._("BYDAY=MO,TU,WE,TH,FR")._("INTERVAL=2")._("UNTIL=20081020T060000Z").assertlength();
 
         v = new Validator(Recurrence.getRecurrenceRule("t|3|i|2|b|3|s|1223013600000|e|1238716800000|o|4|", tz, false));
         v._("FREQ=MONTHLY")._("BYMONTHDAY=3")._("INTERVAL=2")._("COUNT=4").assertlength();
 
         v = new Validator(Recurrence.getRecurrenceRule("t|5|i|1|a|32|b|2|s|1223618400000|e|1229040000000|", tz, false));
-        v._("FREQ=MONTHLY")._("BYSETPOS=2")._("BYDAY=FR")._("INTERVAL=1")._("UNTIL=20081212T050000Z").assertlength();
+        v._("FREQ=MONTHLY")._("BYSETPOS=2")._("BYDAY=FR")._("INTERVAL=1")._("UNTIL=20081212T070000Z").assertlength();
 
         v = new Validator(Recurrence.getRecurrenceRule("t|5|i|1|a|65|b|5|s|1225004400000|e|1228003200000|o|2|", tz, false));
         v._("FREQ=MONTHLY")._("BYSETPOS=-1")._("BYDAY=SU,SA")._("INTERVAL=1")._("COUNT=2").assertlength();

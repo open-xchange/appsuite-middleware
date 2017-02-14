@@ -63,6 +63,7 @@ import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
+import static com.openexchange.chronos.impl.Utils.asList;
 import static com.openexchange.chronos.impl.Utils.i;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_ALL_OBJECTS;
@@ -75,6 +76,7 @@ import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -184,7 +186,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                 /*
                  * update for new change exception, prepare & insert a plain exception first
                  */
-                Event newExceptionEvent = prepareException(originalEvent, Check.recurrenceIdExists(originalEvent, recurrenceID));
+                Event newExceptionEvent = prepareException(originalEvent, Check.recurrenceIdExists(session.getRecurrenceService(), originalEvent, recurrenceID));
                 storage.getEventStorage().insertEvent(newExceptionEvent);
                 /*
                  * take over all original attendees, attachments & alarms
@@ -378,11 +380,10 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                 exceptionDates.addAll(originalEvent.getChangeExceptionDates());
             }
             Collections.sort(exceptionDates);
-            Calendar fromCalendar = initCalendar(TimeZones.UTC, exceptionDates.getFirst().getValue());
             Calendar untilCalendar = initCalendar(TimeZones.UTC, exceptionDates.getLast().getValue());
             untilCalendar.add(Calendar.DATE, 1);
-            List<RecurrenceId> possibleExceptionDates = Utils.asList(session.getRecurrenceService().getRecurrenceIterator(
-                eventUpdate.getUpdate(), fromCalendar, untilCalendar, true));
+            List<RecurrenceId> possibleExceptionDates = asList(session.getRecurrenceService().iterateRecurrenceIds(
+                eventUpdate.getUpdate(), new Date(exceptionDates.getFirst().getValue()), untilCalendar.getTime()));
             /*
              * reset no longer matching delete- and change exceptions if recurrence rule changes
              */
@@ -519,7 +520,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             }
             if (0 < exceptionDateUpdates.getAddedItems().size()) {
                 for (RecurrenceId newDeleteException : exceptionDateUpdates.getAddedItems()) {
-                    RecurrenceId recurrenceId = Check.recurrenceIdExists(originalEvent, newDeleteException);
+                    RecurrenceId recurrenceId = Check.recurrenceIdExists(session.getRecurrenceService(), originalEvent, newDeleteException);
                     if (contains(originalEvent.getChangeExceptionDates(), newDeleteException.getValue())) {
                         /*
                          * remove attendee from existing change exception
@@ -747,7 +748,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                      * ensure all necessary recurrence related data is present in passed event update & check rule validity
                      */
                     EventMapper.getInstance().copyIfNotSet(originalEvent, eventUpdate, EventField.SERIES_ID, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY);
-                    Check.recurrenceRuleIsValid(eventUpdate);
+                    Check.recurrenceRuleIsValid(session.getRecurrenceService(), eventUpdate);
                     /*
                      * single event to series, assign new recurrence id
                      */
@@ -778,7 +779,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                         throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(I(originalEvent.getId()), field);
                     }
                     if (null != eventUpdate.getDeleteExceptionDates()) {
-                        Check.recurrenceIdsExist(originalEvent, eventUpdate.getDeleteExceptionDates());
+                        Check.recurrenceIdsExist(session.getRecurrenceService(), originalEvent, eventUpdate.getDeleteExceptionDates());
                         SimpleCollectionUpdate<RecurrenceId> exceptionDateUpdates = Utils.getExceptionDateUpdates(originalEvent.getDeleteExceptionDates(), eventUpdate.getDeleteExceptionDates());
                         if (0 < exceptionDateUpdates.getRemovedItems().size()) {
                             throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(I(originalEvent.getId()), field);

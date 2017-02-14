@@ -49,16 +49,14 @@
 
 package com.openexchange.chronos.impl.performer;
 
-import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Utils.anonymizeIfNeeded;
 import static com.openexchange.chronos.impl.Utils.find;
-import static com.openexchange.chronos.impl.Utils.getTimeZone;
 import static com.openexchange.chronos.impl.Utils.i;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
 import java.util.ArrayList;
-import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -135,8 +133,7 @@ public class ListPerformer extends AbstractQueryPerformer {
             event = anonymizeIfNeeded(session, event);
             if (null != eventID.getRecurrenceID()) {
                 if (isSeriesMaster(event)) {
-                    Calendar fromCalendar = initCalendar(getTimeZone(session), eventID.getRecurrenceID().getValue());
-                    Iterator<Event> iterator = session.getRecurrenceService().calculateInstancesRespectExceptions(event, fromCalendar, null, I(1), null);
+                    Iterator<Event> iterator = session.getRecurrenceService().iterateEventOccurrences(event, new Date(eventID.getRecurrenceID().getValue()), null);
                     if (false == iterator.hasNext()) {
                         throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(I(eventID.getObjectID()), eventID.getRecurrenceID());
                     }

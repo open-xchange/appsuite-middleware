@@ -65,7 +65,6 @@ import com.openexchange.chronos.Trigger;
 import com.openexchange.chronos.Trigger.Related;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.util.TimeZones;
 
 /**
  * {@link AlarmUtils}
@@ -341,7 +340,7 @@ public class AlarmUtils extends CalendarUtils {
         }
         if (null != trigger.getDateTime()) {
             if (CalendarUtils.isSeriesMaster(event)) {
-                Iterator<Event> iterator = recurrenceService.calculateInstancesRespectExceptions(event, initCalendar(TimeZones.UTC, trigger.getDateTime()), null, null, null);
+                Iterator<Event> iterator = recurrenceService.iterateEventOccurrences(event, trigger.getDateTime(), null);
                 if (iterator.hasNext()) {
                     return getTriggerDuration(trigger, iterator.next());
                 }
@@ -392,7 +391,7 @@ public class AlarmUtils extends CalendarUtils {
         if (null == startDate) {
             startDate = null != alarm.getAcknowledged() ? alarm.getAcknowledged() : new Date();
         }
-        Iterator<Event> iterator = recurrenceService.calculateInstancesRespectExceptions(seriesMaster, initCalendar(TimeZones.UTC, startDate), null, null, null);
+        Iterator<Event> iterator = recurrenceService.iterateEventOccurrences(seriesMaster, startDate, null);
         while (iterator.hasNext()) {
             Event occurrence = iterator.next();
             if (occurrence.getStartDate().before(startDate)) {

@@ -55,7 +55,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.CalendarUserType;
@@ -69,6 +68,8 @@ import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.RecurrenceData;
+import com.openexchange.chronos.service.RecurrenceIterator;
+import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.TimeZones;
@@ -298,36 +299,33 @@ public class Event2Appointment {
     /**
      * Gets the legacy series pattern for the supplied recurrence data.
      *
+     * @param recurrenceService A reference to the recurrence service
      * @param recurrenceData The recurrence data
      * @return The series pattern, or <code>null</code> if passed <code>recurrenceData</code> reference was null
      */
-    public static SeriesPattern getSeriesPattern(RecurrenceData recurrenceData) throws OXException {
+    public static SeriesPattern getSeriesPattern(RecurrenceService recurrenceService, RecurrenceData recurrenceData) throws OXException {
         if (null == recurrenceData) {
             return null;
         }
-        return Recurrence.getSeriesPattern(recurrenceData);
+        return Recurrence.getSeriesPattern(recurrenceService, recurrenceData);
     }
 
     /**
      * Gets the formerly used recurrence position, i.e. the 1-based, sequential position in the series where the original occurrence
      * would have been.
      *
+     * @param recurrenceService A reference to the recurrence service
      * @param recurrenceData The recurrence data
      * @param recurrenceId The recurrence identifier
      * @return The recurrence position
      * @throws OXException {@link CalendarExceptionCodes#INVALID_RECURRENCE_ID}
      */
-    public static int getRecurrencePosition(RecurrenceData recurrenceData, RecurrenceId recurrenceId) throws OXException {
-        if (PositionAwareRecurrenceId.class.isInstance(recurrenceId)) {
-            return ((PositionAwareRecurrenceId) recurrenceId).getRecurrencePosition();
-        }
-        RecurrenceRuleIterator iterator = Recurrence.getRecurrenceIterator(recurrenceData, true);
-        int position = 0;
+    public static int getRecurrencePosition(RecurrenceService recurrenceService, RecurrenceData recurrenceData, RecurrenceId recurrenceId) throws OXException {
+        RecurrenceIterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(recurrenceData, null, null);
         while (iterator.hasNext()) {
-            long nextMillis = iterator.nextMillis();
-            position++;
+            long nextMillis = iterator.next().getValue();
             if (nextMillis == recurrenceId.getValue()) {
-                return position;
+                return iterator.getPosition();
             }
             if (nextMillis > recurrenceId.getValue()) {
                 break;
@@ -349,6 +347,7 @@ public class Event2Appointment {
         }
         return CalendarUtils.truncateTime(new Date(recurrenceId.getValue()), TimeZones.UTC);
     }
+
 
     /**
      * Gets the formerly used recurrence date positions for a list of recurrence IDs, i.e. the date where the original occurrence would

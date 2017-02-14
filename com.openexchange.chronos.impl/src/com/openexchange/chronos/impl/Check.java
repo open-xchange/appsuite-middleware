@@ -53,6 +53,8 @@ import static com.openexchange.chronos.impl.Utils.getCalendarUser;
 import static com.openexchange.chronos.impl.Utils.i;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TimeZone;
@@ -72,6 +74,7 @@ import com.openexchange.chronos.impl.performer.ResolveUidPerformer;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventConflict;
+import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
@@ -275,14 +278,15 @@ public class Check {
     /**
      * Checks an event's recurrence rule for validity.
      *
+     * @param recurrenceService A reference to the recurrence service
      * @param event The event to check
      * @return The passed event's recurrence rule, after it was checked for validity
      * @throws OXException {@link CalendarExceptionCodes#INVALID_RRULE}
      */
-    public static String recurrenceRuleIsValid(Event event) throws OXException {
+    public static String recurrenceRuleIsValid(RecurrenceService recurrenceService, Event event) throws OXException {
         String recurrenceRule = event.getRecurrenceRule();
         if (event.containsRecurrenceRule() && null != recurrenceRule) {
-            Recurrence.checkIsSupported(new DefaultRecurrenceData(event));
+            Recurrence.checkIsSupported(recurrenceService, new DefaultRecurrenceData(event));
         }
         return recurrenceRule;
     }
@@ -291,15 +295,16 @@ public class Check {
      * Ensures that all recurrence identifiers are valid for a specific recurring event series, i.e. the targeted occurrences
      * are actually part of the series.
      *
+     * @param recurrenceService A reference to the recurrence service
      * @param seriesMaster The series master event providing the recurrence information
      * @param recurrenceID The recurrence identifier
      * @return The passed list of recurrence identifiers, after their existence was checked
      * @throws OXException {@link CalendarExceptionCodes#INVALID_RECURRENCE_ID}
      */
-    public static SortedSet<RecurrenceId> recurrenceIdsExist(Event seriesMaster, SortedSet<RecurrenceId> recurrenceIDs) throws OXException {
+    public static SortedSet<RecurrenceId> recurrenceIdsExist(RecurrenceService recurrenceService, Event seriesMaster, SortedSet<RecurrenceId> recurrenceIDs) throws OXException {
         if (null != recurrenceIDs) {
             for (RecurrenceId recurrenceID : recurrenceIDs) {
-                recurrenceIdExists(seriesMaster, recurrenceID);
+                recurrenceIdExists(recurrenceService, seriesMaster, recurrenceID);
             }
         }
         return recurrenceIDs;
@@ -309,13 +314,15 @@ public class Check {
      * Ensures that a specific recurrence identifier is valid for a specific recurring event series, i.e. the targeted occurrence
      * is actually part of the series.
      *
+     * @param recurrenceService A reference to the recurrence service
      * @param seriesMaster The series master event providing the recurrence information
      * @param recurrenceID The recurrence identifier
      * @return The passed recurrence identifier, after it was checked for validity
      * @throws OXException {@link CalendarExceptionCodes#INVALID_RECURRENCE_ID}
      */
-    public static RecurrenceId recurrenceIdExists(Event seriesMaster, RecurrenceId recurrenceID) throws OXException {
-        if (false == Recurrence.isRecurrence(new DefaultRecurrenceData(seriesMaster), recurrenceID)) {
+    public static RecurrenceId recurrenceIdExists(RecurrenceService recurrenceService, Event seriesMaster, RecurrenceId recurrenceID) throws OXException {
+        Iterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(seriesMaster, new Date(recurrenceID.getValue()), null);
+        if (false == iterator.hasNext()) {
             throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(String.valueOf(recurrenceID), seriesMaster.getRecurrenceRule());
         }
         return recurrenceID;

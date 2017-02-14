@@ -66,17 +66,22 @@ import com.openexchange.java.util.TimeZones;
  */
 public class RecurrenceIterator extends AbstractRecurrenceIterator<Event> {
 
+    private final Event master;
+
     /**
      * Initializes a new {@link RecurrenceIterator}.
      *
      * @param master The master event containing all necessary information like recurrence rule, star and end date, timezones etc.
+     * @param forwardToOccurrence <code>true</code> to fast-forward the iterator to the first occurrence if the series master's start
+     *            does not fall into the pattern, <code>false</code> otherwise
      * @param start The left side boundary for the calculation. Optional, can be null.
      * @param end The right side boundary for the calculation. Optional, can be null.
      * @param limit The maximum number of calculated instances. Optional, can be null.
      * @param ignoreExceptions Determines if exceptions should be ignored. If true, all occurrences are calculated as if no exceptions exist. Note: This does not add change exceptions. See {@link ChangeExceptionAwareRecurrenceIterator}
      */
-    public RecurrenceIterator(Event master, Calendar start, Calendar end, Integer limit, boolean ignoreExceptions) throws OXException {
-        super(master, start, end, limit, ignoreExceptions);
+    public RecurrenceIterator(Event master, boolean forwardToOccurrence, Calendar start, Calendar end, Integer limit, boolean ignoreExceptions) throws OXException {
+        super(master, forwardToOccurrence, start, end, limit, ignoreExceptions);
+        this.master = master;
     }
 
     @Override

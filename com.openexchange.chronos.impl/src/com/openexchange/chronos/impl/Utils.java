@@ -80,8 +80,6 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.common.DefaultRecurrenceData;
-import com.openexchange.chronos.compat.Recurrence;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -442,12 +440,17 @@ public class Utils {
             TimeZone timeZone = getTimeZone(session);
             if (isSeriesMaster(event)) {
                 /*
+                 * excluded if there are no actual occurrences in range
+                 */
+                Iterator<Event> iterator = session.getRecurrenceService().iterateEventOccurrences(event, from, until);
+                return false == iterator.hasNext();
+                /*
                  * excluded if last occurrence ends before "from", or first occurrence starts after "until"
                  */
-                if (null != from && Recurrence.isInPast(new DefaultRecurrenceData(event), from, timeZone) ||
-                    null != until && false == isInRange(event, null, until, timeZone)) {
-                    return true;
-                }
+                //                if (null != from && Recurrence.isInPast(new DefaultRecurrenceData(event), from, timeZone) ||
+                //                    null != until && false == isInRange(event, null, until, timeZone)) {
+                //                    return true;
+                //                }
             } else {
                 /*
                  * excluded if event period not in range
@@ -597,12 +600,12 @@ public class Utils {
      * @param timeZone The timezone to consider if the event has <i>floating</i> dates
      * @return <code>true</code> if the event is in the past, <code>false</code>, otherwise
      */
-    public static boolean isInPast(Event event, Date now, TimeZone timeZone) throws OXException {
-        if (false == isSeriesMaster(event)) {
-            return false == isInRange(event, now, null, timeZone);
-        }
-        return Recurrence.isInPast(new DefaultRecurrenceData(event), now, timeZone);
-    }
+    //    private static boolean isInPast(Event event, Date now, TimeZone timeZone) throws OXException {
+    //        if (false == isSeriesMaster(event)) {
+    //            return false == isInRange(event, now, null, timeZone);
+    //        }
+    //        return Recurrence.isInPast(new DefaultRecurrenceData(event), now, timeZone);
+    //    }
 
     /**
      * Gets a value indicating whether an event lies in the past or not, i.e. it's end-time is before the current system time.
@@ -614,9 +617,9 @@ public class Utils {
      * @param timeZone The timezone to consider if the event has <i>floating</i> dates
      * @return <code>true</code> if the event is in the past, <code>false</code>, otherwise
      */
-    public static boolean isInPast(Event event, TimeZone timeZone) throws OXException {
-        return isInPast(event, new Date(), timeZone);
-    }
+    //    private static boolean isInPast(Event event, TimeZone timeZone) throws OXException {
+    //        return isInPast(event, new Date(), timeZone);
+    //    }
 
     /**
      * Gets a value indicating whether a specific event is actually present in the supplied folder. Based on the folder type, the

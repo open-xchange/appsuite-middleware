@@ -47,55 +47,23 @@
  *
  */
 
-package com.openexchange.chronos.compat.osgi;
+package com.openexchange.chronos.service;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.openexchange.caching.CacheService;
-import com.openexchange.chronos.compat.cache.CacheServiceListener;
-import com.openexchange.osgi.HousekeepingActivator;
+import java.util.Iterator;
 
 /**
- * {@link ChronosCompatActivator}
+ * {@link RecurrenceIterator}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class ChronosCompatActivator extends HousekeepingActivator {
-
-    private static final Logger LOG = LoggerFactory.getLogger(ChronosCompatActivator.class);
+public interface RecurrenceIterator<T> extends Iterator<T> {
 
     /**
-     * Initializes a new {@link ChronosCompatActivator}.
+     * Gets the current, <code>1</code>-based position of the iterator in the recurrence set.
+     *
+     * @return The position, or <code>0</code> if there are no occurrences at all
      */
-    public ChronosCompatActivator() {
-        super();
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        try {
-            LOG.info("starting bundle {}", context.getBundle());
-            /*
-             * register calendar handler to invalidate legacy caches when upon changes
-             */
-            track(CacheService.class, new CacheServiceListener(context));
-            openTrackers();
-        } catch (Exception e) {
-            LOG.error("error starting {}", context.getBundle(), e);
-            throw e;
-        }
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle {}", context.getBundle());
-        super.stopBundle();
-    }
+    int getPosition();
 
 }

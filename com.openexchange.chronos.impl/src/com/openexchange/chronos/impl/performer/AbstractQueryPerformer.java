@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.impl.performer;
 
-import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.anonymizeIfNeeded;
@@ -59,7 +58,6 @@ import static com.openexchange.chronos.impl.Utils.getFields;
 import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
 import static com.openexchange.chronos.impl.Utils.getFrom;
 import static com.openexchange.chronos.impl.Utils.getSearchTerm;
-import static com.openexchange.chronos.impl.Utils.getTimeZone;
 import static com.openexchange.chronos.impl.Utils.getUntil;
 import static com.openexchange.chronos.impl.Utils.i;
 import static com.openexchange.chronos.impl.Utils.isExcluded;
@@ -70,12 +68,10 @@ import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.TimeZone;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
@@ -156,10 +152,7 @@ public abstract class AbstractQueryPerformer {
     }
 
     protected Iterator<Event> resolveOccurrences(Event masterEvent, Date from, Date until) throws OXException {
-        TimeZone timeZone = getTimeZone(session);
-        Calendar fromCalendar = null == from ? null : initCalendar(timeZone, from);
-        Calendar untilCalendar = null == until ? null : initCalendar(timeZone, until);
-        return session.getRecurrenceService().calculateInstancesRespectExceptions(masterEvent, fromCalendar, untilCalendar, null, null);
+        return session.getRecurrenceService().iterateEventOccurrences(masterEvent, from, until);
     }
 
     /**
@@ -172,10 +165,7 @@ public abstract class AbstractQueryPerformer {
      * @return The recurrence iterator
      */
     protected Iterator<RecurrenceId> getRecurrenceIterator(Event masterEvent, Date from, Date until) throws OXException {
-        TimeZone timeZone = getTimeZone(session);
-        Calendar fromCalendar = null == from ? null : initCalendar(timeZone, from);
-        Calendar untilCalendar = null == until ? null : initCalendar(timeZone, until);
-        return session.getRecurrenceService().getRecurrenceIterator(masterEvent, fromCalendar, untilCalendar, true);
+        return session.getRecurrenceService().iterateRecurrenceIds(masterEvent, from, until);
     }
 
     /**

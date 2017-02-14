@@ -76,6 +76,7 @@ import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.RecurrenceData;
+import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
@@ -266,7 +267,7 @@ public class EventConverter {
         if (0 >= recurrencePosition) {
             return eventID;
         }
-        RecurrenceId recurrenceID = Appointment2Event.getRecurrenceID(loadRecurrenceData(session, eventID), recurrencePosition);
+        RecurrenceId recurrenceID = Appointment2Event.getRecurrenceID(getRecurrenceService(), loadRecurrenceData(session, eventID), recurrencePosition);
         return new EventID(folderID, objectID, recurrenceID);
     }
 
@@ -285,7 +286,7 @@ public class EventConverter {
         if (null == recurrenceDatePosition) {
             return eventID;
         }
-        RecurrenceId recurrenceID = Appointment2Event.getRecurrenceID(loadRecurrenceData(session, eventID), recurrenceDatePosition);
+        RecurrenceId recurrenceID = Appointment2Event.getRecurrenceID(getRecurrenceService(), loadRecurrenceData(session, eventID), recurrenceDatePosition);
         return new EventID(folderID, objectID, recurrenceID);
     }
 
@@ -351,7 +352,7 @@ public class EventConverter {
                 if (null == recurrenceData) {
                     recurrenceData = loadRecurrenceData(session, originalEventID);
                 }
-                event.setRecurrenceId(Appointment2Event.getRecurrenceID(recurrenceData, appointment.getRecurrenceDatePosition()));
+                event.setRecurrenceId(Appointment2Event.getRecurrenceID(getRecurrenceService(), recurrenceData, appointment.getRecurrenceDatePosition()));
             }
         }
         if (appointment.containsRecurrencePosition()) {
@@ -361,7 +362,7 @@ public class EventConverter {
                 if (null == recurrenceData) {
                     recurrenceData = loadRecurrenceData(session, originalEventID);
                 }
-                event.setRecurrenceId(Appointment2Event.getRecurrenceID(recurrenceData, appointment.getRecurrencePosition()));
+                event.setRecurrenceId(Appointment2Event.getRecurrenceID(getRecurrenceService(), recurrenceData, appointment.getRecurrencePosition()));
             }
         }
         if (appointment.containsRecurrenceType()) {
@@ -382,7 +383,7 @@ public class EventConverter {
                 if (null == recurrenceData) {
                     recurrenceData = loadRecurrenceData(session, originalEventID);
                 }
-                event.setChangeExceptionDates(Appointment2Event.getRecurrenceIDs(recurrenceData, Arrays.asList(appointment.getChangeException())));
+                event.setChangeExceptionDates(Appointment2Event.getRecurrenceIDs(getRecurrenceService(), recurrenceData, Arrays.asList(appointment.getChangeException())));
             }
         }
         if (appointment.containsDeleteExceptions()) {
@@ -392,7 +393,7 @@ public class EventConverter {
                 if (null == recurrenceData) {
                     recurrenceData = loadRecurrenceData(session, originalEventID);
                 }
-                event.setDeleteExceptionDates(Appointment2Event.getRecurrenceIDs(recurrenceData, Arrays.asList(appointment.getDeleteException())));
+                event.setDeleteExceptionDates(Appointment2Event.getRecurrenceIDs(getRecurrenceService(), recurrenceData, Arrays.asList(appointment.getDeleteException())));
             }
         }
         //appointment.getNotification();
@@ -531,7 +532,7 @@ public class EventConverter {
                         }
                     }
                     appointment.setRecurrenceDatePosition(Event2Appointment.getRecurrenceDatePosition(event.getRecurrenceId()));
-                    appointment.setRecurrencePosition(Event2Appointment.getRecurrencePosition(recurrenceData, event.getRecurrenceId()));
+                    appointment.setRecurrencePosition(Event2Appointment.getRecurrencePosition(getRecurrenceService(), recurrenceData, event.getRecurrenceId()));
                 }
             }
         }
@@ -548,7 +549,7 @@ public class EventConverter {
                     recurrenceData = loadRecurrenceData(session, new EventID(event.getFolderId(), event.getSeriesId()));
                 }
             }
-            SeriesPattern pattern = Event2Appointment.getSeriesPattern(recurrenceData);
+            SeriesPattern pattern = Event2Appointment.getSeriesPattern(getRecurrenceService(), recurrenceData);
             if (SeriesPattern.MONTHLY_2.equals(pattern.getType())) {
                 appointment.setRecurrenceType(SeriesPattern.MONTHLY_1.intValue());
             } else if (SeriesPattern.YEARLY_2.equals(pattern.getType())) {
@@ -942,6 +943,10 @@ public class EventConverter {
      */
     private RecurrenceData loadRecurrenceData(ServerSession session, EventID eventID) throws OXException {
         return loadRecurrenceData(services.getService(CalendarService.class).init(session), eventID);
+    }
+
+    private RecurrenceService getRecurrenceService() {
+        return services.getService(RecurrenceService.class);
     }
 
     /**

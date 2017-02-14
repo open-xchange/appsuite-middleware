@@ -49,20 +49,18 @@
 
 package com.openexchange.chronos.recurrence.service;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
-import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.ChronosLogger;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
-import com.openexchange.chronos.compat.Recurrence;
 import com.openexchange.chronos.service.RecurrenceData;
+import com.openexchange.chronos.service.RecurrenceIterator;
 import com.openexchange.exception.OXException;
 
 /**
@@ -71,17 +69,16 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.10.0
  */
-public abstract class AbstractRecurrenceIterator<T> implements Iterator<T> {
+public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterator<T> {
 
     public static final int MAX = 1000;
 
-    protected final Event master;
     protected final Calendar start;
     protected final Calendar end;
     protected final Integer limit;
-    protected final List<RecurrenceId> exceptionDates;
-    protected final boolean ignoreExceptions;
+    protected final long[] exceptionDates;
     protected final RecurrenceData recurrenceData;
+    protected final long eventDuration;
 
     protected Long next;
     protected int count;
@@ -91,31 +88,44 @@ public abstract class AbstractRecurrenceIterator<T> implements Iterator<T> {
     /**
      * Initializes a new {@link AbstractRecurrenceIterator}.
      *
-     * @param master The master event containing all necessary information like recurrence rule, star and end date, timezones etc.
+     * @param recurrenceData The underlying recurrence data
+     * @param forwardToOccurrence <code>true</code> to fast-forward the iterator to the first occurrence if the recurrence data's start
+     *            does not fall into the pattern, <code>false</code> otherwise
+     * @param exceptionDates A sorted array of change- and delete-exception timestamps to ignore during iteration, or <code>null</code> if not set
      * @param start The left side boundary for the calculation. Optional, can be null.
      * @param end The right side boundary for the calculation. Optional, can be null.
      * @param limit The maximum number of calculated instances. Optional, can be null.
      * @param ignoreExceptions Determines if exceptions should be ignored. If true, all occurrences are calculated as if no exceptions exist. Note: This does not add change exceptions. See {@link ChangeExceptionAwareRecurrenceIterator}
      */
-    public AbstractRecurrenceIterator(Event master, Calendar start, Calendar end, Integer limit, boolean ignoreExceptions) throws OXException {
-        this.master = master;
-        this.recurrenceData = new DefaultRecurrenceData(master);
+    protected AbstractRecurrenceIterator(Event master, boolean forwardToOccurrence, Calendar start, Calendar end, Integer limit, boolean ignoreExceptions) throws OXException {
+        this(new DefaultRecurrenceData(master), getEventDuration(master), forwardToOccurrence, ignoreExceptions ? null : getExceptionDates(master), start, end, limit);
+    }
+
+    /**
+     * Initializes a new {@link AbstractRecurrenceIterator}.
+     *
+     * @param recurrenceData The underlying recurrence data
+     * @param eventDuration The duration of the underlying series master event, or <code>0</code> if not considered
+     * @param forwardToOccurrence <code>true</code> to fast-forward the iterator to the first occurrence if the recurrence data's start
+     *            does not fall into the pattern, <code>false</code> otherwise
+     * @param exceptionDates A sorted array of change- and delete-exception timestamps to ignore during iteration, or <code>null</code> if not set
+     * @param start The left side boundary for the calculation. Optional, can be null.
+     * @param end The right side boundary for the calculation. Optional, can be null.
+     * @param limit The maximum number of calculated instances. Optional, can be null.
+     */
+    protected AbstractRecurrenceIterator(RecurrenceData recurrenceData, long eventDuration, boolean forwardToOccurrence, long[] exceptionDates, Calendar start, Calendar end, Integer limit) throws OXException {
+        super();
+        this.recurrenceData = recurrenceData;
+        this.eventDuration = eventDuration;
         this.start = start;
         this.end = end;
         this.limit = limit;
-        this.ignoreExceptions = ignoreExceptions;
-        this.exceptionDates = new ArrayList<RecurrenceId>();
-        if (master.getDeleteExceptionDates() != null) {
-            this.exceptionDates.addAll(master.getDeleteExceptionDates());
-        }
-        if (master.getChangeExceptionDates() != null) {
-            this.exceptionDates.addAll(master.getChangeExceptionDates());
-        }
+        this.exceptionDates = exceptionDates;
         if (limit != null && limit == 0) {
             ChronosLogger.debug("Occurrence limit set to 0, nothing to do.");
             return;
         }
-        inner = Recurrence.getRecurrenceIterator(recurrenceData, true);
+        inner = RecurrenceUtils.getRecurrenceIterator(recurrenceData, forwardToOccurrence);
         next = null;
         position = 0;
         count = 0;
@@ -126,13 +136,12 @@ public abstract class AbstractRecurrenceIterator<T> implements Iterator<T> {
         if (this.start != null) {
             while (inner.hasNext()) {
                 long nextMillis = inner.peekMillis();
-                if (!ignoreExceptions && isException(nextMillis)) {
+                if (isException(nextMillis)) {
                     inner.nextMillis();
                     position++;
                     continue;
                 }
-                Date nextEnd = calculateEnd(master, new Date(nextMillis));
-                if (nextEnd.getTime() > start.getTimeInMillis()) {
+                if (nextMillis + eventDuration > start.getTimeInMillis()) {
                     break;
                 } else {
                     inner.nextMillis();
@@ -182,18 +191,16 @@ public abstract class AbstractRecurrenceIterator<T> implements Iterator<T> {
         }
 
         long peek = inner.peekMillis();
-        if (!ignoreExceptions) {
-            while (isException(peek)) {
-                ChronosLogger.debug("Next instance is exception.");
-                inner.nextMillis();
-                count++;
-                position++;
-                if (inner.hasNext()) {
-                    peek = inner.peekMillis();
-                } else {
-                    next = null;
-                    return;
-                }
+        while (isException(peek)) {
+            ChronosLogger.debug("Next instance is exception.");
+            inner.nextMillis();
+            count++;
+            position++;
+            if (inner.hasNext()) {
+                peek = inner.peekMillis();
+            } else {
+                next = null;
+                return;
             }
         }
         if (this.end != null && peek >= this.end.getTimeInMillis()) {
@@ -207,20 +214,54 @@ public abstract class AbstractRecurrenceIterator<T> implements Iterator<T> {
         position++;
     }
 
-    private Date calculateEnd(Event master, Date start) {
-        long startMillis = master.getStartDate().getTime();
-        long endMillis = master.getEndDate().getTime();
-        long duration = endMillis - startMillis;
-        return new Date(start.getTime() + duration);
-    }
-
     private boolean isException(long start) {
-        return CalendarUtils.contains(exceptionDates, start);
+        return null != exceptionDates && -1 < Arrays.binarySearch(exceptionDates, start);
     }
 
     @Override
     public void remove() {
         throw new UnsupportedOperationException("remove");
+    }
+
+    @Override
+    public int getPosition() {
+        return null == next ? position : position - 1;
+    }
+
+    /**
+     * Builds a sorted array containing the recurrence identifier values from both the change- and delete-exceptions of the supplied
+     * series master event.
+     *
+     * @param seriesMaster The series master event to get all exception dates for
+     * @return The timestamps of the exceptions dates in a sorted array, or an <code>null</code> if there are none
+     */
+    private static long[] getExceptionDates(Event seriesMaster) {
+        SortedSet<RecurrenceId> exceptionDates = new TreeSet<RecurrenceId>();
+        if (null != seriesMaster.getChangeExceptionDates()) {
+            exceptionDates.addAll(seriesMaster.getChangeExceptionDates());
+        }
+        if (null != seriesMaster.getDeleteExceptionDates()) {
+            exceptionDates.addAll(seriesMaster.getDeleteExceptionDates());
+        }
+        if (exceptionDates.isEmpty()) {
+            return null;
+        }
+        long[] timestamps = new long[exceptionDates.size()];
+        int position = 0;
+        for (RecurrenceId recurrenceId : exceptionDates) {
+            timestamps[position++] = recurrenceId.getValue();
+        }
+        return timestamps;
+    }
+
+    /**
+     * Gets the event's duration in milliseconds.
+     *
+     * @param event The event
+     * @return The duration
+     */
+    private static long getEventDuration(Event event) {
+        return event.getEndDate().getTime() - event.getStartDate().getTime();
     }
 
 }
