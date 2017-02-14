@@ -76,6 +76,7 @@ import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
 import com.openexchange.net.ssl.exception.SSLExceptionCode;
 import com.openexchange.net.ssl.management.Certificate;
+import com.openexchange.net.ssl.management.DefaultCertificate;
 import com.openexchange.net.ssl.management.SSLCertificateManagementService;
 import com.openexchange.net.ssl.management.exception.SSLCertificateManagementExceptionCode;
 import com.openexchange.net.ssl.osgi.Services;
@@ -114,7 +115,6 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
     // ---------------------------------------------------------------------------------------------------------------------
 
     protected final X509ExtendedTrustManager trustManager;
-    private final MessageDigest sha256;
 
     /**
      * Initialises a new {@link AbstractTrustManager}.
@@ -124,12 +124,6 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
     protected AbstractTrustManager(X509ExtendedTrustManager trustManager) {
         super();
         this.trustManager = trustManager;
-        try {
-            sha256 = MessageDigest.getInstance("SHA-256");
-        } catch (NoSuchAlgorithmException e) {
-            LOG.error("The cryptographic algorithm 'SHA-256' is not available. Failed to initialise the TrustManager", e);
-            throw new IllegalArgumentException(e);
-        }
     }
 
     public boolean isInitialized() {
@@ -343,7 +337,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
                 throw new CertificateException(SSLExceptionCode.USER_DOES_NOT_TRUST_CERTIFICATE.create(userId, contextId, fingerprint));
             }
 
-            if (!Strings.isEmpty(socketHostname) && !socketHostname.equals(certificate.getHostname())) {
+            if (!Strings.isEmpty(socketHostname) && !socketHostname.equals(certificate.getHostName())) {
                 cacheCertificate(userId, contextId, cert, socketHostname, FailureReason.INVALID_COMMON_NAME);
                 throw new CertificateException(SSLExceptionCode.INVALID_HOSTNAME.create(socketHostname, fingerprint));
             }
@@ -469,24 +463,29 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
     private String cacheCertificate(int userId, int contextId, X509Certificate cert, String hostname, FailureReason failureReason) throws CertificateException {
         try {
             // Create the certificate
-            Certificate certificate = new Certificate(getFingerprint(cert));
-            certificate.setCommonName(getHostFromPrincipal(cert));
-            certificate.setHostname(Strings.isEmpty(hostname) ? getHostFromPrincipal(cert) : hostname);
-            certificate.setExpirationTimestamp(cert.getNotAfter().getTime());
-            certificate.setIssuedOnTimestamp(cert.getNotBefore().getTime());
-            certificate.setIssuer(cert.getIssuerDN().toString());
-            certificate.setSerialNumber(cert.getSerialNumber().toString(16));
-            certificate.setSignature(toHex(cert.getSignature()));
-            certificate.setTrusted(false);
-            certificate.setExpired(certificate.getExpirationTimestamp() < System.currentTimeMillis());
-            certificate.setFailureReason(failureReason.getDetail());
+            String fingerprint = getFingerprint(cert);
+            long expirationTimestamp = cert.getNotAfter().getTime();
+            DefaultCertificate.Builder certificate = DefaultCertificate.builder()
+                .fingerprint(fingerprint)
+                .commonName(getHostFromPrincipal(cert))
+                .hostName(Strings.isEmpty(hostname) ? getHostFromPrincipal(cert) : hostname)
+                .expirationTimestamp(expirationTimestamp)
+                .issuedOnTimestamp(cert.getNotBefore().getTime())
+                .issuer(cert.getIssuerDN().toString())
+                .serialNumber(cert.getSerialNumber().toString(16))
+                .signature(toHex(cert.getSignature()))
+                .trusted(false)
+                .expired(expirationTimestamp < System.currentTimeMillis())
+                .failureReason(failureReason.getDetail());
 
             // Cache it
             SSLCertificateManagementService certificateManagement = Services.getService(SSLCertificateManagementService.class);
-            certificateManagement.cache(userId, contextId, certificate);
+            certificateManagement.cache(userId, contextId, certificate.build());
 
-            return certificate.getFingerprint();
+            return fingerprint;
         } catch (OXException e) {
+            throw new CertificateException(e);
+        } catch (RuntimeException e) {
             throw new CertificateException(e);
         }
     }
@@ -496,12 +495,17 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
      *
      * @param certificate The certificate from which to retrieve the fingerprint
      * @return The SHA-256 fingerprint of the specified {@link X509Certificate}
-     * @throws NoSuchAlgorithmException
-     * @throws CertificateEncodingException
+     * @throws CertificateEncodingException If an encoding error occurs
+     * @throws IllegalArgumentException If the fingerprint cannot be hashed
      */
-    private String getFingerprint(X509Certificate certificate) throws CertificateEncodingException {
-        sha256.update(certificate.getEncoded());
-        return toHex(sha256.digest());
+    private static String getFingerprint(X509Certificate certificate) throws CertificateEncodingException {
+        try {
+            MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
+            sha256.update(certificate.getEncoded());
+            return toHex(sha256.digest());
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalArgumentException("The cryptographic algorithm 'SHA-256' is not available.", e);
+        }
     }
 
     private final static char[] hexArray = "0123456789abcdef".toCharArray();
@@ -511,9 +515,9 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
      *
      * @param bytes The byte array to convert
      * @return The hexadecimal representation of the byte array
-     * @throws IllegalArgumentException if the specified byte array is empty
+     * @throws IllegalArgumentException If the specified byte array is <code>null</code>
      */
-    private String toHex(byte[] bytes) {
+    private static String toHex(byte[] bytes) {
         if (bytes.length == 0) {
             throw new IllegalArgumentException("The specified byte array cannot be empty");
         }

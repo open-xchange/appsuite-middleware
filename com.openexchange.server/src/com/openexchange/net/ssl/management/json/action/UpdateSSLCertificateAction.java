@@ -52,7 +52,7 @@ package com.openexchange.net.ssl.management.json.action;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.net.ssl.management.Certificate;
+import com.openexchange.net.ssl.management.DefaultCertificate;
 import com.openexchange.net.ssl.management.SSLCertificateManagementService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -73,21 +73,22 @@ public class UpdateSSLCertificateAction extends AbstractSSLCertificateManagement
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.ajax.requesthandler.AJAXActionService#perform(com.openexchange.ajax.requesthandler.AJAXRequestData, com.openexchange.tools.session.ServerSession)
      */
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         String fingerprint = requestData.getParameter("fingerprint", String.class, false);
         String hostname = requestData.getParameter("hostname", String.class, false);
-        boolean trust = requestData.getParameter("trust", Boolean.class, false);
+        Boolean trust = requestData.getParameter("trust", Boolean.class, false);
 
-        Certificate certificate = new Certificate(fingerprint);
-        certificate.setHostname(hostname);
-        certificate.setTrusted(trust);
+        DefaultCertificate.Builder certificate = DefaultCertificate.builder()
+            .fingerprint(fingerprint)
+            .hostName(hostname)
+            .trusted(null != trust && trust.booleanValue());
 
         SSLCertificateManagementService managementService = getService(SSLCertificateManagementService.class);
-        managementService.store(session.getUserId(), session.getContextId(), certificate);
+        managementService.store(session.getUserId(), session.getContextId(), certificate.build());
 
         return new AJAXRequestResult();
     }

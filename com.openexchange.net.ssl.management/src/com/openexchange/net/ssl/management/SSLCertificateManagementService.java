@@ -56,6 +56,7 @@ import com.openexchange.exception.OXException;
  * {@link SSLCertificateManagementService}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since 7.8.4
  */
 public interface SSLCertificateManagementService {
 
@@ -67,7 +68,7 @@ public interface SSLCertificateManagementService {
      * @param contextId The context's identifier
      * @param fingerprint The SSL {@link Certificate}'s fingerprint
      * @return <code>true</code> if the {@link Certificate} is trusted; <code>false</code> otherwise
-     * @throws OXException if the certificate is not found or any other error is occurred
+     * @throws OXException If the certificate is not found or any other error occurs
      */
     boolean isTrusted(int userId, int contextId, String hostname, String fingerprint) throws OXException;
 
@@ -78,19 +79,19 @@ public interface SSLCertificateManagementService {
      * @param contextId The context identifier
      * @param fingerprint The fingerprint of the {@link Certificate}
      * @return The {@link Certificate}
-     * @throws OXException if the {@link Certificate} does not exist, or any other error occurs
+     * @throws OXException If the {@link Certificate} does not exist, or any other error occurs
      */
     Certificate get(int userId, int contextId, String hostname, String fingerprint) throws OXException;
 
     /**
-     * Returns an unmodifiable {@link List} with all trusted/untrusted hostname/certificate combinations
+     * Returns an unmodifiable {@link List} with all trusted/untrusted host-name/certificate combinations
      * for the specified certificate fingerprint
      *
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param fingerprint The fingerprint of the {@link Certificate}
      * @return an unmodifiable {@link List} with {@link Certificate}s
-     * @throws OXException if an error is occurred
+     * @throws OXException If fingerprint-associated certificates cannot be returned
      */
     List<Certificate> get(int userId, int contextId, String fingerprint) throws OXException;
 
@@ -102,7 +103,7 @@ public interface SSLCertificateManagementService {
      * @param contextId The context identifier
      * @return an unmodifiable {@link List} with all managed {@link Certificate}s for the specified
      *         user in the specified context
-     * @throws OXException if an error is occurred
+     * @throws OXException If user's certificates cannot be returned
      */
     List<Certificate> getAll(int userId, int contextId) throws OXException;
 
@@ -114,7 +115,7 @@ public interface SSLCertificateManagementService {
      * @param contextId The context identifier
      * @param fingerprint The SSL {@link Certificate}'s fingerprint
      * @return <code>true</code> if the {@link Certificate} exists; <code>false</code> otherwise
-     * @throws OXException if any error is occurred
+     * @throws OXException If existence of denoted certificate cannot be checked
      */
     boolean contains(int userId, int contextId, String hostname, String fingerprint) throws OXException;
 
@@ -126,7 +127,7 @@ public interface SSLCertificateManagementService {
      * @param userId The user's identifier
      * @param contextId The context's identifier
      * @param certificate The SSL {@link Certificate} to store
-     * @throws OXException if any error is occurred
+     * @throws OXException If specified certificate cannot be stored
      */
     void store(int userId, int contextId, Certificate certificate) throws OXException;
 
@@ -137,7 +138,7 @@ public interface SSLCertificateManagementService {
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param fingerprint The SSL {@link Certificate}'s fingerprint
-     * @throws OXException if the certificate is not found or any other error is occurred
+     * @throws OXException If the certificate is not found or any other error occurs
      */
     void delete(int userId, int contextId, String fingerprint) throws OXException;
 
@@ -147,9 +148,9 @@ public interface SSLCertificateManagementService {
      *
      * @param userId The user identifier
      * @param contextId The context identifier
-     * @param hostname The hostname
+     * @param hostname The host name
      * @param fingerprint The SSL {@link Certificate}'s fingerprint
-     * @throws OXException if the certificate is not found or any other error is occurred
+     * @throws OXException If the certificate is not found or any other error occurs
      */
     void delete(int userId, int contextId, String hostname, String fingerprint) throws OXException;
 
@@ -160,7 +161,7 @@ public interface SSLCertificateManagementService {
      * @param userId the user identifier
      * @param contextId the context identifier
      * @param certificate The SSL {@link Certificate}
-     * @throws OXException if the certificate cannot be cached or any other error is occurred
+     * @throws OXException If the certificate cannot be cached or any other error occurs
      */
     void cache(int userId, int contextId, Certificate certificate) throws OXException;
 
@@ -171,7 +172,7 @@ public interface SSLCertificateManagementService {
      * @param contextId the context identifier
      * @param fingerprint The fingerprint of the {@link Certificate}
      * @return The cached {@link Certificate}
-     * @throws OXException if an error is occurred
+     * @throws OXException If no such certificate exists that matches given fingerprint
      */
     Certificate requireCached(int userId, int contextId, String fingerprint) throws OXException;
 
@@ -182,7 +183,7 @@ public interface SSLCertificateManagementService {
      * @param contextId the context identifier
      * @param fingerprint The fingerprint of the {@link Certificate}
      * @return The cached {@link Certificate} or <code>null</code>
-     * @throws OXException if an error is occurred
+     * @throws OXException If certificate cannot be returned
      */
     Certificate optCached(int userId, int contextId, String fingerprint) throws OXException;
 }

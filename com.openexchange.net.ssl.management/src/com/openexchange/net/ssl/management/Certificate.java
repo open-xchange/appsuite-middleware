@@ -50,218 +50,88 @@
 package com.openexchange.net.ssl.management;
 
 /**
- * {@link Certificate}
+ * {@link Certificate} - Represents a user-managed certificate that is either trusted or untrusted.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.8.4
  */
-public class Certificate {
-
-    private final String fingerprint;
-    private long issuedOnTimestamp;
-    private long expirationTimestamp;
-    private boolean trusted;
-    private boolean expired;
-    private String issuer;
-    private String signature;
-    private String serialNumber;
-    private String failureReason;
-    private String hostname;
-    private String commonName;
-
-    /**
-     * Initialises a new {@link Certificate}.
-     */
-    public Certificate(String fingerprint) {
-        super();
-        this.fingerprint = fingerprint;
-    }
+public interface Certificate {
 
     /**
      * Gets the fingerprint
      *
      * @return The fingerprint
      */
-    public String getFingerprint() {
-        return fingerprint;
-    }
+    String getFingerprint();
 
     /**
      * Gets the expirationTimestamp
      *
      * @return The expirationTimestamp
      */
-    public long getExpirationTimestamp() {
-        return expirationTimestamp;
-    }
+    long getExpirationTimestamp();
 
     /**
-     * Sets the expirationTimestamp
+     * Gets the trusted flag
      *
-     * @param expirationTimestamp The expirationTimestamp to set
+     * @return The trusted flag
      */
-    public void setExpirationTimestamp(long expirationTimestamp) {
-        this.expirationTimestamp = expirationTimestamp;
-    }
+    boolean isTrusted();
 
     /**
-     * Gets the trusted
+     * Gets the expired flag
      *
-     * @return The trusted
+     * @return The expired flag
      */
-    public boolean isTrusted() {
-        return trusted;
-    }
-
-    /**
-     * Sets the trusted
-     *
-     * @param trusted The trusted to set
-     */
-    public void setTrusted(boolean trusted) {
-        this.trusted = trusted;
-    }
-
-    /**
-     * Gets the expired
-     *
-     * @return The expired
-     */
-    public boolean isExpired() {
-        return expired;
-    }
-
-    /**
-     * Sets the expired
-     *
-     * @param expired The expired to set
-     */
-    public void setExpired(boolean expired) {
-        this.expired = expired;
-    }
+    boolean isExpired();
 
     /**
      * Gets the issuedOnTimestamp
      *
      * @return The issuedOnTimestamp
      */
-    public long getIssuedOnTimestamp() {
-        return issuedOnTimestamp;
-    }
-
-    /**
-     * Sets the issuedOnTimestamp
-     *
-     * @param issuedOnTimestamp The issuedOnTimestamp to set
-     */
-    public void setIssuedOnTimestamp(long issuedOnTimestamp) {
-        this.issuedOnTimestamp = issuedOnTimestamp;
-    }
+    long getIssuedOnTimestamp();
 
     /**
      * Gets the issuer
      *
      * @return The issuer
      */
-    public String getIssuer() {
-        return issuer;
-    }
-
-    /**
-     * Sets the issuer
-     *
-     * @param issuer The issuer to set
-     */
-    public void setIssuer(String issuer) {
-        this.issuer = issuer;
-    }
+    String getIssuer();
 
     /**
      * Gets the signature
      *
      * @return The signature
      */
-    public String getSignature() {
-        return signature;
-    }
-
-    /**
-     * Sets the signature
-     *
-     * @param signature The signature to set
-     */
-    public void setSignature(String signature) {
-        this.signature = signature;
-    }
+    String getSignature();
 
     /**
      * Gets the serialNumber
      *
      * @return The serialNumber
      */
-    public String getSerialNumber() {
-        return serialNumber;
-    }
-
-    /**
-     * Sets the serialNumber
-     *
-     * @param serialNumber The serialNumber to set
-     */
-    public void setSerialNumber(String serialNumber) {
-        this.serialNumber = serialNumber;
-    }
+    String getSerialNumber();
 
     /**
      * Gets the failureReason
      *
      * @return The failureReason
      */
-    public String getFailureReason() {
-        return failureReason;
-    }
+    String getFailureReason();
 
     /**
-     * Sets the failureReason
+     * Gets the host name
      *
-     * @param failureReason The failureReason to set
+     * @return The host name
      */
-    public void setFailureReason(String failureReason) {
-        this.failureReason = failureReason;
-    }
-
-    /**
-     * Gets the hostname
-     *
-     * @return The hostname
-     */
-    public String getHostname() {
-        return hostname;
-    }
-
-    /**
-     * Sets the hostname
-     *
-     * @param hostname The hostname to set
-     */
-    public void setHostname(String hostname) {
-        this.hostname = hostname;
-    }
+    String getHostName();
 
     /**
      * Gets the commonName
      *
      * @return The commonName
      */
-    public String getCommonName() {
-        return commonName;
-    }
-
-    /**
-     * Sets the commonName
-     *
-     * @param commonName The commonName to set
-     */
-    public void setCommonName(String commonName) {
-        this.commonName = commonName;
-    }
+    String getCommonName();
 }

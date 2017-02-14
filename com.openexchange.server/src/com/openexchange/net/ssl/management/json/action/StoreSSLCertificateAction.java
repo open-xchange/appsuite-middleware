@@ -54,7 +54,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.net.ssl.management.Certificate;
+import com.openexchange.net.ssl.management.DefaultCertificate;
 import com.openexchange.net.ssl.management.SSLCertificateManagementService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -85,19 +85,16 @@ public class StoreSSLCertificateAction extends AbstractSSLCertificateManagementA
         String fingerprint = requestData.getParameter("fingerprint", String.class, true);
         if (!Strings.isEmpty(fingerprint)) {
             String hostname = requestData.getParameter("hostname", String.class, false);
-            boolean trust = requestData.getParameter("trust", Boolean.class, false);
+            Boolean trust = requestData.getParameter("trust", Boolean.class, false);
 
             SSLCertificateManagementService managementService = getService(SSLCertificateManagementService.class);
 
-            Certificate certificate = managementService.optCached(session.getUserId(), session.getContextId(), fingerprint);
-            if (null == certificate) {
-                // Cache miss; everything is OK, we have all necessary information to proceed
-                certificate = new Certificate(fingerprint);
-            }
-            certificate.setHostname(hostname);
-            certificate.setTrusted(trust);
+            DefaultCertificate.Builder certificate = DefaultCertificate.builder()
+                .fingerprint(fingerprint)
+                .hostName(hostname)
+                .trusted(null != trust && trust.booleanValue());
 
-            managementService.store(session.getUserId(), session.getContextId(), certificate);
+            managementService.store(session.getUserId(), session.getContextId(), certificate.build());
 
             return new AJAXRequestResult();
         }

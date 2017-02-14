@@ -57,47 +57,42 @@ package com.openexchange.net.ssl.management.storage;
 final class SQLStatements {
 
     /**
-     * Insert a certificate
+     * Inserts on duplicate key updates a certificate
      */
-    final static String INSERT = "INSERT INTO user_certificate (cid, userid, host, fingerprint, trusted) VALUES (?,?,?,?,?)";
+    final static String INSERT_ON_DUPLICATE_UPDATE = "INSERT INTO user_certificate (cid, userid, host, fingerprint, trusted) VALUES (?,?,?,?,?) ON DUPLICATE KEY UPDATE trusted=?";
 
     /**
-     * Get the certificate for a specified host
+     * Gets the certificate for a specified host
      */
     final static String GET_FOR_HOST = "SELECT * FROM  user_certificate WHERE cid=? AND userid=? AND host=? AND fingerprint=?";
 
     /**
-     * Get the certificate
+     * Gets the certificate
      */
     final static String GET_FOR_ALL_HOSTS = "SELECT * FROM  user_certificate WHERE cid=? AND userid=? AND fingerprint=?";
 
     /**
-     * Get all certificates
+     * Gets all certificates
      */
     final static String GET_ALL = "SELECT * FROM  user_certificate WHERE cid=? AND userid=?";
 
     /**
-     * Updates a certificate
+     * Checks for existence
      */
-    final static String UPDATE = "UPDATE user_certificate SET trusted=? WHERE userid=? AND cid=? AND host=? AND fingerprint=?";
+    final static String CONTAINS = "SELECT 1 FROM user_certificate WHERE cid=? AND userid=? AND host=? AND fingerprint=?";
 
     /**
-     * Check for existence
-     */
-    final static String CONTAINS = "SELECT 1 from user_certificate WHERE cid=? AND userid=? AND host=? AND fingerprint=?";
-
-    /**
-     * Check if the cert is trusted
+     * Checks if the certificate is trusted
      */
     final static String IS_TRUSTED = "SELECT trusted from user_certificate WHERE cid=? AND userid=? AND host=? AND fingerprint=?";
 
     /**
-     * Delete certificate for a specified host
+     * Deletes certificate for a specified host
      */
     final static String DELETE_FOR_HOST = "DELETE FROM user_certificate WHERE cid=? AND userid=? AND host=? AND fingerprint=?";
 
     /**
-     * Delete certificate for all hosts
+     * Deletes certificate for all hosts
      */
     final static String DELETE_FOR_ALL_HOSTS = "DELETE FROM user_certificate WHERE cid=? AND userid=? AND fingerprint=?";
 }

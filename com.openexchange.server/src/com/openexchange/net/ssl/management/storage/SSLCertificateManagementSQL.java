@@ -53,16 +53,17 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import com.google.common.collect.ImmutableList;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.net.ssl.management.Certificate;
+import com.openexchange.net.ssl.management.DefaultCertificate;
 import com.openexchange.net.ssl.management.exception.SSLCertificateManagementExceptionCode;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link SSLCertificateManagementSQL}
@@ -71,11 +72,11 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class SSLCertificateManagementSQL {
 
-    private ServiceLookup services;
+    private final ServiceLookup services;
 
     /**
      * Initialises a new {@link SSLCertificateManagementSQL}.
-     * 
+     *
      * @param services The {@link ServiceLookup} instance
      */
     public SSLCertificateManagementSQL(ServiceLookup services) {
@@ -87,7 +88,7 @@ public class SSLCertificateManagementSQL {
      * Stores the specified {@link Certificate} for the specified user in the specified context.
      * If a certificate with the same fingerprint exists for the same user, then the certificate
      * is updated instead.
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param certificate The {@link Certificate} to store
@@ -97,27 +98,67 @@ public class SSLCertificateManagementSQL {
         DatabaseService databaseService = getDatabaseService();
         Connection connection = databaseService.getWritable(contextId);
 
+        boolean rollback = false;
         try {
             connection.setAutoCommit(false);
-            if (contains(userId, contextId, certificate.getHostname(), certificate.getFingerprint(), connection)) {
-                update(userId, contextId, certificate, connection);
-            } else {
-                insert(userId, contextId, certificate, connection);
-            }
+            rollback = true;
+
+            store(userId, contextId, certificate, connection);
+
             connection.commit();
-            connection.setAutoCommit(true);
+            rollback = false;
         } catch (SQLException e) {
-            DBUtils.rollback(connection);
             throw SSLCertificateManagementExceptionCode.SQL_PROBLEM.create(e.getMessage(), e);
         } finally {
+            if (rollback) {
+                Databases.rollback(connection);
+            }
+            Databases.autocommit(connection);
             databaseService.backWritable(connection);
+        }
+    }
+
+    /**
+     * Stores the specified {@link Certificate} for the specified user in the specified context.
+     * If a certificate with the same fingerprint exists for the same user, then the certificate
+     * is updated instead.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param certificate The {@link Certificate} to store
+     * @param connection The connection to use
+     * @throws OXException If an error is occurred
+     */
+    public void store(int userId, int contextId, Certificate certificate, Connection connection) throws OXException {
+        if (null == connection) {
+            store(userId, contextId, certificate);
+            return;
+        }
+
+        PreparedStatement preparedStatement = null;
+        try {
+            preparedStatement = connection.prepareStatement(SQLStatements.INSERT_ON_DUPLICATE_UPDATE);
+            int index = 1;
+            preparedStatement.setInt(index++, contextId);
+            preparedStatement.setInt(index++, userId);
+            preparedStatement.setString(index++, certificate.getHostName());
+            preparedStatement.setString(index++, certificate.getFingerprint());
+            preparedStatement.setBoolean(index++, certificate.isTrusted());
+            preparedStatement.setBoolean(index++, certificate.isTrusted());
+
+            preparedStatement.executeUpdate();
+
+        } catch (SQLException e) {
+            throw SSLCertificateManagementExceptionCode.SQL_PROBLEM.create(e.getMessage(), e);
+        } finally {
+            Databases.closeSQLStuff( preparedStatement);
         }
     }
 
     /**
      * Retrieve an unmodifiable {@link List} with all trusted/untrusted hostname/certificate combinations
      * for the specified certificate fingerprint
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param fingerprint The fingerprint of the {@link Certificate}
@@ -142,13 +183,14 @@ public class SSLCertificateManagementSQL {
         } catch (SQLException e) {
             throw SSLCertificateManagementExceptionCode.SQL_PROBLEM.create(e.getMessage(), e);
         } finally {
-            DBUtils.closeResources(resultSet, preparedStatement, connection, true, contextId);
+            Databases.closeSQLStuff(resultSet, preparedStatement);
+            databaseService.backReadOnly(contextId, connection);
         }
     }
 
     /**
      * Retrieve a {@link Certificate} from the database
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param fingerprint The fingerprint of the {@link Certificate}
@@ -174,21 +216,23 @@ public class SSLCertificateManagementSQL {
                 throw SSLCertificateManagementExceptionCode.CERTIFICATE_NOT_FOUND.create(fingerprint, userId, contextId);
             }
 
-            Certificate certificate = new Certificate(fingerprint);
-            certificate.setHostname(resultSet.getString("host"));
-            certificate.setTrusted(resultSet.getBoolean("trusted"));
-            return certificate;
+            DefaultCertificate.Builder certificate = DefaultCertificate.builder()
+                .fingerprint(fingerprint)
+                .hostName(resultSet.getString("host"))
+                .trusted(resultSet.getBoolean("trusted"));
+            return certificate.build();
         } catch (SQLException e) {
             throw SSLCertificateManagementExceptionCode.SQL_PROBLEM.create(e.getMessage(), e);
         } finally {
-            DBUtils.closeResources(resultSet, preparedStatement, connection, true, contextId);
+            Databases.closeSQLStuff(resultSet, preparedStatement);
+            databaseService.backReadOnly(contextId, connection);
         }
     }
 
     /**
      * Returns an unmodifiable {@link List} with all managed {@link Certificate}s for the specified
      * user in the specified context
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      * @return an unmodifiable {@link List} with all managed {@link Certificate}s for the specified
@@ -213,14 +257,15 @@ public class SSLCertificateManagementSQL {
         } catch (SQLException e) {
             throw SSLCertificateManagementExceptionCode.SQL_PROBLEM.create(e.getMessage(), e);
         } finally {
-            DBUtils.closeResources(resultSet, preparedStatement, connection, true, contextId);
+            Databases.closeSQLStuff(resultSet, preparedStatement);
+            databaseService.backReadOnly(contextId, connection);
         }
     }
 
     /**
      * Deletes all exceptions of the {@link Certificate} with the specified fingerprint for the specified user
      * in the specified context.
-     * 
+     *
      * @param userId the user identifier
      * @param contextId The context identifier
      * @param fingerprint The fingerprint of the {@link Certificate}
@@ -241,14 +286,15 @@ public class SSLCertificateManagementSQL {
         } catch (SQLException e) {
             throw SSLCertificateManagementExceptionCode.SQL_PROBLEM.create(e.getMessage(), e);
         } finally {
-            DBUtils.closeResources(null, preparedStatement, connection, false, contextId);
+            Databases.closeSQLStuff(preparedStatement);
+            databaseService.backWritable(contextId, connection);
         }
     }
 
     /**
      * Deletes the {@link Certificate} with the specified fingerprint for the specified user
      * in the specified context.
-     * 
+     *
      * @param userId the user identifier
      * @param contextId The context identifier
      * @param hostname The hostname
@@ -271,14 +317,15 @@ public class SSLCertificateManagementSQL {
         } catch (SQLException e) {
             throw SSLCertificateManagementExceptionCode.SQL_PROBLEM.create(e.getMessage(), e);
         } finally {
-            DBUtils.closeResources(null, preparedStatement, connection, false, contextId);
+            Databases.closeSQLStuff(preparedStatement);
+            databaseService.backWritable(contextId, connection);
         }
     }
 
     /**
      * Checks if a {@link Certificate} with the specified fingerprint for the specified
      * user in the specified context exists.
-     * 
+     *
      * @param userId the user identifier
      * @param contextId The context identifier
      * @param fingerprint The fingerprint of the {@link Certificate}
@@ -286,13 +333,19 @@ public class SSLCertificateManagementSQL {
      * @throws OXException If an error is occurred
      */
     public boolean contains(int userId, int contextId, String hostname, String fingerprint) throws OXException {
-        return contains(userId, contextId, hostname, fingerprint, null);
+        DatabaseService databaseService = getDatabaseService();
+        Connection connection = databaseService.getReadOnly(contextId);
+        try {
+            return contains(userId, contextId, hostname, fingerprint, connection);
+        } finally {
+            databaseService.backReadOnly(contextId, connection);
+        }
     }
 
     /**
      * Checks if the {@link Certificate} with the specified fingerprint of the specified user
      * in the specified context is trusted.
-     * 
+     *
      * @param userId the user identifier
      * @param contextId The context identifier
      * @param fingerprint The fingerprint of the {@link Certificate}
@@ -321,72 +374,17 @@ public class SSLCertificateManagementSQL {
         } catch (SQLException e) {
             throw SSLCertificateManagementExceptionCode.SQL_PROBLEM.create(e.getMessage(), e);
         } finally {
-            DBUtils.closeResources(resultSet, preparedStatement, connection, false, contextId);
+            Databases.closeSQLStuff(resultSet, preparedStatement);
+            databaseService.backReadOnly(contextId, connection);
         }
     }
 
     ////////////////////////////////////////////// HELPERS //////////////////////////////////////////////////////
 
     /**
-     * Updates the specified {@link Certificate} for the specified user in the specified context.
-     * 
-     * @param userId the user identifier
-     * @param contextId The context identifier
-     * @param certificate The {@link Certificate} to update
-     * @param connection A writeable {@link Connection}
-     * @throws OXException If the {@link Certificate} cannot be updated
-     */
-    private void update(int userId, int contextId, Certificate certificate, Connection connection) throws OXException {
-        PreparedStatement preparedStatement = null;
-        try {
-            preparedStatement = connection.prepareStatement(SQLStatements.UPDATE);
-            int index = 1;
-            preparedStatement.setBoolean(index++, certificate.isTrusted());
-            preparedStatement.setInt(index++, userId);
-            preparedStatement.setInt(index++, contextId);
-            preparedStatement.setString(index++, certificate.getHostname());
-            preparedStatement.setString(index++, certificate.getFingerprint());
-
-            preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            throw SSLCertificateManagementExceptionCode.SQL_PROBLEM.create(e.getMessage(), e);
-        } finally {
-            DBUtils.closeSQLStuff(preparedStatement);
-        }
-    }
-
-    /**
-     * Inserts the specified {@link Certificate} for the specified user in the specified context.
-     * 
-     * @param userId the user identifier
-     * @param contextId The context identifier
-     * @param certificate The {@link Certificate} to update
-     * @param connection A writeable {@link Connection}
-     * @throws OXException If the {@link Certificate} cannot be inserted
-     */
-    private void insert(int userId, int contextId, Certificate certificate, Connection connection) throws OXException {
-        PreparedStatement preparedStatement = null;
-        try {
-            preparedStatement = connection.prepareStatement(SQLStatements.INSERT);
-            int index = 1;
-            preparedStatement.setInt(index++, contextId);
-            preparedStatement.setInt(index++, userId);
-            preparedStatement.setString(index++, certificate.getHostname());
-            preparedStatement.setString(index++, certificate.getFingerprint());
-            preparedStatement.setBoolean(index++, certificate.isTrusted());
-
-            preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            throw SSLCertificateManagementExceptionCode.SQL_PROBLEM.create(e.getMessage(), e);
-        } finally {
-            DBUtils.closeSQLStuff(preparedStatement);
-        }
-    }
-
-    /**
      * Checks if a {@link Certificate} with the specified fingerprint for the specified
      * user in the specified context exists.
-     * 
+     *
      * @param userId the user identifier
      * @param contextId The context identifier
      * @param fingerprint The fingerprint of the {@link Certificate}
@@ -395,12 +393,10 @@ public class SSLCertificateManagementSQL {
      * @throws OXException If an error is occurred
      */
     private boolean contains(int userId, int contextId, String hostname, String fingerprint, Connection connection) throws OXException {
-        DatabaseService databaseService = getDatabaseService();
-        boolean connectionInitialised = false;
-        if (connection == null) {
-            connection = databaseService.getReadOnly(contextId);
-            connectionInitialised = true;
+        if (null == connection) {
+            return contains(userId, contextId, hostname, fingerprint);
         }
+
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         try {
@@ -417,41 +413,44 @@ public class SSLCertificateManagementSQL {
         } catch (SQLException e) {
             throw SSLCertificateManagementExceptionCode.SQL_PROBLEM.create(e.getMessage(), e);
         } finally {
-            DBUtils.closeSQLStuff(resultSet, preparedStatement);
-            if (connectionInitialised) {
-                databaseService.backReadOnly(connection);
-            }
+            Databases.closeSQLStuff(resultSet, preparedStatement);
         }
     }
 
     /**
      * Parses the {@link ResultSet}
-     * 
+     *
      * @param resultSet The {@link ResultSet} to parse
      * @return An unmodifiable {@link List} with {@link Certificate}s, or an empty {@link List}
      * @throws SQLException if an SQL error is occurred
      */
     private List<Certificate> parse(ResultSet resultSet) throws SQLException {
-        List<Certificate> certificates = new ArrayList<>();
-        while (resultSet.next()) {
-            Certificate certificate = new Certificate(resultSet.getString("fingerprint"));
-            certificate.setHostname(resultSet.getString("host"));
-            certificate.setTrusted(resultSet.getBoolean("trusted"));
-            certificates.add(certificate);
+        if (false == resultSet.next()) {
+            return Collections.emptyList();
         }
-        return Collections.unmodifiableList(certificates);
+
+        ImmutableList.Builder<Certificate> certificates = ImmutableList.builder();
+        do {
+            DefaultCertificate.Builder certificate = DefaultCertificate.builder()
+                .fingerprint(resultSet.getString("fingerprint"))
+                .hostName(resultSet.getString("host"))
+                .trusted(resultSet.getBoolean("trusted"));
+            certificates.add(certificate.build());
+        } while (resultSet.next());
+
+        return certificates.build();
     }
 
     /**
      * Returns the {@link DatabaseService}
-     * 
+     *
      * @return The {@link DatabaseService}
      * @throws OXException If the service is absent
      */
     private DatabaseService getDatabaseService() throws OXException {
         DatabaseService databaseService = services.getService(DatabaseService.class);
         if (databaseService == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create("DatabaseService");
+            throw ServiceExceptionCode.absentService(DatabaseService.class);
         }
         return databaseService;
     }

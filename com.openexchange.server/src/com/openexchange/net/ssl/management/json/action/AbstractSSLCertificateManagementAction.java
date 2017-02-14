@@ -56,6 +56,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.exception.OXException;
 import com.openexchange.net.ssl.management.Certificate;
+import com.openexchange.net.ssl.management.DefaultCertificate;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -67,11 +68,11 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  */
 abstract class AbstractSSLCertificateManagementAction implements AJAXActionService {
 
-    private ServiceLookup services;
+    private final ServiceLookup services;
 
     /**
      * Initialises a new {@link AbstractSSLCertificateManagementAction}.
-     * 
+     *
      * @param services The {@link ServiceLookup} instance
      */
     AbstractSSLCertificateManagementAction(ServiceLookup services) {
@@ -81,7 +82,7 @@ abstract class AbstractSSLCertificateManagementAction implements AJAXActionServi
 
     /**
      * Retrieves the specified service
-     * 
+     *
      * @param clazz The service {@link Class}
      * @return The Service
      * @throws OXException if the service is absent
@@ -95,7 +96,7 @@ abstract class AbstractSSLCertificateManagementAction implements AJAXActionServi
     }
 
     /**
-     * 
+     *
      * @param certificates
      * @return
      * @throws OXException
@@ -110,7 +111,7 @@ abstract class AbstractSSLCertificateManagementAction implements AJAXActionServi
 
     /**
      * Parses the specified {@link Certificate} to a {@link JSONObject}
-     * 
+     *
      * @param certificate The {@link Certificate} to parse
      * @return The {@link JSONObject}
      * @throws OXException if a JSON error occurs
@@ -121,7 +122,7 @@ abstract class AbstractSSLCertificateManagementAction implements AJAXActionServi
             json.put(CertificateFields.FINGERPRINT, certificate.getFingerprint());
             json.put(CertificateFields.ISSUED_ON, certificate.getIssuedOnTimestamp());
             json.put(CertificateFields.EXPIRES_ON, certificate.getExpirationTimestamp());
-            json.put(CertificateFields.HOSTNAME, certificate.getHostname());
+            json.put(CertificateFields.HOSTNAME, certificate.getHostName());
             json.put(CertificateFields.COMMON_NAME, certificate.getCommonName());
             json.put(CertificateFields.ISSUED_BY, certificate.getIssuer());
             json.put(CertificateFields.SIGNATURE, certificate.getSignature());
@@ -137,27 +138,30 @@ abstract class AbstractSSLCertificateManagementAction implements AJAXActionServi
 
     /**
      * Parses the specified {@link JSONObject} to a {@link Certificate}
-     * 
+     *
      * @param jsonObject The {@link JSONObject} to parse
      * @return The {@link Certificate}
      */
     Certificate parse(JSONObject jsonObject) throws OXException {
         try {
-            Certificate certificate = new Certificate(jsonObject.getString("fingerprint"));
-            // Mandatory
-            certificate.setHostname(jsonObject.getString(CertificateFields.HOSTNAME));
-            certificate.setTrusted(jsonObject.getBoolean(CertificateFields.TRUSTED));
+            DefaultCertificate.Builder certificate = DefaultCertificate.builder()
+                .fingerprint(jsonObject.getString(CertificateFields.FINGERPRINT))
 
-            // Optional
-            certificate.setIssuedOnTimestamp(jsonObject.optLong(CertificateFields.ISSUED_ON));
-            certificate.setExpirationTimestamp(jsonObject.optLong(CertificateFields.EXPIRES_ON));
-            certificate.setCommonName(jsonObject.optString(CertificateFields.COMMON_NAME));
-            certificate.setIssuer(jsonObject.optString(CertificateFields.ISSUED_BY));
-            certificate.setSignature(jsonObject.optString(CertificateFields.SIGNATURE));
-            certificate.setSerialNumber(jsonObject.optString(CertificateFields.SERIAL_NUMBER));
-            certificate.setFailureReason(jsonObject.optString(CertificateFields.FAILURE_REASON));
-            certificate.setExpired(jsonObject.optBoolean(CertificateFields.EXPIRED));
-            return certificate;
+                // Mandatory
+                .hostName(jsonObject.getString(CertificateFields.HOSTNAME))
+                .trusted(jsonObject.getBoolean(CertificateFields.TRUSTED))
+
+                // Optional
+                .issuedOnTimestamp(jsonObject.optLong(CertificateFields.ISSUED_ON))
+                .expirationTimestamp(jsonObject.optLong(CertificateFields.EXPIRES_ON))
+                .commonName(jsonObject.optString(CertificateFields.COMMON_NAME))
+                .issuer(jsonObject.optString(CertificateFields.ISSUED_BY))
+                .signature(jsonObject.optString(CertificateFields.SIGNATURE))
+                .serialNumber(jsonObject.optString(CertificateFields.SERIAL_NUMBER))
+                .failureReason(jsonObject.optString(CertificateFields.FAILURE_REASON))
+                .expired(jsonObject.optBoolean(CertificateFields.EXPIRED));
+
+            return certificate.build();
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e);
         }
