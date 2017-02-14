@@ -49,7 +49,6 @@
 
 package com.openexchange.net.ssl.internal;
 
-import java.security.cert.PKIXParameters;
 import javax.net.ssl.X509ExtendedTrustManager;
 
 /**
@@ -63,19 +62,15 @@ public class TrustManagerAndParameters {
     /** The trust manager */
     public final X509ExtendedTrustManager trustManager;
 
-    /** The PKIS parameters */
-    public final PKIXParameters parameters;
-
     /**
      * Initializes a new {@link TrustManagerAndParameters}.
      *
      * @param trustManager The trust manager
      * @param parameters The PKIS parameters
      */
-    public TrustManagerAndParameters(X509ExtendedTrustManager trustManager, PKIXParameters parameters) {
+    public TrustManagerAndParameters(X509ExtendedTrustManager trustManager) {
         super();
         this.trustManager = trustManager;
-        this.parameters = parameters;
     }
 
 }

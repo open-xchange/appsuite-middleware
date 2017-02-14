@@ -55,8 +55,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
-import java.security.cert.PKIXParameters;
-import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.HashSet;
@@ -96,18 +94,14 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
     /** The associated X509 trust manager */
     protected final X509ExtendedTrustManager trustManager;
 
-    /** The PKIX validation parameters */
-    protected final PKIXParameters parameters;
-
     /**
      * Initializes a new {@link AbstractTrustManager}.
      *
      * @param trustManager The trust manager
      */
-    protected AbstractTrustManager(X509ExtendedTrustManager trustManager, PKIXParameters parameters) {
+    protected AbstractTrustManager(X509ExtendedTrustManager trustManager) {
         super();
         this.trustManager = trustManager;
-        this.parameters = parameters;
     }
 
     @Override
@@ -363,17 +357,10 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
      * @throws CertificateException if the root CA is not trusted by the user
      */
     private void checkRootCATrusted(int userId, int contextId, X509Certificate[] chain) throws CertificateException {
-        PKIXParameters parameters = this.parameters;
-        if (null == parameters) {
-            throw new CertificateException("Trust manager not properly initialized.");
-        }
-
-        Set<TrustAnchor> anchors = parameters.getTrustAnchors();
-
-        //The root CA certificate is always the last element in the chain
+        X509Certificate[] acceptedIssuers = trustManager.getAcceptedIssuers();
         X509Certificate rootCert = chain[chain.length - 1];
-        for (TrustAnchor a : anchors) {
-            if (a.getTrustedCert().getSubjectDN().equals(rootCert.getIssuerDN())) {
+        for (X509Certificate x509Certificate : acceptedIssuers) {
+            if (x509Certificate.getSubjectDN().equals(rootCert.getIssuerDN())) {
                 LOG.debug("The root CA '{}' is trusted", rootCert.getIssuerDN());
                 return;
             }
@@ -445,18 +432,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             // Create the certificate
             String fingerprint = getFingerprint(cert);
             long expirationTimestamp = cert.getNotAfter().getTime();
-            DefaultCertificate.Builder certificate = DefaultCertificate.builder()
-                .fingerprint(fingerprint)
-                .commonName(getHostFromPrincipal(cert))
-                .hostName(Strings.isEmpty(hostname) ? getHostFromPrincipal(cert) : hostname)
-                .expirationTimestamp(expirationTimestamp)
-                .issuedOnTimestamp(cert.getNotBefore().getTime())
-                .issuer(cert.getIssuerDN().toString())
-                .serialNumber(cert.getSerialNumber().toString(16))
-                .signature(toHex(cert.getSignature()))
-                .trusted(false)
-                .expired(expirationTimestamp < System.currentTimeMillis())
-                .failureReason(failureReason.getDetail());
+            DefaultCertificate.Builder certificate = DefaultCertificate.builder().fingerprint(fingerprint).commonName(getHostFromPrincipal(cert)).hostName(Strings.isEmpty(hostname) ? getHostFromPrincipal(cert) : hostname).expirationTimestamp(expirationTimestamp).issuedOnTimestamp(cert.getNotBefore().getTime()).issuer(cert.getIssuerDN().toString()).serialNumber(cert.getSerialNumber().toString(16)).signature(toHex(cert.getSignature())).trusted(false).expired(expirationTimestamp < System.currentTimeMillis()).failureReason(failureReason.getDetail());
 
             // Cache it
             SSLCertificateManagementService certificateManagement = Services.getService(SSLCertificateManagementService.class);
