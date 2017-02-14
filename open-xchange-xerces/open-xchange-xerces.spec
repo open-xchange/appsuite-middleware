@@ -1,6 +1,6 @@
 %define __jar_repack %{nil}
 
-Name:          open-xchange-xerces-sun
+Name:          open-xchange-xerces
 BuildArch:     noarch
 #!BuildIgnore: post-build-checks
 %if 0%{?rhel_version} && 0%{?rhel_version} >= 700
@@ -12,7 +12,11 @@ BuildRequires: open-xchange-osgi >= @OXVERSION@
 %if 0%{?rhel_version} && 0%{?rhel_version} == 600
 BuildRequires: java7-devel
 %else
+%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
+BuildRequires: java-1_7_0-openjdk-devel
+%else
 BuildRequires: java-devel >= 1.7.0
+%endif
 %endif
 Version:       @OXVERSION@
 %define        ox_release 0
@@ -25,8 +29,8 @@ Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       Xerces Compat for Sun Java
 Autoreqprov:   no
 Requires:      open-xchange-osgi >= @OXVERSION@
-Provides:      open-xchange-xerces
 Conflicts:     open-xchange-xerces-ibm
+Conflicts:     open-xchange-xerces-sun
 
 %description
 Xerces compatibility for OX installations on Sun JVM.

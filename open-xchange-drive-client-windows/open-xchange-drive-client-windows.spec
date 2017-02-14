@@ -11,7 +11,11 @@ BuildRequires: ant-nodeps
 %if 0%{?rhel_version} && 0%{?rhel_version} == 600
 BuildRequires: java7-devel
 %else
+%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
+BuildRequires: java-1_7_0-openjdk-devel
+%else
 BuildRequires: java-devel >= 1.7.0
+%endif
 %endif
 BuildRequires: open-xchange-admin
 BuildRequires: open-xchange-core >= @OXVERSION@, open-xchange-client-onboarding >= @OXVERSION@, open-xchange-drive >= @OXVERSION@

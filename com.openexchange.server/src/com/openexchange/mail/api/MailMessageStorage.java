@@ -84,6 +84,13 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
 
     private static final SearchTerm<Integer> TERM_FLAG_SEEN = new FlagTerm(MailMessage.FLAG_SEEN, false);
 
+    /**
+     * Initializes a new {@link MailMessageStorage}.
+     */
+    protected MailMessageStorage() {
+        super();
+    }
+
     @Override
     public <T> T supports(Class<T> iface) throws OXException {
         if (iface.isInstance(this)) {

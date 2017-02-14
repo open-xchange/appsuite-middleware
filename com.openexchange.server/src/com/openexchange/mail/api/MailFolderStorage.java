@@ -64,6 +64,13 @@ import com.openexchange.mail.dataobjects.MailFolderDescription;
  */
 public abstract class MailFolderStorage implements IMailFolderStorage {
 
+    /**
+     * Initializes a new {@link MailFolderStorage}.
+     */
+    protected MailFolderStorage() {
+        super();
+    }
+
     @Override
     public <T> T supports(Class<T> iface) throws OXException {
         if (iface.isInstance(this)) {

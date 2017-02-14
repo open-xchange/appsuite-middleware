@@ -67,7 +67,9 @@ import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.AllOfTestCo
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.AnyOfTestCommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.BodyTestCommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.CurrentDateTestCommandParser;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.DateTestCommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.EnvelopeTestCommandParser;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.ExistsTestCommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.HasFlagCommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.HeaderTestCommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.NotTestCommandParser;
@@ -132,6 +134,8 @@ public class MailFilterJSONActivator extends HousekeepingActivator {
         registry.register(Commands.ALLOF.getCommandName(), new AllOfTestCommandParser());
         registry.register(Commands.ANYOF.getCommandName(), new AnyOfTestCommandParser());
         registry.register(Commands.BODY.getCommandName(), new BodyTestCommandParser());
+        registry.register(Commands.DATE.getCommandName(), new DateTestCommandParser());
+        registry.register(Commands.EXISTS.getCommandName(), new ExistsTestCommandParser());
         registry.register(Commands.CURRENTDATE.getCommandName(), new CurrentDateTestCommandParser());
         registry.register(Commands.ENVELOPE.getCommandName(), new EnvelopeTestCommandParser());
         registry.register(Commands.HEADER.getCommandName(), new HeaderTestCommandParser());
