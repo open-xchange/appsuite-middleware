@@ -154,7 +154,7 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
 
         final long retval = delegate.attachmentAction(folderId, objectId, userId, session, c, numberOfAttachments, batch);
         // Trigger Update Mail unless attachment is in create new limbo
-        if (batch != null && batch.getBatchId() != null && !batch.isFinalElement()) {
+        if (batch == null || batch.getBatchId() == null || batch.isFinalElement()) {
             try {
                 final CalendarDataObject reloaded = getObjectById(objectId);
                 final ITipMailGenerator generator = generators.create(reloaded, reloaded, session, onBehalfOf(folderId));
