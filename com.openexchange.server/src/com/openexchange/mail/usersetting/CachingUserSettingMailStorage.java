@@ -62,6 +62,7 @@ import java.util.concurrent.locks.Lock;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
+import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
@@ -408,12 +409,13 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
     }
 
     protected void updateSpamSetting(UserSettingMail userSettingMail, int userId, Context ctx, ConfigView configView) throws OXException {
-        Boolean spamEnabledByConfig = configView.get(SPAM_ENABLED, Boolean.class);
-        if (spamEnabledByConfig == null) {
+        ComposedConfigProperty<Boolean> spamEnabledByConfig = configView.property(SPAM_ENABLED, Boolean.class);
+
+        if (!spamEnabledByConfig.isDefined()) {
             LOG.debug("No config for user {} in context {} found. Falling back to user permission bit for spam handling.", userId, ctx.getContextId());
             return;
         }
-        boolean boolSpamEnabledByConfig = spamEnabledByConfig.booleanValue();
+        boolean boolSpamEnabledByConfig = spamEnabledByConfig.get().booleanValue();
         if (userSettingMail.isSpamOptionEnabled() != boolSpamEnabledByConfig) {
             userSettingMail.setSpamEnabled(boolSpamEnabledByConfig);
             this.saveUserSettingMail(userSettingMail, userId, ctx);
