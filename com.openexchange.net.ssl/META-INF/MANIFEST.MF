@@ -33,7 +33,11 @@ Import-Package: com.google.common.annotations,
  org.osgi.framework,
  org.osgi.service.http,
  org.osgi.util.tracker,
- org.slf4j
+ org.slf4j,
+ sun.security,
+ sun.security.action,
+ sun.security.ssl,
+ sun.security.util
 Bundle-ClassPath: .
 Export-Package: com.openexchange.net.ssl,
  com.openexchange.net.ssl.exception

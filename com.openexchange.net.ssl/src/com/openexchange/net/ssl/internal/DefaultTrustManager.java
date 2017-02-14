@@ -110,10 +110,13 @@ public class DefaultTrustManager extends AbstractTrustManager {
             if (null == sslConfigService) {
                 LOG.warn("Absent service " + SSLConfigurationService.class.getName() + ". Assuming default JVM truststore is supposed to be used.");
                 useDefaultTruststore = true;
-                password = "changeit"; //At this point we can only fall back to the default password
+                password = "changeit"; // At this point we can only fall back to the default password
             } else {
                 useDefaultTruststore = sslConfigService.isDefaultTruststoreEnabled();
                 password = sslConfigService.getDefaultTrustStrorePassword();
+                if (null == password) {
+                    password = "changeit"; // At this point we can only fall back to the default password
+                }
             }
         }
 
@@ -123,8 +126,7 @@ public class DefaultTrustManager extends AbstractTrustManager {
         }
 
         String filename = System.getProperty("java.home") + "/lib/security/cacerts".replace('/', File.separatorChar);
-        try {
-            FileInputStream is = new FileInputStream(filename);
+        try (FileInputStream is = new FileInputStream(filename)) {
             KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
             keystore.load(is, password.toCharArray());
 
