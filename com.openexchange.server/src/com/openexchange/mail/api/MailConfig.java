@@ -315,6 +315,7 @@ public abstract class MailConfig {
         }
 
         mailConfig.parseServerURL(urlInfo);
+        mailConfig.doCustomParsing(mailAccount, session);
         return mailConfig;
     }
 
@@ -783,7 +784,6 @@ public abstract class MailConfig {
         mailConfig.password = authInfo.getPassword();
         mailConfig.authType = authInfo.getAuthType();
         mailConfig.oauthAccountId = authInfo.getOauthAccountId();
-        mailConfig.doCustomParsing(account, session);
     }
 
     /**
