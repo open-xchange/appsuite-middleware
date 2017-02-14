@@ -49,9 +49,15 @@
 
 package com.openexchange.net.ssl.internal;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.PKIXParameters;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509ExtendedTrustManager;
@@ -62,25 +68,52 @@ import com.openexchange.net.ssl.osgi.Services;
  * {@link DefaultTrustManager}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.8.3
  */
 public class DefaultTrustManager extends AbstractTrustManager {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultTrustManager.class);
 
-    public DefaultTrustManager() {
-        super(initDefaultTrustManager());
+    /**
+     * Creates a new {@link DefaultTrustManager} instance.
+     *
+     * @return The new instance or <code>null</code> if initialization failed
+     */
+    public static DefaultTrustManager newInstance() {
+        TrustManagerAndParameters managerAndParameters = initDefaultTrustManager();
+        if (null == managerAndParameters) {
+            return null;
+        }
+        return new DefaultTrustManager(managerAndParameters.trustManager, managerAndParameters.parameters);
     }
 
-    private static X509ExtendedTrustManager initDefaultTrustManager() {
+    // --------------------------------------------------------------------------------------------
+
+    /**
+     * Initializes a new {@link CustomTrustManager}.
+     */
+    private DefaultTrustManager(X509ExtendedTrustManager trustManager, PKIXParameters parameters) {
+        super(trustManager, parameters);
+    }
+
+    /**
+     * Initialises the {@link CustomTrustManager}
+     *
+     * @return An {@link X509ExtendedTrustManager}
+     */
+    private static TrustManagerAndParameters initDefaultTrustManager() {
         boolean useDefaultTruststore;
+        SSLConfigurationService sslConfigService = Services.getService(SSLConfigurationService.class);
+        String password;
         {
-            SSLConfigurationService sslConfigService = Services.getService(SSLConfigurationService.class);
             if (null == sslConfigService) {
                 LOG.warn("Absent service " + SSLConfigurationService.class.getName() + ". Assuming default JVM truststore is supposed to be used.");
                 useDefaultTruststore = true;
+                password = "changeit"; //At this point we can only fall back to the default password
             } else {
                 useDefaultTruststore = sslConfigService.isDefaultTruststoreEnabled();
+                password = sslConfigService.getDefaultTrustStrorePassword();
             }
         }
 
@@ -89,16 +122,26 @@ public class DefaultTrustManager extends AbstractTrustManager {
             return null;
         }
 
+        String filename = System.getProperty("java.home") + "/lib/security/cacerts".replace('/', File.separatorChar);
         try {
+            FileInputStream is = new FileInputStream(filename);
+            KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+            keystore.load(is, password.toCharArray());
+
+            PKIXParameters parameters = new PKIXParameters(keystore);
+
             TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
             tmf.init((KeyStore) null); // Using null here initializes the TMF with the default trust store.
 
             for (TrustManager tm : tmf.getTrustManagers()) {
                 if (tm instanceof X509ExtendedTrustManager) {
-                    return (X509ExtendedTrustManager) tm;
+                    return new TrustManagerAndParameters((X509ExtendedTrustManager) tm, parameters);
                 }
             }
-        } catch (KeyStoreException | NoSuchAlgorithmException e) {
+        } catch (IOException e) {
+            LOG.error("Unable to read custom truststore file from " + filename, e);
+            //TODO re-throw or OXException?
+        } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | InvalidAlgorithmParameterException e) {
             LOG.error("Unable to initialize default truststore.", e);
             //TODO re-throw or OXException?
         }

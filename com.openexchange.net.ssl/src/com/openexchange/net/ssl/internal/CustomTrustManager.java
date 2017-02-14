@@ -53,10 +53,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.security.cert.PKIXParameters;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509ExtendedTrustManager;
@@ -68,17 +70,41 @@ import com.openexchange.net.ssl.osgi.Services;
  * {@link CustomTrustManager}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.8.3
  */
 public class CustomTrustManager extends AbstractTrustManager {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CustomTrustManager.class);
 
-    public CustomTrustManager() {
-        super(initCustomTrustManager());
+    /**
+     * Creates a new {@link CustomTrustManager} instance.
+     *
+     * @return The new instance or <code>null</code> if initialization failed
+     */
+    public static CustomTrustManager newInstance() {
+        TrustManagerAndParameters managerAndParameters = initCustomTrustManager();
+        if (null == managerAndParameters) {
+            return null;
+        }
+        return new CustomTrustManager(managerAndParameters.trustManager, managerAndParameters.parameters);
     }
 
-    private static X509ExtendedTrustManager initCustomTrustManager() {
+    // --------------------------------------------------------------------------------------------
+
+    /**
+     * Initializes a new {@link CustomTrustManager}.
+     */
+    private CustomTrustManager(X509ExtendedTrustManager trustManager, PKIXParameters parameters) {
+        super(trustManager, parameters);
+    }
+
+    /**
+     * Initialises the {@link CustomTrustManager}
+     *
+     * @return An {@link X509ExtendedTrustManager}
+     */
+    private static TrustManagerAndParameters initCustomTrustManager() {
         SSLConfigurationService sslConfigService = Services.getService(SSLConfigurationService.class);
         if (null == sslConfigService) {
             LOG.warn("Absent service " + SSLConfigurationService.class.getName() + ". Assuming custom truststore is NOT supposed to be used.");
@@ -116,15 +142,17 @@ public class CustomTrustManager extends AbstractTrustManager {
             TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
             tmf.init(ks);
 
+            PKIXParameters parameters = new PKIXParameters(ks);
+
             for (TrustManager tm : tmf.getTrustManagers()) {
                 if (tm instanceof X509ExtendedTrustManager) {
-                    return (X509ExtendedTrustManager) tm;
+                    return new TrustManagerAndParameters((X509ExtendedTrustManager) tm, parameters);
                 }
             }
         } catch (IOException e) {
             LOG.error("Unable to read custom truststore file from " + file.getAbsolutePath(), e);
             //TODO re-throw or OXException?
-        } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException e) {
+        } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | InvalidAlgorithmParameterException e) {
             LOG.error("Unable to initialize custom truststore file from " + file.getAbsolutePath(), e);
             //TODO re-throw or OXException?
         }

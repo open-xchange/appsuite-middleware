@@ -55,6 +55,7 @@ import com.openexchange.osgi.annotation.SingletonService;
  * {@link SSLConfigurationService}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.8.3
  */
 @SingletonService
@@ -133,5 +134,14 @@ public interface SSLConfigurationService {
      * @return the password to access the custom truststore
      */
     String getCustomTruststorePassword();
+
+    /**
+     * Returns the password of the default trust store
+     * 
+     * Hint: Loaded once per startup and cannot be reloaded as additional initialization is made based on the configuration.
+     * 
+     * @return the password of the default trust store
+     */
+    String getDefaultTrustStrorePassword();
 
 }

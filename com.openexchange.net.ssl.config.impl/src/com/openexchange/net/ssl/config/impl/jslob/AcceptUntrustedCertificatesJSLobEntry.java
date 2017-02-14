@@ -69,12 +69,12 @@ public class AcceptUntrustedCertificatesJSLobEntry implements JSlobEntry {
 
     private static final String LOB_NAMESPACE = "security";
 
-    private ContextService contextService;
-    private UserAwareSSLConfigurationService userAwareSSLConfigurationService;
+    private final ContextService contextService;
+    private final UserAwareSSLConfigurationService userAwareSSLConfigurationService;
 
     /**
      * Default constructor.
-     * 
+     *
      * @param contextService
      */
     public AcceptUntrustedCertificatesJSLobEntry(ContextService contextService, UserAwareSSLConfigurationService userAwareSSLConfigurationService) {
@@ -113,7 +113,7 @@ public class AcceptUntrustedCertificatesJSLobEntry implements JSlobEntry {
         boolean allowedToDefineTrustLevel = userAwareSSLConfigurationService.isAllowedToDefineTrustLevel(sessiond.getUserId(), sessiond.getContextId());
 
         if (!allowedToDefineTrustLevel) {
-            LOG.debug("Setting {} has been disabled due to configuration ('" + UserAwareSSLConfigurationService.USER_CONFIG_ENABLED_PROPERTY + "'). The request will be ignored.", UserAwareSSLConfigurationService.USER_ATTRIBUTE_NAME);
+            LOG.debug("Setting {} has been disabled due to configuration ('{}'). The request will be ignored.", UserAwareSSLConfigurationService.USER_ATTRIBUTE_NAME, UserAwareSSLConfigurationService.USER_CONFIG_ENABLED_PROPERTY);
             return;
         }
         userAwareSSLConfigurationService.setTrustAll(sessiond.getUserId(), contextService.getContext(sessiond.getContextId()), Boolean.parseBoolean(value.toString()));

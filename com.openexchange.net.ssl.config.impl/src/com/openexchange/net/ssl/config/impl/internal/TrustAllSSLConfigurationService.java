@@ -53,11 +53,11 @@ import java.util.List;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.net.ssl.config.TrustLevel;
 
-
 /**
  * {@link TrustAllSSLConfigurationService} - The SSL configuration service in case trust-all is configured.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.8.3
  */
 public class TrustAllSSLConfigurationService implements SSLConfigurationService {
@@ -113,7 +113,11 @@ public class TrustAllSSLConfigurationService implements SSLConfigurationService 
 
     @Override
     public String getCustomTruststorePassword() {
-        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public String getDefaultTrustStrorePassword() {
         return null;
     }
 
