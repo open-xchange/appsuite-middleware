@@ -82,6 +82,7 @@ import java.util.concurrent.CompletionService;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.AccountAware;
@@ -96,6 +97,7 @@ import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderServiceDecorator;
+import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.LockCleaningFolderStorage;
 import com.openexchange.folderstorage.Permission;
@@ -275,8 +277,8 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
     }
 
     private static final ConcurrentTIntObjectHashMap<Long> STAMPS = new ConcurrentTIntObjectHashMap<Long>(128);
-    private static final long                              DELAY  = 60 * 60 * 1000;
-    private static final int                               MAX    = 3;
+    private static final long DELAY = 60 * 60 * 1000;
+    private static final int MAX = 3;
 
     @Override
     public void checkConsistency(final String treeId, final StorageParameters storageParameters) throws OXException {
@@ -1706,7 +1708,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
 
             final Date millis = new Date();
 
-            final FolderObject updateMe = new FolderObject();
+            final FolderObject updateMe = getFolderObject(folderId, context, con, storageParameters);
             updateMe.setObjectID(folderId);
             updateMe.setDefaultFolder(false);
             {
@@ -1752,27 +1754,26 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
             // Permissions
             Permission[] perms = folder.getPermissions();
             final OXFolderManager folderManager = OXFolderManager.getInstance(session, con, con);
+            boolean isUpdated = false;
             if (null != perms) {
                 final OCLPermission[] oclPermissions = new OCLPermission[perms.length];
                 for (int i = 0; i < perms.length; i++) {
                     oclPermissions[i] = newOCLPermissionFor(perms[i]);
                 }
                 updateMe.setPermissionsAsArray(oclPermissions);
-                // Do update
-                folderManager.updateFolder(updateMe, true, StorageParametersUtility.isHandDownPermissions(storageParameters), millis.getTime());
             } else {
-                // TODO: Get recursive property
-                boolean resursive = true;
-                FolderObject parent = getFolderObject(updateMe.getParentFolderID(), context, con, storageParameters);
-                if (FolderObject.PUBLIC == parent.getType() || FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_NAME.equals(parent.getFolderName())) {
-                    List<FolderObject> toUpdate = inheritPublicFolderPermissions(updateMe, parent, resursive, context, con, storageParameters);
-                    // Do update all
-                    for (FolderObject update : toUpdate) {
-                        folderManager.updateFolder(update, false, false, millis.getTime());
-                    }
+                if (isInPublicTree(updateMe, context, con, storageParameters)) {
+                    ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    boolean recursive = configurationService.getBoolProperty("com.openexchange.folderstorage.inheritParentPermissions", false);
+                    FolderObject parent = getFolderObject(updateMe.getParentFolderID(), context, con, storageParameters);
+                    inheritPublicFolderPermissions(updateMe, parent, recursive, context, con, storageParameters, folderManager, millis);
+                    isUpdated = true;
                 }
             }
 
+            if (!isUpdated) {
+                folderManager.updateFolder(updateMe, true, StorageParametersUtility.isHandDownPermissions(storageParameters), millis.getTime());
+            }
             // Handle warnings
             final List<OXException> warnings = folderManager.getWarnings();
             if (null != warnings) {
@@ -1785,8 +1786,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
         }
     }
 
-    private List<FolderObject> inheritPublicFolderPermissions(FolderObject folder, FolderObject parent, boolean recursive, Context context, Connection con, StorageParameters storageParameters) throws OXException {
-        List<FolderObject> result = new ArrayList<>();
+    private void inheritPublicFolderPermissions(FolderObject folder, FolderObject parent, boolean recursive, Context context, Connection con, StorageParameters storageParameters, OXFolderManager folderManager, Date millis) throws OXException {
         OCLPermission[] perms = folder.getPermissionsAsArray();
         OCLPermission[] parentPerms = parent.getPermissionsAsArray();
         Map<Integer, OCLPermission> permsMappingPerEntity = new HashMap<>();
@@ -1814,15 +1814,29 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
             }
         }
         folder.setPermissions(new ArrayList<>(permsMappingPerEntity.values()));
-        result.add(folder);
+        folderManager.updateFolder(folder, false, false, millis.getTime());
         if (recursive && folder.hasSubfolders()) {
-            List<Integer> subfolderIds = folder.getSubfolderIds();
-            for (Integer subfolderId : subfolderIds) {
-                FolderObject subfolder = getFolderObject(subfolderId, context, con, storageParameters);
-                result.addAll(inheritPublicFolderPermissions(subfolder, folder, recursive, context, con, storageParameters));
+            SortableId[] subFolderIds = getSubfolders(FolderStorage.REAL_TREE_ID, String.valueOf(folder.getObjectID()), storageParameters);
+            for (SortableId subfolderId : subFolderIds) {
+                FolderObject subfolder = getFolderObject(Integer.parseInt(subfolderId.getId()), context, con, storageParameters);
+                inheritPublicFolderPermissions(subfolder, parent, recursive, context, con, storageParameters, folderManager, millis);
             }
         }
-        return result;
+    }
+
+    private boolean isInPublicTree(FolderObject folder, Context context, Connection con, StorageParameters storageParameters) throws OXException {
+        int parentId = folder.getParentFolderID();
+        while (parentId != FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID && parentId != FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID && parentId != FolderObject.SYSTEM_PUBLIC_FOLDER_ID) {
+            FolderObject parent = getFolderObject(parentId, context, con, storageParameters);
+            parentId = parent.getParentFolderID();
+        }
+        if (parentId == FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID) {
+            return false;
+        }
+        if (parentId == FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID || parentId == FolderObject.SYSTEM_PUBLIC_FOLDER_ID) {
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -2218,7 +2232,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
     private static final class FolderObjectComparator implements Comparator<FolderObject> {
 
         private final Collator collator;
-        private final Context  context;
+        private final Context context;
 
         FolderObjectComparator(Locale locale, Context context) {
             super();
@@ -2272,7 +2286,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
     private static final class FolderNameComparator implements Comparator<FolderObject> {
 
         private final Collator collator;
-        private final Context  context;
+        private final Context context;
 
         FolderNameComparator(Locale locale, Context context) {
             super();
