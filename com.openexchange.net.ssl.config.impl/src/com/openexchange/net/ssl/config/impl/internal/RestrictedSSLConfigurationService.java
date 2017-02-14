@@ -70,7 +70,6 @@ public class RestrictedSSLConfigurationService implements SSLConfigurationServic
     private final boolean customTruststoreEnabled;
     private final String customTruststoreLocation;
     private final String customTruststorePassword;
-    private final String defaultTrustStorePassword;
 
     /**
      * Initializes a new {@link RestrictedSSLConfigurationService}.
@@ -89,7 +88,6 @@ public class RestrictedSSLConfigurationService implements SSLConfigurationServic
         this.customTruststoreEnabled = configService.getBoolProperty(SSLProperties.CUSTOM_TRUSTSTORE_ENABLED.getName(), SSLProperties.CUSTOM_TRUSTSTORE_ENABLED.getDefaultBoolean());
         this.customTruststoreLocation = configService.getProperty(SSLProperties.CUSTOM_TRUSTSTORE_LOCATION.getName(), SSLProperties.CUSTOM_TRUSTSTORE_LOCATION.getDefault());
         this.customTruststorePassword = configService.getProperty(SSLProperties.CUSTOM_TRUSTSTORE_PASSWORD.getName(), SSLProperties.CUSTOM_TRUSTSTORE_PASSWORD.getDefault());
-        this.defaultTrustStorePassword = configService.getProperty(SSLProperties.DEFAULT_TRUSTSTORE_PASSWORD.getName(), SSLProperties.DEFAULT_TRUSTSTORE_PASSWORD.getDefault());
     }
 
     /**
@@ -150,10 +148,5 @@ public class RestrictedSSLConfigurationService implements SSLConfigurationServic
     @Override
     public String getCustomTruststorePassword() {
         return customTruststorePassword;
-    }
-
-    @Override
-    public String getDefaultTrustStrorePassword() {
-        return defaultTrustStorePassword;
     }
 }

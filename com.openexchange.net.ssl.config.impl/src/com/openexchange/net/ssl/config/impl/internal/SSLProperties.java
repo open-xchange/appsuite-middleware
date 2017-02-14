@@ -79,15 +79,13 @@ public enum SSLProperties {
     SECURE_CONNECTIONS_DEBUG_LOGS_ENABLED(SSLProperties.SECURE_CONNECTIONS_DEBUG_LOGS_KEY, false),
 
     DEFAULT_TRUSTSTORE_ENABLED(SSLProperties.DEFAULT_TRUSTSTORE_ENABLED_KEY, true),
-    
-    DEFAULT_TRUSTSTORE_PASSWORD(SSLProperties.DEFAULT_TRUSTSTORE_PASSWORD_KEY, SSLProperties.CHANGE_IT),
 
     CUSTOM_TRUSTSTORE_ENABLED(SSLProperties.CUSTOM_TRUSTSTORE_ENABLED_KEY, false),
 
     CUSTOM_TRUSTSTORE_LOCATION(SSLProperties.CUSTOM_TRUSTSTORE_PATH_KEY, SSLProperties.EMPTY_STRING),
 
     CUSTOM_TRUSTSTORE_PASSWORD(SSLProperties.CUSTOM_TRUSTSTORE_PASSWORD_KEY, SSLProperties.EMPTY_STRING),
-    
+
     HOSTNAME_VERIFICATION_ENABLED(SSLProperties.HOSTNAME_VERIFICATION_ENABLED_KEY, true),
 
     ;
@@ -121,7 +119,6 @@ public enum SSLProperties {
     // ------------------------------------------------------------------------------------------------------------
 
     private static final String EMPTY_STRING = "";
-    private static final String CHANGE_IT = "changeit";
 
     private static final AtomicReference<List<String>> DEFAULT_CIPHER_SUITES_REFERENCE = new AtomicReference<List<String>>(null);
     private static final AtomicReference<List<String>> SUPPORTED_CIPHER_SUITES_REFERENCE = new AtomicReference<List<String>>(null);
@@ -192,15 +189,13 @@ public enum SSLProperties {
     static final String SECURE_CONNECTIONS_DEBUG_LOGS_KEY = "com.openexchange.net.ssl.debug.logs";
 
     static final String DEFAULT_TRUSTSTORE_ENABLED_KEY = "com.openexchange.net.ssl.default.truststore.enabled";
-    
-    static final String DEFAULT_TRUSTSTORE_PASSWORD_KEY = "com.openexchange.net.ssl.default.truststore.password";
 
     static final String CUSTOM_TRUSTSTORE_ENABLED_KEY = "com.openexchange.net.ssl.custom.truststore.enabled";
 
     static final String CUSTOM_TRUSTSTORE_PATH_KEY = "com.openexchange.net.ssl.custom.truststore.path";
 
     static final String CUSTOM_TRUSTSTORE_PASSWORD_KEY = "com.openexchange.net.ssl.custom.truststore.password";
-    
+
     static final String HOSTNAME_VERIFICATION_ENABLED_KEY = "com.openexchange.net.ssl.hostname.verification.enabled";
 
     //---------- Reloadable Properties -------------//
@@ -263,16 +258,7 @@ public enum SSLProperties {
 
     static final String CIPHERS_KEY = "com.openexchange.net.ssl.ciphersuites";
 
-    static final List<String> CIPHERS_DEFAULT_DESIRED = ImmutableList.<String> builder().add(
-        "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA",
-        "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA",
-        "TLS_RSA_WITH_AES_128_CBC_SHA",
-        "TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA",
-        "TLS_ECDH_RSA_WITH_AES_128_CBC_SHA",
-        "TLS_DHE_RSA_WITH_AES_128_CBC_SHA",
-        "TLS_DHE_DSS_WITH_AES_128_CBC_SHA",
-        "TLS_EMPTY_RENEGOTIATION_INFO_SCSV"
-        ).build();
+    static final List<String> CIPHERS_DEFAULT_DESIRED = ImmutableList.<String> builder().add("TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA", "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA", "TLS_RSA_WITH_AES_128_CBC_SHA", "TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA", "TLS_ECDH_RSA_WITH_AES_128_CBC_SHA", "TLS_DHE_RSA_WITH_AES_128_CBC_SHA", "TLS_DHE_DSS_WITH_AES_128_CBC_SHA", "TLS_EMPTY_RENEGOTIATION_INFO_SCSV").build();
 
     private static String[] getJvmApplicableCipherSuites(List<String> desiredCipherSuites, boolean allowDefaultOnes) {
         // Get the cipher suites actually supported by running JVM

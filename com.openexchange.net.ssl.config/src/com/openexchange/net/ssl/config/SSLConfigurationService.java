@@ -135,13 +135,4 @@ public interface SSLConfigurationService {
      */
     String getCustomTruststorePassword();
 
-    /**
-     * Returns the password of the default trust store
-     * 
-     * Hint: Loaded once per startup and cannot be reloaded as additional initialization is made based on the configuration.
-     * 
-     * @return the password of the default trust store
-     */
-    String getDefaultTrustStrorePassword();
-
 }

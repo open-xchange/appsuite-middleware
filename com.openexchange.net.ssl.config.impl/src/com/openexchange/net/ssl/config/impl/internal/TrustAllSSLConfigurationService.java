@@ -115,10 +115,4 @@ public class TrustAllSSLConfigurationService implements SSLConfigurationService 
     public String getCustomTruststorePassword() {
         return null;
     }
-
-    @Override
-    public String getDefaultTrustStrorePassword() {
-        return null;
-    }
-
 }
