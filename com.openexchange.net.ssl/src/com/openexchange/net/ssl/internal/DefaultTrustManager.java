@@ -78,12 +78,12 @@ public class DefaultTrustManager extends AbstractTrustManager {
     /**
      * Creates a new {@link DefaultTrustManager} instance.
      *
-     * @return The new instance
+     * @return The new instance or <code>null</code> if initialization failed
      */
     public static DefaultTrustManager newInstance() {
         TrustManagerAndParameters managerAndParameters = initDefaultTrustManager();
         if (null == managerAndParameters) {
-            return new DefaultTrustManager(null, null);
+            return null;
         }
         return new DefaultTrustManager(managerAndParameters.trustManager, managerAndParameters.parameters);
     }

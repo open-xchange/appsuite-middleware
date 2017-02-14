@@ -97,15 +97,19 @@ public class TrustedSSLSocketFactory extends SSLSocketFactory implements Handsha
 
     private static List<TrustManager> initTrustManagers() {
         ImmutableList.Builder<TrustManager> lTrustManagers = ImmutableList.builder();
+
+        // Default trust manager
         DefaultTrustManager defaultTrustManager = DefaultTrustManager.newInstance();
-        if (defaultTrustManager.isInitialized()) {
+        if (null != defaultTrustManager) {
             lTrustManagers.add(defaultTrustManager);
         }
 
+        // Custom trust manager
         CustomTrustManager customTrustManager = CustomTrustManager.newInstance();
-        if (customTrustManager.isInitialized()) {
+        if (null != customTrustManager) {
             lTrustManagers.add(customTrustManager);
         }
+
         return lTrustManagers.build();
     }
 

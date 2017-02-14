@@ -80,12 +80,12 @@ public class CustomTrustManager extends AbstractTrustManager {
     /**
      * Creates a new {@link CustomTrustManager} instance.
      *
-     * @return The new instance
+     * @return The new instance or <code>null</code> if initialization failed
      */
     public static CustomTrustManager newInstance() {
         TrustManagerAndParameters managerAndParameters = initCustomTrustManager();
         if (null == managerAndParameters) {
-            return new CustomTrustManager(null, null);
+            return null;
         }
         return new CustomTrustManager(managerAndParameters.trustManager, managerAndParameters.parameters);
     }

@@ -110,15 +110,6 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         this.parameters = parameters;
     }
 
-    /**
-     * Checks if this trust manager has been properly initialized
-     *
-     * @return <code>true</code> if properly initialized; otherwise <code>false</code>
-     */
-    public boolean isInitialized() {
-        return this.trustManager != null;
-    }
-
     @Override
     public X509Certificate[] getAcceptedIssuers() {
         return this.trustManager.getAcceptedIssuers();
