@@ -74,6 +74,7 @@ import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Consistency;
 import com.openexchange.chronos.impl.UpdateResultImpl;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.RecurrenceIterator;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -244,14 +245,16 @@ public class DeletePerformer extends AbstractUpdatePerformer {
 
     /**
      * Adds a specific recurrence identifier to the series master's delete exception array, i.e. creates a new delete exception. A
-     * previously existing entry for the recurrence identifier in the master's change exception date array is removed implicitly.
+     * previously existing entry for the recurrence identifier in the master's change exception date array is removed implicitly. In case
+     * there are no occurrences remaining at all after the deletion, the whole series event is deleted.
      *
      * @param originalMasterEvent The original series master event
      * @param recurrenceID The recurrence identifier of the occurrence to add
      */
     private void addDeleteExceptionDate(Event originalMasterEvent, RecurrenceId recurrenceID) throws OXException {
-        Event eventUpdate = new Event();
-        eventUpdate.setId(originalMasterEvent.getId());
+        /*
+         * build new set of delete exception dates
+         */
         SortedSet<RecurrenceId> deleteExceptionDates = new TreeSet<RecurrenceId>();
         if (null != originalMasterEvent.getDeleteExceptionDates()) {
             deleteExceptionDates.addAll(originalMasterEvent.getDeleteExceptionDates());
@@ -259,18 +262,41 @@ public class DeletePerformer extends AbstractUpdatePerformer {
         if (false == deleteExceptionDates.add(recurrenceID)) {
             // TODO throw/log?
         }
-        eventUpdate.setDeleteExceptionDates(deleteExceptionDates);
-        SortedSet<RecurrenceId> changeExceptionDates = new TreeSet<RecurrenceId>();
-        if (null != originalMasterEvent.getChangeExceptionDates()) {
-            changeExceptionDates.addAll(originalMasterEvent.getChangeExceptionDates());
+        /*
+         * check if there are any further occurrences left
+         */
+        boolean hasOccurrences = false;
+        RecurrenceIterator<RecurrenceId> iterator = session.getRecurrenceService().iterateRecurrenceIds(originalMasterEvent, null, null);
+        while (iterator.hasNext()) {
+            if (false == contains(deleteExceptionDates, iterator.next())) {
+                hasOccurrences = true;
+                break;
+            }
         }
-        if (changeExceptionDates.remove(recurrenceID)) {
-            eventUpdate.setChangeExceptionDates(changeExceptionDates);
+        if (hasOccurrences) {
+            /*
+             * update series master accordingly
+             */
+            Event eventUpdate = new Event();
+            eventUpdate.setId(originalMasterEvent.getId());
+            eventUpdate.setDeleteExceptionDates(deleteExceptionDates);
+            SortedSet<RecurrenceId> changeExceptionDates = new TreeSet<RecurrenceId>();
+            if (null != originalMasterEvent.getChangeExceptionDates()) {
+                changeExceptionDates.addAll(originalMasterEvent.getChangeExceptionDates());
+            }
+            if (changeExceptionDates.remove(recurrenceID)) {
+                eventUpdate.setChangeExceptionDates(changeExceptionDates);
+            }
+            Consistency.setModified(timestamp, eventUpdate, calendarUser.getId());
+            storage.getEventStorage().updateEvent(eventUpdate);
+            Event updatedMasterEvent = loadEventData(originalMasterEvent.getId());
+            result.addUpdate(new UpdateResultImpl(originalMasterEvent, updatedMasterEvent));
+        } else {
+            /*
+             * delete series master
+             */
+            delete(originalMasterEvent);
         }
-        Consistency.setModified(timestamp, eventUpdate, calendarUser.getId());
-        storage.getEventStorage().updateEvent(eventUpdate);
-        Event updatedMasterEvent = loadEventData(originalMasterEvent.getId());
-        result.addUpdate(new UpdateResultImpl(originalMasterEvent, updatedMasterEvent));
     }
 
     /**
