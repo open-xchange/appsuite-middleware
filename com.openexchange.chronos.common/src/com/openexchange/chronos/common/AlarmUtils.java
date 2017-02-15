@@ -176,28 +176,30 @@ public class AlarmUtils extends CalendarUtils {
         String previousToken = null;
         StringTokenizer tokenizer = new StringTokenizer(duration.toUpperCase(), "+-PWDTHMS", true);
         while (tokenizer.hasMoreTokens()) {
-            token = tokenizer.nextToken();
-            switch (token) {
-                case "W":
-                    calendar.add(Calendar.DATE, (int) Long.parseLong(previousToken) * (negative ? -7 : 7));
-                    break;
-                case "D":
-                    calendar.add(Calendar.DATE, (int) Long.parseLong(previousToken) * (negative ? -1 : 1));
-                    break;
-                case "H":
-                    calendar.add(Calendar.HOUR_OF_DAY, (int) Long.parseLong(previousToken) * (negative ? -1 : 1));
-                    break;
-                case "M":
-                    calendar.add(Calendar.MINUTE, (int) Long.parseLong(previousToken) * (negative ? -1 : 1));
-                    break;
-                case "S":
-                    calendar.add(Calendar.SECOND, (int) Long.parseLong(previousToken) * (negative ? -1 : 1));
-                    break;
-                default:
-                    // skip
-                    break;
-            }
             previousToken = token;
+            token = tokenizer.nextToken();
+            if (null != previousToken) {
+                switch (token) {
+                    case "W":
+                        calendar.add(Calendar.DATE, (int) Long.parseLong(previousToken) * (negative ? -7 : 7));
+                        break;
+                    case "D":
+                        calendar.add(Calendar.DATE, (int) Long.parseLong(previousToken) * (negative ? -1 : 1));
+                        break;
+                    case "H":
+                        calendar.add(Calendar.HOUR_OF_DAY, (int) Long.parseLong(previousToken) * (negative ? -1 : 1));
+                        break;
+                    case "M":
+                        calendar.add(Calendar.MINUTE, (int) Long.parseLong(previousToken) * (negative ? -1 : 1));
+                        break;
+                    case "S":
+                        calendar.add(Calendar.SECOND, (int) Long.parseLong(previousToken) * (negative ? -1 : 1));
+                        break;
+                    default:
+                        // skip
+                        break;
+                }
+            }
         }
         return calendar;
     }
