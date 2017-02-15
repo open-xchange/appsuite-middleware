@@ -85,61 +85,6 @@ import com.openexchange.java.util.TimeZones;
 public class Recurrence {
 
     /**
-     * Gets a value indicating whether the supplied recurrence data is supported or not, throwing an appropriate exception if not.
-     *
-     * @param recurrenceService A reference to the recurrence service
-     * @param recurrenceData The recurrence data
-     * @throws OXException {@link CalendarExceptionCodes#INVALID_RRULE} {@link CalendarExceptionCodes#UNSUPPORTED_RRULE}
-     */
-    public static void checkIsSupported(RecurrenceService recurrenceService, RecurrenceData recurrenceData) throws OXException {
-        /*
-         * check unsupported parts
-         */
-        RecurrenceRule rule = getRecurrenceRule(recurrenceData.getRecurrenceRule());
-        //TODO: further checks
-        switch (rule.getFreq()) {
-            case DAILY:
-                List<Integer> byMonthPart = rule.getByPart(Part.BYMONTH);
-                if (null != byMonthPart && 0 < byMonthPart.size()) {
-                    // bug #9840
-                    throw CalendarExceptionCodes.UNSUPPORTED_RRULE.create(
-                        recurrenceData.getRecurrenceRule(), "BYMONTH", "BYMONTH not supported in DAILY");
-                }
-                break;
-            case MONTHLY:
-                break;
-            case WEEKLY:
-                break;
-            case YEARLY:
-                break;
-            default:
-                // no BYSECOND, BYMINUTE, BYHOUR, ...
-                throw CalendarExceptionCodes.UNSUPPORTED_RRULE.create(
-                    recurrenceData.getRecurrenceRule(), "FREQ", rule.getFreq() + " not supported");
-        }
-        /*
-         * validate via recurrence service
-         */
-        recurrenceService.validate(recurrenceData);
-    }
-
-    /**
-     * Initializes a new recurrence rule for the supplied recurrence rule string.
-     *
-     *
-     * @param rrule The recurrence rule string
-     * @return The recurrence rule
-     * @throws OXException {@link CalendarExceptionCodes#INVALID_RRULE}
-     */
-    private static RecurrenceRule getRecurrenceRule(String rrule) throws OXException {
-        try {
-            return new RecurrenceRule(rrule);
-        } catch (InvalidRecurrenceRuleException | IllegalArgumentException e) {
-            throw CalendarExceptionCodes.INVALID_RRULE.create(e, rrule);
-        }
-    }
-
-    /**
      * Gets the recurrence rule appropriate for the supplied series pattern.
      *
      * @param seriesPattern The legacy, pipe-separated series pattern, e.g. <code>t|1|i|1|s|1313388000000|e|1313625600000|o|4|</code>
@@ -211,13 +156,16 @@ public class Recurrence {
                     // save as 'weekly' type with daymask
                     setDays(pattern, rrule, seriesStartCalendar);
                     pattern.setType(SeriesPattern.WEEKLY);
+                    checkNoUnsupportedParts(rrule, Part.BYMONTH, Part.BYWEEKNO, Part.BYYEARDAY, Part.BYMONTHDAY, Part.BYHOUR, Part.BYMINUTE, Part.BYSECOND, Part.BYSETPOS);
                 } else {
                     pattern.setType(SeriesPattern.DAILY);
+                    checkNoUnsupportedParts(rrule, Part.BYMONTH, Part.BYWEEKNO, Part.BYYEARDAY, Part.BYMONTHDAY, Part.BYDAY, Part.BYHOUR, Part.BYMINUTE, Part.BYSECOND, Part.BYSETPOS);
                 }
                 return pattern;
             case WEEKLY:
                 setDays(pattern, rrule, seriesStartCalendar);
                 pattern.setType(SeriesPattern.WEEKLY);
+                checkNoUnsupportedParts(rrule, Part.BYMONTH, Part.BYWEEKNO, Part.BYYEARDAY, Part.BYMONTHDAY, Part.BYHOUR, Part.BYMINUTE, Part.BYSECOND, Part.BYSETPOS);
                 return pattern;
             case MONTHLY:
                 setMonthDay(pattern, rrule, seriesStartCalendar);
@@ -226,11 +174,11 @@ public class Recurrence {
                 } else {
                     pattern.setType(SeriesPattern.MONTHLY_2);
                 }
+                checkNoUnsupportedParts(rrule, Part.BYMONTH, Part.BYYEARDAY, Part.BYHOUR, Part.BYMINUTE, Part.BYSECOND);
                 return pattern;
             case YEARLY:
-                List<Integer> monthList = rrule.getByPart(Part.BYMONTH);
-                if (null != monthList && !monthList.isEmpty()) {
-                    pattern.setMonth(monthList.get(0));
+                if (rrule.hasPart(Part.BYMONTH)) {
+                    pattern.setMonth(checkOnlyOnePart(rrule, Part.BYMONTH));
                     setMonthDay(pattern, rrule, seriesStartCalendar);
                 } else {
                     pattern.setMonth(I(seriesStartCalendar.get(Calendar.MONTH))); //TODO: which timezone for floating events?
@@ -241,9 +189,11 @@ public class Recurrence {
                 } else {
                     pattern.setType(SeriesPattern.YEARLY_2);
                 }
+                checkNoUnsupportedParts(rrule, Part.BYHOUR, Part.BYMINUTE, Part.BYSECOND);
                 return pattern;
             default:
-                throw CalendarExceptionCodes.UNSUPPORTED_RRULE.create(recurrenceData.getRecurrenceRule(), Part.FREQ, "Unsupported frequency");
+                // no SECONDLY, MINUTELY, HOURLY, ...
+                throw CalendarExceptionCodes.UNSUPPORTED_RRULE.create(recurrenceData.getRecurrenceRule(), Part.FREQ, rrule.getFreq() + " not supported");
         }
     }
 
@@ -432,17 +382,15 @@ public class Recurrence {
         }
     }
 
-    private static void setMonthDay(SeriesPattern pattern, RecurrenceRule rrule, Calendar seriesStart) {
-        List<Integer> byMonthDayPart = rrule.getByPart(Part.BYMONTHDAY);
-        if (null != byMonthDayPart && 0 < byMonthDayPart.size()) {
-            pattern.setDayOfMonth(byMonthDayPart.get(0));
+    private static void setMonthDay(SeriesPattern pattern, RecurrenceRule rrule, Calendar seriesStart) throws OXException {
+        if (rrule.hasPart(Part.BYMONTHDAY)) {
+            pattern.setDayOfMonth(checkOnlyOnePart(rrule, Part.BYMONTHDAY));
         } else {
-            List<Integer> byWeekNoPart = rrule.getByPart(Part.BYWEEKNO);
-            if (null != byWeekNoPart && 0 < byWeekNoPart.size()) {
-                Integer firstWeek = byWeekNoPart.get(0);
+            if (rrule.hasPart(Part.BYWEEKNO)) {
+                Integer firstWeek = checkOnlyOnePart(rrule, Part.BYWEEKNO);
                 pattern.setDaysOfWeek(-1 == firstWeek.intValue() ? I(5) : firstWeek); // Day in month stores week
                 setDays(pattern, rrule, seriesStart);
-            } else if (null != rrule.getByDayPart() && 0 < rrule.getByDayPart().size()) {
+            } else if (rrule.hasPart(Part.BYDAY)) {
                 setWeekdayInMonth(pattern, rrule);
                 setDayInMonthFromSetPos(pattern, rrule);
             } else {
@@ -452,10 +400,9 @@ public class Recurrence {
         }
     }
 
-    private static void setDayInMonthFromSetPos(SeriesPattern pattern, RecurrenceRule rrule) {
-        List<Integer> bySetPosPart = rrule.getByPart(Part.BYSETPOS);
-        if (null != bySetPosPart && 0 < bySetPosPart.size()) {
-            Integer firstPos = bySetPosPart.get(0);
+    private static void setDayInMonthFromSetPos(SeriesPattern pattern, RecurrenceRule rrule) throws OXException {
+        if (rrule.hasPart(Part.BYSETPOS)) {
+            Integer firstPos = checkOnlyOnePart(rrule, Part.BYSETPOS);
             pattern.setDayOfMonth(-1 == firstPos.intValue() ? I(5) : firstPos);
         }
     }
@@ -496,6 +443,63 @@ public class Recurrence {
             localUntil = new DateTime(millis);
         }
         return initCalendar(TimeZones.UTC, localUntil.getYear(), localUntil.getMonth(), localUntil.getDayOfMonth()).getTime();
+    }
+
+    /**
+     * Initializes a new recurrence rule for the supplied recurrence rule string.
+     *
+     *
+     * @param rrule The recurrence rule string
+     * @return The recurrence rule
+     * @throws OXException {@link CalendarExceptionCodes#INVALID_RRULE}
+     */
+    private static RecurrenceRule getRecurrenceRule(String rrule) throws OXException {
+        try {
+            return new RecurrenceRule(rrule);
+        } catch (InvalidRecurrenceRuleException | IllegalArgumentException e) {
+            throw CalendarExceptionCodes.INVALID_RRULE.create(e, rrule);
+        }
+    }
+
+    /**
+     * Checks that a recurrence rule does not define one or more <code>BYxxx</code> rule parts.
+     *
+     * @param rrule The recurrence rule to check
+     * @param unsupportedParts The unsupported parts to check for
+     * @throws OXException {@link CalendarExceptionCodes#INVALID_RRULE}
+     */
+    private static void checkNoUnsupportedParts(RecurrenceRule rrule, Part... unsupportedParts) throws OXException {
+        for (Part unsupportedPart : unsupportedParts) {
+            List<?> byPart;
+            switch (unsupportedPart) {
+                case BYDAY:
+                    byPart = rrule.getByDayPart();
+                    break;
+                default:
+                    byPart = rrule.getByPart(unsupportedPart);
+                    break;
+            }
+            if (null != byPart && 0 < byPart.size()) {
+                String error = "Part \"" + unsupportedPart + "\" is not supported for \"FREQ=" + rrule.getFreq() + "\"";
+                throw CalendarExceptionCodes.UNSUPPORTED_RRULE.create(rrule.toString(), unsupportedPart, error);
+            }
+        }
+    }
+
+    /**
+     * Checks that a recurrence rule does not define more than one value in a specific <code>BYxxx</code> rule part.
+     *
+     * @param rrule The recurrence rule to check
+     * @param part The part to check the values for
+     * @return The single value of the checked <code>BYxxx</code> rule part
+     * @throws OXException {@link CalendarExceptionCodes#INVALID_RRULE}
+     */
+    private static Integer checkOnlyOnePart(RecurrenceRule rrule, Part part) throws OXException {
+        List<Integer> byPart = rrule.getByPart(part);
+        if (null == byPart || 1 != byPart.size() || null == byPart.get(0)) {
+            throw CalendarExceptionCodes.UNSUPPORTED_RRULE.create(rrule.toString(), part, "Only one value allowed for part \"" + part + "\"");
+        }
+        return byPart.get(0);
     }
 
 }

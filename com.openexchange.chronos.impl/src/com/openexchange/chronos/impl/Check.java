@@ -67,7 +67,6 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
-import com.openexchange.chronos.compat.Recurrence;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.performer.ConflictCheckPerformer;
 import com.openexchange.chronos.impl.performer.ResolveUidPerformer;
@@ -286,7 +285,7 @@ public class Check {
     public static String recurrenceRuleIsValid(RecurrenceService recurrenceService, Event event) throws OXException {
         String recurrenceRule = event.getRecurrenceRule();
         if (event.containsRecurrenceRule() && null != recurrenceRule) {
-            Recurrence.checkIsSupported(recurrenceService, new DefaultRecurrenceData(event));
+            recurrenceService.validate(new DefaultRecurrenceData(event));
         }
         return recurrenceRule;
     }
