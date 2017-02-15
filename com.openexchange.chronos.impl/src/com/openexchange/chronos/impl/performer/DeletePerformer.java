@@ -172,9 +172,9 @@ public class DeletePerformer extends AbstractUpdatePerformer {
      * @return The result
      */
     private void deleteRecurrence(Event originalEvent, RecurrenceId recurrenceID) throws OXException {
-        if (isOrganizer(originalEvent, calendarUser.getId())) {
+        if (isOrganizer(originalEvent, calendarUser.getId()) || isLastUserAttendee(originalEvent.getAttendees(), calendarUser.getId())) {
             /*
-             * deletion as organizer
+             * deletion as organizer / last user attendee
              */
             if (isSeriesMaster(originalEvent)) {
                 if (contains(originalEvent.getChangeExceptionDates(), recurrenceID)) {
