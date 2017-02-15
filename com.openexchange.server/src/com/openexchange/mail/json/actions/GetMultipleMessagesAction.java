@@ -211,10 +211,12 @@ public final class GetMultipleMessagesAction extends AbstractMailAction {
                             final int pos = name.indexOf(ext);
                             final String entryName = name.substring(0, pos) + (num > 1 ? "_(" + num + ")" : "") + ext;
                             entry = new ZipArchiveEntry(entryName);
-                            if (ajaxRequestData != null) {
-                                zipOutput = new ZipArchiveOutputStream(ajaxRequestData.optOutputStream());
-                            } else {
-                                zipOutput = new ZipArchiveOutputStream(stream);
+                            if(zipOutput==null){
+                                if (ajaxRequestData != null) {
+                                    zipOutput = new ZipArchiveOutputStream(ajaxRequestData.optOutputStream());
+                                } else {
+                                    zipOutput = new ZipArchiveOutputStream(stream);
+                                }
                             }
                             zipOutput.setEncoding("UTF-8");
                             zipOutput.setUseLanguageEncodingFlag(true);
