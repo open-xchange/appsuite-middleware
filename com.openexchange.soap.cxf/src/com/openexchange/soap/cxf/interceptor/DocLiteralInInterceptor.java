@@ -78,6 +78,10 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
         }
 
         DepthXMLStreamReader xmlReader = getXMLStreamReader(message);
+        if (xmlReader == null) {
+            LOG.warning("Unable to retrieve XMLStreamReader from message.");
+            return;
+        }
         DataReader<XMLStreamReader> dr = getDataReader(message);
         MessageContentsList parameters = new MessageContentsList();
 
