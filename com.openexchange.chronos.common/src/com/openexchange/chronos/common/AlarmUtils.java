@@ -129,6 +129,7 @@ public class AlarmUtils extends CalendarUtils {
         String previousToken = null;
         StringTokenizer tokenizer = new StringTokenizer(duration.toUpperCase(), "+-PWDTHMS", true);
         while (tokenizer.hasMoreTokens()) {
+            previousToken = token;
             token = tokenizer.nextToken();
             switch (token) {
                 case "+":
@@ -138,19 +139,29 @@ public class AlarmUtils extends CalendarUtils {
                     negative = true;
                     break;
                 case "W":
-                    totalMillis += TimeUnit.DAYS.toMillis(7 * Long.parseLong(previousToken));
+                    if (null != previousToken) {
+                        totalMillis += TimeUnit.DAYS.toMillis(7 * Long.parseLong(previousToken));
+                    }
                     break;
                 case "D":
-                    totalMillis += TimeUnit.DAYS.toMillis(Long.parseLong(previousToken));
+                    if (null != previousToken) {
+                        totalMillis += TimeUnit.DAYS.toMillis(Long.parseLong(previousToken));
+                    }
                     break;
                 case "H":
-                    totalMillis += TimeUnit.HOURS.toMillis(Long.parseLong(previousToken));
+                    if (null != previousToken) {
+                        totalMillis += TimeUnit.HOURS.toMillis(Long.parseLong(previousToken));
+                    }
                     break;
                 case "M":
-                    totalMillis += TimeUnit.MINUTES.toMillis(Long.parseLong(previousToken));
+                    if (null != previousToken) {
+                        totalMillis += TimeUnit.MINUTES.toMillis(Long.parseLong(previousToken));
+                    }
                     break;
                 case "S":
-                    totalMillis += TimeUnit.SECONDS.toMillis(Long.parseLong(previousToken));
+                    if (null != previousToken) {
+                        totalMillis += TimeUnit.SECONDS.toMillis(Long.parseLong(previousToken));
+                    }
                     break;
                 case "T":
                 case "P":
@@ -158,7 +169,6 @@ public class AlarmUtils extends CalendarUtils {
                     // skip
                     break;
             }
-            previousToken = token;
         }
         return negative ? -1 * totalMillis : totalMillis;
     }
