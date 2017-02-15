@@ -278,7 +278,7 @@ public class Recurrence {
                 weekNo = -1;
             }
             recur.setByPart(Part.BYSETPOS, weekNo);
-        } else if (SeriesPattern.MONTHLY_1 == pattern.getType()) {
+        } else if (SeriesPattern.MONTHLY_1.equals(pattern.getType())) {
             recur.setByPart(Part.BYMONTHDAY, pattern.getDayOfMonth());
         } else {
             return null;
