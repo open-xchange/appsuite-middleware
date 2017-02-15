@@ -1029,6 +1029,8 @@ public class LoginServlet extends AJAXServlet {
         final String domain = getDomainValue(null == serverName ? determineServerNameByLogProperty() : serverName);
         if (null != domain) {
             cookie.setDomain(domain);
+        } else {
+            cookie.setDomain(serverName);
         }
         return cookie;
     }
