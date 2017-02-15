@@ -50,7 +50,6 @@
 package com.openexchange.chronos.compat;
 
 import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
-import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import java.util.ArrayList;
@@ -87,32 +86,36 @@ public class Recurrence {
     /**
      * Gets the recurrence rule appropriate for the supplied series pattern.
      *
-     * @param seriesPattern The legacy, pipe-separated series pattern, e.g. <code>t|1|i|1|s|1313388000000|e|1313625600000|o|4|</code>
-     * @return The corresponding recurrence rule
+     * @param databasePattern The legacy, pipe-separated series pattern, e.g. <code>t|1|i|1|s|1313388000000|e|1313625600000|o|4|</code>
+     * @param timeZone The timezone of the corresponding appointment
+     * @param fulltime <code>true</code> if the corresponding appointment is marked as <i>fulltime</i>, <code>false</code>, otherwise
+     * @return The converted recurrence rule
      */
-    public static String getRecurrenceRule(String seriesPattern, TimeZone tz, Boolean fullTime) throws OXException {
-        return getRecurrenceRule(new SeriesPattern(seriesPattern, tz.getID(), fullTime.booleanValue()));
+    public static String getRecurrenceRule(String databasePattern, TimeZone timeZone, boolean fulltime) throws OXException {
+        return getRecurrenceRule(new SeriesPattern(databasePattern), timeZone, fulltime);
     }
 
-    public static String getRecurrenceRule(SeriesPattern pattern) throws OXException {
-        if (pattern.isFullTime() == null) {
-            throw new IllegalArgumentException("Fulltime value must be set.");
-        }
-        if (pattern.getTimeZone() == null) {
-            throw new IllegalArgumentException("TimeZone must be set.");
-        }
+    /**
+     * Gets the recurrence rule appropriate for the supplied series pattern.
+     *
+     * @param pattern The legacy series pattern
+     * @param timeZone The timezone of the corresponding appointment
+     * @param fulltime <code>true</code> if the corresponding appointment is marked as <i>fulltime</i>, <code>false</code>, otherwise
+     * @return The converted recurrence rule
+     */
+    public static String getRecurrenceRule(SeriesPattern pattern, TimeZone timeZone, boolean fulltime) throws OXException {
         try {
             switch (pattern.getType()) {
                 case 1:
-                    return daily(pattern);
+                    return daily(pattern, fulltime, timeZone);
                 case 2:
-                    return weekly(pattern);
+                    return weekly(pattern, fulltime, timeZone);
                 case 3:
                 case 5:
-                    return monthly(pattern);
+                    return monthly(pattern, fulltime, timeZone);
                 case 4:
                 case 6:
-                    return yearly(pattern);
+                    return yearly(pattern, fulltime, timeZone);
                 default:
                     return null;
             }
@@ -138,8 +141,6 @@ public class Recurrence {
         SeriesPattern pattern = new SeriesPattern();
         pattern.setInterval(I(rrule.getInterval()));
         pattern.setSeriesStart(L(recurrenceData.getSeriesStart()));
-        pattern.setFullTime(B(recurrenceData.isAllDay())); //TODO: needed?
-        pattern.setTz(timeZone); //TODO: needed?
         if (null != rrule.getCount()) {
             pattern.setOccurrences(rrule.getCount());
             pattern.setSeriesEnd(L(getUntilForUnlimited(recurrenceService, recurrenceData).getTime()));
@@ -258,18 +259,18 @@ public class Recurrence {
         return initCalendar(TimeZones.UTC, localUntil.getYear(), localUntil.getMonth(), localUntil.getDayOfMonth()).getTime();
     }
 
-    private static String daily(SeriesPattern pattern) {
-        return getRecurBuilder(Freq.DAILY, pattern).toString();
+    private static String daily(SeriesPattern pattern, boolean fulltime, TimeZone timeZone) {
+        return getRecurBuilder(Freq.DAILY, pattern, fulltime, timeZone).toString();
     }
 
-    private static String weekly(SeriesPattern pattern) throws InvalidRecurrenceRuleException {
-        RecurrenceRule recur = getRecurBuilder(Freq.WEEKLY, pattern);
+    private static String weekly(SeriesPattern pattern, boolean fulltime, TimeZone timeZone) throws InvalidRecurrenceRuleException {
+        RecurrenceRule recur = getRecurBuilder(Freq.WEEKLY, pattern, fulltime, timeZone);
         recur.setByDayPart(getByDayPart(pattern.getDaysOfWeek()));
         return recur.toString();
     }
 
-    private static String monthly(SeriesPattern pattern) throws InvalidRecurrenceRuleException {
-        RecurrenceRule recur = getRecurBuilder(Freq.MONTHLY, pattern);
+    private static String monthly(SeriesPattern pattern, boolean fulltime, TimeZone timeZone) throws InvalidRecurrenceRuleException {
+        RecurrenceRule recur = getRecurBuilder(Freq.MONTHLY, pattern, fulltime, timeZone);
         if (SeriesPattern.MONTHLY_2 == pattern.getType()) {
             recur.setByDayPart(getByDayPart(pattern.getDaysOfWeek()));
             int weekNo = pattern.getDayOfMonth();
@@ -285,8 +286,8 @@ public class Recurrence {
         return recur.toString();
     }
 
-    private static String yearly(SeriesPattern pattern) throws InvalidRecurrenceRuleException {
-        RecurrenceRule recur = getRecurBuilder(Freq.YEARLY, pattern);
+    private static String yearly(SeriesPattern pattern, boolean fulltime, TimeZone timeZone) throws InvalidRecurrenceRuleException {
+        RecurrenceRule recur = getRecurBuilder(Freq.YEARLY, pattern, fulltime, timeZone);
         if (SeriesPattern.YEARLY_2 == pattern.getType()) {
             recur.setByDayPart(getByDayPart(pattern.getDaysOfWeek()));
             recur.setByPart(Part.BYMONTH, pattern.getMonth());
@@ -317,13 +318,13 @@ public class Recurrence {
         return byDayPart;
     }
 
-    private static RecurrenceRule getRecurBuilder(Freq frequency, SeriesPattern pattern) {
+    private static RecurrenceRule getRecurBuilder(Freq frequency, SeriesPattern pattern, boolean fulltime, TimeZone timeZone) {
         RecurrenceRule recur = new RecurrenceRule(frequency);
         recur.setInterval(pattern.getInterval());
         if (pattern.getOccurrences() != null) {
             recur.setCount(pattern.getOccurrences());
         } else if (pattern.getSeriesEnd() != null) {
-            recur.setUntil(getUntil(pattern));
+            recur.setUntil(getUntil(pattern, fulltime, timeZone));
         }
         return recur;
     }
@@ -340,12 +341,12 @@ public class Recurrence {
      * @return the calculated until date
      * @see http://tools.ietf.org/html/rfc5545#section-3.3.10
      */
-    private static DateTime getUntil(SeriesPattern pattern) {
+    private static DateTime getUntil(SeriesPattern pattern, boolean fulltime, TimeZone timeZone) {
         if (pattern.getSeriesEnd() == null) {
             return null;
         }
 
-        if (pattern.isFullTime()) {
+        if (fulltime) {
             return new DateTime(pattern.getSeriesEnd()).toAllDay();
         }
 
@@ -356,9 +357,9 @@ public class Recurrence {
         /*
          * iCal wants a correct inclusive until value. With time zone and time. So extract time from the start date.
          */
-        Calendar effectiveUntilCalendar = Calendar.getInstance(pattern.getTimeZone());
+        Calendar effectiveUntilCalendar = Calendar.getInstance(timeZone);
 //        Calendar seriesStart = pattern.getSeriesStartCalendar();
-        Calendar seriesStart = Calendar.getInstance(pattern.getTimeZone());
+        Calendar seriesStart = Calendar.getInstance(timeZone);
         seriesStart.setTimeInMillis(pattern.getSeriesStart().longValue());
         effectiveUntilCalendar.set(utcUntilCalendar.get(Calendar.YEAR), utcUntilCalendar.get(Calendar.MONTH), utcUntilCalendar.get(Calendar.DAY_OF_MONTH), seriesStart.get(Calendar.HOUR_OF_DAY), seriesStart.get(Calendar.MINUTE), seriesStart.get(Calendar.SECOND));
         /*

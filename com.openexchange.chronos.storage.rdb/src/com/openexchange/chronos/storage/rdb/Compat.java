@@ -112,13 +112,12 @@ public class Compat {
             int idx = value.indexOf('~');
             int absoluteDuration = Integer.parseInt(value.substring(0, idx));
             String databasePattern = value.substring(idx + 1);
-            String timeZone = null != event.getStartTimeZone() ? event.getStartTimeZone() : "UTC";
-            boolean allDay = event.isAllDay();
+            TimeZone timeZone = null != event.getStartTimeZone() ? TimeZone.getTimeZone(event.getStartTimeZone()) : TimeZones.UTC;
             /*
              * convert legacy series pattern into proper recurrence rule
              */
-            SeriesPattern seriesPattern = new SeriesPattern(databasePattern, timeZone, allDay);
-            RecurrenceData recurrenceData = Appointment2Event.getRecurrenceData(seriesPattern);
+            SeriesPattern seriesPattern = new SeriesPattern(databasePattern);
+            RecurrenceData recurrenceData = Appointment2Event.getRecurrenceData(seriesPattern, timeZone, event.isAllDay());
             if (isSeriesMaster(event)) {
                 /*
                  * apply recurrence rule & adjust the recurrence master's actual start- and enddate

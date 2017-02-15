@@ -761,11 +761,13 @@ public class EventConverter {
         /*
          * prepare series pattern & take over original pattern data if available
          */
+        boolean fulltime = false;
+        TimeZone timeZone = null;
         SeriesPattern pattern = new SeriesPattern();
         if (null != originalRecurrenceData) {
-            pattern.setFullTime(Boolean.valueOf(originalRecurrenceData.isAllDay()));
+            fulltime = originalRecurrenceData.isAllDay();
             pattern.setSeriesStart(Long.valueOf(originalRecurrenceData.getSeriesStart()));
-            pattern.setTz(TimeZone.getTimeZone(null != originalRecurrenceData.getTimeZoneID() ? originalRecurrenceData.getTimeZoneID() : "UTC"));
+            timeZone = TimeZone.getTimeZone(null != originalRecurrenceData.getTimeZoneID() ? originalRecurrenceData.getTimeZoneID() : "UTC");
         }
         if (appointment.containsRecurrenceType()) {
             if (0 == appointment.getRecurrenceType()) {
@@ -797,21 +799,21 @@ public class EventConverter {
             pattern.setOccurrences(appointment.getOccurrence());
         }
         if (appointment.containsFullTime()) {
-            pattern.setFullTime(Boolean.valueOf(appointment.getFullTime()));
-        } else if (null == pattern.isFullTime()) {
-            pattern.setFullTime(Boolean.FALSE);
+            fulltime = appointment.getFullTime();
         }
-        if (appointment.containsTimezone()) {
-            pattern.setTz(TimeZone.getTimeZone(appointment.getTimezone()));
-        } else if (null == pattern.getTimeZone()) {
-            pattern.setTz(session.get(CalendarParameters.PARAMETER_TIMEZONE, TimeZone.class, TimeZone.getTimeZone(session.getUser().getTimeZone())));
+        if (appointment.containsTimezone() && null != appointment.getTimezone()) {
+            timeZone = TimeZone.getTimeZone(appointment.getTimezone());
         }
+        if (null == timeZone) {
+            timeZone = session.get(CalendarParameters.PARAMETER_TIMEZONE, TimeZone.class, TimeZone.getTimeZone(session.getUser().getTimeZone()));
+        }
+
         if (appointment.containsRecurringStart() && appointment.containsStartDate()) {
             /*
              * recurring start and appointment start are both set; prefer the time fraction from start date
              */
-            Calendar seriesStartCalendar = CalendarUtils.initCalendar(pattern.getTimeZone(), appointment.getRecurringStart());
-            Calendar startDateCalendar = CalendarUtils.initCalendar(pattern.getTimeZone(), appointment.getStartDate());
+            Calendar seriesStartCalendar = CalendarUtils.initCalendar(timeZone, appointment.getRecurringStart());
+            Calendar startDateCalendar = CalendarUtils.initCalendar(timeZone, appointment.getStartDate());
             seriesStartCalendar.set(Calendar.HOUR_OF_DAY, startDateCalendar.get(Calendar.HOUR_OF_DAY));
             seriesStartCalendar.set(Calendar.MINUTE, startDateCalendar.get(Calendar.MINUTE));
             seriesStartCalendar.set(Calendar.SECOND, startDateCalendar.get(Calendar.SECOND));
@@ -828,7 +830,7 @@ public class EventConverter {
              */
             pattern.setSeriesStart(Long.valueOf(appointment.getStartDate().getTime()));
         }
-        return Appointment2Event.getRecurrenceData(validate(pattern));
+        return Appointment2Event.getRecurrenceData(validate(pattern), timeZone, fulltime);
     }
 
     private SeriesPattern validate(SeriesPattern pattern) throws OXException {

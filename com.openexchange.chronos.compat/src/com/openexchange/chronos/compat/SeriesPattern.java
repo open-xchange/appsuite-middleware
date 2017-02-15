@@ -49,8 +49,7 @@
 
 package com.openexchange.chronos.compat;
 
-import java.util.Calendar;
-import java.util.TimeZone;
+import static com.openexchange.java.Autoboxing.I;
 
 /**
  * {@link SeriesPattern}
@@ -106,8 +105,6 @@ public class SeriesPattern {
     private Integer occurrences;
     private Long seriesStart;
     private Long seriesEnd;
-    private TimeZone tz;
-    private Boolean fullTime;
 
     /**
      * Initializes a new, empty {@link SeriesPattern}.
@@ -120,13 +117,9 @@ public class SeriesPattern {
      * Initializes a new {@link SeriesPattern}.
      *
      * @param databasePattern The legacy, pipe-separated series pattern, e.g. <code>t|1|i|1|s|1313388000000|e|1313625600000|o|4|</code>
-     * @param timeZone The timezone of the event series
-     * @param allDay <code>true</code> for an "all-day" event series, <code>false</code>, otherwise
      */
-    public SeriesPattern(String databasePattern, String timeZone, boolean allDay) {
+    public SeriesPattern(String databasePattern) {
         super();
-        this.tz = TimeZone.getTimeZone(timeZone);
-        this.fullTime = Boolean.valueOf(allDay);
         deserialize(databasePattern);
     }
 
@@ -134,14 +127,10 @@ public class SeriesPattern {
      * Initializes a new {@link SeriesPattern}.
      *
      * @param type The recurrence type
-     * @param timeZone The timezone of the event series
-     * @param allDay <code>true</code> for an "all-day" event series, <code>false</code>, otherwise
      */
-    public SeriesPattern(int type, String timeZone, boolean allDay) {
+    public SeriesPattern(int type) {
         super();
-        this.type = type;
-        this.tz = TimeZone.getTimeZone(timeZone);
-        this.fullTime = Boolean.valueOf(allDay);
+        this.type = I(type);
     }
 
     private void deserialize(String pattern) throws IllegalArgumentException {
@@ -290,62 +279,6 @@ public class SeriesPattern {
      */
     public void setSeriesEnd(Long seriesEnd) {
         this.seriesEnd = seriesEnd;
-    }
-
-    /**
-     * Gets the time zone
-     *
-     * @return The time zone
-     */
-    public TimeZone getTimeZone() {
-        return tz;
-    }
-
-    /**
-     * @param tz The TimeZone to set
-     */
-    public void setTz(TimeZone tz) {
-        this.tz = tz;
-    }
-
-    /**
-     * @return true if full time, false otherwise
-     */
-    public Boolean isFullTime() {
-        return fullTime;
-    }
-
-    /**
-     * @param fullTime
-     */
-    public void setFullTime(Boolean fullTime) {
-        this.fullTime = fullTime;
-    }
-
-    /**
-     * Gets the series start as Calendar with proper TimeZone.
-     *
-     * @return
-     */
-    public Calendar getSeriesStartCalendar() {
-        Calendar retval = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        retval.setTimeInMillis(getSeriesStart());
-        return retval;
-    }
-
-    /**
-     * Gets the series end as Calendar with proper TimeZone.
-     *
-     * @return
-     */
-    public Calendar getSeriesEndCalendar() {
-        Long seriesEnd = getSeriesEnd();
-        if (null == seriesEnd) {
-            return null;
-        }
-        Calendar retval = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        retval.setTimeInMillis(seriesEnd.longValue());
-        return retval;
     }
 
     /**

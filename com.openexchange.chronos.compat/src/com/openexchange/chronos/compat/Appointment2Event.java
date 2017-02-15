@@ -59,6 +59,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.SortedSet;
+import java.util.TimeZone;
 import java.util.TreeSet;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
@@ -239,14 +240,16 @@ public class Appointment2Event {
      * Gets the recurrence data for the supplied series pattern.
      *
      * @param pattern The legacy series pattern
+     * @param timeZone The timezone of the corresponding appointment
+     * @param fulltime <code>true</code> if the corresponding appointment is marked as <i>fulltime</i>, <code>false</code>, otherwise
      * @return The recurrence data, or <code>null</code> if not mappable
      */
-    public static RecurrenceData getRecurrenceData(SeriesPattern pattern) throws OXException {
+    public static RecurrenceData getRecurrenceData(SeriesPattern pattern, TimeZone timeZone, boolean fulltime) throws OXException {
         if (null == pattern || null == pattern.getType()) {
             return null;
         }
-        String recurrenceRule = Recurrence.getRecurrenceRule(pattern);
-        return new DefaultRecurrenceData(recurrenceRule, pattern.isFullTime().booleanValue(), pattern.getTimeZone().getID(), pattern.getSeriesStart().longValue());
+        String recurrenceRule = Recurrence.getRecurrenceRule(pattern, timeZone, fulltime);
+        return new DefaultRecurrenceData(recurrenceRule, fulltime, timeZone.getID(), pattern.getSeriesStart().longValue());
     }
 
     /**
