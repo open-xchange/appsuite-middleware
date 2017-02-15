@@ -329,6 +329,10 @@ public final class SieveTextFilter {
         }
         final List<OwnType> commentedoutput = (List<OwnType>) commentednode.jjtAccept(new Visitor(), null);
 
+        if(commentedoutput == null){
+            throw new SieveException("Commented output is null");
+        }
+
         return listToString(interweaving(noncommentedoutput, commentedoutput, clientrulesandrequire.getRules()));
     }
 
