@@ -219,11 +219,21 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
     @Override
     public AttachmentMetadata getAttachment(final Session session, final int folderId, final int objectId, final int moduleId, final int id, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+        // Get the attachment (and thus implicitly check existence)
+        AttachmentMetadata attachment = loadAttachment(folderId, id, ctx);
+
+        // Verify
+        if (attachment.getAttachedId() != objectId) {
+            // Attachment is actually not attached to specified PIM object
+            throw AttachmentExceptionCodes.ATTACHMENT_NOT_FOUND.create();
+        }
         checkMayReadAttachments(ServerSessionAdapter.valueOf(session, ctx, user, userConfig), moduleId, folderId, objectId);
 
+        // Set context
         contextHolder.set(ctx);
 
-        return loadAttachment(folderId, id, ctx);
+        // Return...
+        return attachment;
     }
 
     @Override
