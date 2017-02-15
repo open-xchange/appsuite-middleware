@@ -873,23 +873,16 @@ public class EventConverter {
         }
         switch (attendee.getCuType()) {
             case GROUP:
-                GroupParticipant groupParticipant = new GroupParticipant(attendee.getEntity());
-                // display name is not expected for groups participants
-                //                groupParticipant.setDisplayName(attendee.getCommonName());
-                participants.add(groupParticipant);
+                participants.add(new GroupParticipant(attendee.getEntity()));
                 break;
             case INDIVIDUAL:
                 if (CalendarUtils.isInternal(attendee)) {
                     UserParticipant userParticipant = new UserParticipant(attendee.getEntity());
                     userParticipant.setConfirm(Event2Appointment.getConfirm(attendee.getPartStat()));
                     userParticipant.setConfirmMessage(attendee.getComment());
-                    userParticipant.setDisplayName(attendee.getCn());
-                    if (null != attendee.getUri() && attendee.getUri().toLowerCase().startsWith("mailto:")) {
-                        userParticipant.setEmailAddress(Event2Appointment.getEMailAddress(attendee.getUri()));
-                    }
                     users.add(userParticipant);
                     if (null == attendee.getMember()) {
-                        participants.add(userParticipant);
+                        participants.add(new UserParticipant(attendee.getEntity()));
                     }
                 } else {
                     ExternalUserParticipant externalParticipant = new ExternalUserParticipant(Event2Appointment.getEMailAddress(attendee.getUri()));
@@ -902,9 +895,7 @@ public class EventConverter {
                 break;
             case RESOURCE:
             case ROOM:
-                ResourceParticipant resourceParticipant = new ResourceParticipant(attendee.getEntity());
-                resourceParticipant.setDisplayName(attendee.getCn());
-                participants.add(resourceParticipant);
+                participants.add(new ResourceParticipant(attendee.getEntity()));
                 break;
             case UNKNOWN:
                 break;
