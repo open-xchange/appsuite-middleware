@@ -50,6 +50,8 @@
 package com.openexchange.ajax;
 
 import static com.openexchange.ajax.ConfigMenu.convert2JS;
+import static com.openexchange.net.IPAddressUtil.textToNumericFormatV4;
+import static com.openexchange.net.IPAddressUtil.textToNumericFormatV6;
 import static com.openexchange.tools.servlet.http.Cookies.getDomainValue;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -1030,7 +1032,9 @@ public class LoginServlet extends AJAXServlet {
         if (null != domain) {
             cookie.setDomain(domain);
         } else {
-            cookie.setDomain(serverName);
+            if (!"localhost".equalsIgnoreCase(serverName) && (null == textToNumericFormatV4(serverName)) && (null == textToNumericFormatV6(serverName))) {
+                cookie.setDomain(serverName);
+            }
         }
         return cookie;
     }
