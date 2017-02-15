@@ -504,21 +504,13 @@ public final class ConfigurationImpl implements ConfigurationService {
     }
 
     public Properties getPropertiesInFolder(final String folderName, final PropertyListener listener) {
-        final Properties retval = new Properties();
-        final Iterator<Entry<String, String>> iter = propertiesFiles.entrySet().iterator();
-        String fldName = folderName;
-        for (final File dir : dirs) {
-            fldName = dir.getAbsolutePath() + File.separatorChar + fldName + File.separatorChar;
-            while (iter.hasNext()) {
-                final Entry<String, String> entry = iter.next();
+        Properties retval = new Properties();
+        for (File dir : dirs) {
+            String fldName = dir.getAbsolutePath() + File.separatorChar + folderName + File.separatorChar;
+            for (Iterator<Entry<String, String>> iter = propertiesFiles.entrySet().iterator(); iter.hasNext();) {
+                Map.Entry<String, String> entry = iter.next();
                 if (entry.getValue().startsWith(fldName)) {
-                    final String value;
-                    if (null == listener) {
-                        value = getProperty(entry.getKey());
-                    } else {
-                        value = getProperty(entry.getKey(), listener);
-                    } // FIXME: this could have been overridden by some property
-                      // external to the requested folder.
+                    String value = null == listener ? getProperty(entry.getKey()) : getProperty(entry.getKey(), listener);
                     retval.put(entry.getKey(), value);
                 }
             }
