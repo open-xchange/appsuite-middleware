@@ -138,6 +138,7 @@ import com.openexchange.mail.api.ISimplifiedThreadStructure;
 import com.openexchange.mail.api.ISimplifiedThreadStructureEnhanced;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.api.crypto.CryptographicAwareMailAccessFactory;
 import com.openexchange.mail.api.unified.UnifiedFullName;
 import com.openexchange.mail.api.unified.UnifiedViewService;
 import com.openexchange.mail.cache.MailMessageCache;
@@ -261,6 +262,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     private MailAccount mailAccount;
     private final MailFields folderAndId;
     private final boolean checkParameters;
+    private final boolean doDecryption;
+    private final String cryptoAuthentication;
 
     /**
      * Initializes a new {@link MailServletInterfaceImpl}.
@@ -268,6 +271,18 @@ final class MailServletInterfaceImpl extends MailServletInterface {
      * @throws OXException If user has no mail access or properties cannot be successfully loaded
      */
     MailServletInterfaceImpl(Session session) throws OXException {
+        this(session, false, null);
+    }
+
+    /**
+     * Initializes a new {@link MailServletInterfaceImpl}.
+     *
+     * @param session The session
+     * @param doDecryption True in order to perform email decryption, false to use the raw messages.
+     * @param cryptoAuthentication Authentication for decrypting emails.
+     * @throws OXException If user has no mail access or properties cannot be successfully loaded
+     */
+    MailServletInterfaceImpl(Session session, boolean doDecryption, String cryptoAuthentication) throws OXException {
         super();
         warnings = new ArrayList<>(2);
         mailImportResults = new ArrayList<>();
@@ -290,6 +305,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         contextId = session.getContextId();
         folderAndId = new MailFields(MailField.ID, MailField.FOLDER_ID);
         checkParameters = false;
+        this.doDecryption = doDecryption;
+        this.cryptoAuthentication = cryptoAuthentication;
     }
 
     @Override
@@ -2930,6 +2947,20 @@ final class MailServletInterfaceImpl extends MailServletInterface {
          * Fetch a mail access (either from cache or a new instance)
          */
         MailAccess<?, ?> mailAccess = null == access ? MailAccess.getInstance(session, accountId) : access;
+
+        /**
+         *  Decorate the MailAccess with crypto functionality
+         */
+        if(doDecryption) {
+            CryptographicAwareMailAccessFactory cryptoMailAccessFactory = Services.getServiceLookup().getOptionalService(CryptographicAwareMailAccessFactory.class);
+            if(cryptoMailAccessFactory != null) {
+                mailAccess = cryptoMailAccessFactory.createAccess(
+                    (MailAccess<IMailFolderStorage, IMailMessageStorage>) mailAccess,
+                    session,
+                    cryptoAuthentication /* might be null in order to let the impl. obtain the authentication*/);
+            }
+        }
+
         if (!mailAccess.isConnected()) {
             /*
              * Get new mail configuration

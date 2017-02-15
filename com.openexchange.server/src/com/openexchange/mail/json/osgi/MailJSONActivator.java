@@ -99,6 +99,7 @@ import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.jslob.ConfigTreeEquivalent;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.api.crypto.CryptographicAwareMailAccessFactory;
 import com.openexchange.mail.attachment.storage.DefaultMailAttachmentStorage;
 import com.openexchange.mail.attachment.storage.DefaultMailAttachmentStorageRegistry;
 import com.openexchange.mail.attachment.storage.MailAttachmentStorage;
@@ -161,7 +162,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getOptionalServices() {
-        return new Class<?>[] { MailCategoriesConfigService.class, CapabilityService.class, CryptographicServiceAuthenticationFactory.class, EncryptedMailService.class, PGPMailRecognizer.class };
+        return new Class<?>[] { MailCategoriesConfigService.class, CapabilityService.class, CryptographicServiceAuthenticationFactory.class, CryptographicAwareMailAccessFactory.class, EncryptedMailService.class, PGPMailRecognizer.class };
     }
 
     @Override
