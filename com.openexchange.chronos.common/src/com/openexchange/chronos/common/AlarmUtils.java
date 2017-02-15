@@ -330,7 +330,6 @@ public class AlarmUtils extends CalendarUtils {
         long seconds = unit.toSeconds(duration);
         if (0 < seconds) {
             stringBuilder.append(seconds).append('S');
-            duration -= unit.convert(seconds, TimeUnit.SECONDS);
         }
         return stringBuilder.toString();
     }
