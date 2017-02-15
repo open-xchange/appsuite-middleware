@@ -96,19 +96,20 @@ public final class GetMultipleMessagesAction extends AbstractMailAction {
 
     @Override
     protected AJAXRequestResult perform(final MailRequest req) throws OXException, JSONException {
-        final List<IdFolderPair> pairs;
+        List<IdFolderPair> pairs;
+
         // Parse pairs
         {
-            final String value = req.getParameter("body");
+            String value = req.getParameter("body");
             if (isEmpty(value)) {
-                final String folderPath = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
-                final String[] ids;
+                String folderPath = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
+                String[] ids;
                 {
-                    final String parameterId = AJAXServlet.PARAMETER_ID;
-                    final String sIds = req.getParameter(parameterId);
+                    String parameterId = AJAXServlet.PARAMETER_ID;
+                    String sIds = req.getParameter(parameterId);
                     if (null == sIds) {
-                        final JSONArray jArray = (JSONArray) req.getRequest().requireData();
-                        final int length = jArray.length();
+                        JSONArray jArray = (JSONArray) req.getRequest().requireData();
+                        int length = jArray.length();
                         ids = new String[length];
                         for (int i = 0; i < length; i++) {
                             ids[i] = jArray.getJSONObject(i).getString(parameterId);
@@ -122,47 +123,54 @@ public final class GetMultipleMessagesAction extends AbstractMailAction {
                     pairs.add(new IdFolderPair(ids[i], folderPath));
                 }
             } else {
-                final JSONArray jsonArray = new JSONArray(value);
-                final int len = jsonArray.length();
+                JSONArray jsonArray = new JSONArray(value);
+                int len = jsonArray.length();
                 pairs = new ArrayList<IdFolderPair>(len);
                 for (int i = 0; i < len; i++) {
-                    final JSONObject tuple = jsonArray.getJSONObject(i);
+                    JSONObject tuple = jsonArray.getJSONObject(i);
                     // Identifier
-                    final String id = tuple.getString(DataFields.ID);
+                    String id = tuple.getString(DataFields.ID);
                     // Folder
                     String folderId = tuple.optString(FolderChildFields.FOLDER_ID, null);
                     if (null == folderId) {
                         folderId = tuple.optString(AJAXServlet.PARAMETER_FOLDERID, null);
                     }
-                    final IdFolderPair pair = new IdFolderPair(id, folderId);
+                    IdFolderPair pair = new IdFolderPair(id, folderId);
                     pairs.add(pair);
                 }
             }
         }
 
-        // Do it...
+        // Sort them
         Collections.sort(pairs);
-        AJAXRequestData ajaxRequestData = req.getRequest();
 
+        // Do it...
+        AJAXRequestData ajaxRequestData = req.getRequest();
         if (ajaxRequestData.setResponseHeader("Content-Type", "application/zip")) {
-            // Write directly...
-            // Set HTTP response headers
+            // Write directly... set HTTP response headers
             {
-                final StringBuilder sb = new StringBuilder(512);
+                StringBuilder sb = new StringBuilder(512);
                 sb.append("attachment");
                 DownloadUtility.appendFilenameParameter("mails.zip", "application/zip", ajaxRequestData.getUserAgent(), sb);
                 ajaxRequestData.setResponseHeader("Content-Disposition", sb.toString());
             }
 
-            performMultipleFolder(req, pairs, ajaxRequestData, null);
-            return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(AJAXRequestResult.ResultType.DIRECT);
+            try {
+                performMultipleFolder(req, pairs, ajaxRequestData.optOutputStream());
+                return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(AJAXRequestResult.ResultType.DIRECT);
+            } catch (IOException e) {
+                if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
+                    throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+                }
+                throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+            }
         }
 
         // Store to .tmp folder
         ThresholdFileHolder thresholdFileHolder = new ThresholdFileHolder();
         boolean error = true;
         try {
-            performMultipleFolder(req, pairs, null, thresholdFileHolder.asOutputStream());
+            performMultipleFolder(req, pairs, thresholdFileHolder.asOutputStream());
             error = false;
         } finally {
             // Close on error
@@ -180,7 +188,7 @@ public final class GetMultipleMessagesAction extends AbstractMailAction {
         return new AJAXRequestResult(thresholdFileHolder, "file");
     }
 
-    private void performMultipleFolder(MailRequest req, List<IdFolderPair> pairs, AJAXRequestData ajaxRequestData, OutputStream stream) throws OXException {
+    private void performMultipleFolder(MailRequest req, List<IdFolderPair> pairs, OutputStream stream) throws OXException {
         final MailServletInterface mailInterface = getMailInterface(req);
 
         // Initialize ZIP'ing
@@ -194,52 +202,55 @@ public final class GetMultipleMessagesAction extends AbstractMailAction {
                 final IdFolderPair pair = pairs.get(i);
                 final MailMessage message = mailInterface.getMessage(pair.folderId, pair.identifier, false);
                 if (null != message) {
-                    // Add ZIP entry to output stream
-                    final String subject = message.getSubject();
-                    String name = (isEmpty(subject) ? "mail" + (i + 1) : MailServletInterface.saneForFileName(subject)) + ext;
-                    final int reslen = name.lastIndexOf('.');
-                    int count = 1;
-                    while (false == names.add(name)) {
-                        // Name already contained
-                        name = name.substring(0, reslen);
-                        name = new StringBuilder(name).append("_(").append(count++).append(')').append(ext).toString();
+                    // Initialize ZIP output stream (if not already done)
+                    if (zipOutput == null) {
+                        zipOutput = new ZipArchiveOutputStream(stream);
+                        zipOutput.setEncoding("UTF-8");
+                        zipOutput.setUseLanguageEncodingFlag(true);
                     }
-                    ZipArchiveEntry entry;
-                    int num = 1;
-                    while (true) {
-                        try {
-                            final int pos = name.indexOf(ext);
-                            final String entryName = name.substring(0, pos) + (num > 1 ? "_(" + num + ")" : "") + ext;
-                            entry = new ZipArchiveEntry(entryName);
-                            if(zipOutput==null){
-                                if (ajaxRequestData != null) {
-                                    zipOutput = new ZipArchiveOutputStream(ajaxRequestData.optOutputStream());
-                                } else {
-                                    zipOutput = new ZipArchiveOutputStream(stream);
-                                }
-                            }
-                            zipOutput.setEncoding("UTF-8");
-                            zipOutput.setUseLanguageEncodingFlag(true);
-                            zipOutput.putArchiveEntry(entry);
-                            break;
-                        } catch (final java.util.zip.ZipException e) {
-                            final String eMessage = e.getMessage();
-                            if (eMessage == null || !eMessage.startsWith("duplicate entry")) {
-                                throw e;
-                            }
-                            num++;
+
+                    // Determine proper name for message-associated entry
+                    String name;
+                    {
+                        String subject = message.getSubject();
+                        name = (isEmpty(subject) ? "mail" + (i + 1) : MailServletInterface.saneForFileName(subject)) + ext;
+                        int reslen = name.lastIndexOf('.');
+                        int count = 1;
+                        while (false == names.add(name)) {
+                            // Name already contained
+                            name = name.substring(0, reslen);
+                            name = new StringBuilder(name).append("_(").append(count++).append(')').append(ext).toString();
                         }
                     }
-                    /*
-                     * Transfer bytes from the message to the ZIP file
-                     */
-                    final long before = zipOutput.getBytesWritten();
+
+                    // Add ZIP entry to output stream
+                    ZipArchiveEntry entry;
+                    {
+                        int num = 1;
+                        while (true) {
+                            try {
+                                final int pos = name.indexOf(ext);
+                                final String entryName = name.substring(0, pos) + (num > 1 ? "_(" + num + ")" : "") + ext;
+                                entry = new ZipArchiveEntry(entryName);
+                                zipOutput.putArchiveEntry(entry);
+                                break;
+                            } catch (final java.util.zip.ZipException e) {
+                                final String eMessage = e.getMessage();
+                                if (eMessage == null || !eMessage.startsWith("duplicate entry")) {
+                                    throw e;
+                                }
+                                num++;
+                            }
+                        }
+                    }
+
+                    // Transfer bytes from the message to the ZIP stream
+                    long before = zipOutput.getBytesWritten();
                     message.writeTo(zipOutput);
-                    final long entrySize = zipOutput.getBytesWritten() - before;
+                    long entrySize = zipOutput.getBytesWritten() - before;
                     entry.setSize(entrySize);
-                    /*
-                     * Complete the entry
-                     */
+
+                    // Complete the entry
                     zipOutput.closeArchiveEntry();
                 }
             }
