@@ -210,7 +210,7 @@ public class DataParser {
     public byte[] getValueAsByteArray(final XmlPullParser parser) throws XmlPullParserException, IOException {
         final String s = parser.nextText();
 
-        if (s != null && s.length() == 0) {
+        if (s==null || s.length() == 0) {
             return null;
         }
         return s.getBytes();
