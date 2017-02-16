@@ -51,10 +51,14 @@ package com.openexchange.chronos.recurrence;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.SortedSet;
 import java.util.TimeZone;
+import java.util.TreeSet;
 import org.junit.After;
 import org.junit.Before;
 import com.openexchange.chronos.Event;
@@ -91,9 +95,9 @@ public abstract class RecurrenceServiceTest {
     protected void compareInstanceWithMaster(Event master, Event instance, Date start, Date end) {
         assertNotNull("Master must not be null.", master);
         assertNotNull("Instance must not be null", instance);
-        Event clone = master.clone();
+        Event clone = clone(master);
 
-        instance = instance.clone();
+        instance = clone(instance);
         instance.removeRecurrenceId();
         instance.removeRecurrenceRule();
 
@@ -104,14 +108,14 @@ public abstract class RecurrenceServiceTest {
         clone.setStartDate(start);
         clone.setEndDate(end);
 
-        boolean equals = clone.equals(instance);
+        boolean equals = equals(clone, instance);
         assertTrue("Not equal.", equals);
     }
 
     protected void compareChangeExceptionWithMaster(Event master, Event instance, Date recurrenceId, Date start, Date end) {
         assertNotNull("Master must not be null.", master);
         assertNotNull("Instance must not be null", instance);
-        Event clone = master.clone();
+        Event clone = clone(master);
 
         clone.removeId();
         clone.removeRecurrenceRule();
@@ -121,14 +125,14 @@ public abstract class RecurrenceServiceTest {
         clone.setStartDate(start);
         clone.setEndDate(end);
 
-        boolean equals = clone.equals(instance);
+        boolean equals = equals(clone, instance);
         assertTrue("Not equal.", equals);
     }
 
     protected void compareFullTimeChangeExceptionWithMaster(Event master, Event instance, Date recurrenceId, Date start, Date end) {
         assertNotNull("Master must not be null.", master);
         assertNotNull("Instance must not be null", instance);
-        Event clone = master.clone();
+        Event clone = clone(master);
 
         clone.removeId();
         clone.removeRecurrenceRule();
@@ -139,14 +143,14 @@ public abstract class RecurrenceServiceTest {
         clone.setEndDate(end);
         clone.setAllDay(true);
 
-        boolean equals = clone.equals(instance);
+        boolean equals = equals(clone, instance);
         assertTrue("Not equal.", equals);
     }
 
     protected void compareChangeExceptionWithFullTimeMaster(Event master, Event instance, Date recurrenceId, Date start, Date end) {
         assertNotNull("Master must not be null.", master);
         assertNotNull("Instance must not be null", instance);
-        Event clone = master.clone();
+        Event clone = clone(master);
 
         clone.removeId();
         clone.removeRecurrenceRule();
@@ -157,7 +161,7 @@ public abstract class RecurrenceServiceTest {
         clone.setEndDate(end);
         clone.removeAllDay();
 
-        boolean equals = clone.equals(instance);
+        boolean equals = equals(clone, instance);
         assertTrue("Not equal.", equals);
     }
 
@@ -191,7 +195,7 @@ public abstract class RecurrenceServiceTest {
     }
 
     protected Event getInstance(Event master, Date recurrenceId, Date start, Date end) {
-        Event instance = master.clone();
+        Event instance = clone(master);
         instance.removeId();
         instance.removeRecurrenceRule();
         instance.removeDeleteExceptionDates();
@@ -200,6 +204,256 @@ public abstract class RecurrenceServiceTest {
         instance.setStartDate(start);
         instance.setEndDate(end);
         return instance;
+    }
+
+    protected boolean equals(Event event, Event other) {
+        if (event == other)
+            return true;
+        if (event == null)
+            return null == other;
+        if (event.isAllDay() != other.isAllDay())
+            return false;
+        if (event.getAttachments() == null) {
+            if (other.getAttachments() != null)
+                return false;
+        } else if (!event.getAttachments().equals(other.getAttachments()))
+            return false;
+        if (event.getAttendees() == null) {
+            if (other.getAttendees() != null)
+                return false;
+        } else if (!event.getAttendees().equals(other.getAttendees()))
+            return false;
+        if (event.getCategories() == null) {
+            if (other.getCategories() != null)
+                return false;
+        } else if (!event.getCategories().equals(other.getCategories()))
+            return false;
+        if (event.getChangeExceptionDates() == null) {
+            if (other.getChangeExceptionDates() != null)
+                return false;
+        } else if (!event.getChangeExceptionDates().equals(other.getChangeExceptionDates()))
+            return false;
+        if (event.getClassification() != other.getClassification())
+            return false;
+        if (event.getColor() == null) {
+            if (other.getColor() != null)
+                return false;
+        } else if (!event.getColor().equals(other.getColor()))
+            return false;
+        if (event.getCreated() == null) {
+            if (other.getCreated() != null)
+                return false;
+        } else if (!event.getCreated().equals(other.getCreated()))
+            return false;
+        if (event.getCreatedBy() != other.getCreatedBy())
+            return false;
+        if (event.getDeleteExceptionDates() == null) {
+            if (other.getDeleteExceptionDates() != null)
+                return false;
+        } else if (!event.getDeleteExceptionDates().equals(other.getDeleteExceptionDates()))
+            return false;
+        if (event.getDescription() == null) {
+            if (other.getDescription() != null)
+                return false;
+        } else if (!event.getDescription().equals(other.getDescription()))
+            return false;
+        if (event.getEndDate() == null) {
+            if (other.getEndDate() != null)
+                return false;
+        } else if (!event.getEndDate().equals(other.getEndDate()))
+            return false;
+        if (event.getEndTimeZone() == null) {
+            if (other.getEndTimeZone() != null)
+                return false;
+        } else if (!event.getEndTimeZone().equals(other.getEndTimeZone()))
+            return false;
+        if (event.getFilename() == null) {
+            if (other.getFilename() != null)
+                return false;
+        } else if (!event.getFilename().equals(other.getFilename()))
+            return false;
+        if (event.getId() != other.getId())
+            return false;
+        if (event.getLastModified() == null) {
+            if (other.getLastModified() != null)
+                return false;
+        } else if (!event.getLastModified().equals(other.getLastModified()))
+            return false;
+        if (event.getLocation() == null) {
+            if (other.getLocation() != null)
+                return false;
+        } else if (!event.getLocation().equals(other.getLocation()))
+            return false;
+        if (event.getModifiedBy() != other.getModifiedBy())
+            return false;
+        if (event.getOrganizer() == null) {
+            if (other.getOrganizer() != null)
+                return false;
+        } else if (!event.getOrganizer().equals(other.getOrganizer()))
+            return false;
+        if (event.getPublicFolderId() != other.getPublicFolderId())
+            return false;
+        if (event.getRecurrenceId() == null) {
+            if (other.getRecurrenceId() != null)
+                return false;
+        } else if (!event.getRecurrenceId().equals(other.getRecurrenceId()))
+            return false;
+        if (event.getRecurrenceRule() == null) {
+            if (other.getRecurrenceRule() != null)
+                return false;
+        } else if (!event.getRecurrenceRule().equals(other.getRecurrenceRule()))
+            return false;
+        if (event.getSequence() != other.getSequence())
+            return false;
+        if (event.getSeriesId() != other.getSeriesId())
+            return false;
+        if (event.getStartDate() == null) {
+            if (other.getStartDate() != null)
+                return false;
+        } else if (!event.getStartDate().equals(other.getStartDate()))
+            return false;
+        if (event.getStartTimeZone() == null) {
+            if (other.getStartTimeZone() != null)
+                return false;
+        } else if (!event.getStartTimeZone().equals(other.getStartTimeZone()))
+            return false;
+        if (event.getStatus() != other.getStatus())
+            return false;
+        if (event.getSummary() == null) {
+            if (other.getSummary() != null)
+                return false;
+        } else if (!event.getSummary().equals(other.getSummary()))
+            return false;
+        if (event.getTransp() == null) {
+            if (other.getTransp() != null)
+                return false;
+        } else if (!event.getTransp().equals(other.getTransp()))
+            return false;
+        if (event.getUid() == null) {
+            if (other.getUid() != null)
+                return false;
+        } else if (!event.getUid().equals(other.getUid()))
+            return false;
+        return true;
+    }
+
+    protected Event clone(Event event) {
+        Event clone = new Event();
+        if (event.containsAllDay()) {
+            clone.setAllDay(event.getAllDay());
+        }
+        if (event.containsAttachments()) {
+            clone.setAttachments(cloneList(event.getAttachments()));
+        }
+        if (event.containsAttendees()) {
+            clone.setAttendees(cloneList(event.getAttendees()));
+        }
+        if (event.containsAlarms()) {
+            clone.setAlarms(cloneList(event.getAlarms()));
+        }
+        if (event.containsCategories()) {
+            clone.setCategories(cloneList(event.getCategories()));
+        }
+        if (event.containsChangeExceptionDates()) {
+            clone.setChangeExceptionDates(cloneSet(event.getChangeExceptionDates()));
+        }
+        if (event.containsClassification()) {
+            clone.setClassification(event.getClassification());
+        }
+        if (event.containsColor()) {
+            clone.setColor(event.getColor());
+        }
+        if (event.containsCreated()) {
+            clone.setCreated(event.getCreated());
+        }
+        if (event.containsCreatedBy()) {
+            clone.setCreatedBy(event.getCreatedBy());
+        }
+        if (event.containsDeleteExceptionDates()) {
+            clone.setDeleteExceptionDates(cloneSet(event.getDeleteExceptionDates()));
+        }
+        if (event.containsDescription()) {
+            clone.setDescription(event.getDescription());
+        }
+        if (event.containsEndDate()) {
+            clone.setEndDate(event.getEndDate());
+        }
+        if (event.containsEndTimeZone()) {
+            clone.setEndTimeZone(event.getEndTimeZone());
+        }
+        if (event.containsFilename()) {
+            clone.setFilename(event.getFilename());
+        }
+        if (event.containsFolderId()) {
+            clone.setFolderId(event.getFolderId());
+        }
+        if (event.containsId()) {
+            clone.setId(event.getId());
+        }
+        if (event.containsLastModified()) {
+            clone.setLastModified(event.getLastModified());
+        }
+        if (event.containsLocation()) {
+            clone.setLocation(event.getLocation());
+        }
+        if (event.containsModifiedBy()) {
+            clone.setModifiedBy(event.getModifiedBy());
+        }
+        if (event.containsOrganizer()) {
+            clone.setOrganizer(event.getOrganizer());
+        }
+        if (event.containsPublicFolderId()) {
+            clone.setPublicFolderId(event.getPublicFolderId());
+        }
+        if (event.containsRecurrenceId()) {
+            clone.setRecurrenceId(event.getRecurrenceId());
+        }
+        if (event.containsRecurrenceRule()) {
+            clone.setRecurrenceRule(event.getRecurrenceRule());
+        }
+        if (event.containsSequence()) {
+            clone.setSequence(event.getSequence());
+        }
+        if (event.containsSeriesId()) {
+            clone.setSeriesId(event.getSeriesId());
+        }
+        if (event.containsStartDate()) {
+            clone.setStartDate(event.getStartDate());
+        }
+        if (event.containsStartTimeZone()) {
+            clone.setStartTimeZone(event.getStartTimeZone());
+        }
+        if (event.containsStatus()) {
+            clone.setStatus(event.getStatus());
+        }
+        if (event.containsSummary()) {
+            clone.setSummary(event.getSummary());
+        }
+        if (event.containsTransp()) {
+            clone.setTransp(event.getTransp());
+        }
+        if (event.containsUid()) {
+            clone.setUid(event.getUid());
+        }
+        return clone;
+    }
+
+    private <T> List<T> cloneList(List<T> list) {
+        if (null == list) {
+            return null;
+        }
+        List<T> retval = new ArrayList<T>();
+        retval.addAll(list);
+        return retval;
+    }
+
+    private <T> SortedSet<T> cloneSet(SortedSet<T> list) {
+        if (null == list) {
+            return null;
+        }
+        SortedSet<T> retval = new TreeSet<T>();
+        retval.addAll(list);
+        return retval;
     }
 
 }
