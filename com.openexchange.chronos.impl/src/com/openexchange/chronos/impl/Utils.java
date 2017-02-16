@@ -279,11 +279,9 @@ public class Utils {
     public static CompositeSearchTerm appendTimeRangeTerms(CalendarSession session, CompositeSearchTerm searchTerm) {
         Date from = getFrom(session);
         if (null != from) {
-            boolean inclusiveFrom = false; // TODO: https://tools.ietf.org/html/rfc4791#section-9.9
-            SingleOperation comparisonOperation = inclusiveFrom ? SingleOperation.GREATER_OR_EQUAL : SingleOperation.GREATER_THAN;
             if (session.getConfig().isIgnoreSeriesPastCalculationLimit()) {
                 searchTerm.addSearchTerm(new CompositeSearchTerm(CompositeOperation.OR)
-                    .addSearchTerm(getSearchTerm(EventField.END_DATE, comparisonOperation, from))
+                    .addSearchTerm(getSearchTerm(EventField.END_DATE, SingleOperation.GREATER_THAN, from))
                     .addSearchTerm(new CompositeSearchTerm(CompositeOperation.AND)
                         .addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID)))
                         .addSearchTerm(new CompositeSearchTerm(CompositeOperation.NOT)
@@ -292,7 +290,7 @@ public class Utils {
                     )
                 );
             } else {
-                searchTerm.addSearchTerm(getSearchTerm(EventField.END_DATE, comparisonOperation, from));
+                searchTerm.addSearchTerm(getSearchTerm(EventField.END_DATE, SingleOperation.GREATER_THAN, from));
             }
         }
         Date until = getUntil(session);
