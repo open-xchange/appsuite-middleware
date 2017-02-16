@@ -93,7 +93,8 @@ public class EventUpdateImpl extends DefaultItemUpdate<Event, EventField> implem
             null != originalEvent ? originalEvent.getAlarms() : null, null != updatedEvent ? updatedEvent.getAlarms() : null);
         this.attendeeUpdates = AttendeeMapper.getInstance().getAttendeeUpdate(
             null != originalEvent ? originalEvent.getAttendees() : null, null != updatedEvent ? updatedEvent.getAttendees() : null);
-        this.attachmentUpdates = Utils.getAttachmentUpdates(originalEvent.getAttachments(), updatedEvent.getAttachments());
+        this.attachmentUpdates = Utils.getAttachmentUpdates(
+            null != originalEvent ? originalEvent.getAttachments() : null, null != updatedEvent ? updatedEvent.getAttachments() : null);
     }
 
     @Override
