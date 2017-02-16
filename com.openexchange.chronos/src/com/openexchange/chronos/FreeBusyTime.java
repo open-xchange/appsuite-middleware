@@ -152,6 +152,45 @@ public class FreeBusyTime implements Comparable<FreeBusyTime> {
     }
 
     @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((endTime == null) ? 0 : endTime.hashCode());
+        result = prime * result + ((fbType == null || fbType.getValue() == null) ? 0 : fbType.getValue().hashCode());
+        result = prime * result + ((startTime == null) ? 0 : startTime.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        FreeBusyTime other = (FreeBusyTime) obj;
+        if (endTime == null) {
+            if (other.endTime != null)
+                return false;
+        } else if (!endTime.equals(other.endTime))
+            return false;
+        String fbTypeValue = null == fbType ? null : fbType.getValue();
+        String otherFbTypeValue = null == other.fbType ? null : other.fbType.getValue();
+        if (fbTypeValue == null) {
+            if (otherFbTypeValue != null)
+                return false;
+        } else if (!fbTypeValue.equals(otherFbTypeValue))
+            return false;
+        if (startTime == null) {
+            if (other.startTime != null)
+                return false;
+        } else if (!startTime.equals(other.startTime))
+            return false;
+        return true;
+    }
+
+    @Override
     public String toString() {
         return "FreeBusyTime [fbType=" + fbType + ", startTime=" + startTime + ", endTime=" + endTime + "]";
     }
