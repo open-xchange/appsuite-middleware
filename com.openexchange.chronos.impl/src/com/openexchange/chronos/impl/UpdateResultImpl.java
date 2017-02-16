@@ -49,17 +49,8 @@
 
 package com.openexchange.chronos.impl;
 
-import java.util.Set;
-import com.openexchange.chronos.Alarm;
-import com.openexchange.chronos.AlarmField;
-import com.openexchange.chronos.Attachment;
-import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.service.CollectionUpdate;
-import com.openexchange.chronos.service.ItemUpdate;
-import com.openexchange.chronos.service.SimpleCollectionUpdate;
 import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.exception.OXException;
 
@@ -69,12 +60,7 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class UpdateResultImpl implements UpdateResult {
-
-    private final ItemUpdate<Event, EventField> itemUpdate;
-    private final CollectionUpdate<Alarm, AlarmField> alarmUpdates;
-    private final CollectionUpdate<Attendee, AttendeeField> attendeeUpdates;
-    private final SimpleCollectionUpdate<Attachment> attachmentUpdates;
+public class UpdateResultImpl extends EventUpdateImpl implements UpdateResult {
 
     /**
      * Initializes a new {@link UpdateResultImpl}.
@@ -83,48 +69,7 @@ public class UpdateResultImpl implements UpdateResult {
      * @param updatedEvent The updated event
      */
     public UpdateResultImpl(Event originalEvent, Event updatedEvent) throws OXException {
-        super();
-        this.itemUpdate = new DefaultItemUpdate<Event, EventField>(EventMapper.getInstance(), originalEvent, updatedEvent);
-        this.alarmUpdates = AlarmMapper.getInstance().getAlarmUpdate(
-            null != originalEvent ? originalEvent.getAlarms() : null, null != updatedEvent ? updatedEvent.getAlarms() : null);
-        this.attendeeUpdates = AttendeeMapper.getInstance().getAttendeeUpdate(
-            null != originalEvent ? originalEvent.getAttendees() : null, null != updatedEvent ? updatedEvent.getAttendees() : null);
-        this.attachmentUpdates = Utils.getAttachmentUpdates(originalEvent.getAttachments(), updatedEvent.getAttachments());
-    }
-
-    @Override
-    public CollectionUpdate<Attendee, AttendeeField> getAttendeeUpdates() {
-        return attendeeUpdates;
-    }
-
-    @Override
-    public CollectionUpdate<Alarm, AlarmField> getAlarmUpdates() {
-        return alarmUpdates;
-    }
-
-    @Override
-    public SimpleCollectionUpdate<Attachment> getAttachmentUpdates() {
-        return attachmentUpdates;
-    }
-
-    @Override
-    public Event getOriginal() {
-        return itemUpdate.getOriginal();
-    }
-
-    @Override
-    public Event getUpdate() {
-        return itemUpdate.getUpdate();
-    }
-
-    @Override
-    public Set<EventField> getUpdatedFields() {
-        return itemUpdate.getUpdatedFields();
-    }
-
-    @Override
-    public boolean containsAnyChangeOf(EventField[] fields) {
-        return itemUpdate.containsAnyChangeOf(fields);
+        super(originalEvent, updatedEvent, true, (EventField[]) null);
     }
 
 }
