@@ -53,12 +53,18 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.List;
+import java.util.Map;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -102,9 +108,33 @@ public class GetSSLWebSite implements AJAXActionService {
             httpConnection = httpsConnection;
 
             httpConnection.connect();
-        } catch (IOException e) {
-            throw new OXException(e);
+            return new AJAXRequestResult(parseHeaderFields(httpConnection.getHeaderFields()));
+        } catch (IOException | JSONException e) {
+            throw new OXException(1138, "An unexpected error occurred", e);
         }
-        return new AJAXRequestResult();
+    }
+
+    /**
+     * Parse the header fields
+     * 
+     * @param map The header fields as {@link Map}
+     * @return A {@link JSONObject} with all header fields
+     * @throws JSONException If a JSON parsing error occurs
+     */
+    private JSONObject parseHeaderFields(Map<String, List<String>> map) throws JSONException {
+        JSONObject json = new JSONObject();
+        for (String key : map.keySet()) {
+            List<String> list = map.get(key);
+            JSONArray array = new JSONArray(list.size());
+            for (String entry : list) {
+                array.put(entry);
+            }
+            if (Strings.isEmpty(key)) {
+                json.put("responseMessage", array);
+            } else {
+                json.put(key, array);
+            }
+        }
+        return json;
     }
 }
