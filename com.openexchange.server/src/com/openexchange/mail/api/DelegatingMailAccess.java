@@ -153,4 +153,21 @@ public abstract class DelegatingMailAccess extends MailAccess<IMailFolderStorage
     protected void shutdown() throws OXException {
         delegate.shutdown();
     }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.mail.api.MailAccess#getMailConfig()
+     */
+    @Override
+    public MailConfig getMailConfig() throws OXException {
+
+        //Workaround for Bug #51721: Overriding this non abstract method for proper delegation.
+
+        //TODO/FIXME:
+        //If this class does not overwrite all public methods of MailAccess,
+        //calls to this methods result in calling the super implementation of MailAccess,
+        //but not the delegate's overwritten method.
+        //Create proper interface?
+
+        return delegate.getMailConfig();
+    }
 }
