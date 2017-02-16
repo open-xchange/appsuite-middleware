@@ -53,6 +53,9 @@ import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
 import static com.openexchange.chronos.common.CalendarUtils.isFloating;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
+import static com.openexchange.chronos.compat.Appointment2Event.getRecurrenceData;
+import static com.openexchange.chronos.compat.Appointment2Event.getRecurrenceID;
+import static com.openexchange.chronos.compat.Appointment2Event.getRecurrenceIDs;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -69,7 +72,6 @@ import com.openexchange.chronos.Period;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
-import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.compat.PositionAwareRecurrenceId;
 import com.openexchange.chronos.compat.SeriesPattern;
@@ -117,38 +119,41 @@ public class Compat {
              * convert legacy series pattern into proper recurrence rule
              */
             SeriesPattern seriesPattern = new SeriesPattern(databasePattern);
-            RecurrenceData recurrenceData = Appointment2Event.getRecurrenceData(seriesPattern, timeZone, event.isAllDay());
-            if (isSeriesMaster(event)) {
-                /*
-                 * apply recurrence rule & adjust the recurrence master's actual start- and enddate
-                 */
-                event.setRecurrenceRule(recurrenceData.getRecurrenceRule());
-                Period seriesPeriod = new Period(event);
-                Period masterPeriod = getRecurrenceMasterPeriod(seriesPeriod, absoluteDuration);
-                event.setStartDate(masterPeriod.getStartDate());
-                event.setEndDate(masterPeriod.getEndDate());
-                /*
-                 * transform legacy "recurrence date positions" for exceptions to recurrence ids
-                 */
-                if (event.containsDeleteExceptionDates() && null != event.getDeleteExceptionDates()) {
-                    event.setDeleteExceptionDates(Appointment2Event.getRecurrenceIDs(Services.getService(RecurrenceService.class), recurrenceData, getDates(event.getDeleteExceptionDates())));
-                }
-                if (event.containsChangeExceptionDates() && null != event.getChangeExceptionDates()) {
-                    event.setChangeExceptionDates(Appointment2Event.getRecurrenceIDs(Services.getService(RecurrenceService.class), recurrenceData, getDates(event.getChangeExceptionDates())));
-                }
-            } else if (isSeriesException(event)) {
-                /*
-                 * drop recurrence information for change exceptions
-                 */
-                event.removeRecurrenceRule();
-                /*
-                 * transform change exception's legacy "recurrence date position" to recurrence id & apply actual recurrence id
-                 */
-                if (event.containsRecurrenceId() && null != event.getRecurrenceId() && StoredRecurrenceId.class.isInstance(event.getRecurrenceId())) {
-                    event.setRecurrenceId(Appointment2Event.getRecurrenceID(Services.getService(RecurrenceService.class), recurrenceData, ((StoredRecurrenceId) event.getRecurrenceId()).getRecurrencePosition()));
-                }
-                if (event.containsChangeExceptionDates() && null != event.getChangeExceptionDates()) {
-                    event.setChangeExceptionDates(Appointment2Event.getRecurrenceIDs(Services.getService(RecurrenceService.class), recurrenceData, getDates(event.getChangeExceptionDates())));
+            RecurrenceData recurrenceData = getRecurrenceData(seriesPattern, timeZone, event.isAllDay());
+            if (null != recurrenceData) {
+                if (isSeriesMaster(event)) {
+                    /*
+                     * apply recurrence rule & adjust the recurrence master's actual start- and enddate
+                     */
+                    event.setRecurrenceRule(recurrenceData.getRecurrenceRule());
+                    Period seriesPeriod = new Period(event);
+                    Period masterPeriod = getRecurrenceMasterPeriod(seriesPeriod, absoluteDuration);
+                    event.setStartDate(masterPeriod.getStartDate());
+                    event.setEndDate(masterPeriod.getEndDate());
+                    /*
+                     * transform legacy "recurrence date positions" for exceptions to recurrence ids
+                     */
+                    if (event.containsDeleteExceptionDates() && null != event.getDeleteExceptionDates()) {
+                        event.setDeleteExceptionDates(getRecurrenceIDs(Services.getService(RecurrenceService.class), recurrenceData, getDates(event.getDeleteExceptionDates())));
+                    }
+                    if (event.containsChangeExceptionDates() && null != event.getChangeExceptionDates()) {
+                        event.setChangeExceptionDates(getRecurrenceIDs(Services.getService(RecurrenceService.class), recurrenceData, getDates(event.getChangeExceptionDates())));
+                    }
+                } else if (isSeriesException(event)) {
+                    /*
+                     * drop recurrence information for change exceptions
+                     */
+                    event.removeRecurrenceRule();
+                    /*
+                     * transform change exception's legacy "recurrence date position" to recurrence id & apply actual recurrence id
+                     */
+                    if (event.containsRecurrenceId() && null != event.getRecurrenceId() && StoredRecurrenceId.class.isInstance(event.getRecurrenceId())) {
+                        int recurrencePosition = ((StoredRecurrenceId) event.getRecurrenceId()).getRecurrencePosition();
+                        event.setRecurrenceId(getRecurrenceID(Services.getService(RecurrenceService.class), recurrenceData, recurrencePosition));
+                    }
+                    if (event.containsChangeExceptionDates() && null != event.getChangeExceptionDates()) {
+                        event.setChangeExceptionDates(getRecurrenceIDs(Services.getService(RecurrenceService.class), recurrenceData, getDates(event.getChangeExceptionDates())));
+                    }
                 }
             }
         }
