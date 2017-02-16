@@ -100,12 +100,19 @@ public class DateTestCommandParser implements CommandParser<TestCommand> {
     public TestCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException {
         String commandName = Commands.DATE.getCommandName();
         final List<Object> argList = new ArrayList<Object>();
-        // add the zone tag
-        if (session != null && session.getUser().getTimeZone() != null) {
-            argList.add(ArgumentUtil.createTagArgument("zone"));
-            TimeZone tZone = TimeZone.getTimeZone(session.getUser().getTimeZone());
-            String zone = String.format("%+03d%02d", tZone.getRawOffset() / 3600000, Math.abs((tZone.getRawOffset() / 60000) % 60));
-            argList.add(CommandParserJSONUtil.stringToList(zone));
+
+        if(jsonObject.has(DateTestField.zone.name())){
+           argList.add(ArgumentUtil.createTagArgument("zone"));
+           String zone = CommandParserJSONUtil.getString(jsonObject, DateTestField.zone.name(), commandName);
+           argList.add(CommandParserJSONUtil.stringToList(zone));
+        } else {
+            // add the zone tag
+            if (session != null && session.getUser().getTimeZone() != null) {
+                argList.add(ArgumentUtil.createTagArgument("zone"));
+                TimeZone tZone = TimeZone.getTimeZone(session.getUser().getTimeZone());
+                String zone = String.format("%+03d%02d", tZone.getRawOffset() / 3600000, Math.abs((tZone.getRawOffset() / 60000) % 60));
+                argList.add(CommandParserJSONUtil.stringToList(zone));
+            }
         }
 
         // Parse the comparison tag
