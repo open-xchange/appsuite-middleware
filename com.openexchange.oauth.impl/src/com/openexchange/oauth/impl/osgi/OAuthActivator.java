@@ -67,6 +67,7 @@ import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.oauth.CallbackRegistry;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthAccountInvalidationListener;
+import com.openexchange.oauth.OAuthAccountReauthorizedListener;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
@@ -77,6 +78,7 @@ import com.openexchange.oauth.impl.internal.CallbackRegistryImpl;
 import com.openexchange.oauth.impl.internal.DeleteListenerRegistry;
 import com.openexchange.oauth.impl.internal.InvalidationListenerRegistry;
 import com.openexchange.oauth.impl.internal.OAuthServiceImpl;
+import com.openexchange.oauth.impl.internal.ReauthorizeListenerRegistry;
 import com.openexchange.oauth.impl.scope.impl.OAuthScopeRegistryImpl;
 import com.openexchange.oauth.impl.services.Services;
 import com.openexchange.oauth.scope.OAuthScopeRegistry;
@@ -126,6 +128,7 @@ public final class OAuthActivator extends HousekeepingActivator {
 
             DeleteListenerRegistry.initInstance();
             InvalidationListenerRegistry.initInstance();
+            ReauthorizeListenerRegistry.initInstance();
             /*
              * Collect OAuth services
              */
@@ -146,6 +149,7 @@ public final class OAuthActivator extends HousekeepingActivator {
              * Start other trackers
              */
             track(OAuthAccountDeleteListener.class, new DeleteListenerServiceTracker(context));
+            track(OAuthAccountReauthorizedListener.class, new ReauthorizeListenerServiceTracker(context));
             track(OAuthAccountInvalidationListener.class, new InvalidationListenerServiceTracker(context));
             trackService(HtmlService.class);
             trackService(DeferringURLService.class);
@@ -246,6 +250,7 @@ public final class OAuthActivator extends HousekeepingActivator {
                 accessRegistryService.clear();
             }
 
+            ReauthorizeListenerRegistry.releaseInstance();
             DeleteListenerRegistry.releaseInstance();
             OSGiMetaDataRegistry.releaseInstance();
             Services.setServiceLookup(null);

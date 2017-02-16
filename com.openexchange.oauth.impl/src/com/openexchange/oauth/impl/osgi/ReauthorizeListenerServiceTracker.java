@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,62 +47,57 @@
  *
  */
 
-package com.openexchange.mailaccount.internal;
+package com.openexchange.oauth.impl.osgi;
 
-import java.sql.Connection;
-import java.util.Collections;
-import java.util.Map;
-import com.openexchange.exception.OXException;
-import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.oauth.OAuthAccountDeleteListener;
-import com.openexchange.server.services.ServerServiceRegistry;
-
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.oauth.OAuthAccountReauthorizedListener;
+import com.openexchange.oauth.impl.internal.ReauthorizeListenerRegistry;
 
 /**
- * {@link MailAccountOAuthAccountDeleteListener}
+ * {@link ReauthorizeListenerServiceTracker} - The {@link ServiceTrackerCustomizer} for OAuth account delete listeners.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.3
  */
-public class MailAccountOAuthAccountDeleteListener extends MailAccountOAuthAccountListener implements OAuthAccountDeleteListener {
+public final class ReauthorizeListenerServiceTracker implements ServiceTrackerCustomizer<OAuthAccountReauthorizedListener,OAuthAccountReauthorizedListener> {
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ReauthorizeListenerServiceTracker.class);
+
+    private final BundleContext context;
 
     /**
-     * Initializes a new {@link MailAccountOAuthAccountDeleteListener}.
+     * Initializes a new {@link ReauthorizeListenerServiceTracker}.
      */
-    public MailAccountOAuthAccountDeleteListener() {
+    public ReauthorizeListenerServiceTracker(final BundleContext context) {
         super();
+        this.context = context;
     }
 
     @Override
-    public void onBeforeOAuthAccountDeletion(int oauthAccountId, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
-        // Ignore
+    public OAuthAccountReauthorizedListener addingService(final ServiceReference<OAuthAccountReauthorizedListener> reference) {
+        final OAuthAccountReauthorizedListener listener = context.getService(reference);
+        if (ReauthorizeListenerRegistry.getInstance().addReauthorizeListener(listener)) {
+            return listener;
+        }
+        LOG.warn("Duplicate re-authorize listener \"{}\" is not added to registry.", listener.getClass().getName());
+        // This service needs not to be tracked, thus return null
+        context.ungetService(reference);
+        return null;
     }
 
     @Override
-    public void onAfterOAuthAccountDeletion(int oauthAccountId, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
-        MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
-        if (null != mass) {
-            MailAccount[] userMailAccounts = mass.getUserMailAccounts(user, cid, con);
-            for (MailAccount mailAccount : userMailAccounts) {
-                if (false == mailAccount.isDefaultAccount() && false == isUnifiedINBOXAccount(mailAccount)) {
-                    deleteAccount(mailAccount, oauthAccountId, user, cid, con, mass);
-                }
-            }
-        }
+    public void modifiedService(final ServiceReference<OAuthAccountReauthorizedListener> reference, final OAuthAccountReauthorizedListener listener) {
+        // Nothing to do
     }
 
-    private void deleteAccount(MailAccount mailAccount, int oauthAccountId, int user, int cid, Connection con, MailAccountStorageService mass) throws OXException {
-        boolean deleted = false;
-        if (mailAccount.isMailOAuthAble()) {
-            if (mailAccount.getMailOAuthId() == oauthAccountId) {
-                mass.deleteMailAccount(mailAccount.getId(), Collections.<String, Object> emptyMap(), user, cid, false, con);
-                deleted = true;
-            }
-        }
-        if (!deleted && mailAccount.isTransportOAuthAble()) {
-            if (mailAccount.getTransportOAuthId() == oauthAccountId) {
-                mass.deleteTransportAccount(mailAccount.getId(), user, cid, con);
+    @Override
+    public void removedService(final ServiceReference<OAuthAccountReauthorizedListener> reference, final OAuthAccountReauthorizedListener listener) {
+        if (null != listener) {
+            try {
+                ReauthorizeListenerRegistry.getInstance().removeReauthorizeListener(listener);
+            } finally {
+                context.ungetService(reference);
             }
         }
     }

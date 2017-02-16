@@ -1616,6 +1616,67 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
+    public void enableMailAccount(int accountId, int userId, int contextId) throws OXException {
+        Connection con = Database.get(contextId, true);
+        boolean rollback = false;
+        try {
+            con.setAutoCommit(false);
+            rollback = true;
+
+            enableMailAccount(accountId, userId, contextId, con);
+
+            con.commit();
+            rollback = false;
+        } catch (final SQLException e) {
+            throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                rollback(con);
+            }
+            autocommit(con);
+            Database.back(contextId, true, con);
+        }
+    }
+
+    /**
+     * Enables the specified mail/transport account.
+     *
+     * @param accountId The account identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param con The connection to use
+     * @throws OXException If enabling the account fails
+     */
+    public void enableMailAccount(int accountId, int userId, int contextId, Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("UPDATE user_mail_account SET failed_auth_count=0, failed_auth_date=0, disabled=0 WHERE cid=? AND id=? AND user=? AND disabled=1");
+            int pos = 1;
+            stmt.setLong(pos++, contextId);
+            stmt.setLong(pos++, accountId);
+            stmt.setLong(pos++, userId);
+            stmt.executeUpdate();
+            Databases.closeSQLStuff(stmt);
+            stmt = null;
+
+            stmt = con.prepareStatement("UPDATE user_transport_account SET failed_auth_count=0, failed_auth_date=0, disabled=0 WHERE cid=? AND id=? AND user=? AND disabled=1");
+            pos = 1;
+            stmt.setLong(pos++, contextId);
+            stmt.setLong(pos++, accountId);
+            stmt.setLong(pos++, userId);
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(stmt);
+        }
+    }
+
+    @Override
     public void updateMailAccount(MailAccountDescription mailAccount, Set<Attribute> attributes, int userId, int contextId, Session session) throws OXException {
         updateMailAccount(mailAccount, attributes, userId, contextId, session, false);
     }

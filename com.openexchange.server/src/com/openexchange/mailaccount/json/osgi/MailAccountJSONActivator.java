@@ -61,11 +61,13 @@ import com.openexchange.mailaccount.Constants;
 import com.openexchange.mailaccount.CredentialsProviderRegistry;
 import com.openexchange.mailaccount.CredentialsProviderService;
 import com.openexchange.mailaccount.internal.MailAccountOAuthAccountDeleteListener;
+import com.openexchange.mailaccount.internal.MailAccountOAuthAccountReauthorizedListener;
 import com.openexchange.mailaccount.json.MailAccountActionProvider;
 import com.openexchange.mailaccount.json.MailAccountOAuthConstants;
 import com.openexchange.mailaccount.json.actions.AbstractMailAccountAction;
 import com.openexchange.mailaccount.json.factory.MailAccountActionFactory;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
+import com.openexchange.oauth.OAuthAccountReauthorizedListener;
 import com.openexchange.oauth.provider.resourceserver.scope.AbstractScopeProvider;
 import com.openexchange.oauth.provider.resourceserver.scope.OAuthScopeProvider;
 
@@ -126,6 +128,7 @@ public final class MailAccountJSONActivator extends AJAXModuleActivator {
         registerModule(new MailAccountActionFactory(providerTracker), Constants.getModule());
 
         registerService(OAuthAccountDeleteListener.class, new MailAccountOAuthAccountDeleteListener());
+        registerService(OAuthAccountReauthorizedListener.class, new MailAccountOAuthAccountReauthorizedListener());
 
         registerService(OAuthScopeProvider.class, new AbstractScopeProvider(MailAccountOAuthConstants.OAUTH_READ_SCOPE, OAuthScopeDescription.READ_ONLY) {
 

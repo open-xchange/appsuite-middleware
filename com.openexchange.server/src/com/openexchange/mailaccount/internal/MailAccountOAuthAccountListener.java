@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,62 +49,42 @@
 
 package com.openexchange.mailaccount.internal;
 
-import java.sql.Connection;
-import java.util.Collections;
-import java.util.Map;
-import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.oauth.OAuthAccountDeleteListener;
-import com.openexchange.server.services.ServerServiceRegistry;
-
+import com.openexchange.mailaccount.UnifiedInboxManagement;
 
 /**
- * {@link MailAccountOAuthAccountDeleteListener}
+ * {@link MailAccountOAuthAccountListener}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.3
+ * @since v7.8.4
  */
-public class MailAccountOAuthAccountDeleteListener extends MailAccountOAuthAccountListener implements OAuthAccountDeleteListener {
+public abstract class MailAccountOAuthAccountListener {
 
     /**
-     * Initializes a new {@link MailAccountOAuthAccountDeleteListener}.
+     * Initializes a new {@link MailAccountOAuthAccountListener}.
      */
-    public MailAccountOAuthAccountDeleteListener() {
+    protected MailAccountOAuthAccountListener() {
         super();
     }
 
-    @Override
-    public void onBeforeOAuthAccountDeletion(int oauthAccountId, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
-        // Ignore
+    /**
+     * Checks if specified mail account represents the Unified Mail account
+     *
+     * @param mailAccount The mail account to check
+     * @return <code>true</code> if specified mail account represents the Unified Mail account; otherwise <code>false</code>
+     */
+    protected static boolean isUnifiedINBOXAccount(final MailAccount mailAccount) {
+        return isUnifiedINBOXAccount(mailAccount.getMailProtocol());
     }
 
-    @Override
-    public void onAfterOAuthAccountDeletion(int oauthAccountId, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
-        MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
-        if (null != mass) {
-            MailAccount[] userMailAccounts = mass.getUserMailAccounts(user, cid, con);
-            for (MailAccount mailAccount : userMailAccounts) {
-                if (false == mailAccount.isDefaultAccount() && false == isUnifiedINBOXAccount(mailAccount)) {
-                    deleteAccount(mailAccount, oauthAccountId, user, cid, con, mass);
-                }
-            }
-        }
-    }
-
-    private void deleteAccount(MailAccount mailAccount, int oauthAccountId, int user, int cid, Connection con, MailAccountStorageService mass) throws OXException {
-        boolean deleted = false;
-        if (mailAccount.isMailOAuthAble()) {
-            if (mailAccount.getMailOAuthId() == oauthAccountId) {
-                mass.deleteMailAccount(mailAccount.getId(), Collections.<String, Object> emptyMap(), user, cid, false, con);
-                deleted = true;
-            }
-        }
-        if (!deleted && mailAccount.isTransportOAuthAble()) {
-            if (mailAccount.getTransportOAuthId() == oauthAccountId) {
-                mass.deleteTransportAccount(mailAccount.getId(), user, cid, con);
-            }
-        }
+    /**
+     * Checks if specified mail protocol denotes the Unified Mail protocol identifier
+     *
+     * @param mailProtocol The mail protocol to check
+     * @return <code>true</code> if specified mail protocol denotes the Unified Mail protocol identifier; otherwise <code>false</code>
+     */
+    protected static boolean isUnifiedINBOXAccount(final String mailProtocol) {
+        return UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(mailProtocol);
     }
 
 }

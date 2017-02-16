@@ -50,59 +50,53 @@
 package com.openexchange.mailaccount.internal;
 
 import java.sql.Connection;
-import java.util.Collections;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.oauth.OAuthAccountDeleteListener;
+import com.openexchange.oauth.OAuthAccountReauthorizedListener;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 
 /**
- * {@link MailAccountOAuthAccountDeleteListener}
+ * {@link MailAccountOAuthAccountReauthorizedListener}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.3
+ * @since v7.8.4
  */
-public class MailAccountOAuthAccountDeleteListener extends MailAccountOAuthAccountListener implements OAuthAccountDeleteListener {
+public class MailAccountOAuthAccountReauthorizedListener extends MailAccountOAuthAccountListener implements OAuthAccountReauthorizedListener {
 
     /**
-     * Initializes a new {@link MailAccountOAuthAccountDeleteListener}.
+     * Initializes a new {@link MailAccountOAuthAccountReauthorizedListener}.
      */
-    public MailAccountOAuthAccountDeleteListener() {
+    public MailAccountOAuthAccountReauthorizedListener() {
         super();
     }
 
     @Override
-    public void onBeforeOAuthAccountDeletion(int oauthAccountId, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
-        // Ignore
-    }
-
-    @Override
-    public void onAfterOAuthAccountDeletion(int oauthAccountId, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
+    public void onAfterOAuthAccountReauthorized(int oauthAccountId, Map<String, Object> eventProps, int user, int contextId, Connection con) throws OXException {
         MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
         if (null != mass) {
-            MailAccount[] userMailAccounts = mass.getUserMailAccounts(user, cid, con);
+            MailAccount[] userMailAccounts = mass.getUserMailAccounts(user, contextId, con);
             for (MailAccount mailAccount : userMailAccounts) {
                 if (false == mailAccount.isDefaultAccount() && false == isUnifiedINBOXAccount(mailAccount)) {
-                    deleteAccount(mailAccount, oauthAccountId, user, cid, con, mass);
+                    enbledMailAccount(mailAccount, oauthAccountId, user, contextId, mass);
                 }
             }
         }
     }
 
-    private void deleteAccount(MailAccount mailAccount, int oauthAccountId, int user, int cid, Connection con, MailAccountStorageService mass) throws OXException {
-        boolean deleted = false;
+    private void enbledMailAccount(MailAccount mailAccount, int oauthAccountId, int userId, int contextId, MailAccountStorageService mass) throws OXException {
+        boolean updated = false;
         if (mailAccount.isMailOAuthAble()) {
             if (mailAccount.getMailOAuthId() == oauthAccountId) {
-                mass.deleteMailAccount(mailAccount.getId(), Collections.<String, Object> emptyMap(), user, cid, false, con);
-                deleted = true;
+                mass.enableMailAccount(mailAccount.getId(), userId, contextId);
+                updated = true;
             }
         }
-        if (!deleted && mailAccount.isTransportOAuthAble()) {
+        if (!updated && mailAccount.isTransportOAuthAble()) {
             if (mailAccount.getTransportOAuthId() == oauthAccountId) {
-                mass.deleteTransportAccount(mailAccount.getId(), user, cid, con);
+                mass.enableMailAccount(mailAccount.getId(), userId, contextId);
             }
         }
     }

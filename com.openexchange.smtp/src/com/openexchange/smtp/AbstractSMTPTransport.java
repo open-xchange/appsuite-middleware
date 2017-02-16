@@ -141,7 +141,6 @@ import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthService;
-import com.openexchange.oauth.OAuthUtil;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.smtp.config.ISMTPProperties;
@@ -657,10 +656,37 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
             Account account = getAccount(smtpConfig);
             if (null != account) {
                 if (account.isTransportDisabled()) {
+                    if (account.isTransportOAuthAble() && account.getTransportOAuthId() >= 0) {
+                        OAuthService oauthService = Services.optService(OAuthService.class);
+                        if (null != oauthService) {
+                            try {
+                                OAuthAccount oAuthAccount = oauthService.getAccount(account.getTransportOAuthId(), session, session.getUserId(), session.getContextId());
+                                throw MailExceptionCode.MAIL_TRANSPORT_DISABLED_OAUTH.create(smtpConfig.getServer(), smtpConfig.getLogin(), I(session.getUserId()), I(session.getContextId()), oAuthAccount.getDisplayName());
+                            } catch (Exception x) {
+                                LOG.warn("Failed to load transport-associated OAuth account", x);
+                            }
+                        }
+                    }
+
                     throw MailExceptionCode.MAIL_TRANSPORT_DISABLED.create(smtpConfig.getServer(), smtpConfig.getLogin(), I(session.getUserId()), I(session.getContextId()));
                 }
-                if (TransportAuth.considerAsMailTransportAuth(account.getTransportAuth()) && ((account instanceof MailAccount) && ((MailAccount) account).isMailDisabled())) {
-                    throw MailExceptionCode.MAIL_TRANSPORT_DISABLED.create(smtpConfig.getServer(), smtpConfig.getLogin(), I(session.getUserId()), I(session.getContextId()));
+                if (TransportAuth.considerAsMailTransportAuth(account.getTransportAuth()) && (account instanceof MailAccount)) {
+                    MailAccount mailAccount = (MailAccount) account;
+                    if (mailAccount.isMailDisabled()) {
+                        if (mailAccount.isMailOAuthAble() && mailAccount.getMailOAuthId() >= 0) {
+                            OAuthService oauthService = Services.optService(OAuthService.class);
+                            if (null != oauthService) {
+                                try {
+                                    OAuthAccount oAuthAccount = oauthService.getAccount(mailAccount.getMailOAuthId(), session, session.getUserId(), session.getContextId());
+                                    throw MailExceptionCode.MAIL_TRANSPORT_DISABLED_OAUTH.create(smtpConfig.getServer(), smtpConfig.getLogin(), I(session.getUserId()), I(session.getContextId()), oAuthAccount.getDisplayName());
+                                } catch (Exception x) {
+                                    LOG.warn("Failed to load mail-associated OAuth account", x);
+                                }
+                            }
+                        }
+
+                        throw MailExceptionCode.MAIL_TRANSPORT_DISABLED.create(smtpConfig.getServer(), smtpConfig.getLogin(), I(session.getUserId()), I(session.getContextId()));
+                    }
                 }
             }
         }
@@ -778,10 +804,9 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                     } else {
                         try {
                             OAuthAccount oAuthAccount = oauthService.getAccount(oauthAccountId, session, session.getUserId(), session.getContextId());
-                            String cburl = OAuthUtil.buildCallbackURL(oAuthAccount);
                             API api = oAuthAccount.getAPI();
                             Throwable cause = e.getCause();
-                            throw OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(cause, api.getShortName(), oAuthAccount.getId(), session.getUserId(), session.getContextId(), api.getFullName(), cburl);
+                            throw OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(cause, api.getShortName(), I(oAuthAccount.getId()), I(session.getUserId()), I(session.getContextId()));
                         } catch (Exception x) {
                             LOG.warn("Failed to handle failed OAuth authentication", x);
                         }
