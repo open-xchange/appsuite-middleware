@@ -1,0 +1,12 @@
+/certificate?action=deleteAll:
+  put:
+    operationId: deleteAllCertificates
+    tags:
+      - Certificate
+    summary: Deletes all fingerprint/hostname combinations for the user
+    description: Deletes all fingerprint/hostname combinations for the user
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+    responses:
+      200:
+        description: An empty JSON object. In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
