@@ -53,7 +53,9 @@ import com.openexchange.exception.OXException;
 
 
 /**
- * {@link IMailMessageStorageDelegator}
+ * {@link IMailMessageStorageDelegator} - This message storage actually delegates calls to an instance of {@link IMailMessageStorage}.
+ * <p>
+ * The delegate instance can be obtained via {@link #getDelegateMessageStorage()}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

@@ -58,6 +58,7 @@ import com.openexchange.net.ssl.config.TrustLevel;
  * The {@link RestrictedSSLConfigurationService} provides user specific configuration with regards to SSL
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.8.3
  */
 public class RestrictedSSLConfigurationService implements SSLConfigurationService {

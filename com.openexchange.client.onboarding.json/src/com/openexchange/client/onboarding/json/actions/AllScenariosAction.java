@@ -90,8 +90,11 @@ public class AllScenariosAction extends AbstractOnboardingAction {
             throw OnboardingExceptionCodes.INVALID_DEVICE_ID.create(deviceId);
         }
 
-        String clientDeviceId = requestData.getParameter("client");
-        ClientDevice clientDevice = ClientDevices.getClientDeviceFor(clientDeviceId);
+        ClientDevice clientDevice;
+        {
+            String clientDeviceId = requestData.getParameter("client");
+            clientDevice = ClientDevices.getClientDeviceFor(clientDeviceId);
+        }
 
         List<DeviceAwareScenario> scenarios = onboardingService.getScenariosFor(clientDevice, device, session);
         return new AJAXRequestResult(scenarios, "onboardingScenario");

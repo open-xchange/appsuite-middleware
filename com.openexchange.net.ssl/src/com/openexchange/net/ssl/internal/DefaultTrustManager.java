@@ -62,20 +62,44 @@ import com.openexchange.net.ssl.osgi.Services;
  * {@link DefaultTrustManager}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.8.3
  */
 public class DefaultTrustManager extends AbstractTrustManager {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultTrustManager.class);
 
-    public DefaultTrustManager() {
-        super(initDefaultTrustManager());
+    /**
+     * Creates a new {@link DefaultTrustManager} instance.
+     *
+     * @return The new instance or <code>null</code> if initialization failed
+     */
+    public static DefaultTrustManager newInstance() {
+        TrustManagerAndParameters managerAndParameters = initDefaultTrustManager();
+        if (null == managerAndParameters) {
+            return null;
+        }
+        return new DefaultTrustManager(managerAndParameters.trustManager);
     }
 
-    private static X509ExtendedTrustManager initDefaultTrustManager() {
+    // --------------------------------------------------------------------------------------------
+
+    /**
+     * Initializes a new {@link CustomTrustManager}.
+     */
+    private DefaultTrustManager(X509ExtendedTrustManager trustManager) {
+        super(trustManager);
+    }
+
+    /**
+     * Initialises the {@link CustomTrustManager}
+     *
+     * @return An {@link X509ExtendedTrustManager}
+     */
+    private static TrustManagerAndParameters initDefaultTrustManager() {
         boolean useDefaultTruststore;
+        SSLConfigurationService sslConfigService = Services.getService(SSLConfigurationService.class);
         {
-            SSLConfigurationService sslConfigService = Services.getService(SSLConfigurationService.class);
             if (null == sslConfigService) {
                 LOG.warn("Absent service " + SSLConfigurationService.class.getName() + ". Assuming default JVM truststore is supposed to be used.");
                 useDefaultTruststore = true;
@@ -95,7 +119,7 @@ public class DefaultTrustManager extends AbstractTrustManager {
 
             for (TrustManager tm : tmf.getTrustManagers()) {
                 if (tm instanceof X509ExtendedTrustManager) {
-                    return (X509ExtendedTrustManager) tm;
+                    return new TrustManagerAndParameters((X509ExtendedTrustManager) tm);
                 }
             }
         } catch (KeyStoreException | NoSuchAlgorithmException e) {

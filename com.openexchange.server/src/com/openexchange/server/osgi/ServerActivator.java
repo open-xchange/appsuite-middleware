@@ -161,6 +161,7 @@ import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.reminder.ReminderService;
 import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.tree.ShardingSubdomains;
 import com.openexchange.groupware.upload.impl.UploadUtility;
 import com.openexchange.groupware.userconfiguration.osgi.CapabilityRegistrationListener;
 import com.openexchange.guest.GuestService;
@@ -168,6 +169,7 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.imagetransformation.ImageTransformationService;
+import com.openexchange.jslob.ConfigTreeEquivalent;
 import com.openexchange.lock.LockService;
 import com.openexchange.lock.impl.LockServiceImpl;
 import com.openexchange.log.Slf4jLogger;
@@ -849,6 +851,10 @@ public final class ServerActivator extends HousekeepingActivator {
          * Register servlets
          */
         registerServlets(getService(HttpService.class));
+        
+        ShardingSubdomains shardingSubdomains = new ShardingSubdomains();
+        registerService(PreferencesItemService.class, shardingSubdomains);
+        registerService(ConfigTreeEquivalent.class, shardingSubdomains);
     }
 
     @Override

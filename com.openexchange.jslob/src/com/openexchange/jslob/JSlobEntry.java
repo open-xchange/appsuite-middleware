@@ -112,7 +112,6 @@ public interface JSlobEntry {
      *
      * @param value The new value to apply
      * @param session The session providing user data
-     * @return The value
      * @throws OXException If value cannot be set
      */
     void setValue(Object value, Session sessiond) throws OXException;

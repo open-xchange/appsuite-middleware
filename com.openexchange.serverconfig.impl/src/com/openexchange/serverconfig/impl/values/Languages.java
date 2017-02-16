@@ -57,6 +57,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import com.google.common.collect.ImmutableList;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.serverconfig.ComputedServerConfigValueService;
@@ -70,7 +71,7 @@ import com.openexchange.session.Session;
  */
 public class Languages implements ComputedServerConfigValueService {
 
-    List<SimpleEntry<String, String>> languages;
+    private final List<SimpleEntry<String, String>> languages;
 
     /**
      * Initializes a new {@link Languages}.
@@ -83,7 +84,7 @@ public class Languages implements ComputedServerConfigValueService {
         ConfigurationService config = services.getService(ConfigurationService.class);
         Properties properties = config.getPropertiesInFolder("languages" + File.separatorChar + "appsuite");
 
-        languages = new ArrayList<SimpleEntry<String,String>>();
+        List<SimpleEntry<String, String>> languages = new ArrayList<SimpleEntry<String,String>>(properties.size());
         for (Object key : properties.keySet()) {
             String propName = (String) key;
             String languageName = properties.getProperty(propName);
@@ -106,10 +107,11 @@ public class Languages implements ComputedServerConfigValueService {
             @Override
             public int compare(SimpleEntry<String, String> arg0, SimpleEntry<String, String> arg1) {
                 String language1 = arg0.getValue();
-                String language2 = arg1.getValue();
                 if (null == language1) {
-                    return null == language2 ? 0 : 1;
+                    return null == arg1.getValue() ? 0 : 1;
                 }
+
+                String language2 = arg1.getValue();
                 if (null == language2) {
                     return -1;
                 }
@@ -117,6 +119,7 @@ public class Languages implements ComputedServerConfigValueService {
             }
         });
 
+        this.languages = ImmutableList.copyOf(languages);
     }
 
     @Override

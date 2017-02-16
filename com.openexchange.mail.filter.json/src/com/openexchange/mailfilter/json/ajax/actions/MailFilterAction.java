@@ -72,6 +72,7 @@ import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
 import com.openexchange.mailfilter.json.ajax.Parameter;
 import com.openexchange.mailfilter.json.ajax.actions.AbstractRequest.Parameters;
 import com.openexchange.mailfilter.json.ajax.json.RuleParser;
+import com.openexchange.mailfilter.json.ajax.servlet.MailFilterExtensionCapabilities;
 import com.openexchange.mailfilter.json.osgi.Services;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -112,11 +113,30 @@ public class MailFilterAction extends AbstractAction<Rule, MailFilterRequest> {
         final MailFilterService mailFilterService = Services.getService(MailFilterService.class);
         final Set<String> capabilities = mailFilterService.getCapabilities(credentials);
         try {
-            final JSONObject tests = getTestAndActionObjects(capabilities);
-            return tests;
+            final JSONObject result = getTestAndActionObjects(capabilities);
+            addSupportedCapabilities(capabilities, result);
+            return result;
         } catch (JSONException e) {
             throw MailFilterExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
+    }
+
+    /**
+     * Adds all supported capabilities to the {@link JSONObject}
+     *
+     * @param capabilities All sieve capabilities
+     * @param jsonObject The json object
+     * @throws JSONException
+     */
+    private void addSupportedCapabilities(Set<String> capabilities, JSONObject jsonObject) throws JSONException {
+        JSONArray caps = new JSONArray();
+        for(MailFilterExtensionCapabilities cap: MailFilterExtensionCapabilities.values()){
+            if(capabilities.contains(cap.name())){
+                caps.put(cap.name());
+            }
+        }
+        jsonObject.putOpt("capabilities", caps);
+
     }
 
     /**

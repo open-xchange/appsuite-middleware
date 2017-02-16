@@ -300,6 +300,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public IDTuple move(IDTuple source, String destFolder, long sequenceNumber, File update, List<Field> modifiedFields) throws OXException {
+        checkFolderExistence(destFolder);
         String path = toPath(source.getFolder(), source.getId());
         String destName = null != update && null != modifiedFields && modifiedFields.contains(Field.FILENAME) ? update.getFileName() : source.getId();
         String destPath = toPath(destFolder, destName);
@@ -762,6 +763,9 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     private void checkFolderExistence(String folderId) throws OXException{
         try {
+            if(Strings.isEmpty(folderId) || folderId.equals("/")){
+                return; // The root folder is always present
+            }
             getFolderMetadata(folderId);
         } catch (GetMetadataErrorException e) {
             OXException interpretedException = DropboxExceptionHandler.handleGetMetadataErrorException(e, folderId, "");
@@ -879,7 +883,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         try {
             if (Strings.isEmpty(pattern) || pattern.equals("*")) {
                 // Return everything
-                return getAllFiles(folderId, true);
+                return getAllFiles(folderId, includeSubfolders);
             } else {
                 // Search
                 return fireSearch(folderId, pattern, includeSubfolders);

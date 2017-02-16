@@ -57,8 +57,13 @@ package com.openexchange.net.ssl.config;
  */
 public enum TrustLevel {
 
+    /**
+     * The "trust-all" trust level
+     */
     TRUST_ALL("all"),
-
+    /**
+     * The restricted trust level taking configuration (custom trust-store, enabled protocols/cipher suites, etc.) into consideration.
+     */
     TRUST_RESTRICTED("restricted");
 
     private final String level;
@@ -67,17 +72,35 @@ public enum TrustLevel {
         this.level = level;
     }
 
+    /**
+     * Gets the identifier for this trust level
+     *
+     * @return The level identifier
+     */
     public String level() {
         return level;
     }
 
+    /**
+     * Looks up the appropriate trust level for given identifier.
+     *
+     * @param abbr The identifier to look-up
+     * @return The matching trust level or {@link #TRUST_ALL}
+     */
     public static TrustLevel find(String abbr) {
+        if (null == abbr) {
+            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(TrustLevel.class);
+            logger.error("The defined log level '{}' is invalid. Please use '{}' or '{}'. Will fall back to default: trust '{}'.", abbr, TRUST_ALL.level, TRUST_RESTRICTED.level, TRUST_ALL.level);
+            return TrustLevel.TRUST_ALL;
+        }
+
         for (TrustLevel v : values()) {
             if (v.level().equals(abbr)) {
                 return v;
             }
         }
-        org.slf4j.LoggerFactory.getLogger(TrustLevel.class).error("The defined log level '{}' is invalid. Please use '{}' or '{}'. Will fall back to default: trust 'all'.", abbr, TRUST_ALL.level, TRUST_RESTRICTED.level);
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(TrustLevel.class);
+        logger.error("The defined log level '{}' is invalid. Please use '{}' or '{}'. Will fall back to default: trust '{}'.", abbr, TRUST_ALL.level, TRUST_RESTRICTED.level, TRUST_ALL.level);
         return TrustLevel.TRUST_ALL;
     }
 }

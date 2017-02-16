@@ -55,11 +55,11 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
 
-
 /**
  * {@link SSLExceptionCode}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.8.3
  */
 public enum SSLExceptionCode implements DisplayableOXExceptionCode {
@@ -72,7 +72,22 @@ public enum SSLExceptionCode implements DisplayableOXExceptionCode {
      * The certificate for domain "%1$s" is untrusted
      */
     UNTRUSTED_CERT_USER_CONFIG("The certificate for domain \"%1$s\" is untrusted.", CATEGORY_ERROR, 2, SSLExceptionMessages.UNTRUSTED_CERT_USER_CONFIG_MSG),
-
+    /**
+     * The user '%1$s' in context '%2$s' does not trust the certificate '%3$s'
+     */
+    USER_DOES_NOT_TRUST_CERTIFICATE("The user '%1$s' in context '%2$s' does not trust the certificate '%3$s'", CATEGORY_ERROR, 3, SSLExceptionMessages.USER_DOES_NOT_TRUST_CERTIFICATE),
+    /**
+     * The certificate '%1$s' is self-signed
+     */
+    SELF_SIGNED_CERTIFICATE("The certificate '%1$s' is self-signed", CATEGORY_ERROR, 4, SSLExceptionMessages.SELF_SIGNED_CERTIFICATE),
+    /**
+     * The certificate '%1$s' is expired
+     */
+    CERTIFICATE_IS_EXPIRED("The certificate '%1$s' is expired", CATEGORY_ERROR, 5, SSLExceptionMessages.CERTIFICATE_IS_EXPIRED),
+    /**
+     * The hostname '%1$s' for the certificate '%2$s' is invalid
+     */
+    INVALID_HOSTNAME("The hostname '%1$s' for the certificate '%2$s' is invalid", CATEGORY_ERROR, 6, SSLExceptionMessages.INVALID_COMMON_NAME),
     ;
 
     public static final String PREFIX = "SSL";
@@ -84,6 +99,7 @@ public enum SSLExceptionCode implements DisplayableOXExceptionCode {
 
     /**
      * Initializes a new {@link SSLExceptionCode}.
+     * 
      * @param detailNumber
      */
     private SSLExceptionCode(final String message, final Category category, final int detailNumber) {
@@ -162,6 +178,5 @@ public enum SSLExceptionCode implements DisplayableOXExceptionCode {
     public OXException create(final Throwable cause, final Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
     }
-
 
 }

@@ -502,6 +502,18 @@ public abstract class MailMessage extends MailPart {
     private boolean b_originalId;
 
     /**
+     * Email is encrypted
+     */
+    private boolean encrypted;
+    private boolean b_encrypted;
+
+    /**
+     * Email security data
+     */
+    private SecurityResult securityResult;
+    private boolean b_securityResult;
+
+    /**
      * Default constructor
      */
     protected MailMessage() {
@@ -1979,6 +1991,87 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
+     * Sets the encrypted flag
+     *
+     * @param encrypted The encrypted flag to set
+     */
+    public void setEncrypted (boolean encrypted) {
+        this.encrypted = encrypted;
+        b_encrypted = true;
+    }
+
+    /**
+     * Checks whether encrypted flag is set
+     *
+     * @return <code>true</code> if set; otherwise <code>false</code>
+     */
+    public boolean containsEncrypted () {
+        return b_encrypted;
+    }
+
+    /**
+     * Checks if this mail is marked as encrypted.
+     *
+     * @return <code>true</code> if encrypted; otherwise <code>false</code>
+     */
+    public boolean isEncrypted () {
+        return this.encrypted;
+    }
+
+    /**
+     * Removes the encrypted flag.
+     */
+    public void removeEncrypted () {
+        encrypted = false;
+        b_encrypted = false;
+    }
+
+    /**
+     * Sets the given security result.
+     *
+     * @param result The security result to set
+     */
+    public void setSecurityResult(SecurityResult result) {
+        this.securityResult = result;
+        b_securityResult = true;
+    }
+
+    /**
+     * Gets the security result
+     *
+     * @return The security result or <code>null</code> if not set
+     */
+    public SecurityResult getSecurityResult() {
+        return this.securityResult;
+    }
+
+    /**
+     * Checks if security result is available
+     *
+     * @return <code>true</code> if available; otherwise <code>false</code>
+     */
+    public boolean hasSecurityResult() {
+        return securityResult != null;
+    }
+
+    /**
+     * Checks if security result has been set
+     *
+     * @return <code>true</code> if set; otherwise <code>false</code>
+     */
+    public boolean containsSecurityResult() {
+        return b_securityResult;
+    }
+
+    /**
+     * Removes the security result.
+     */
+    public void removeSecurityResult() {
+        this.securityResult = null;
+        b_securityResult = false;
+    }
+
+    /**
      * Gets the implementation-specific unique ID of this mail in its mail folder. The ID returned by this method is used in storages to
      * refer to a mail.
      *
@@ -2007,4 +2100,5 @@ public abstract class MailMessage extends MailPart {
      * @param unreadMessages The number of unread messages
      */
     public abstract void setUnreadMessages(int unreadMessages);
+
 }

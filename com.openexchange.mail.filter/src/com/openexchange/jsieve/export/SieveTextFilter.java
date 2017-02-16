@@ -290,10 +290,10 @@ public final class SieveTextFilter {
         if (nextUidAndError.isError()) {
             errorsInScript = true;
         }
-        
+
         MailFilterInterceptorRegistry interceptorRegistry = Services.getService(MailFilterInterceptorRegistry.class);
         interceptorRegistry.executeBefore(finalRules);
-        
+
         return new RuleListAndNextUid(finalRules, nextUidAndError.getNextuid(), errorsInScript);
     }
 
@@ -329,6 +329,10 @@ public final class SieveTextFilter {
             nonCommentedOutput = (List<OwnType>) nonCommentedNode.jjtAccept(new Visitor(), null);
         }
         final List<OwnType> commentedOutput = (List<OwnType>) commentedNode.jjtAccept(new Visitor(), null);
+
+        if (commentedOutput == null) {
+            throw new SieveException("Commented output is null");
+        }
 
         return listToString(interweaving(nonCommentedOutput, commentedOutput, clientRulesAndRequire.getRules()));
     }

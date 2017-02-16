@@ -111,7 +111,7 @@ public class RefreshITipAnalyzer extends AbstractITipAnalyzer {
 
         refreshed = util.resolveUid(appointment.getUid(), session);
 
-        if (isException) {
+        if (isException && refreshed!=null) {
             refreshed = findAndRemoveMatchingException(appointment, util.getExceptions(refreshed, session));
         }
 

@@ -27,7 +27,7 @@ Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@
 
 %description
-This package provides connectivity to an GeoIP service as well as the possibility to configured an IP check against country code plausibility
+This package provides connectivity to an GeoIP service as well as the possibility to configure an IP check against country code plausibility
 
 
 Authors:
