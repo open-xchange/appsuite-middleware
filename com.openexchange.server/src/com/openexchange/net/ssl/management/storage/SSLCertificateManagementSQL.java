@@ -151,7 +151,7 @@ public class SSLCertificateManagementSQL {
         } catch (SQLException e) {
             throw SSLCertificateManagementExceptionCode.SQL_PROBLEM.create(e.getMessage(), e);
         } finally {
-            Databases.closeSQLStuff( preparedStatement);
+            Databases.closeSQLStuff(preparedStatement);
         }
     }
 
@@ -216,10 +216,7 @@ public class SSLCertificateManagementSQL {
                 throw SSLCertificateManagementExceptionCode.CERTIFICATE_NOT_FOUND.create(fingerprint, userId, contextId);
             }
 
-            DefaultCertificate.Builder certificate = DefaultCertificate.builder()
-                .fingerprint(fingerprint)
-                .hostName(resultSet.getString("host"))
-                .trusted(resultSet.getBoolean("trusted"));
+            DefaultCertificate.Builder certificate = DefaultCertificate.builder().fingerprint(fingerprint).hostName(resultSet.getString("host")).trusted(resultSet.getBoolean("trusted"));
             return certificate.build();
         } catch (SQLException e) {
             throw SSLCertificateManagementExceptionCode.SQL_PROBLEM.create(e.getMessage(), e);
@@ -312,6 +309,32 @@ public class SSLCertificateManagementSQL {
             preparedStatement.setInt(index++, userId);
             preparedStatement.setString(index++, hostname);
             preparedStatement.setString(index++, fingerprint);
+
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw SSLCertificateManagementExceptionCode.SQL_PROBLEM.create(e.getMessage(), e);
+        } finally {
+            Databases.closeSQLStuff(preparedStatement);
+            databaseService.backWritable(contextId, connection);
+        }
+    }
+
+    /**
+     * Deletes all SSL {@link Certificate} exceptions for the specified user
+     * 
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @throws OXException if an error is occurred
+     */
+    public void deleteAll(int userId, int contextId) throws OXException {
+        DatabaseService databaseService = getDatabaseService();
+        Connection connection = databaseService.getWritable(contextId);
+        PreparedStatement preparedStatement = null;
+        try {
+            preparedStatement = connection.prepareStatement(SQLStatements.DELETE_ALL);
+            int index = 1;
+            preparedStatement.setInt(index++, contextId);
+            preparedStatement.setInt(index++, userId);
 
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
@@ -431,10 +454,7 @@ public class SSLCertificateManagementSQL {
 
         ImmutableList.Builder<Certificate> certificates = ImmutableList.builder();
         do {
-            DefaultCertificate.Builder certificate = DefaultCertificate.builder()
-                .fingerprint(resultSet.getString("fingerprint"))
-                .hostName(resultSet.getString("host"))
-                .trusted(resultSet.getBoolean("trusted"));
+            DefaultCertificate.Builder certificate = DefaultCertificate.builder().fingerprint(resultSet.getString("fingerprint")).hostName(resultSet.getString("host")).trusted(resultSet.getBoolean("trusted"));
             certificates.add(certificate.build());
         } while (resultSet.next());
 

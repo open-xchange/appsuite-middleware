@@ -155,6 +155,15 @@ public interface SSLCertificateManagementService {
     void delete(int userId, int contextId, String hostname, String fingerprint) throws OXException;
 
     /**
+     * Deletes all SSL {@link Certificate} exceptions for the specified user
+     * 
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @throws OXException If an error is occurred
+     */
+    void deleteAll(int userId, int contextId) throws OXException;
+
+    /**
      * Caches the specified {@link Certificate} temporarily for the specified user in the
      * specified context
      *

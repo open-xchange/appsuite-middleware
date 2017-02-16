@@ -162,6 +162,14 @@ public class SSLCertificateManagementServiceImpl implements SSLCertificateManage
     public void delete(int userId, int contextId, String hostname, String fingerprint) throws OXException {
         storage.delete(userId, contextId, hostname, fingerprint);
     }
+    
+    /* (non-Javadoc)
+     * @see com.openexchange.net.ssl.management.SSLCertificateManagementService#deleteAll(int, int)
+     */
+    @Override
+    public void deleteAll(int userId, int contextId) throws OXException {
+        storage.deleteAll(userId, contextId);
+    }
 
     /*
      * (non-Javadoc)

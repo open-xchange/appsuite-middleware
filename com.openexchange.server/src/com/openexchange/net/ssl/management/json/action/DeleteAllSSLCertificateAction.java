@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2017-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,57 +47,40 @@
  *
  */
 
-package com.openexchange.net.ssl.management.storage;
+package com.openexchange.net.ssl.management.json.action;
+
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
+import com.openexchange.net.ssl.management.SSLCertificateManagementService;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link SQLStatements}
+ * {@link DeleteAllSSLCertificateAction}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-final class SQLStatements {
+public class DeleteAllSSLCertificateAction extends AbstractSSLCertificateManagementAction {
 
     /**
-     * Inserts on duplicate key updates a certificate
+     * Initialises a new {@link DeleteAllSSLCertificateAction}.
+     * 
+     * @param services The {@link ServiceLookup} instance
      */
-    final static String INSERT_ON_DUPLICATE_UPDATE = "INSERT INTO user_certificate (cid, userid, host, fingerprint, trusted) VALUES (?,?,?,?,?) ON DUPLICATE KEY UPDATE trusted=?";
+    public DeleteAllSSLCertificateAction(ServiceLookup services) {
+        super(services);
+    }
 
-    /**
-     * Gets the certificate for a specified host
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.requesthandler.AJAXActionService#perform(com.openexchange.ajax.requesthandler.AJAXRequestData, com.openexchange.tools.session.ServerSession)
      */
-    final static String GET_FOR_HOST = "SELECT * FROM  user_certificate WHERE cid=? AND userid=? AND host=? AND fingerprint=?";
-
-    /**
-     * Gets the certificate
-     */
-    final static String GET_FOR_ALL_HOSTS = "SELECT * FROM  user_certificate WHERE cid=? AND userid=? AND fingerprint=?";
-
-    /**
-     * Gets all certificates
-     */
-    final static String GET_ALL = "SELECT * FROM  user_certificate WHERE cid=? AND userid=?";
-
-    /**
-     * Checks for existence
-     */
-    final static String CONTAINS = "SELECT 1 FROM user_certificate WHERE cid=? AND userid=? AND host=? AND fingerprint=?";
-
-    /**
-     * Checks if the certificate is trusted
-     */
-    final static String IS_TRUSTED = "SELECT trusted from user_certificate WHERE cid=? AND userid=? AND host=? AND fingerprint=?";
-
-    /**
-     * Deletes certificate for a specified host
-     */
-    final static String DELETE_FOR_HOST = "DELETE FROM user_certificate WHERE cid=? AND userid=? AND host=? AND fingerprint=?";
-
-    /**
-     * Deletes all certificates for the specified user
-     */
-    final static String DELETE_ALL = "DELETE FROM user_certificate WHERE cid=? AND userid=?";
-
-    /**
-     * Deletes certificate for all hosts
-     */
-    final static String DELETE_FOR_ALL_HOSTS = "DELETE FROM user_certificate WHERE cid=? AND userid=? AND fingerprint=?";
+    @Override
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        SSLCertificateManagementService managementService = getService(SSLCertificateManagementService.class);
+        managementService.deleteAll(session.getUserId(), session.getContextId());
+        return new AJAXRequestResult();
+    }
 }
