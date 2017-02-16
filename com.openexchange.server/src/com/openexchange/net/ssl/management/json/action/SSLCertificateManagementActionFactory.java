@@ -81,6 +81,7 @@ public class SSLCertificateManagementActionFactory implements AJAXActionServiceF
         a.put("get", new GetSSLCertificateAction(services));
         a.put("store", new StoreSSLCertificateAction(services));
         a.put("delete", new DeleteSSLCertificateAction(services));
+        a.put("deleteAll", new DeleteAllSSLCertificateAction(services));
         a.put("update", new UpdateSSLCertificateAction(services));
         a.put("all", new AllSSLCertificateAction(services));
 
