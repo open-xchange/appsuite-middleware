@@ -94,6 +94,7 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.tree.modules.mail.MailColorModePreferenceItem;
 import com.openexchange.groupware.settings.tree.modules.mail.MailFlaggedModePreferenceItem;
 import com.openexchange.groupware.settings.tree.modules.mail.MaliciousCheck;
+import com.openexchange.groupware.settings.tree.modules.mail.MaliciousListing;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.jslob.ConfigTreeEquivalent;
@@ -320,6 +321,10 @@ public final class MailJSONActivator extends AJAXModuleActivator {
         MaliciousCheck maliciousCheck = new MaliciousCheck();
         registerService(PreferencesItemService.class, maliciousCheck);
         registerService(ConfigTreeEquivalent.class, maliciousCheck);
+
+        MaliciousListing maliciousListing = new MaliciousListing();
+        registerService(PreferencesItemService.class, maliciousListing);
+        registerService(ConfigTreeEquivalent.class, maliciousListing);
     }
 
     @Override
