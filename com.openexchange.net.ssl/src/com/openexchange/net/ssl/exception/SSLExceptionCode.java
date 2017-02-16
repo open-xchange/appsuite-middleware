@@ -73,21 +73,21 @@ public enum SSLExceptionCode implements DisplayableOXExceptionCode {
      */
     UNTRUSTED_CERT_USER_CONFIG("The certificate for domain \"%1$s\" is untrusted.", CATEGORY_ERROR, 2, SSLExceptionMessages.UNTRUSTED_CERT_USER_CONFIG_MSG),
     /**
-     * The user '%1$s' in context '%2$s' does not trust the certificate '%3$s'
+     * The certificate with fingerprint '%1$s' is not trusted by the user '%2$s' in context '%3$s'
      */
-    USER_DOES_NOT_TRUST_CERTIFICATE("The user '%1$s' in context '%2$s' does not trust the certificate '%3$s'", CATEGORY_ERROR, 3, SSLExceptionMessages.USER_DOES_NOT_TRUST_CERTIFICATE),
+    USER_DOES_NOT_TRUST_CERTIFICATE("The certificate with fingerprint '%1$s' is not trusted by the user '%2$s' in context '%3$s'", CATEGORY_ERROR, 3, SSLExceptionMessages.USER_DOES_NOT_TRUST_CERTIFICATE),
     /**
-     * The certificate '%1$s' is self-signed
+     * The certificate with fingerprint '%1$s' is self-signed
      */
-    SELF_SIGNED_CERTIFICATE("The certificate '%1$s' is self-signed", CATEGORY_ERROR, 4, SSLExceptionMessages.SELF_SIGNED_CERTIFICATE),
+    SELF_SIGNED_CERTIFICATE("The certificate with finderprint '%1$s' is self-signed", CATEGORY_ERROR, 4, SSLExceptionMessages.SELF_SIGNED_CERTIFICATE),
     /**
-     * The certificate '%1$s' is expired
+     * The certificate with fingerprint '%1$s' is expired
      */
-    CERTIFICATE_IS_EXPIRED("The certificate '%1$s' is expired", CATEGORY_ERROR, 5, SSLExceptionMessages.CERTIFICATE_IS_EXPIRED),
+    CERTIFICATE_IS_EXPIRED("The certificate with fingerprint '%1$s' is expired", CATEGORY_ERROR, 5, SSLExceptionMessages.CERTIFICATE_IS_EXPIRED),
     /**
-     * The hostname '%1$s' for the certificate '%2$s' is invalid
+     * The common name of the certificate with fingerprint '%1$s' does not match the requested endpoint's hostname '%2$s'
      */
-    INVALID_HOSTNAME("The hostname '%1$s' for the certificate '%2$s' is invalid", CATEGORY_ERROR, 6, SSLExceptionMessages.INVALID_COMMON_NAME),
+    INVALID_HOSTNAME("The common name of the certificate with fingerprint '%1$s' does not match the requested endpoint's hostname '%2$s'", CATEGORY_ERROR, 6, SSLExceptionMessages.INVALID_COMMON_NAME),
     ;
 
     public static final String PREFIX = "SSL";
