@@ -65,7 +65,7 @@ import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserJSO
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ExistsTestCommandParser}
+ * {@link ExistsTestCommandParser} parses exists sieve tests.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4

@@ -71,9 +71,10 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link DateTestCommandParser}
+ * {@link DateTestCommandParser} parses date sieve tests.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.4
  */
 public class DateTestCommandParser implements CommandParser<TestCommand> {
 
@@ -200,22 +201,22 @@ public class DateTestCommandParser implements CommandParser<TestCommand> {
         return retval;
     }
 
-    private String convertJSONDate2Sieve(final String string, final String formatPattern) throws JSONException {
+    private String convertJSONDate2Sieve(final String dateString, final String formatPattern) throws JSONException {
         try {
-            final Date date = new Date(Long.parseLong(string));
+            final Date date = new Date(Long.parseLong(dateString));
             final SimpleDateFormat df = new SimpleDateFormat(formatPattern);
             df.setTimeZone(TimeZone.getTimeZone("UTC"));
             return df.format(date);
         } catch (NumberFormatException e) {
-            throw new JSONException("Date field \"" + string + "\" is no date value");
+            throw new JSONException("Date field \"" + dateString + "\" is no date value");
         }
     }
 
-    private JSONArray getJSONDateArray(final List<String> collection, final String formatPattern) throws JSONException {
+    private JSONArray getJSONDateArray(final List<String> dateStringCollection, final String formatPattern) throws JSONException {
         final SimpleDateFormat df = new SimpleDateFormat(formatPattern);
         df.setTimeZone(TimeZone.getTimeZone("UTC"));
         final JSONArray retval = new JSONArray();
-        for (final String part : collection) {
+        for (final String part : dateStringCollection) {
             Date parse;
             try {
                 parse = df.parse(part);
