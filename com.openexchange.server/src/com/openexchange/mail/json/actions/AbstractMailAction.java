@@ -168,13 +168,12 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
      */
     protected MailServletInterface getMailInterface(final MailRequest mailRequest) throws OXException {
 
-        String cryptoAuthentication = null;
-        boolean decrypt = true;
-        {
-            //TODO: request's can control somehow whether to decrypt the messages or not
-            //...
+        //requests can control whether or not to decrypt messages
+        final boolean decrypt = mailRequest.getParameter("decrypt") != null && mailRequest.getParameter("decrypt").toLowerCase().equals("true");
 
-            //Parsing crypto authentication from the request
+        //Parsing crypto authentication from the request
+        String cryptoAuthentication = null;
+        if(decrypt) {
             CryptographicServiceAuthenticationFactory encryptionAuthenticationFactory = services.getService(CryptographicServiceAuthenticationFactory.class);
             if(encryptionAuthenticationFactory != null) {
                 cryptoAuthentication = encryptionAuthenticationFactory.createAuthenticationFrom(mailRequest.getRequest());
