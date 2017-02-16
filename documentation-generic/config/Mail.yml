@@ -90,7 +90,16 @@ Specifies the color which should be added to colorless flagged mails in case the
   - data:
       Key: com.openexchange.mail.maliciousFolders.enabled
       Description: >
-Enables/disables support for malicious folders
+Enables/disables support for malicious folders.
+
+If enabled and a mail is fetched from a folder contained in listing configured through "com.openexchange.mail.maliciousFolders.listing"
+property, the imail's JSON representation contains an additional "malicious: true" field and possible HTML content is processed in the way
+to disable any hyper-links.
+
+I.e.
+"...<a href="http://evil.com/click.me">Get something for free here</a>..."
+is turned to
+"...<a href="#" onclick"return false;" data-disabled="true">Get something for free here</a>..."
       Default: true
       Version: 7.8.4
       Reloadable: true
