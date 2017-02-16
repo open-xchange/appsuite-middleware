@@ -145,7 +145,10 @@ public class Recurrence {
             pattern.setOccurrences(rrule.getCount());
             pattern.setSeriesEnd(L(getUntilForUnlimited(recurrenceService, recurrenceData).getTime()));
         } else if (null != rrule.getUntil()) {
-            pattern.setSeriesEnd(L(getSeriesEnd(rrule, recurrenceService, recurrenceData).getTime()));
+            Date seriesEnd = getSeriesEnd(rrule, recurrenceService, recurrenceData);
+            if (null != seriesEnd) {
+                pattern.setSeriesEnd(L(seriesEnd.getTime()));
+            }
         }
         /*
          * apply specific parts based on rule's FREQ
@@ -202,6 +205,7 @@ public class Recurrence {
      * Calculates the (legacy) series end date from the <code>UNTIL</code> part of a specific recurrence rule, which is the date in UTC
      * (without time fraction) of the last occurrence, as used in the legacy series pattern.
      *
+     * @param rrule The recurrence rule
      * @param recurrenceService A reference to the recurrence service
      * @param recurrenceData The recurrence data
      * @return The series end date, or <code>null</code> if not set in the recurrence rule
