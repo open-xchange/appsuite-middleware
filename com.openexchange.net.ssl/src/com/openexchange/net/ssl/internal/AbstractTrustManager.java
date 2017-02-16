@@ -53,6 +53,7 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -270,6 +271,8 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             throw e;
         }
 
+        logChain(chain);
+
         // Fetch user details
         int user = Tools.getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_USER_ID));
         if (user < 0) {
@@ -290,6 +293,38 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
 
         // Check if the user trusts it
         checkUserTrustsServer(user, context, chain, socket);
+    }
+
+    /**
+     * Log the entire {@link X509Certificate} chain in the debug level
+     * 
+     * @param chain The chain to log
+     * @throws CertificateEncodingException if the fingerprint of a certificate cannot be generated
+     */
+    private void logChain(X509Certificate[] chain) throws CertificateEncodingException {
+        if (!LOG.isDebugEnabled()) {
+            return;
+        }
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < chain.length; i++) {
+            X509Certificate cert = chain[i];
+            builder.append("\nCertificate ").append((i + 1));
+            builder.append("\n     Common Name......: ").append(cert.getSubjectDN());
+            builder.append("\n     Issued by........: ").append(cert.getIssuerDN());
+            builder.append("\n     Issued on........: ").append(cert.getNotBefore());
+            builder.append("\n     Expiration Date..: ").append(cert.getNotAfter());
+            builder.append("\n     Serial Number....: ").append(cert.getSerialNumber().toString(16));
+            builder.append("\n     Signature........: ").append(toHex(cert.getSignature()));
+            builder.append("\n  Public Key Info");
+            PublicKey pk = cert.getPublicKey();
+            builder.append("\n     Algorithm........: ").append(pk.getAlgorithm());
+            builder.append("\n     Format...........: ").append(pk.getFormat());
+            builder.append("\n   ").append(pk);
+            builder.append("\n  Fingerprint");
+            builder.append("\n     SHA-256..........: ").append(getFingerprint(cert));
+            builder.append("\n");
+        }
+        LOG.debug(builder.toString());
     }
 
     /**
