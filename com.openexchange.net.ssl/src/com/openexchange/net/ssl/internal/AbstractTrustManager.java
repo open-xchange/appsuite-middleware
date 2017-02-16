@@ -367,7 +367,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         }
 
         String fingerprint = cacheCertificate(userId, contextId, chain[0], null, FailureReason.UNTRUSTED_ISSUER);
-        throw new CertificateException(SSLExceptionCode.USER_DOES_NOT_TRUST_CERTIFICATE.create(userId, contextId, fingerprint));
+        throw new CertificateException(SSLExceptionCode.USER_DOES_NOT_TRUST_CERTIFICATE.create(fingerprint, userId, contextId));
     }
 
     /**
@@ -398,7 +398,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         }
 
         String fingerprint = cacheCertificate(userId, contextId, chain[0], hostname, FailureReason.INVALID_COMMON_NAME);
-        throw new CertificateException(SSLExceptionCode.INVALID_HOSTNAME.create(hostname, fingerprint));
+        throw new CertificateException(SSLExceptionCode.INVALID_HOSTNAME.create(fingerprint, hostname));
     }
 
     /**
