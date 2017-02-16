@@ -68,6 +68,7 @@ import com.openexchange.tools.session.ServerSession;
  * {@link SetFlagActionCommandParser}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.4
  */
 public class SetFlagActionCommandParser implements CommandParser<ActionCommand> {
 
