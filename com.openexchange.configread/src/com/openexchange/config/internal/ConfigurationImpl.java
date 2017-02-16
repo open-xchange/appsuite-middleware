@@ -71,6 +71,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import com.google.common.collect.Iterators;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ConfigurationServices;
@@ -238,7 +239,7 @@ public final class ConfigurationImpl implements ConfigurationService {
 
         propertiesByFile = new HashMap<File, Properties>(256);
         texts = new ConcurrentHashMap<String, String>(1024, 0.9f, 1);
-        properties = new HashMap<String, String>(2048);
+        properties = new ConcurrentHashMap<String, String>(2048, 0.9f, 1);
         propertiesFiles = new HashMap<String, String>(2048);
         yamlFiles = new HashMap<File, YamlRef>(64);
         yamlPaths = new HashMap<String, File>(64);
@@ -579,7 +580,7 @@ public final class ConfigurationImpl implements ConfigurationService {
 
     @Override
     public Iterator<String> propertyNames() {
-        return properties.keySet().iterator();
+        return Iterators.unmodifiableIterator(properties.keySet().iterator());
     }
 
     @Override
