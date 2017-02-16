@@ -96,6 +96,16 @@ public class DataAwareRecurrenceId extends DefaultRecurrenceId implements Recurr
     }
 
     @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj);
+    }
+
+    @Override
     public String toString() {
         if (null != getTimeZoneID()) {
             return super.toString();
