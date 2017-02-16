@@ -373,7 +373,7 @@ public class EventConverter {
                     recurrenceData = loadRecurrenceData(session, originalEventID);
                 }
                 recurrenceData = getRecurrenceData(session, appointment, recurrenceData);
-                event.setRecurrenceRule(recurrenceData.getRecurrenceRule());
+                event.setRecurrenceRule(null != recurrenceData ? recurrenceData.getRecurrenceRule() : null);
             }
         }
         if (appointment.containsChangeExceptions()) {
