@@ -87,6 +87,28 @@ public class StoredRecurrenceId implements RecurrenceId {
     }
 
     @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + recurrencePosition;
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        StoredRecurrenceId other = (StoredRecurrenceId) obj;
+        if (recurrencePosition != other.recurrencePosition)
+            return false;
+        return true;
+    }
+
+    @Override
     public int compareTo(RecurrenceId other) {
         if (null == other) {
             return 1;
