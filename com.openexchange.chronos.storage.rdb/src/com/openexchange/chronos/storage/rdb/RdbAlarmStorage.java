@@ -51,9 +51,6 @@ package com.openexchange.chronos.storage.rdb;
 
 import static com.openexchange.chronos.common.AlarmUtils.filter;
 import static com.openexchange.chronos.common.AlarmUtils.find;
-import static com.openexchange.chronos.common.AlarmUtils.getTriggerTime;
-import static com.openexchange.chronos.common.CalendarUtils.getDateInTimeZone;
-import static com.openexchange.chronos.common.CalendarUtils.isFloating;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.groupware.tools.mappings.database.DefaultDbMapper.getParameters;
 import static com.openexchange.java.Autoboxing.I;
@@ -359,11 +356,9 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         return null;
     }
 
-    private static int getReminderMinutes(Trigger trigger, Event event, TimeZone timeZone) {
-        Date triggerTime = getTriggerTime(trigger, event, timeZone);
-        Date startTime = isFloating(event) ? getDateInTimeZone(event.getStartDate(), timeZone) : event.getStartDate();
-        long duration = startTime.getTime() - triggerTime.getTime();
-        return (int) TimeUnit.MILLISECONDS.toMinutes(duration);
+    private static int getReminderMinutes(Trigger trigger, Event event, TimeZone timeZone) throws OXException {
+        String duration = AlarmUtils.getTriggerDuration(trigger, event, Services.getService(RecurrenceService.class));
+        return null == duration ? 0 : -1 * (int) TimeUnit.MILLISECONDS.toMinutes(AlarmUtils.getTriggerDuration(duration));
     }
 
     private static ReminderData selectReminder(Connection connection, int contextID, int eventID, int userID) throws SQLException, OXException {
