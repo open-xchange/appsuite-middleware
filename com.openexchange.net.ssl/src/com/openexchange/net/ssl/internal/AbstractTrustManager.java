@@ -313,7 +313,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
 
             if (!Strings.isEmpty(socketHostname) && !socketHostname.equals(certificate.getHostName())) {
                 cacheCertificate(userId, contextId, cert, socketHostname, FailureReason.INVALID_COMMON_NAME);
-                throw new CertificateException(SSLExceptionCode.INVALID_HOSTNAME.create(socketHostname, fingerprint));
+                throw new CertificateException(SSLExceptionCode.INVALID_HOSTNAME.create(fingerprint, socketHostname));
             }
         } catch (OXException e) {
             if (SSLCertificateManagementExceptionCode.CERTIFICATE_NOT_FOUND.equals(e)) {
