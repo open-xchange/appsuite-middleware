@@ -123,6 +123,7 @@ This section describes the structures of tests.
 |comparison | String || Only three types are valid here. A description can be found in [Possible currentdate comparisons](#possible-currentdate-comparisons).|
 |datepart | String || A string containing the string "date", "weekday" or "time" as we only allow fix date, time and weekday comparisions for now.|
 |datevalue | Array || A value array containing the corresponding value to the datepart. For "date" and "time" this will be an array of "Date" (unix timestamp). For "weekday", it will be an array of integers ranging from 0 to 6, reflecting the equivalent weekday, starting from Sunday through Saturday, i.e. 0 - Sunday, ..., 6 - Saturday. The test will be true if any of the values matches|
+|zone | String || The optional timezone which should be used for the test. E.g. "+0100". If omitted the current timezone of the user is used.|
 
 ### header-test
 
@@ -166,6 +167,7 @@ This section describes the structures of tests.
 |header | String || The header field to test against.|
 |datepart | String || A string containing the string "date", "weekday" or "time" as we only allow fix date, time and weekday comparisions for now.|
 |datevalue | Array || A value array containing the corresponding value to the datepart. For "date" and "time" this will be an array of "Date" (unix timestamp). For "weekday", it will be an array of integers ranging from 0 to 6, reflecting the equivalent weekday, starting from Sunday through Saturday, i.e. 0 - Sunday, ..., 6 - Saturday. The test will be true if any of the values matches|
+|zone | String || The optional timezone which should be used for the test. E.g. "+0100". If omitted the current timezone of the user is used.|
 
 ### exists-test
 
