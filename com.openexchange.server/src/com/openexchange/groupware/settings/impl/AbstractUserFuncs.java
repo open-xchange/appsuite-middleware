@@ -56,7 +56,10 @@ import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.Setting;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.user.UserService;
 
 /**
  * This class contains the shared functions for all user settings.
@@ -77,7 +80,14 @@ public abstract class AbstractUserFuncs implements IValueHandler {
          */
         UserImpl newUser = new UserImpl(user);
         setValue(newUser, setting.getSingleValue().toString(), user);
-        UserStorage.getInstance().updateUser(newUser, ctx);
+        UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class);
+        if (null != userService) {
+            userService.updateUser(user, ctx);
+        } else {
+            org.slf4j.LoggerFactory.getLogger(AbstractUserFuncs.class).warn(
+                "Unable to access user service, updating directly via storage.", ServiceExceptionCode.absentService(UserService.class));
+            UserStorage.getInstance().updateUser(newUser, ctx);
+        }
         /*
          * try and set value in passed reference, too
          */
