@@ -50,14 +50,11 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
-import static com.openexchange.chronos.impl.Utils.getCalendarUser;
 import static com.openexchange.chronos.impl.Utils.getFields;
 import static com.openexchange.chronos.impl.Utils.getFolder;
-import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
 import static com.openexchange.chronos.impl.Utils.getSearchTerm;
 import static com.openexchange.chronos.impl.Utils.getVisibleFolders;
 import static com.openexchange.chronos.impl.Utils.i;
-import static com.openexchange.chronos.impl.Utils.isIncludePrivate;
 import static com.openexchange.chronos.impl.Utils.sortEvents;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
@@ -136,46 +133,19 @@ public class SearchPerformer extends AbstractQueryPerformer {
         EventField[] fields = getFields(session);
         SortOptions sortOptions = new SortOptions(session);
         List<Event> events = new ArrayList<Event>();
-        boolean combindedSearch = true;
-        if (combindedSearch) {
-            List<Event> foundEvents = storage.getEventStorage().searchEvents(buildSearchTerm(folders, queries), filters, sortOptions, fields);
-            for (Event event : readAdditionalEventData(foundEvents, -1, Utils.getFields(session, EventField.ATTENDEES))) {
-                List<UserizedFolder> foldersForEvent = getFoldersForEvent(folders, event);
-                if (1 == foldersForEvent.size()) {
-                    events.addAll(postProcess(Collections.singletonList(event), foldersForEvent.get(0), false));
-                } else {
-                    for (UserizedFolder folder : foldersForEvent) {
-                        Event copiedEvent = EventMapper.getInstance().copy(event, new Event(), (EventField[]) null);
-                        events.addAll(postProcess(Collections.singletonList(copiedEvent), folder, false));
-                    }
+        List<Event> foundEvents = storage.getEventStorage().searchEvents(buildSearchTerm(folders, queries), filters, sortOptions, fields);
+        for (Event event : readAdditionalEventData(foundEvents, -1, Utils.getFields(session, EventField.ATTENDEES))) {
+            List<UserizedFolder> foldersForEvent = getFoldersForEvent(folders, event);
+            if (1 == foldersForEvent.size()) {
+                events.addAll(postProcess(Collections.singletonList(event), foldersForEvent.get(0), false));
+            } else {
+                for (UserizedFolder folder : foldersForEvent) {
+                    Event copiedEvent = EventMapper.getInstance().copy(event, new Event(), (EventField[]) null);
+                    events.addAll(postProcess(Collections.singletonList(copiedEvent), folder, false));
                 }
-            }
-        } else {
-            for (UserizedFolder folder : folders) {
-                requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
-                List<Event> eventsInFolder = storage.getEventStorage().searchEvents(buildSearchTerm(folder, queries), filters, sortOptions, fields);
-                eventsInFolder = readAdditionalEventData(eventsInFolder, getCalendarUser(folder).getId(), fields);
-                events.addAll(postProcess(eventsInFolder, folder, isIncludePrivate(session)));
             }
         }
         return sortEvents(events, new SortOptions(session));
-    }
-
-    private SearchTerm<?> buildSearchTerm(UserizedFolder folder, List<String> queries) throws OXException {
-        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND).addSearchTerm(getFolderIdTerm(folder));
-        if (null != queries) {
-            for (String query : queries) {
-                if (false == isWildcardOnly(query)) {
-                    String pattern = addWildcards(Check.minimumSearchPatternLength(query, minimumSearchPatternLength), true, true);
-                    searchTerm.addSearchTerm(new CompositeSearchTerm(CompositeOperation.OR)
-                        .addSearchTerm(getSearchTerm(EventField.SUMMARY, SingleOperation.EQUALS, pattern))
-                        .addSearchTerm(getSearchTerm(EventField.DESCRIPTION, SingleOperation.EQUALS, pattern))
-                        .addSearchTerm(getSearchTerm(EventField.CATEGORIES, SingleOperation.EQUALS, pattern))
-                    );
-                }
-            }
-        }
-        return 1 == searchTerm.getOperands().length ? searchTerm.getOperands()[0] : searchTerm;
     }
 
     private SearchTerm<?> buildSearchTerm(List<UserizedFolder> folders, List<String> queries) throws OXException {
