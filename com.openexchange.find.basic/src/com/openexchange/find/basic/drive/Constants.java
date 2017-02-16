@@ -98,8 +98,8 @@ public final class Constants {
         "application/*ms-excel*",
         "application/*ms-powerpoint*",
         "application/*msword*",
-        "application/*msexcel*",
-        "application/*mspowerpoint*",
+        "application/*excel*",
+        "application/*powerpoint*",
         "application/*openxmlformats*",
         "application/*opendocument*",
         "application/*pdf*",
@@ -123,8 +123,8 @@ public final class Constants {
     
     /** The patterns used match {@link Type#DOC_TEXT}. */
     public static final String[] FILETYPE_PATTERNS_DOCUMENTS_TEXT = {
-        "application/msword",
-        "application/ms-word",
+        "application/*msword*",
+        "application/*ms-word*",
         "application/*opendocument.text",
         "application/vnd.openxmlformats-officedocument.wordprocessingml*",
         "text/*rtf*"
@@ -132,16 +132,15 @@ public final class Constants {
     
     /** The patterns used match {@link Type#DOC_SPREADSHEET}. */
     public static final String[] FILETYPE_PATTERNS_DOCUMENTS_SPREADSHEET = {
-        "application/*ms-excel*",
+        "application/*excel*",
         "application/*opendocument.spreadsheet",
         "application/vnd.openxmlformats-officedocument.spreadsheetml*"
-
     };  
     
     /** The patterns used match {@link Type#DOC_PRESENTATION}. */
     public static final String[] FILETYPE_PATTERNS_DOCUMENTS_PRESENTATION = {
         "application/vnd.openxmlformats-officedocument.presentationml*",
-        "application/*.ms-powerpoint*",
+        "application/*powerpoint*",
         "application/*opendocument.presentation*"
     };    
 
