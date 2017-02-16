@@ -66,6 +66,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
@@ -159,9 +161,9 @@ public class ServerConfigServiceImpl implements ServerConfigService {
             if (looksApplicable(possibleConfiguration, hostName)) {
                 // ensure that "all"-host-wildcards are applied first
                 if ("all".equals(possibleConfiguration.get("host"))) {
-                    applicableConfigs.addFirst(possibleConfiguration);
+                    applicableConfigs.addFirst(ImmutableMap.copyOf(possibleConfiguration));
                 } else {
-                    applicableConfigs.add(possibleConfiguration);
+                    applicableConfigs.add(ImmutableMap.copyOf(possibleConfiguration));
                 }
             } else {
                 String configName = configEntry.getKey();
@@ -191,9 +193,9 @@ public class ServerConfigServiceImpl implements ServerConfigService {
                 }
             }
         }
-        applicableConfigs.add(ccValues);
+        applicableConfigs.add(ImmutableMap.copyOf(ccValues));
 
-        return applicableConfigs;
+        return ImmutableList.copyOf(applicableConfigs);
     }
 
     /**
