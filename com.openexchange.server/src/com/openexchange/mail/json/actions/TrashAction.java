@@ -134,10 +134,9 @@ public final class TrashAction extends AbstractMailAction {
             for (MailPath mailPath : mailPaths) {
                 if (null != mailPath) {
                     jPaths.put(new JSONObject(2).put(FolderChildFields.FOLDER_ID, MailFolderUtility.prepareFullname(fa.getAccountId(), mailPath.getFolder())).put(DataFields.ID, mailPath.getMailID()));
+                } else {
+                    jPaths.put(JSONObject.NULL);
                 }
-                //else {
-                //     jPaths.put(JSONObject.NULL);
-                //}
             }
 
             return new AJAXRequestResult(jPaths, "json");
