@@ -92,13 +92,13 @@ If the admin wants a custom autologin handling for each tenant on the system, **
 For request distribution purposes, the administrator can configure an array of sharding subdomains. If set up correctly, those subdomains will primarly be used to load image previews in drive. This way, requests needed to keep the UI under full functionality are detached from those requests. Those subdomains have to be registered inside the apache configuration. Example:
 
 	<VirtualHost *:80>
-	    ServerName sharding.local-appsuite.com
+	    ServerName sharding.appsuite.com
 	</VirtualHost>
 
 Those subdomains can point to the same server, which handles all other requests or another distinct server. This has to be configured inside the <code>hosts</code> file. Inside the <code>as-congig.yml</code> a host has to provide the following parameter to enable sharding:
 
 	shardingSubdomains: 
-		- "sharding.local-appsuite.com/appsuite/api"
+		- sharding.appsuite.com/appsuite/api
 	
 Please note, that the full API path has to be provided. This way the administrator is capable of configuring a custom api location. The same cookies will be used for all requests on the main domian and all subdomains provided. Attention, even a single sharding subdomain has to be provided as an array.
 
