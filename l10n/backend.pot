@@ -6,6 +6,17 @@
 #, fuzzy
 msgid ""
 msgstr ""
+"#-#-#-#-#  backend1.pot (PACKAGE VERSION)  #-#-#-#-#\n"
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"#-#-#-#-#  backend2.pot (PACKAGE VERSION)  #-#-#-#-#\n"
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -7717,10 +7728,19 @@ msgstr ""
 #. Thrown when a mail access has been disabled. That is it exceeded the limit for failed authentication count.
 #. Thrown when a mail transport has been disabled. That is it exceeded the limit for failed authentication count.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:250
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:253
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:256
 msgid ""
 "Accessing server %1$s is disabled. Please update the account and enter valid "
 "credentials in order to use it again."
+msgstr ""
+
+#. Thrown when an oauth-associated mail access has been disabled. That is it exceeded the limit for failed authentication count.
+#. Thrown when an oauth-associated mail transport has been disabled. That is it exceeded the limit for failed authentication count.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:253
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:259
+msgid ""
+"Accessing server %1$s is disabled. Please reauthorize the associated OAuth "
+"account %5$s in order to use it again."
 msgstr ""
 
 #. The default name for a file
