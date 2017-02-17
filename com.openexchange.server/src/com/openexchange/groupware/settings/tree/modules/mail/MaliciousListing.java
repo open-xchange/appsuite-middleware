@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.settings.tree.modules.mail;
 
+import org.json.JSONArray;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -116,11 +117,18 @@ public class MaliciousListing implements PreferencesItemService, ConfigTreeEquiv
                     listing = tmp;
                 }
 
+                JSONArray jListing;
                 if (Strings.isEmpty(listing) || "none".equalsIgnoreCase(listing)) {
-                    listing = null;
+                    jListing = new JSONArray(0);
+                } else {
+                    String[] tokens = Strings.splitByCommaNotInQuotes(listing);
+                    jListing = new JSONArray(tokens.length);
+                    for (String token : tokens) {
+                        jListing.put(token);
+                    }
                 }
 
-                setting.setSingleValue(listing);
+                setting.setSingleValue(jListing);
             }
         };
     }
