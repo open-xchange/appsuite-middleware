@@ -126,8 +126,9 @@ public class FileIntoActionCommandParser implements CommandParser<ActionCommand>
             }
             jsonObject.put(MoveActionField.into.name(), MailFolderUtility.prepareFullname(0, folderName));
         } else {
-            if(actionCommand.getTagArguments().get(MoveActionField.copy.name()) != null){
-                jsonObject.put(MoveActionField.copy.name(), Boolean.valueOf(actionCommand.getTagArguments().get(MoveActionField.copy.name()).get(0)));
+            String copyCommandString = ArgumentUtil.createTagArgument(MoveActionField.copy.name()).toString();
+            if (actionCommand.getTagArguments().get(copyCommandString) != null) {
+                jsonObject.put(MoveActionField.copy.name(), true);
             }
             if (useUTF7Encoding()) {
                 folderName = BASE64MailboxDecoder.decode(((List<String>) arguments.get(1)).get(0));

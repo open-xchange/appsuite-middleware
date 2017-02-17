@@ -123,8 +123,9 @@ public class RedirectActionCommandParser implements CommandParser<ActionCommand>
         if(arguments.size()==1){
             jsonObject.put(RedirectActionField.to.name(), ((List<String>) arguments.get(0)).get(0));
         } else {
-            if(actionCommand.getTagArguments().get(RedirectActionField.copy.name()) != null){
-                jsonObject.put(RedirectActionField.copy.name(), Boolean.valueOf(actionCommand.getTagArguments().get(RedirectActionField.copy.name()).get(0)));
+            String copyCommandString = ArgumentUtil.createTagArgument(RedirectActionField.copy.name()).toString();
+            if (actionCommand.getTagArguments().get(copyCommandString) != null) {
+                jsonObject.put(RedirectActionField.copy.name(), true);
             }
             jsonObject.put(RedirectActionField.to.name(), ((List<String>) arguments.get(1)).get(0));
         }
