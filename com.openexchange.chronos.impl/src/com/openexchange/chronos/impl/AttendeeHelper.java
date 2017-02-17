@@ -307,8 +307,9 @@ public class AttendeeHelper {
             }
             groupAttendee = session.getEntityResolver().applyEntityData(groupAttendee);
             if (false == resolveGroupAttendees) {
-                LOG.debug("Skipping group attendee {}; only resolving group members.", groupAttendee);
                 attendees.add(groupAttendee);
+            } else {
+                LOG.debug("Skipping group attendee {}; only resolving group members.", groupAttendee);
             }
             for (int memberID : session.getEntityResolver().getGroupMembers(groupAttendee.getEntity())) {
                 if (contains(existingAttendees, memberID) || contains(attendees, memberID)) {
