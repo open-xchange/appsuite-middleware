@@ -84,6 +84,7 @@ import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.search.internal.operands.ColumnFieldOperand;
 import com.openexchange.search.internal.operands.ConstantOperand;
+import com.openexchange.tools.TimeZoneUtils;
 
 /**
  * {@link CalendarUtils}
@@ -709,7 +710,10 @@ public class CalendarUtils {
      * @return The matching Java timezone, or the fallback if not found
      */
     public static TimeZone optTimeZone(String id, TimeZone fallback) {
-        TimeZone timeZone = TimeZone.getTimeZone(id);
+        if (null == id) {
+            return fallback;
+        }
+        TimeZone timeZone = TimeZoneUtils.getTimeZone(id);
         if ("GMT".equals(timeZone.getID()) && false == "GMT".equalsIgnoreCase(id)) {
             return fallback;
         }

@@ -50,6 +50,7 @@
 package com.openexchange.chronos.compat;
 
 import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
+import static com.openexchange.chronos.common.CalendarUtils.optTimeZone;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import java.util.ArrayList;
@@ -135,7 +136,7 @@ public class Recurrence {
         /*
          * take over common attributes
          */
-        TimeZone timeZone = null != recurrenceData.getTimeZoneID() ? TimeZone.getTimeZone(recurrenceData.getTimeZoneID()) : TimeZones.UTC;
+        TimeZone timeZone = optTimeZone(recurrenceData.getTimeZoneID(), TimeZones.UTC);
         Calendar seriesStartCalendar = initCalendar(timeZone, recurrenceData.getSeriesStart());
         RecurrenceRule rrule = getRecurrenceRule(recurrenceData.getRecurrenceRule());
         SeriesPattern pattern = new SeriesPattern();
@@ -248,7 +249,7 @@ public class Recurrence {
         /*
          * check if the client-defined UNTIL is at least one day prior next occurrence (as observed in the timezone)
          */
-        DateTime localUntil = null != recurrenceData.getTimeZoneID() ? new DateTime(TimeZone.getTimeZone(recurrenceData.getTimeZoneID()), until.getTimestamp()) : until;
+        DateTime localUntil = null != recurrenceData.getTimeZoneID() ? new DateTime(optTimeZone(recurrenceData.getTimeZoneID(), TimeZones.UTC), until.getTimestamp()) : until;
         if (null == nextOccurrenceStart || nextOccurrenceStart.getYear() > localUntil.getYear() ||
             nextOccurrenceStart.getMonth() > localUntil.getMonth() || nextOccurrenceStart.getDayOfMonth() > localUntil.getDayOfMonth()) {
             /*
@@ -443,7 +444,7 @@ public class Recurrence {
         if (recurrenceData.isAllDay()) {
             localUntil = new DateTime(TimeZones.UTC, millis).toAllDay();
         } else if (null != recurrenceData.getTimeZoneID()) {
-            localUntil = new DateTime(TimeZone.getTimeZone(recurrenceData.getTimeZoneID()), millis);
+            localUntil = new DateTime(optTimeZone(recurrenceData.getTimeZoneID(), TimeZones.UTC), millis);
         } else {
             localUntil = new DateTime(millis);
         }

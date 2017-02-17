@@ -52,6 +52,7 @@ package com.openexchange.chronos.impl.session;
 import static com.openexchange.chronos.common.CalendarUtils.extractEMailAddress;
 import static com.openexchange.chronos.common.CalendarUtils.filter;
 import static com.openexchange.chronos.common.CalendarUtils.isInternal;
+import static com.openexchange.chronos.common.CalendarUtils.optTimeZone;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.java.Autoboxing.i2I;
@@ -87,6 +88,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
+import com.openexchange.java.util.TimeZones;
 import com.openexchange.objectusecount.BatchIncrementArguments;
 import com.openexchange.objectusecount.BatchIncrementArguments.Builder;
 import com.openexchange.objectusecount.IncrementArguments;
@@ -187,7 +189,7 @@ public class DefaultEntityResolver implements EntityResolver {
 
     @Override
     public TimeZone getTimeZone(int userID) throws OXException {
-        return TimeZone.getTimeZone(getUser(userID).getTimeZone());
+        return optTimeZone(getUser(userID).getTimeZone(), TimeZones.UTC);
     }
 
     @Override

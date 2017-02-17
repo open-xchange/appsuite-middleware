@@ -53,6 +53,7 @@ import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
 import static com.openexchange.chronos.common.CalendarUtils.isFloating;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
+import static com.openexchange.chronos.common.CalendarUtils.optTimeZone;
 import static com.openexchange.chronos.compat.Appointment2Event.getRecurrenceData;
 import static com.openexchange.chronos.compat.Appointment2Event.getRecurrenceID;
 import static com.openexchange.chronos.compat.Appointment2Event.getRecurrenceIDs;
@@ -114,7 +115,7 @@ public class Compat {
             int idx = value.indexOf('~');
             int absoluteDuration = Integer.parseInt(value.substring(0, idx));
             String databasePattern = value.substring(idx + 1);
-            TimeZone timeZone = null != event.getStartTimeZone() ? TimeZone.getTimeZone(event.getStartTimeZone()) : TimeZones.UTC;
+            TimeZone timeZone = optTimeZone(event.getStartTimeZone(), TimeZones.UTC);
             /*
              * convert legacy series pattern into proper recurrence rule
              */
@@ -313,7 +314,7 @@ public class Compat {
         /*
          * remember time fraction of actual start- and end-date
          */
-        TimeZone timeZone = isFloating(seriesMaster) || null == seriesMaster.getStartTimeZone() ? TimeZones.UTC : TimeZone.getTimeZone(seriesMaster.getStartTimeZone());
+        TimeZone timeZone = isFloating(seriesMaster) ? TimeZones.UTC : optTimeZone(seriesMaster.getStartTimeZone(), TimeZones.UTC);
         Calendar calendar = initCalendar(timeZone, seriesMaster.getStartDate());
         int startHour = calendar.get(Calendar.HOUR_OF_DAY);
         int startMinute = calendar.get(Calendar.MINUTE);

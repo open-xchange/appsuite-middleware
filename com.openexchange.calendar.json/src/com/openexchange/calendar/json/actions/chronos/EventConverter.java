@@ -49,6 +49,12 @@
 
 package com.openexchange.calendar.json.actions.chronos;
 
+import static com.openexchange.chronos.common.CalendarUtils.find;
+import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
+import static com.openexchange.chronos.common.CalendarUtils.isInternal;
+import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
+import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
+import static com.openexchange.chronos.common.CalendarUtils.optTimeZone;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -64,7 +70,6 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.RecurrenceId;
-import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DataAwareRecurrenceId;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.compat.Appointment2Event;
@@ -90,6 +95,7 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.participants.ConfirmableParticipant;
+import com.openexchange.java.util.TimeZones;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
@@ -536,12 +542,12 @@ public class EventConverter {
                 }
             }
         }
-        if (event.containsRecurrenceRule() && null != event.getRecurrenceRule() && false == CalendarUtils.isSeriesException(event)) {
+        if (event.containsRecurrenceRule() && null != event.getRecurrenceRule() && false == isSeriesException(event)) {
 
             // series pattern seems to be added in response for recurrence master and "regular" occurrences, but not for change exceptions
 
             if (null == recurrenceData) {
-                if (CalendarUtils.isSeriesMaster(event)) {
+                if (isSeriesMaster(event)) {
                     recurrenceData = new DefaultRecurrenceData(event);
                 } else if (null != event.getRecurrenceId() && DataAwareRecurrenceId.class.isInstance(event.getRecurrenceId())) {
                     recurrenceData = (RecurrenceData) event.getRecurrenceId();
@@ -702,7 +708,7 @@ public class EventConverter {
         }
         if (null != users) {
             for (UserParticipant user : users) {
-                Attendee existingAttendee = CalendarUtils.find(attendees, user.getIdentifier());
+                Attendee existingAttendee = find(attendees, user.getIdentifier());
                 if (null != existingAttendee) {
                     copyProperties(getAttendee(user), existingAttendee);
                 } else {
@@ -767,7 +773,7 @@ public class EventConverter {
         if (null != originalRecurrenceData) {
             fulltime = originalRecurrenceData.isAllDay();
             pattern.setSeriesStart(Long.valueOf(originalRecurrenceData.getSeriesStart()));
-            timeZone = TimeZone.getTimeZone(null != originalRecurrenceData.getTimeZoneID() ? originalRecurrenceData.getTimeZoneID() : "UTC");
+            timeZone = optTimeZone(originalRecurrenceData.getTimeZoneID(), TimeZones.UTC);
         }
         if (appointment.containsRecurrenceType()) {
             if (0 == appointment.getRecurrenceType()) {
@@ -805,15 +811,18 @@ public class EventConverter {
             timeZone = TimeZone.getTimeZone(appointment.getTimezone());
         }
         if (null == timeZone) {
-            timeZone = session.get(CalendarParameters.PARAMETER_TIMEZONE, TimeZone.class, TimeZone.getTimeZone(session.getUser().getTimeZone()));
+            timeZone = session.get(CalendarParameters.PARAMETER_TIMEZONE, TimeZone.class);
+            if (null == timeZone) {
+                timeZone = optTimeZone(session.getUser().getTimeZone(), TimeZones.UTC);
+            }
         }
 
         if (appointment.containsRecurringStart() && appointment.containsStartDate()) {
             /*
              * recurring start and appointment start are both set; prefer the time fraction from start date
              */
-            Calendar seriesStartCalendar = CalendarUtils.initCalendar(timeZone, appointment.getRecurringStart());
-            Calendar startDateCalendar = CalendarUtils.initCalendar(timeZone, appointment.getStartDate());
+            Calendar seriesStartCalendar = initCalendar(timeZone, appointment.getRecurringStart());
+            Calendar startDateCalendar = initCalendar(timeZone, appointment.getStartDate());
             seriesStartCalendar.set(Calendar.HOUR_OF_DAY, startDateCalendar.get(Calendar.HOUR_OF_DAY));
             seriesStartCalendar.set(Calendar.MINUTE, startDateCalendar.get(Calendar.MINUTE));
             seriesStartCalendar.set(Calendar.SECOND, startDateCalendar.get(Calendar.SECOND));
@@ -876,7 +885,7 @@ public class EventConverter {
                 participants.add(new GroupParticipant(attendee.getEntity()));
                 break;
             case INDIVIDUAL:
-                if (CalendarUtils.isInternal(attendee)) {
+                if (isInternal(attendee)) {
                     UserParticipant userParticipant = new UserParticipant(attendee.getEntity());
                     userParticipant.setConfirm(Event2Appointment.getConfirm(attendee.getPartStat()));
                     userParticipant.setConfirmMessage(attendee.getComment());
