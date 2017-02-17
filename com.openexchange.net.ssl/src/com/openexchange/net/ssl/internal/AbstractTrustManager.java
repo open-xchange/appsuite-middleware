@@ -288,7 +288,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         // Check if the user is allowed to accept untrusted certificates
         UserAwareSSLConfigurationService sslConfigurationService = Services.optService(UserAwareSSLConfigurationService.class);
         if (null == sslConfigurationService || false == sslConfigurationService.isAllowedToDefineTrustLevel(user, context)) {
-            throw e;
+            throw new CertificateException(SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e, getHostFromPrincipal(chain[0])));
         }
 
         // Check if the user trusts it
