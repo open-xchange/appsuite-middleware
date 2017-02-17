@@ -265,7 +265,6 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
         String sessionId = request.getParameter(OAuthProviderConstants.PARAM_SESSION);
         if (sessionId != null) {
             // Session must only be provided by a previous login POST. This is enforced via additional cookie hash parameters.
-            LoginConfiguration loginConfig = LoginServlet.getLoginConfiguration();
             Session session = requireService(SessiondService.class, services).getSession(sessionId);
             if (session != null) {
                 Map<String, Cookie> cookies = Cookies.cookieMapFor(request);

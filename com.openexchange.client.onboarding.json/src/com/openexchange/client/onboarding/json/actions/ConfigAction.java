@@ -81,8 +81,11 @@ public class ConfigAction extends AbstractOnboardingAction {
     protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
         OnboardingService onboardingService = getOnboardingService();
 
-        String clientDeviceId = requestData.getParameter("client");
-        ClientDevice clientDevice = ClientDevices.getClientDeviceFor(clientDeviceId);
+        ClientDevice clientDevice;
+        {
+            String clientDeviceId = requestData.getParameter("client");
+            clientDevice = ClientDevices.getClientDeviceFor(clientDeviceId);
+        }
 
         OnboardingView view = onboardingService.getViewFor(clientDevice, session);
         return new AJAXRequestResult(view, "onboardingView");

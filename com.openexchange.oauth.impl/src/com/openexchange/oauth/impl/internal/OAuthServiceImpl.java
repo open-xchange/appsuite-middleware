@@ -546,18 +546,24 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
         }
     }
 
-    private void executeUpdate(final int contextId, final Command command, final List<Object> values) throws OXException {
-        final Context ctx = getContext(contextId);
-        final Connection writeCon = getConnection(false, ctx);
+    private void executeUpdate(int contextId, Command command, List<Object> values) throws OXException {
+        Context ctx = getContext(contextId);
+        Connection writeCon = getConnection(false, ctx);
         try {
-            new StatementBuilder().executeStatement(writeCon, command, values);
-        } catch (final SQLException e) {
-            LOG.error(e.toString());
-            throw OAuthExceptionCodes.SQL_ERROR.create(e.getMessage(), e);
+            executeUpdate(command, values, writeCon);
         } finally {
             if (writeCon != null) {
                 provider.releaseWriteConnection(ctx, writeCon);
             }
+        }
+    }
+
+    private void executeUpdate(Command command, List<Object> values, Connection writeCon) throws OXException {
+        try {
+            new StatementBuilder().executeStatement(writeCon, command, values);
+        } catch (SQLException e) {
+            LOG.error(e.toString());
+            throw OAuthExceptionCodes.SQL_ERROR.create(e.getMessage(), e);
         }
     }
 
@@ -793,19 +799,52 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             final ArrayList<Object> values = new ArrayList<Object>(SQLStructure.OAUTH_COLUMN.values().length);
             final UPDATE update = SQLStructure.updateAccount(account, contextId, user, values);
             /*
-             * Execute UPDATE command
+             * Get connection
              */
-            executeUpdate(contextId, update, values);
-            /*
-             * Re-authorise
-             */
-            OAuthAccessRegistryService registryService = Services.getService(OAuthAccessRegistryService.class);
-            OAuthAccessRegistry oAuthAccessRegistry = registryService.get(serviceMetaData);
-            OAuthAccess access = oAuthAccessRegistry.get(contextId, user);
-            // No need to re-authorise if access not present
-            if (access != null) {
-                // Initialise the access with the new access token
-                access.initialize();
+            Context ctx = getContext(contextId);
+            Connection writeCon = getConnection(false, ctx);
+            boolean rollback = false;
+            try {
+                Databases.startTransaction(writeCon);
+                rollback = true;
+                /*
+                 * Execute UPDATE command
+                 */
+                executeUpdate(update, values, writeCon);
+                /*
+                 * Re-authorise
+                 */
+                OAuthAccessRegistryService registryService = Services.getService(OAuthAccessRegistryService.class);
+                OAuthAccessRegistry oAuthAccessRegistry = registryService.get(serviceMetaData);
+                OAuthAccess access = oAuthAccessRegistry.get(contextId, user);
+                // No need to re-authorise if access not present
+                if (access != null) {
+                    // Initialise the access with the new access token
+                    access.initialize();
+                }
+                /*
+                 * Signal re-authorized event
+                 */
+                {
+                    Map<String, Object> properties = Collections.<String, Object> emptyMap();
+                    ReauthorizeListenerRegistry.getInstance().onAfterOAuthAccountReauthorized(accountId, properties, user, contextId, writeCon);
+                }
+                /*
+                 * Commit
+                 */
+                writeCon.commit();
+                rollback = false;
+            } catch (SQLException e) {
+                LOG.error(e.toString());
+                throw OAuthExceptionCodes.SQL_ERROR.create(e.getMessage(), e);
+            } finally {
+                if (rollback) {
+                    Databases.rollback(writeCon);
+                }
+                Databases.autocommit(writeCon);
+                if (writeCon != null) {
+                    provider.releaseWriteConnection(ctx, writeCon);
+                }
             }
             /*
              * Return the account

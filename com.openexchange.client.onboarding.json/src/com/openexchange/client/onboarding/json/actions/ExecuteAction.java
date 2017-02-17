@@ -113,8 +113,11 @@ public class ExecuteAction extends AbstractOnboardingAction {
             throw AjaxExceptionCodes.IMVALID_PARAMETER.create("action_id");
         }
 
-        String clientDeviceId = requestData.getParameter("client");
-        ClientDevice clientDevice = ClientDevices.getClientDeviceFor(clientDeviceId);
+        ClientDevice clientDevice;
+        {
+            String clientDeviceId = requestData.getParameter("client");
+            clientDevice = ClientDevices.getClientDeviceFor(clientDeviceId);
+        }
 
         if (false == clientDevice.implies(compositeId.getDevice())) {
             throw OnboardingExceptionCodes.NO_SUCH_SCENARIO.create(compositeId.getScenarioId());

@@ -203,10 +203,9 @@ public final class MailProviderRegistry {
         /*
          * Look-up
          */
-        for (final Iterator<Map.Entry<Protocol, MailProvider>> iter = PROVIDERS.entrySet().iterator(); iter.hasNext();) {
-            final Map.Entry<Protocol, MailProvider> entry = iter.next();
-            if (entry.getKey().isSupported(protocolName)) {
-                return entry.getValue();
+        for (Map.Entry<Protocol, MailProvider> providerEntry : PROVIDERS.entrySet()) {
+            if (providerEntry.getKey().isSupported(protocolName)) {
+                return providerEntry.getValue();
             }
         }
         return null;

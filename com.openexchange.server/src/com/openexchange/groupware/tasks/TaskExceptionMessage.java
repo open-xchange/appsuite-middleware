@@ -80,7 +80,7 @@ public class TaskExceptionMessage implements LocalizableStrings {
 
     public static final String WRONG_DATE_RANGE_MSG = "Date range in search must contain 2 and not %d values.";
 
-    public static final String NO_READ_PERMISSION_MSG = "You do not have the appropriate permissions to read the contents of folder \"%1$s\".";
+    public static final String NO_READ_PERMISSION_MSG = "You do not have the appropriate permissions to read the contents of the folder with id %1$d.";
 
     public static final String NO_TASKS_MSG = "Tasks are disabled for you.";
 
@@ -94,7 +94,7 @@ public class TaskExceptionMessage implements LocalizableStrings {
 
     public static final String PERCENTAGE_NOT_ZERO_MSG = "Tasks that have not been started yet need to have a 'Done' percentage of 0 and not %d.";
 
-    public static final String NO_WRITE_PERMISSION_MSG = "You do not have the appropriate permissions to edit tasks in folder \"%1$s\".";
+    public static final String NO_WRITE_PERMISSION_MSG = "You do not have the appropriate permissions to edit tasks in the folder with id %1$d.";
 
     public static final String NO_SHARED_MOVE_MSG = "Moving items from or into shared folder \"%1$s\" is not allowed.";
 
@@ -131,5 +131,5 @@ public class TaskExceptionMessage implements LocalizableStrings {
 
     public final static String INCORRECT_STRING_DISPLAY = "The character \"%1$s\" in field \"%2$s\" can't be saved. Please remove the problematic character and try again.";
 
-    public static final String NOT_VISIBLE = "This folder (%2$d) is not visible.";
+    public static final String NOT_VISIBLE = "This folder (%1$d) is not visible.";
 }

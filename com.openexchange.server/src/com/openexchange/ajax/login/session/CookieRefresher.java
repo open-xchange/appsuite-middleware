@@ -83,7 +83,8 @@ public class CookieRefresher implements SessionServletInterceptor {
 
     @Override
     public void intercept(Session session, HttpServletRequest req, HttpServletResponse resp) throws OXException {
-        if(!(conf.isSessiondAutoLogin(req.getServerName()) || conf.getCookieExpiry()<0)){
+        boolean autoLogin = conf.isSessiondAutoLogin(req.getServerName());
+        if (!autoLogin && conf.getCookieExpiry() >= 0) {
             return;
         }
 
@@ -95,7 +96,7 @@ public class CookieRefresher implements SessionServletInterceptor {
 
             // Refresh HTTP session, too
             req.getSession();
-        } else if (conf.isSessiondAutoLogin(req.getServerName())) {
+        } else if (autoLogin) {
             if (needsSessionCookieRefresh(session)) {
                 String hash = session.getHash();
 

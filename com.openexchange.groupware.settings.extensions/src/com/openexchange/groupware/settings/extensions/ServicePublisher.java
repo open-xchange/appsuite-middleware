@@ -54,10 +54,25 @@ package com.openexchange.groupware.settings.extensions;
  */
 public interface ServicePublisher {
 
-    public void publishService(Class<?> clazz,Object service);
+    /**
+     * (OSGi-wise) Publishes the specified service.
+     *
+     * @param clazz The service's class
+     * @param service The service instance
+     */
+    public <S> void publishService(Class<S> clazz, S service);
 
-    public void removeService(Class<?> clazz, Object service);
+    /**
+     * (OSGi-wise) Removes the specified service.
+     *
+     * @param clazz The service's class
+     * @param service The service instance
+     */
+    public <S> void removeService(Class<S> clazz, S service);
 
+    /**
+     * Removes all previously published services.
+     */
     public void removeAllServices();
 
 }

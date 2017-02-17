@@ -240,13 +240,12 @@ public final class MimeStructureFixer {
                 // Check mailer/boundary for "Apple"
                 {
                     final String mailer = mimeMessage.getHeader(MessageHeaders.HDR_X_MAILER, null);
-                    final boolean noAppleMailer;
-                    if (null == mailer || (noAppleMailer = (com.openexchange.java.Strings.toLowerCase(mailer).indexOf("apple") < 0))) {
+                    if (null == mailer || com.openexchange.java.Strings.toLowerCase(mailer).indexOf("apple") < 0) {
                         // Not composed by Apple mailer
                         return mimeMessage;
                     }
                     final String boundary = contentType.getParameter("boundary");
-                    if (noAppleMailer && (null == boundary || com.openexchange.java.Strings.toLowerCase(boundary).indexOf("apple") < 0)) {
+                    if (null == boundary || com.openexchange.java.Strings.toLowerCase(boundary).indexOf("apple") < 0) {
                         // Not composed by Apple mailer
                         return mimeMessage;
                     }

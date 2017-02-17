@@ -10,3 +10,8 @@ properties:
     description: Array of available action commands.
     items:
       type: string
+  capabilities:
+    type: array
+    description: Array of supported imap capabilities
+    items:
+      type: string

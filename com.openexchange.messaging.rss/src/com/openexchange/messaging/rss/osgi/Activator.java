@@ -83,11 +83,4 @@ public class Activator extends HousekeepingActivator {
         }
     }
 
-    @Override
-    protected void stopBundle() {
-        closeTrackers();
-        unregisterServices();
-        cleanUp();
-    }
-
 }

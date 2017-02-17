@@ -107,6 +107,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
+import com.openexchange.folderstorage.virtual.osgi.Services;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -173,6 +174,7 @@ import com.openexchange.mail.search.ReceivedDateTerm;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.search.SearchUtility;
 import com.openexchange.mail.search.service.SearchTermMapper;
+import com.openexchange.mail.service.EncryptedMailService;
 import com.openexchange.mail.threader.Conversation;
 import com.openexchange.mail.threader.Conversations;
 import com.openexchange.mail.threader.ThreadableMapping;
@@ -1614,6 +1616,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         String fullName = argument.getFullname();
         MailMessage mail = mailAccess.getMessageStorage().getMessage(fullName, msgUID, markAsSeen);
         if (mail != null) {
+
             if (!mail.containsAccountId() || mail.getAccountId() < 0) {
                 mail.setAccountId(accountId);
             }
@@ -1645,6 +1648,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             } catch (OXException e) {
                 LOG.error("", e);
             }
+
             /*
              * Check color label vs. \Flagged flag
              */
@@ -2953,11 +2957,23 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         return (b != null) && b.booleanValue();
     }
 
+    private ComposedMailMessage checkGuardEmail (ComposedMailMessage composedMail) throws OXException {
+        // Check if Guard email
+        if (composedMail.getSecuritySettings()!= null && composedMail.getSecuritySettings().anythingSet()) {
+            EncryptedMailService encryptor = Services.getServiceLookup().getOptionalService(EncryptedMailService.class);
+            if (encryptor != null) {
+                composedMail = encryptor.encryptDraftEmail(composedMail, session);
+            }
+        }
+        return (composedMail);
+    }
+
     @Override
     public MailPath saveDraft(ComposedMailMessage draftMail, boolean autosave, int accountId) throws OXException {
         if (autosave) {
             return autosaveDraft(draftMail, accountId);
         }
+        draftMail = checkGuardEmail (draftMail);
         initConnection(isTransportOnly(accountId) ? MailAccount.DEFAULT_ID : accountId);
         String draftFullname = mailAccess.getFolderStorage().getDraftsFolder();
         if (!draftMail.containsSentDate()) {
@@ -2977,6 +2993,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
     private MailPath autosaveDraft(ComposedMailMessage draftMail, int accountId) throws OXException {
         initConnection(isTransportOnly(accountId) ? MailAccount.DEFAULT_ID : accountId);
+
+        // Until MessageStorage fully implemented for Guard, autosave is simply save draft for Guard
+        if (draftMail.getSecuritySettings() != null && draftMail.getSecuritySettings().isEncrypt()) {
+            return saveDraft(draftMail, false, accountId);
+        }
         String draftFullname = mailAccess.getFolderStorage().getDraftsFolder();
         /*
          * Auto-save draft

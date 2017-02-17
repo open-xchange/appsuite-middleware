@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.json.actions;
 
+import org.json.ImmutableJSONArray;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -78,6 +79,8 @@ import com.openexchange.server.ServiceLookup;
  */
 public final class TrashAction extends AbstractMailAction {
 
+    private final JSONArray emptyJsonArray;
+
     /**
      * Initializes a new {@link TrashAction}.
      *
@@ -85,6 +88,7 @@ public final class TrashAction extends AbstractMailAction {
      */
     public TrashAction(final ServiceLookup services) {
         super(services);
+        emptyJsonArray = ImmutableJSONArray.immutableFor(new JSONArray(0));
     }
 
     @Override
@@ -122,13 +126,16 @@ public final class TrashAction extends AbstractMailAction {
             }
 
             MailPath[] mailPaths = enhancedDeletionMessageStorage.deleteMessagesEnhanced(fa.getFullName(), mailIds, hardDelete);
+            if (null == mailPaths || mailPaths.length == 0) {
+                return new AJAXRequestResult(emptyJsonArray, "json");
+            }
 
             JSONArray jPaths = new JSONArray(mailPaths.length);
             for (MailPath mailPath : mailPaths) {
-                if (null == mailPath) {
-                    jPaths.put(JSONObject.NULL);
-                } else {
+                if (null != mailPath) {
                     jPaths.put(new JSONObject(2).put(FolderChildFields.FOLDER_ID, MailFolderUtility.prepareFullname(fa.getAccountId(), mailPath.getFolder())).put(DataFields.ID, mailPath.getMailID()));
+                } else {
+                    jPaths.put(JSONObject.NULL);
                 }
             }
 

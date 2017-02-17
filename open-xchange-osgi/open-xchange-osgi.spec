@@ -11,7 +11,11 @@ BuildRequires: ant-nodeps
 %if 0%{?rhel_version} && 0%{?rhel_version} == 600
 BuildRequires: java7-devel
 %else
+%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
+BuildRequires: java-1_7_0-openjdk-devel
+%else
 BuildRequires: java-devel >= 1.7.0
+%endif
 %endif
 Version:       @OXVERSION@
 %define        ox_release 0
@@ -32,10 +36,8 @@ Requires:      java7
 %else
 Requires:      java >= 1.7.0
 %endif
-%if 0%{?rhel_version}
-# ibm java only on SLE, please
+# No ibm java on RHEL and on SLE, please
 Conflicts:     java-ibm
-%endif
 
 %description
 This package installes 3rd party OSGi bundles for the Open-Xchange backend. This includes the Equinox OSGi framework and the servlet API.

@@ -48,6 +48,7 @@
  */
 package com.openexchange.jsieve.commands;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
@@ -60,6 +61,7 @@ import java.util.List;
 public abstract class IfOrElseIfCommand extends IfStructureCommand {
 
     protected TestCommand testcommand;
+    protected List<String> optRequired = new ArrayList<>();
 
     protected IfOrElseIfCommand() {
 
@@ -94,7 +96,13 @@ public abstract class IfOrElseIfCommand extends IfStructureCommand {
         for (final ActionCommand actionCommand : super.getActionCommands()) {
             retval.addAll(actionCommand.getRequired());
         }
+        retval.addAll(optRequired);
         return retval;
+    }
+
+    @Override
+    public void addOptionalRequired(String required) {
+        this.optRequired.add(required);
     }
 
 }

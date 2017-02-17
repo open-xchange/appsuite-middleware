@@ -56,6 +56,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
@@ -86,6 +87,7 @@ import com.openexchange.folderstorage.database.contentType.CalendarContentType;
 import com.openexchange.folderstorage.database.contentType.ContactContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.groupware.notify.hostname.HostData;
+import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.provider.exceptions.OAuthInsufficientScopeException;
 import com.openexchange.oauth.provider.resourceserver.OAuthAccess;
@@ -105,6 +107,8 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractFolderAction implements AJAXActionService {
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractFolderAction.class);
 
     /**
      * <code>"ignoreTranslation"</code>.
@@ -156,6 +160,25 @@ public abstract class AbstractFolderAction implements AJAXActionService {
         }
         final String uc = Strings.toUpperCase(clientId);
         return uc.startsWith("USM-EAS") || uc.startsWith("USM-JSON");
+    }
+
+    /**
+     * Gets the possibly specified <code>"language"</code> parameter from given request and parses its value to an appropriate instance of {@link Locale}.
+     *
+     * @param request The request to get the parameter from
+     * @return The locale or <code>null</code>
+     */
+    protected static Locale optLocale(AJAXRequestData request) {
+        String sLocale = request.getParameter("language");
+        if (Strings.isEmpty(sLocale)) {
+            return null;
+        }
+
+        Locale locale = LocaleTools.getLocale(sLocale);
+        if (null == locale) {
+            LOG.warn("Specified \"language\" parameter (\"{}\") cannot be parsed to a locale. Using user's locale instead.", sLocale);
+        }
+        return locale;
     }
 
     /**

@@ -90,39 +90,38 @@ public class MobilityProvisioningActivator extends HousekeepingActivator {
 
 	}
 
-	@Override
-	protected void startBundle() throws Exception {
-		try {
-			{
-				final MobilityProvisioningServiceRegistry registry = getInstance();
-				registry.clearRegistry();
-				registry.clearActionServices();
-				final Class<?>[] classes = getNeededServices();
-				for (int i = 0; i < classes.length; i++) {
-					final Object service = getService(classes[i]);
-					if (null != service) {
-						registry.addService(classes[i], service);
-					}
-				}
-			}
+    @Override
+    protected void startBundle() throws Exception {
+        try {
 
-			String alias = getService(DispatcherPrefixService.class).getPrefix() + SERVLET_PATH_APPENDIX;
+            final MobilityProvisioningServiceRegistry registry = getInstance();
+            registry.clearRegistry();
+            registry.clearActionServices();
+            final Class<?>[] classes = getNeededServices();
+            for (int i = 0; i < classes.length; i++) {
+                final Object service = getService(classes[i]);
+                if (null != service) {
+                    registry.addService(classes[i], service);
+                }
+            }
+
+            String alias = getService(DispatcherPrefixService.class).getPrefix() + SERVLET_PATH_APPENDIX;
             getService(HttpService.class).registerServlet(alias, new MobilityProvisioningServlet(), null, null);
             this.alias = alias;
 
             track(ActionService.class, new ActionServiceListener(context));
             openTrackers();
-		} catch (final Throwable t) {
-			LOG.error("", t);
-			throw t instanceof Exception ? (Exception) t : new Exception(t);
-		}
+        } catch (final Throwable t) {
+            LOG.error("", t);
+            throw t instanceof Exception ? (Exception) t : new Exception(t);
+        }
 
-	}
+    }
 
-	@Override
-	protected void stopBundle() throws Exception {
-		try {
-		    final HttpService service = getService(HttpService.class);
+    @Override
+    protected void stopBundle() throws Exception {
+        try {
+            final HttpService service = getService(HttpService.class);
             if (null != service) {
                 String alias = this.alias;
                 if (null != alias) {
@@ -133,12 +132,12 @@ public class MobilityProvisioningActivator extends HousekeepingActivator {
             /*
              * Close service trackers
              */
-            closeTrackers();
+            cleanUp();
             getInstance().clearRegistry();
             getInstance().clearActionServices();
-		} catch (final Throwable t) {
-			LOG.error("", t);
-			throw t instanceof Exception ? (Exception) t : new Exception(t);
-		}
-	}
+        } catch (final Throwable t) {
+            LOG.error("", t);
+            throw t instanceof Exception ? (Exception) t : new Exception(t);
+        }
+    }
 }

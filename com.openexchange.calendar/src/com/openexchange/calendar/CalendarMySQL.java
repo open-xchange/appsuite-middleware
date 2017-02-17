@@ -2520,7 +2520,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             }
             final int pfid = member.pfid;
 
-            if (pfid > 0) {
+            if (pfid > 0 && cdaos!=null) {
                 for (final CalendarDataObject cdao : cdaos) {
                     if (cdao.getFolderType() == FolderObject.PRIVATE) {
                         if (uid == tuid) {
@@ -2555,7 +2555,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             final int alarm = member.alarm;
             if (alarm > -1) {
                 up.setAlarmMinutes(alarm);
-                if (up.getAlarmMinutes() >= 0) {
+                if (up.getAlarmMinutes() >= 0 && cdaos!=null) {
                     for (final CalendarDataObject cdao : cdaos) {
                         int folderType = cdao.getFolderType();
                         if (folderType == FolderObject.SHARED && up.getIdentifier() == cdao.getSharedFolderOwner()) {

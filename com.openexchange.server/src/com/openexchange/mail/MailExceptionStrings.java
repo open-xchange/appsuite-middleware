@@ -249,7 +249,13 @@ public final class MailExceptionStrings implements LocalizableStrings {
     // Thrown when a mail access has been disabled. That is it exceeded the limit for failed authentication count.
     public static final String MAIL_ACCESS_DISABLED_MSG = "Accessing server %1$s is disabled. Please update the account and enter valid credentials in order to use it again.";
 
+    // Thrown when an oauth-associated mail access has been disabled. That is it exceeded the limit for failed authentication count.
+    public static final String MAIL_ACCESS_DISABLED_OAUTH_MSG = "Accessing server %1$s is disabled. Please reauthorize the associated OAuth account %5$s in order to use it again.";
+
     // Thrown when a mail transport has been disabled. That is it exceeded the limit for failed authentication count.
     public static final String MAIL_TRANSPORT_DISABLED_MSG = "Accessing server %1$s is disabled. Please update the account and enter valid credentials in order to use it again.";
+
+    // Thrown when an oauth-associated mail transport has been disabled. That is it exceeded the limit for failed authentication count.
+    public static final String MAIL_TRANSPORT_DISABLED_OAUTH_MSG = "Accessing server %1$s is disabled. Please reauthorize the associated OAuth account %5$s in order to use it again.";
 
 }

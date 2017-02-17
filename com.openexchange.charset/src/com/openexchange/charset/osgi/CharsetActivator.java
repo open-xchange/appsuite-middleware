@@ -139,7 +139,6 @@ public final class CharsetActivator extends HousekeepingActivator implements Ser
     public void stopBundle() {
         LOG.info("stopping bundle: com.openexchange.charset");
         try {
-            closeTrackers();
             /*
              * Restore original
              */
@@ -155,7 +154,6 @@ public final class CharsetActivator extends HousekeepingActivator implements Ser
             LOG.info("Collection charset provider replaced with former standard/external charset provider. Charset bundle successfully stopped");
         } catch (final Throwable t) {
             LOG.error("", t);
-//            throw t instanceof Exception ? (Exception) t : new Exception(t);
         } finally {
             collectionCharsetProvider = null;
             cleanUp();

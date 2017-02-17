@@ -99,10 +99,12 @@ public class VacationActionCommandParser implements CommandParser<ActionCommand>
     public ActionCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException {
         final ArrayList<Object> arrayList = new ArrayList<Object>();
         final String days = jsonObject.getString(VacationActionField.days.getFieldName());
-        if (null != days) {
-            arrayList.add(ArgumentUtil.createTagArgument(VacationActionField.days));
-            arrayList.add(ArgumentUtil.createNumberArgument(days));
+        if (days == null) {
+            throw OXJSONExceptionCodes.JSON_READ_ERROR.create("Parameter " + VacationActionField.days.getFieldName() + " is missing for " + ActionCommand.Commands.VACATION.getJsonName() + " is missing in JSON-Object. This is a required field");
         }
+        arrayList.add(ArgumentUtil.createTagArgument(VacationActionField.days));
+        arrayList.add(ArgumentUtil.createNumberArgument(days));
+        
         final JSONArray addresses = jsonObject.optJSONArray(VacationActionField.addresses.getFieldName());
         if (null != addresses) {
             arrayList.add(ArgumentUtil.createTagArgument(VacationActionField.addresses));
