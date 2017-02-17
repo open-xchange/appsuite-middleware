@@ -665,6 +665,12 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
+    public void enableMailAccount(int accountId, int userId, int contextId, Connection con) throws OXException {
+        delegate.enableMailAccount(accountId, userId, contextId, con);
+        invalidateMailAccount(accountId, userId, contextId);
+    }
+
+    @Override
     public int insertMailAccount(MailAccountDescription mailAccount, int userId, Context ctx, Session session) throws OXException {
         int id = delegate.insertMailAccount(mailAccount, userId, ctx, session);
         invalidateMailAccount(id, userId, ctx.getContextId());

@@ -272,6 +272,17 @@ public interface MailAccountStorageService {
     void enableMailAccount(int accountId, int userId, int contextId) throws OXException;
 
     /**
+     * Enables the specified mail/transport account.
+     *
+     * @param accountId The account identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param con The connection to use
+     * @throws OXException If enabling the account fails
+     */
+    void enableMailAccount(int accountId, int userId, int contextId, Connection con) throws OXException;
+
+    /**
      * Updates mail account's value taken specified {@code MailAccountDescription} instance.
      *
      * @param mailAccount TThe {@code MailAccountDescription} instance to read from

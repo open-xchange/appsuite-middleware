@@ -207,6 +207,11 @@ final class SanitizingStorageService implements MailAccountStorageService {
     }
 
     @Override
+    public void enableMailAccount(int accountId, int userId, int contextId, Connection con) throws OXException {
+        storageService.enableMailAccount(accountId, userId, contextId, con);
+    }
+
+    @Override
     public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final Session session) throws OXException {
         storageService.updateMailAccount(mailAccount, attributes, user, cid, session);
     }
