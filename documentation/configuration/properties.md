@@ -995,7 +995,7 @@ If you would like to add a reference to another property use the following appro
 | __Version__ | 7.8.3  |
 | __Reloadable__ | true  |
 | __Configcascade Aware__ | true  |
-| __Related__ | com.openexchange.net.ssl.trustlevel, JSLob: io.ox/core//acceptUntrustedCertificates  |
+| __Related__ | com.openexchange.net.ssl.trustlevel, JSLob: io.ox/core//trustAllConnections  |
 | __File__ | ssl.properties  |
 
 ---
