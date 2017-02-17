@@ -29,11 +29,13 @@ Furthermore some tests use a comparison field as stated above which specifies ho
 | [true](#true-test) | A test for a true result (can be used if an action command should be executed every time). |
 | [not](#not-test) | Negates a given test. |
 | [size](#not-test) | Deals with the size of the mail. |
-| [currentdate](#currentdate-test) | Compares a given date with the current date (available since v6.20) |
+| [currentdate](#currentdate-test) | Compares a given date with the current date. |
 | [header](#header-test) | Tests against all headers of a mail. So with this test in contrast to the address test also fields such as subject can be handled. This test returns true if any combination of the header-list and values-list arguments match. |
 | [body](#body-test) | Tests against the content of a mail. |
 | [allof](#allof-test) | Defines an AND condition between several tests. |
 | [anyof](#anyof-test) | Defines an OR condition between several tests. |
+| [date](#date-test) | Compares a given date with the given date header. |
+| [exists](#exists-test) | Tests whether a list of headers exist or not. |
 
 </div>
 
@@ -119,8 +121,9 @@ This section describes the structures of tests.
 |:----|:---|:----|:----------|
 |id | String | currentdate | A string describing the test command.|
 |comparison | String || Only three types are valid here. A description can be found in [Possible currentdate comparisons](#possible-currentdate-comparisons).|
-|datepart | String || A string containing the string "date", "weekday" or "time" (available with 7.6.1) as we only allow fix date, time and weekday comparisions for now.|
+|datepart | String || A string containing the string "date", "weekday" or "time" as we only allow fix date, time and weekday comparisions for now.|
 |datevalue | Array || A value array containing the corresponding value to the datepart. For "date" and "time" this will be an array of "Date" (unix timestamp). For "weekday", it will be an array of integers ranging from 0 to 6, reflecting the equivalent weekday, starting from Sunday through Saturday, i.e. 0 - Sunday, ..., 6 - Saturday. The test will be true if any of the values matches|
+|zone | String || The optional timezone which should be used for the test. E.g. "+0100". If omitted the current timezone of the user is used.|
 
 ### header-test
 
@@ -155,6 +158,26 @@ This section describes the structures of tests.
 |extensionsvalue | String || A value for the given key. If the key has no value (see [Possible extensions](#possible-extensions) for this information) the value given here is ignored.|
 |values | Array || A string array containing the values for the body. The test will be true if any of the strings matches.|
 
+### date-test
+
+|Name |Type|Value|Description|
+|:----|:---|:----|:----------|
+|id | String | date | A string describing the test command.|
+|comparison | String || Only three types are valid here. A description can be found in [Possible currentdate comparisons](#possible-currentdate-comparisons).|
+|header | String || The header field to test against.|
+|datepart | String || A string containing the string "date", "weekday" or "time" as we only allow fix date, time and weekday comparisions for now.|
+|datevalue | Array || A value array containing the corresponding value to the datepart. For "date" and "time" this will be an array of "Date" (unix timestamp). For "weekday", it will be an array of integers ranging from 0 to 6, reflecting the equivalent weekday, starting from Sunday through Saturday, i.e. 0 - Sunday, ..., 6 - Saturday. The test will be true if any of the values matches|
+|zone | String || The optional timezone which should be used for the test. E.g. "+0100". If omitted the current timezone of the user is used.|
+
+### exists-test
+
+|Name |Type|Value|Description|
+|:----|:---|:----|:----------|
+|id | String | exists | A string describing the test command.|
+|headers | Array || A string array containing the header fields.|
+
+
+
 ## Possible action commands
 
 <div class="mailFilterToc">
@@ -168,6 +191,7 @@ This section describes the structures of tests.
 | [reject](#reject-command) | Rejects the mail with a given text. |
 | [stop](#stop-command) | Stops any further progressing of a mail. |
 | [vacation](#vacation-command) | Creates a vacation mail. |
+| [setflags](#setflags-command) | Set flags of a mail. |
 | [addflags](#addflags-command) | Adds flags to a mail. |
 | [notify](#notify-command) | Adds a notification. |
 | [pgp](#pgp-command) | Encrypts a mail via pgp. |
@@ -196,6 +220,7 @@ This section describes the structures of action commands.
 |:----|:---|:----|:----------|
 |id | String | redirect | A string defining the object itself.|
 |to | String ||	A string containing where the mail should be redirected to.|
+|copy| Boolean || An optional boolean flag. If set the :copy argument will be added to the redirect command. See [RFC 3894](http://tools.ietf.org/html/rfc3894) for further details.|
 
 ### move-command
 
@@ -203,6 +228,7 @@ This section describes the structures of action commands.
 |:----|:---|:----|:----------|
 |id | String | move | A string defining the object itself.|
 |into |	String || This string takes the object id of the destination mail folder as specified in the HTTP API of the groupware.|
+|copy| Boolean || An optional boolean flag. If set the :copy argument will be added to the fileinto command. See [RFC 3894](http://tools.ietf.org/html/rfc3894) for further details.|
 
 ### reject-command
 
@@ -241,7 +267,24 @@ User flags begin with a dollar sign ($) and can contain any ASCII characters bet
 \
 "%()*\]{ \
 \
-Mail color flags as used by OX are implemented by user flags of the form $cl_n, where n is a number between 1 and 10, includive.\
+Mail color flags as used by OX are implemented by user flags of the form $cl_n, where n is a number between 1 and 10, inclusive.\
+\
+See [RFC 3501](http://tools.ietf.org/html/rfc3501) for further details on IMAP flags and their meanings.|
+
+### setflags-command
+
+|Name |Type|Value|Description|
+|:----|:---|:----|:----------|
+|id | String | setflags | A string defining the object itself.|
+|flags | Array || An array containing the flags which should be set. A flag can be either a system flag or a user flag. System flags begin with a backslash (\) and can be one of the ones describes in [Flags](#flags). \
+\
+System flags are case-insensitive. \
+\
+User flags begin with a dollar sign ($) and can contain any ASCII characters between 0x21 (!) and 0x7E (~), inclusive, except for the characters 0x22, 0x25, 0x28, 0x29, 0x2A, 0x5C, 0x5D and 0x7B, which correspond to \
+\
+"%()*\]{ \
+\
+Mail color flags as used by OX are implemented by user flags of the form $cl_n, where n is a number between 1 and 10, inclusive.\
 \
 See [RFC 3501](http://tools.ietf.org/html/rfc3501) for further details on IMAP flags and their meanings.|
 

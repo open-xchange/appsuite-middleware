@@ -60,9 +60,11 @@ import com.openexchange.config.Reloadable;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.jsieve.commands.TestCommand.Commands;
 import com.openexchange.jsieve.registry.TestCommandRegistry;
+import com.openexchange.mailfilter.MailFilterInterceptorRegistry;
 import com.openexchange.mailfilter.MailFilterProperties;
 import com.openexchange.mailfilter.MailFilterService;
 import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
+import com.openexchange.mailfilter.internal.MailFilterInterceptorRegistryImpl;
 import com.openexchange.mailfilter.internal.MailFilterPreferencesItem;
 import com.openexchange.mailfilter.internal.MailFilterReloadable;
 import com.openexchange.mailfilter.internal.MailFilterServiceImpl;
@@ -93,6 +95,9 @@ public class MailFilterActivator extends HousekeepingActivator {
             Services.setServiceLookup(this);
 
             checkConfigfile();
+            
+            registerService(MailFilterInterceptorRegistry.class, new MailFilterInterceptorRegistryImpl());
+            trackService(MailFilterInterceptorRegistry.class);
 
             trackService(SSLSocketFactoryProvider.class);
             openTrackers();
@@ -125,7 +130,7 @@ public class MailFilterActivator extends HousekeepingActivator {
             registerService(Reloadable.class, new MailFilterReloadable(), null);
 
             registerService(MailFilterService.class, new MailFilterServiceImpl());
-
+            
             registerTestCommandRegistry();
 
             Logger logger = org.slf4j.LoggerFactory.getLogger(MailFilterActivator.class);

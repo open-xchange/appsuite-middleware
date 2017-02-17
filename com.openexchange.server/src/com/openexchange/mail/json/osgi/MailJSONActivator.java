@@ -70,6 +70,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.AJAXResultDecorator;
 import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthenticationFactory;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
@@ -92,6 +93,8 @@ import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.tree.modules.mail.MailColorModePreferenceItem;
 import com.openexchange.groupware.settings.tree.modules.mail.MailFlaggedModePreferenceItem;
+import com.openexchange.groupware.settings.tree.modules.mail.MaliciousCheck;
+import com.openexchange.groupware.settings.tree.modules.mail.MaliciousListing;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.jslob.ConfigTreeEquivalent;
@@ -114,6 +117,8 @@ import com.openexchange.mail.json.compose.internal.ComposeHandlerRegistryImpl;
 import com.openexchange.mail.json.converters.MailConverter;
 import com.openexchange.mail.json.converters.MailJSONConverter;
 import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.crypto.PGPMailRecognizer;
+import com.openexchange.mail.service.EncryptedMailService;
 import com.openexchange.mail.transport.config.TransportReloadable;
 import com.openexchange.oauth.provider.resourceserver.scope.AbstractScopeProvider;
 import com.openexchange.oauth.provider.resourceserver.scope.OAuthScopeProvider;
@@ -156,7 +161,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getOptionalServices() {
-        return new Class<?>[] { MailCategoriesConfigService.class, CapabilityService.class };
+        return new Class<?>[] { MailCategoriesConfigService.class, CapabilityService.class, CryptographicServiceAuthenticationFactory.class, EncryptedMailService.class, PGPMailRecognizer.class };
     }
 
     @Override
@@ -312,6 +317,14 @@ public final class MailJSONActivator extends AJAXModuleActivator {
         MailFlaggedModePreferenceItem flaggedItem = new MailFlaggedModePreferenceItem();
         registerService(PreferencesItemService.class, flaggedItem);
         registerService(ConfigTreeEquivalent.class, flaggedItem);
+
+        MaliciousCheck maliciousCheck = new MaliciousCheck();
+        registerService(PreferencesItemService.class, maliciousCheck);
+        registerService(ConfigTreeEquivalent.class, maliciousCheck);
+
+        MaliciousListing maliciousListing = new MaliciousListing();
+        registerService(PreferencesItemService.class, maliciousListing);
+        registerService(ConfigTreeEquivalent.class, maliciousListing);
     }
 
     @Override

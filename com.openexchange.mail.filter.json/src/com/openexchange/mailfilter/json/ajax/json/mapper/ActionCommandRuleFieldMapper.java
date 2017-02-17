@@ -76,6 +76,7 @@ import com.openexchange.mailfilter.json.ajax.json.mapper.parser.action.PGPEncryp
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.action.RedirectActionCommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.action.RejectActionCommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.action.RemoveFlagActionCommandParser;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.action.SetFlagActionCommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.action.StopActionCommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.action.VacationActionCommandParser;
 import com.openexchange.tools.session.ServerSession;
@@ -104,6 +105,7 @@ public class ActionCommandRuleFieldMapper implements RuleFieldMapper {
         p.put(Commands.STOP.getJsonName(), new StopActionCommandParser());
         p.put(Commands.VACATION.getJsonName(), new VacationActionCommandParser());
         p.put(Commands.ENOTIFY.getJsonName(), new EnotifyActionCommandParser());
+        p.put(Commands.SETFLAG.getJsonName(), new SetFlagActionCommandParser());
         p.put(Commands.ADDFLAG.getJsonName(), new AddFlagActionCommandParser());
         p.put(Commands.REMOVEFLAG.getJsonName(), new RemoveFlagActionCommandParser());
         p.put(Commands.PGP_ENCRYPT.getJsonName(), new PGPEncryptActionCommandParser());

@@ -46,10 +46,12 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.groupware.settings.extensions.osgi;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Iterator;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.groupware.settings.extensions.ServicePublisher;
@@ -59,7 +61,7 @@ import com.openexchange.groupware.settings.extensions.ServicePublisher;
  */
 public class OSGiServicePublisher implements ServicePublisher {
 
-    private final Map<Object, ServiceRegistration> serviceRegistrations = new HashMap<Object, ServiceRegistration>();
+    private final ConcurrentMap<Object, ServiceRegistration<?>> serviceRegistrations;
     private final BundleContext context;
 
     /**
@@ -68,27 +70,37 @@ public class OSGiServicePublisher implements ServicePublisher {
      * @param context The OSGi bundle context
      */
     public OSGiServicePublisher(final BundleContext context) {
+        super();
         this.context = context;
+        serviceRegistrations = new ConcurrentHashMap<Object, ServiceRegistration<?>>(4, 0.9F, 1);
     }
 
     @Override
-    public void publishService(final Class<?> clazz, final Object service) {
-        final ServiceRegistration registration = context.registerService(clazz.getName(), service, null);
-        serviceRegistrations.put(service, registration);
-    }
+    public <S> void publishService(final Class<S> clazz, final S service) {
+        ServiceRegistration<S> registration = context.registerService(clazz, service, null);
+        if (null == serviceRegistrations.putIfAbsent(service, registration)) {
+            return;
+        }
 
-    @Override
-    public void removeService(final Class<?> clazz, final Object service) {
-        final ServiceRegistration registration = serviceRegistrations.get(service);
-        serviceRegistrations.remove(service);
+        // Already contained...
         registration.unregister();
     }
 
     @Override
-    public void removeAllServices() {
-        for(final ServiceRegistration registration : serviceRegistrations.values()) {
+    public <S> void removeService(final Class<S> clazz, final S service) {
+        ServiceRegistration<S> registration = (ServiceRegistration<S>) serviceRegistrations.remove(service);
+        if (null != registration) {
             registration.unregister();
         }
-        serviceRegistrations.clear();
     }
+
+    @Override
+    public void removeAllServices() {
+        for (Iterator<ServiceRegistration<?>> it = serviceRegistrations.values().iterator(); it.hasNext();) {
+            ServiceRegistration<?> registration = it.next();
+            it.remove();
+            registration.unregister();
+        }
+    }
+
 }

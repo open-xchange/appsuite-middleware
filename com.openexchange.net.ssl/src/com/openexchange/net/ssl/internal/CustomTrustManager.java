@@ -68,17 +68,41 @@ import com.openexchange.net.ssl.osgi.Services;
  * {@link CustomTrustManager}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.8.3
  */
 public class CustomTrustManager extends AbstractTrustManager {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CustomTrustManager.class);
 
-    public CustomTrustManager() {
-        super(initCustomTrustManager());
+    /**
+     * Creates a new {@link CustomTrustManager} instance.
+     *
+     * @return The new instance or <code>null</code> if initialization failed
+     */
+    public static CustomTrustManager newInstance() {
+        TrustManagerAndParameters managerAndParameters = initCustomTrustManager();
+        if (null == managerAndParameters) {
+            return null;
+        }
+        return new CustomTrustManager(managerAndParameters.trustManager);
     }
 
-    private static X509ExtendedTrustManager initCustomTrustManager() {
+    // --------------------------------------------------------------------------------------------
+
+    /**
+     * Initializes a new {@link CustomTrustManager}.
+     */
+    private CustomTrustManager(X509ExtendedTrustManager trustManager) {
+        super(trustManager);
+    }
+
+    /**
+     * Initialises the {@link CustomTrustManager}
+     *
+     * @return An {@link X509ExtendedTrustManager}
+     */
+    private static TrustManagerAndParameters initCustomTrustManager() {
         SSLConfigurationService sslConfigService = Services.getService(SSLConfigurationService.class);
         if (null == sslConfigService) {
             LOG.warn("Absent service " + SSLConfigurationService.class.getName() + ". Assuming custom truststore is NOT supposed to be used.");
@@ -118,7 +142,7 @@ public class CustomTrustManager extends AbstractTrustManager {
 
             for (TrustManager tm : tmf.getTrustManagers()) {
                 if (tm instanceof X509ExtendedTrustManager) {
-                    return (X509ExtendedTrustManager) tm;
+                    return new TrustManagerAndParameters((X509ExtendedTrustManager) tm);
                 }
             }
         } catch (IOException e) {

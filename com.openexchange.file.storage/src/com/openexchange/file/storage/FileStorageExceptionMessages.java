@@ -144,8 +144,8 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
     // The file %1$s doesn't have any content.
     public static final String NO_CONTENT_MSG = "The file %1$s doesn't have any content.";
 
-    // The associated %2$s account does no more exist
-    public static final String ACCOUNT_NOT_FOUND_MSG = "The associated %2$s account does no more exist";
+    // The associated %2$s account no longer exists.
+    public static final String ACCOUNT_NOT_FOUND_MSG = "The associated %2$s account no longer exists.";
 
     // Individual permissions are not supported in account \"%1$s\".
     public static final String NO_PERMISSION_SUPPORT_MSG = "Individual permissions are not supported in account \"%1$s\".";

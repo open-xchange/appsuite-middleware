@@ -57,6 +57,7 @@ package com.openexchange.mailfilter.json.ajax.json.fields;
 public enum CurrentDateTestField {
 
     comparison,
+    zone,
     datepart,
     datevalue;
 }

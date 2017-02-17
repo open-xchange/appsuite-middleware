@@ -64,6 +64,7 @@ import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
 import com.openexchange.mailfilter.json.ajax.json.fields.GeneralField;
 import com.openexchange.mailfilter.json.ajax.json.fields.RedirectActionField;
+import com.openexchange.mailfilter.json.ajax.json.mapper.ArgumentUtil;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserJSONUtil;
 import com.openexchange.mailfilter.json.osgi.Services;
@@ -83,13 +84,15 @@ public class RedirectActionCommandParser implements CommandParser<ActionCommand>
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser#parse(org.json.JSONObject)
-     */
     @Override
     public ActionCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException {
+        final ArrayList<Object> argList = new ArrayList<Object>();
+
+        Boolean copy = jsonObject.optBoolean(RedirectActionField.copy.name(), false);
+        if(copy){
+            argList.add(ArgumentUtil.createTagArgument(RedirectActionField.copy.name()));
+        }
+
         String stringParam = CommandParserJSONUtil.getString(jsonObject, RedirectActionField.to.name(), Commands.REDIRECT.getCommandName());
         // Check for valid email address here:
         try {
@@ -103,21 +106,28 @@ public class RedirectActionCommandParser implements CommandParser<ActionCommand>
         if (null != service && (null != (filter = service.getFilterFromProperty("com.openexchange.mail.filter.redirectWhitelist"))) && !filter.accepts(stringParam)) {
             throw MailFilterExceptionCode.REJECTED_REDIRECT_ADDRESS.create(stringParam);
         }
-
-        return new ActionCommand(Commands.REDIRECT, CommandParserJSONUtil.createArrayOfArrays(stringParam));
+        argList.add(CommandParserJSONUtil.stringToList(stringParam));
+        ActionCommand result =  new ActionCommand(Commands.REDIRECT, argList);
+        if(copy){
+            result.addOptionalRequired(RedirectActionField.copy.name());
+        }
+        return result;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser#parse(org.json.JSONObject, com.openexchange.jsieve.commands.ActionCommand)
-     */
     @SuppressWarnings("unchecked")
     @Override
     public void parse(JSONObject jsonObject, ActionCommand actionCommand) throws JSONException, OXException {
         ArrayList<Object> arguments = actionCommand.getArguments();
 
         jsonObject.put(GeneralField.id.name(), Commands.REDIRECT.getJsonName());
-        jsonObject.put(RedirectActionField.to.name(), ((List<String>) arguments.get(0)).get(0));
+        if(arguments.size()==1){
+            jsonObject.put(RedirectActionField.to.name(), ((List<String>) arguments.get(0)).get(0));
+        } else {
+            String copyCommandString = ArgumentUtil.createTagArgument(RedirectActionField.copy.name()).toString();
+            if (actionCommand.getTagArguments().get(copyCommandString) != null) {
+                jsonObject.put(RedirectActionField.copy.name(), true);
+            }
+            jsonObject.put(RedirectActionField.to.name(), ((List<String>) arguments.get(1)).get(0));
+        }
     }
 }

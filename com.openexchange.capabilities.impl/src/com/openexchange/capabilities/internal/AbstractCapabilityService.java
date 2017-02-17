@@ -306,11 +306,12 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         }
 
         String hostname = LogProperties.getHostName();
-        if (!Strings.isEmpty(hostname)) {
-            tmp = isAutologinEnabledForHost(hostname, tmp);
+        if (Strings.isEmpty(hostname)) {
+            return tmp.booleanValue();
         }
 
-        return tmp.booleanValue();
+        // Determine "autologin" capability by host name
+        return isAutologinEnabledForHost(hostname, tmp.booleanValue());
     }
 
     private boolean isAutologinEnabledForHost(String hostname, boolean defaultValue) {
@@ -319,7 +320,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         if (serverConfigService != null) {
             try {
                 List<Map<String, Object>> applicableConfigs = serverConfigService.getCustomHostConfigurations(hostname, -1, -1);
-                isEnabled = getBooleanPropertyFromMap(applicableConfigs, "com.openexchange.sessiond.autologin", isEnabled);
+                isEnabled = getBooleanPropertyFromMaps(applicableConfigs, "com.openexchange.sessiond.autologin", isEnabled);
             } catch (OXException e) {
                 LOG.error("", e);
             }
@@ -327,10 +328,11 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         return isEnabled;
     }
 
-    private Boolean getBooleanPropertyFromMap(List<Map<String, Object>> applicableConfigs, String string, boolean defaultValue) {
+    private boolean getBooleanPropertyFromMaps(List<Map<String, Object>> applicableConfigs, String propertyName, boolean defaultValue) {
         for (Map<String, Object> map : applicableConfigs) {
-            if (map.containsKey(string)) {
-                defaultValue = (boolean) map.get(string);
+            Object obj = map.get(propertyName);
+            if (obj instanceof Boolean) {
+                return ((Boolean) obj).booleanValue();
             }
         }
         return defaultValue;

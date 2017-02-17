@@ -165,7 +165,7 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
                 defaultFolder.getObjectID(),
                 session.getUserId(),
                 UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx));
-            if (permission.canCreateObjects()) {
+            if (permission.canCreateObjects() && original!=null) {
                 original.setParentFolderID(defaultFolder.getObjectID());
             } else {
                 analysis.addAnnotation(new ITipAnnotation(Messages.SHARED_FOLDER, locale));

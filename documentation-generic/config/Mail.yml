@@ -90,7 +90,16 @@ Specifies the color which should be added to colorless flagged mails in case the
   - data:
       Key: com.openexchange.mail.maliciousFolders.enabled
       Description: >
-Enables/disables support for malicious folders
+Enables/disables support for malicious folders.
+
+If enabled and a mail is fetched from a folder contained in listing configured through "com.openexchange.mail.maliciousFolders.listing"
+property, the imail's JSON representation contains an additional "malicious: true" field and possible HTML content is processed in the way
+to disable any hyper-links.
+
+I.e.
+"...<a href="http://evil.com/click.me">Get something for free here</a>..."
+is turned to
+"...<a href="#" onclick"return false;" data-disabled="true">Get something for free here</a>..."
       Default: true
       Version: 7.8.4
       Reloadable: true
@@ -103,12 +112,13 @@ Enables/disables support for malicious folders
 Specifies the full paths for such mail folders in the primary account's folder tree that are supposed being considered as malicious
 and therefore a special treatment happens; e.g. hyper-links that occur in mail content are not displayed and/or are not clickable.
 
-The value is supposed to be comma-separated list of folder paths.
-Such tokens starting with the '$' character refer to a standard folder. Currently supported: $Spam, $Drafts, $Inbox, $Sent, $Trash, $Confirmed-Spam, $Confirmed-Ham
+The value is supposed to be comma-separated list of folder paths. An entry in the CSV list is either a full path of a folder in the primary
+mail account (e.g. "INBOX/Malware") or a reserved identifier denoting the standard folder and its sub-folders of every mail account (incl.
+Unified Mail). Supported reserved identifiers are: "$Spam", "$Drafts", "$Sent", "$Trash", "$Confirmed-spam", "$Confirmed-ham".
 
 Example: $Spam, INBOX/Malware
 Special treatment happens for standard Spam folder and for the "INBOX/Malware" folder in primary account's folder tree hierarchy.
-      Default: $Spam
+      Default: $Spam, $Confirmed-spam
       Version: 7.8.4
       Reloadable: true
       Configcascade_Aware: true

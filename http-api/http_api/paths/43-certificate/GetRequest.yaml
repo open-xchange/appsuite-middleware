@@ -1,0 +1,26 @@
+/certificate?action=get:
+  get:
+    operationId: getCertificate
+    tags:
+      - Certificate
+    summary: Gets a specific or all SSL certificates
+    description: Gets a specific or all SSL certificates
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: fingerprint
+        type: string
+        description: The fingerprint of the SSL certificate
+        required: true
+      - in: query
+        name: hostname
+        type: string
+        description: The hostname for which the SSL certificate is trusted/not trusted. If absent, then all entries for the specified fingerprint will be returned
+        required: false
+    responses:
+      200:
+        description: |
+          A JSON object containing an array with data for all certificates. In case of errors the responsible fields in the response are
+          filled (see [Error handling](#error-handling)).
+        schema:
+          $ref: "#/definitions/CertificatesAllResponse"

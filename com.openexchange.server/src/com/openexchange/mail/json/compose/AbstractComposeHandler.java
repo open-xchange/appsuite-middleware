@@ -75,6 +75,7 @@ import javax.mail.internet.InternetAddress;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthenticationFactory;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
@@ -105,6 +106,7 @@ import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.DataMailPart;
 import com.openexchange.mail.dataobjects.compose.ReferencedMailPart;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
+import com.openexchange.mail.json.osgi.MailJSONActivator;
 import com.openexchange.mail.mime.HeaderCollection;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeTypes;
@@ -827,13 +829,24 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
              * Security settings
              */
             {
+                final CryptographicServiceAuthenticationFactory authenticationFactory =
+                    MailJSONActivator.SERVICES.get().getOptionalService(CryptographicServiceAuthenticationFactory.class);
+                String authentication = null;
+                if(authenticationFactory != null) {
+                    if(composeRequest.getRequest() != null) {
+                        authentication = authenticationFactory.createAuthenticationFrom(composeRequest.getRequest());
+                    }
+                }
                 JSONObject jSecuritySettings = jMail.optJSONObject("security");
                 if (null != jSecuritySettings) {
                     SecuritySettings settings = SecuritySettings.builder()
                         .encrypt(jSecuritySettings.optBoolean("encrypt", false))
                         .pgpInline(jSecuritySettings.optBoolean("pgpInline", false))
                         .sign(jSecuritySettings.optBoolean("sign", false))
-                        .authentication(jSecuritySettings.optString("authentication", null))
+                        .authentication(authentication)
+                        .guestLanguage(jSecuritySettings.optString("language", null))
+                        .guestMessage(jSecuritySettings.optString("message", null))
+                        .pin(jSecuritySettings.optString("pin", null))
                         .build();
                     if (settings.anythingSet()) {
                         composedMail.setSecuritySettings(settings);

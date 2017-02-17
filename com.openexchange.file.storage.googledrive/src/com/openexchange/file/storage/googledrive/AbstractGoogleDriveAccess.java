@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.googledrive;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import com.google.api.client.http.HttpResponseException;
 import com.google.api.services.drive.Drive;
@@ -63,7 +64,6 @@ import com.openexchange.java.Strings;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
-import com.openexchange.oauth.OAuthUtil;
 import com.openexchange.oauth.scope.OXScope;
 import com.openexchange.session.Session;
 
@@ -184,9 +184,8 @@ public abstract class AbstractGoogleDriveAccess {
      */
     private OXException createInvalidAccessTokenException() {
         OAuthAccount oAuthAccount = googleDriveAccess.getOAuthAccount();
-        String cburl = OAuthUtil.buildCallbackURL(oAuthAccount);
         API api = oAuthAccount.getAPI();
-        return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(api.getShortName(), oAuthAccount.getId(), session.getUserId(), session.getContextId(), api.getFullName(), cburl);
+        return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(api.getShortName(), I(oAuthAccount.getId()), I(session.getUserId()), I(session.getContextId()));
     }
 
     /**

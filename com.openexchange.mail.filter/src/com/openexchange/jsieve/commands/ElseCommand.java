@@ -65,4 +65,9 @@ public class ElseCommand extends IfStructureCommand {
     public HashSet<String> getRequired() {
         return new HashSet<String>(0);
     }
+
+    @Override
+    public void addOptionalRequired(String required){
+        // do nothing
+    }
 }

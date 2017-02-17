@@ -96,7 +96,6 @@ import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthService;
-import com.openexchange.oauth.OAuthUtil;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
@@ -778,6 +777,17 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             {
                 MailAccount mailAccount = getMailAccount(mailConfig);
                 if (null != mailAccount && mailAccount.isMailDisabled()) {
+                    if (mailAccount.isMailOAuthAble() && mailAccount.getMailOAuthId() >= 0) {
+                        OAuthService oauthService = ServerServiceRegistry.getInstance().getService(OAuthService.class);
+                        if (null != oauthService) {
+                            try {
+                                OAuthAccount oAuthAccount = oauthService.getAccount(mailAccount.getMailOAuthId(), session, session.getUserId(), session.getContextId());
+                                throw MailExceptionCode.MAIL_ACCESS_DISABLED_OAUTH.create(mailConfig.getServer(), mailConfig.getLogin(), I(session.getUserId()), I(session.getContextId()), oAuthAccount.getDisplayName());
+                            } catch (Exception x) {
+                                LOG.warn("Failed to load mail-associated OAuth account", x);
+                            }
+                        }
+                    }
                     throw MailExceptionCode.MAIL_ACCESS_DISABLED.create(mailConfig.getServer(), mailConfig.getLogin(), I(session.getUserId()), I(session.getContextId()));
                 }
             }
@@ -841,10 +851,9 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                 } else {
                     try {
                         OAuthAccount oAuthAccount = oauthService.getAccount(oauthAccountId, session, session.getUserId(), session.getContextId());
-                        String cburl = OAuthUtil.buildCallbackURL(oAuthAccount);
                         API api = oAuthAccount.getAPI();
                         Throwable cause = e.getCause();
-                        return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(cause, api.getShortName(), oAuthAccount.getId(), session.getUserId(), session.getContextId(), api.getFullName(), cburl);
+                        return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(cause, api.getShortName(), I(oAuthAccount.getId()), I(session.getUserId()), I(session.getContextId()));
                     } catch (Exception x) {
                         LOG.warn("Failed to handle failed OAuth authentication", x);
                     }

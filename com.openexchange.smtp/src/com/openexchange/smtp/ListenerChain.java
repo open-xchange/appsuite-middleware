@@ -50,6 +50,7 @@
 package com.openexchange.smtp;
 
 import java.util.List;
+import javax.mail.Address;
 import javax.mail.internet.MimeMessage;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.SecuritySettings;
@@ -109,21 +110,21 @@ public class ListenerChain implements MailTransportListener {
     }
 
     @Override
-    public Result onBeforeMessageTransport(MimeMessage message, SecuritySettings securitySettings, Session session) throws OXException {
+    public Result onBeforeMessageTransport(MimeMessage message, Address[] recipients, SecuritySettings securitySettings, Session session) throws OXException {
         List<MailTransportListener> listeners = this.listeners.getServiceList();
         if (null == listeners || listeners.isEmpty()) {
-            return new ChainResult(message, Reply.NEUTRAL);
+            return new ChainResult(message, recipients, Reply.NEUTRAL);
         }
 
         for (MailTransportListener listener : listeners) {
-            Result result = listener.onBeforeMessageTransport(message, securitySettings, session);
+            Result result = listener.onBeforeMessageTransport(message, recipients, securitySettings, session);
             Reply reply = result.getReply();
             if (Reply.NEUTRAL != reply) {
                 return result;
             }
         }
 
-        return new ChainResult(message, Reply.NEUTRAL);
+        return new ChainResult(message, recipients, Reply.NEUTRAL);
     }
 
     @Override
@@ -144,10 +145,12 @@ public class ListenerChain implements MailTransportListener {
 
         private final MimeMessage mimeMessage;
         private final Reply reply;
+        private final Address[] recipients;
 
-        ChainResult(MimeMessage mimeMessage, Reply reply) {
+        ChainResult(MimeMessage mimeMessage, Address[] recipients, Reply reply) {
             super();
             this.mimeMessage = mimeMessage;
+            this.recipients = recipients;
             this.reply = reply;
         }
 
@@ -159,6 +162,11 @@ public class ListenerChain implements MailTransportListener {
         @Override
         public MimeMessage getMimeMessage() {
             return mimeMessage;
+        }
+
+        @Override
+        public Address[] getRecipients() {
+            return recipients;
         }
 
     }

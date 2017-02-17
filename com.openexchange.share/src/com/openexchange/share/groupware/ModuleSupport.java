@@ -53,6 +53,7 @@ import java.sql.Connection;
 import java.util.Collection;
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.ShareTargetPath;
@@ -67,6 +68,7 @@ import com.openexchange.share.ShareTargetPath;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
+@SingletonService
 public interface ModuleSupport {
 
     /**

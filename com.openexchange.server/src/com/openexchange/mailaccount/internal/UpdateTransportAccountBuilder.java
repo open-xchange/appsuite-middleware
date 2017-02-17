@@ -95,6 +95,7 @@ public class UpdateTransportAccountBuilder implements AttributeSwitch {
     private final StringBuilder bob;
     private boolean valid;
     private boolean injectClearingFailAuthCount;
+    private boolean injectClearingDisabled;
 
     /**
      * Initializes a new {@link UpdateTransportAccountBuilder}.
@@ -104,6 +105,7 @@ public class UpdateTransportAccountBuilder implements AttributeSwitch {
         bob = new StringBuilder("UPDATE user_transport_account SET ");
         valid = clearFailAuthCount;
         injectClearingFailAuthCount = clearFailAuthCount;
+        injectClearingDisabled = clearFailAuthCount;
     }
 
     /**
@@ -133,7 +135,10 @@ public class UpdateTransportAccountBuilder implements AttributeSwitch {
      */
     public String getUpdateQuery() {
         if (injectClearingFailAuthCount) {
-            bob.append("failed_auth_count=0,failed_auth_date=0,disabled=0,");
+            bob.append("failed_auth_count=0,failed_auth_date=0,");
+        }
+        if (injectClearingDisabled) {
+            bob.append("disabled=0,");
         }
         bob.setLength(bob.length() - 1);
         bob.append(" WHERE cid = ? AND id = ? and user = ?");
@@ -167,6 +172,7 @@ public class UpdateTransportAccountBuilder implements AttributeSwitch {
         bob.append("url = ?,");
         valid = true;
         injectClearingFailAuthCount = true;
+        injectClearingDisabled = true;
         return null;
     }
 
@@ -286,6 +292,7 @@ public class UpdateTransportAccountBuilder implements AttributeSwitch {
         bob.append("login = ?,");
         valid = true;
         injectClearingFailAuthCount = true;
+        injectClearingDisabled = true;
         return null;
     }
 
@@ -294,6 +301,7 @@ public class UpdateTransportAccountBuilder implements AttributeSwitch {
         bob.append("password = ?,");
         valid = true;
         injectClearingFailAuthCount = true;
+        injectClearingDisabled = true;
         return null;
     }
 
@@ -394,6 +402,7 @@ public class UpdateTransportAccountBuilder implements AttributeSwitch {
         bob.append("oauth = ?,");
         valid = true;
         injectClearingFailAuthCount = true;
+        injectClearingDisabled = true;
         return null;
     }
 
@@ -410,6 +419,7 @@ public class UpdateTransportAccountBuilder implements AttributeSwitch {
     @Override
     public Object transportDisabled() {
         bob.append("disabled = ?,");
+        injectClearingDisabled = false;
         valid = true;
         return null;
     }

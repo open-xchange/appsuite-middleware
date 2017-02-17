@@ -503,7 +503,7 @@ public class Configuration
         m_adapters[3] = new LogEventAdapter(m_bundleContext, admin);
     }
 
-    private Object tryToCreateMetaTypeProvider(final Object managedService)
+    private synchronized Object tryToCreateMetaTypeProvider(final Object managedService)
     {
         try
         {

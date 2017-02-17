@@ -63,4 +63,11 @@ public abstract class Command {
      * @return A list of String defining the extensions
      */
     public abstract HashSet<String> getRequired();
+
+    /**
+     * This method adds an optional requirement to the list of requirements.
+     *
+     * @param required The requirement
+     */
+    public abstract void addOptionalRequired(String required);
 }
