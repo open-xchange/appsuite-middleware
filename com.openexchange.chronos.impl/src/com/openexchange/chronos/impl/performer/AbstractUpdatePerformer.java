@@ -258,14 +258,8 @@ public abstract class AbstractUpdatePerformer {
      * @param exceptionDates The recurrence identifiers of the change exceptions to delete
      */
     protected void deleteExceptions(int seriesID, Collection<RecurrenceId> exceptionDates) throws OXException {
-        if (null != exceptionDates && 0 < exceptionDates.size()) {
-            List<RecurrenceId> recurrenceIDs = new ArrayList<RecurrenceId>();
-            for (RecurrenceId exceptionDate : exceptionDates) {
-                recurrenceIDs.add(exceptionDate);
-            }
-            for (Event originalExceptionEvent : loadExceptionData(seriesID, recurrenceIDs)) {
-                delete(originalExceptionEvent);
-            }
+        for (Event originalExceptionEvent : loadExceptionData(seriesID, exceptionDates)) {
+            delete(originalExceptionEvent);
         }
     }
 
@@ -280,16 +274,10 @@ public abstract class AbstractUpdatePerformer {
      * @param userID The identifier of the user attendee to delete
      */
     protected void deleteExceptions(int seriesID, Collection<RecurrenceId> exceptionDates, int userID) throws OXException {
-        if (null != exceptionDates && 0 < exceptionDates.size()) {
-            List<RecurrenceId> recurrenceIDs = new ArrayList<RecurrenceId>();
-            for (RecurrenceId exceptionDate : exceptionDates) {
-                recurrenceIDs.add(exceptionDate);
-            }
-            for (Event originalExceptionEvent : loadExceptionData(seriesID, recurrenceIDs)) {
-                Attendee originalUserAttendee = find(originalExceptionEvent.getAttendees(), userID);
-                if (null != originalUserAttendee) {
-                    delete(originalExceptionEvent, originalUserAttendee);
-                }
+        for (Event originalExceptionEvent : loadExceptionData(seriesID, exceptionDates)) {
+            Attendee originalUserAttendee = find(originalExceptionEvent.getAttendees(), userID);
+            if (null != originalUserAttendee) {
+                delete(originalExceptionEvent, originalUserAttendee);
             }
         }
     }
@@ -354,14 +342,19 @@ public abstract class AbstractUpdatePerformer {
         return event;
     }
 
-    protected List<Event> loadExceptionData(int seriesID, List<RecurrenceId> recurrenceIDs) throws OXException {
+    protected List<Event> loadExceptionData(int seriesID, Collection<RecurrenceId> recurrenceIDs) throws OXException {
         List<Event> exceptions = new ArrayList<Event>();
         if (null != recurrenceIDs && 0 < recurrenceIDs.size()) {
             for (RecurrenceId recurrenceID : recurrenceIDs) {
-                exceptions.add(loadExceptionData(seriesID, recurrenceID));
+                Event exception = storage.getEventStorage().loadException(seriesID, recurrenceID, null);
+                if (null == exception) {
+                    throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(I(seriesID), String.valueOf(recurrenceID));
+                }
+                exception.setFolderId(i(folder));
+                exceptions.add(exception);
             }
         }
-        return exceptions;
+        return Utils.loadAdditionalEventData(storage, calendarUser.getId(), exceptions, EventField.values());
     }
 
     protected Event loadExceptionData(int seriesID, RecurrenceId recurrenceID) throws OXException {
