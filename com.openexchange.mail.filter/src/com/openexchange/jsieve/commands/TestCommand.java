@@ -112,7 +112,7 @@ public class TestCommand extends Command {
          * <code>address [ADDRESS-PART] [COMPARATOR] [MATCH-TYPE] &lt;header-list: string-list&gt; &lt;key-list: string-list&gt;</code>
          * <p><a href="https://tools.ietf.org/html/rfc5228#section-5.1">RFC-5228: Test address</a></p>
          */
-        ADDRESS("address", 2, Integer.MAX_VALUE, standardAddressPart(), standardComparators(), standardAddressMatchTypes(), standardJSONAddressMatchTypes(), null, null),
+        ADDRESS("address", 2, Integer.MAX_VALUE, addressParts(), standardComparators(), standardMatchTypes(), standardJSONMatchTypes(), null, null),
         /**
          * <p>The "envelope" test is true if the specified part of the [SMTP] (or equivalent)
          * envelope matches the specified key. The type of match is specified by the optional
@@ -120,7 +120,7 @@ public class TestCommand extends Command {
          * <code>envelope [COMPARATOR] [ADDRESS-PART] [MATCH-TYPE] &lt;envelope-part: string-list&gt; &lt;key-list: string-list&gt;</code>
          * <p><a href="https://tools.ietf.org/html/rfc5228#section-5.4">RFC-5228: Test envelope</a></p>
          */
-        ENVELOPE("envelope", 2, Integer.MAX_VALUE, standardAddressPart(), standardComparators(), standardMatchTypes(), standardJSONMatchTypes(), "envelope", null),
+        ENVELOPE("envelope", 2, Integer.MAX_VALUE, addressParts(), standardComparators(), standardMatchTypes(), standardJSONMatchTypes(), "envelope", null),
         /**
          * <p>The "exists" test is true if the headers listed in the header-names argument exist within the message. All of the headers must exist or the test is false.
          * <code>exists &lt;header-names: string-list&gt;</code>
@@ -222,10 +222,10 @@ public class TestCommand extends Command {
         }
 
         /**
-         * <p>Specifies the comparison optional arguments ':localpart', ':domain', ':all' as described
+         * <p>Specifies the addresspart arguments ':localpart', ':domain', ':all' as described
          * in <a href="href=https://tools.ietf.org/html/rfc5228#section-2.7.4">RFC-5228</a>.</p>
          *
-         * @return A {@link Hashtable} with the standard match types
+         * @return A {@link Hashtable} with the standard addressparts
          */
         private static Hashtable<String, String> standardAddressPart() {
             final Hashtable<String, String> standard_address_part = new Hashtable<String, String>(3);
@@ -252,17 +252,17 @@ public class TestCommand extends Command {
         }
 
         /**
-         * <p>Specifies the match types ':user' and ':detail' as described
+         * <p>Specifies the addressparts ':user' and ':detail' as described
          * in <a href="https://tools.ietf.org/html/rfc5233#section-4">RFC-5233: Subaddress Comparisons</a>.</p>
          *
-         * @return A {@link Hashtable} with the subaddress match types
+         * @return A {@link Hashtable} with the subaddress addressparts
          */
-        private static Hashtable<String, String> standardAddressMatchTypes() {
-            final Hashtable<String, String> standard_match_types = standardMatchTypes();
-            standard_match_types.putAll(standardAddressPart());
-            standard_match_types.put(":user", "subaddress");
-            standard_match_types.put(":detail", "subaddress");
-            return standard_match_types;
+        private static Hashtable<String, String> addressParts() {
+            final Hashtable<String, String> standard_address_parts = new Hashtable<>(5);
+            standard_address_parts.putAll(standardAddressPart());
+            standard_address_parts.put(":user", "subaddress");
+            standard_address_parts.put(":detail", "subaddress");
+            return standard_address_parts;
         }
 
         /**
@@ -703,6 +703,21 @@ public class TestCommand extends Command {
      */
     public final String getMatchType() {
         final ArrayList<String> arrayList = new ArrayList<String>(this.command.getMatchTypes().keySet());
+        arrayList.retainAll(this.tagArguments);
+        if (1 == arrayList.size()) {
+            return arrayList.get(0);
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * This method returns the addresspart of this command
+     *
+     * @return
+     */
+    public final String getAddressPart() {
+        final ArrayList<String> arrayList = new ArrayList<String>(this.command.getAddress().keySet());
         arrayList.retainAll(this.tagArguments);
         if (1 == arrayList.size()) {
             return arrayList.get(0);
