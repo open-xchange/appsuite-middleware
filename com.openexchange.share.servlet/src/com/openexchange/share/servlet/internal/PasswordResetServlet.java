@@ -235,7 +235,7 @@ public class PasswordResetServlet extends AbstractShareServlet {
 
             ShareService shareService = ShareServiceLookup.getService(ShareService.class, true);
             GuestInfo guestInfo = shareService.resolveGuest(token);
-            if (AuthenticationMode.GUEST_PASSWORD != guestInfo.getAuthentication()) {
+            if (guestInfo == null || AuthenticationMode.GUEST_PASSWORD != guestInfo.getAuthentication()) {
                 sendInvalidRequest(translator, response);
                 return;
             }
