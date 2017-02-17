@@ -369,7 +369,7 @@ public class ConflictCheckPerformer extends AbstractQueryPerformer {
      * @return The overlapping events of the attendees, or an empty list if there are none
      */
     private List<Event> getOverlappingEvents(Date from, Date until, List<Attendee> attendeesToCheck) throws OXException {
-        EventField[] fields = getFields(new EventField[] { EventField.TRANSP, EventField.SUMMARY });
+        EventField[] fields = getFields(new EventField[] { EventField.TRANSP, EventField.SUMMARY, EventField.LOCATION });
         List<Event> eventsInPeriod = storage.getEventStorage().searchOverlappingEvents(from, until, attendeesToCheck, false, null, fields);
         if (0 == eventsInPeriod.size()) {
             return Collections.emptyList();
