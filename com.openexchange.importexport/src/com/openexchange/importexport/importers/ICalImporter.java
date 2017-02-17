@@ -833,7 +833,7 @@ public class ICalImporter extends AbstractImporter {
             }
             return importResult;
         }
-        return null; // should not get here
+        throw new AssertionError(); // should not get here
     }
 
     private static ImportResult createEventException(CalendarSession session, EventID masterEventID, Event importedException) {
@@ -866,7 +866,7 @@ public class ICalImporter extends AbstractImporter {
             }
             return importResult;
         }
-        return null; // should not get here
+        throw new AssertionError(); // should not get here
     }
 
     /**
