@@ -49,6 +49,7 @@
 
 package com.openexchange.find.basic.calendar.sort;
 
+import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
@@ -63,7 +64,10 @@ import com.openexchange.chronos.Event;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class RankedEventComparator implements Comparator<Event> {
+public class RankedEventComparator implements Comparator<Event>, Serializable {
+
+    /** serialVersionUID */
+    private static final long serialVersionUID = 5180481713172279479L;
 
     /** Milliseconds per day */
     private static final long MILLIS_PER_DAY = TimeUnit.DAYS.toMillis(1);
