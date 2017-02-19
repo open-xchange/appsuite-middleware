@@ -58,7 +58,9 @@ import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.onedrive.OneDriveConstants;
 import com.openexchange.file.storage.onedrive.OneDriveFileStorageService;
+import com.openexchange.file.storage.onedrive.oauth.OneDriveOAuthAccountAssociationProvider;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
+import com.openexchange.oauth.association.spi.OAuthAccountAssociationProvider;
 
 /**
  * {@link OneDriveServiceRegisterer}
@@ -68,10 +70,11 @@ import com.openexchange.oauth.OAuthAccountDeleteListener;
 public final class OneDriveServiceRegisterer implements ServiceTrackerCustomizer<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider> {
 
     private final BundleContext context;
-    private volatile FileStorageAccountManagerProvider provider;
-    private volatile OneDriveFileStorageService service;
-    private volatile ServiceRegistration<FileStorageService> serviceRegistration;
-    private volatile ServiceRegistration<OAuthAccountDeleteListener> listenerRegistration;
+    private FileStorageAccountManagerProvider provider;
+    private OneDriveFileStorageService service;
+    private ServiceRegistration<FileStorageService> serviceRegistration;
+    private ServiceRegistration<OAuthAccountDeleteListener> listenerRegistration;
+    private ServiceRegistration<OAuthAccountAssociationProvider> associationProviderRegistration; // guarded by synchronized
 
     /**
      * Initializes a new {@link OneDriveServiceRegisterer}.
@@ -102,6 +105,7 @@ public final class OneDriveServiceRegisterer implements ServiceTrackerCustomizer
                 service = new OneDriveFileStorageService(Services.getServices());
                 this.serviceRegistration = context.registerService(FileStorageService.class, service, null);
                 this.listenerRegistration = context.registerService(OAuthAccountDeleteListener.class, service, null);
+                this.associationProviderRegistration = context.registerService(OAuthAccountAssociationProvider.class, new OneDriveOAuthAccountAssociationProvider(service), null);
                 this.service = service;
                 this.provider = provider;
             } else {
@@ -116,6 +120,7 @@ public final class OneDriveServiceRegisterer implements ServiceTrackerCustomizer
                     service = new OneDriveFileStorageService(Services.getServices(), compositeProvider);
                     this.serviceRegistration = context.registerService(FileStorageService.class, service, null);
                     this.listenerRegistration = context.registerService(OAuthAccountDeleteListener.class, service, null);
+                    this.associationProviderRegistration = context.registerService(OAuthAccountAssociationProvider.class, new OneDriveOAuthAccountAssociationProvider(service), null);
                     this.service = service;
                     this.provider = compositeProvider;
                 }
@@ -150,14 +155,20 @@ public final class OneDriveServiceRegisterer implements ServiceTrackerCustomizer
     private void unregisterService(final ServiceReference<FileStorageAccountManagerProvider> ref) {
         ServiceRegistration<FileStorageService> serviceRegistration = this.serviceRegistration;
         if (null != serviceRegistration) {
-            serviceRegistration.unregister();
             this.serviceRegistration = null;
+            serviceRegistration.unregister();
         }
 
         ServiceRegistration<OAuthAccountDeleteListener> listenerRegistration = this.listenerRegistration;
         if (null != listenerRegistration) {
-            listenerRegistration.unregister();
             this.listenerRegistration = null;
+            listenerRegistration.unregister();
+        }
+
+        ServiceRegistration<OAuthAccountAssociationProvider> associationProviderRegistration = this.associationProviderRegistration;
+        if (null != associationProviderRegistration) {
+            this.associationProviderRegistration = null;
+            associationProviderRegistration.unregister();
         }
 
         ServiceReference<FileStorageAccountManagerProvider> reference = ref;
