@@ -106,6 +106,13 @@ public interface OAuthAccountAssociation {
      */
     String getDisplayName();
 
+    /**
+     * Gets the association's type.
+     *
+     * @return The type
+     */
+    Type getType();
+
     // ---------------------------------------------------------------------------------------------------------------------
 
     /**

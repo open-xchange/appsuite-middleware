@@ -47,80 +47,51 @@
  *
  */
 
-package com.openexchange.oauth.json;
+package com.openexchange.oauth.json.oauthaccount;
 
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.oauth.OAuthService;
-import com.openexchange.oauth.association.OAuthAccountAssociationService;
-import com.openexchange.secret.SecretService;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.exception.OXException;
+import com.openexchange.oauth.association.OAuthAccountAssociation;
+import com.openexchange.oauth.association.Status;
+import com.openexchange.oauth.json.AbstractOAuthWriter;
 import com.openexchange.session.Session;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- * {@link AbstractOAuthAJAXActionService}
+ * The OAuth account association writer
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AbstractOAuthAJAXActionService implements AJAXActionService {
+public class AssociationWriter extends AbstractOAuthWriter {
 
     /**
-     * The {@link DefaultDeferringURLService} reference.
+     * Initializes a new {@link AssociationWriter}.
      */
-    public static final java.util.concurrent.atomic.AtomicReference<DispatcherPrefixService> PREFIX = new java.util.concurrent.atomic.AtomicReference<DispatcherPrefixService>();
-
-    private static volatile OAuthService oAuthService;
-    private static volatile OAuthAccountAssociationService oAuthAccountAssociationService;
-    private static volatile SecretService secretService;
-
-    /**
-     * Sets the OAuth service
-     *
-     * @param oAuthService The OAuth service
-     */
-    public static void setOAuthService(final OAuthService oAuthService) {
-        AbstractOAuthAJAXActionService.oAuthService = oAuthService;
-    }
-
-    /**
-     * Gets the OAuth service
-     *
-     * @return The OAuth service
-     */
-    public static OAuthService getOAuthService() {
-        return oAuthService;
-    }
-
-    public static void setSecretService(final SecretService secretService) {
-        AbstractOAuthAJAXActionService.secretService = secretService;
-    }
-
-    public static String secret(final Session session) {
-        return secretService.getSecret(session);
-    }
-
-    /**
-     * Sets the <code>OAuthAccountAssociationService</code> instance
-     *
-     * @param oAuthAccountAssociationService The instance
-     */
-    public static void setOAuthAccountAssociationService(final OAuthAccountAssociationService oAuthAccountAssociationService) {
-        AbstractOAuthAJAXActionService.oAuthAccountAssociationService = oAuthAccountAssociationService;
-    }
-
-    /**
-     * Gets the <code>OAuthAccountAssociationService</code> instance
-     *
-     * @return The instance or <code>null</code>
-     */
-    public static OAuthAccountAssociationService getOAuthAccountAssociationService() {
-        return oAuthAccountAssociationService;
-    }
-
-    /**
-     * Initializes a new {@link AbstractOAuthAJAXActionService}.
-     */
-    protected AbstractOAuthAJAXActionService() {
+    private AssociationWriter() {
         super();
     }
 
+    /**
+     * Writes specified account association as a JSON object.
+     *
+     * @param association The account association
+     * @return The JSON object
+     * @throws OXException If writing to JSON fails
+     */
+    public static JSONObject write(final OAuthAccountAssociation association, Session session) throws OXException {
+        try {
+            JSONObject jAssociation = new JSONObject(8);
+            jAssociation.put(AccountField.ID.getName(), association.getId());
+            jAssociation.put(AccountField.DISPLAY_NAME.getName(), association.getDisplayName());
+            jAssociation.put(AccountField.SERVICE_ID.getName(), association.getServiceId());
+            jAssociation.put("type", association.getType().getId());
+            jAssociation.put("oauthAccontId", association.getOAuthAccountId());
+            Status status = association.getStatus(session);
+            jAssociation.put("status", status.getId());
+            return jAssociation;
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
+    }
 }

@@ -47,96 +47,79 @@
  *
  */
 
-package com.openexchange.file.storage.googledrive.oauth;
+package com.openexchange.file.storage.dropbox.oauth;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
-import com.openexchange.file.storage.googledrive.GoogleDriveConstants;
-import com.openexchange.file.storage.googledrive.access.GoogleDriveOAuthAccess;
+import com.openexchange.file.storage.dropbox.DropboxFileStorageService;
 import com.openexchange.oauth.association.OAuthAccountAssociation;
-import com.openexchange.oauth.association.Status;
-import com.openexchange.oauth.association.Type;
+import com.openexchange.oauth.association.spi.OAuthAccountAssociationProvider;
 import com.openexchange.session.Session;
 
-
 /**
- * {@link GoogleDriveOAuthAccountAssociation}
+ * {@link DropboxOAuthAccountAssociationProvider}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.4
  */
-public class GoogleDriveOAuthAccountAssociation implements OAuthAccountAssociation {
+public class DropboxOAuthAccountAssociationProvider implements OAuthAccountAssociationProvider {
 
-    private final int oAuthAccountId;
-    private final FileStorageAccount fileStorageAccount;
-    private final int userId;
-    private final int contextId;
+    private final DropboxFileStorageService storageService;
 
     /**
-     * Initializes a new {@link GoogleDriveOAuthAccountAssociation}.
-     *
-     * @param oAuthAccountId The identifier of the OAuth account
-     * @param fileStorageAccount The association Google Drive file storage account
-     * @param userId The user identifier
-     * @param contextId The context identifier
+     * Initializes a new {@link DropboxOAuthAccountAssociationProvider}.
      */
-    public GoogleDriveOAuthAccountAssociation(int oAuthAccountId, FileStorageAccount fileStorageAccount, int userId, int contextId) {
+    public DropboxOAuthAccountAssociationProvider(DropboxFileStorageService storageService) {
         super();
-        this.oAuthAccountId = oAuthAccountId;
-        this.fileStorageAccount = fileStorageAccount;
-        this.userId = userId;
-        this.contextId = contextId;
-
+        this.storageService = storageService;
     }
 
     @Override
-    public int getOAuthAccountId() {
-        return oAuthAccountId;
+    public Collection<OAuthAccountAssociation> getAssociationsFor(int accountId, Session session) throws OXException {
+        Collection<OAuthAccountAssociation> associations = null;
+        List<FileStorageAccount> accounts = storageService.getAccounts(session);
+        for (FileStorageAccount fileStorageAccount : accounts) {
+            Map<String, Object> configuration = fileStorageAccount.getConfiguration();
+            if (getAccountId(configuration) == accountId) {
+                if (null == associations) {
+                    associations = new LinkedList<>();
+                }
+                associations.add(new DropboxOAuthAccountAssociation(accountId, fileStorageAccount, session.getUserId(), session.getContextId()));
+            }
+        }
+
+        return null == associations ? Collections.<OAuthAccountAssociation> emptyList() : associations;
     }
 
-    @Override
-    public int getUserId() {
-        return userId;
-    }
+    /**
+     * Returns the OAuth account identifier from associated account's configuration
+     *
+     * @param configuration The configuration
+     * @return The account identifier or <code>-1</code> if account identifier cannot be determined
+     */
+    private int getAccountId(Map<String, Object> configuration) {
+        if (null == configuration) {
+            return -1;
+        }
 
-    @Override
-    public int getContextId() {
-        return contextId;
-    }
+        Object accountId = configuration.get("account");
+        if (null == accountId) {return -1;
+        }
 
-    @Override
-    public String getServiceId() {
-        return GoogleDriveConstants.ID;
-    }
+        if (accountId instanceof Integer) {
+            return ((Integer) accountId).intValue();
+        }
 
-    @Override
-    public String getId() {
-        return fileStorageAccount.getId();
-    }
-
-    @Override
-    public String getDisplayName() {
-        return fileStorageAccount.getDisplayName();
-    }
-
-    @Override
-    public Type getType() {
-        return Type.FILE_STORAGE;
-    }
-
-    @Override
-    public Status getStatus(Session session) throws OXException {
-        GoogleDriveOAuthAccess access = new GoogleDriveOAuthAccess(fileStorageAccount, session);
         try {
-            access.initialize();
-        } catch (OXException e) {
-            return Status.RECREATION_NEEDED;
+            return Integer.parseInt(accountId.toString());
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("The account identifier '" + accountId.toString() + "' cannot be parsed as an integer.", e);
         }
-        boolean success = access.ping();
-        if (success) {
-            return Status.OK;
-        }
-        return Status.INVALID_GRANT;
     }
 
 }

@@ -47,80 +47,60 @@
  *
  */
 
-package com.openexchange.oauth.json;
+package com.openexchange.oauth.json.oauthaccount.actions;
 
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.oauth.OAuthService;
+import static com.openexchange.java.util.Tools.getUnsignedInteger;
+import java.util.Collection;
+import org.json.JSONArray;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
+import com.openexchange.oauth.association.OAuthAccountAssociation;
 import com.openexchange.oauth.association.OAuthAccountAssociationService;
-import com.openexchange.secret.SecretService;
-import com.openexchange.session.Session;
+import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
+import com.openexchange.oauth.json.oauthaccount.AssociationWriter;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link AbstractOAuthAJAXActionService}
+ * {@link StatusAction}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AbstractOAuthAJAXActionService implements AJAXActionService {
+public final class StatusAction extends AbstractOAuthAJAXActionService {
 
     /**
-     * The {@link DefaultDeferringURLService} reference.
+     * Initializes a new {@link StatusAction}.
      */
-    public static final java.util.concurrent.atomic.AtomicReference<DispatcherPrefixService> PREFIX = new java.util.concurrent.atomic.AtomicReference<DispatcherPrefixService>();
-
-    private static volatile OAuthService oAuthService;
-    private static volatile OAuthAccountAssociationService oAuthAccountAssociationService;
-    private static volatile SecretService secretService;
-
-    /**
-     * Sets the OAuth service
-     *
-     * @param oAuthService The OAuth service
-     */
-    public static void setOAuthService(final OAuthService oAuthService) {
-        AbstractOAuthAJAXActionService.oAuthService = oAuthService;
-    }
-
-    /**
-     * Gets the OAuth service
-     *
-     * @return The OAuth service
-     */
-    public static OAuthService getOAuthService() {
-        return oAuthService;
-    }
-
-    public static void setSecretService(final SecretService secretService) {
-        AbstractOAuthAJAXActionService.secretService = secretService;
-    }
-
-    public static String secret(final Session session) {
-        return secretService.getSecret(session);
-    }
-
-    /**
-     * Sets the <code>OAuthAccountAssociationService</code> instance
-     *
-     * @param oAuthAccountAssociationService The instance
-     */
-    public static void setOAuthAccountAssociationService(final OAuthAccountAssociationService oAuthAccountAssociationService) {
-        AbstractOAuthAJAXActionService.oAuthAccountAssociationService = oAuthAccountAssociationService;
-    }
-
-    /**
-     * Gets the <code>OAuthAccountAssociationService</code> instance
-     *
-     * @return The instance or <code>null</code>
-     */
-    public static OAuthAccountAssociationService getOAuthAccountAssociationService() {
-        return oAuthAccountAssociationService;
-    }
-
-    /**
-     * Initializes a new {@link AbstractOAuthAJAXActionService}.
-     */
-    protected AbstractOAuthAJAXActionService() {
+    public StatusAction() {
         super();
+    }
+
+    @Override
+    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+        /*
+         * Parse parameters
+         */
+        final String accountId = request.getParameter("id");
+        if (null == accountId) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create( "id");
+        }
+        /*
+         * Request status
+         */
+        final OAuthAccountAssociationService oAuthAccountAssociationService = getOAuthAccountAssociationService();
+        Collection<OAuthAccountAssociation> associations = oAuthAccountAssociationService.getAssociationsFor(getUnsignedInteger(accountId), session);
+        /*
+         * Write account as a JSON array
+         */
+        JSONArray jAssociations = new JSONArray(associations.size());
+        for (OAuthAccountAssociation association : associations) {
+            jAssociations.put(AssociationWriter.write(association, session));
+        }
+        /*
+         * Return appropriate result
+         */
+        return new AJAXRequestResult(jAssociations);
     }
 
 }

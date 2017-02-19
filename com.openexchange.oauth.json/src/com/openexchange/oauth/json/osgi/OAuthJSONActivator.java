@@ -61,6 +61,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
+import com.openexchange.oauth.association.OAuthAccountAssociationService;
 import com.openexchange.oauth.http.OAuthHTTPClientFactory;
 import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
 import com.openexchange.oauth.json.Services;
@@ -85,7 +86,8 @@ public class OAuthJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, DispatcherPrefixService.class, OAuthService.class, OAuthScopeRegistry.class, OAuthHTTPClientFactory.class, CapabilityService.class, ClusterLockService.class, OAuthAccessRegistryService.class };
+        return new Class<?>[] { ConfigurationService.class, DispatcherPrefixService.class, OAuthService.class, OAuthScopeRegistry.class, OAuthHTTPClientFactory.class, CapabilityService.class, ClusterLockService.class,
+            OAuthAccessRegistryService.class, OAuthAccountAssociationService.class };
     }
 
     @Override
@@ -106,6 +108,7 @@ public class OAuthJSONActivator extends AJAXModuleActivator {
             this.oAuthService = oAuthService;
             // registry.addService(OAuthService.class, oAuthService);
             AbstractOAuthAJAXActionService.setOAuthService(oAuthService);
+            AbstractOAuthAJAXActionService.setOAuthAccountAssociationService(getService(OAuthAccountAssociationService.class));
             final WhiteboardSecretService secretService = new WhiteboardSecretService(context);
             this.secretService = secretService;
             secretService.open();
@@ -154,6 +157,7 @@ public class OAuthJSONActivator extends AJAXModuleActivator {
                 this.oAuthService = null;
             }
             AbstractOAuthAJAXActionService.setOAuthService(null);
+            AbstractOAuthAJAXActionService.setOAuthAccountAssociationService(null);
             AbstractOAuthAJAXActionService.PREFIX.set(null);
             Services.setServiceLookup(null);
         } catch (final Exception e) {

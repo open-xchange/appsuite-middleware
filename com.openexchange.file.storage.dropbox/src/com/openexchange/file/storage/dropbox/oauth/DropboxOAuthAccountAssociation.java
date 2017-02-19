@@ -47,80 +47,96 @@
  *
  */
 
-package com.openexchange.oauth.json;
+package com.openexchange.file.storage.dropbox.oauth;
 
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.oauth.OAuthService;
-import com.openexchange.oauth.association.OAuthAccountAssociationService;
-import com.openexchange.secret.SecretService;
+import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.dropbox.DropboxConstants;
+import com.openexchange.file.storage.dropbox.access.DropboxOAuth2Access;
+import com.openexchange.oauth.association.OAuthAccountAssociation;
+import com.openexchange.oauth.association.Status;
+import com.openexchange.oauth.association.Type;
 import com.openexchange.session.Session;
 
+
 /**
- * {@link AbstractOAuthAJAXActionService}
+ * {@link DropboxOAuthAccountAssociation}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.4
  */
-public abstract class AbstractOAuthAJAXActionService implements AJAXActionService {
+public class DropboxOAuthAccountAssociation implements OAuthAccountAssociation {
+
+    private final int oAuthAccountId;
+    private final FileStorageAccount fileStorageAccount;
+    private final int userId;
+    private final int contextId;
 
     /**
-     * The {@link DefaultDeferringURLService} reference.
-     */
-    public static final java.util.concurrent.atomic.AtomicReference<DispatcherPrefixService> PREFIX = new java.util.concurrent.atomic.AtomicReference<DispatcherPrefixService>();
-
-    private static volatile OAuthService oAuthService;
-    private static volatile OAuthAccountAssociationService oAuthAccountAssociationService;
-    private static volatile SecretService secretService;
-
-    /**
-     * Sets the OAuth service
+     * Initializes a new {@link DropboxOAuthAccountAssociation}.
      *
-     * @param oAuthService The OAuth service
+     * @param oAuthAccountId The identifier of the OAuth account
+     * @param fileStorageAccount The association Dropbox file storage account
+     * @param userId The user identifier
+     * @param contextId The context identifier
      */
-    public static void setOAuthService(final OAuthService oAuthService) {
-        AbstractOAuthAJAXActionService.oAuthService = oAuthService;
-    }
-
-    /**
-     * Gets the OAuth service
-     *
-     * @return The OAuth service
-     */
-    public static OAuthService getOAuthService() {
-        return oAuthService;
-    }
-
-    public static void setSecretService(final SecretService secretService) {
-        AbstractOAuthAJAXActionService.secretService = secretService;
-    }
-
-    public static String secret(final Session session) {
-        return secretService.getSecret(session);
-    }
-
-    /**
-     * Sets the <code>OAuthAccountAssociationService</code> instance
-     *
-     * @param oAuthAccountAssociationService The instance
-     */
-    public static void setOAuthAccountAssociationService(final OAuthAccountAssociationService oAuthAccountAssociationService) {
-        AbstractOAuthAJAXActionService.oAuthAccountAssociationService = oAuthAccountAssociationService;
-    }
-
-    /**
-     * Gets the <code>OAuthAccountAssociationService</code> instance
-     *
-     * @return The instance or <code>null</code>
-     */
-    public static OAuthAccountAssociationService getOAuthAccountAssociationService() {
-        return oAuthAccountAssociationService;
-    }
-
-    /**
-     * Initializes a new {@link AbstractOAuthAJAXActionService}.
-     */
-    protected AbstractOAuthAJAXActionService() {
+    public DropboxOAuthAccountAssociation(int oAuthAccountId, FileStorageAccount fileStorageAccount, int userId, int contextId) {
         super();
+        this.oAuthAccountId = oAuthAccountId;
+        this.fileStorageAccount = fileStorageAccount;
+        this.userId = userId;
+        this.contextId = contextId;
+
+    }
+
+    @Override
+    public int getOAuthAccountId() {
+        return oAuthAccountId;
+    }
+
+    @Override
+    public int getUserId() {
+        return userId;
+    }
+
+    @Override
+    public int getContextId() {
+        return contextId;
+    }
+
+    @Override
+    public String getServiceId() {
+        return DropboxConstants.ID;
+    }
+
+    @Override
+    public String getId() {
+        return fileStorageAccount.getId();
+    }
+
+    @Override
+    public String getDisplayName() {
+        return fileStorageAccount.getDisplayName();
+    }
+
+    @Override
+    public Type getType() {
+        return Type.FILE_STORAGE;
+    }
+
+    @Override
+    public Status getStatus(Session session) throws OXException {
+        DropboxOAuth2Access access = new DropboxOAuth2Access(fileStorageAccount, session);
+        try {
+            access.initialize();
+        } catch (OXException e) {
+            return Status.RECREATION_NEEDED;
+        }
+        boolean success = access.ping();
+        if (success) {
+            return Status.OK;
+        }
+        return Status.INVALID_GRANT;
     }
 
 }
