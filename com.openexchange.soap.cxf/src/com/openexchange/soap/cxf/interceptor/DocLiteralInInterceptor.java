@@ -103,10 +103,8 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
         }
 
         if (bop == null) {
-            QName startQName = xmlReader == null
-                ? new QName("http://cxf.apache.org/jaxws/provider", "invoke")
-            : xmlReader.getName();
-                bop = getBindingOperationInfo(exchange, startQName, client);
+            QName startQName = xmlReader.getName();
+            bop = getBindingOperationInfo(exchange, startQName, client);
         }
 
         try {
