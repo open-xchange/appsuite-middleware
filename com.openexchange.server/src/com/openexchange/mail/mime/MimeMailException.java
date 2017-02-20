@@ -610,7 +610,18 @@ public class MimeMailException extends OXException {
                     return MimeMailExceptionCode.IN_USE_ERROR.create(pe, appendInfo(getInfo(skipTag(pe.getMessage())), folder)).setCategory(CATEGORY_USER_INPUT);
                 }
             case LIMIT:
-                break;
+                {
+                    if (null != mailConfig && null != session) {
+                        return MimeMailExceptionCode.PROCESSING_ERROR_WE_EXT.create(
+                            pe,
+                            mailConfig.getServer(),
+                            mailConfig.getLogin(),
+                            Integer.valueOf(session.getUserId()),
+                            Integer.valueOf(session.getContextId()),
+                            appendInfo(getInfo(skipTag(pe.getMessage())), folder));
+                    }
+                    return MimeMailExceptionCode.PROCESSING_ERROR_WE.create(pe, appendInfo(getInfo(skipTag(pe.getMessage())), folder));
+                }
             case NONEXISTENT:
                 break;
             case NOPERM:
@@ -810,8 +821,8 @@ public class MimeMailException extends OXException {
         if (null == msg) {
             return false;
         }
-        final String m = com.openexchange.java.Strings.toLowerCase(msg);
-        return (m.indexOf("quota") >= 0 || m.indexOf("limit") >= 0);
+        String m = com.openexchange.java.Strings.asciiLowerCase(msg);
+        return (m.indexOf("quota") >= 0 || (m.indexOf("limit") >= 0 && m.indexOf("[limit]") < 0));
     }
 
     /**
@@ -829,7 +840,7 @@ public class MimeMailException extends OXException {
             }
         }
 
-        return isInUseException(com.openexchange.java.Strings.toLowerCase(e.getMessage()));
+        return isInUseException(com.openexchange.java.Strings.asciiLowerCase(e.getMessage()));
     }
 
     /**
