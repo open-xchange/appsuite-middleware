@@ -192,26 +192,29 @@ public class DataFetcherMysql implements DataFetcher {
                 to = new TableObject();
                 to.setName(table_name);
                 // fetch all columns from table and see if it contains matching column
-                ResultSet columns_res = dbmetadata.getColumns(getCatalogName(), null, table_name, null);
-                boolean table_matches = false;
-                while (columns_res.next()) {
+                ResultSet columns_res = null;
+                try {
+                    columns_res = dbmetadata.getColumns(getCatalogName(), null, table_name, null);
+                    boolean table_matches = false;
+                    while (columns_res.next()) {
+                        TableColumnObject tco = new TableColumnObject();
+                        String column_name = columns_res.getString("COLUMN_NAME");
+                        tco.setName(column_name);
+                        tco.setType(columns_res.getInt("DATA_TYPE"));
+                        tco.setColumnSize(columns_res.getInt("COLUMN_SIZE"));
 
-                    TableColumnObject tco = new TableColumnObject();
-                    String column_name = columns_res.getString("COLUMN_NAME");
-                    tco.setName(column_name);
-                    tco.setType(columns_res.getInt("DATA_TYPE"));
-                    tco.setColumnSize(columns_res.getInt("COLUMN_SIZE"));
-
-                    // if table has our ciriteria column, we should fetch data from it
-                    if (column_name.equals(getMatchingColumn())) {
-                        table_matches = true;
+                        // if table has our ciriteria column, we should fetch data from it
+                        if (column_name.equals(getMatchingColumn())) {
+                            table_matches = true;
+                        }
+                        // add column to table
+                        to.addColumn(tco);
                     }
-                    // add column to table
-                    to.addColumn(tco);
-                }
-                columns_res.close();
-                if (table_matches) {
-                    tableObjects.add(to);
+                    if (table_matches) {
+                        tableObjects.add(to);
+                    }
+                } finally {
+                    DBUtils.closeSQLStuff(columns_res);
                 }
             }
             log.debug("####### Found -> {} tables", tableObjects.size());
