@@ -58,6 +58,14 @@ Furthermore some tests use a comparison field as stated above which specifies ho
 | ge | Used in the date test to check for a value greater or equal to the given one. |
 | le | Used in the date test to check for a value less or equal to the given one. |
 
+### Possible address parts
+
+| Name | Description |
+|:------|:-------------|
+| all | The hole mail address. This is also the default. |
+| localpart | The local part of the mail address. |
+| domain | The domain part of the mail address. |
+
 ### Possible size comparisons
 
 | Name | Description |
@@ -82,6 +90,7 @@ This section describes the structures of tests.
 |:----|:---|:----|:----------|
 |id | String |address | A string describing the test command.|
 |comparison | String ||	Available types can be found in the config object. (see [Possible comparisons](#possible-comparisons)).|
+|addresspart| String || The address part which should be tested, see [Possible address parts](#possible-address-parts).
 |headers | Array ||	A string array containing the header fields.|
 |values | Array || A string array containing the value for the header fields. The test will be true if any of the strings matches.|
 
@@ -91,6 +100,7 @@ This section describes the structures of tests.
 |:----|:---|:----|:----------|
 |id | String | envelope | A string describing the test command. |
 |comparison | String || Available types can be found in the config object. (see [Possible comparisons](#possible-comparisons)).|
+|addresspart| String || The address part which should be tested, see [Possible address parts](#possible-address-parts).
 |headers | Array || A string array containing the header fields.|
 |values | Array || A string array containing the value for the header fields. The test will be true if any of the strings matches.|
 

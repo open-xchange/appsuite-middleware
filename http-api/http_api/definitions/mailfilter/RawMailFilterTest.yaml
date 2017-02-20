@@ -4,6 +4,9 @@ id:
 comparison:
   type: string
   description: The comparison type, see [Possible comparisons](#possible-comparisons).
+addresspart:
+  type: string
+  description: The addresspart which shall be used for envelope or address tests, see [Possible address parts](#possible-address-parts).
 headers:
   type: array
   description: An array containing the header fields (for address-, envelope-, exists- and header-test).
