@@ -84,9 +84,13 @@ import com.openexchange.client.onboarding.Scenario;
 import com.openexchange.client.onboarding.service.OnboardingService;
 import com.openexchange.client.onboarding.service.OnboardingView;
 import com.openexchange.exception.OXException;
+import com.openexchange.image.ImageLocation;
 import com.openexchange.java.Strings;
+import com.openexchange.log.LogProperties;
+import com.openexchange.mail.text.HtmlProcessing;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link OnboardingServiceImpl}
@@ -530,8 +534,19 @@ public class OnboardingServiceImpl implements OnboardingService {
             return null;
         }
 
+        String linkImageUrl = null;
+        {
+            ConfiguredLinkImage image = configuredLink.getImage();
+            if (null != image) {
+                // Build image location
+                ImageLocation imageLocation = new ImageLocation.Builder(image.getName()).id(image.getType().getScheme()).optImageHost(HtmlProcessing.imageHost()).build();
+                OnboardingImageDataSource imgSource = OnboardingImageDataSource.getInstance();
+                linkImageUrl = imgSource.generateUrl(imageLocation, session);
+            }
+        }
+
         if (false == configuredLink.isProperty()) {
-            return new Link(configuredLink.getUrl(), configuredLink.getType());
+            return new Link(configuredLink.getUrl(), configuredLink.getType(), linkImageUrl);
         }
 
         // Look up the actual link by retrieving the denoted property
@@ -541,7 +556,7 @@ public class OnboardingServiceImpl implements OnboardingService {
             LOG.warn("No such property providing the link: {}", configuredLink.getUrl());
             return null;
         }
-        return new Link(url, configuredLink.getType());
+        return new Link(url, configuredLink.getType(), linkImageUrl);
     }
 
     private Link resolveLink(ConfiguredLink configuredLink, int userId, int contextId) throws OXException {
@@ -549,8 +564,28 @@ public class OnboardingServiceImpl implements OnboardingService {
             return null;
         }
 
+        String linkImageUrl = null;
+        {
+            ConfiguredLinkImage image = configuredLink.getImage();
+            if (null != image) {
+                // Try to build image location
+                String optSessionId = LogProperties.get(LogProperties.Name.SESSION_SESSION_ID);
+                if (null != optSessionId) {
+                    SessiondService service = services.getOptionalService(SessiondService.class);
+                    if (null != service) {
+                        Session session = service.getSession(optSessionId);
+                        if (null != session && session.getContextId() == contextId && session.getUserId() == userId) {
+                            ImageLocation imageLocation = new ImageLocation.Builder(image.getName()).id(image.getType().getScheme()).optImageHost(HtmlProcessing.imageHost()).build();
+                            OnboardingImageDataSource imgSource = OnboardingImageDataSource.getInstance();
+                            linkImageUrl = imgSource.generateUrl(imageLocation, session);
+                        }
+                    }
+                }
+            }
+        }
+
         if (false == configuredLink.isProperty()) {
-            return new Link(configuredLink.getUrl(), configuredLink.getType());
+            return new Link(configuredLink.getUrl(), configuredLink.getType(), linkImageUrl);
         }
 
         // Look up the actual link by retrieving the denoted property
@@ -560,7 +595,7 @@ public class OnboardingServiceImpl implements OnboardingService {
             LOG.warn("No such property providing the link: {}", configuredLink.getUrl());
             return null;
         }
-        return new Link(url, configuredLink.getType());
+        return new Link(url, configuredLink.getType(), linkImageUrl);
     }
 
     @Override

@@ -155,7 +155,7 @@ public class DriveWindowsClientOnboardingProvider implements OnboardingProvider 
     }
 
     private Result linkResult(OnboardingRequest request, Session session) throws OXException {
-        return new LinkResult(new Link(getDownloadLink(request, session), LinkType.COMMON));
+        return new LinkResult(new Link(getDownloadLink(request, session), LinkType.COMMON, null));
     }
 
     private String getDownloadLink(OnboardingRequest request, Session session) throws OXException {
