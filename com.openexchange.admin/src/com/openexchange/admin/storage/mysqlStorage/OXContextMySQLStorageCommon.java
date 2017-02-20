@@ -86,6 +86,7 @@ import com.openexchange.tools.pipesnfilters.DataSource;
 import com.openexchange.tools.pipesnfilters.Filter;
 import com.openexchange.tools.pipesnfilters.PipesAndFiltersException;
 import com.openexchange.tools.pipesnfilters.PipesAndFiltersService;
+import com.openexchange.tools.sql.DBUtils;
 
 public class OXContextMySQLStorageCommon {
 
@@ -248,16 +249,9 @@ public class OXContextMySQLStorageCommon {
                 }
             }
         } finally {
-            if(rs != null) {
-                rs.close();
-            }
-            if(stmtuserattributes != null) {
-                stmtuserattributes.close();
-            }
+            closeSQLStuff(rs, stmtuserattributes);
         }
-
     }
-
 
     public Context[] loadContexts(final Collection<Integer> cids, final long averageSize, final List<Filter<Context, Context>> filters, final boolean failOnMissing) throws StorageException {
         PipesAndFiltersService pnfService;
@@ -296,17 +290,21 @@ public class OXContextMySQLStorageCommon {
         // TODO: this must be defined somewhere else
         final int NOGROUP = 65534;
         final PreparedStatement group_stmt = ox_write_con.prepareStatement("INSERT INTO groups (cid, id, identifier, displayname,lastModified,gidNumber) VALUES (?,?,'users',?,?,?);");
-        group_stmt.setInt(1, context_id);
-        group_stmt.setInt(2, group_id);
-        group_stmt.setString(3, display_name);
-        group_stmt.setLong(4, System.currentTimeMillis());
-        if (Integer.parseInt(prop.getGroupProp(AdminProperties.Group.GID_NUMBER_START, "-1")) > 0) {
-            group_stmt.setInt(5, gid_number);
-        } else {
-            group_stmt.setInt(5, NOGROUP);
+        try {
+            group_stmt.setInt(1, context_id);
+            group_stmt.setInt(2, group_id);
+            group_stmt.setString(3, display_name);
+            group_stmt.setLong(4, System.currentTimeMillis());
+            if (Integer.parseInt(prop.getGroupProp(AdminProperties.Group.GID_NUMBER_START, "-1")) > 0) {
+                group_stmt.setInt(5, gid_number);
+            } else {
+                group_stmt.setInt(5, NOGROUP);
+            }
+            group_stmt.executeUpdate();
+        } finally {
+            closeSQLStuff(group_stmt);
         }
-        group_stmt.executeUpdate();
-        group_stmt.close();
+        
     }
 
     /**
