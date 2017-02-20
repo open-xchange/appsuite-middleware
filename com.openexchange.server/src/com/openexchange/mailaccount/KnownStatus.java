@@ -76,6 +76,10 @@ public enum KnownStatus implements Status {
      * Account is disabled.
      */
     DISABLED("disabled", KnownStatusMessage.MESSAGE_DISABLED),
+    /**
+     * Account is current being set-up.
+     */
+    IN_SETUP("in_setup", KnownStatusMessage.MESSAGE_IN_SETUP),
 
     ;
 

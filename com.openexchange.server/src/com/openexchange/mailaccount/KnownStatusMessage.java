@@ -79,4 +79,7 @@ public class KnownStatusMessage implements LocalizableStrings {
     // The message advertising that affected account has been disabled by administrator
     public static final String MESSAGE_DISABLED = "Account is disabled.";
 
+    // The message advertising that affected account is currently in setup phase and does not yet reflect up-to-date information
+    public static final String MESSAGE_IN_SETUP = "Account is current being set-up.";
+
 }
