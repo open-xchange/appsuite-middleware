@@ -1804,26 +1804,37 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     private void findReferences(List<TableObject> fetchTableObjects, Connection ox_db_write_con) throws SQLException {
         DatabaseMetaData dbmeta = ox_db_write_con.getMetaData();
         String dbCatalog = ox_db_write_con.getCatalog();
+
         for (TableObject to : fetchTableObjects) {
             // get references from this table to another
             String tableName = to.getName();
             // ResultSet table_references =
             // dbmetadata.getCrossReference("%",null,table_name,getCatalogName(),null,getCatalogName());
-            final ResultSet tableReferences = dbmeta.getImportedKeys(dbCatalog, null, tableName);
-            LOG.debug("Table {} has pk reference to table-column:", tableName);
-            while (tableReferences.next()) {
-                final String pk = tableReferences.getString("PKTABLE_NAME");
-                final String pkc = tableReferences.getString("PKCOLUMN_NAME");
-                LOG.debug("--> Table: {} column ->{}", pk, pkc);
-                to.addCrossReferenceTable(pk);
-                final int pos = tableListContainsObject(pk, fetchTableObjects);
-                if (pos != -1) {
-                    LOG.debug("Found referenced by {}<->{}->{}", tableName, pk, pkc);
-                    final TableObject editMe = fetchTableObjects.get(pos);
-                    editMe.addReferencedBy(tableName);
+
+            ResultSet tableReferences = dbmeta.getImportedKeys(dbCatalog, null, tableName);
+            try {
+                LOG.debug("Table {} has pk reference to table-column:", tableName);
+                while (tableReferences.next()) {
+                    final String pk = tableReferences.getString("PKTABLE_NAME");
+                    final String pkc = tableReferences.getString("PKCOLUMN_NAME");
+                    LOG.debug("--> Table: {} column ->{}", pk, pkc);
+                    to.addCrossReferenceTable(pk);
+                    final int pos = tableListContainsObject(pk, fetchTableObjects);
+                    if (pos != -1) {
+                        LOG.debug("Found referenced by {}<->{}->{}", tableName, pk, pkc);
+                        final TableObject editMe = fetchTableObjects.get(pos);
+                        editMe.addReferencedBy(tableName);
+                    }
+                }
+            } finally {
+                try {
+                    if (tableReferences != null) {
+                        tableReferences.close();
+                    }
+                } catch (final Exception e) {
+                    LOG.error("Error closing statement", e);
                 }
             }
-            tableReferences.close();
         }
     }
 
