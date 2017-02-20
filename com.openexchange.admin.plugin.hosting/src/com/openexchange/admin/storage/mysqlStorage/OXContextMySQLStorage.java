@@ -1832,13 +1832,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     }
                 }
             } finally {
-                try {
-                    if (tableReferences != null) {
-                        tableReferences.close();
-                    }
-                } catch (final Exception e) {
-                    LOG.error("Error closing result set", e);
-                }
+                closeSQLStuff(tableReferences);
             }
         }
     }
