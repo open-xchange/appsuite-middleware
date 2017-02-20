@@ -397,12 +397,12 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
     protected void applyConfigCascadeSettings(UserSettingMail userSettingMail, int userId, Context ctx) throws OXException {
         ConfigViewFactory configViewFactory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
         if (configViewFactory == null) {
-            LOG.warn("Required service ConfigViewFactory absent. Unable to retrieve spam configuration for user {} in context {}.");
+            LOG.warn("Required service ConfigViewFactory absent. Unable to retrieve spam configuration for user {} in context {}.", userId, ctx.getContextId());
             return;
         }
         ConfigView configView = configViewFactory.getView(userId, ctx.getContextId());
         if (configView == null) {
-            LOG.warn("Required ConfigView not available. Unable to retrieve spam configuration for user {} in context {}.");
+            LOG.warn("Required ConfigView not available. Unable to retrieve spam configuration for user {} in context {}.", userId, ctx.getContextId());
             return;
         }
         updateSpamSetting(userSettingMail, userId, ctx, configView);
