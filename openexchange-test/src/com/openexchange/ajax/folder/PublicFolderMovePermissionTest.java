@@ -161,8 +161,43 @@ public class PublicFolderMovePermissionTest extends AbstractAJAXSession {
         }
     }
 
+    @Test
     public void testPermissionOnMoveIntoPublicFolderWithSubfolders() throws Exception {
-        
+        FolderObject sub = new FolderObject();
+        sub.setFolderName(UUID.randomUUID().toString());
+        sub.setParentFolderID(toMove.getObjectID());
+        sub.setModule(FolderObject.INFOSTORE);
+        sub.setType(FolderObject.PUBLIC);
+        InsertRequest req = new InsertRequest(EnumAPI.OX_NEW, sub);
+        InsertResponse resp = client.execute(req);
+        resp.fillObject(sub);
+
+        toMove.setParentFolderID(folder.getParentFolderID());
+        toMove.setPermissionsAsArray(null);
+        toMove.setPermissions(null);
+        UpdateRequest updateReq = new UpdateRequest(EnumAPI.OX_NEW, toMove);
+        client.execute(updateReq);
+
+        GetRequest getReq = new GetRequest(EnumAPI.OX_NEW, sub.getObjectID());
+        GetResponse getResp = client.execute(getReq);
+        FolderObject f = getResp.getFolder();
+        Assert.assertNotNull(f);
+        OCLPermission[] perms = f.getPermissionsAsArray();
+        Assert.assertEquals(2, perms.length);
+        for (OCLPermission p : perms) {
+            if (p.getEntity() == client.getValues().getUserId()) {
+                Assert.assertTrue(p.isFolderAdmin());
+            }
+            if (p.getEntity() == client2.getValues().getUserId()) {
+                Assert.assertFalse(p.isFolderAdmin());
+                Assert.assertTrue(p.canCreateObjects());
+                Assert.assertTrue(p.canReadAllObjects());
+                Assert.assertTrue(p.canWriteOwnObjects());
+                Assert.assertFalse(p.canWriteAllObjects());
+                Assert.assertFalse(p.canDeleteAllObjects());
+                Assert.assertFalse(p.canDeleteOwnObjects());
+            }
+        }
     }
 
 }
