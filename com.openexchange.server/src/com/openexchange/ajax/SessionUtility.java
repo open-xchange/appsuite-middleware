@@ -399,11 +399,12 @@ public final class SessionUtility {
      * @throws OXException If the IP check denies given session
      */
     public static void checkIP(Session session, String currentIpAddress) throws OXException {
-        if (null == currentIpAddress || !currentIpAddress.equals(session.getLocalIp())) {
+        String oldIp = session.getLocalIp();
+        if (null == currentIpAddress || !currentIpAddress.equals(oldIp)) {
             // IP is missing or has changed
             IPCheckService ipChecker = ServerServiceRegistry.getInstance().getService(IPCheckService.class);
             if (null != ipChecker) {
-                ipChecker.handleChangedIp(currentIpAddress, session.getLocalIp(), session);
+                ipChecker.handleChangedIp(currentIpAddress, oldIp, session);
             }
         }
     }
