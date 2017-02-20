@@ -47,62 +47,36 @@
  *
  */
 
-package com.openexchange.html;
+package com.openexchange.snippet;
 
-import java.util.Map;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import com.openexchange.exception.OXException;
-import com.openexchange.html.internal.HtmlServiceImpl;
-import com.openexchange.html.osgi.HTMLServiceActivator;
+import com.openexchange.i18n.LocalizableStrings;
+
 
 /**
- * {@link Bug35982Test}
+ * {@link SnippetStrings} - Provides localizable strings for snippet module.
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.2
  */
-public class Bug35982Test {
+public class SnippetStrings implements LocalizableStrings {
 
-    private HtmlService service;
-
-    public Bug35982Test() {
+    /**
+     * Initializes a new {@link SnippetStrings}.
+     */
+    private SnippetStrings() {
         super();
     }
 
-    @Before
-    public void setUp() {
-        Object[] maps = HTMLServiceActivator.getDefaultHTMLEntityMaps();
+    // Thrown if a user tries to create a snippet/signature referencing to invalid or even harmful image data
+    public static final String INVALID_IMAGE_DATA_MSG = "Invalid or harmful image data detected";
 
-        @SuppressWarnings("unchecked")
-        final Map<String, Character> htmlEntityMap = (Map<String, Character>) maps[1];
-        @SuppressWarnings("unchecked")
-        final Map<Character, String> htmlCharMap = (Map<Character, String>) maps[0];
+    // Thrown if a user tries to create a snippet/signature referencing to an image which is too big
+    public static final String MAXIMUM_IMAGE_SIZE_MSG = "The signature image exceeds the maximum allowed size of '%1$s'.";
 
-        htmlEntityMap.put("apos", Character.valueOf('\''));
+    // Thrown if a user tries to create a snippet/signature containing more than max. number of allowed images
+    public static final String MAXIMUM_IMAGES_COUNT_MSG = "The maximum allowed number of '%1$s' images in the signature is reached.";
 
-        service = new HtmlServiceImpl(htmlCharMap, htmlEntityMap);
-    }
+    // Thrown if a user must not modify a snippet/signature. Neither shared nor owned by that user.
+    public static final String UPDATE_DENIED_MSG = "You are not allowed to modify the signature";
 
-    @After
-    public void tearDown() {
-        service = null;
-    }
-
-    @Test
-    public void testScriptTagSanitizing() throws OXException {
-        String content = "<!DOCTYPE html>\n" +
-            "<html>\n" +
-            "<head>\n" +
-            "</head>\n" +
-            "<body>\n" +
-            "<<SCRIPT>alert(\\\"XSS\\\");//<</SCRIPT>script/xss>x=/xss/;alert(x.source)</script>\n" +
-            "</body>\n" +
-            "</html>";
-
-        String test = service.sanitize(content, null, true, null, null);
-
-        Assert.assertTrue("Script tag not properly sanitized: " + test, test.indexOf("<script") < 0);
-    }
 }

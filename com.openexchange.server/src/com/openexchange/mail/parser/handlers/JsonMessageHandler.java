@@ -58,13 +58,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -553,7 +551,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
             // }
             // } else {
             // jsonObject.put(MailJSONField.CONTENT.getKey(), JSONObject.NULL);
-            // } 
+            // }
             getAttachmentsArr().put(jsonObject);
             return true;
         } catch (final JSONException e) {
@@ -1093,7 +1091,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
         }
     }
 
-    private String getHtmlDisplayVersion(final ContentType contentType, final String src) {
+    private String getHtmlDisplayVersion(final ContentType contentType, final String src) throws OXException {
         final String baseType = contentType.getBaseType().toLowerCase(Locale.ENGLISH);
         if (baseType.startsWith(MimeTypes.MIME_TEXT_ENRICHED) || baseType.startsWith(MimeTypes.MIME_TEXT_RICHTEXT)) {
             return HtmlProcessing.formatHTMLForDisplay(
@@ -1161,7 +1159,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
          * Since we obviously touched message's content, mark its corresponding message object as seen
          */
         mail.setFlags(mail.getFlags() | MailMessage.FLAG_SEEN);
-        
+
         /*
          * Check if we did not append any text so far
          */
@@ -1172,7 +1170,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
             asRawContent(plainText.id, plainText.contentType, new HtmlSanitizeResult(plainText.content), true);
 
         }
-        
+
         try {
             final String headersKey = HEADERS;
             if (!jsonObject.hasAndNotNull(headersKey)) {

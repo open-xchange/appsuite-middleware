@@ -53,6 +53,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import java.util.Queue;
 import org.apache.commons.lang.StringUtils;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 
 /**
@@ -75,18 +76,22 @@ public class AssertionHelper {
     }
 
     public static void assertSanitized(HtmlService service, String html, String[] maliciousParams, AssertExpression ae) {
-        String sanitized = service.sanitize(html, null, false, null, null);
-        if (!Strings.isEmpty(sanitized)) {
-            sanitized = sanitized.toLowerCase();
-        }
-        if (AssertExpression.NOT_CONTAINED.equals(ae)) {
-            if (null != maliciousParams) {
-                for (String maliciousParam : maliciousParams) {
-                    assertFalse("sanitized output: " + sanitized + " contains " + maliciousParam, StringUtils.containsIgnoreCase(sanitized, maliciousParam));
-                }
+        try {
+            String sanitized = service.sanitize(html, null, false, null, null);
+            if (!Strings.isEmpty(sanitized)) {
+                sanitized = sanitized.toLowerCase();
             }
-        } else if (AssertExpression.EMPTY.equals(ae)) {
-            assertTrue("expected html: " + html + " after sanitizing to be empty but contains " + sanitized, Strings.isEmpty(sanitized));
+            if (AssertExpression.NOT_CONTAINED.equals(ae)) {
+                if (null != maliciousParams) {
+                    for (String maliciousParam : maliciousParams) {
+                        assertFalse("sanitized output: " + sanitized + " contains " + maliciousParam, StringUtils.containsIgnoreCase(sanitized, maliciousParam));
+                    }
+                }
+            } else if (AssertExpression.EMPTY.equals(ae)) {
+                assertTrue("expected html: " + html + " after sanitizing to be empty but contains " + sanitized, Strings.isEmpty(sanitized));
+            }
+        } catch (OXException e) {
+            org.junit.Assert.fail(e.getMessage());
         }
     }
 

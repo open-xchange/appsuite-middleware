@@ -54,6 +54,7 @@ import java.util.Map;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import com.openexchange.exception.OXException;
 import com.openexchange.html.internal.HtmlServiceImpl;
 import com.openexchange.html.osgi.HTMLServiceActivator;
 
@@ -92,7 +93,7 @@ public class Bug26789Test {
     }
 
     @Test
-    public void testForNullPointerException() {
+    public void testForNullPointerException() throws OXException {
         String content = content1;
         String test = service.getConformHTML(content, "UTF-8");
         assertNotNull(test);
@@ -192,7 +193,7 @@ public class Bug26789Test {
         + " P.MsoAcetate {  MARGIN: 0cm 0cm 0pt; FONT-FAMILY: \"Tahoma\",\"sans-serif\"; FONT-SIZE: 8pt;  }\r\n";
 
     @Test
-    public void testForNullPointerException2() {
+    public void testForNullPointerException2() throws OXException {
         StringBuilder sb = new StringBuilder(190000);
         sb.append("<html><head>");
         sb.append("<style type=\"text/css\">.mceResizeHandle {position: absolute;border: 1px soli");

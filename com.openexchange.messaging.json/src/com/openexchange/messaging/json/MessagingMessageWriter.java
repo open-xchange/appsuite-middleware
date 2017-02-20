@@ -229,7 +229,7 @@ public class MessagingMessageWriter {
         }
 
         @Override
-        public Object write(final MessagingPart part, final MessagingContent content, final ServerSession session, final DisplayMode mode) {
+        public Object write(final MessagingPart part, final MessagingContent content, final ServerSession session, final DisplayMode mode) throws OXException {
             if (null == session || null == mode) {
                 return ((StringContent) content).getData();
             }

@@ -50,6 +50,7 @@
 package com.openexchange.html;
 
 import java.util.Map;
+import com.openexchange.exception.OXException;
 import com.openexchange.html.internal.HtmlServiceImpl;
 import com.openexchange.html.osgi.HTMLServiceActivator;
 
@@ -108,7 +109,7 @@ public class SimHtmlService implements HtmlService {
     }
 
     @Override
-    public String sanitize(final String htmlContent, final String optConfigName, final boolean dropExternalImages, final boolean[] modified, final String cssPrefix) {
+    public String sanitize(final String htmlContent, final String optConfigName, final boolean dropExternalImages, final boolean[] modified, final String cssPrefix) throws OXException {
         return htmlService.sanitize(htmlContent, optConfigName, dropExternalImages, modified, cssPrefix);
     }
 
@@ -138,12 +139,12 @@ public class SimHtmlService implements HtmlService {
     }
 
     @Override
-    public String getConformHTML(final String htmlContent, final String charset) {
+    public String getConformHTML(final String htmlContent, final String charset) throws OXException {
         return htmlService.getConformHTML(htmlContent, charset);
     }
 
     @Override
-    public String getConformHTML(final String htmlContent, final String charset, final boolean replaceUrls) {
+    public String getConformHTML(final String htmlContent, final String charset, final boolean replaceUrls) throws OXException {
         return htmlService.getConformHTML(htmlContent, charset, replaceUrls);
     }
 
@@ -193,7 +194,7 @@ public class SimHtmlService implements HtmlService {
     }
 
     @Override
-    public HtmlSanitizeResult sanitize(String htmlContent, String optConfigName, boolean dropExternalImages, boolean[] modified, String cssPrefix, int maxContentSize) {
+    public HtmlSanitizeResult sanitize(String htmlContent, String optConfigName, boolean dropExternalImages, boolean[] modified, String cssPrefix, int maxContentSize) throws OXException {
         return htmlService.sanitize(htmlContent, optConfigName, dropExternalImages, modified, cssPrefix, maxContentSize);
     }
 

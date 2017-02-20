@@ -54,6 +54,7 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlSanitizeResult;
 import com.openexchange.html.osgi.HTMLServiceActivator;
 
@@ -140,7 +141,7 @@ public class HtmlServiceImplTest {
     }
 
     @Test
-    public void testSupportForDataScheme() {
+    public void testSupportForDataScheme() throws OXException {
         String html = "Sincerely Peter Pan\n" +
             "\n" +
             "<a href=\"domain.invalid\"><img alt=\"alternative\" src=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAABQC\"></a>";
@@ -163,31 +164,31 @@ public class HtmlServiceImplTest {
     }
 
     @Test
-    public void testSanitize_contentEmtpy_returnEmptyContent() {
+    public void testSanitize_contentEmtpy_returnEmptyContent() throws OXException {
         HtmlSanitizeResult sanitize = htmlServiceImpl.sanitize("", null, false, new boolean[0], cssPrefix, 100);
         Assert.assertEquals("", sanitize.getContent());
     }
 
     @Test
-    public void testSanitize_htmlContentWithSetMaxContentSize_returnSanitizedContent() {
+    public void testSanitize_htmlContentWithSetMaxContentSize_returnSanitizedContent() throws OXException {
         HtmlSanitizeResult sanitize = htmlServiceImpl.sanitize(htmlContent, null, false, new boolean[0], cssPrefix, 100);
         Assert.assertTrue(!sanitize.getContent().contains("<br />"));
     }
 
     @Test
-    public void testSanitize_htmlContentWithSetMaxContentSize_notTruncatedDueToSmallerContent() {
+    public void testSanitize_htmlContentWithSetMaxContentSize_notTruncatedDueToSmallerContent() throws OXException {
         HtmlSanitizeResult sanitize = htmlServiceImpl.sanitize(htmlContent, null, false, new boolean[0], cssPrefix, 11111);
         Assert.assertFalse(sanitize.isTruncated());
     }
 
     @Test
-    public void testSanitize_htmlContentWithSetMaxContentSize_truncatedDueToBigContent() {
+    public void testSanitize_htmlContentWithSetMaxContentSize_truncatedDueToBigContent() throws OXException {
         HtmlSanitizeResult sanitize = htmlServiceImpl.sanitize(bigHtmlContent, null, false, new boolean[0], cssPrefix, 11111);
         Assert.assertTrue(sanitize.isTruncated());
     }
 
     @Test
-    public void testSanitize_htmlContentWithNoMaxContentSize_notTruncated() {
+    public void testSanitize_htmlContentWithNoMaxContentSize_notTruncated() throws OXException {
         HtmlSanitizeResult sanitize = htmlServiceImpl.sanitize(bigHtmlContent, null, false, new boolean[0], cssPrefix, -1);
         Assert.assertFalse(sanitize.isTruncated());
     }
@@ -237,7 +238,7 @@ public class HtmlServiceImplTest {
     }
 
     @Test
-    public void testDropSuperfluousDivTags() {
+    public void testDropSuperfluousDivTags() throws OXException {
         String html = "<div id=\"ox-7bf62dbb34\"><p>Some text</p></div>";
         String test = htmlServiceImpl.getConformHTML(html, "UTF-8");
         Assert.assertTrue(test.indexOf("<div") < 0);

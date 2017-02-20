@@ -54,6 +54,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import com.openexchange.exception.OXException;
 import com.openexchange.html.internal.HtmlServiceImpl;
 import com.openexchange.html.osgi.HTMLServiceActivator;
 
@@ -90,7 +91,7 @@ public class Bug31826Test {
     }
 
     @Test
-    public void testKeepUnicode() {
+    public void testKeepUnicode() throws OXException {
         String content = "dfg &hearts;&diams;&spades;&clubs;&copy;&reg;&trade; dfg";
         String test = service.sanitize(content, null, true, null, null);
 
