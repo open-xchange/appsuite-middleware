@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,72 +47,100 @@
  *
  */
 
-package com.openexchange.client.onboarding;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
-import com.openexchange.session.Session;
+package com.openexchange.client.onboarding.internal;
 
 /**
- * {@link LinkResult} - A result when a link is supposed to be returned.
+ * {@link ConfiguredLinkImage}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.1
+ * @since v7.8.4
  */
-public class LinkResult implements Result {
+public class ConfiguredLinkImage {
 
-    private final Link link;
+    /** The type for a configured link image */
+    public static enum Type {
+        /**
+         * The image is accessible via an HTTP URL like <code>"http://cdn.ox.io/images/apps/drive.gif"</code>
+         */
+        HTTP("http"),
+        /**
+         * The image is accessible via an HTTPS URL like <code>"https://cdn.ox.io/images/apps/drive.gif"</code>
+         */
+        HTTPS("https"),
+        /**
+         * The image is accessible through a file on HDD like <code>"file:///opt/open-xchange/images/drive.gif"</code>
+         */
+        FILE("file"),
+        /**
+         * The image is accessible through a resource <code>"resource://images/drive.gif"</code>
+         */
+        RESOURCE("resource");
 
-    /**
-     * Initializes a new {@link LinkResult}.
-     *
-     * @param link The link
-     */
-    public LinkResult(Link link) {
-        super();
-        this.link = link;
-    }
+        private final String scheme;
 
-    /**
-     * Gets the link.
-     *
-     * @return The result string
-     */
-    public Link getLink() {
-        return link;
-    }
-
-    @Override
-    public ResultReply getReply() {
-        return ResultReply.ACCEPT;
-    }
-
-    @Override
-    public ResultObject getResultObject(OnboardingRequest request, Session session) throws OXException {
-        OnboardingAction action = request.getAction();
-        if (OnboardingAction.LINK != action) {
-            throw OnboardingExceptionCodes.UNSUPPORTED_ACTION.create(null == action ? "null" : action.getId());
+        private Type(String scheme) {
+            this.scheme = scheme;
         }
 
-        try {
-            JSONObject jLink = new JSONObject(4);
-            jLink.put("link", link.getUrl());
-            {
-                LinkType type = link.getType();
-                jLink.put("type", null == type ? LinkType.COMMON.getId() : type.getId());
+        /**
+         * Gets the scheme
+         *
+         * @return The scheme
+         */
+        public String getScheme() {
+            return scheme;
+        }
+
+        /**
+         * Gets the type for specified identifier.
+         *
+         * @param type The type identifier
+         * @return The type or <code>null</code>
+         */
+        public static Type typeFor(String type) {
+            if (null == type) {
+                return null;
             }
-            {
-                String imageUrl = link.getImageUrl();
-                if (false == Strings.isEmpty(imageUrl)) {
-                    jLink.put("image", imageUrl);
+
+            for (Type t : Type.values()) {
+                if (type.equalsIgnoreCase(t.scheme)) {
+                    return t;
                 }
             }
-            return new SimpleResultObject(jLink, "json");
-        } catch (JSONException e) {
-            throw OnboardingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            return null;
         }
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------
+
+    private final String name;
+    private final Type type;
+
+    /**
+     * Initializes a new {@link ConfiguredLinkImage}.
+     */
+    public ConfiguredLinkImage(String name, Type type) {
+        super();
+        this.name = name;
+        this.type = type;
+    }
+
+    /**
+     * Gets the name
+     *
+     * @return The name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Gets the type
+     *
+     * @return The type
+     */
+    public Type getType() {
+        return type;
     }
 
 }

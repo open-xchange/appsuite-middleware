@@ -57,6 +57,7 @@ import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.client.onboarding.OnboardingUtility;
 import com.openexchange.client.onboarding.download.DownloadLinkProvider;
 import com.openexchange.client.onboarding.internal.OnboardingConfig;
+import com.openexchange.client.onboarding.internal.OnboardingImageDataSource;
 import com.openexchange.client.onboarding.internal.OnboardingServiceImpl;
 import com.openexchange.client.onboarding.rmi.RemoteOnboardingService;
 import com.openexchange.client.onboarding.rmi.impl.RemoteOnboardingServiceImpl;
@@ -65,13 +66,16 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
+import com.openexchange.conversion.DataSource;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.TranslatorFactory;
+import com.openexchange.image.ImageActionFactory;
 import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.notification.mail.NotificationMailFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sms.SMSServiceSPI;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -98,12 +102,13 @@ public class OnboardingActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { UserService.class, ConfigViewFactory.class, ConfigurationService.class, MimeTypeMap.class, UserAgentParser.class, ContextService.class,
- TranslatorFactory.class, ServerConfigService.class, CapabilityService.class, NotificationMailFactory.class };
+ TranslatorFactory.class, ServerConfigService.class, CapabilityService.class, NotificationMailFactory.class, SessiondService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         Services.setServiceLookup(this);
+        OnboardingImageDataSource.setBundle(context.getBundle());
 
         // Create service instance
         OnboardingServiceImpl serviceImpl = new OnboardingServiceImpl(this);
@@ -155,6 +160,15 @@ public class OnboardingActivator extends HousekeepingActivator {
             props.put("RMIName", RemoteOnboardingService.RMI_NAME);
             registerService(Remote.class, new RemoteOnboardingServiceImpl(serviceImpl), props);
         }
+
+        // Register image data source
+        {
+            OnboardingImageDataSource imageDataSource = OnboardingImageDataSource.getInstance();
+            Dictionary<String, Object> props = new Hashtable<String, Object>(1);
+            props.put("identifier", imageDataSource.getRegistrationName());
+            registerService(DataSource.class, imageDataSource, props);
+            ImageActionFactory.addMapping(imageDataSource.getRegistrationName(), imageDataSource.getAlias());
+        }
     }
 
     @Override
@@ -166,6 +180,7 @@ public class OnboardingActivator extends HousekeepingActivator {
             removeService(OnboardingService.class);
         }
 
+        OnboardingImageDataSource.setBundle(null);
         Services.setServiceLookup(null);
     }
 
