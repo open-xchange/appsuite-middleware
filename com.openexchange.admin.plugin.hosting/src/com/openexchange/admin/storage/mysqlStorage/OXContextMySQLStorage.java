@@ -1739,27 +1739,32 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 to = new TableObject();
                 to.setName(table_name);
                 // fetch all columns from table and see if it contains matching column
-                final ResultSet columns_res = db_metadata.getColumns(ox_db_write_connection.getCatalog(), null, table_name, null);
+                ResultSet columns_res = null;
+                try {
+                    columns_res = db_metadata.getColumns(ox_db_write_connection.getCatalog(), null, table_name, null);
 
-                boolean table_matches = false;
-                while (columns_res.next()) {
+                    boolean table_matches = false;
+                    while (columns_res.next()) {
 
-                    final TableColumnObject tco = new TableColumnObject();
-                    final String column_name = columns_res.getString("COLUMN_NAME");
-                    tco.setName(column_name);
-                    tco.setType(columns_res.getInt("DATA_TYPE"));
-                    tco.setColumnSize(columns_res.getInt("COLUMN_SIZE"));
+                        final TableColumnObject tco = new TableColumnObject();
+                        final String column_name = columns_res.getString("COLUMN_NAME");
+                        tco.setName(column_name);
+                        tco.setType(columns_res.getInt("DATA_TYPE"));
+                        tco.setColumnSize(columns_res.getInt("COLUMN_SIZE"));
 
-                    // if table has our criteria column, we should fetch data from it
-                    if (column_name.equals(this.selectionCriteria)) {
-                        table_matches = true;
+                        // if table has our criteria column, we should fetch data from it
+                        if (column_name.equals(this.selectionCriteria)) {
+                            table_matches = true;
+                        }
+                        // add column to table
+                        to.addColumn(tco);
                     }
-                    // add column to table
-                    to.addColumn(tco);
-                }
-                columns_res.close();
-                if (table_matches) {
-                    tableObjects.add(to);
+                    
+                    if (table_matches) {
+                        tableObjects.add(to);
+                    }
+                } finally {
+                    closeSQLStuff(columns_res);
                 }
             }
         } finally {
@@ -1832,7 +1837,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                         tableReferences.close();
                     }
                 } catch (final Exception e) {
-                    LOG.error("Error closing statement", e);
+                    LOG.error("Error closing result set", e);
                 }
             }
         }
