@@ -51,6 +51,7 @@ package com.openexchange.mailfilter;
 
 import javax.security.auth.Subject;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.mailfilter.properties.MailFilterProperties;
 import com.openexchange.mailfilter.services.Services;
 import com.openexchange.session.Session;
 

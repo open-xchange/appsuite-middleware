@@ -76,8 +76,8 @@ import com.openexchange.mail.categories.ruleengine.MailCategoriesRuleEngineExcep
 import com.openexchange.mail.categories.ruleengine.MailCategoryRule;
 import com.openexchange.mail.categories.ruleengine.RuleType;
 import com.openexchange.mailfilter.Credentials;
-import com.openexchange.mailfilter.MailFilterProperties;
 import com.openexchange.mailfilter.MailFilterService;
+import com.openexchange.mailfilter.properties.MailFilterProperties;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 

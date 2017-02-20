@@ -53,10 +53,10 @@ import javax.security.auth.Subject;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailfilter.Credentials;
-import com.openexchange.mailfilter.MailFilterProperties;
 import com.openexchange.mailfilter.json.ajax.Action;
 import com.openexchange.mailfilter.json.ajax.Parameter;
 import com.openexchange.mailfilter.json.osgi.Services;
+import com.openexchange.mailfilter.properties.MailFilterProperties;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
