@@ -890,6 +890,17 @@ If you would like to add a reference to another property use the following appro
 | __File__ | spamhandler.properties  |
 
 ---
+| Key | <span style="font-weight:normal">com.openexchange.spamhandler.enabled</span> |
+|:----------------|:--------|
+| __Description__ | Allows to enable/disable spam handling per user/context/server via ConfigCascade (based on the configured spam handler).<br>If no configuration is available (for the mentioned property) the previously configured user setting mail permission bit will be taken into account. If there is a configuration for "com.openexchange.spamhandler.enabled" available these will be used for the defined scope <br><b>Caution:</b> if the property has been set via ConfigCascade only these source will be used. Changing the user configuration afterwards via /opt/open-xchange/sbin/changeuser ... --gui_spam_filter_capabilities_enabled true/false will have no effect! You can change it for instance on a user base as described here: http://oxpedia.org/wiki/index.php?title=ConfigCascade . If you remove the property from ConfigCascade sources the formerly overwritten permission bit will be used.<br> |
+| __Default__ | UserSettingMail permission bit from database  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | true  |
+| __Configcascade Aware__ | true  |
+| __Related__ | com.openexchange.spamhandler.name  |
+| __File__ | spamhandler.properties  |
+
+---
 
 
 ## SSL 
