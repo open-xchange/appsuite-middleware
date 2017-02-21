@@ -82,7 +82,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 import com.openexchange.api2.AppointmentSQLInterface;
-import com.openexchange.api2.ReminderService;
+import com.openexchange.api2.ReminderSQLInterface;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.calendar.cache.Attribute;
@@ -3106,11 +3106,11 @@ public class CalendarMySQL implements CalendarSqlImp {
             /*
              * Update reminders' folder ID on move operation
              */
-            ReminderService reminderInterface = new ReminderHandler(ctx);
+            ReminderSQLInterface reminderInterface = ReminderHandler.getInstance();
 
             List<ReminderObject> toUpdate = new LinkedList<ReminderObject>();
             {
-                SearchIterator<?> it = reminderInterface.listReminder(Types.APPOINTMENT, cdao.getObjectID());
+                SearchIterator<?> it = reminderInterface.listReminder(Types.APPOINTMENT, cdao.getObjectID(), ctx);
                 try {
                     while (it.hasNext()) {
                         toUpdate.add((ReminderObject) it.next());
@@ -3131,7 +3131,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 } else {
                     reminder.setFolder(cdao.getParentFolderID());
                 }
-                reminderInterface.updateReminder(reminder, writecon);
+                reminderInterface.updateReminder(reminder, writecon, ctx);
             }
         }
 
@@ -4683,14 +4683,14 @@ public class CalendarMySQL implements CalendarSqlImp {
     }
 
     private static final void changeReminder(final int oid, final int uid, final int fid, final Context c, final boolean sequence, final java.util.Date end_date, final java.util.Date reminder_date, final int action, final boolean recurrenceChange, final Connection con) throws OXException {
-        final ReminderService rsql = new ReminderHandler(c);
+        final ReminderSQLInterface rsql = ReminderHandler.getInstance();
         if (action == CalendarOperation.DELETE || action == CalendarOperation.UPDATE && COLLECTION.isInThePast(end_date)) {
-            if (rsql.existsReminder(oid, uid, Types.APPOINTMENT, con)) {
+            if (rsql.existsReminder(oid, uid, Types.APPOINTMENT, con, c)) {
                 try {
                     if (con != null) {
-                        rsql.deleteReminder(oid, uid, Types.APPOINTMENT, con);
+                        rsql.deleteReminder(oid, uid, Types.APPOINTMENT, con, c);
                     } else {
-                        rsql.deleteReminder(oid, uid, Types.APPOINTMENT);
+                        rsql.deleteReminder(oid, uid, Types.APPOINTMENT, c);
                     }
                 } catch (final OXException exc) {
                     if (ReminderExceptionCode.NOT_FOUND.equals(exc)) {
@@ -4709,7 +4709,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 ro.setRecurrenceAppointment(sequence);
                 ro.setDate(reminder_date);
                 ro.setFolder(fid);
-                if (rsql.existsReminder(oid, uid, Types.APPOINTMENT, con)) {
+                if (rsql.existsReminder(oid, uid, Types.APPOINTMENT, con, c)) {
                     if (sequence && !recurrenceChange) {
                         /*
                          * A recurring appointment's reminder update whose recurrence pattern has not changed; verify that no already
@@ -4717,12 +4717,12 @@ public class CalendarMySQL implements CalendarSqlImp {
                          * storage. If storage's reminder date is greater than or equal to specified reminder, leave unchanged. Update: I
                          * think this is inverted. Change it...
                          */
-                        Date storageReminder = rsql.loadReminder(oid, uid, Types.APPOINTMENT, con).getDate();
+                        Date storageReminder = rsql.loadReminder(oid, uid, Types.APPOINTMENT, con, c).getDate();
                         if (storageReminder.getTime() > reminder_date.getTime()) {
                             if (con != null) {
-                                rsql.updateReminder(ro, con);
+                                rsql.updateReminder(ro, con, c);
                             } else {
-                                rsql.updateReminder(ro);
+                                rsql.updateReminder(ro, c);
                             }
 
                         } else {
@@ -4730,16 +4730,16 @@ public class CalendarMySQL implements CalendarSqlImp {
                         }
                     } else {
                         if (con != null) {
-                            rsql.updateReminder(ro, con);
+                            rsql.updateReminder(ro, con, c);
                         } else {
-                            rsql.updateReminder(ro);
+                            rsql.updateReminder(ro, c);
                         }
                     }
                 } else {
                     if (con != null) {
-                        rsql.insertReminder(ro, con);
+                        rsql.insertReminder(ro, con, c);
                     } else {
-                        rsql.insertReminder(ro);
+                        rsql.insertReminder(ro, c);
                     }
                 }
             }
@@ -5321,9 +5321,9 @@ public class CalendarMySQL implements CalendarSqlImp {
         if (userIsOrganizer(so.getUserId(), ao)) {
             COLLECTION.triggerEvent(so, CalendarOperation.DELETE, ao);
         }
-        final ReminderService rsql = new ReminderHandler(ctx);
+        final ReminderSQLInterface rsql = ReminderHandler.getInstance();
         try {
-            rsql.deleteReminder(oid, Types.APPOINTMENT, con);
+            rsql.deleteReminder(oid, Types.APPOINTMENT, con, ctx);
         } catch (final OXException oxe) {
             // this is wanted if Code = Code.NOT_FOUND
             if (!ReminderExceptionCode.NOT_FOUND.equals(oxe)) {

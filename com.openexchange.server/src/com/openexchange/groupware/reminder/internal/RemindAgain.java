@@ -49,7 +49,7 @@
 
 package com.openexchange.groupware.reminder.internal;
 
-import com.openexchange.api2.ReminderService;
+import com.openexchange.api2.ReminderSQLInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
@@ -67,7 +67,7 @@ public class RemindAgain {
     private final Session session;
     private final Context ctx;
     private final ReminderObject reminder;
-    private final ReminderService reminderService;
+    private final ReminderSQLInterface reminderService;
 
     /**
      * Initializes a new {@link RemindAgain}.
@@ -76,7 +76,7 @@ public class RemindAgain {
      * @param session The session
      * @param ctx The context
      */
-    public RemindAgain(final ReminderObject reminder, final Session session, final Context ctx, final ReminderService reminderService) {
+    public RemindAgain(final ReminderObject reminder, final Session session, final Context ctx, final ReminderSQLInterface reminderService) {
         super();
         this.session = session;
         this.ctx = ctx;
@@ -107,20 +107,20 @@ public class RemindAgain {
         final int taskId = reminder.getTargetId();
         final int userId = reminder.getUser();
         if (null == reminder.getDate()) {
-            if (reminderService.existsReminder(taskId, userId, Types.TASK)) {
-                reminderService.deleteReminder(taskId, userId, Types.TASK);
+            if (reminderService.existsReminder(taskId, userId, Types.TASK, ctx)) {
+                reminderService.deleteReminder(taskId, userId, Types.TASK, ctx);
             }
         } else {
-            if (reminderService.existsReminder(taskId, userId, Types.TASK)) {
-                reminderService.updateReminder(reminder);
+            if (reminderService.existsReminder(taskId, userId, Types.TASK, ctx)) {
+                reminderService.updateReminder(reminder, ctx);
             } else {
-                reminderService.insertReminder(reminder);
+                reminderService.insertReminder(reminder, ctx);
             }
         }
         /*
          * Load updated reminder...
          */
-        final ReminderObject updated = reminderService.loadReminder(reminder.getObjectId());
+        final ReminderObject updated = reminderService.loadReminder(reminder.getObjectId(), ctx);
         /*
          * ... and apply new values to passed reminder object
          */

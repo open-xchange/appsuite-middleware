@@ -76,4 +76,7 @@ public class SnippetStrings implements LocalizableStrings {
     // Thrown if a user tries to create a snippet/signature containing more than max. number of allowed images
     public static final String MAXIMUM_IMAGES_COUNT_MSG = "The maximum allowed number of '%1$s' images in the signature is reached.";
 
+    // Thrown if a user must not modify a snippet/signature. Neither shared nor owned by that user.
+    public static final String UPDATE_DENIED_MSG = "You are not allowed to modify the signature";
+
 }

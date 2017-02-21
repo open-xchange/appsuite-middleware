@@ -870,6 +870,26 @@ public final class CSSMatcher {
         return modified;
     }
 
+    private static boolean dropImport(final Stringer cssBuilder) {
+        if (cssBuilder.indexOf("@import") < 0) {
+            return false;
+        }
+
+
+        StringBuffer sb = new StringBuffer(cssBuilder.length());
+        sb.append(cssBuilder.toString());
+        Thread thread = Thread.currentThread();
+        boolean modified = false;
+        for (int pos; !thread.isInterrupted() && (pos = sb.indexOf("@import")) >= 0;) {
+            sb.delete(pos, pos + 7);
+            modified = true;
+        }
+
+        cssBuilder.setLength(0);
+        cssBuilder.append(sb);
+        return modified;
+    }
+
     private static final Pattern PATTERN_HTML_ENTITIES = Pattern.compile("&([^;\\W]+);");
 
     /**
@@ -935,23 +955,30 @@ public final class CSSMatcher {
         correctRGBFunc(cssBuilder);
         // replaceHtmlEntities(cssBuilder);
         modified = dropInlineData(cssBuilder);
+        modified |= dropImport(cssBuilder);
         modified |= replacePositionFixedWithDisplayBlock(cssBuilder);
 
         /*
          * Feed matcher with buffer's content and reset
          */
-        final Matcher m;
-        final MatcherReplacer mr;
+        Matcher m;
+        MatcherReplacer mr;
         {
-            final String str = cssBuilder.toString();
+            String str = cssBuilder.toString();
             m = PATTERN_STYLE_LINE.matcher(InterruptibleCharSequence.valueOf(str));
             mr = new MatcherReplacer(m, str);
         }
         cssBuilder.setLength(0);
-        final StringBuilder elemBuilder = new StringBuilder(128);
-        final Thread thread = Thread.currentThread();
-        while (!thread.isInterrupted() && m.find()) {
-            final String elementName = m.group(1);
+
+        if (false == m.find()) {
+            // Found no single CSS element...
+            return true;
+        }
+
+        StringBuilder elemBuilder = new StringBuilder(128);
+        Thread thread = Thread.currentThread();
+        do {
+            String elementName = m.group(1);
             if (null != elementName) {
                 Set<String> allowedValuesSet = styleMap.get(toLowerCase(elementName));
                 if (null != allowedValuesSet) {
@@ -999,7 +1026,7 @@ public final class CSSMatcher {
                     mr.appendReplacement(cssBuilder, "");
                 }
             }
-        }
+        } while (!thread.isInterrupted() && m.find());
         mr.appendTail(cssBuilder);
         return modified;
     }

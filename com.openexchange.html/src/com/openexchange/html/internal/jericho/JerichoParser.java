@@ -66,6 +66,8 @@ import net.htmlparser.jericho.StreamedSource;
 import net.htmlparser.jericho.Tag;
 import net.htmlparser.jericho.TagType;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
+import com.openexchange.html.HtmlExceptionCodes;
 import com.openexchange.html.HtmlServices;
 import com.openexchange.html.internal.jericho.control.JerichoParseControl;
 import com.openexchange.html.internal.jericho.control.JerichoParseControlTask;
@@ -84,49 +86,6 @@ import com.openexchange.java.Strings;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JerichoParser {
-
-    /**
-     * {@link ParsingDeniedException} - Thrown if HTML content cannot be parsed by {@link JerichoParser#parse(String, JerichoHandler)}
-     * without wasting too many JVM resources.
-     */
-    public static final class ParsingDeniedException extends RuntimeException {
-
-        private static final long serialVersionUID = 150733382242549446L;
-
-        /**
-         * Initializes a new {@link ParsingDeniedException}.
-         */
-        ParsingDeniedException() {
-            super();
-        }
-
-        /**
-         * Initializes a new {@link ParsingDeniedException}.
-         */
-        ParsingDeniedException(final String message, final Throwable cause) {
-            super(message, cause);
-        }
-
-        /**
-         * Initializes a new {@link ParsingDeniedException}.
-         */
-        ParsingDeniedException(final String message) {
-            super(message);
-        }
-
-        /**
-         * Initializes a new {@link ParsingDeniedException}.
-         */
-        ParsingDeniedException(final Throwable cause) {
-            super(cause);
-        }
-
-        @Override
-        public synchronized Throwable fillInStackTrace() {
-            return this;
-        }
-
-    } // End of ParsingDeniedException
 
     private static final JerichoParser INSTANCE = new JerichoParser();
 
@@ -185,31 +144,31 @@ public final class JerichoParser {
      *
      * @param html The HTML content to check
      * @return The checked HTML content possibly with surrounded with a <code>&lt;body&gt;</code> tag
-     * @throws ParsingDeniedException If specified HTML content cannot be parsed without wasting too many JVM resources
+     * @throws OXException If specified HTML content cannot be parsed without wasting too many JVM resources
      */
-    private boolean checkBody(String html, boolean checkSize) {
+    private boolean checkBody(String html, boolean checkSize) throws OXException {
         if (null == html) {
             return false;
         }
         if (checkSize) {
             int maxLength = HtmlServices.htmlThreshold();
             if (html.length() > maxLength) {
-                throw new ParsingDeniedException("HTML content is too big: max. " + maxLength + ", but is " + html.length());
+                throw HtmlExceptionCodes.TOO_BIG.create(maxLength, html.length());
             }
         }
         return (html.indexOf("<body") >= 0) || (html.indexOf("<BODY") >= 0);
     }
 
-    private static final Pattern FIX_START_TAG = Pattern.compile("\\s*(<[a-zA-Z][^>]+)(>?)\\s*");
+    private static final Pattern FIX_START_TAG = Pattern.compile("\\s*(<[a-zA-Z][^<>]+)(>?)\\s*");
 
     /**
      * Parses specified real-life HTML document and delegates events to given instance of {@link HtmlHandler}
      *
      * @param html The real-life HTML document
      * @param handler The HTML handler
-     * @throws ParsingDeniedException If specified HTML content cannot be parsed without wasting too many JVM resources
+     * @throws OXException If specified HTML content cannot be parsed
      */
-    public void parse(String html, JerichoHandler handler) {
+    public void parse(String html, JerichoHandler handler) throws OXException {
         parse(html, handler, true);
     }
 
@@ -219,9 +178,9 @@ public final class JerichoParser {
      * @param html The real-life HTML document
      * @param handler The HTML handler
      * @param checkSize Whether this call is supposed to check the size of given HTML content against <i>"com.openexchange.html.maxLength"</i> property
-     * @throws ParsingDeniedException If specified HTML content cannot be parsed without wasting too many JVM resources
+     * @throws OXException If specified HTML content cannot be parsed
      */
-    public void parse(final String html, final JerichoHandler handler, final boolean checkSize) {
+    public void parse(final String html, final JerichoHandler handler, final boolean checkSize) throws OXException {
         int timeout = htmlParseTimeoutSec;
         if (timeout <= 0) {
             doParse(html, handler, checkSize);
@@ -241,9 +200,9 @@ public final class JerichoParser {
      * @param html The real-life HTML document
      * @param handler The HTML handler
      * @param checkSize Whether this call is supposed to check the size of given HTML content against <i>"com.openexchange.html.maxLength"</i> property
-     * @throws ParsingDeniedException If specified HTML content cannot be parsed without wasting too many JVM resources
+     * @throws OXException If specified HTML content cannot be parsed
      */
-    public void doParse(String html, JerichoHandler handler, boolean checkSize) {
+    public void doParse(String html, JerichoHandler handler, boolean checkSize) throws OXException {
         Thread thread = Thread.currentThread();
         StreamedSource streamedSource = null;
         try {
@@ -278,9 +237,9 @@ public final class JerichoParser {
                 prev = handleSegment(handler, segment, true, false);
             }
         } catch (InterruptedRuntimeException e) {
-            throw new ParsingDeniedException("Parser timeout.", e);
+            throw HtmlExceptionCodes.PARSING_FAILED.create("Parser timeout.", e);
         } catch (StackOverflowError parserOverflow) {
-            throw new ParsingDeniedException("Parser overflow detected.", parserOverflow);
+            throw HtmlExceptionCodes.PARSING_FAILED.create("Parser overflow detected.", parserOverflow);
         } finally {
             Streams.close(streamedSource);
         }
@@ -314,7 +273,7 @@ public final class JerichoParser {
         }
     }
 
-    private static Segment handleSegment(JerichoHandler handler, Segment segment, boolean fixStartTags, boolean force) {
+    private static Segment handleSegment(JerichoHandler handler, Segment segment, boolean fixStartTags, boolean force) throws OXException {
         if (segment instanceof Tag) {
             Tag tag = (Tag) segment;
             TagType tagType = tag.getTagType();
@@ -322,11 +281,17 @@ public final class JerichoParser {
             EnumTagType enumType = EnumTagType.enumFor(tagType);
             if (null == enumType) {
                 if (!segment.isWhiteSpace()) {
+                    if ((tag instanceof StartTag) && (indexOf('<', 1, tag) >= 0)) {
+                        throw HtmlExceptionCodes.CORRUPT.create();
+                    }
                     handler.handleUnknownTag(tag);
                 }
             } else {
                 switch (enumType) {
                     case START_TAG:
+                        if (indexOf('<', 1, tag) >= 0) {
+                            throw HtmlExceptionCodes.CORRUPT.create();
+                        }
                         handler.handleStartTag((StartTag) tag);
                         break;
                     case END_TAG:
@@ -358,15 +323,15 @@ public final class JerichoParser {
         return safeParse(handler, segment, fixStartTags, force);
     }
 
-    private static Segment safeParse(JerichoHandler handler, Segment segment, boolean fixStartTags, boolean force) {
+    private static Segment safeParse(JerichoHandler handler, Segment segment, boolean fixStartTags, boolean force) throws OXException {
         if (!fixStartTags || !containsStartTag(segment)) {
-            handler.handleSegment(segment);
+            handler.handleSegment(saneCharSequence(segment));
             return null;
         }
 
         Matcher m = FIX_START_TAG.matcher(segment);
         if (!m.find()) {
-            handler.handleSegment(segment);
+            handler.handleSegment(saneCharSequence(segment));
             return null;
         }
 
@@ -379,13 +344,14 @@ public final class JerichoParser {
         if (!force) {
             String closing = m.group(2);
             if (Strings.isEmpty(closing)) {
-                return segment;
+                // No closing '>' found
+                // throw HtmlExceptionCodes.CORRUPT.create();
             }
         }
 
         int start = m.start();
         if (start > 0) {
-            handler.handleSegment(segment.subSequence(0, start));
+            handler.handleSegment(saneCharSequence(segment.subSequence(0, start)));
         }
         int[] remainder = null;
 
@@ -403,10 +369,21 @@ public final class JerichoParser {
         @SuppressWarnings("resource")
         StreamedSource nestedSource = new StreamedSource(dropWeirdAttributes(startTag)); // No need to close since String-backed (all in memory)!
         Thread thread = Thread.currentThread();
-        for (Iterator<Segment> iter = nestedSource.iterator(); !thread.isInterrupted() && iter.hasNext();) {
-            Segment nestedSegment = iter.next();
-            handleSegment(handler, nestedSegment, false, true);
+
+        Iterator<Segment> iter = nestedSource.iterator();
+        if (!thread.isInterrupted() && iter.hasNext()) {
+            Segment firstSegment = iter.next();
+            if (!(firstSegment instanceof Tag)) {
+                // Start tag detection did not help
+                throw HtmlExceptionCodes.CORRUPT.create();
+            }
+            handleSegment(handler, firstSegment, false, true);
+            while (!thread.isInterrupted() && iter.hasNext()) {
+                Segment nestedSegment = iter.next();
+                handleSegment(handler, nestedSegment, false, true);
+            }
         }
+
         if (null != remainder) {
             return safeParse(handler, new Segment(new Source(segment), remainder[0], remainder[1]), fixStartTags, force);
             // handler.handleSegment(remainder);
@@ -476,6 +453,31 @@ public final class JerichoParser {
             sb.append(' ').append(m.group());
         }
         sb.append('>');
+        return sb.toString();
+    }
+
+    private static CharSequence saneCharSequence(CharSequence segment) {
+        if (indexOf('<', 0, segment) < 0 && indexOf('>', 0, segment) < 0) {
+            return segment;
+        }
+
+        String content = segment.toString();
+        int len = content.length();
+        StringBuilder sb = new StringBuilder(content.length() + 16);
+        for (int i = 0, k = len; k-- > 0; i++) {
+            char ch = content.charAt(i);
+            switch (ch) {
+                case '<':
+                    sb.append("&lt;");
+                    break;
+                case '>':
+                    sb.append("&gt;");
+                    break;
+                default:
+                    sb.append(ch);
+                    break;
+            }
+        }
         return sb.toString();
     }
 

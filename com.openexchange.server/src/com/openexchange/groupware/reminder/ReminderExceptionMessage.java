@@ -116,4 +116,10 @@ public class ReminderExceptionMessage implements LocalizableStrings {
      */
     public final static String MANDATORY_FIELD_ID_DISPLAY = "Required  value \"identifier\" was not supplied.";
 
+    public final static String NO_PERMISSION_READ = "You do not have the appropriate permissions to read this object.";
+
+    public final static String NO_PERMISSION_MODIFY = "You do not have the appropriate permissions to modify this object.";
+
+
+
 }
