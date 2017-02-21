@@ -72,5 +72,6 @@ Export-Package: com.openexchange.jsieve.commands,
  com.openexchange.jsieve.registry,
  com.openexchange.mailfilter,
  com.openexchange.mailfilter.exceptions,
+ com.openexchange.mailfilter.properties,
  org.apache.jsieve,
  org.apache.jsieve.parser.generated
