@@ -61,16 +61,58 @@ import java.util.List;
  */
 public interface FeedbackType {
 
-    public long saveFeedback(Object feedback, Connection con) throws SQLException;
+    /**
+     * Stores Feedback data
+     *
+     * @param feedback The data
+     * @param con The write connection to the global db
+     * @return The id of the newly created entry or -1
+     * @throws SQLException
+     */
+    public long storeFeedback(Object feedback, Connection con) throws SQLException;
 
+    /**
+     * Retrieves the feedback with the given id
+     *
+     * @param id The id of the feedback
+     * @param con A read connection to the global db
+     * @return The feedback object
+     * @throws SQLException
+     */
     public Object getFeedback(Long id, Connection con) throws SQLException;
 
+    /**
+     * Retrieves a list of feedback objects
+     *
+     * @param ids The feedback ids to retrieve
+     * @param con A read connection to the global db
+     * @return A list of feedback objects
+     * @throws SQLException
+     */
     public List<Object> getFeedbacks(List<Long> ids, Connection con) throws SQLException;
 
+    /**
+     * Deletes the feedback with the given id
+     *
+     * @param id The id of the feedback entry to delete
+     * @param con A write connection to the global db
+     * @throws SQLException
+     */
     public void deleteFeedback(long id, Connection con) throws SQLException;
 
+    /**
+     * Deletes multiple feedback entries
+     * @param ids A list of feedback entries
+     * @param con A write connection to the global db
+     * @throws SQLException
+     */
     public void deleteFeedbacks(List<Long> ids, Connection con) throws SQLException;
 
+    /**
+     * Retrieves the feedback type
+     *
+     * @return The feedback type
+     */
     public String getType();
 
 }

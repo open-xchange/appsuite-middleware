@@ -51,17 +51,30 @@ package com.openexchange.feedback;
 
 
 /**
- * {@link FeedbackTypeRegistry}
+ * {@link FeedbackTypeRegistry} is a registry for {@link FeedbackType} implementations
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
 public interface FeedbackTypeRegistry {
 
+    /**
+     * Register a {@link FeedbackType}
+     * @param type The {@link FeedbackType} to register
+     */
     public void registertype(FeedbackType type);
 
+    /**
+     * Unregister a {@link FeedbackType}
+     * @param type The {@link FeedbackType} to unregister
+     */
     public void unregister(FeedbackType type);
 
+    /**
+     * Retrieves the {@link FeedbackType} for the given type
+     * @param type The feedback type
+     * @return The {@link FeedbackType} or null
+     */
     public FeedbackType getFeedbackType(String type);
 
 }

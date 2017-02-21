@@ -71,7 +71,7 @@ public class StarRatingV1 implements FeedbackType {
 
 
     @Override
-    public long saveFeedback(Object feedback, Connection con) throws SQLException {
+    public long storeFeedback(Object feedback, Connection con) throws SQLException {
 
         PreparedStatement stmt = con.prepareStatement(SAVE_SQL, Statement.RETURN_GENERATED_KEYS);
         ResultSet rs = null;

@@ -60,6 +60,14 @@ import com.openexchange.session.Session;
  */
 public interface FeedbackService {
 
+    /**
+     * Stores feedback data and metadata for a given user
+     *
+     * @param session The session of the user
+     * @param type The feedback type
+     * @param feedback The feedback data
+     * @throws OXException if feedback couldn't be stored
+     */
     public void storeFeedback(Session session, String type, Object feedback) throws OXException;
 
 }

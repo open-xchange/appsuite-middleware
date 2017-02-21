@@ -102,7 +102,7 @@ public class FeedBackServiceImpl implements FeedbackService {
         try {
             // Store feedback and feedback metadata
             writeCon.setAutoCommit(false);
-            long fid = feedBackType.saveFeedback(feedback, writeCon);
+            long fid = feedBackType.storeFeedback(feedback, writeCon);
             if(fid<=0){
                 writeCon.rollback();
                 throw FeedbackExceptionCodes.UNEXPECTED_ERROR.create("Unable to store feedback metadata.");
