@@ -122,7 +122,7 @@ public class MailFilterConfigurationServiceImpl implements MailFilterConfigurati
      */
     @Override
     public String getProperty(int userId, int contextId, MailFilterProperty property) {
-        return getProperty(property.getFQPropertyName(), userId, contextId, String.class, property.getDefaultValue(String.class));
+        return getProperty(property, userId, contextId, String.class);
     }
 
     /*
@@ -143,7 +143,7 @@ public class MailFilterConfigurationServiceImpl implements MailFilterConfigurati
      */
     @Override
     public int getIntProperty(int userId, int contextId, MailFilterProperty property) {
-        return getProperty(property.getFQPropertyName(), userId, contextId, int.class, property.getDefaultValue(Integer.class));
+        return getProperty(property, userId, contextId, Integer.class);
     }
 
     /*
@@ -164,7 +164,7 @@ public class MailFilterConfigurationServiceImpl implements MailFilterConfigurati
      */
     @Override
     public boolean getBooleanProperty(int userId, int contextId, MailFilterProperty property) {
-        return getProperty(property.getFQPropertyName(), userId, contextId, boolean.class, property.getDefaultValue(Boolean.class));
+        return getProperty(property, userId, contextId, Boolean.class);
     }
 
     //////////////////////////////////////// HELPERS ///////////////////////////////////////
@@ -172,14 +172,16 @@ public class MailFilterConfigurationServiceImpl implements MailFilterConfigurati
     /**
      * Get the value T of specified property for the specified user in the specified context and coerce it to the specified type T
      *
-     * @param property The property's name
+     * @param property The {@link MailFilterProperty}
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param coerceTo The type T to coerce the value of the property
-     * @return The value T of the property
+     * @return The value T of the property from the config cascade or the default value
      * @throws OXException If an error is occurred while getting the property
      */
-    private <T> T getProperty(String property, int userId, int contextId, Class<T> coerceTo, T defaultValue) {
+    private <T> T getProperty(MailFilterProperty property, int userId, int contextId, Class<T> coerceTo) {
+        T defaultValue = property.getDefaultValue(coerceTo);
+
         if (contextId == 0) {
             return defaultValue;
         }
@@ -192,7 +194,7 @@ public class MailFilterConfigurationServiceImpl implements MailFilterConfigurati
             ConfigViewFactory factory = getService(ConfigViewFactory.class);
             ConfigView view = factory.getView(userId, contextId);
 
-            ComposedConfigProperty<T> p = view.property(property, coerceTo);
+            ComposedConfigProperty<T> p = view.property(property.getFQPropertyName(), coerceTo);
             if (!p.isDefined()) {
                 return defaultValue;
             }
