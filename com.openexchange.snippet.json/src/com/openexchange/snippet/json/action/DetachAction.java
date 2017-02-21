@@ -66,9 +66,13 @@ import com.openexchange.snippet.Attachment;
 import com.openexchange.snippet.DefaultAttachment;
 import com.openexchange.snippet.DefaultSnippet;
 import com.openexchange.snippet.Property;
+import com.openexchange.snippet.Snippet;
+import com.openexchange.snippet.SnippetExceptionCodes;
+import com.openexchange.snippet.SnippetManagement;
 import com.openexchange.snippet.SnippetService;
 import com.openexchange.snippet.json.SnippetJsonParser;
 import com.openexchange.snippet.json.SnippetRequest;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link DetachAction}
@@ -92,8 +96,17 @@ public final class DetachAction extends SnippetAction {
 
     @Override
     protected AJAXRequestResult perform(final SnippetRequest snippetRequest) throws OXException, JSONException {
-        final String id = snippetRequest.checkParameter("id");
-        final SnippetService snippetService = getSnippetService(snippetRequest.getSession());
+        String id = snippetRequest.checkParameter("id");
+        ServerSession session = snippetRequest.getSession();
+        SnippetService snippetService = getSnippetService(session);
+        SnippetManagement management = snippetService.getManagement(session);
+
+        {
+            Snippet snippetToChange = management.getSnippet(id);
+            if (!snippetToChange.isShared() && snippetToChange.getCreatedBy() != session.getUserId()) {
+                throw SnippetExceptionCodes.UPDATE_DENIED.create(id, session.getUserId(), session.getContextId());
+            }
+        }
 
         final DefaultSnippet snippet = new DefaultSnippet().setId(id);
         final JSONArray jsonAttachments = (JSONArray) snippetRequest.getRequestData().requireData();
@@ -107,12 +120,7 @@ public final class DetachAction extends SnippetAction {
         /*
          * Update
          */
-        final String newId = snippetService.getManagement(snippetRequest.getSession()).updateSnippet(
-            id,
-            snippet,
-            Collections.<Property> emptySet(),
-            Collections.<Attachment> emptyList(),
-            attachments);
+        String newId = management.updateSnippet(id, snippet, Collections.<Property> emptySet(), Collections.<Attachment> emptyList(), attachments);
         return new AJAXRequestResult(newId, "string");
     }
 

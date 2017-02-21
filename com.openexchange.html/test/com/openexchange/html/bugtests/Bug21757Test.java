@@ -52,6 +52,7 @@ package com.openexchange.html.bugtests;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
+import com.openexchange.exception.OXException;
 import com.openexchange.html.AbstractSanitizing;
 
 /**
@@ -62,7 +63,7 @@ import com.openexchange.html.AbstractSanitizing;
 public class Bug21757Test extends AbstractSanitizing {
 
     @Test
-    public void testEnsureBodyTagPresence() {
+    public void testEnsureBodyTagPresence() throws OXException {
         String htmlContent = "<center>Lorem Ipsum Dolor<table<tr><td>cell</td></tr></table></center>";
         String actual = getHtmlService().getConformHTML(htmlContent, "UTF-8");
         StringBuilder expectedBuilder = new StringBuilder();

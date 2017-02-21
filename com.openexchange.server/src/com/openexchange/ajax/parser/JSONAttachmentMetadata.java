@@ -52,6 +52,7 @@ package com.openexchange.ajax.parser;
 import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.groupware.attach.AttachmentBatch;
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 
@@ -60,6 +61,8 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(JSONAttachmentMetadata.class);
 
     private final JSONObject json;
+
+    private AttachmentBatch batch;
 
     public JSONAttachmentMetadata(JSONObject json) {
         super();
@@ -307,6 +310,16 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
         } catch (final JSONException e) {
             LOG.debug("",e);
         }
+    }
+
+    @Override
+    public void setAttachmentBatch(AttachmentBatch batch) {
+        this.batch = batch;
+    }
+
+    @Override
+    public AttachmentBatch getAttachmentBatch() {
+        return batch;
     }
 
 }

@@ -184,14 +184,15 @@ public class RssAction implements AJAXActionService {
                 @SuppressWarnings("unchecked") List<SyndContent> contents = entry.getContents();
                 boolean foundHtml = false;
                 for (SyndContent content : contents) {
-                    if ("html".equals(content.getType())) {
+                    String type = content.getType();
+                    if (null != type && (type.startsWith("htm") || type.startsWith("xhtm"))) {
                         foundHtml = true;
                         String htmlContent = preprocessor.process(content.getValue(), result);
                         result.setBody(htmlContent).setFormat("text/html");
                         break;
                     }
                     if (!foundHtml) {
-                        result.setBody(content.getValue()).setFormat(content.getType());
+                        result.setBody(content.getValue()).setFormat(type);
                     }
                 }
             }
@@ -335,7 +336,7 @@ public class RssAction implements AJAXActionService {
      * @param string The string to sanitise
      * @return The sanitised string if the {@link HtmlService} is available
      */
-    private static String sanitiseString(String string) {
+    private static String sanitiseString(String string) throws OXException {
         final HtmlService htmlService = Services.getService(HtmlService.class);
         if (htmlService == null) {
             LOG.warn("The HTMLService is unavailable at the moment, thus the RSS string '{}' might not be sanitised", string);

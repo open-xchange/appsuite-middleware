@@ -198,10 +198,10 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
                     for (Map.Entry<String, File> entry : orphanedFiles.entrySet()) {
                         String name = entry.getKey();
                         File orphaned = entry.getValue();
-                        if (!orphaned.delete()) {
-                            logger.warn("Temporary file could not be deleted: {}", name);
+                        boolean deleted = orphaned.delete();
+                        if (deleted) {
+                            logger.debug("Removed orphaned managed file {}", name);
                         }
-                        logger.debug("Removed orphaned managed file {}", name);
                     }
                 }
             } catch (Exception t) {

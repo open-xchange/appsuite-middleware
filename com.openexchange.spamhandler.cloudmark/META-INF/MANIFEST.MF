@@ -8,6 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.ajax.container,
  com.openexchange.ajax.fileholder,
  com.openexchange.config,
+ com.openexchange.config.cascade,
  com.openexchange.exception,
  com.openexchange.java,
  com.openexchange.log,

@@ -70,6 +70,7 @@ import com.openexchange.snippet.Attachment;
 import com.openexchange.snippet.DefaultSnippet;
 import com.openexchange.snippet.Property;
 import com.openexchange.snippet.Snippet;
+import com.openexchange.snippet.SnippetExceptionCodes;
 import com.openexchange.snippet.SnippetManagement;
 import com.openexchange.snippet.SnippetProcessor;
 import com.openexchange.snippet.SnippetService;
@@ -109,6 +110,17 @@ public final class UpdateAction extends SnippetAction {
     @Override
     protected AJAXRequestResult perform(final SnippetRequest snippetRequest) throws OXException, JSONException {
         String id = snippetRequest.checkParameter("id");
+        ServerSession session = snippetRequest.getSession();
+        SnippetService snippetService = getSnippetService(session);
+        SnippetManagement management = snippetService.getManagement(session);
+
+        {
+            Snippet snippetToChange = management.getSnippet(id);
+            if (!snippetToChange.isShared() && snippetToChange.getCreatedBy() != session.getUserId()) {
+                throw SnippetExceptionCodes.UPDATE_DENIED.create(id, session.getUserId(), session.getContextId());
+            }
+        }
+
         JSONObject jsonSnippet = (JSONObject) snippetRequest.getRequestData().getData();
         if (null == jsonSnippet) {
             throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
@@ -120,7 +132,6 @@ public final class UpdateAction extends SnippetAction {
         SnippetJsonParser.parse(jsonSnippet, snippet, properties);
 
         // Process image in an <img> tag and add it as an attachment
-        ServerSession session = snippetRequest.getSession();
         String contentSubType = getContentSubType(snippet);
         List<Attachment> attachments = Collections.<Attachment> emptyList();
         if (contentSubType.equals("html")) {
@@ -129,7 +140,6 @@ public final class UpdateAction extends SnippetAction {
         }
 
         // Update
-        SnippetManagement management = getSnippetService(session).getManagement(session);
         String newId = management.updateSnippet(id, snippet, properties, attachments, Collections.<Attachment> emptyList());
         Snippet newSnippet = management.getSnippet(newId);
         return new AJAXRequestResult(newSnippet, "snippet");

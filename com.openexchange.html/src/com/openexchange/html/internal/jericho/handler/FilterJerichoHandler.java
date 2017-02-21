@@ -1043,9 +1043,13 @@ public final class FilterJerichoHandler implements JerichoHandler {
                 }
             }
         } else {
+            // No need to keep comments
+            /*-
+             *
             if (checkMaxContentSize(comment.length())) {
                 htmlBuilder.append(comment);
             }
+             */
         }
     }
 

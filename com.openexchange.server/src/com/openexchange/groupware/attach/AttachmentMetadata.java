@@ -53,53 +53,56 @@ import java.util.Date;
 
 public interface AttachmentMetadata {
 
-	public abstract int getCreatedBy();
+    public abstract int getCreatedBy();
 
-	public abstract void setCreatedBy(int createdBy);
+    public abstract void setCreatedBy(int createdBy);
 
-	public abstract Date getCreationDate();
+    public abstract Date getCreationDate();
 
-	public abstract void setCreationDate(Date creationDate);
+    public abstract void setCreationDate(Date creationDate);
 
-	public abstract String getFileMIMEType();
+    public abstract String getFileMIMEType();
 
-	public abstract void setFileMIMEType(String fileMIMEType);
+    public abstract void setFileMIMEType(String fileMIMEType);
 
-	public abstract String getFilename();
+    public abstract String getFilename();
 
-	public abstract void setFilename(String filename);
+    public abstract void setFilename(String filename);
 
-	public abstract long getFilesize();
+    public abstract long getFilesize();
 
-	public abstract void setFilesize(long filesize);
+    public abstract void setFilesize(long filesize);
 
-	public abstract int getAttachedId();
+    public abstract int getAttachedId();
 
-	public abstract void setAttachedId(int objectId);
+    public abstract void setAttachedId(int objectId);
 
-	public abstract boolean getRtfFlag();
+    public abstract boolean getRtfFlag();
 
-	public abstract void setRtfFlag(boolean rtfFlag);
+    public abstract void setRtfFlag(boolean rtfFlag);
 
-	public abstract int getModuleId();
+    public abstract int getModuleId();
 
-	public abstract void setModuleId(int moduleId);
+    public abstract void setModuleId(int moduleId);
 
-	public abstract int getId();
+    public abstract int getId();
 
-	public abstract void setId(int id);
+    public abstract void setId(int id);
 
-	public abstract void setFolderId(int folderId);
+    public abstract void setFolderId(int folderId);
 
-	public abstract int getFolderId();
+    public abstract int getFolderId();
 
-	public abstract void setComment(String string);
+    public abstract void setComment(String string);
 
-	public abstract String getComment();
+    public abstract String getComment();
 
-	public abstract void setFileId(String string);
+    public abstract void setFileId(String string);
 
-	public abstract String getFileId();
+    public abstract String getFileId();
 
+    public void setAttachmentBatch(AttachmentBatch batch);
+
+    public AttachmentBatch getAttachmentBatch();
 
 }

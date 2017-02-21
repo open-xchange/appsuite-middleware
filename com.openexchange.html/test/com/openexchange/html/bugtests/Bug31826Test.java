@@ -51,6 +51,7 @@ package com.openexchange.html.bugtests;
 
 import org.junit.Assert;
 import org.junit.Test;
+import com.openexchange.exception.OXException;
 import com.openexchange.html.AbstractSanitizing;
 
 /**
@@ -63,7 +64,7 @@ public class Bug31826Test extends AbstractSanitizing {
         super();
     }
     @Test
-    public void testKeepUnicode() {
+    public void testKeepUnicode() throws OXException {
         String content = "dfg &hearts;&diams;&spades;&clubs;&copy;&reg;&trade; dfg";
         String test = getHtmlService().sanitize(content, null, true, null, null);
 

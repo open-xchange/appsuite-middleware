@@ -605,7 +605,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
         }
     }
 
-    static String sanitizeHtml(String htmlContent, HtmlService htmlService) {
+    static String sanitizeHtml(String htmlContent, HtmlService htmlService) throws OXException {
         if (htmlService == null) {
             LOG.warn("HtmlService absent. Unable to sanitize content. Return unsanitized content.");
             return htmlContent;
