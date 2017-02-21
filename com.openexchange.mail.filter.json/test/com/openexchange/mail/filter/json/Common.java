@@ -1,3 +1,4 @@
+
 package com.openexchange.mail.filter.json;
 
 import java.util.Properties;
@@ -6,10 +7,8 @@ import java.util.concurrent.ConcurrentMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.SimConfigurationService;
 import com.openexchange.mailfilter.json.osgi.Services;
-import com.openexchange.mailfilter.properties.MailFilterProperties;
 import com.openexchange.mailfilter.properties.MailFilterProperty;
 import com.openexchange.server.ServiceLookup;
-
 
 public class Common {
 
@@ -17,6 +16,7 @@ public class Common {
 
     public static void prepare(String passwordSource, String masterPassword) {
         SimConfigurationService simConfigurationService = new SimConfigurationService() {
+
             @Override
             public Properties getFile(String fileName) {
                 final Properties properties = new Properties();
@@ -26,20 +26,20 @@ public class Common {
         };
         Common.simConfigurationService = simConfigurationService;
         simConfigurationService.stringProperties.put(MailFilterProperty.credentialSource.getFQPropertyName(), "imapLogin");
-        simConfigurationService.stringProperties.put(MailFilterProperties.Values.SIEVE_LOGIN_TYPE.property, "user");
-        simConfigurationService.stringProperties.put(MailFilterProperties.Values.SIEVE_SERVER.property, "localhost");
-        simConfigurationService.stringProperties.put(MailFilterProperties.Values.SIEVE_PORT.property, "2000");
-        simConfigurationService.stringProperties.put(MailFilterProperties.Values.SCRIPT_NAME.property, "Open-Xchange");
-        simConfigurationService.stringProperties.put(MailFilterProperties.Values.SIEVE_AUTH_ENC.property, "UTF-8");
-        simConfigurationService.stringProperties.put(MailFilterProperties.Values.NON_RFC_COMPLIANT_TLS_REGEX.property, "^Cyrus.*v([0-1]\\.[0-9].*|2\\.[0-2].*|2\\.3\\.[0-9]|2\\.3\\.[0-9][^0-9].*)$");
-        simConfigurationService.stringProperties.put(MailFilterProperties.Values.TLS.property, "false");
-        simConfigurationService.stringProperties.put(MailFilterProperties.Values.VACATION_DOMAINS.property, "");
-        simConfigurationService.stringProperties.put(MailFilterProperties.Values.SIEVE_CONNECTION_TIMEOUT.property, "30000");
+        simConfigurationService.stringProperties.put(MailFilterProperty.loginType.getFQPropertyName(), "user");
+        simConfigurationService.stringProperties.put(MailFilterProperty.server.getFQPropertyName(), "localhost");
+        simConfigurationService.stringProperties.put(MailFilterProperty.port.getFQPropertyName(), "2000");
+        simConfigurationService.stringProperties.put(MailFilterProperty.scriptName.getFQPropertyName(), "Open-Xchange");
+        simConfigurationService.stringProperties.put(MailFilterProperty.authenticationEncoding.getFQPropertyName(), "UTF-8");
+        simConfigurationService.stringProperties.put(MailFilterProperty.nonRFCCompliantTLSRegex.getFQPropertyName(), "^Cyrus.*v([0-1]\\.[0-9].*|2\\.[0-2].*|2\\.3\\.[0-9]|2\\.3\\.[0-9][^0-9].*)$");
+        simConfigurationService.stringProperties.put(MailFilterProperty.tls.getFQPropertyName(), "false");
+        simConfigurationService.stringProperties.put(MailFilterProperty.vacationDomains.getFQPropertyName(), "");
+        simConfigurationService.stringProperties.put(MailFilterProperty.connectionTimeout.getFQPropertyName(), "30000");
         if (null != passwordSource) {
-            simConfigurationService.stringProperties.put(MailFilterProperties.Values.SIEVE_PASSWORDSRC.property, passwordSource);
+            simConfigurationService.stringProperties.put(MailFilterProperty.passwordSource.getFQPropertyName(), passwordSource);
         }
         if (null != masterPassword) {
-            simConfigurationService.stringProperties.put(MailFilterProperties.Values.SIEVE_MASTERPASSWORD.property, masterPassword);
+            simConfigurationService.stringProperties.put(MailFilterProperty.masterPassword.getFQPropertyName(), masterPassword);
         }
 
         final ConcurrentMap<Class<?>, Object> services = new ConcurrentHashMap<Class<?>, Object>(2, 0.9f, 1);
