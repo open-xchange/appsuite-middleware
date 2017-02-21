@@ -47,27 +47,45 @@
  *
  */
 
-package com.openexchange.feedback;
+package com.openexchange.userfeedback;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * {@link FeedbackService}
+ * {@link FeedbackTypeRegistryImpl}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-public interface FeedbackService {
+public class FeedbackTypeRegistryImpl implements FeedbackTypeRegistry{
+
+    private static final FeedbackTypeRegistry INSTANCE = new FeedbackTypeRegistryImpl();
+    private final ConcurrentHashMap<String, FeedbackType> map = new ConcurrentHashMap<String, FeedbackType>(1);
 
     /**
-     * Stores feedback data and metadata for a given user
-     *
-     * @param session The session of the user
-     * @param type The feedback type
-     * @param feedback The feedback data
-     * @throws OXException if feedback couldn't be stored
+     * Initializes a new {@link FeedbackTypeRegistryImpl}.
      */
-    public void storeFeedback(Session session, String type, Object feedback) throws OXException;
+    private FeedbackTypeRegistryImpl() {
+        super();
+    }
+
+    @Override
+    public void registertype(FeedbackType type) {
+        map.put(type.getType(), type);
+    }
+
+    @Override
+    public void unregister(FeedbackType type) {
+        map.remove(type.getType());
+    }
+
+    @Override
+    public FeedbackType getFeedbackType(String type) {
+       return map.get(type);
+    }
+
+    public static FeedbackTypeRegistry getInstance() {
+        return INSTANCE;
+    }
 
 }

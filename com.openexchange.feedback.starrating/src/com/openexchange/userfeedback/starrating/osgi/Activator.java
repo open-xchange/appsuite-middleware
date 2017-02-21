@@ -47,73 +47,39 @@
  *
  */
 
-package com.openexchange.feedback.starrating.osgi;
+package com.openexchange.userfeedback.starrating.osgi;
 
-import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.userfeedback.FeedbackTypeRegistry;
+import com.openexchange.userfeedback.starrating.v1.StarRatingV1;
 
 /**
- * {@link Services}
+ * {@link Activator}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-public class Services {
+public class Activator extends HousekeepingActivator{
 
-   /**
-    * Initializes a new {@link Services}.
-    */
-   private Services() {
-       super();
-   }
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class[]{FeedbackTypeRegistry.class};
+    }
 
-   private static final AtomicReference<Activator> REF = new AtomicReference<>();
+    @Override
+    protected void startBundle() throws Exception {
+        Services.setServiceLookup(this);
+        FeedbackTypeRegistry registry = Services.getService(FeedbackTypeRegistry.class);
 
-   /**
-    * Sets the service lookup.
-    *
-    * @param serviceLookup The service lookup or <code>null</code>
-    */
-   public static void setServiceLookup(final Activator serviceLookup) {
-       REF.set(serviceLookup);
-   }
+        // TODO use service tracker customzier instead
+        registry.registertype(new StarRatingV1());
+    }
 
-   /**
-    * Gets the service lookup.
-    *
-    * @return The service lookup or <code>null</code>
-    */
-   public static HousekeepingActivator getServiceLookup() {
-       return REF.get();
-   }
 
-   /**
-    * Gets the service of specified type
-    *
-    * @param clazz The service's class
-    * @return The service
-    * @throws IllegalStateException If an error occurs while returning the demanded service
-    */
-   public static <S extends Object> S getService(final Class<? extends S> clazz) {
-       final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
-       if (null == serviceLookup) {
-           throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.feedback.starrating\" not started?");
-       }
-       return serviceLookup.getService(clazz);
-   }
-
-   /**
-    * (Optionally) Gets the service of specified type
-    *
-    * @param clazz The service's class
-    * @return The service or <code>null</code> if absent
-    */
-   public static <S extends Object> S optService(final Class<? extends S> clazz) {
-       try {
-           return getService(clazz);
-       } catch (final IllegalStateException e) {
-           return null;
-       }
-   }
+    @Override
+    protected void stopBundle() throws Exception {
+        Services.setServiceLookup(null);
+        super.stopBundle();
+    }
 
 }

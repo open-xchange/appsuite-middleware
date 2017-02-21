@@ -47,29 +47,38 @@
  *
  */
 
-package com.openexchange.userfeedback.json.osgi;
+package com.openexchange.userfeedback;
 
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.userfeedback.FeedbackService;
-import com.openexchange.userfeedback.json.UserFeedbackActionFactory;
 
 /**
- * {@link UserFeedbackJSONActivator}
+ * {@link FeedbackFilter}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-public class UserFeedbackJSONActivator extends AJAXModuleActivator {
+public interface FeedbackFilter {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { FeedbackService.class };
-    }
+    public static FeedbackFilter DEFAULT_FILTER = new FeedbackFilter() {
 
-    @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-        registerModule(new UserFeedbackActionFactory(), "userfeedback");
-    }
+        @Override
+        public boolean accept(FeedbackMetaData feedback) {
+            return true;
+        }
+
+        @Override
+        public String getType() {
+            return "star_rating_v1";
+        }
+    };
+
+
+    public boolean accept(FeedbackMetaData feedback);
+
+    /**
+     * The feedback type to query
+     *
+     * @return The feedback type
+     */
+    public String getType();
 
 }

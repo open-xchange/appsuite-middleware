@@ -47,11 +47,15 @@
  *
  */
 
-package com.openexchange.feedback.starrating.osgi;
+package com.openexchange.userfeedback.osgi;
 
-import com.openexchange.feedback.FeedbackTypeRegistry;
-import com.openexchange.feedback.starratingv1.StarRatingV1;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.userfeedback.FeedBackServiceImpl;
+import com.openexchange.userfeedback.FeedbackService;
+import com.openexchange.userfeedback.FeedbackTypeRegistry;
+import com.openexchange.userfeedback.FeedbackTypeRegistryImpl;
 
 /**
  * {@link Activator}
@@ -63,18 +67,15 @@ public class Activator extends HousekeepingActivator{
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[]{FeedbackTypeRegistry.class};
+        return new Class[]{ConfigViewFactory.class, DatabaseService.class};
     }
 
     @Override
     protected void startBundle() throws Exception {
         Services.setServiceLookup(this);
-        FeedbackTypeRegistry registry = Services.getService(FeedbackTypeRegistry.class);
-
-        // TODO use service tracker customzier instead
-        registry.registertype(new StarRatingV1());
+        registerService(FeedbackTypeRegistry.class, FeedbackTypeRegistryImpl.getInstance());
+        registerService(FeedbackService.class, new FeedBackServiceImpl());
     }
-
 
     @Override
     protected void stopBundle() throws Exception {

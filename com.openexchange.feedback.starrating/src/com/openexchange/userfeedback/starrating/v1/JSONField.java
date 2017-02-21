@@ -47,40 +47,49 @@
  *
  */
 
-package com.openexchange.feedback.osgi;
-
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.feedback.FeedBackServiceImpl;
-import com.openexchange.feedback.FeedbackService;
-import com.openexchange.feedback.FeedbackTypeRegistry;
-import com.openexchange.feedback.FeedbackTypeRegistryImpl;
-import com.openexchange.osgi.HousekeepingActivator;
+package com.openexchange.userfeedback.starrating.v1;
 
 /**
- * {@link Activator}
+ * {@link JSONField}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-public class Activator extends HousekeepingActivator{
+public enum JSONField {
+    score("Score"),
+    app("App"),
+    entry_point("Entry point"),
+    comment("Comment"),
+    operating_system("Operating System"),
+    browser("Browsser"),
+    browser_version("Browser version"),
+    user_agent("User agent"),
+    screen_resolution("Screen Resolution"),
+    language("Language");
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[]{ConfigViewFactory.class, DatabaseService.class};
+    String displayName;
+
+    JSONField(String displayName){
+        this.displayName=displayName;
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-        registerService(FeedbackTypeRegistry.class, FeedbackTypeRegistryImpl.getInstance());
-        registerService(FeedbackService.class, new FeedBackServiceImpl());
+    /**
+     * Gets the displayName
+     *
+     * @return The displayName
+     */
+    public String getDisplayName() {
+        return displayName;
     }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        Services.setServiceLookup(null);
-        super.stopBundle();
-    }
-
 }
+
+
+
+
+
+
+
+
+
+
+

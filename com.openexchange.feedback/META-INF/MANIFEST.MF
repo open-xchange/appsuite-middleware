@@ -1,11 +1,11 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open Xchange Feedback Bundle
-Bundle-SymbolicName: com.openexchange.feedback
+Bundle-SymbolicName: com.openexchange.userfeedback
 Bundle-Version: 7.8.4
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Bundle-Activator: com.openexchange.feedback.osgi.Activator
+Bundle-Activator: com.openexchange.userfeedback.osgi.Activator
 Import-Package: com.openexchange.config.cascade,
  com.openexchange.database,
  com.openexchange.exception,
@@ -15,4 +15,4 @@ Import-Package: com.openexchange.config.cascade,
  com.openexchange.tools.sql,
  com.openexchange.user,
  org.osgi.framework
-Export-Package: com.openexchange.feedback
+Export-Package: com.openexchange.userfeedback

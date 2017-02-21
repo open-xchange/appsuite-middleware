@@ -47,75 +47,34 @@
  *
  */
 
-package com.openexchange.feedback.starratingv1;
+package com.openexchange.userfeedback;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.List;
-import com.openexchange.feedback.FeedbackType;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
- * {@link StarRatingV1}
+ * {@link FeedbackTypeRegistry} is a registry for {@link FeedbackType} implementations
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-public class StarRatingV1 implements FeedbackType {
+public interface FeedbackTypeRegistry {
 
-    private static final String TYPE = "star-rating-v1";
-    private static final String SAVE_SQL = "INSERT INTO star_rating_v1 (data) VALUES (?)";
+    /**
+     * Register a {@link FeedbackType}
+     * @param type The {@link FeedbackType} to register
+     */
+    public void registertype(FeedbackType type);
 
+    /**
+     * Unregister a {@link FeedbackType}
+     * @param type The {@link FeedbackType} to unregister
+     */
+    public void unregister(FeedbackType type);
 
-    @Override
-    public long storeFeedback(Object feedback, Connection con) throws SQLException {
-
-        PreparedStatement stmt = con.prepareStatement(SAVE_SQL, Statement.RETURN_GENERATED_KEYS);
-        ResultSet rs = null;
-        try {
-        stmt.setObject(1, feedback);
-        stmt.executeUpdate();
-        rs = stmt.getGeneratedKeys();
-        if(rs.next()){
-            return rs.getInt(1);
-        }
-
-        return -1;
-        } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
-        }
-    }
-
-    @Override
-    public Object getFeedback(Long id, Connection con) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public List<Object> getFeedbacks(List<Long> ids, Connection con) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void deleteFeedback(long id, Connection con) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void deleteFeedbacks(List<Long> ids, Connection con) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public String getType() {
-        return TYPE;
-    }
+    /**
+     * Retrieves the {@link FeedbackType} for the given type
+     * @param type The feedback type
+     * @return The {@link FeedbackType} or null
+     */
+    public FeedbackType getFeedbackType(String type);
 
 }

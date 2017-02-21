@@ -47,72 +47,73 @@
  *
  */
 
-package com.openexchange.feedback;
+package com.openexchange.userfeedback.starrating.osgi;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link FeedbackType}
+ * {@link Services}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-public interface FeedbackType {
+public class Services {
 
-    /**
-     * Stores Feedback data
-     *
-     * @param feedback The data
-     * @param con The write connection to the global db
-     * @return The id of the newly created entry or -1
-     * @throws SQLException
-     */
-    public long storeFeedback(Object feedback, Connection con) throws SQLException;
+   /**
+    * Initializes a new {@link Services}.
+    */
+   private Services() {
+       super();
+   }
 
-    /**
-     * Retrieves the feedback with the given id
-     *
-     * @param id The id of the feedback
-     * @param con A read connection to the global db
-     * @return The feedback object
-     * @throws SQLException
-     */
-    public Object getFeedback(Long id, Connection con) throws SQLException;
+   private static final AtomicReference<Activator> REF = new AtomicReference<>();
 
-    /**
-     * Retrieves a list of feedback objects
-     *
-     * @param ids The feedback ids to retrieve
-     * @param con A read connection to the global db
-     * @return A list of feedback objects
-     * @throws SQLException
-     */
-    public List<Object> getFeedbacks(List<Long> ids, Connection con) throws SQLException;
+   /**
+    * Sets the service lookup.
+    *
+    * @param serviceLookup The service lookup or <code>null</code>
+    */
+   public static void setServiceLookup(final Activator serviceLookup) {
+       REF.set(serviceLookup);
+   }
 
-    /**
-     * Deletes the feedback with the given id
-     *
-     * @param id The id of the feedback entry to delete
-     * @param con A write connection to the global db
-     * @throws SQLException
-     */
-    public void deleteFeedback(long id, Connection con) throws SQLException;
+   /**
+    * Gets the service lookup.
+    *
+    * @return The service lookup or <code>null</code>
+    */
+   public static HousekeepingActivator getServiceLookup() {
+       return REF.get();
+   }
 
-    /**
-     * Deletes multiple feedback entries
-     * @param ids A list of feedback entries
-     * @param con A write connection to the global db
-     * @throws SQLException
-     */
-    public void deleteFeedbacks(List<Long> ids, Connection con) throws SQLException;
+   /**
+    * Gets the service of specified type
+    *
+    * @param clazz The service's class
+    * @return The service
+    * @throws IllegalStateException If an error occurs while returning the demanded service
+    */
+   public static <S extends Object> S getService(final Class<? extends S> clazz) {
+       final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+       if (null == serviceLookup) {
+           throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.feedback.starrating\" not started?");
+       }
+       return serviceLookup.getService(clazz);
+   }
 
-    /**
-     * Retrieves the feedback type
-     *
-     * @return The feedback type
-     */
-    public String getType();
+   /**
+    * (Optionally) Gets the service of specified type
+    *
+    * @param clazz The service's class
+    * @return The service or <code>null</code> if absent
+    */
+   public static <S extends Object> S optService(final Class<? extends S> clazz) {
+       try {
+           return getService(clazz);
+       } catch (final IllegalStateException e) {
+           return null;
+       }
+   }
 
 }

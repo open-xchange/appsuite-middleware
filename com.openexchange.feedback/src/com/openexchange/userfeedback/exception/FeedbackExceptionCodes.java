@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.feedback.exception;
+package com.openexchange.userfeedback.exception;
 
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;

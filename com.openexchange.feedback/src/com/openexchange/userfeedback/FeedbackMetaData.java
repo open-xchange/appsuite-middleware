@@ -47,34 +47,93 @@
  *
  */
 
-package com.openexchange.feedback;
+package com.openexchange.userfeedback;
 
 
 /**
- * {@link FeedbackTypeRegistry} is a registry for {@link FeedbackType} implementations
+ * {@link FeedbackMetaData}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-public interface FeedbackTypeRegistry {
+public class FeedbackMetaData {
+
+    private final String type;
+    private final long date;
+    private final int ctxId;
+    private final int userId;
+    private final String loginName;
+    private final long typeId;
 
     /**
-     * Register a {@link FeedbackType}
-     * @param type The {@link FeedbackType} to register
+     * Initializes a new {@link FeedbackMetaData}.
+     * @param type
+     * @param date
+     * @param ctxId
+     * @param userId
+     * @param loginName
      */
-    public void registertype(FeedbackType type);
+    public FeedbackMetaData(String type, long date, int ctxId, int userId, String loginName, long typeId) {
+        super();
+        this.type = type;
+        this.date = date;
+        this.ctxId = ctxId;
+        this.userId = userId;
+        this.loginName = loginName;
+        this.typeId=typeId;
+    }
 
     /**
-     * Unregister a {@link FeedbackType}
-     * @param type The {@link FeedbackType} to unregister
+     * Gets the type
+     *
+     * @return The type
      */
-    public void unregister(FeedbackType type);
+    public String getType() {
+        return type;
+    }
 
     /**
-     * Retrieves the {@link FeedbackType} for the given type
-     * @param type The feedback type
-     * @return The {@link FeedbackType} or null
+     * Gets the date
+     *
+     * @return The date
      */
-    public FeedbackType getFeedbackType(String type);
+    public long getDate() {
+        return date;
+    }
 
+    /**
+     * Gets the ctxId
+     *
+     * @return The ctxId
+     */
+    public int getCtxId() {
+        return ctxId;
+    }
+
+    /**
+     * Gets the userId
+     *
+     * @return The userId
+     */
+    public int getUserId() {
+        return userId;
+    }
+
+    /**
+     * Gets the loginName
+     *
+     * @return The loginName
+     */
+    public String getLoginName() {
+        return loginName;
+    }
+
+    /**
+     * Gets the typeId
+     *
+     * @return The typeId
+     */
+    public long getTypeId() {
+        return typeId;
+    }
 }
