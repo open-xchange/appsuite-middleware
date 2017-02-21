@@ -112,7 +112,7 @@ public class MailFilterConfigurationServiceImpl implements MailFilterConfigurati
      */
     @Override
     public String getProperty(MailFilterProperty property) {
-        return null;
+        return getProperty(property, -1, -1, String.class);
     }
 
     /*
@@ -132,8 +132,7 @@ public class MailFilterConfigurationServiceImpl implements MailFilterConfigurati
      */
     @Override
     public int getIntProperty(MailFilterProperty property) {
-        // TODO Auto-generated method stub
-        return 0;
+        return getProperty(property, -1, -1, Integer.class);
     }
 
     /*
@@ -153,8 +152,7 @@ public class MailFilterConfigurationServiceImpl implements MailFilterConfigurati
      */
     @Override
     public boolean getBooleanProperty(MailFilterProperty property) {
-        // TODO Auto-generated method stub
-        return false;
+        return getProperty(property, -1, -1, Boolean.class);
     }
 
     /*
@@ -182,12 +180,8 @@ public class MailFilterConfigurationServiceImpl implements MailFilterConfigurati
     private <T> T getProperty(MailFilterProperty property, int userId, int contextId, Class<T> coerceTo) {
         T defaultValue = property.getDefaultValue(coerceTo);
 
-        if (contextId == 0) {
+        if (contextId <= 0) {
             return defaultValue;
-        }
-        if (contextId < 0) {
-            contextId = -contextId;
-            userId = -1;
         }
 
         try {
