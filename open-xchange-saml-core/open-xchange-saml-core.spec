@@ -15,7 +15,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 15
+%define        ox_release 14
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -91,8 +91,6 @@ fi
 %defattr(-,root,root)
 
 %changelog
-* Fri Feb 17 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-02-21 (3969)
 * Tue Feb 14 2017 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2017-02-20 (3952)
 * Tue Jan 31 2017 Marcus Klein <marcus.klein@open-xchange.com>
