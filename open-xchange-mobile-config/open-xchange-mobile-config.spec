@@ -15,7 +15,7 @@ BuildRequires: java-devel >= 1.7.0
 %endif
 # TODO: version not hardcoded in spec file
 Version:	@OXVERSION@
-%define        ox_release 14
+%define        ox_release 15
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        Creative Commons Attribution-Noncommercial-Share Alike 2.5 Generic
@@ -76,6 +76,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/meta/*
 
 %changelog
+* Tue Feb 21 2017 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Build for patch 2017-02-21 (3969)
 * Tue Feb 14 2017 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2017-02-20 (3952)
 * Tue Jan 31 2017 Marcus Klein <jenkins@hudson-slave-1.netline.de>
