@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: The star rating feedback bundle
+Bundle-SymbolicName: com.openexchange.feedback.starrating
+Bundle-Version: 7.8.4
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-Activator: com.openexchange.feedback.starrating.osgi.Activator
+Import-Package: com.openexchange.exception,
+ com.openexchange.feedback,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.tools.sql,
+ org.osgi.framework
