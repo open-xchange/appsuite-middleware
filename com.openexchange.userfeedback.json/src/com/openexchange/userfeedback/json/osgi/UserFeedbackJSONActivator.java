@@ -50,7 +50,7 @@
 package com.openexchange.userfeedback.json.osgi;
 
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.uadetector.UserAgentParser;
+import com.openexchange.feedback.FeedbackService;
 import com.openexchange.userfeedback.json.UserFeedbackActionFactory;
 
 /**
@@ -63,12 +63,13 @@ public class UserFeedbackJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserAgentParser.class };
+        return new Class<?>[] { FeedbackService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        registerModule(new UserFeedbackActionFactory(this), "userfeedback");
+        Services.setServiceLookup(this);
+        registerModule(new UserFeedbackActionFactory(), "userfeedback");
     }
 
 }

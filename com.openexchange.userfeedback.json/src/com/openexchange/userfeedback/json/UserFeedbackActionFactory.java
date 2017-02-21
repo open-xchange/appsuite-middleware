@@ -56,9 +56,8 @@ import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.userfeedback.json.actions.CollectAction;
+import com.openexchange.userfeedback.json.actions.StoreAction;
 
 /**
  * {@link UserFeedbackActionFactory}
@@ -70,10 +69,10 @@ public class UserFeedbackActionFactory implements AJAXActionServiceFactory {
 
     private final Map<String, AJAXActionService> actions;
 
-    public UserFeedbackActionFactory(ServiceLookup services) {
+    public UserFeedbackActionFactory() {
         super();
         actions = new HashMap<>();
-        actions.put("collect", new CollectAction(services));
+        actions.put("store", new StoreAction());
     }
 
     @Override

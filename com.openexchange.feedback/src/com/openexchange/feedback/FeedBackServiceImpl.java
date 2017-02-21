@@ -72,7 +72,7 @@ import com.openexchange.tools.sql.DBUtils;
 public class FeedBackServiceImpl implements FeedbackService {
 
     @Override
-    public void saveFeedBack(Session session, String type, Object feedback) throws OXException {
+    public void storeFeedback(Session session, String type, Object feedback) throws OXException {
 
         // Get context group id
 

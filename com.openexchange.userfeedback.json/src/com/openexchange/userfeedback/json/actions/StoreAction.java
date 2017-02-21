@@ -49,69 +49,48 @@
 
 package com.openexchange.userfeedback.json.actions;
 
-import java.util.Date;
-import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.feedback.FeedbackService;
 import com.openexchange.java.Strings;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.uadetector.UserAgentParser;
-import net.sf.uadetector.ReadableUserAgent;
+import com.openexchange.userfeedback.json.osgi.Services;
 
 
 /**
- * {@link CollectAction}
+ * {@link StoreAction}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-public class CollectAction implements AJAXActionService {
+public class StoreAction implements AJAXActionService {
 
-    private final ServiceLookup services;
 
-    public CollectAction(ServiceLookup services) {
+    public StoreAction() {
         super();
-        this.services = services;
     }
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         Object data = requestData.getData();
-        if (null == data || !JSONObject.class.isInstance(data)) {
+        if (null == data) {
             throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
         }
         String type = requestData.getParameter("type");
         if (null == type || Strings.isEmpty(type)) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("type");
         }
-        JSONObject json = (JSONObject) data;
-        Date now = new Date();
-        int ctxId = session.getContextId();
-        int userId = session.getUserId();
-        String loginName = session.getLoginName();
-        UserAgentParser parser = services.getService(UserAgentParser.class);
-        String userAgent = requestData.getUserAgent();
-        try {
-            int score = json.getInt("score");
-            String app = json.getString("app");
-            String entryPoint = json.getString("entryPoint");
-            String comment = json.getString("comment");
-            String screenResolution = json.getString("screenResolution");
-            String language = json.getString("language");
 
-            ReadableUserAgent agent = parser.parse(userAgent);
-            String os = agent.getOperatingSystem().getFamilyName();
-            String osVersion = agent.getOperatingSystem().getVersionNumber().toVersionString();
-            String browser = agent.getName();
-            String browserVersion = agent.getVersionNumber().toVersionString();
-        } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
+        FeedbackService service = Services.getService(FeedbackService.class);
+        if(service==null){
+            throw ServiceExceptionCode.absentService(FeedbackService.class);
         }
+        service.storeFeedback(session, type, data);
         return new AJAXRequestResult();
     }
 
