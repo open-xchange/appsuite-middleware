@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,57 +47,27 @@
  *
  */
 
-package com.openexchange.mailfilter.json.ajax.json.mapper.parser.test;
+package com.openexchange.share.impl.osgi;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.apache.jsieve.SieveException;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.exception.OXException;
-import com.openexchange.jsieve.commands.TestCommand;
-import com.openexchange.jsieve.commands.TestCommand.Commands;
-import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
-import com.openexchange.tools.session.ServerSession;
+import org.osgi.framework.BundleContext;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
+import com.openexchange.share.groupware.spi.AccessibleModulesExtension;
+
 
 /**
- * {@link CurrentDateTestCommandParser}
+ * {@link AccessibleModulesExtensionTracker}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:felix.marx@open-xchange.com">Felix Marx</a>
+ * @since 7.8.4
  */
-public class CurrentDateTestCommandParser extends AbstractDateTestCommandParser implements CommandParser<TestCommand> {
+public class AccessibleModulesExtensionTracker extends RankingAwareNearRegistryServiceTracker<AccessibleModulesExtension> {
 
     /**
-     * Initialises a new {@link CurrentDateTestCommandParser}.
-     */
-    public CurrentDateTestCommandParser() {
-        super();
-    }
-
-    /*
-     * (non-Javadoc)
+     * Initializes a new {@link AccessibleModulesExtensionTracker}.
      *
-     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser#parse(org.json.JSONObject)
+     * @param context The OSGi bundle execution context
      */
-    @Override
-    public TestCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException {
-        String commandName = Commands.CURRENTDATE.getCommandName();
-        final List<Object> argList = new ArrayList<Object>();
-        parseZone(argList, jsonObject, session, commandName);
-        parseComparisonTag(argList, jsonObject, commandName);
-        parseDatePart(argList, jsonObject, commandName);
-
-        return new TestCommand(TestCommand.Commands.CURRENTDATE, argList, new ArrayList<TestCommand>());
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser#parse(org.json.JSONObject, java.lang.Object)
-     */
-    @Override
-    public void parse(JSONObject jsonObject, TestCommand command) throws JSONException, OXException {
-        parseComparisonTag(jsonObject, command);
-        parseDatePart(jsonObject, command);
+    AccessibleModulesExtensionTracker(BundleContext context) {
+        super(context, AccessibleModulesExtension.class, 0);
     }
 }
