@@ -7,6 +7,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.SimConfigurationService;
 import com.openexchange.mailfilter.json.osgi.Services;
 import com.openexchange.mailfilter.properties.MailFilterProperties;
+import com.openexchange.mailfilter.properties.MailFilterProperty;
 import com.openexchange.server.ServiceLookup;
 
 
@@ -24,7 +25,7 @@ public class Common {
             }
         };
         Common.simConfigurationService = simConfigurationService;
-        simConfigurationService.stringProperties.put(MailFilterProperties.Values.SIEVE_CREDSRC.property, "imapLogin");
+        simConfigurationService.stringProperties.put(MailFilterProperty.credentialSource.getFQPropertyName(), "imapLogin");
         simConfigurationService.stringProperties.put(MailFilterProperties.Values.SIEVE_LOGIN_TYPE.property, "user");
         simConfigurationService.stringProperties.put(MailFilterProperties.Values.SIEVE_SERVER.property, "localhost");
         simConfigurationService.stringProperties.put(MailFilterProperties.Values.SIEVE_PORT.property, "2000");

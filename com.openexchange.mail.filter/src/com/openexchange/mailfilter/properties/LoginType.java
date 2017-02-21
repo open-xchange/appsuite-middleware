@@ -49,6 +49,11 @@
 
 package com.openexchange.mailfilter.properties;
 
+import java.util.Map;
+import com.google.common.collect.ImmutableMap;
+import com.openexchange.exception.OXException;
+import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
+
 /**
  * {@link LoginType}
  *
@@ -64,6 +69,15 @@ public enum LoginType {
      */
     USER("user");
 
+    private static final Map<String, LoginType> MAP;
+    static {
+        ImmutableMap.Builder<String, LoginType> b = ImmutableMap.builder();
+        for (LoginType loginType : LoginType.values()) {
+            b.put(loginType.name, loginType);
+        }
+        MAP = b.build();
+    }
+
     public final String name;
 
     /**
@@ -73,5 +87,20 @@ public enum LoginType {
      */
     private LoginType(final String name) {
         this.name = name;
+    }
+
+    /**
+     * The name of the {@link LoginType}
+     * 
+     * @param name The name of the {@link LoginType} as string
+     * @return The {@link LoginType}
+     * @throws OXException if an invalid {@link LoginType} is requested
+     */
+    public static LoginType loginTypeFor(String name) throws OXException {
+        LoginType loginType = MAP.get(name);
+        if (loginType == null) {
+            throw MailFilterExceptionCode.NO_VALID_LOGIN_TYPE.create();
+        }
+        return loginType;
     }
 }

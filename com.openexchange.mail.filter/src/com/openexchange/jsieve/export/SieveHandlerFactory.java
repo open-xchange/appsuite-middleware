@@ -58,7 +58,11 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mailfilter.Credentials;
 import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
+import com.openexchange.mailfilter.properties.CredentialSource;
+import com.openexchange.mailfilter.properties.LoginType;
+import com.openexchange.mailfilter.properties.MailFilterConfigurationService;
 import com.openexchange.mailfilter.properties.MailFilterProperties;
+import com.openexchange.mailfilter.properties.MailFilterProperty;
 import com.openexchange.mailfilter.services.Services;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
@@ -91,72 +95,79 @@ public final class SieveHandlerFactory {
      */
     public static SieveHandler getSieveHandler(Credentials creds, boolean onlyWelcome) throws OXException {
         ConfigurationService config = Services.getService(ConfigurationService.class);
+        MailFilterConfigurationService mailFilterConfig = Services.getService(MailFilterConfigurationService.class);
+
+        int userId = creds.getUserid();
+        int contextId = creds.getContextid();
 
         // Determine & parse host and port
-        int sieve_port;
-        String sieve_server;
+        int sievePort;
+        String sieveServer;
         User user = null;
         {
-            String logintype = config.getProperty(MailFilterProperties.Values.SIEVE_LOGIN_TYPE.property);
-            if (MailFilterProperties.LoginTypes.GLOBAL.name.equals(logintype)) {
-                sieve_server = config.getProperty(MailFilterProperties.Values.SIEVE_SERVER.property);
-                if (null == sieve_server) {
-                    throw MailFilterExceptionCode.PROPERTY_ERROR.create(MailFilterProperties.Values.SIEVE_SERVER.property);
-                }
-                try {
-                    sieve_port = Integer.parseInt(config.getProperty(MailFilterProperties.Values.SIEVE_PORT.property));
-                } catch (final RuntimeException e) {
-                    throw MailFilterExceptionCode.PROPERTY_ERROR.create(e, MailFilterProperties.Values.SIEVE_PORT.property);
-                }
-            } else if (MailFilterProperties.LoginTypes.USER.name.equals(logintype)) {
-                user = getUser(creds, null);
-                {
+            String sCredSrc = mailFilterConfig.getProperty(userId, contextId, MailFilterProperty.loginType);
+            LoginType loginType = LoginType.loginTypeFor(sCredSrc);
+
+            switch (loginType) {
+                case GLOBAL:
+                    sieveServer = mailFilterConfig.getProperty(userId, contextId, MailFilterProperty.server);
+                    if (null == sieveServer) {
+                        throw MailFilterExceptionCode.PROPERTY_ERROR.create(MailFilterProperty.server.getFQPropertyName());
+                    }
+                    try {
+                        sievePort = Integer.parseInt(mailFilterConfig.getProperty(userId, contextId, MailFilterProperty.port));
+                    } catch (final RuntimeException e) {
+                        throw MailFilterExceptionCode.PROPERTY_ERROR.create(e, MailFilterProperty.port.getFQPropertyName());
+                    }
+                    break;
+                case USER:
+                    user = getUser(creds, null);
                     String mailServerURL = user.getImapServer();
                     try {
                         URI uri = URIParser.parse(IDNA.toASCII(mailServerURL), URIDefaults.IMAP);
-                        sieve_server = uri.getHost();
+                        sieveServer = uri.getHost();
                     } catch (final URISyntaxException e) {
                         throw MailFilterExceptionCode.NO_SERVERNAME_IN_SERVERURL.create(e, mailServerURL);
                     }
-                }
 
-                try {
-                    sieve_port = Integer.parseInt(config.getProperty(MailFilterProperties.Values.SIEVE_PORT.property));
-                } catch (final RuntimeException e) {
-                    throw MailFilterExceptionCode.PROPERTY_ERROR.create(e, MailFilterProperties.Values.SIEVE_PORT.property);
-                }
-            } else {
-                throw MailFilterExceptionCode.NO_VALID_LOGIN_TYPE.create();
+                    try {
+                        sievePort = Integer.parseInt(mailFilterConfig.getProperty(userId, contextId, MailFilterProperty.port));
+                    } catch (final RuntimeException e) {
+                        throw MailFilterExceptionCode.PROPERTY_ERROR.create(e, MailFilterProperty.port.getFQPropertyName());
+                    }
+
+                    break;
+                default:
+                    throw MailFilterExceptionCode.NO_VALID_LOGIN_TYPE.create();
             }
         }
 
         if (onlyWelcome) {
             // Host name and port are sufficient...
-            return new SieveHandler(sieve_server, sieve_port);
+            return new SieveHandler(sieveServer, sievePort);
         }
 
-        // Get SIEVE_AUTH_ENC property
-        String authEnc = config.getProperty(MailFilterProperties.Values.SIEVE_AUTH_ENC.property, MailFilterProperties.Values.SIEVE_AUTH_ENC.def);
+        // Get the 'authenticationEncoding' property
+        String authEnc = mailFilterConfig.getProperty(userId, contextId, MailFilterProperty.authenticationEncoding);
 
         // Determine & parse login and password dependent on configured credentials source
-        switch (getCredSrc(config)) {
-            case IMAP_LOGIN:
-                {
-                    String authname = getUser(creds, user).getImapLogin();
-                    return newSieveHandlerUsing(sieve_server, sieve_port, creds.getUsername(), authname, getRightPassword(config, creds), authEnc, creds.getOauthToken());
-                }
-            case MAIL:
-                {
-                    String authname = getUser(creds, user).getMail();
-                    return newSieveHandlerUsing(sieve_server, sieve_port, creds.getUsername(), authname, getRightPassword(config, creds), authEnc, creds.getOauthToken());
-                }
+        String sCredSrc = mailFilterConfig.getProperty(userId, contextId, MailFilterProperty.credentialSource);
+        CredentialSource credentialSource = CredentialSource.credentialSourceFor(sCredSrc);
+        switch (credentialSource) {
+            case IMAP_LOGIN: {
+                String authname = getUser(creds, user).getImapLogin();
+                return newSieveHandlerUsing(sieveServer, sievePort, creds.getUsername(), authname, getRightPassword(config, creds), authEnc, creds.getOauthToken());
+            }
+            case MAIL: {
+                String authname = getUser(creds, user).getMail();
+                return newSieveHandlerUsing(sieveServer, sievePort, creds.getUsername(), authname, getRightPassword(config, creds), authEnc, creds.getOauthToken());
+            }
             case SESSION:
                 // fall-through
             case SESSION_FULL_LOGIN:
-                return newSieveHandlerUsing(sieve_server, sieve_port, creds.getUsername(), creds.getAuthname(), getRightPassword(config, creds), authEnc, creds.getOauthToken());
+                return newSieveHandlerUsing(sieveServer, sievePort, creds.getUsername(), creds.getAuthname(), getRightPassword(config, creds), authEnc, creds.getOauthToken());
             default:
                 throw MailFilterExceptionCode.NO_VALID_CREDSRC.create();
-
         }
     }
 
@@ -176,16 +187,6 @@ public final class SieveHandlerFactory {
         return storageUser;
     }
 
-    private static MailFilterProperties.CredSrc getCredSrc(ConfigurationService config) throws OXException {
-        String sCredSrc = config.getProperty(MailFilterProperties.Values.SIEVE_CREDSRC.property);
-        MailFilterProperties.CredSrc credSrc = MailFilterProperties.CredSrc.credSrcFor(sCredSrc);
-        if (null == credSrc) {
-            // Unknown credsrc
-            throw MailFilterExceptionCode.NO_VALID_CREDSRC.create();
-        }
-        return credSrc;
-    }
-
     /**
      * Get the correct password according to the credentials
      *
@@ -202,14 +203,13 @@ public final class SieveHandlerFactory {
         }
 
         switch (passwordSource) {
-            case GLOBAL:
-                {
-                    String masterpassword = config.getProperty(MailFilterProperties.Values.SIEVE_MASTERPASSWORD.property);
-                    if (null == masterpassword || masterpassword.length() == 0) {
-                        throw MailFilterExceptionCode.NO_MASTERPASSWORD_SET.create();
-                    }
-                    return masterpassword;
+            case GLOBAL: {
+                String masterpassword = config.getProperty(MailFilterProperties.Values.SIEVE_MASTERPASSWORD.property);
+                if (null == masterpassword || masterpassword.length() == 0) {
+                    throw MailFilterExceptionCode.NO_MASTERPASSWORD_SET.create();
                 }
+                return masterpassword;
+            }
             case SESSION:
                 return creds.getPassword();
             default:

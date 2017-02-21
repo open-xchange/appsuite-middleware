@@ -76,7 +76,7 @@ public interface MailFilterConfigurationService extends Reloadable {
      * @return The {@link String} value of the property
      */
     String getProperty(int userId, int contextId, MailFilterProperty property);
-
+    
     /**
      * Fetches the {@link Integer} value of specified {@link MailFilterProperty}
      *
