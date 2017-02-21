@@ -46,11 +46,18 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.mailfilter.properties;
 
 import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 
+/**
+ * 
+ * {@link MailFilterProperties}
+ * 
+ * @deprecated Use {@link MailFilterProperty} instead
+ */
 public class MailFilterProperties {
 
     public static enum LoginTypes {
@@ -79,7 +86,7 @@ public class MailFilterProperties {
         SIEVE_MASTERPASSWORD("com.openexchange.mail.filter.masterPassword", ""),
         USE_UTF7_FOLDER_ENCODING("com.openexchange.mail.filter.useUTF7FolderEncoding", "false"),
         PUNYCODE("com.openexchange.mail.filter.punycode", "false"),
-        USE_SIEVE_RESPONSE_CODES("com.openexchange.mail.filter.useSIEVEResponseCodes","false");
+        USE_SIEVE_RESPONSE_CODES("com.openexchange.mail.filter.useSIEVEResponseCodes", "false");
 
         public final String property;
 
