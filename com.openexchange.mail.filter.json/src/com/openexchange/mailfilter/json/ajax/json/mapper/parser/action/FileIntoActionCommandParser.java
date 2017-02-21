@@ -54,7 +54,6 @@ import java.util.List;
 import org.apache.jsieve.SieveException;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.jsieve.commands.ActionCommand.Commands;
@@ -65,7 +64,8 @@ import com.openexchange.mailfilter.json.ajax.json.mapper.ArgumentUtil;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserJSONUtil;
 import com.openexchange.mailfilter.json.osgi.Services;
-import com.openexchange.mailfilter.properties.MailFilterProperties;
+import com.openexchange.mailfilter.properties.MailFilterConfigurationService;
+import com.openexchange.mailfilter.properties.MailFilterProperty;
 import com.openexchange.tools.session.ServerSession;
 import com.sun.mail.imap.protocol.BASE64MailboxDecoder;
 import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
@@ -89,7 +89,7 @@ public class FileIntoActionCommandParser implements CommandParser<ActionCommand>
         final ArrayList<Object> argList = new ArrayList<Object>();
 
         Boolean copy = jsonObject.optBoolean(MoveActionField.copy.name(), false);
-        if(copy){
+        if (copy) {
             argList.add(ArgumentUtil.createTagArgument(MoveActionField.copy.name()));
         }
 
@@ -103,8 +103,8 @@ public class FileIntoActionCommandParser implements CommandParser<ActionCommand>
         }
 
         argList.add(CommandParserJSONUtil.stringToList(folderName));
-        ActionCommand result =  new ActionCommand(Commands.FILEINTO, argList);
-        if(copy){
+        ActionCommand result = new ActionCommand(Commands.FILEINTO, argList);
+        if (copy) {
             result.addOptionalRequired(MoveActionField.copy.name());
         }
         return result;
@@ -118,7 +118,7 @@ public class FileIntoActionCommandParser implements CommandParser<ActionCommand>
         jsonObject.put(GeneralField.id.name(), actionCommand.getCommand().getJsonName());
 
         final String folderName;
-        if(arguments.size()==1){
+        if (arguments.size() == 1) {
             if (useUTF7Encoding()) {
                 folderName = BASE64MailboxDecoder.decode(((List<String>) arguments.get(0)).get(0));
             } else {
@@ -145,8 +145,9 @@ public class FileIntoActionCommandParser implements CommandParser<ActionCommand>
      * @return The value of the 'com.openexchange.mail.filter.useUTF7FolderEncoding' property
      */
     private boolean useUTF7Encoding() {
-        ConfigurationService config = Services.getService(ConfigurationService.class);
-        String encodingProperty = config.getProperty(MailFilterProperties.Values.USE_UTF7_FOLDER_ENCODING.property);
+        // TODO: get for user?
+        MailFilterConfigurationService config = Services.getService(MailFilterConfigurationService.class);
+        String encodingProperty = config.getProperty(MailFilterProperty.useUTF7FolderEncoding);
         return Boolean.parseBoolean(encodingProperty);
     }
 }

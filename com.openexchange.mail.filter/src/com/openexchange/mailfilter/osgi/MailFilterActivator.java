@@ -67,7 +67,6 @@ import com.openexchange.mailfilter.internal.MailFilterInterceptorRegistryImpl;
 import com.openexchange.mailfilter.internal.MailFilterPreferencesItem;
 import com.openexchange.mailfilter.internal.MailFilterReloadable;
 import com.openexchange.mailfilter.internal.MailFilterServiceImpl;
-import com.openexchange.mailfilter.properties.MailFilterProperties;
 import com.openexchange.mailfilter.services.Services;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -161,35 +160,36 @@ public class MailFilterActivator extends HousekeepingActivator {
      */
     // protected to be able to test this
     public static void checkConfigfile() throws Exception {
-        final ConfigurationService config = Services.getService(ConfigurationService.class);
-        final Properties file = config.getFile("mailfilter.properties");
-        if (file.isEmpty()) {
-            throw new Exception("No configfile found for mailfilter bundle");
-        }
-        for (final MailFilterProperties.Values type : MailFilterProperties.Values.values()) {
-            if (null == file.getProperty(type.property)) {
-                throw new Exception("Property for mailfilter not found: " + type.property);
-            }
-        }
-        try {
-            Integer.parseInt(file.getProperty(MailFilterProperties.Values.SIEVE_CONNECTION_TIMEOUT.property));
-        } catch (final NumberFormatException e) {
-            throw new Exception("Property " + MailFilterProperties.Values.SIEVE_CONNECTION_TIMEOUT.property + " is no integer value");
-        }
-
-        final String passwordsrc = config.getProperty(MailFilterProperties.Values.SIEVE_PASSWORDSRC.property);
-        if (null != passwordsrc) {
-            if (MailFilterProperties.PasswordSource.GLOBAL.name.equals(passwordsrc)) {
-                final String masterpassword = config.getProperty(MailFilterProperties.Values.SIEVE_MASTERPASSWORD.property);
-                if (masterpassword.length() == 0) {
-                    throw MailFilterExceptionCode.NO_MASTERPASSWORD_SET.create();
-                }
-            } else if (!MailFilterProperties.PasswordSource.SESSION.name.equals(passwordsrc)) {
-                throw MailFilterExceptionCode.NO_VALID_PASSWORDSOURCE.create();
-            }
-        } else {
-            throw MailFilterExceptionCode.NO_VALID_PASSWORDSOURCE.create();
-        }
+        //TODO: perform check?
+//        final ConfigurationService config = Services.getService(ConfigurationService.class);
+//        final Properties file = config.getFile("mailfilter.properties");
+//        if (file.isEmpty()) {
+//            throw new Exception("No configfile found for mailfilter bundle");
+//        }
+//        for (final MailFilterProperties.Values type : MailFilterProperties.Values.values()) {
+//            if (null == file.getProperty(type.property)) {
+//                throw new Exception("Property for mailfilter not found: " + type.property);
+//            }
+//        }
+//        try {
+//            Integer.parseInt(file.getProperty(MailFilterProperties.Values.SIEVE_CONNECTION_TIMEOUT.property));
+//        } catch (final NumberFormatException e) {
+//            throw new Exception("Property " + MailFilterProperties.Values.SIEVE_CONNECTION_TIMEOUT.property + " is no integer value");
+//        }
+//
+//        final String passwordsrc = config.getProperty(MailFilterProperties.Values.SIEVE_PASSWORDSRC.property);
+//        if (null != passwordsrc) {
+//            if (MailFilterProperties.PasswordSource.GLOBAL.name.equals(passwordsrc)) {
+//                final String masterpassword = config.getProperty(MailFilterProperties.Values.SIEVE_MASTERPASSWORD.property);
+//                if (masterpassword.length() == 0) {
+//                    throw MailFilterExceptionCode.NO_MASTERPASSWORD_SET.create();
+//                }
+//            } else if (!MailFilterProperties.PasswordSource.SESSION.name.equals(passwordsrc)) {
+//                throw MailFilterExceptionCode.NO_VALID_PASSWORDSOURCE.create();
+//            }
+//        } else {
+//            throw MailFilterExceptionCode.NO_VALID_PASSWORDSOURCE.create();
+//        }
 
     }
 

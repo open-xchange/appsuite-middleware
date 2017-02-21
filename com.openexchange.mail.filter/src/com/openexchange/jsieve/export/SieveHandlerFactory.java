@@ -154,16 +154,16 @@ public final class SieveHandlerFactory {
         switch (credentialSource) {
             case IMAP_LOGIN: {
                 String authname = getUser(creds, user).getImapLogin();
-                return newSieveHandlerUsing(sieveServer, sievePort, creds.getUsername(), authname, getRightPassword(mailFilterConfig, creds), authEnc, creds.getOauthToken());
+                return newSieveHandlerUsing(sieveServer, sievePort, creds.getUsername(), authname, getRightPassword(mailFilterConfig, creds), authEnc, creds.getOauthToken(), creds.getUserid(), creds.getContextid());
             }
             case MAIL: {
                 String authname = getUser(creds, user).getMail();
-                return newSieveHandlerUsing(sieveServer, sievePort, creds.getUsername(), authname, getRightPassword(mailFilterConfig, creds), authEnc, creds.getOauthToken());
+                return newSieveHandlerUsing(sieveServer, sievePort, creds.getUsername(), authname, getRightPassword(mailFilterConfig, creds), authEnc, creds.getOauthToken(), creds.getUserid(), creds.getContextid());
             }
             case SESSION:
                 // fall-through
             case SESSION_FULL_LOGIN:
-                return newSieveHandlerUsing(sieveServer, sievePort, creds.getUsername(), creds.getAuthname(), getRightPassword(mailFilterConfig, creds), authEnc, creds.getOauthToken());
+                return newSieveHandlerUsing(sieveServer, sievePort, creds.getUsername(), creds.getAuthname(), getRightPassword(mailFilterConfig, creds), authEnc, creds.getOauthToken(), creds.getUserid(), creds.getContextid());
             default:
                 throw MailFilterExceptionCode.NO_VALID_CREDSRC.create();
         }
@@ -180,8 +180,8 @@ public final class SieveHandlerFactory {
      * @param oauthToken
      * @return
      */
-    private static SieveHandler newSieveHandlerUsing(String host, int port, String userName, String authName, String password, String authEncoding, String oauthToken) {
-        return new SieveHandler(null == userName ? authName : userName, authName, password, host, port, authEncoding, oauthToken);
+    private static SieveHandler newSieveHandlerUsing(String host, int port, String userName, String authName, String password, String authEncoding, String oauthToken, int userId, int contextId) {
+        return new SieveHandler(null == userName ? authName : userName, authName, password, host, port, authEncoding, oauthToken, userId, contextId);
     }
 
     /**

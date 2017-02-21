@@ -77,7 +77,6 @@ import com.openexchange.jsieve.export.exceptions.OXSieveHandlerException;
 import com.openexchange.jsieve.export.exceptions.OXSieveHandlerInvalidCredentialsException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mailfilter.properties.MailFilterConfigurationService;
-import com.openexchange.mailfilter.properties.MailFilterProperties;
 import com.openexchange.mailfilter.properties.MailFilterProperty;
 import com.openexchange.mailfilter.services.Services;
 import com.openexchange.tools.encoding.Base64;
@@ -166,6 +165,8 @@ public class SieveHandler {
     private boolean useSIEVEResponseCodes = false;
     private Long connectTimeout = null;
     private Long readTimeout = null;
+    private int userId = -1;
+    private int contextId = -1;
 
     /**
      * Initializes a new {@link SieveHandler}.
@@ -178,7 +179,7 @@ public class SieveHandler {
      * @param authEnc The encoding to use when transferring credential bytes to SIEVE end-point
      * @param oauthToken The optional OAuth token; relevant in case <code>"XOAUTH2"</code> or <code>"OAUTHBEARER"</code> SASL authentication is supposed to be performed
      */
-    public SieveHandler(String userName, String authUserName, String authUserPasswd, String host, int port, String authEnc, String oauthToken) {
+    public SieveHandler(String userName, String authUserName, String authUserPasswd, String host, int port, String authEnc, String oauthToken, int userId, int contextId) {
         super();
         sieve_user = null == userName ? authUserName : userName;
         sieve_auth = authUserName;
@@ -188,6 +189,8 @@ public class SieveHandler {
         sieve_host_port = port; // 2000
         onlyWelcome = false;
         this.oauthToken = oauthToken;
+        this.userId = userId;
+        this.contextId = contextId;
     }
 
     /**
@@ -308,16 +311,15 @@ public class SieveHandler {
      */
     public void initializeConnection() throws IOException, OXSieveHandlerException, UnsupportedEncodingException, OXSieveHandlerInvalidCredentialsException {
         measureStart();
-        final ConfigurationService config = Services.getService(ConfigurationService.class);
         final MailFilterConfigurationService mailFilterConfig = Services.getService(MailFilterConfigurationService.class);
 
-        useSIEVEResponseCodes = Boolean.parseBoolean(config.getProperty(MailFilterProperties.Values.USE_SIEVE_RESPONSE_CODES.property));
+        useSIEVEResponseCodes = Boolean.parseBoolean(mailFilterConfig.getProperty(MailFilterProperty.useSIEVEResponseCodes));
 
         s_sieve = new Socket();
         /*
          * Connect with the connect-timeout of the config file or the one which was explicitly set
          */
-        int configuredTimeout = Integer.parseInt(config.getProperty(MailFilterProperties.Values.SIEVE_CONNECTION_TIMEOUT.property));
+        int configuredTimeout = Integer.parseInt(mailFilterConfig.getProperty(MailFilterProperty.connectionTimeout));
         try {
             s_sieve.connect(new InetSocketAddress(sieve_host, sieve_host_port), getEffectiveConnectTimeout(configuredTimeout));
         } catch (final java.net.ConnectException e) {
@@ -347,11 +349,11 @@ public class SieveHandler {
             List<String> sasl = capa.getSasl();
             measureEnd("capa.getSasl");
 
-            final boolean tlsenabled = Boolean.parseBoolean(config.getProperty(MailFilterProperties.Values.TLS.property));
+            final boolean tlsenabled = Boolean.parseBoolean(mailFilterConfig.getProperty(userId, contextId, MailFilterProperty.tls));
 
             final boolean issueTLS = tlsenabled && capa.getStarttls().booleanValue();
 
-            punycode = Boolean.parseBoolean(config.getProperty(MailFilterProperties.Values.PUNYCODE.property));
+            punycode = Boolean.parseBoolean(mailFilterConfig.getProperty(userId, contextId, MailFilterProperty.punycode));
 
             final StringBuilder commandBuilder = new StringBuilder(64);
 
@@ -400,7 +402,7 @@ public class SieveHandler {
                  */
                 final String implementation = capa.getImplementation();
                 ;
-                if (implementation.matches(config.getProperty(mailFilterConfig.getProperty(MailFilterProperty.nonRFCCompliantTLSRegex)))) {
+                if (implementation.matches(mailFilterConfig.getProperty(userId, contextId, MailFilterProperty.nonRFCCompliantTLSRegex))) {
                     measureStart();
                     bos_sieve.write(commandBuilder.append("CAPABILITY").append(CRLF).toString().getBytes(com.openexchange.java.Charsets.UTF_8));
                     bos_sieve.flush();
@@ -954,7 +956,6 @@ public class SieveHandler {
     }
 
     private boolean authGSSAPI(final StringBuilder commandBuilder) throws IOException, UnsupportedEncodingException, OXSieveHandlerException {
-        final String user = getRightEncodedString(sieve_user, "username");
         final String authname = getRightEncodedString(sieve_auth, "authname");
 
         final HashMap<String, String> saslProps = new HashMap<String, String>();

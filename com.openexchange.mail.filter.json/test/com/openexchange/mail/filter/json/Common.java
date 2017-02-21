@@ -12,6 +12,7 @@ import com.openexchange.server.ServiceLookup;
 
 public class Common {
 
+    // TODO: implement the SimMailFilterConfigurationService
     public static SimConfigurationService simConfigurationService;
 
     public static void prepare(String passwordSource, String masterPassword) {
