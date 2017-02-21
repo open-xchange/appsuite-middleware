@@ -226,6 +226,7 @@ public abstract class AbstractValidateMailAccountAction extends AbstractMailAcco
         transportConfig.setServer(URITools.getHost(uri));
         transportConfig.setPort(uri.getPort());
         transportConfig.setSecure(accountDescription.isTransportSecure());
+        transportConfig.setRequireTls(accountDescription.isTransportStartTls());
         boolean validated = true;
         // Now try to connect
         boolean close = false;

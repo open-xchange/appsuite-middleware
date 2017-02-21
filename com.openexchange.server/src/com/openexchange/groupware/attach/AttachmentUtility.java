@@ -278,6 +278,7 @@ public final class AttachmentUtility {
         private int folderId;
         private String comment;
         private String fileId;
+        private AttachmentBatch batch;
 
         /**
          * Initializes a new {@link AttachmentMetadataImpl}.
@@ -418,6 +419,16 @@ public final class AttachmentUtility {
         @Override
         public String getFileId() {
             return fileId;
+        }
+
+        @Override
+        public void setAttachmentBatch(AttachmentBatch batch) {
+            this.batch = batch;
+        }
+
+        @Override
+        public AttachmentBatch getAttachmentBatch() {
+            return batch;
         }
 
     }

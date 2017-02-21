@@ -51,6 +51,7 @@ package com.openexchange.html.internal.jericho.control;
 
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
+import com.openexchange.exception.OXException;
 import com.openexchange.html.internal.jericho.JerichoHandler;
 import com.openexchange.html.internal.jericho.JerichoParser;
 import com.openexchange.threadpool.AbstractTask;
@@ -125,7 +126,7 @@ public class JerichoParseTask extends AbstractTask<Void> implements Delayed {
     }
 
     @Override
-    public Void call() {
+    public Void call() throws OXException {
         JerichoParseControl control = JerichoParseControl.getInstance();
         stamp = System.currentTimeMillis() + (timeoutSec * 1000L);
         worker = Thread.currentThread();

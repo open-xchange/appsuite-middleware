@@ -127,7 +127,7 @@ public final class HtmlProcessing {
      * @see #formatContentForDisplay(String, String, boolean, Session, MailPath, UserSettingMail, boolean[], DisplayMode)
      * @return The formatted content
      */
-    public static HtmlSanitizeResult formatTextForDisplay(final String content, final UserSettingMail usm, final DisplayMode mode, final int maxContentSize) {
+    public static HtmlSanitizeResult formatTextForDisplay(final String content, final UserSettingMail usm, final DisplayMode mode, final int maxContentSize) throws OXException {
         return formatContentForDisplay(content, null, false, null, null, usm, null, mode, false, maxContentSize);
     }
 
@@ -140,7 +140,7 @@ public final class HtmlProcessing {
      * @see #formatContentForDisplay(String, String, boolean, Session, MailPath, UserSettingMail, boolean[], DisplayMode)
      * @return The formatted content
      */
-    public static String formatTextForDisplay(final String content, final UserSettingMail usm, final DisplayMode mode) {
+    public static String formatTextForDisplay(final String content, final UserSettingMail usm, final DisplayMode mode) throws OXException {
         return formatTextForDisplay(content, usm, mode, -1).getContent();
     }
 
@@ -158,7 +158,7 @@ public final class HtmlProcessing {
      * @see #formatContentForDisplay(String, String, boolean, Session, MailPath, UserSettingMail, boolean[], DisplayMode)
      * @return The formatted content
      */
-    public static String formatHTMLForDisplay(final String content, final String charset, final Session session, final MailPath mailPath, final UserSettingMail usm, final boolean[] modified, final DisplayMode mode, final boolean embedded) {
+    public static String formatHTMLForDisplay(final String content, final String charset, final Session session, final MailPath mailPath, final UserSettingMail usm, final boolean[] modified, final DisplayMode mode, final boolean embedded) throws OXException {
         return formatHTMLForDisplay(content, charset, session, mailPath, usm, modified, mode, embedded, -1).getContent();
     }
 
@@ -176,7 +176,7 @@ public final class HtmlProcessing {
      * @see #formatContentForDisplay(String, String, boolean, Session, MailPath, UserSettingMail, boolean[], DisplayMode)
      * @return The formatted content
      */
-    public static String formatHTMLForDisplay(String content, String charset, Session session, MailPath mailPath, MailPath originalMailPath, UserSettingMail usm, boolean[] modified, DisplayMode mode, boolean embedded) {
+    public static String formatHTMLForDisplay(String content, String charset, Session session, MailPath mailPath, MailPath originalMailPath, UserSettingMail usm, boolean[] modified, DisplayMode mode, boolean embedded) throws OXException {
         return formatHTMLForDisplay(content, charset, session, mailPath, originalMailPath, usm, modified, mode, embedded, -1).getContent();
     }
 
@@ -196,7 +196,7 @@ public final class HtmlProcessing {
      * @see #formatContentForDisplay(String, String, boolean, Session, MailPath, UserSettingMail, boolean[], DisplayMode)
      * @return The formatted content
      */
-    public static HtmlSanitizeResult formatHTMLForDisplay(String content, String charset, Session session, MailPath mailPath, UserSettingMail usm, boolean[] modified, DisplayMode mode, boolean embedded, int maxContentSize) {
+    public static HtmlSanitizeResult formatHTMLForDisplay(String content, String charset, Session session, MailPath mailPath, UserSettingMail usm, boolean[] modified, DisplayMode mode, boolean embedded, int maxContentSize) throws OXException {
         return formatHTMLForDisplay(content, charset, session, mailPath, null, usm, modified, mode, embedded, maxContentSize);
     }
 
@@ -217,7 +217,7 @@ public final class HtmlProcessing {
      * @see #formatContentForDisplay(String, String, boolean, Session, MailPath, UserSettingMail, boolean[], DisplayMode)
      * @return The formatted content
      */
-    public static HtmlSanitizeResult formatHTMLForDisplay(String content, String charset, Session session, MailPath mailPath, MailPath originalMailPath, UserSettingMail usm, boolean[] modified, DisplayMode mode, boolean embedded, int maxContentSize) {
+    public static HtmlSanitizeResult formatHTMLForDisplay(String content, String charset, Session session, MailPath mailPath, MailPath originalMailPath, UserSettingMail usm, boolean[] modified, DisplayMode mode, boolean embedded, int maxContentSize) throws OXException {
         return formatContentForDisplay(content, charset, true, session, mailPath, originalMailPath, usm, modified, mode, embedded, maxContentSize);
     }
 
@@ -250,7 +250,7 @@ public final class HtmlProcessing {
      * @param maxContentSize maximum number of bytes that is will be returned for content. '<=0' means unlimited.
      * @return The formatted content
      */
-    public static HtmlSanitizeResult formatContentForDisplay(String content, String charset, boolean isHtml, Session session, MailPath mailPath, UserSettingMail usm, boolean[] modified, DisplayMode mode, boolean embedded, int maxContentSize) {
+    public static HtmlSanitizeResult formatContentForDisplay(String content, String charset, boolean isHtml, Session session, MailPath mailPath, UserSettingMail usm, boolean[] modified, DisplayMode mode, boolean embedded, int maxContentSize) throws OXException {
         return formatContentForDisplay(content, charset, isHtml, session, mailPath, null, usm, modified, mode, embedded, maxContentSize);
     }
 
@@ -286,7 +286,7 @@ public final class HtmlProcessing {
      * @param maxContentSize maximum number of bytes that is will be returned for content. '<=0' means unlimited.
      * @return The formatted content
      */
-    public static HtmlSanitizeResult formatContentForDisplay(String content, String charset, boolean isHtml, Session session, MailPath mailPath, MailPath originalMailPath, UserSettingMail usm, boolean[] modified, DisplayMode mode, boolean embedded, int maxContentSize) {
+    public static HtmlSanitizeResult formatContentForDisplay(String content, String charset, boolean isHtml, Session session, MailPath mailPath, MailPath originalMailPath, UserSettingMail usm, boolean[] modified, DisplayMode mode, boolean embedded, int maxContentSize) throws OXException {
         HtmlSanitizeResult retval = new HtmlSanitizeResult(content);
         final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
         if (isHtml) {
@@ -729,7 +729,7 @@ public final class HtmlProcessing {
      * @param contentType The corresponding content type (including charset parameter)
      * @return The HTML content conform to W3C standards
      */
-    public static String getConformHTML(final String htmlContent, final ContentType contentType) {
+    public static String getConformHTML(final String htmlContent, final ContentType contentType) throws OXException {
         return getConformHTML(htmlContent, contentType.getCharsetParameter());
     }
 
@@ -740,7 +740,7 @@ public final class HtmlProcessing {
      * @param charset The charset parameter
      * @return The HTML content conform to W3C standards
      */
-    public static String getConformHTML(final String htmlContent, final String charset) {
+    public static String getConformHTML(final String htmlContent, final String charset) throws OXException {
         return ServerServiceRegistry.getInstance().getService(HtmlService.class).getConformHTML(htmlContent, charset);
     }
 

@@ -51,6 +51,7 @@ package com.openexchange.html.bugtests;
 
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
+import com.openexchange.exception.OXException;
 import com.openexchange.html.AbstractSanitizing;
 import com.openexchange.html.HtmlService;
 
@@ -63,7 +64,7 @@ import com.openexchange.html.HtmlService;
 public class Bug17195Test extends AbstractSanitizing {
 
     @Test
-    public void testContainsSigns() {
+    public void testContainsSigns() throws OXException {
         HtmlService htmlService = getHtmlService();
 
         String url = "https://ox6.local.com/ox6/#m=3Dinfostore&f=485D112&i=4D89719";

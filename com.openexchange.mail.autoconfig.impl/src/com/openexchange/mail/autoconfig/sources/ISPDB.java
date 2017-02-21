@@ -123,6 +123,11 @@ public class ISPDB extends AbstractProxyAwareConfigSource {
         {
             DefaultAutoconfig autoconfig = autoConfigCache.getIfPresent(sUrl);
             if (null != autoconfig) {
+                if (forceSecure && ((!autoconfig.isMailSecure() && !autoconfig.isMailStartTls()) || (!autoconfig.isTransportSecure() && !autoconfig.isTransportStartTls()))) {
+                    // Either mail or transport do not support a secure connection (or neither of them)
+                    return null;
+                }
+
                 return generateIndividualAutoconfig(emailLocalPart, emailDomain, autoconfig, forceSecure);
             }
         }
@@ -165,7 +170,17 @@ public class ISPDB extends AbstractProxyAwareConfigSource {
             // Read & parse response
             ClientConfig clientConfig = new AutoconfigParser().getConfig(rsp.getEntity().getContent());
             DefaultAutoconfig autoconfig = getBestConfiguration(clientConfig, emailDomain);
+            if (null == autoconfig) {
+                return null;
+            }
             autoConfigCache.put(sUrl, autoconfig);
+
+            // If 'forceSecure' is true, ensure that both - mail and transport settings - either support SSL or STARTTLS
+            if (forceSecure && ((!autoconfig.isMailSecure() && !autoconfig.isMailStartTls()) || (!autoconfig.isTransportSecure() && !autoconfig.isTransportStartTls()))) {
+                // Either mail or transport do not support a secure connection (or neither of them)
+                return null;
+            }
+
             return generateIndividualAutoconfig(emailLocalPart, emailDomain, autoconfig, forceSecure);
         } catch (SSLHandshakeException e) {
             LOG.info("Could not retrieve config XML.", e);

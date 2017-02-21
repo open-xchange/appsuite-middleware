@@ -54,6 +54,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PipedOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -85,10 +86,14 @@ import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.boxcom.access.BoxOAuthAccess;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.java.ExceptionAwarePipedInputStream;
 import com.openexchange.java.SizeKnowingInputStream;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.threadpool.behavior.AbortBehavior;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 
@@ -354,23 +359,82 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
 
             @Override
             protected InputStream doPerform() throws OXException, BoxAPIException, UnsupportedEncodingException {
+                // For a memory-safe download, either pipe the binary data or do the "store in memory, if too big flush to a temp. file" approach
+                boolean usePipes = true;
+                if (usePipes) {
+                    try {
+                        final com.box.sdk.BoxFile boxFile = getBoxFile();
+
+                        final PipedOutputStream pos = new PipedOutputStream();
+                        final ExceptionAwarePipedInputStream pin = new ExceptionAwarePipedInputStream(pos, 65536);
+                        Runnable r = new Runnable() {
+
+                            @Override
+                            public void run() {
+                                try {
+                                    boxFile.download(pos);
+                                    pos.flush();
+                                } catch (BoxAPIException e) {
+                                    Throwable cause = e.getCause();
+                                    if (cause instanceof IOException) {
+                                        IOException ioe = (IOException) cause;
+                                        if ("Pipe closed".equals(ioe.getMessage())) {
+                                            // Sink closed intentionally, ignore
+                                        } else {
+                                            pin.setException(ioe);
+                                        }
+                                    } else {                                        
+                                        pin.setException(e);
+                                    }
+                                } catch (Exception e) {
+                                    pin.setException(e);
+                                } finally {
+                                    Streams.close(pos);
+                                }
+                            }
+                        };
+                        ThreadPoolService threadPool = ThreadPools.getThreadPool();
+                        if (null == threadPool) {
+                            new Thread(r, "BoxFileAccess.getDocument").start();
+                        } else {
+                            threadPool.submit(ThreadPools.task(r), AbortBehavior.getInstance());
+                        }
+                        
+                        return pin;
+                    } catch (IOException e) {
+                        throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
+                    } catch (BoxAPIException e) {
+                        throw handleHttpResponseError(id, account.getId(), e);
+                    }
+                }
+                
+                // Otherwise use a ThresholdFileHolder for a memory-safe download
+                ThresholdFileHolder tfh = null;
+                boolean error = true;
                 try {
-                    BoxAPIConnection apiConnection = getAPIConnection();
-                    com.box.sdk.BoxFile boxFile = new com.box.sdk.BoxFile(apiConnection, id);
-                    Info fileInfo = boxFile.getInfo("trashed_at", "name", "size");
-                    checkFileValidity(fileInfo);
-
-                    // FIXME: Memory intensive?
-                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                    boxFile.download(outputStream);
-                    outputStream.close();
-
-                    return new SizeKnowingInputStream(new ByteArrayInputStream(outputStream.toByteArray()), fileInfo.getSize());
-                } catch (IOException e) {
-                    throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
+                    com.box.sdk.BoxFile boxFile = getBoxFile();
+                    
+                    tfh = new ThresholdFileHolder();
+                    boxFile.download(tfh.asOutputStream());
+                    
+                    SizeKnowingInputStream stream = new SizeKnowingInputStream(tfh.getClosingStream(), tfh.getLength());
+                    error = true; // Avoid premature closing
+                    return stream;
                 } catch (final BoxAPIException e) {
                     throw handleHttpResponseError(id, account.getId(), e);
+                } finally {
+                    if (error) {
+                        Streams.close(tfh);
+                    }
                 }
+            }
+
+            private com.box.sdk.BoxFile getBoxFile() throws OXException {
+                BoxAPIConnection apiConnection = getAPIConnection();
+                com.box.sdk.BoxFile boxFile = new com.box.sdk.BoxFile(apiConnection, id);
+                Info fileInfo = boxFile.getInfo("trashed_at", "name", "size");
+                checkFileValidity(fileInfo);
+                return boxFile;
             }
         });
     }

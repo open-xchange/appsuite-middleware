@@ -106,6 +106,7 @@ public class Change extends ChangeCore {
         if (null != personal) {
             oxusr.changeMailAddressPersonal(ctx, usr, "NULL".equals(personal) ? null : personal, auth);
         }
+
     }
 
     @Override

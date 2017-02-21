@@ -1484,11 +1484,11 @@ public final class OXFolderSQL {
         insertFolderSQL(newFolderID, userId, folder, creatingTime, false, ctx, writeConArg);
     }
 
-    static void insertDefaultFolderSQL(final int newFolderID, final int userId, final FolderObject folder, final long creatingTime, final Context ctx, final Connection writeConArg) throws SQLException, OXException {
-        insertFolderSQL(newFolderID, userId, folder, creatingTime, true, ctx, writeConArg);
+    static void insertDefaultFolderSQL(final int newFolderID, final int userId, final FolderObject folder, final long creatingTime, boolean setDefaultFlag, final Context ctx, final Connection writeConArg) throws SQLException, OXException {
+        insertFolderSQL(newFolderID, userId, folder, creatingTime, setDefaultFlag, ctx, writeConArg);
     }
 
-    private static void insertFolderSQL(final int newFolderID, final int userId, final FolderObject folder, final long creatingTime, final boolean acceptDefaultFlag, final Context ctx, final Connection writeConArg) throws SQLException, OXException {
+    private static void insertFolderSQL(final int newFolderID, final int userId, final FolderObject folder, final long creatingTime, final boolean setDefaultFlag, final Context ctx, final Connection writeConArg) throws SQLException, OXException {
         Connection writeCon = writeConArg;
         int permissionFlag = determinePermissionFlag(folder);
         boolean closeWriteCon = false;
@@ -1526,7 +1526,7 @@ public final class OXFolderSQL {
                     stmt.setInt(11, permissionFlag);
                     stmt.setInt(12, 0); // new folder does not contain
                     // subfolders
-                    if (acceptDefaultFlag) {
+                    if (setDefaultFlag) {
                         stmt.setInt(13, folder.isDefaultFolder() ? 1 : 0); // default_flag
                     } else {
                         stmt.setInt(13, 0); // default_flag
@@ -1586,7 +1586,7 @@ public final class OXFolderSQL {
                     folder.setLastModified(creatingDate);
                     folder.setModifiedBy(userId);
                     folder.setSubfolderFlag(false);
-                    if (!acceptDefaultFlag) {
+                    if (!setDefaultFlag) {
                         folder.setDefaultFolder(false);
                     }
                 } finally {

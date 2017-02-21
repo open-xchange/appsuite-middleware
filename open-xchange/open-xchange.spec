@@ -17,7 +17,7 @@ BuildRequires:    java-devel >= 1.7.0
 BuildRequires:    systemd-rpm-macros
 %endif
 Version:          @OXVERSION@
-%define           ox_release 13
+%define           ox_release 14
 Release:          %{ox_release}_<CI_CNT>.<B_CNT>
 Group:            Applications/Productivity
 License:          GPL-2.0
@@ -90,6 +90,20 @@ then
 fi
 %endif
 
+# SoftwareChange_Request-3859
+drop_in=%{dropin_dir}/%{dropin_example}
+if [ -f ${drop_in} ]
+then
+  sed -i 's/^#LimitNOFILE=16384$/#LimitNOFILE=65536/' ${drop_in}
+fi
+
+# SoftwareChange_Request-3882
+drop_in=%{dropin_dir}/%{dropin_example}
+if [ -f ${drop_in} ] && ! grep -q LimitNPROC ${drop_in}
+then
+  sed -i '/^\[Service\]$/a #LimitNPROC=65536' ${drop_in}
+fi
+
 %preun
 %if (0%{?suse_version} && 0%{?suse_version} >= 1210)
 %service_del_preun open-xchange.service
@@ -119,6 +133,8 @@ fi
 
 
 %changelog
+* Tue Feb 14 2017 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2017-02-20 (3952)
 * Tue Jan 31 2017 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2017-02-06 (3918)
 * Thu Jan 26 2017 Marcus Klein <marcus.klein@open-xchange.com>

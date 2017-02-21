@@ -51,6 +51,7 @@ package com.openexchange.html.vulntests;
 
 import org.junit.Assert;
 import org.junit.Test;
+import com.openexchange.exception.OXException;
 import com.openexchange.html.AbstractSanitizing;
 
 /**
@@ -60,7 +61,7 @@ import com.openexchange.html.AbstractSanitizing;
  */
 public class Bug26611VulTest extends AbstractSanitizing {
     @Test
-    public void testSanitize() {
+    public void testSanitize() throws OXException {
         String content = "foo <object/data=\"data:text/html;base64,PHNjcmlwdD5hbGVydCgiWFNTIFNjaHdhY2hzdGVsbGUiKTwvc2NyaXB0Pg==\"<!-- --></object//-->> bar";
         String test = getHtmlService().sanitize(content, null, false, null, null);
         Assert.assertFalse("Sanitized content still contains object tag.", test.contains("<object"));

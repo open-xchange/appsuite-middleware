@@ -260,7 +260,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             // can only copy the current revision
             throw FileStorageExceptionCodes.VERSIONING_NOT_SUPPORTED.create(DropboxConstants.ID);
         }
-
+        checkFolderExistence(destFolder);
         String path = toPath(source.getFolder(), source.getId());
         String destName = null != update && null != modifiedFields && modifiedFields.contains(Field.FILENAME) ? update.getFileName() : source.getId();
 
@@ -296,6 +296,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public IDTuple move(IDTuple source, String destFolder, long sequenceNumber, File update, List<Field> modifiedFields) throws OXException {
+        checkFolderExistence(destFolder);
         String path = toPath(source.getFolder(), source.getId());
         String destName = null != update && null != modifiedFields && modifiedFields.contains(Field.FILENAME) ? update.getFileName() : source.getId();
         String destPath = toPath(destFolder, destName);
@@ -747,10 +748,27 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      * @throws OXException If the file cannot be uploaded or any other error is occurred
      */
     private IDTuple saveDocument(File file, InputStream data) throws OXException {
+        
+        checkFolderExistence(file.getFolderId());
+        
         long fileSize = file.getFileSize();
         DropboxFile dbxFile = fileSize > CHUNK_SIZE ? sessionUpload(file, data) : singleUpload(file, data);
         file.copyFrom(dbxFile, copyFields);
         return dbxFile.getIDTuple();
+    }
+    
+    private void checkFolderExistence(String folderId) throws OXException{
+        try {
+            getFolderMetadata(folderId);
+        } catch (GetMetadataErrorException e) {
+            OXException interpretedException = DropboxExceptionHandler.handleGetMetadataErrorException(e, folderId, "");
+            if (interpretedException.getExceptionCode() == FileStorageExceptionCodes.NOT_FOUND) {
+                throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create();
+            }
+            throw interpretedException;
+        } catch (DbxException e) {
+            throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
+        } 
     }
 
     /**

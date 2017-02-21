@@ -52,6 +52,7 @@ import java.net.MalformedURLException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -67,6 +68,9 @@ import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public abstract class ChangeCore extends UserFilestoreAbstraction {
+	
+	protected CLIOption convertDriveUserFoldersOption = null;
+    protected static final String OPT_CONVERT_DRIVE_USER_FOLDERS = "convert-drive-user-folders";
 
     protected final void setOptions(final AdminParser parser) {
 
@@ -83,6 +87,8 @@ public abstract class ChangeCore extends UserFilestoreAbstraction {
         setOptionalOptions(parser);
 
         setFurtherOptions(parser);
+        
+        this.convertDriveUserFoldersOption = setLongOpt(parser, OPT_CONVERT_DRIVE_USER_FOLDERS, "Convert drive user folders into normal folders", false, false);
 
         parser.allowDynamicOptions();
     }
@@ -136,6 +142,10 @@ public abstract class ChangeCore extends UserFilestoreAbstraction {
 
             // Dynamic Options
             applyDynamicOptionsToUser(parser, usr);
+            
+            if (parser.hasOption(this.convertDriveUserFoldersOption)) {
+            	usr.setConvertDriveUserFolders(true);
+            }
 
             // finally do change call last (must be done last because else we cannot
             // change admin password

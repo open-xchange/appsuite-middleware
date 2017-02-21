@@ -17,7 +17,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 13
+%define        ox_release 14
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -1414,9 +1414,22 @@ sed -i '/^# Maximum number of open Files for the groupware$/{i\
 d
 }' /opt/open-xchange/etc/ox-scriptconf.sh
 
+# SoftwareChange_Request-3859
+VALUE=$(ox_read_property NRFILES /opt/open-xchange/etc/ox-scriptconf.sh)
+VALUE=${VALUE//\"/}
+if [ "8192" = "$VALUE" ]; then
+    ox_set_property NRFILES 65536 /opt/open-xchange/etc/ox-scriptconf.sh
+fi
+
 # SoftwareChange_Request-3862
 ox_comment html.tag.form add /opt/open-xchange/etc/whitelist.properties
 ox_comment html.tag.input add /opt/open-xchange/etc/whitelist.properties
+
+# SoftwareChange_Request-3882
+ox_add_property NPROC 65536 /opt/open-xchange/etc/ox-scriptconf.sh
+
+# SoftwareChange_Request-3934
+ox_comment html.style.list-style-image add /opt/open-xchange/etc/whitelist.properties
 
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
 for FILE in "${PROTECT[@]}"
@@ -1459,6 +1472,8 @@ exit 0
 %doc com.openexchange.database/doc/examples
 
 %changelog
+* Tue Feb 14 2017 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2017-02-20 (3952)
 * Tue Jan 31 2017 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2017-02-06 (3918)
 * Thu Jan 26 2017 Marcus Klein <marcus.klein@open-xchange.com>

@@ -61,6 +61,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -74,6 +75,7 @@ import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.DataSource;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentBase;
+import com.openexchange.groupware.attach.AttachmentBatch;
 import com.openexchange.groupware.attach.AttachmentConfig;
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
@@ -275,11 +277,17 @@ public final class AttachAction extends AbstractAttachmentAction {
             final Iterator<UploadFile> ufIter = uploadFiles.iterator();
             final JSONArray arr = new JSONArray();
             long timestamp = 0;
-
-            for (final AttachmentMetadata attachment : attachments) {
+            final UUID batchId = UUID.randomUUID();
+            
+            Iterator<AttachmentMetadata> iterator = attachments.iterator();
+            while (iterator.hasNext()) {
+                AttachmentMetadata attachment = iterator.next();
                 final UploadFile uploadFile = ufIter.next();
 
                 attachment.setId(AttachmentBase.NEW);
+
+                AttachmentBatch batch = new AttachmentBatch(batchId, !iterator.hasNext());
+                attachment.setAttachmentBatch(batch);
 
                 BufferedInputStream data = new BufferedInputStream(new FileInputStream(uploadFile.getTmpFile()), 65536);
                 final long modified = ATTACHMENT_BASE.attachToObject(attachment, data, session, ctx, user, userConfig);

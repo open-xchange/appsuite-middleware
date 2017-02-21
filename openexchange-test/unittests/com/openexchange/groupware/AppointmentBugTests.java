@@ -126,7 +126,7 @@ public class AppointmentBugTests extends CalendarTest {
 
         contextid = ctx.getContextId();
         userid = user;
-        
+
         CalendarMySQL.setApppointmentSqlFactory(new AppointmentSqlFactory());
     }
 
@@ -164,6 +164,7 @@ public class AppointmentBugTests extends CalendarTest {
         }
     }
 
+    @Override
     void deleteAllAppointments() throws Exception  {
         final Connection readcon = DBPool.pickup(getContext());
         final Context context = new ContextImpl(contextid);
@@ -232,7 +233,7 @@ public class AppointmentBugTests extends CalendarTest {
         DBPool.push(context, readcon);
         return privatefolder;
     }
-    
+
     /**
      * Test for <a href=
      * "https://bugs.open-xchange.com/show_bug.cgi?id=20972">bug
@@ -245,9 +246,9 @@ public class AppointmentBugTests extends CalendarTest {
     public void testBug20972() throws Exception {
         final int fid = getPrivateFolder(userid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "testIdentifierForBug20972");
-        
+
         final UserParticipant userParticipant = new UserParticipant(userid);
-        
+
         StringBuilder sb = new StringBuilder();
         int cap = 0;
         String locString = "0123456789";
@@ -256,7 +257,7 @@ public class AppointmentBugTests extends CalendarTest {
             cap += locString.length();
         }
         sb.append("TRUNCATE ME");
-        
+
         final CalendarDataObject cdao = new CalendarDataObject();
         cdao.setLocation(sb.toString());
         cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
@@ -266,17 +267,17 @@ public class AppointmentBugTests extends CalendarTest {
         cdao.setTitle("Testing bug 20972");
         cdao.addParticipant(userParticipant);
         cdao.setExternalOrganizer(true);
-        
+
         final CalendarSql csql = new CalendarSql(so);
         csql.insertAppointmentObject(cdao);
-        
+
         final int oid = cdao.getObjectID();
         final CalendarDataObject expected = csql.getObjectById(oid, fid);
-        
+
         assertNotNull("Object not created", expected);
         assertNotSame("Location truncated: ", expected.getLocation(), cdao.getLocation());
     }
-    
+
 
     /*
      1.  Create an appointment
@@ -2754,8 +2755,8 @@ public class AppointmentBugTests extends CalendarTest {
         final int object_id = cdao.getObjectID();
         assertTrue("Got object_id", object_id > 0);
 
-        final ReminderHandler rh = new ReminderHandler(getContext());
-        ReminderObject ro = rh.loadReminder(object_id, userid, Types.APPOINTMENT);
+        final ReminderHandler rh = ReminderHandler.getInstance();
+        ReminderObject ro = rh.loadReminder(object_id, userid, Types.APPOINTMENT, getContext());
         final Date check_date = ro.getDate();
         assertEquals("Check correct Alarm", check_alarm, check_date);
 
@@ -2774,7 +2775,7 @@ public class AppointmentBugTests extends CalendarTest {
 
         csql.updateAppointmentObject(update, fid, new Date());
 
-        ro = rh.loadReminder(object_id, userid, Types.APPOINTMENT);
+        ro = rh.loadReminder(object_id, userid, Types.APPOINTMENT, getContext());
         final Date check_date_update = ro.getDate();
 
         assertEquals("Check correct Alarm", check_alarm_update, check_date_update);
@@ -3560,8 +3561,7 @@ public class AppointmentBugTests extends CalendarTest {
              */
             final int reminderId;
             {
-                final ReminderObject ro = new ReminderHandler(getContext()).loadReminder(object_id, userid,
-                        Types.APPOINTMENT);
+                final ReminderObject ro =ReminderHandler.getInstance().loadReminder(object_id, userid,Types.APPOINTMENT, getContext());
                 assertTrue("Folder ID mismatch in reminder", ro.getFolder() == fid);
                 reminderId = ro.getObjectId();
             }
@@ -3604,11 +3604,11 @@ public class AppointmentBugTests extends CalendarTest {
 
                 csql.updateAppointmentObject(update, fid, new Date());
 
-                final ReminderObject ro = new ReminderHandler(getContext()).loadReminder(reminderId);
+                final ReminderObject ro = ReminderHandler.getInstance().loadReminder(reminderId, getContext());
                 assertTrue("Reminder's folder ID not updated properly", ro.getFolder() == fo.getObjectID());
             } finally {
                 try {
-                    new ReminderHandler(getContext()).deleteReminder(object_id, userid, Types.APPOINTMENT);
+                    ReminderHandler.getInstance().deleteReminder(object_id, userid, Types.APPOINTMENT, getContext());
                 } catch (final Exception e) {
                     e.printStackTrace();
                 }

@@ -85,6 +85,7 @@ import com.openexchange.mail.cache.SingletonMailAccessCache;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.mime.MimeCleanUp;
+import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.oauth.API;
@@ -824,7 +825,28 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
         if (Thread.currentThread() == acquiredLatch.owner) {
             // Perform the standard folder check
             try {
-                getFolderStorage().checkDefaultFolders();
+                F folderStorage = getFolderStorage();
+                try {
+                    folderStorage.checkDefaultFolders();
+                } catch (OXException e) {
+                    // Check if default folder check failed due to a quota limitation
+                    Throwable cause = e.getCause();
+                    String message = cause == null ? e.getPlainLogMessage() : cause.getMessage();
+                    if (!MimeMailException.isOverQuotaException(message)) {
+                        throw e;
+                    }
+
+                    // Handle quota-related errors
+                    MailConfig mailConfig = getMailConfig();
+                    String server = mailConfig.getServer();
+                    String login = mailConfig.getLogin();
+                    Integer contextId = Integer.valueOf(session.getContextId());
+                    Integer userId = Integer.valueOf(session.getUserId());
+
+                    OXException mailExc = MailExceptionCode.DEFAULT_FOLDER_CHECK_FAILED_OVER_QUOTA.create(cause, server, userId, login, contextId, message);
+                    acquiredLatch.result.set(mailExc);
+                    throw mailExc;
+                }
                 acquiredLatch.result.set(Boolean.TRUE);
                 return;
             } catch (OXException e) {

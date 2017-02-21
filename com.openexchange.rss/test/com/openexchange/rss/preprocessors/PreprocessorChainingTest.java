@@ -1,5 +1,6 @@
 package com.openexchange.rss.preprocessors;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.rss.RssResult;
 import junit.framework.TestCase;
 
@@ -26,12 +27,12 @@ public class PreprocessorChainingTest extends TestCase {
 		}
 	}
 
-	public void testChaining(){
+	public void testChaining() throws OXException{
 		String actual = new Pre1().chain(new Pre2().chain(new Pre3())).process("", null);
 		assertEquals("ABC", actual);
 	}
 
-	public void testNoChain(){
+	public void testNoChain() throws OXException{
 		String actual = new Pre1().process("", null);
 		assertEquals("A", actual);
 	}

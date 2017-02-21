@@ -53,6 +53,8 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
+import com.openexchange.groupware.reminder.ReminderService;
+import com.openexchange.groupware.reminder.ReminderServiceImpl;
 import com.openexchange.groupware.reminder.TargetService;
 import com.openexchange.groupware.reminder.json.ReminderActionFactory;
 import com.openexchange.groupware.userconfiguration.Permission;
@@ -80,6 +82,8 @@ public class ReminderActivator extends AJAXModuleActivator {
     protected void startBundle() throws Exception {
         rememberTracker(new ServiceTracker<TargetService, TargetService>(context, TargetService.class.getName(), new TargetRegistryCustomizer(context)));
         openTrackers();
+        ReminderService reminderService = new ReminderServiceImpl();
+        registerService(ReminderService.class, reminderService);
         registerModule(new ReminderActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "reminder");
         registerService(OAuthScopeProvider.class, new AbstractScopeProvider(ReminderActionFactory.OAUTH_READ_SCOPE, OAuthScopeDescription.READ_ONLY) {
             @Override

@@ -38,6 +38,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *         &lt;element name="country_business" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="country_home" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="country_other" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *         &lt;element name="driveUserFolderMode" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="defaultSenderAddress" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="default_group" type="{http://dataobjects.soap.admin.openexchange.com/xsd}Group" minOccurs="0"/>
  *         &lt;element name="department" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
@@ -145,6 +146,15 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *         &lt;element name="userfield18" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="userfield19" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="userfield20" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+<<<<<<< HEAD
+=======
+ *         &lt;element name="primaryAccountName" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+<<<<<<< HEAD
+ *         &lt;element name="remove_drive_folder_flags" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+>>>>>>> 2b50186a082... MW-488: Added SOAP & refactoring
+=======
+ *         &lt;element name="convert_drive_user_folders" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+>>>>>>> c60111aa698... MW-488: Changed parameter name
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -173,6 +183,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
     "countryBusiness",
     "countryHome",
     "countryOther",
+    "driveUserFolderMode",
     "defaultSenderAddress",
     "defaultGroup",
     "department",
@@ -284,7 +295,9 @@ import javax.xml.datatype.XMLGregorianCalendar;
     "userfield17",
     "userfield18",
     "userfield19",
-    "userfield20"
+    "userfield20",
+    "primaryAccountName",
+    "convertDriveUserFolders"
 })
 public class User {
 
@@ -325,6 +338,8 @@ public class User {
     protected String countryHome;
     @XmlElement(name = "country_other", nillable = true)
     protected String countryOther;
+    @XmlElement(name = "drive_user_folder_mode", nillable = true)
+    protected String driveUserFolderMode;
     @XmlElement(nillable = true)
     protected String defaultSenderAddress;
     @XmlElement(name = "default_group", nillable = true)
@@ -547,6 +562,10 @@ public class User {
     protected String userfield19;
     @XmlElement(nillable = true)
     protected String userfield20;
+    @XmlElement(nillable = true)
+    private String primaryAccountName;
+    @XmlElement(name = "convert_drive_user_folders", nillable = true)
+    protected Boolean convertDriveUserFolders;
 
     /**
      * Gets the value of the aliases property.
@@ -1013,6 +1032,29 @@ public class User {
      */
     public void setDefaultSenderAddress(String value) {
         this.defaultSenderAddress = value;
+    }
+    
+    /**
+     * Get driveUserFolderMode value.
+     * 
+     * @return
+     *      possible object is
+     *     {@link String }
+     */
+    public String getDriveUserFolderMode() {
+        return driveUserFolderMode;
+    }
+
+    /**
+     * Set driveUserFolderMode value..
+     *
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *
+     */
+    public void setDriveUserFolderMode(String value) {
+        this.driveUserFolderMode = value;
     }
 
     /**
@@ -3678,6 +3720,32 @@ public class User {
      */
     public void setUserfield20(String value) {
         this.userfield20 = value;
+    }
+
+    /**
+     * Gets the primaryAccountName
+     *
+     * @return The primaryAccountName
+     */
+    public String getPrimaryAccountName() {
+        return primaryAccountName;
+    }
+
+    /**
+     * Sets the primaryAccountName
+     *
+     * @param primaryAccountName The primaryAccountName to set
+     */
+    public void setPrimaryAccountName(String primaryAccountName) {
+        this.primaryAccountName = primaryAccountName;
+    }
+
+    public Boolean isConvertDriveUserFolders() {
+        return convertDriveUserFolders;
+    }
+
+    public void setConvertDriveUserFolders(Boolean convertDriveUserFolders) {
+        this.convertDriveUserFolders = convertDriveUserFolders;
     }
 
 }

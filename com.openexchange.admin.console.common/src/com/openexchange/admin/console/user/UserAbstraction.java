@@ -582,8 +582,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected static final String OPT_TITLE_LONG = "title";
     protected static final String OPT_POSITION_LONG = "position";
 
-
-
     protected static final String JAVA_UTIL_TIME_ZONE = "java.util.TimeZone";
     protected static final String PASSWORDMECH_CLASS = "com.openexchange.admin.rmi.dataobjects.User$PASSWORDMECH";
     protected static final String JAVA_UTIL_HASH_SET = "java.util.HashSet";
@@ -2483,7 +2481,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         this.mail_folder_confirmed_spam_nameOption = setLongOpt(parser, OPT_MAIL_FOLDER_CONFIRMED_SPAM_NAME_LONG, "stringvalue", "Mail_folder_confirmed_spam_name", true, false, true);
         this.defaultsenderaddressOption = setLongOpt(parser, OPT_DEFAULTSENDERADDRESS_LONG, "stringvalue", "DefaultSenderAddress", true, false, true);
         this.foldertreeOption = setIntegerLongOpt(parser, OPT_FOLDERTREE_LONG, "intvalue", "FolderTree", true, false, true);
-
         setGui_Spam_option(parser);
         setModuleAccessOptions(parser);
     }
