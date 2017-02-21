@@ -47,55 +47,45 @@
  *
  */
 
-package com.openexchange.mail.loginhandler;
+package com.openexchange.mail.usersetting.reloadable;
 
-import com.openexchange.authentication.LoginExceptionCodes;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.userconfiguration.UserPermissionBits;
-import com.openexchange.login.LoginHandlerService;
-import com.openexchange.login.LoginResult;
-import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ForcedReloadable;
+import com.openexchange.config.Interests;
+import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.mail.usersetting.UserSettingMailStorage;
 
 /**
- * {@link TransportLoginHandler} - The login handler for mail transport.
+ * {@link ForcedReloadable} that ensures to clear {@link UserSettingMail} cache and guarantees reading the configuration again.<br>
+ * <br>
+ * As the initial configuration setting 'com.openexchange.spamhandler.enabled' is ConfigCascade-aware and might only have configurations within
+ * the contextSets definition we have to force this download as changes in the contextSets cannot be recognized without having a defined file.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.8.4
  */
-public final class TransportLoginHandler implements LoginHandlerService {
+public class UserSettingMailReloadable implements ForcedReloadable {
 
     /**
-     * Initializes a new {@link TransportLoginHandler}.
+     * Initializes a new {@link UserSettingMailReloadable}.
      */
-    public TransportLoginHandler() {
+    public UserSettingMailReloadable() {
         super();
     }
 
     @Override
-    public void handleLogin(final LoginResult login) throws OXException {
+    public void reloadConfiguration(ConfigurationService configService) {
         try {
-            /*
-             * Ensure publishing infostore folder exists
-             */
-            final Context ctx = login.getContext();
-            final ServerSession serverSession = getServerSessionFrom(login.getSession(), ctx);
-            final UserPermissionBits permissionBits = serverSession.getUserPermissionBits();
-        } catch (final RuntimeException e) {
-            throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
+            UserSettingMailStorage.getInstance().clearStorage();
+        } catch (Exception e) {
+            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(UserSettingMailReloadable.class);
+            logger.error("Unable to reload configuration for UserSettingMail.", e);
         }
+
     }
 
     @Override
-    public void handleLogout(final LoginResult logout) throws OXException {
-        // Nothing to do
-    }
-
-    private static ServerSession getServerSessionFrom(final Session session, final Context context) {
-        if (session instanceof ServerSession) {
-            return (ServerSession) session;
-        }
-        return ServerSessionAdapter.valueOf(session, context);
+    public Interests getInterests() {
+        return null;
     }
 }

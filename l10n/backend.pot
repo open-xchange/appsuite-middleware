@@ -8028,6 +8028,11 @@ msgstr ""
 msgid "Account is disabled."
 msgstr ""
 
+#. The message advertising that affected account is currently in setup phase and does not yet reflect up-to-date information
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/KnownStatusMessage.java:83
+msgid "Account is current being set-up."
+msgstr ""
+
 #. Cannot find mail account for user "%2$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:62
 msgid "Cannot find mail account for user \"%2$s\"."

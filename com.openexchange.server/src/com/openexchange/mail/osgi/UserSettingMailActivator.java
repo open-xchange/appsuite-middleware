@@ -47,39 +47,27 @@
  *
  */
 
-package com.openexchange.mailaccount;
+package com.openexchange.mail.osgi;
 
-import com.openexchange.i18n.LocalizableStrings;
-
+import com.openexchange.config.ForcedReloadable;
+import com.openexchange.mail.usersetting.reloadable.UserSettingMailReloadable;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link KnownStatusMessage}
+ * {@link UserSettingMailActivator}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.3
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.8.4
  */
-public class KnownStatusMessage implements LocalizableStrings {
+public class UserSettingMailActivator extends HousekeepingActivator {
 
-    /**
-     * Initializes a new {@link KnownStatusMessage}.
-     */
-    private KnownStatusMessage() {
-        super();
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return EMPTY_CLASSES;
     }
 
-    // The message advertising that everything is fine with checked account
-    public static final String MESSAGE_OK = "All fine";
-
-    // The message advertising that authentication against referenced mail account does not work or stopped working
-    public static final String MESSAGE_INVALID_CREDENTIALS = "The entered credential or authentication information does not work or are no longer accepted by provider. Please change them.";
-
-    // The message advertising that affected account is broken and needs to be re-created
-    public static final String MESSAGE_RECREATION_NEEDED = "Account is broken and needs to be re-created";
-
-    // The message advertising that affected account has been disabled by administrator
-    public static final String MESSAGE_DISABLED = "Account is disabled.";
-
-    // The message advertising that affected account is currently in setup phase and does not yet reflect up-to-date information
-    public static final String MESSAGE_IN_SETUP = "Account is current being set-up.";
-
+    @Override
+    protected void startBundle() throws Exception {
+        registerService(ForcedReloadable.class, new UserSettingMailReloadable());
+    }
 }
