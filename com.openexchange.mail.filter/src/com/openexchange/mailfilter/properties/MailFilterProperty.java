@@ -229,8 +229,7 @@ public enum MailFilterProperty {
     public <T extends Object> T getDefaultValue(Class<T> cls) {
         if (defaultValue.getClass().isAssignableFrom(cls)) {
             return cls.cast(defaultValue);
-        } else {
-            throw new IllegalArgumentException("The object cannot be converted to the specified type '" + cls.getCanonicalName() + "'");
         }
+        throw new IllegalArgumentException("The object cannot be converted to the specified type '" + cls.getCanonicalName() + "'");
     }
 }
