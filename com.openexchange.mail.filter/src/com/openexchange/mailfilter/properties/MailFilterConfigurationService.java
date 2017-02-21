@@ -49,14 +49,12 @@
 
 package com.openexchange.mailfilter.properties;
 
-import com.openexchange.config.Reloadable;
-
 /**
  * {@link MailFilterConfigurationService}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface MailFilterConfigurationService extends Reloadable {
+public interface MailFilterConfigurationService {
 
     /**
      * Fetches the {@link String} value of specified {@link MailFilterProperty}

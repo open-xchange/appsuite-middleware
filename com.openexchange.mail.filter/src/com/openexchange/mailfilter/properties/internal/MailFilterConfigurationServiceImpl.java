@@ -51,8 +51,6 @@ package com.openexchange.mailfilter.properties.internal;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Interests;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -81,28 +79,6 @@ public class MailFilterConfigurationServiceImpl implements MailFilterConfigurati
     public MailFilterConfigurationServiceImpl(ServiceLookup services) {
         super();
         this.services = services;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.config.Reloadable#reloadConfiguration(com.openexchange.config.ConfigurationService)
-     */
-    @Override
-    public void reloadConfiguration(ConfigurationService configService) {
-        // TODO Auto-generated method stub
-
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.config.Reloadable#getInterests()
-     */
-    @Override
-    public Interests getInterests() {
-        // TODO Auto-generated method stub
-        return null;
     }
 
     /*
