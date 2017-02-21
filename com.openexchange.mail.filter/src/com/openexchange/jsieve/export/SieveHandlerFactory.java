@@ -52,7 +52,6 @@ package com.openexchange.jsieve.export;
 import java.net.URI;
 import java.net.URISyntaxException;
 import javax.mail.internet.idn.IDNA;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -61,8 +60,8 @@ import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
 import com.openexchange.mailfilter.properties.CredentialSource;
 import com.openexchange.mailfilter.properties.LoginType;
 import com.openexchange.mailfilter.properties.MailFilterConfigurationService;
-import com.openexchange.mailfilter.properties.MailFilterProperties;
 import com.openexchange.mailfilter.properties.MailFilterProperty;
+import com.openexchange.mailfilter.properties.PasswordSource;
 import com.openexchange.mailfilter.services.Services;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
@@ -94,7 +93,6 @@ public final class SieveHandlerFactory {
      * @throws OXException
      */
     public static SieveHandler getSieveHandler(Credentials creds, boolean onlyWelcome) throws OXException {
-        ConfigurationService config = Services.getService(ConfigurationService.class);
         MailFilterConfigurationService mailFilterConfig = Services.getService(MailFilterConfigurationService.class);
 
         int userId = creds.getUserid();
@@ -156,25 +154,43 @@ public final class SieveHandlerFactory {
         switch (credentialSource) {
             case IMAP_LOGIN: {
                 String authname = getUser(creds, user).getImapLogin();
-                return newSieveHandlerUsing(sieveServer, sievePort, creds.getUsername(), authname, getRightPassword(config, creds), authEnc, creds.getOauthToken());
+                return newSieveHandlerUsing(sieveServer, sievePort, creds.getUsername(), authname, getRightPassword(mailFilterConfig, creds), authEnc, creds.getOauthToken());
             }
             case MAIL: {
                 String authname = getUser(creds, user).getMail();
-                return newSieveHandlerUsing(sieveServer, sievePort, creds.getUsername(), authname, getRightPassword(config, creds), authEnc, creds.getOauthToken());
+                return newSieveHandlerUsing(sieveServer, sievePort, creds.getUsername(), authname, getRightPassword(mailFilterConfig, creds), authEnc, creds.getOauthToken());
             }
             case SESSION:
                 // fall-through
             case SESSION_FULL_LOGIN:
-                return newSieveHandlerUsing(sieveServer, sievePort, creds.getUsername(), creds.getAuthname(), getRightPassword(config, creds), authEnc, creds.getOauthToken());
+                return newSieveHandlerUsing(sieveServer, sievePort, creds.getUsername(), creds.getAuthname(), getRightPassword(mailFilterConfig, creds), authEnc, creds.getOauthToken());
             default:
                 throw MailFilterExceptionCode.NO_VALID_CREDSRC.create();
         }
     }
 
+    /**
+     * 
+     * @param host
+     * @param port
+     * @param userName
+     * @param authName
+     * @param password
+     * @param authEncoding
+     * @param oauthToken
+     * @return
+     */
     private static SieveHandler newSieveHandlerUsing(String host, int port, String userName, String authName, String password, String authEncoding, String oauthToken) {
         return new SieveHandler(null == userName ? authName : userName, authName, password, host, port, authEncoding, oauthToken);
     }
 
+    /**
+     * 
+     * @param creds
+     * @param user
+     * @return
+     * @throws OXException
+     */
     private static User getUser(Credentials creds, User user) throws OXException {
         if (null != user) {
             return user;
@@ -195,16 +211,15 @@ public final class SieveHandlerFactory {
      * @return
      * @throws OXException
      */
-    public static String getRightPassword(final ConfigurationService config, final Credentials creds) throws OXException {
-        String sPasswordsrc = config.getProperty(MailFilterProperties.Values.SIEVE_PASSWORDSRC.property);
-        MailFilterProperties.PasswordSource passwordSource = MailFilterProperties.PasswordSource.passwordSourceFor(sPasswordsrc);
-        if (null == passwordSource) {
-            throw MailFilterExceptionCode.NO_VALID_PASSWORDSOURCE.create();
-        }
+    public static String getRightPassword(final MailFilterConfigurationService config, final Credentials creds) throws OXException {
+        int userId = creds.getUserid();
+        int contextId = creds.getContextid();
+        String sPasswordsrc = config.getProperty(userId, contextId, MailFilterProperty.passwordSource);
+        PasswordSource passwordSource = PasswordSource.passwordSourceFor(sPasswordsrc);
 
         switch (passwordSource) {
             case GLOBAL: {
-                String masterpassword = config.getProperty(MailFilterProperties.Values.SIEVE_MASTERPASSWORD.property);
+                String masterpassword = config.getProperty(userId, contextId, MailFilterProperty.masterPassword);
                 if (null == masterpassword || masterpassword.length() == 0) {
                     throw MailFilterExceptionCode.NO_MASTERPASSWORD_SET.create();
                 }

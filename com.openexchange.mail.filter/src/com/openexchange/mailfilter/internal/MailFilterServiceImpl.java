@@ -95,7 +95,9 @@ import com.openexchange.jsieve.export.exceptions.OXSieveHandlerInvalidCredential
 import com.openexchange.mailfilter.Credentials;
 import com.openexchange.mailfilter.MailFilterService;
 import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
+import com.openexchange.mailfilter.properties.MailFilterConfigurationService;
 import com.openexchange.mailfilter.properties.MailFilterProperties;
+import com.openexchange.mailfilter.properties.MailFilterProperty;
 import com.openexchange.mailfilter.services.Services;
 
 /**
@@ -232,7 +234,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
                     }
                 }
 
-                changeIncomingVacationRule(rule);
+                changeIncomingVacationRule(credentials.getUserid(), credentials.getContextid(), rule);
 
                 int nextuid = insertIntoPosition(rule, rules, clientrulesandrequire);
                 String writeback = sieveTextFilter.writeback(clientrulesandrequire, new HashSet<String>(sieveHandler.getCapabilities().getSieve()));
@@ -277,7 +279,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
 
                 ClientRulesAndRequire clientRulesAndReq = sieveTextFilter.splitClientRulesAndRequire(rules.getRulelist(), null, rules.isError());
                 RuleAndPosition rightRule = getRightRuleForUniqueId(clientRulesAndReq.getRules(), uid);
-                changeIncomingVacationRule(rightRule.rule);
+                changeIncomingVacationRule(credentials.getUserid(), credentials.getContextid(), rightRule.rule);
                 if (rightRule.position == rule.getPosition()) {
                     clientRulesAndReq.getRules().set(rightRule.position, rule);
                 } else {
@@ -420,7 +422,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
 
                 ClientRulesAndRequire clientrulesandrequire = sieveTextFilter.splitClientRulesAndRequire(rules.getRulelist(), flag, rules.isError());
                 List<Rule> clientRules = clientrulesandrequire.getRules();
-                changeOutgoingVacationRule(clientRules);
+                changeOutgoingVacationRule(credentials.getUserid(), credentials.getContextid(), clientRules);
                 if (!flag.equals(CATEGORY_FLAG)) {
                     removeRules(clientRules, CATEGORY_FLAG);
                 }
@@ -723,9 +725,9 @@ public final class MailFilterServiceImpl implements MailFilterService {
      * @param rule the rule to be changed
      * @throws SieveException
      */
-    private void changeIncomingVacationRule(Rule rule) throws SieveException {
-        ConfigurationService config = Services.getService(ConfigurationService.class);
-        String vacationdomains = config.getProperty(MailFilterProperties.Values.VACATION_DOMAINS.property);
+    private void changeIncomingVacationRule(int userId, int contextId, Rule rule) throws SieveException {
+        MailFilterConfigurationService config = Services.getService(MailFilterConfigurationService.class);
+        String vacationdomains = config.getProperty(userId, contextId, MailFilterProperty.vacationDomains);
 
         if (null != vacationdomains && 0 != vacationdomains.length()) {
             IfCommand ifCommand = rule.getIfCommand();
@@ -764,9 +766,9 @@ public final class MailFilterServiceImpl implements MailFilterService {
      * @param clientrules
      * @throws SieveException
      */
-    private void changeOutgoingVacationRule(List<Rule> clientrules) throws SieveException {
-        ConfigurationService config = Services.getService(ConfigurationService.class);
-        String vacationdomains = config.getProperty(MailFilterProperties.Values.VACATION_DOMAINS.property);
+    private void changeOutgoingVacationRule(int userId, int contextId, List<Rule> clientrules) throws SieveException {
+        MailFilterConfigurationService config = Services.getService(MailFilterConfigurationService.class);
+        String vacationdomains = config.getProperty(userId, contextId, MailFilterProperty.vacationDomains);
 
         if (null != vacationdomains && 0 != vacationdomains.length()) {
             for (Rule rule : clientrules) {
