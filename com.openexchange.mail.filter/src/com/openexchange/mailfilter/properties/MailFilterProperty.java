@@ -49,8 +49,10 @@
 
 package com.openexchange.mailfilter.properties;
 
+import com.openexchange.mailfilter.MailFilterService;
+
 /**
- * {@link MailFilterProperty}
+ * {@link MailFilterProperty} - Defines all available properties for the {@link MailFilterService}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
@@ -58,65 +60,67 @@ public enum MailFilterProperty {
 
     /**
      * Specify which sieve server should be used. Two options are allowed here:
-     * user : use the imap server setting stored for user in the database
-     * global : use the sieve server given in this config file for all users
+     * <li>{@link LoginType#USER}</li>
+     * <li>{@link LoginType#GLOBAL}</li>
      */
-    SIEVE_LOGIN_TYPE("user", MailFilterProperty.EMPTY),
+    loginType(LoginType.USER.name),
 
     /**
-     * Specify which sieve credentials should be use. Two options are allowed here:
-     * "session" : login name and password are used from the current session
-     * "session-full-login" : full login (incl. context part) name and password are used from the current session
-     * "imapLogin" : the login name is taken from the field imapLogin of the current
-     * user the password is taken from the current session
-     * "mail" : use the primary mail address of the user and the password from the
-     * session
+     * Specify which sieve credentials should be use. Following options are allowed here:
+     * 
+     * <li>{@link CredentialSource#SESSION}: login name and password are used from the current session</li>
+     * <li>{@link CredentialSource#SESSION_FULL_LOGIN}: full login (incl. context part) name and password
+     * are used from the current session</i>
+     * <li>{@link CredentialSource#IMAP_LOGIN}: the login name is taken from the field imapLogin of the current
+     * user the password is taken from the current session</li>
+     * <li>{@link CredentialSource#MAIL}: use the primary mail address of the user and the password from the
+     * session</li>
      */
-    SIEVE_CREDSRC("session", MailFilterProperty.EMPTY),
+    credentialSource(CredentialSource.SESSION.name),
 
     /**
      * To override the sieve server defaults specify a value for the sieve server here
      */
-    SIEVE_SERVER("localhost", MailFilterProperty.EMPTY),
+    server("localhost"),
 
     /**
-     * Specify the SIEVE port
-     * -----------------------------------------------------------
-     * NOTE: 2000 is the deprecated port number for SIEVE (now assigned to some Cisco SCCP protocol by the IANA)
-     * 4190 is the new one used with most recent Linux and IMAP implementations.
-     * Please check your system's default port defined at /etc/services.
-     * -----------------------------------------------------------
+     * <p>Specify the SIEVE port</p>
+     * 
+     * <p><b>NOTE</b>: <code>2000</code> is the deprecated port number for SIEVE (now assigned to
+     * some Cisco SCCP protocol by the IANA).
+     * <code>4190</code> is the new one used with most recent Linux and IMAP implementations.
+     * Please check your system's default port defined at <code>/etc/services</code>.</p>
      */
-    SIEVE_PORT(4190, MailFilterProperty.EMPTY),
+    port(4190),
 
     /**
      * If you want the script to be generated with another script name change it here.
      * Note that the mail filter bundle will then leave the old script with the old
      * script name behind, and doesn't delete it
      */
-    SCRIPT_NAME("Open-Xchange", MailFilterProperty.EMPTY),
+    scriptName("Open-Xchange"),
 
     /**
      * Define the charset encoding to use for authentication to sieve server
      */
-    SIEVE_AUTH_ENC("UTF-8", MailFilterProperty.EMPTY),
+    authenticationEncoding("UTF-8"),
 
     /**
      * Define the regex which recognizes servers with incorrect sieve TLS implementation
      */
-    NON_RFC_COMPLIANT_TLS_REGEX("^Cyrus.*v([0-1]\\.[0-9].*|2\\.[0-2].*|2\\.3\\.[0-9]|2\\.3\\.[0-9][^0-9].*)$", MailFilterProperty.EMPTY),
+    nonRFCCompliantTLSRegex("^Cyrus.*v([0-1]\\.[0-9].*|2\\.[0-2].*|2\\.3\\.[0-9]|2\\.3\\.[0-9][^0-9].*)$"),
 
     /**
      * Whether to use TLS if available
      */
-    TLS(true, MailFilterProperty.EMPTY),
+    tls(true),
 
     /**
      * Specify here if vacation messages should only be sent to specific domains
      * If multiple domains are given, they should be separated by ","
      * e.g. VACATION_DOMAINS=testdomain.com,example.com
      */
-    VACATION_DOMAINS(MailFilterProperty.EMPTY, MailFilterProperty.EMPTY),
+    vacationDomains(MailFilterProperty.EMPTY),
 
     /**
      * Specifies when the connection should time out (value in milliseconds)
@@ -124,11 +128,12 @@ public enum MailFilterProperty {
     connectionTimeout(30000),
 
     /**
-     * Set the password source; meaning which source is taken to determine a user's
+     * <p>Set the password source; meaning which source is taken to determine a user's
      * password to login into mail filter system. If 'session' is set, then user's individual
      * system's password is taken. If 'global' is set, then the value specified through
-     * property 'com.openexchange.mail.filter.masterPassword' is taken.
-     * Currently known values: session and global
+     * property 'com.openexchange.mail.filter.masterPassword' is taken.</p>
+     * 
+     * <p>Currently known values: {@link PasswordSource#SESSION} and {@link PasswordSource#GLOBAL}</p>
      */
     passwordSource("session"),
 
