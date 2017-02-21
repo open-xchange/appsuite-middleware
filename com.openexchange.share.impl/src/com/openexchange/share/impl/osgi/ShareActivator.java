@@ -170,7 +170,12 @@ public class ShareActivator extends HousekeepingActivator {
             }
         });
 
-        registerService(ModuleSupport.class, new ModuleSupportImpl(this));
+        FolderHandlerModuleExtensionTracker folderTracker = new FolderHandlerModuleExtensionTracker(context);
+        rememberTracker(folderTracker);
+        AccessibleModulesExtensionTracker accessibleModulesTracker = new AccessibleModulesExtensionTracker(context);
+        rememberTracker(accessibleModulesTracker);
+
+        registerService(ModuleSupport.class, new ModuleSupportImpl(this, folderTracker, accessibleModulesTracker));
         registerService(QuotaProvider.class, new ShareLinksQuotaProvider(this));
         registerService(QuotaProvider.class, new InviteGuestsQuotaProvider(this));
 
