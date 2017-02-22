@@ -313,13 +313,13 @@ public class SieveHandler {
         measureStart();
         final MailFilterConfigurationService mailFilterConfig = Services.getService(MailFilterConfigurationService.class);
 
-        useSIEVEResponseCodes = Boolean.parseBoolean(mailFilterConfig.getProperty(MailFilterProperty.useSIEVEResponseCodes));
+        useSIEVEResponseCodes = mailFilterConfig.getBooleanProperty(MailFilterProperty.useSIEVEResponseCodes);
 
         s_sieve = new Socket();
         /*
          * Connect with the connect-timeout of the config file or the one which was explicitly set
          */
-        int configuredTimeout = Integer.parseInt(mailFilterConfig.getProperty(MailFilterProperty.connectionTimeout));
+        int configuredTimeout = mailFilterConfig.getIntProperty(MailFilterProperty.connectionTimeout);
         try {
             s_sieve.connect(new InetSocketAddress(sieve_host, sieve_host_port), getEffectiveConnectTimeout(configuredTimeout));
         } catch (final java.net.ConnectException e) {
@@ -349,11 +349,11 @@ public class SieveHandler {
             List<String> sasl = capa.getSasl();
             measureEnd("capa.getSasl");
 
-            final boolean tlsenabled = Boolean.parseBoolean(mailFilterConfig.getProperty(userId, contextId, MailFilterProperty.tls));
+            final boolean tlsenabled = mailFilterConfig.getBooleanProperty(userId, contextId, MailFilterProperty.tls);
 
             final boolean issueTLS = tlsenabled && capa.getStarttls().booleanValue();
 
-            punycode = Boolean.parseBoolean(mailFilterConfig.getProperty(userId, contextId, MailFilterProperty.punycode));
+            punycode = mailFilterConfig.getBooleanProperty(userId, contextId, MailFilterProperty.punycode);
 
             final StringBuilder commandBuilder = new StringBuilder(64);
 

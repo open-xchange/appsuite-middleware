@@ -147,7 +147,6 @@ public class FileIntoActionCommandParser implements CommandParser<ActionCommand>
     private boolean useUTF7Encoding() {
         // TODO: get for user?
         MailFilterConfigurationService config = Services.getService(MailFilterConfigurationService.class);
-        String encodingProperty = config.getProperty(MailFilterProperty.useUTF7FolderEncoding);
-        return Boolean.parseBoolean(encodingProperty);
+        return config.getBooleanProperty(MailFilterProperty.useUTF7FolderEncoding);
     }
 }

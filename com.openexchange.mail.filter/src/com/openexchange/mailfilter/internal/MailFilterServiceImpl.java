@@ -671,7 +671,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
      */
     private boolean useSIEVEResponseCodes(int userId, int contextId) {
         MailFilterConfigurationService config = Services.getService(MailFilterConfigurationService.class);
-        return Boolean.parseBoolean(config.getProperty(userId, contextId, MailFilterProperty.useSIEVEResponseCodes));
+        return config.getBooleanProperty(userId, contextId, MailFilterProperty.useSIEVEResponseCodes);
     }
 
     private List<Rule> exclude(Map<String, List<Rule>> flagged, List<FilterType> exclusionFlags) {
