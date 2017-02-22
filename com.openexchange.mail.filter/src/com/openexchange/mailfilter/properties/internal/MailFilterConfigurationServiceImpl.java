@@ -240,11 +240,6 @@ public class MailFilterConfigurationServiceImpl implements MailFilterConfigurati
      */
     private <T> T getProperty(MailFilterProperty property, int userId, int contextId, Class<T> coerceTo) {
         T defaultValue = property.getDefaultValue(coerceTo);
-
-        if (contextId <= 0) {
-            return defaultValue;
-        }
-
         try {
             ConfigViewFactory factory = getService(ConfigViewFactory.class);
             ConfigView view = factory.getView(userId, contextId);
