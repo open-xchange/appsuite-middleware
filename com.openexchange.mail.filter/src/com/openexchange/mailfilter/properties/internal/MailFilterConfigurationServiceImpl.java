@@ -49,14 +49,20 @@
 
 package com.openexchange.mailfilter.properties.internal;
 
+import java.io.IOException;
+import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ConfigurationServices;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
 import com.openexchange.mailfilter.properties.MailFilterConfigurationService;
 import com.openexchange.mailfilter.properties.MailFilterProperty;
+import com.openexchange.mailfilter.properties.PasswordSource;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
@@ -75,10 +81,58 @@ public class MailFilterConfigurationServiceImpl implements MailFilterConfigurati
      * Initialises a new {@link MailFilterConfigurationServiceImpl}.
      * 
      * @param services The {@link ServiceLookup} instance
+     * @throws OXException if initialisation fails
      */
-    public MailFilterConfigurationServiceImpl(ServiceLookup services) {
+    public MailFilterConfigurationServiceImpl(ServiceLookup services) throws OXException {
         super();
         this.services = services;
+        checkConfigfile();
+    }
+
+    /**
+     * This method checks for a valid configfile and throws and exception if now configfile is there or one of the properties is missing
+     * 
+     * @throws OXException
+     */
+    private void checkConfigfile() throws OXException {
+        final ConfigurationService config = getService(ConfigurationService.class);
+        try {
+            Properties file = ConfigurationServices.loadPropertiesFrom(config.getFileByName("mailfilter.properties"));
+            if (file.isEmpty()) {
+                throw MailFilterExceptionCode.NO_PROPERTIES_FILE_FOUND.create();
+            }
+            for (final MailFilterProperty property : MailFilterProperty.values()) {
+                if (null == file.getProperty(property.getFQPropertyName())) {
+                    throw MailFilterExceptionCode.PROPERTY_NOT_FOUND.create(property.getFQPropertyName());
+                }
+            }
+            try {
+                Integer.parseInt(file.getProperty(MailFilterProperty.connectionTimeout.getFQPropertyName()));
+            } catch (final NumberFormatException e) {
+                throw MailFilterExceptionCode.PROPERTY_ERROR.create("Property " + MailFilterProperty.connectionTimeout.getFQPropertyName() + " is not an integer value", e);
+            }
+        } catch (IOException e) {
+            throw MailFilterExceptionCode.IO_ERROR.create(e.getMessage(), e);
+        }
+
+        // Check passwod source
+        final String passwordSrc = config.getProperty(MailFilterProperty.passwordSource.getFQPropertyName());
+        if (passwordSrc == null) {
+            throw MailFilterExceptionCode.NO_VALID_PASSWORDSOURCE.create();
+        }
+        PasswordSource passwordSource = PasswordSource.passwordSourceFor(passwordSrc);
+        switch (passwordSource) {
+            case GLOBAL:
+                final String masterpassword = config.getProperty(MailFilterProperty.masterPassword.getFQPropertyName());
+                if (masterpassword.length() == 0) {
+                    throw MailFilterExceptionCode.NO_MASTERPASSWORD_SET.create();
+                }
+                break;
+            case SESSION:
+                break;
+            default:
+                throw MailFilterExceptionCode.NO_VALID_PASSWORDSOURCE.create();
+        }
     }
 
     /*
