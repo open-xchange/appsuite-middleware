@@ -92,9 +92,9 @@ public class MailFilterConfigurationServiceImpl implements MailFilterConfigurati
     }
 
     /**
-     * This method checks for a valid configfile and throws and exception if now configfile is there or one of the properties is missing
+     * This method checks for a valid properties' file and throws and exception if none is there or one of the properties is missing
      * 
-     * @throws OXException
+     * @throws OXException If the properties' file is invalid
      */
     private void checkConfigfile() throws OXException {
         final ConfigurationService config = getService(ConfigurationService.class);
