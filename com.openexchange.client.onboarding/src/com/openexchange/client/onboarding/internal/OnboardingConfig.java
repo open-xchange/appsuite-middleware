@@ -108,6 +108,7 @@ public class OnboardingConfig {
      */
     public static Map<String, ConfiguredScenario> parseScenarios(ConfigurationService configService) throws OXException {
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(OnboardingConfig.class);
+        ConfiguredLinkImage.clear();
 
         Map<String, ConfiguredScenario> scenarios = null;
 

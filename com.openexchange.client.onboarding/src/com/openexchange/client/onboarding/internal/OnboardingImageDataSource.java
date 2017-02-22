@@ -139,6 +139,10 @@ public class OnboardingImageDataSource implements ImageDataSource {
         if (name == null) {
             throw DataExceptionCodes.MISSING_ARGUMENT.create(args[1]);
         }
+        name = ConfiguredLinkImage.getRealNameFor(name);
+        if (name == null) {
+            throw DataExceptionCodes.MISSING_ARGUMENT.create(args[1]);
+        }
 
         try {
             if (scheme.equals("resource")) {

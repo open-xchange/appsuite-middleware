@@ -49,6 +49,10 @@
 
 package com.openexchange.client.onboarding.internal;
 
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import com.openexchange.java.util.UUIDs;
+
 /**
  * {@link ConfiguredLinkImage}
  *
@@ -111,6 +115,25 @@ public class ConfiguredLinkImage {
         }
     }
 
+    private static final ConcurrentMap<String, String> NAME_MAP = new ConcurrentHashMap<>(16, 0.9F, 1);
+
+    /**
+     * Gets the real name for given UUID string.
+     *
+     * @param uuid The UUID string
+     * @return The association real name or <code>null</code>
+     */
+    public static String getRealNameFor(String uuid) {
+        return null == uuid ? null : NAME_MAP.get(uuid);
+    }
+
+    /**
+     * Clears the UUID to real name associations.
+     */
+    public static void clear() {
+        NAME_MAP.clear();
+    }
+
     // ------------------------------------------------------------------------------------------------------------------
 
     private final String name;
@@ -119,9 +142,13 @@ public class ConfiguredLinkImage {
     /**
      * Initializes a new {@link ConfiguredLinkImage}.
      */
-    public ConfiguredLinkImage(String name, Type type) {
+    public ConfiguredLinkImage(String realName, Type type) {
         super();
-        this.name = name;
+        String uuid = UUIDs.getUnformattedStringFromRandom();
+        while (null != NAME_MAP.putIfAbsent(uuid, realName)) {
+            uuid = UUIDs.getUnformattedStringFromRandom();
+        }
+        this.name = uuid;
         this.type = type;
     }
 

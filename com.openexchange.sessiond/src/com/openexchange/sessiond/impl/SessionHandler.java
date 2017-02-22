@@ -1671,11 +1671,12 @@ public final class SessionHandler {
     }
 
     private static void postSessionRemoval(final SessionImpl session) {
+        Future<Void> dropSessionFromHz = null;
         if (useSessionStorage(session)) {
             // Asynchronous remove from session storage
             final SessionStorageService sessionStorageService = Services.optService(SessionStorageService.class);
             if (sessionStorageService != null) {
-                ThreadPools.getThreadPool().submit(new AbstractTask<Void>() {
+                dropSessionFromHz = ThreadPools.getThreadPool().submit(new AbstractTask<Void>() {
 
                     @Override
                     public Void call() {
@@ -1708,6 +1709,23 @@ public final class SessionHandler {
                 if (false == sessionData.isUserActive(userId, contextId, false)) {
                     postLastSessionGone(userId, contextId, eventAdmin);
                 }
+            }
+        }
+
+        // Await session removal from session storage
+        if (null != dropSessionFromHz) {
+            int tout = 2;
+            try {
+                dropSessionFromHz.get(tout, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                LOG.warn("Interrupted while waiting for session removal from session storage", e);
+            } catch (ExecutionException e) {
+                // Cannot occur
+                LOG.warn("Session could not be removed from session storage: {}", session.getSessionID(), e.getCause());
+            } catch (TimeoutException e) {
+                // Ignore...
+                LOG.debug("Session could not be removed from session storage within {} seconds: {}", I(tout), session.getSessionID(), e);
             }
         }
     }
