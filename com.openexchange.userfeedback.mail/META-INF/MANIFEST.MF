@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Mail
+Bundle-SymbolicName: com.openexchange.userfeedback.mail
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: OPENEXCHANGE
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: com.openexchange.config,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ org.osgi.framework;version="1.8.0"
