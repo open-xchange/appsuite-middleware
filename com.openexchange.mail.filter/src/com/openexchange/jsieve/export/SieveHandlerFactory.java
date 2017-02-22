@@ -112,14 +112,10 @@ public final class SieveHandlerFactory {
                     if (null == sieveServer) {
                         throw MailFilterExceptionCode.PROPERTY_ERROR.create(MailFilterProperty.server.getFQPropertyName());
                     }
-                    try {
-                        sievePort = mailFilterConfig.getIntProperty(userId, contextId, MailFilterProperty.port);
-                    } catch (final RuntimeException e) {
-                        throw MailFilterExceptionCode.PROPERTY_ERROR.create(e, MailFilterProperty.port.getFQPropertyName());
-                    }
+                    sievePort = getPort(mailFilterConfig, userId, contextId);
                     break;
                 case USER:
-                    user = getUser(creds, null);
+                    user = getUser(creds);
                     String mailServerURL = user.getImapServer();
                     try {
                         URI uri = URIParser.parse(IDNA.toASCII(mailServerURL), URIDefaults.IMAP);
@@ -127,12 +123,7 @@ public final class SieveHandlerFactory {
                     } catch (final URISyntaxException e) {
                         throw MailFilterExceptionCode.NO_SERVERNAME_IN_SERVERURL.create(e, mailServerURL);
                     }
-
-                    try {
-                        sievePort = mailFilterConfig.getIntProperty(userId, contextId, MailFilterProperty.port);
-                    } catch (final RuntimeException e) {
-                        throw MailFilterExceptionCode.PROPERTY_ERROR.create(e, MailFilterProperty.port.getFQPropertyName());
-                    }
+                    sievePort = getPort(mailFilterConfig, userId, contextId);
 
                     break;
                 default:
@@ -170,25 +161,40 @@ public final class SieveHandlerFactory {
     }
 
     /**
+     * Creates an new {@link SieveHandler} with the specified properties
      * 
-     * @param host
-     * @param port
-     * @param userName
-     * @param authName
-     * @param password
-     * @param authEncoding
-     * @param oauthToken
-     * @return
+     * @param host The host
+     * @param port The port
+     * @param userName The username
+     * @param authName The authentication name
+     * @param password The password
+     * @param authEncoding The authentication encoding
+     * @param oauthToken The oauth token
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The {@link SieveHandler}
      */
     private static SieveHandler newSieveHandlerUsing(String host, int port, String userName, String authName, String password, String authEncoding, String oauthToken, int userId, int contextId) {
         return new SieveHandler(null == userName ? authName : userName, authName, password, host, port, authEncoding, oauthToken, userId, contextId);
     }
 
     /**
+     * Get the user
      * 
-     * @param creds
-     * @param user
-     * @return
+     * @param credentials The {@link Credentials}
+     * @return the user
+     * @throws OXException
+     */
+    private static User getUser(Credentials credentials) throws OXException {
+        return getUser(credentials, null);
+    }
+
+    /**
+     * Get the user
+     * 
+     * @param creds The {@link Credentials}
+     * @param user The optional {@link User}
+     * @return the user
      * @throws OXException
      */
     private static User getUser(Credentials creds, User user) throws OXException {
@@ -201,6 +207,23 @@ public final class SieveHandlerFactory {
             throw MailFilterExceptionCode.INVALID_CREDENTIALS.create("Could not get a valid user object for uid " + creds.getUserid() + " and contextid " + creds.getContextid());
         }
         return storageUser;
+    }
+
+    /**
+     * Get the port from the configuration service
+     * 
+     * @param mailFilterConfig The {@link MailFilterConfigurationService}
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The sieve port
+     * @throws OXException if an error is occurred
+     */
+    private static int getPort(MailFilterConfigurationService mailFilterConfig, int userId, int contextId) throws OXException {
+        try {
+            return mailFilterConfig.getIntProperty(userId, contextId, MailFilterProperty.port);
+        } catch (final RuntimeException e) {
+            throw MailFilterExceptionCode.PROPERTY_ERROR.create(e, MailFilterProperty.port.getFQPropertyName());
+        }
     }
 
     /**
