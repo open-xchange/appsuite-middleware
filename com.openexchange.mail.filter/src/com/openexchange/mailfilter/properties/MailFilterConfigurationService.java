@@ -49,12 +49,14 @@
 
 package com.openexchange.mailfilter.properties;
 
+import com.openexchange.config.Reloadable;
+
 /**
  * {@link MailFilterConfigurationService}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface MailFilterConfigurationService {
+public interface MailFilterConfigurationService extends Reloadable {
 
     /**
      * Fetches the {@link String} value of specified {@link MailFilterProperty}
@@ -74,7 +76,7 @@ public interface MailFilterConfigurationService {
      * @return The {@link String} value of the property
      */
     String getProperty(int userId, int contextId, MailFilterProperty property);
-    
+
     /**
      * Fetches the {@link Integer} value of specified {@link MailFilterProperty}
      *

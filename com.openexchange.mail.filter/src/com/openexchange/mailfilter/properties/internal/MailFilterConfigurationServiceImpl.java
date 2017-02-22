@@ -55,6 +55,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ConfigurationServices;
+import com.openexchange.config.DefaultInterests;
+import com.openexchange.config.Interests;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -133,6 +135,35 @@ public class MailFilterConfigurationServiceImpl implements MailFilterConfigurati
             default:
                 throw MailFilterExceptionCode.NO_VALID_PASSWORDSOURCE.create();
         }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.config.Reloadable#reloadConfiguration(com.openexchange.config.ConfigurationService)
+     */
+    @Override
+    public void reloadConfiguration(ConfigurationService configService) {
+        try {
+            checkConfigfile();
+        } catch (OXException e) {
+            LOGGER.error("Error while reloading 'mailfilter.properties': {}", e.getMessage(), e);
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.config.Reloadable#getInterests()
+     */
+    @Override
+    public Interests getInterests() {
+        String[] configFileNames = new String[MailFilterProperty.values().length];
+        int index = 0;
+        for (MailFilterProperty mailFilterProperty : MailFilterProperty.values()) {
+            configFileNames[index++] = mailFilterProperty.getFQPropertyName();
+        }
+        return DefaultInterests.builder().configFileNames("mailfilter.properties").configFileNames(configFileNames).build();
     }
 
     /*
