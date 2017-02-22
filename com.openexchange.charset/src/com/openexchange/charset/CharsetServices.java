@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,47 +49,32 @@
 
 package com.openexchange.charset;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
+import java.nio.charset.Charset;
+import com.openexchange.charset.internal.CharsetServiceUtility;
 
 /**
- * {@link ReflectionHelper} - The reflection helper class.
+ * {@link CharsetServices} - Utility class for charset service.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.4
  */
-public final class ReflectionHelper {
+public class CharsetServices {
 
     /**
-     * Initializes a new {@link ReflectionHelper}.
+     * Initializes a new {@link CharsetServices}.
      */
-    private ReflectionHelper() {
+    private CharsetServices() {
         super();
     }
 
     /**
-     * Sets the final static field.
+     * Gets the ISO-8859-1 character set.
      *
-     * @param field The field to set
-     * @param value The new value to apply
-     * @throws NoSuchFieldException If there is no such field
-     * @throws IllegalAccessException If access is prohibited
+     * @return The ISO-8859-1 character set
      */
-    public static void setStaticFinalField(final Field field, final Object value) throws NoSuchFieldException, IllegalAccessException {
-        // Mark the field to be public
-        field.setAccessible(true);
-
-        // Change the modifier in the Field instance to
-        // not be final anymore, thus tricking reflection into
-        // letting us modify the static final field
-        final Field modifiersField = Field.class.getDeclaredField("modifiers");
-        modifiersField.setAccessible(true);
-        int modifiers = modifiersField.getInt(field);
-
-        // Blank out the final bit in the modifiers integer
-        modifiers &= ~Modifier.FINAL;
-        modifiersField.setInt(field, modifiers);
-        final sun.reflect.FieldAccessor fa = sun.reflect.ReflectionFactory.getReflectionFactory().newFieldAccessor(field, false);
-        fa.set(null, value);
+    public static Charset getIso8859Charset() {
+        Charset iso8859cs = CharsetServiceUtility.getIso8859CS();
+        return null == iso8859cs ? Charset.forName("ISO-8859-1") : iso8859cs;
     }
 
 }
