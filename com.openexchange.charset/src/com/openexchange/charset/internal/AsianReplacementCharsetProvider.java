@@ -47,48 +47,90 @@
  *
  */
 
-package com.openexchange.charset;
+package com.openexchange.charset.internal;
 
 import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CharsetEncoder;
 import java.nio.charset.UnsupportedCharsetException;
 import java.nio.charset.spi.CharsetProvider;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
-import java.util.Set;
 
 /**
- * {@link ISOReplacementCharsetProvider} - A charset provider which returns the "WINDOWS-1252" charset when "ISO-8859-1" is requested.
+ * {@link AsianReplacementCharsetProvider} - A charset provider which returns the "CP50220" charset when "ISO-2022-JP" is requested.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ISOReplacementCharsetProvider extends CharsetProvider {
+public final class AsianReplacementCharsetProvider extends CharsetProvider {
 
-    private final Set<String> aliases;
+    private static final class DelegatingCharset extends Charset {
+
+        private final Charset encodeDelegate;
+        private final Charset decodeDelegate;
+
+        protected DelegatingCharset(final Charset decodeDelegate, final Charset encodeDelegate) {
+            super(decodeDelegate.name(), decodeDelegate.aliases().toArray(new String[0]));
+            this.decodeDelegate = decodeDelegate;
+            this.encodeDelegate = encodeDelegate;
+        }
+
+        @Override
+        public String displayName() {
+            return decodeDelegate.displayName();
+        }
+
+        @Override
+        public String displayName(final Locale locale) {
+            return decodeDelegate.displayName(locale);
+        }
+
+        @Override
+        public boolean contains(final Charset cs) {
+            return decodeDelegate.contains(cs);
+        }
+
+        @Override
+        public CharsetDecoder newDecoder() {
+            return decodeDelegate.newDecoder();
+        }
+
+        @Override
+        public CharsetEncoder newEncoder() {
+            return encodeDelegate.newEncoder();
+        }
+
+        @Override
+        public boolean canEncode() {
+            return encodeDelegate.canEncode();
+        }
+
+    } // End of class DelegatingCharset
 
     private final CharsetProvider standardProvider;
 
-    private final Charset windows1252;
+    private final Charset cp50220;
 
-    private final Locale english;
+    private final Charset delegatingCharset;
 
     /**
-     * Initializes a new {@link ISOReplacementCharsetProvider}.
+     * Initializes a new {@link AsianReplacementCharsetProvider}.
      *
-     * @throws UnsupportedCharsetException If "WINDOWS-1252" charset cannot be found
+     * @throws UnsupportedCharsetException If "CP50220" charset cannot be found
      */
-    public ISOReplacementCharsetProvider(final CharsetProvider standardProvider) {
+    public AsianReplacementCharsetProvider(final CharsetProvider standardProvider) {
         super();
         this.standardProvider = standardProvider;
-        windows1252 = Charset.forName("WINDOWS-1252");
-
-        final Charset iso_8859_1 = Charset.forName("ISO-8859-1");
-        english = Locale.ENGLISH;
-        aliases = new HashSet<String>(16);
-        aliases.add("ISO-8859-1");
-        for (final String alias : iso_8859_1.aliases()) {
-            aliases.add(alias.toUpperCase(english));
-        }
+        cp50220 = Charset.forName("CP50220");
+        // Delegating charset
+        final Charset iso2022CN_Encoder = Charset.forName("ISO2022CN_GB");
+        final Charset iso2022CN = Charset.forName("iso-2022-cn");
+        delegatingCharset = new DelegatingCharset(iso2022CN, iso2022CN_Encoder);
+        /*-
+         * Retry with: "x-windows-50220", "MS50220"
+         *
+         * http://www.docjar.com/html/api/sun/nio/cs/ext/MS50220.java.html
+         */
     }
 
     @Override
@@ -103,8 +145,11 @@ public final class ISOReplacementCharsetProvider extends CharsetProvider {
 
     @Override
     public Charset charsetForName(final String charsetName) {
-        if (aliases.contains(charsetName.toUpperCase(english))) {
-            return windows1252;
+        if ("ISO-2022-JP".equalsIgnoreCase(charsetName)) {
+            return cp50220;
+        }
+        if ("iso-2022-cn".equalsIgnoreCase(charsetName) || "ISO2022CN".equalsIgnoreCase(charsetName)) {
+            return delegatingCharset;
         }
         /*
          * Delegate to standard provider

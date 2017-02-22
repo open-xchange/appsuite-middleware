@@ -47,54 +47,48 @@
  *
  */
 
-package com.openexchange.charset;
+package com.openexchange.charset.internal;
 
 import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
-import java.nio.charset.CharsetEncoder;
 import java.nio.charset.UnsupportedCharsetException;
 import java.nio.charset.spi.CharsetProvider;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.concurrent.ConcurrentMap;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
+import java.util.Locale;
+import java.util.Set;
 
 /**
- * {@link CachingCharsetProvider} - A charset provider which returns the "CP50220" charset when "ISO-2022-JP" is requested.
+ * {@link ASCIIReplacementCharsetProvider} - A charset provider which returns the "WINDOWS-1252" charset when "ISO-8859-1" is requested.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CachingCharsetProvider extends CharsetProvider {
+public final class ASCIIReplacementCharsetProvider extends CharsetProvider {
 
-    private static final Charset NULL = new Charset("x-null", new String[0]) {
-
-        @Override
-        public CharsetEncoder newEncoder() {
-            return null;
-        }
-
-        @Override
-        public CharsetDecoder newDecoder() {
-            return null;
-        }
-
-        @Override
-        public boolean contains(final Charset cs) {
-            return false;
-        }
-    };
+    private final Set<String> aliases;
 
     private final CharsetProvider standardProvider;
-    private final ConcurrentMap<String, Charset> cache;
+
+    private final Charset windows1252;
+
+    private final Locale english;
 
     /**
-     * Initializes a new {@link CachingCharsetProvider}.
+     * Initializes a new {@link ASCIIReplacementCharsetProvider}.
      *
-     * @throws UnsupportedCharsetException If "CP50220" charset cannot be found
+     * @throws UnsupportedCharsetException If "WINDOWS-1252" charset cannot be found
      */
-    public CachingCharsetProvider(final CharsetProvider standardProvider) {
+    public ASCIIReplacementCharsetProvider(final CharsetProvider standardProvider) {
         super();
         this.standardProvider = standardProvider;
-        cache = new NonBlockingHashMap<String, Charset>(32);
+        windows1252 = Charset.forName("WINDOWS-1252");
+
+        final Charset ascii = Charset.forName("US-ASCII");
+        english = Locale.ENGLISH;
+        aliases = new HashSet<String>(16);
+        aliases.add("US-ASCII");
+        for (final String alias : ascii.aliases()) {
+            aliases.add(alias.toUpperCase(english));
+        }
     }
 
     @Override
@@ -109,18 +103,13 @@ public final class CachingCharsetProvider extends CharsetProvider {
 
     @Override
     public Charset charsetForName(final String charsetName) {
-        Charset charset = cache.get(charsetName);
-        if (null == charset) {
-            Charset ncharset = standardProvider.charsetForName(charsetName);
-            if (null == ncharset) {
-                ncharset = NULL;
-            }
-            charset = cache.putIfAbsent(charsetName, ncharset);
-            if (null == charset) {
-                charset = ncharset;
-            }
+        if (aliases.contains(charsetName.toUpperCase(english))) {
+            return windows1252;
         }
-        return NULL == charset ? null : charset;
+        /*
+         * Delegate to standard provider
+         */
+        return standardProvider.charsetForName(charsetName);
     }
 
     @Override

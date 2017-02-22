@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.charset;
+package com.openexchange.charset.internal;
 
 import java.lang.reflect.Field;
 import java.nio.charset.spi.CharsetProvider;

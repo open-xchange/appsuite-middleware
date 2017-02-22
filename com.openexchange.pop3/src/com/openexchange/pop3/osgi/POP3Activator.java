@@ -55,6 +55,7 @@ import java.util.Hashtable;
 import org.osgi.framework.BundleActivator;
 import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.charset.CharsetService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
@@ -72,6 +73,7 @@ import com.openexchange.pop3.POP3Provider;
 import com.openexchange.pop3.storage.POP3StorageProvider;
 import com.openexchange.pop3.storage.mailaccount.MailAccountPOP3StorageProvider;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
 
@@ -99,7 +101,7 @@ public final class POP3Activator extends HousekeepingActivator {
         return new Class<?>[] {
             ConfigurationService.class, CacheService.class, UserService.class, MailAccountStorageService.class,
             ContextService.class, TimerService.class, ConfigViewFactory.class, CapabilityService.class, SSLSocketFactoryProvider.class,
-            SSLConfigurationService.class, UserAwareSSLConfigurationService.class
+            SSLConfigurationService.class, UserAwareSSLConfigurationService.class, ThreadPoolService.class, CharsetService.class
         };
     }
 
