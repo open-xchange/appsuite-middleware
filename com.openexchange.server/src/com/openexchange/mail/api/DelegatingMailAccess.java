@@ -57,12 +57,13 @@ import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.session.Session;
 
 /**
- * {@link DelegatingMailAccess}
+ * {@link DelegatingMailAccess} - Wraps a {@link MailAccess} instance to delegate to.
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.4
  */
-public abstract class DelegatingMailAccess extends MailAccess<IMailFolderStorage,IMailMessageStorage> {
+public abstract class DelegatingMailAccess extends MailAccess<IMailFolderStorage, IMailMessageStorage> {
 
     private static final long serialVersionUID = -4906495158045777677L;
 
@@ -92,11 +93,6 @@ public abstract class DelegatingMailAccess extends MailAccess<IMailFolderStorage
         super(session,accountId);
         this.delegate = delegate;
     }
-
-    /*
-     * (Bug #51721)
-     * This class must override all, not only abstract, methods of MailAccess for proper delegation.
-     */
 
     @Override
     public <T> T supports(Class<T> iface) throws OXException {
@@ -243,67 +239,48 @@ public abstract class DelegatingMailAccess extends MailAccess<IMailFolderStorage
         return delegate.isConnectedUnsafe();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.api.MailAccess#connectInternal()
-     */
     @Override
     protected void connectInternal() throws OXException {
         delegate.connectInternal();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.api.MailAccess#createNewMailConfig()
-     */
     @Override
     protected MailConfig createNewMailConfig() {
         return delegate.createNewMailConfig();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.api.MailAccess#createNewMailProperties()
-     */
     @Override
     protected IMailProperties createNewMailProperties() throws OXException {
         return delegate.createNewMailProperties();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.api.MailAccess#checkMailServerPort()
-     */
     @Override
     protected boolean checkMailServerPort() {
         return delegate.checkMailServerPort();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.api.MailAccess#releaseResources()
-     */
     @Override
     protected void releaseResources() {
         delegate.releaseResources();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.api.MailAccess#closeInternal()
-     */
     @Override
     protected void closeInternal() {
         delegate.closeInternal();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.api.MailAccess#startup()
-     */
     @Override
     protected void startup() throws OXException {
         delegate.startup();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.api.MailAccess#shutdown()
-     */
     @Override
     protected void shutdown() throws OXException {
         delegate.shutdown();
+    }
+
+    @Override
+    protected boolean supports(AuthType authType) throws OXException {
+        return delegate.supports(authType);
     }
 }
