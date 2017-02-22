@@ -61,18 +61,6 @@ import com.openexchange.session.Session;
  */
 public interface AuthenticationFailedHandler {
 
-    /** The result for a handled authentication error */
-    public static enum Result {
-        /**
-         * Possible further handlers are supposed to be invoked.
-         */
-        NEUTRAL,
-        /**
-         * Possible further handlers are <b>not</b> supposed to be invoked.
-         */
-        ABORT;
-    }
-
     /** The type of service that yielded the failed authentication */
     public static enum Service {
         /**
@@ -99,6 +87,6 @@ public interface AuthenticationFailedHandler {
      * @return The result that controls whether to proceed in invocation chain
      * @throws OXException If handling the failed authentication is supposed being aborted with an error
      */
-    Result handleAuthenticationFailed(OXException failedAuthentication, Service service, MailConfig mailConfig, Session session) throws OXException;
+    AuthenticationFailureHandlerResult handleAuthenticationFailed(OXException failedAuthentication, Service service, MailConfig mailConfig, Session session) throws OXException;
 
 }

@@ -794,7 +794,14 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             try {
                 connectInternal();
             } catch (OXException e) {
-                throw handleConnectFailure(e, mailConfig);
+                AuthenticationFailureHandlerResult result =  handleConnectFailure(e, mailConfig);
+                if(result.equals(AuthenticationFailureHandlerResult.RETRY)){
+                    connectInternal();
+                } else if(result.equals(AuthenticationFailureHandlerResult.EXCEPTION)) {
+                    throw result.getError();
+                } else {
+                    throw e;
+                }
             }
             if (checkDefaultFolder) {
                 checkDefaultFolderOnConnect();
@@ -823,19 +830,18 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
         return service.getMailAccount(accountId, session.getUserId(), session.getContextId());
     }
 
-    private OXException handleConnectFailure(OXException e, MailConfig mailConfig) {
+    private AuthenticationFailureHandlerResult handleConnectFailure(OXException e, MailConfig mailConfig) {
         if (!MimeMailExceptionCode.LOGIN_FAILED.equals(e) && !MimeMailExceptionCode.INVALID_CREDENTIALS.equals(e)) {
-            return e;
+            return AuthenticationFailureHandlerResult.createErrorResult(e);
         }
 
         if (mailConfig.getAccountId() == MailAccount.DEFAULT_ID) {
             AuthenticationFailedHandlerService handlerService = ServerServiceRegistry.getInstance().getService(AuthenticationFailedHandlerService.class);
             if (null != handlerService) {
                 try {
-                    handlerService.handleAuthenticationFailed(e, Service.MAIL, mailConfig, session);
-                    return e;
+                    return handlerService.handleAuthenticationFailed(e, Service.MAIL, mailConfig, session);
                 } catch (OXException x) {
-                    return x;
+                    return AuthenticationFailureHandlerResult.createErrorResult(x);
                 }
             }
         }
@@ -853,7 +859,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                         OAuthAccount oAuthAccount = oauthService.getAccount(oauthAccountId, session, session.getUserId(), session.getContextId());
                         API api = oAuthAccount.getAPI();
                         Throwable cause = e.getCause();
-                        return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(cause, api.getShortName(), I(oAuthAccount.getId()), I(session.getUserId()), I(session.getContextId()));
+                        return AuthenticationFailureHandlerResult.createErrorResult(OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(cause, api.getShortName(), I(oAuthAccount.getId()), I(session.getUserId()), I(session.getContextId())));
                     } catch (Exception x) {
                         LOG.warn("Failed to handle failed OAuth authentication", x);
                     }
@@ -861,7 +867,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             }
         }
 
-        return e;
+        return AuthenticationFailureHandlerResult.createErrorResult(e);
     }
 
     private void checkDefaultFolderOnConnect() throws OXException {

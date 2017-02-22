@@ -47,46 +47,47 @@
  *
  */
 
-package com.openexchange.mail.authentication.handler;
+package com.openexchange.saml.oauth;
 
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.api.AuthType;
-import com.openexchange.mail.api.AuthenticationFailedHandler;
-import com.openexchange.mail.api.AuthenticationFailureHandlerResult;
-import com.openexchange.mail.api.MailConfig;
-import com.openexchange.session.Session;
-import com.openexchange.sessiond.SessionExceptionCodes;
-import com.openexchange.sessiond.SessiondService;
+import com.openexchange.saml.oauth.osgi.Services;
 
 /**
- * {@link DefaultAuthenticationFailedHandler} is the default implementation for the {@link AuthenticationFailedHandler} interface.
- * <p>
- * It handles the failed authentication by terminating the current session and throwing an <code>SES-0206</code> (<i>"Your session was invalidated. Please try again."</i>) error.
+ * {@link SAMLOAuthConfig}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-public class DefaultAuthenticationFailedHandler implements AuthenticationFailedHandler {
+public class SAMLOAuthConfig {
 
-    private final SessiondService sessiondService;
+    private static final String TOKEN_ENDPOINT_PROPERTY = "com.openexchange.saml.oauth.introspection";
+    private static final String CLIENT_ID_PROPERTY = "com.openexchange.saml.oauth.clientId";
+    private static final String CLIENT_SECRET_PROPERTY = "com.openexchange.saml.oauth.clientSecret";
 
-    /**
-     * Initializes a new {@link DefaultAuthenticationFailedHandler}.
-     */
-    public DefaultAuthenticationFailedHandler(SessiondService sessiondService) {
-        super();
-        this.sessiondService = sessiondService;
+    static String getIntrospectionEndpoint(int userId, int contextId) throws OXException{
+        ConfigViewFactory configViewFactory = Services.getService(ConfigViewFactory.class);
+        ConfigView view = configViewFactory.getView(userId, contextId);
+        return view.get(TOKEN_ENDPOINT_PROPERTY, String.class);
     }
 
-    @Override
-    public AuthenticationFailureHandlerResult handleAuthenticationFailed(OXException failedAuth, Service service, MailConfig mailConfig, Session session) throws OXException {
-        if (AuthType.isOAuthType(mailConfig.getAuthType())) {
-            sessiondService.removeSession(session.getSessionID());
-            return AuthenticationFailureHandlerResult.createErrorResult(SessionExceptionCodes.SESSION_EXPIRED.create(failedAuth, new Object[0]));
-        }
+    static String getClientID(int userId, int contextId) throws OXException {
+        ConfigViewFactory configViewFactory = Services.getService(ConfigViewFactory.class);
+        ConfigView view = configViewFactory.getView(userId, contextId);
+        return view.get(CLIENT_ID_PROPERTY, String.class);
+    }
 
-        // Don't care...
-        return AuthenticationFailureHandlerResult.CONTINUE;
+    static String getClientSecret(int userId, int contextId) throws OXException{
+        ConfigViewFactory configViewFactory = Services.getService(ConfigViewFactory.class);
+        ConfigView view = configViewFactory.getView(userId, contextId);
+        return view.get(CLIENT_SECRET_PROPERTY, String.class);
+    }
+
+    public static boolean isConfigured(int userId, int contextId) throws OXException{
+        ConfigViewFactory configViewFactory = Services.getService(ConfigViewFactory.class);
+        ConfigView view = configViewFactory.getView(userId, contextId);
+        return view.property(TOKEN_ENDPOINT_PROPERTY, String.class).isDefined() && view.property(CLIENT_ID_PROPERTY, String.class).isDefined() && view.property(CLIENT_SECRET_PROPERTY, String.class).isDefined();
     }
 
 }

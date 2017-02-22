@@ -53,6 +53,7 @@ import org.osgi.framework.BundleContext;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.AuthenticationFailedHandler;
 import com.openexchange.mail.api.AuthenticationFailedHandlerService;
+import com.openexchange.mail.api.AuthenticationFailureHandlerResult;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.AuthenticationFailedHandler.Service;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
@@ -74,14 +75,16 @@ public class AuthenticationFailedHandlerServiceImpl extends RankingAwareNearRegi
     }
 
     @Override
-    public void handleAuthenticationFailed(OXException failedAuthentication, Service service, MailConfig mailConfig, Session session) throws OXException {
-        AuthenticationFailedHandler.Result result;
+    public AuthenticationFailureHandlerResult handleAuthenticationFailed(OXException failedAuthentication, Service service, MailConfig mailConfig, Session session) throws OXException {
+        AuthenticationFailureHandlerResult result;
         for (AuthenticationFailedHandler handler : this) {
             result = handler.handleAuthenticationFailed(failedAuthentication, service, mailConfig, session);
-            if (AuthenticationFailedHandler.Result.ABORT == result) {
-                return;
+            if (!AuthenticationFailureHandlerResult.CONTINUE.equals(result)) {
+                return result;
             }
         }
+
+        return AuthenticationFailureHandlerResult.createErrorResult(failedAuthentication);
     }
 
 }

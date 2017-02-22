@@ -70,8 +70,9 @@ public interface AuthenticationFailedHandlerService {
      * @param service The type of service that yielded the failed authentication
      * @param mailConfig The effective mail configuration for affected user (providing host, port, credentials, auth type, etc.)
      * @param session The user which couln't be authenticated.
+     * @return An {@link AuthenticationFailureHandlerResult}
      * @throws OXException If handling the failed authentication is supposed being aborted with an error
      */
-    void handleAuthenticationFailed(OXException failedAuthentication, Service service, MailConfig mailConfig, Session session) throws OXException;
+    AuthenticationFailureHandlerResult handleAuthenticationFailed(OXException failedAuthentication, Service service, MailConfig mailConfig, Session session) throws OXException;
 
 }
