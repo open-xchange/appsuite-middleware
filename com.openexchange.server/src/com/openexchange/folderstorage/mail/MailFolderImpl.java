@@ -57,6 +57,7 @@ import java.util.EnumSet;
 import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.ContentType;
@@ -159,7 +160,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
 
     // -------------------------------------------------------------------------------------------------------------------------------
 
-    private final MailFolderType mailFolderType;
+    private final AtomicReference<MailFolderType> mailFolderTypeRef;
     private final boolean cacheable;
     private final String fullName;
     private final int mailAccountId;
@@ -263,6 +264,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
         unread = mailFolder.getUnreadMessageCount();
         deleted = mailFolder.getDeletedMessageCount();
         MailPermission mp;
+        MailFolderType mailFolderType;
         if (mailFolder.isRootFolder()) {
             mailFolderType = MailFolderType.ROOT;
             mp = mailFolder.getOwnPermission();
@@ -282,13 +284,14 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
             }
 
             // Determine the mail folder type (None, Trash, Sent, ...) and set localized name
-            this.mailFolderType = determineMailFolderType(folderName, mailFolder, mailAccess, mailAccount, user, locale, fullnameProvider, translatePrimaryAccountDefaultFolders);
+            mailFolderType = determineMailFolderType(folderName, mailFolder, mailAccess, mailAccount, user, locale, fullnameProvider, translatePrimaryAccountDefaultFolders);
         }
+        this.mailFolderTypeRef = new AtomicReference<MailFolderType>(mailFolderType);
 
         {
             String client = Strings.asciiLowerCase(mailAccess.getSession().getClient());
             if (null == client || !client.startsWith("usm-")) {
-                if (MailFolderType.NONE.equals(this.mailFolderType)) {
+                if (MailFolderType.NONE.equals(mailFolderType)) {
                     if (mailFolder.containsShared() && mailFolder.isShared()) {
                         type = SharedType.getInstance();
                     } else if (mailFolder.containsPublic() && mailFolder.isPublic()) {
@@ -323,7 +326,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
             permissionBits |= BIT_USER_FLAG;
         }
         final int canRename = mp.canRename();
-        if ((canRename > 0 || (mp.isFolderAdmin() && canRename < 0)) && isNoDefaultFolder(this.mailFolderType, fullName, mailAccess, mailAccount)) {
+        if ((canRename > 0 || (mp.isFolderAdmin() && canRename < 0)) && isNoDefaultFolder(mailFolderType, fullName, mailAccess, mailAccount)) {
             // Rename only allowed for non-standard folders
             permissionBits |= BIT_RENAME_FLAG;
         }
@@ -676,17 +679,26 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
 
     @Override
     public ContentType getContentType() {
-        return mailFolderType.getContentType();
+        return mailFolderTypeRef.get().getContentType();
     }
 
     @Override
     public int getDefaultType() {
-        return mailFolderType.getType();
+        return mailFolderTypeRef.get().getType();
     }
 
     @Override
     public void setDefaultType(final int defaultType) {
         // Nothing to do
+    }
+    
+    /**
+     * Sets the mail folder type
+     *
+     * @param mailFolderType The type to set
+     */
+    public void setMailFolderType(final MailFolderType mailFolderType) {
+        mailFolderTypeRef.set(mailFolderType);
     }
 
     @Override
