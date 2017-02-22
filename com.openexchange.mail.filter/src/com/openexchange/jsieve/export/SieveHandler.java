@@ -313,13 +313,13 @@ public class SieveHandler {
         measureStart();
         final MailFilterConfigurationService mailFilterConfig = Services.getService(MailFilterConfigurationService.class);
 
-        useSIEVEResponseCodes = mailFilterConfig.getBooleanProperty(MailFilterProperty.useSIEVEResponseCodes);
+        useSIEVEResponseCodes = mailFilterConfig.getBooleanProperty(userId, contextId, MailFilterProperty.useSIEVEResponseCodes);
 
         s_sieve = new Socket();
         /*
          * Connect with the connect-timeout of the config file or the one which was explicitly set
          */
-        int configuredTimeout = mailFilterConfig.getIntProperty(MailFilterProperty.connectionTimeout);
+        int configuredTimeout = mailFilterConfig.getIntProperty(userId, contextId, MailFilterProperty.connectionTimeout);
         try {
             s_sieve.connect(new InetSocketAddress(sieve_host, sieve_host_port), getEffectiveConnectTimeout(configuredTimeout));
         } catch (final java.net.ConnectException e) {
