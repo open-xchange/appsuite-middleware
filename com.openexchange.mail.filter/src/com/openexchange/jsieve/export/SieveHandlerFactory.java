@@ -113,7 +113,7 @@ public final class SieveHandlerFactory {
                         throw MailFilterExceptionCode.PROPERTY_ERROR.create(MailFilterProperty.server.getFQPropertyName());
                     }
                     try {
-                        sievePort = Integer.parseInt(mailFilterConfig.getProperty(userId, contextId, MailFilterProperty.port));
+                        sievePort = mailFilterConfig.getIntProperty(userId, contextId, MailFilterProperty.port);
                     } catch (final RuntimeException e) {
                         throw MailFilterExceptionCode.PROPERTY_ERROR.create(e, MailFilterProperty.port.getFQPropertyName());
                     }
@@ -129,7 +129,7 @@ public final class SieveHandlerFactory {
                     }
 
                     try {
-                        sievePort = Integer.parseInt(mailFilterConfig.getProperty(userId, contextId, MailFilterProperty.port));
+                        sievePort = mailFilterConfig.getIntProperty(userId, contextId, MailFilterProperty.port);
                     } catch (final RuntimeException e) {
                         throw MailFilterExceptionCode.PROPERTY_ERROR.create(e, MailFilterProperty.port.getFQPropertyName());
                     }
