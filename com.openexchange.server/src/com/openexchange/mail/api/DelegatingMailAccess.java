@@ -49,7 +49,11 @@
 
 package com.openexchange.mail.api;
 
+import java.util.Collection;
+import java.util.Properties;
+import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.session.Session;
 
 /**
@@ -67,7 +71,7 @@ public abstract class DelegatingMailAccess extends MailAccess<IMailFolderStorage
     /**
      * Initializes a new {@link DelegatingMailAccess} for the default mail account of the session-associated user.
      * <p>
-     * THis is the same as calling {@link #DelegatingMailAccess(MailAccess, Session, int)} with <code>accountId</code> set to {@link com.openexchange.mailaccount.Account#DEFAULT_ID default identifier}.
+     * This is the same as calling {@link #DelegatingMailAccess(MailAccess, Session, int)} with <code>accountId</code> set to {@link com.openexchange.mailaccount.Account#DEFAULT_ID default identifier}.
      *
      * @param delegate The mail access to delegate to
      * @param session The associated session
@@ -89,34 +93,129 @@ public abstract class DelegatingMailAccess extends MailAccess<IMailFolderStorage
         this.delegate = delegate;
     }
 
+    /*
+     * (Bug #51721)
+     * This class must override all, not only abstract, methods of MailAccess for proper delegation.
+     */
+
     @Override
-    protected void connectInternal() throws OXException {
-        delegate.connectInternal();
+    public <T> T supports(Class<T> iface) throws OXException {
+        return delegate.supports(iface);
     }
 
     @Override
-    protected MailConfig createNewMailConfig() {
-        return delegate.createNewMailConfig();
+    public Session getSession() {
+        return delegate.getSession();
     }
 
     @Override
-    protected IMailProperties createNewMailProperties() throws OXException {
-        return delegate.createNewMailProperties();
+    public MailProvider getProvider() {
+        return delegate.getProvider();
     }
 
     @Override
-    protected boolean checkMailServerPort() {
-        return delegate.checkMailServerPort();
+    public void addWarnings(Collection<OXException> warnings) {
+        delegate.addWarnings(warnings);
     }
 
     @Override
-    protected void releaseResources() {
-        delegate.releaseResources();
+    public Collection<OXException> getWarnings() {
+        return delegate.getWarnings();
     }
 
     @Override
-    protected void closeInternal() {
-        delegate.closeInternal();
+    public Properties getMailProperties() {
+        return delegate.getMailProperties();
+    }
+
+    @Override
+    public void setMailProperties(Properties mailProperties) {
+        delegate.setMailProperties(mailProperties);
+    }
+
+    @Override
+    public boolean ping() throws OXException {
+        return delegate.ping();
+    }
+
+    @Override
+    public MailFolder getRootFolder() throws OXException {
+        return delegate.getRootFolder();
+    }
+
+    @Override
+    public int getUnreadMessagesCount(String fullname) throws OXException {
+        return delegate.getUnreadMessagesCount(fullname);
+    }
+
+    @Override
+    public void close() {
+        delegate.close();
+    }
+
+    @Override
+    public void logTrace(StringBuilder sBuilder, Logger log) {
+        delegate.logTrace(sBuilder, log);
+    }
+
+    @Override
+    public MailConfig getMailConfig() throws OXException {
+        return delegate.getMailConfig();
+    }
+
+    @Override
+    public int getAccountId() {
+        return delegate.getAccountId();
+    }
+
+    @Override
+    public boolean isTrackable() {
+        return delegate.isTrackable();
+    }
+
+    @Override
+    public void setTrackable(boolean trackable) {
+        delegate.setTrackable(trackable);
+    }
+
+    @Override
+    public int getCacheIdleSeconds() {
+        return delegate.getCacheIdleSeconds();
+    }
+
+    @Override
+    public boolean isCacheable() {
+        return delegate.isCacheable();
+    }
+
+    @Override
+    public void setCacheable(boolean cacheable) {
+        delegate.setCacheable(cacheable);
+    }
+
+    @Override
+    public boolean isCached() {
+        return delegate.isCached();
+    }
+
+    @Override
+    public void setCached(boolean cached) {
+        delegate.setCached(cached);
+    }
+
+    @Override
+    public boolean isWaiting() {
+        return delegate.isWaiting();
+    }
+
+    @Override
+    public void setWaiting(boolean waiting) {
+        delegate.setWaiting(waiting);
+    }
+
+    @Override
+    public void invokeReleaseResources() {
+        delegate.invokeReleaseResources();
     }
 
     @Override
@@ -144,30 +243,67 @@ public abstract class DelegatingMailAccess extends MailAccess<IMailFolderStorage
         return delegate.isConnectedUnsafe();
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.mail.api.MailAccess#connectInternal()
+     */
+    @Override
+    protected void connectInternal() throws OXException {
+        delegate.connectInternal();
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.mail.api.MailAccess#createNewMailConfig()
+     */
+    @Override
+    protected MailConfig createNewMailConfig() {
+        return delegate.createNewMailConfig();
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.mail.api.MailAccess#createNewMailProperties()
+     */
+    @Override
+    protected IMailProperties createNewMailProperties() throws OXException {
+        return delegate.createNewMailProperties();
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.mail.api.MailAccess#checkMailServerPort()
+     */
+    @Override
+    protected boolean checkMailServerPort() {
+        return delegate.checkMailServerPort();
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.mail.api.MailAccess#releaseResources()
+     */
+    @Override
+    protected void releaseResources() {
+        delegate.releaseResources();
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.mail.api.MailAccess#closeInternal()
+     */
+    @Override
+    protected void closeInternal() {
+        delegate.closeInternal();
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.mail.api.MailAccess#startup()
+     */
     @Override
     protected void startup() throws OXException {
         delegate.startup();
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.mail.api.MailAccess#shutdown()
+     */
     @Override
     protected void shutdown() throws OXException {
         delegate.shutdown();
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.api.MailAccess#getMailConfig()
-     */
-    @Override
-    public MailConfig getMailConfig() throws OXException {
-
-        //Workaround for Bug #51721: Overriding this non abstract method for proper delegation.
-
-        //TODO/FIXME:
-        //If this class does not overwrite all public methods of MailAccess,
-        //calls to this methods result in calling the super implementation of MailAccess,
-        //but not the delegate's overwritten method.
-        //Create proper interface?
-
-        return delegate.getMailConfig();
     }
 }
