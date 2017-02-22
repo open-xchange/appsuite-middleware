@@ -117,7 +117,7 @@ public class MailFilterConfigurationServiceImpl implements MailFilterConfigurati
             throw MailFilterExceptionCode.IO_ERROR.create(e.getMessage(), e);
         }
 
-        // Check passwod source
+        // Check password source
         final String passwordSrc = config.getProperty(MailFilterProperty.passwordSource.getFQPropertyName());
         if (passwordSrc == null) {
             throw MailFilterExceptionCode.NO_VALID_PASSWORDSOURCE.create();
