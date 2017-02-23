@@ -58,6 +58,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -78,6 +79,7 @@ import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.AuthnRequest;
 import org.opensaml.saml2.core.AuthnStatement;
 import org.opensaml.saml2.core.BaseID;
+import org.opensaml.saml2.core.EncryptedAssertion;
 import org.opensaml.saml2.core.EncryptedID;
 import org.opensaml.saml2.core.Issuer;
 import org.opensaml.saml2.core.LogoutRequest;
@@ -294,7 +296,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
 
             String samlResponseStr = httpRequest.getParameter("SAMLResponse");
 
-            getOAuthAccessToken(samlResponseStr, properties, authInfo);
+            getOAuthAccessToken(samlResponseStr, properties, authInfo, backend.getCredentialProvider());
 
             String sessionToken = sessionReservationService.reserveSessionFor(
                 authInfo.getUserId(),
@@ -335,10 +337,11 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
      * @param base64SamlResponse
      * @param properties
      * @param authInfo
+     * @param credentialProvider
      * @throws OXException
      *
      */
-    private void getOAuthAccessToken(String base64SamlResponse, Map<String, String> properties, AuthenticationInfo authInfo) throws OXException {
+    private void getOAuthAccessToken(String base64SamlResponse, Map<String, String> properties, AuthenticationInfo authInfo, CredentialProvider credentialProvider) throws OXException {
         try {
             if (!SAMLOAuthConfig.isConfigured(authInfo.getUserId(), authInfo.getContextId())) {
                 return;
@@ -349,7 +352,12 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
             Element responseElement = openSAML.getParserPool().parse(new ByteArrayInputStream(decodedBytes)).getDocumentElement();
             XMLObject unmarshalledResponse = openSAML.getUnmarshallerFactory().getUnmarshaller(responseElement).unmarshall(responseElement);
             final Response response = (Response) unmarshalledResponse;
-            Assertion assertion = response.getAssertions().iterator().next();
+            Assertion assertion;
+            if(response.getAssertions().size()!=0){
+                assertion = response.getAssertions().iterator().next();
+            } else {
+                assertion = decryptAndCollectAssertions(response, credentialProvider).iterator().next();
+            }
             String xmlAssertion = openSAML.marshall(assertion);
             String b64Assertion = Base64.encodeBase64String(xmlAssertion.getBytes());
             OAuthAccessToken token = OAuthAccessTokenRequest.getInstance().requestAccessToken(b64Assertion, authInfo.getUserId(), authInfo.getContextId());
@@ -361,7 +369,26 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
             throw SAMLExceptionCode.INTERNAL_ERROR.create(e.getMessage());
         } catch (UnmarshallingException e) {
             throw SAMLExceptionCode.INTERNAL_ERROR.create(e.getMessage());
+        } catch (DecryptionException e) {
+            throw SAMLExceptionCode.INTERNAL_ERROR.create(e.getMessage());
         }
+    }
+
+    private List<Assertion> decryptAndCollectAssertions(Response response, CredentialProvider credentialProvider) throws DecryptionException {
+        List<Assertion> assertions = new LinkedList<Assertion>();
+        List<EncryptedAssertion> encryptedAssertions = response.getEncryptedAssertions();
+        if (encryptedAssertions.size() > 0) {
+            Decrypter decrypter = CryptoHelper.getDecrypter(credentialProvider);
+            for (EncryptedAssertion encryptedAssertion : encryptedAssertions) {
+                assertions.add(decrypter.decrypt(encryptedAssertion));
+            }
+        }
+
+        for (Assertion assertion : response.getAssertions()) {
+            assertions.add(assertion);
+        }
+
+        return assertions;
     }
 
     @Override
