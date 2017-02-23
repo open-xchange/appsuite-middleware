@@ -1792,14 +1792,23 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
         OCLPermission[] perms = folder.getPermissionsAsArray();
         OCLPermission[] parentPerms = parent.getPermissionsAsArray();
         Map<Integer, OCLPermission> permsMappingPerEntity = new HashMap<>();
+        Map<Integer, OCLPermission> systemPermsMappingPerEntity = new HashMap<>();
         Map<Integer, OCLPermission> parentMappingPerEntity = new HashMap<>();
+        Map<Integer, OCLPermission> parentSystemMappingPerEntity = new HashMap<>();
         for (OCLPermission p : perms) {
-            permsMappingPerEntity.put(Integer.valueOf(p.getEntity()), p);
+            if (p.isSystem()) {
+                systemPermsMappingPerEntity.put(Integer.valueOf(p.getEntity()), p);
+            } else {
+                permsMappingPerEntity.put(Integer.valueOf(p.getEntity()), p);
+            }
         }
         for (OCLPermission p : parentPerms) {
-            parentMappingPerEntity.put(Integer.valueOf(p.getEntity()), p);
+            if (p.isSystem()) {
+                parentSystemMappingPerEntity.put(Integer.valueOf(p.getEntity()), p);
+            } else {
+                parentMappingPerEntity.put(Integer.valueOf(p.getEntity()), p);
+            }
         }
-
         for (Integer entity : parentMappingPerEntity.keySet()) {
             if (OCLPermission.ALL_GUESTS == entity.intValue()) {
                 continue;
@@ -1808,6 +1817,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
             if (permsMappingPerEntity.containsKey(entity)) {
                 OCLPermission folderPerm = permsMappingPerEntity.remove(entity);
                 folderPerm.setAllPermission(Math.max(folderPerm.getFolderPermission(), parentPerm.getFolderPermission()), Math.max(folderPerm.getReadPermission(), parentPerm.getReadPermission()), Math.max(folderPerm.getWritePermission(), parentPerm.getWritePermission()), Math.max(folderPerm.getDeletePermission(), parentPerm.getDeletePermission()));
+                folderPerm.setFolderAdmin(folderPerm.isFolderAdmin() || parentPerm.isFolderAdmin());
                 folderPerm.setEntity(entity);
                 folderPerm.setFuid(folder.getObjectID());
                 permsMappingPerEntity.put(entity, folderPerm);
@@ -1815,7 +1825,26 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                 permsMappingPerEntity.put(entity, parentPerm);
             }
         }
-        folder.setPermissions(new ArrayList<>(permsMappingPerEntity.values()));
+        for (Integer entity : parentSystemMappingPerEntity.keySet()) {
+            if (OCLPermission.ALL_GUESTS == entity.intValue()) {
+                continue;
+            }
+            OCLPermission parentPerm = parentSystemMappingPerEntity.get(entity);
+            if (systemPermsMappingPerEntity.containsKey(entity)) {
+                OCLPermission folderPerm = systemPermsMappingPerEntity.remove(entity);
+                folderPerm.setAllPermission(Math.max(folderPerm.getFolderPermission(), parentPerm.getFolderPermission()), Math.max(folderPerm.getReadPermission(), parentPerm.getReadPermission()), Math.max(folderPerm.getWritePermission(), parentPerm.getWritePermission()), Math.max(folderPerm.getDeletePermission(), parentPerm.getDeletePermission()));
+                folderPerm.setFolderAdmin(folderPerm.isFolderAdmin() || parentPerm.isFolderAdmin());
+                folderPerm.setEntity(entity);
+                folderPerm.setFuid(folder.getObjectID());
+                systemPermsMappingPerEntity.put(entity, folderPerm);
+            } else {
+                systemPermsMappingPerEntity.put(entity, parentPerm);
+            }
+        }
+        List<OCLPermission> compiledPerms = new ArrayList<>();
+        compiledPerms.addAll(permsMappingPerEntity.values());
+        compiledPerms.addAll(systemPermsMappingPerEntity.values());
+        folder.setPermissions(compiledPerms);
         folderManager.updateFolder(folder, false, false, millis.getTime());
         if (folder.hasSubfolders()) {
             SortableId[] subFolderIds = getSubfolders(FolderStorage.REAL_TREE_ID, String.valueOf(folder.getObjectID()), storageParameters);
