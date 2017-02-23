@@ -971,7 +971,11 @@ public class SieveHandler {
 
         SaslClient sc = null;
         try {
-            sc = Sasl.createSaslClient(new String[]{"GSSAPI"}, authname, "sieve", sieve_host, saslProps, null);
+            sc = Sasl.createSaslClient(new String[] { "GSSAPI" }, authname, "sieve", sieve_host, saslProps, null);
+            if (sc == null) {
+                log.error("Unable to crate a SaslClient");
+                return false;
+            }
             byte[] response = sc.evaluateChallenge(new byte[0]);
             String b64resp = com.openexchange.tools.encoding.Base64.encode(response);
 
