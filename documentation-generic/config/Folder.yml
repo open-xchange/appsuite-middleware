@@ -32,4 +32,14 @@ Example
       Configcascade_Aware: true
       Related: 
       File: foldercache.properties
-  		
+
+  - data:
+      Key: com.openexchange.folderstorage.inheritParentPermissions
+      Description: >
+        Specifies if permissions of new parent folder should be applied when moving a folder into the public folder tree.
+      Default: false
+      Version: 7.8.4
+      Reloadable: false
+      Configcascade_Aware: false
+      Related: 
+      File: foldercache.properties
