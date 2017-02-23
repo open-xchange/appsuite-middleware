@@ -91,12 +91,12 @@ public final class DropboxOAuthActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void stopBundle() {
+    protected void stopBundle() throws Exception {
         try {
-            // Clean-up
-            cleanUp();
             // Clear service registry
             DropboxOAuthServices.setServices(null);
+            
+            super.stopBundle();
         } catch (final Exception e) {
             org.slf4j.LoggerFactory.getLogger(DropboxOAuthActivator.class).error("", e);
             throw e;
