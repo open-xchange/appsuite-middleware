@@ -1787,12 +1787,42 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
     }
 
     private void inheritPublicFolderPermissions(FolderObject folder, FolderObject parent, Context context, Connection con, StorageParameters storageParameters, OXFolderManager folderManager, Date millis) throws OXException {
-        OCLPermission[] perms = folder.getPermissionsAsArray();
-        OCLPermission[] parentPerms = parent.getPermissionsAsArray();
+        List<OCLPermission> compiledPerms = getCombinedFolderPermissions(folder, parent);
+
+        folder.setPermissions(compiledPerms);
+        folderManager.updateFolder(folder, false, false, millis.getTime());
+        if (folder.hasSubfolders()) {
+            SortableId[] subFolderIds = getSubfolders(FolderStorage.REAL_TREE_ID, String.valueOf(folder.getObjectID()), storageParameters);
+            for (SortableId subfolderId : subFolderIds) {
+                FolderObject subfolder = getFolderObject(Integer.parseInt(subfolderId.getId()), context, con, storageParameters);
+                inheritPublicFolderPermissions(subfolder, parent, context, con, storageParameters, folderManager, millis);
+            }
+        }
+    }
+
+    private List<OCLPermission> getCombinedFolderPermissions(FolderObject folder, FolderObject parent) {
         Map<Integer, OCLPermission> permsMappingPerEntity = new HashMap<>();
         Map<Integer, OCLPermission> systemPermsMappingPerEntity = new HashMap<>();
         Map<Integer, OCLPermission> parentMappingPerEntity = new HashMap<>();
         Map<Integer, OCLPermission> parentSystemMappingPerEntity = new HashMap<>();
+
+        mapPermissions(folder.getPermissionsAsArray(), permsMappingPerEntity, systemPermsMappingPerEntity);
+        mapPermissions(parent.getPermissionsAsArray(), parentMappingPerEntity, parentSystemMappingPerEntity);
+
+        addParentPermissionsToFolder(folder, permsMappingPerEntity, parentMappingPerEntity);
+        addParentPermissionsToFolder(folder, systemPermsMappingPerEntity, parentSystemMappingPerEntity);
+
+        return mergeAllPermissions(permsMappingPerEntity, systemPermsMappingPerEntity);
+    }
+
+    private List<OCLPermission> mergeAllPermissions(Map<Integer, OCLPermission> permsMappingPerEntity, Map<Integer, OCLPermission> systemPermsMappingPerEntity) {
+        List<OCLPermission> compiledPerms = new ArrayList<>();
+        compiledPerms.addAll(permsMappingPerEntity.values());
+        compiledPerms.addAll(systemPermsMappingPerEntity.values());
+        return compiledPerms;
+    }
+
+    private void mapPermissions(OCLPermission[] perms, Map<Integer, OCLPermission> permsMappingPerEntity, Map<Integer, OCLPermission> systemPermsMappingPerEntity) {
         for (OCLPermission p : perms) {
             if (p.isSystem()) {
                 systemPermsMappingPerEntity.put(Integer.valueOf(p.getEntity()), p);
@@ -1800,13 +1830,9 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                 permsMappingPerEntity.put(Integer.valueOf(p.getEntity()), p);
             }
         }
-        for (OCLPermission p : parentPerms) {
-            if (p.isSystem()) {
-                parentSystemMappingPerEntity.put(Integer.valueOf(p.getEntity()), p);
-            } else {
-                parentMappingPerEntity.put(Integer.valueOf(p.getEntity()), p);
-            }
-        }
+    }
+
+    private void addParentPermissionsToFolder(FolderObject folder, Map<Integer, OCLPermission> permsMappingPerEntity, Map<Integer, OCLPermission> parentMappingPerEntity) {
         for (Integer entity : parentMappingPerEntity.keySet()) {
             if (OCLPermission.ALL_GUESTS == entity.intValue()) {
                 continue;
@@ -1821,34 +1847,6 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                 permsMappingPerEntity.put(entity, folderPerm);
             } else {
                 permsMappingPerEntity.put(entity, parentPerm);
-            }
-        }
-        for (Integer entity : parentSystemMappingPerEntity.keySet()) {
-            if (OCLPermission.ALL_GUESTS == entity.intValue()) {
-                continue;
-            }
-            OCLPermission parentPerm = parentSystemMappingPerEntity.get(entity);
-            if (systemPermsMappingPerEntity.containsKey(entity)) {
-                OCLPermission folderPerm = systemPermsMappingPerEntity.remove(entity);
-                folderPerm.setAllPermission(Math.max(folderPerm.getFolderPermission(), parentPerm.getFolderPermission()), Math.max(folderPerm.getReadPermission(), parentPerm.getReadPermission()), Math.max(folderPerm.getWritePermission(), parentPerm.getWritePermission()), Math.max(folderPerm.getDeletePermission(), parentPerm.getDeletePermission()));
-                folderPerm.setFolderAdmin(folderPerm.isFolderAdmin() || parentPerm.isFolderAdmin());
-                folderPerm.setEntity(entity);
-                folderPerm.setFuid(folder.getObjectID());
-                systemPermsMappingPerEntity.put(entity, folderPerm);
-            } else {
-                systemPermsMappingPerEntity.put(entity, parentPerm);
-            }
-        }
-        List<OCLPermission> compiledPerms = new ArrayList<>();
-        compiledPerms.addAll(permsMappingPerEntity.values());
-        compiledPerms.addAll(systemPermsMappingPerEntity.values());
-        folder.setPermissions(compiledPerms);
-        folderManager.updateFolder(folder, false, false, millis.getTime());
-        if (folder.hasSubfolders()) {
-            SortableId[] subFolderIds = getSubfolders(FolderStorage.REAL_TREE_ID, String.valueOf(folder.getObjectID()), storageParameters);
-            for (SortableId subfolderId : subFolderIds) {
-                FolderObject subfolder = getFolderObject(Integer.parseInt(subfolderId.getId()), context, con, storageParameters);
-                inheritPublicFolderPermissions(subfolder, parent, context, con, storageParameters, folderManager, millis);
             }
         }
     }
