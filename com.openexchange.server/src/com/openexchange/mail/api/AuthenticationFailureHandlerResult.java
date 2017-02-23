@@ -59,45 +59,87 @@ import com.openexchange.exception.OXException;
  */
 public class AuthenticationFailureHandlerResult {
 
-    public enum Type {
+    private static final AuthenticationFailureHandlerResult RESULT_RETRY = new AuthenticationFailureHandlerResult(Type.RETRY);
+    private static final AuthenticationFailureHandlerResult RESULT_CONTINUE = new AuthenticationFailureHandlerResult(Type.CONTINUE);
+
+    /**
+     * The type for a handled authentication error.
+     */
+    public static enum Type {
+        /**
+         * Simply go ahead and do not care at all.
+         */
         CONTINUE,
+        /**
+         * Throw a certain exception (as given through {@link AuthenticationFailureHandlerResult#getError()}
+         */
         EXCEPTION,
+        /**
+         * Authentication is supposed to be retried.
+         */
         RETRY;
     }
 
-    private OXException exception = null;
-    private Type type = null;
-
-    private AuthenticationFailureHandlerResult(){
-
-    }
-
-    private AuthenticationFailureHandlerResult(Type type){
-       this.type=type;
-    }
-
-    private AuthenticationFailureHandlerResult(OXException exception){
-        this.type=Type.EXCEPTION;
-        this.exception=exception;
-     }
-
-    public OXException getError() {
-        return exception;
-    }
-
-    public Type getType(){
-        return type;
-    }
-
+    /**
+     * Create the result signaling specified error.
+     *
+     * @return The result with given error contained
+     */
     public static AuthenticationFailureHandlerResult createErrorResult(OXException e) {
         return new AuthenticationFailureHandlerResult(e);
     }
 
+    /**
+     * Create the result signaling to continue.
+     *
+     * @return The result
+     */
     public static AuthenticationFailureHandlerResult createContinueResult() {
-        return new AuthenticationFailureHandlerResult(Type.CONTINUE);
+        return RESULT_CONTINUE;
     }
 
+    /**
+     * Create the result signaling to retry.
+     *
+     * @return The result
+     */
     public static AuthenticationFailureHandlerResult createRetryResult() {
-        return new AuthenticationFailureHandlerResult(Type.RETRY);
+        return RESULT_RETRY;
     }
+
+    // --------------------------------------------------------------------------------------------
+
+    private final OXException exception;
+    private final Type type;
+
+    private AuthenticationFailureHandlerResult(Type type) {
+        super();
+        exception = null;
+        this.type = type;
+    }
+
+    private AuthenticationFailureHandlerResult(OXException exception) {
+        super();
+        this.type = Type.EXCEPTION;
+        this.exception = exception;
+    }
+
+    /**
+     * Gets the error associated with this result.
+     *
+     * @return The error or <code>null</code> (if type is different from {@link Type#EXCEPTION})
+     */
+    public OXException getError() {
+        return exception;
+    }
+
+    /**
+     * Gets this result's type, which indicates how to proceed.
+     *
+     * @return The type
+     */
+    public Type getType() {
+        return type;
+    }
+
 }
