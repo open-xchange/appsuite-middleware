@@ -67,7 +67,7 @@ public class AuthenticationFailureHandlerResult {
      */
     public static enum Type {
         /**
-         * Simply go ahead and do not care at all.
+         * Simply go ahead with original processing (that is to throw originating authentication error).
          */
         CONTINUE,
         /**
