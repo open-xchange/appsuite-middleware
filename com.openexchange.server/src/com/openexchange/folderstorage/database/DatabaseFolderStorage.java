@@ -82,6 +82,7 @@ import java.util.concurrent.CompletionService;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.AccountAware;
@@ -96,6 +97,7 @@ import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderServiceDecorator;
+import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.LockCleaningFolderStorage;
 import com.openexchange.folderstorage.Permission;
@@ -1706,7 +1708,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
 
             final Date millis = new Date();
 
-            final FolderObject updateMe = new FolderObject();
+            final FolderObject updateMe = getFolderObject(folderId, context, con, storageParameters);
             updateMe.setObjectID(folderId);
             updateMe.setDefaultFolder(false);
             {
@@ -1750,7 +1752,9 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                 }
             }
             // Permissions
-            final Permission[] perms = folder.getPermissions();
+            Permission[] perms = folder.getPermissions();
+            final OXFolderManager folderManager = OXFolderManager.getInstance(session, con, con);
+            boolean isUpdated = false;
             if (null != perms) {
                 final OCLPermission[] oclPermissions = new OCLPermission[perms.length];
                 for (int i = 0; i < perms.length; i++) {
@@ -1759,10 +1763,19 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                     oclPermissions[i] = oclPerm;
                 }
                 updateMe.setPermissionsAsArray(oclPermissions);
+            } else {
+                ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                boolean applyParentPermissions = configurationService.getBoolProperty("com.openexchange.folderstorage.inheritParentPermissions", false);
+                if (applyParentPermissions && isInPublicTree(updateMe, context, con, storageParameters)) {
+                    FolderObject parent = getFolderObject(updateMe.getParentFolderID(), context, con, storageParameters);
+                    inheritPublicFolderPermissions(updateMe, parent, context, con, storageParameters, folderManager, millis);
+                    isUpdated = true;
+                }
             }
-            // Do update
-            final OXFolderManager folderManager = OXFolderManager.getInstance(session, con, con);
-            folderManager.updateFolder(updateMe, true, StorageParametersUtility.isHandDownPermissions(storageParameters), millis.getTime());
+
+            if (!isUpdated) {
+                folderManager.updateFolder(updateMe, true, StorageParametersUtility.isHandDownPermissions(storageParameters), millis.getTime());
+            }
             // Handle warnings
             final List<OXException> warnings = folderManager.getWarnings();
             if (null != warnings) {
@@ -1773,6 +1786,86 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
         } finally {
             provider.close();
         }
+    }
+
+    private void inheritPublicFolderPermissions(FolderObject folder, FolderObject parent, Context context, Connection con, StorageParameters storageParameters, OXFolderManager folderManager, Date millis) throws OXException {
+        List<OCLPermission> compiledPerms = getCombinedFolderPermissions(folder, parent);
+
+        folder.setPermissions(compiledPerms);
+        folderManager.updateFolder(folder, false, false, millis.getTime());
+        if (folder.hasSubfolders()) {
+            SortableId[] subFolderIds = getSubfolders(FolderStorage.REAL_TREE_ID, String.valueOf(folder.getObjectID()), storageParameters);
+            for (SortableId subfolderId : subFolderIds) {
+                FolderObject subfolder = getFolderObject(Integer.parseInt(subfolderId.getId()), context, con, storageParameters);
+                inheritPublicFolderPermissions(subfolder, parent, context, con, storageParameters, folderManager, millis);
+            }
+        }
+    }
+
+    private List<OCLPermission> getCombinedFolderPermissions(FolderObject folder, FolderObject parent) {
+        Map<Integer, OCLPermission> permsMappingPerEntity = new HashMap<>();
+        Map<Integer, OCLPermission> systemPermsMappingPerEntity = new HashMap<>();
+        Map<Integer, OCLPermission> parentMappingPerEntity = new HashMap<>();
+        Map<Integer, OCLPermission> parentSystemMappingPerEntity = new HashMap<>();
+
+        mapPermissions(folder.getPermissionsAsArray(), permsMappingPerEntity, systemPermsMappingPerEntity);
+        mapPermissions(parent.getPermissionsAsArray(), parentMappingPerEntity, parentSystemMappingPerEntity);
+
+        addParentPermissionsToFolder(folder, permsMappingPerEntity, parentMappingPerEntity);
+        addParentPermissionsToFolder(folder, systemPermsMappingPerEntity, parentSystemMappingPerEntity);
+
+        return mergeAllPermissions(permsMappingPerEntity, systemPermsMappingPerEntity);
+    }
+
+    private List<OCLPermission> mergeAllPermissions(Map<Integer, OCLPermission> permsMappingPerEntity, Map<Integer, OCLPermission> systemPermsMappingPerEntity) {
+        List<OCLPermission> compiledPerms = new ArrayList<>();
+        compiledPerms.addAll(permsMappingPerEntity.values());
+        compiledPerms.addAll(systemPermsMappingPerEntity.values());
+        return compiledPerms;
+    }
+
+    private void mapPermissions(OCLPermission[] perms, Map<Integer, OCLPermission> permsMappingPerEntity, Map<Integer, OCLPermission> systemPermsMappingPerEntity) {
+        for (OCLPermission p : perms) {
+            if (p.isSystem()) {
+                systemPermsMappingPerEntity.put(Integer.valueOf(p.getEntity()), p);
+            } else {
+                permsMappingPerEntity.put(Integer.valueOf(p.getEntity()), p);
+            }
+        }
+    }
+
+    private void addParentPermissionsToFolder(FolderObject folder, Map<Integer, OCLPermission> permsMappingPerEntity, Map<Integer, OCLPermission> parentMappingPerEntity) {
+        for (Integer entity : parentMappingPerEntity.keySet()) {
+            if (OCLPermission.ALL_GUESTS == entity.intValue()) {
+                continue;
+            }
+            OCLPermission parentPerm = parentMappingPerEntity.get(entity);
+            if (permsMappingPerEntity.containsKey(entity)) {
+                OCLPermission folderPerm = permsMappingPerEntity.remove(entity);
+                folderPerm.setAllPermission(Math.max(folderPerm.getFolderPermission(), parentPerm.getFolderPermission()), Math.max(folderPerm.getReadPermission(), parentPerm.getReadPermission()), Math.max(folderPerm.getWritePermission(), parentPerm.getWritePermission()), Math.max(folderPerm.getDeletePermission(), parentPerm.getDeletePermission()));
+                folderPerm.setFolderAdmin(folderPerm.isFolderAdmin() || parentPerm.isFolderAdmin());
+                folderPerm.setEntity(entity);
+                folderPerm.setFuid(folder.getObjectID());
+                permsMappingPerEntity.put(entity, folderPerm);
+            } else {
+                permsMappingPerEntity.put(entity, parentPerm);
+            }
+        }
+    }
+
+    private boolean isInPublicTree(FolderObject folder, Context context, Connection con, StorageParameters storageParameters) throws OXException {
+        int parentId = folder.getParentFolderID();
+        while (parentId != FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID && parentId != FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID && parentId != FolderObject.SYSTEM_PUBLIC_FOLDER_ID) {
+            FolderObject parent = getFolderObject(parentId, context, con, storageParameters);
+            parentId = parent.getParentFolderID();
+        }
+        if (parentId == FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID) {
+            return false;
+        }
+        if (parentId == FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID || parentId == FolderObject.SYSTEM_PUBLIC_FOLDER_ID) {
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -1898,8 +1991,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
             Connection connection = provider.getConnection();
             User user = storageParameters.getUser();
             UserPermissionBits userPermissionBits = getUserPermissionBits(connection, storageParameters);
-            searchIterator = OXFolderIteratorSQL.getDeletedFoldersSince(
-                since, user.getId(), user.getGroups(), userPermissionBits.getAccessibleModules(), storageParameters.getContext(), connection);
+            searchIterator = OXFolderIteratorSQL.getDeletedFoldersSince(since, user.getId(), user.getGroups(), userPermissionBits.getAccessibleModules(), storageParameters.getContext(), connection);
             return filterByContentType(searchIterator, includeContentTypes);
         } finally {
             SearchIterators.close(searchIterator);

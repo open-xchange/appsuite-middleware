@@ -86,13 +86,13 @@ import com.openexchange.test.concurrent.ParallelSuite;
     FunctionTests.class,
     com.openexchange.ajax.folder.ShareFolderTest.class,
     com.openexchange.ajax.folder.DeleteFolderTest.class,
-    
+
     // Now several single function tests.
     GetMailInboxTest.class,
     GetVirtualTest.class,
     // GetSortedMailFolderTest.class,
     ExemplaryFolderTestManagerTest.class,
-    
+
     // New folder API
     ClearTest.class,
     CreateTest.class,
@@ -105,7 +105,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
     VisibleFoldersTest.class,
     SubscribeTest.class,
     DefaultMediaFoldersTest.class,
-    
+
     // Test for object counts for database folder
     ContactObjectCountTest.class,
     TaskObjectCountTest.class,
@@ -115,11 +115,11 @@ import com.openexchange.test.concurrent.ParallelSuite;
     com.openexchange.ajax.folder.eas.SubscribeTest.class,
     com.openexchange.ajax.folder.eas.MultipleSubscribeTest.class,
     com.openexchange.ajax.folder.eas.MultipleSubscribeWithoutParentTest.class,
-    
+
     // And finally bug tests.
     Bug12393Test.class,
     Bug16899Test.class,
-    
+
     // New folder API bug tests
     Bug15752Test.class,
     Bug15995Test.class,
@@ -137,6 +137,8 @@ import com.openexchange.test.concurrent.ParallelSuite;
     Bug37211Test.class,
     Bug44895Test.class,
     PermissionsCascadeTest.class,
+
+    PublicFolderMovePermissionTest.class
 
 })
 public final class FolderTestSuite {
