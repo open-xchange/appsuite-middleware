@@ -470,6 +470,16 @@ If you would like to add a reference to another property use the following appro
 | __File__ | foldercache.properties  |
 
 ---
+| Key | <span style="font-weight:normal">com.openexchange.folderstorage.inheritParentPermissions</span> |
+|:----------------|:--------|
+| __Description__ |         Specifies if permissions of new parent folder should be applied when moving a folder into the public folder tree.<br> |
+| __Default__ | false  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | false  |
+| __Configcascade Aware__ | false  |
+| __File__ | foldercache.properties  |
+
+---
 
 
 ## Grizzly 
