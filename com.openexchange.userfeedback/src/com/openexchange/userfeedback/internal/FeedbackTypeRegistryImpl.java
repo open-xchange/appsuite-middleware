@@ -47,9 +47,11 @@
  *
  */
 
-package com.openexchange.userfeedback;
+package com.openexchange.userfeedback.internal;
 
 import java.util.concurrent.ConcurrentHashMap;
+import com.openexchange.userfeedback.FeedbackType;
+import com.openexchange.userfeedback.FeedbackTypeRegistry;
 
 /**
  * {@link FeedbackTypeRegistryImpl}

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.userfeedback;
+package com.openexchange.userfeedback.internal;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -63,6 +63,12 @@ import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.userfeedback.ExportType;
+import com.openexchange.userfeedback.FeedbackFilter;
+import com.openexchange.userfeedback.FeedbackMetaData;
+import com.openexchange.userfeedback.FeedbackService;
+import com.openexchange.userfeedback.FeedbackType;
+import com.openexchange.userfeedback.FeedbackTypeRegistry;
 import com.openexchange.userfeedback.exception.FeedbackExceptionCodes;
 import com.openexchange.userfeedback.osgi.Services;
 

@@ -49,7 +49,6 @@
 
 package com.openexchange.userfeedback;
 
-
 /**
  * {@link FeedbackFilter}
  *

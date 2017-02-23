@@ -52,10 +52,10 @@ package com.openexchange.userfeedback.osgi;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.userfeedback.FeedBackServiceImpl;
 import com.openexchange.userfeedback.FeedbackService;
 import com.openexchange.userfeedback.FeedbackTypeRegistry;
-import com.openexchange.userfeedback.FeedbackTypeRegistryImpl;
+import com.openexchange.userfeedback.internal.FeedBackServiceImpl;
+import com.openexchange.userfeedback.internal.FeedbackTypeRegistryImpl;
 
 /**
  * {@link Activator}
