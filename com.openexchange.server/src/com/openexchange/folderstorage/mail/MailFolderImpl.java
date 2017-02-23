@@ -166,10 +166,10 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
     private final int mailAccountId;
     private final int userId;
     private final int contextId;
-    private String localizedName;
+    private final String localizedName;
 
-    private int m_total = -1;
-    private int m_unread = -1;
+    private final int m_total;
+    private final int m_unread;
 
     /** The special bit for user flag support */
     public static final int BIT_USER_FLAG = (1 << 29);
@@ -230,6 +230,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
         String folderName = mailFolder.getName();
         name = folderName;
         Locale effectiveLocale = null == locale ? (null == user.getLocale() ? Locale.US : user.getLocale()) : locale;
+        String localizedName;
         if ("INBOX".equals(fullName)) {
             localizedName = StringHelper.valueOf(effectiveLocale).getString(MailStrings.INBOX);
         } else if (mailFolder.isRootFolder() && isUnifiedMail(mailFolder)) {
@@ -285,9 +286,14 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
             }
 
             // Determine the mail folder type (None, Trash, Sent, ...) and set localized name
-            mailFolderType = determineMailFolderType(folderName, mailFolder, mailAccess, mailAccount, effectiveLocale, fullnameProvider, translatePrimaryAccountDefaultFolders);
+            MailFolderTypeRetval retval = determineMailFolderType(folderName, mailFolder, mailAccess, mailAccount, effectiveLocale, fullnameProvider, translatePrimaryAccountDefaultFolders);
+            mailFolderType = retval.mailFolderType;
+            if (null != retval.localizedName) {
+                localizedName = retval.localizedName;
+            }
         }
         this.mailFolderTypeRef = new AtomicReference<MailFolderType>(mailFolderType);
+        this.localizedName = localizedName;
 
         {
             String client = Strings.asciiLowerCase(mailAccess.getSession().getClient());
@@ -346,7 +352,9 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
             // Already cached in MAL API layer
             cache = false;
         }
-        // Since not cached we can obtain total/unread counter here
+        // If not cached, we can obtain total/unread counter here
+        int m_total = -1;
+        int m_unread = -1;
         if (!cache) {
             IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
 
@@ -366,6 +374,8 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
                 }
             }
         }
+        this.m_total = m_total;
+        this.m_unread = m_unread;
         cacheable = cache;
     }
 
@@ -386,8 +396,9 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
         return MailFolder.DEFAULT_FOLDER_ID.equals(fullName) ? FolderStorage.PRIVATE_ID : MailFolderUtility.prepareFullname(accountId, MailFolder.DEFAULT_FOLDER_ID);
     }
 
-    private MailFolderType determineMailFolderType(String folderName, MailFolder mailFolder, MailAccess<?, ?> mailAccess, MailAccount mailAccount, Locale effectiveLocale, DefaultFolderFullnameProvider fullnameProvider, boolean translatePrimaryAccountDefaultFolders) throws OXException {
+    private MailFolderTypeRetval determineMailFolderType(String folderName, MailFolder mailFolder, MailAccess<?, ?> mailAccess, MailAccount mailAccount, Locale effectiveLocale, DefaultFolderFullnameProvider fullnameProvider, boolean translatePrimaryAccountDefaultFolders) throws OXException {
         MailFolderType mailFolderType = MailFolderType.NONE;
+        String localizedName = null;
         boolean isPrimaryAccount = MailAccount.DEFAULT_ID == mailAccount.getId();
         if (mailFolder.containsDefaultFolderType()) {
             switch (mailFolder.getDefaultFolderType()) {
@@ -480,7 +491,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
         } else {
             mailFolderType = MailFolderType.NONE;
         }
-        return mailFolderType;
+        return new MailFolderTypeRetval(mailFolderType, localizedName);
     }
 
     private boolean isUnifiedMail(final MailFolder mailFolder) {
@@ -593,6 +604,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
             return new int[] { total, unread };
         }
 
+        // Live look-up of total/unread count
         if (null == optParams) {
             MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
             try {
@@ -609,6 +621,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
                 closeMailAccess(mailAccess);
             }
         }
+
         // Look-up provided parameters
         try {
             final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = mailAccess(optParams);
@@ -720,6 +733,20 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
     public String getLocalizedName(final Locale locale) {
         final String localizedName = this.localizedName;
         return null == localizedName ? name : localizedName;
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------
+
+    private static final class MailFolderTypeRetval {
+
+        final MailFolderType mailFolderType;
+        final String localizedName;
+
+        MailFolderTypeRetval(MailFolderType mailFolderType, String localizedName) {
+            super();
+            this.mailFolderType = mailFolderType;
+            this.localizedName = localizedName;
+        }
     }
 
 }
