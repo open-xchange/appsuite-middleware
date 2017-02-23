@@ -47,31 +47,38 @@
  *
  */
 
-package com.openexchange.userfeedback.rest.osgi;
+package com.openexchange.userfeedback;
 
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.uadetector.UserAgentParser;
-import com.openexchange.userfeedback.FeedbackService;
-import com.openexchange.userfeedback.rest.services.CollectUserFeedbackService;
-import com.openexchange.userfeedback.rest.services.ExportUserFeedbackService;
 
 /**
- * {@link UserFeedbackRESTActivator}
+ * {@link FeedbackFilter}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-public class UserFeedbackRESTActivator extends HousekeepingActivator {
+public interface FeedbackFilter {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserAgentParser.class, FeedbackService.class };
-    }
+    public static FeedbackFilter DEFAULT_FILTER = new FeedbackFilter() {
 
-    @Override
-    protected void startBundle() throws Exception {
-        registerService(CollectUserFeedbackService.class, new CollectUserFeedbackService(this));
-        registerService(ExportUserFeedbackService.class, new ExportUserFeedbackService(this));
-    } 
+        @Override
+        public boolean accept(FeedbackMetaData feedback) {
+            return true;
+        }
+
+        @Override
+        public String getType() {
+            return "star-rating-v1";
+        }
+    };
+
+
+    public boolean accept(FeedbackMetaData feedback);
+
+    /**
+     * The feedback type to query
+     *
+     * @return The feedback type
+     */
+    public String getType();
 
 }

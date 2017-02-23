@@ -12,9 +12,13 @@ Import-Package: com.openexchange.ajax.requesthandler,
  com.openexchange.rest.services.annotation,
  com.openexchange.server,
  com.openexchange.uadetector,
- javax.ws.rs;version="2.0.1",
+ com.openexchange.userfeedback,
+ javax.ws.rs,
  net.sf.uadetector,
+ org.apache.http.impl.bootstrap,
+ org.glassfish.grizzly.http.server,
  org.json,
- org.osgi.framework
+ org.osgi.framework,
+ org.slf4j
 Bundle-Activator: com.openexchange.userfeedback.rest.osgi.UserFeedbackRESTActivator
 Bundle-ClassPath: .

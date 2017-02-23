@@ -47,31 +47,26 @@
  *
  */
 
-package com.openexchange.userfeedback.rest.osgi;
+package com.openexchange.userfeedback.rest.services;
 
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.uadetector.UserAgentParser;
-import com.openexchange.userfeedback.FeedbackService;
-import com.openexchange.userfeedback.rest.services.CollectUserFeedbackService;
-import com.openexchange.userfeedback.rest.services.ExportUserFeedbackService;
+import org.glassfish.jersey.test.JerseyTest;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
- * {@link UserFeedbackRESTActivator}
+ * {@link ExportUserFeedbackServiceTest}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.4
  */
-public class UserFeedbackRESTActivator extends HousekeepingActivator {
+public class ExportUserFeedbackServiceTest extends JerseyTest {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserAgentParser.class, FeedbackService.class };
+    @Before
+    public void setUp() throws Exception {}
+
+    @Test
+    public void lutsch() {
+        //        target(path)
     }
-
-    @Override
-    protected void startBundle() throws Exception {
-        registerService(CollectUserFeedbackService.class, new CollectUserFeedbackService(this));
-        registerService(ExportUserFeedbackService.class, new ExportUserFeedbackService(this));
-    } 
 
 }

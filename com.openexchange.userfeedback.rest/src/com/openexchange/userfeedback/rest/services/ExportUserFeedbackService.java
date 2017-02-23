@@ -47,31 +47,70 @@
  *
  */
 
-package com.openexchange.userfeedback.rest.osgi;
+package com.openexchange.userfeedback.rest.services;
 
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.uadetector.UserAgentParser;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
+import com.openexchange.exception.OXException;
+import com.openexchange.rest.services.JAXRSService;
+import com.openexchange.rest.services.annotation.Role;
+import com.openexchange.rest.services.annotation.RoleAllowed;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.userfeedback.ExportType;
+import com.openexchange.userfeedback.FeedbackFilter;
+import com.openexchange.userfeedback.FeedbackMetaData;
 import com.openexchange.userfeedback.FeedbackService;
-import com.openexchange.userfeedback.rest.services.CollectUserFeedbackService;
-import com.openexchange.userfeedback.rest.services.ExportUserFeedbackService;
 
 /**
- * {@link UserFeedbackRESTActivator}
+ * 
+ * {@link ExportUserFeedbackService}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.4
  */
-public class UserFeedbackRESTActivator extends HousekeepingActivator {
+@RoleAllowed(Role.BASIC_AUTHENTICATED)
+@Path("/userfeedback/v1/export")
+public class ExportUserFeedbackService extends JAXRSService {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserAgentParser.class, FeedbackService.class };
+    public ExportUserFeedbackService(ServiceLookup services) {
+        super(services);
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        registerService(CollectUserFeedbackService.class, new CollectUserFeedbackService(this));
-        registerService(ExportUserFeedbackService.class, new ExportUserFeedbackService(this));
-    } 
+    @GET
+    @Path("/{context-group}/{type}")
+    public Object export(@QueryParam("start") final long start, @QueryParam("end") final long end, @PathParam("type") final String type, @PathParam("context-group") final String contextGroup) {
+        FeedbackService feedbackService = this.getService(FeedbackService.class);
+
+        FeedbackFilter feedbackFilter = new FeedbackFilter() {
+
+            @Override
+            public boolean accept(FeedbackMetaData feedback) {
+                if ((start == 0) && (end == 0)) {
+                    return true;
+                }
+                long feedbackDate = feedback.getDate();
+                if (start == 0) {
+                    return feedbackDate < end;
+                } else if (end == 0) {
+                    return feedbackDate > start;
+                } else {
+                    return (feedbackDate < end) && (feedbackDate > start);
+                }
+            }
+
+            @Override
+            public String getType() {
+                return type;
+            }
+        };
+        try {
+            return feedbackService.listFeedback(contextGroup, feedbackFilter, ExportType.CSV);
+        } catch (OXException e) {
+            org.slf4j.LoggerFactory.getLogger(ExportUserFeedbackService.class).error("An error occurred while retrieving user feedback.", e);
+            return e.getMessage();
+        }
+    }
 
 }

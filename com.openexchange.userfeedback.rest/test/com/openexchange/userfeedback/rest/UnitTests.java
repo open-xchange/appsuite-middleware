@@ -47,38 +47,24 @@
  *
  */
 
-package com.openexchange.userfeedback;
+package com.openexchange.userfeedback.rest;
 
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.userfeedback.rest.services.ExportUserFeedbackServiceTest;
 
 /**
- * {@link FeedbackFilter}
+ * 
+ * {@link UnitTests}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.4
  */
-public interface FeedbackFilter {
+@RunWith(Suite.class)
+@SuiteClasses({
+    ExportUserFeedbackServiceTest.class
 
-    public static FeedbackFilter DEFAULT_FILTER = new FeedbackFilter() {
-
-        @Override
-        public boolean accept(FeedbackMetaData feedback) {
-            return true;
-        }
-
-        @Override
-        public String getType() {
-            return "star_rating_v1";
-        }
-    };
-
-
-    public boolean accept(FeedbackMetaData feedback);
-
-    /**
-     * The feedback type to query
-     *
-     * @return The feedback type
-     */
-    public String getType();
-
+})
+public class UnitTests {
 }

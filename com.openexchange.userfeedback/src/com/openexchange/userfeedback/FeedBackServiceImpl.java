@@ -174,8 +174,9 @@ public class FeedBackServiceImpl implements FeedbackService {
             throw ServiceExceptionCode.absentService(DatabaseService.class);
         }
 
-        Connection readCon = dbService.getReadOnlyForGlobal(ctxGroup);
+        Connection readCon = null;
         try {
+            readCon = dbService.getReadOnlyForGlobal(ctxGroup);
             // Load Metadata
             List<FeedbackMetaData> metaDataList = loadFeedbackMetaData(readCon, filter.getType(), ctxGroup);
             List<Long> filteredFeedbackIds = new ArrayList<>();
@@ -186,7 +187,6 @@ public class FeedBackServiceImpl implements FeedbackService {
             }
 
             return feedBackType.getFeedbacks(filteredFeedbackIds, readCon, type);
-
         } catch (SQLException e) {
             throw FeedbackExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage());
         } finally {
