@@ -4,16 +4,17 @@ package com.openexchange.mail.filter.json;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.SimConfigurationService;
+import com.openexchange.mail.filter.SimMailFilterConfigurationService;
 import com.openexchange.mailfilter.json.osgi.Services;
+import com.openexchange.mailfilter.properties.MailFilterConfigurationService;
 import com.openexchange.mailfilter.properties.MailFilterProperty;
 import com.openexchange.server.ServiceLookup;
 
 public class Common {
 
     // TODO: implement the SimMailFilterConfigurationService
-    public static SimConfigurationService simConfigurationService;
+    public static SimMailFilterConfigurationService simMailFilterConfigurationService;
 
     public static void prepare(String passwordSource, String masterPassword) {
         SimConfigurationService simConfigurationService = new SimConfigurationService() {
@@ -25,7 +26,8 @@ public class Common {
                 return properties;
             }
         };
-        Common.simConfigurationService = simConfigurationService;
+
+        Common.simMailFilterConfigurationService = new SimMailFilterConfigurationService(simConfigurationService);
         simConfigurationService.stringProperties.put(MailFilterProperty.credentialSource.getFQPropertyName(), "imapLogin");
         simConfigurationService.stringProperties.put(MailFilterProperty.loginType.getFQPropertyName(), "user");
         simConfigurationService.stringProperties.put(MailFilterProperty.server.getFQPropertyName(), "localhost");
@@ -44,7 +46,7 @@ public class Common {
         }
 
         final ConcurrentMap<Class<?>, Object> services = new ConcurrentHashMap<Class<?>, Object>(2, 0.9f, 1);
-        services.put(ConfigurationService.class, simConfigurationService);
+        services.put(MailFilterConfigurationService.class, simMailFilterConfigurationService);
         Services.setServiceLookup(new ServiceLookup() {
 
             @Override

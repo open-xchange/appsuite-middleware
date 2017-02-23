@@ -90,7 +90,7 @@ public class MailFilterActionTest extends MailFilterAction {
 
     @Test
     public void testGetRightPasswordSession() throws OXException {
-        Common.simConfigurationService.stringProperties.put(MailFilterProperty.passwordSource.getFQPropertyName(), PasswordSource.SESSION.name);
+        Common.simMailFilterConfigurationService.delegateConfigurationService.stringProperties.put(MailFilterProperty.passwordSource.getFQPropertyName(), PasswordSource.SESSION.name);
         final MailFilterConfigurationService config = Services.getService(MailFilterConfigurationService.class);
         final String credsPW = "pw2";
         final Credentials creds = new Credentials("", credsPW, 0, 0, null);
@@ -100,7 +100,7 @@ public class MailFilterActionTest extends MailFilterAction {
 
     @Test
     public void testGetRightPasswordGlobalNoMasterPW() throws OXException {
-        Common.simConfigurationService.stringProperties.put(MailFilterProperty.passwordSource.getFQPropertyName(), PasswordSource.GLOBAL.name);
+        Common.simMailFilterConfigurationService.delegateConfigurationService.stringProperties.put(MailFilterProperty.passwordSource.getFQPropertyName(), PasswordSource.GLOBAL.name);
         final MailFilterConfigurationService config = Services.getService(MailFilterConfigurationService.class);
         final String credsPW = "pw2";
         final Credentials creds = new Credentials("", credsPW, 0, 0, null);
@@ -115,8 +115,8 @@ public class MailFilterActionTest extends MailFilterAction {
     @Test
     public void testGetRightPasswordGlobal() throws OXException {
         final String masterPW = "masterPW";
-        Common.simConfigurationService.stringProperties.put(MailFilterProperty.passwordSource.getFQPropertyName(), PasswordSource.GLOBAL.name);
-        Common.simConfigurationService.stringProperties.put(MailFilterProperty.masterPassword.getFQPropertyName(), masterPW);
+        Common.simMailFilterConfigurationService.delegateConfigurationService.stringProperties.put(MailFilterProperty.passwordSource.getFQPropertyName(), PasswordSource.GLOBAL.name);
+        Common.simMailFilterConfigurationService.delegateConfigurationService.stringProperties.put(MailFilterProperty.masterPassword.getFQPropertyName(), masterPW);
         final MailFilterConfigurationService config = Services.getService(MailFilterConfigurationService.class);
         final String credsPW = "pw2";
         final Credentials creds = new Credentials("", credsPW, 0, 0, null);
