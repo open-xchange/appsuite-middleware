@@ -52,9 +52,10 @@ package com.openexchange.mail.api;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link AuthenticationFailureHandlerResult}
+ * {@link AuthenticationFailureHandlerResult} - The result for a processed authentication failure.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.4
  */
 public class AuthenticationFailureHandlerResult {
@@ -63,7 +64,7 @@ public class AuthenticationFailureHandlerResult {
     private static final AuthenticationFailureHandlerResult RESULT_CONTINUE = new AuthenticationFailureHandlerResult(Type.CONTINUE);
 
     /**
-     * The type for a handled authentication error.
+     * The result's type for a processed authentication failure.
      */
     public static enum Type {
         /**
