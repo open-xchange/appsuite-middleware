@@ -56,7 +56,7 @@ import com.datastax.driver.mapping.MappingManager;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link CassandraService}
+ * {@link CassandraService} - The service providing access to the Cassandra cluster and its keyspace-bound sessions.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
