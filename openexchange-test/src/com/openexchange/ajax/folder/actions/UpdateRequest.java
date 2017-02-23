@@ -91,6 +91,11 @@ public class UpdateRequest extends InsertRequest {
         return this;
     }
 
+    public UpdateRequest setIgnorePermission(boolean ignorePermissions) {
+        this.ignorePermissions = ignorePermissions;
+        return this;
+    }
+
     @Override
     protected void addParameters(List<Parameter> params) {
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE));
