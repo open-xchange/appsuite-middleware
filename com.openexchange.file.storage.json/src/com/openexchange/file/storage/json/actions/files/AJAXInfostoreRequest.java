@@ -91,6 +91,7 @@ import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.java.FileKnowingInputStream;
 import com.openexchange.java.Strings;
 import com.openexchange.java.UnsynchronizedByteArrayInputStream;
+import com.openexchange.mail.mime.ContentType;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -773,10 +774,26 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
             jFile = object;
         }
 
-        // Disallow to manually set MIME type
-        boolean mimeTypeRemoved = null != jFile.remove(File.Field.FILE_MIMETYPE.getName());
-        if (mimeTypeRemoved) {
-            throw FileStorageExceptionCodes.DENIED_MIME_TYPE.create();
+        // Disallow to manually set weird MIME type
+        {
+            Object mimeType = jFile.opt(File.Field.FILE_MIMETYPE.getName());
+            if (null != mimeType) {
+                String cts = mimeType.toString();
+                if (Strings.isEmpty(cts)) {
+                    jFile.remove(File.Field.FILE_MIMETYPE.getName());
+                } else {
+                    try {
+                        ContentType contentType = new ContentType(cts);
+                        if (contentType.startsWith("multipart/") || contentType.containsBoundaryParameter()) {
+                            // deny weird MIME types
+                            throw FileStorageExceptionCodes.DENIED_MIME_TYPE.create();
+                        }
+                    } catch (Exception e) {
+                        // MIME type could not be safely parsed
+                        throw FileStorageExceptionCodes.DENIED_MIME_TYPE.create(e, e.getMessage());
+                    }
+                }
+            }
         }
 
         UploadFile uploadFile = null;
