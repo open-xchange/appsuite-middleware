@@ -79,6 +79,7 @@ public abstract class AbstractFolderRequest<T extends AbstractAJAXResponse> impl
     private final API api;
     private AllowedModules[] allowedModules;
     private final TimeZone timeZone;
+    protected boolean ignorePermissions = false;
 
     protected AbstractFolderRequest(final API api) {
         this(api, null);
@@ -105,7 +106,7 @@ public abstract class AbstractFolderRequest<T extends AbstractAJAXResponse> impl
         if (folder.containsFolderName()) {
             jsonFolder.put(FolderFields.TITLE, folder.getFolderName());
         }
-        if (folder.containsPermissions()) {
+        if (folder.containsPermissions() && !ignorePermissions) {
             final JSONArray jsonPerms = new JSONArray();
             for (final OCLPermission perm : folder.getPermissions()) {
                 final JSONObject jsonPermission = new JSONObject();

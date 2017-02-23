@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.folder;
 
+import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 import org.junit.Assert;
 import org.junit.Test;
@@ -90,7 +92,7 @@ public class PublicFolderMovePermissionTest extends AbstractAJAXSession {
         permission.setFolderAdmin(false);
         permission.setGroupPermission(false);
         permission.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_OWN_OBJECTS, OCLPermission.NO_PERMISSIONS);
-        
+
         folder = new FolderObject();
         folder.setFolderName(UUID.randomUUID().toString());
         folder.setParentFolderID(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID);
@@ -115,7 +117,7 @@ public class PublicFolderMovePermissionTest extends AbstractAJAXSession {
         perm2.setEntity(client.getValues().getUserId());
         perm2.setFolderAdmin(true);
         perm2.setGroupPermission(false);
-        perm2.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
+        perm2.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
         toMove.setPermissionsAsArray(new OCLPermission[] {perm2});
         InsertRequest req2 = new InsertRequest(EnumAPI.OX_NEW, toMove);
         InsertResponse resp2 = client.execute(req2);
@@ -133,31 +135,21 @@ public class PublicFolderMovePermissionTest extends AbstractAJAXSession {
 
     @Test
     public void testPermissionOnMoveIntoPublicFolder() throws Exception {
-        toMove.setParentFolderID(folder.getParentFolderID());
-        toMove.setPermissionsAsArray(null);
-        toMove.setPermissions(null);
+        toMove.setParentFolderID(folder.getObjectID());
         UpdateRequest updateReq = new UpdateRequest(EnumAPI.OX_NEW, toMove);
+        updateReq.setIgnorePermission(true);
         client.execute(updateReq);
 
+        GetRequest parentGet = new GetRequest(EnumAPI.OX_NEW, folder.getObjectID());
+        GetResponse parentResp = client.execute(parentGet);
+        FolderObject parent = parentResp.getFolder();
         GetRequest getReq = new GetRequest(EnumAPI.OX_NEW, toMove.getObjectID());
         GetResponse getResp = client.execute(getReq);
         FolderObject f = getResp.getFolder();
         Assert.assertNotNull(f);
-        OCLPermission[] perms = f.getPermissionsAsArray();
-        Assert.assertEquals(2, perms.length);
-        for (OCLPermission p : perms) {
-            if (p.getEntity() == client.getValues().getUserId()) {
-                Assert.assertTrue(p.isFolderAdmin());
-            }
-            if (p.getEntity() == client2.getValues().getUserId()) {
-                Assert.assertFalse(p.isFolderAdmin());
-                Assert.assertTrue(p.canCreateObjects());
-                Assert.assertTrue(p.canReadAllObjects());
-                Assert.assertTrue(p.canWriteOwnObjects());
-                Assert.assertFalse(p.canWriteAllObjects());
-                Assert.assertFalse(p.canDeleteAllObjects());
-                Assert.assertFalse(p.canDeleteOwnObjects());
-            }
+        List<OCLPermission> perms = f.getPermissions();
+        for (OCLPermission parentPerm : parent.getPermissions()) {
+            Assert.assertTrue(comparePermissions(perms, parentPerm));
         }
     }
 
@@ -172,32 +164,41 @@ public class PublicFolderMovePermissionTest extends AbstractAJAXSession {
         InsertResponse resp = client.execute(req);
         resp.fillObject(sub);
 
-        toMove.setParentFolderID(folder.getParentFolderID());
-        toMove.setPermissionsAsArray(null);
-        toMove.setPermissions(null);
+        GetRequest get = new GetRequest(EnumAPI.OX_NEW, toMove.getObjectID());
+        GetResponse get2 = client.execute(get);
+        toMove = get2.getFolder();
+        toMove.setLastModified(new Date());
+        toMove.setParentFolderID(folder.getObjectID());
         UpdateRequest updateReq = new UpdateRequest(EnumAPI.OX_NEW, toMove);
+        updateReq.setIgnorePermission(true);
         client.execute(updateReq);
 
+        GetRequest parentGet = new GetRequest(EnumAPI.OX_NEW, folder.getObjectID());
+        GetResponse parentResp = client.execute(parentGet);
+        FolderObject parent = parentResp.getFolder();
         GetRequest getReq = new GetRequest(EnumAPI.OX_NEW, sub.getObjectID());
         GetResponse getResp = client.execute(getReq);
         FolderObject f = getResp.getFolder();
         Assert.assertNotNull(f);
-        OCLPermission[] perms = f.getPermissionsAsArray();
-        Assert.assertEquals(2, perms.length);
-        for (OCLPermission p : perms) {
-            if (p.getEntity() == client.getValues().getUserId()) {
-                Assert.assertTrue(p.isFolderAdmin());
-            }
-            if (p.getEntity() == client2.getValues().getUserId()) {
-                Assert.assertFalse(p.isFolderAdmin());
-                Assert.assertTrue(p.canCreateObjects());
-                Assert.assertTrue(p.canReadAllObjects());
-                Assert.assertTrue(p.canWriteOwnObjects());
-                Assert.assertFalse(p.canWriteAllObjects());
-                Assert.assertFalse(p.canDeleteAllObjects());
-                Assert.assertFalse(p.canDeleteOwnObjects());
+        List<OCLPermission> perms = f.getPermissions();
+        for (OCLPermission parentPerm : parent.getPermissions()) {
+            Assert.assertTrue(comparePermissions(perms, parentPerm));
+        }
+    }
+
+    private boolean comparePermissions(List<OCLPermission> parent, OCLPermission p) {
+        for (OCLPermission p2 : parent) {
+            if ((p2.getEntity() == p.getEntity()) &&
+            (p2.getFolderPermission() == p.getFolderPermission()) &&
+            (p2.getReadPermission() == p.getReadPermission()) &&
+            (p2.getWritePermission() == p.getWritePermission()) &&
+            (p2.getDeletePermission() == p.getDeletePermission()) &&
+            (p2.isFolderAdmin() == p.isFolderAdmin()) &&
+            (p2.isSystem() == p.isSystem())) {
+                return true;
             }
         }
+        return false;
     }
 
 }
