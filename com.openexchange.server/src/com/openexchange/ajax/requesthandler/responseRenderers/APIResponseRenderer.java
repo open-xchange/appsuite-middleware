@@ -278,7 +278,11 @@ public class APIResponseRenderer implements ResponseRenderer {
      * @return <code>true</code> if a JavaScript call-back is expected; otherwise <code>false</code>
      */
     public static boolean expectsJsCallback(HttpServletRequest req) {
-        return (isMultipartContent(req) || isRespondWithHTML(req) || req.getParameter(CALLBACK) != null);
+        if (isPlainJson(req)) {
+            return false;
+        } else {
+            return (isRespondWithHTML(req) || req.getParameter(CALLBACK) != null);
+        }
     }
 
     /**
@@ -352,6 +356,10 @@ public class APIResponseRenderer implements ResponseRenderer {
             return true;
         }
         return false;
+    }
+
+    private static boolean isPlainJson(final HttpServletRequest req) {
+        return Boolean.parseBoolean(req.getParameter("plainJson"));
     }
 
     private static boolean isRespondWithHTML(final HttpServletRequest req) {
