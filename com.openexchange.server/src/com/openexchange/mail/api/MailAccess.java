@@ -795,9 +795,9 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                 connectInternal();
             } catch (OXException e) {
                 AuthenticationFailureHandlerResult result =  handleConnectFailure(e, mailConfig);
-                if(result.equals(AuthenticationFailureHandlerResult.RETRY)){
+                if(result.getType().equals(AuthenticationFailureHandlerResult.Type.RETRY)){
                     connectInternal();
-                } else if(result.equals(AuthenticationFailureHandlerResult.EXCEPTION)) {
+                } else if(result.getType().equals(AuthenticationFailureHandlerResult.Type.EXCEPTION)) {
                     throw result.getError();
                 } else {
                     throw e;

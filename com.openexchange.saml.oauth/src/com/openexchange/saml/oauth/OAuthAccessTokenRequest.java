@@ -100,7 +100,7 @@ public class OAuthAccessTokenRequest {
 
     public OAuthAccessToken requestAccessToken(String base64SamlResponse, int userId, int contextId) throws OXException {
         try {
-            HttpPost requestAccessToken = new HttpPost(SAMLOAuthConfig.getIntrospectionEndpoint(userId, contextId));
+            HttpPost requestAccessToken = new HttpPost(SAMLOAuthConfig.getTokenEndpoint(userId, contextId));
             requestAccessToken.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
             StringBuilder authBuilder = new StringBuilder(SAMLOAuthConfig.getClientID(userId, contextId));

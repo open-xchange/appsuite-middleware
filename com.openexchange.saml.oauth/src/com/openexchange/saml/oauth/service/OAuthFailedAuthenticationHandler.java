@@ -85,7 +85,7 @@ public class OAuthFailedAuthenticationHandler implements AuthenticationFailedHan
                   session.setParameter(Session.PARAM_OAUTH_REFRESH_TOKEN, accessToken.getRefreshToken());
                   mailConfig.setPassword(accessToken.getAccessToken());
                   sessiondService.storeSession(session.getSessionID());
-                  return AuthenticationFailureHandlerResult.RETRY;
+                  return AuthenticationFailureHandlerResult.createRetryResult();
               } catch (OXException e1) {
                   // Unable to refresh access token -> logout
                   sessiondService.removeSession(session.getSessionID());
@@ -96,7 +96,7 @@ public class OAuthFailedAuthenticationHandler implements AuthenticationFailedHan
           sessiondService.removeSession(session.getSessionID());
           return AuthenticationFailureHandlerResult.createErrorResult(SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID()));
       }
-      return AuthenticationFailureHandlerResult.CONTINUE;
+      return AuthenticationFailureHandlerResult.createContinueResult();
     }
 
 }

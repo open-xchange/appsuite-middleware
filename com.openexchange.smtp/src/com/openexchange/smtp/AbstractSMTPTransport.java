@@ -792,9 +792,9 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                 if (handlerService != null) {
                     OXException oxe = MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
                     AuthenticationFailureHandlerResult result = handlerService.handleAuthenticationFailed(oxe, Service.TRANSPORT, smtpConfig, session);
-                    if(result.equals(AuthenticationFailureHandlerResult.RETRY)){
+                    if(result.getType().equals(AuthenticationFailureHandlerResult.Type.RETRY)){
                         transport.connect(host, port, user, password);
-                    } else if(result.equals(AuthenticationFailureHandlerResult.EXCEPTION)) {
+                    } else if(result.getType().equals(AuthenticationFailureHandlerResult.Type.EXCEPTION)) {
                         throw result.getError();
                     } else {
                         throw e;

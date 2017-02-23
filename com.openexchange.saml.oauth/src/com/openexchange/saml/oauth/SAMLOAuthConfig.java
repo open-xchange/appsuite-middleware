@@ -62,11 +62,11 @@ import com.openexchange.saml.oauth.osgi.Services;
  */
 public class SAMLOAuthConfig {
 
-    private static final String TOKEN_ENDPOINT_PROPERTY = "com.openexchange.saml.oauth.introspection";
+    private static final String TOKEN_ENDPOINT_PROPERTY = "com.openexchange.saml.oauth.token";
     private static final String CLIENT_ID_PROPERTY = "com.openexchange.saml.oauth.clientId";
     private static final String CLIENT_SECRET_PROPERTY = "com.openexchange.saml.oauth.clientSecret";
 
-    static String getIntrospectionEndpoint(int userId, int contextId) throws OXException{
+    static String getTokenEndpoint(int userId, int contextId) throws OXException{
         ConfigViewFactory configViewFactory = Services.getService(ConfigViewFactory.class);
         ConfigView view = configViewFactory.getView(userId, contextId);
         return view.get(TOKEN_ENDPOINT_PROPERTY, String.class);

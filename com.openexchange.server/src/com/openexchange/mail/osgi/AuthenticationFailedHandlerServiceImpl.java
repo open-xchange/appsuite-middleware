@@ -79,7 +79,7 @@ public class AuthenticationFailedHandlerServiceImpl extends RankingAwareNearRegi
         AuthenticationFailureHandlerResult result;
         for (AuthenticationFailedHandler handler : this) {
             result = handler.handleAuthenticationFailed(failedAuthentication, service, mailConfig, session);
-            if (!AuthenticationFailureHandlerResult.CONTINUE.equals(result)) {
+            if (!AuthenticationFailureHandlerResult.Type.CONTINUE.equals(result.getType())) {
                 return result;
             }
         }

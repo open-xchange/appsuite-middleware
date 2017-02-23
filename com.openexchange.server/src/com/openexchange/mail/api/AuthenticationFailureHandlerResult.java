@@ -57,21 +57,47 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-public enum AuthenticationFailureHandlerResult {
+public class AuthenticationFailureHandlerResult {
 
-    CONTINUE,
-    EXCEPTION,
-    RETRY;
+    public enum Type {
+        CONTINUE,
+        EXCEPTION,
+        RETRY;
+    }
 
     private OXException exception = null;
+    private Type type = null;
+
+    private AuthenticationFailureHandlerResult(){
+
+    }
+
+    private AuthenticationFailureHandlerResult(Type type){
+       this.type=type;
+    }
+
+    private AuthenticationFailureHandlerResult(OXException exception){
+        this.type=Type.EXCEPTION;
+        this.exception=exception;
+     }
 
     public OXException getError() {
         return exception;
     }
 
+    public Type getType(){
+        return type;
+    }
+
     public static AuthenticationFailureHandlerResult createErrorResult(OXException e) {
-        AuthenticationFailureHandlerResult result = AuthenticationFailureHandlerResult.EXCEPTION;
-        result.exception = e;
-        return result;
+        return new AuthenticationFailureHandlerResult(e);
+    }
+
+    public static AuthenticationFailureHandlerResult createContinueResult() {
+        return new AuthenticationFailureHandlerResult(Type.CONTINUE);
+    }
+
+    public static AuthenticationFailureHandlerResult createRetryResult() {
+        return new AuthenticationFailureHandlerResult(Type.RETRY);
     }
 }
