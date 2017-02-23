@@ -49,9 +49,6 @@
 
 package com.openexchange.ajax.folder;
 
-import junit.framework.JUnit4TestAdapter;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 import com.openexchange.ajax.folder.api2.Bug15752Test;
 import com.openexchange.ajax.folder.api2.Bug15980Test;
 import com.openexchange.ajax.folder.api2.Bug15995Test;
@@ -75,6 +72,9 @@ import com.openexchange.ajax.folder.api2.UpdatesTest;
 import com.openexchange.ajax.folder.api2.VisibleFoldersTest;
 import com.openexchange.ajax.infostore.test.Bug37211Test;
 import com.openexchange.ajax.infostore.test.InfostoreObjectCountTest;
+import junit.framework.JUnit4TestAdapter;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
  * Suite for all folder tests.
@@ -152,6 +152,8 @@ public final class FolderTestSuite {
         tests.addTestSuite(ChangePermissionsTest.class);
         tests.addTestSuite(Bug37211Test.class);
         tests.addTestSuite(Bug44895Test.class);
+
+        tests.addTestSuite(PublicFolderMovePermissionTest.class);
 
         tests.addTestSuite(PermissionsCascadeTest.class);
 
