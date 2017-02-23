@@ -49,6 +49,7 @@
 
 package com.openexchange.userfeedback.starrating.v1;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.sql.Connection;
@@ -60,15 +61,21 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.AsciiReader;
+import com.openexchange.java.AsciiWriter;
+import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.userfeedback.ExportType;
+import com.openexchange.userfeedback.FeedbackMetaData;
 import com.openexchange.userfeedback.FeedbackType;
-import com.openexchange.java.Charsets;
+import com.openexchange.userfeedback.starrating.exceptions.StarRatingExceptionCodes;
 
 /**
  * {@link StarRatingV1}
@@ -81,7 +88,7 @@ public class StarRatingV1 implements FeedbackType {
     private static final List<String> DISPLAY_FIELDS = new ArrayList<>();
 
     static {
-        for(JSONField field: JSONField.values()) {
+        for (JSONField field : JSONField.values()) {
             DISPLAY_FIELDS.add(field.getDisplayName());
         }
     }
@@ -94,14 +101,14 @@ public class StarRatingV1 implements FeedbackType {
     public static final char CELL_DELIMITER = ',';
     public static final char ROW_DELIMITER = '\n';
 
-
     @Override
-    public long storeFeedback(Object feedback, Connection con) throws SQLException {
-
-        PreparedStatement stmt = con.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS);
+    public long storeFeedback(Object feedback, Connection con) throws OXException {
         ResultSet rs = null;
+        PreparedStatement stmt = null;
         try {
-            stmt.setObject(1, feedback);
+            stmt = con.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS);
+            setBinaryStream((JSONObject) feedback, stmt, 1);
+            //            stmt.setObject(1, feedback);
             stmt.executeUpdate();
             rs = stmt.getGeneratedKeys();
             if (rs.next()) {
@@ -109,55 +116,82 @@ public class StarRatingV1 implements FeedbackType {
             }
 
             return -1;
+        } catch (final SQLException e) {
+            throw StarRatingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
         }
     }
 
+    private void setBinaryStream(JSONObject jObject, PreparedStatement stmt, int... positions) throws OXException {
+        try {
+            JSONObject json = null != jObject ? jObject : new JSONObject(0);
+            ByteArrayOutputStream buf = Streams.newByteArrayOutputStream(65536);
+            json.write(new AsciiWriter(buf), true);
+
+            if (positions.length == 1) {
+                stmt.setBinaryStream(positions[0], Streams.asInputStream(buf));
+            } else {
+                byte[] data = buf.toByteArray();
+                buf = null; // might help GC
+                for (int pos : positions) {
+                    stmt.setBytes(pos, data);
+                }
+            }
+        } catch (final SQLException | JSONException e) {
+            throw StarRatingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        }
+    }
 
     @Override
-    public Object getFeedbacks(List<Long> ids, Connection con, ExportType type) throws SQLException {
-        if(ids.size()==0){
+    public Object getFeedbacks(List<FeedbackMetaData> feedbacks, Connection con, ExportType type) throws OXException {
+        if (feedbacks.size() == 0) {
             return null;
         }
 
-        String sql = Databases.getIN(SELECT_SQL, ids.size());
-        PreparedStatement stmt = con.prepareStatement(sql);
         ResultSet rs = null;
+        PreparedStatement stmt = null;
         try {
-            int x=1;
-            for(Long id: ids){
-                stmt.setLong(x++, id);
+            String sql = Databases.getIN(SELECT_SQL, feedbacks.size());
+            stmt = con.prepareStatement(sql);
+            int x = 1;
+            for (FeedbackMetaData meta : feedbacks) {
+                stmt.setLong(x++, meta.getTypeId());
             }
             ResultSet resultSet = stmt.executeQuery();
-            switch(type){
-             case CSV:
-                 return convertResultsToCSVStream(resultSet);
-             case RAW:
-             default:
-                 List<Object> result = new ArrayList<>(ids.size());
-                 while(resultSet.next()){
-                     result.add(resultSet.getObject(1));
-                 }
-                 return result;
+            switch (type) {
+                case CSV:
+                    return convertResultsToCSVStream(resultSet);
+                case RAW:
+                default:
+                    JSONArray result = new JSONArray(feedbacks.size());
+                    while (resultSet.next()) {
+                        try {
+                            JSONObject current = new JSONObject(new AsciiReader(resultSet.getBinaryStream(1)));
+                            result.put(current);
+                        } catch (JSONException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        }
+                    }
+                    return result;
             }
-
+        } catch (final SQLException e) {
+            throw StarRatingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
         }
     }
 
-
     @SuppressWarnings("resource")
-    private Object convertResultsToCSVStream(ResultSet resultSet) throws SQLException {
-
+    private Object convertResultsToCSVStream(ResultSet resultSet) throws OXException {
         ThresholdFileHolder sink = new ThresholdFileHolder();
         OutputStreamWriter writer = new OutputStreamWriter(sink.asOutputStream(), Charsets.UTF_8);
         try {
             writer.write(convertToLine(DISPLAY_FIELDS));
             while (resultSet.next()) {
-                JSONObject current = (JSONObject) resultSet.getObject(1);
                 try {
+                    JSONObject current = new JSONObject(new AsciiReader(resultSet.getBinaryStream(1)));
                     writer.write(convertToLine(convertToList(current)));
                 } catch (JSONException e) {
                     // TODO Auto-generated catch block
@@ -167,14 +201,10 @@ public class StarRatingV1 implements FeedbackType {
             }
             writer.flush();
             return sink.getClosingStream();
-        } catch (IOException e) {
+        } catch (final SQLException | IOException e) {
             sink.close();
-        } catch (OXException e) {
-            sink.close();
-            e.printStackTrace();
+            throw StarRatingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         }
-
-        return null;
     }
 
     private static String convertToLine(final List<String> line) {
@@ -191,8 +221,8 @@ public class StarRatingV1 implements FeedbackType {
 
     private static List<String> convertToList(final JSONObject json) throws JSONException {
         final List<String> l = new LinkedList<String>();
-        for (JSONField field: JSONField.values()) {
-            l.add(json.getString(field.name()));
+        for (JSONField field : JSONField.values()) {
+            l.add(json.getString(field.getDisplayName()));
         }
         return l;
     }

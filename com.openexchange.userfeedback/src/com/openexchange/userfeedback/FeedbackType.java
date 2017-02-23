@@ -50,8 +50,8 @@
 package com.openexchange.userfeedback;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.List;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link FeedbackType}
@@ -67,27 +67,28 @@ public interface FeedbackType {
      * @param feedback The data
      * @param con The write connection to the global db
      * @return The id of the newly created entry or -1
-     * @throws SQLException
+     * @throws OXException
      */
-    public long storeFeedback(Object feedback, Connection con) throws SQLException;
+    public long storeFeedback(Object feedback, Connection con) throws OXException;
 
     /**
      * Retrieves a list of feedback objects
      *
-     * @param ids The feedback ids to retrieve
+     * @param metaDataList The feedback metadata to retrieve
      * @param con A read connection to the global db
      * @return A list of feedback objects
-     * @throws SQLException
+     * @throws OXException
      */
-    public Object getFeedbacks(List<Long> ids, Connection con, ExportType type) throws SQLException;
+    public Object getFeedbacks(List<FeedbackMetaData> metaDataList, Connection con, ExportType type) throws OXException;
 
     /**
      * Deletes multiple feedback entries
+     * 
      * @param ids A list of feedback entries
      * @param con A write connection to the global db
-     * @throws SQLException
+     * @throws OXException
      */
-    public void deleteFeedbacks(List<Long> ids, Connection con) throws SQLException;
+    public void deleteFeedbacks(List<Long> ids, Connection con) throws OXException;
 
     /**
      * Retrieves the feedback type
@@ -95,6 +96,4 @@ public interface FeedbackType {
      * @return The feedback type
      */
     public String getType();
-
-
 }

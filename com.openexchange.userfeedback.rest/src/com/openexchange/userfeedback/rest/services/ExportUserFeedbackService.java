@@ -52,7 +52,12 @@ package com.openexchange.userfeedback.rest.services;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import org.json.JSONArray;
 import com.openexchange.exception.OXException;
 import com.openexchange.rest.services.JAXRSService;
 import com.openexchange.rest.services.annotation.Role;
@@ -81,6 +86,25 @@ public class ExportUserFeedbackService extends JAXRSService {
     @GET
     @Path("/{context-group}/{type}")
     public Object export(@QueryParam("start") final long start, @QueryParam("end") final long end, @PathParam("type") final String type, @PathParam("context-group") final String contextGroup) {
+        return export(start, end, type, contextGroup, ExportType.CSV);
+    }
+
+    @GET
+    @Path("/{context-group}/{type}/raw")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response exportRaw(@QueryParam("start") final long start, @QueryParam("end") final long end, @PathParam("type") final String type, @PathParam("context-group") final String contextGroup) {
+        Object export = export(start, end, type, contextGroup, ExportType.RAW);
+        ResponseBuilder builder = Response.status(200);
+        if (export == null) {
+            return builder.build();
+        }
+        JSONArray feedback = (JSONArray) export;
+
+        builder.entity(feedback);
+        return builder.build();
+    }
+
+    private Object export(final long start, final long end, final String type, final String contextGroup, ExportType exportType) {
         FeedbackService feedbackService = this.getService(FeedbackService.class);
 
         FeedbackFilter feedbackFilter = new FeedbackFilter() {
@@ -104,13 +128,28 @@ public class ExportUserFeedbackService extends JAXRSService {
             public String getType() {
                 return type;
             }
+
+            @Override
+            public Long start() {
+                if (start == 0) {
+                    return Long.MIN_VALUE;
+                }
+                return start;
+            }
+
+            @Override
+            public Long end() {
+                if (end == 0) {
+                    return Long.MAX_VALUE;
+                }
+                return end;
+            }
         };
         try {
-            return feedbackService.listFeedback(contextGroup, feedbackFilter, ExportType.CSV);
+            return feedbackService.listFeedback(contextGroup, feedbackFilter, exportType);
         } catch (OXException e) {
             org.slf4j.LoggerFactory.getLogger(ExportUserFeedbackService.class).error("An error occurred while retrieving user feedback.", e);
             return e.getMessage();
         }
     }
-
 }

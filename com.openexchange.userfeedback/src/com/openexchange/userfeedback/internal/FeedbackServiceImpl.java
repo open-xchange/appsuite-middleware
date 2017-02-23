@@ -73,18 +73,16 @@ import com.openexchange.userfeedback.exception.FeedbackExceptionCodes;
 import com.openexchange.userfeedback.osgi.Services;
 
 /**
- * {@link FeedBackServiceImpl}
+ * {@link FeedbackServiceImpl}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-public class FeedBackServiceImpl implements FeedbackService {
+public class FeedbackServiceImpl implements FeedbackService {
 
     @Override
     public void storeFeedback(Session session, String type, Object feedback) throws OXException {
-
         // Get context group id
-
         ConfigViewFactory factory = Services.getService(ConfigViewFactory.class);
         if (factory == null) {
             throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
@@ -107,21 +105,22 @@ public class FeedBackServiceImpl implements FeedbackService {
             throw ServiceExceptionCode.absentService(DatabaseService.class);
         }
 
-        Connection writeCon = dbService.getWritableForGlobal(contextGroupId);
+        Connection writeCon = null;
         try {
+            writeCon = dbService.getWritableForGlobal(contextGroupId);
             // Store feedback and feedback metadata
             writeCon.setAutoCommit(false);
             long fid = feedBackType.storeFeedback(feedback, writeCon);
-            if(fid<=0){
+            if (fid <= 0) {
                 writeCon.rollback();
                 throw FeedbackExceptionCodes.UNEXPECTED_ERROR.create("Unable to store feedback metadata.");
             }
             saveFeedBackInternal(writeCon, session.getUserId(), session.getContextId(), contextGroupId == null ? "default" : contextGroupId, session.getLoginName(), System.currentTimeMillis(), type, fid);
             writeCon.commit();
         } catch (SQLException e) {
-            try{
+            try {
                 writeCon.rollback();
-            }catch (SQLException sqlEx) {
+            } catch (SQLException sqlEx) {
                 // ignore
             }
         } finally {
@@ -132,9 +131,8 @@ public class FeedBackServiceImpl implements FeedbackService {
         }
     }
 
-
     private static final String INSERT_FEEDBACK_SQL = "INSERT INTO feedback (groupId, type, date, cid, user, login_name, typeId) VALUES (?,?,?,?,?,?,?);";
-    private static final String SELECT_FEEDBACK_SQL = "SELECT date, cid, user, login_name, typeId FROM feedback WHERE groupId=? AND type=?";
+    private static final String SELECT_FEEDBACK_SQL = "SELECT date, cid, user, login_name, typeId FROM feedback WHERE groupId=? AND type=? AND date >? AND date <?";
 
     /**
      * @param writeCon The global db write connection
@@ -145,15 +143,16 @@ public class FeedBackServiceImpl implements FeedbackService {
      * @throws SQLException
      */
     private void saveFeedBackInternal(Connection writeCon, int userId, int contextId, String groupId, String loginName, long date, String type, long feedbackId) throws SQLException {
-        PreparedStatement statement = writeCon.prepareStatement(INSERT_FEEDBACK_SQL);
+        PreparedStatement statement = null;
         try {
+            statement = writeCon.prepareStatement(INSERT_FEEDBACK_SQL);
             statement.setString(1, groupId);
             statement.setString(2, type);
             statement.setLong(3, date);
             statement.setInt(4, contextId);
             statement.setInt(5, userId);
-            if(loginName==null){
-                loginName="";
+            if (loginName == null) {
+                loginName = "";
             }
             statement.setString(6, loginName);
             statement.setLong(7, feedbackId);
@@ -165,8 +164,6 @@ public class FeedBackServiceImpl implements FeedbackService {
 
     @Override
     public Object listFeedback(String ctxGroup, FeedbackFilter filter, ExportType type) throws OXException {
-
-        // Get type service
         FeedbackTypeRegistry registry = FeedbackTypeRegistryImpl.getInstance();
         FeedbackType feedBackType = registry.getFeedbackType(filter.getType());
 
@@ -174,7 +171,6 @@ public class FeedBackServiceImpl implements FeedbackService {
             throw FeedbackExceptionCodes.INVALID_FEEDBACK_TYPE.create();
         }
 
-        // Get db connection
         GlobalDatabaseService dbService = Services.getService(DatabaseService.class);
         if (dbService == null) {
             throw ServiceExceptionCode.absentService(DatabaseService.class);
@@ -183,16 +179,13 @@ public class FeedBackServiceImpl implements FeedbackService {
         Connection readCon = null;
         try {
             readCon = dbService.getReadOnlyForGlobal(ctxGroup);
-            // Load Metadata
-            List<FeedbackMetaData> metaDataList = loadFeedbackMetaData(readCon, filter.getType(), ctxGroup);
-            List<Long> filteredFeedbackIds = new ArrayList<>();
-            for(FeedbackMetaData meta: metaDataList){
-                if(filter.accept(meta)){
-                    filteredFeedbackIds.add(meta.getTypeId());
-                }
+
+            List<FeedbackMetaData> metaDataList = loadFeedbackMetaData(readCon, filter, ctxGroup);
+            if (metaDataList.isEmpty()) {
+                return null;
             }
 
-            return feedBackType.getFeedbacks(filteredFeedbackIds, readCon, type);
+            return feedBackType.getFeedbacks(metaDataList, readCon, type);
         } catch (SQLException e) {
             throw FeedbackExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage());
         } finally {
@@ -202,17 +195,22 @@ public class FeedBackServiceImpl implements FeedbackService {
         }
     }
 
-    private List<FeedbackMetaData> loadFeedbackMetaData(Connection readCon, String type, String groupId) throws SQLException {
-
-        PreparedStatement statement = readCon.prepareStatement(SELECT_FEEDBACK_SQL);
-        statement.setString(1, groupId);
-        statement.setString(2, type);
-        ResultSet resultSet = statement.executeQuery();
-        List<FeedbackMetaData> result = new ArrayList<>();
-        while(resultSet.next()){
-            result.add(new FeedbackMetaData(type, resultSet.getLong(1), resultSet.getInt(2), resultSet.getInt(3), resultSet.getString(4), resultSet.getLong(5)));
+    private List<FeedbackMetaData> loadFeedbackMetaData(Connection readCon, FeedbackFilter filter, String groupId) throws SQLException {
+        PreparedStatement statement = null;
+        try {
+            statement = readCon.prepareStatement(SELECT_FEEDBACK_SQL);
+            statement.setString(1, groupId);
+            statement.setString(2, filter.getType());
+            statement.setLong(3, filter.start());
+            statement.setLong(4, filter.end());
+            ResultSet resultSet = statement.executeQuery();
+            List<FeedbackMetaData> result = new ArrayList<>();
+            while (resultSet.next()) {
+                result.add(new FeedbackMetaData(filter.getType(), resultSet.getLong(1), resultSet.getInt(2), resultSet.getInt(3), resultSet.getString(4), resultSet.getLong(5)));
+            }
+            return result;
+        } finally {
+            DBUtils.closeSQLStuff(statement);
         }
-        return result;
-
     }
 }

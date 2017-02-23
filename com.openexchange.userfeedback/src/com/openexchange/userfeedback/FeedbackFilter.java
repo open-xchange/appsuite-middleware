@@ -68,6 +68,16 @@ public interface FeedbackFilter {
         public String getType() {
             return "star-rating-v1";
         }
+
+        @Override
+        public Long start() {
+            return 0L;
+        }
+
+        @Override
+        public Long end() {
+            return 0L;
+        }
     };
 
 
@@ -79,5 +89,9 @@ public interface FeedbackFilter {
      * @return The feedback type
      */
     public String getType();
+
+    public Long start();
+
+    public Long end();
 
 }

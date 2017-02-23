@@ -61,7 +61,7 @@ public enum JSONField {
     entry_point("Entry point"),
     comment("Comment"),
     operating_system("Operating System"),
-    browser("Browsser"),
+    browser("Browser"),
     browser_version("Browser version"),
     user_agent("User agent"),
     screen_resolution("Screen Resolution"),
@@ -69,8 +69,8 @@ public enum JSONField {
 
     String displayName;
 
-    JSONField(String displayName){
-        this.displayName=displayName;
+    JSONField(String displayName) {
+        this.displayName = displayName;
     }
 
     /**
@@ -82,14 +82,3 @@ public enum JSONField {
         return displayName;
     }
 }
-
-
-
-
-
-
-
-
-
-
-

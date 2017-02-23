@@ -54,7 +54,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.userfeedback.FeedbackService;
 import com.openexchange.userfeedback.FeedbackTypeRegistry;
-import com.openexchange.userfeedback.internal.FeedBackServiceImpl;
+import com.openexchange.userfeedback.internal.FeedbackServiceImpl;
 import com.openexchange.userfeedback.internal.FeedbackTypeRegistryImpl;
 
 /**
@@ -74,7 +74,7 @@ public class Activator extends HousekeepingActivator{
     protected void startBundle() throws Exception {
         Services.setServiceLookup(this);
         registerService(FeedbackTypeRegistry.class, FeedbackTypeRegistryImpl.getInstance());
-        registerService(FeedbackService.class, new FeedBackServiceImpl());
+        registerService(FeedbackService.class, new FeedbackServiceImpl());
     }
 
     @Override
