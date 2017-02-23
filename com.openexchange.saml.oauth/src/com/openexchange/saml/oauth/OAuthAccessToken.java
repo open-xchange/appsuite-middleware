@@ -47,46 +47,75 @@
  *
  */
 
-package com.openexchange.mail.authentication.handler;
+package com.openexchange.saml.oauth;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.mail.api.AuthType;
-import com.openexchange.mail.api.AuthenticationFailedHandler;
-import com.openexchange.mail.api.AuthenticationFailureHandlerResult;
-import com.openexchange.mail.api.MailConfig;
-import com.openexchange.session.Session;
-import com.openexchange.sessiond.SessionExceptionCodes;
-import com.openexchange.sessiond.SessiondService;
 
 /**
- * {@link DefaultAuthenticationFailedHandler} is the default implementation for the {@link AuthenticationFailedHandler} interface.
- * <p>
- * It handles the failed authentication by terminating the current session and throwing an <code>SES-0206</code> (<i>"Your session was invalidated. Please try again."</i>) error.
+ * {@link OAuthAccessToken}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-public class DefaultAuthenticationFailedHandler implements AuthenticationFailedHandler {
+public class OAuthAccessToken {
 
-    private final SessiondService sessiondService;
+    private final String accessToken;
+    private final String refreshToken;
+    private final String type;
+    private final int expires_in;
+
 
     /**
-     * Initializes a new {@link DefaultAuthenticationFailedHandler}.
+     * Initializes a new {@link OAuthAccessToken}.
+     * @param accessToken
+     * @param refreshToken
+     * @param type
+     * @param expires_in
      */
-    public DefaultAuthenticationFailedHandler(SessiondService sessiondService) {
+    public OAuthAccessToken(String accessToken, String refreshToken, String type, int expires_in) {
         super();
-        this.sessiondService = sessiondService;
+        this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
+        this.type = type;
+        this.expires_in = expires_in;
     }
 
-    @Override
-    public AuthenticationFailureHandlerResult handleAuthenticationFailed(OXException failedAuth, Service service, MailConfig mailConfig, Session session) throws OXException {
-        if (AuthType.isOAuthType(mailConfig.getAuthType())) {
-            sessiondService.removeSession(session.getSessionID());
-            return AuthenticationFailureHandlerResult.createErrorResult(SessionExceptionCodes.SESSION_EXPIRED.create(failedAuth, new Object[0]));
-        }
+    /**
+     * Gets the accessToken
+     *
+     * @return The accessToken
+     */
+    public String getAccessToken() {
+        return accessToken;
+    }
 
-        // Don't care...
-        return AuthenticationFailureHandlerResult.CONTINUE;
+
+    /**
+     * Gets the refreshToken
+     *
+     * @return The refreshToken
+     */
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
+
+    /**
+     * Gets the type
+     *
+     * @return The type
+     */
+    public String getType() {
+        return type;
+    }
+
+
+    /**
+     * Gets the expires_in
+     *
+     * @return The expires_in
+     */
+    public int getExpires_in() {
+        return expires_in;
     }
 
 }

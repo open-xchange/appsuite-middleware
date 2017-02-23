@@ -47,46 +47,40 @@
  *
  */
 
-package com.openexchange.mail.authentication.handler;
+package com.openexchange.saml.oauth.osgi;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.mail.api.AuthType;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.mail.api.AuthenticationFailedHandler;
-import com.openexchange.mail.api.AuthenticationFailureHandlerResult;
-import com.openexchange.mail.api.MailConfig;
-import com.openexchange.session.Session;
-import com.openexchange.sessiond.SessionExceptionCodes;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.saml.oauth.service.OAuthFailedAuthenticationHandler;
 import com.openexchange.sessiond.SessiondService;
 
 /**
- * {@link DefaultAuthenticationFailedHandler} is the default implementation for the {@link AuthenticationFailedHandler} interface.
- * <p>
- * It handles the failed authentication by terminating the current session and throwing an <code>SES-0206</code> (<i>"Your session was invalidated. Please try again."</i>) error.
+ * {@link Activator}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-public class DefaultAuthenticationFailedHandler implements AuthenticationFailedHandler {
+public class Activator extends HousekeepingActivator {
 
-    private final SessiondService sessiondService;
+    private static final int SERVICE_RANKING = 100;
 
-    /**
-     * Initializes a new {@link DefaultAuthenticationFailedHandler}.
-     */
-    public DefaultAuthenticationFailedHandler(SessiondService sessiondService) {
-        super();
-        this.sessiondService = sessiondService;
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class[] { SessiondService.class, ConfigViewFactory.class };
     }
 
     @Override
-    public AuthenticationFailureHandlerResult handleAuthenticationFailed(OXException failedAuth, Service service, MailConfig mailConfig, Session session) throws OXException {
-        if (AuthType.isOAuthType(mailConfig.getAuthType())) {
-            sessiondService.removeSession(session.getSessionID());
-            return AuthenticationFailureHandlerResult.createErrorResult(SessionExceptionCodes.SESSION_EXPIRED.create(failedAuth, new Object[0]));
-        }
+    protected void startBundle() throws Exception {
+        Services.setServiceLookup(this);
+        registerService(AuthenticationFailedHandler.class, new OAuthFailedAuthenticationHandler(), SERVICE_RANKING);
 
-        // Don't care...
-        return AuthenticationFailureHandlerResult.CONTINUE;
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        Services.setServiceLookup(null);
+        super.stopBundle();
     }
 
 }

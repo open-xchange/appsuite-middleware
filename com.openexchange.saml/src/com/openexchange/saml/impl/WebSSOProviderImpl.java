@@ -123,6 +123,9 @@ import com.openexchange.java.util.UUIDs;
 import com.openexchange.saml.OpenSAML;
 import com.openexchange.saml.SAMLConfig;
 import com.openexchange.saml.SAMLConfig.Binding;
+import com.openexchange.saml.oauth.OAuthAccessToken;
+import com.openexchange.saml.oauth.OAuthAccessTokenRequest;
+import com.openexchange.saml.oauth.SAMLOAuthConfig;
 import com.openexchange.saml.SAMLExceptionCode;
 import com.openexchange.saml.SAMLSessionParameters;
 import com.openexchange.saml.SAMLWebSSOProvider;
@@ -288,6 +291,11 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
 
             enhanceAuthInfo(authInfo, bearerAssertion);
             Map<String, String> properties = authInfo.getProperties();
+
+            String samlResponseStr = httpRequest.getParameter("SAMLResponse");
+
+            getOAuthAccessToken(samlResponseStr, properties, authInfo);
+
             String sessionToken = sessionReservationService.reserveSessionFor(
                 authInfo.getUserId(),
                 authInfo.getContextId(),
@@ -318,6 +326,41 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
             throw SAMLExceptionCode.INTERNAL_ERROR.create(e.getMessage());
         } catch (ValidationException e) {
             throw SAMLExceptionCode.VALIDATION_FAILED.create(e.getReason().getMessage(), e.getMessage());
+        }
+    }
+
+    /**
+     * Retrieves oauth access and refresh tokens and adds them to the properties list
+     *
+     * @param base64SamlResponse
+     * @param properties
+     * @param authInfo
+     * @throws OXException
+     *
+     */
+    private void getOAuthAccessToken(String base64SamlResponse, Map<String, String> properties, AuthenticationInfo authInfo) throws OXException {
+        try {
+            if (!SAMLOAuthConfig.isConfigured(authInfo.getUserId(), authInfo.getContextId())) {
+                return;
+            }
+
+            OpenSAML openSAML = new OpenSAML();
+            byte[] decodedBytes = Base64.decodeBase64(base64SamlResponse.getBytes());
+            Element responseElement = openSAML.getParserPool().parse(new ByteArrayInputStream(decodedBytes)).getDocumentElement();
+            XMLObject unmarshalledResponse = openSAML.getUnmarshallerFactory().getUnmarshaller(responseElement).unmarshall(responseElement);
+            final Response response = (Response) unmarshalledResponse;
+            Assertion assertion = response.getAssertions().iterator().next();
+            String xmlAssertion = openSAML.marshall(assertion);
+            String b64Assertion = Base64.encodeBase64String(xmlAssertion.getBytes());
+            OAuthAccessToken token = OAuthAccessTokenRequest.getInstance().requestAccessToken(b64Assertion, authInfo.getUserId(), authInfo.getContextId());
+            properties.put(SAMLSessionParameters.ACCESS_TOKEN, token.getAccessToken());
+            properties.put(SAMLSessionParameters.REFRESH_TOKEN, token.getRefreshToken());
+        } catch (MarshallingException e) {
+            throw SAMLExceptionCode.INTERNAL_ERROR.create(e.getMessage());
+        } catch (XMLParserException e) {
+            throw SAMLExceptionCode.INTERNAL_ERROR.create(e.getMessage());
+        } catch (UnmarshallingException e) {
+            throw SAMLExceptionCode.INTERNAL_ERROR.create(e.getMessage());
         }
     }
 

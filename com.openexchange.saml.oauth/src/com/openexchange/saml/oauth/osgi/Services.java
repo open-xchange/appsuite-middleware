@@ -47,46 +47,80 @@
  *
  */
 
-package com.openexchange.mail.authentication.handler;
+package com.openexchange.saml.oauth.osgi;
 
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.api.AuthType;
-import com.openexchange.mail.api.AuthenticationFailedHandler;
-import com.openexchange.mail.api.AuthenticationFailureHandlerResult;
-import com.openexchange.mail.api.MailConfig;
-import com.openexchange.session.Session;
-import com.openexchange.sessiond.SessionExceptionCodes;
-import com.openexchange.sessiond.SessiondService;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link DefaultAuthenticationFailedHandler} is the default implementation for the {@link AuthenticationFailedHandler} interface.
- * <p>
- * It handles the failed authentication by terminating the current session and throwing an <code>SES-0206</code> (<i>"Your session was invalidated. Please try again."</i>) error.
+ * {@link Services}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.4
+ * @since v7.8.3
  */
-public class DefaultAuthenticationFailedHandler implements AuthenticationFailedHandler {
-
-    private final SessiondService sessiondService;
+public class Services {
 
     /**
-     * Initializes a new {@link DefaultAuthenticationFailedHandler}.
+     * Initializes a new {@link Services}.
      */
-    public DefaultAuthenticationFailedHandler(SessiondService sessiondService) {
+    private Services() {
         super();
-        this.sessiondService = sessiondService;
     }
 
-    @Override
-    public AuthenticationFailureHandlerResult handleAuthenticationFailed(OXException failedAuth, Service service, MailConfig mailConfig, Session session) throws OXException {
-        if (AuthType.isOAuthType(mailConfig.getAuthType())) {
-            sessiondService.removeSession(session.getSessionID());
-            return AuthenticationFailureHandlerResult.createErrorResult(SessionExceptionCodes.SESSION_EXPIRED.create(failedAuth, new Object[0]));
-        }
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<>();
 
-        // Don't care...
-        return AuthenticationFailureHandlerResult.CONTINUE;
+    /**
+     * Sets the service lookup.
+     *
+     * @param serviceLookup The service lookup or <code>null</code>
+     */
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
+    }
+
+    /**
+     * Gets the service lookup.
+     *
+     * @return The service lookup or <code>null</code>
+     */
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
+    }
+
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service
+     * @throws OXException
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) throws OXException {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.saml.oauth\" not started?");
+        }
+        S service = serviceLookup.getService(clazz);
+        if(service==null){
+            throw ServiceExceptionCode.absentService(clazz);
+        }
+        return service;
+    }
+
+    /**
+     * (Optionally) Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        try {
+            return getService(clazz);
+        } catch (final IllegalStateException | OXException e) {
+            return null;
+        }
     }
 
 }

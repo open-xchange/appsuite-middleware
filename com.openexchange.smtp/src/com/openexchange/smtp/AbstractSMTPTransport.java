@@ -108,6 +108,7 @@ import com.openexchange.mail.MailPath;
 import com.openexchange.mail.api.AuthType;
 import com.openexchange.mail.api.AuthenticationFailedHandler.Service;
 import com.openexchange.mail.api.AuthenticationFailedHandlerService;
+import com.openexchange.mail.api.AuthenticationFailureHandlerResult;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
@@ -790,8 +791,14 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                 AuthenticationFailedHandlerService handlerService = Services.getService(AuthenticationFailedHandlerService.class);
                 if (handlerService != null) {
                     OXException oxe = MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
-                    handlerService.handleAuthenticationFailed(oxe, Service.TRANSPORT, smtpConfig, session);
-                    throw e;
+                    AuthenticationFailureHandlerResult result = handlerService.handleAuthenticationFailed(oxe, Service.TRANSPORT, smtpConfig, session);
+                    if(result.equals(AuthenticationFailureHandlerResult.RETRY)){
+                        transport.connect(host, port, user, password);
+                    } else if(result.equals(AuthenticationFailureHandlerResult.EXCEPTION)) {
+                        throw result.getError();
+                    } else {
+                        throw e;
+                    }
                 }
             }
 
