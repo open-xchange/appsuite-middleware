@@ -1764,11 +1764,11 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                 }
                 updateMe.setPermissionsAsArray(oclPermissions);
             } else {
-                if (isInPublicTree(updateMe, context, con, storageParameters)) {
-                    ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    boolean recursive = configurationService.getBoolProperty("com.openexchange.folderstorage.inheritParentPermissions", false);
+                ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                boolean applyParentPermissions = configurationService.getBoolProperty("com.openexchange.folderstorage.inheritParentPermissions", false);
+                if (applyParentPermissions && isInPublicTree(updateMe, context, con, storageParameters)) {
                     FolderObject parent = getFolderObject(updateMe.getParentFolderID(), context, con, storageParameters);
-                    inheritPublicFolderPermissions(updateMe, parent, recursive, context, con, storageParameters, folderManager, millis);
+                    inheritPublicFolderPermissions(updateMe, parent, context, con, storageParameters, folderManager, millis);
                     isUpdated = true;
                 }
             }
@@ -1788,7 +1788,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
         }
     }
 
-    private void inheritPublicFolderPermissions(FolderObject folder, FolderObject parent, boolean recursive, Context context, Connection con, StorageParameters storageParameters, OXFolderManager folderManager, Date millis) throws OXException {
+    private void inheritPublicFolderPermissions(FolderObject folder, FolderObject parent, Context context, Connection con, StorageParameters storageParameters, OXFolderManager folderManager, Date millis) throws OXException {
         OCLPermission[] perms = folder.getPermissionsAsArray();
         OCLPermission[] parentPerms = parent.getPermissionsAsArray();
         Map<Integer, OCLPermission> permsMappingPerEntity = new HashMap<>();
@@ -1807,7 +1807,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
             OCLPermission parentPerm = parentMappingPerEntity.get(entity);
             if (permsMappingPerEntity.containsKey(entity)) {
                 OCLPermission folderPerm = permsMappingPerEntity.remove(entity);
-                folderPerm.setAllPermission(folderPerm.getFolderPermission() | parentPerm.getFolderPermission(), folderPerm.getReadPermission() | parentPerm.getReadPermission(), folderPerm.getWritePermission() | parentPerm.getWritePermission(), folderPerm.getDeletePermission() | parentPerm.getDeletePermission());
+                folderPerm.setAllPermission(Math.max(folderPerm.getFolderPermission(), parentPerm.getFolderPermission()), Math.max(folderPerm.getReadPermission(), parentPerm.getReadPermission()), Math.max(folderPerm.getWritePermission(), parentPerm.getWritePermission()), Math.max(folderPerm.getDeletePermission(), parentPerm.getDeletePermission()));
                 folderPerm.setEntity(entity);
                 folderPerm.setFuid(folder.getObjectID());
                 permsMappingPerEntity.put(entity, folderPerm);
@@ -1817,11 +1817,11 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
         }
         folder.setPermissions(new ArrayList<>(permsMappingPerEntity.values()));
         folderManager.updateFolder(folder, false, false, millis.getTime());
-        if (recursive && folder.hasSubfolders()) {
+        if (folder.hasSubfolders()) {
             SortableId[] subFolderIds = getSubfolders(FolderStorage.REAL_TREE_ID, String.valueOf(folder.getObjectID()), storageParameters);
             for (SortableId subfolderId : subFolderIds) {
                 FolderObject subfolder = getFolderObject(Integer.parseInt(subfolderId.getId()), context, con, storageParameters);
-                inheritPublicFolderPermissions(subfolder, parent, recursive, context, con, storageParameters, folderManager, millis);
+                inheritPublicFolderPermissions(subfolder, parent, context, con, storageParameters, folderManager, millis);
             }
         }
     }
