@@ -165,6 +165,16 @@ public class MimeMailExceptionMessage implements LocalizableStrings {
     public final static String CONNECT_ERROR_MSG_DISPLAY = "The connection to remote server %1$s was refused or timed out while attempting to connect.";
 
     /**
+     * The connection to remote server %1$s timed out while awaiting the response.
+     */
+    public final static String READ_TIMEOUT_MSG_DISPLAY = "The connection to remote server %1$s timed out while awaiting the response.";
+
+    /**
+     * Mail server %1$s unexpectedly closed connection for user %2$s.
+     */
+    public final static String CONNECTION_CLOSED_MSG_DISPLAY = "Mail server %1$s unexpectedly closed connection.";
+
+    /**
      * The allowed quota on mail server exceeded.
      */
     public final static String QUOTA_EXCEEDED_MSG_DISPLAY = "The allowed quota on mail server exceeded.";
@@ -186,7 +196,7 @@ public class MimeMailExceptionMessage implements LocalizableStrings {
 
     // Wrong or missing login data to access mail transport server %1$s. Please check associated account's settings/credentials.
     public static final String TRANSPORT_INVALID_CREDENTIALS_MSG_DISPLAY = "Wrong or missing login data to access mail transport server %1$s. Please check associated account's settings/credentials.";
-    
+
     /**
      * The message could not be sent due to a mail server temporary failure. Please try again later.
      */
