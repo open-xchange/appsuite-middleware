@@ -379,7 +379,7 @@ public final class IMAPFolderConverter {
                      * Check reliably for subscribed subfolders through LSUB command since folder attributes need not to to be present as
                      * per RFC 3501
                      */
-                    mailFolder.setSubscribedSubfolders(ListLsubCache.hasAnySubscribedSubfolder(imapFullName, accountId, imapFolder, session, imapConfig.getIMAPProperties().isIgnoreSubscription()));
+                    mailFolder.setSubscribedSubfolders(mailFolder.hasSubfolders() && ListLsubCache.hasAnySubscribedSubfolder(imapFullName, accountId, imapFolder, session, imapConfig.getIMAPProperties().isIgnoreSubscription()));
                 }
                 /*
                  * Set full name, name, and parent full name

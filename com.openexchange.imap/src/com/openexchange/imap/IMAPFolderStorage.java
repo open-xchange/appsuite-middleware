@@ -2919,6 +2919,12 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
          * Unsubscribe prior to deletion
          */
         IMAPCommandsCollection.forceSetSubscribed(imapStore, fullName, false);
+        // Unsubscribe subfolders
+        ListInfo[] subSubscriptions = IMAPCommandsCollection.listSubfolders(fullName, separator, deleteMe);
+        for (ListInfo info : subSubscriptions) {
+            IMAPCommandsCollection.forceSetSubscribed(imapStore, info.name, false);
+        }
+
         removeSessionData(deleteMe.getFullName(), separator, deleteMe);
         final long start = System.currentTimeMillis();
         if (!deleteMe.delete(true)) {

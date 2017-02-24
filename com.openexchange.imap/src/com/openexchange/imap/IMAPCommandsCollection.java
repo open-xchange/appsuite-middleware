@@ -277,6 +277,26 @@ public final class IMAPCommandsCollection {
     }
 
     /**
+     * List LSUB subfolder entries under specified full name.
+     *
+     * @param fullName The full name
+     * @param separator The separator character
+     * @param imapFolder The IMAP folder providing the protocol to use
+     * @return The LSUB entries
+     * @throws MessagingException If LSUB entries cannot be returned
+     */
+    public static ListInfo[] listLSUBSubfolders(final String fullName, final char separator, IMAPFolder imapFolder) throws MessagingException {
+        ListInfo[] listInfos = ((ListInfo[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+
+            @Override
+            public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
+                return protocol.lsub("", new StringBuilder(fullName).append(separator).append("%").toString());
+            }
+        }));
+        return null == listInfos ? new ListInfo[0] : listInfos;
+    }
+
+    /**
      * Gets the LIST info for specified full name.
      *
      * @param fullName The full name
