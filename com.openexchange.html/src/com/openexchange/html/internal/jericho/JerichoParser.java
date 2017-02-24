@@ -289,9 +289,6 @@ public final class JerichoParser {
             } else {
                 switch (enumType) {
                     case START_TAG:
-                        if (indexOf('<', 1, tag) >= 0) {
-                            throw HtmlExceptionCodes.CORRUPT.create();
-                        }
                         handler.handleStartTag((StartTag) tag);
                         break;
                     case END_TAG:
