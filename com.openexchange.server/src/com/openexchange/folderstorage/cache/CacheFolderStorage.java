@@ -1431,8 +1431,8 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
                 allSubfolderIds = new LinkedList<SortableId>();
 
                 // Query storages (except first one) using dedicated threads
-                CompletionService<java.util.List<SortableId>> completionService = new ThreadPoolCompletionService<java.util.List<SortableId>>(
-                    ThreadPools.getThreadPool()).setTrackable(true);
+                ThreadPoolService tps = CacheServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class);
+                CompletionService<java.util.List<SortableId>> completionService = new ThreadPoolCompletionService<java.util.List<SortableId>>(tps).setTrackable(true);
                 int submittedTasks = 0;
                 for (int i = 1; i < neededStorages.length; i++) {
                     final FolderStorage neededStorage = neededStorages[i];
