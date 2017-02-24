@@ -157,21 +157,26 @@ public class ServerConfigServiceImpl implements ServerConfigService {
 
         LinkedList<Map<String, Object>> applicableConfigs = new LinkedList<Map<String, Object>>();
         for (Map.Entry<String, Object> configEntry : configurations.entrySet()) {
-            Map<String, Object> possibleConfiguration = (Map<String, Object>) configEntry.getValue();
-            if (looksApplicable(possibleConfiguration, hostName)) {
-                // ensure that "all"-host-wildcards are applied first
-                if ("all".equals(possibleConfiguration.get("host"))) {
-                    applicableConfigs.addFirst(ImmutableMap.copyOf(possibleConfiguration));
+            Object value = configEntry.getValue();
+            if (value instanceof Map) {
+                Map<String, Object> possibleConfiguration = (Map<String, Object>) value;
+                if (looksApplicable(possibleConfiguration, hostName)) {
+                    // ensure that "all"-host-wildcards are applied first
+                    if ("all".equals(possibleConfiguration.get("host"))) {
+                        applicableConfigs.addFirst(ImmutableMap.copyOf(possibleConfiguration));
+                    } else {
+                        applicableConfigs.add(ImmutableMap.copyOf(possibleConfiguration));
+                    }
                 } else {
-                    applicableConfigs.add(ImmutableMap.copyOf(possibleConfiguration));
+                    String configName = configEntry.getKey();
+                    if (null == possibleConfiguration) {
+                        LOG.debug("Empty configuration \"{}\" is not applicable", configName);
+                    } else {
+                        LOG.debug("Configuration \"{}\" is not applicable: {}", configName, prettyPrint(configName, possibleConfiguration));
+                    }
                 }
             } else {
-                String configName = configEntry.getKey();
-                if (null == possibleConfiguration) {
-                    LOG.debug("Empty configuration \"{}\" is not applicable", configName);
-                } else {
-                    LOG.debug("Configuration \"{}\" is not applicable: {}", configName, prettyPrint(configName, possibleConfiguration));
-                }
+                LOG.warn("Ignore invalid entry in '{}' file for key {}.", "as-config.yml", configEntry.getKey());
             }
         }
 
