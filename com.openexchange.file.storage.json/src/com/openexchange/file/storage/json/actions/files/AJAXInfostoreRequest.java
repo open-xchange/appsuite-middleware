@@ -89,7 +89,6 @@ import com.openexchange.java.FileKnowingInputStream;
 import com.openexchange.java.Strings;
 import com.openexchange.java.UnsynchronizedByteArrayInputStream;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -604,7 +603,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
                 } else {
                     try {
                         ContentType contentType = new ContentType(cts);
-                        if (contentType.startsWith("multipart/") || contentType.containsBoundaryParameter()) {
+                        if (contentType.startsWith("multipart/") || contentType.containsParameter("boundary")) {
                             // deny weird MIME types
                             throw FileStorageExceptionCodes.DENIED_MIME_TYPE.create();
                         }
