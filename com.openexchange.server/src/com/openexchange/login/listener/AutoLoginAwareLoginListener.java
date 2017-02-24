@@ -49,27 +49,16 @@
 
 package com.openexchange.login.listener;
 
-import java.util.Map;
 import com.openexchange.exception.OXException;
-import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
 
 /**
- * {@link LoginListener} - A login listener, which receives call-backs for different phases of the login operation.
+ * {@link AutoLoginAwareLoginListener} - A login listener, which also receives call-backs for auto-login success.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.1
+ * @since v7.8.4
  */
-public interface LoginListener {
-
-    /**
-     * Invoked during login operation right before actual authentication is performed.
-     *
-     * @param request The associated login request
-     * @param properties The arbitrary properties; e.g. <code>"headers"</code> or <code>{@link com.openexchange.authentication.Cookie "cookies"}</code>
-     * @throws OXException If this call-back renders the login attempt as invalid
-     */
-    void onBeforeAuthentication(LoginRequest request, Map<String, Object> properties) throws OXException;
+public interface AutoLoginAwareLoginListener extends LoginListener {
 
     /**
      * Invoked during login operation in case authentication succeeded.
@@ -77,26 +66,6 @@ public interface LoginListener {
      * @param result The login result
      * @throws OXException If this call-back renders the login attempt as invalid
      */
-    void onSucceededAuthentication(LoginResult result) throws OXException;
-
-    /**
-     * Invoked during login operation in case authentication failed.
-     *
-     * @param request The associated login request
-     * @param properties The arbitrary properties; e.g. <code>"headers"</code> or <code>{@link com.openexchange.authentication.Cookie "cookies"}</code>
-     * @param e The optional exception rendering the login attempt as invalid; e.g. <code>null</code> in case authentication service signaled <code>ResultCode.FAILED</code>
-     * @throws OXException If this call-back is supposed to signal a different error
-     */
-    void onFailedAuthentication(LoginRequest request, Map<String, Object> properties, OXException e) throws OXException;
-
-    /**
-     * Invoked during login operation in case authentication gets redirected to another end-point.
-     *
-     * @param request The associated login request
-     * @param properties The arbitrary properties; e.g. <code>"headers"</code> or <code>{@link com.openexchange.authentication.Cookie "cookies"}</code>
-     * @param e The optional exception rendering the login attempt as redirected; e.g. <code>null</code> in case authentication service signaled <code>ResultCode.REDIRECT</code>
-     * @throws OXException If this call-back is supposed to signal a different error
-     */
-    void onRedirectedAuthentication(LoginRequest request, Map<String, Object> properties, OXException e) throws OXException;
+    void onSucceededAutoLogin(LoginResult result) throws OXException;
 
 }

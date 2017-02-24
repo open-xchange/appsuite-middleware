@@ -177,6 +177,7 @@ import com.openexchange.log.audit.AuditLogService;
 import com.openexchange.login.BlockingLoginHandlerService;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.internal.LoginNameRecorder;
+import com.openexchange.login.listener.AutoLoginAwareLoginListener;
 import com.openexchange.login.listener.LoginListener;
 import com.openexchange.mail.MailCounterImpl;
 import com.openexchange.mail.MailIdleCounterImpl;
@@ -228,6 +229,7 @@ import com.openexchange.objectusecount.service.ObjectUseCountServiceTracker;
 import com.openexchange.osgi.BundleServiceTracker;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
+import com.openexchange.osgi.Tools;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.passwordmechs.PasswordMechFactory;
 import com.openexchange.pns.PushNotificationService;
@@ -584,7 +586,7 @@ public final class ServerActivator extends HousekeepingActivator {
         track(LoginHandlerService.class, new LoginHandlerCustomizer(context));
         track(BlockingLoginHandlerService.class, new BlockingLoginHandlerCustomizer(context));
         // Login listener
-        track(LoginListener.class, new LoginListenerCustomizer(context));
+        track(Tools.generateServiceFilter(context, LoginListener.class, AutoLoginAwareLoginListener.class), new LoginListenerCustomizer(context));
         // Multiple handler factory services
         track(MultipleHandlerFactoryService.class, new MultipleHandlerServiceTracker(context));
 
@@ -850,7 +852,7 @@ public final class ServerActivator extends HousekeepingActivator {
          * Register servlets
          */
         registerServlets(getService(HttpService.class));
-        
+
         ShardingSubdomains shardingSubdomains = new ShardingSubdomains();
         registerService(PreferencesItemService.class, shardingSubdomains);
         registerService(ConfigTreeEquivalent.class, shardingSubdomains);
