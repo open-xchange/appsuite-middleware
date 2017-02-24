@@ -49,52 +49,22 @@
 
 package com.openexchange.userfeedback;
 
-import java.sql.Connection;
-import java.util.List;
-import org.json.JSONObject;
-import com.openexchange.exception.OXException;
-
 /**
- * {@link FeedbackType}
+ * {@link ExportResult}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.4
  */
-public interface FeedbackType {
+public interface ExportResult {
 
-    /**
-     * Stores Feedback data
-     *
-     * @param feedback The data
-     * @param con The write connection to the global db
-     * @return The id of the newly created entry or -1
-     * @throws OXException
-     */
-    public long storeFeedback(JSONObject feedback, Connection con) throws OXException;
+    public static ExportResult EMPTY_RESULT = new ExportResult() {
 
-    /**
-     * Retrieves a list of feedback objects
-     *
-     * @param metaDataList The feedback metadata to retrieve
-     * @param con A read connection to the global db
-     * @return A list of feedback objects
-     * @throws OXException
-     */
-    public ExportResultConverter getFeedbacks(List<FeedbackMetaData> metaDataList, Connection con) throws OXException;
+        @Override
+        public Object getResult() {
+            return new Object();
+        }
 
-    /**
-     * Deletes multiple feedback entries
-     * 
-     * @param ids A list of feedback entries
-     * @param con A write connection to the global db
-     * @throws OXException
-     */
-    public void deleteFeedbacks(List<Long> ids, Connection con) throws OXException;
+    };
 
-    /**
-     * Retrieves the feedback type
-     *
-     * @return The feedback type
-     */
-    public String getType();
+    Object getResult();
 }

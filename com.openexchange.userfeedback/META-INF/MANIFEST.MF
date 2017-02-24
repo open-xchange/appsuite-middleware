@@ -6,13 +6,18 @@ Bundle-Version: 7.8.4
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Activator: com.openexchange.userfeedback.osgi.Activator
-Import-Package: com.openexchange.config.cascade,
+Import-Package: com.openexchange.ajax.container,
+ com.openexchange.annotation,
+ com.openexchange.config.cascade,
  com.openexchange.database,
  com.openexchange.exception,
+ com.openexchange.java,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.session,
  com.openexchange.tools.sql,
  com.openexchange.user,
+ org.json,
  org.osgi.framework
-Export-Package: com.openexchange.userfeedback
+Export-Package: com.openexchange.userfeedback,
+ com.openexchange.userfeedback.filter

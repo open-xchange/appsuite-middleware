@@ -49,6 +49,7 @@
 
 package com.openexchange.userfeedback.json.actions;
 
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -60,7 +61,6 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.userfeedback.FeedbackService;
 import com.openexchange.userfeedback.json.osgi.Services;
 
-
 /**
  * {@link StoreAction}
  *
@@ -70,28 +70,26 @@ import com.openexchange.userfeedback.json.osgi.Services;
  */
 public class StoreAction implements AJAXActionService {
 
-
-    public StoreAction() {
-        super();
-    }
-
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         Object data = requestData.getData();
-        if (null == data) {
-            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
-        }
-        String type = requestData.getParameter("type");
-        if (null == type || Strings.isEmpty(type)) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("type");
-        }
+        if (null != data) {
+            if (false == JSONObject.class.isInstance(data)) {
+                throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
+            }
+            JSONObject dataObject = (JSONObject) data;
 
-        FeedbackService service = Services.getService(FeedbackService.class);
-        if(service==null){
-            throw ServiceExceptionCode.absentService(FeedbackService.class);
+            String type = requestData.getParameter("type");
+            if (null == type || Strings.isEmpty(type)) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create("type");
+            }
+
+            FeedbackService service = Services.getService(FeedbackService.class);
+            if (service == null) {
+                throw ServiceExceptionCode.absentService(FeedbackService.class);
+            }
+            service.store(session, type, dataObject);
         }
-        service.storeFeedback(session, type, data);
         return new AJAXRequestResult();
     }
-
 }

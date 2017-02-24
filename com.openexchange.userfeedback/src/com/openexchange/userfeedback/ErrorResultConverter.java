@@ -49,52 +49,64 @@
 
 package com.openexchange.userfeedback;
 
-import java.sql.Connection;
-import java.util.List;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Charsets;
 
 /**
- * {@link FeedbackType}
+ * {@link ErrorResultConverter}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.4
  */
-public interface FeedbackType {
+public class ErrorResultConverter implements ExportResultConverter {
 
-    /**
-     * Stores Feedback data
-     *
-     * @param feedback The data
-     * @param con The write connection to the global db
-     * @return The id of the newly created entry or -1
-     * @throws OXException
-     */
-    public long storeFeedback(JSONObject feedback, Connection con) throws OXException;
+    private final JSONObject error;
 
-    /**
-     * Retrieves a list of feedback objects
-     *
-     * @param metaDataList The feedback metadata to retrieve
-     * @param con A read connection to the global db
-     * @return A list of feedback objects
-     * @throws OXException
-     */
-    public ExportResultConverter getFeedbacks(List<FeedbackMetaData> metaDataList, Connection con) throws OXException;
+    public ErrorResultConverter(String error) {
+        JSONObject jsonError = new JSONObject();
+        try {
+            jsonError.put("error", error);
+        } catch (JSONException e) {
+            // won't happen
+        }
+        this.error = jsonError;
+    }
 
-    /**
-     * Deletes multiple feedback entries
-     * 
-     * @param ids A list of feedback entries
-     * @param con A write connection to the global db
-     * @throws OXException
-     */
-    public void deleteFeedbacks(List<Long> ids, Connection con) throws OXException;
+    @Override
+    public ExportResult get(final ExportType type) {
+        final JSONObject lError = error;
+        return new ExportResult() {
 
-    /**
-     * Retrieves the feedback type
-     *
-     * @return The feedback type
-     */
-    public String getType();
+            @Override
+            public Object getResult() {
+                switch (type) {
+                    case CSV:
+                        return csvErrorResult();
+                    case RAW:
+                    default:
+                        return lError;
+                }
+            }
+
+            private Object csvErrorResult() {
+                ThresholdFileHolder sink = new ThresholdFileHolder();
+                OutputStreamWriter writer = new OutputStreamWriter(sink.asOutputStream(), Charsets.UTF_8);
+
+                try {
+                    writer.write(lError.toString());
+                    writer.flush();
+                    return sink.getClosingStream();
+                } catch (IOException | OXException e) {
+                    // won't happen
+                }
+                return null;
+            }
+        };
+    }
+
 }

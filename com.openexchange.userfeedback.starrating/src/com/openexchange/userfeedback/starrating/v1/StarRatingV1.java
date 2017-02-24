@@ -50,29 +50,25 @@
 package com.openexchange.userfeedback.starrating.v1;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
-import java.util.regex.Pattern;
-import org.json.JSONArray;
+import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.AsciiReader;
 import com.openexchange.java.AsciiWriter;
-import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.tools.sql.DBUtils;
-import com.openexchange.userfeedback.ExportType;
+import com.openexchange.userfeedback.ExportResultConverter;
+import com.openexchange.userfeedback.Feedback;
 import com.openexchange.userfeedback.FeedbackMetaData;
 import com.openexchange.userfeedback.FeedbackType;
 import com.openexchange.userfeedback.starrating.exceptions.StarRatingExceptionCodes;
@@ -85,29 +81,19 @@ import com.openexchange.userfeedback.starrating.exceptions.StarRatingExceptionCo
  */
 public class StarRatingV1 implements FeedbackType {
 
-    private static final List<String> DISPLAY_FIELDS = new ArrayList<>();
-
-    static {
-        for (JSONField field : JSONField.values()) {
-            DISPLAY_FIELDS.add(field.getDisplayName());
-        }
-    }
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(StarRatingV1.class);
 
     private static final String TYPE = "star-rating-v1";
     private static final String INSERT_SQL = "INSERT INTO star_rating_v1 (data) VALUES (?)";
-    private static final String SELECT_SQL = "SELECT data FROM star_rating_v1 WHERE id IN (";
-
-    private static final Pattern PATTERN_QUOTE = Pattern.compile("\"", Pattern.LITERAL);
-    public static final char CELL_DELIMITER = ',';
-    public static final char ROW_DELIMITER = '\n';
+    private static final String SELECT_SQL = "SELECT id, data FROM star_rating_v1 WHERE id IN (";
 
     @Override
-    public long storeFeedback(Object feedback, Connection con) throws OXException {
+    public long storeFeedback(JSONObject feedback, Connection con) throws OXException {
         ResultSet rs = null;
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS);
-            setBinaryStream((JSONObject) feedback, stmt, 1);
+            setBinaryStream(feedback, stmt, 1);
             //            stmt.setObject(1, feedback);
             stmt.executeUpdate();
             rs = stmt.getGeneratedKeys();
@@ -144,93 +130,50 @@ public class StarRatingV1 implements FeedbackType {
     }
 
     @Override
-    public Object getFeedbacks(List<FeedbackMetaData> feedbacks, Connection con, ExportType type) throws OXException {
-        if (feedbacks.size() == 0) {
-            return null;
+    public ExportResultConverter getFeedbacks(List<FeedbackMetaData> feedbackMetaData, Connection con) throws OXException {
+        if (feedbackMetaData.size() == 0) {
+            return ExportResultConverter.EMTPY_CONVERTER;
         }
 
         ResultSet rs = null;
         PreparedStatement stmt = null;
+        Map<Long, Feedback> feedbacks = new HashMap<>();
         try {
-            String sql = Databases.getIN(SELECT_SQL, feedbacks.size());
+            String sql = Databases.getIN(SELECT_SQL, feedbackMetaData.size());
             stmt = con.prepareStatement(sql);
             int x = 1;
-            for (FeedbackMetaData meta : feedbacks) {
+            for (FeedbackMetaData meta : feedbackMetaData) {
                 stmt.setLong(x++, meta.getTypeId());
+                feedbacks.put(meta.getTypeId(), new Feedback(meta, null));
             }
-            ResultSet resultSet = stmt.executeQuery();
-            switch (type) {
-                case CSV:
-                    return convertResultsToCSVStream(resultSet);
-                case RAW:
-                default:
-                    JSONArray result = new JSONArray(feedbacks.size());
-                    while (resultSet.next()) {
-                        try {
-                            JSONObject current = new JSONObject(new AsciiReader(resultSet.getBinaryStream(1)));
-                            result.put(current);
-                        } catch (JSONException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
-                        }
-                    }
-                    return result;
+            rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                long id = rs.getLong(1);
+                try {
+                    Feedback current = feedbacks.get(id);
+                    JSONObject content = new JSONObject(new AsciiReader(rs.getBinaryStream(2)));
+                    current.setContent(content);
+                } catch (JSONException e) {
+                    LOG.error("Unable to read feedback with id {}. Won't return it.", id, e);
+                }
             }
         } catch (final SQLException e) {
             throw StarRatingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
         }
+        return createExportObject(feedbacks.values());
     }
 
-    @SuppressWarnings("resource")
-    private Object convertResultsToCSVStream(ResultSet resultSet) throws OXException {
-        ThresholdFileHolder sink = new ThresholdFileHolder();
-        OutputStreamWriter writer = new OutputStreamWriter(sink.asOutputStream(), Charsets.UTF_8);
-        try {
-            writer.write(convertToLine(DISPLAY_FIELDS));
-            while (resultSet.next()) {
-                try {
-                    JSONObject current = new JSONObject(new AsciiReader(resultSet.getBinaryStream(1)));
-                    writer.write(convertToLine(convertToList(current)));
-                } catch (JSONException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-
-            }
-            writer.flush();
-            return sink.getClosingStream();
-        } catch (final SQLException | IOException e) {
-            sink.close();
-            throw StarRatingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    private static String convertToLine(final List<String> line) {
-        StringBuilder bob = new StringBuilder(1024);
-        for (String token : line) {
-            bob.append('"');
-            bob.append(PATTERN_QUOTE.matcher(token).replaceAll("\"\""));
-            bob.append('"');
-            bob.append(CELL_DELIMITER);
-        }
-        bob.setCharAt(bob.length() - 1, ROW_DELIMITER);
-        return bob.toString();
-    }
-
-    private static List<String> convertToList(final JSONObject json) throws JSONException {
-        final List<String> l = new LinkedList<String>();
-        for (JSONField field : JSONField.values()) {
-            l.add(json.getString(field.getDisplayName()));
-        }
-        return l;
+    private ExportResultConverter createExportObject(Collection<Feedback> feedbacks) {
+        ExportResultConverter converter = new StarRatingV1ExportResultConverter(feedbacks);
+        return converter;
     }
 
     @Override
     public void deleteFeedbacks(List<Long> ids, Connection con) {
         // TODO Auto-generated method stub
-
     }
 
     @Override

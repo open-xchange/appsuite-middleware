@@ -50,7 +50,6 @@
 package com.openexchange.cli;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.client.Invocation.Builder;
@@ -71,7 +70,7 @@ import org.apache.commons.codec.binary.Base64;
  * @since v7.8.4
  * @param <R>
  */
-public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, InputStream> {
+public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Builder> {
 
     protected static final String AUTHORIZATION_HEADER_NAME = "Authorization";
 
@@ -130,9 +129,7 @@ public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, In
                 String authorizationHeaderValue = "Basic " + Base64.encodeBase64String(authString.getBytes());
                 request.header(AUTHORIZATION_HEADER_NAME, authorizationHeaderValue);
             }
-            InputStream response = request.get(InputStream.class);
-
-            R retval = invoke(options, cmd, response);
+            R retval = invoke(options, cmd, request);
             error = false;
             return retval;
         } catch (final ExecutionFault e) {
@@ -190,14 +187,4 @@ public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, In
     protected abstract void addOptions(Options options);
 
     protected abstract WebTarget getEndpoint(CommandLine cmd);
-
-    /**
-     * Invokes the MBean's method.
-     *
-     * @param option The options
-     * @param cmd The command line providing parameters/options
-     * @return The return value
-     * @throws Exception If invocation fails
-     */
-    //    protected abstract R invoke(Options option, CommandLine cmd) throws Exception;
 }

@@ -47,54 +47,62 @@
  *
  */
 
-package com.openexchange.userfeedback;
+package com.openexchange.userfeedback.filter;
 
-import java.sql.Connection;
-import java.util.List;
-import org.json.JSONObject;
-import com.openexchange.exception.OXException;
+import com.openexchange.userfeedback.FeedbackMetaData;
 
 /**
- * {@link FeedbackType}
+ * {@link DateFeedbackFilter}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.4
  */
-public interface FeedbackType {
+public class DateFeedbackFilter implements FeedbackFilter {
 
-    /**
-     * Stores Feedback data
-     *
-     * @param feedback The data
-     * @param con The write connection to the global db
-     * @return The id of the newly created entry or -1
-     * @throws OXException
-     */
-    public long storeFeedback(JSONObject feedback, Connection con) throws OXException;
+    private final long start;
+    private final long end;
+    private final String type;
 
-    /**
-     * Retrieves a list of feedback objects
-     *
-     * @param metaDataList The feedback metadata to retrieve
-     * @param con A read connection to the global db
-     * @return A list of feedback objects
-     * @throws OXException
-     */
-    public ExportResultConverter getFeedbacks(List<FeedbackMetaData> metaDataList, Connection con) throws OXException;
+    public DateFeedbackFilter(String type, long start, long end) {
+        this.type = type;
+        this.start = start;
+        this.end = end;
+    }
 
-    /**
-     * Deletes multiple feedback entries
-     * 
-     * @param ids A list of feedback entries
-     * @param con A write connection to the global db
-     * @throws OXException
-     */
-    public void deleteFeedbacks(List<Long> ids, Connection con) throws OXException;
+    @Override
+    public boolean accept(FeedbackMetaData feedback) {
+        if ((start == 0) && (end == 0)) {
+            return true;
+        }
+        long feedbackDate = feedback.getDate();
+        if (start == 0) {
+            return feedbackDate < end;
+        } else if (end == 0) {
+            return feedbackDate > start;
+        } else {
+            return (feedbackDate < end) && (feedbackDate > start);
+        }
+    }
 
-    /**
-     * Retrieves the feedback type
-     *
-     * @return The feedback type
-     */
-    public String getType();
+    @Override
+    public String getType() {
+        return type;
+    }
+
+    @Override
+    public Long start() {
+        if (start == 0) {
+            return Long.MIN_VALUE;
+        }
+        return start;
+    }
+
+    @Override
+    public Long end() {
+        if (end == 0) {
+            return Long.MAX_VALUE;
+        }
+        return end;
+    }
+
 }

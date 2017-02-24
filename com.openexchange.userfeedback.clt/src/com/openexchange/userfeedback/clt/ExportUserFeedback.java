@@ -53,15 +53,20 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.client.ClientConfig;
 import com.openexchange.cli.AbstractRestCLI;
+import com.openexchange.java.AsciiReader;
+import com.openexchange.java.Charsets;
 
 /**
  * 
@@ -108,8 +113,7 @@ public class ExportUserFeedback extends AbstractRestCLI<Void> {
     }
 
     @Override
-    protected void checkOptions(CommandLine cmd) {
-    }
+    protected void checkOptions(CommandLine cmd) {}
 
     @Override
     protected String getFooter() {
@@ -131,8 +135,14 @@ public class ExportUserFeedback extends AbstractRestCLI<Void> {
     }
 
     @Override
-    protected Void invoke(Options option, CommandLine cmd, InputStream response) throws Exception {
-        Files.write(Paths.get(cmd.getArgs()[0]), IOUtils.toByteArray(response));
+    protected Void invoke(Options option, CommandLine cmd, Builder builder) throws Exception {
+        builder.accept(MediaType.APPLICATION_JSON_TYPE, MediaType.APPLICATION_OCTET_STREAM_TYPE);
+
+        InputStream response = builder.get(InputStream.class);
+
+        Path path = Paths.get(cmd.getArgs()[0]);
+        Files.write(path, IOUtils.toByteArray(new AsciiReader(response), Charsets.US_ASCII.name()));
+        System.out.println("File successfully written to: " + path.toString());
         return null;
     }
 
@@ -151,10 +161,10 @@ public class ExportUserFeedback extends AbstractRestCLI<Void> {
             WebTarget target = baseTarget.path(contextGroup).path(type);
 
             if (cmd.hasOption(START_SHORT)) {
-                target.queryParam("start", cmd.getOptionValue(START_SHORT));
+                target = target.queryParam("start", cmd.getOptionValue(START_SHORT));
             }
             if (cmd.hasOption(END_SHORT)) {
-                target.queryParam("end", cmd.getOptionValue(END_SHORT));
+                target = target.queryParam("end", cmd.getOptionValue(END_SHORT));
             }
             return target;
         } catch (URISyntaxException e) {

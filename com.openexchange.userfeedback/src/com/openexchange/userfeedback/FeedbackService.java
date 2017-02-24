@@ -49,8 +49,10 @@
 
 package com.openexchange.userfeedback;
 
+import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
+import com.openexchange.userfeedback.filter.FeedbackFilter;
 
 /**
  * {@link FeedbackService}
@@ -68,9 +70,9 @@ public interface FeedbackService {
      * @param feedback The feedback data
      * @throws OXException if feedback couldn't be stored
      */
-    public void storeFeedback(Session session, String type, Object feedback) throws OXException;
+    void store(Session session, String type, JSONObject feedback) throws OXException;
 
 
-    public Object listFeedback(String ctxGroup, FeedbackFilter filter, ExportType type) throws OXException;
+    ExportResultConverter export(String ctxGroup, FeedbackFilter filter) throws OXException;
 
 }

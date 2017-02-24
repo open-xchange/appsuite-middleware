@@ -16,4 +16,5 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.tools.sql,
  com.openexchange.userfeedback,
  org.json,
- org.osgi.framework
+ org.osgi.framework,
+ org.slf4j

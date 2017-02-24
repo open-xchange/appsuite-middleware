@@ -49,7 +49,6 @@
 
 package com.openexchange.userfeedback;
 
-
 /**
  * {@link FeedbackMetaData}
  *
@@ -67,6 +66,7 @@ public class FeedbackMetaData {
 
     /**
      * Initializes a new {@link FeedbackMetaData}.
+     * 
      * @param type
      * @param date
      * @param ctxId
@@ -80,7 +80,7 @@ public class FeedbackMetaData {
         this.ctxId = ctxId;
         this.userId = userId;
         this.loginName = loginName;
-        this.typeId=typeId;
+        this.typeId = typeId;
     }
 
     /**

@@ -47,54 +47,53 @@
  *
  */
 
-package com.openexchange.userfeedback;
+package com.openexchange.userfeedback.filter;
 
-import java.sql.Connection;
-import java.util.List;
-import org.json.JSONObject;
-import com.openexchange.exception.OXException;
+import com.openexchange.userfeedback.FeedbackMetaData;
 
 /**
- * {@link FeedbackType}
+ * {@link FeedbackFilter}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-public interface FeedbackType {
+public interface FeedbackFilter {
+
+    public static FeedbackFilter DEFAULT_FILTER = new FeedbackFilter() {
+
+        @Override
+        public boolean accept(FeedbackMetaData feedback) {
+            return true;
+        }
+
+        @Override
+        public String getType() {
+            return "star-rating-v1";
+        }
+
+        @Override
+        public Long start() {
+            return 0L;
+        }
+
+        @Override
+        public Long end() {
+            return 0L;
+        }
+    };
+
+
+    public boolean accept(FeedbackMetaData feedback);
 
     /**
-     * Stores Feedback data
-     *
-     * @param feedback The data
-     * @param con The write connection to the global db
-     * @return The id of the newly created entry or -1
-     * @throws OXException
-     */
-    public long storeFeedback(JSONObject feedback, Connection con) throws OXException;
-
-    /**
-     * Retrieves a list of feedback objects
-     *
-     * @param metaDataList The feedback metadata to retrieve
-     * @param con A read connection to the global db
-     * @return A list of feedback objects
-     * @throws OXException
-     */
-    public ExportResultConverter getFeedbacks(List<FeedbackMetaData> metaDataList, Connection con) throws OXException;
-
-    /**
-     * Deletes multiple feedback entries
-     * 
-     * @param ids A list of feedback entries
-     * @param con A write connection to the global db
-     * @throws OXException
-     */
-    public void deleteFeedbacks(List<Long> ids, Connection con) throws OXException;
-
-    /**
-     * Retrieves the feedback type
+     * The feedback type to query
      *
      * @return The feedback type
      */
     public String getType();
+
+    public Long start();
+
+    public Long end();
+
 }

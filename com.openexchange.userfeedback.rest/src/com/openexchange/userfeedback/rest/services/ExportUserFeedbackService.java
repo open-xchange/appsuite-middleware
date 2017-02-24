@@ -54,19 +54,21 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
-import org.json.JSONArray;
 import com.openexchange.exception.OXException;
 import com.openexchange.rest.services.JAXRSService;
 import com.openexchange.rest.services.annotation.Role;
 import com.openexchange.rest.services.annotation.RoleAllowed;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.userfeedback.ErrorResultConverter;
+import com.openexchange.userfeedback.ExportResult;
+import com.openexchange.userfeedback.ExportResultConverter;
 import com.openexchange.userfeedback.ExportType;
-import com.openexchange.userfeedback.FeedbackFilter;
-import com.openexchange.userfeedback.FeedbackMetaData;
 import com.openexchange.userfeedback.FeedbackService;
+import com.openexchange.userfeedback.filter.DateFeedbackFilter;
 
 /**
  * 
@@ -85,71 +87,40 @@ public class ExportUserFeedbackService extends JAXRSService {
 
     @GET
     @Path("/{context-group}/{type}")
-    public Object export(@QueryParam("start") final long start, @QueryParam("end") final long end, @PathParam("type") final String type, @PathParam("context-group") final String contextGroup) {
-        return export(start, end, type, contextGroup, ExportType.CSV);
+    @Produces(MediaType.APPLICATION_OCTET_STREAM + ";charset=utf-8")
+    public Response export(@QueryParam("start") final long start, @QueryParam("end") final long end, @PathParam("type") final String type, @PathParam("context-group") final String contextGroup) {
+        ExportResult export = export(start, end, type, contextGroup, ExportType.CSV);
+        ResponseBuilder builder = Response.status(200);
+        if (export == null) {
+            return builder.build();
+        }
+        builder.entity(export.getResult());
+        builder.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM + "; charset=utf-8");
+        return builder.build();
     }
 
     @GET
     @Path("/{context-group}/{type}/raw")
     @Produces(MediaType.APPLICATION_JSON)
     public Response exportRaw(@QueryParam("start") final long start, @QueryParam("end") final long end, @PathParam("type") final String type, @PathParam("context-group") final String contextGroup) {
-        Object export = export(start, end, type, contextGroup, ExportType.RAW);
+        ExportResult export = export(start, end, type, contextGroup, ExportType.RAW);
         ResponseBuilder builder = Response.status(200);
         if (export == null) {
             return builder.build();
         }
-        JSONArray feedback = (JSONArray) export;
-
-        builder.entity(feedback);
+        builder.entity(export.getResult());
         return builder.build();
     }
 
-    private Object export(final long start, final long end, final String type, final String contextGroup, ExportType exportType) {
+    private ExportResult export(final long start, final long end, final String type, final String contextGroup, ExportType exportType) {
         FeedbackService feedbackService = this.getService(FeedbackService.class);
 
-        FeedbackFilter feedbackFilter = new FeedbackFilter() {
-
-            @Override
-            public boolean accept(FeedbackMetaData feedback) {
-                if ((start == 0) && (end == 0)) {
-                    return true;
-                }
-                long feedbackDate = feedback.getDate();
-                if (start == 0) {
-                    return feedbackDate < end;
-                } else if (end == 0) {
-                    return feedbackDate > start;
-                } else {
-                    return (feedbackDate < end) && (feedbackDate > start);
-                }
-            }
-
-            @Override
-            public String getType() {
-                return type;
-            }
-
-            @Override
-            public Long start() {
-                if (start == 0) {
-                    return Long.MIN_VALUE;
-                }
-                return start;
-            }
-
-            @Override
-            public Long end() {
-                if (end == 0) {
-                    return Long.MAX_VALUE;
-                }
-                return end;
-            }
-        };
         try {
-            return feedbackService.listFeedback(contextGroup, feedbackFilter, exportType);
+            ExportResultConverter converter = feedbackService.export(contextGroup, new DateFeedbackFilter(type, start, end));
+            return converter.get(exportType);
         } catch (OXException e) {
             org.slf4j.LoggerFactory.getLogger(ExportUserFeedbackService.class).error("An error occurred while retrieving user feedback.", e);
-            return e.getMessage();
+            return new ErrorResultConverter(e.getMessage()).get(exportType);
         }
     }
 }

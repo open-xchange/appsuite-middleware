@@ -47,51 +47,33 @@
  *
  */
 
-package com.openexchange.userfeedback;
+package com.openexchange.userfeedback.starrating.v1;
+
+import java.io.InputStream;
+import org.json.JSONArray;
+import com.openexchange.userfeedback.ExportResult;
 
 /**
- * {@link FeedbackFilter}
+ * {@link StarRatingV1ExportResult}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.4
  */
-public interface FeedbackFilter {
+public class StarRatingV1ExportResult implements ExportResult {
 
-    public static FeedbackFilter DEFAULT_FILTER = new FeedbackFilter() {
+    private Object result;
 
-        @Override
-        public boolean accept(FeedbackMetaData feedback) {
-            return true;
-        }
+    @Override
+    public Object getResult() {
+        return result;
+    }
 
-        @Override
-        public String getType() {
-            return "star-rating-v1";
-        }
+    public void setCSV(InputStream result) {
+        this.result = result;
 
-        @Override
-        public Long start() {
-            return 0L;
-        }
+    }
 
-        @Override
-        public Long end() {
-            return 0L;
-        }
-    };
-
-
-    public boolean accept(FeedbackMetaData feedback);
-
-    /**
-     * The feedback type to query
-     *
-     * @return The feedback type
-     */
-    public String getType();
-
-    public Long start();
-
-    public Long end();
-
+    public void setRAW(JSONArray result) {
+        this.result = result;
+    }
 }

@@ -55,6 +55,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import org.json.JSONObject;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DatabaseService;
@@ -63,13 +64,13 @@ import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.tools.sql.DBUtils;
-import com.openexchange.userfeedback.ExportType;
-import com.openexchange.userfeedback.FeedbackFilter;
+import com.openexchange.userfeedback.ExportResultConverter;
 import com.openexchange.userfeedback.FeedbackMetaData;
 import com.openexchange.userfeedback.FeedbackService;
 import com.openexchange.userfeedback.FeedbackType;
 import com.openexchange.userfeedback.FeedbackTypeRegistry;
 import com.openexchange.userfeedback.exception.FeedbackExceptionCodes;
+import com.openexchange.userfeedback.filter.FeedbackFilter;
 import com.openexchange.userfeedback.osgi.Services;
 
 /**
@@ -81,7 +82,7 @@ import com.openexchange.userfeedback.osgi.Services;
 public class FeedbackServiceImpl implements FeedbackService {
 
     @Override
-    public void storeFeedback(Session session, String type, Object feedback) throws OXException {
+    public void store(Session session, String type, JSONObject feedback) throws OXException {
         // Get context group id
         ConfigViewFactory factory = Services.getService(ConfigViewFactory.class);
         if (factory == null) {
@@ -163,7 +164,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     }
 
     @Override
-    public Object listFeedback(String ctxGroup, FeedbackFilter filter, ExportType type) throws OXException {
+    public ExportResultConverter export(String ctxGroup, FeedbackFilter filter) throws OXException {
         FeedbackTypeRegistry registry = FeedbackTypeRegistryImpl.getInstance();
         FeedbackType feedBackType = registry.getFeedbackType(filter.getType());
 
@@ -182,10 +183,10 @@ public class FeedbackServiceImpl implements FeedbackService {
 
             List<FeedbackMetaData> metaDataList = loadFeedbackMetaData(readCon, filter, ctxGroup);
             if (metaDataList.isEmpty()) {
-                return null;
+                return ExportResultConverter.EMTPY_CONVERTER;
             }
 
-            return feedBackType.getFeedbacks(metaDataList, readCon, type);
+            return feedBackType.getFeedbacks(metaDataList, readCon);
         } catch (SQLException e) {
             throw FeedbackExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage());
         } finally {
