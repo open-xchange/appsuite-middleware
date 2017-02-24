@@ -414,12 +414,18 @@ public class ContentType extends ParameterizedHeader {
             return;
         }
         try {
-            final String cts = prepareParameterizedHeader(contentType);
+            String cts = prepareParameterizedHeader(contentType);
             int semicolonPos = cts.indexOf(';');
             int commaPos = -1;
-            final String type = semicolonPos < 0 ? cts : cts.substring(0, semicolonPos);
+            String type = semicolonPos < 0 ? cts : cts.substring(0, semicolonPos);
             // Check for '/' character
-            final int slashPos = type.indexOf(DELIMITER);
+            int slashPos = type.indexOf(DELIMITER);
+            if (slashPos < 0) {
+                if ("*octet".equalsIgnoreCase(type)) {
+                    type = DEFAULT_PRIMTYPE + "/" + DEFAULT_SUBTYPE;
+                    slashPos = type.indexOf(DELIMITER);
+                }
+            }
             if (slashPos >= 0) {
                 try {
                     // Primary type
