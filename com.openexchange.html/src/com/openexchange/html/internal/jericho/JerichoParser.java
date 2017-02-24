@@ -184,7 +184,7 @@ public final class JerichoParser {
      * @throws OXException If specified HTML content cannot be parsed
      */
     public void parse(final String html, final JerichoHandler handler, final boolean checkSize) throws OXException {
-        int timeout = htmlParseTimeoutSec;
+        int timeout = 0; //htmlParseTimeoutSec;
         if (timeout <= 0) {
             doParse(html, handler, checkSize);
             return;
@@ -292,9 +292,6 @@ public final class JerichoParser {
             } else {
                 switch (enumType) {
                     case START_TAG:
-                        if (indexOf('<', 1, tag) >= 0) {
-                            throw HtmlExceptionCodes.CORRUPT.create();
-                        }
                         handler.handleStartTag((StartTag) tag);
                         break;
                     case END_TAG:
