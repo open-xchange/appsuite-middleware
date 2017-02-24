@@ -50,14 +50,16 @@
 package com.openexchange.pns.mobile.api.facade;
 
 import java.util.Map;
-import org.json.JSONValue;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.pns.KnownTransport;
 import com.openexchange.pns.Message;
 import com.openexchange.pns.PushExceptionCodes;
 import com.openexchange.pns.PushMessageGenerator;
 import com.openexchange.pns.PushNotification;
-import com.openexchange.pns.PushNotifications;
+
+import javapns.json.JSONException;
+import javapns.notification.PushNotificationPayload;
 
 
 /**
@@ -70,6 +72,7 @@ public class MobileApiFacadeMessageGenerator implements PushMessageGenerator {
 
     private static final String TRANSPORT_ID_GCM = KnownTransport.GCM.getTransportId();
     private static final int GCM_MAX_PAYLOAD_SIZE = 4096;
+    private static final String TRANSPORT_ID_APNS = KnownTransport.APNS.getTransportId();
 
     // ------------------------------------------------------------------------------------------------------------------------
 
@@ -86,7 +89,7 @@ public class MobileApiFacadeMessageGenerator implements PushMessageGenerator {
     }
 
     @Override
-    public Message<com.google.android.gcm.Message> generateMessageFor(String transportId, PushNotification notification) throws OXException {
+    public Message<?> generateMessageFor(String transportId, PushNotification notification) throws OXException {
         if (TRANSPORT_ID_GCM.equals(transportId)) {
             // Build the GCM/FCM message payload
 
@@ -114,6 +117,38 @@ public class MobileApiFacadeMessageGenerator implements PushMessageGenerator {
                     return gcmMessage;
                 }
            };
+        } else if (TRANSPORT_ID_APNS.equals(transportId)) {
+            // Build APNS payload as expected by client
+
+            final PushNotificationPayload payload = new PushNotificationPayload();
+            Map<String, Object> messageData = notification.getMessageData();
+            try {
+                String subject = MessageDataUtil.getSubject(messageData);
+                String sender = MessageDataUtil.getSender(messageData);
+                String path = MessageDataUtil.getPath(messageData);
+                int unread = MessageDataUtil.getUnread(messageData);
+
+                StringBuffer sb = new StringBuffer(sender);
+                sb.append("\n");
+                sb.append(subject);
+
+                payload.addAlert(sb.toString());
+
+                if (unread > -1) {
+                  payload.addBadge(unread);
+                }
+
+                payload.addCustomDictionary("cid", path);
+                return new Message<PushNotificationPayload>() {
+
+                    @Override
+                    public PushNotificationPayload getMessage() {
+                        return payload;
+                    };
+                };
+            } catch (JSONException e) {
+                throw PushExceptionCodes.MESSAGE_GENERATION_FAILED.create(e, e.getMessage());
+            }
         }
 
         throw PushExceptionCodes.UNSUPPORTED_TRANSPORT.create(null == transportId ? "null" : transportId);
