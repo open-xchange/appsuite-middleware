@@ -47,39 +47,38 @@
  *
  */
 
-package com.openexchange.mailaccount;
+package com.openexchange.imap.osgi.console;
 
-import com.openexchange.i18n.LocalizableStrings;
-
+import org.eclipse.osgi.framework.console.CommandInterpreter;
+import org.eclipse.osgi.framework.console.CommandProvider;
+import com.openexchange.imap.cache.ListLsubCache;
 
 /**
- * {@link KnownStatusMessage}
+ * {@link ClearListLsubCommandProvider}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.3
+ * @since v7.8.0
  */
-public class KnownStatusMessage implements LocalizableStrings {
+public class ClearListLsubCommandProvider implements CommandProvider {
 
     /**
-     * Initializes a new {@link KnownStatusMessage}.
+     * Initializes a new {@link ClearListLsubCommandProvider}.
      */
-    private KnownStatusMessage() {
+    public ClearListLsubCommandProvider() {
         super();
     }
 
-    // The message advertising that everything is fine with checked account
-    public static final String MESSAGE_OK = "All fine";
+    @Override
+    public String getHelp() {
+        return "clearimaplistlsub <user-id> <context-id> - Clears the content of the IMAP LIST/LSUB cache for the primary account\n";
+    }
 
-    // The message advertising that authentication against referenced mail account does not work or stopped working
-    public static final String MESSAGE_INVALID_CREDENTIALS = "The entered credential or authentication information does not work or are no longer accepted by provider. Please change them.";
+    public void _clearimaplistlsub(final CommandInterpreter ci) {
+        String sUserId = ci.nextArgument();
+        String sContextId = ci.nextArgument();
 
-    // The message advertising that affected account is broken and needs to be re-created
-    public static final String MESSAGE_RECREATION_NEEDED = "Account is broken and needs to be re-created";
-
-    // The message advertising that affected account has been disabled by administrator
-    public static final String MESSAGE_DISABLED = "Account is disabled.";
-
-    // The message advertising that affected account is currently in setup phase and does not yet reflect up-to-date information
-    public static final String MESSAGE_IN_SETUP = "Account is current being set-up.";
+        ListLsubCache.dropFor(Integer.parseInt(sUserId.trim()), Integer.parseInt(sContextId.trim()), false, true);
+        ci.println("Cleared LIST/LSUB cache for user " + sUserId + " in context " + sContextId);
+    }
 
 }

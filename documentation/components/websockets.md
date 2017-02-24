@@ -18,7 +18,7 @@ Following the [exemplary best-practice configuration for Apache](http://oxpedia.
 the `mod_proxy_wstunnel` module needs at first to be enabled:
 
 ```
-  $ a2enmod mod_proxy_wstunnel
+  $ a2enmod proxy_wstunnel
 ```
 
 Assuming there is already a proxy configuration for Open-Xchange Groupware nodes; e.g.
