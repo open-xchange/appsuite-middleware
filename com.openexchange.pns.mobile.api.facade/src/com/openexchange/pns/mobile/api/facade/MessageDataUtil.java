@@ -75,21 +75,13 @@ public class MessageDataUtil {
     }
 
     private static int getInteger(Map<String, Object> messageData, String key) {
-        if (messageData.containsKey(key)) {
-            if (messageData.get(key) instanceof Integer) {
-                return (Integer) messageData.get(key);
-            }
-        }
-        return -1;
+        Object value = messageData.get(key);
+        return value instanceof Integer ? ((Integer) value).intValue() : -1;
     }
 
     private static String getString(Map<String, Object> messageData, String key) {
-        if (messageData.containsKey(key)) {
-            if (messageData.get(key) instanceof String) {
-                return (String) messageData.get(key);
-            }
-        }
-        return "";
+        Object value = messageData.get(key);
+        return value instanceof String ? (String) value : "";
     }
 
 }
