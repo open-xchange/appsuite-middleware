@@ -17,8 +17,6 @@ Import-Package: com.openexchange.ajax.requesthandler,
  javax.ws.rs,
  javax.ws.rs.core,
  net.sf.uadetector,
- org.apache.http.impl.bootstrap,
- org.glassfish.grizzly.http.server,
  org.json,
  org.osgi.framework,
  org.slf4j
