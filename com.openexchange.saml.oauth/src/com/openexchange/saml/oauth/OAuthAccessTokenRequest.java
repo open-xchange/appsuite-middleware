@@ -75,7 +75,6 @@ import com.openexchange.java.Charsets;
  */
 public class OAuthAccessTokenRequest {
 
-    private final CloseableHttpClient httpClient;
     private static final OAuthAccessTokenRequest INSTANCE = new OAuthAccessTokenRequest();
 
     /**
@@ -87,9 +86,14 @@ public class OAuthAccessTokenRequest {
         return INSTANCE;
     }
 
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private final CloseableHttpClient httpClient;
+
     private OAuthAccessTokenRequest() {
+        super();
         HttpClientBuilder clientBuilder = HttpClientBuilder.create();
-        httpClient = clientBuilder.build();;
+        httpClient = clientBuilder.build();
     }
 
     private static final String GRANT_TYPE = "urn:ietf:params:oauth:grant-type:saml2-bearer";
@@ -103,10 +107,12 @@ public class OAuthAccessTokenRequest {
             HttpPost requestAccessToken = new HttpPost(SAMLOAuthConfig.getTokenEndpoint(userId, contextId));
             requestAccessToken.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
-            StringBuilder authBuilder = new StringBuilder(SAMLOAuthConfig.getClientID(userId, contextId));
-            authBuilder.append(":").append(SAMLOAuthConfig.getClientSecret(userId, contextId));
-            String auth = "Basic " + Base64.encodeBase64String(authBuilder.toString().getBytes());
-            requestAccessToken.addHeader("Authorization", auth);
+            {
+                StringBuilder authBuilder = new StringBuilder(SAMLOAuthConfig.getClientID(userId, contextId));
+                authBuilder.append(":").append(SAMLOAuthConfig.getClientSecret(userId, contextId));
+                String auth = "Basic " + Base64.encodeBase64String(authBuilder.toString().getBytes(Charsets.UTF_8));
+                requestAccessToken.addHeader("Authorization", auth);
+            }
 
             List<NameValuePair> nvps = new ArrayList<NameValuePair>();
 
@@ -119,12 +125,13 @@ public class OAuthAccessTokenRequest {
             String responseStr = EntityUtils.toString(validationResp.getEntity());
             if (responseStr != null) {
                 JSONObject jsonResponse = new JSONObject(responseStr);
-                if (!jsonResponse.has(ACCESS_TOKEN)) {
+                String accessToken = jsonResponse.optString(ACCESS_TOKEN, null);
+                if (null == accessToken) {
                     throw SAMLOAuthExceptionCodes.NO_ACCESS_TOKEN.create("Token response doesn't contain the access token.");
-                } else {
-                    OAuthAccessToken token = new OAuthAccessToken(jsonResponse.getString(ACCESS_TOKEN), jsonResponse.getString(REFRESH_TOKEN), jsonResponse.getString(TOKEN_TYPE), jsonResponse.getInt(EXPIRE));
-                    return token;
                 }
+
+                OAuthAccessToken token = new OAuthAccessToken(accessToken, jsonResponse.getString(REFRESH_TOKEN), jsonResponse.getString(TOKEN_TYPE), jsonResponse.getInt(EXPIRE));
+                return token;
             }
 
             throw SAMLOAuthExceptionCodes.NO_ACCESS_TOKEN.create("Unable to parse token response.");

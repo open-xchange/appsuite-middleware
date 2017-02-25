@@ -1835,16 +1835,17 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
     }
 
     private void addParentPermissionsToFolder(FolderObject folder, Map<Integer, OCLPermission> permsMappingPerEntity, Map<Integer, OCLPermission> parentMappingPerEntity) {
-        for (Integer entity : parentMappingPerEntity.keySet()) {
+        for (Map.Entry<Integer, OCLPermission> entityEntry : parentMappingPerEntity.entrySet()) {
+            Integer entity = entityEntry.getKey();
             if (OCLPermission.ALL_GUESTS == entity.intValue()) {
                 continue;
             }
-            OCLPermission parentPerm = parentMappingPerEntity.get(entity);
+            OCLPermission parentPerm = entityEntry.getValue();
             if (permsMappingPerEntity.containsKey(entity)) {
                 OCLPermission folderPerm = permsMappingPerEntity.remove(entity);
                 folderPerm.setAllPermission(Math.max(folderPerm.getFolderPermission(), parentPerm.getFolderPermission()), Math.max(folderPerm.getReadPermission(), parentPerm.getReadPermission()), Math.max(folderPerm.getWritePermission(), parentPerm.getWritePermission()), Math.max(folderPerm.getDeletePermission(), parentPerm.getDeletePermission()));
                 folderPerm.setFolderAdmin(folderPerm.isFolderAdmin() || parentPerm.isFolderAdmin());
-                folderPerm.setEntity(entity);
+                folderPerm.setEntity(entity.intValue());
                 folderPerm.setFuid(folder.getObjectID());
                 permsMappingPerEntity.put(entity, folderPerm);
             } else {

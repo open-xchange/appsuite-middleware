@@ -348,7 +348,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
             }
 
             OpenSAML openSAML = new OpenSAML();
-            byte[] decodedBytes = Base64.decodeBase64(base64SamlResponse.getBytes());
+            byte[] decodedBytes = Base64.decodeBase64(base64SamlResponse.getBytes(Charsets.UTF_8));
             Element responseElement = openSAML.getParserPool().parse(new ByteArrayInputStream(decodedBytes)).getDocumentElement();
             XMLObject unmarshalledResponse = openSAML.getUnmarshallerFactory().getUnmarshaller(responseElement).unmarshall(responseElement);
             final Response response = (Response) unmarshalledResponse;

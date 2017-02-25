@@ -53,6 +53,7 @@ import static com.openexchange.folderstorage.mail.MailFolderStorage.closeMailAcc
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
 import gnu.trove.map.hash.TIntIntHashMap;
+import java.io.Serializable;
 import java.util.EnumSet;
 import java.util.Locale;
 import java.util.Set;
@@ -753,12 +754,14 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
         }
     }
 
-    private static interface LocalizedNameProvider {
+    private static interface LocalizedNameProvider extends Serializable {
 
         String getLocalizedName(Locale locale);
     }
 
     private static final class StaticLocalizedNameProvider implements LocalizedNameProvider {
+
+        private static final long serialVersionUID = 7258965483623767051L;
 
         private final String name;
 
@@ -771,9 +774,11 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
         public String getLocalizedName(Locale locale) {
             return name;
         }
-    };
+    }
 
     private static final class CommonLocalizedNameProvider implements LocalizedNameProvider {
+
+        private static final long serialVersionUID = -2733154469307477060L;
 
         private final String key;
 
@@ -786,6 +791,6 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
         public String getLocalizedName(Locale locale) {
             return StringHelper.valueOf(locale).getString(key);
         }
-    };
+    }
 
 }
