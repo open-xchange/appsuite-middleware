@@ -52,85 +52,18 @@ package com.openexchange.test;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
-import com.openexchange.ajax.advertisement.AdvertisementTestSuite;
-import com.openexchange.ajax.drive.DriveAJAXSuite;
-import com.openexchange.ajax.find.FindTestSuite;
 import com.openexchange.ajax.framework.ProvisioningSetup;
-import com.openexchange.ajax.jslob.JSlobTestSuite;
-import com.openexchange.ajax.oauth.provider.OAuthProviderTests;
 import com.openexchange.exception.OXException;
-import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
- * Test suite for all AJAX interface tests.
+ * Test suite for all AJAX interface tests. All suites considered within this definition will be executed sequentially.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-@RunWith(ParallelSuite.class)
+@RunWith(Suite.class)
 @Suite.SuiteClasses({
-    com.openexchange.SmokeTestSuite.class,
-    com.openexchange.ajax.FolderTest.class,
-    com.openexchange.ajax.UserTest.class,
-    com.openexchange.ajax.mailaccount.MailAccountSuite.class,
-    com.openexchange.ajax.appointment.AppointmentAJAXSuite.class,
-    com.openexchange.ajax.attach.AttachmentTests.class,
-    com.openexchange.ajax.config.ConfigTestSuite.class,
-    com.openexchange.ajax.contact.ContactAJAXSuite.class,
-    com.openexchange.ajax.folder.FolderTestSuite.class,
-    com.openexchange.ajax.group.GroupTestSuite.class,
-    com.openexchange.ajax.importexport.ImportExportServerSuite.class,
-    com.openexchange.ajax.infostore.InfostoreAJAXSuite.class,
-    com.openexchange.ajax.mail.MailTestSuite.class,
-    com.openexchange.ajax.mail.filter.MailFilterTestSuite.class,
-    com.openexchange.ajax.redirect.RedirectTests.class,
-    com.openexchange.ajax.reminder.ReminderAJAXSuite.class,
-    com.openexchange.ajax.session.SessionTestSuite.class,
-    com.openexchange.ajax.task.TaskTestSuite.class,
-    com.openexchange.ajax.publish.PublishTestSuite.class,
-    com.openexchange.ajax.subscribe.SubscribeTestSuite.class,
-    com.openexchange.ajax.user.UserAJAXSuite.class,
-    com.openexchange.subscribe.google.GoogleTestSuite.class,
-    // TODO: enable when MSLiveOAuthClient is implemented
-    // com.openexchange.subscribe.mslive.MSLiveTestSuite.class,
-    
-    com.openexchange.dav.caldav.tests.CalDAVTestSuite.class,
-    com.openexchange.dav.caldav.bugs.CalDAVBugSuite.class,
-    com.openexchange.dav.carddav.tests.CardDAVTestSuite.class,
-    com.openexchange.dav.carddav.bugs.CardDAVBugSuite.class,
-    
-    com.openexchange.grizzly.GrizzlyTestSuite.class,
-    
-    com.openexchange.webdav.xml.appointment.AppointmentWebdavSuite.class,
-    com.openexchange.webdav.xml.contact.ContactWebdavSuite.class,
-    com.openexchange.webdav.xml.folder.FolderWebdavSuite.class,
-    com.openexchange.webdav.xml.task.TaskWebdavSuite.class,
-    com.openexchange.webdav.xml.attachment.AttachmentWebdavSuite.class,
-    com.openexchange.ajax.resource.ResourceSuite.class,
-    
-    com.openexchange.ajax.roundtrip.pubsub.PubSubSuite.class,
-    com.openexchange.webdav.xml.GroupUserTest.class,
-    /*
-     * TODO Enable the following test again. But this requires fixing the server. Currently the request fails.
-     * com.openexchange.webdav.client.NaughtyClientTest.class,
-     */
-    com.openexchange.ajax.appointment.recurrence.AppointmentParticipantsShouldBecomeUsersIfPossible.class,
-    com.openexchange.ajax.task.TaskExternalUsersBecomeInternalUsers.class,
-//    com.openexchange.ajax.contact.AggregatingContactTest.class,
-    com.openexchange.ajax.framework.ParamsTest.class,
-    com.openexchange.ajax.contact.AdvancedSearchTest.class,
-    com.openexchange.ajax.tokenloginV2.TokenLoginV2Test.class,
-    com.openexchange.ajax.oauth.OAuthTests.class,
-    com.openexchange.test.resourcecache.ResourceCacheTest.class,
-    FindTestSuite.class,
-    com.openexchange.ajax.quota.QuotaTestSuite.class,
-    JSlobTestSuite.class,
-    // Needs to be disabled as associated test suite requires a frontend package, which is currently not available
-    // ManifestsTestSuite.class,
-    // TODO: enable
-    DriveAJAXSuite.class,
-    com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRendererTest.class,
-    AdvertisementTestSuite.class,
-    OAuthProviderTests.class,
+    com.openexchange.test.MainInterfaceTests.class,
+    com.openexchange.test.InterfaceSmtpMockTests.class,
 })
 public final class InterfaceTests {
 
