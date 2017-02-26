@@ -54,6 +54,10 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/bundles/*
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
+%dir /opt/open-xchange/sbin/
+/opt/open-xchange/sbin/*
+%dir /opt/open-xchange/lib/
+/opt/open-xchange/lib/com.openexchange.userfeedback.clt.jar
 
 %changelog
 * Wed Feb 08 2016 Martin Schneider <martin.schneider@open-xchange.com>
