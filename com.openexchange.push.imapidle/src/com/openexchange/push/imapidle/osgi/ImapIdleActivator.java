@@ -54,6 +54,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.lock.LockService;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -110,6 +111,7 @@ public class ImapIdleActivator extends HousekeepingActivator {
         }
         trackService(PushNotificationService.class);
         trackService(SessionStorageService.class);
+        trackService(LockService.class);
         openTrackers();
 
         registerService(MailAccountDeleteListener.class, new ImapIdleMailAccountDeleteListener());
