@@ -122,7 +122,7 @@ EARLY_NEEDED_TOOLS="basename cat echo dirname java pwd tr date"
 NEEDED_TOOLS="awk bzip2 cat cut cp df du egrep find file grep gzip head mkdir mktemp rm rmdir sed sleep tail tar tr xargs"
 OX_LOG_DIR=/var/log/open-xchange
 OX_CONFIG_DIRS="/opt/open-xchange/etc /opt/open-xchange/documentconverter/etc"
-OTHER_CONFIGS="/etc/security/limits.conf"
+OTHER_CONFIGS="/etc/security/limits.conf /etc/*-release"
 
 ###############################################################################
 #                                   Functions                                 #
@@ -548,12 +548,10 @@ distribution_check() {
          test -f /etc/mysql/my.cnf && OTHER_CONFIGS="${OTHER_CONFIGS} /etc/mysql/my.cnf"
      elif [ $(( ${DIST} & ${SUSE} )) -eq ${SUSE} ]; then
          echo "SuSE system detected"
-         OTHER_CONFIGS="${OTHER_CONFIGS} /etc/SuSE-release"
          PROCS=${PROCS}';rpm -qa --last;verify_ox_rpm_packages SuSE'
          test -f /etc/my.cnf && OTHER_CONFIGS="${OTHER_CONFIGS} /etc/my.cnf"
      elif [ $(( ${DIST} & ${REDHAT} )) -eq ${REDHAT} ]; then
          echo "Redhat system detected"
-         OTHER_CONFIGS="${OTHER_CONFIGS} /etc/*-release"
          PROCS=${PROCS}';rpm -qa --last;verify_ox_rpm_packages Redhat'
          test -f /etc/my.cnf && OTHER_CONFIGS="${OTHER_CONFIGS} /etc/my.cnf"
      else
