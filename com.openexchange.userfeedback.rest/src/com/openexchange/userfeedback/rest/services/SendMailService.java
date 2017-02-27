@@ -87,7 +87,7 @@ public class SendMailService extends JAXRSService {
     @GET
     @Path("/{context-group}/{type}")
     @Produces(MediaType.APPLICATION_OCTET_STREAM + ";charset=utf-8")
-    public Response export(@QueryParam("start") final long start, @QueryParam("end") final long end, @PathParam("type") final String type, @PathParam("context-group") final String contextGroup) {
+    public Response sendMail(@QueryParam("start") final long start, @QueryParam("end") final long end, @PathParam("type") final String type, @PathParam("context-group") final String contextGroup) {
         Map<String, String> recipients = new HashMap<>();
         // TODO: Read from config service
         recipients.put("CHANGEME", "dummy@example.org");
