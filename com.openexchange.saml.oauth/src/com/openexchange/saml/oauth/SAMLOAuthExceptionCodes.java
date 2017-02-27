@@ -64,7 +64,7 @@ import com.openexchange.exception.OXExceptionStrings;
 public enum SAMLOAuthExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
-     * Unable to retrieve access token.
+     * Unable to retrieve access token: %1$s
      */
     NO_ACCESS_TOKEN("Unable to retrieve access token: %1$s", Category.CATEGORY_ERROR, 1)
     ;
