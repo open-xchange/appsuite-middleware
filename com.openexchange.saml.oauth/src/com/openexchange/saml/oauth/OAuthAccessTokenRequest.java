@@ -66,6 +66,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
+import com.openexchange.rest.client.httpclient.HttpClients;
 
 /**
  * {@link OAuthAccessTokenRequest}
@@ -103,8 +104,10 @@ public class OAuthAccessTokenRequest {
     private static final String ACCESS_TOKEN = "access_token";
 
     public OAuthAccessToken requestAccessToken(String base64SamlResponse, int userId, int contextId) throws OXException {
+        HttpPost requestAccessToken = null;
+        HttpResponse validationResp = null;
         try {
-            HttpPost requestAccessToken = new HttpPost(SAMLOAuthConfig.getTokenEndpoint(userId, contextId));
+            requestAccessToken = new HttpPost(SAMLOAuthConfig.getTokenEndpoint(userId, contextId));
             requestAccessToken.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
             {
@@ -121,7 +124,7 @@ public class OAuthAccessTokenRequest {
 
             requestAccessToken.setEntity(new UrlEncodedFormEntity(nvps, Charsets.UTF_8));
 
-            HttpResponse validationResp = httpClient.execute(requestAccessToken);
+            validationResp = httpClient.execute(requestAccessToken);
             String responseStr = EntityUtils.toString(validationResp.getEntity());
             if (responseStr != null) {
                 JSONObject jsonResponse = new JSONObject(responseStr);
@@ -141,6 +144,8 @@ public class OAuthAccessTokenRequest {
             throw SAMLOAuthExceptionCodes.NO_ACCESS_TOKEN.create(e, e.getMessage());
         } catch (JSONException e) {
             throw SAMLOAuthExceptionCodes.NO_ACCESS_TOKEN.create(e, e.getMessage());
+        } finally {
+            HttpClients.close(requestAccessToken, validationResp);
         }
     }
 }
