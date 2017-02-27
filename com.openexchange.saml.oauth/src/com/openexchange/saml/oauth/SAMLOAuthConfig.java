@@ -53,6 +53,7 @@ import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.saml.oauth.osgi.Services;
+import com.openexchange.server.ServiceExceptionCode;
 
 /**
  * {@link SAMLOAuthConfig}
@@ -66,26 +67,74 @@ public class SAMLOAuthConfig {
     private static final String CLIENT_ID_PROPERTY = "com.openexchange.saml.oauth.clientId";
     private static final String CLIENT_SECRET_PROPERTY = "com.openexchange.saml.oauth.clientSecret";
 
+    /**
+     * Gets the configured token end-point for specified user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The token end-point
+     * @throws OXException If token end-point cannot be returned
+     */
     static String getTokenEndpoint(int userId, int contextId) throws OXException{
-        ConfigViewFactory configViewFactory = Services.getService(ConfigViewFactory.class);
+        ConfigViewFactory configViewFactory = Services.optService(ConfigViewFactory.class);
+        if (null == configViewFactory) {
+            throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
+        }
+
         ConfigView view = configViewFactory.getView(userId, contextId);
         return view.get(TOKEN_ENDPOINT_PROPERTY, String.class);
     }
 
+    /**
+     * Gets the configured client identifier for specified user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The client identifier
+     * @throws OXException If client identifier cannot be returned
+     */
     static String getClientID(int userId, int contextId) throws OXException {
-        ConfigViewFactory configViewFactory = Services.getService(ConfigViewFactory.class);
+        ConfigViewFactory configViewFactory = Services.optService(ConfigViewFactory.class);
+        if (null == configViewFactory) {
+            throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
+        }
+
         ConfigView view = configViewFactory.getView(userId, contextId);
         return view.get(CLIENT_ID_PROPERTY, String.class);
     }
 
+    /**
+     * Gets the client secret for specified user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The client secret
+     * @throws OXException If client secret cannot be returned
+     */
     static String getClientSecret(int userId, int contextId) throws OXException{
-        ConfigViewFactory configViewFactory = Services.getService(ConfigViewFactory.class);
+        ConfigViewFactory configViewFactory = Services.optService(ConfigViewFactory.class);
+        if (null == configViewFactory) {
+            throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
+        }
+
         ConfigView view = configViewFactory.getView(userId, contextId);
         return view.get(CLIENT_SECRET_PROPERTY, String.class);
     }
 
+    /**
+     * Checks whether necessary options are specified for given user that are required to let SAML OAuth work.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> if necessary options are available; otherwise <code>false</code>
+     * @throws OXException If checking necessary options fails
+     */
     public static boolean isConfigured(int userId, int contextId) throws OXException{
-        ConfigViewFactory configViewFactory = Services.getService(ConfigViewFactory.class);
+        ConfigViewFactory configViewFactory = Services.optService(ConfigViewFactory.class);
+        if (null == configViewFactory) {
+            throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
+        }
+
         ConfigView view = configViewFactory.getView(userId, contextId);
         return view.property(TOKEN_ENDPOINT_PROPERTY, String.class).isDefined() && view.property(CLIENT_ID_PROPERTY, String.class).isDefined() && view.property(CLIENT_SECRET_PROPERTY, String.class).isDefined();
     }
