@@ -82,9 +82,9 @@ SKIP_RUN_COMMANDS=false
 SKIP_RUN_COMMANDS_LONG=skip-system-tools
 SKIP_RUN_COMMANDS_VALUES="true false"
 SPINNER='/-\|'
-EXCLUDE_OLDER_LOGS_THAN=disabled
+EXCLUDE_OLDER_LOGS_THAN=5
 EXCLUDE_OLDER_LOGS_THAN_LONG=exclude-old-logs
-EXCLUDE_OLDER_LOGS_THAN_VALUES="0 ... n Days"
+EXCLUDE_OLDER_LOGS_THAN_VALUES="0 ... n Days or 'all'"
 EXCLUDE_SECRETS=true
 EXCLUDE_SECRETS_LONG=exclude-ox-secrets
 EXCLUDE_SECRETS_VALUES="true false"
@@ -915,11 +915,15 @@ for argument in ${@}; do
             shift 2
         ;;
         --${EXCLUDE_OLDER_LOGS_THAN_LONG})
-            if [ '0' -le "${2}" ] 2> /dev/null ; then
+            if [ "all" == "${2}" ]; then
                 EXCLUDE_OLDER_LOGS_THAN=${2}
             else
-                usage
-                die "Error, option '${1}' requires positive numbers: ${2}"
+                if [ '0' -le "${2}" ] 2> /dev/null ; then
+                    EXCLUDE_OLDER_LOGS_THAN=${2}
+                else
+                    usage
+                    die "Error, numbers or keyword 'all' required: --${EXCLUDE_OLDER_LOGS_THAN_LONG} ${2}"
+                fi
             fi
             shift 2
        ;;
@@ -1024,10 +1028,13 @@ fi
 if [ 'true' == "${CREATE_HEAP_DUMP}" ]; then
     create_heap_dump
 fi
-collect_logs ${OX_LOG_DIR}
-if [ -n "${UNIVENTION_LOG_DIR}" ]; then
-    collect_logs ${UNIVENTION_LOG_DIR}
+if [ "all" != "${EXCLUDE_OLDER_LOGS_THAN}" ]; then
+    collect_logs ${OX_LOG_DIR}
+    if [ -n "${UNIVENTION_LOG_DIR}" ]; then
+        collect_logs ${UNIVENTION_LOG_DIR}
+    fi
 fi
+
 create_excluded_and_modified_overview modified-and-excluded-files.txt
 echo "Creating final archive: $(normalize_path ${LOGARC})"
 tar cvf ${LOGARC%%.gz}  -C ${TMP} ${LOGDIR} > /dev/null 2>&1
