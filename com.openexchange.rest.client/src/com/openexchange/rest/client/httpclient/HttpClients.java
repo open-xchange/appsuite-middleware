@@ -62,6 +62,7 @@ import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.params.HttpClientParams;
 import org.apache.http.client.utils.DateUtils;
@@ -91,6 +92,7 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
+import org.apache.http.util.EntityUtils;
 import org.apache.http.util.TextUtils;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
@@ -460,6 +462,37 @@ public final class HttpClients {
             // shut down the connection manager to ensure
             // immediate deallocation of all system resources
             httpclient.getConnectionManager().shutdown();
+        }
+    }
+
+    /**
+     * Closes the supplied HTTP request / response resources silently.
+     * <p>
+     * <ul>
+     * <li>Resets internal state of the HTTP request making it reusable.</li>
+     * <li>Ensures that the response's content is fully consumed and the content stream, if exists, is closed</li>
+     * </ul>
+     *
+     * @param request The HTTP request to reset
+     * @param response The HTTP response to consume and close
+     */
+    public static void close(HttpRequestBase request, HttpResponse response) {
+        if (null != response) {
+            HttpEntity entity = response.getEntity();
+            if (null != entity) {
+                try {
+                    EntityUtils.consumeQuietly(entity);
+                } catch (Exception e) {
+                    // Ignore...
+                }
+            }
+        }
+        if (null != request) {
+            try {
+                request.reset();
+            } catch (Exception e) {
+                // Ignore
+            }
         }
     }
 
