@@ -97,9 +97,9 @@ property, the imail's JSON representation contains an additional "malicious: tru
 to disable any hyper-links.
 
 I.e.
-"...<a href="http://evil.com/click.me">Get something for free here</a>..."
+"...&lt;a href="http://evil.com/click.me"&gt;Get something for free here&lt;/a&gt;..."
 is turned to
-"...<a href="#" onclick"return false;" data-disabled="true">Get something for free here</a>..."
+"...&lt;a href="#" onclick"return false;" data-disabled="true"&gt;Get something for free here&lt;/a&gt;..."
       Default: true
       Version: 7.8.4
       Reloadable: true
