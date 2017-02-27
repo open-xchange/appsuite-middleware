@@ -422,6 +422,26 @@ If you would like to add a reference to another property use the following appro
 | __File__ | cassandra.properties  |
 
 ---
+| Key | <span style="font-weight:normal">com.openexchange.nosql.cassandra.connectTimeout</span> |
+|:----------------|:--------|
+| __Description__ | Specifies the connect timeout in milliseconds<br> |
+| __Default__ | 5000  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | false  |
+| __Configcascade Aware__ | false  |
+| __File__ | cassandra.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexchange.nosql.cassandra.readTimeout</span> |
+|:----------------|:--------|
+| __Description__ | Specifies the read timeout in milliseconds<br> |
+| __Default__ | 12000  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | false  |
+| __Configcascade Aware__ | false  |
+| __File__ | cassandra.properties  |
+
+---
 
 
 ## Doveadm 
