@@ -84,9 +84,9 @@ If you would like to add a reference to another property use the following appro
 
 ## Advertisement 
 
-| Key | <span style="font-weight:normal">com.openexchange.advertisement.[reseller].packageScheme</span> |
+| Key | <span style="font-weight:normal">com.openexchange.advertisement.&#91;reseller&#93;.packageScheme</span> |
 |:----------------|:--------|
-| __Description__ |         Defines which package scheme is used for the reseller. <reseller> can be replaced with either the reseller name or the reseller id.<br>        Use 'OX_ALL' for the default reseller. Available package schemes are:<br>        Global - always uses the default reseller and default package.<br>        AccessCombinations - Using access combination names to retrive the package.<br>        TaxonomyTypes - Using taxonomy types to retrieve the package.<br> |
+| __Description__ |         Defines which package scheme is used for the reseller. <reseller> can be replaced with either the reseller name or the reseller id.<br>        Use 'OX_ALL' for the default reseller. Available package schemes are:<br>        Global - always uses the default reseller and default package.<br>        AccessCombinations - Using access combination names to retrieve the package.<br>        TaxonomyTypes - Using taxonomy types to retrieve the package.<br> |
 | __Default__ | Global  |
 | __Version__ | 7.8.3  |
 | __Reloadable__ | true  |
@@ -94,7 +94,7 @@ If you would like to add a reference to another property use the following appro
 | __File__ | advertisement.properties  |
 
 ---
-| Key | <span style="font-weight:normal">com.openexchange.advertisement.[reseller].taxonomy.types</span> |
+| Key | <span style="font-weight:normal">com.openexchange.advertisement.&#91;reseller&#93;.taxonomy.types</span> |
 |:----------------|:--------|
 | __Description__ |         Defines a comma separated list of taxonomy types which are used as package identifiers. <br>        This list is used by the 'TaxonomyTypes' package scheme to identify the package.<br> |
 | __Default__ |  |
@@ -624,7 +624,7 @@ If you would like to add a reference to another property use the following appro
 ---
 | Key | <span style="font-weight:normal">com.openexchange.mail.maliciousFolders.enabled</span> |
 |:----------------|:--------|
-| __Description__ | Enables/disables support for malicious folders.<br><br>If enabled and a mail is fetched from a folder contained in listing configured through "com.openexchange.mail.maliciousFolders.listing"<br>property, the imail's JSON representation contains an additional "malicious: true" field and possible HTML content is processed in the way<br>to disable any hyper-links.<br><br>I.e.<br>"...<a href="http://evil.com/click.me">Get something for free here</a>..."<br>is turned to<br>"...<a href="#" onclick"return false;" data-disabled="true">Get something for free here</a>..."<br> |
+| __Description__ | Enables/disables support for malicious folders.<br><br>If enabled and a mail is fetched from a folder contained in listing configured through "com.openexchange.mail.maliciousFolders.listing"<br>property, the imail's JSON representation contains an additional "malicious: true" field and possible HTML content is processed in the way<br>to disable any hyper-links.<br><br>I.e.<br>"...&lt;a href="http://evil.com/click.me"&gt;Get something for free here&lt;/a&gt;..."<br>is turned to<br>"...&lt;a href="#" onclick"return false;" data-disabled="true"&gt;Get something for free here&lt;/a&gt;..."<br> |
 | __Default__ | true  |
 | __Version__ | 7.8.4  |
 | __Reloadable__ | true  |
