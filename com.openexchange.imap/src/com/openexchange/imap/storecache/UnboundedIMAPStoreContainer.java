@@ -133,7 +133,7 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
         }
 
         // Grab associated IMAP session identifier (as advertised via "ID" command)
-        String sessionInformation = imapStore.getClientParameter(IMAPClientParameters.SESSION_ID.getParamName());
+        String sessionInformation = imapStore.getGeneratedExternalId();
         if (null != sessionInformation) {
             LogProperties.put(LogProperties.Name.MAIL_SESSION, sessionInformation);
         }
