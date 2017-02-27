@@ -59,13 +59,13 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
+import com.openexchange.rest.client.httpclient.HttpClients;
 
 /**
  * {@link OAuthRefreshTokenRequest}
@@ -75,8 +75,23 @@ import com.openexchange.java.Charsets;
  */
 public class OAuthRefreshTokenRequest {
 
-    private final CloseableHttpClient httpClient;
-    private static final OAuthRefreshTokenRequest INSTANCE = new OAuthRefreshTokenRequest();
+    private static volatile OAuthRefreshTokenRequest instance;
+
+    /**
+     * Initializes the singleton instance with given HTTP client
+     *
+     * @param httpClient The HTTP client to use
+     */
+    public static void initInstance(CloseableHttpClient httpClient) {
+        instance = new OAuthRefreshTokenRequest(httpClient);
+    }
+
+    /**
+     * Releases the singleton instance
+     */
+    public static void releaseInstance() {
+        instance = null;
+    }
 
     /**
      * Gets the instance
@@ -84,12 +99,16 @@ public class OAuthRefreshTokenRequest {
      * @return The instance
      */
     public static OAuthRefreshTokenRequest getInstance() {
-        return INSTANCE;
+        return instance;
     }
 
-    private OAuthRefreshTokenRequest() {
-        HttpClientBuilder clientBuilder = HttpClientBuilder.create();
-        httpClient = clientBuilder.build();;
+    // -----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    private final CloseableHttpClient httpClient;
+
+    private OAuthRefreshTokenRequest(CloseableHttpClient httpClient) {
+        super();
+        this.httpClient = httpClient;
     }
 
     private static final String GRANT_TYPE = "refresh_token";
@@ -99,8 +118,10 @@ public class OAuthRefreshTokenRequest {
     private static final String ACCESS_TOKEN = "access_token";
 
     public OAuthAccessToken requestAccessToken(String refreshToken, int userId, int contextId) throws OXException {
+        HttpPost requestAccessToken = null;
+        HttpResponse validationResp = null;
         try {
-            HttpPost requestAccessToken = new HttpPost(SAMLOAuthConfig.getTokenEndpoint(userId, contextId));
+            requestAccessToken = new HttpPost(SAMLOAuthConfig.getTokenEndpoint(userId, contextId));
             requestAccessToken.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
             StringBuilder authBuilder = new StringBuilder(SAMLOAuthConfig.getClientID(userId, contextId));
@@ -115,17 +136,17 @@ public class OAuthRefreshTokenRequest {
 
             requestAccessToken.setEntity(new UrlEncodedFormEntity(nvps, Charsets.UTF_8));
 
-            HttpResponse validationResp = httpClient.execute(requestAccessToken);
+            validationResp = httpClient.execute(requestAccessToken);
             String responseStr = EntityUtils.toString(validationResp.getEntity());
             if (responseStr != null) {
                 JSONObject jsonResponse = new JSONObject(responseStr);
-                if (!jsonResponse.has(ACCESS_TOKEN)) {
+                String accessToken = jsonResponse.optString(ACCESS_TOKEN, null);
+                if (null == accessToken) {
                     throw SAMLOAuthExceptionCodes.NO_ACCESS_TOKEN.create("Token response doesn't contain the access token.");
-
-                } else {
-                    OAuthAccessToken token = new OAuthAccessToken(jsonResponse.getString(ACCESS_TOKEN), jsonResponse.getString(REFRESH_TOKEN), jsonResponse.getString(TOKEN_TYPE), jsonResponse.getInt(EXPIRE));
-                    return token;
                 }
+
+                OAuthAccessToken token = new OAuthAccessToken(accessToken, jsonResponse.getString(REFRESH_TOKEN), jsonResponse.getString(TOKEN_TYPE), jsonResponse.getInt(EXPIRE));
+                return token;
             }
 
             throw SAMLOAuthExceptionCodes.NO_ACCESS_TOKEN.create("Unable to parse token response.");
@@ -135,6 +156,8 @@ public class OAuthRefreshTokenRequest {
             throw SAMLOAuthExceptionCodes.NO_ACCESS_TOKEN.create(e, e.getMessage());
         } catch (JSONException e) {
             throw SAMLOAuthExceptionCodes.NO_ACCESS_TOKEN.create(e, e.getMessage());
+        } finally {
+            HttpClients.close(requestAccessToken, validationResp);
         }
     }
 }

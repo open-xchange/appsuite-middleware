@@ -59,7 +59,6 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
@@ -76,7 +75,23 @@ import com.openexchange.rest.client.httpclient.HttpClients;
  */
 public class OAuthAccessTokenRequest {
 
-    private static final OAuthAccessTokenRequest INSTANCE = new OAuthAccessTokenRequest();
+    private static volatile OAuthAccessTokenRequest instance;
+
+    /**
+     * Initializes the singleton instance with given HTTP client
+     *
+     * @param httpClient The HTTP client to use
+     */
+    public static void initInstance(CloseableHttpClient httpClient) {
+        instance = new OAuthAccessTokenRequest(httpClient);
+    }
+
+    /**
+     * Releases the singleton instance
+     */
+    public static void releaseInstance() {
+        instance = null;
+    }
 
     /**
      * Gets the instance
@@ -84,17 +99,16 @@ public class OAuthAccessTokenRequest {
      * @return The instance
      */
     public static OAuthAccessTokenRequest getInstance() {
-        return INSTANCE;
+        return instance;
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------------
 
     private final CloseableHttpClient httpClient;
 
-    private OAuthAccessTokenRequest() {
+    private OAuthAccessTokenRequest(CloseableHttpClient httpClient) {
         super();
-        HttpClientBuilder clientBuilder = HttpClientBuilder.create();
-        httpClient = clientBuilder.build();
+        this.httpClient = httpClient;
     }
 
     private static final String GRANT_TYPE = "urn:ietf:params:oauth:grant-type:saml2-bearer";

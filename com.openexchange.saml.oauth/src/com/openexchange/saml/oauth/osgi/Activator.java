@@ -49,9 +49,16 @@
 
 package com.openexchange.saml.oauth.osgi;
 
+import org.apache.http.impl.client.CloseableHttpClient;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.api.AuthenticationFailedHandler;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.rest.client.httpclient.HttpClients;
+import com.openexchange.rest.client.httpclient.HttpClients.ClientConfig;
+import com.openexchange.saml.oauth.OAuthAccessTokenRequest;
+import com.openexchange.saml.oauth.OAuthRefreshTokenRequest;
 import com.openexchange.saml.oauth.service.OAuthFailedAuthenticationHandler;
 import com.openexchange.sessiond.SessiondService;
 
@@ -65,22 +72,50 @@ public class Activator extends HousekeepingActivator {
 
     private static final int SERVICE_RANKING = 100;
 
+    private CloseableHttpClient httpClient;
+
+    /**
+     * Initializes a new {@link Activator}.
+     */
+    public Activator() {
+        super();
+    }
+
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { SessiondService.class, ConfigViewFactory.class };
+        return new Class[] { SessiondService.class, ConfigViewFactory.class, SSLSocketFactoryProvider.class };
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         Services.setServiceLookup(this);
-        registerService(AuthenticationFailedHandler.class, new OAuthFailedAuthenticationHandler(), SERVICE_RANKING);
 
+        // Init HttpClient
+        ClientConfig config = ClientConfig.newInstance();
+        config.setConnectionTimeout(3000);
+        config.setSocketReadTimeout(10000);
+        config.setUserAgent("Open-Xchange SAML OAuth Client");
+        httpClient = HttpClients.getHttpClient(config, getService(SSLSocketFactoryProvider.class));
+
+        OAuthAccessTokenRequest.initInstance(httpClient);
+        OAuthRefreshTokenRequest.initInstance(httpClient);
+
+        registerService(AuthenticationFailedHandler.class, new OAuthFailedAuthenticationHandler(), SERVICE_RANKING);
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         Services.setServiceLookup(null);
         super.stopBundle();
+
+        OAuthAccessTokenRequest.releaseInstance();
+        OAuthRefreshTokenRequest.releaseInstance();
+
+        CloseableHttpClient httpClient = this.httpClient;
+        if (null != httpClient) {
+            this.httpClient = null;
+            Streams.close(httpClient);
+        }
     }
 
 }
