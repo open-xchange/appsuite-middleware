@@ -57,8 +57,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.database.Databases;
@@ -66,12 +69,13 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.AsciiReader;
 import com.openexchange.java.AsciiWriter;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.userfeedback.AbstractFeedbackType;
 import com.openexchange.userfeedback.ExportResultConverter;
 import com.openexchange.userfeedback.Feedback;
 import com.openexchange.userfeedback.FeedbackMetaData;
-import com.openexchange.userfeedback.FeedbackType;
-import com.openexchange.userfeedback.starrating.exceptions.StarRatingExceptionCodes;
+import com.openexchange.userfeedback.exception.FeedbackExceptionCodes;
 
 /**
  * {@link StarRatingV1}
@@ -79,7 +83,7 @@ import com.openexchange.userfeedback.starrating.exceptions.StarRatingExceptionCo
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-public class StarRatingV1 implements FeedbackType {
+public class StarRatingV1 extends AbstractFeedbackType {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(StarRatingV1.class);
 
@@ -88,13 +92,17 @@ public class StarRatingV1 implements FeedbackType {
     private static final String SELECT_SQL = "SELECT id, data FROM star_rating_v1 WHERE id IN (";
 
     @Override
-    public long storeFeedback(JSONObject feedback, Connection con) throws OXException {
+    public long storeFeedbackInternal(Object feedback, Connection con) throws OXException {
+        if (!(feedback instanceof JSONObject)) {
+            throw FeedbackExceptionCodes.INVALID_DATA_TYPE.create("JSONObject");
+        }
+        JSONObject jsonFeedback = (JSONObject) feedback;
+
         ResultSet rs = null;
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS);
-            setBinaryStream(feedback, stmt, 1);
-            //            stmt.setObject(1, feedback);
+            setBinaryStream(jsonFeedback, stmt, 1);
             stmt.executeUpdate();
             rs = stmt.getGeneratedKeys();
             if (rs.next()) {
@@ -103,10 +111,42 @@ public class StarRatingV1 implements FeedbackType {
 
             return -1;
         } catch (final SQLException e) {
-            throw StarRatingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            throw FeedbackExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
         }
+    }
+
+    @Override
+    public Object validateFeedback(Object feedback) throws OXException {
+        if (!(feedback instanceof JSONObject)) {
+            throw FeedbackExceptionCodes.INVALID_DATA_TYPE.create("JSONObject");
+        }
+        JSONObject jsonFeedback = (JSONObject) feedback;
+        Iterator<?> jsonKeys = jsonFeedback.keys();
+        JSONObject returnFeedback = new JSONObject(jsonFeedback);
+
+        Set<String> keys = new HashSet<String>(StarRatingV1JsonFields.keys());
+        while (jsonKeys.hasNext()) {
+            String key = ((String) jsonKeys.next()).toLowerCase();
+            if (!keys.contains(key)) {
+                LOG.warn("An unknown key '{}' has been provided. It will be removed before persisting.", key);
+                returnFeedback.remove(key);
+                continue;
+            }
+            keys.remove(key);
+        }
+        if (!keys.isEmpty()) {
+            LOG.info("Desired keys {} not contained within the request. They will be stored as empty.", Strings.concat(",", keys));
+            for (String key : keys) {
+                try {
+                    returnFeedback.put(key, "");
+                } catch (JSONException e) {
+                    LOG.error("Error while adding new key.", e);
+                }
+            }
+        }
+        return returnFeedback;
     }
 
     private void setBinaryStream(JSONObject jObject, PreparedStatement stmt, int... positions) throws OXException {
@@ -125,7 +165,7 @@ public class StarRatingV1 implements FeedbackType {
                 }
             }
         } catch (final SQLException | JSONException e) {
-            throw StarRatingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            throw FeedbackExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -159,7 +199,7 @@ public class StarRatingV1 implements FeedbackType {
                 }
             }
         } catch (final SQLException e) {
-            throw StarRatingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            throw FeedbackExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
         }
@@ -180,5 +220,4 @@ public class StarRatingV1 implements FeedbackType {
     public String getType() {
         return TYPE;
     }
-
 }

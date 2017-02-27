@@ -49,13 +49,16 @@
 
 package com.openexchange.userfeedback.starrating.v1;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
- * {@link JSONField}
+ * {@link StarRatingV1JsonFields}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-public enum JSONField {
+public enum StarRatingV1JsonFields {
     score("Score"),
     app("App"),
     entry_point("Entry point"),
@@ -67,9 +70,17 @@ public enum JSONField {
     screen_resolution("Screen Resolution"),
     language("Language");
 
-    String displayName;
+    private static Set<String> KEYS = new HashSet<String>();
 
-    JSONField(String displayName) {
+    static {
+        for (StarRatingV1JsonFields field : StarRatingV1JsonFields.values()) {
+            KEYS.add(field.name().toLowerCase());
+        }
+    }
+
+    private String displayName;
+
+    StarRatingV1JsonFields(String displayName) {
         this.displayName = displayName;
     }
 
@@ -80,5 +91,13 @@ public enum JSONField {
      */
     public String getDisplayName() {
         return displayName;
+    }
+
+    public static Set<String> keys() {
+        return KEYS;
+    }
+
+    public static boolean contains(String key) {
+        return KEYS.contains(key.toLowerCase());
     }
 }

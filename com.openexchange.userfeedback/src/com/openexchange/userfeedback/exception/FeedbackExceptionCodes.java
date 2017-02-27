@@ -61,7 +61,7 @@ import com.openexchange.exception.OXExceptionStrings;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-public enum FeedbackExceptionCodes implements DisplayableOXExceptionCode{
+public enum FeedbackExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * An error occurred: %1$s
@@ -69,9 +69,19 @@ public enum FeedbackExceptionCodes implements DisplayableOXExceptionCode{
     UNEXPECTED_ERROR("An error occurred: %1$s", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 1),
 
     /**
+     * SQL problem: %1$s.
+     */
+    SQL_ERROR("SQL problem: %1$s.", OXExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 2),
+
+    /**
      * Unknown feedback type!
      */
-    INVALID_FEEDBACK_TYPE("Unknown feedback type!", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 2),
+    INVALID_FEEDBACK_TYPE("Unknown feedback type!", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 3),
+
+    /**
+     * Unknown data type for feedback.
+     */
+    INVALID_DATA_TYPE("Unknown data type for feedback. Please provide  %1$s", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 4),
 
     ;
 

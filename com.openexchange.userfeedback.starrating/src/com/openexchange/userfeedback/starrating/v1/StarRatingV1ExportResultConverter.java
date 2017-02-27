@@ -75,6 +75,8 @@ import com.openexchange.userfeedback.Feedback;
  */
 public class StarRatingV1ExportResultConverter implements ExportResultConverter {
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(StarRatingV1ExportResultConverter.class);
+
     private static final Pattern PATTERN_QUOTE = Pattern.compile("\"", Pattern.LITERAL);
     private static final char CELL_DELIMITER = ',';
     private static final char ROW_DELIMITER = '\n';
@@ -82,7 +84,7 @@ public class StarRatingV1ExportResultConverter implements ExportResultConverter 
     private static final LinkedList<String> DISPLAY_FIELDS = new LinkedList<>();
 
     static {
-        for (JSONField field : JSONField.values()) {
+        for (StarRatingV1JsonFields field : StarRatingV1JsonFields.values()) {
             DISPLAY_FIELDS.add(field.getDisplayName());
         }
         DISPLAY_FIELDS.addFirst("Date");
@@ -114,8 +116,7 @@ public class StarRatingV1ExportResultConverter implements ExportResultConverter 
             try {
                 current.put("Date", new Date(feedback.getDate()).toString());
             } catch (JSONException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOG.error("Error while adding 'date'. It will be ignored.", e);
             }
             result.put(current);
         }
@@ -134,8 +135,7 @@ public class StarRatingV1ExportResultConverter implements ExportResultConverter 
                 try {
                     writer.write(convertToLine(convertToList(feedback)));
                 } catch (JSONException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    LOG.error("An error occurred while writing feedback.", e);
                 }
             }
             writer.flush();
@@ -162,10 +162,9 @@ public class StarRatingV1ExportResultConverter implements ExportResultConverter 
         final List<String> l = new LinkedList<String>();
         l.add(new Date(feedback.getDate()).toString());
         JSONObject content = (JSONObject) feedback.getContent();
-        for (JSONField field : JSONField.values()) {
-            l.add(content.getString(field.getDisplayName()));
+        for (String key : StarRatingV1JsonFields.keys()) {
+            l.add(content.getString(key));
         }
         return l;
     }
-
 }

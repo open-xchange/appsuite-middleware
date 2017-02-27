@@ -50,50 +50,31 @@
 package com.openexchange.userfeedback;
 
 import java.sql.Connection;
-import java.util.List;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link FeedbackType}
+ * {@link AbstractFeedbackType}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.4
  */
-public interface FeedbackType {
+public abstract class AbstractFeedbackType implements FeedbackType {
+
+    @Override
+    public long storeFeedback(Object feedback, Connection con) throws OXException {
+        Object validatedFeedback = validateFeedback(feedback);
+        return storeFeedbackInternal(validatedFeedback, con);
+    }
 
     /**
-     * Stores Feedback data
-     *
-     * @param feedback The data
-     * @param con The write connection to the global db
-     * @return The id of the newly created entry or -1
-     * @throws OXException
-     */
-    public long storeFeedback(Object feedback, Connection con) throws OXException;
-
-    /**
-     * Retrieves the requested feedbacks wrapped in an {@link ExportResultConverter}.
-     *
-     * @param metaDataList The feedback metadata to retrieve
-     * @param con A read connection to the global db
-     * @return A list of feedback objects
-     * @throws OXException
-     */
-    public ExportResultConverter getFeedbacks(List<FeedbackMetaData> metaDataList, Connection con) throws OXException;
-
-    /**
-     * Deletes multiple feedback entries
+     * Returns the updated and ready-to-persist feedback Object
      * 
-     * @param ids A list of feedback entries
-     * @param con A write connection to the global db
+     * @param feedback
+     * @return
      * @throws OXException
      */
-    public void deleteFeedbacks(List<Long> ids, Connection con) throws OXException;
+    public abstract Object validateFeedback(Object feedback) throws OXException;
 
-    /**
-     * Retrieves the feedback type
-     *
-     * @return The feedback type
-     */
-    public String getType();
+    public abstract long storeFeedbackInternal(Object feedback, Connection con) throws OXException;
+
 }

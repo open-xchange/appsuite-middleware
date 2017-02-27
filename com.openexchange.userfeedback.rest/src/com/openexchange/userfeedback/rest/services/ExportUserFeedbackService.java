@@ -68,7 +68,7 @@ import com.openexchange.userfeedback.ExportResult;
 import com.openexchange.userfeedback.ExportResultConverter;
 import com.openexchange.userfeedback.ExportType;
 import com.openexchange.userfeedback.FeedbackService;
-import com.openexchange.userfeedback.filter.DateFeedbackFilter;
+import com.openexchange.userfeedback.filter.DateOnlyFilter;
 
 /**
  * 
@@ -116,7 +116,7 @@ public class ExportUserFeedbackService extends JAXRSService {
         FeedbackService feedbackService = this.getService(FeedbackService.class);
 
         try {
-            ExportResultConverter converter = feedbackService.export(contextGroup, new DateFeedbackFilter(type, start, end));
+            ExportResultConverter converter = feedbackService.export(contextGroup, new DateOnlyFilter(type, start, end));
             return converter.get(exportType);
         } catch (OXException e) {
             org.slf4j.LoggerFactory.getLogger(ExportUserFeedbackService.class).error("An error occurred while retrieving user feedback.", e);

@@ -52,18 +52,18 @@ package com.openexchange.userfeedback.filter;
 import com.openexchange.userfeedback.FeedbackMetaData;
 
 /**
- * {@link DateFeedbackFilter}
+ * {@link DateOnlyFilter}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.4
  */
-public class DateFeedbackFilter implements FeedbackFilter {
+public class DateOnlyFilter implements FeedbackFilter {
 
     private final long start;
     private final long end;
     private final String type;
 
-    public DateFeedbackFilter(String type, long start, long end) {
+    public DateOnlyFilter(String type, long start, long end) {
         this.type = type;
         this.start = start;
         this.end = end;
@@ -71,17 +71,7 @@ public class DateFeedbackFilter implements FeedbackFilter {
 
     @Override
     public boolean accept(FeedbackMetaData feedback) {
-        if ((start == 0) && (end == 0)) {
-            return true;
-        }
-        long feedbackDate = feedback.getDate();
-        if (start == 0) {
-            return feedbackDate < end;
-        } else if (end == 0) {
-            return feedbackDate > start;
-        } else {
-            return (feedbackDate < end) && (feedbackDate > start);
-        }
+        return true;
     }
 
     @Override

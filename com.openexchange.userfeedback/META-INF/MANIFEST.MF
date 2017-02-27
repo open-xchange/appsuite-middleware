@@ -20,4 +20,5 @@ Import-Package: com.openexchange.ajax.container,
  org.json,
  org.osgi.framework
 Export-Package: com.openexchange.userfeedback,
+ com.openexchange.userfeedback.exception,
  com.openexchange.userfeedback.filter
