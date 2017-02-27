@@ -186,7 +186,14 @@ public class FeedbackServiceImpl implements FeedbackService {
                 return ExportResultConverter.EMTPY_CONVERTER;
             }
 
-            return feedBackType.getFeedbacks(metaDataList, readCon);
+            List<FeedbackMetaData> filteredFeedback = new ArrayList<>();
+            for (FeedbackMetaData meta : metaDataList) {
+                if (filter.accept(meta)) {
+                    filteredFeedback.add(meta);
+                }
+            }
+
+            return feedBackType.getFeedbacks(filteredFeedback, readCon);
         } catch (SQLException e) {
             throw FeedbackExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage());
         } finally {
