@@ -122,7 +122,12 @@ public class StarRatingV1 extends AbstractFeedbackType {
         if (!(feedback instanceof JSONObject)) {
             throw FeedbackExceptionCodes.INVALID_DATA_TYPE.create("JSONObject");
         }
-        JSONObject jsonFeedback = (JSONObject) feedback;
+
+        JSONObject jsonFeedback = normalizeFeedback((JSONObject) feedback);
+        return cleanUpFeedback(jsonFeedback);
+    }
+
+    private Object cleanUpFeedback(JSONObject jsonFeedback) {
         Iterator<?> jsonKeys = jsonFeedback.keys();
         JSONObject returnFeedback = new JSONObject(jsonFeedback);
 
@@ -147,6 +152,22 @@ public class StarRatingV1 extends AbstractFeedbackType {
             }
         }
         return returnFeedback;
+    }
+
+    private JSONObject normalizeFeedback(JSONObject jsonFeedback) {
+        Iterator<?> jsonKeys = jsonFeedback.keys();
+        JSONObject normalizedFeedback = new JSONObject(jsonFeedback.length());
+        while (jsonKeys.hasNext()) {
+            try {
+                String unnormalizedKey = (String) jsonKeys.next();
+                String value = jsonFeedback.getString(unnormalizedKey);
+                String key = unnormalizedKey.toLowerCase();
+                normalizedFeedback.put(key, value);
+            } catch (JSONException e) {
+                LOG.warn("Error while updating json keys.", e);
+            }
+        }
+        return normalizedFeedback;
     }
 
     private void setBinaryStream(JSONObject jObject, PreparedStatement stmt, int... positions) throws OXException {

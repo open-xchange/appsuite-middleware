@@ -132,11 +132,7 @@ public class StarRatingV1ExportResultConverter implements ExportResultConverter 
             writer.write(convertToLine(DISPLAY_FIELDS));
 
             for (Feedback feedback : feedbacks) {
-                try {
-                    writer.write(convertToLine(convertToList(feedback)));
-                } catch (JSONException e) {
-                    LOG.error("An error occurred while writing feedback.", e);
-                }
+                writer.write(convertToLine(convertToList(feedback)));
             }
             writer.flush();
             exportResult.setCSV(sink.getClosingStream());
@@ -158,12 +154,17 @@ public class StarRatingV1ExportResultConverter implements ExportResultConverter 
         return bob.toString();
     }
 
-    private static List<String> convertToList(final Feedback feedback) throws JSONException {
+    private static List<String> convertToList(final Feedback feedback) {
         final List<String> l = new LinkedList<String>();
         l.add(new Date(feedback.getDate()).toString());
         JSONObject content = (JSONObject) feedback.getContent();
         for (String key : StarRatingV1JsonFields.keys()) {
-            l.add(content.getString(key));
+            try {
+                l.add(content.getString(key));
+            } catch (JSONException e) {
+                LOG.warn("Unable to find an entry for key {}. Will add 'N/A' to move forward.");
+                l.add("N/A");
+            }
         }
         return l;
     }
