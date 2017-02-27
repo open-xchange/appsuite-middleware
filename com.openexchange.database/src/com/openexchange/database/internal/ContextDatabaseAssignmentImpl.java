@@ -377,16 +377,16 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
 
     @Override
     public void lock(Connection con, int writePoolId) throws OXException {
-        PreparedStatement stmt = null;
-        try {
-            stmt = con.prepareStatement("SELECT count FROM contexts_per_dbpool WHERE db_pool_id=? FOR UPDATE");
-            stmt.setInt(1, writePoolId);
-            stmt.execute();
-        } catch (SQLException e) {
-            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            closeSQLStuff(stmt);
-        }
+//        PreparedStatement stmt = null;
+//        try {
+//            stmt = con.prepareStatement("SELECT count FROM contexts_per_dbpool WHERE db_pool_id=? FOR UPDATE");
+//            stmt.setInt(1, writePoolId);
+//            stmt.execute();
+//        } catch (SQLException e) {
+//            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+//        } finally {
+//            closeSQLStuff(stmt);
+//        }
     }
 
     void setCacheService(final CacheService service) {
