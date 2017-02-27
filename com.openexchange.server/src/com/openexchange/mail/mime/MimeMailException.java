@@ -225,6 +225,11 @@ public class MimeMailException extends OXException {
                     mailConfig == null ? STR_EMPTY : mailConfig.getServer(),
                         e.getMessage());
             } else if (e instanceof javax.mail.FolderClosedException) {
+                if (isTimeoutException(e)) {
+                    // javax.mail.FolderClosedException through a read timeout
+                    return MimeMailExceptionCode.READ_TIMEOUT.create(e, mailConfig == null ? STR_EMPTY : mailConfig.getServer(), mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
+                }
+
                 final Folder f = ((javax.mail.FolderClosedException) e).getFolder();
                 if (null != mailConfig && null != session) {
                     return MimeMailExceptionCode.FOLDER_CLOSED_EXT.create(
@@ -369,6 +374,11 @@ public class MimeMailException extends OXException {
                 }
                 return MimeMailExceptionCode.SEND_FAILED_EXT.create(exc, Arrays.toString(invalidAddresses), null == smtpInfo ? exc.getMessage() : smtpInfo.toString());
             } else if (e instanceof javax.mail.StoreClosedException) {
+                if (isTimeoutException(e)) {
+                    // javax.mail.FolderClosedException through a read timeout
+                    return MimeMailExceptionCode.READ_TIMEOUT.create(e, mailConfig == null ? STR_EMPTY : mailConfig.getServer(), mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
+                }
+
                 if (null != mailConfig && null != session) {
                     return MimeMailExceptionCode.STORE_CLOSED_EXT.create(e, mailConfig.getServer(), mailConfig.getLogin(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), EMPTY_ARGS);
                 }
