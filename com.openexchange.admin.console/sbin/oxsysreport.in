@@ -449,6 +449,10 @@ verify_ox_dpkg_packages(){
         egrep 'open-xchange|readerengine|calcengine' | \
         awk '{print $2}')
 
+    if [ 'true' != "${_dpkg_verify_support}" ]; then
+        echo "Info: dpkg does not support the needed '-V' option in this version." > "${_output}"
+    fi
+
     for package in ${_ox_packages}; do
         busySpin
         if [ -n "$(type apt-cache)" ]; then
@@ -472,8 +476,6 @@ verify_ox_dpkg_packages(){
                 # use dpkg verify
                 dpkg -V "${package}" | \
                     sed 's|^|  Change: |g'
-            else
-                    echo "  Info: dpkg does not support the needed '-V' option in this version."
             fi
         else
             echo "Error, missing tool: apt-cache"
