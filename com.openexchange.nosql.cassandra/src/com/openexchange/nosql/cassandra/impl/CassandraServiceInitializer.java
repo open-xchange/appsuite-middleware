@@ -59,6 +59,7 @@ import com.datastax.driver.core.Configuration;
 import com.datastax.driver.core.Host.StateListener;
 import com.datastax.driver.core.HostDistance;
 import com.datastax.driver.core.PoolingOptions;
+import com.datastax.driver.core.SocketOptions;
 import com.datastax.driver.core.policies.LoadBalancingPolicy;
 import com.datastax.driver.core.policies.Policies;
 import com.datastax.driver.core.policies.RetryPolicy;
@@ -126,11 +127,14 @@ class CassandraServiceInitializer implements Initializer {
         String rp = configurationService.getProperty(CassandraProperty.retryPolicy.getName(), CassandraProperty.retryPolicy.getDefaultValue(String.class));
         boolean logRetryPolicy = configurationService.getBoolProperty(CassandraProperty.logRetryPolicy.getName(), CassandraProperty.logRetryPolicy.getDefaultValue(Boolean.class));
         RetryPolicy retryPolicy = logRetryPolicy ? CassandraRetryPolicy.valueOf(rp).getLoggingRetryPolicy() : CassandraRetryPolicy.valueOf(rp).getRetryPolicy();
+
         // Load Balancing Policies
         String lbPolicy = configurationService.getProperty(CassandraProperty.loadBalancingPolicy.getName(), CassandraProperty.loadBalancingPolicy.getDefaultValue(String.class));
         LoadBalancingPolicy loadBalancingPolicy = CassandraLoadBalancingPolicy.createLoadBalancingPolicy(lbPolicy);
+
         // Build policies
         Policies policies = Policies.builder().withRetryPolicy(retryPolicy).withLoadBalancingPolicy(loadBalancingPolicy).build();
+
         // Build pooling options
         PoolingOptions poolingOptions = new PoolingOptions();
         int heartbeatInterval = configurationService.getIntProperty(CassandraProperty.poolingHeartbeat.getName(), CassandraProperty.poolingHeartbeat.getDefaultValue(Integer.class));
@@ -149,8 +153,19 @@ class CassandraServiceInitializer implements Initializer {
         poolingOptions.setMaxRequestsPerConnection(HostDistance.LOCAL, localMaxRequests);
         poolingOptions.setMaxRequestsPerConnection(HostDistance.REMOTE, remoteMaxRequests);
         poolingOptions.setMaxQueueSize(maxQueueSize);
+
+        // Build socket options
+        SocketOptions socketOptions = new SocketOptions();
+        {
+            int connectTimeout = configurationService.getIntProperty("com.openexchange.nosql.cassandra.connectTimeout", SocketOptions.DEFAULT_CONNECT_TIMEOUT_MILLIS);
+            socketOptions.setConnectTimeoutMillis(connectTimeout);
+        }
+        {
+            int readTimeout = configurationService.getIntProperty("com.openexchange.nosql.cassandra.readTimeout", SocketOptions.DEFAULT_READ_TIMEOUT_MILLIS);
+            socketOptions.setConnectTimeoutMillis(readTimeout);
+        }
         // Build configuration
-        return Configuration.builder().withPolicies(policies).withPoolingOptions(poolingOptions).build();
+        return Configuration.builder().withPolicies(policies).withPoolingOptions(poolingOptions).withSocketOptions(socketOptions).build();
     }
 
     /*
