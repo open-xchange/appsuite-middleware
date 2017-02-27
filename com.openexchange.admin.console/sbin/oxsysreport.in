@@ -54,6 +54,7 @@ export LANG=C
 export LC_ALL=C
 
 # some defaults
+GLOBAL_PARAMETER="${0} ${@}"
 PATH="${PATH}:/opt/open-xchange/sbin"
 TMP=/tmp
 TMP_LONG=tempdir
@@ -104,6 +105,7 @@ PROCS='
     mount;
     netstat -putane;
     ox_java_vm_limits;
+    oxsysreport_parameter;
     ps -eLf;
     ps faux;
     readerengine_cache_overview;
@@ -192,6 +194,12 @@ collect_command_output() {
    done
    IFS=${OIFS}
    cd - > /dev/null 2>&1
+}
+
+oxsysreport_parameter(){
+    # print tool parameter
+    local _output="${1}"
+    echo "${GLOBAL_PARAMETER}" > ${_output}
 }
 
 ox_java_vm_limits() {
