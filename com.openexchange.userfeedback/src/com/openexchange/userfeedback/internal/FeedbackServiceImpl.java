@@ -134,6 +134,7 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     private static final String INSERT_FEEDBACK_SQL = "INSERT INTO feedback (groupId, type, date, cid, user, login_name, typeId) VALUES (?,?,?,?,?,?,?);";
     private static final String SELECT_FEEDBACK_SQL = "SELECT date, cid, user, login_name, typeId FROM feedback WHERE groupId=? AND type=? AND date >? AND date <?";
+    private static final String DELETE_FEEDBACK_SQL = "DELETE FROM feedback WHERE groupId = ? AND type = ? AND date > ? AND date < ?";
 
     /**
      * @param writeCon The global db write connection
@@ -219,6 +220,45 @@ public class FeedbackServiceImpl implements FeedbackService {
             return result;
         } finally {
             DBUtils.closeSQLStuff(statement);
+        }
+    }
+
+    @Override
+    public void delete(String ctxGroup, FeedbackFilter filter) throws OXException {
+        FeedbackTypeRegistry registry = FeedbackTypeRegistryImpl.getInstance();
+        FeedbackType feedBackType = registry.getFeedbackType(filter.getType());
+
+        if (feedBackType == null) {
+            throw FeedbackExceptionCodes.INVALID_FEEDBACK_TYPE.create();
+        }
+
+        GlobalDatabaseService dbService = Services.getService(DatabaseService.class);
+        if (dbService == null) {
+            throw ServiceExceptionCode.absentService(DatabaseService.class);
+        }
+        Connection writeCon = null;
+        try {
+            writeCon = dbService.getWritableForGlobal(ctxGroup);
+            deleteFeedback(writeCon, feedBackType, filter, ctxGroup);
+        } catch (SQLException e) {
+            throw FeedbackExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            dbService.backWritableForGlobal(ctxGroup, writeCon);
+        }
+
+    }
+
+    private void deleteFeedback(Connection writeCon, FeedbackType feedbackType, FeedbackFilter filter, String ctxGroup) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = writeCon.prepareStatement(DELETE_FEEDBACK_SQL);
+            stmt.setString(1, ctxGroup);
+            stmt.setString(2, feedbackType.getType());
+            stmt.setLong(3, filter.start());
+            stmt.setLong(4, filter.end());
+            stmt.execute();
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
         }
     }
 }

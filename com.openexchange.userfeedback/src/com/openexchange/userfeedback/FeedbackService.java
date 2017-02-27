@@ -75,4 +75,13 @@ public interface FeedbackService {
 
     ExportResultConverter export(String ctxGroup, FeedbackFilter filter) throws OXException;
 
+    /**
+     * Delete feedback data
+     * 
+     * @param ctxGroup The context group
+     * @param filter Feedback filter to determine which feedback should be deleted
+     * @throws OXException If feedback could not be deleted
+     */
+    void delete(String ctxGroup, FeedbackFilter filter) throws OXException;
+
 }
