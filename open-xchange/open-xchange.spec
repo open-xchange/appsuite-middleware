@@ -1,5 +1,5 @@
 %define __jar_repack %{nil}
-
+%define use_systemd (0%{?rhel} && 0%{?rhel} >= 7) || (0%{?suse_version} && 0%{?suse_version} >=1210)
 Name:             open-xchange
 BuildArch:        noarch
 #!BuildIgnore:    post-build-checks
@@ -92,7 +92,7 @@ fi
 
 # SoftwareChange_Request-3859
 drop_in=%{dropin_dir}/%{dropin_example}
-if [ -f ${drop_in} ]
+if [ -f ${drop_in} ] && grep -q "^#LimitNOFILE=16384$" ${drop_in}
 then
   sed -i 's/^#LimitNOFILE=16384$/#LimitNOFILE=65536/' ${drop_in}
 fi
@@ -103,6 +103,11 @@ if [ -f ${drop_in} ] && ! grep -q LimitNPROC ${drop_in}
 then
   sed -i '/^\[Service\]$/a #LimitNPROC=65536' ${drop_in}
 fi
+
+# Trigger a service definition/config reload
+%if %{use_systemd}
+systemctl daemon-reload &> /dev/null || :
+%endif
 
 %preun
 %if (0%{?suse_version} && 0%{?suse_version} >= 1210)
