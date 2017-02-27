@@ -63,6 +63,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.MailSessionCache;
@@ -254,7 +255,8 @@ public class MaliciousFolders {
         }
         if (null != fullNames) {
             for (String fullName : fullNames) {
-                builder.add(new FullNameFolderChecker(fullName, MailAccount.DEFAULT_ID));
+                FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(fullName);
+                builder.add(new FullNameFolderChecker(fa.getFullName(), fa.getAccountId()));
             }
         }
 
@@ -293,9 +295,26 @@ public class MaliciousFolders {
         return false;
     }
 
+    /**
+     * Gets the applicable folder listing for this instance
+     *
+     * @return The folder listing
+     */
+    public List<String> getFolderListing() {
+        List<String> tokens = new LinkedList<>();
+        for (Checker checker : checkers) {
+            checker.addTokensTo(tokens);
+        }
+        return tokens;
+    }
+
     @Override
     public String toString() {
-        return checkers.toString();
+        StringBuilder sb = null;
+        for (Checker checker : checkers) {
+            sb = appendTo('\0', checker.toString(), sb);
+        }
+        return null == sb ? "" : sb.toString();
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -303,6 +322,8 @@ public class MaliciousFolders {
     private static interface Checker {
 
         boolean isMalicious(String fullName, int accountId, MailServletInterface mailInterface) throws OXException;
+        
+        void addTokensTo(List<String> tokens);
     }
 
     private static final class StandardFolderChecker implements Checker {
@@ -443,49 +464,87 @@ public class MaliciousFolders {
         }
 
         @Override
+        public void addTokensTo(List<String> tokens) {
+            for (int index : indexes) {
+                switch (index) {
+                    case StorageUtility.INDEX_CONFIRMED_HAM:
+                        tokens.add("$Confirmed-Ham");
+                        break;
+                    case StorageUtility.INDEX_CONFIRMED_SPAM:
+                        tokens.add("$Confirmed-Spam");
+                        break;
+                    case StorageUtility.INDEX_DRAFTS:
+                        tokens.add("$Drafts");
+                        break;
+                    case StorageUtility.INDEX_SENT:
+                        tokens.add("$Sent");
+                        break;
+                    case StorageUtility.INDEX_SPAM:
+                        tokens.add("$Spam");
+                        break;
+                    case StorageUtility.INDEX_TRASH:
+                        tokens.add("$Trash");
+                        break;
+                    case StorageUtility.INDEX_INBOX:
+                        tokens.add("$Inbox");
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        @Override
         public String toString() {
             StringBuilder sb = null;
             for (int index : indexes) {
                 switch (index) {
                     case StorageUtility.INDEX_CONFIRMED_HAM:
-                        sb = appendTo(MailStrings.CONFIRMED_HAM, sb);
+                        sb = appendTo('$', MailStrings.CONFIRMED_HAM, sb);
                         break;
                     case StorageUtility.INDEX_CONFIRMED_SPAM:
-                        sb = appendTo(MailStrings.CONFIRMED_SPAM, sb);
+                        sb = appendTo('$', MailStrings.CONFIRMED_SPAM, sb);
                         break;
                     case StorageUtility.INDEX_DRAFTS:
-                        sb = appendTo(MailStrings.DRAFTS, sb);
+                        sb = appendTo('$', MailStrings.DRAFTS, sb);
                         break;
                     case StorageUtility.INDEX_SENT:
-                        sb = appendTo(MailStrings.SENT, sb);
+                        sb = appendTo('$', MailStrings.SENT, sb);
                         break;
                     case StorageUtility.INDEX_SPAM:
-                        sb = appendTo(MailStrings.SPAM, sb);
+                        sb = appendTo('$', MailStrings.SPAM, sb);
                         break;
                     case StorageUtility.INDEX_TRASH:
-                        sb = appendTo(MailStrings.TRASH, sb);
+                        sb = appendTo('$', MailStrings.TRASH, sb);
                         break;
                     case StorageUtility.INDEX_INBOX:
-                        sb = appendTo("INBOX", sb);
+                        sb = appendTo('$', "INBOX", sb);
                         break;
                     default:
-                        sb = appendTo("none", sb);
+                        sb = appendTo('\0', "none", sb);
                         break;
                 }
             }
             return null == sb ? "" : sb.toString();
         }
-
-        private StringBuilder appendTo(String str, StringBuilder sb) {
-            if (null == sb) {
-                StringBuilder newSb = new StringBuilder(24);
-                newSb.append(str);
-                return newSb;
+    }
+    
+    static StringBuilder appendTo(char sym, String str, StringBuilder sb) {
+        if (null == sb) {
+            StringBuilder newSb = new StringBuilder(24);
+            if (sym > 0) {
+                newSb.append(sym);
             }
-
-            sb.append(", ").append(str);
-            return sb;
+            newSb.append(str);
+            return newSb;
         }
+
+        sb.append(", ");
+        if (sym > 0) {
+            sb.append(sym);
+        }
+        sb.append(str);
+        return sb;
     }
 
     private static final class FullNameFolderChecker implements Checker {
@@ -508,9 +567,15 @@ public class MaliciousFolders {
         }
 
         @Override
-        public String toString() {
-            return fullName;
+        public void addTokensTo(List<String> tokens) {
+            tokens.add(MailFolderUtility.prepareFullname(accountId, fullName));
         }
+
+        @Override
+        public String toString() {
+            return MailFolderUtility.prepareFullname(accountId, fullName);
+        }
+        
     }
 
 }
