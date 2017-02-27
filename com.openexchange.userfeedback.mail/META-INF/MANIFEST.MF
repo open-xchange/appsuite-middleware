@@ -6,8 +6,12 @@ Bundle-Version: 7.8.4
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.config,
+ com.openexchange.exception,
  com.openexchange.osgi,
  com.openexchange.server,
+ com.openexchange.userfeedback,
+ com.openexchange.userfeedback.filter,
  org.osgi.framework
 Bundle-Activator: com.openexchange.userfeedback.mail.osgi.UserFeedbackMailActivator
 Bundle-ClassPath: .
+Export-Package: com.openexchange.userfeedback.mail.filter

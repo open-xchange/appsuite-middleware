@@ -51,6 +51,8 @@ package com.openexchange.userfeedback.mail.osgi;
 
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.userfeedback.mail.FeedbackMailService;
+import com.openexchange.userfeedback.mail.internal.FeedbackMailServiceSMTP;
 
 /**
 * {@link UserFeedbackMailActivator}
@@ -68,6 +70,7 @@ public class UserFeedbackMailActivator extends HousekeepingActivator{
     @Override
     protected void startBundle() throws Exception {
         Services.setServices(this);
+        registerService(FeedbackMailService.class, new FeedbackMailServiceSMTP());
     }
     
     @Override
