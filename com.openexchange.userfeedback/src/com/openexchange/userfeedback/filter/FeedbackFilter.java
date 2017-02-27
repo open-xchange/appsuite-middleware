@@ -49,10 +49,12 @@
 
 package com.openexchange.userfeedback.filter;
 
+import com.openexchange.userfeedback.Feedback;
 import com.openexchange.userfeedback.FeedbackMetaData;
 
 /**
- * {@link FeedbackFilter}
+ * {@link FeedbackFilter} - Implementation of this filter will be used to reduce {@link Feedback}s based on the given criteria.
+ * Start and end date will always be used to filter. Of course you will be able to use zero (0L) as a wildcard.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
@@ -81,7 +83,6 @@ public interface FeedbackFilter {
             return 0L;
         }
     };
-
 
     public boolean accept(FeedbackMetaData feedback);
 

@@ -73,7 +73,7 @@ public interface FeedbackType {
     public long storeFeedback(JSONObject feedback, Connection con) throws OXException;
 
     /**
-     * Retrieves a list of feedback objects
+     * Retrieves the requested feedbacks wrapped in an {@link ExportResultConverter}.
      *
      * @param metaDataList The feedback metadata to retrieve
      * @param con A read connection to the global db
