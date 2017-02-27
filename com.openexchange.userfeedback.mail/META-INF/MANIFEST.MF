@@ -14,4 +14,5 @@ Import-Package: com.openexchange.config,
  org.osgi.framework
 Bundle-Activator: com.openexchange.userfeedback.mail.osgi.UserFeedbackMailActivator
 Bundle-ClassPath: .
-Export-Package: com.openexchange.userfeedback.mail.filter
+Export-Package: com.openexchange.userfeedback.mail,
+ com.openexchange.userfeedback.mail.filter
