@@ -58,6 +58,7 @@ import java.util.Set;
 import org.apache.jsieve.NumberArgument;
 import org.apache.jsieve.SieveException;
 import org.apache.jsieve.TagArgument;
+import com.openexchange.jsieve.commands.test.IActionCommand;
 
 /**
  * An {@link ActionCommand} is an identifier followed by zero or more arguments,
@@ -86,7 +87,7 @@ public class ActionCommand extends ControlOrActionCommand {
      * <li>Required directive</li>
      * </ul>
      */
-    public enum Commands {
+    public enum Commands implements IActionCommand{
         /**
          * <p>The "keep" action is whatever action is taken in lieu of all other
          * actions, if no filtering happens at all; generally, this simply means
@@ -363,6 +364,7 @@ public class ActionCommand extends ControlOrActionCommand {
          *
          * @return the amount of minimum allowed arguments
          */
+        @Override
         public final int getMinNumberOfArguments() {
             return minNumberOfArguments;
         }
@@ -372,6 +374,7 @@ public class ActionCommand extends ControlOrActionCommand {
          *
          * @return the command's name
          */
+        @Override
         public final String getCommandName() {
             return commandName;
         }
@@ -390,6 +393,7 @@ public class ActionCommand extends ControlOrActionCommand {
          *
          * @return a {@link List} with the required plugins
          */
+        @Override
         public final List<String> getRequired() {
             return required;
         }
@@ -399,9 +403,11 @@ public class ActionCommand extends ControlOrActionCommand {
          *
          * @return a {@link Hashtable} with all the tag arguments
          */
+        @Override
         public final Hashtable<String, Integer> getTagArgs() {
             return tagArgs;
         }
+
     }
 
     private final Commands command;

@@ -58,7 +58,9 @@ import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.jsieve.commands.TestCommand.Commands;
+import com.openexchange.jsieve.registry.ActionCommandRegistry;
 import com.openexchange.jsieve.registry.TestCommandRegistry;
 import com.openexchange.mailfilter.MailFilterInterceptorRegistry;
 import com.openexchange.mailfilter.MailFilterService;
@@ -128,6 +130,7 @@ public class MailFilterActivator extends HousekeepingActivator {
             registerService(PreferencesItemService.class, new MailFilterPreferencesItem(), null);
             registerService(MailFilterService.class, new MailFilterServiceImpl());
             registerTestCommandRegistry();
+            registerActionCommandRegistry();
 
             Logger logger = org.slf4j.LoggerFactory.getLogger(MailFilterActivator.class);
             logger.info("Bundle successfully started: {}", context.getBundle().getSymbolicName());
@@ -142,7 +145,6 @@ public class MailFilterActivator extends HousekeepingActivator {
     protected void stopBundle() throws Exception {
         try {
             super.stopBundle();
-            //MailFilterServletInit.getInstance().stop();
             Services.setServiceLookup(null);
         } catch (final Exception e) {
             LOG.error("", e);
@@ -151,18 +153,32 @@ public class MailFilterActivator extends HousekeepingActivator {
     }
 
     /**
-     * Registers the {@link TestCommandParserRegistry} along with all available {@link TestCommandParser}s
+     * Registers the {@link TestCommandParserRegistry} along with all available {@link TestCommand}s
      */
     private void registerTestCommandRegistry() {
         TestCommandRegistry registry = new TestCommandRegistry();
 
-        // add own Tests:
         for (Commands command : Commands.values()) {
             registry.register(command.getCommandName(), command);
         }
 
         registerService(TestCommandRegistry.class, registry);
         trackService(TestCommandRegistry.class);
+        openTrackers();
+    }
+
+    /**
+     * Registers the {@link ActionCommandRegistry} along with all available {@link ActionCommand}s
+     */
+    private void registerActionCommandRegistry() {
+        ActionCommandRegistry registry = new ActionCommandRegistry();
+
+        for (ActionCommand.Commands command : ActionCommand.Commands.values()) {
+            registry.register(command.getCommandName(), command);
+        }
+
+        registerService(ActionCommandRegistry.class, registry);
+        trackService(ActionCommandRegistry.class);
         openTrackers();
     }
 }

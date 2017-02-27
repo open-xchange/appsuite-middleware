@@ -323,21 +323,6 @@ public class TestCommand extends Command {
         }
 
         /**
-         * The JSON mappings of all address match types ({@link #standardAddressMatchTypes()})
-         *
-         * @return A {@link List} with the mappings
-         */
-        private static List<String[]> standardJSONAddressMatchTypes() {
-            final List<String[]> standard_match_types = Collections.synchronizedList(new ArrayList<String[]>(2));
-            standard_match_types.add(new String[] { "subaddress", "user" });
-            standard_match_types.add(new String[] { "subaddress", "detail" });
-            standard_match_types.add(new String[] { "", "all" });
-            standard_match_types.add(new String[] { "", "domain" });
-            standard_match_types.add(new String[] { "", "localpart" });
-            return standard_match_types;
-        }
-
-        /**
          * The JSON mappings for the standard match types ({@link #standardMatchTypes()})
          *
          * @return A {@link List} with the mappings
@@ -591,25 +576,7 @@ public class TestCommand extends Command {
             if (null != otherArguments) {
                 tagArray.removeAll(otherArguments.keySet());
             }
-            //            final Hashtable<String, String> comparator = this.command.getComparator();
-            //            if (null != comparator) {
-            //                final boolean comparatorrule = tagarray.remove(":comparator");
-            //                if (comparatorrule) {
-            //                    // The argument of the comparator is located one after the
-            //                    // comparator tag itself
-            //                    indexOfComparator = searchcomparator() + 1;
-            //                    final Object object = this.arguments.get(indexOfComparator);
-            //                    if (object instanceof ArrayList) {
-            //                        final ArrayList<String> new_name = (ArrayList<String>) object;
-            //                        final String comparatorarg = new_name.get(0);
-            //                        if (!comparator.containsKey(comparatorarg)) {
-            //                            throw new SieveException(comparatorarg + " is no valid comparator for " + this.command.getCommandname());
-            //                        }
-            //                    } else {
-            //                        throw new SieveException(object + " is no valid comparator for " + this.command.getCommandname());
-            //                    }
-            //                }
-            //            }
+
             if (!tagArray.isEmpty()) {
                 throw new SieveException("One of the tagArguments: " + tagArray + " is not valid for " + this.command.getCommandName());
             }
@@ -626,27 +593,6 @@ public class TestCommand extends Command {
 
         // Add test for testcommands here only anyof and allof are allowed to
         // take further tests
-    }
-
-    /**
-     * This method searches for the comparator tag in the array and returns its
-     * position. This method must find the right tag, otherwise this is an
-     * error. So an exception is thrown here if the comparator tag isn't found
-     *
-     * @return
-     * @throws SieveException
-     */
-    private int searchComparator() throws SieveException {
-        for (int i = 0; i < this.arguments.size(); i++) {
-            final Object obj = this.arguments.get(i);
-            if (obj instanceof TagArgument) {
-                final TagArgument tag = (TagArgument) obj;
-                if (":comparator".equals(tag.getTag())) {
-                    return i;
-                }
-            }
-        }
-        throw new SieveException("An error occured while search the comparator tag in the arguments");
     }
 
     /**
