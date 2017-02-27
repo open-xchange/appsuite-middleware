@@ -5,7 +5,7 @@ array:
         Defines which package scheme is used for the reseller. <reseller> can be replaced with either the reseller name or the reseller id.
         Use 'OX_ALL' for the default reseller. Available package schemes are:
         Global - always uses the default reseller and default package.
-        AccessCombinations - Using access combination names to retrive the package.
+        AccessCombinations - Using access combination names to retrieve the package.
         TaxonomyTypes - Using taxonomy types to retrieve the package.
       Default: Global
       Version: 7.8.3
