@@ -61,14 +61,17 @@ import java.util.Set;
 public enum StarRatingV1JsonFields {
     score("Score"),
     app("App"),
-    entry_point("Entry point"),
+    entry_point("Entry Point"),
     comment("Comment"),
     operating_system("Operating System"),
     browser("Browser"),
-    browser_version("Browser version"),
-    user_agent("User agent"),
+    browser_version("Browser Version"),
+    user_agent("User Agent"),
     screen_resolution("Screen Resolution"),
-    language("Language");
+    language("Language"),
+    server_version("Server Version"),
+    client_version("Client Version"),
+    ;
 
     private static Set<String> KEYS = new HashSet<String>();
 
