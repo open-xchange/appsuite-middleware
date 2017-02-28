@@ -52,7 +52,6 @@ package com.openexchange.userfeedback.rest.osgi;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.uadetector.UserAgentParser;
 import com.openexchange.userfeedback.FeedbackService;
-import com.openexchange.userfeedback.rest.services.CollectUserFeedbackService;
 import com.openexchange.userfeedback.rest.services.DeleteUserFeedbackService;
 import com.openexchange.userfeedback.rest.services.ExportUserFeedbackService;
 import com.openexchange.userfeedback.rest.services.SendMailService;
@@ -72,10 +71,9 @@ public class UserFeedbackRESTActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        registerService(CollectUserFeedbackService.class, new CollectUserFeedbackService(this));
         registerService(ExportUserFeedbackService.class, new ExportUserFeedbackService(this));
         registerService(SendMailService.class, new SendMailService(this));
         registerService(DeleteUserFeedbackService.class, new DeleteUserFeedbackService(this));
-    } 
+    }
 
 }
