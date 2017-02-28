@@ -68,6 +68,7 @@ import javax.mail.FetchProfile;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.search.SearchException;
+import com.google.common.collect.ImmutableList;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
@@ -108,6 +109,7 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 import com.sun.mail.iap.Argument;
 import com.sun.mail.iap.BadCommandException;
 import com.sun.mail.iap.ProtocolException;
@@ -353,28 +355,33 @@ public final class IMAPConversationWorker {
                         for (final Conversation conversation : conversations) {
                             conversation.addMessageIdsTo(allMessageIds);
                         }
-                        List<MailMessage> tmp = null;
-                        for (MailMessage sentMessage : sentMessages) {
-                            if (false == allMessageIds.contains(sentMessage.getMessageId())) {
-                                if (null == tmp) {
-                                    tmp = new LinkedList<>();
-                                }
-                                tmp.add(sentMessage);
+                        for (Iterator<MailMessage> iter = sentMessages.iterator(); iter.hasNext();) {
+                            MailMessage sentMessage = iter.next();
+                            if (allMessageIds.contains(sentMessage.getMessageId())) {
+                                // Already contained
+                                iter.remove();
                             }
-                        }
-                        if (null != tmp) {
-                            sentMessages = tmp;
                         }
                     }
 
                     if (false == sentMessages.isEmpty()) {
                         // Add to conversation if references or referenced-by
-                        for (Conversation conversation : conversations) {
-                            for (MailMessage sentMessage : sentMessages) {
-                                if (conversation.referencesOrIsReferencedBy(sentMessage)) {
-                                    conversation.addMessage(sentMessage);
+                        final List<MailMessage> toMergeWith = ImmutableList.copyOf(sentMessages);
+                        sentMessages = null;
+                        for (final Conversation conversation : conversations) {
+                            AbstractTask<Void> merge = new AbstractTask<Void>() {
+
+                                @Override
+                                public Void call() throws Exception {
+                                    for (MailMessage sentMessage : toMergeWith) {
+                                        if (conversation.referencesOrIsReferencedBy(sentMessage)) {
+                                            conversation.addMessage(sentMessage);
+                                        }
+                                    }
+                                    return null;
                                 }
-                            }
+                            };
+                            ThreadPools.getThreadPool().submit(merge, CallerRunsBehavior.<Void> getInstance());
                         }
                     }
                 }
@@ -469,7 +476,7 @@ public final class IMAPConversationWorker {
                     try {
                         mailAccess = MailAccess.getInstance(ses, imapMessageStorage.getAccountId());
                         mailAccess.connect();
-                        
+
                         IMAPMessageStorage messageStorage = IMAPMessageStorage.getImapMessageStorageFrom(mailAccess);
                         if (null == messageStorage) {
                             // Eh...?
