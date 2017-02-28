@@ -47,59 +47,75 @@
  *
  */
 
-package com.openexchange.saml.oauth.osgi;
+package com.openexchange.saml.oauth;
 
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.mail.api.AuthenticationFailedHandler;
+import org.apache.http.impl.client.CloseableHttpClient;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.saml.oauth.HttpClientOAuthAccessTokenService;
-import com.openexchange.saml.oauth.OAuthFailedAuthenticationHandler;
+import com.openexchange.rest.client.httpclient.HttpClients;
+import com.openexchange.rest.client.httpclient.HttpClients.ClientConfig;
+import com.openexchange.saml.oauth.osgi.Services;
+import com.openexchange.saml.oauth.service.OAuthAccessToken;
 import com.openexchange.saml.oauth.service.OAuthAccessTokenService;
-import com.openexchange.sessiond.SessiondService;
 
 /**
- * {@link Activator}
+ * {@link HttpClientOAuthAccessTokenService}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-public class Activator extends HousekeepingActivator {
+public class HttpClientOAuthAccessTokenService implements OAuthAccessTokenService {
 
-    private static final int SERVICE_RANKING = 100;
-    private static HttpClientOAuthAccessTokenService tokenService;
+    private CloseableHttpClient httpClient;
 
     /**
-     * Initializes a new {@link Activator}.
+     * Initializes a new {@link HttpClientOAuthAccessTokenService}.
+     * @throws OXException
      */
-    public Activator() {
+    public HttpClientOAuthAccessTokenService() throws OXException {
         super();
+        initHttpClient(3000, 10000);
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { SessiondService.class, ConfigViewFactory.class, SSLSocketFactoryProvider.class };
+    public void initHttpClient(int connectionTimeout, int socketReadTimeout) throws OXException{
+        closeHttpClient();
+        // Init HttpClient
+        ClientConfig config = ClientConfig.newInstance();
+        config.setConnectionTimeout(connectionTimeout);
+        config.setSocketReadTimeout(socketReadTimeout);
+        config.setUserAgent("Open-Xchange SAML OAuth Client");
+        httpClient = HttpClients.getHttpClient(config, Services.getService(SSLSocketFactoryProvider.class));
+
+        OAuthAccessTokenRequest.initInstance(httpClient);
+        OAuthRefreshTokenRequest.initInstance(httpClient);
     }
 
-    @Override
-    protected synchronized void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-
-        tokenService = new HttpClientOAuthAccessTokenService();
-        trackService(OAuthAccessTokenService.class);
-        openTrackers();
-        registerService(OAuthAccessTokenService.class, tokenService);
-        registerService(AuthenticationFailedHandler.class, new OAuthFailedAuthenticationHandler(), SERVICE_RANKING);
-    }
-
-    @Override
-    protected synchronized void stopBundle() throws Exception {
-        Services.setServiceLookup(null);
-        super.stopBundle();
-
-        if(tokenService!=null){
-            tokenService.closeHttpClient();
+    public void closeHttpClient(){
+        OAuthAccessTokenRequest.releaseInstance();
+        OAuthRefreshTokenRequest.releaseInstance();
+        CloseableHttpClient httpClient = this.httpClient;
+        if (null != httpClient) {
+            this.httpClient = null;
+            Streams.close(httpClient);
         }
+    }
+
+
+    @Override
+    public OAuthAccessToken getAccessToken(OAuthGrantType type, String data, int userId, int contextId) throws OXException {
+        switch(type){
+            case SAML:
+                return OAuthAccessTokenRequest.getInstance().requestAccessToken(data, userId, contextId);
+            case REFRESH_TOKEN:
+                return OAuthRefreshTokenRequest.getInstance().requestAccessToken(data, userId, contextId);
+        }
+        // should never occur
+        return null;
+    }
+    @Override
+    public boolean isConfigured(int userId, int contextId) throws OXException {
+        return SAMLOAuthConfig.isConfigured(userId, contextId);
     }
 
 }

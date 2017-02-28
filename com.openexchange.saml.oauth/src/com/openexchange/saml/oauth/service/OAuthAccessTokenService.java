@@ -47,75 +47,57 @@
  *
  */
 
-package com.openexchange.saml.oauth;
+package com.openexchange.saml.oauth.service;
 
+import com.openexchange.exception.OXException;
 
 /**
- * {@link OAuthAccessToken}
+ * {@link OAuthAccessTokenService}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-public class OAuthAccessToken {
-
-    private final String accessToken;
-    private final String refreshToken;
-    private final String type;
-    private final int expires_in;
-
+public interface OAuthAccessTokenService {
 
     /**
-     * Initializes a new {@link OAuthAccessToken}.
-     * @param accessToken
-     * @param refreshToken
-     * @param type
-     * @param expires_in
-     */
-    public OAuthAccessToken(String accessToken, String refreshToken, String type, int expires_in) {
-        super();
-        this.accessToken = accessToken;
-        this.refreshToken = refreshToken;
-        this.type = type;
-        this.expires_in = expires_in;
-    }
-
-    /**
-     * Gets the accessToken
+     * Retrieves an {@link OAuthAccessToken}
      *
-     * @return The accessToken
+     * @param type The request type
+     * @param data The data needed for the corresponding {@link OAuthGrantType}. E.g. a SAML response for {@link OAuthGrantType.SAML} or a refresh token for {@link OAuthGrantType.REFRESH_TOKEN}
+     * @param userId The user id
+     * @param contextId The context id
+     * @return the {@link OAuthAccessToken}
+     * @throws OXException in case the token couldn't be retrieved.
      */
-    public String getAccessToken() {
-        return accessToken;
-    }
-
+    public OAuthAccessToken getAccessToken(OAuthGrantType type, String data, int userId, int contextId) throws OXException;
 
     /**
-     * Gets the refreshToken
+     * Checks whether OAuth is configured for the given user.
      *
-     * @return The refreshToken
+     * @param userId The user id
+     * @param contextId The context id
+     * @return true if it is configured, false otherwise
+     * @throws OXException
      */
-    public String getRefreshToken() {
-        return refreshToken;
-    }
-
+    public boolean isConfigured(int userId, int contextId) throws OXException;
 
     /**
-     * Gets the type
      *
-     * @return The type
-     */
-    public String getType() {
-        return type;
-    }
-
-
-    /**
-     * Gets the expires_in
+     * {@link OAuthGrantType} describes possible grant types for {@link OAuthAccessTokenService#getAccessToken(OAuthGrantType, String, int, int)}
      *
-     * @return The expires_in
+     * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+     * @since v7.8.4
      */
-    public int getExpires_in() {
-        return expires_in;
+    public enum OAuthGrantType {
+        /**
+         * The SAML assertions as authorization grant
+         */
+        SAML,
+
+        /**
+         * The refresh token grant
+         */
+        REFRESH_TOKEN
     }
 
 }

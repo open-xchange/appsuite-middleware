@@ -47,16 +47,17 @@
  *
  */
 
-package com.openexchange.saml.oauth.service;
+package com.openexchange.saml.oauth;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.AuthType;
 import com.openexchange.mail.api.AuthenticationFailedHandler;
 import com.openexchange.mail.api.AuthenticationFailureHandlerResult;
 import com.openexchange.mail.api.MailConfig;
-import com.openexchange.saml.oauth.OAuthAccessToken;
-import com.openexchange.saml.oauth.OAuthRefreshTokenRequest;
 import com.openexchange.saml.oauth.osgi.Services;
+import com.openexchange.saml.oauth.service.OAuthAccessToken;
+import com.openexchange.saml.oauth.service.OAuthAccessTokenService;
+import com.openexchange.saml.oauth.service.OAuthAccessTokenService.OAuthGrantType;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
@@ -86,7 +87,7 @@ public class OAuthFailedAuthenticationHandler implements AuthenticationFailedHan
         if (session.containsParameter(Session.PARAM_OAUTH_REFRESH_TOKEN)) {
             // try to refresh the access token
             try {
-                OAuthAccessToken accessToken = OAuthRefreshTokenRequest.getInstance().requestAccessToken((String) session.getParameter(Session.PARAM_OAUTH_REFRESH_TOKEN), session.getUserId(), session.getContextId());
+                OAuthAccessToken accessToken = Services.getService(OAuthAccessTokenService.class).getAccessToken(OAuthGrantType.REFRESH_TOKEN,(String) session.getParameter(Session.PARAM_OAUTH_REFRESH_TOKEN), session.getUserId(), session.getContextId());
                 if (accessToken == null) {
                     sessiondService.removeSession(session.getSessionID());
                     return AuthenticationFailureHandlerResult.createErrorResult(SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID()));

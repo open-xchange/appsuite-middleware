@@ -22,9 +22,7 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.opensaml.DefaultBootstrap;
@@ -78,16 +76,14 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.SimUser;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.saml.SAMLConfig.Binding;
 import com.openexchange.saml.impl.WebSSOProviderImpl;
-import com.openexchange.saml.oauth.OAuthAccessToken;
-import com.openexchange.saml.oauth.OAuthAccessTokenRequest;
-import com.openexchange.saml.oauth.SAMLOAuthConfig;
-import com.openexchange.saml.oauth.SAMLOAuthExceptionCodes;
+import com.openexchange.saml.oauth.service.OAuthAccessToken;
+import com.openexchange.saml.oauth.service.OAuthAccessTokenService;
+import com.openexchange.saml.oauth.service.OAuthAccessTokenService.OAuthGrantType;
 import com.openexchange.saml.spi.CredentialProvider;
 import com.openexchange.saml.spi.SAMLBackend;
 import com.openexchange.saml.state.SimStateManagement;
@@ -157,7 +153,7 @@ import com.openexchange.user.UserService;
  * @since v7.8.4
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({SAMLOAuthConfig.class, OAuthAccessTokenRequest.class})
+@PrepareForTest(OAuthAccessTokenService.class)
 @PowerMockIgnore({"javax.net.*","javax.security.*","javax.crypto.*"})
 public class SAMLWebSSOProviderOAuthTest {
 
@@ -171,6 +167,8 @@ public class SAMLWebSSOProviderOAuthTest {
     private static SimSessiondService sessiondService;
     private static SimpleServiceLookup services;
     private static SimUserService userService;
+
+    private static OAuthAccessTokenService mock;
 
     @BeforeClass
     public static void beforeClass() throws Exception {
@@ -201,6 +199,11 @@ public class SAMLWebSSOProviderOAuthTest {
         services.add(UserService.class, userService);
         userService.addUser(new SimUser(1), 1);
         stateManagement = new SimStateManagement();
+
+        mock = PowerMockito.mock(OAuthAccessTokenService.class);
+        PowerMockito.when(mock, "isConfigured", 1,1).thenReturn(true);
+        services.add(OAuthAccessTokenService.class,mock);
+
         provider = new WebSSOProviderImpl(config, openSAML, stateManagement, services, samlBackend);
     }
 
@@ -295,52 +298,11 @@ public class SAMLWebSSOProviderOAuthTest {
         Assert.assertNotNull(sessionReservationService.removeReservation(reservationToken));
     }
 
-    @Rule
-    public final ExpectedException exception = ExpectedException.none();
-
-    @Test
-    public void testIdPInitiatedLoginWithFailedOAuthTokenRequest() throws Exception {
-        AuthnRequest authnRequest = prepareAuthnRequest();
-
-        /*
-         * Build response and process it
-         */
-        Response response = buildResponseWithoutInResponseTo();
-        SimHttpServletRequest samlResponseRequest = prepareHTTPRequest("POST", new URIBuilder(authnRequest.getAssertionConsumerServiceURL()).setParameter("SAMLResponse", Base64.encodeBytes(marshall(response).getBytes())).build());
-
-        SimHttpServletResponse httpResponse = new SimHttpServletResponse();
-        mockSAMLConfigFailed();
-
-        exception.expect(OXException.class);
-        provider.handleAuthnResponse(samlResponseRequest, httpResponse, Binding.HTTP_POST);
-    }
-
     private void mockSAMLConfig() throws Exception {
-        PowerMockito.mockStatic(SAMLOAuthConfig.class);
-        PowerMockito.when(SAMLOAuthConfig.class, "isConfigured", 1, 1).thenReturn(true);
-        PowerMockito.when(SAMLOAuthConfig.class, "getClientID", 1, 1).thenReturn("id");
-        PowerMockito.when(SAMLOAuthConfig.class, "getClientSecret", 1, 1).thenReturn("secret");
-        PowerMockito.when(SAMLOAuthConfig.class, "getTokenEndpoint", 1, 1).thenReturn("localhost");
 
-        OAuthAccessToken token = new OAuthAccessToken("access", "refresh", "oauthbearer", 100);
-        PowerMockito.mockStatic(OAuthAccessTokenRequest.class);
-        OAuthAccessTokenRequest tokenRequest = PowerMockito.mock(OAuthAccessTokenRequest.class);
-        PowerMockito.when(tokenRequest, "requestAccessToken", Mockito.anyString(), Mockito.anyInt(), Mockito.anyInt()).thenReturn(token);
-        PowerMockito.when(OAuthAccessTokenRequest.class, "getInstance").thenReturn(tokenRequest);
+        PowerMockito.when(mock.getAccessToken((OAuthGrantType) Mockito.any(), Mockito.anyString(), Mockito.anyInt(), Mockito.anyInt())).thenReturn(new OAuthAccessToken("access", "refresh", "oauth_bearer", 10));
+
      }
-
-    private void mockSAMLConfigFailed() throws Exception {
-        PowerMockito.mockStatic(SAMLOAuthConfig.class);
-        PowerMockito.when(SAMLOAuthConfig.class, "isConfigured", 1, 1).thenReturn(true);
-        PowerMockito.when(SAMLOAuthConfig.class, "getClientID", 1, 1).thenReturn("id");
-        PowerMockito.when(SAMLOAuthConfig.class, "getClientSecret", 1, 1).thenReturn("secret");
-        PowerMockito.when(SAMLOAuthConfig.class, "getTokenEndpoint", 1, 1).thenReturn("localhost");
-
-        PowerMockito.mockStatic(OAuthAccessTokenRequest.class);
-        OAuthAccessTokenRequest tokenRequest = PowerMockito.mock(OAuthAccessTokenRequest.class);
-        PowerMockito.when(tokenRequest, "requestAccessToken", Mockito.anyString(), Mockito.anyInt(), Mockito.anyInt()).thenThrow(SAMLOAuthExceptionCodes.NO_ACCESS_TOKEN.create("Some error message."));
-        PowerMockito.when(OAuthAccessTokenRequest.class, "getInstance").thenReturn(tokenRequest);
-    }
 
      @Test
      public void testIdPInitiatedLoginWithRelayState() throws Exception {

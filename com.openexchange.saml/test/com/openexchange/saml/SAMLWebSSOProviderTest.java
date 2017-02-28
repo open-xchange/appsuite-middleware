@@ -106,7 +106,7 @@ import com.openexchange.saml.SAMLConfig.Binding;
 import com.openexchange.saml.http.InitService;
 import com.openexchange.saml.impl.LoginConfigurationLookup;
 import com.openexchange.saml.impl.WebSSOProviderImpl;
-import com.openexchange.saml.oauth.SAMLOAuthConfig;
+import com.openexchange.saml.oauth.service.OAuthAccessTokenService;
 import com.openexchange.saml.spi.CredentialProvider;
 import com.openexchange.saml.spi.DefaultExceptionHandler;
 import com.openexchange.saml.spi.SAMLBackend;
@@ -179,7 +179,7 @@ import com.openexchange.user.UserService;
  * @since v7.6.1
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(SAMLOAuthConfig.class)
+@PrepareForTest(OAuthAccessTokenService.class)
 @PowerMockIgnore({"javax.net.*","javax.security.*","javax.crypto.*"})
 public class SAMLWebSSOProviderTest {
 
@@ -221,6 +221,9 @@ public class SAMLWebSSOProviderTest {
         services.add(SessiondService.class, sessiondService);
         userService = new SimUserService();
         services.add(UserService.class, userService);
+        OAuthAccessTokenService mock = PowerMockito.mock(OAuthAccessTokenService.class);
+        PowerMockito.when(mock, "isConfigured", 1,1).thenReturn(false);
+        services.add(OAuthAccessTokenService.class,mock);
         userService.addUser(new SimUser(1), 1);
         stateManagement = new SimStateManagement();
         provider = new WebSSOProviderImpl(config, openSAML, stateManagement, services, samlBackend);
@@ -268,8 +271,6 @@ public class SAMLWebSSOProviderTest {
             .build());
 
         SimHttpServletResponse httpResponse = new SimHttpServletResponse();
-        PowerMockito.mockStatic(SAMLOAuthConfig.class);
-        PowerMockito.when(SAMLOAuthConfig.class, "isConfigured", 1,1).thenReturn(false);
         provider.handleAuthnResponse(samlResponseRequest, httpResponse, Binding.HTTP_POST);
         assertCachingDisabledHeaders(httpResponse);
 
@@ -571,8 +572,6 @@ public class SAMLWebSSOProviderTest {
             .build());
 
         SimHttpServletResponse httpResponse = new SimHttpServletResponse();
-        PowerMockito.mockStatic(SAMLOAuthConfig.class);
-        PowerMockito.when(SAMLOAuthConfig.class, "isConfigured", 1,1).thenReturn(false);
         provider.handleAuthnResponse(samlResponseRequest, httpResponse, Binding.HTTP_POST);
         assertCachingDisabledHeaders(httpResponse);
 
@@ -617,9 +616,6 @@ public class SAMLWebSSOProviderTest {
 
         SimHttpServletResponse httpResponse = new SimHttpServletResponse();
 
-        PowerMockito.mockStatic(SAMLOAuthConfig.class);
-        PowerMockito.when(SAMLOAuthConfig.class, "isConfigured", 1,1).thenReturn(false);
-
         provider.handleAuthnResponse(samlResponseRequest, httpResponse, Binding.HTTP_POST);
         assertCachingDisabledHeaders(httpResponse);
 
@@ -661,8 +657,6 @@ public class SAMLWebSSOProviderTest {
             .build());
 
         SimHttpServletResponse httpResponse = new SimHttpServletResponse();
-        PowerMockito.mockStatic(SAMLOAuthConfig.class);
-        PowerMockito.when(SAMLOAuthConfig.class, "isConfigured", 1,1).thenReturn(false);
         provider.handleAuthnResponse(samlResponseRequest, httpResponse, Binding.HTTP_POST);
         assertCachingDisabledHeaders(httpResponse);
 

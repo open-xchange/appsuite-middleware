@@ -125,9 +125,9 @@ import com.openexchange.java.util.UUIDs;
 import com.openexchange.saml.OpenSAML;
 import com.openexchange.saml.SAMLConfig;
 import com.openexchange.saml.SAMLConfig.Binding;
-import com.openexchange.saml.oauth.OAuthAccessToken;
-import com.openexchange.saml.oauth.OAuthAccessTokenRequest;
-import com.openexchange.saml.oauth.SAMLOAuthConfig;
+import com.openexchange.saml.oauth.service.OAuthAccessToken;
+import com.openexchange.saml.oauth.service.OAuthAccessTokenService;
+import com.openexchange.saml.oauth.service.OAuthAccessTokenService.OAuthGrantType;
 import com.openexchange.saml.SAMLExceptionCode;
 import com.openexchange.saml.SAMLSessionParameters;
 import com.openexchange.saml.SAMLWebSSOProvider;
@@ -343,7 +343,11 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
      */
     private void getOAuthAccessToken(String base64SamlResponse, Map<String, String> properties, AuthenticationInfo authInfo, CredentialProvider credentialProvider) throws OXException {
         try {
-            if (!SAMLOAuthConfig.isConfigured(authInfo.getUserId(), authInfo.getContextId())) {
+            OAuthAccessTokenService service = services.getService(OAuthAccessTokenService.class);
+            if(service==null){
+                return;
+            }
+            if (!service.isConfigured(authInfo.getUserId(), authInfo.getContextId())) {
                 return;
             }
 
@@ -360,7 +364,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
             }
             String xmlAssertion = openSAML.marshall(assertion);
             String b64Assertion = Base64.encodeBase64String(xmlAssertion.getBytes());
-            OAuthAccessToken token = OAuthAccessTokenRequest.getInstance().requestAccessToken(b64Assertion, authInfo.getUserId(), authInfo.getContextId());
+            OAuthAccessToken token = service.getAccessToken(OAuthGrantType.SAML, b64Assertion, authInfo.getUserId(), authInfo.getContextId());
             properties.put(SAMLSessionParameters.ACCESS_TOKEN, token.getAccessToken());
             properties.put(SAMLSessionParameters.REFRESH_TOKEN, token.getRefreshToken());
         } catch (MarshallingException e) {

@@ -71,6 +71,7 @@ import com.openexchange.saml.impl.DefaultConfigReference;
 import com.openexchange.saml.impl.SAMLSessionInspector;
 import com.openexchange.saml.impl.hz.PortableAuthnRequestInfoFactory;
 import com.openexchange.saml.impl.hz.PortableLogoutRequestInfoFactory;
+import com.openexchange.saml.oauth.service.OAuthAccessTokenService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.inspector.SessionInspectorService;
 import com.openexchange.session.reservation.SessionReservationService;
@@ -101,7 +102,8 @@ public class SAMLFeature extends DependentServiceStarter {
         CapabilityService.class,
         TemplateService.class,
         ContextService.class,
-        UserService.class
+        UserService.class,
+        OAuthAccessTokenService.class
     };
 
     private final static Class<?>[] OPTIONAL_SERVICES = new Class[] {

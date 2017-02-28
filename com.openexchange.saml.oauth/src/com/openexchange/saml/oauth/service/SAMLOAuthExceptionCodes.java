@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.saml.oauth;
+package com.openexchange.saml.oauth.service;
 
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;

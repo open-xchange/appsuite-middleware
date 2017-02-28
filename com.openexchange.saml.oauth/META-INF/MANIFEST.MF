@@ -26,4 +26,4 @@ Import-Package: com.openexchange.config.cascade,
  org.apache.http.util,
  org.json,
  org.osgi.framework
-Export-Package: com.openexchange.saml.oauth
+Export-Package: com.openexchange.saml.oauth.service

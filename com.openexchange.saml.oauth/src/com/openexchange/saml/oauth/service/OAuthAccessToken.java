@@ -47,59 +47,75 @@
  *
  */
 
-package com.openexchange.saml.oauth.osgi;
+package com.openexchange.saml.oauth.service;
 
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.mail.api.AuthenticationFailedHandler;
-import com.openexchange.net.ssl.SSLSocketFactoryProvider;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.saml.oauth.HttpClientOAuthAccessTokenService;
-import com.openexchange.saml.oauth.OAuthFailedAuthenticationHandler;
-import com.openexchange.saml.oauth.service.OAuthAccessTokenService;
-import com.openexchange.sessiond.SessiondService;
 
 /**
- * {@link Activator}
+ * {@link OAuthAccessToken}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-public class Activator extends HousekeepingActivator {
+public class OAuthAccessToken {
 
-    private static final int SERVICE_RANKING = 100;
-    private static HttpClientOAuthAccessTokenService tokenService;
+    private final String accessToken;
+    private final String refreshToken;
+    private final String type;
+    private final int expires_in;
+
 
     /**
-     * Initializes a new {@link Activator}.
+     * Initializes a new {@link OAuthAccessToken}.
+     * @param accessToken
+     * @param refreshToken
+     * @param type
+     * @param expires_in
      */
-    public Activator() {
+    public OAuthAccessToken(String accessToken, String refreshToken, String type, int expires_in) {
         super();
+        this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
+        this.type = type;
+        this.expires_in = expires_in;
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { SessiondService.class, ConfigViewFactory.class, SSLSocketFactoryProvider.class };
+    /**
+     * Gets the accessToken
+     *
+     * @return The accessToken
+     */
+    public String getAccessToken() {
+        return accessToken;
     }
 
-    @Override
-    protected synchronized void startBundle() throws Exception {
-        Services.setServiceLookup(this);
 
-        tokenService = new HttpClientOAuthAccessTokenService();
-        trackService(OAuthAccessTokenService.class);
-        openTrackers();
-        registerService(OAuthAccessTokenService.class, tokenService);
-        registerService(AuthenticationFailedHandler.class, new OAuthFailedAuthenticationHandler(), SERVICE_RANKING);
+    /**
+     * Gets the refreshToken
+     *
+     * @return The refreshToken
+     */
+    public String getRefreshToken() {
+        return refreshToken;
     }
 
-    @Override
-    protected synchronized void stopBundle() throws Exception {
-        Services.setServiceLookup(null);
-        super.stopBundle();
 
-        if(tokenService!=null){
-            tokenService.closeHttpClient();
-        }
+    /**
+     * Gets the type
+     *
+     * @return The type
+     */
+    public String getType() {
+        return type;
+    }
+
+
+    /**
+     * Gets the expires_in
+     *
+     * @return The expires_in
+     */
+    public int getExpires_in() {
+        return expires_in;
     }
 
 }

@@ -66,6 +66,8 @@ import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.rest.client.httpclient.HttpClients;
+import com.openexchange.saml.oauth.service.OAuthAccessToken;
+import com.openexchange.saml.oauth.service.SAMLOAuthExceptionCodes;
 
 /**
  * {@link OAuthRefreshTokenRequest}
