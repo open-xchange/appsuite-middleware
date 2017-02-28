@@ -49,25 +49,28 @@
 
 package com.openexchange.userfeedback.rest.services;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.Response.Status;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.rest.services.JAXRSService;
 import com.openexchange.rest.services.annotation.Role;
 import com.openexchange.rest.services.annotation.RoleAllowed;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.userfeedback.ErrorResultConverter;
 import com.openexchange.userfeedback.ExportResult;
 import com.openexchange.userfeedback.ExportResultConverter;
 import com.openexchange.userfeedback.ExportType;
 import com.openexchange.userfeedback.FeedbackService;
+import com.openexchange.userfeedback.exception.FeedbackExceptionCodes;
 import com.openexchange.userfeedback.filter.DateOnlyFilter;
 
 /**
@@ -89,38 +92,55 @@ public class ExportUserFeedbackService extends JAXRSService {
     @Path("/{context-group}/{type}")
     @Produces(MediaType.APPLICATION_OCTET_STREAM + ";charset=utf-8")
     public Response export(@QueryParam("start") final long start, @QueryParam("end") final long end, @PathParam("type") final String type, @PathParam("context-group") final String contextGroup) {
-        ExportResult export = export(start, end, type, contextGroup, ExportType.CSV);
-        ResponseBuilder builder = Response.status(200);
-        if (export == null) {
-            return builder.build();
-        }
-        builder.entity(export.getResult());
-        builder.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM + "; charset=utf-8");
-        return builder.build();
+        Response response = export(start, end, type, contextGroup, ExportType.CSV);
+        return response;
     }
 
     @GET
     @Path("/{context-group}/{type}/raw")
     @Produces(MediaType.APPLICATION_JSON)
     public Response exportRaw(@QueryParam("start") final long start, @QueryParam("end") final long end, @PathParam("type") final String type, @PathParam("context-group") final String contextGroup) {
-        ExportResult export = export(start, end, type, contextGroup, ExportType.RAW);
-        ResponseBuilder builder = Response.status(200);
-        if (export == null) {
-            return builder.build();
-        }
-        builder.entity(export.getResult());
-        return builder.build();
+        Response response = export(start, end, type, contextGroup, ExportType.RAW);
+        return response;
     }
 
-    private ExportResult export(final long start, final long end, final String type, final String contextGroup, ExportType exportType) {
+    private Response export(final long start, final long end, final String type, final String contextGroup, ExportType exportType) {
         FeedbackService feedbackService = this.getService(FeedbackService.class);
 
         try {
+            validateParams(start, end);
             ExportResultConverter converter = feedbackService.export(contextGroup, new DateOnlyFilter(type, start, end));
-            return converter.get(exportType);
+            ExportResult export = converter.get(exportType);
+            ResponseBuilder builder = Response.status(Status.OK);
+            builder.entity(export.getResult());
+            return builder.build();
         } catch (OXException e) {
             org.slf4j.LoggerFactory.getLogger(ExportUserFeedbackService.class).error("An error occurred while retrieving user feedback.", e);
-            return new ErrorResultConverter(e.getMessage()).get(exportType);
+            if (e.similarTo(FeedbackExceptionCodes.GLOBAL_DB_NOT_CONFIGURED)) {
+                ResponseBuilder builder = Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.TEXT_PLAIN);
+                builder.entity(e.getDisplayMessage(null));
+                return builder.build();
+            } else if (e.similarTo(FeedbackExceptionCodes.INVALID_PARAMETER_VALUE)) {
+                ResponseBuilder builder = Response.status(Status.BAD_REQUEST).type(MediaType.TEXT_PLAIN);
+                builder.entity(e.getDisplayMessage(null));
+                return builder.build();
+            }
+            ResponseBuilder builder = Response.status(Status.NOT_FOUND).type(MediaType.TEXT_PLAIN);
+            builder.entity(e.getMessage());
+            return builder.build();
+        }
+    }
+
+    private void validateParams(long start, long end) throws OXException {
+        List<String> badParams = new ArrayList<>(2);
+        if (start < 0L) {
+            badParams.add("start");
+        }
+        if (end < 0L) {
+            badParams.add("end");
+        }
+        if (!badParams.isEmpty()) {
+            throw FeedbackExceptionCodes.INVALID_PARAMETER_VALUE.create(Strings.concat(",", badParams));
         }
     }
 }

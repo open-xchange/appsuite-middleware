@@ -145,6 +145,12 @@ public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Bu
             System.err.println("Unable to communicate with the server: " + e.getMessage());
         } catch (final NotAuthorizedException e) {
             System.err.println("Authorization not possible. Please check the provided credentials.");
+        } catch (final javax.ws.rs.ProcessingException e) {
+            System.err.println("Unable to reach provided endpoint: " + e.getMessage());
+        } catch (final javax.ws.rs.InternalServerErrorException e) {
+            System.err.println("An error occurred on endpoint side. Please check the server logs.");
+        } catch (final javax.ws.rs.NotFoundException e) {
+            System.err.println("The requested resource cannot be found. Please check the provided parameters and additionally the server logs for further information.");
         } catch (final RuntimeException e) {
             String message = e.getMessage();
             String clazzName = e.getClass().getName();

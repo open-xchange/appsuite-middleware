@@ -476,6 +476,11 @@ public class QuotaFileStorageTest {
             // TODO Auto-generated method stub
             return null;
         }
+
+        @Override
+        public boolean isGlobalDatabaseAvailable() {
+            return false;
+        }
     }
 
     private static void rmdir(final File tempFile) {

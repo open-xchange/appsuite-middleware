@@ -71,18 +71,27 @@ public enum FeedbackExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * SQL problem: %1$s.
      */
-    SQL_ERROR("SQL problem: %1$s.", OXExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 2),
+    SQL_ERROR("SQL problem: %1$s", OXExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 2),
 
     /**
      * Unknown feedback type!
      */
-    INVALID_FEEDBACK_TYPE("Unknown feedback type!", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 3),
+    INVALID_FEEDBACK_TYPE("Unknown feedback type: %1$s", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 3),
 
     /**
      * Unknown data type for feedback.
      */
-    INVALID_DATA_TYPE("Unknown data type for feedback. Please provide  %1$s", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 4),
+    INVALID_DATA_TYPE("Unknown data type for feedback. Please provide %1$s", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 4),
 
+    /**
+     * No global database configured.
+     */
+    GLOBAL_DB_NOT_CONFIGURED("No global database configured.", OXExceptionStrings.MESSAGE, CATEGORY_CONFIGURATION, 5),
+
+    /**
+     * Provided value '%1$s' for parameter '%2$s' is invalid.
+     */
+    INVALID_PARAMETER_VALUE("Provided value(s) for parameter(s) '%1$s' is/are invalid.", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 6),
     ;
 
     /**

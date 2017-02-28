@@ -49,6 +49,7 @@
 
 package com.openexchange.userfeedback.clt;
 
+import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -93,6 +94,7 @@ public class ExportUserFeedback extends AbstractRestCLI<Void> {
 
     private static final String ENDPOINT_LONG = "api-root";
     private static final String ENDPOINT_DEFAULT = "http://localhost:8009/userfeedback/v1/export";
+    private String pathStr;
 
     /**
      * Invokes this command-line tool
@@ -129,18 +131,25 @@ public class ExportUserFeedback extends AbstractRestCLI<Void> {
     protected void checkArguments(CommandLine cmd) {
         if (cmd.getArgs().length < 1) {
             System.out.println("Please add a destination file for export.");
-            System.exit(0);
+            System.exit(1);
+            return;
+        }
+        pathStr = cmd.getArgs()[0];
+        File file = new File(pathStr);
+        if (file.exists()) {
+            System.out.println("File " + file.getAbsolutePath() + " does already exist! Please choose another location.");
+            System.exit(1);
             return;
         }
     }
 
     @Override
     protected Void invoke(Options option, CommandLine cmd, Builder builder) throws Exception {
-        builder.accept(MediaType.APPLICATION_JSON_TYPE, MediaType.APPLICATION_OCTET_STREAM_TYPE);
+        builder.accept(MediaType.APPLICATION_JSON_TYPE, MediaType.APPLICATION_OCTET_STREAM_TYPE, MediaType.TEXT_PLAIN_TYPE);
 
         InputStream response = builder.get(InputStream.class);
 
-        Path path = Paths.get(cmd.getArgs()[0]);
+        Path path = Paths.get(pathStr);
         Files.write(path, IOUtils.toByteArray(new AsciiReader(response), Charsets.US_ASCII.name()));
         System.out.println("File successfully written to: " + path.toString());
         return null;
@@ -169,6 +178,7 @@ public class ExportUserFeedback extends AbstractRestCLI<Void> {
             return target;
         } catch (URISyntaxException e) {
             System.err.print("Unable to return endpoint: " + e.getMessage());
+            System.exit(1);
         }
         return null;
     }

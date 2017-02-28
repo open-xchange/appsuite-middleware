@@ -18,7 +18,8 @@ Import-Package: com.openexchange.ajax.container,
  com.openexchange.tools.sql,
  com.openexchange.user,
  org.json,
- org.osgi.framework
+ org.osgi.framework,
+ org.osgi.util.tracker
 Export-Package: com.openexchange.userfeedback,
  com.openexchange.userfeedback.exception,
  com.openexchange.userfeedback.filter

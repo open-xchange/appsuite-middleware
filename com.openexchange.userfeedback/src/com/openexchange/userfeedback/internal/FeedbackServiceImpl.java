@@ -59,7 +59,6 @@ import org.json.JSONObject;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.database.GlobalDatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
@@ -100,10 +99,9 @@ public class FeedbackServiceImpl implements FeedbackService {
             throw FeedbackExceptionCodes.INVALID_FEEDBACK_TYPE.create();
         }
 
-        // Get db connection
-        GlobalDatabaseService dbService = Services.getService(DatabaseService.class);
-        if (dbService == null) {
-            throw ServiceExceptionCode.absentService(DatabaseService.class);
+        DatabaseService dbService = Services.getService(DatabaseService.class);
+        if (!dbService.isGlobalDatabaseAvailable()) {
+            throw FeedbackExceptionCodes.GLOBAL_DB_NOT_CONFIGURED.create();
         }
 
         Connection writeCon = null;
@@ -170,12 +168,12 @@ public class FeedbackServiceImpl implements FeedbackService {
         FeedbackType feedBackType = registry.getFeedbackType(filter.getType());
 
         if (feedBackType == null) {
-            throw FeedbackExceptionCodes.INVALID_FEEDBACK_TYPE.create();
+            throw FeedbackExceptionCodes.INVALID_FEEDBACK_TYPE.create(filter.getType());
         }
 
-        GlobalDatabaseService dbService = Services.getService(DatabaseService.class);
-        if (dbService == null) {
-            throw ServiceExceptionCode.absentService(DatabaseService.class);
+        DatabaseService dbService = Services.getService(DatabaseService.class);
+        if (!dbService.isGlobalDatabaseAvailable()) {
+            throw FeedbackExceptionCodes.GLOBAL_DB_NOT_CONFIGURED.create();
         }
 
         Connection readCon = null;
