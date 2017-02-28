@@ -285,7 +285,7 @@ public class PlistResult implements Result {
 
         number = sanitizeNumber(number);
         setRateLimitTime(ratelimit, session);
-        smsService.sendMessage(new String[] { number }, text);
+        smsService.sendMessage(new String[] { number }, text, session.getUserId(), session.getContextId());
 
         ResultObject resultObject;
         resultObject = new SimpleResultObject(OnboardingUtility.getTranslationFor(OnboardingStrings.RESULT_SMS_SENT, session), "string");
