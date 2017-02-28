@@ -16,6 +16,7 @@ Furthermore this document describes how to extend a custom SAML implementation t
 * A running token endpoint supporting the SAML Bearer Assertion Authorization Grant and (optional) the Token Refresh Grant. E.g. via a running wso2 identity server.
 
 Now you only need to configure the following properties:
+
 ```
 com.openexchange.mail.authType=oauthbearer
 com.openexchange.mail.transport.authType=oauthbearer

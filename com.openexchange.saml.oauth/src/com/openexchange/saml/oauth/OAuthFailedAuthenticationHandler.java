@@ -102,12 +102,13 @@ public class OAuthFailedAuthenticationHandler implements AuthenticationFailedHan
                 mailConfig.setPassword(accessToken.getAccessToken());
                 sessiondService.storeSession(session.getSessionID());
                 return AuthenticationFailureHandlerResult.createRetryResult();
-            } catch (OXException e1) {
+            } catch (OXException x) {
                 // Unable to refresh access token -> logout
                 sessiondService.removeSession(session.getSessionID());
-                return AuthenticationFailureHandlerResult.createErrorResult(SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID()));
+                return AuthenticationFailureHandlerResult.createErrorResult(SessionExceptionCodes.SESSION_EXPIRED.create(x, session.getSessionID()));
             }
         }
+
         // Unable to refresh access token -> logout
         sessiondService.removeSession(session.getSessionID());
         return AuthenticationFailureHandlerResult.createErrorResult(SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID()));
