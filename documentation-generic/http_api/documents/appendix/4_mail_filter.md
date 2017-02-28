@@ -39,6 +39,24 @@ Furthermore some tests use a comparison field as stated above which specifies ho
 
 </div>
 
+
+### Simplified tests
+
+The mailfilter v2 api suppports some simplified rules.
+
+<div class="mailFilterToc">
+
+| Name | Description |
+|:------|:-------------|
+| [subject](#simplified-header-test) | A convenience test to match against a mails subject. |
+| [from](#simplified-header-test) | A convenience test to match against a mails From header. |
+| [to](#simplified-header-test) | A convenience test to match against a mails To header. |
+| [cc](#simplified-header-test) | A convenience test to match against a mails Cc header. |
+| [anyRecipient](#simplified-header-test) | A convenience test to match against a mails To and Cc headers. |
+| [mailingList](#simplified-header-test) | Matches against common mailing list headers for simple filtering of mailing list mails. |
+
+</div>
+
 ### Possible comparisons
 
 | Name | Description |
@@ -185,6 +203,14 @@ This section describes the structures of tests.
 |:----|:---|:----|:----------|
 |id | String | exists | A string describing the test command.|
 |headers | Array || A string array containing the header fields.|
+
+### simplified-header-test
+
+|Name |Type|Value|Description|
+|:----|:---|:----|:----------|
+|id | String ||	A string describing a simplified test command.|
+|comparison | String || Available types can be found in the config object (see [Possible comparisons](#possible-comparisons)). Defaults to "contains".|
+|values | Array || A string array containing the values for the header fields. The test will be true if any of the strings matches.|
 
 
 
