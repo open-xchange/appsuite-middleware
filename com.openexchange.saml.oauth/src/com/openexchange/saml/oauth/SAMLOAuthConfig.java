@@ -54,11 +54,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.UserAndContext;
 
@@ -123,49 +122,22 @@ public class SAMLOAuthConfig {
 
         ConfigView view = configViewFactory.getView(userId, contextId);
 
-        String endpoint;
-        {
-            ComposedConfigProperty<String> property = view.property(TOKEN_ENDPOINT_PROPERTY, String.class);
-            if (false == property.isDefined()) {
-                // No end-point configured
-                return null;
-            }
-
-            endpoint = property.get();
-            if (Strings.isEmpty(endpoint)) {
-                // No end-point configured
-                return null;
-            }
+        String endpoint = ConfigViews.getNonEmptyPropertyFrom(TOKEN_ENDPOINT_PROPERTY, view);
+        if (null == endpoint) {
+            // No end-point configured
+            return null;
         }
 
-        String clientId;
-        {
-            ComposedConfigProperty<String> property = view.property(CLIENT_ID_PROPERTY, String.class);
-            if (false == property.isDefined()) {
-                // No client ID configured
-                return null;
-            }
-
-            clientId = property.get();
-            if (Strings.isEmpty(clientId)) {
-                // No client ID configured
-                return null;
-            }
+        String clientId = ConfigViews.getNonEmptyPropertyFrom(CLIENT_ID_PROPERTY, view);
+        if (null == clientId) {
+            // No client ID configured
+            return null;
         }
 
-        String clientSecret;
-        {
-            ComposedConfigProperty<String> property = view.property(CLIENT_SECRET_PROPERTY, String.class);
-            if (false == property.isDefined()) {
-                // No client secret configured
-                return null;
-            }
-
-            clientSecret = property.get();
-            if (Strings.isEmpty(clientSecret)) {
-                // No client secret configured
-                return null;
-            }
+        String clientSecret = ConfigViews.getNonEmptyPropertyFrom(CLIENT_SECRET_PROPERTY, view);
+        if (null == clientSecret) {
+            // No client secret configured
+            return null;
         }
 
         return new OAuthConfiguration(endpoint, clientId, clientSecret);
