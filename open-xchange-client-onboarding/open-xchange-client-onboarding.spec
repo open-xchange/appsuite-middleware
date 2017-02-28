@@ -15,7 +15,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 26
+%define        ox_release 27
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -109,6 +109,8 @@ fi
 /opt/open-xchange/sbin/*
 
 %changelog
+* Tue Feb 28 2017 Thorben Betten <thorben.betten@open-xchange.com>
+Build for patch 2017-03-06 (3984)
 * Fri Feb 24 2017 Thorben Betten <thorben.betten@open-xchange.com>
 Build for patch 2017-02-24 (3993)
 * Wed Feb 15 2017 Thorben Betten <thorben.betten@open-xchange.com>
