@@ -49,8 +49,8 @@
 
 package com.openexchange.userfeedback.rest.services;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -60,6 +60,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.rest.services.JAXRSService;
@@ -83,6 +86,8 @@ import com.openexchange.userfeedback.filter.DateOnlyFilter;
 @RoleAllowed(Role.BASIC_AUTHENTICATED)
 @Path("/userfeedback/v1/export")
 public class ExportUserFeedbackService extends JAXRSService {
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ExportUserFeedbackService.class);
 
     public ExportUserFeedbackService(ServiceLookup services) {
         super(services);
@@ -116,31 +121,46 @@ public class ExportUserFeedbackService extends JAXRSService {
             return builder.build();
         } catch (OXException e) {
             org.slf4j.LoggerFactory.getLogger(ExportUserFeedbackService.class).error("An error occurred while retrieving user feedback.", e);
+            JSONObject errorJson = generateError(e);
             if (e.similarTo(FeedbackExceptionCodes.GLOBAL_DB_NOT_CONFIGURED)) {
-                ResponseBuilder builder = Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.TEXT_PLAIN);
-                builder.entity(e.getDisplayMessage(null));
+                ResponseBuilder builder = Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON);
+                builder.entity(errorJson);
                 return builder.build();
             } else if (e.similarTo(FeedbackExceptionCodes.INVALID_PARAMETER_VALUE)) {
-                ResponseBuilder builder = Response.status(Status.BAD_REQUEST).type(MediaType.TEXT_PLAIN);
-                builder.entity(e.getDisplayMessage(null));
+                ResponseBuilder builder = Response.status(Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON);
+                builder.entity(errorJson);
                 return builder.build();
             }
-            ResponseBuilder builder = Response.status(Status.NOT_FOUND).type(MediaType.TEXT_PLAIN);
-            builder.entity(e.getMessage());
+            ResponseBuilder builder = Response.status(Status.NOT_FOUND).type(MediaType.APPLICATION_JSON);
+            builder.entity(errorJson);
             return builder.build();
         }
     }
 
     private void validateParams(long start, long end) throws OXException {
-        List<String> badParams = new ArrayList<>(2);
+        Set<String> badParams = new HashSet<>(2);
         if (start < 0L) {
             badParams.add("start");
         }
         if (end < 0L) {
             badParams.add("end");
         }
+        if (end < start) {
+            badParams.add("start");
+            badParams.add("end");
+        }
         if (!badParams.isEmpty()) {
             throw FeedbackExceptionCodes.INVALID_PARAMETER_VALUE.create(Strings.concat(",", badParams));
         }
+    }
+
+    private JSONObject generateError(OXException ex) {
+        JSONObject main = new JSONObject();
+        try {
+            ResponseWriter.addException(main, ex);
+        } catch (JSONException e) {
+            LOG.error("Error while generating error for client.", e);
+        }
+        return main;
     }
 }

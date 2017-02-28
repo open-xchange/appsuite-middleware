@@ -51,7 +51,6 @@ package com.openexchange.cli;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
 import org.apache.commons.cli.CommandLine;
@@ -132,10 +131,6 @@ public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Bu
             R retval = invoke(options, cmd, request);
             error = false;
             return retval;
-        } catch (final ExecutionFault e) {
-            final Throwable t = e.getCause();
-            final String message = t.getMessage();
-            System.err.println(null == message ? "An error occurred." : message);
         } catch (final ParseException e) {
             System.err.println("Unable to parse command line: " + e.getMessage());
             printHelp(options);
@@ -143,12 +138,14 @@ public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Bu
             System.err.println("URL to connect to server is invalid: " + e.getMessage());
         } catch (final IOException e) {
             System.err.println("Unable to communicate with the server: " + e.getMessage());
-        } catch (final NotAuthorizedException e) {
+        } catch (final javax.ws.rs.NotAuthorizedException e) {
             System.err.println("Authorization not possible. Please check the provided credentials.");
         } catch (final javax.ws.rs.ProcessingException e) {
             System.err.println("Unable to reach provided endpoint: " + e.getMessage());
         } catch (final javax.ws.rs.InternalServerErrorException e) {
             System.err.println("An error occurred on endpoint side. Please check the server logs.");
+        } catch (final javax.ws.rs.BadRequestException e) {
+            System.err.println("The provided request parameters seem to be invalid. Please check them and additionally the server logs for further information.");
         } catch (final javax.ws.rs.NotFoundException e) {
             System.err.println("The requested resource cannot be found. Please check the provided parameters and additionally the server logs for further information.");
         } catch (final RuntimeException e) {
