@@ -93,7 +93,7 @@ public class SendMailService extends JAXRSService {
     public Response sendMail(@QueryParam("start") final long start, @QueryParam("end") final long end, @PathParam("type") final String type, @PathParam("context-group") final String contextGroup, @QueryParam("recipients") final String recipients) {
         ResponseBuilder builder = null;
         if (null == recipients || Strings.isEmpty(recipients)) {
-            builder = Response.serverError().entity("Add recipients as comma-separated list");
+            builder = Response.status(400).entity("Add recipients as comma-separated list");
             builder.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM + "; charset=utf-8");
             return builder.build();
         }
@@ -102,7 +102,7 @@ public class SendMailService extends JAXRSService {
         try {
             addresses = QuotedInternetAddress.parse(recipients);
         } catch (AddressException e) {
-            builder = Response.serverError().entity(e.getMessage());
+            builder = Response.status(400).entity(e.getMessage());
             builder.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM + "; charset=utf-8");
             return builder.build();
         }
