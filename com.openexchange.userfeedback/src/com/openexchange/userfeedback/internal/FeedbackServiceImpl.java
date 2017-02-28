@@ -230,7 +230,7 @@ public class FeedbackServiceImpl implements FeedbackService {
             throw FeedbackExceptionCodes.INVALID_FEEDBACK_TYPE.create();
         }
 
-        GlobalDatabaseService dbService = Services.getService(DatabaseService.class);
+        DatabaseService dbService = Services.getService(DatabaseService.class);
         if (dbService == null) {
             throw ServiceExceptionCode.absentService(DatabaseService.class);
         }
