@@ -65,7 +65,7 @@ import com.openexchange.tools.session.ServerSession;
 public class ActiveRuleFieldMapper implements RuleFieldMapper {
 
     /**
-     * Initialises a new {@link ActiveRuleFieldMapper}.
+     * Initializes a new {@link ActiveRuleFieldMapper}.
      */
     public ActiveRuleFieldMapper() {
         super();

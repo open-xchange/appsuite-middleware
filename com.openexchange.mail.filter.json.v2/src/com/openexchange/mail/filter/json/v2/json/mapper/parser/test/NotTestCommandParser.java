@@ -83,9 +83,6 @@ public class NotTestCommandParser extends AbstractTestCommandParser<TestCommand>
 
     @Override
     public TestCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException {
-        // FIXME Not parser seems to be broken by design
-
-
         final List<Object> argList = new ArrayList<Object>();
         ArrayList<TestCommand> testcommands = new ArrayList<TestCommand>();
 

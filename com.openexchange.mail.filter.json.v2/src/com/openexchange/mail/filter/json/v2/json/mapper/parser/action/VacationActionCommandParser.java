@@ -85,7 +85,7 @@ import com.openexchange.tools.session.ServerSession;
 public class VacationActionCommandParser extends AbstractActionCommandParser {
 
     /**
-     * Initialises a new {@link VacationActionCommandParser}.
+     * Initializes a new {@link VacationActionCommandParser}.
      */
     public VacationActionCommandParser() {
         super();

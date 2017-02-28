@@ -65,7 +65,7 @@ import com.openexchange.tools.session.ServerSession;
 public class TextRuleFieldMapper implements RuleFieldMapper {
 
     /**
-     * Initialises a new {@link TextRuleFieldMapper}.
+     * Initializes a new {@link TextRuleFieldMapper}.
      */
     public TextRuleFieldMapper() {
         super();

@@ -68,7 +68,7 @@ import com.openexchange.tools.session.ServerSession;
 public class KeepActionCommandParser extends AbstractActionCommandParser {
 
     /**
-     * Initialises a new {@link KeepActionCommandParser}.
+     * Initializes a new {@link KeepActionCommandParser}.
      */
     public KeepActionCommandParser() {
         super();

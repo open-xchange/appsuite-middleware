@@ -78,7 +78,7 @@ import com.openexchange.tools.session.ServerSession;
 public class RedirectActionCommandParser extends AbstractActionCommandParser {
 
     /**
-     * Initialises a new {@link RedirectActionCommandParser}.
+     * Initializes a new {@link RedirectActionCommandParser}.
      */
     public RedirectActionCommandParser() {
         super();

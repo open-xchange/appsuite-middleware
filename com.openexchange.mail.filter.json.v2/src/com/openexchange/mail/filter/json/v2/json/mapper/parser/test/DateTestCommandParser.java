@@ -74,11 +74,6 @@ public class DateTestCommandParser extends AbstractDateTestCommandParser {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser#parse(org.json.JSONObject, com.openexchange.tools.session.ServerSession)
-     */
     @Override
     public TestCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException {
         String commandName = Commands.DATE.getCommandName();
@@ -92,11 +87,6 @@ public class DateTestCommandParser extends AbstractDateTestCommandParser {
         return new TestCommand(TestCommand.Commands.DATE, argList, new ArrayList<TestCommand>());
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser#parse(org.json.JSONObject, java.lang.Object)
-     */
     @Override
     public void parse(JSONObject jsonObject, TestCommand command) throws JSONException, OXException {
         parseComparisonTag(jsonObject, command);

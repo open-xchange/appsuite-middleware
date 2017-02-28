@@ -78,7 +78,7 @@ import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
 public class FileIntoActionCommandParser extends AbstractActionCommandParser {
 
     /**
-     * Initialises a new {@link FileIntoActionCommandParser}.
+     * Initializes a new {@link FileIntoActionCommandParser}.
      */
     public FileIntoActionCommandParser() {
         super();

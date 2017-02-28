@@ -65,7 +65,7 @@ import com.openexchange.tools.session.ServerSession;
 public class ErrorMessageRuleFieldMapper implements RuleFieldMapper {
 
     /**
-     * Initialises a new {@link ErrorMessageRuleFieldMapper}.
+     * Initializes a new {@link ErrorMessageRuleFieldMapper}.
      */
     public ErrorMessageRuleFieldMapper() {
         super();

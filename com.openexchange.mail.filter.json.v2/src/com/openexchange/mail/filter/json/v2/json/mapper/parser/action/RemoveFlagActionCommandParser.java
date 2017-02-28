@@ -73,7 +73,7 @@ import com.openexchange.tools.session.ServerSession;
 public class RemoveFlagActionCommandParser extends AbstractActionCommandParser {
 
     /**
-     * Initialises a new {@link RemoveFlagActionCommandParser}.
+     * Initializes a new {@link RemoveFlagActionCommandParser}.
      */
     public RemoveFlagActionCommandParser() {
         super();

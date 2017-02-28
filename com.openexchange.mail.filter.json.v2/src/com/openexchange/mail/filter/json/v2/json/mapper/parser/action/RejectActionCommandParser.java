@@ -71,7 +71,7 @@ import com.openexchange.tools.session.ServerSession;
 public class RejectActionCommandParser extends AbstractActionCommandParser {
 
     /**
-     * Initialises a new {@link RejectActionCommandParser}.
+     * Initializes a new {@link RejectActionCommandParser}.
      */
     public RejectActionCommandParser() {
         super();

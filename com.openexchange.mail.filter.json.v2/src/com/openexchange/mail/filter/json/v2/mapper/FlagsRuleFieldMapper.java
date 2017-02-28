@@ -68,7 +68,7 @@ import com.openexchange.tools.session.ServerSession;
 public class FlagsRuleFieldMapper implements RuleFieldMapper {
 
     /**
-     * Initialises a new {@link FlagsRuleFieldMapper}.
+     * Initializes a new {@link FlagsRuleFieldMapper}.
      */
     public FlagsRuleFieldMapper() {
         super();

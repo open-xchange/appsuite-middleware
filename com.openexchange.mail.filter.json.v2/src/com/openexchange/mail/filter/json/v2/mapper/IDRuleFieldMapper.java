@@ -66,7 +66,7 @@ import com.openexchange.tools.session.ServerSession;
 public class IDRuleFieldMapper implements RuleFieldMapper {
 
     /**
-     * Initialises a new {@link IDRuleFieldMapper}.
+     * Initializes a new {@link IDRuleFieldMapper}.
      */
     public IDRuleFieldMapper() {
         super();

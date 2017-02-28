@@ -52,6 +52,8 @@ package com.openexchange.mail.filter.json.v2.mapper.parser.test.simplified;
 import java.util.Arrays;
 import java.util.List;
 import org.json.JSONException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.filter.json.v2.json.mapper.parser.exceptions.CommandParserExceptionCodes;
 
 /**
  * {@link SimplifiedHeaderTest}
@@ -85,14 +87,15 @@ public enum SimplifiedHeaderTest {
      * @param name The name
      * @return The {@link SimplifiedHeaderTest}
      * @throws JSONException if no {@link SimplifiedHeaderTest} with this name exists
+     * @throws OXException
      */
-    public static SimplifiedHeaderTest getTestByName(String name) throws JSONException {
+    public static SimplifiedHeaderTest getTestByName(String name) throws OXException {
         for(SimplifiedHeaderTest test: values()){
             if(test.getCommandName().equals(name)){
                 return test;
             }
         }
-        throw new JSONException("Unknown test command while creating object: " + name);
+        throw CommandParserExceptionCodes.UNKOWN_SIMPLIFIED_RULE.create(name);
     }
 
     /**

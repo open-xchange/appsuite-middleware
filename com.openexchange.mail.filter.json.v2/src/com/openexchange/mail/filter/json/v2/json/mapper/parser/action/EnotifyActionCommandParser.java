@@ -73,7 +73,7 @@ import com.openexchange.tools.session.ServerSession;
 public class EnotifyActionCommandParser extends AbstractActionCommandParser {
 
     /**
-     * Initialises a new {@link EnotifyActionCommandParser}.
+     * Initializes a new {@link EnotifyActionCommandParser}.
      */
     public EnotifyActionCommandParser() {
         super();

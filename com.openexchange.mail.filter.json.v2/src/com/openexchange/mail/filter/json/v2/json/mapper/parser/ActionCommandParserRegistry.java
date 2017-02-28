@@ -66,7 +66,7 @@ public class ActionCommandParserRegistry implements CommandParserRegistry<Action
     private final Map<String, ActionCommandParser<ActionCommand>> parsers;
 
     /**
-     * Initialises a new {@link ActionCommandParserRegistry}.
+     * Initializes a new {@link ActionCommandParserRegistry}.
      */
     public ActionCommandParserRegistry() {
         super();

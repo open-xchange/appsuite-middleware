@@ -74,7 +74,7 @@ import com.openexchange.tools.session.ServerSession;
 public class PGPEncryptActionCommandParser extends AbstractActionCommandParser {
 
     /**
-     * Initialises a new {@link PGPEncryptActionCommandParser}.
+     * Initializes a new {@link PGPEncryptActionCommandParser}.
      */
     public PGPEncryptActionCommandParser() {
         super();

@@ -92,7 +92,7 @@ public class ActionCommandRuleFieldMapper implements RuleFieldMapper {
     private final Map<String, CommandParser<ActionCommand>> parsers;
 
     /**
-     * Initialises a new {@link ActionCommandRuleFieldMapper}.
+     * Initializes a new {@link ActionCommandRuleFieldMapper}.
      */
     public ActionCommandRuleFieldMapper() {
         super();
@@ -113,31 +113,16 @@ public class ActionCommandRuleFieldMapper implements RuleFieldMapper {
         parsers = Collections.unmodifiableMap(p);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.mailfilter.json.ajax.json.RuleFieldMapper#getAttributeName()
-     */
     @Override
     public RuleField getAttributeName() {
         return RuleField.actioncmds;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.mailfilter.json.ajax.json.RuleFieldMapper#isNull(com.openexchange.jsieve.commands.Rule)
-     */
     @Override
     public boolean isNull(Rule rule) {
         return rule.getIfCommand() == null;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.mailfilter.json.ajax.json.RuleFieldMapper#getAttribute(com.openexchange.jsieve.commands.Rule)
-     */
     @Override
     public Object getAttribute(Rule rule) throws JSONException, OXException {
         if (isNull(rule)) {
@@ -157,11 +142,6 @@ public class ActionCommandRuleFieldMapper implements RuleFieldMapper {
         return array;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.mailfilter.json.ajax.json.RuleFieldMapper#setAttribute(com.openexchange.jsieve.commands.Rule, java.lang.Object)
-     */
     @Override
     public void setAttribute(Rule rule, Object attribute, ServerSession session) throws JSONException, SieveException, OXException {
         if (isNull(rule)) {

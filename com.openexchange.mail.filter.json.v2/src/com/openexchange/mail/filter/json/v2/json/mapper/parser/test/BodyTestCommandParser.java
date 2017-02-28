@@ -91,8 +91,6 @@ public class BodyTestCommandParser extends AbstractTestCommandParser<TestCommand
             if (extensionkey.equals("text")) {
                 argList.add(ArgumentUtil.createTagArgument("text"));
             } else if (extensionkey.equals("content")) {
-                // TODO: This part should be tested for correct operation, our GUI doesn't use this, but this is
-                // allowed according to our specification
                 argList.add(ArgumentUtil.createTagArgument("content"));
                 final String extensionvalue = CommandParserJSONUtil.getString(jsonObject, BodyTestField.extensionsvalue.name(), commandName);
                 argList.add(extensionvalue);
@@ -114,8 +112,6 @@ public class BodyTestCommandParser extends AbstractTestCommandParser<TestCommand
             final String extensionkey = tagArguments.get(1).substring(1);
             jsonObject.put(BodyTestField.extensionskey.name(), extensionkey);
             if ("content".equals(extensionkey)) {
-                // TODO: This part should be tested for correct operation, our GUI doesn't use this, but this is
-                // allowed according to our specification
                 jsonObject.put(BodyTestField.extensionsvalue.name(), command.getArguments().get(2));
                 jsonObject.put(BodyTestField.values.name(), new JSONArray((List) command.getArguments().get(3)));
             } else {

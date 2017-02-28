@@ -68,7 +68,7 @@ import com.openexchange.tools.session.ServerSession;
 public class StopActionCommandParser extends AbstractActionCommandParser {
 
     /**
-     * Initialises a new {@link StopActionCommandParser}.
+     * Initializes a new {@link StopActionCommandParser}.
      */
     public StopActionCommandParser() {
         super();

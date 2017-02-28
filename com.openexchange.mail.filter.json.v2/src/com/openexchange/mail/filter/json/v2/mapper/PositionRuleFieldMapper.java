@@ -65,7 +65,7 @@ import com.openexchange.tools.session.ServerSession;
 public class PositionRuleFieldMapper implements RuleFieldMapper {
 
     /**
-     * Initialises a new {@link PositionRuleFieldMapper}.
+     * Initializes a new {@link PositionRuleFieldMapper}.
      */
     public PositionRuleFieldMapper() {
         super();

@@ -74,6 +74,10 @@ public enum CommandParserExceptionCodes implements DisplayableOXExceptionCode {
      * Unable to decode the field '%1$s' of the '%2$s' rule
      */
     UNABLE_TO_DECODE("Unable to decode the field '%1$s' of the '%2$s' rule", CATEGORY_ERROR, 3),
+    /**
+     * No simplified rule found for the specified key '%1$s'
+     */
+    UNKOWN_SIMPLIFIED_RULE("No simplified rule found for the specified key '%1$s'", CATEGORY_ERROR, 4),
 
     ;
 

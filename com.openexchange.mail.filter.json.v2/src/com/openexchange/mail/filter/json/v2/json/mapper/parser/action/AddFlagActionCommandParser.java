@@ -73,7 +73,7 @@ import com.openexchange.tools.session.ServerSession;
 public class AddFlagActionCommandParser extends AbstractActionCommandParser {
 
     /**
-     * Initialises a new {@link AddFlagActionCommandParser}.
+     * Initializes a new {@link AddFlagActionCommandParser}.
      */
     public AddFlagActionCommandParser() {
         super();

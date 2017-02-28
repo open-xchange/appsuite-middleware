@@ -68,7 +68,7 @@ import com.openexchange.tools.session.ServerSession;
 public class DiscardActionCommandParser extends AbstractActionCommandParser {
 
     /**
-     * Initialises a new {@link DiscardActionCommandParser}.
+     * Initializes a new {@link DiscardActionCommandParser}.
      */
     public DiscardActionCommandParser() {
         super();
