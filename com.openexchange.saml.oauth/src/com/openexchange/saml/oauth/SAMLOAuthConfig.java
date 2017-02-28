@@ -49,6 +49,7 @@
 
 package com.openexchange.saml.oauth;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -68,6 +69,8 @@ import com.openexchange.session.UserAndContext;
  * @since v7.8.4
  */
 public class SAMLOAuthConfig {
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SAMLOAuthConfig.class);
 
     private static final String TOKEN_ENDPOINT_PROPERTY = "com.openexchange.saml.oauth.token";
     private static final String CLIENT_ID_PROPERTY = "com.openexchange.saml.oauth.clientId";
@@ -125,18 +128,21 @@ public class SAMLOAuthConfig {
         String endpoint = ConfigViews.getNonEmptyPropertyFrom(TOKEN_ENDPOINT_PROPERTY, view);
         if (null == endpoint) {
             // No end-point configured
+            LOG.debug("No token end-point configured for user {} in context {}", I(userId), I(contextId));
             return null;
         }
 
         String clientId = ConfigViews.getNonEmptyPropertyFrom(CLIENT_ID_PROPERTY, view);
         if (null == clientId) {
             // No client ID configured
+            LOG.debug("No client identifier configured for user {} in context {}", I(userId), I(contextId));
             return null;
         }
 
         String clientSecret = ConfigViews.getNonEmptyPropertyFrom(CLIENT_SECRET_PROPERTY, view);
         if (null == clientSecret) {
             // No client secret configured
+            LOG.debug("No client secret configured for user {} in context {}", I(userId), I(contextId));
             return null;
         }
 

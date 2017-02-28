@@ -85,8 +85,8 @@ public interface OAuthAccessTokenService {
      * @param data The data needed for the corresponding {@link OAuthGrantType}. E.g. a SAML response for {@link OAuthGrantType.SAML} or a refresh token for {@link OAuthGrantType.REFRESH_TOKEN}
      * @param userId The user identifier
      * @param contextId The context identifier
-     * @return the {@link OAuthAccessToken}
-     * @throws OXException in case the token couldn't be retrieved.
+     * @return The {@link OAuthAccessToken access token}
+     * @throws OXException If the token couldn't be retrieved.
      */
     OAuthAccessToken getAccessToken(OAuthGrantType type, String data, int userId, int contextId) throws OXException;
 
@@ -95,8 +95,8 @@ public interface OAuthAccessTokenService {
      *
      * @param userId The user identifier
      * @param contextId The context identifier
-     * @return true if it is configured, false otherwise
-     * @throws OXException
+     * @return <code>true</code> if it is configured, <code>false</code> otherwise
+     * @throws OXException If test for OAuth availability fails
      */
     boolean isConfigured(int userId, int contextId) throws OXException;
 

@@ -86,7 +86,7 @@ public class HttpClientOAuthAccessTokenService implements OAuthAccessTokenServic
         config.setUserAgent("Open-Xchange SAML OAuth Client");
         httpClient = HttpClients.getHttpClient(config, factoryProvider);
 
-        // Pass it to request instances
+        // Initialize request instances
         accessTokenRequest = new OAuthAccessTokenRequest(httpClient, configViewFactory);
         refreshTokenRequest = new OAuthRefreshTokenRequest(httpClient, configViewFactory);
     }
@@ -103,14 +103,19 @@ public class HttpClientOAuthAccessTokenService implements OAuthAccessTokenServic
 
     @Override
     public OAuthAccessToken getAccessToken(OAuthGrantType type, String data, int userId, int contextId) throws OXException {
+        if (null == type) {
+            throw new OXException(new IllegalArgumentException("Missing grant type"));
+        }
+
         switch (type) {
             case SAML:
                 return accessTokenRequest.requestAccessToken(data, userId, contextId);
             case REFRESH_TOKEN:
                 return refreshTokenRequest.requestAccessToken(data, userId, contextId);
         }
-        // should never occur
-        return null;
+
+        // Should never occur
+        throw new OXException(new IllegalArgumentException("Unknown grant type: " + type));
     }
 
     @Override

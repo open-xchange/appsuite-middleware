@@ -29,5 +29,6 @@ Import-Package: com.google.common.annotations,
  org.apache.http.message,
  org.apache.http.util,
  org.json,
- org.osgi.framework
+ org.osgi.framework,
+ org.slf4j
 Export-Package: com.openexchange.saml.oauth.service
