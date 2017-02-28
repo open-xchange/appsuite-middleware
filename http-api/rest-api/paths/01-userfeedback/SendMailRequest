@@ -1,0 +1,47 @@
+/userfeedback/v1/mail/{context-group}/{type}:
+  get:
+  operationId: mail
+    tags:
+      - Userfeedback
+    summary: Exports user feedback and sends exported data to provided recipients
+    parameters:
+
+      - in: path
+        name: context-group
+        description: The context group identifying the global DB where the feedback is stored.
+        required: false
+        default: default
+
+      - in: path
+        name: type
+        description: The feedback type to send.
+        required: false
+        default: star-rating-v1
+
+      - in: query
+        name: start
+        description: Start time in seconds since 1970-01-01 00:00:00 UTC. Only feedback given after this time is sent. If not set, all feedback up to -e is sent.
+        required: false
+        default: 0
+
+      - in: query
+        name: end
+        description: End time in seconds since 1970-01-01 00:00:00 UTC. Only feedback given before this time is sent. If not set, all feedback since -s is sent.
+        required: false
+        default: 0
+ 
+      - in: query
+        name: recipients
+        description: Comma-separated list of recipients for exported feedback.
+        required: true
+
+    responses:
+      200:
+        description: Blank in case of success, error message from server in case of error.
+      400:
+        description: Bad request, response contains error message.
+
+    x-ox-examples:
+      Example:
+        description: Export user feedback from 2016-01-01 to 2016-12-31 and send it via mail to user1@example.org and user2@example.org
+        example: GET http://localhost:8009/userfeedback/v1/mail/default/star-rating-v1?start=1451606400&end=1483228799&recipients=user1@example.org,user2@example.org
