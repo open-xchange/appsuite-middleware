@@ -67,7 +67,6 @@ public interface SMSServiceSPI {
      * @param message The message to send
      * @param userId The identifier of the user on whose behalf the SMS is supposed to be sent
      * @param contextId The identifier of the context in which the user resides
-     * @param session The session of the user sending the SMS
      * @throws OXException If SMS cannot be sent
      */
     void sendMessage(String[] recipients, String message, int userId, int contextId) throws OXException;
