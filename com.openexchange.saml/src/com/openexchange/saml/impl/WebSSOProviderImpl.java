@@ -332,14 +332,13 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
     }
 
     /**
-     * Retrieves oauth access and refresh tokens and adds them to the properties list
+     * Retrieves OAuth access and refresh tokens and adds them to the properties list
      *
      * @param base64SamlResponse
      * @param properties
      * @param authInfo
      * @param credentialProvider
      * @throws OXException
-     *
      */
     private void getOAuthAccessToken(String base64SamlResponse, Map<String, String> properties, AuthenticationInfo authInfo, CredentialProvider credentialProvider) throws OXException {
         try {

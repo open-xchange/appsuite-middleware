@@ -66,7 +66,11 @@ public enum SAMLOAuthExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Unable to retrieve access token: %1$s
      */
-    NO_ACCESS_TOKEN("Unable to retrieve access token: %1$s", Category.CATEGORY_ERROR, 1)
+    NO_ACCESS_TOKEN("Unable to retrieve access token: %1$s", Category.CATEGORY_ERROR, 1),
+    /**
+     * OAuth access is not configured for user %1$s in context %2$s
+     */
+    OAUTH_NOT_CONFIGURED("OAuth access is not configured for user %1$s in context %2$s", Category.CATEGORY_CONFIGURATION, 2),
     ;
 
     private final Category category;

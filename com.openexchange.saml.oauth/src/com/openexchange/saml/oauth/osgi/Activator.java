@@ -49,12 +49,16 @@
 
 package com.openexchange.saml.oauth.osgi;
 
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ForcedReloadable;
+import com.openexchange.config.Interests;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.mail.api.AuthenticationFailedHandler;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.saml.oauth.HttpClientOAuthAccessTokenService;
 import com.openexchange.saml.oauth.OAuthFailedAuthenticationHandler;
+import com.openexchange.saml.oauth.SAMLOAuthConfig;
 import com.openexchange.saml.oauth.service.OAuthAccessTokenService;
 import com.openexchange.sessiond.SessiondService;
 
@@ -91,6 +95,19 @@ public class Activator extends HousekeepingActivator {
     protected synchronized void startBundle() throws Exception {
         HttpClientOAuthAccessTokenService tokenService = new HttpClientOAuthAccessTokenService(getService(ConfigViewFactory.class), getService(SSLSocketFactoryProvider.class));
         this.tokenService = tokenService;
+
+        registerService(ForcedReloadable.class, new ForcedReloadable() {
+
+            @Override
+            public void reloadConfiguration(ConfigurationService configService) {
+                SAMLOAuthConfig.invalidateCache();
+            }
+
+            @Override
+            public Interests getInterests() {
+                return null;
+            }
+        });
 
         registerService(OAuthAccessTokenService.class, tokenService);
         registerService(AuthenticationFailedHandler.class, new OAuthFailedAuthenticationHandler(tokenService, this), SERVICE_RANKING);

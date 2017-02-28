@@ -97,11 +97,16 @@ public class OAuthRefreshTokenRequest {
         HttpPost requestAccessToken = null;
         HttpResponse validationResp = null;
         try {
-            requestAccessToken = new HttpPost(SAMLOAuthConfig.getTokenEndpoint(userId, contextId, configViewFactory));
+            OAuthConfiguration oAuthConfiguration = SAMLOAuthConfig.getConfig(userId, contextId, configViewFactory);
+            if (oAuthConfiguration == null) {
+                throw SAMLOAuthExceptionCodes.OAUTH_NOT_CONFIGURED.create(userId, contextId);
+            }
+
+            requestAccessToken = new HttpPost(oAuthConfiguration.getTokenEndpoint());
             requestAccessToken.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
-            StringBuilder authBuilder = new StringBuilder(SAMLOAuthConfig.getClientID(userId, contextId, configViewFactory));
-            authBuilder.append(":").append(SAMLOAuthConfig.getClientSecret(userId, contextId, configViewFactory));
+            StringBuilder authBuilder = new StringBuilder(oAuthConfiguration.getClientId());
+            authBuilder.append(":").append(oAuthConfiguration.getClientSecret());
             String auth = "Basic " + Base64.encodeBase64String(authBuilder.toString().getBytes());
             requestAccessToken.addHeader("Authorization", auth);
 
