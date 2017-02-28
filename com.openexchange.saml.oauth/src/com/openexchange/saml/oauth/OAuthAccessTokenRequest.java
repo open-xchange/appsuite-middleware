@@ -49,98 +49,35 @@
 
 package com.openexchange.saml.oauth;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Charsets;
-import com.openexchange.rest.client.httpclient.HttpClients;
-import com.openexchange.saml.oauth.service.OAuthAccessToken;
-import com.openexchange.saml.oauth.service.SAMLOAuthExceptionCodes;
 
 /**
  * {@link OAuthAccessTokenRequest}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.4
  */
-public class OAuthAccessTokenRequest {
-
-    private final CloseableHttpClient httpClient;
-    private final ConfigViewFactory configViewFactory;
+public class OAuthAccessTokenRequest extends AbstractOAuthAccessTokenRequest {
 
     public OAuthAccessTokenRequest(CloseableHttpClient httpClient, ConfigViewFactory configViewFactory) {
-        super();
-        this.httpClient = httpClient;
-        this.configViewFactory = configViewFactory;
+        super(httpClient, configViewFactory);
     }
 
     private static final String GRANT_TYPE = "urn:ietf:params:oauth:grant-type:saml2-bearer";
-    private static final String TOKEN_TYPE = "token_type";
-    private static final String EXPIRE = "expires_in";
-    private static final String REFRESH_TOKEN = "refresh_token";
-    private static final String ACCESS_TOKEN = "access_token";
 
-    public OAuthAccessToken requestAccessToken(String base64SamlResponse, int userId, int contextId) throws OXException {
-        HttpPost requestAccessToken = null;
-        HttpResponse validationResp = null;
-        try {
-            OAuthConfiguration oAuthConfiguration = SAMLOAuthConfig.getConfig(userId, contextId, configViewFactory);
-            if (oAuthConfiguration == null) {
-                throw SAMLOAuthExceptionCodes.OAUTH_NOT_CONFIGURED.create(userId, contextId);
-            }
-
-            requestAccessToken = new HttpPost(oAuthConfiguration.getTokenEndpoint());
-            requestAccessToken.addHeader("Content-Type", "application/x-www-form-urlencoded");
-
-            {
-                StringBuilder authBuilder = new StringBuilder(oAuthConfiguration.getClientId());
-                authBuilder.append(":").append(oAuthConfiguration.getClientSecret());
-                String auth = "Basic " + Base64.encodeBase64String(authBuilder.toString().getBytes(Charsets.UTF_8));
-                requestAccessToken.addHeader("Authorization", auth);
-            }
-
-            List<NameValuePair> nvps = new ArrayList<NameValuePair>();
-
-            nvps.add(new BasicNameValuePair("grant_type", GRANT_TYPE));
-            nvps.add(new BasicNameValuePair("assertion", base64SamlResponse));
-
-            requestAccessToken.setEntity(new UrlEncodedFormEntity(nvps, Charsets.UTF_8));
-
-            validationResp = httpClient.execute(requestAccessToken);
-            String responseStr = EntityUtils.toString(validationResp.getEntity());
-            if (responseStr != null) {
-                JSONObject jsonResponse = new JSONObject(responseStr);
-                String accessToken = jsonResponse.optString(ACCESS_TOKEN, null);
-                if (null == accessToken) {
-                    throw SAMLOAuthExceptionCodes.NO_ACCESS_TOKEN.create("Token response doesn't contain the access token.");
-                }
-
-                OAuthAccessToken token = new OAuthAccessToken(accessToken, jsonResponse.getString(REFRESH_TOKEN), jsonResponse.getString(TOKEN_TYPE), jsonResponse.getInt(EXPIRE));
-                return token;
-            }
-
-            throw SAMLOAuthExceptionCodes.NO_ACCESS_TOKEN.create("Unable to parse token response.");
-        } catch (ClientProtocolException e) {
-            throw SAMLOAuthExceptionCodes.NO_ACCESS_TOKEN.create(e, e.getMessage());
-        } catch (IOException e) {
-            throw SAMLOAuthExceptionCodes.NO_ACCESS_TOKEN.create(e, e.getMessage());
-        } catch (JSONException e) {
-            throw SAMLOAuthExceptionCodes.NO_ACCESS_TOKEN.create(e, e.getMessage());
-        } finally {
-            HttpClients.close(requestAccessToken, validationResp);
-        }
+    @Override
+    protected String getGrantType() {
+        return GRANT_TYPE;
     }
+
+    @Override
+    protected void addAccessInfo(String accessInfo, List<NameValuePair> nvps) {
+        nvps.add(new BasicNameValuePair("assertion", accessInfo));
+    }
+
 }

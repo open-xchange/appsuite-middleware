@@ -50,7 +50,12 @@
 package com.openexchange.saml.oauth;
 
 /**
- * {@link OAuthConfiguration}
+ * {@link OAuthConfiguration} - An OAuth configuration for a certain user.
+ * <ul>
+ * <li>Token end-point (HTTP)
+ * <li>Client identifier
+ * <li>Client secret
+ * </ul>
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.4

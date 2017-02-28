@@ -66,6 +66,7 @@ import com.openexchange.session.UserAndContext;
  * {@link SAMLOAuthConfig}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.4
  */
 public class SAMLOAuthConfig {
