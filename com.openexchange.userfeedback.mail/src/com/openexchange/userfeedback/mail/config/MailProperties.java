@@ -73,7 +73,7 @@ public class MailProperties implements Reloadable {
     private static String SMTP_HOSTNAME_DEFAULT = "";
 
     private static String SMTP_PORT = "com.openexchange.userfeedback.smtp.port";
-    private static String SMTP_PORT_DEFAULT = "";
+    private static int SMTP_PORT_DEFAULT = 587;
 
     private static String SMTP_PROTOCOL = "com.openexchange.userfeedback.smtp.protocol";
     private static String SMTP_PROTOCOL_DEFAULT = "TLSv1";
@@ -83,14 +83,22 @@ public class MailProperties implements Reloadable {
 
     private static String SMTP_CONNECTION_TIMEOUT = "com.openexchange.userfeedback.smtp.connectionTimeout";
     private static int SMTP_CONNECTION_TIMEOUT_DEFAULT = 10000;
+    
+    private static String SMTP_USERNAME = "com.openexchange.userfeedback.smtp.username";
+    private static String SMTP_USERNAME_DEFAULT = "";
+    
+    private static String SMTP_PASSWORD = "com.openexchange.userfeedback.smtp.password";
+    private static String SMTP_PASSWORD_DEFAULT = "";
 
     private static volatile String senderName;
     private static volatile String senderAddress;
     private static volatile String smtpHostname;
-    private static volatile String smtpPort;
+    private static volatile Integer smtpPort;
     private static volatile String smtpProtocol;
     private static volatile Integer smtpTimeout;
     private static volatile Integer smtpConnectionTimeout;
+    private static volatile String smtpUsername;
+    private static volatile String smtpPassword;
 
     public MailProperties() {
         super();
@@ -138,13 +146,13 @@ public class MailProperties implements Reloadable {
         return loadedSmtpHostname;
     }
 
-    public static String getSmtpPort() {
-        String loadedSmtpPort = smtpPort;
+    public static Integer getSmtpPort() {
+        Integer loadedSmtpPort = smtpPort;
         if (loadedSmtpPort == null) {
             synchronized (MailProperties.class) {
                 loadedSmtpPort = smtpPort;
                 if (loadedSmtpPort == null) {
-                    loadedSmtpPort = loadStringValue(SMTP_PORT, SMTP_PORT_DEFAULT);
+                    loadedSmtpPort = loadIntegerValue(SMTP_PORT, SMTP_PORT_DEFAULT);
                     smtpPort = loadedSmtpPort;
                 }
             }
@@ -193,7 +201,35 @@ public class MailProperties implements Reloadable {
         }
         return loadedSmtpConnectionTimeout;
     }
-
+    
+    public static String getSmtpUsername() {
+        String loadedSmtpUsername = smtpUsername;
+        if (loadedSmtpUsername == null) {
+            synchronized (MailProperties.class) {
+                loadedSmtpUsername = smtpUsername;
+                if (loadedSmtpUsername == null) {
+                    loadedSmtpUsername = loadStringValue(SMTP_USERNAME, SMTP_USERNAME_DEFAULT);
+                    smtpUsername = loadedSmtpUsername;
+                }
+            }
+        }
+        return loadedSmtpUsername;
+    }
+    
+    public static String getSmtpPassword() {
+        String loadedSmtpPassword = smtpPassword;
+        if (loadedSmtpPassword == null) {
+            synchronized (MailProperties.class) {
+                loadedSmtpPassword = smtpPassword;
+                if (loadedSmtpPassword == null) {
+                    loadedSmtpPassword = loadStringValue(SMTP_PASSWORD, SMTP_PASSWORD_DEFAULT);
+                    smtpPassword = loadedSmtpPassword;
+                }
+            }
+        }
+        return loadedSmtpPassword;
+    }
+    
     private static Integer loadIntegerValue(String key, int defaultValue) {
         Integer propertyValue = null;
         ConfigurationService service = Services.getService(ConfigurationService.class);

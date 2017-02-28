@@ -1,6 +1,8 @@
 
 package com.openexchange.userfeedback.mail.filter;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.userfeedback.FeedbackMetaData;
@@ -15,6 +17,12 @@ public class FeedbackMailFilter implements FeedbackFilter {
     private long start;
     private long end;
     private String type;
+    
+    private static final String DEFAULT_BODY = "";
+    private static final String DEFAULT_CONTEXT_GROUP = "default";
+    private static final String DEFAULT_TYPE = "star-rating-v1";
+    private static final String DEFAULT_SUBJECT = "User feedback report: %s";
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     public FeedbackMailFilter(String ctxGroup, Map<String, String> recipients, String subject, String body, long start, long end, String type) {
         super();
@@ -44,6 +52,9 @@ public class FeedbackMailFilter implements FeedbackFilter {
 
     @Override
     public String getType() {
+        if (type == null) {
+            type = DEFAULT_TYPE;
+        }
         return type;
     }
 
@@ -65,7 +76,7 @@ public class FeedbackMailFilter implements FeedbackFilter {
 
     public String getCtxGroup() {
         if (ctxGroup == null) {
-            ctxGroup = "";
+            ctxGroup = DEFAULT_CONTEXT_GROUP;
         }
         return ctxGroup;
     }
@@ -79,14 +90,30 @@ public class FeedbackMailFilter implements FeedbackFilter {
 
     public String getSubject() {
         if (subject == null) {
-            subject = "";
+            subject = String.format(DEFAULT_SUBJECT, getTimerangeString());
         }
         return subject;
     }
 
+    private String getTimerangeString() {
+        String result = "";
+        if (start > 0) {
+            result = dateFormat.format(new Date(start));
+        }
+        if (end > 0) {
+            String endDate = dateFormat.format(new Date(end));
+            result = result.length() > 0 ? result + " - " + endDate : endDate;
+        }
+        if (result.length() == 0) {
+            result = "no timerange selected";
+        }
+        
+        return result;
+    }
+
     public String getBody() {
         if (body == null) {
-            body = "";
+            body = DEFAULT_BODY;
         }
         return body;
     }

@@ -55,27 +55,27 @@ import com.openexchange.userfeedback.mail.FeedbackMailService;
 import com.openexchange.userfeedback.mail.internal.FeedbackMailServiceSMTP;
 
 /**
-* {@link UserFeedbackMailActivator}
-*
-* @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
-* @since 7.8.4
-*/
-public class UserFeedbackMailActivator extends HousekeepingActivator{
+ * {@link UserFeedbackMailActivator}
+ *
+ * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
+ * @since 7.8.4
+ */
+public class UserFeedbackMailActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] {ConfigurationService.class};
+        return new Class[] { ConfigurationService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        Services.setServices(this);
+        Services.setServiceLookup(this);
         registerService(FeedbackMailService.class, new FeedbackMailServiceSMTP());
     }
-    
+
     @Override
     protected void stopBundle() throws Exception {
-        Services.setServices(null);
+        Services.setServiceLookup(null);
         super.stopBundle();
     }
 }
