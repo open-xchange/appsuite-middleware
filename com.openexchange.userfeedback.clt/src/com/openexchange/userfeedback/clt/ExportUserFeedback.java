@@ -53,9 +53,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Invocation.Builder;
@@ -63,11 +60,10 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.client.ClientConfig;
 import com.openexchange.cli.AbstractRestCLI;
-import com.openexchange.java.AsciiReader;
-import com.openexchange.java.Charsets;
 
 /**
  * 
@@ -146,12 +142,15 @@ public class ExportUserFeedback extends AbstractRestCLI<Void> {
     @Override
     protected Void invoke(Options option, CommandLine cmd, Builder builder) throws Exception {
         builder.accept(MediaType.APPLICATION_JSON_TYPE, MediaType.APPLICATION_OCTET_STREAM_TYPE, MediaType.TEXT_PLAIN_TYPE);
+        builder.acceptEncoding("UTF-8");
 
         InputStream response = builder.get(InputStream.class);
 
-        Path path = Paths.get(pathStr);
-        Files.write(path, IOUtils.toByteArray(new AsciiReader(response), Charsets.US_ASCII.name()));
-        System.out.println("File successfully written to: " + path.toString());
+        File file = new File(pathStr);
+        byte[] byteArray = IOUtils.toByteArray(response);
+        FileUtils.writeByteArrayToFile(file, byteArray);
+
+        System.out.println("File successfully written to: " + pathStr);
         return null;
     }
 
@@ -168,6 +167,7 @@ public class ExportUserFeedback extends AbstractRestCLI<Void> {
             String contextGroup = cmd.getOptionValue(CONTEXT_GROUP_SHORT, CONTEXT_GROUP_DEFAULT);
             String type = cmd.getOptionValue(TYPE_SHORT, TYPE_DEFAULT);
             WebTarget target = baseTarget.path(contextGroup).path(type);
+            target.request(MediaType.APPLICATION_OCTET_STREAM_TYPE).accept(MediaType.APPLICATION_OCTET_STREAM_TYPE);
 
             if (cmd.hasOption(START_SHORT)) {
                 target = target.queryParam("start", cmd.getOptionValue(START_SHORT));

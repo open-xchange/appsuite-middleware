@@ -56,6 +56,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -127,20 +128,28 @@ public class StarRatingV1 extends AbstractFeedbackType {
         return cleanUpFeedback(jsonFeedback);
     }
 
+    /**
+     * Aligns the feedback to store (provided via the jsonFeedback parameter) against the JSON keys expected by the implementation
+     * 
+     * @param jsonFeedback The JSON object provided by the client
+     * @return {@link JSONObject} that is aligned to be stored
+     */
     private Object cleanUpFeedback(JSONObject jsonFeedback) {
-        Iterator<?> jsonKeys = jsonFeedback.keys();
         JSONObject returnFeedback = new JSONObject(jsonFeedback);
 
-        Set<String> keys = new HashSet<String>(StarRatingV1JsonFields.keys());
-        while (jsonKeys.hasNext()) {
-            String key = ((String) jsonKeys.next()).toLowerCase();
-            if (!keys.contains(key)) {
-                LOG.warn("An unknown key '{}' has been provided. It will be removed before persisting.", key);
-                returnFeedback.remove(key);
-                continue;
-            }
-            keys.remove(key);
-        }
+        Set<String> keys = new HashSet<String>(StarRatingV1JsonFields.storingKeys());
+        removeAdditionals(returnFeedback, keys);
+        addRequired(returnFeedback, keys);
+        return returnFeedback;
+    }
+
+    /**
+     * Enhances the given JSON by dummy entries if not yet provided.
+     * 
+     * @param returnFeedback The provided feedback that will be adapted.
+     * @param keys The keys that will be added
+     */
+    private void addRequired(JSONObject returnFeedback, Set<String> keys) {
         if (!keys.isEmpty()) {
             LOG.info("Desired keys {} not contained within the request. They will be stored as empty.", Strings.concat(",", keys));
             for (String key : keys) {
@@ -151,7 +160,25 @@ public class StarRatingV1 extends AbstractFeedbackType {
                 }
             }
         }
-        return returnFeedback;
+    }
+
+    /**
+     * Removes JSON entries from provided object that aren't expected by the implementation.
+     * 
+     * @param returnFeedback The provided feedback that will be adapted
+     * @param keys The keys that are handled by the implementation.
+     */
+    private void removeAdditionals(JSONObject returnFeedback, Set<String> keys) {
+        Iterator<?> jsonKeys = new JSONObject(returnFeedback).keys();
+        while (jsonKeys.hasNext()) {
+            String key = ((String) jsonKeys.next()).toLowerCase();
+            if (!keys.contains(key)) {
+                LOG.warn("An unknown key '{}' has been provided. It will be removed before persisting.", key);
+                returnFeedback.remove(key);
+                continue;
+            }
+            keys.remove(key);
+        }
     }
 
     private JSONObject normalizeFeedback(JSONObject jsonFeedback) {
@@ -214,6 +241,7 @@ public class StarRatingV1 extends AbstractFeedbackType {
                 try {
                     Feedback current = feedbacks.get(id);
                     JSONObject content = new JSONObject(new AsciiReader(rs.getBinaryStream(2)));
+                    content.put("date", new Date(current.getDate())); // add date to content for easy export
                     current.setContent(content);
                 } catch (JSONException e) {
                     LOG.error("Unable to read feedback with id {}. Won't return it.", id, e);

@@ -59,6 +59,7 @@ import java.util.Set;
  * @since v7.8.4
  */
 public enum StarRatingV1JsonFields {
+    date("Date"),
     score("Score"),
     app("App"),
     entry_point("Entry Point"),
@@ -73,11 +74,11 @@ public enum StarRatingV1JsonFields {
     client_version("Client Version"),
     ;
 
-    private static Set<String> KEYS = new HashSet<String>();
+    private static final Set<String> INTERNAL_KEYS = new HashSet<String>();
 
     static {
         for (StarRatingV1JsonFields field : StarRatingV1JsonFields.values()) {
-            KEYS.add(field.name().toLowerCase());
+            INTERNAL_KEYS.add(field.name().toLowerCase());
         }
     }
 
@@ -96,11 +97,9 @@ public enum StarRatingV1JsonFields {
         return displayName;
     }
 
-    public static Set<String> keys() {
-        return KEYS;
-    }
-
-    public static boolean contains(String key) {
-        return KEYS.contains(key.toLowerCase());
+    public static Set<String> storingKeys() {
+        Set<String> copy = new HashSet<>(INTERNAL_KEYS);
+        copy.remove("date");
+        return copy;
     }
 }

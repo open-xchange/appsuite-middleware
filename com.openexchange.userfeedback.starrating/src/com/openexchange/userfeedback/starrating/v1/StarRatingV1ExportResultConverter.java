@@ -52,9 +52,6 @@ package com.openexchange.userfeedback.starrating.v1;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.Collection;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.regex.Pattern;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -81,20 +78,10 @@ public class StarRatingV1ExportResultConverter implements ExportResultConverter 
     private static final char CELL_DELIMITER = ',';
     private static final char ROW_DELIMITER = '\n';
 
-    private static final LinkedList<String> DISPLAY_FIELDS = new LinkedList<>();
-
-    static {
-        for (StarRatingV1JsonFields field : StarRatingV1JsonFields.values()) {
-            DISPLAY_FIELDS.add(field.getDisplayName());
-        }
-        DISPLAY_FIELDS.addFirst("Date");
-    }
-
     private Collection<Feedback> feedbacks;
 
     public StarRatingV1ExportResultConverter(Collection<Feedback> feedbacks) {
         this.feedbacks = feedbacks;
-
     }
 
     @Override
@@ -113,11 +100,6 @@ public class StarRatingV1ExportResultConverter implements ExportResultConverter 
         JSONArray result = new JSONArray(feedbacks.size());
         for (Feedback feedback : feedbacks) {
             JSONObject current = (JSONObject) feedback.getContent();
-            try {
-                current.put("Date", new Date(feedback.getDate()).toString());
-            } catch (JSONException e) {
-                LOG.error("Error while adding 'date'. It will be ignored.", e);
-            }
             result.put(current);
         }
         exportResult.setRAW(result);
@@ -129,43 +111,35 @@ public class StarRatingV1ExportResultConverter implements ExportResultConverter 
         ThresholdFileHolder sink = new ThresholdFileHolder();
         OutputStreamWriter writer = new OutputStreamWriter(sink.asOutputStream(), Charsets.UTF_8);
         try {
-            writer.write(convertToLine(DISPLAY_FIELDS));
+            final StarRatingV1JsonFields[] jsonFields = StarRatingV1JsonFields.values();
+            writer.write(convertToLine(jsonFields, null));
 
             for (Feedback feedback : feedbacks) {
-                writer.write(convertToLine(convertToList(feedback)));
+                writer.write(convertToLine(jsonFields, (JSONObject) feedback.getContent()));
             }
             writer.flush();
             exportResult.setCSV(sink.getClosingStream());
-        } catch (final IOException | OXException e) {
+        } catch (final IOException | OXException | JSONException e) {
             sink.close();
         }
         return exportResult;
     }
 
-    private static String convertToLine(final List<String> line) {
+    private String convertToLine(StarRatingV1JsonFields[] jsonFields, JSONObject object) throws JSONException {
+        boolean isHeader = object == null;
         StringBuilder bob = new StringBuilder(1024);
-        for (String token : line) {
+        for (StarRatingV1JsonFields token : jsonFields) {
             bob.append('"');
-            bob.append(PATTERN_QUOTE.matcher(token).replaceAll("\"\""));
+            if (isHeader) {
+                bob.append(PATTERN_QUOTE.matcher(token.getDisplayName()).replaceAll("\"\""));
+            } else {
+                bob.append(PATTERN_QUOTE.matcher(object.getString(token.name())).replaceAll("\"\""));
+            }
             bob.append('"');
             bob.append(CELL_DELIMITER);
         }
         bob.setCharAt(bob.length() - 1, ROW_DELIMITER);
-        return bob.toString();
-    }
 
-    private static List<String> convertToList(final Feedback feedback) {
-        final List<String> l = new LinkedList<String>();
-        l.add(new Date(feedback.getDate()).toString());
-        JSONObject content = (JSONObject) feedback.getContent();
-        for (String key : StarRatingV1JsonFields.keys()) {
-            try {
-                l.add(content.getString(key));
-            } catch (JSONException e) {
-                LOG.warn("Unable to find an entry for key {}. Will add 'N/A' to move forward.");
-                l.add("N/A");
-            }
-        }
-        return l;
+        return bob.toString();
     }
 }

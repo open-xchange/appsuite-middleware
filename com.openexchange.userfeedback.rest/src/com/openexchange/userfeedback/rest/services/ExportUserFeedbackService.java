@@ -95,7 +95,7 @@ public class ExportUserFeedbackService extends JAXRSService {
 
     @GET
     @Path("/{context-group}/{type}")
-    @Produces(MediaType.APPLICATION_OCTET_STREAM + ";charset=utf-8")
+    @Produces(MediaType.APPLICATION_OCTET_STREAM + ";charset=UTF-8")
     public Response export(@QueryParam("start") final long start, @QueryParam("end") final long end, @PathParam("type") final String type, @PathParam("context-group") final String contextGroup) {
         Response response = export(start, end, type, contextGroup, ExportType.CSV);
         return response;
