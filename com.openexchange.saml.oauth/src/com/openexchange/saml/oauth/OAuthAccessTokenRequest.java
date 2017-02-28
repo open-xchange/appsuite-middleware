@@ -63,6 +63,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.rest.client.httpclient.HttpClients;
@@ -77,40 +78,13 @@ import com.openexchange.saml.oauth.service.SAMLOAuthExceptionCodes;
  */
 public class OAuthAccessTokenRequest {
 
-    private static volatile OAuthAccessTokenRequest instance;
-
-    /**
-     * Initializes the singleton instance with given HTTP client
-     *
-     * @param httpClient The HTTP client to use
-     */
-    public static void initInstance(CloseableHttpClient httpClient) {
-        instance = new OAuthAccessTokenRequest(httpClient);
-    }
-
-    /**
-     * Releases the singleton instance
-     */
-    public static void releaseInstance() {
-        instance = null;
-    }
-
-    /**
-     * Gets the instance
-     *
-     * @return The instance
-     */
-    public static OAuthAccessTokenRequest getInstance() {
-        return instance;
-    }
-
-    // -------------------------------------------------------------------------------------------------------------------------------------
-
     private final CloseableHttpClient httpClient;
+    private final ConfigViewFactory configViewFactory;
 
-    private OAuthAccessTokenRequest(CloseableHttpClient httpClient) {
+    public OAuthAccessTokenRequest(CloseableHttpClient httpClient, ConfigViewFactory configViewFactory) {
         super();
         this.httpClient = httpClient;
+        this.configViewFactory = configViewFactory;
     }
 
     private static final String GRANT_TYPE = "urn:ietf:params:oauth:grant-type:saml2-bearer";
@@ -123,12 +97,12 @@ public class OAuthAccessTokenRequest {
         HttpPost requestAccessToken = null;
         HttpResponse validationResp = null;
         try {
-            requestAccessToken = new HttpPost(SAMLOAuthConfig.getTokenEndpoint(userId, contextId));
+            requestAccessToken = new HttpPost(SAMLOAuthConfig.getTokenEndpoint(userId, contextId, configViewFactory));
             requestAccessToken.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
             {
-                StringBuilder authBuilder = new StringBuilder(SAMLOAuthConfig.getClientID(userId, contextId));
-                authBuilder.append(":").append(SAMLOAuthConfig.getClientSecret(userId, contextId));
+                StringBuilder authBuilder = new StringBuilder(SAMLOAuthConfig.getClientID(userId, contextId, configViewFactory));
+                authBuilder.append(":").append(SAMLOAuthConfig.getClientSecret(userId, contextId, configViewFactory));
                 String auth = "Basic " + Base64.encodeBase64String(authBuilder.toString().getBytes(Charsets.UTF_8));
                 requestAccessToken.addHeader("Authorization", auth);
             }

@@ -52,7 +52,6 @@ package com.openexchange.saml.oauth;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.saml.oauth.osgi.Services;
 import com.openexchange.server.ServiceExceptionCode;
 
 /**
@@ -72,11 +71,11 @@ public class SAMLOAuthConfig {
      *
      * @param userId The user identifier
      * @param contextId The context identifier
+     * @param configViewFactory The service to use
      * @return The token end-point
      * @throws OXException If token end-point cannot be returned
      */
-    static String getTokenEndpoint(int userId, int contextId) throws OXException{
-        ConfigViewFactory configViewFactory = Services.optService(ConfigViewFactory.class);
+    static String getTokenEndpoint(int userId, int contextId, ConfigViewFactory configViewFactory) throws OXException{
         if (null == configViewFactory) {
             throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
         }
@@ -90,11 +89,11 @@ public class SAMLOAuthConfig {
      *
      * @param userId The user identifier
      * @param contextId The context identifier
+     * @param configViewFactory The service to use
      * @return The client identifier
      * @throws OXException If client identifier cannot be returned
      */
-    static String getClientID(int userId, int contextId) throws OXException {
-        ConfigViewFactory configViewFactory = Services.optService(ConfigViewFactory.class);
+    static String getClientID(int userId, int contextId, ConfigViewFactory configViewFactory) throws OXException {
         if (null == configViewFactory) {
             throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
         }
@@ -108,11 +107,11 @@ public class SAMLOAuthConfig {
      *
      * @param userId The user identifier
      * @param contextId The context identifier
+     * @param configViewFactory The service to use
      * @return The client secret
      * @throws OXException If client secret cannot be returned
      */
-    static String getClientSecret(int userId, int contextId) throws OXException{
-        ConfigViewFactory configViewFactory = Services.optService(ConfigViewFactory.class);
+    static String getClientSecret(int userId, int contextId, ConfigViewFactory configViewFactory) throws OXException{
         if (null == configViewFactory) {
             throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
         }
@@ -126,11 +125,11 @@ public class SAMLOAuthConfig {
      *
      * @param userId The user identifier
      * @param contextId The context identifier
+     * @param configViewFactory The service to use
      * @return <code>true</code> if necessary options are available; otherwise <code>false</code>
      * @throws OXException If checking necessary options fails
      */
-    public static boolean isConfigured(int userId, int contextId) throws OXException{
-        ConfigViewFactory configViewFactory = Services.optService(ConfigViewFactory.class);
+    public static boolean isConfigured(int userId, int contextId, ConfigViewFactory configViewFactory) throws OXException{
         if (null == configViewFactory) {
             throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
         }

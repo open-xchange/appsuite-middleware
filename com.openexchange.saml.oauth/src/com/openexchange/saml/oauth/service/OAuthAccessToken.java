@@ -49,9 +49,8 @@
 
 package com.openexchange.saml.oauth.service;
 
-
 /**
- * {@link OAuthAccessToken}
+ * {@link OAuthAccessToken} - Represents an OAuth access token.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
@@ -61,61 +60,58 @@ public class OAuthAccessToken {
     private final String accessToken;
     private final String refreshToken;
     private final String type;
-    private final int expires_in;
-
+    private final int expiresIn;
 
     /**
      * Initializes a new {@link OAuthAccessToken}.
-     * @param accessToken
-     * @param refreshToken
-     * @param type
-     * @param expires_in
+     * 
+     * @param accessToken The access token string
+     * @param refreshToken The refresh token string
+     * @param type The token type; e.g. <code>"Bearer"</code>
+     * @param expiresIn The lifetime in seconds of the access token
      */
-    public OAuthAccessToken(String accessToken, String refreshToken, String type, int expires_in) {
+    public OAuthAccessToken(String accessToken, String refreshToken, String type, int expiresIn) {
         super();
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
         this.type = type;
-        this.expires_in = expires_in;
+        this.expiresIn = expiresIn;
     }
 
     /**
-     * Gets the accessToken
+     * Gets the access token
      *
-     * @return The accessToken
+     * @return The access token
      */
     public String getAccessToken() {
         return accessToken;
     }
 
-
     /**
-     * Gets the refreshToken
+     * Gets the refresh token
      *
-     * @return The refreshToken
+     * @return The refresh token
      */
     public String getRefreshToken() {
         return refreshToken;
     }
 
-
     /**
-     * Gets the type
+     * Gets the type of the token
      *
-     * @return The type
+     * @return The type of the token
      */
     public String getType() {
         return type;
     }
 
-
     /**
-     * Gets the expires_in
+     * Gets the lifetime in seconds of the access token
      *
-     * @return The expires_in
+     * @return The lifetime in seconds of the access token
      */
-    public int getExpires_in() {
-        return expires_in;
+    public int getExpiresIn() {
+        return expiresIn;
     }
 
 }

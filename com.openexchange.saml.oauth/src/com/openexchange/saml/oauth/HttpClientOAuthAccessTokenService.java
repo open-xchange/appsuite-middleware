@@ -50,12 +50,12 @@
 package com.openexchange.saml.oauth;
 
 import org.apache.http.impl.client.CloseableHttpClient;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.rest.client.httpclient.HttpClients.ClientConfig;
-import com.openexchange.saml.oauth.osgi.Services;
 import com.openexchange.saml.oauth.service.OAuthAccessToken;
 import com.openexchange.saml.oauth.service.OAuthAccessTokenService;
 
@@ -67,55 +67,55 @@ import com.openexchange.saml.oauth.service.OAuthAccessTokenService;
  */
 public class HttpClientOAuthAccessTokenService implements OAuthAccessTokenService {
 
-    private CloseableHttpClient httpClient;
+    private final CloseableHttpClient httpClient;
+    private final ConfigViewFactory configViewFactory;
+    private final OAuthAccessTokenRequest accessTokenRequest;
+    private final OAuthRefreshTokenRequest refreshTokenRequest;
 
     /**
      * Initializes a new {@link HttpClientOAuthAccessTokenService}.
-     * @throws OXException
      */
-    public HttpClientOAuthAccessTokenService() throws OXException {
+    public HttpClientOAuthAccessTokenService(ConfigViewFactory configViewFactory, SSLSocketFactoryProvider factoryProvider) {
         super();
-        initHttpClient(3000, 10000);
-    }
+        this.configViewFactory = configViewFactory;
 
-    public void initHttpClient(int connectionTimeout, int socketReadTimeout) throws OXException{
-        closeHttpClient();
-        // Init HttpClient
+        // Initialize HttpClient
         ClientConfig config = ClientConfig.newInstance();
-        config.setConnectionTimeout(connectionTimeout);
-        config.setSocketReadTimeout(socketReadTimeout);
+        config.setConnectionTimeout(3000);
+        config.setSocketReadTimeout(10000);
         config.setUserAgent("Open-Xchange SAML OAuth Client");
-        httpClient = HttpClients.getHttpClient(config, Services.getService(SSLSocketFactoryProvider.class));
+        httpClient = HttpClients.getHttpClient(config, factoryProvider);
 
-        OAuthAccessTokenRequest.initInstance(httpClient);
-        OAuthRefreshTokenRequest.initInstance(httpClient);
+        // Pass it to request instances
+        accessTokenRequest = new OAuthAccessTokenRequest(httpClient, configViewFactory);
+        refreshTokenRequest = new OAuthRefreshTokenRequest(httpClient, configViewFactory);
     }
 
-    public void closeHttpClient(){
-        OAuthAccessTokenRequest.releaseInstance();
-        OAuthRefreshTokenRequest.releaseInstance();
+    /**
+     * Closes the backing HTTP client.
+     */
+    public void closeHttpClient() {
         CloseableHttpClient httpClient = this.httpClient;
         if (null != httpClient) {
-            this.httpClient = null;
             Streams.close(httpClient);
         }
     }
 
-
     @Override
     public OAuthAccessToken getAccessToken(OAuthGrantType type, String data, int userId, int contextId) throws OXException {
-        switch(type){
+        switch (type) {
             case SAML:
-                return OAuthAccessTokenRequest.getInstance().requestAccessToken(data, userId, contextId);
+                return accessTokenRequest.requestAccessToken(data, userId, contextId);
             case REFRESH_TOKEN:
-                return OAuthRefreshTokenRequest.getInstance().requestAccessToken(data, userId, contextId);
+                return refreshTokenRequest.requestAccessToken(data, userId, contextId);
         }
         // should never occur
         return null;
     }
+
     @Override
     public boolean isConfigured(int userId, int contextId) throws OXException {
-        return SAMLOAuthConfig.isConfigured(userId, contextId);
+        return SAMLOAuthConfig.isConfigured(userId, contextId, configViewFactory);
     }
 
 }

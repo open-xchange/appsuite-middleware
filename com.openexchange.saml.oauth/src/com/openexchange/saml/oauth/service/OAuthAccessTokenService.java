@@ -52,7 +52,7 @@ package com.openexchange.saml.oauth.service;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link OAuthAccessTokenService}
+ * {@link OAuthAccessTokenService} - A service to obtain an access token from user-sensitive token end-point.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
@@ -60,33 +60,7 @@ import com.openexchange.exception.OXException;
 public interface OAuthAccessTokenService {
 
     /**
-     * Retrieves an {@link OAuthAccessToken}
-     *
-     * @param type The request type
-     * @param data The data needed for the corresponding {@link OAuthGrantType}. E.g. a SAML response for {@link OAuthGrantType.SAML} or a refresh token for {@link OAuthGrantType.REFRESH_TOKEN}
-     * @param userId The user id
-     * @param contextId The context id
-     * @return the {@link OAuthAccessToken}
-     * @throws OXException in case the token couldn't be retrieved.
-     */
-    public OAuthAccessToken getAccessToken(OAuthGrantType type, String data, int userId, int contextId) throws OXException;
-
-    /**
-     * Checks whether OAuth is configured for the given user.
-     *
-     * @param userId The user id
-     * @param contextId The context id
-     * @return true if it is configured, false otherwise
-     * @throws OXException
-     */
-    public boolean isConfigured(int userId, int contextId) throws OXException;
-
-    /**
-     *
      * {@link OAuthGrantType} describes possible grant types for {@link OAuthAccessTokenService#getAccessToken(OAuthGrantType, String, int, int)}
-     *
-     * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
-     * @since v7.8.4
      */
     public enum OAuthGrantType {
         /**
@@ -97,7 +71,33 @@ public interface OAuthAccessTokenService {
         /**
          * The refresh token grant
          */
-        REFRESH_TOKEN
+        REFRESH_TOKEN,
+
+        ;
     }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Retrieves an appropriate {@link OAuthAccessToken} for specified grant type.
+     *
+     * @param type The request type
+     * @param data The data needed for the corresponding {@link OAuthGrantType}. E.g. a SAML response for {@link OAuthGrantType.SAML} or a refresh token for {@link OAuthGrantType.REFRESH_TOKEN}
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return the {@link OAuthAccessToken}
+     * @throws OXException in case the token couldn't be retrieved.
+     */
+    OAuthAccessToken getAccessToken(OAuthGrantType type, String data, int userId, int contextId) throws OXException;
+
+    /**
+     * Checks whether OAuth is configured for the given user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return true if it is configured, false otherwise
+     * @throws OXException
+     */
+    boolean isConfigured(int userId, int contextId) throws OXException;
 
 }

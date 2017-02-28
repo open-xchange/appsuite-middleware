@@ -67,7 +67,8 @@ import com.openexchange.sessiond.SessiondService;
 public class Activator extends HousekeepingActivator {
 
     private static final int SERVICE_RANKING = 100;
-    private static HttpClientOAuthAccessTokenService tokenService;
+
+    private HttpClientOAuthAccessTokenService tokenService;
 
     /**
      * Initializes a new {@link Activator}.
@@ -77,27 +78,31 @@ public class Activator extends HousekeepingActivator {
     }
 
     @Override
+    protected boolean stopOnServiceUnavailability() {
+        return true;
+    }
+
+    @Override
     protected Class<?>[] getNeededServices() {
         return new Class[] { SessiondService.class, ConfigViewFactory.class, SSLSocketFactoryProvider.class };
     }
 
     @Override
     protected synchronized void startBundle() throws Exception {
-        Services.setServiceLookup(this);
+        HttpClientOAuthAccessTokenService tokenService = new HttpClientOAuthAccessTokenService(getService(ConfigViewFactory.class), getService(SSLSocketFactoryProvider.class));
+        this.tokenService = tokenService;
 
-        tokenService = new HttpClientOAuthAccessTokenService();
-        trackService(OAuthAccessTokenService.class);
-        openTrackers();
         registerService(OAuthAccessTokenService.class, tokenService);
-        registerService(AuthenticationFailedHandler.class, new OAuthFailedAuthenticationHandler(), SERVICE_RANKING);
+        registerService(AuthenticationFailedHandler.class, new OAuthFailedAuthenticationHandler(tokenService, this), SERVICE_RANKING);
     }
 
     @Override
     protected synchronized void stopBundle() throws Exception {
-        Services.setServiceLookup(null);
         super.stopBundle();
 
-        if(tokenService!=null){
+        HttpClientOAuthAccessTokenService tokenService = this.tokenService;
+        if (tokenService != null) {
+            this.tokenService = null;
             tokenService.closeHttpClient();
         }
     }
