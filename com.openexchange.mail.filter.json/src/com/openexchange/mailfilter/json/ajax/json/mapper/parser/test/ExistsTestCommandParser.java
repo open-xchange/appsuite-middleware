@@ -84,7 +84,7 @@ public class ExistsTestCommandParser implements CommandParser<TestCommand> {
     @Override
     public void parse(JSONObject jsonObject, TestCommand command) throws JSONException, OXException {
         jsonObject.put(GeneralField.id.name(), command.getCommand().getCommandName());
-        jsonObject.put(ExistsTestField.headers.name(), command.getArguments().get(0));
+        jsonObject.put(ExistsTestField.headers.name(), new JSONArray((List<?>) command.getArguments().get(0)));
 
     }
 
