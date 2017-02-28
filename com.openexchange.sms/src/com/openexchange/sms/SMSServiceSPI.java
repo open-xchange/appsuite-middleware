@@ -52,9 +52,10 @@ package com.openexchange.sms;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link SMSServiceSPI}
+ * {@link SMSServiceSPI} - The SMS service provider interface, which is called to send an SMS to given phone numbers on behalf of a certain user.
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> Added <code>userId</code> and <code>contextId</code> parameters to {@link #sendMessage(String[], String, int, int) sendMessage()}
  * @since v7.8.1
  */
 public interface SMSServiceSPI {
