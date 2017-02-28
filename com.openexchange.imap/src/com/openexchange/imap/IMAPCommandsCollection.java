@@ -3428,6 +3428,10 @@ public final class IMAPCommandsCollection {
                     }
                 }
 
+                if (null == bodystructure) {
+                    throw new ProtocolException("FETCH command does not provide BODYSTRUCTURE item");
+                }
+
                 BodyAndId bid = null;
                 try {
                     bid = getBODYSTRUCTUREByContentId(contentId, bodystructure, null, 1, new boolean[1]);
