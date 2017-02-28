@@ -72,7 +72,7 @@ import com.openexchange.java.AsciiReader;
  * @since v7.8.4
  */
 public class SendFeedbackViaMail extends AbstractRestCLI<Void> {
-    
+
     private static final String END_LONG = "end-time";
     private static final String END_SHORT = "e";
 
@@ -96,7 +96,11 @@ public class SendFeedbackViaMail extends AbstractRestCLI<Void> {
 
     @Override
     protected void checkArguments(CommandLine cmd) {
-        // nothing to do
+        if (cmd.getArgs().length != 1) {
+            System.out.println("Please add recipients as comma-separated list.");
+            System.exit(1);
+            return;
+        }
     }
 
     @Override
@@ -128,6 +132,7 @@ public class SendFeedbackViaMail extends AbstractRestCLI<Void> {
             if (cmd.hasOption(END_SHORT)) {
                 target = target.queryParam("end", cmd.getOptionValue(END_SHORT));
             }
+            target = target.queryParam("recipients", cmd.getArgs()[0]);
             return target;
         } catch (URISyntaxException e) {
             System.err.print("Unable to return endpoint: " + e.getMessage());

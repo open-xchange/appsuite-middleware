@@ -52,6 +52,8 @@ package com.openexchange.userfeedback.rest.services;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -62,6 +64,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.rest.services.JAXRSService;
 import com.openexchange.rest.services.annotation.Role;
 import com.openexchange.rest.services.annotation.RoleAllowed;
@@ -87,15 +90,30 @@ public class SendMailService extends JAXRSService {
     @GET
     @Path("/{context-group}/{type}")
     @Produces(MediaType.APPLICATION_OCTET_STREAM + ";charset=utf-8")
-    public Response sendMail(@QueryParam("start") final long start, @QueryParam("end") final long end, @PathParam("type") final String type, @PathParam("context-group") final String contextGroup) {
-        Map<String, String> recipients = new HashMap<>();
-        // TODO: Read from config service
-        recipients.put("CHANGEME", "dummy@example.org");
+    public Response sendMail(@QueryParam("start") final long start, @QueryParam("end") final long end, @PathParam("type") final String type, @PathParam("context-group") final String contextGroup, @QueryParam("recipients") final String recipients) {
+        ResponseBuilder builder = null;
+        if (null == recipients || Strings.isEmpty(recipients)) {
+            builder = Response.serverError().entity("Add recipients as comma-separated list");
+            builder.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM + "; charset=utf-8");
+            return builder.build();
+        }
+        Map<String, String> recipientsMap = new HashMap<>();
+        InternetAddress[] addresses = null;
+        try {
+            addresses = QuotedInternetAddress.parse(recipients);
+        } catch (AddressException e) {
+            builder = Response.serverError().entity(e.getMessage());
+            builder.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM + "; charset=utf-8");
+            return builder.build();
+        }
+        for (InternetAddress address : addresses) {
+            recipientsMap.put(address.getAddress(), address.getPersonal());
+        }
         FeedbackMailService service = getService(FeedbackMailService.class);
         StringBuilder body = new StringBuilder().append("User feedback from ").append(new Date(start).toString()).append(" to ").append(new Date(end).toString()).append(".");
-        FeedbackMailFilter filter = new FeedbackMailFilter(contextGroup, recipients, "User Feedback", body.toString(), start, end, type);
+        FeedbackMailFilter filter = new FeedbackMailFilter(contextGroup, recipientsMap, "User Feedback", body.toString(), start, end, type);
         String response = service.sendFeedbackMail(filter);
-        ResponseBuilder builder = Response.status(200);
+        builder = Response.status(200);
         if (Strings.isEmpty(response)) {
             return builder.build();
         }
