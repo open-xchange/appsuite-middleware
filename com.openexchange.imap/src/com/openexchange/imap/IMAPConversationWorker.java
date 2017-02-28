@@ -469,7 +469,13 @@ public final class IMAPConversationWorker {
                     try {
                         mailAccess = MailAccess.getInstance(ses, imapMessageStorage.getAccountId());
                         mailAccess.connect();
-                        IMAPStore imapStore = IMAPMessageStorage.getImapMessageStorageFrom(mailAccess).getImapStore();
+                        
+                        IMAPMessageStorage messageStorage = IMAPMessageStorage.getImapMessageStorageFrom(mailAccess);
+                        if (null == messageStorage) {
+                            // Eh...?
+                            throw new OXException(new IllegalStateException("Couldn't extract IMAP message storage out of " + mailAccess.getClass().getName()));
+                        }
+                        IMAPStore imapStore = messageStorage.getImapStore();
 
                         if (null != first) {
                             fillMessagesStatic(first, fullName, sentFullName, mergeWithSent, usedFields, headerNames, isRev1, imapStore, imapMessageStorage.getImapServerInfo(), mailAccount);
