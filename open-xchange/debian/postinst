@@ -70,8 +70,6 @@ postFix() {
     systemctl daemon-reload &> /dev/null || :
 }
 
-echo "current params: $@" >> /tmp/wurst
-
 case "$1" in
     configure)
         if [ -n "$2" ]
