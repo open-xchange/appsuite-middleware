@@ -894,7 +894,7 @@ If you would like to add a reference to another property use the following appro
 ---
 | Key | <span style="font-weight:normal">com.openexchange.saml.oauth.token</span> |
 |:----------------|:--------|
-| __Description__ | Specifies the oauth token endpoint.<br> |
+| __Description__ | Specifies the OAuth HTTP token end-point.<br> |
 | __Default__ |  |
 | __Version__ | 7.8.4  |
 | __Reloadable__ | true  |
@@ -904,7 +904,7 @@ If you would like to add a reference to another property use the following appro
 ---
 | Key | <span style="font-weight:normal">com.openexchange.saml.oauth.clientId</span> |
 |:----------------|:--------|
-| __Description__ | Specifies the client id used to authenticate the client against the oauth token endpoint.<br> |
+| __Description__ | Specifies the client id used to authenticate the client against the OAuth token end-point.<br> |
 | __Default__ |  |
 | __Version__ | 7.8.4  |
 | __Reloadable__ | true  |
@@ -915,7 +915,7 @@ If you would like to add a reference to another property use the following appro
 ---
 | Key | <span style="font-weight:normal">com.openexchange.saml.oauth.clientSecret</span> |
 |:----------------|:--------|
-| __Description__ | Specifies the client secret used to authenticate the client against the oauth token endpoint.<br> |
+| __Description__ | Specifies the client secret used to authenticate the client against the OAuth token end-point.<br> |
 | __Default__ |  |
 | __Version__ | 7.8.4  |
 | __Reloadable__ | true  |
