@@ -338,6 +338,9 @@ public final class IMAPConversationWorker {
                 fp = Conversations.getFetchProfileConversationByHeaders(null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
             }
             conversations = Conversations.conversationsFor(imapMessageStorage.getImapFolder(), lookAhead, order, fp, imapMessageStorage.getImapServerInfo(), byEnvelope);
+            if (conversations.isEmpty()) {
+                return Collections.emptyList();
+            }
             // Retrieve from sent folder
             int sentTotal = 0;
             long sentUidNext = 0L;
@@ -368,20 +371,32 @@ public final class IMAPConversationWorker {
                         // Add to conversation if references or referenced-by
                         final List<MailMessage> toMergeWith = ImmutableList.copyOf(sentMessages);
                         sentMessages = null;
-                        for (final Conversation conversation : conversations) {
-                            AbstractTask<Void> merge = new AbstractTask<Void>() {
+                        boolean hasNext = true;
+                        for (Iterator<Conversation> iter = conversations.iterator(); hasNext;) {
+                            final Conversation conversation = iter.next();
+                            hasNext = iter.hasNext();
+                            if (hasNext) {
+                                // Not the last one...
+                                AbstractTask<Void> merge = new AbstractTask<Void>() {
 
-                                @Override
-                                public Void call() throws Exception {
-                                    for (MailMessage sentMessage : toMergeWith) {
-                                        if (conversation.referencesOrIsReferencedBy(sentMessage)) {
-                                            conversation.addMessage(sentMessage);
+                                    @Override
+                                    public Void call() throws Exception {
+                                        for (MailMessage sentMessage : toMergeWith) {
+                                            if (conversation.referencesOrIsReferencedBy(sentMessage)) {
+                                                conversation.addMessage(sentMessage);
+                                            }
                                         }
+                                        return null;
                                     }
-                                    return null;
+                                };
+                                ThreadPools.getThreadPool().submit(merge, CallerRunsBehavior.<Void> getInstance());
+                            } else {
+                                for (MailMessage sentMessage : toMergeWith) {
+                                    if (conversation.referencesOrIsReferencedBy(sentMessage)) {
+                                        conversation.addMessage(sentMessage);
+                                    }
                                 }
-                            };
-                            ThreadPools.getThreadPool().submit(merge, CallerRunsBehavior.<Void> getInstance());
+                            }
                         }
                     }
                 }
