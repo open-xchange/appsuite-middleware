@@ -4,9 +4,6 @@
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="tests"/>
-	<classpathentry exported="true" kind="lib" path="lib/bcpg-jdk15on-156.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/bcpkix-jdk15on-156.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/bcprov-jdk15on-156.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.test"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
