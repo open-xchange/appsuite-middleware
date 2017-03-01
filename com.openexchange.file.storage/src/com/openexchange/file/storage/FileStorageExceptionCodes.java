@@ -209,9 +209,9 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
     FILE_MOVE_NOT_SUPPORTED("The file \"%1$s\" cannot be moved to \"%2$s\".", Category.CATEGORY_USER_INPUT, 37, FileStorageExceptionMessages.FILE_MOVE_NOT_SUPPORTED_MSG),
 
     /**
-     * The MIME type for a file must not be manually specified
+     * The specified MIME type is not allowed being set
      */
-    DENIED_MIME_TYPE("The MIME type for a file must not be manually specified", Category.CATEGORY_USER_INPUT, 71, OXExceptionStrings.MESSAGE_DENIED);
+    DENIED_MIME_TYPE("The specified MIME type is not allowed being set", Category.CATEGORY_USER_INPUT, 71, OXExceptionStrings.MESSAGE_DENIED);
     ;
 
     /**
