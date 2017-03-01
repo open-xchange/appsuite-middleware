@@ -346,9 +346,9 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
     WHITESPACE_END("File name must not end with a dot or whitespace.", Category.CATEGORY_USER_INPUT, 68, FileStorageExceptionMessages.WHITESPACE_END_MSG),
 
     /**
-     * The MIME type for a file must not be manually specified
+     * The specified MIME type is not allowed being set
      */
-    DENIED_MIME_TYPE("The MIME type for a file must not be manually specified", Category.CATEGORY_USER_INPUT, 71, OXExceptionStrings.MESSAGE_DENIED);
+    DENIED_MIME_TYPE("The specified MIME type is not allowed being set", Category.CATEGORY_USER_INPUT, 71, OXExceptionStrings.MESSAGE_DENIED);
     ;
 
     /**
