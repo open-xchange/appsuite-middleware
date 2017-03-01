@@ -47,23 +47,21 @@
  *
  */
 
-package com.openexchange.pgp.core;
+package com.openexchange.pgp.keys.parsing.impl;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 /**
- * {@link UnitTests} - Unit tests for c.o.pgp.core
+ * {@link UnitTests} - Unit tests for c.o.pgp.keys
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.8.4
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-    PGPEncrypterDecrypterTest.class,
-    PGPSignVerifyTests.class,
-    ModifyRecipientTest.class
+    AsciiArmoredKeyParserTest.class
 })
 public class UnitTests {
 

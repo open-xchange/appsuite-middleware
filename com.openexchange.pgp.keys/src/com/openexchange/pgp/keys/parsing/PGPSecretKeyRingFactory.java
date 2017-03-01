@@ -57,6 +57,7 @@ import org.bouncycastle.openpgp.PGPObjectFactory;
 import org.bouncycastle.openpgp.PGPSecretKeyRing;
 import org.bouncycastle.openpgp.PGPUtil;
 import org.bouncycastle.openpgp.operator.bc.BcKeyFingerprintCalculator;
+import org.slf4j.Logger;
 
 /**
  * {@link PGPSecretKeyRingFactory} is a simple factory for creating instances of PGPSecretKeyRing.
@@ -65,6 +66,8 @@ import org.bouncycastle.openpgp.operator.bc.BcKeyFingerprintCalculator;
  * @since v7.8.3
  */
 public class PGPSecretKeyRingFactory {
+
+    private static Logger logger = org.slf4j.LoggerFactory.getLogger(PGPSecretKeyRingFactory.class);
 
     /**
      * Creates a PGPSecretKeyRing object from the given ASCII-Armored data.
@@ -80,7 +83,10 @@ public class PGPSecretKeyRingFactory {
         if (o instanceof PGPSecretKeyRing) {
             return (PGPSecretKeyRing) o;
         }
-        throw new IllegalArgumentException("Input text does not contain a PGP Secret Key");
+        else {
+            logger.error("Input text does not contain a PGP Secret Key");
+            return null;
+        }
     }
 
     /**
@@ -93,7 +99,10 @@ public class PGPSecretKeyRingFactory {
     public static List<PGPSecretKeyRing> create(KeyRingParserResult parserResult) throws IOException {
         List<PGPSecretKeyRing> ret = new ArrayList<PGPSecretKeyRing>();
         for(String secretKeyData : parserResult.getSecretKeysData()) {
-            ret.add(create(secretKeyData));
+            PGPSecretKeyRing parsedKey = create(secretKeyData);
+            if(parsedKey != null) {
+                ret.add(parsedKey);
+            }
         }
         return ret;
     }

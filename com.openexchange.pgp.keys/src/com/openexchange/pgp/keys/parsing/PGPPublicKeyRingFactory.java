@@ -9,11 +9,14 @@ import org.bouncycastle.openpgp.PGPObjectFactory;
 import org.bouncycastle.openpgp.PGPPublicKeyRing;
 import org.bouncycastle.openpgp.PGPUtil;
 import org.bouncycastle.openpgp.operator.bc.BcKeyFingerprintCalculator;
+import org.slf4j.Logger;
 
 /**
  * {@link PGPPublicKeyRingFactory} a simple factory for creating instances of PGPPublicKeyRing
  */
 public class PGPPublicKeyRingFactory {
+
+    private static Logger logger = org.slf4j.LoggerFactory.getLogger(PGPPublicKeyRingFactory.class);
 
     /**
      * Creates a PGPPublicKeyRing object from some ASCII-armored data
@@ -33,7 +36,10 @@ public class PGPPublicKeyRingFactory {
         if (o instanceof PGPPublicKeyRing) {
             return (PGPPublicKeyRing) o;
         }
-        throw new IllegalArgumentException("Input text does not contain a PGP Public Key");
+        else {
+            logger.error("Input text does not contain a PGP Public Key");
+            return null;
+        }
     }
 
     /**
@@ -47,7 +53,10 @@ public class PGPPublicKeyRingFactory {
     public static List<PGPPublicKeyRing> create(KeyRingParserResult parserResult) throws IOException {
         List<PGPPublicKeyRing> ret = new ArrayList<PGPPublicKeyRing>();
         for (String publicKey : parserResult.getPublicKeysData()) {
-            ret.add(create(publicKey));
+            PGPPublicKeyRing parsedKey = create(publicKey);
+            if(parsedKey != null) {
+                ret.add(parsedKey);
+            }
         }
         return ret;
     }
