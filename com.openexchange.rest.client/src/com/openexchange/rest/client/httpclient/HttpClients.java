@@ -157,7 +157,10 @@ public final class HttpClients {
     public static DefaultHttpClient getHttpClient(final ClientConfig config) {
         SSLSocketFactoryProvider factoryProvider = RestClientServices.getOptionalService(SSLSocketFactoryProvider.class);
         if (null != factoryProvider) {
-            return getHttpClient(config, factoryProvider);
+            SSLConfigurationService sslConfig = RestClientServices.getOptionalService(SSLConfigurationService.class);
+            if (null != sslConfig) {
+                return getHttpClient(config, factoryProvider, sslConfig);
+            }
         }
 
         return WrappedClientsRegistry.getInstance().createWrapped(config);
@@ -168,20 +171,20 @@ public final class HttpClients {
      *
      * @param config The configuration settings for the client
      * @param factoryProvider The provider for the appropriate <code>SSLSocketFactory</code> instance to use
+     * @param sslConfig The SSL configuration service to use
      * @return A newly created {@link DefaultHttpClient} instance
      */
-    public static DefaultHttpClient getHttpClient(ClientConfig config, SSLSocketFactoryProvider factoryProvider) {
+    public static DefaultHttpClient getHttpClient(ClientConfig config, SSLSocketFactoryProvider factoryProvider, SSLConfigurationService sslConfig) {
         // Initialize ClientConnectionManager
-        ClientConnectionManager ccm = initializeClientConnectionManagerUsing(config, factoryProvider);
+        ClientConnectionManager ccm = initializeClientConnectionManagerUsing(config, factoryProvider, sslConfig);
 
         // Initialize DefaultHttpClient using the ClientConnectionManager and client configuration
         return initializeHttpClientUsing(config, ccm);
     }
 
-    private static ClientConnectionManager initializeClientConnectionManagerUsing(ClientConfig config, SSLSocketFactoryProvider factoryProvider) {
+    private static ClientConnectionManager initializeClientConnectionManagerUsing(ClientConfig config, SSLSocketFactoryProvider factoryProvider, SSLConfigurationService sslConfig) {
         javax.net.ssl.SSLSocketFactory f = factoryProvider.getDefault();
 
-        SSLConfigurationService sslConfig = RestClientServices.getService(SSLConfigurationService.class);
         final SchemeRegistry schemeRegistry = new SchemeRegistry();
         schemeRegistry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
         schemeRegistry.register(new Scheme("https", 443, new SSLSocketFactory(f, sslConfig.getSupportedProtocols(), sslConfig.getSupportedCipherSuites(), new StrictHostnameVerifier())));

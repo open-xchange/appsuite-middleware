@@ -55,6 +55,7 @@ import com.openexchange.config.Interests;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.mail.api.AuthenticationFailedHandler;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
+import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.saml.oauth.HttpClientOAuthAccessTokenService;
 import com.openexchange.saml.oauth.OAuthFailedAuthenticationHandler;
@@ -88,12 +89,12 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { SessiondService.class, ConfigViewFactory.class, SSLSocketFactoryProvider.class };
+        return new Class[] { SessiondService.class, ConfigViewFactory.class, SSLSocketFactoryProvider.class, SSLConfigurationService.class };
     }
 
     @Override
     protected synchronized void startBundle() throws Exception {
-        HttpClientOAuthAccessTokenService tokenService = new HttpClientOAuthAccessTokenService(getService(ConfigViewFactory.class), getService(SSLSocketFactoryProvider.class));
+        HttpClientOAuthAccessTokenService tokenService = new HttpClientOAuthAccessTokenService(getService(ConfigViewFactory.class), getService(SSLSocketFactoryProvider.class), getService(SSLConfigurationService.class));
         this.tokenService = tokenService;
 
         registerService(ForcedReloadable.class, new ForcedReloadable() {

@@ -54,6 +54,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
+import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.rest.client.httpclient.HttpClients.ClientConfig;
 import com.openexchange.saml.oauth.service.OAuthAccessToken;
@@ -75,7 +76,7 @@ public class HttpClientOAuthAccessTokenService implements OAuthAccessTokenServic
     /**
      * Initializes a new {@link HttpClientOAuthAccessTokenService}.
      */
-    public HttpClientOAuthAccessTokenService(ConfigViewFactory configViewFactory, SSLSocketFactoryProvider factoryProvider) {
+    public HttpClientOAuthAccessTokenService(ConfigViewFactory configViewFactory, SSLSocketFactoryProvider factoryProvider, SSLConfigurationService sslConfig) {
         super();
         this.configViewFactory = configViewFactory;
 
@@ -84,7 +85,7 @@ public class HttpClientOAuthAccessTokenService implements OAuthAccessTokenServic
         config.setConnectionTimeout(3000);
         config.setSocketReadTimeout(10000);
         config.setUserAgent("Open-Xchange SAML OAuth Client");
-        httpClient = HttpClients.getHttpClient(config, factoryProvider);
+        httpClient = HttpClients.getHttpClient(config, factoryProvider, sslConfig);
 
         // Initialize request instances
         accessTokenRequest = new OAuthAccessTokenRequest(httpClient, configViewFactory);
