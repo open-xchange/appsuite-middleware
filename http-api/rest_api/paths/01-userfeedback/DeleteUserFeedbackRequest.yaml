@@ -1,6 +1,6 @@
 /userfeedback/v1/delete/{context-group}/{type}:
   delete:
-  operationId: delete
+    operationId: delete
     tags:
       - Userfeedback
     summary: Deletes user feedback
