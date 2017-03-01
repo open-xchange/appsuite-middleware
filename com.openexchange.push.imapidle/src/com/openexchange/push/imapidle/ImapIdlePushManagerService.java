@@ -477,16 +477,6 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
                     }
                 }
             }
-
-            // Look-up remote sessions, too, if possible
-            if (sessiondService instanceof SessiondServiceExtended) {
-                sessions = ((SessiondServiceExtended) sessiondService).getSessions(userId, contextId, true);
-                for (Session session : sessions) {
-                    if (!oldSessionId.equals(session.getSessionID()) && PushUtility.allowedClient(session.getClient())) {
-                        return injectAnotherListenerUsing(session, false).injectedPushListener;
-                    }
-                }
-            }
         }
 
         return null;
