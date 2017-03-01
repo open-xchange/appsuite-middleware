@@ -137,7 +137,7 @@ public class ExportUserFeedbackService extends JAXRSService {
         }
     }
 
-    private void validateParams(long start, long end) throws OXException {
+    protected void validateParams(long start, long end) throws OXException {
         Set<String> badParams = new HashSet<>(2);
         if (start < 0L) {
             badParams.add("start");

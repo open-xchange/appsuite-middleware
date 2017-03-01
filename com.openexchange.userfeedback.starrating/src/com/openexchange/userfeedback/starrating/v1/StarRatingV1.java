@@ -56,6 +56,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -220,7 +221,7 @@ public class StarRatingV1 extends AbstractFeedbackType {
     @Override
     public ExportResultConverter getFeedbacks(List<FeedbackMetaData> feedbackMetaData, Connection con) throws OXException {
         if (feedbackMetaData.size() == 0) {
-            return ExportResultConverter.EMTPY_CONVERTER;
+            return createExportObject(Collections.<Feedback> emptyList());
         }
 
         ResultSet rs = null;

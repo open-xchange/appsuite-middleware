@@ -47,56 +47,24 @@
  *
  */
 
-package com.openexchange.userfeedback.internal;
+package com.openexchange.userfeedback;
 
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.userfeedback.FeedbackType;
-import com.openexchange.userfeedback.FeedbackTypeRegistry;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.userfeedback.internal.FeedbackServiceImplTest;
 
 /**
- * {@link FeedbackTypeRegistryImpl}
+ * 
+ * {@link UnitTests}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.4
  */
-public class FeedbackTypeRegistryImpl implements FeedbackTypeRegistry {
+@RunWith(Suite.class)
+@SuiteClasses({
+    FeedbackServiceImplTest.class
 
-    private static volatile FeedbackTypeRegistry INSTANCE;
-    private final ConcurrentHashMap<String, FeedbackType> map = new ConcurrentHashMap<String, FeedbackType>(1);
-
-    /**
-     * Initializes a new {@link FeedbackTypeRegistryImpl}.
-     */
-    protected FeedbackTypeRegistryImpl() {
-        super();
-    }
-
-    @Override
-    public void registerType(FeedbackType type) {
-        map.put(type.getType(), type);
-    }
-
-    @Override
-    public void unregisterType(FeedbackType type) {
-        map.remove(type.getType());
-    }
-
-    @Override
-    public FeedbackType getFeedbackType(String type) {
-        return map.get(type);
-    }
-
-    public static FeedbackTypeRegistry getInstance() {
-        FeedbackTypeRegistry tmp = INSTANCE;
-        if (null == tmp) {
-            synchronized (FeedbackTypeRegistryImpl.class) {
-                tmp = INSTANCE;
-                if (null == tmp) {
-                    tmp = INSTANCE = new FeedbackTypeRegistryImpl();
-                }
-            }
-        }
-        return tmp;
-    }
-
+})
+public class UnitTests {
 }

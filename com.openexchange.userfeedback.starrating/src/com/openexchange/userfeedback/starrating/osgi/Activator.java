@@ -72,7 +72,7 @@ public class Activator extends HousekeepingActivator{
         FeedbackTypeRegistry registry = Services.getService(FeedbackTypeRegistry.class);
 
         // TODO use service tracker customzier instead
-        registry.registertype(new StarRatingV1());
+        registry.registerType(new StarRatingV1());
     }
 
 

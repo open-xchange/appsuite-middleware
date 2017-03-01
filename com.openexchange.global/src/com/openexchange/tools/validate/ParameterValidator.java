@@ -47,56 +47,38 @@
  *
  */
 
-package com.openexchange.userfeedback.internal;
+package com.openexchange.tools.validate;
 
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.userfeedback.FeedbackType;
-import com.openexchange.userfeedback.FeedbackTypeRegistry;
+import org.json.JSONObject;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link FeedbackTypeRegistryImpl}
+ * {@link ParameterValidator}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.4
  */
-public class FeedbackTypeRegistryImpl implements FeedbackTypeRegistry {
+public class ParameterValidator {
 
-    private static volatile FeedbackTypeRegistry INSTANCE;
-    private final ConcurrentHashMap<String, FeedbackType> map = new ConcurrentHashMap<String, FeedbackType>(1);
-
-    /**
-     * Initializes a new {@link FeedbackTypeRegistryImpl}.
-     */
-    protected FeedbackTypeRegistryImpl() {
-        super();
-    }
-
-    @Override
-    public void registerType(FeedbackType type) {
-        map.put(type.getType(), type);
-    }
-
-    @Override
-    public void unregisterType(FeedbackType type) {
-        map.remove(type.getType());
-    }
-
-    @Override
-    public FeedbackType getFeedbackType(String type) {
-        return map.get(type);
-    }
-
-    public static FeedbackTypeRegistry getInstance() {
-        FeedbackTypeRegistry tmp = INSTANCE;
-        if (null == tmp) {
-            synchronized (FeedbackTypeRegistryImpl.class) {
-                tmp = INSTANCE;
-                if (null == tmp) {
-                    tmp = INSTANCE = new FeedbackTypeRegistryImpl();
-                }
-            }
+    public static void checkJSON(JSONObject object) throws OXException {
+        if (object == null) {
+            throw ParameterValidatorExceptionCodes.JSON_OBJECT_CANNOT_BE_NULL_ERROR.create();
+        } else if (object.length() == 0) {
+            throw ParameterValidatorExceptionCodes.JSON_OBJECT_CANNOT_BE_EMPTY_ERROR.create();
         }
-        return tmp;
     }
 
+    public static void checkString(String object) throws OXException {
+        if (object == null) {
+            throw ParameterValidatorExceptionCodes.STRING_OBJECT_CANNOT_BE_NULL_ERROR.create();
+        } else if (object.length() == 0) {
+            throw ParameterValidatorExceptionCodes.STRING_OBJECT_CANNOT_BE_EMPTY_ERROR.create();
+        }
+    }
+
+    public static void checkObject(Object object) throws OXException {
+        if (object == null) {
+            throw ParameterValidatorExceptionCodes.OBJECT_CANNOT_BE_NULL_ERROR.create();
+        }
+    }
 }

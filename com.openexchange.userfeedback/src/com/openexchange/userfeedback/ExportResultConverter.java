@@ -57,14 +57,6 @@ package com.openexchange.userfeedback;
  */
 public interface ExportResultConverter {
 
-    public static ExportResultConverter EMTPY_CONVERTER = new ExportResultConverter() {
-
-        @Override
-        public ExportResult get(ExportType type) {
-            return ExportResult.EMPTY_RESULT;
-        }
-    };
-
     /**
      * 
      * @param type

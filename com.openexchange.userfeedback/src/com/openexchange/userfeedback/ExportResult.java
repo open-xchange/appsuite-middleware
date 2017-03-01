@@ -57,14 +57,5 @@ package com.openexchange.userfeedback;
  */
 public interface ExportResult {
 
-    public static ExportResult EMPTY_RESULT = new ExportResult() {
-
-        @Override
-        public Object getResult() {
-            return new Object();
-        }
-
-    };
-
     Object getResult();
 }

@@ -62,13 +62,13 @@ public interface FeedbackTypeRegistry {
      * Register a {@link FeedbackType}
      * @param type The {@link FeedbackType} to register
      */
-    public void registertype(FeedbackType type);
+    public void registerType(FeedbackType type);
 
     /**
      * Unregister a {@link FeedbackType}
      * @param type The {@link FeedbackType} to unregister
      */
-    public void unregister(FeedbackType type);
+    public void unregisterType(FeedbackType type);
 
     /**
      * Retrieves the {@link FeedbackType} for the given type

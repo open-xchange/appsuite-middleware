@@ -72,7 +72,14 @@ public interface FeedbackService {
      */
     void store(Session session, String type, JSONObject feedback) throws OXException;
 
-
+    /**
+     * Exports feedback data within an {@link ExportResultConverter}. The export data becomes generated/formatted based on the {@link ExportType} defined for {@link ExportResultConverter#get(ExportType)}
+     * 
+     * @param ctxGroup The context group to export for
+     * @param filter The filter (containing the type of report) to limit the results
+     * @return {@link ExportResultConverter} wrapping the data
+     * @throws OXException if an export isn't possible due to errors
+     */
     ExportResultConverter export(String ctxGroup, FeedbackFilter filter) throws OXException;
 
     /**

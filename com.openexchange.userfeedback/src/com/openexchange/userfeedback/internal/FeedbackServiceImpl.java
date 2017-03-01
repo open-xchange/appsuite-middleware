@@ -63,6 +63,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.tools.validate.ParameterValidator;
 import com.openexchange.userfeedback.ExportResultConverter;
 import com.openexchange.userfeedback.FeedbackMetaData;
 import com.openexchange.userfeedback.FeedbackService;
@@ -82,6 +83,9 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     @Override
     public void store(Session session, String type, JSONObject feedback) throws OXException {
+        ParameterValidator.checkString(type);
+        ParameterValidator.checkJSON(feedback);
+
         // Get context group id
         ConfigViewFactory factory = Services.getService(ConfigViewFactory.class);
         if (factory == null) {
@@ -142,7 +146,7 @@ public class FeedbackServiceImpl implements FeedbackService {
      * @param date The time of the feedback
      * @throws SQLException
      */
-    private void saveFeedBackInternal(Connection writeCon, int userId, int contextId, String groupId, String loginName, long date, String type, long feedbackId) throws SQLException {
+    protected void saveFeedBackInternal(Connection writeCon, int userId, int contextId, String groupId, String loginName, long date, String type, long feedbackId) throws SQLException {
         PreparedStatement statement = null;
         try {
             statement = writeCon.prepareStatement(INSERT_FEEDBACK_SQL);
@@ -164,6 +168,9 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     @Override
     public ExportResultConverter export(String ctxGroup, FeedbackFilter filter) throws OXException {
+        ParameterValidator.checkString(ctxGroup);
+        ParameterValidator.checkObject(filter);
+
         FeedbackTypeRegistry registry = FeedbackTypeRegistryImpl.getInstance();
         FeedbackType feedBackType = registry.getFeedbackType(filter.getType());
 
@@ -181,9 +188,6 @@ public class FeedbackServiceImpl implements FeedbackService {
             readCon = dbService.getReadOnlyForGlobal(ctxGroup);
 
             List<FeedbackMetaData> metaDataList = loadFeedbackMetaData(readCon, filter, ctxGroup);
-            if (metaDataList.isEmpty()) {
-                return ExportResultConverter.EMTPY_CONVERTER;
-            }
 
             List<FeedbackMetaData> filteredFeedback = new ArrayList<>();
             for (FeedbackMetaData meta : metaDataList) {
@@ -202,7 +206,7 @@ public class FeedbackServiceImpl implements FeedbackService {
         }
     }
 
-    private List<FeedbackMetaData> loadFeedbackMetaData(Connection readCon, FeedbackFilter filter, String groupId) throws SQLException {
+    protected List<FeedbackMetaData> loadFeedbackMetaData(Connection readCon, FeedbackFilter filter, String groupId) throws SQLException {
         PreparedStatement statement = null;
         try {
             statement = readCon.prepareStatement(SELECT_FEEDBACK_SQL);
