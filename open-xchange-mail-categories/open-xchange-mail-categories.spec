@@ -16,7 +16,7 @@ BuildRequires: java-devel >= 1.7.0
 BuildRequires: open-xchange-core >= @OXVERSION@
 BuildRequires: open-xchange-mailfilter >= @OXVERSION@
 Version:       @OXVERSION@
-%define        ox_release 27
+%define        ox_release 26
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -57,8 +57,6 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/mail-categories.properties
 
 %changelog
-* Tue Feb 28 2017 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
-Build for patch 2017-03-06 (3984)
 * Fri Feb 24 2017 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
 Build for patch 2017-02-24 (3993)
 * Wed Feb 15 2017 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
