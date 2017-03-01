@@ -168,10 +168,11 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
      */
     protected MailServletInterface getMailInterface(final MailRequest mailRequest) throws OXException {
 
-        //requests can control whether or not to decrypt messages
+        //requests can control whether or not to decrypt messages or verify signatures
         final boolean decrypt = mailRequest.getParameter("decrypt") != null && mailRequest.getParameter("decrypt").toLowerCase().equals("true");
+        final boolean verify = mailRequest.getParameter("verify") != null && mailRequest.getParameter("verify").toLowerCase().equals("true");
 
-        //Parsing crypto authentication from the request
+        //Parsing crypto authentication from the request if decrypting
         String cryptoAuthentication = null;
         if(decrypt) {
             CryptographicServiceAuthenticationFactory encryptionAuthenticationFactory = services.getService(CryptographicServiceAuthenticationFactory.class);
@@ -186,7 +187,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
             // No AJAX state
             MailServletInterface mailInterface = mailRequest.getMailServletInterface();
             if (mailInterface == null) {
-                MailServletInterface newMailInterface = decrypt ?
+                MailServletInterface newMailInterface = decrypt || verify ? // If decrypting or verifying, get Crypto Aware MailServlet
                     MailServletInterface.getInstanceWithDecryptionSupport(mailRequest.getSession(), cryptoAuthentication) :
                     MailServletInterface.getInstance(mailRequest.getSession());
                 mailRequest.setMailServletInterface(newMailInterface);
@@ -197,7 +198,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
 
         MailServletInterface mailInterface = state.optProperty(PROPERTY_MAIL_IFACE);
         if (mailInterface == null) {
-            MailServletInterface newMailInterface = decrypt ?
+            MailServletInterface newMailInterface = decrypt || verify ?
                 MailServletInterface.getInstanceWithDecryptionSupport(mailRequest.getSession(), cryptoAuthentication) :
                 MailServletInterface.getInstance(mailRequest.getSession());
             mailInterface = state.putProperty(PROPERTY_MAIL_IFACE, newMailInterface);
