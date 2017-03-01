@@ -502,13 +502,13 @@ public abstract class MailMessage extends MailPart {
     private boolean b_originalId;
 
     /**
-     * Email is encrypted
+     * Email Security Info, encrypted or signed
      */
-    private boolean encrypted;
-    private boolean b_encrypted;
+    private SecurityInfo securityInfo;
+    private boolean b_securityInfo;
 
     /**
-     * Email security data
+     * Email security results from decryption/signature verification
      */
     private SecurityResult securityResult;
     private boolean b_securityResult;
@@ -1990,40 +1990,38 @@ public abstract class MailMessage extends MailPart {
         b_references = true;
     }
 
+
     /**
-     * Sets the encrypted flag
-     *
-     * @param encrypted The encrypted flag to set
+     * Sets the seucrity info for an email (Encrypted, signed, etc)
+     * @param securityInfo
      */
-    public void setEncrypted (boolean encrypted) {
-        this.encrypted = encrypted;
-        b_encrypted = true;
+    public void setSecurityInfo(SecurityInfo securityInfo) {
+        this.securityInfo = securityInfo;
+        b_securityInfo = (securityInfo != null);
     }
 
     /**
-     * Checks whether encrypted flag is set
-     *
-     * @return <code>true</code> if set; otherwise <code>false</code>
+     * Gets the security info for an email (Encypted, signed, etc)
+     * @return
      */
-    public boolean containsEncrypted () {
-        return b_encrypted;
+    public SecurityInfo getSecurityInfo () {
+        return this.securityInfo;
     }
 
     /**
-     * Checks if this mail is marked as encrypted.
-     *
-     * @return <code>true</code> if encrypted; otherwise <code>false</code>
+     * Returns if email conatins security Info
+     * @return
      */
-    public boolean isEncrypted () {
-        return this.encrypted;
+    public boolean containsSecurityInfo () {
+        return b_securityInfo;
     }
 
     /**
-     * Removes the encrypted flag.
+     * Remove seucrity info from email
      */
-    public void removeEncrypted () {
-        encrypted = false;
-        b_encrypted = false;
+    public void removeSecurityInfo () {
+        this.securityInfo = null;
+        b_securityInfo = false;
     }
 
     /**
