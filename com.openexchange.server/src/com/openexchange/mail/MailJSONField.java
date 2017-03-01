@@ -246,11 +246,11 @@ public enum MailJSONField {
      */
     DATE("date"),
     /**
-     * If the email is a Guard Encrypted Email
+     * If the E-Mail is Guard-encrypted
      */
     SECURITY("security"),
     /**
-     * If the email contains encyption or signatures
+     * If the E-Mail contains encryption or signatures
      */
     SECURITY_INFO("security_info")
     ;

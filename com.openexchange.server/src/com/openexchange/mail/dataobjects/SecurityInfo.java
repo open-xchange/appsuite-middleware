@@ -60,43 +60,53 @@ import org.json.JSONObject;
  * {@link SecurityInfo}
  *
  * @author <a href="mailto:greg.hill@open-xchange.com">Greg Hill</a>
- * @since v2.8.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.4
  */
 public class SecurityInfo {
 
-    private boolean isSigned;
-    private boolean isEncrypted;
+    private final boolean signed;
+    private final boolean encrypted;
 
-    public SecurityInfo (boolean isEncrypted, boolean isSigned) {
-        this.isSigned = isSigned;
-        this.isEncrypted = isEncrypted;
+    /**
+     * Initializes a new {@link SecurityInfo}.
+     *
+     * @param encrypted Whether E-Mail is encrypted
+     * @param signed Whether E-Mail is signed
+     */
+    public SecurityInfo (boolean encrypted, boolean signed) {
+        this.signed = signed;
+        this.encrypted = encrypted;
     }
 
     /**
-     * If email is encrypted
-     * @return
+     * Checks if E-Mail is encrypted.
+     *
+     * @return <code>true</code> if encrypted; otherwise <code>false</code>
      */
     public boolean isEncrypted () {
-        return isEncrypted;
+        return encrypted;
     }
 
     /**
-     * If email is plaintext but signed
-     * @return
+     * Checks if E-Mail is signed.
+     *
+     * @return <code>true</code> if signed; otherwise <code>false</code>
      */
     public boolean isSigned () {
-        return isSigned;
+        return signed;
     }
 
     /**
-     * Create JSON from SecurityInfo object
-     * @return
-     * @throws JSONException
+     * Create the JSON representation for this <code>SecurityInfo</code> object.
+     *
+     * @return The JSON representation
+     * @throws JSONException If JSON representation cannot be returned
      */
     public JSONObject toJSON() throws JSONException {
-        JSONObject security = new JSONObject();
-        security.put("encrypted", isEncrypted);
-        security.put("signed", isSigned);
+        JSONObject security = new JSONObject(2);
+        security.put("encrypted", encrypted);
+        security.put("signed", signed);
         return security;
     }
 

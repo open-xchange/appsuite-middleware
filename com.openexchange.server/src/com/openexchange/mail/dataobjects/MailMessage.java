@@ -1992,8 +1992,9 @@ public abstract class MailMessage extends MailPart {
 
 
     /**
-     * Sets the seucrity info for an email (Encrypted, signed, etc)
-     * @param securityInfo
+     * Sets the security info (encrypted, signed, etc)
+     *
+     * @param securityInfo The security info to set
      */
     public void setSecurityInfo(SecurityInfo securityInfo) {
         this.securityInfo = securityInfo;
@@ -2001,23 +2002,25 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
-     * Gets the security info for an email (Encypted, signed, etc)
-     * @return
+     * Gets the security info (encypted, signed, etc)
+     *
+     * @return The security info or <code>null</code>
      */
     public SecurityInfo getSecurityInfo () {
         return this.securityInfo;
     }
 
     /**
-     * Returns if email conatins security Info
-     * @return
+     * Checks if security info is contained
+     *
+     * @return <code>true</code> if contained; otherwise <code>false</code>
      */
     public boolean containsSecurityInfo () {
         return b_securityInfo;
     }
 
     /**
-     * Remove seucrity info from email
+     * Removes the security info
      */
     public void removeSecurityInfo () {
         this.securityInfo = null;

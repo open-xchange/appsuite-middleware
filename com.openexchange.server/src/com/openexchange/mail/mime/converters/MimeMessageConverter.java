@@ -2063,7 +2063,7 @@ public final class MimeMessageConverter {
 
         try {
             return new SecurityInfo (recognizer.isPGPMessage(mail), recognizer.isPGPSignedMessage(mail));
-        } catch (OXException e) {
+        } catch (Exception e) {
             LOG.warn("Failed to check if mail is encrypted", e);
             return null;
         }
