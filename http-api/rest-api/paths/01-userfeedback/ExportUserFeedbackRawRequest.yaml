@@ -1,0 +1,42 @@
+/userfeedback/v1/export/{context-group}/{type}/raw:
+  get:
+  operationId: export
+    tags:
+      - Userfeedback
+    summary: Exports user feedback
+    parameters:
+
+      - in: path
+        name: context-group
+        description: The context group identifying the global DB where the feedback is stored.
+        required: false
+        default: default
+
+      - in: path
+        name: type
+        description: The feedback type to send.
+        required: false
+        default: star-rating-v1
+
+      - in: query
+        name: start
+        description: Start time in seconds since 1970-01-01 00:00:00 UTC. Only feedback given after this time is sent. If not set, all feedback up to -e is sent.
+        required: false
+        default: 0
+
+      - in: query
+        name: end
+        description: End time in seconds since 1970-01-01 00:00:00 UTC. Only feedback given before this time is sent. If not set, all feedback since -s is sent.
+        required: false
+        default: 0
+
+    responses:
+      200:
+        description: Blank in case of success, error message from server in case of error.
+      400:
+        description: Bad request, response contains error message.
+
+    x-ox-examples:
+      Example:
+        description: Export user feedback from 2016-01-01 to 2016-12-31
+        example: GET http://localhost:8009/userfeedback/v1/export/default/star-rating-v1/raw?start=1451606400&end=1483228799
