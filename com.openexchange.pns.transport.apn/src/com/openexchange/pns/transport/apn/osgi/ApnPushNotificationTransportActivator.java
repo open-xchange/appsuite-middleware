@@ -148,6 +148,8 @@ public class ApnPushNotificationTransportActivator extends HousekeepingActivator
                 return null;
             }
         });
+
+        registerService(Reloadable.class, this);
     }
 
     @Override
