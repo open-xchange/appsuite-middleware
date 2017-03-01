@@ -169,7 +169,7 @@ public class PGPEncrypterDecrypterTest extends AbstractPGPTest {
     @Test
     public void testDecryptNonPGPDataShouldThrowException() throws Exception {
         expectedException.expect(OXException.class);
-        expectedException.expectMessage("GRD-COR-0001");
+        expectedException.expectMessage("PGP-CORE-0001");
 
         //Trying to decrypt emtpy data should result in an OXException
         InputStream nonPGPData = new ByteArrayInputStream(new byte[] {});
@@ -181,7 +181,7 @@ public class PGPEncrypterDecrypterTest extends AbstractPGPTest {
     public void testDecryptWithoutKnownPrivateKeyShouldThrowException() throws Exception {
 
         expectedException.expect(OXException.class);
-        expectedException.expectMessage("GRD-COR-0002");
+        expectedException.expectMessage("PGP-CORE-0002");
 
         //A strategy which does not find any keys in order to test error handling
         PGPKeyRetrievalStrategy noKeyFoundRetrievalStrategy = mock(PGPKeyRetrievalStrategy.class);
