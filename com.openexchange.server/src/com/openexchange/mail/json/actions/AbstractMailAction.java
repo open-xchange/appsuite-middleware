@@ -66,6 +66,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.AJAXRequestResultPostProcessor;
 import com.openexchange.ajax.requesthandler.AJAXState;
@@ -166,13 +167,12 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
      * @return The mail interface
      * @throws OXException If mail interface cannot be initialized
      */
-    protected MailServletInterface getMailInterface(final MailRequest mailRequest) throws OXException {
+    protected MailServletInterface getMailInterface(MailRequest mailRequest) throws OXException {
+        // Requests can control whether or not to decrypt messages or verify signatures
+        boolean decrypt = AJAXRequestDataTools.parseBoolParameter(mailRequest.getParameter("decrypt"));
+        boolean verify = AJAXRequestDataTools.parseBoolParameter(mailRequest.getParameter("verify"));
 
-        //requests can control whether or not to decrypt messages or verify signatures
-        final boolean decrypt = mailRequest.getParameter("decrypt") != null && mailRequest.getParameter("decrypt").toLowerCase().equals("true");
-        final boolean verify = mailRequest.getParameter("verify") != null && mailRequest.getParameter("verify").toLowerCase().equals("true");
-
-        //Parsing crypto authentication from the request if decrypting
+        // Parsing crypto authentication from the request if decrypting
         String cryptoAuthentication = null;
         if(decrypt) {
             CryptographicServiceAuthenticationFactory encryptionAuthenticationFactory = services.getService(CryptographicServiceAuthenticationFactory.class);
