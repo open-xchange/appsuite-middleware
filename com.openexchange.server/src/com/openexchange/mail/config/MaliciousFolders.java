@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.config;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -90,7 +91,7 @@ import gnu.trove.list.array.TIntArrayList;
  */
 public class MaliciousFolders {
 
-    private static final MaliciousFolders EMPTY = new MaliciousFolders(null) {
+    private static final MaliciousFolders EMPTY = new MaliciousFolders(Collections.<Checker> emptyList()) {
 
         @Override
         public boolean isMalicious(String fullName, int accountId, MailServletInterface mailInterface) throws OXException {
@@ -322,7 +323,7 @@ public class MaliciousFolders {
     private static interface Checker {
 
         boolean isMalicious(String fullName, int accountId, MailServletInterface mailInterface) throws OXException;
-        
+
         void addTokensTo(List<String> tokens);
     }
 
@@ -528,7 +529,7 @@ public class MaliciousFolders {
             return null == sb ? "" : sb.toString();
         }
     }
-    
+
     static StringBuilder appendTo(char sym, String str, StringBuilder sb) {
         if (null == sb) {
             StringBuilder newSb = new StringBuilder(24);
@@ -575,7 +576,7 @@ public class MaliciousFolders {
         public String toString() {
             return MailFolderUtility.prepareFullname(accountId, fullName);
         }
-        
+
     }
 
 }
