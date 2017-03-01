@@ -51,7 +51,6 @@ package com.openexchange.mail.filter.json.v2.actions;
 
 import org.apache.jsieve.SieveException;
 import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
@@ -84,9 +83,7 @@ public class NewMailFilterAction extends AbstractMailFilterAction{
             final Credentials credentials = new Credentials(session);
             final Rule rule = RuleParser.getInstance().parse(getJSONBody(request.getData()), ServerSessionAdapter.valueOf(request.getSession()));
             int id = mailFilterService.createFilterRule(credentials, rule);
-            JSONObject result = new JSONObject(1);
-            result.put("id", id);
-            return new AJAXRequestResult(result);
+            return new AJAXRequestResult(id);
         } catch (final SieveException e) {
             throw MailFilterExceptionCode.handleSieveException(e);
         } catch (final JSONException e) {

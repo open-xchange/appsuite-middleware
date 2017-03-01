@@ -90,6 +90,10 @@ public class SimplifiedHeaderTestParser extends AbstractTestCommandParser<TestCo
             return HEADER_PARSER.parse(jsonObject, session);
         }
         SimplifiedHeaderTest test = SimplifiedHeaderTest.getTestByName(id);
+        // use contains as default comparator
+        if(!jsonObject.has(HeaderTestField.comparison.name())){
+            jsonObject.put(HeaderTestField.comparison.name(), "contains");
+        }
         switch(test){
             case From:
                 jsonObject.put(HeaderTestField.headers.name(), SimplifiedHeaderTest.From.getHeaderNames());
