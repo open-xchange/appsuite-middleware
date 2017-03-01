@@ -7,7 +7,7 @@ Bundle-Vendor: Hazelcast Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Eclipse-BuddyPolicy: registered
 Bundle-ClassPath: .,
- lib/hazelcast-3.7.5.jar
+ lib/hazelcast-3.8.jar
 Import-Package: com.openexchange.config,
  edu.umd.cs.findbugs.annotations,
  javax.annotation,
@@ -77,6 +77,7 @@ Export-Package: com.hazelcast.cache,
  com.hazelcast.spi,
  com.hazelcast.spi.annotation,
  com.hazelcast.spi.exception,
+ com.hazelcast.spi.properties,
  com.hazelcast.topic,
  com.hazelcast.transaction,
  com.hazelcast.util,
