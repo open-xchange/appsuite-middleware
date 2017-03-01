@@ -65,7 +65,9 @@ public enum PGPCoreExceptionCodes implements DisplayableOXExceptionCode {
     NO_PGP_DATA_FOUND("No encrypted items found.", CATEGORY_ERROR, 1),
     PRIVATE_KEY_NOT_FOUND("The private key for the identity '%1$s' could not be found.", CATEGORY_ERROR, 2),
     BAD_PASSWORD("Bad password.", CATEGORY_USER_INPUT, 3),
-    NO_PGP_SIGNATURE_FOUND("No signature items found", CATEGORY_ERROR,4);
+    NO_PGP_SIGNATURE_FOUND("No signature items found", CATEGORY_ERROR,4),
+    IO_EXCEPTION("An IO error occured: '%1$s'", CATEGORY_ERROR, 5),
+    PGP_EXCEPTION("An PGP error occured: '%1$s'", CATEGORY_ERROR, 6),
     ;
 
     public static final String PREFIX = "PGP-CORE";

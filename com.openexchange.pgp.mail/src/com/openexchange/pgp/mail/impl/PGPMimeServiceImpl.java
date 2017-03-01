@@ -56,15 +56,22 @@ import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Properties;
 import javax.mail.BodyPart;
 import javax.mail.Header;
 import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.Session;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.openpgp.PGPException;
 import org.bouncycastle.openpgp.PGPPublicKey;
 import org.bouncycastle.openpgp.PGPSecretKey;
 import com.openexchange.exception.OXException;
 import com.openexchange.pgp.core.PGPEncrypter;
+import com.openexchange.pgp.core.PGPSignatureCreator;
 import com.openexchange.pgp.mail.PGPMimeService;
 import com.openexchange.pgp.mail.exceptions.PGPMailExceptionCodes;
 import com.openexchange.pgp.mail.tools.PGPMimeMailCreator;
@@ -88,7 +95,7 @@ public class PGPMimeServiceImpl implements PGPMimeService {
      * @throws IOException
      * @throws MessagingException
      */
-    private MimeMessage createPGPMimeWrapper(InputStream encryptedMimeData, HashMap<String, String> headers, List<BodyPart> additionalClearTextParts) throws MessagingException, IOException  {
+    private MimeMessage createPGPMimeWrapper(InputStream encryptedMimeData, HashMap<String, String> headers, List<BodyPart> additionalClearTextParts) throws MessagingException, IOException {
         //Create a PGP/MIME message based on the given encrypted data
         return new PGPMimeMailCreator().createPGPMimeMessage(encryptedMimeData, headers, additionalClearTextParts);
     }
@@ -108,6 +115,50 @@ public class PGPMimeServiceImpl implements PGPMimeService {
             ret.put(h.getName(), h.getValue());
         }
         return ret;
+    }
+
+    private String normalize(String content) {
+        StringBuilder sb = new StringBuilder();
+        String[] lines = content.split("\n");
+        for (String line : lines) {
+            sb.append(StringUtils.stripEnd(line, null) + "\r\n");
+        }
+        return sb.toString();
+    }
+
+    private String getMessageContentForSigning(MimeMessage message) throws IOException, MessagingException {
+        MimeMessage msg = new MimeMessage(message);
+        Enumeration<Header> headers = msg.getAllHeaders();
+        while (headers.hasMoreElements()) {
+            Header h = headers.nextElement();
+            String name = h.getName();
+            if (name != null && !name.contains("Content")) {
+                msg.removeHeader(h.getName());
+            }
+        }
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        msg.writeTo(out, new String[] { "Message-ID", "MIME-Version" });
+        out.close();
+        return out.toString();
+    }
+
+    private String getPartContent(MimeMultipart mp) throws IOException, MessagingException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        // we need to wrap in message to get full writeout of the mimepart contents witht he content-type header
+        MimeMessage msg = new MimeMessage(Session.getInstance(new Properties()));
+        msg.setContent(mp);
+        msg.writeTo(out, new String[] { "Message-ID", "MIME-Version" });
+        out.close();
+        return new String(out.toByteArray(), "UTF-8");
+    }
+
+    private MimeMultipart getFirstMultipart(MimeMessage message) throws IOException, MessagingException {
+        final Object content = message.getContent();
+        if (content instanceof Multipart || content instanceof MimeMultipart) {
+            final MimeMultipart mp = (MimeMultipart) content;
+            return (mp);
+        }
+        return null;
     }
 
     @Override
@@ -158,8 +209,48 @@ public class PGPMimeServiceImpl implements PGPMimeService {
     }
 
     @Override
-    public MimeMessage sign(MimeMessage mimeMessage, PGPSecretKey signingKey, char[] password) throws OXException {
-        //TODO: Not impl. yet
-        return mimeMessage;
+    public MimeMessage sign(MimeMessage message, PGPSecretKey signingKey, char[] password) throws OXException {
+
+        try {
+            //Get the content and normalize; We need to normalize the text, remove whitespaces, etc
+            MimeMultipart firstMultiPart = getFirstMultipart(message);
+            String signingContent;
+            if (firstMultiPart != null) {
+                signingContent = normalize(getPartContent(firstMultiPart));
+            } else { // If not multipart email, get the content
+                signingContent = normalize(getMessageContentForSigning(message));
+            }
+
+            //Sign
+            ByteArrayInputStream signingContentStream = new ByteArrayInputStream(signingContent.getBytes("UTF-8"));
+            ByteArrayOutputStream signedContentStream = new ByteArrayOutputStream();
+            PGPSignatureCreator signatureCreator = new PGPSignatureCreator(signingKey.getPublicKey().getAlgorithm());
+            final boolean armored = true;
+            signatureCreator.createSignature(signingContentStream, signedContentStream, armored, signingKey, password);
+
+            MimeMultipart newcontent = new MimeMultipart("signed; micalg=pgp-sha1; protocol=\"application/pgp-signature\"");
+            // Add our normalized text back as a body part
+            MimeBodyPart bodyPart = new MimeBodyPart(new ByteArrayInputStream(signingContent.getBytes("UTF-8")));
+            newcontent.addBodyPart(bodyPart);
+            // Create signature attachment
+            String signature = new String(signedContentStream.toByteArray());
+            BodyPart signaturePart = new MimeBodyPart();
+            signaturePart.setContent(signature, "application/pgp-signature");
+            signaturePart.setDisposition("attachment");
+            signaturePart.setFileName("signature.asc");
+            signaturePart.setHeader("Content-Transfer-Encoding", "7bit");
+            signaturePart.setHeader("Content-Type", "application/pgp-signature");
+            newcontent.addBodyPart(signaturePart);
+
+            MimeMessage ret = new MimeMessage(message);
+            ret.setContent(newcontent);
+            ret.saveChanges();
+
+            return ret;
+        } catch (IOException e) {
+            throw PGPMailExceptionCodes.IO_EXCEPTION.create(e, e.getMessage());
+        } catch (MessagingException e) {
+            throw PGPMailExceptionCodes.MESSAGE_EXCEPTION.create(e, e.getMessage());
+        }
     }
 }

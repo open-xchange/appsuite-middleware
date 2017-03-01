@@ -63,6 +63,7 @@ import org.bouncycastle.openpgp.PGPSignatureGenerator;
 import org.bouncycastle.openpgp.operator.PBESecretKeyDecryptor;
 import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentSignerBuilder;
 import org.bouncycastle.openpgp.operator.jcajce.JcePBESecretKeyDecryptorBuilder;
+import com.openexchange.exception.OXException;
 import com.openexchange.pgp.core.exceptions.PGPCoreExceptionCodes;
 
 /**
@@ -103,7 +104,7 @@ public class PGPSignatureCreator {
      * @throws IOException
      * @throws PGPException
      */
-    public void createSignature(InputStream input, OutputStream output, boolean armored, PGPSecretKey signingKey, char[] password) throws Exception {
+    public void createSignature(InputStream input, OutputStream output, boolean armored, PGPSecretKey signingKey, char[] password) throws OXException {
         output = armored ? new ArmoredOutputStream(output) : output;
 
         try {
@@ -130,9 +131,20 @@ public class PGPSignatureCreator {
                 }
                 signatureGenerator.generate().encode(signingStream);
             }
-        } finally {
+        }
+        catch(PGPException e) {
+            PGPCoreExceptionCodes.PGP_EXCEPTION.create(e, e.getMessage());
+        }
+        catch(IOException e) {
+            PGPCoreExceptionCodes.IO_EXCEPTION.create(e, e.getMessage());
+        }
+        finally {
             if (armored) {
-                output.close();
+                try {
+                    output.close();
+                } catch (IOException e) {
+                    //no-op
+                }
             }
         }
     }
