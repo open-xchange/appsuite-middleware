@@ -60,11 +60,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
+import com.openexchange.lock.LockService;
 import com.openexchange.push.PushListenerService;
 import com.openexchange.push.PushUser;
 import com.openexchange.push.PushUserInfo;
@@ -99,6 +102,7 @@ public final class MailNotifyPushListenerRegistry {
     private final boolean useEmailAddress;
     private final MailNotifyDelayQueue notificationsQueue;
     private final ScheduledTimerTask timerTask;
+    private final Lock globalLock;
 
     /**
      * Initializes a new {@link MailNotifyPushListenerRegistry}.
@@ -126,6 +130,23 @@ public final class MailNotifyPushListenerRegistry {
         };
         int delay = 3000;
         timerTask = timerService.scheduleWithFixedDelay(r, delay, delay);
+
+        // The fall-back lock
+        globalLock = new ReentrantLock();
+    }
+
+    private Lock getlockFor(int userId, int contextId) {
+        LockService lockService = Services.optService(LockService.class);
+        if (null == lockService) {
+            return globalLock;
+        }
+
+        try {
+            return lockService.getSelfCleaningLockFor(new StringBuilder(32).append("imapidle-").append(contextId).append('-').append(userId).toString());
+        } catch (Exception e) {
+            LOG.warn("Failed to acquire lock for user {} in context {}. Using global lock instead.", I(userId), I(contextId), e);
+            return globalLock;
+        }
     }
 
     private boolean hasPermanentPush(int userId, int contextId) {
@@ -194,7 +215,7 @@ public final class MailNotifyPushListenerRegistry {
     /**
      * Triggers all due notifications.
      */
-    public synchronized void triggerDueNotifications() {
+    public void triggerDueNotifications() {
         DelayedNotification polled = notificationsQueue.poll();
         if (null != polled) {
             // Collect due notifications
@@ -289,7 +310,9 @@ public final class MailNotifyPushListenerRegistry {
             return false;
         }
 
-        synchronized (this) {
+        Lock lock = getlockFor(userId, contextId);
+        lock.lock();
+        try {
             boolean notYetPushed = true;
             for (String mboxId : mboxIds) {
                 MailNotifyPushListener current = mboxId2Listener.putIfAbsent(mboxId, pushListener);
@@ -316,6 +339,8 @@ public final class MailNotifyPushListenerRegistry {
                 }
             }
             return notYetPushed;
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -336,7 +361,9 @@ public final class MailNotifyPushListenerRegistry {
             return false;
         }
 
-        synchronized (this) {
+        Lock lock = getlockFor(userId, contextId);
+        lock.lock();
+        try {
             boolean stopped = false;
             for (String mboxId : mboxIds) {
                 StopResult stopResult = stopListener(tryToReconnect, stopIfPermanent, mboxId, userId, contextId);
@@ -359,6 +386,8 @@ public final class MailNotifyPushListenerRegistry {
 
             }
             return stopped;
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -474,11 +503,9 @@ public final class MailNotifyPushListenerRegistry {
             return false;
         }
 
-        synchronized (this) {
-            for (String id : mboxIds) {
-                LOG.debug("Removing alias {} from map", id);
-                mboxId2Listener.remove(id);
-            }
+        for (String id : mboxIds) {
+            LOG.debug("Removing alias {} from map", id);
+            mboxId2Listener.remove(id);
         }
 
         return true;
