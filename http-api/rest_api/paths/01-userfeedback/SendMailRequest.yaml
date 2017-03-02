@@ -1,6 +1,6 @@
 /userfeedback/v1/mail/{context-group}/{type}:
   get:
-  operationId: mail
+    operationId: mail
     tags:
       - Userfeedback
     summary: Exports user feedback and sends exported data to provided recipients
@@ -10,30 +10,35 @@
         name: context-group
         description: The context group identifying the global DB where the feedback is stored.
         required: false
+        type: String
         default: default
 
       - in: path
         name: type
         description: The feedback type to send.
         required: false
+        type: String
         default: star-rating-v1
 
       - in: query
         name: start
         description: Start time in seconds since 1970-01-01 00:00:00 UTC. Only feedback given after this time is sent. If not set, all feedback up to -e is sent.
         required: false
+        type: long
         default: 0
 
       - in: query
         name: end
         description: End time in seconds since 1970-01-01 00:00:00 UTC. Only feedback given before this time is sent. If not set, all feedback since -s is sent.
         required: false
+        type: long
         default: 0
  
       - in: query
         name: recipients
         description: Comma-separated list of recipients for exported feedback.
         required: true
+        type: String
 
     responses:
       200:

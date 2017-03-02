@@ -5,37 +5,31 @@
       - Userfeedback
     summary: Deletes user feedback
     parameters:
-
       - in: path
         name: context-group
         description: The context group identifying the global DB where the feedback is stored.
         required: false
-        default: default
-
+        type: String
       - in: path
         name: type
         description: The feedback type to delete.
         required: false
-        default: star-rating-v1
-
+        type: String
       - in: query
         name: start
         description: Start time in seconds since 1970-01-01 00:00:00 UTC. Only feedback given after this time is deleted. If not set, all feedback up to -e is deleted.
         required: false
-        default: 0
-
+        type: long
       - in: query
         name: end
         description: End time in seconds since 1970-01-01 00:00:00 UTC. Only feedback given before this time is deleted. If not set, all feedback since -s is deleted.
         required: false
-        default: 0
-
+        type: long
     responses:
       200:
         description: Blank in case of success, error message from server in case of error.
       400:
         description: Bad request, response contains error message.
-
     x-ox-examples:
       Example:
         description: Delete user feedback from 2016-01-01 to 2016-12-31
