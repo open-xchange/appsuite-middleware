@@ -135,67 +135,90 @@ public class StarRatingV1 extends AbstractFeedbackType {
      * @param jsonFeedback The JSON object provided by the client
      * @return {@link JSONObject} that is aligned to be stored
      */
-    private Object cleanUpFeedback(JSONObject jsonFeedback) {
+    protected Object cleanUpFeedback(JSONObject jsonFeedback) {
         JSONObject returnFeedback = new JSONObject(jsonFeedback);
 
         Set<String> keys = new HashSet<String>(StarRatingV1JsonFields.storingKeys());
-        removeAdditionals(returnFeedback, keys);
-        addRequired(returnFeedback, keys);
-        return returnFeedback;
+        JSONObject removeAdditional = remove(returnFeedback, keys);
+        JSONObject cleanedFeedback = addRequired(removeAdditional, keys);
+        return cleanedFeedback;
     }
 
     /**
-     * Enhances the given JSON by dummy entries if not yet provided.
+     * Enhances the given JSON by dummy entries for every missing key defined in the parameter list. If keys parameter is empty the origin object will be returned.<br>
+     * <br>
+     * <b>Caution:</> this check is case sensitive. Having 'comment' in keys parameter will add it even 'Comment' is available within the provided {@link JSONObject}.
      * 
-     * @param returnFeedback The provided feedback that will be adapted.
-     * @param keys The keys that will be added
+     * @param feedback The provided feedback that will be adapted.
+     * @param keys The keys that should be available within the object
      */
-    private void addRequired(JSONObject returnFeedback, Set<String> keys) {
-        if (!keys.isEmpty()) {
-            LOG.info("Desired keys {} not contained within the request. They will be stored as empty.", Strings.concat(",", keys));
-            for (String key : keys) {
-                try {
-                    returnFeedback.put(key, "");
-                } catch (JSONException e) {
-                    LOG.error("Error while adding new key.", e);
-                }
-            }
+    protected JSONObject addRequired(final JSONObject feedback, Set<String> keys) {
+        if ((keys == null) || (keys.isEmpty())) {
+            return feedback;
         }
-    }
 
-    /**
-     * Removes JSON entries from provided object that aren't expected by the implementation.
-     * 
-     * @param returnFeedback The provided feedback that will be adapted
-     * @param keys The keys that are handled by the implementation.
-     */
-    private void removeAdditionals(JSONObject returnFeedback, Set<String> keys) {
-        Iterator<?> jsonKeys = new JSONObject(returnFeedback).keys();
-        while (jsonKeys.hasNext()) {
-            String key = ((String) jsonKeys.next()).toLowerCase();
-            if (!keys.contains(key)) {
-                LOG.warn("An unknown key '{}' has been provided. It will be removed before persisting.", key);
-                returnFeedback.remove(key);
+        JSONObject processed = new JSONObject(feedback);
+        for (String key : keys) {
+            if (feedback.has(key)) {
                 continue;
             }
-            keys.remove(key);
+            LOG.info("Desired key {} not contained within the request. They will be stored as empty.", Strings.concat(",", keys));
+            try {
+                processed.put(key, "");
+            } catch (JSONException e) {
+                LOG.error("Error while adding new key.", e);
+            }
         }
+        return processed;
     }
 
-    private JSONObject normalizeFeedback(JSONObject jsonFeedback) {
-        Iterator<?> jsonKeys = jsonFeedback.keys();
-        JSONObject normalizedFeedback = new JSONObject(jsonFeedback.length());
+    /**
+     * Removes JSON entries from provided object that aren't expected. Expected keys are defined by the 'keys' parameter). If keys parameter is empty the origin object will be returned.<br>
+     * <br>
+     * <b>Caution:</> this check is case sensitive. Having 'comment' in keys parameter will remove 'Comment' from provided {@link JSONObject} as it is not expected.
+     * 
+     * @param feedback The provided feedback that will be adapted
+     * @param expectedKeys The keys that are expected
+     */
+    protected JSONObject remove(final JSONObject feedback, Set<String> expectedKeys) {
+        if ((expectedKeys == null) || (expectedKeys.isEmpty())) {
+            return feedback;
+        }
+
+        JSONObject processed = new JSONObject(feedback);
+        Iterator<?> jsonKeys = feedback.keys();
+        while (jsonKeys.hasNext()) {
+            String key = (String) jsonKeys.next();
+            if (!expectedKeys.contains(key)) {
+                LOG.warn("An unknown key '{}' has been provided. It will be removed before persisting.", key);
+                processed.remove(key);
+                continue;
+            }
+            expectedKeys.remove(key);
+        }
+        return processed;
+    }
+
+    /**
+     * Ensures that the provided feedback only has lower case keys!
+     * 
+     * @param feedback The feedback that should be normalized
+     * @return {@link JSONObject} with lower case keys
+     */
+    protected JSONObject normalizeFeedback(JSONObject feedback) {
+        Iterator<?> jsonKeys = feedback.keys();
+        JSONObject processed = new JSONObject(feedback.length());
         while (jsonKeys.hasNext()) {
             try {
                 String unnormalizedKey = (String) jsonKeys.next();
-                String value = jsonFeedback.getString(unnormalizedKey);
+                String value = feedback.getString(unnormalizedKey);
                 String key = unnormalizedKey.toLowerCase();
-                normalizedFeedback.put(key, value);
+                processed.put(key, value);
             } catch (JSONException e) {
                 LOG.warn("Error while updating json keys.", e);
             }
         }
-        return normalizedFeedback;
+        return processed;
     }
 
     private void setBinaryStream(JSONObject jObject, PreparedStatement stmt, int... positions) throws OXException {

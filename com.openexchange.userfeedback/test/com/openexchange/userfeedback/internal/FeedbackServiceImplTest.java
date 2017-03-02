@@ -49,11 +49,13 @@
 
 package com.openexchange.userfeedback.internal;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collections;
+import java.util.concurrent.ConcurrentHashMap;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -70,9 +72,8 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
-import com.openexchange.userfeedback.ExportResult;
+import com.openexchange.test.mock.MockUtils;
 import com.openexchange.userfeedback.ExportResultConverter;
-import com.openexchange.userfeedback.ExportType;
 import com.openexchange.userfeedback.FeedbackType;
 import com.openexchange.userfeedback.filter.FeedbackFilter;
 import com.openexchange.userfeedback.osgi.Services;
@@ -128,10 +129,14 @@ public class FeedbackServiceImplTest {
 
     @Mock
     private Connection connection;
+    
+    @Mock
+    private ExportResultConverter resultConverter;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        MockUtils.injectValueIntoPrivateField(FeedbackTypeRegistryImpl.getInstance(), "map", new ConcurrentHashMap<String, FeedbackType>(1));
 
         PowerMockito.mockStatic(Services.class);
         PowerMockito.when(Services.getService(ConfigViewFactory.class)).thenReturn(configViewFactory);
@@ -144,6 +149,7 @@ public class FeedbackServiceImplTest {
 
         PowerMockito.when(feedbackType.getType()).thenReturn("star-rating-v1");
         PowerMockito.when(feedbackType.storeFeedback(Matchers.any(), (Connection)Matchers.any())).thenReturn(1L);
+        PowerMockito.when(feedbackType.getFeedbacks(Matchers.anyList(), (Connection)Matchers.any())).thenReturn(resultConverter);
 
         feedback = new JSONObject(validFeedbackStr);
 
@@ -252,7 +258,10 @@ public class FeedbackServiceImplTest {
     }
 
     @Test(expected = OXException.class)
-    public void testExport_feedbackTypeNotRegistered_throwException() throws OXException {
+    public void testExport_feedbackTypeNotRegistered_throwException() throws OXException, SQLException {
+        feedbackService = Mockito.spy(new FeedbackServiceImpl());
+        Mockito.doReturn(Collections.EMPTY_LIST).when(feedbackService).loadFeedbackMetaData((Connection)Matchers.any(), (FeedbackFilter)Matchers.any(), Matchers.anyString());
+
         feedbackService.export("default", FeedbackFilter.DEFAULT_FILTER);
 
         fail();
@@ -269,16 +278,13 @@ public class FeedbackServiceImplTest {
     }
 
     @Test
-    public void testExport_noDataAvailable_returnEmptyResultConverter() throws OXException, SQLException {
+    public void testExport_noDataAvailable_returnEmptyResult() throws OXException, SQLException {
         FeedbackTypeRegistryImpl.getInstance().registerType(feedbackType);
         feedbackService = Mockito.spy(new FeedbackServiceImpl());
-        Mockito.when(feedbackService.loadFeedbackMetaData((Connection)Matchers.any(), (FeedbackFilter)Matchers.any(), Matchers.anyString())).thenReturn(Collections.EMPTY_LIST);
+        Mockito.doReturn(Collections.EMPTY_LIST).when(feedbackService).loadFeedbackMetaData((Connection)Matchers.any(), (FeedbackFilter)Matchers.any(), Matchers.anyString());
         
         ExportResultConverter export = feedbackService.export("default", FeedbackFilter.DEFAULT_FILTER);
         
-        ExportResult exportResult = export.get(ExportType.CSV);
-        assertTrue(false);
-
+        assertEquals(resultConverter, export);
     }
-
 }

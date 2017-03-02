@@ -47,76 +47,23 @@
  *
  */
 
-package com.openexchange.userfeedback.rest.services;
+package com.openexchange.rest.userfeedback;
 
-import static org.junit.Assert.fail;
-import java.util.Date;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
- * {@link ExportUserFeedbackServiceTest}
+ * 
+ * {@link UserFeedbackSuite}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.4
  */
-public class ExportUserFeedbackServiceTest {
+@RunWith(ParallelSuite.class)
+@Suite.SuiteClasses({
+    ExportTest.class,
 
-    private ExportUserFeedbackService service;
-
-    @Mock
-    private ServiceLookup serviceLookup;
-
-    private long now;
-
-    @Before
-    public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-
-        service = new ExportUserFeedbackService(serviceLookup);
-        now = new Date().getTime();
-    }
-
-    @Test(expected = OXException.class)
-    public void testValidateParams_startAfterDate_throwException() throws OXException {
-        service.validateParams(now, now - 100000L);
-
-        fail();
-    }
-
-    @Test(expected = OXException.class)
-    public void testValidateParams_startNegative_throwException() throws OXException {
-        service.validateParams(-55555L, now);
-
-        fail();
-    }
-
-    @Test(expected = OXException.class)
-    public void testValidateParams_endNegative_throwException() throws OXException {
-        service.validateParams(now, -44444L);
-
-        fail();
-    }
-
-    @Test
-    public void testValidateParams_paramsOk_return() {
-        try {
-            service.validateParams(now - 100000000L, now);
-        } catch (OXException e) {
-            fail(e.getMessage());
-        }
-    }
-
-    @Test
-    public void testValidateParams_paramsNotSet_return() {
-        try {
-            service.validateParams(0L, 0L);
-        } catch (OXException e) {
-            fail(e.getMessage());
-        }
-    }
+})
+public class UserFeedbackSuite {
 }
