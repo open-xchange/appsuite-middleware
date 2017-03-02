@@ -142,7 +142,7 @@ public final class MailNotifyPushListenerRegistry {
         }
 
         try {
-            return lockService.getSelfCleaningLockFor(new StringBuilder(32).append("imapidle-").append(contextId).append('-').append(userId).toString());
+            return lockService.getSelfCleaningLockFor(new StringBuilder(32).append("mailnotify-").append(contextId).append('-').append(userId).toString());
         } catch (Exception e) {
             LOG.warn("Failed to acquire lock for user {} in context {}. Using global lock instead.", I(userId), I(contextId), e);
             return globalLock;
