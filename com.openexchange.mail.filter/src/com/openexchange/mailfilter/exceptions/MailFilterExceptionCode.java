@@ -196,9 +196,13 @@ public enum MailFilterExceptionCode implements DisplayableOXExceptionCode {
      */
     MAILFILTER_NOT_AVAILABLE("Mailfilter not available for user %1$d in context %1$d.", MAILFILTER_NOT_AVAILABLE_MSG, CATEGORY_PERMISSION_DENIED, 27),
     /**
-     * The specified 'reorder' array is invalid as the size (%1$d) exceeds the amount (%2$d) of rules for user '%3$d' in context '%4$d'. 
+     * The specified 'reorder' array is invalid as the size (%1$d) exceeds the amount (%2$d) of rules for user '%3$d' in context '%4$d'.
      */
     INVALID_REORDER_ARRAY("The specified 'reorder' array is invalid as the size (%1$d) exceeds the amount (%2$d) of rules for user '%3$d' in context '%4$d'.", CATEGORY_ERROR, 28),
+    /**
+     * Timeout while performing authentication against sieve server %1$s at port %2$s: %3$s
+     */
+    AUTH_TIMEOUT("Timeout while performing authentication against sieve server %1$s at port %2$s: %3$s", CATEGORY_CONNECTIVITY, 29),
     ;
 
     private final String message;
@@ -340,6 +344,10 @@ public enum MailFilterExceptionCode implements DisplayableOXExceptionCode {
 
         if (e.isParseError()) {
             return MailFilterExceptionCode.INVALID_SIEVE_RULE2.create(e, saneMessage(e.getMessage()));
+        }
+
+        if (e.isAuthTimeoutError()) {
+            return MailFilterExceptionCode.AUTH_TIMEOUT.create(e, e.getSieveHost(), e.getSieveHostPort(), saneMessage(e.getMessage()));
         }
 
         return MailFilterExceptionCode.SIEVE_COMMUNICATION_ERROR.create(
