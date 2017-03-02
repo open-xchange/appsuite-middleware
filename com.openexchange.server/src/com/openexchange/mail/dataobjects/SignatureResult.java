@@ -49,90 +49,77 @@
 
 package com.openexchange.mail.dataobjects;
 
-import java.util.ArrayList;
-
 /**
- * {@link SecurityResult}
+ * Result of a signature verification
+ * {@link SignatureResult}
  *
  * @author <a href="mailto:greg.hill@open-xchange.com">Greg Hill</a>
- * @since v7.8.4
+ * @since v2.8.0
  */
-public abstract class SecurityResult {
+public class SignatureResult {
+
+    private boolean verified;  // Signature is verified
+    private boolean missing;   // Missing key/info to verify
+    private long date;         // Tick representation date
 
     /**
-     * Type of encryption for future options
-     * {@link EncryptionType}
-     *
-     * @author <a href="mailto:greg.hill@open-xchange.com">Greg Hill</a>
-     * @since v2.8.0
+     * Default constructor
+     * Initializes a new {@link SignatureResult}.
      */
-    public enum EncryptionType {
-        PGP ("PGP"),
-        SMIME ("SMIME");
-
-        private final String name;
-
-        private EncryptionType (String name) {
-            this.name = name;
-        }
-
-        public String toString() {
-            return this.name;
-        }
+    public SignatureResult () {
+        verified = false;
+        missing = false;
+        date = 0l;
     }
 
-    protected boolean decryptSuccess;  // If sucessfully decoded
-    protected String error; // Any error messages
-    protected ArrayList<SignatureResult> signatureResults;
-    protected EncryptionType type;  // Type of encryption
+    /**
+     * Set if the signature was verified or failed verification
+     * True if verified
+     * @param verified
+     */
+    public void setVerified (boolean verified) {
+        this.verified = verified;
+    }
 
     /**
-     * Return true if E-Mail action successful
+     * Set if the signature was missing data for verification
+     * @param missing
+     */
+    public void setMissing (boolean missing) {
+        this.missing = missing;
+    }
+
+    /**
+     * Long representation of the date
+     * @param date
+     */
+    public void setDate (long date) {
+        this.date = date;
+    }
+
+    /**
+     * Return true if the signature was successfully verified
      * @return
      */
-    public boolean getSuccess () {
-        return decryptSuccess;
+    public boolean isVerified () {
+        return verified;
     }
 
     /**
-     * Return true if has error
+     * Return true if information was missing for verification
      * @return
      */
-    public boolean hasError () {
-        return (error != null && !error.isEmpty());
+    public boolean isMissing () {
+        return missing;
     }
 
     /**
-     * Get error message if any
+     * Return long representation of the date
      * @return
      */
-    public String getError () {
-        return error;
+    public long getDate () {
+        return date;
     }
-
-    /**
-     * Get list of signature results
-     * @return
-     */
-    public ArrayList<SignatureResult> getSignatureResults() {
-        return signatureResults;
-    }
-
-    /**
-     * Return true if has signature results
-     * @return
-     */
-    public boolean hasSignatureResults () {
-        return (signatureResults != null && !signatureResults.isEmpty());
-    }
-
-    /**
-     * Get type of encryption.  PGP vs SMIME
-     * @return
-     */
-    public EncryptionType getType () {
-        return type;
-    }
-
 
 }
+

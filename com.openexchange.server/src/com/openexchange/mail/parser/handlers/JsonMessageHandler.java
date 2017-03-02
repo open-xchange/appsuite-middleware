@@ -93,6 +93,8 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.conversion.InlineImageDataSource;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.dataobjects.SecurityResult;
+import com.openexchange.mail.dataobjects.SignatureResult;
 import com.openexchange.mail.json.writer.MessageWriter;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.HeaderName;
@@ -366,7 +368,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 jsonObject.put(MALICIOUS, usm.isSuppressLinks());
                 // Guard info
                 if (mail.containsSecurityInfo()) jsonObject.put(SECURITY_INFO, mail.getSecurityInfo().toJSON());
-                if (mail.hasSecurityResult()) jsonObject.put(SECURITY, mail.getSecurityResult().toJSON());
+                if (mail.hasSecurityResult()) jsonObject.put(SECURITY, securityResultToJSON(mail.getSecurityResult()));
 
                 this.initialiserSequenceId = mail.getSequenceId();
 
@@ -393,6 +395,33 @@ public final class JsonMessageHandler implements MailMessageHandler {
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
+    }
+
+    /**
+     * Transform SecurityResult to JSON
+     * @param result JSON representation of securityResult
+     * @return
+     * @throws JSONException
+     */
+    public JSONObject securityResultToJSON (SecurityResult result) throws JSONException {
+        JSONObject json = new JSONObject();
+        json.put("decrypted", result.getSuccess());
+        json.put("type", result.getType().toString());
+        if (result.hasError()) {
+            json.put("error", result.getError());
+        }
+        if (result.hasSignatureResults()) {
+            JSONArray signatures = new JSONArray();
+            for (SignatureResult res : result.getSignatureResults()) {
+                JSONObject sig = new JSONObject();
+                sig.put("verified", res.isVerified());
+                sig.put("missing", res.isMissing());
+                sig.put("date", res.getDate());
+                signatures.put(sig);
+            }
+            json.put("signatures", signatures);
+        }
+        return json;
     }
 
     /**
