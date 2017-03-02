@@ -93,6 +93,7 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.conversion.InlineImageDataSource;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.dataobjects.SecurityInfo;
 import com.openexchange.mail.dataobjects.SecurityResult;
 import com.openexchange.mail.dataobjects.SignatureResult;
 import com.openexchange.mail.json.writer.MessageWriter;
@@ -367,7 +368,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 jsonObject.put(ACCOUNT_ID, mail.getAccountId());
                 jsonObject.put(MALICIOUS, usm.isSuppressLinks());
                 // Guard info
-                if (mail.containsSecurityInfo()) jsonObject.put(SECURITY_INFO, mail.getSecurityInfo().toJSON());
+                if (mail.containsSecurityInfo()) jsonObject.put(SECURITY_INFO, securityInfoToJSON(mail.getSecurityInfo()));
                 if (mail.hasSecurityResult()) jsonObject.put(SECURITY, securityResultToJSON(mail.getSecurityResult()));
 
                 this.initialiserSequenceId = mail.getSequenceId();
@@ -422,6 +423,19 @@ public final class JsonMessageHandler implements MailMessageHandler {
             json.put("signatures", signatures);
         }
         return json;
+    }
+
+    /**
+     * Create the JSON representation for this <code>SecurityInfo</code> object.
+     *
+     * @return The JSON representation
+     * @throws JSONException If JSON representation cannot be returned
+     */
+    public JSONObject securityInfoToJSON(SecurityInfo info) throws JSONException {
+        JSONObject security = new JSONObject(2);
+        security.put("encrypted", info.isEncrypted());
+        security.put("signed", info.isSigned());
+        return security;
     }
 
     /**
