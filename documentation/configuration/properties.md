@@ -664,6 +664,16 @@ If you would like to add a reference to another property use the following appro
 | __File__ | mail.properties  |
 
 ---
+| Key | <span style="font-weight:normal">com.openexchange.imap.greeting.host.regex</span> |
+|:----------------|:--------|
+| __Description__ | Specifies the regular expression to use to extract the host name/IP address information out of the greeting string advertised by primary<br>IMAP server. Only applicable for primary IMAP server! Default is empty.<br> |
+| __Default__ |  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | false  |
+| __Configcascade Aware__ | false  |
+| __File__ | imap.properties  |
+
+---
 
 | Key | <span style="font-weight:normal">com.openexchange.mailaccount.failedAuth.limit</span> |
 |:----------------|:--------|
