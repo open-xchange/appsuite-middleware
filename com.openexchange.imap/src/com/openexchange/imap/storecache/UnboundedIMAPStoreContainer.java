@@ -51,6 +51,7 @@ package com.openexchange.imap.storecache;
 
 import java.util.AbstractQueue;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.PriorityQueue;
@@ -61,8 +62,11 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.mail.MessagingException;
 import com.openexchange.imap.IMAPClientParameters;
+import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.log.LogProperties;
+import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.session.Session;
+import com.sun.mail.imap.GreetingListener;
 import com.sun.mail.imap.IMAPStore;
 
 /**
@@ -136,6 +140,13 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
         String sessionInformation = imapStore.getGeneratedExternalId();
         if (null != sessionInformation) {
             LogProperties.put(LogProperties.Name.MAIL_SESSION, sessionInformation);
+            if (accountId == MailAccount.DEFAULT_ID) {
+                GreetingListener greetingListener = IMAPProperties.getInstance().getHostNameRegex();
+                if (null != greetingListener) {
+                    String greeting = imapStore.getGreeting();
+                    greetingListener.onGreetingProcessed(greeting, imapStore.getHost(), imapStore.getPort());
+                }
+            }
         }
 
         // Should we set properties from passed session?
