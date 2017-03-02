@@ -111,18 +111,19 @@ public class OAuthFailedAuthenticationHandler implements AuthenticationFailedHan
         }
 
         SessiondService sessiondService = services.getService(SessiondService.class);
-        if (session.containsParameter(Session.PARAM_OAUTH_REFRESH_TOKEN)) {
+        String oldRefreshToken = (String) session.getParameter(Session.PARAM_OAUTH_REFRESH_TOKEN);
+        if (null != oldRefreshToken) {
             // Try to refresh the access token
             Lock lock = getLockFor(session);
             if (null == lock) {
                 synchronized (session) {
-                    return doHandleAuthFailed(session, mailConfig, sessiondService);
+                    return doHandleAuthFailed(session, oldRefreshToken, mailConfig, sessiondService);
                 }
             }
 
             lock.lock();
             try {
-                return doHandleAuthFailed(session, mailConfig, sessiondService);
+                return doHandleAuthFailed(session, oldRefreshToken, mailConfig, sessiondService);
             } finally {
                 lock.unlock();
             }
@@ -134,7 +135,12 @@ public class OAuthFailedAuthenticationHandler implements AuthenticationFailedHan
         return AuthenticationFailureHandlerResult.createErrorResult(SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID()));
     }
 
-    private AuthenticationFailureHandlerResult doHandleAuthFailed(Session session, MailConfig mailConfig, SessiondService sessiondService) {
+    private AuthenticationFailureHandlerResult doHandleAuthFailed(Session session, String oldRefreshToken, MailConfig mailConfig, SessiondService sessiondService) {
+        if (false == oldRefreshToken.equals(session.getParameter(Session.PARAM_OAUTH_REFRESH_TOKEN))) {
+            // Changed in the meantime...
+            return AuthenticationFailureHandlerResult.createRetryResult();
+        }
+
         try {
             OAuthAccessToken accessToken = tokenService.getAccessToken(OAuthGrantType.REFRESH_TOKEN, (String) session.getParameter(Session.PARAM_OAUTH_REFRESH_TOKEN), session.getUserId(), session.getContextId());
             if (accessToken == null) {
