@@ -95,7 +95,7 @@ public class MailFilterActivator extends HousekeepingActivator {
             Services.setServiceLookup(this);
 
             checkConfigfile();
-            
+
             registerService(MailFilterInterceptorRegistry.class, new MailFilterInterceptorRegistryImpl());
             trackService(MailFilterInterceptorRegistry.class);
 
@@ -130,7 +130,7 @@ public class MailFilterActivator extends HousekeepingActivator {
             registerService(Reloadable.class, new MailFilterReloadable(), null);
 
             registerService(MailFilterService.class, new MailFilterServiceImpl());
-            
+
             registerTestCommandRegistry();
 
             Logger logger = org.slf4j.LoggerFactory.getLogger(MailFilterActivator.class);
@@ -167,7 +167,7 @@ public class MailFilterActivator extends HousekeepingActivator {
             throw new Exception("No configfile found for mailfilter bundle");
         }
         for (final MailFilterProperties.Values type : MailFilterProperties.Values.values()) {
-            if (null == file.getProperty(type.property)) {
+            if (type.required && null == file.getProperty(type.property)) {
                 throw new Exception("Property for mailfilter not found: " + type.property);
             }
         }
