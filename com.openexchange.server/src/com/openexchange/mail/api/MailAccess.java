@@ -781,11 +781,15 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                     if (mailAccount.isMailOAuthAble() && mailAccount.getMailOAuthId() >= 0) {
                         OAuthService oauthService = ServerServiceRegistry.getInstance().getService(OAuthService.class);
                         if (null != oauthService) {
+                            OAuthAccount oAuthAccount;
                             try {
-                                OAuthAccount oAuthAccount = oauthService.getAccount(mailAccount.getMailOAuthId(), session, session.getUserId(), session.getContextId());
-                                throw MailExceptionCode.MAIL_ACCESS_DISABLED_OAUTH.create(mailConfig.getServer(), mailConfig.getLogin(), I(session.getUserId()), I(session.getContextId()), oAuthAccount.getDisplayName());
+                                oAuthAccount = oauthService.getAccount(mailAccount.getMailOAuthId(), session, session.getUserId(), session.getContextId());
                             } catch (Exception x) {
                                 LOG.warn("Failed to load mail-associated OAuth account", x);
+                                oAuthAccount = null;
+                            }
+                            if (null != oAuthAccount) {
+                                throw MailExceptionCode.MAIL_ACCESS_DISABLED_OAUTH.create(mailConfig.getServer(), mailConfig.getLogin(), I(session.getUserId()), I(session.getContextId()), oAuthAccount.getDisplayName());
                             }
                         }
                     }
