@@ -54,7 +54,7 @@ import java.util.Map;
 public class MessageDataUtil {
 
     private static final String KEY_CID = "cid";
-    private static final String KEY_SENDER = "sender";
+    private static final String KEY_SENDER = "email";
     private static final String KEY_SUBJECT = "subject";
     private static final String KEY_UNREAD = "unread";
 
