@@ -49,6 +49,8 @@
 
 package com.openexchange.saml.oauth;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.AuthType;
 import com.openexchange.mail.api.AuthenticationFailedHandler;
@@ -72,6 +74,7 @@ public class OAuthFailedAuthenticationHandler implements AuthenticationFailedHan
 
     private final ServiceLookup services;
     private final OAuthAccessTokenService tokenService;
+    private static final Logger LOG = LoggerFactory.getLogger(OAuthAccessTokenService.class);
 
     /**
      * Initializes a new {@link OAuthFailedAuthenticationHandler}.
@@ -91,24 +94,29 @@ public class OAuthFailedAuthenticationHandler implements AuthenticationFailedHan
         SessiondService sessiondService = services.getService(SessiondService.class);
         if (session.containsParameter(Session.PARAM_OAUTH_REFRESH_TOKEN)) {
             // try to refresh the access token
-            try {
-                OAuthAccessToken accessToken = tokenService.getAccessToken(OAuthGrantType.REFRESH_TOKEN,(String) session.getParameter(Session.PARAM_OAUTH_REFRESH_TOKEN), session.getUserId(), session.getContextId());
-                if (accessToken == null) {
+            synchronized (session) {
+                try {
+                    OAuthAccessToken accessToken = tokenService.getAccessToken(OAuthGrantType.REFRESH_TOKEN, (String) session.getParameter(Session.PARAM_OAUTH_REFRESH_TOKEN), session.getUserId(), session.getContextId());
+                    if (accessToken == null) {
+                        LOG.debug("Unable to refresh access token for user {} in context {}. Session will be invalidated.", session.getUserId(), session.getContextId());
+                        sessiondService.removeSession(session.getSessionID());
+                        return AuthenticationFailureHandlerResult.createErrorResult(SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID()));
+                    }
+                    session.setParameter(Session.PARAM_OAUTH_ACCESS_TOKEN, accessToken.getAccessToken());
+                    session.setParameter(Session.PARAM_OAUTH_REFRESH_TOKEN, accessToken.getRefreshToken());
+                    mailConfig.setPassword(accessToken.getAccessToken());
+                    sessiondService.storeSession(session.getSessionID());
+                    LOG.debug("Access token succesfully refreshed for user {} in context {}", session.getUserId(), session.getContextId());
+                    return AuthenticationFailureHandlerResult.createRetryResult();
+                } catch (OXException x) {
+                    // Unable to refresh access token -> logout
+                    LOG.debug("Unable to refresh access token for user {} in context {}. Session will be invalidated.", session.getUserId(), session.getContextId());
                     sessiondService.removeSession(session.getSessionID());
-                    return AuthenticationFailureHandlerResult.createErrorResult(SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID()));
+                    return AuthenticationFailureHandlerResult.createErrorResult(SessionExceptionCodes.SESSION_EXPIRED.create(x, session.getSessionID()));
                 }
-                session.setParameter(Session.PARAM_OAUTH_ACCESS_TOKEN, accessToken.getAccessToken());
-                session.setParameter(Session.PARAM_OAUTH_REFRESH_TOKEN, accessToken.getRefreshToken());
-                mailConfig.setPassword(accessToken.getAccessToken());
-                sessiondService.storeSession(session.getSessionID());
-                return AuthenticationFailureHandlerResult.createRetryResult();
-            } catch (OXException x) {
-                // Unable to refresh access token -> logout
-                sessiondService.removeSession(session.getSessionID());
-                return AuthenticationFailureHandlerResult.createErrorResult(SessionExceptionCodes.SESSION_EXPIRED.create(x, session.getSessionID()));
             }
         }
-
+        LOG.debug("Unable to refresh access token for user {} in context {}. Session contains no refresh token.", session.getUserId(), session.getContextId());
         // Unable to refresh access token -> logout
         sessiondService.removeSession(session.getSessionID());
         return AuthenticationFailureHandlerResult.createErrorResult(SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID()));

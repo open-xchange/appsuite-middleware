@@ -29,6 +29,7 @@ Import-Package: com.google.common.annotations,
  org.apache.http.impl.client,
  org.apache.http.message,
  org.apache.http.util,
+ org.apache.log4j.spi,
  org.json,
  org.osgi.framework,
  org.slf4j
