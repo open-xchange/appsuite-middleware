@@ -86,7 +86,7 @@ public class DefaultAuthenticationFailedHandler implements AuthenticationFailedH
         }
 
         // Don't care...
-        return AuthenticationFailureHandlerResult.CONTINUE;
+        return AuthenticationFailureHandlerResult.createContinueResult();
     }
 
 }

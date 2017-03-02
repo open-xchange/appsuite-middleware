@@ -49,92 +49,35 @@
 
 package com.openexchange.saml.oauth;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Charsets;
+import com.openexchange.config.cascade.ConfigViewFactory;
 
 /**
  * {@link OAuthRefreshTokenRequest}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.4
  */
-public class OAuthRefreshTokenRequest {
+public class OAuthRefreshTokenRequest extends AbstractOAuthAccessTokenRequest {
 
-    private final CloseableHttpClient httpClient;
-    private static final OAuthRefreshTokenRequest INSTANCE = new OAuthRefreshTokenRequest();
-
-    /**
-     * Gets the instance
-     *
-     * @return The instance
-     */
-    public static OAuthRefreshTokenRequest getInstance() {
-        return INSTANCE;
-    }
-
-    private OAuthRefreshTokenRequest() {
-        HttpClientBuilder clientBuilder = HttpClientBuilder.create();
-        httpClient = clientBuilder.build();;
+    public OAuthRefreshTokenRequest(CloseableHttpClient httpClient, ConfigViewFactory configViewFactory) {
+        super(httpClient, configViewFactory);
     }
 
     private static final String GRANT_TYPE = "refresh_token";
-    private static final String TOKEN_TYPE = "token_type";
-    private static final String EXPIRE = "expires_in";
-    private static final String REFRESH_TOKEN = "refresh_token";
-    private static final String ACCESS_TOKEN = "access_token";
 
-    public OAuthAccessToken requestAccessToken(String refreshToken, int userId, int contextId) throws OXException {
-        try {
-            HttpPost requestAccessToken = new HttpPost(SAMLOAuthConfig.getIntrospectionEndpoint(userId, contextId));
-            requestAccessToken.addHeader("Content-Type", "application/x-www-form-urlencoded");
-
-            StringBuilder authBuilder = new StringBuilder(SAMLOAuthConfig.getClientID(userId, contextId));
-            authBuilder.append(":").append(SAMLOAuthConfig.getClientSecret(userId, contextId));
-            String auth = "Basic " + Base64.encodeBase64String(authBuilder.toString().getBytes());
-            requestAccessToken.addHeader("Authorization", auth);
-
-            List<NameValuePair> nvps = new ArrayList<NameValuePair>();
-
-            nvps.add(new BasicNameValuePair("grant_type", GRANT_TYPE));
-            nvps.add(new BasicNameValuePair("refresh_token", refreshToken));
-
-            requestAccessToken.setEntity(new UrlEncodedFormEntity(nvps, Charsets.UTF_8));
-
-            HttpResponse validationResp = httpClient.execute(requestAccessToken);
-            String responseStr = EntityUtils.toString(validationResp.getEntity());
-            if (responseStr != null) {
-                JSONObject jsonResponse = new JSONObject(responseStr);
-                if (!jsonResponse.has(ACCESS_TOKEN)) {
-                    throw SAMLOAuthExceptionCodes.NO_ACCESS_TOKEN.create("Token response doesn't contain the access token.");
-
-                } else {
-                    OAuthAccessToken token = new OAuthAccessToken(jsonResponse.getString(ACCESS_TOKEN), jsonResponse.getString(REFRESH_TOKEN), jsonResponse.getString(TOKEN_TYPE), jsonResponse.getInt(EXPIRE));
-                    return token;
-                }
-            }
-
-            throw SAMLOAuthExceptionCodes.NO_ACCESS_TOKEN.create("Unable to parse token response.");
-        } catch (ClientProtocolException e) {
-            throw SAMLOAuthExceptionCodes.NO_ACCESS_TOKEN.create(e, e.getMessage());
-        } catch (IOException e) {
-            throw SAMLOAuthExceptionCodes.NO_ACCESS_TOKEN.create(e, e.getMessage());
-        } catch (JSONException e) {
-            throw SAMLOAuthExceptionCodes.NO_ACCESS_TOKEN.create(e, e.getMessage());
-        }
+    @Override
+    protected String getGrantType() {
+        return GRANT_TYPE;
     }
+
+    @Override
+    protected void addAccessInfo(String accessInfo, List<NameValuePair> nvps) {
+        nvps.add(new BasicNameValuePair("refresh_token", accessInfo));
+    }
+
 }

@@ -57,6 +57,7 @@ import java.util.Map;
 import java.util.Random;
 import org.apache.commons.lang.RandomStringUtils;
 import com.openexchange.java.Strings;
+import com.openexchange.log.LogProperties;
 import com.openexchange.session.Session;
 import com.openexchange.version.Version;
 import com.sun.mail.imap.IMAPStore;
@@ -155,7 +156,9 @@ public enum IMAPClientParameters {
 
         @Override
         public String generateExternalId() {
-            return generateSessionInformation(session);
+            String imapSessionId = generateSessionInformation(session);
+            LogProperties.put(LogProperties.Name.MAIL_SESSION, imapSessionId);
+            return imapSessionId;
         }
     }
 

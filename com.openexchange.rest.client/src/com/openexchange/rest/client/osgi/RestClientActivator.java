@@ -81,7 +81,7 @@ public class RestClientActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         RestClientServices.setServices(this);
-        WrappedClientsRegistry.getInstance().setFactoryProvider(getService(SSLSocketFactoryProvider.class));
+        WrappedClientsRegistry.getInstance().setSSLServices(getService(SSLSocketFactoryProvider.class), getService(SSLConfigurationService.class));
         registerService(EndpointManagerFactory.class, new EndpointManagerFactoryImpl(this));
 
         // Avoid annoying WARN logging
@@ -94,7 +94,7 @@ public class RestClientActivator extends HousekeepingActivator {
             // Clean-up
             super.stopBundle();
             // Clear service registry
-            WrappedClientsRegistry.getInstance().setFactoryProvider(null);
+            WrappedClientsRegistry.getInstance().setSSLServices(null, null);
             RestClientServices.setServices(null);
         } catch (final Exception e) {
             org.slf4j.LoggerFactory.getLogger(RestClientActivator.class).error("", e);

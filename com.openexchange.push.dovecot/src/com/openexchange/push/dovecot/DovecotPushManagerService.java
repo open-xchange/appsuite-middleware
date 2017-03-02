@@ -53,14 +53,17 @@ import static com.openexchange.java.Autoboxing.I;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.lock.LockService;
 import com.openexchange.push.PushExceptionCodes;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushListenerService;
@@ -137,6 +140,7 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
     private final String authLogin;
     private final String authPassword;
     private final URI uri;
+    private final Lock globalLock;
 
     /**
      * Initializes a new {@link DovecotPushManagerService}.
@@ -146,7 +150,7 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
         name = "Dovecot Push Manager";
         this.services = services;
         this.clusterLock = clusterLock;
-        listeners = new HashMap<SimpleKey, DovecotPushListener>(512, 0.9F);
+        listeners = new ConcurrentHashMap<SimpleKey, DovecotPushListener>(512, 0.9F, 1);
 
         // Parse auth data
         {
@@ -170,6 +174,23 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
             } catch (URISyntaxException e) {
                 throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, null == endPoint ? "<empty>" : endPoint);
             }
+        }
+
+        // The fall-back lock
+        globalLock = new ReentrantLock();
+    }
+
+    private Lock getlockFor(int userId, int contextId) {
+        LockService lockService = services.getOptionalService(LockService.class);
+        if (null == lockService) {
+            return globalLock;
+        }
+
+        try {
+            return lockService.getSelfCleaningLockFor(new StringBuilder(32).append("imapidle-").append(contextId).append('-').append(userId).toString());
+        } catch (Exception e) {
+            LOGGER.warn("Failed to acquire lock for user {} in context {}. Using global lock instead.", I(userId), I(contextId), e);
+            return globalLock;
         }
     }
 
@@ -235,26 +256,22 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
      * @throws OXException If operation fails
      */
     public DovecotPushListener injectAnotherListenerUsing(Session newSession, boolean permanent) {
-        synchronized (this) {
-            DovecotPushListener listener = new DovecotPushListener(uri, authLogin, authPassword, newSession, permanent, this, services);
-            // Replace old/existing one
-            listeners.put(SimpleKey.valueOf(newSession), listener);
-            return listener;
-        }
+        DovecotPushListener listener = new DovecotPushListener(uri, authLogin, authPassword, newSession, permanent, this, services);
+        // Replace old/existing one
+        listeners.put(SimpleKey.valueOf(newSession), listener);
+        return listener;
     }
 
     private void stopAll() {
-        synchronized (this) {
-            for (Map.Entry<SimpleKey, DovecotPushListener> entry : listeners.entrySet()) {
-                try {
-                    entry.getValue().unregister(false);
-                } catch (Exception e) {
-                    SimpleKey key = entry.getKey();
-                    LOGGER.warn("Failed to stop listener for user {} in context {}", key.userId, key.contextId);
-                }
+        for (Map.Entry<SimpleKey, DovecotPushListener> entry : listeners.entrySet()) {
+            try {
+                entry.getValue().unregister(false);
+            } catch (Exception e) {
+                SimpleKey key = entry.getKey();
+                LOGGER.warn("Failed to stop listener for user {} in context {}", key.userId, key.contextId);
             }
-            listeners.clear();
         }
+        listeners.clear();
     }
 
     /**
@@ -268,7 +285,9 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
      * @throws OXException If unregistration attempt fails
      */
     public StopResult stopListener(boolean tryToReconnect, boolean stopIfPermanent, int userId, int contextId) throws OXException {
-        synchronized (this) {
+        Lock lock = getlockFor(userId, contextId);
+        lock.lock();
+        try {
             SimpleKey key = SimpleKey.valueOf(userId, contextId);
             DovecotPushListener listener = listeners.get(key);
             if (null != listener) {
@@ -289,6 +308,8 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
                 return (null != newListener && newListener.isPermanent()) ? StopResult.RECONNECTED_AS_PERMANENT : StopResult.RECONNECTED;
             }
             return StopResult.NONE;
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -323,7 +344,9 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
         int userId = session.getUserId();
         SessionInfo sessionInfo = new SessionInfo(session, false);
         if (clusterLock.acquireLock(sessionInfo)) {
-            synchronized (this) {
+            Lock lock = getlockFor(userId, contextId);
+            lock.lock();
+            try {
                 // Locked...
                 boolean unlock = true;
                 boolean removeListener = false;
@@ -355,6 +378,8 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
                         releaseLock(sessionInfo);
                     }
                 }
+            } finally {
+                lock.unlock();
             }
         } else {
             LOGGER.info("Could not acquire lock to start Dovecot listener for user {} in context {} with session {} ({}) as there is already an associated listener", I(userId), I(contextId), session.getSessionID(), session.getClient());
@@ -422,7 +447,9 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
 
         SessionInfo sessionInfo = new SessionInfo(session, true);
         if (clusterLock.acquireLock(sessionInfo)) {
-            synchronized (this) {
+            Lock lock = getlockFor(userId, contextId);
+            lock.lock();
+            try {
                 // Locked...
                 boolean unlock = true;
                 boolean removeListener = false;
@@ -471,6 +498,8 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
                         releaseLock(sessionInfo);
                     }
                 }
+            } finally {
+                lock.unlock();
             }
         } else {
             LOGGER.info("Could not acquire lock to start permanent Dovecot listener for user {} in context {} with session {} ({}) as there is already an associated listener", I(userId), I(contextId), session.getSessionID(), session.getClient());
@@ -504,11 +533,9 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
     @Override
     public List<PushUserInfo> getAvailablePushUsers() throws OXException {
         List<PushUserInfo> l = new LinkedList<PushUserInfo>();
-        synchronized (this) {
-            for (Map.Entry<SimpleKey, DovecotPushListener> entry : listeners.entrySet()) {
-                SimpleKey key = entry.getKey();
-                l.add(new PushUserInfo(new PushUser(key.userId, key.contextId), entry.getValue().isPermanent()));
-            }
+        for (Map.Entry<SimpleKey, DovecotPushListener> entry : listeners.entrySet()) {
+            SimpleKey key = entry.getKey();
+            l.add(new PushUserInfo(new PushUser(key.userId, key.contextId), entry.getValue().isPermanent()));
         }
         return l;
     }

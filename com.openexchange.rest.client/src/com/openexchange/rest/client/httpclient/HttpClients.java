@@ -62,6 +62,7 @@ import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.params.HttpClientParams;
 import org.apache.http.client.utils.DateUtils;
@@ -91,6 +92,7 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
+import org.apache.http.util.EntityUtils;
 import org.apache.http.util.TextUtils;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
@@ -155,7 +157,10 @@ public final class HttpClients {
     public static DefaultHttpClient getHttpClient(final ClientConfig config) {
         SSLSocketFactoryProvider factoryProvider = RestClientServices.getOptionalService(SSLSocketFactoryProvider.class);
         if (null != factoryProvider) {
-            return getHttpClient(config, factoryProvider);
+            SSLConfigurationService sslConfig = RestClientServices.getOptionalService(SSLConfigurationService.class);
+            if (null != sslConfig) {
+                return getHttpClient(config, factoryProvider, sslConfig);
+            }
         }
 
         return WrappedClientsRegistry.getInstance().createWrapped(config);
@@ -166,20 +171,20 @@ public final class HttpClients {
      *
      * @param config The configuration settings for the client
      * @param factoryProvider The provider for the appropriate <code>SSLSocketFactory</code> instance to use
+     * @param sslConfig The SSL configuration service to use
      * @return A newly created {@link DefaultHttpClient} instance
      */
-    public static DefaultHttpClient getHttpClient(ClientConfig config, SSLSocketFactoryProvider factoryProvider) {
+    public static DefaultHttpClient getHttpClient(ClientConfig config, SSLSocketFactoryProvider factoryProvider, SSLConfigurationService sslConfig) {
         // Initialize ClientConnectionManager
-        ClientConnectionManager ccm = initializeClientConnectionManagerUsing(config, factoryProvider);
+        ClientConnectionManager ccm = initializeClientConnectionManagerUsing(config, factoryProvider, sslConfig);
 
         // Initialize DefaultHttpClient using the ClientConnectionManager and client configuration
         return initializeHttpClientUsing(config, ccm);
     }
 
-    private static ClientConnectionManager initializeClientConnectionManagerUsing(ClientConfig config, SSLSocketFactoryProvider factoryProvider) {
+    private static ClientConnectionManager initializeClientConnectionManagerUsing(ClientConfig config, SSLSocketFactoryProvider factoryProvider, SSLConfigurationService sslConfig) {
         javax.net.ssl.SSLSocketFactory f = factoryProvider.getDefault();
 
-        SSLConfigurationService sslConfig = RestClientServices.getService(SSLConfigurationService.class);
         final SchemeRegistry schemeRegistry = new SchemeRegistry();
         schemeRegistry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
         schemeRegistry.register(new Scheme("https", 443, new SSLSocketFactory(f, sslConfig.getSupportedProtocols(), sslConfig.getSupportedCipherSuites(), new StrictHostnameVerifier())));
@@ -460,6 +465,37 @@ public final class HttpClients {
             // shut down the connection manager to ensure
             // immediate deallocation of all system resources
             httpclient.getConnectionManager().shutdown();
+        }
+    }
+
+    /**
+     * Closes the supplied HTTP request / response resources silently.
+     * <p>
+     * <ul>
+     * <li>Resets internal state of the HTTP request making it reusable.</li>
+     * <li>Ensures that the response's content is fully consumed and the content stream, if exists, is closed</li>
+     * </ul>
+     *
+     * @param request The HTTP request to reset
+     * @param response The HTTP response to consume and close
+     */
+    public static void close(HttpRequestBase request, HttpResponse response) {
+        if (null != response) {
+            HttpEntity entity = response.getEntity();
+            if (null != entity) {
+                try {
+                    EntityUtils.consumeQuietly(entity);
+                } catch (Exception e) {
+                    // Ignore...
+                }
+            }
+        }
+        if (null != request) {
+            try {
+                request.reset();
+            } catch (Exception e) {
+                // Ignore
+            }
         }
     }
 

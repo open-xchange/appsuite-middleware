@@ -49,45 +49,119 @@
 
 package com.openexchange.saml.oauth;
 
+import static com.openexchange.java.Autoboxing.I;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.exception.OXException;
-import com.openexchange.saml.oauth.osgi.Services;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.session.UserAndContext;
 
 /**
  * {@link SAMLOAuthConfig}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.4
  */
 public class SAMLOAuthConfig {
 
-    private static final String TOKEN_ENDPOINT_PROPERTY = "com.openexchange.saml.oauth.introspection";
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SAMLOAuthConfig.class);
+
+    private static final String TOKEN_ENDPOINT_PROPERTY = "com.openexchange.saml.oauth.token";
     private static final String CLIENT_ID_PROPERTY = "com.openexchange.saml.oauth.clientId";
     private static final String CLIENT_SECRET_PROPERTY = "com.openexchange.saml.oauth.clientSecret";
 
-    static String getIntrospectionEndpoint(int userId, int contextId) throws OXException{
-        ConfigViewFactory configViewFactory = Services.getService(ConfigViewFactory.class);
-        ConfigView view = configViewFactory.getView(userId, contextId);
-        return view.get(TOKEN_ENDPOINT_PROPERTY, String.class);
+    private static final Cache<UserAndContext, ImmutableReference<OAuthConfiguration>> CACHE_OAUTH_CONFIGS = CacheBuilder.newBuilder().maximumSize(262144).expireAfterAccess(30, TimeUnit.MINUTES).build();
+
+    /**
+     * Clears the cache.
+     */
+    public static void invalidateCache() {
+        CACHE_OAUTH_CONFIGS.invalidateAll();
     }
 
-    static String getClientID(int userId, int contextId) throws OXException {
-        ConfigViewFactory configViewFactory = Services.getService(ConfigViewFactory.class);
-        ConfigView view = configViewFactory.getView(userId, contextId);
-        return view.get(CLIENT_ID_PROPERTY, String.class);
+    /**
+     * Gets the OAuth configuration for specified user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param configViewFactory The service to use
+     * @return The OAuth configuration or <code>null</code> if OAuth is not configured for that user
+     * @throws OXException If OAuth configuration cannot be returned
+     */
+    public static OAuthConfiguration getConfig(final int userId, final int contextId, final ConfigViewFactory configViewFactory) throws OXException {
+        UserAndContext key = UserAndContext.newInstance(userId, contextId);
+        ImmutableReference<OAuthConfiguration> configRef = CACHE_OAUTH_CONFIGS.getIfPresent(key);
+        if (null != configRef) {
+            return configRef.getValue();
+        }
+
+        Callable<ImmutableReference<OAuthConfiguration>> loader = new Callable<ImmutableReference<OAuthConfiguration>>() {
+
+            @Override
+            public ImmutableReference<OAuthConfiguration> call() throws Exception {
+                return new ImmutableReference<OAuthConfiguration>(doGetConfig(userId, contextId, configViewFactory));
+            }
+        };
+
+        try {
+            configRef = CACHE_OAUTH_CONFIGS.get(key, loader);
+            return configRef.getValue();
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            throw cause instanceof OXException ? (OXException) cause : new OXException(cause);
+        }
     }
 
-    static String getClientSecret(int userId, int contextId) throws OXException{
-        ConfigViewFactory configViewFactory = Services.getService(ConfigViewFactory.class);
+    static OAuthConfiguration doGetConfig(int userId, int contextId, ConfigViewFactory configViewFactory) throws OXException {
+        if (null == configViewFactory) {
+            throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
+        }
+
         ConfigView view = configViewFactory.getView(userId, contextId);
-        return view.get(CLIENT_SECRET_PROPERTY, String.class);
+
+        String endpoint = ConfigViews.getNonEmptyPropertyFrom(TOKEN_ENDPOINT_PROPERTY, view);
+        if (null == endpoint) {
+            // No end-point configured
+            LOG.debug("No token end-point configured for user {} in context {}", I(userId), I(contextId));
+            return null;
+        }
+
+        String clientId = ConfigViews.getNonEmptyPropertyFrom(CLIENT_ID_PROPERTY, view);
+        if (null == clientId) {
+            // No client ID configured
+            LOG.debug("No client identifier configured for user {} in context {}", I(userId), I(contextId));
+            return null;
+        }
+
+        String clientSecret = ConfigViews.getNonEmptyPropertyFrom(CLIENT_SECRET_PROPERTY, view);
+        if (null == clientSecret) {
+            // No client secret configured
+            LOG.debug("No client secret configured for user {} in context {}", I(userId), I(contextId));
+            return null;
+        }
+
+        return new OAuthConfiguration(endpoint, clientId, clientSecret);
     }
 
-    public static boolean isConfigured(int userId, int contextId) throws OXException{
-        ConfigViewFactory configViewFactory = Services.getService(ConfigViewFactory.class);
-        ConfigView view = configViewFactory.getView(userId, contextId);
-        return view.property(TOKEN_ENDPOINT_PROPERTY, String.class).isDefined() && view.property(CLIENT_ID_PROPERTY, String.class).isDefined() && view.property(CLIENT_SECRET_PROPERTY, String.class).isDefined();
+    /**
+     * Checks whether necessary options are specified for given user that are required to let SAML OAuth work.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param configViewFactory The service to use
+     * @return <code>true</code> if necessary options are available; otherwise <code>false</code>
+     * @throws OXException If checking necessary options fails
+     */
+    public static boolean isConfigured(int userId, int contextId, ConfigViewFactory configViewFactory) throws OXException{
+        OAuthConfiguration config = getConfig(userId, contextId, configViewFactory);
+        return null != config;
     }
 
 }

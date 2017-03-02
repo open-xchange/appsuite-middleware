@@ -59,6 +59,7 @@ import com.datastax.driver.core.Configuration;
 import com.datastax.driver.core.Host.StateListener;
 import com.datastax.driver.core.HostDistance;
 import com.datastax.driver.core.PoolingOptions;
+import com.datastax.driver.core.SocketOptions;
 import com.datastax.driver.core.policies.LoadBalancingPolicy;
 import com.datastax.driver.core.policies.Policies;
 import com.datastax.driver.core.policies.RetryPolicy;
@@ -124,24 +125,27 @@ class CassandraServiceInitializer implements Initializer {
     public Configuration getConfiguration() {
         // Retry Policies
         String rp = configurationService.getProperty(CassandraProperty.retryPolicy.getName(), CassandraProperty.retryPolicy.getDefaultValue(String.class));
-        boolean logRetryPolicy = configurationService.getBoolProperty(CassandraProperty.logRetryPolicy.getName(), CassandraProperty.logRetryPolicy.getDefaultValue(Boolean.class));
+        boolean logRetryPolicy = configurationService.getBoolProperty(CassandraProperty.logRetryPolicy.getName(), CassandraProperty.logRetryPolicy.getDefaultValue(Boolean.class).booleanValue());
         RetryPolicy retryPolicy = logRetryPolicy ? CassandraRetryPolicy.valueOf(rp).getLoggingRetryPolicy() : CassandraRetryPolicy.valueOf(rp).getRetryPolicy();
+
         // Load Balancing Policies
         String lbPolicy = configurationService.getProperty(CassandraProperty.loadBalancingPolicy.getName(), CassandraProperty.loadBalancingPolicy.getDefaultValue(String.class));
         LoadBalancingPolicy loadBalancingPolicy = CassandraLoadBalancingPolicy.createLoadBalancingPolicy(lbPolicy);
+
         // Build policies
         Policies policies = Policies.builder().withRetryPolicy(retryPolicy).withLoadBalancingPolicy(loadBalancingPolicy).build();
+
         // Build pooling options
         PoolingOptions poolingOptions = new PoolingOptions();
-        int heartbeatInterval = configurationService.getIntProperty(CassandraProperty.poolingHeartbeat.getName(), CassandraProperty.poolingHeartbeat.getDefaultValue(Integer.class));
-        int minLocal = configurationService.getIntProperty(CassandraProperty.minimumLocalConnectionsPerNode.getName(), CassandraProperty.minimumLocalConnectionsPerNode.getDefaultValue(Integer.class));
-        int maxLocal = configurationService.getIntProperty(CassandraProperty.maximumLocalConnectionsPerNode.getName(), CassandraProperty.maximumLocalConnectionsPerNode.getDefaultValue(Integer.class));
-        int minRemote = configurationService.getIntProperty(CassandraProperty.minimumRemoteConnectionsPerNode.getName(), CassandraProperty.minimumRemoteConnectionsPerNode.getDefaultValue(Integer.class));
-        int maxRemote = configurationService.getIntProperty(CassandraProperty.maximumRemoteConnectionsPerNode.getName(), CassandraProperty.maximumRemoteConnectionsPerNode.getDefaultValue(Integer.class));
-        int idleTimeoutSeconds = configurationService.getIntProperty(CassandraProperty.idleConnectionTrashTimeout.getName(), CassandraProperty.idleConnectionTrashTimeout.getDefaultValue(Integer.class));
-        int localMaxRequests = configurationService.getIntProperty(CassandraProperty.maximumRequestsPerLocalConnection.getName(), CassandraProperty.maximumRequestsPerLocalConnection.getDefaultValue(Integer.class));
-        int remoteMaxRequests = configurationService.getIntProperty(CassandraProperty.maximumRequestsPerRemoteConnection.getName(), CassandraProperty.maximumRequestsPerRemoteConnection.getDefaultValue(Integer.class));
-        int maxQueueSize = configurationService.getIntProperty(CassandraProperty.acquisitionQueueMaxSize.getName(), CassandraProperty.acquisitionQueueMaxSize.getDefaultValue(Integer.class));
+        int heartbeatInterval = configurationService.getIntProperty(CassandraProperty.poolingHeartbeat.getName(), CassandraProperty.poolingHeartbeat.getDefaultValue(Integer.class).intValue());
+        int minLocal = configurationService.getIntProperty(CassandraProperty.minimumLocalConnectionsPerNode.getName(), CassandraProperty.minimumLocalConnectionsPerNode.getDefaultValue(Integer.class).intValue());
+        int maxLocal = configurationService.getIntProperty(CassandraProperty.maximumLocalConnectionsPerNode.getName(), CassandraProperty.maximumLocalConnectionsPerNode.getDefaultValue(Integer.class).intValue());
+        int minRemote = configurationService.getIntProperty(CassandraProperty.minimumRemoteConnectionsPerNode.getName(), CassandraProperty.minimumRemoteConnectionsPerNode.getDefaultValue(Integer.class).intValue());
+        int maxRemote = configurationService.getIntProperty(CassandraProperty.maximumRemoteConnectionsPerNode.getName(), CassandraProperty.maximumRemoteConnectionsPerNode.getDefaultValue(Integer.class).intValue());
+        int idleTimeoutSeconds = configurationService.getIntProperty(CassandraProperty.idleConnectionTrashTimeout.getName(), CassandraProperty.idleConnectionTrashTimeout.getDefaultValue(Integer.class).intValue());
+        int localMaxRequests = configurationService.getIntProperty(CassandraProperty.maximumRequestsPerLocalConnection.getName(), CassandraProperty.maximumRequestsPerLocalConnection.getDefaultValue(Integer.class).intValue());
+        int remoteMaxRequests = configurationService.getIntProperty(CassandraProperty.maximumRequestsPerRemoteConnection.getName(), CassandraProperty.maximumRequestsPerRemoteConnection.getDefaultValue(Integer.class).intValue());
+        int maxQueueSize = configurationService.getIntProperty(CassandraProperty.acquisitionQueueMaxSize.getName(), CassandraProperty.acquisitionQueueMaxSize.getDefaultValue(Integer.class).intValue());
         poolingOptions.setHeartbeatIntervalSeconds(heartbeatInterval);
         poolingOptions.setConnectionsPerHost(HostDistance.LOCAL, minLocal, maxLocal);
         poolingOptions.setConnectionsPerHost(HostDistance.REMOTE, minRemote, maxRemote);
@@ -149,8 +153,20 @@ class CassandraServiceInitializer implements Initializer {
         poolingOptions.setMaxRequestsPerConnection(HostDistance.LOCAL, localMaxRequests);
         poolingOptions.setMaxRequestsPerConnection(HostDistance.REMOTE, remoteMaxRequests);
         poolingOptions.setMaxQueueSize(maxQueueSize);
+
+        // Build socket options
+        SocketOptions socketOptions = new SocketOptions();
+        {
+            int connectTimeout = configurationService.getIntProperty(CassandraProperty.connectTimeout.getName(), CassandraProperty.connectTimeout.getDefaultValue(Integer.class).intValue());
+            socketOptions.setConnectTimeoutMillis(connectTimeout);
+        }
+        {
+            int readTimeout = configurationService.getIntProperty(CassandraProperty.readTimeout.getName(), CassandraProperty.readTimeout.getDefaultValue(Integer.class).intValue());
+            socketOptions.setConnectTimeoutMillis(readTimeout);
+        }
+
         // Build configuration
-        return Configuration.builder().withPolicies(policies).withPoolingOptions(poolingOptions).build();
+        return Configuration.builder().withPolicies(policies).withPoolingOptions(poolingOptions).withSocketOptions(socketOptions).build();
     }
 
     /*

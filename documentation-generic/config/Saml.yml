@@ -9,4 +9,34 @@ Specifies whether SAML-specific auto-login is enabled, that uses the SessionInde
       Configcascade_Aware: false
       Related: 
       File: saml.properties
+  - data:
+      Key: com.openexchange.saml.oauth.token
+      Description: >
+Specifies the OAuth HTTP token end-point.
+      Default: 
+      Version: 7.8.4
+      Reloadable: true
+      Configcascade_Aware: true
+      Related:
+      File: saml.properties
+  - data:
+      Key: com.openexchange.saml.oauth.clientId
+      Description: >
+Specifies the client id used to authenticate the client against the OAuth token end-point.
+      Default: 
+      Version: 7.8.4
+      Reloadable: true
+      Configcascade_Aware: true
+      Related: com.openexchange.saml.oauth.token
+      File: saml.properties
+  - data:
+      Key: com.openexchange.saml.oauth.clientSecret
+      Description: >
+Specifies the client secret used to authenticate the client against the OAuth token end-point.
+      Default: 
+      Version: 7.8.4
+      Reloadable: true
+      Configcascade_Aware: true
+      Related: com.openexchange.saml.oauth.token
+      File: saml.properties
   		

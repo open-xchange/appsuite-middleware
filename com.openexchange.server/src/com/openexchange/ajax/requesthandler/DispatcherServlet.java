@@ -402,7 +402,7 @@ public class DispatcherServlet extends SessionServlet {
     /**
      * A set of those {@link Category categories} that should not be logged as <tt>ERROR</tt>, but as <tt>DEBUG</tt> only.
      */
-    private static final Set<Category> CAT_IGNOREES = ImmutableSet.of(Category.CATEGORY_PERMISSION_DENIED);
+    private static final Set<Category> CAT_IGNOREES = ImmutableSet.of(Category.CATEGORY_PERMISSION_DENIED, Category.CATEGORY_USER_INPUT);
 
     /**
      * Checks if passed {@code OXException} instance should not be logged as <tt>ERROR</tt>, but as <tt>DEBUG</tt> only.

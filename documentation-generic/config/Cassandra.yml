@@ -195,3 +195,23 @@ If all hosts are busy with a full queue, the request will fail with a <code>NoHo
       Configcascade_Aware: false
       Related: com.openexchange.nosql.cassandra.acquistionQueueMaxSize
       File: cassandra.properties
+  - data:
+      Key: com.openexchange.nosql.cassandra.connectTimeout
+      Description: >
+Specifies the connect timeout in milliseconds
+      Default: 5000
+      Version: 7.8.4
+      Reloadable: false
+      Configcascade_Aware: false
+      Related: 
+      File: cassandra.properties
+  - data:
+      Key: com.openexchange.nosql.cassandra.readTimeout
+      Description: >
+Specifies the read timeout in milliseconds
+      Default: 12000
+      Version: 7.8.4
+      Reloadable: false
+      Configcascade_Aware: false
+      Related: 
+      File: cassandra.properties

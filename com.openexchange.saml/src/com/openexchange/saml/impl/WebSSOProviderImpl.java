@@ -58,6 +58,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -78,6 +79,7 @@ import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.AuthnRequest;
 import org.opensaml.saml2.core.AuthnStatement;
 import org.opensaml.saml2.core.BaseID;
+import org.opensaml.saml2.core.EncryptedAssertion;
 import org.opensaml.saml2.core.EncryptedID;
 import org.opensaml.saml2.core.Issuer;
 import org.opensaml.saml2.core.LogoutRequest;
@@ -123,9 +125,9 @@ import com.openexchange.java.util.UUIDs;
 import com.openexchange.saml.OpenSAML;
 import com.openexchange.saml.SAMLConfig;
 import com.openexchange.saml.SAMLConfig.Binding;
-import com.openexchange.saml.oauth.OAuthAccessToken;
-import com.openexchange.saml.oauth.OAuthAccessTokenRequest;
-import com.openexchange.saml.oauth.SAMLOAuthConfig;
+import com.openexchange.saml.oauth.service.OAuthAccessToken;
+import com.openexchange.saml.oauth.service.OAuthAccessTokenService;
+import com.openexchange.saml.oauth.service.OAuthAccessTokenService.OAuthGrantType;
 import com.openexchange.saml.SAMLExceptionCode;
 import com.openexchange.saml.SAMLSessionParameters;
 import com.openexchange.saml.SAMLWebSSOProvider;
@@ -294,7 +296,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
 
             String samlResponseStr = httpRequest.getParameter("SAMLResponse");
 
-            getOAuthAccessToken(samlResponseStr, properties, authInfo);
+            getOAuthAccessToken(samlResponseStr, properties, authInfo, backend.getCredentialProvider());
 
             String sessionToken = sessionReservationService.reserveSessionFor(
                 authInfo.getUserId(),
@@ -330,29 +332,38 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
     }
 
     /**
-     * Retrieves oauth access and refresh tokens and adds them to the properties list
+     * Retrieves OAuth access and refresh tokens and adds them to the properties list
      *
      * @param base64SamlResponse
      * @param properties
      * @param authInfo
+     * @param credentialProvider
      * @throws OXException
-     *
      */
-    private void getOAuthAccessToken(String base64SamlResponse, Map<String, String> properties, AuthenticationInfo authInfo) throws OXException {
+    private void getOAuthAccessToken(String base64SamlResponse, Map<String, String> properties, AuthenticationInfo authInfo, CredentialProvider credentialProvider) throws OXException {
         try {
-            if (!SAMLOAuthConfig.isConfigured(authInfo.getUserId(), authInfo.getContextId())) {
+            OAuthAccessTokenService service = services.getService(OAuthAccessTokenService.class);
+            if(service==null){
+                return;
+            }
+            if (!service.isConfigured(authInfo.getUserId(), authInfo.getContextId())) {
                 return;
             }
 
             OpenSAML openSAML = new OpenSAML();
-            byte[] decodedBytes = Base64.decodeBase64(base64SamlResponse.getBytes());
+            byte[] decodedBytes = Base64.decodeBase64(base64SamlResponse.getBytes(Charsets.UTF_8));
             Element responseElement = openSAML.getParserPool().parse(new ByteArrayInputStream(decodedBytes)).getDocumentElement();
             XMLObject unmarshalledResponse = openSAML.getUnmarshallerFactory().getUnmarshaller(responseElement).unmarshall(responseElement);
             final Response response = (Response) unmarshalledResponse;
-            Assertion assertion = response.getAssertions().iterator().next();
+            Assertion assertion;
+            if(response.getAssertions().size()!=0){
+                assertion = response.getAssertions().iterator().next();
+            } else {
+                assertion = decryptAndCollectAssertions(response, credentialProvider).iterator().next();
+            }
             String xmlAssertion = openSAML.marshall(assertion);
             String b64Assertion = Base64.encodeBase64String(xmlAssertion.getBytes());
-            OAuthAccessToken token = OAuthAccessTokenRequest.getInstance().requestAccessToken(b64Assertion, authInfo.getUserId(), authInfo.getContextId());
+            OAuthAccessToken token = service.getAccessToken(OAuthGrantType.SAML, b64Assertion, authInfo.getUserId(), authInfo.getContextId());
             properties.put(SAMLSessionParameters.ACCESS_TOKEN, token.getAccessToken());
             properties.put(SAMLSessionParameters.REFRESH_TOKEN, token.getRefreshToken());
         } catch (MarshallingException e) {
@@ -361,7 +372,26 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
             throw SAMLExceptionCode.INTERNAL_ERROR.create(e.getMessage());
         } catch (UnmarshallingException e) {
             throw SAMLExceptionCode.INTERNAL_ERROR.create(e.getMessage());
+        } catch (DecryptionException e) {
+            throw SAMLExceptionCode.INTERNAL_ERROR.create(e.getMessage());
         }
+    }
+
+    private List<Assertion> decryptAndCollectAssertions(Response response, CredentialProvider credentialProvider) throws DecryptionException {
+        List<Assertion> assertions = new LinkedList<Assertion>();
+        List<EncryptedAssertion> encryptedAssertions = response.getEncryptedAssertions();
+        if (encryptedAssertions.size() > 0) {
+            Decrypter decrypter = CryptoHelper.getDecrypter(credentialProvider);
+            for (EncryptedAssertion encryptedAssertion : encryptedAssertions) {
+                assertions.add(decrypter.decrypt(encryptedAssertion));
+            }
+        }
+
+        for (Assertion assertion : response.getAssertions()) {
+            assertions.add(assertion);
+        }
+
+        return assertions;
     }
 
     @Override

@@ -66,9 +66,11 @@ import org.json.JSONObject;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.AJAXRequestResultPostProcessor;
 import com.openexchange.ajax.requesthandler.AJAXState;
+import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthenticationFactory;
 import com.openexchange.ajax.requesthandler.oauth.OAuthConstants;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.contactcollector.ContactCollectorService;
@@ -165,14 +167,29 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
      * @return The mail interface
      * @throws OXException If mail interface cannot be initialized
      */
-    protected MailServletInterface getMailInterface(final MailRequest mailRequest) throws OXException {
+    protected MailServletInterface getMailInterface(MailRequest mailRequest) throws OXException {
+        // Requests can control whether or not to decrypt messages or verify signatures
+        boolean decrypt = AJAXRequestDataTools.parseBoolParameter(mailRequest.getParameter("decrypt"));
+        boolean verify = AJAXRequestDataTools.parseBoolParameter(mailRequest.getParameter("verify"));
+
+        // Parsing crypto authentication from the request if decrypting
+        String cryptoAuthentication = null;
+        if(decrypt) {
+            CryptographicServiceAuthenticationFactory encryptionAuthenticationFactory = services.getService(CryptographicServiceAuthenticationFactory.class);
+            if(encryptionAuthenticationFactory != null) {
+                cryptoAuthentication = encryptionAuthenticationFactory.createAuthenticationFrom(mailRequest.getRequest());
+            }
+        }
+
         // Get mail interface
         AJAXState state = mailRequest.getRequest().getState();
         if (state == null) {
             // No AJAX state
             MailServletInterface mailInterface = mailRequest.getMailServletInterface();
             if (mailInterface == null) {
-                MailServletInterface newMailInterface = MailServletInterface.getInstance(mailRequest.getSession());
+                MailServletInterface newMailInterface = decrypt || verify ? // If decrypting or verifying, get Crypto Aware MailServlet
+                    MailServletInterface.getInstanceWithDecryptionSupport(mailRequest.getSession(), cryptoAuthentication) :
+                    MailServletInterface.getInstance(mailRequest.getSession());
                 mailRequest.setMailServletInterface(newMailInterface);
                 mailInterface = newMailInterface;
             }
@@ -181,7 +198,9 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
 
         MailServletInterface mailInterface = state.optProperty(PROPERTY_MAIL_IFACE);
         if (mailInterface == null) {
-            MailServletInterface newMailInterface = MailServletInterface.getInstance(mailRequest.getSession());
+            MailServletInterface newMailInterface = decrypt || verify ?
+                MailServletInterface.getInstanceWithDecryptionSupport(mailRequest.getSession(), cryptoAuthentication) :
+                MailServletInterface.getInstance(mailRequest.getSession());
             mailInterface = state.putProperty(PROPERTY_MAIL_IFACE, newMailInterface);
             if (null == mailInterface) {
                 mailInterface = newMailInterface;

@@ -79,6 +79,7 @@ import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.api.AuthenticationFailedHandler.Service;
+import com.openexchange.mail.api.AuthenticationFailureHandlerResult.Type;
 import com.openexchange.mail.api.permittance.Permittance;
 import com.openexchange.mail.api.permittance.Permitter;
 import com.openexchange.mail.cache.EnqueueingMailAccessCache;
@@ -794,13 +795,16 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             try {
                 connectInternal();
             } catch (OXException e) {
-                AuthenticationFailureHandlerResult result =  handleConnectFailure(e, mailConfig);
-                if(result.equals(AuthenticationFailureHandlerResult.RETRY)){
-                    connectInternal();
-                } else if(result.equals(AuthenticationFailureHandlerResult.EXCEPTION)) {
-                    throw result.getError();
-                } else {
-                    throw e;
+                AuthenticationFailureHandlerResult result = handleConnectFailure(e, mailConfig);
+                Type type = result.getType();
+                switch (type) {
+                    case RETRY:
+                        connectInternal();
+                        break;
+                    case EXCEPTION:
+                        throw result.getError();
+                    default:
+                        throw e;
                 }
             }
             if (checkDefaultFolder) {

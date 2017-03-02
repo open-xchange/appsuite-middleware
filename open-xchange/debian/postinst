@@ -19,6 +19,23 @@ set -e
 
 . /opt/open-xchange/lib/oxfunctions.sh
 
+initialConfigure() {
+    # prevent bash from expanding, see bug 13316
+    GLOBIGNORE='*'
+
+    # SoftwareChange_Request-3773
+    dropin_dir=/etc/systemd/system/open-xchange.service.d
+    dropin_example=limits.conf
+    examples_dir=/usr/share/doc/open-xchange/examples
+    if [ ! -f ${dropin_dir}/${dropin_example} ]
+    then
+      install -D -m 644 ${examples_dir}/${dropin_example} ${dropin_dir}/${dropin_example}
+    fi
+
+    # Trigger a service definition/config reload
+    systemctl daemon-reload &> /dev/null || :
+}
+
 postFix() {
     local version=${1%-*}
     version=${version//[-.]/}
@@ -37,7 +54,7 @@ postFix() {
 
     # SoftwareChange_Request-3859
     drop_in=${dropin_dir}/${dropin_example}
-    if [ -f ${drop_in} ]
+    if [ -f ${drop_in} ] && grep -q "^#LimitNOFILE=16384$" ${drop_in}
     then
       sed -i 's/^#LimitNOFILE=16384$/#LimitNOFILE=65536/' ${drop_in}
     fi
@@ -48,14 +65,21 @@ postFix() {
     then
       sed -i '/^\[Service\]$/a #LimitNPROC=65536' ${drop_in}
     fi
+
+    # Trigger a service definition/config reload
+    systemctl daemon-reload &> /dev/null || :
 }
 
 case "$1" in
     configure)
-        test -n "$2" && {
+        if [ -n "$2" ]
+        then
             # we are in update mode, run postFix to apply fixes
             postFix "$2"
-        }
+        else
+            # this is the initial install
+            initialConfigure
+        fi
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

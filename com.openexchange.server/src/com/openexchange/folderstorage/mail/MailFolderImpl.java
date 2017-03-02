@@ -53,6 +53,7 @@ import static com.openexchange.folderstorage.mail.MailFolderStorage.closeMailAcc
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
 import gnu.trove.map.hash.TIntIntHashMap;
+import java.io.Serializable;
 import java.util.EnumSet;
 import java.util.Locale;
 import java.util.Set;
@@ -166,10 +167,10 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
     private final int mailAccountId;
     private final int userId;
     private final int contextId;
-    private String localizedName;
+    private final LocalizedNameProvider localizedNameProvider;
 
-    private int m_total = -1;
-    private int m_unread = -1;
+    private final int m_total;
+    private final int m_unread;
 
     /** The special bit for user flag support */
     public static final int BIT_USER_FLAG = (1 << 29);
@@ -229,12 +230,14 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
         id = MailFolderUtility.prepareFullname(accountId, fullName);
         String folderName = mailFolder.getName();
         name = folderName;
+        Locale effectiveLocale = null == locale ? (null == user.getLocale() ? Locale.US : user.getLocale()) : locale;
+        LocalizedNameProvider localizedNameProvider;
         if ("INBOX".equals(fullName)) {
-            localizedName = StringHelper.valueOf(null == locale ? user.getLocale() : locale).getString(MailStrings.INBOX);
+            localizedNameProvider = new CommonLocalizedNameProvider(MailStrings.INBOX);
         } else if (mailFolder.isRootFolder() && isUnifiedMail(mailFolder)) {
-            localizedName = StringHelper.valueOf(null == locale ? user.getLocale() : locale).getString(MailStrings.UNIFIED_MAIL);
+            localizedNameProvider = new CommonLocalizedNameProvider(MailStrings.UNIFIED_MAIL);
         } else {
-            localizedName = folderName;
+            localizedNameProvider = new StaticLocalizedNameProvider(folderName);
         }
         // Determine the parent...
         if (mailFolder.isRootFolder()) {
@@ -284,9 +287,14 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
             }
 
             // Determine the mail folder type (None, Trash, Sent, ...) and set localized name
-            mailFolderType = determineMailFolderType(folderName, mailFolder, mailAccess, mailAccount, user, locale, fullnameProvider, translatePrimaryAccountDefaultFolders);
+            MailFolderTypeRetval retval = determineMailFolderType(folderName, mailFolder, mailAccess, mailAccount, effectiveLocale, fullnameProvider, translatePrimaryAccountDefaultFolders);
+            mailFolderType = retval.mailFolderType;
+            if (null != retval.localizedNameProvider) {
+                localizedNameProvider = retval.localizedNameProvider;
+            }
         }
         this.mailFolderTypeRef = new AtomicReference<MailFolderType>(mailFolderType);
+        this.localizedNameProvider = localizedNameProvider;
 
         {
             String client = Strings.asciiLowerCase(mailAccess.getSession().getClient());
@@ -345,7 +353,9 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
             // Already cached in MAL API layer
             cache = false;
         }
-        // Since not cached we can obtain total/unread counter here
+        // If not cached, we can obtain total/unread counter here
+        int m_total = -1;
+        int m_unread = -1;
         if (!cache) {
             IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
 
@@ -365,6 +375,8 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
                 }
             }
         }
+        this.m_total = m_total;
+        this.m_unread = m_unread;
         cacheable = cache;
     }
 
@@ -385,10 +397,14 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
         return MailFolder.DEFAULT_FOLDER_ID.equals(fullName) ? FolderStorage.PRIVATE_ID : MailFolderUtility.prepareFullname(accountId, MailFolder.DEFAULT_FOLDER_ID);
     }
 
-    private MailFolderType determineMailFolderType(String folderName, MailFolder mailFolder, MailAccess<?, ?> mailAccess, MailAccount mailAccount, User user, Locale locale, DefaultFolderFullnameProvider fullnameProvider, boolean translatePrimaryAccountDefaultFolders) throws OXException {
+    private LocalizedNameProvider getLocalizedNameProviderForPrimaryStandard(String key, boolean translatePrimaryAccountDefaultFolders, String folderName) {
+        return translatePrimaryAccountDefaultFolders ? new CommonLocalizedNameProvider(key) : new StaticLocalizedNameProvider(folderName);
+    }
+
+    private MailFolderTypeRetval determineMailFolderType(String folderName, MailFolder mailFolder, MailAccess<?, ?> mailAccess, MailAccount mailAccount, Locale effectiveLocale, DefaultFolderFullnameProvider fullnameProvider, boolean translatePrimaryAccountDefaultFolders) throws OXException {
         MailFolderType mailFolderType = MailFolderType.NONE;
+        LocalizedNameProvider localizedNameProvider = null;
         boolean isPrimaryAccount = MailAccount.DEFAULT_ID == mailAccount.getId();
-        Locale loc = null == locale ? user.getLocale() : locale;
         if (mailFolder.containsDefaultFolderType()) {
             switch (mailFolder.getDefaultFolderType()) {
             case INBOX:
@@ -396,41 +412,41 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
                 break;
             case TRASH:
                 if (isPrimaryAccount) {
-                    localizedName = translatePrimaryAccountDefaultFolders ? (StringHelper.valueOf(loc).getString(MailStrings.TRASH)) : (MailStrings.TRASH.equals(folderName) ? StringHelper.valueOf(loc).getString(MailStrings.TRASH) : folderName);
+                    localizedNameProvider = getLocalizedNameProviderForPrimaryStandard(MailStrings.TRASH, translatePrimaryAccountDefaultFolders, folderName);
                 }
                 mailFolderType = MailFolderType.TRASH;
                 break;
             case SENT:
                 if (isPrimaryAccount) {
-                    localizedName = translatePrimaryAccountDefaultFolders ? (StringHelper.valueOf(loc).getString(MailStrings.SENT)) : (MailStrings.SENT.equals(folderName) ? StringHelper.valueOf(loc).getString(MailStrings.SENT) : folderName);
+                    localizedNameProvider = getLocalizedNameProviderForPrimaryStandard(MailStrings.SENT, translatePrimaryAccountDefaultFolders, folderName);
                 }
                 mailFolderType = MailFolderType.SENT;
                 break;
             case SPAM:
                 if (isPrimaryAccount) {
-                    localizedName = translatePrimaryAccountDefaultFolders ? (StringHelper.valueOf(loc).getString(MailStrings.SPAM)) : (MailStrings.SPAM.equals(folderName) ? StringHelper.valueOf(loc).getString(MailStrings.SPAM) : folderName);
+                    localizedNameProvider = getLocalizedNameProviderForPrimaryStandard(MailStrings.SPAM, translatePrimaryAccountDefaultFolders, folderName);
                 }
                 mailFolderType = MailFolderType.SPAM;
                 break;
             case DRAFTS:
                 if (isPrimaryAccount) {
-                    localizedName = translatePrimaryAccountDefaultFolders ? (StringHelper.valueOf(loc).getString(MailStrings.DRAFTS)) : (MailStrings.DRAFTS.equals(folderName) ? StringHelper.valueOf(loc).getString(MailStrings.DRAFTS) : folderName);
+                    localizedNameProvider = getLocalizedNameProviderForPrimaryStandard(MailStrings.DRAFTS, translatePrimaryAccountDefaultFolders, folderName);
                 }
                 mailFolderType = MailFolderType.DRAFTS;
                 break;
             case CONFIRMED_SPAM:
                 if (isPrimaryAccount) {
-                    localizedName = StringHelper.valueOf(loc).getString(MailStrings.CONFIRMED_SPAM);
+                    localizedNameProvider = new CommonLocalizedNameProvider(MailStrings.CONFIRMED_SPAM);
                 }
                 break;
             case CONFIRMED_HAM:
                 if (isPrimaryAccount) {
-                    localizedName = StringHelper.valueOf(loc).getString(MailStrings.CONFIRMED_HAM);
+                    localizedNameProvider = new CommonLocalizedNameProvider(MailStrings.CONFIRMED_HAM);
                 }
                 break;
             default:
                 if (isPrimaryAccount && translatePrimaryAccountDefaultFolders && MailFolderStorage.isArchiveFolder(fullName, mailAccess, mailAccount)) {
-                    localizedName = StringHelper.valueOf(loc).getString(MailStrings.ARCHIVE);
+                    localizedNameProvider = new CommonLocalizedNameProvider(MailStrings.ARCHIVE);
                 }
                 // Nope
             }
@@ -441,34 +457,34 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
                 try {
                     if (fullName.equals(fullnameProvider.getDraftsFolder())) {
                         if (isPrimaryAccount) {
-                            localizedName = translatePrimaryAccountDefaultFolders ? (StringHelper.valueOf(loc).getString(MailStrings.DRAFTS)) : (MailStrings.DRAFTS.equals(folderName) ? StringHelper.valueOf(loc).getString(MailStrings.DRAFTS) : folderName);
+                            localizedNameProvider = getLocalizedNameProviderForPrimaryStandard(MailStrings.DRAFTS, translatePrimaryAccountDefaultFolders, folderName);
                         }
                         mailFolderType = MailFolderType.DRAFTS;
                     } else if (fullName.equals(fullnameProvider.getINBOXFolder())) {
                         mailFolderType = MailFolderType.INBOX;
                     } else if (fullName.equals(fullnameProvider.getSentFolder())) {
                         if (isPrimaryAccount) {
-                            localizedName = translatePrimaryAccountDefaultFolders ? (StringHelper.valueOf(loc).getString(MailStrings.SENT)) : (MailStrings.SENT.equals(folderName) ? StringHelper.valueOf(loc).getString(MailStrings.SENT) : folderName);
+                            localizedNameProvider = getLocalizedNameProviderForPrimaryStandard(MailStrings.SENT, translatePrimaryAccountDefaultFolders, folderName);
                         }
                         mailFolderType = MailFolderType.SENT;
                     } else if (fullName.equals(fullnameProvider.getSpamFolder())) {
                         if (isPrimaryAccount) {
-                            localizedName = translatePrimaryAccountDefaultFolders ? (StringHelper.valueOf(loc).getString(MailStrings.SPAM)) : (MailStrings.SPAM.equals(folderName) ? StringHelper.valueOf(loc).getString(MailStrings.SPAM) : folderName);
+                            localizedNameProvider = getLocalizedNameProviderForPrimaryStandard(MailStrings.SPAM, translatePrimaryAccountDefaultFolders, folderName);
                         }
                         mailFolderType = MailFolderType.SPAM;
                     } else if (fullName.equals(fullnameProvider.getTrashFolder())) {
                         if (isPrimaryAccount) {
-                            localizedName = translatePrimaryAccountDefaultFolders ? (StringHelper.valueOf(loc).getString(MailStrings.TRASH)) : (MailStrings.TRASH.equals(folderName) ? StringHelper.valueOf(loc).getString(MailStrings.TRASH) : folderName);
+                            localizedNameProvider = getLocalizedNameProviderForPrimaryStandard(MailStrings.TRASH, translatePrimaryAccountDefaultFolders, folderName);
                         }
                         mailFolderType = MailFolderType.TRASH;
                     } else {
                         if (isPrimaryAccount && translatePrimaryAccountDefaultFolders) {
                             if (fullName.equals(fullnameProvider.getConfirmedSpamFolder())) {
-                                localizedName = StringHelper.valueOf(loc).getString(MailStrings.CONFIRMED_SPAM);
+                                localizedNameProvider = new CommonLocalizedNameProvider(MailStrings.CONFIRMED_SPAM);
                             } else if (fullName.equals(fullnameProvider.getConfirmedHamFolder())) {
-                                localizedName = StringHelper.valueOf(loc).getString(MailStrings.CONFIRMED_HAM);
+                                localizedNameProvider = new CommonLocalizedNameProvider(MailStrings.CONFIRMED_HAM);
                             } else if (MailFolderStorage.isArchiveFolder(fullName, mailAccess, mailAccount)) {
-                                localizedName = StringHelper.valueOf(loc).getString(MailStrings.ARCHIVE);
+                                localizedNameProvider = new CommonLocalizedNameProvider(MailStrings.ARCHIVE);
                             }
                         }
                     }
@@ -480,7 +496,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
         } else {
             mailFolderType = MailFolderType.NONE;
         }
-        return mailFolderType;
+        return new MailFolderTypeRetval(mailFolderType, localizedNameProvider);
     }
 
     private boolean isUnifiedMail(final MailFolder mailFolder) {
@@ -593,6 +609,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
             return new int[] { total, unread };
         }
 
+        // Live look-up of total/unread count
         if (null == optParams) {
             MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
             try {
@@ -609,6 +626,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
                 closeMailAccess(mailAccess);
             }
         }
+
         // Look-up provided parameters
         try {
             final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = mailAccess(optParams);
@@ -691,7 +709,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
     public void setDefaultType(final int defaultType) {
         // Nothing to do
     }
-    
+
     /**
      * Sets the mail folder type
      *
@@ -718,8 +736,61 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
 
     @Override
     public String getLocalizedName(final Locale locale) {
-        final String localizedName = this.localizedName;
-        return null == localizedName ? name : localizedName;
+        LocalizedNameProvider localizedNameProvider = this.localizedNameProvider;
+        return null == localizedNameProvider ? name : localizedNameProvider.getLocalizedName(locale);
+    }
+
+    // --------------------------------------------------- i18n stuff ------------------------------------------------------------------------
+
+    private static final class MailFolderTypeRetval {
+
+        final MailFolderType mailFolderType;
+        final LocalizedNameProvider localizedNameProvider;
+
+        MailFolderTypeRetval(MailFolderType mailFolderType, LocalizedNameProvider localizedNameProvider) {
+            super();
+            this.mailFolderType = mailFolderType;
+            this.localizedNameProvider = localizedNameProvider;
+        }
+    }
+
+    private static interface LocalizedNameProvider extends Serializable {
+
+        String getLocalizedName(Locale locale);
+    }
+
+    private static final class StaticLocalizedNameProvider implements LocalizedNameProvider {
+
+        private static final long serialVersionUID = 7258965483623767051L;
+
+        private final String name;
+
+        StaticLocalizedNameProvider(String name) {
+            super();
+            this.name = name;
+        }
+
+        @Override
+        public String getLocalizedName(Locale locale) {
+            return name;
+        }
+    }
+
+    private static final class CommonLocalizedNameProvider implements LocalizedNameProvider {
+
+        private static final long serialVersionUID = -2733154469307477060L;
+
+        private final String key;
+
+        CommonLocalizedNameProvider(String key) {
+            super();
+            this.key = key;
+        }
+
+        @Override
+        public String getLocalizedName(Locale locale) {
+            return StringHelper.valueOf(locale).getString(key);
+        }
     }
 
 }

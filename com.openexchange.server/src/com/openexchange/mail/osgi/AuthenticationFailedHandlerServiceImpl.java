@@ -54,6 +54,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.AuthenticationFailedHandler;
 import com.openexchange.mail.api.AuthenticationFailedHandlerService;
 import com.openexchange.mail.api.AuthenticationFailureHandlerResult;
+import com.openexchange.mail.api.AuthenticationFailureHandlerResult.Type;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.AuthenticationFailedHandler.Service;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
@@ -67,6 +68,8 @@ import com.openexchange.session.Session;
  */
 public class AuthenticationFailedHandlerServiceImpl extends RankingAwareNearRegistryServiceTracker<AuthenticationFailedHandler> implements AuthenticationFailedHandlerService {
 
+    private static final Type CONTINUE = AuthenticationFailureHandlerResult.Type.CONTINUE;
+
     /**
      * Initializes a new {@link AuthenticationFailedHandlerServiceImpl}.
      */
@@ -79,7 +82,7 @@ public class AuthenticationFailedHandlerServiceImpl extends RankingAwareNearRegi
         AuthenticationFailureHandlerResult result;
         for (AuthenticationFailedHandler handler : this) {
             result = handler.handleAuthenticationFailed(failedAuthentication, service, mailConfig, session);
-            if (!AuthenticationFailureHandlerResult.CONTINUE.equals(result)) {
+            if (!CONTINUE.equals(result.getType())) {
                 return result;
             }
         }

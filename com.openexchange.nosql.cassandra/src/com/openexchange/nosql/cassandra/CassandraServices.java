@@ -51,6 +51,7 @@ package com.openexchange.nosql.cassandra;
 
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Session;
+import com.datastax.driver.core.Statement;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.nosql.cassandra.exceptions.CassandraServiceExceptionCodes;
@@ -91,6 +92,32 @@ public class CassandraServices {
             throw CassandraServiceExceptionCodes.QUERY_EXECUTION_ERROR.create(e, query);
         } catch (com.datastax.driver.core.exceptions.QueryValidationException e) {
             throw CassandraServiceExceptionCodes.QUERY_VALIDATION_ERROR.create(e, query);
+        } catch (com.datastax.driver.core.exceptions.DriverException e) {
+            throw CassandraServiceExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Executes given query using specified session.
+     *
+     * @param statemnent The statement to execute
+     * @param session The session to use
+     * @return The result of the query. That result will never be <code>null</code>, but can be empty (and will be for any non <code>SELECT</code> query).
+     * @throws OXException If executing the query fails
+     */
+    public static ResultSet executeQuery(Statement statemnent, Session session) throws OXException {
+        if (null == statemnent || null == session) {
+            return null;
+        }
+
+        try {
+            return session.execute(statemnent);
+        } catch (com.datastax.driver.core.exceptions.NoHostAvailableException e) {
+            throw CassandraServiceExceptionCodes.CONTACT_POINTS_NOT_REACHABLE_SIMPLE.create(e, new Object[0]);
+        } catch (com.datastax.driver.core.exceptions.QueryExecutionException e) {
+            throw CassandraServiceExceptionCodes.QUERY_EXECUTION_ERROR.create(e, statemnent);
+        } catch (com.datastax.driver.core.exceptions.QueryValidationException e) {
+            throw CassandraServiceExceptionCodes.QUERY_VALIDATION_ERROR.create(e, statemnent);
         } catch (com.datastax.driver.core.exceptions.DriverException e) {
             throw CassandraServiceExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }

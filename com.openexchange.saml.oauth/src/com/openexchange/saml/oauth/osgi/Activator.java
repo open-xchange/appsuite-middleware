@@ -49,10 +49,18 @@
 
 package com.openexchange.saml.oauth.osgi;
 
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ForcedReloadable;
+import com.openexchange.config.Interests;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.mail.api.AuthenticationFailedHandler;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
+import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.saml.oauth.service.OAuthFailedAuthenticationHandler;
+import com.openexchange.saml.oauth.HttpClientOAuthAccessTokenService;
+import com.openexchange.saml.oauth.OAuthFailedAuthenticationHandler;
+import com.openexchange.saml.oauth.SAMLOAuthConfig;
+import com.openexchange.saml.oauth.service.OAuthAccessTokenService;
 import com.openexchange.sessiond.SessiondService;
 
 /**
@@ -65,22 +73,56 @@ public class Activator extends HousekeepingActivator {
 
     private static final int SERVICE_RANKING = 100;
 
+    private HttpClientOAuthAccessTokenService tokenService;
+
+    /**
+     * Initializes a new {@link Activator}.
+     */
+    public Activator() {
+        super();
+    }
+
+    @Override
+    protected boolean stopOnServiceUnavailability() {
+        return true;
+    }
+
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { SessiondService.class, ConfigViewFactory.class };
+        return new Class[] { SessiondService.class, ConfigViewFactory.class, SSLSocketFactoryProvider.class, SSLConfigurationService.class };
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-        registerService(AuthenticationFailedHandler.class, new OAuthFailedAuthenticationHandler(), SERVICE_RANKING);
+    protected synchronized void startBundle() throws Exception {
+        HttpClientOAuthAccessTokenService tokenService = new HttpClientOAuthAccessTokenService(getService(ConfigViewFactory.class), getService(SSLSocketFactoryProvider.class), getService(SSLConfigurationService.class));
+        this.tokenService = tokenService;
 
+        registerService(ForcedReloadable.class, new ForcedReloadable() {
+
+            @Override
+            public void reloadConfiguration(ConfigurationService configService) {
+                SAMLOAuthConfig.invalidateCache();
+            }
+
+            @Override
+            public Interests getInterests() {
+                return null;
+            }
+        });
+
+        registerService(OAuthAccessTokenService.class, tokenService);
+        registerService(AuthenticationFailedHandler.class, new OAuthFailedAuthenticationHandler(tokenService, this), SERVICE_RANKING);
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        Services.setServiceLookup(null);
+    protected synchronized void stopBundle() throws Exception {
         super.stopBundle();
+
+        HttpClientOAuthAccessTokenService tokenService = this.tokenService;
+        if (tokenService != null) {
+            this.tokenService = null;
+            tokenService.closeHttpClient();
+        }
     }
 
 }

@@ -110,6 +110,12 @@ public abstract class DelegatingMailAccess extends MailAccess<IMailFolderStorage
     }
 
     @Override
+    protected MailAccess<IMailFolderStorage, IMailMessageStorage> setProvider(MailProvider provider) {
+        delegate.setProvider(provider);
+        return this;
+    }
+
+    @Override
     public void addWarnings(Collection<OXException> warnings) {
         delegate.addWarnings(warnings);
     }

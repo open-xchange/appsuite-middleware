@@ -54,6 +54,7 @@ export LANG=C
 export LC_ALL=C
 
 # some defaults
+GLOBAL_PARAMETER="${0} ${@}"
 PATH="${PATH}:/opt/open-xchange/sbin"
 TMP=/tmp
 TMP_LONG=tempdir
@@ -82,9 +83,9 @@ SKIP_RUN_COMMANDS=false
 SKIP_RUN_COMMANDS_LONG=skip-system-tools
 SKIP_RUN_COMMANDS_VALUES="true false"
 SPINNER='/-\|'
-EXCLUDE_OLDER_LOGS_THAN=disabled
+EXCLUDE_OLDER_LOGS_THAN=5
 EXCLUDE_OLDER_LOGS_THAN_LONG=exclude-old-logs
-EXCLUDE_OLDER_LOGS_THAN_VALUES="0 ... n Days"
+EXCLUDE_OLDER_LOGS_THAN_VALUES="0 ... n Days or 'all'"
 EXCLUDE_SECRETS=true
 EXCLUDE_SECRETS_LONG=exclude-ox-secrets
 EXCLUDE_SECRETS_VALUES="true false"
@@ -104,6 +105,7 @@ PROCS='
     mount;
     netstat -putane;
     ox_java_vm_limits;
+    oxsysreport_parameter;
     ps -eLf;
     ps faux;
     readerengine_cache_overview;
@@ -122,7 +124,7 @@ EARLY_NEEDED_TOOLS="basename cat echo dirname java pwd tr date"
 NEEDED_TOOLS="awk bzip2 cat cut cp df du egrep find file grep gzip head mkdir mktemp rm rmdir sed sleep tail tar tr xargs"
 OX_LOG_DIR=/var/log/open-xchange
 OX_CONFIG_DIRS="/opt/open-xchange/etc /opt/open-xchange/documentconverter/etc"
-OTHER_CONFIGS="/etc/security/limits.conf"
+OTHER_CONFIGS="/etc/security/limits.conf /etc/*-release"
 
 ###############################################################################
 #                                   Functions                                 #
@@ -168,30 +170,42 @@ busyEnd(){
 }
 
 collect_command_output() {
-   # Drop leading blanks from commands
-   PROCS=$(echo ${PROCS} | sed 's|;[[:blank:]]*|;|g')
-   echo "Collecting output of system tools into $(normalize_path ${TMP}/${LOGDIR}/commands)"
-   cd /${TMP}
-   OIFS=${IFS}
-   IFS=";"
-   for i in ${PROCS}; do
-       IFS=${OIFS}
-       # slashes are forbidden in file names
-       removed_path=$(echo ${i} | sed 's|/.*/||g')
-       tool_name=$(echo ${removed_path} | awk '{print $1}')
-       # bash functions may use the busy spinner and have to write the output file directly
-       if [ -n "$(type ${tool_name} 2>/dev/null | grep 'function' )" ]; then
-           echo -n "  ${i}  "
-           ${i} "/${TMP}/${LOGDIR}/commands/${removed_path}"
-           echo
-       else
-           echo "  ${i}"
-           ${i} > "/${TMP}/${LOGDIR}/commands/${removed_path}" 2>&1
-       fi
-       IFS=";"
-   done
-   IFS=${OIFS}
-   cd - > /dev/null 2>&1
+    # Drop leading blanks from commands
+    PROCS=$(echo ${PROCS} | sed 's|;[[:blank:]]*|;|g')
+    echo "Collecting output of system tools into $(normalize_path ${TMP}/${LOGDIR}/commands)"
+    cd /${TMP}
+    OIFS=${IFS}
+    IFS=";"
+    for i in ${PROCS}; do
+        IFS=${OIFS}
+        # slashes are forbidden in file names
+        removed_path=$(echo ${i} | sed 's|/.*/||g')
+        tool_name=$(echo ${removed_path} | awk '{print $1}')
+        # bash functions may use the busy spinner and have to write the output file directly
+        if [ -n "$(type ${tool_name} 2>/dev/null | grep 'function' )" ]; then
+            echo -n "  ${i}  "
+            ${i} "/${TMP}/${LOGDIR}/commands/${removed_path}"
+            echo
+        else
+            echo "  ${i}"
+            ${i} > "/${TMP}/${LOGDIR}/commands/${removed_path}" 2>&1
+        fi
+        IFS=";"
+    done
+    IFS=${OIFS}
+    cd - > /dev/null 2>&1
+    if [ 'true' == "${EXCLUDE_SECRETS}" ]; then
+        if [ -f "${TMP}/${LOGDIR}/commands/ucr dump" ]; then
+            echo "Removing secrets: ${TMP}/${LOGDIR}/commands/ucr dump"
+            exclude_secret_entries "${TMP}/${LOGDIR}/commands/ucr dump"
+        fi
+    fi
+}
+
+oxsysreport_parameter(){
+    # print tool parameter
+    local _output="${1}"
+    echo "${GLOBAL_PARAMETER}" > ${_output}
 }
 
 ox_java_vm_limits() {
@@ -205,7 +219,7 @@ ox_java_vm_limits() {
 }
 
 collect_httpd_configs() {
-    # Be very selective on what to add to the archive (Bug#28830)
+    # be very selective on what to add to the archive (Bug#28830)
     for dir in /etc/httpd /etc/apache*; do
         if [ -d "${dir}" ]; then
             local _tmp=$(mktemp)
@@ -215,30 +229,46 @@ collect_httpd_configs() {
             echo "Collecting httpd configuration into ${_httpd_config_copy}"
             mkdir -p $(dirname ${_httpd_config_copy})
             cp -a ${dir} ${_httpd_config_copy}
-            # Drop dangling links
+            # drop dangling links
             find ${_httpd_config_copy} -type l -xtype l | xargs -r rm
-            # Drop all files without name schema '.conf' or which are stored outside
+            # drop all files without name schema '.conf' or which are stored outside
             # <name>-enabled or <name>-available directories
             find ${_httpd_config_copy} -type f | \
                 egrep -v '^.*\.conf$|^.*-(enabled|available)/.*$' | \
                 sed 's| |\\ |g' >> ${_tmp}
-            # Drop all files with SSL suffix types
+            # drop all files with SSL suffix types
             find ${_httpd_config_copy} -type f | \
                 egrep '^.*\.crt$|^.*\.key$|^.*\.csr$|^.*\.prm$' | \
                 sed 's| |\\ |g' >> ${_tmp}
-            # Drop all which could be identified as cert or key file
+            # drop all which could be identified as cert or key file
             find ${_httpd_config_copy} -type f | \
                 sed 's| |\\ |g' | \
                 xargs -r file | \
-                egrep '*[cC]ertificate*|*[kK]ey*' | \
+                egrep -i '.*certificate.*|.*key.*' | \
                 awk -F ':' '{print $1}' >> ${_tmp}
-            cat ${_tmp} | sort -u > ${_tmp_exclude_status}
-            rm ${_tmp}
-            cat ${_tmp_exclude_status} | xargs -r rm
-            # Delete empty directories
+            # check also on configured auth files
+            local _auth_files=$(find ${_httpd_config_copy} -type f | \
+                xargs grep -rH 'Auth[A-Za-z]*File' | \
+                awk '{print $2}' | \
+                sed "s|'||g" | \
+                sed 's|"||g' | \
+                sed 's/\(^\.\.\|^\.\)//g' | \
+                sed 's| |\\ |g')
+            for file in ${_auth_files}; do
+                find ${_httpd_config_copy} -type f | grep "${file}" >> ${_tmp}
+            done
+            # sort status file
+            sort -u ${_tmp} >> ${_tmp_exclude_status}
+            # delete tmp and secret files
+            rm -f ${_tmp} $(cat ${_tmp_exclude_status})
+            # delete empty directories
             find ${_httpd_config_copy} -depth -type d -empty | \
                 sed 's| |\\ |g' | \
                 xargs -r rmdir
+            if [ 'true' == "${EXCLUDE_SECRETS}" ]; then
+                echo "Removing secrets: ${_httpd_config_copy}"
+                exclude_secret_entries ${_httpd_config_copy}
+            fi
             print_hint_to_line_end ${_tmp_exclude_status} "removed"
             ALL_EXCLUDED="${_tmp_exclude_status} ${ALL_EXCLUDED}"
         fi
@@ -301,8 +331,13 @@ collect_other_configs() {
     if [ -n "${OTHER_CONFIGS}" ]; then
         echo "Collecting other system configurations into $(normalize_path ${TMP}/${LOGDIR}/etc)"
         for config in ${OTHER_CONFIGS}; do
-            mkdir -p ${TMP}/${LOGDIR}/$(dirname ${config})
-            cp -aL ${config} ${TMP}/${LOGDIR}/$(dirname ${config})
+            local _config_copy=${TMP}/${LOGDIR}${config}
+            mkdir -p $(dirname ${_config_copy})
+            cp -aL ${config} ${_config_copy}
+            if [ 'true' == "${EXCLUDE_SECRETS}" ]; then
+                echo "Removing secrets: ${_config_copy}"
+                exclude_secret_entries ${_config_copy}
+            fi
         done
     fi
 }
@@ -318,8 +353,8 @@ collect_ox_configs() {
             fi
             cp -rL ${ox_config_dir} ${_ox_config_copy}
             if [ 'true' == "${EXCLUDE_SECRETS}" ]; then
-                echo "Removing secrets from Open-Xchange configurations: ${_ox_config_copy}"
-                exclude_secret_ox_properties_entries ${_ox_config_copy}
+                echo "Removing secrets: ${_ox_config_copy}"
+                exclude_secret_entries ${_ox_config_copy}
                 exclude_secret_ox_config_files ${_ox_config_copy}
             fi
         fi
@@ -441,6 +476,10 @@ verify_ox_dpkg_packages(){
         egrep 'open-xchange|readerengine|calcengine' | \
         awk '{print $2}')
 
+    if [ 'true' != "${_dpkg_verify_support}" ]; then
+        echo "Info: dpkg does not support the needed '-V' option in this version." > "${_output}"
+    fi
+
     for package in ${_ox_packages}; do
         busySpin
         if [ -n "$(type apt-cache)" ]; then
@@ -464,8 +503,6 @@ verify_ox_dpkg_packages(){
                 # use dpkg verify
                 dpkg -V "${package}" | \
                     sed 's|^|  Change: |g'
-            else
-                    echo "  Info: dpkg does not support the needed '-V' option in this version."
             fi
         else
             echo "Error, missing tool: apt-cache"
@@ -548,12 +585,10 @@ distribution_check() {
          test -f /etc/mysql/my.cnf && OTHER_CONFIGS="${OTHER_CONFIGS} /etc/mysql/my.cnf"
      elif [ $(( ${DIST} & ${SUSE} )) -eq ${SUSE} ]; then
          echo "SuSE system detected"
-         OTHER_CONFIGS="${OTHER_CONFIGS} /etc/SuSE-release"
          PROCS=${PROCS}';rpm -qa --last;verify_ox_rpm_packages SuSE'
          test -f /etc/my.cnf && OTHER_CONFIGS="${OTHER_CONFIGS} /etc/my.cnf"
      elif [ $(( ${DIST} & ${REDHAT} )) -eq ${REDHAT} ]; then
          echo "Redhat system detected"
-         OTHER_CONFIGS="${OTHER_CONFIGS} /etc/*-release"
          PROCS=${PROCS}';rpm -qa --last;verify_ox_rpm_packages Redhat'
          test -f /etc/my.cnf && OTHER_CONFIGS="${OTHER_CONFIGS} /etc/my.cnf"
      else
@@ -561,50 +596,61 @@ distribution_check() {
      fi
 }
 
-exclude_secret_ox_properties_entries() {
-# This function only works on .properies* files and replace secret entries with an
-# '<REMOVED BY OXSYSREPORT>' marker on a working copy.
+exclude_secret_entries() {
+# this function replace secret entries with a '<REMOVED BY OXSYSREPORT>' marker on a working copy.
 # _file=/tmp/ox_support_infos-20140526-165503/opt/open-xchange/etc/msnoauth.properties
 # _original_line=com.openexchange.oauth.msn.apiSecret=secret
 # _plain_property=com.openexchange.oauth.msn.apiSecret=
 # _secret_part=secret
 # _modified_line=com.openexchange.oauth.msn.apiSecret=<REMOVED BY OXSYSREPORT>
-    local _ox_config_copy=${1}
-    local _tmp_exclude_status=$(normalize_path ${TMP}/${LOGDIR}/ox-configs-secret-exclude)
-    local _whitelist='enabledMailCapableKey|UserAttributePassword|^[[:blank:]]*#'
-    local _blacklist='[pP]assword[[:blank:]]*=|[sS]ecret[[:blank:]]*=|[kK]ey[[:blank:]]*=|secretSource[[:blank:]]*=|secretRandom[[:blank:]]*=|[sS]alt[[:blank:]]*=|SSLKey(Pass|Name)[[:blank:]]*=|[lL]ogin[[:blank:]]*='
-    find ${_ox_config_copy} -type f -name "*.properties*" | \
+    local _config_copy=${1}
+    local _tmp_exclude_status=$(normalize_path ${TMP}/${LOGDIR}/configs-secret-exclude)
+    local _whitelist='enabledMailCapableKey|UserAttributePassword|login_pattern.domain_user|maxAccessesPerUser|maxSessionPerUser|namespacePerUser|forgotPassword|AfterLogin|^[[:blank:]]*#'
+    local _blacklist='pass(word)*[[:blank:]]*(=|:)|secret[[:blank:]]*(=|:)|key[[:blank:]]*(=|:)|secretsource[[:blank:]]*(=|:)|secretrandom[[:blank:]]*(=|:)|salt[[:blank:]]*(=|:)|sslkey(pass|name)[[:blank:]]*(=|:)|login[[:blank:]]*(=|:)|user[[:blank:]]*(=|:)'
+    find "${_config_copy}" -type f | \
+        sed 's|[[:blank:]]|\\ |g' | \
         xargs egrep -HrIv "${_whitelist}" | \
-        egrep "${_blacklist}" >> ${_tmp_exclude_status}
+        egrep -i "${_blacklist}" >> ${_tmp_exclude_status}
 
+    # /tmp/ox_support_infos-20140526-165503/opt/open-xchange/etc/msnoauth.properties:com.openexchange.oauth.msn.apiSecret=secret
     while read line; do
-        local _file=$(echo ${line} | awk -F ':' '{print $1}')
-        local _original_line=$(echo ${line} | awk -F '\\.properties.*:' '{print $2}')
-        local _plain_property=$(echo ${_original_line} | sed 's|=.*$|=|g')
-        local _secret_part=$(echo ${_original_line} | \
+        # /tmp/ox_support_infos-20140526-165503/opt/open-xchange/etc/msnoauth.properties
+        local _file=$(echo "${line}" | \
+            awk -F ':' '{print $1}' | \
+            sed 's|[[:blank:]]|\ |g')
+        # com.openexchange.oauth.msn.apiSecret=secret
+        local _original_line=$(echo "${line}" | \
+            sed "s|^${_file}:||g")
+        # com.openexchange.oauth.msn.apiSecret=
+        local _plain_property=$(echo "${_original_line}" | \
+            sed 's|=.*$|=|g' | \
+            sed 's|:.*$|:|g')
+        # secret
+        local _secret_part=$(echo "${_original_line}" | \
             sed "s|${_plain_property}||g" | \
-            sed 's|password=||g' )
-
-        # Replace special chars to wildcards (bug 43117)
-        local _secret_part=$(echo ${_secret_part} | \
+            sed 's|=password=||g' | \
+            sed 's|=user=||g')
+        # replace special chars to wildcards (bug 43117) e.g. secr[et -> secr.et
+        local _secret_part=$(echo "${_secret_part}" | \
             sed 's|\[|.|g' | \
             sed 's|\]|.|g' | \
             sed 's|\||.|g' | \
-            sed "s|'|.|g" )
-        local _original_line=$(echo ${_original_line} | \
+            sed "s|'|.|g")
+        local _original_line=$(echo "${_original_line}" | \
             sed 's|\[|.|g' | \
             sed 's|\]|.|g' | \
             sed 's|\||.|g' | \
-            sed "s|'|.|g" )
-
+            sed "s|'|.|g")
+        # com.openexchange.oauth.msn.apiSecret=<REMOVED BY OXSYSREPORT>
         if [ -n "${_secret_part}" ]; then
-            local _modified_line=$(echo ${_original_line} | \
+            local _modified_line=$(echo "${_original_line}" | \
                 sed "s|${_secret_part}|<REMOVED BY OXSYSREPORT>|g")
         else
+            # set this marker also if no value was set
             local _modified_line="${_original_line}<REMOVED BY OXSYSREPORT>"
         fi
-        sed -i "s|^${_original_line}$|${_modified_line}|g" ${_file}
-        sed -i "s|:${_original_line}$|:${_modified_line}|g" ${_tmp_exclude_status}
+        sed -i "s|^${_original_line}[[:blank:]]*$|${_modified_line}|g" "${_file}"
+        sed -i "s|:${_original_line}[[:blank:]]*$|:${_modified_line}|g" "${_tmp_exclude_status}"
     done < ${_tmp_exclude_status}
     print_hint_to_line_end ${_tmp_exclude_status} "modified"
     ALL_EXCLUDED="${_tmp_exclude_status} ${ALL_EXCLUDED}"
@@ -917,11 +963,15 @@ for argument in ${@}; do
             shift 2
         ;;
         --${EXCLUDE_OLDER_LOGS_THAN_LONG})
-            if [ '0' -le "${2}" ] 2> /dev/null ; then
+            if [ "all" == "${2}" ]; then
                 EXCLUDE_OLDER_LOGS_THAN=${2}
             else
-                usage
-                die "Error, option '${1}' requires positive numbers: ${2}"
+                if [ '0' -le "${2}" ] 2> /dev/null ; then
+                    EXCLUDE_OLDER_LOGS_THAN=${2}
+                else
+                    usage
+                    die "Error, numbers or keyword 'all' required: --${EXCLUDE_OLDER_LOGS_THAN_LONG} ${2}"
+                fi
             fi
             shift 2
        ;;
@@ -1026,10 +1076,13 @@ fi
 if [ 'true' == "${CREATE_HEAP_DUMP}" ]; then
     create_heap_dump
 fi
-collect_logs ${OX_LOG_DIR}
-if [ -n "${UNIVENTION_LOG_DIR}" ]; then
-    collect_logs ${UNIVENTION_LOG_DIR}
+if [ "all" != "${EXCLUDE_OLDER_LOGS_THAN}" ]; then
+    collect_logs ${OX_LOG_DIR}
+    if [ -n "${UNIVENTION_LOG_DIR}" ]; then
+        collect_logs ${UNIVENTION_LOG_DIR}
+    fi
 fi
+
 create_excluded_and_modified_overview modified-and-excluded-files.txt
 echo "Creating final archive: $(normalize_path ${LOGARC})"
 tar cvf ${LOGARC%%.gz}  -C ${TMP} ${LOGDIR} > /dev/null 2>&1
