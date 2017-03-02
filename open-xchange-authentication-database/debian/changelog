@@ -1,3 +1,9 @@
+open-xchange-authentication-database (7.8.3-17) stable; urgency=medium
+
+  * Build for patch 2017-03-06 (3985)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 02 Mar 2017 15:04:27 +0100
+
 open-xchange-authentication-database (7.8.3-16) stable; urgency=medium
 
   * Build for patch 2017-02-24 (3994)
