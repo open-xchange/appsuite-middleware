@@ -53,6 +53,7 @@ import java.net.SocketTimeoutException;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Locale;
@@ -125,6 +126,7 @@ import com.openexchange.timer.TimerService;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 import com.sun.mail.iap.ConnectQuotaExceededException;
 import com.sun.mail.iap.StarttlsRequiredException;
+import com.sun.mail.imap.GreetingListener;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.JavaIMAPStore;
@@ -1319,6 +1321,15 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
          */
         if (config.getIMAPProperties().isAuditLogEnabled()) {
             imapProps.put("mail.imap.auditLog.enabled", "true");
+        }
+        /*
+         * Greeting listener (for primary IMAP)
+         */
+        if (config.getAccountId() == MailAccount.DEFAULT_ID) {
+            GreetingListener greetingListener = IMAPProperties.getInstance().getHostNameRegex();
+            if (null != greetingListener) {
+                imapProps.put("mail.imap.greeting.listeners", Collections.singletonList(greetingListener));
+            }
         }
         /*
          * Check if a secure IMAP connection should be established

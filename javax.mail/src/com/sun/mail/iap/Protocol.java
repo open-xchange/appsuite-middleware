@@ -40,9 +40,9 @@
 
 package com.sun.mail.iap;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Vector;
 import java.util.Properties;
 import java.io.*;
 import java.nio.channels.SocketChannel;
@@ -51,6 +51,7 @@ import java.util.logging.Level;
 
 import javax.net.ssl.SSLSocket;
 
+import com.sun.mail.imap.GreetingListener;
 import com.sun.mail.util.*;
 
 /**
@@ -129,6 +130,17 @@ public class Protocol {
 
 	    // Read server greeting
 	    processGreeting(readResponse());
+	    
+	    // Call greeting listeners
+	    if (null != props) {
+	        Object value = props.get(prefix + ".greeting.listeners");
+	        if (value instanceof Collection) {
+                Collection<GreetingListener> listeners = (Collection<GreetingListener>) value;
+                for (GreetingListener greetingListener : listeners) {
+                    greetingListener.onGreetingProcessed(greeting, host, port);
+                }
+            }
+	    }
 
 	    timestamp = System.currentTimeMillis();
  
