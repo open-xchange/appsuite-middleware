@@ -35,7 +35,7 @@ datevalue:
     format: int64
 zone: 
   type: string
-  description: The timezone which should be used for a date or currentdate test. E.g. "+0100". If omitted the current timezone of the user is used.
+  description: Containing the timezone of date or currentdate tests. E.g. "+0100". If omitted the current timezone of the user is used.
 extensionskey:
   type: string
   description: The [extension key](#possible-extensions) (for body-test).

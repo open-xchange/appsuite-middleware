@@ -78,7 +78,7 @@ public class DateTestCommandParser extends AbstractDateTestCommandParser impleme
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser#parse(org.json.JSONObject, com.openexchange.tools.session.ServerSession)
      */
     @Override
@@ -96,11 +96,12 @@ public class DateTestCommandParser extends AbstractDateTestCommandParser impleme
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser#parse(org.json.JSONObject, java.lang.Object)
      */
     @Override
     public void parse(JSONObject jsonObject, TestCommand command) throws JSONException, OXException {
+        parseZone(jsonObject, command);
         parseComparisonTag(jsonObject, command);
         parseHeader(jsonObject, command);
         parseDatePart(jsonObject, command);
