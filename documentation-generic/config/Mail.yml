@@ -124,3 +124,14 @@ Special treatment happens for standard Spam folder and for the "INBOX/Malware" f
       Configcascade_Aware: true
       Related: com.openexchange.mail.maliciousFolders.enabled
       File: mail.properties
+  - data:
+      Key: com.openexchange.imap.greeting.host.regex
+      Description: >
+Specifies the regular expression to use to extract the host name/IP address information out of the greeting string advertised by primary
+IMAP server. Only applicable for primary IMAP server! Default is empty.
+      Default: 
+      Version: 7.8.4
+      Reloadable: false
+      Configcascade_Aware: false
+      Related: 
+      File: imap.properties
