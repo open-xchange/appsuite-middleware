@@ -64,6 +64,7 @@ import java.util.List;
 import java.util.Set;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.rmi.dataobjects.Database;
+import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.sqlStorage.CreateTableRegistry;
 import com.openexchange.admin.tools.AdminCache;
@@ -125,22 +126,29 @@ public class OXUtilMySQLStorageCommon {
 
     public void createDatabase(final Database db) throws StorageException {
         final Connection con;
+        final Connection configdbCon;
         String sql_pass = "";
         if (db.getPassword() != null) {
             sql_pass = db.getPassword();
         }
         try {
             con = cache.getSimpleSQLConnectionWithoutTimeout(db.getUrl(), db.getLogin(), sql_pass, db.getDriver());
+            configdbCon = cache.getConnectionForConfigDB();
         } catch (final SQLException e) {
             LOG.error("SQL Error", e);
             throw new StorageException(e.toString(), e);
         } catch (final ClassNotFoundException e) {
             LOG.error("Driver not found to create database ", e);
             throw new StorageException(e);
+        } catch (PoolException e) {
+            LOG.error("Pool Error", e);
+            throw new StorageException(e.toString(), e);
         }
         boolean created = false;
+        PreparedStatement stmt = null;
         try {
             con.setAutoCommit(false);
+            configdbCon.setAutoCommit(false);
             if (existsDatabase(con, db.getScheme())) {
                 throw new StorageException("Database \"" + db.getScheme() + "\" already exists");
             }
@@ -152,21 +160,31 @@ public class OXUtilMySQLStorageCommon {
             pumpData2DatabaseNew(con, CreateTableRegistry.getInstance().getList());
             initUpdateTaskTable(con, db.getId().intValue(), db.getScheme());
             con.commit();
+
+            stmt = configdbCon.prepareStatement("INSERT INTO contexts_per_dbschema VALUES(?,?,?)");
+            stmt.setInt(1, db.getId());
+            stmt.setString(2, db.getScheme());
+            stmt.setInt(3, 0);
+            stmt.executeUpdate();
+            stmt.close();
+            configdbCon.commit();
         } catch (final SQLException e) {
             rollback(con);
             if (created) {
-                deleteDatabase(con, db);
+                deleteDatabase(con, db, configdbCon);
             }
             throw new StorageException(e.toString());
         } catch (final StorageException e) {
             rollback(con);
             if (created) {
-                deleteDatabase(con, db);
+                deleteDatabase(con, db, configdbCon);
             }
             throw e;
         } finally {
             autocommit(con);
+            autocommit(configdbCon);
             cache.closeSimpleConnection(con);
+            cache.closeConfigDBSqlStuff(configdbCon, stmt);
         }
     }
 
@@ -262,7 +280,7 @@ public class OXUtilMySQLStorageCommon {
         }
     }
 
-    public static void deleteDatabase(final Database db) throws StorageException {
+    public static void deleteDatabase(final Database db, final Connection configdbCon) throws StorageException {
         final Connection con;
         try {
             con = cache.getSimpleSQLConnectionWithoutTimeout(db.getUrl(), db.getLogin(), db.getPassword(), db.getDriver());
@@ -274,23 +292,31 @@ public class OXUtilMySQLStorageCommon {
             throw new StorageException(e);
         }
         try {
-            deleteDatabase(con, db);
+            deleteDatabase(con, db, configdbCon);
         } finally {
             cache.closeSimpleConnection(con);
         }
     }
 
-    private static void deleteDatabase(final Connection con, final Database db) throws StorageException {
+    private static void deleteDatabase(final Connection con, final Database db, final Connection configdbCon) throws StorageException {
+        PreparedStatement pstmt = null;
         Statement stmt = null;
         try {
             con.setAutoCommit(false);
+            configdbCon.setAutoCommit(false);
             stmt = con.createStatement();
             stmt.executeUpdate("DROP DATABASE IF EXISTS `" + db.getScheme() + "`");
             con.commit();
+            
+            pstmt = configdbCon.prepareStatement("DELETE FROM contexts_per_dbschema WHERE db_pool_id=?");
+            pstmt.setInt(1, db.getId());
+            pstmt.executeUpdate();
+            pstmt.close();
         } catch (final SQLException e) {
             rollback(con);
             throw new StorageException(e.getMessage(), e);
         } finally {
+            closeSQLStuff(pstmt);
             closeSQLStuff(stmt);
         }
     }

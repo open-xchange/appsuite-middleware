@@ -450,7 +450,34 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     @Override
     public void deleteDatabase(final Database db) throws StorageException {
         final OXUtilMySQLStorageCommon oxutilcommon = new OXUtilMySQLStorageCommon();
-        oxutilcommon.deleteDatabase(db);
+        Connection con = null;
+        try {
+            con = cache.getConnectionForConfigDB();
+            con.setAutoCommit(false);
+            oxutilcommon.deleteDatabase(db, con);
+            con.commit();
+        } catch (PoolException e) {
+            LOG.error("Pool Error", e);
+            throw new StorageException(e);
+        } catch (SQLException e) {
+            LOG.error("SQL Error", e);
+            try {
+                if (con != null && !con.getAutoCommit()) {
+                    con.rollback();
+                }
+            } catch (final SQLException exp) {
+                LOG.error("Error processing rollback of configdb connection!", exp);
+            }
+            throw new StorageException(e);
+        } finally {
+            try {
+                if (con != null) {
+                    cache.pushConnectionForConfigDB(con);
+                }
+            } catch (final PoolException exp) {
+                LOG.error("Error pushing configdb connection to pool!", exp);
+            }
+        }
     }
 
     @Override

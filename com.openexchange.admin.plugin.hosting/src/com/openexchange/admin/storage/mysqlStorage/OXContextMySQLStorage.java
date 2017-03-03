@@ -1143,6 +1143,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             boolean rollback = false;
             boolean configConCommitted = false;
             boolean automaticStrategyUsed = true;
+            PreparedStatement stmt = null;
             try {
                 // Start transaction & mark to perform a roll-back if any error occurs
                 startTransaction(configCon);
@@ -1170,6 +1171,12 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     // Write context data before COMMIT
                     retval = writeContext(ctx, adminUser, access);
 
+                    stmt = configCon.prepareStatement("UPDATE contexts_per_dbschema SET count=count+1 WHERE db_pool_id=? AND schemaname=?");
+                    stmt.setInt(1, db.getId());
+                    stmt.setString(2, db.getScheme());
+                    stmt.executeUpdate();
+                    stmt.close();
+
                     // Commit transaction and unmark to perform a roll-back
                     configCon.commit();
                     rollback = false;
@@ -1181,9 +1188,15 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
                     // Write context data after COMMIT and unmark to perform a roll-back
                     retval = writeContext(ctx, adminUser, access);
+                    stmt = configCon.prepareStatement("UPDATE contexts_per_dbschema SET count=count+1 WHERE db_pool_id=? AND schemaname=?");
+                    stmt.setInt(1, db.getId());
+                    stmt.setString(2, db.getScheme());
+                    stmt.executeUpdate();
+                    stmt.close();
                     rollback = false;
                 }
 
+                
                 // Apparently, no error occurred
                 contextCreated = true;
 
@@ -1220,6 +1233,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 }
 
                 autocommit(configCon);
+                closeSQLStuff(stmt);
             }
         } finally {
             pushConnectionToPoolConfigDB(configCon);

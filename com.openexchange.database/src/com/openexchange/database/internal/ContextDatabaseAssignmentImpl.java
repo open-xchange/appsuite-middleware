@@ -91,8 +91,7 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
     private static final String DELETE = "DELETE FROM context_server2db_pool WHERE cid=? AND server_id=?";
     private static final String CONTEXTS_IN_SCHEMA = "SELECT cid FROM context_server2db_pool WHERE server_id=? AND write_db_pool_id=? AND db_schema=?";
     private static final String CONTEXTS_IN_DATABASE = "SELECT cid FROM context_server2db_pool WHERE read_db_pool_id=? OR write_db_pool_id=?";
-    private static final String NOTFILLED = "SELECT db_schema,contexts_per_dbpool.count AS count FROM context_server2db_pool LEFT JOIN contexts_per_dbpool ON contexts_per_dbpool.db_pool_id=context_server2db_pool.write_db_pool_id WHERE write_db_pool_id=? GROUP BY db_schema HAVING count<? ORDER BY count ASC;";
-
+    private static final String NOTFILLED = "SELECT schemaname,count FROM contexts_per_dbschema WHERE db_pool_id=? AND count<? ORDER BY count ASC";
     private final ConfigDatabaseService configDatabaseService;
 
     private static final String CACHE_NAME = "OXDBPoolCache";

@@ -371,7 +371,7 @@ public class OXContextMySQLStorageCommon {
         if (otherContexts.length == 0) {
             Database db = OXToolStorageInterface.getInstance().loadDatabaseById(poolId);
             db.setScheme(dbSchema);
-            OXUtilMySQLStorageCommon.deleteDatabase(db);
+            OXUtilMySQLStorageCommon.deleteDatabase(db,con);
         }
     }
 
@@ -402,6 +402,11 @@ public class OXContextMySQLStorageCommon {
             pool.deleteAssignment(con, contextId);
             stmt = con.prepareStatement("UPDATE contexts_per_dbpool SET count=count-1 WHERE db_pool_id=?");
             stmt.setInt(1, poolId);
+            stmt.executeUpdate();
+            stmt.close();
+            stmt = con.prepareStatement("UPDATE contexts_per_dbschema SET count=count-1 WHERE db_pool_id=? AND schemaname=?");
+            stmt.setInt(1, poolId);
+            stmt.setString(2, dbSchema);
             stmt.executeUpdate();
             stmt.close();
             deleteEmptySchema(con, poolId, dbSchema);
