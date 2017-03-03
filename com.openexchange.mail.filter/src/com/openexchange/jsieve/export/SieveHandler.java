@@ -79,6 +79,7 @@ import com.openexchange.jsieve.export.exceptions.OXSieveHandlerInvalidCredential
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mailfilter.properties.MailFilterConfigurationService;
 import com.openexchange.mailfilter.properties.MailFilterProperty;
+import com.openexchange.mailfilter.properties.PreferredSASLMech;
 import com.openexchange.mailfilter.services.Services;
 import com.openexchange.tools.encoding.Base64;
 
@@ -429,44 +430,63 @@ public class SieveHandler {
                 throw new OXSieveHandlerException(message, sieve_host, sieve_host_port, null);
             }
             measureStart();
-            String useAuth = "PLAIN";
-            {
-                String preferredSaslMech = null;
-                {
-                    ConfigurationService service = Services.getService(ConfigurationService.class);
-                    if (null != service) {
-                        preferredSaslMech = mailFilterConfig.getProperty(userId, contextId, MailFilterProperty.preferredSaslMech);
-                        if (null == preferredSaslMech) {
-                            // Check old property to keep compatibility
-                            boolean preferGSSAPI = service.getBoolProperty("com.openexchange.mail.filter.preferGSSAPI", false);
-                            if (preferGSSAPI) {
-                                useAuth = "GSSAPI";
-                            }
-                        }
-                    }
-                }
-                if ("GSSAPI".equals(preferredSaslMech) && sasl.contains("GSSAPI")) {
-                    useAuth = "GSSAPI";
-                }
-                if ("XOAUTH2".equals(preferredSaslMech) && sasl.contains("XOAUTH2")) {
-                    useAuth = "XOAUTH2";
-                }
-                if ("OAUTHBEARER".equals(preferredSaslMech) && sasl.contains("OAUTHBEARER")) {
-                    useAuth = "OAUTHBEARER";
-                }
-            }
-            if (!sasl.contains(useAuth)) {
-                String message = new StringBuilder(64).append("The server doesn't support ").append(useAuth).append(" authentication over a ").append(issueTLS ? "TLS" : "plain-text").append(" connection.").toString();
+            PreferredSASLMech saslMech = getPreferredSASLMechanism(mailFilterConfig, sasl);
+
+            if (!sasl.contains(saslMech.name())) {
+                String message = new StringBuilder(64).append("The server doesn't support ").append(saslMech.name()).append(" authentication over a ").append(issueTLS ? "TLS" : "plain-text").append(" connection.").toString();
                 throw new OXSieveHandlerException(message, sieve_host, sieve_host_port, null);
             }
 
             int configuredAuthTimeout = mailFilterConfig.getIntProperty(userId, contextId, MailFilterProperty.authTimeout);
-            if (!selectAuth(useAuth, commandBuilder, configuredAuthTimeout)) {
+            if (!selectAuth(saslMech, commandBuilder, configuredAuthTimeout)) {
                 throw new OXSieveHandlerInvalidCredentialsException("Authentication failed");
             }
             log.debug("Authentication to sieve successful");
             measureEnd("selectAuth");
         }
+    }
+
+    /**
+     * Returns the {@link PreferredSASLMech}
+     * 
+     * @param mailFilterConfig The {@link MailFilterConfigurationService}
+     * @param sasl The server SASL
+     * @return The {@link PreferredSASLMech}
+     */
+    private PreferredSASLMech getPreferredSASLMechanism(final MailFilterConfigurationService mailFilterConfig, List<String> sasl) {
+        PreferredSASLMech preferredSASLMechanism = PreferredSASLMech.PLAIN;
+        PreferredSASLMech configuredPreferredSASLMechanism = null;
+        String psm = null;
+        {
+            psm = mailFilterConfig.getProperty(userId, contextId, MailFilterProperty.preferredSaslMech);
+            if (psm != null) {
+                try {
+                    configuredPreferredSASLMechanism = PreferredSASLMech.valueOf(psm);
+                } catch (IllegalArgumentException e) {
+                    log.warn("Invalid property for {} found in mailfilter.properties.", MailFilterProperty.preferredSaslMech.getFQPropertyName());
+                }
+            }
+            if (null == configuredPreferredSASLMechanism) {
+                // Check old property to keep compatibility
+                ConfigurationService service = Services.getService(ConfigurationService.class);
+                if (null != service) {
+                    boolean preferGSSAPI = service.getBoolProperty("com.openexchange.mail.filter.preferGSSAPI", false);
+                    if (preferGSSAPI) {
+                        preferredSASLMechanism = PreferredSASLMech.GSSAPI;
+                    }
+                }
+            }
+        }
+        if (PreferredSASLMech.GSSAPI.equals(configuredPreferredSASLMechanism) && sasl.contains(PreferredSASLMech.GSSAPI.name())) {
+            preferredSASLMechanism = PreferredSASLMech.GSSAPI;
+        }
+        if (PreferredSASLMech.XOAUTH2.equals(configuredPreferredSASLMechanism) && sasl.contains(PreferredSASLMech.XOAUTH2.name())) {
+            preferredSASLMechanism = PreferredSASLMech.XOAUTH2;
+        }
+        if (PreferredSASLMech.OAUTHBEARER.equals(configuredPreferredSASLMechanism) && sasl.contains(PreferredSASLMech.OAUTHBEARER.name())) {
+            preferredSASLMechanism = PreferredSASLMech.OAUTHBEARER;
+        }
+        return preferredSASLMechanism;
     }
 
     /**
@@ -1275,7 +1295,7 @@ public class SieveHandler {
      * @throws UnsupportedEncodingException
      * @throws OXSieveHandlerException
      */
-    private boolean selectAuth(String auth_mech, StringBuilder commandBuilder, int timeout) throws IOException, UnsupportedEncodingException, OXSieveHandlerException {
+    private boolean selectAuth(PreferredSASLMech auth_mech, StringBuilder commandBuilder, int timeout) throws IOException, UnsupportedEncodingException, OXSieveHandlerException {
         // Adjust timeout if necessary
         int toRestore = s_sieve.getSoTimeout();
         if (toRestore > timeout) {
@@ -1286,21 +1306,24 @@ public class SieveHandler {
 
         // Perform authentication
         try {
-            if (auth_mech.equals("PLAIN")) {
-                return authPLAIN(commandBuilder);
-            } else if (auth_mech.equals("LOGIN")) {
-                return authLOGIN(commandBuilder);
-            } else if (auth_mech.equals("GSSAPI")) {
-                return authGSSAPI(commandBuilder);
-            } else if (auth_mech.equals("XOAUTH2")) {
-                return authXOAUTH2(commandBuilder);
-            } else if (auth_mech.equals("OAUTHBEARER")) {
-                return authOAUTHBEARER(commandBuilder);
+            switch (auth_mech) {
+                case GSSAPI:
+                    return authGSSAPI(commandBuilder);
+                case LOGIN:
+                    return authLOGIN(commandBuilder);
+                case OAUTHBEARER:
+                    return authOAUTHBEARER(commandBuilder);
+                case PLAIN:
+                    return authPLAIN(commandBuilder);
+                case XOAUTH2:
+                    return authXOAUTH2(commandBuilder);
+                default:
+                    return false;
+
             }
-            return false;
         } catch (SocketTimeoutException e) {
             // Read timeout while doing auth
-            String message = "Exceeded timeout of " + s_sieve.getSoTimeout() + "milliseconds while performing \"" + auth_mech + "\" SASL authentication for " + sieve_auth;
+            String message = "Exceeded timeout of " + s_sieve.getSoTimeout() + "milliseconds while performing \"" + auth_mech.name() + "\" SASL authentication for " + sieve_auth;
             throw new OXSieveHandlerException(message, sieve_host, sieve_host_port, null, e).setAuthTimeoutError(true);
         } finally {
             // Restore read timeout
