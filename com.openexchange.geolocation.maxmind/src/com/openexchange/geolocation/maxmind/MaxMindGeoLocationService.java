@@ -60,6 +60,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import org.osgi.framework.Bundle;
+import com.maxmind.db.CHMCache;
 import com.maxmind.geoip2.DatabaseReader;
 import com.maxmind.geoip2.exception.GeoIp2Exception;
 import com.maxmind.geoip2.model.CityResponse;
@@ -77,7 +78,7 @@ import com.openexchange.osgi.BundleResourceLoader;
 
 
 /**
- * {@link MaxMindGeoLocationService}
+ * {@link MaxMindGeoLocationService} - The MaxMind Geo location service.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.4
@@ -86,14 +87,15 @@ public class MaxMindGeoLocationService implements GeoLocationService {
 
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(MaxMindGeoLocationService.class);
 
-    private final DatabaseReader reader;
-
     /**
-     * Initializes a new {@link MaxMindGeoLocationService}.
+     * Creates a new <code>MaxMindGeoLocationService</code> instance.
+     *
+     * @param bundle The associated bundle
+     * @param configurationService The configuration service to use
+     * @return Newly created <code>MaxMindGeoLocationService</code> instance
+     * @throws OXException If creation fails
      */
-    public MaxMindGeoLocationService(Bundle bundle, ConfigurationService configurationService) throws OXException {
-        super();
-
+    public static MaxMindGeoLocationService newInstance(Bundle bundle, ConfigurationService configurationService) throws OXException {
         String databasePath = configurationService.getProperty("com.openexchange.geolocation.maxmind.databasePath", "resource://geodb/GeoLite2-City.mmdb");
 
         InputStream in = null;
@@ -110,7 +112,12 @@ public class MaxMindGeoLocationService implements GeoLocationService {
                 // Expect a file
                 in = getInputStreamFromFile(databasePath);
             }
-            reader = new DatabaseReader.Builder(in).build();
+
+            // Create DatabaseReader from input stream
+            DatabaseReader reader = new DatabaseReader.Builder(in).withCache(new CHMCache()).build();
+
+            // Pass DatabaseReader to a new instance
+            return new MaxMindGeoLocationService(reader);
         } catch (IOException e) {
             throw OXException.general("Failed to read " + databasePath, e);
         } finally {
@@ -118,7 +125,7 @@ public class MaxMindGeoLocationService implements GeoLocationService {
         }
     }
 
-    private InputStream getInputStreamFromFile(String databasePath) throws OXException {
+    private static InputStream getInputStreamFromFile(String databasePath) throws OXException {
         try {
             return new FileInputStream(databasePath);
         } catch (FileNotFoundException e) {
@@ -126,7 +133,7 @@ public class MaxMindGeoLocationService implements GeoLocationService {
         }
     }
 
-    private InputStream getInputStreamFromURL(URI uri) throws OXException {
+    private static InputStream getInputStreamFromURL(URI uri) throws OXException {
         try {
             URL url = uri.toURL();
             return url.openStream();
@@ -139,7 +146,7 @@ public class MaxMindGeoLocationService implements GeoLocationService {
         }
     }
 
-    private InputStream getInputStreamFromResource(URI uri, Bundle bundle) throws OXException {
+    private static InputStream getInputStreamFromResource(URI uri, Bundle bundle) throws OXException {
         try {
             String path = uri.getPath();
             String resourceName = null != path && path.length() > 0 ? uri.getHost() + path : uri.getHost();
@@ -155,12 +162,24 @@ public class MaxMindGeoLocationService implements GeoLocationService {
         }
     }
 
-    private URI toURI(String databasePath) throws OXException {
+    private static URI toURI(String databasePath) throws OXException {
         try {
             return new URI(databasePath);
         } catch (URISyntaxException e) {
             throw OXException.general("Invalid URI: " + databasePath, e);
         }
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------------
+
+    private final DatabaseReader reader;
+
+    /**
+     * Initializes a new {@link MaxMindGeoLocationService}.
+     */
+    private MaxMindGeoLocationService(DatabaseReader reader) {
+        super();
+        this.reader = reader;
     }
 
     /**
@@ -241,6 +260,17 @@ public class MaxMindGeoLocationService implements GeoLocationService {
         }
 
         return gi.build();
+    }
+
+    /**
+     * Stops this MaxMind Geo,location service.
+     */
+    public void stop() {
+        try {
+            reader.close();
+        } catch (Exception e) {
+            // Ignore
+        }
     }
 
 }

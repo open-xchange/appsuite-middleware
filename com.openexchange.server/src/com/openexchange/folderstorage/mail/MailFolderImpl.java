@@ -60,6 +60,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderExtension;
@@ -111,6 +112,10 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailFolderImpl.class);
 
     private static final String PROTOCOL_UNIFIED_INBOX = UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX;
+    private static final String CAPABILITY_COUNT_TOTAL = Strings.asciiLowerCase(FileStorageCapability.COUNT_TOTAL.name());
+    private static final String CAPABILITY_STORE_SEEN = "STORE_SEEN";
+    private static final String CAPABILITY_FOLDER_VALIDITY = "FOLDER_VALIDITY";
+    private static final String CAPABILITY_FILENAME_SEARCH = "FILENAME_SEARCH";
 
     /**
      * The mail folder content type.
@@ -311,22 +316,27 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
 
         this.capabilities = mailConfig.getCapabilities().getCapabilities();
         if (mailConfig.getCapabilities().hasFileNameSearch()) {
-            addSupportedCapabilities("FILENAME_SEARCH");
+            addSupportedCapabilities(CAPABILITY_FILENAME_SEARCH);
         }
         if (mailConfig.getCapabilities().hasFolderValidity()) {
-            addSupportedCapabilities("FOLDER_VALIDITY");
+            addSupportedCapabilities(CAPABILITY_FOLDER_VALIDITY);
         }
         if (!mailFolder.isHoldsFolders() && mp.canCreateSubfolders()) {
             // Cannot contain subfolders; therefore deny subfolder creation
             mp.setFolderPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER);
         }
-        if (!mailFolder.isHoldsMessages() && mp.canReadOwnObjects()) {
-            // Cannot contain messages; therefore deny read access. Folder is not selectable.
-            mp.setReadObjectPermission(OCLPermission.NO_PERMISSIONS);
+        if (mp.canReadOwnObjects()) {
+            if (mailFolder.isHoldsMessages()) {
+                addSupportedCapabilities(CAPABILITY_COUNT_TOTAL);
+            } else {
+                // Cannot contain messages; therefore deny read access. Folder is not selectable.
+                mp.setReadObjectPermission(OCLPermission.NO_PERMISSIONS);
+            }
         }
+
         final int canStoreSeenFlag = mp.canStoreSeenFlag();
         if (canStoreSeenFlag > 0 || ((canStoreSeenFlag < 0) && (mp.getReadPermission() > MailPermission.NO_PERMISSIONS))) {
-            addSupportedCapabilities("STORE_SEEN");
+            addSupportedCapabilities(CAPABILITY_STORE_SEEN);
         }
         // Permission bits
         int permissionBits = createPermissionBits(mp.getFolderPermission(), mp.getReadPermission(), mp.getWritePermission(), mp.getDeletePermission(), mp.isFolderAdmin());
