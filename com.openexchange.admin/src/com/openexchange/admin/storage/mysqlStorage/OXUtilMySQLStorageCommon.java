@@ -308,8 +308,8 @@ public class OXUtilMySQLStorageCommon {
             stmt.executeUpdate("DROP DATABASE IF EXISTS `" + db.getScheme() + "`");
             con.commit();
             
-            pstmt = configdbCon.prepareStatement("DELETE FROM contexts_per_dbschema WHERE db_pool_id=?");
-            pstmt.setInt(1, db.getId());
+            pstmt = configdbCon.prepareStatement("DELETE FROM contexts_per_dbschema WHERE schemaname=?");
+            pstmt.setString(1, db.getScheme());
             pstmt.executeUpdate();
             pstmt.close();
         } catch (final SQLException e) {
