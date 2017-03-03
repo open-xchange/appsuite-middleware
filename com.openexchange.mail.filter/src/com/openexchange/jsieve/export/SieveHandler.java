@@ -403,7 +403,6 @@ public class SieveHandler {
                  * directly as response for the STARTTLS command.
                  */
                 final String implementation = capa.getImplementation();
-                ;
                 if (implementation.matches(mailFilterConfig.getProperty(userId, contextId, MailFilterProperty.nonRFCCompliantTLSRegex))) {
                     measureStart();
                     bos_sieve.write(commandBuilder.append("CAPABILITY").append(CRLF).toString().getBytes(com.openexchange.java.Charsets.UTF_8));
