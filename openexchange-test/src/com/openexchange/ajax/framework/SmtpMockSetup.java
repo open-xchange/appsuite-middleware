@@ -93,7 +93,8 @@ public class SmtpMockSetup {
     }
 
     private static void startSmtpMockForAllContexts() {
-        contextsWithStartedMock = TestContextPool.getCopyOfCurrentlyAvailableContexts();
+        contextsWithStartedMock = TestContextPool.getAllTimeAvailableContexts();
+        LOG.info("Retrieved {} contexts to start SMTP mock server for.", contextsWithStartedMock.size());
 
         for (TestContext testContext : contextsWithStartedMock) {
             TestUser noReplyUser = testContext.getNoReplyUser();
@@ -107,6 +108,7 @@ public class SmtpMockSetup {
     }
 
     private static SmtpMockConfig startSmtpMockServerAndSetNoReply(TestUser userNoReply) {
+        LOG.info("Try to start SMTP mock server for user {} in context {}.", userNoReply.getLogin(), userNoReply.getContext());
         try {
             AJAXClient client = new AJAXClient(userNoReply);
             StartSMTPRequest request = new StartSMTPRequest(true, client.getValues().getContextId(), userNoReply.getLogin());

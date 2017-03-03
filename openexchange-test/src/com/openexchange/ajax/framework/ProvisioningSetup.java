@@ -63,7 +63,6 @@ import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.configuration.TestConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
-import com.openexchange.java.Strings;
 import com.openexchange.test.pool.TestContext;
 import com.openexchange.test.pool.TestContextPool;
 import com.openexchange.test.pool.TestUser;
@@ -115,7 +114,7 @@ public class ProvisioningSetup {
                 TestContextPool.startWatcher();
 
                 initialized.compareAndSet(false, true);
-                LOG.info("Finished initialization of the following contexts: {}.", Strings.concat(",", TestContextPool.getCopyOfCurrentlyAvailableContexts()));
+                LOG.info("Finished initialization for {} contexts.", TestContextPool.getAllTimeAvailableContexts().size());
             }
         }
     }
