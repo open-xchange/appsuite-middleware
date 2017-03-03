@@ -251,6 +251,15 @@ public class Strings {
     }
 
     /**
+     * High speed test for ASCII letter!
+     *
+     * @return <code>true</code> if the indicated character is an ASCII letter; otherwise <code>false</code>
+     */
+    public static boolean isAsciiLetter(final char c) {
+        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+    }
+
+    /**
      * Gets specified string's ASCII bytes
      *
      * @param str The string
