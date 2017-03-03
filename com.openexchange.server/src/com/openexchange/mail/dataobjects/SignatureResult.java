@@ -47,42 +47,79 @@
  *
  */
 
-package com.openexchange.test;
-
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import com.openexchange.ajax.framework.SmtpMockSetup;
-import com.openexchange.ajax.oauth.provider.OAuthProviderSmtpTests;
-import com.openexchange.ajax.onboarding.OnboardingAJAXSuite;
-import com.openexchange.ajax.share.ShareAJAXSuite;
-import com.openexchange.test.concurrent.ParallelSuite;
+package com.openexchange.mail.dataobjects;
 
 /**
- * 
- * {@link InterfaceSmtpMockTests}
+ * Result of a signature verification
+ * {@link SignatureResult}
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since v7.8.4
+ * @author <a href="mailto:greg.hill@open-xchange.com">Greg Hill</a>
+ * @since v2.8.0
  */
-@RunWith(ParallelSuite.class)
-@Suite.SuiteClasses({ 
-    OnboardingAJAXSuite.class, 
-    OAuthProviderSmtpTests.class, 
-    ShareAJAXSuite.class,
-})
-public final class InterfaceSmtpMockTests {
-    
-    @BeforeClass
-    public static void before() throws Exception {
-        SmtpMockSetup.init();
-    }
-    
-    @AfterClass
-    public static void after() throws Exception {
-        SmtpMockSetup.restore();
+public class SignatureResult {
+
+    private boolean verified;  // Signature is verified
+    private boolean missing;   // Missing key/info to verify
+    private long date;         // Tick representation date
+
+    /**
+     * Default constructor
+     * Initializes a new {@link SignatureResult}.
+     */
+    public SignatureResult () {
+        verified = false;
+        missing = false;
+        date = 0l;
     }
 
+    /**
+     * Set if the signature was verified or failed verification
+     * True if verified
+     * @param verified
+     */
+    public void setVerified (boolean verified) {
+        this.verified = verified;
+    }
+
+    /**
+     * Set if the signature was missing data for verification
+     * @param missing
+     */
+    public void setMissing (boolean missing) {
+        this.missing = missing;
+    }
+
+    /**
+     * Long representation of the date
+     * @param date
+     */
+    public void setDate (long date) {
+        this.date = date;
+    }
+
+    /**
+     * Return true if the signature was successfully verified
+     * @return
+     */
+    public boolean isVerified () {
+        return verified;
+    }
+
+    /**
+     * Return true if information was missing for verification
+     * @return
+     */
+    public boolean isMissing () {
+        return missing;
+    }
+
+    /**
+     * Return long representation of the date
+     * @return
+     */
+    public long getDate () {
+        return date;
+    }
 
 }
+

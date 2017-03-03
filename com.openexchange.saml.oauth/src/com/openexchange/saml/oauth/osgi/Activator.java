@@ -53,6 +53,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.Interests;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.lock.LockService;
 import com.openexchange.mail.api.AuthenticationFailedHandler;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
@@ -89,7 +90,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { SessiondService.class, ConfigViewFactory.class, SSLSocketFactoryProvider.class, SSLConfigurationService.class };
+        return new Class[] { SessiondService.class, ConfigViewFactory.class, SSLSocketFactoryProvider.class, SSLConfigurationService.class, LockService.class };
     }
 
     @Override

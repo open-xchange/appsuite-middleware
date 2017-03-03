@@ -128,6 +128,12 @@ public enum MailFilterProperty {
     connectionTimeout(30000),
 
     /**
+     * Specifies when the connection should time out (value in milliseconds) when performing
+     * SASL authentication against Sieve end-point. Default is 6000
+     */
+    authTimeout(6000),
+
+    /**
      * <p>Set the password source; meaning which source is taken to determine a user's
      * password to login into mail filter system. If 'session' is set, then user's individual
      * system's password is taken. If 'global' is set, then the value specified through

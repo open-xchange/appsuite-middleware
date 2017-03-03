@@ -50,6 +50,8 @@
 package com.openexchange.saml.oauth;
 
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
@@ -72,6 +74,7 @@ public class HttpClientOAuthAccessTokenService implements OAuthAccessTokenServic
     private final ConfigViewFactory configViewFactory;
     private final OAuthAccessTokenRequest accessTokenRequest;
     private final OAuthRefreshTokenRequest refreshTokenRequest;
+    private static final Logger LOG = LoggerFactory.getLogger(OAuthAccessTokenService.class);
 
     /**
      * Initializes a new {@link HttpClientOAuthAccessTokenService}.
@@ -110,7 +113,9 @@ public class HttpClientOAuthAccessTokenService implements OAuthAccessTokenServic
 
         switch (type) {
             case SAML:
-                return accessTokenRequest.requestAccessToken(data, userId, contextId);
+                OAuthAccessToken result = accessTokenRequest.requestAccessToken(data, userId, contextId);
+                LOG.debug("Successfully traded a saml assertion for an access token.");
+                return result;
             case REFRESH_TOKEN:
                 return refreshTokenRequest.requestAccessToken(data, userId, contextId);
         }

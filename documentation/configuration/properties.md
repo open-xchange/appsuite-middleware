@@ -644,7 +644,7 @@ If you would like to add a reference to another property use the following appro
 ---
 | Key | <span style="font-weight:normal">com.openexchange.mail.maliciousFolders.enabled</span> |
 |:----------------|:--------|
-| __Description__ | Enables/disables support for malicious folders.<br><br>If enabled and a mail is fetched from a folder contained in listing configured through "com.openexchange.mail.maliciousFolders.listing"<br>property, the imail's JSON representation contains an additional "malicious: true" field and possible HTML content is processed in the way<br>to disable any hyper-links.<br><br>I.e.<br>"...&lt;a href="http://evil.com/click.me"&gt;Get something for free here&lt;/a&gt;..."<br>is turned to<br>"...&lt;a href="#" onclick"return false;" data-disabled="true"&gt;Get something for free here&lt;/a&gt;..."<br> |
+| __Description__ | Enables/disables support for malicious folders.<br><br>If enabled and a mail is fetched from a folder contained in listing configured through "com.openexchange.mail.maliciousFolders.listing" property, the mail's JSON representation contains an additional "malicious: true" field and possible HTML content is processed in the way to disable any hyper-links.<br><br>I.e.<br>"...&lt;a href="http://evil.com/click.me"&gt;Get something for free here&lt;/a&gt;..."<br>is turned to<br>"...&lt;a href="#" onclick"return false;" data-disabled="true"&gt;Get something for free here&lt;/a&gt;..."<br> |
 | __Default__ | true  |
 | __Version__ | 7.8.4  |
 | __Reloadable__ | true  |
@@ -655,13 +655,23 @@ If you would like to add a reference to another property use the following appro
 ---
 | Key | <span style="font-weight:normal">com.openexchange.mail.maliciousFolders.listing</span> |
 |:----------------|:--------|
-| __Description__ | Specifies the full paths for such mail folders in the primary account's folder tree that are supposed being considered as malicious<br>and therefore a special treatment happens; e.g. hyper-links that occur in mail content are not displayed and/or are not clickable.<br><br>The value is supposed to be comma-separated list of folder paths. An entry in the CSV list is either a full path of a folder in the primary<br>mail account (e.g. "INBOX/Malware") or a reserved identifier denoting the standard folder and its sub-folders of every mail account (incl.<br>Unified Mail). Supported reserved identifiers are: "$Spam", "$Drafts", "$Sent", "$Trash", "$Confirmed-spam", "$Confirmed-ham".<br><br> Example $Spam, INBOX/Malware<br>Special treatment happens for standard Spam folder and for the "INBOX/Malware" folder in primary account's folder tree hierarchy.<br> |
+| __Description__ | Specifies the full paths for such mail folders in the primary account's folder tree that are supposed being considered as malicious and therefore a special treatment happens; e.g. hyper-links that occur in mail content are not displayed and/or are not clickable.<br><br>The value is supposed to be comma-separated list of folder paths. An entry in the CSV list is either a full path of a folder in the primary mail account (e.g. "INBOX/Malware") or a reserved identifier denoting the standard folder and its sub-folders of every mail account (incl. Unified Mail). Supported reserved identifiers are: "$Spam", "$Drafts", "$Sent", "$Trash", "$Confirmed-spam", "$Confirmed-ham".<br><br> Example $Spam, INBOX/Malware<br>Special treatment happens for standard Spam folder and for the "INBOX/Malware" folder in primary account's folder tree hierarchy.<br> |
 | __Default__ | $Spam, $Confirmed-spam  |
 | __Version__ | 7.8.4  |
 | __Reloadable__ | true  |
 | __Configcascade Aware__ | true  |
 | __Related__ | com.openexchange.mail.maliciousFolders.enabled  |
 | __File__ | mail.properties  |
+
+---
+| Key | <span style="font-weight:normal">com.openexchange.imap.greeting.host.regex</span> |
+|:----------------|:--------|
+| __Description__ | Specifies the regular expression to use to extract the host name/IP address information out of the greeting string advertised by primary<br>IMAP server. Only applicable for primary IMAP server! Default is empty.<br><br>The regular expression is supposed to be specified in Java notation: http://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html<br><br>Moreover, either the complete regex is considered or in case a capturing group is present that group will be preferred.<br>I.e. "Dovecot at ([0-9a-zA-Z._-]*) is ready", then the capturing group is supposed to extract the host name/IP addres information<br> |
+| __Default__ |  |
+| __Version__ | 7.8.4  |
+| __Reloadable__ | false  |
+| __Configcascade Aware__ | false  |
+| __File__ | imap.properties  |
 
 ---
 

@@ -49,9 +49,6 @@
 
 package com.openexchange.mail.dataobjects;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 /**
  * Class to handle the security Information for an email
  * Will keep track if email has signature or is Encrypted
@@ -95,19 +92,6 @@ public class SecurityInfo {
      */
     public boolean isSigned () {
         return signed;
-    }
-
-    /**
-     * Create the JSON representation for this <code>SecurityInfo</code> object.
-     *
-     * @return The JSON representation
-     * @throws JSONException If JSON representation cannot be returned
-     */
-    public JSONObject toJSON() throws JSONException {
-        JSONObject security = new JSONObject(2);
-        security.put("encrypted", encrypted);
-        security.put("signed", signed);
-        return security;
     }
 
 }

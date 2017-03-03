@@ -187,7 +187,7 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
         }
 
         try {
-            return lockService.getSelfCleaningLockFor(new StringBuilder(32).append("imapidle-").append(contextId).append('-').append(userId).toString());
+            return lockService.getSelfCleaningLockFor(new StringBuilder(32).append("dovecotpush-").append(contextId).append('-').append(userId).toString());
         } catch (Exception e) {
             LOGGER.warn("Failed to acquire lock for user {} in context {}. Using global lock instead.", I(userId), I(contextId), e);
             return globalLock;

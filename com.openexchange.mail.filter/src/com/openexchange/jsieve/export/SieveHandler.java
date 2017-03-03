@@ -58,6 +58,7 @@ import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
@@ -434,7 +435,7 @@ public class SieveHandler {
                 {
                     ConfigurationService service = Services.getService(ConfigurationService.class);
                     if (null != service) {
-                        preferredSaslMech = service.getProperty("com.openexchange.mail.filter.preferredSaslMech");
+                        preferredSaslMech = mailFilterConfig.getProperty(userId, contextId, MailFilterProperty.preferredSaslMech);
                         if (null == preferredSaslMech) {
                             // Check old property to keep compatibility
                             boolean preferGSSAPI = service.getBoolProperty("com.openexchange.mail.filter.preferGSSAPI", false);
@@ -458,7 +459,9 @@ public class SieveHandler {
                 String message = new StringBuilder(64).append("The server doesn't support ").append(useAuth).append(" authentication over a ").append(issueTLS ? "TLS" : "plain-text").append(" connection.").toString();
                 throw new OXSieveHandlerException(message, sieve_host, sieve_host_port, null);
             }
-            if (!selectAuth(useAuth, commandBuilder)) {
+
+            int configuredAuthTimeout = mailFilterConfig.getIntProperty(userId, contextId, MailFilterProperty.authTimeout);
+            if (!selectAuth(useAuth, commandBuilder, configuredAuthTimeout)) {
                 throw new OXSieveHandlerInvalidCredentialsException("Authentication failed");
             }
             log.debug("Authentication to sieve successful");
@@ -1264,25 +1267,47 @@ public class SieveHandler {
     }
 
     /**
-     * @param auth_mech
+     * @param auth_mech The selected SASL authentication mechanism
+     * @param commandBuilder The command builder to use
+     * @param timeout The special read timeout to apply for doing authentication
      * @return
      * @throws IOException
      * @throws UnsupportedEncodingException
      * @throws OXSieveHandlerException
      */
-    private boolean selectAuth(final String auth_mech, final StringBuilder commandBuilder) throws IOException, UnsupportedEncodingException, OXSieveHandlerException {
-        if (auth_mech.equals("PLAIN")) {
-            return authPLAIN(commandBuilder);
-        } else if (auth_mech.equals("LOGIN")) {
-            return authLOGIN(commandBuilder);
-        } else if (auth_mech.equals("GSSAPI")) {
-            return authGSSAPI(commandBuilder);
-        } else if (auth_mech.equals("XOAUTH2")) {
-            return authXOAUTH2(commandBuilder);
-        } else if (auth_mech.equals("OAUTHBEARER")) {
-            return authOAUTHBEARER(commandBuilder);
+    private boolean selectAuth(String auth_mech, StringBuilder commandBuilder, int timeout) throws IOException, UnsupportedEncodingException, OXSieveHandlerException {
+        // Adjust timeout if necessary
+        int toRestore = s_sieve.getSoTimeout();
+        if (toRestore > timeout) {
+            s_sieve.setSoTimeout(timeout);
+        } else {
+            toRestore = -1;
         }
-        return false;
+
+        // Perform authentication
+        try {
+            if (auth_mech.equals("PLAIN")) {
+                return authPLAIN(commandBuilder);
+            } else if (auth_mech.equals("LOGIN")) {
+                return authLOGIN(commandBuilder);
+            } else if (auth_mech.equals("GSSAPI")) {
+                return authGSSAPI(commandBuilder);
+            } else if (auth_mech.equals("XOAUTH2")) {
+                return authXOAUTH2(commandBuilder);
+            } else if (auth_mech.equals("OAUTHBEARER")) {
+                return authOAUTHBEARER(commandBuilder);
+            }
+            return false;
+        } catch (SocketTimeoutException e) {
+            // Read timeout while doing auth
+            String message = "Exceeded timeout of " + s_sieve.getSoTimeout() + "milliseconds while performing \"" + auth_mech + "\" SASL authentication for " + sieve_auth;
+            throw new OXSieveHandlerException(message, sieve_host, sieve_host_port, null, e).setAuthTimeoutError(true);
+        } finally {
+            // Restore read timeout
+            if (toRestore > 0) {
+                s_sieve.setSoTimeout(toRestore);
+            }
+        }
     }
 
     private void parseCAPA(final String line) {

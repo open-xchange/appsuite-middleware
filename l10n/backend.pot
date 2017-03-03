@@ -7816,7 +7816,7 @@ msgstr ""
 #. * The provided login information seem to be wrong. Please try again.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:70
-msgid "The provided login information seem to be wrong. Please try again."
+msgid "The provided login data seem to be wrong. Please correct them."
 msgstr ""
 
 #. *
@@ -7824,8 +7824,8 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:75
 msgid ""
-"The provided login information to access mail server %1$s seem to be wrong. "
-"Please try again."
+"The provided login data to access mail server %1$s seem to be wrong. Please "
+"correct them."
 msgstr ""
 
 #. *

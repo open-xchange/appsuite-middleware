@@ -207,6 +207,10 @@ public enum MailFilterExceptionCode implements DisplayableOXExceptionCode {
      * An I/O error occurred: %1$s
      */
     IO_ERROR("An I/O error occurred: %1$s", CATEGORY_ERROR, 31),
+    /**
+     * Timeout while performing authentication against sieve server %1$s at port %2$s: %3$s
+     */
+    AUTH_TIMEOUT("Timeout while performing authentication against sieve server %1$s at port %2$s: %3$s", CATEGORY_CONNECTIVITY, 32),
     ;
 
     private final String message;
@@ -337,6 +341,10 @@ public enum MailFilterExceptionCode implements DisplayableOXExceptionCode {
 
         if (e.isParseError()) {
             return MailFilterExceptionCode.INVALID_SIEVE_RULE2.create(e, saneMessage(e.getMessage()));
+        }
+
+        if (e.isAuthTimeoutError()) {
+            return MailFilterExceptionCode.AUTH_TIMEOUT.create(e, e.getSieveHost(), e.getSieveHostPort(), saneMessage(e.getMessage()));
         }
 
         return MailFilterExceptionCode.SIEVE_COMMUNICATION_ERROR.create(e, e.getSieveHost(), Integer.valueOf(e.getSieveHostPort()), credentials.getRightUsername(), credentials.getContextString());

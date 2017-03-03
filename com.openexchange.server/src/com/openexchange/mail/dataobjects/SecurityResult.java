@@ -49,8 +49,7 @@
 
 package com.openexchange.mail.dataobjects;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.util.ArrayList;
 
 /**
  * {@link SecurityResult}
@@ -58,14 +57,82 @@ import org.json.JSONObject;
  * @author <a href="mailto:greg.hill@open-xchange.com">Greg Hill</a>
  * @since v7.8.4
  */
-public interface SecurityResult {
+public abstract class SecurityResult {
 
     /**
-     * Gets the JSON representation of the security object
+     * Type of encryption for future options
+     * {@link EncryptionType}
      *
-     * @return The JSON representation of the security object
-     * @throws JSONException If JSON representation cannot be returned
+     * @author <a href="mailto:greg.hill@open-xchange.com">Greg Hill</a>
+     * @since v2.8.0
      */
-    JSONObject toJSON() throws JSONException;
+    public enum EncryptionType {
+        PGP ("PGP"),
+        SMIME ("SMIME");
+
+        private final String name;
+
+        private EncryptionType (String name) {
+            this.name = name;
+        }
+
+        public String toString() {
+            return this.name;
+        }
+    }
+
+    protected boolean decryptSuccess;  // If sucessfully decoded
+    protected String error; // Any error messages
+    protected ArrayList<SignatureResult> signatureResults;
+    protected EncryptionType type;  // Type of encryption
+
+    /**
+     * Return true if E-Mail action successful
+     * @return
+     */
+    public boolean getSuccess () {
+        return decryptSuccess;
+    }
+
+    /**
+     * Return true if has error
+     * @return
+     */
+    public boolean hasError () {
+        return (error != null && !error.isEmpty());
+    }
+
+    /**
+     * Get error message if any
+     * @return
+     */
+    public String getError () {
+        return error;
+    }
+
+    /**
+     * Get list of signature results
+     * @return
+     */
+    public ArrayList<SignatureResult> getSignatureResults() {
+        return signatureResults;
+    }
+
+    /**
+     * Return true if has signature results
+     * @return
+     */
+    public boolean hasSignatureResults () {
+        return (signatureResults != null && !signatureResults.isEmpty());
+    }
+
+    /**
+     * Get type of encryption.  PGP vs SMIME
+     * @return
+     */
+    public EncryptionType getType () {
+        return type;
+    }
+
 
 }

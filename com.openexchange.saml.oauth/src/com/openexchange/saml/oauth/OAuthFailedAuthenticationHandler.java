@@ -49,7 +49,12 @@
 
 package com.openexchange.saml.oauth;
 
+import static com.openexchange.java.Autoboxing.I;
+import java.util.concurrent.locks.Lock;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.lock.LockService;
 import com.openexchange.mail.api.AuthType;
 import com.openexchange.mail.api.AuthenticationFailedHandler;
 import com.openexchange.mail.api.AuthenticationFailureHandlerResult;
@@ -72,6 +77,7 @@ public class OAuthFailedAuthenticationHandler implements AuthenticationFailedHan
 
     private final ServiceLookup services;
     private final OAuthAccessTokenService tokenService;
+    private static final Logger LOG = LoggerFactory.getLogger(OAuthAccessTokenService.class);
 
     /**
      * Initializes a new {@link OAuthFailedAuthenticationHandler}.
@@ -82,6 +88,22 @@ public class OAuthFailedAuthenticationHandler implements AuthenticationFailedHan
         this.services = services;
     }
 
+    private Lock getLockFor(Session session) {
+        LockService lockService = services.getOptionalService(LockService.class);
+        if (null == lockService) {
+            return (Lock) session.getParameter(Session.PARAM_LOCK);
+        }
+
+        int userId = session.getUserId();
+        int contextId = session.getContextId();
+        try {
+            return lockService.getSelfCleaningLockFor(new StringBuilder(32).append("oauthfah-").append(contextId).append('-').append(userId).toString());
+        } catch (Exception e) {
+            LOG.warn("Failed to acquire lock for user {} in context {}. Using global lock instead.", I(userId), I(contextId), e);
+            return null;
+        }
+    }
+
     @Override
     public AuthenticationFailureHandlerResult handleAuthenticationFailed(OXException failedAuthentication, Service service, MailConfig mailConfig, Session session) throws OXException {
         if (!AuthType.isOAuthType(mailConfig.getAuthType())) {
@@ -89,29 +111,55 @@ public class OAuthFailedAuthenticationHandler implements AuthenticationFailedHan
         }
 
         SessiondService sessiondService = services.getService(SessiondService.class);
-        if (session.containsParameter(Session.PARAM_OAUTH_REFRESH_TOKEN)) {
-            // try to refresh the access token
-            try {
-                OAuthAccessToken accessToken = tokenService.getAccessToken(OAuthGrantType.REFRESH_TOKEN,(String) session.getParameter(Session.PARAM_OAUTH_REFRESH_TOKEN), session.getUserId(), session.getContextId());
-                if (accessToken == null) {
-                    sessiondService.removeSession(session.getSessionID());
-                    return AuthenticationFailureHandlerResult.createErrorResult(SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID()));
+        String oldRefreshToken = (String) session.getParameter(Session.PARAM_OAUTH_REFRESH_TOKEN);
+        if (null != oldRefreshToken) {
+            // Try to refresh the access token
+            Lock lock = getLockFor(session);
+            if (null == lock) {
+                synchronized (session) {
+                    return doHandleAuthFailed(session, oldRefreshToken, mailConfig, sessiondService);
                 }
-                session.setParameter(Session.PARAM_OAUTH_ACCESS_TOKEN, accessToken.getAccessToken());
-                session.setParameter(Session.PARAM_OAUTH_REFRESH_TOKEN, accessToken.getRefreshToken());
-                mailConfig.setPassword(accessToken.getAccessToken());
-                sessiondService.storeSession(session.getSessionID());
-                return AuthenticationFailureHandlerResult.createRetryResult();
-            } catch (OXException x) {
-                // Unable to refresh access token -> logout
-                sessiondService.removeSession(session.getSessionID());
-                return AuthenticationFailureHandlerResult.createErrorResult(SessionExceptionCodes.SESSION_EXPIRED.create(x, session.getSessionID()));
+            }
+
+            lock.lock();
+            try {
+                return doHandleAuthFailed(session, oldRefreshToken, mailConfig, sessiondService);
+            } finally {
+                lock.unlock();
             }
         }
 
         // Unable to refresh access token -> logout
+        LOG.debug("Unable to refresh access token for user {} in context {}. Session contains no refresh token.", I(session.getUserId()), I(session.getContextId()));
         sessiondService.removeSession(session.getSessionID());
         return AuthenticationFailureHandlerResult.createErrorResult(SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID()));
+    }
+
+    private AuthenticationFailureHandlerResult doHandleAuthFailed(Session session, String oldRefreshToken, MailConfig mailConfig, SessiondService sessiondService) {
+        if (false == oldRefreshToken.equals(session.getParameter(Session.PARAM_OAUTH_REFRESH_TOKEN))) {
+            // Changed in the meantime...
+            return AuthenticationFailureHandlerResult.createRetryResult();
+        }
+
+        try {
+            OAuthAccessToken accessToken = tokenService.getAccessToken(OAuthGrantType.REFRESH_TOKEN, (String) session.getParameter(Session.PARAM_OAUTH_REFRESH_TOKEN), session.getUserId(), session.getContextId());
+            if (accessToken == null) {
+                LOG.debug("Unable to refresh access token for user {} in context {}. Session will be invalidated.", I(session.getUserId()), I(session.getContextId()));
+                sessiondService.removeSession(session.getSessionID());
+                return AuthenticationFailureHandlerResult.createErrorResult(SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID()));
+            }
+            session.setParameter(Session.PARAM_OAUTH_ACCESS_TOKEN, accessToken.getAccessToken());
+            session.setParameter(Session.PARAM_OAUTH_REFRESH_TOKEN, accessToken.getRefreshToken());
+            mailConfig.setPassword(accessToken.getAccessToken());
+            sessiondService.storeSession(session.getSessionID());
+            LOG.debug("Access token succesfully refreshed for user {} in context {}", I(session.getUserId()), I(session.getContextId()));
+            return AuthenticationFailureHandlerResult.createRetryResult();
+        } catch (OXException x) {
+            // Unable to refresh access token -> logout
+            LOG.debug("Unable to refresh access token for user {} in context {}. Session will be invalidated.", I(session.getUserId()), I(session.getContextId()));
+            sessiondService.removeSession(session.getSessionID());
+            return AuthenticationFailureHandlerResult.createErrorResult(SessionExceptionCodes.SESSION_EXPIRED.create(x, session.getSessionID()));
+        }
     }
 
 }

@@ -55,6 +55,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+import org.apache.jsieve.TagArgument;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -87,7 +88,7 @@ abstract class AbstractDateTestCommandParser {
 
     /**
      * Parses the zone tag
-     * 
+     *
      * @param argList The argument list
      * @param jsonObject the {@link JSONObject}
      * @param session The session
@@ -110,9 +111,29 @@ abstract class AbstractDateTestCommandParser {
         }
     }
 
+
+    private static final TagArgument ZONE_TAG = ArgumentUtil.createTagArgument("zone");
+
+    /**
+     * Parses the zone tag
+     *
+     * @param jsonObject the {@link JSONObject}
+     * @param command the test command
+     * @throws JSONException if a JSON error is occurred
+     */
+    void parseZone(JSONObject jsonObject, TestCommand command) throws JSONException {
+        for(int x=0; x<command.getArguments().size(); x++){
+            Object arg = command.getArguments().get(x);
+            if(ZONE_TAG.equals(arg)){
+                jsonObject.put(DateTestField.zone.name(), command.getArguments().get(x+1));
+                return;
+            }
+        }
+    }
+
     /**
      * Parses the comparison tag
-     * 
+     *
      * @param argList The argument list
      * @param jsonObject the {@link JSONObject}
      * @param commandName The command's name
@@ -141,7 +162,7 @@ abstract class AbstractDateTestCommandParser {
 
     /**
      * Parses the header tag
-     * 
+     *
      * @param argList The argument list
      * @param jsonObject the {@link JSONObject}
      * @param commandName The command's name
@@ -155,7 +176,7 @@ abstract class AbstractDateTestCommandParser {
 
     /**
      * Parses the date part
-     * 
+     *
      * @param argList The argument list
      * @param jsonObject the {@link JSONObject}
      * @param commandName The command's name
@@ -186,7 +207,7 @@ abstract class AbstractDateTestCommandParser {
 
     /**
      * Parses the comparison tag
-     * 
+     *
      * @param jsonObject the {@link JSONObject}
      * @param command the test command
      * @throws JSONException if a JSON error is occurred
@@ -205,7 +226,7 @@ abstract class AbstractDateTestCommandParser {
 
     /**
      * Parses the header tag
-     * 
+     *
      * @param jsonObject the {@link JSONObject}
      * @param command the test command
      * @throws JSONException if a JSON error is occurred
@@ -219,7 +240,7 @@ abstract class AbstractDateTestCommandParser {
 
     /**
      * Parses the date part
-     * 
+     *
      * @param jsonObject the {@link JSONObject}
      * @param command the test command
      * @throws OXException if a parsing error is occurred
@@ -250,7 +271,7 @@ abstract class AbstractDateTestCommandParser {
 
     /**
      * Converts the specified {@link JSONArray} to {@link String} {@link List} with the date
-     * 
+     *
      * @param jarray The {@link JSONArray} to convert
      * @param formatPattern The format pattern of the date
      * @return The {@link List} with the date
@@ -267,7 +288,7 @@ abstract class AbstractDateTestCommandParser {
 
     /**
      * Converts the specified string to a Sieve compatible date
-     * 
+     *
      * @param string The JSON string
      * @param formatPattern The format pattern
      * @return The Sieve date
@@ -287,7 +308,7 @@ abstract class AbstractDateTestCommandParser {
     /**
      * Retrieves from the specified {@link List} the date according to
      * the specified pattern and returns it as a {@link JSONArray}
-     * 
+     *
      * @param collection The {@link List} that contains
      * @param formatPattern The format pattern
      * @return The {@link JSONArray} with the date

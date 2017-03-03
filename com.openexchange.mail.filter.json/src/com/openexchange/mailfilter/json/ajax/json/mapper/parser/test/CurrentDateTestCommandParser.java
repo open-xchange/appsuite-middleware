@@ -97,6 +97,7 @@ public class CurrentDateTestCommandParser extends AbstractDateTestCommandParser 
      */
     @Override
     public void parse(JSONObject jsonObject, TestCommand command) throws JSONException, OXException {
+        parseZone(jsonObject, command);
         parseComparisonTag(jsonObject, command);
         parseDatePart(jsonObject, command);
     }

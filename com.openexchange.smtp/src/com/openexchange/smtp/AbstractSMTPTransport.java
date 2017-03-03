@@ -661,11 +661,15 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                     if (account.isTransportOAuthAble() && account.getTransportOAuthId() >= 0) {
                         OAuthService oauthService = Services.optService(OAuthService.class);
                         if (null != oauthService) {
+                            OAuthAccount oAuthAccount;
                             try {
-                                OAuthAccount oAuthAccount = oauthService.getAccount(account.getTransportOAuthId(), session, session.getUserId(), session.getContextId());
-                                throw MailExceptionCode.MAIL_TRANSPORT_DISABLED_OAUTH.create(smtpConfig.getServer(), smtpConfig.getLogin(), I(session.getUserId()), I(session.getContextId()), oAuthAccount.getDisplayName());
+                                oAuthAccount = oauthService.getAccount(account.getTransportOAuthId(), session, session.getUserId(), session.getContextId());
                             } catch (Exception x) {
                                 LOG.warn("Failed to load transport-associated OAuth account", x);
+                                oAuthAccount = null;
+                            }
+                            if (null != oAuthAccount) {
+                                throw MailExceptionCode.MAIL_TRANSPORT_DISABLED_OAUTH.create(smtpConfig.getServer(), smtpConfig.getLogin(), I(session.getUserId()), I(session.getContextId()), oAuthAccount.getDisplayName());
                             }
                         }
                     }
