@@ -701,94 +701,96 @@ public final class FilterJerichoHandler implements JerichoHandler {
         List<Attribute> uriAttributes = replaceUrls ? startTag.getURIAttributes() : Collections.<Attribute> emptyList();
         for (Map.Entry<String, String> attribute : attrMap.entrySet()) {
             String attr = attribute.getKey();
-            if ("style".equals(attr)) {
-                /*
-                 * Handle style attribute
-                 */
-                String css = attribute.getValue();
-                if (!Strings.isEmpty(css)) {
-                    checkCSS(cssBuffer.append(css), styleMap, true);
-                    css = cssBuffer.toString();
-                    cssBuffer.setLength(0);
-                    if (dropExternalImages) {
-                        imageURLFound |= checkCSS(cssBuffer.append(css), IMAGE_STYLE_MAP, true, false);
+            if (false == Strings.asciiLowerCase(attr).startsWith("on")) {
+                if ("style".equals(attr)) {
+                    /*
+                     * Handle style attribute
+                     */
+                    String css = attribute.getValue();
+                    if (!Strings.isEmpty(css)) {
+                        checkCSS(cssBuffer.append(css), styleMap, true);
                         css = cssBuffer.toString();
                         cssBuffer.setLength(0);
-                    }
-                }
-                if (containsCSSElement(css)) {
-                    if (css.indexOf('"') == -1) {
-                        attrBuilder.append(' ').append("style").append("=\"").append(css).append('"');
-                    } else {
-                        attrBuilder.append(' ').append("style").append("='").append(css).append('\'');
-                    }
-                }
-            } else if ("class".equals(attr) || "id".equals(attr)) {
-                final String value = prefixBlock(CharacterReference.encode(attribute.getValue()), cssPrefix);
-                attrBuilder.append(' ').append(attr).append("=\"").append(value).append('"');
-            } else {
-                final String val = attribute.getValue();
-                if (null == allowedAttributes) { // No restrictions
-                    if (isSafe(val, tagName)) {
-                        if (dropExternalImages && "background".equals(attr) && PATTERN_URL.matcher(val).matches()) {
-                            attrBuilder.append(' ').append(attr).append("=\"\"");
-                            imageURLFound = true;
-                        } else if (dropExternalImages && (HTMLElementName.IMG == tagName || HTMLElementName.INPUT == tagName) && "src".equals(attr)) {
-                            if (isInlineImage(val)) {
-                                // Allow inline images
-                                attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(val)).append('"');
-                            } else {
-                                attrBuilder.append(' ').append(attr).append("=\"\" data-original-src=\"").append(CharacterReference.encode(val)).append('"');
-                                imageURLFound = true;
-                                // return;
-                            }
-                        } else {
-                            if (replaceUrls && uriAttributes.contains(attribute)) {
-                                attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(checkPossibleURL(val))).append('"');
-                            } else {
-                                attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(val)).append('"');
-                            }
+                        if (dropExternalImages) {
+                            imageURLFound |= checkCSS(cssBuffer.append(css), IMAGE_STYLE_MAP, true, false);
+                            css = cssBuffer.toString();
+                            cssBuffer.setLength(0);
                         }
                     }
-                } else {
-                    if (allowedAttributes.containsKey(attr)) {
-                        if (null == val) {
-                            attrBuilder.append(' ').append(attr);
+                    if (containsCSSElement(css)) {
+                        if (css.indexOf('"') == -1) {
+                            attrBuilder.append(' ').append("style").append("=\"").append(css).append('"');
                         } else {
-                            final Set<String> allowedValues = allowedAttributes.get(attr);
-                            if (null == allowedValues || allowedValues.contains(toLowerCase(val))) {
-                                if (isSafe(val, tagName)) {
-                                    if (dropExternalImages && "background".equals(attr) && PATTERN_URL.matcher(val).matches()) {
-                                        attrBuilder.append(' ').append(attr).append("=\"\"");
-                                        imageURLFound = true;
-                                    } else if (dropExternalImages && (HTMLElementName.IMG == tagName || HTMLElementName.INPUT == tagName) && "src".equals(attr)) {
-                                        if (isInlineImage(val)) {
-                                            // Allow inline images
-                                            attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(val)).append('"');
-                                        } else {
-                                            attrBuilder.append(' ').append(attr).append("=\"\" data-original-src=\"").append(CharacterReference.encode(val)).append('"');
+                            attrBuilder.append(' ').append("style").append("='").append(css).append('\'');
+                        }
+                    }
+                } else if ("class".equals(attr) || "id".equals(attr)) {
+                    final String value = prefixBlock(CharacterReference.encode(attribute.getValue()), cssPrefix);
+                    attrBuilder.append(' ').append(attr).append("=\"").append(value).append('"');
+                } else {
+                    final String val = attribute.getValue();
+                    if (null == allowedAttributes) { // No restrictions
+                        if (isSafe(val, tagName)) {
+                            if (dropExternalImages && "background".equals(attr) && PATTERN_URL.matcher(val).matches()) {
+                                attrBuilder.append(' ').append(attr).append("=\"\"");
+                                imageURLFound = true;
+                            } else if (dropExternalImages && (HTMLElementName.IMG == tagName || HTMLElementName.INPUT == tagName) && "src".equals(attr)) {
+                                if (isInlineImage(val)) {
+                                    // Allow inline images
+                                    attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(val)).append('"');
+                                } else {
+                                    attrBuilder.append(' ').append(attr).append("=\"\" data-original-src=\"").append(CharacterReference.encode(val)).append('"');
+                                    imageURLFound = true;
+                                    // return;
+                                }
+                            } else {
+                                if (replaceUrls && uriAttributes.contains(attribute)) {
+                                    attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(checkPossibleURL(val))).append('"');
+                                } else {
+                                    attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(val)).append('"');
+                                }
+                            }
+                        }
+                    } else {
+                        if (allowedAttributes.containsKey(attr)) {
+                            if (null == val) {
+                                attrBuilder.append(' ').append(attr);
+                            } else {
+                                final Set<String> allowedValues = allowedAttributes.get(attr);
+                                if (null == allowedValues || allowedValues.contains(toLowerCase(val))) {
+                                    if (isSafe(val, tagName)) {
+                                        if (dropExternalImages && "background".equals(attr) && PATTERN_URL.matcher(val).matches()) {
+                                            attrBuilder.append(' ').append(attr).append("=\"\"");
                                             imageURLFound = true;
-                                            // return;
-                                        }
-                                    } else {
-                                        if (replaceUrls && uriAttributes.contains(attribute)) {
-                                            attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(checkPossibleURL(val))).append('"');
+                                        } else if (dropExternalImages && (HTMLElementName.IMG == tagName || HTMLElementName.INPUT == tagName) && "src".equals(attr)) {
+                                            if (isInlineImage(val)) {
+                                                // Allow inline images
+                                                attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(val)).append('"');
+                                            } else {
+                                                attrBuilder.append(' ').append(attr).append("=\"\" data-original-src=\"").append(CharacterReference.encode(val)).append('"');
+                                                imageURLFound = true;
+                                                // return;
+                                            }
                                         } else {
-                                            attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(val)).append('"');
+                                            if (replaceUrls && uriAttributes.contains(attribute)) {
+                                                attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(checkPossibleURL(val))).append('"');
+                                            } else {
+                                                attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(val)).append('"');
+                                            }
                                         }
                                     }
-                                }
-                            } else if (NUM_ATTRIBS == allowedValues) {
-                                /*
-                                 * Only numeric attribute value allowed
-                                 */
-                                if (PAT_NUMERIC.matcher(val.trim()).matches()) {
-                                    attrBuilder.append(' ').append(attr).append("=\"").append(val).append('"');
+                                } else if (NUM_ATTRIBS == allowedValues) {
+                                    /*
+                                     * Only numeric attribute value allowed
+                                     */
+                                    if (PAT_NUMERIC.matcher(val.trim()).matches()) {
+                                        attrBuilder.append(' ').append(attr).append("=\"").append(val).append('"');
+                                    }
                                 }
                             }
                         }
-                    }
-                } // End of else
+                    } // End of else
+                }
             }
         }
 
