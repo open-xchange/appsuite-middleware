@@ -67,12 +67,12 @@ public class MimeMailExceptionMessage implements LocalizableStrings {
     /**
      * The provided login information seem to be wrong. Please try again.
      */
-    public final static String INVALID_CREDENTIALS_MSG_DISPLAY = "The provided login information seem to be wrong. Please try again.";
+    public final static String INVALID_CREDENTIALS_MSG_DISPLAY = "The provided login data seem to be wrong. Please correct them.";
 
     /**
      * The provided login information to access mail server %1$s seem to be wrong. Please try again.
      */
-    public final static String INVALID_CREDENTIALS_EXT_MSG_DISPLAY = "The provided login information to access mail server %1$s seem to be wrong. Please try again.";
+    public final static String INVALID_CREDENTIALS_EXT_MSG_DISPLAY = "The provided login data to access mail server %1$s seem to be wrong. Please correct them.";
 
     /**
      * Mail folder "%1$s" could not be found.
