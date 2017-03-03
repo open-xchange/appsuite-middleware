@@ -104,7 +104,7 @@ public class MailFilterConfigurationServiceImpl implements MailFilterConfigurati
                 throw MailFilterExceptionCode.NO_PROPERTIES_FILE_FOUND.create();
             }
             for (final MailFilterProperty property : MailFilterProperty.values()) {
-                if (null == file.getProperty(property.getFQPropertyName())) {
+                if (!property.isOptional() && null == file.getProperty(property.getFQPropertyName())) {
                     throw MailFilterExceptionCode.PROPERTY_NOT_FOUND.create(property.getFQPropertyName());
                 }
             }

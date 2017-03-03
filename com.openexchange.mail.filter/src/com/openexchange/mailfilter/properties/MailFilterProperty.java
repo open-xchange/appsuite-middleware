@@ -131,7 +131,7 @@ public enum MailFilterProperty {
      * Specifies when the connection should time out (value in milliseconds) when performing
      * SASL authentication against Sieve end-point. Default is 6000
      */
-    authTimeout(6000),
+    authTimeout(6000, true),
 
     /**
      * <p>Set the password source; meaning which source is taken to determine a user's
@@ -195,6 +195,7 @@ public enum MailFilterProperty {
     private static final String PREFIX = "com.openexchange.mail.filter.";
     private final String fqn;
     private final Object defaultValue;
+    private final boolean optional;
 
     /**
      * Initialises a new {@link MailFilterProperty}.
@@ -209,18 +210,19 @@ public enum MailFilterProperty {
      * @param defaultValue The default value of the property
      */
     private MailFilterProperty(Object defaultValue) {
-        this(defaultValue, PREFIX);
+        this(defaultValue, false);
     }
 
     /**
      * Initialises a new {@link MailFilterProperty}.
      * 
      * @param defaultValue The default value of the property
-     * @param fqn The fully qualified name of the property
+     * @param optional Whether the property is optional
      */
-    private MailFilterProperty(Object defaultValue, String fqn) {
+    private MailFilterProperty(Object defaultValue, boolean optional) {
+        this.optional = optional;
         this.defaultValue = defaultValue;
-        this.fqn = fqn;
+        this.fqn = PREFIX;
     }
 
     /**
@@ -230,6 +232,15 @@ public enum MailFilterProperty {
      */
     public String getFQPropertyName() {
         return fqn + name();
+    }
+
+    /**
+     * Returns whether the property is optional
+     * 
+     * @return <code>true</code> if the property is optional; <code>false</code> otherwise
+     */
+    public boolean isOptional() {
+        return optional;
     }
 
     /**
