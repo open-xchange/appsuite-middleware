@@ -83,6 +83,8 @@ import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StoragePriority;
 import com.openexchange.folderstorage.StorageType;
+import com.openexchange.folderstorage.TrashAwareFolderStorage;
+import com.openexchange.folderstorage.TrashResult;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.cache.memory.FolderMap;
@@ -132,7 +134,7 @@ import gnu.trove.map.hash.TObjectIntHashMap;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CacheFolderStorage implements ReinitializableFolderStorage, FolderCacheInvalidationService {
+public final class CacheFolderStorage implements ReinitializableFolderStorage, FolderCacheInvalidationService, TrashAwareFolderStorage {
 
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CacheFolderStorage.class);
 
@@ -1048,6 +1050,115 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
                 removeFromCache(parentId, treeId, session.getUserId(), session.getContextId(), newPathPerformer(storageParameters));
             }
         }
+    }
+
+    @Override
+    public TrashResult trashFolder(String treeId, String folderId, StorageParameters storageParameters) throws OXException {
+        String parentId;
+        String realParentId;
+        int contextId = storageParameters.getContextId();
+        int userId = storageParameters.getUserId();
+        Session session = storageParameters.getSession();
+        String sContextId = Integer.toString(contextId);
+        String[] subfolderIDs;
+        {
+            Folder deleteMe;
+            try {
+                deleteMe = getFolder(treeId, folderId, storageParameters);
+                /*
+                 * Load all subfolders
+                 */
+                subfolderIDs = loadAllSubfolders(treeId, deleteMe, false, storageParameters);
+            } catch (OXException e) {
+                /*
+                 * Obviously folder does not exist
+                 */
+                if (Tools.isGlobalId(folderId)) {
+                    globalCache.removeFromGroup(newCacheKey(folderId, treeId), sContextId);
+                }
+                FolderMapManagement.getInstance().dropFor(folderId, treeId, userId, contextId, session);
+                return new TrashResult(null, folderId);
+            }
+            parentId = deleteMe.getParentID();
+            if (!realTreeId.equals(treeId)) {
+                StorageParameters parameters = newStorageParameters(storageParameters);
+                FolderStorage folderStorage = registry.getFolderStorage(realTreeId, folderId);
+                boolean started = folderStorage.startTransaction(parameters, false);
+                try {
+                    realParentId = folderStorage.getFolder(realTreeId, folderId, parameters).getParentID();
+                    if (started) {
+                        folderStorage.commitTransaction(parameters);
+                        started = false;
+                    }
+                } catch (RuntimeException e) {
+                    throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e);
+                } finally {
+                    if (started) {
+                        folderStorage.rollback(parameters);
+                    }
+                }
+            } else {
+                realParentId = null;
+            }
+        }
+        /*
+         * Delete from cache
+         */
+        {
+            FolderMapManagement folderMapManagement = FolderMapManagement.getInstance();
+            folderMapManagement.dropFor(Arrays.asList(folderId, parentId), treeId, userId, contextId, session);
+            if (!treeId.equals(realTreeId)) {
+                List<String> fids = new ArrayList<String>(Arrays.asList(folderId, parentId));
+                if (null != realParentId) {
+                    fids.add(realParentId);
+                }
+                folderMapManagement.dropFor(fids, realTreeId, userId, contextId, session);
+            }
+        }
+        {
+            List<Serializable> keys = new LinkedList<Serializable>();
+            if (Tools.isGlobalId(folderId)) {
+                keys.add(newCacheKey(folderId, treeId));
+            }
+            if (Tools.isGlobalId(parentId)) {
+                keys.add(newCacheKey(parentId, treeId));
+            }
+            if (null != realParentId && !realParentId.equals(parentId)) {
+                if (Tools.isGlobalId(realParentId)) {
+                    keys.add(newCacheKey(realParentId, realTreeId));
+                }
+            }
+            if (!keys.isEmpty()) {
+                globalCache.removeFromGroup(keys, sContextId);
+            }
+        }
+        registry.clearCaches(storageParameters.getUserId(), storageParameters.getContextId());
+        /*
+         * Drop subfolders from cache
+         */
+        removeSingleFromCache(Arrays.asList(subfolderIDs), treeId, userId, contextId, true, session);
+        /*
+         * Perform delete
+         */
+        TrashResult trashResult = newDeletePerformer(storageParameters).doTrash(treeId, folderId, storageParameters.getTimeStamp());
+        /*
+         * Refresh
+         */
+        if (null != realParentId && !ROOT_ID.equals(realParentId)) {
+            if (session == null) {
+                removeFromCache(realParentId, treeId, storageParameters.getUserId(), storageParameters.getContextId(), newPathPerformer(storageParameters));
+            } else {
+                removeFromCache(realParentId, treeId, session.getUserId(), session.getContextId(), newPathPerformer(storageParameters));
+            }
+        }
+        if (!ROOT_ID.equals(parentId)) {
+            if (session == null) {
+                removeFromCache(parentId, treeId, storageParameters.getUserId(), storageParameters.getContextId(), newPathPerformer(storageParameters));
+            } else {
+                removeFromCache(parentId, treeId, session.getUserId(), session.getContextId(), newPathPerformer(storageParameters));
+            }
+        }
+        return trashResult;
     }
 
     @Override
