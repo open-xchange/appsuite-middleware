@@ -59,6 +59,7 @@ import com.openexchange.mailaccount.Constants;
 import com.openexchange.mailaccount.json.ActiveProviderDetector;
 import com.openexchange.mailaccount.json.actions.AllAction;
 import com.openexchange.mailaccount.json.actions.DeleteAction;
+import com.openexchange.mailaccount.json.actions.EnableAction;
 import com.openexchange.mailaccount.json.actions.GetAction;
 import com.openexchange.mailaccount.json.actions.GetTreeAction;
 import com.openexchange.mailaccount.json.actions.ListAction;
@@ -96,6 +97,7 @@ public class MailAccountActionFactory implements AJAXActionServiceFactory {
         tmp.put(GetTreeAction.ACTION, new GetTreeAction(activeProviderDetector));
         tmp.put(NewAction.ACTION, new NewAction(activeProviderDetector));
         tmp.put(StatusAction.ACTION, new StatusAction(activeProviderDetector));
+        tmp.put(EnableAction.ACTION, new EnableAction(activeProviderDetector));
         actions = tmp.build();
     }
 
