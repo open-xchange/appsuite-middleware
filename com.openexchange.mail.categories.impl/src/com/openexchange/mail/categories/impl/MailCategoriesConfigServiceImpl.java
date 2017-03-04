@@ -558,10 +558,8 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
     }
 
     void initMailCategories(Session session) throws OXException {
-
         CapabilityService capService = Services.getService(CapabilityService.class);
-        Boolean capability = capService.getCapabilities(session).contains(new Capability("mail_categories"));
-        if (!capability) {
+        if (!capService.getCapabilities(session).contains(new Capability("mail_categories"))) {
             return;
         }
 
@@ -576,7 +574,7 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         ConfigView view = configViewFactory.getView(session.getUserId(), session.getContextId());
         Boolean apply = view.get(MailCategoriesConstants.APPLY_OX_RULES_PROPERTY, Boolean.class);
 
-        if (apply == null || !apply) {
+        if (apply == null || !apply.booleanValue()) {
             return;
         }
 
