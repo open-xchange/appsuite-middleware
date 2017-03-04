@@ -49,9 +49,11 @@
 
 package com.openexchange.mail.categories.impl;
 
+import com.openexchange.ajax.Client;
 import com.openexchange.exception.OXException;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
+import com.openexchange.session.Session;
 
 /**
  * {@link MailCategoriesLoginHandler} initializes the MailCategoriesRuleEngine if it is the first login after activation.
@@ -73,7 +75,12 @@ public class MailCategoriesLoginHandler implements LoginHandlerService {
 
     @Override
     public void handleLogin(LoginResult login) throws OXException {
-        mailCategoriesService.initMailCategories(login.getSession());
+        Session session = login.getSession();
+        if (false == Client.isAppSuiteUI(session)) {
+            return;
+        }
+
+        mailCategoriesService.initMailCategories(session);
     }
 
     @Override
