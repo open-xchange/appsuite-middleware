@@ -80,6 +80,8 @@ import com.openexchange.mailfilter.MailFilterProperties;
 import com.openexchange.mailfilter.MailFilterService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 
 /**
  * {@link SieveMailCategoriesRuleEngine}
@@ -297,11 +299,11 @@ public class SieveMailCategoriesRuleEngine implements MailCategoriesRuleEngine {
         List<TestCommand> twoCommands = command.getTestCommands();
         if (twoCommands.size() != 2) {
             throw MailCategoriesRuleEngineExceptionCodes.UNABLE_TO_RETRIEVE_RULE.create();
-        } else {
-            // assume command 0 is the not hasflag command
-            TestCommand realTest = twoCommands.get(1);
-            return parseRule(realTest, flag);
         }
+
+        // assume command 0 is the not hasflag command
+        TestCommand realTest = twoCommands.get(1);
+        return parseRule(realTest, flag);
     }
 
     @SuppressWarnings("unchecked")
@@ -476,8 +478,8 @@ public class SieveMailCategoriesRuleEngine implements MailCategoriesRuleEngine {
         }
 
         Credentials creds = getCredentials(session);
-        List<Integer> uidList = new ArrayList<>();
         List<Rule> rules = mailFilterService.listRules(creds, RuleType.CATEGORY.getName());
+        TIntList uidList = new TIntArrayList(rules.size());
         for (Rule rule : rules) {
             String name = rule.getRuleComment().getRulename();
             if (!flags.contains(name) && !name.equals(MailCategoriesConstants.GENERAL_CATEGORY_ID)) {
@@ -487,14 +489,8 @@ public class SieveMailCategoriesRuleEngine implements MailCategoriesRuleEngine {
         if (uidList.isEmpty()) {
             return;
         }
-        int[] uids = new int[uidList.size()];
-        int x = 0;
-        for (Integer i : uidList) {
-            uids[x++] = i;
-        }
 
-        mailFilterService.deleteFilterRules(creds, uids);
-
+        mailFilterService.deleteFilterRules(creds, uidList.toArray());
     }
 
 }

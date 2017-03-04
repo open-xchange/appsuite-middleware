@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax;
 
+import com.openexchange.java.Strings;
+import com.openexchange.session.Session;
+
 /**
  * {@link Client} - An enumeration for known clients accessing the AJAX HTTP-API.
  *
@@ -140,7 +143,7 @@ public enum Client {
 
     /**
      * Gets the Client with the given clientID
-     * 
+     *
      * @param clientID
      * @return the Client
      */
@@ -155,4 +158,59 @@ public enum Client {
         }
         return null;
     }
+
+    // ----------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Checks if given session is associated with App Suite UI client.
+     *
+     * @param session The session to examine
+     * @return <code>true</code> if given session is associated with App Suite UI client; otherwise <code>false</code>
+     */
+    public static boolean isAppSuiteUI(Session session) {
+        return isUsmEas(session.getClient());
+    }
+
+    /**
+     * Checks if given client identifier denotes App Suite UI client.
+     *
+     * @param clientId The client identifier to examine
+     * @return <code>true</code> if given client identifier denotes App Suite UI client; otherwise <code>false</code>
+     */
+    public static boolean isAppSuiteUI(String clientId) {
+        if (Strings.isEmpty(clientId)) {
+            return false;
+        }
+
+        String uc = Strings.asciiLowerCase(clientId);
+        return APPSUITE_UI.clientId.equals(uc);
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Checks if given session is associated with an USM client.
+     *
+     * @param session The session to examine
+     * @return <code>true</code> if given session is associated with an USM client; otherwise <code>false</code>
+     */
+    public static boolean isUsmEas(Session session) {
+        return isUsmEas(session.getClient());
+    }
+
+    /**
+     * Checks if given client identifier denotes an USM client.
+     *
+     * @param clientId The client identifier to examine
+     * @return <code>true</code> if given client identifier denotes an USM client; otherwise <code>false</code>
+     */
+    public static boolean isUsmEas(String clientId) {
+        if (Strings.isEmpty(clientId)) {
+            return false;
+        }
+
+        String uc = Strings.toUpperCase(clientId);
+        return uc.startsWith(USM_EAS.clientId) || uc.startsWith(USM_JSON.clientId);
+    }
+
 }
