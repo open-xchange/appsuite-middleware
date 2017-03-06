@@ -76,10 +76,12 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
      * Initializes a new {@link MailAccountIMAPProperties}.
      *
      * @param mailAccount The mail account
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @throws IllegalArgumentException If provided mail account is <code>null</code>
      */
-    public MailAccountIMAPProperties(final MailAccount mailAccount) {
-        super(mailAccount);
+    public MailAccountIMAPProperties(MailAccount mailAccount, int userId, int contextId) {
+        super(mailAccount, userId, contextId);
         mailAccountId = mailAccount.getId();
     }
 

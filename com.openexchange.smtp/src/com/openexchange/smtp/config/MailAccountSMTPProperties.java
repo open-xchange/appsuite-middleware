@@ -70,10 +70,12 @@ public final class MailAccountSMTPProperties extends MailAccountTransportPropert
      * Initializes a new {@link MailAccountSMTPProperties}.
      *
      * @param mailAccount The mail account providing the properties
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @throws IllegalArgumentException If provided mail account is <code>null</code>
      */
-    public MailAccountSMTPProperties(final MailAccount mailAccount) {
-        super(mailAccount);
+    public MailAccountSMTPProperties(MailAccount mailAccount, int userId, int contextId) {
+        super(mailAccount, userId, contextId);
         this.mailAccountId = mailAccount.getId();
     }
 
@@ -81,9 +83,11 @@ public final class MailAccountSMTPProperties extends MailAccountTransportPropert
      * Initializes a new {@link MailAccountSMTPProperties}.
      *
      * @param accountId The transport account identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
      */
-    public MailAccountSMTPProperties(int accountId) {
-        super();
+    public MailAccountSMTPProperties(int accountId, int userId, int contextId) {
+        super(userId, contextId);
         this.mailAccountId = accountId;
     }
 

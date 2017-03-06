@@ -311,11 +311,11 @@ public final class DefaultSMTPTransport extends AbstractSMTPTransport {
         int contextId = session.getContextId();
         int userId = session.getUserId();
         if (storageService.existsMailAccount(accountId, userId, contextId)) {
-            return new MailAccountSMTPProperties(storageService.getMailAccount(accountId, userId, contextId));
+            return new MailAccountSMTPProperties(storageService.getMailAccount(accountId, userId, contextId), userId, contextId);
         }
 
         // Fall-back...
-        return new MailAccountSMTPProperties(accountId);
+        return new MailAccountSMTPProperties(accountId, userId, contextId);
     }
 
     private static String quoteReplacement(final String str) {

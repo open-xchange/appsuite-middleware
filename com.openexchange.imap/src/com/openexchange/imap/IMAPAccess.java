@@ -1286,7 +1286,9 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     @Override
     protected IMailProperties createNewMailProperties() throws OXException {
         final MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
-        return new MailAccountIMAPProperties(storageService.getMailAccount(accountId, session.getUserId(), session.getContextId()));
+        int userId = session.getUserId();
+        int contextId = session.getContextId();
+        return new MailAccountIMAPProperties(storageService.getMailAccount(accountId, userId, contextId), userId, contextId);
     }
 
     private static javax.mail.Session setConnectProperties(final IMAPConfig config, final int timeout, final int connectionTimeout, final Properties imapProps, final Class<? extends IMAPStore> storeClass, final boolean forceSecure) throws OXException {

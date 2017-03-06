@@ -66,10 +66,12 @@ public final class MailAccountPOP3Properties extends MailAccountProperties imple
      * Initializes a new {@link MailAccountPOP3Properties}.
      *
      * @param mailAccount The mail account
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @throws IllegalArgumentException If provided mail account is <code>null</code>
      */
-    public MailAccountPOP3Properties(final MailAccount mailAccount) {
-        super(mailAccount);
+    public MailAccountPOP3Properties(MailAccount mailAccount, int userId, int contextId) {
+        super(mailAccount, userId, contextId);
     }
 
     @Override

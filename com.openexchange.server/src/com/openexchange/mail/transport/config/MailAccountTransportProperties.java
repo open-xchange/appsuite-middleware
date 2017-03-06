@@ -67,15 +67,21 @@ public class MailAccountTransportProperties implements ITransportProperties {
 
     protected Boolean enforceSecureConnection;
     protected final Map<String, String> properties;
+    protected final int userId;
+    protected final int contextId;
 
     /**
      * Initializes a new {@link MailAccountTransportProperties}.
      *
      * @param mailAccount The mail account providing the properties
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @throws IllegalArgumentException If provided mail account is <code>null</code>
      */
-    public MailAccountTransportProperties(MailAccount mailAccount) {
+    public MailAccountTransportProperties(MailAccount mailAccount, int userId, int contextId) {
         super();
+        this.userId = userId;
+        this.contextId = contextId;
         if (null == mailAccount) {
             throw new IllegalArgumentException("mail account is null.");
         }
@@ -84,9 +90,14 @@ public class MailAccountTransportProperties implements ITransportProperties {
 
     /**
      * Initializes a new {@link MailAccountTransportProperties} with empty properties.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
      */
-    protected MailAccountTransportProperties() {
+    protected MailAccountTransportProperties(int userId, int contextId) {
         super();
+        this.userId = userId;
+        this.contextId = contextId;
         properties = new HashMap<String, String>(0);
     }
 

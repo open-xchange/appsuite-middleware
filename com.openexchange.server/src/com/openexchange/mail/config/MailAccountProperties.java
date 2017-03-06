@@ -67,15 +67,21 @@ public class MailAccountProperties implements IMailProperties {
     protected Boolean enforceSecureConnection;
     protected final Map<String, String> properties;
     protected final String url;
+    protected final int userId;
+    protected final int contextId;
 
     /**
      * Initializes a new {@link MailAccountProperties}.
      *
      * @param mailAccount The mail account
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @throws IllegalArgumentException If provided mail account is <code>null</code>
      */
-    public MailAccountProperties(final MailAccount mailAccount) {
+    public MailAccountProperties(MailAccount mailAccount, int userId, int contextId) {
         super();
+        this.userId = userId;
+        this.contextId = contextId;
         if (null == mailAccount) {
             throw new IllegalArgumentException("mail account is null.");
         }
@@ -116,6 +122,8 @@ public class MailAccountProperties implements IMailProperties {
         final String attachDisplaySizeStr = properties.get("com.openexchange.mail.attachmentDisplaySizeLimit");
         if (null == attachDisplaySizeStr) {
             return MailProperties.getInstance().getAttachDisplaySize();
+        } else {
+
         }
 
         try {
@@ -131,6 +139,8 @@ public class MailAccountProperties implements IMailProperties {
         final String defaultSepStr = properties.get("com.openexchange.mail.defaultSeparator");
         if (null == defaultSepStr) {
             return MailProperties.getInstance().getDefaultSeparator();
+        } else {
+
         }
 
         final char defaultSep = defaultSepStr.trim().charAt(0);
@@ -147,6 +157,8 @@ public class MailAccountProperties implements IMailProperties {
         final String tmp = properties.get("com.openexchange.mail.mailAccessCacheIdleSeconds");
         if (null == tmp) {
             return MailProperties.getInstance().getMailAccessCacheIdleSeconds();
+        } else {
+
         }
 
         try {
@@ -162,6 +174,8 @@ public class MailAccountProperties implements IMailProperties {
         final String tmp = properties.get("com.openexchange.mail.mailAccessCacheShrinkerSeconds");
         if (null == tmp) {
             return MailProperties.getInstance().getMailAccessCacheShrinkerSeconds();
+        } else {
+
         }
 
         try {
@@ -177,6 +191,8 @@ public class MailAccountProperties implements IMailProperties {
         final String mailFetchLimitStr = properties.get("com.openexchange.mail.mailFetchLimit");
         if (null == mailFetchLimitStr) {
             return MailProperties.getInstance().getMailFetchLimit();
+        } else {
+
         }
 
         try {
@@ -192,6 +208,8 @@ public class MailAccountProperties implements IMailProperties {
         final String watcherFreqStr = properties.get("com.openexchange.mail.watcherFrequency");
         if (null == watcherFreqStr) {
             return MailProperties.getInstance().getWatcherFrequency();
+        } else {
+
         }
 
         try {
@@ -207,6 +225,8 @@ public class MailAccountProperties implements IMailProperties {
         final String watcherTimeStr = properties.get("com.openexchange.mail.watcherTime");
         if (null == watcherTimeStr) {
             return MailProperties.getInstance().getWatcherTime();
+        } else {
+
         }
 
         try {
