@@ -99,11 +99,7 @@ public class SendFeedbackViaMail extends AbstractRestCLI<Void> {
 
     @Override
     protected void checkArguments(CommandLine cmd) {
-        if (cmd.getArgs().length != 1) {
-            System.out.println("Please add recipients as comma-separated list.");
-            System.exit(1);
-            return;
-        }
+        // nothing to do
     }
 
     @Override
