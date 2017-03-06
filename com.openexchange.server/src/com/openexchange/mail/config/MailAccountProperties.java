@@ -50,7 +50,10 @@
 package com.openexchange.mail.config;
 
 import java.util.Map;
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViews;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -66,6 +69,7 @@ public class MailAccountProperties implements IMailProperties {
 
     protected Boolean enforceSecureConnection;
     protected final Map<String, String> properties;
+    protected final boolean hasAccountProperties;
     protected final String url;
     protected final int userId;
     protected final int contextId;
@@ -86,6 +90,7 @@ public class MailAccountProperties implements IMailProperties {
             throw new IllegalArgumentException("mail account is null.");
         }
         properties = mailAccount.getProperties();
+        hasAccountProperties = null != properties && !properties.isEmpty();
         String tmp;
         try {
             tmp = mailAccount.generateMailServerURL();
@@ -93,6 +98,16 @@ public class MailAccountProperties implements IMailProperties {
             tmp = null;
         }
         url = tmp;
+    }
+
+    /**
+     * Gets the value for named property from {@link #properties account properties}.
+     *
+     * @param name The name to look-up
+     * @return The value or <code>null</code>
+     */
+    protected String getAccountProperty(String name) {
+        return hasAccountProperties ? properties.get(name) : null;
     }
 
     /**
@@ -112,139 +127,166 @@ public class MailAccountProperties implements IMailProperties {
      * @param defaultValue The default value to return if absent
      * @return The looked-up value or given <code>defaultValue</code>
      */
+    protected int lookUpIntProperty(String name, int defaultValue) {
+        String value = hasAccountProperties ? properties.get(name) : null;
+        if (null != value) {
+            try {
+                return Integer.parseInt(value.trim());
+            } catch (final NumberFormatException e) {
+                LOG.error("Non parseable integer value for property {}: {}", name, value, e);
+            }
+        }
+
+        ConfigViewFactory viewFactory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+        if (null != viewFactory) {
+            try {
+                ConfigView view = viewFactory.getView(userId, contextId);
+                value = ConfigViews.getNonEmptyPropertyFrom(name, view);
+                if (null == value) {
+                    return defaultValue;
+                }
+
+                try {
+                    return Integer.parseInt(value.trim());
+                } catch (NumberFormatException e) {
+                    LOG.error("Non parseable integer value for property {}: {}", name, value, e);
+                }
+            } catch (OXException e) {
+                LOG.error("Failed to query property {} from config-cascade for user {} in context {}", name, userId, contextId, e);
+            }
+        }
+
+        return defaultValue;
+    }
+
+    /**
+     * Looks-up the denoted property.
+     *
+     * @param name The property name
+     * @param defaultValue The default value to return if absent
+     * @return The looked-up value or given <code>defaultValue</code>
+     */
+    protected char lookUpCharProperty(String name, char defaultValue) {
+        String value = hasAccountProperties ? properties.get(name) : null;
+        if (null != value) {
+            return value.trim().charAt(0);
+        }
+
+        ConfigViewFactory viewFactory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+        if (null != viewFactory) {
+            try {
+                ConfigView view = viewFactory.getView(userId, contextId);
+                value = ConfigViews.getNonEmptyPropertyFrom(name, view);
+                if (null == value) {
+                    return defaultValue;
+                }
+
+                return value.trim().charAt(0);
+            } catch (OXException e) {
+                LOG.error("Failed to query property {} from config-cascade for user {} in context {}", name, userId, contextId, e);
+            }
+        }
+
+        return defaultValue;
+    }
+
+    /**
+     * Looks-up the denoted property.
+     *
+     * @param name The property name
+     * @param defaultValue The default value to return if absent
+     * @return The looked-up value or given <code>defaultValue</code>
+     */
+    protected boolean lookUpBoolProperty(String name, boolean defaultValue) {
+        String value = hasAccountProperties ? properties.get(name) : null;
+        if (null != value) {
+            return Boolean.parseBoolean(value.trim());
+        }
+
+        ConfigViewFactory viewFactory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+        if (null != viewFactory) {
+            try {
+                ConfigView view = viewFactory.getView(userId, contextId);
+                value = ConfigViews.getNonEmptyPropertyFrom(name, view);
+                if (null == value) {
+                    return defaultValue;
+                }
+
+                Boolean.parseBoolean(value.trim());
+            } catch (OXException e) {
+                LOG.error("Failed to query property {} from config-cascade for user {} in context {}", name, userId, contextId, e);
+            }
+        }
+
+        return defaultValue;
+    }
+
+    /**
+     * Looks-up the denoted property.
+     *
+     * @param name The property name
+     * @param defaultValue The default value to return if absent
+     * @return The looked-up value or given <code>defaultValue</code>
+     */
     protected String lookUpProperty(String name, String defaultValue) {
-        ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-        return null == service ? defaultValue : service.getProperty(name, defaultValue);
+        String value = hasAccountProperties ? properties.get(name) : null;
+        if (null != value) {
+            return value;
+        }
+
+        ConfigViewFactory viewFactory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+        if (null != viewFactory) {
+            try {
+                ConfigView view = viewFactory.getView(userId, contextId);
+                value = ConfigViews.getNonEmptyPropertyFrom(name, view);
+                return null == value ? defaultValue : value;
+            } catch (OXException e) {
+                LOG.error("Failed to query property {} from config-cascade for user {} in context {}", name, userId, contextId, e);
+            }
+        }
+
+        return defaultValue;
     }
 
     @Override
     public int getAttachDisplaySize() {
-        final String attachDisplaySizeStr = properties.get("com.openexchange.mail.attachmentDisplaySizeLimit");
-        if (null == attachDisplaySizeStr) {
-            return MailProperties.getInstance().getAttachDisplaySize();
-        } else {
-
-        }
-
-        try {
-            return Integer.parseInt(attachDisplaySizeStr.trim());
-        } catch (final NumberFormatException e) {
-            LOG.error("Attachment Display Size: Non parseable value.", e);
-            return MailProperties.getInstance().getMailFetchLimit();
-        }
+        return lookUpIntProperty("com.openexchange.mail.attachmentDisplaySizeLimit", MailProperties.getInstance().getAttachDisplaySize());
     }
 
     @Override
     public char getDefaultSeparator() {
-        final String defaultSepStr = properties.get("com.openexchange.mail.defaultSeparator");
-        if (null == defaultSepStr) {
-            return MailProperties.getInstance().getDefaultSeparator();
-        } else {
-
-        }
-
-        final char defaultSep = defaultSepStr.trim().charAt(0);
-        if (defaultSep <= 32) {
-            final char fallback = MailProperties.getInstance().getDefaultSeparator();
-            LOG.error("\tDefault Separator: Invalid separator (decimal ascii value={}). Setting to fallback: {}{}", (int) defaultSep, fallback, '\n');
-            return fallback;
-        }
-        return defaultSep;
+        return lookUpCharProperty("com.openexchange.mail.defaultSeparator", MailProperties.getInstance().getDefaultSeparator());
     }
 
     @Override
     public int getMailAccessCacheIdleSeconds() {
-        final String tmp = properties.get("com.openexchange.mail.mailAccessCacheIdleSeconds");
-        if (null == tmp) {
-            return MailProperties.getInstance().getMailAccessCacheIdleSeconds();
-        } else {
-
-        }
-
-        try {
-            return Integer.parseInt(tmp.trim());
-        } catch (final NumberFormatException e) {
-            LOG.error("Mail Access Cache idle seconds: Non parseable value.", e);
-            return MailProperties.getInstance().getMailAccessCacheIdleSeconds();
-        }
+        return lookUpIntProperty("com.openexchange.mail.mailAccessCacheIdleSeconds", MailProperties.getInstance().getMailAccessCacheIdleSeconds());
     }
 
     @Override
     public int getMailAccessCacheShrinkerSeconds() {
-        final String tmp = properties.get("com.openexchange.mail.mailAccessCacheShrinkerSeconds");
-        if (null == tmp) {
-            return MailProperties.getInstance().getMailAccessCacheShrinkerSeconds();
-        } else {
-
-        }
-
-        try {
-            return Integer.parseInt(tmp.trim());
-        } catch (final NumberFormatException e) {
-            LOG.error("Mail Access Cache shrinker-interval seconds: Non parseable value.", e);
-            return MailProperties.getInstance().getMailAccessCacheShrinkerSeconds();
-        }
+        return lookUpIntProperty("com.openexchange.mail.mailAccessCacheShrinkerSeconds", MailProperties.getInstance().getMailAccessCacheShrinkerSeconds());
     }
 
     @Override
     public int getMailFetchLimit() {
-        final String mailFetchLimitStr = properties.get("com.openexchange.mail.mailFetchLimit");
-        if (null == mailFetchLimitStr) {
-            return MailProperties.getInstance().getMailFetchLimit();
-        } else {
-
-        }
-
-        try {
-            return Integer.parseInt(mailFetchLimitStr.trim());
-        } catch (final NumberFormatException e) {
-            LOG.error("Mail Fetch Limit: Non parseable value.", e);
-            return MailProperties.getInstance().getMailFetchLimit();
-        }
+        return lookUpIntProperty("com.openexchange.mail.mailFetchLimit", MailProperties.getInstance().getMailFetchLimit());
     }
 
     @Override
     public int getWatcherFrequency() {
-        final String watcherFreqStr = properties.get("com.openexchange.mail.watcherFrequency");
-        if (null == watcherFreqStr) {
-            return MailProperties.getInstance().getWatcherFrequency();
-        } else {
-
-        }
-
-        try {
-            return Integer.parseInt(watcherFreqStr.trim());
-        } catch (final NumberFormatException e) {
-            LOG.error("Watcher frequency: Non parseable value.", e);
-            return MailProperties.getInstance().getWatcherFrequency();
-        }
+        return lookUpIntProperty("com.openexchange.mail.watcherFrequency", MailProperties.getInstance().getWatcherFrequency());
     }
 
     @Override
     public int getWatcherTime() {
-        final String watcherTimeStr = properties.get("com.openexchange.mail.watcherTime");
-        if (null == watcherTimeStr) {
-            return MailProperties.getInstance().getWatcherTime();
-        } else {
-
-        }
-
-        try {
-            return Integer.parseInt(watcherTimeStr.trim());
-        } catch (final NumberFormatException e) {
-            LOG.error("Watcher time: Non parseable value.", e);
-            return MailProperties.getInstance().getWatcherTime();
-        }
+        return lookUpIntProperty("com.openexchange.mail.watcherTime", MailProperties.getInstance().getWatcherTime());
     }
 
     @Override
     public boolean isAllowNestedDefaultFolderOnAltNamespace() {
-        final String allowNestedStr = properties.get("com.openexchange.mail.allowNestedDefaultFolderOnAltNamespace");
-        if (null == allowNestedStr) {
-            return MailProperties.getInstance().isAllowNestedDefaultFolderOnAltNamespace();
-        }
+        return lookUpBoolProperty("com.openexchange.mail.allowNestedDefaultFolderOnAltNamespace", MailProperties.getInstance().isAllowNestedDefaultFolderOnAltNamespace());
 
-        return Boolean.parseBoolean(allowNestedStr.trim());
     }
 
     @Override
@@ -254,12 +296,7 @@ public class MailAccountProperties implements IMailProperties {
             return b.booleanValue();
         }
 
-        String tmp = properties.get("com.openexchange.mail.enforceSecureConnection");
-        if (null == tmp) {
-            return MailProperties.getInstance().isEnforceSecureConnection();
-        }
-
-        return Boolean.parseBoolean(tmp.trim());
+        return lookUpBoolProperty("com.openexchange.mail.enforceSecureConnection", MailProperties.getInstance().isEnforceSecureConnection());
     }
 
     @Override
@@ -269,52 +306,27 @@ public class MailAccountProperties implements IMailProperties {
 
     @Override
     public boolean isIgnoreSubscription() {
-        final String ignoreSubsStr = properties.get("com.openexchange.mail.ignoreSubscription");
-        if (null == ignoreSubsStr) {
-            return MailProperties.getInstance().isIgnoreSubscription();
-        }
-
-        return Boolean.parseBoolean(ignoreSubsStr.trim());
+        return lookUpBoolProperty("com.openexchange.mail.ignoreSubscription", MailProperties.getInstance().isIgnoreSubscription());
     }
 
     @Override
     public boolean isSupportSubscription() {
-        final String supportSubsStr = properties.get("com.openexchange.mail.supportSubscription");
-        if (null == supportSubsStr) {
-            return MailProperties.getInstance().isSupportSubscription();
-        }
-
-        return Boolean.parseBoolean(supportSubsStr.trim());
+        return lookUpBoolProperty("com.openexchange.mail.supportSubscription", MailProperties.getInstance().isSupportSubscription());
     }
 
     @Override
     public boolean isUserFlagsEnabled() {
-        final String userFlagsStr = properties.get("com.openexchange.mail.userFlagsEnabled");
-        if (null == userFlagsStr) {
-            return MailProperties.getInstance().isUserFlagsEnabled();
-        }
-
-        return Boolean.parseBoolean(userFlagsStr.trim());
+        return lookUpBoolProperty("com.openexchange.mail.userFlagsEnabled", MailProperties.getInstance().isUserFlagsEnabled());
     }
 
     @Override
     public boolean isWatcherEnabled() {
-        final String watcherEnabledStr = properties.get("com.openexchange.mail.watcherEnabled");
-        if (null == watcherEnabledStr) {
-            return MailProperties.getInstance().isWatcherEnabled();
-        }
-
-        return Boolean.parseBoolean(watcherEnabledStr.trim());
+        return lookUpBoolProperty("com.openexchange.mail.watcherEnabled", MailProperties.getInstance().isWatcherEnabled());
     }
 
     @Override
     public boolean isWatcherShallClose() {
-        final String watcherShallCloseStr = properties.get("com.openexchange.mail.watcherShallClose");
-        if (null == watcherShallCloseStr) {
-            return MailProperties.getInstance().isWatcherShallClose();
-        }
-
-        return Boolean.parseBoolean(watcherShallCloseStr.trim());
+        return lookUpBoolProperty("com.openexchange.mail.watcherShallClose", MailProperties.getInstance().isWatcherShallClose());
     }
 
     @Override
