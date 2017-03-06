@@ -605,11 +605,11 @@ exclude_secret_entries() {
 # _modified_line=com.openexchange.oauth.msn.apiSecret=<REMOVED BY OXSYSREPORT>
     local _config_copy=${1}
     local _tmp_exclude_status=$(normalize_path ${TMP}/${LOGDIR}/configs-secret-exclude)
-    local _whitelist='enabledMailCapableKey|UserAttributePassword|login_pattern.domain_user|maxAccessesPerUser|maxSessionPerUser|namespacePerUser|forgotPassword|AfterLogin|^[[:blank:]]*#'
-    local _blacklist='pass(word)*[[:blank:]]*(=|:)|secret[[:blank:]]*(=|:)|key[[:blank:]]*(=|:)|secretsource[[:blank:]]*(=|:)|secretrandom[[:blank:]]*(=|:)|salt[[:blank:]]*(=|:)|sslkey(pass|name)[[:blank:]]*(=|:)|login[[:blank:]]*(=|:)|user[[:blank:]]*(=|:)'
+    local _whitelist='enabledMailCapableKey|UserAttributePassword|forgotPassword|^[[:blank:]]*#'
+    local _blacklist='pass(word)*[[:blank:]]*(=|:)|secret[[:blank:]]*(=|:)|key[[:blank:]]*(=|:)|secretsource[[:blank:]]*(=|:)|secretrandom[[:blank:]]*(=|:)|salt[[:blank:]]*(=|:)|sslkey(pass|name)[[:blank:]]*(=|:)|(\.|JMX|JDBC|:[[:blank:]]*)login[[:blank:]]*(=|:)|(\.|:[[:blank:]]*|=[[:blank:]]*)user[[:blank:]]*(=|:)'
     find "${_config_copy}" -type f | \
         sed 's|[[:blank:]]|\\ |g' | \
-        xargs egrep -HrIv "${_whitelist}" | \
+        xargs egrep -iHrIv "${_whitelist}" | \
         egrep -i "${_blacklist}" >> ${_tmp_exclude_status}
 
     # /tmp/ox_support_infos-20140526-165503/opt/open-xchange/etc/msnoauth.properties:com.openexchange.oauth.msn.apiSecret=secret
