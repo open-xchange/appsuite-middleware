@@ -49,7 +49,6 @@
 
 package com.openexchange.pop3.config;
 
-import java.nio.charset.Charset;
 import com.openexchange.mail.config.MailAccountProperties;
 import com.openexchange.mailaccount.MailAccount;
 
@@ -76,118 +75,42 @@ public final class MailAccountPOP3Properties extends MailAccountProperties imple
 
     @Override
     public String getPOP3AuthEnc() {
-        final String pop3AuthEncStr = properties.get("com.openexchange.pop3.pop3AuthEnc");
-        if (null == pop3AuthEncStr) {
-            return POP3Properties.getInstance().getPOP3AuthEnc();
-        }
-
-        if (Charset.isSupported(pop3AuthEncStr)) {
-            return pop3AuthEncStr;
-        }
-
-        final String fallback = POP3Properties.getInstance().getPOP3AuthEnc();
-        LOG.error("POP3 Authentication Encoding: Unsupported charset \"{}\". Setting to fallback: {}{}", pop3AuthEncStr, fallback, '\n');
-        return fallback;
+        return lookUpProperty("com.openexchange.pop3.pop3AuthEnc", POP3Properties.getInstance().getPOP3AuthEnc());
     }
 
     @Override
     public int getPOP3ConnectionIdleTime() {
-        final String tmp = properties.get("com.openexchange.pop3.pop3ConnectionIdleTime");
-        if (null == tmp) {
-            return POP3Properties.getInstance().getPOP3ConnectionIdleTime();
-        }
-
-        try {
-            return Integer.parseInt(tmp.trim());
-        } catch (final NumberFormatException e) {
-            LOG.error("POP3 Connection Idle Time: Invalid value.", e);
-            return POP3Properties.getInstance().getPOP3ConnectionIdleTime();
-        }
+        return lookUpIntProperty("com.openexchange.pop3.pop3ConnectionIdleTime", POP3Properties.getInstance().getPOP3ConnectionIdleTime());
     }
 
     @Override
     public int getPOP3BlockSize() {
-        final String tmp = properties.get("com.openexchange.pop3.pop3BlockSize");
-        if (null == tmp) {
-            return POP3Properties.getInstance().getPOP3BlockSize();
-        }
-
-        try {
-            final int blockSize = Integer.parseInt(tmp.trim());
-            if (blockSize <= 0) {
-                LOG.error("POP3 Block Size: Invalid value.");
-                return POP3Properties.getInstance().getPOP3BlockSize();
-            }
-            return blockSize;
-        } catch (final NumberFormatException e) {
-            LOG.error("POP3 Block Size: Invalid value.", e);
-            return POP3Properties.getInstance().getPOP3BlockSize();
-        }
+        return lookUpIntProperty("com.openexchange.pop3.pop3BlockSize", POP3Properties.getInstance().getPOP3BlockSize());
     }
 
     @Override
     public int getPOP3ConnectionTimeout() {
-        final String tmp = properties.get("com.openexchange.pop3.pop3ConnectionTimeout");
-        if (null == tmp) {
-            return POP3Properties.getInstance().getPOP3ConnectionTimeout();
-        }
-
-        try {
-            return Integer.parseInt(tmp.trim());
-        } catch (final NumberFormatException e) {
-            LOG.error("POP3 Connection Timeout: Invalid value.", e);
-            return POP3Properties.getInstance().getPOP3ConnectionTimeout();
-        }
+        return lookUpIntProperty("com.openexchange.pop3.pop3ConnectionTimeout", POP3Properties.getInstance().getPOP3ConnectionTimeout());
     }
 
     @Override
     public int getPOP3TemporaryDown() {
-        final String tmp = properties.get("com.openexchange.pop3.pop3TemporaryDown");
-        if (null == tmp) {
-            return POP3Properties.getInstance().getPOP3TemporaryDown();
-        }
-
-        try {
-            return Integer.parseInt(tmp.trim());
-        } catch (final NumberFormatException e) {
-            LOG.error("POP3 Temporary Down: Invalid value.", e);
-            return POP3Properties.getInstance().getPOP3TemporaryDown();
-        }
+        return lookUpIntProperty("com.openexchange.pop3.pop3TemporaryDown", POP3Properties.getInstance().getPOP3TemporaryDown());
     }
 
     @Override
     public int getPOP3Timeout() {
-        final String tmp = properties.get("com.openexchange.pop3.pop3Timeout");
-        if (null == tmp) {
-            return POP3Properties.getInstance().getPOP3Timeout();
-        }
-
-        try {
-            return Integer.parseInt(tmp.trim());
-        } catch (final NumberFormatException e) {
-            LOG.error("POP3 Timeout: Invalid value.", e);
-            return POP3Properties.getInstance().getPOP3Timeout();
-        }
+        return lookUpIntProperty("com.openexchange.pop3.pop3Timeout", POP3Properties.getInstance().getPOP3Timeout());
     }
 
     @Override
     public String getSSLProtocols() {
-        final String tmp = properties.get("com.openexchange.pop3.ssl.protocols");
-        if (null == tmp) {
-            return POP3Properties.getInstance().getSSLProtocols();
-        }
-
-        return tmp.trim();
+        return lookUpProperty("com.openexchange.pop3.ssl.protocols", POP3Properties.getInstance().getSSLProtocols());
     }
 
     @Override
     public String getSSLCipherSuites() {
-        final String tmp = properties.get("com.openexchange.pop3.ssl.ciphersuites");
-        if (null == tmp) {
-            return POP3Properties.getInstance().getSSLCipherSuites();
-        }
-
-        return tmp.trim();
+        return lookUpProperty("com.openexchange.pop3.ssl.ciphersuites", POP3Properties.getInstance().getSSLCipherSuites());
     }
 
 }
