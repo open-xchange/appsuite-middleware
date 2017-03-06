@@ -87,6 +87,9 @@ public class SendFeedbackViaMail extends AbstractRestCLI<Void> {
     private static final String TYPE_SHORT = "t";
     private static final String TYPE_DEFAULT = "star-rating-v1";
 
+    private static final String RECIPIENTS_SHORT = "r";
+    private static final String RECIPIENT_LONG = "recipients";
+
     private static final String ENDPOINT_LONG = "api-root";
     private static final String ENDPOINT_DEFAULT = "http://localhost:8009/userfeedback/v1/mail";
 
@@ -109,6 +112,7 @@ public class SendFeedbackViaMail extends AbstractRestCLI<Void> {
         options.addOption(CONTEXT_GROUP_SHORT, CONTEXT_GROUP_LONG, true, "The context group identifying the global DB where the feedback is stored. Default: 'default'.");
         options.addOption(START_SHORT, START_LONG, true, "Start time in seconds since 1970-01-01 00:00:00 UTC. Only feedback given after this time is sent. If not set, all feedback up to -e is sent.");
         options.addOption(END_SHORT, END_LONG, true, "End time in seconds since 1970-01-01 00:00:00 UTC. Only feedback given before this time is sent. If not set, all feedback since -s is sent.");
+        options.addOption(RECIPIENTS_SHORT, RECIPIENT_LONG, true, "Comma-separated list of recipients.");
         options.addOption(null, ENDPOINT_LONG, true, " URL to an alternative HTTP API endpoint. Example: 'https://192.168.0.1:8443/userfeedback/v1'");
     }
 
@@ -132,7 +136,7 @@ public class SendFeedbackViaMail extends AbstractRestCLI<Void> {
             if (cmd.hasOption(END_SHORT)) {
                 target = target.queryParam("end", cmd.getOptionValue(END_SHORT));
             }
-            target = target.queryParam("recipients", cmd.getArgs()[0]);
+            target = target.queryParam("recipients", cmd.getOptionValue(RECIPIENTS_SHORT));
             return target;
         } catch (URISyntaxException e) {
             System.err.print("Unable to return endpoint: " + e.getMessage());
