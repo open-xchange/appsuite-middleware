@@ -93,9 +93,8 @@ public final class MailAccountSMTPProperties extends MailAccountTransportPropert
 
     @Override
     public String getSmtpAuthEnc() {
-        String smtpAuthEncStr = properties.get("com.openexchange.smtp.smtpAuthEnc");
+        String smtpAuthEncStr = getAccountProperty("com.openexchange.smtp.smtpAuthEnc");
         if (null != smtpAuthEncStr) {
-
             if (Charset.isSupported(smtpAuthEncStr)) {
                 return smtpAuthEncStr;
             }
@@ -117,14 +116,13 @@ public final class MailAccountSMTPProperties extends MailAccountTransportPropert
             }
         }
 
-        return SMTPProperties.getInstance().getSmtpAuthEnc();
+        return lookUpProperty("com.openexchange.smtp.smtpAuthEnc", SMTPProperties.getInstance().getSmtpAuthEnc());
     }
 
     @Override
     public int getSmtpConnectionTimeout() {
-        String smtpConTimeoutStr = properties.get("com.openexchange.smtp.smtpConnectionTimeout");
+        String smtpConTimeoutStr = getAccountProperty("com.openexchange.smtp.smtpConnectionTimeout");
         if (null != smtpConTimeoutStr) {
-
             try {
                 return Integer.parseInt(smtpConTimeoutStr);
             } catch (final NumberFormatException e) {
@@ -146,12 +144,12 @@ public final class MailAccountSMTPProperties extends MailAccountTransportPropert
             }
         }
 
-        return SMTPProperties.getInstance().getSmtpConnectionTimeout();
+        return lookUpIntProperty("com.openexchange.smtp.smtpConnectionTimeout", SMTPProperties.getInstance().getSmtpConnectionTimeout());
     }
 
     @Override
     public String getSmtpLocalhost() {
-        String smtpLocalhostStr = properties.get("com.openexchange.smtp.smtpLocalhost");
+        String smtpLocalhostStr = getAccountProperty("com.openexchange.smtp.smtpLocalhost");
         if (null != smtpLocalhostStr) {
             return (smtpLocalhostStr.length() == 0) || "null".equalsIgnoreCase(smtpLocalhostStr) ? null : smtpLocalhostStr;
         }
@@ -163,7 +161,7 @@ public final class MailAccountSMTPProperties extends MailAccountTransportPropert
             }
         }
 
-        return SMTPProperties.getInstance().getSmtpLocalhost();
+        return lookUpProperty("com.openexchange.smtp.smtpLocalhost", SMTPProperties.getInstance().getSmtpLocalhost());
     }
 
     @Override
@@ -190,12 +188,12 @@ public final class MailAccountSMTPProperties extends MailAccountTransportPropert
             }
         }
 
-        return SMTPProperties.getInstance().getSmtpTimeout();
+        return lookUpIntProperty("com.openexchange.smtp.smtpTimeout", SMTPProperties.getInstance().getSmtpTimeout());
     }
 
     @Override
     public boolean isSmtpAuth() {
-        String smtpAuthStr = properties.get("com.openexchange.smtp.smtpAuthentication");
+        String smtpAuthStr = getAccountProperty("com.openexchange.smtp.smtpAuthentication");
         if (null != smtpAuthStr) {
             return Boolean.parseBoolean(smtpAuthStr.trim());
         }
@@ -207,12 +205,12 @@ public final class MailAccountSMTPProperties extends MailAccountTransportPropert
             }
         }
 
-        return SMTPProperties.getInstance().isSmtpAuth();
+        return lookUpBoolProperty("com.openexchange.smtp.smtpAuthentication", SMTPProperties.getInstance().isSmtpAuth());
     }
 
     @Override
     public boolean isSendPartial() {
-        String smtpPartialStr = properties.get("com.openexchange.smtp.sendPartial");
+        String smtpPartialStr = getAccountProperty("com.openexchange.smtp.sendPartial");
         if (null != smtpPartialStr) {
             return Boolean.parseBoolean(smtpPartialStr.trim());
         }
@@ -224,7 +222,7 @@ public final class MailAccountSMTPProperties extends MailAccountTransportPropert
             }
         }
 
-        return SMTPProperties.getInstance().isSendPartial();
+        return lookUpBoolProperty("com.openexchange.smtp.sendPartial", SMTPProperties.getInstance().isSendPartial());
     }
 
     @Override
@@ -233,11 +231,7 @@ public final class MailAccountSMTPProperties extends MailAccountTransportPropert
             return false;
         }
 
-        String smtpEnvFromStr = properties.get("com.openexchange.smtp.setSMTPEnvelopeFrom");
-        if (null == smtpEnvFromStr) {
-            return SMTPProperties.getInstance().isSmtpEnvelopeFrom();
-        }
-        return Boolean.parseBoolean(smtpEnvFromStr);
+        return lookUpBoolProperty("com.openexchange.smtp.setSMTPEnvelopeFrom", SMTPProperties.getInstance().isSmtpEnvelopeFrom());
     }
 
     @Override
@@ -246,16 +240,12 @@ public final class MailAccountSMTPProperties extends MailAccountTransportPropert
             return false;
         }
 
-        String tmp = properties.get("com.openexchange.smtp.logTransport");
-        if (null == tmp) {
-            return SMTPProperties.getInstance().isLogTransport();
-        }
-        return Boolean.parseBoolean(tmp);
+        return lookUpBoolProperty("com.openexchange.smtp.logTransport", SMTPProperties.getInstance().isLogTransport());
     }
 
     @Override
     public String getSSLProtocols() {
-        String tmp = properties.get("com.openexchange.smtp.ssl.protocols");
+        String tmp = getAccountProperty("com.openexchange.smtp.ssl.protocols");
         if (null != tmp) {
             return tmp.trim();
         }
@@ -267,12 +257,12 @@ public final class MailAccountSMTPProperties extends MailAccountTransportPropert
             }
         }
 
-        return SMTPProperties.getInstance().getSSLProtocols();
+        return lookUpProperty("com.openexchange.smtp.ssl.protocols", SMTPProperties.getInstance().getSSLProtocols());
     }
 
     @Override
     public String getSSLCipherSuites() {
-        String tmp = properties.get("com.openexchange.smtp.ssl.ciphersuites");
+        String tmp = getAccountProperty("com.openexchange.smtp.ssl.ciphersuites");
         if (null != tmp) {
             return tmp.trim();
         }
@@ -284,7 +274,7 @@ public final class MailAccountSMTPProperties extends MailAccountTransportPropert
             }
         }
 
-        return SMTPProperties.getInstance().getSSLCipherSuites();
+        return lookUpProperty("com.openexchange.smtp.ssl.protocols", SMTPProperties.getInstance().getSSLCipherSuites());
     }
 
 }
