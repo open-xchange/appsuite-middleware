@@ -606,7 +606,7 @@ exclude_secret_entries() {
     local _config_copy=${1}
     local _tmp_exclude_status=$(normalize_path ${TMP}/${LOGDIR}/configs-secret-exclude)
     local _whitelist='enabledMailCapableKey|UserAttributePassword|forgotPassword|^[[:blank:]]*#'
-    local _blacklist='pass(word)*[[:blank:]]*(=|:)|secret[[:blank:]]*(=|:)|key[[:blank:]]*(=|:)|secretsource[[:blank:]]*(=|:)|secretrandom[[:blank:]]*(=|:)|salt[[:blank:]]*(=|:)|sslkey(pass|name)[[:blank:]]*(=|:)|(\.|JMX|JDBC|:[[:blank:]]*)login[[:blank:]]*(=|:)|(\.|:[[:blank:]]*|=[[:blank:]]*)user[[:blank:]]*(=|:)'
+    local _blacklist='pass(word)*[[:blank:]]*(=|:)|secret[[:blank:]]*(=|:)|key[[:blank:]]*(=|:)|secretsource[[:blank:]]*(=|:)|secretrandom[[:blank:]]*(=|:)|salt[[:blank:]]*(=|:)|sslkey(pass|name)[[:blank:]]*(=|:)|(\.|JMX|JDBC|:[[:blank:]]*)login[[:blank:]]*(=|:)|(\.|:[[:blank:]]*|=[[:blank:]]*)user(name)[[:blank:]]*(=|:)'
     find "${_config_copy}" -type f | \
         sed 's|[[:blank:]]|\\ |g' | \
         xargs egrep -iHrIv "${_whitelist}" | \
