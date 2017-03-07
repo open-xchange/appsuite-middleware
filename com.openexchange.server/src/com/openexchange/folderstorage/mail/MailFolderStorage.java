@@ -1010,9 +1010,9 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
                  * An external account folder
                  */
                 if (IGNORABLES.contains(mailAccount.getMailProtocol())) {
-                    retval = new ExternalMailAccountRootFolder(mailAccount, mailAccess.getMailConfig(), session);
+                    retval = new ExternalMailAccountRootFolder(mailAccount, /*mailAccess.getMailConfig(),*/ session);
                 } else {
-                    retval = new RemoveAfterAccessExtRootFolder(mailAccount, mailAccess.getMailConfig(), session);
+                    retval = new RemoveAfterAccessExtRootFolder(mailAccount, /*mailAccess.getMailConfig(),*/ session);
                 }
                 /*
                  * Load on demand (or in FolderMap)
