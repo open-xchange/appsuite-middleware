@@ -89,7 +89,7 @@ public class SendMailService extends JAXRSService {
 
     @GET
     @Path("/{context-group}/{type}")
-    @Produces(MediaType.APPLICATION_OCTET_STREAM + ";charset=utf-8")
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response sendMail(@QueryParam("start") final long start, @QueryParam("end") final long end, @PathParam("type") final String type, @PathParam("context-group") final String contextGroup, @QueryParam("recipients") final String recipients) {
         ResponseBuilder builder = null;
         if (null == recipients || Strings.isEmpty(recipients)) {

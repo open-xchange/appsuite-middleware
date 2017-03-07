@@ -6,6 +6,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -16,6 +18,7 @@ import javax.mail.Multipart;
 import javax.mail.NoSuchProviderException;
 import javax.mail.Session;
 import javax.mail.Transport;
+import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
@@ -37,21 +40,21 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FeedbackMailServiceSMTP.class);
     public static final String FILENAME = "feedback";
     public static final String FILE_TYPE = ".csv";
+    private List<InternetAddress> invalidAddresses;
 
     @Override
     public String sendFeedbackMail(FeedbackMailFilter filter) {
-        String result = "Mail(s) send.";
+        invalidAddresses = new ArrayList<>();
+        String result = "Sending email(s) failed for unkown reason, please contact the administrator or see the server logs";
         try {
             File feedbackfile = getFeedbackfile(filter);
             if (feedbackfile != null) {
                 result = sendMail(feedbackfile, filter);
             }
         } catch (OXException e) {
-            // TODO QS-VS: correct logging
             e.printStackTrace();
             result = "Failure";
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
@@ -75,29 +78,41 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
         Session smtpSession = Session.getInstance(smtpProperties);
         Transport transport = null;
         
+        String result = "";
+        
         try {
-            Address[] recipients = extractRecipients(filter);
+            Address[] recipients = extractValidRecipients(filter);
             MimeMessage mail = createMailMessage(feedbackFile, filter, smtpProperties, smtpSession);
             transport = smtpSession.getTransport("smtp");
             transport.connect(MailProperties.getSmtpHostname(), MailProperties.getSmtpPort(), MailProperties.getSmtpUsername(), MailProperties.getSmtpPassword());
             transport.sendMessage(mail, recipients);
+            result = getPositiveSendingResult(recipients);
         } catch (NoSuchProviderException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (MessagingException e) {
-            // TODO Auto-generated catch block
+            result = result.concat(e.getMessage());
             e.printStackTrace();
         } catch (UnsupportedEncodingException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } finally {
             closeTransport(transport);
         }
+        
+        result = result.concat(appendWarnings());
 
-        return null;
+        return result;
+    }
+
+    private String getPositiveSendingResult(Address[] recipients) {
+        String result = "An email with userfeedback was send to \n";
+        for (int i = 0; i < recipients.length; i++) {
+            InternetAddress address = (InternetAddress) recipients[i];
+            String personalPart = address.getPersonal();
+            result += address.getAddress().concat(" ").concat(personalPart != null && !personalPart.isEmpty() ? personalPart : "").concat("\n");
+        }
+        return result;
     }
 
     private void closeTransport(Transport transport) {
@@ -105,7 +120,6 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
             try {
                 transport.close();
             } catch (MessagingException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
@@ -128,14 +142,20 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
         return email;
     }
 
-    private Address[] extractRecipients(FeedbackMailFilter filter) throws UnsupportedEncodingException {
+    private Address[] extractValidRecipients(FeedbackMailFilter filter) throws UnsupportedEncodingException {
         Map<String, String> recipients = filter.getRecipients();
         InternetAddress[] result = new InternetAddress[recipients.size()];
         int index = 0;
         for (Entry<String, String> recipient : recipients.entrySet()) {
-            InternetAddress adress = new InternetAddress(recipient.getKey(), recipient.getValue());
-            result[index] = adress;
-            index++;
+            InternetAddress address = new InternetAddress(recipient.getKey(), recipient.getValue());
+            try {
+                address.validate();
+                result[index] = address;
+                index++;
+            } catch (AddressException e) {
+                this.invalidAddresses.add(address);
+                e.printStackTrace();
+            }
         }
         
         return result;
@@ -164,7 +184,17 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
         properties.put("mail.smtp.timeout", MailProperties.getSmtpTimeout());
         properties.put("mail.smtp.ssl.protocols", MailProperties.getSmtpProtocol());
         
-        
         return properties;
+    }
+    
+    private String appendWarnings() {
+        String result = "";
+        if (invalidAddresses.size() > 0) {
+            result = "\nThe following addresses are invalid and therefore igonred\n=======================\n";
+            for (InternetAddress internetAddress : invalidAddresses) {
+                result = result.concat(internetAddress.getAddress().concat("\n"));
+            }
+        }
+        return result;
     }
 }

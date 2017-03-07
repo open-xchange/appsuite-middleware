@@ -47,37 +47,22 @@
  *
  */
 
-package com.openexchange.userfeedback.mail.osgi;
+package com.openexchange.userfeedback.mail;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.net.ssl.SSLSocketFactoryProvider;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.userfeedback.FeedbackService;
-import com.openexchange.userfeedback.mail.FeedbackMailService;
-import com.openexchange.userfeedback.mail.internal.FeedbackMailServiceSMTP;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.userfeedback.mail.internal.FeedbackMailServiceSMTPTest;
+import com.openexchange.userfeedback.mail.internal.FeedbackMimeMessageUtilityTest;
 
 /**
- * {@link UserFeedbackMailActivator}
+ * 
+ * {@link UnitTests}
  *
  * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
- * @since 7.8.4
+ * @since v7.8.4
  */
-public class UserFeedbackMailActivator extends HousekeepingActivator {
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { ConfigurationService.class, FeedbackService.class, SSLSocketFactoryProvider.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-        registerService(FeedbackMailService.class, new FeedbackMailServiceSMTP());
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        Services.setServiceLookup(null);
-        super.stopBundle();
-    }
+@RunWith(Suite.class)
+@SuiteClasses({FeedbackMailServiceSMTPTest.class, FeedbackMimeMessageUtilityTest.class})
+public class UnitTests {
 }

@@ -47,37 +47,49 @@
  *
  */
 
-package com.openexchange.userfeedback.mail.osgi;
+package com.openexchange.userfeedback.mail.transport;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.net.ssl.SSLSocketFactoryProvider;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.userfeedback.FeedbackService;
-import com.openexchange.userfeedback.mail.FeedbackMailService;
-import com.openexchange.userfeedback.mail.internal.FeedbackMailServiceSMTP;
+import javax.mail.Address;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.MimeMessage;
+import com.openexchange.userfeedback.mail.config.MailProperties;
 
 /**
- * {@link UserFeedbackMailActivator}
+ * {@link TransportHandler}
  *
  * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  * @since 7.8.4
  */
-public class UserFeedbackMailActivator extends HousekeepingActivator {
+public class TransportHandler {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { ConfigurationService.class, FeedbackService.class, SSLSocketFactoryProvider.class };
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TransportHandler.class);
+
+    public boolean sendViaSmtp(Session smtpSession, Address[] recipients, MimeMessage mail) {
+        Transport transport = null;
+        boolean result = true;
+        try {
+            transport = smtpSession.getTransport("smtp");
+            transport.connect(MailProperties.getSmtpHostname(), MailProperties.getSmtpPort(), MailProperties.getSmtpUsername(), MailProperties.getSmtpPassword());
+            transport.sendMessage(mail, recipients);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+            result = false;
+        } finally {
+            closeTransport(transport);
+        }
+        return result;
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-        registerService(FeedbackMailService.class, new FeedbackMailServiceSMTP());
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        Services.setServiceLookup(null);
-        super.stopBundle();
+    private void closeTransport(Transport transport) {
+        if (transport != null) {
+            try {
+                transport.close();
+            } catch (MessagingException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
     }
 }
