@@ -8,12 +8,12 @@
       - in: path
         name: context-group
         description: The context group identifying the global DB where the feedback is stored.
-        required: false
+        required: true
         type: String
       - in: path
         name: type
         description: The feedback type to delete.
-        required: false
+        required: true
         type: String
       - in: query
         name: start

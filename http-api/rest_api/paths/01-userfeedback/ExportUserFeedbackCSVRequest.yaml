@@ -9,14 +9,14 @@
       - in: path
         name: context-group
         description: The context group identifying the global DB where the feedback is stored.
-        required: false
+        required: true
         type: String
         default: default
 
       - in: path
         name: type
         description: The feedback type to send.
-        required: false
+        required: true
         type: String
         default: star-rating-v1
 
@@ -36,9 +36,13 @@
 
     responses:
       200:
-        description: Blank in case of success, error message from server in case of error.
+        description: Blank in case of success.
       400:
         description: Bad request, response contains error message.
+      404:
+        description: Not found, if path is wrong (unknown context group or feedback type). Response contains error message.
+      500:
+        description: Internal server error that might have multiple reasons, for instance no configured global database. Response contains error message.
 
     x-ox-examples:
       Example:
