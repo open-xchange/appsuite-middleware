@@ -137,7 +137,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     private static final String INSERT_FEEDBACK_SQL = "INSERT INTO feedback (groupId, type, date, cid, user, login_name, typeId) VALUES (?,?,?,?,?,?,?);";
     private static final String SELECT_FEEDBACK_SQL = "SELECT date, cid, user, login_name, typeId FROM feedback WHERE groupId=? AND type=? AND date >? AND date <?";
     private static final String DELETE_FEEDBACK_SQL = "DELETE FROM feedback WHERE groupId = ? AND type = ? AND date > ? AND date < ?";
-    private static final String TYPEID_FEEDBACK_SQL = "SELECT typeId FROM feedback WHERE groupId = ? AND type = ? AND date > ? AND data < ?";
+    private static final String TYPEID_FEEDBACK_SQL = "SELECT typeId FROM feedback WHERE groupId = ? AND type = ? AND date > ? AND date < ?";
 
     /**
      * @param writeCon The global db write connection
