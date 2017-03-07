@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="rest_client" default="download_check_and_add_rest_jar" basedir=".">
+    <description>
+        Enhances test libs by the rest client
+    </description>
+	
+    <import file="./main.xml" />
+
+    <property name="rest.jar.url" value="https://artifactory.open-xchange.com/artifactory/qa/com/openexchange/testing/httpClient-java/develop-5/httpClient-java-develop-5.jar"/>
+
+    <target name="download_check_and_add_rest_jar">
+        <antcall target="download_check_and_add_jar">
+            <param name="jar.url" value="${rest.jar.url}" />
+        </antcall>
+        <delete dir="${tmp_dir}" verbose="true"/>
+    </target>
+
+</project>
