@@ -878,7 +878,7 @@ public final class HtmlProcessing {
      * @return The color for given <code>quotelevel</code>
      */
     private static String getLevelColor(final int quotelevel) {
-        final String[] colors = MailProperties.getInstance().getQuoteLineColors(session.getUserId(), session.getContextId());
+        final String[] colors = MailProperties.getInstance().getQuoteLineColors();
         return (colors != null) && (colors.length > 0) ? (quotelevel >= colors.length ? colors[colors.length - 1] : colors[quotelevel]) : DEFAULT_COLOR;
     }
 
