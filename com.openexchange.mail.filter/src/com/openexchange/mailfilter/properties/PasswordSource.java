@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2017-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,28 +47,60 @@
  *
  */
 
-package com.openexchange.unifiedinbox.config;
+package com.openexchange.mailfilter.properties;
 
-import com.openexchange.mail.config.MailAccountProperties;
-import com.openexchange.mailaccount.MailAccount;
+import java.util.Map;
+import com.google.common.collect.ImmutableMap;
+import com.openexchange.exception.OXException;
+import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
 
 /**
- * {@link MailAccountUnifiedINBOXProperties} - TODO Short description of this class' purpose.
+ * {@link PasswordSource}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class MailAccountUnifiedINBOXProperties extends MailAccountProperties implements IUnifiedInboxProperties {
-
+public enum PasswordSource {
     /**
-     * Initializes a new {@link MailAccountUnifiedINBOXProperties}.
-     *
-     * @param mailAccount The mail account
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @throws IllegalArgumentException If provided mail account is <code>null</code>
+     * The user's individual system's password is taken
      */
-    public MailAccountUnifiedINBOXProperties(MailAccount mailAccount, int userId, int contextId) {
-        super(mailAccount, userId, contextId);
+    SESSION("session"),
+    /**
+     * The the value specified through property {@link MailFilterProperty#masterPassword} is taken.
+     */
+    GLOBAL("global");
+
+    private static final Map<String, PasswordSource> MAP;
+    static {
+        ImmutableMap.Builder<String, PasswordSource> b = ImmutableMap.builder();
+        for (PasswordSource pwSrc : PasswordSource.values()) {
+            b.put(pwSrc.name, pwSrc);
+        }
+        MAP = b.build();
     }
 
+    public final String name;
+
+    /**
+     * Initialises a new {@link PasswordSource}.
+     * 
+     * @param name
+     */
+    private PasswordSource(final String name) {
+        this.name = name;
+    }
+
+    /**
+     * The name of the {@link PasswordSource}
+     * 
+     * @param name The name of the {@link PasswordSource} as string
+     * @return The {@link PasswordSource}
+     * @throws OXException if an invalid {@link PasswordSource} is requested
+     */
+    public static PasswordSource passwordSourceFor(String name) throws OXException {
+        PasswordSource passwordSource = MAP.get(name);
+        if (passwordSource == null) {
+            throw MailFilterExceptionCode.NO_VALID_PASSWORDSOURCE.create();
+        }
+        return passwordSource;
+    }
 }

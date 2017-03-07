@@ -182,11 +182,7 @@ public enum MailFilterExceptionCode implements DisplayableOXExceptionCode {
     /**
      * Invalid SIEVE rule specified. Server response: %1$s
      */
-    INVALID_SIEVE_RULE2("Invalid SIEVE rule specified. Server response: %1$s", INVALID_SIEVE_RULE2_MSG, CATEGORY_USER_INPUT, 25), // Yapp,
-                                                                                                                                  // the
-                                                                                                                                  // same
-                                                                                                                                  // error
-                                                                                                                                  // code
+    INVALID_SIEVE_RULE2("Invalid SIEVE rule specified. Server response: %1$s", INVALID_SIEVE_RULE2_MSG, CATEGORY_USER_INPUT, 25), // Yup, the same error code
     /**
      * Invalid credentials
      */
@@ -200,9 +196,21 @@ public enum MailFilterExceptionCode implements DisplayableOXExceptionCode {
      */
     INVALID_REORDER_ARRAY("The specified 'reorder' array is invalid as the size (%1$d) exceeds the amount (%2$d) of rules for user '%3$d' in context '%4$d'.", CATEGORY_ERROR, 28),
     /**
+     * No properties file found for the 'com.openexchange.mail.filter' bundle
+     */
+    NO_PROPERTIES_FILE_FOUND("No properties file found for the 'com.openexchange.mail.filter' bundle", CATEGORY_ERROR, 29),
+    /**
+     * Property '%1$s' not found in 'mailfilter.properties'.
+     */
+    PROPERTY_NOT_FOUND("Property '%1$s' not found in 'mailfilter.properties'.", CATEGORY_ERROR, 30),
+    /**
+     * An I/O error occurred: %1$s
+     */
+    IO_ERROR("An I/O error occurred: %1$s", CATEGORY_ERROR, 31),
+    /**
      * Timeout while performing authentication against sieve server %1$s at port %2$s: %3$s
      */
-    AUTH_TIMEOUT("Timeout while performing authentication against sieve server %1$s at port %2$s: %3$s", CATEGORY_CONNECTIVITY, 29),
+    AUTH_TIMEOUT("Timeout while performing authentication against sieve server %1$s at port %2$s: %3$s", CATEGORY_CONNECTIVITY, 32),
     ;
 
     private final String message;
@@ -321,25 +329,14 @@ public enum MailFilterExceptionCode implements DisplayableOXExceptionCode {
         if (useSIEVEResponseCodes) {
             final SieveResponse.Code code = e.getSieveResponseCode();
             if (null != code) {
-                return new OXException(
-                    code.getDetailnumber(),
-                    code.getMessage(),
-                    e.getSieveHost(),
-                    Integer.valueOf(e.getSieveHostPort()),
-                    credentials.getRightUsername(),
-                    credentials.getContextString()).addCategory(sieveResponse2OXCategory(code)).setPrefix("MAIL_FILTER");
+                return new OXException(code.getDetailnumber(), code.getMessage(), e.getSieveHost(), Integer.valueOf(e.getSieveHostPort()), credentials.getRightUsername(), credentials.getContextString()).addCategory(sieveResponse2OXCategory(code)).setPrefix("MAIL_FILTER");
             }
 
             if (e.isParseError()) {
                 return MailFilterExceptionCode.INVALID_SIEVE_RULE2.create(e, saneMessage(e.getMessage()));
             }
 
-            return MailFilterExceptionCode.SIEVE_COMMUNICATION_ERROR.create(
-                e,
-                e.getSieveHost(),
-                Integer.valueOf(e.getSieveHostPort()),
-                credentials.getRightUsername(),
-                credentials.getContextString());
+            return MailFilterExceptionCode.SIEVE_COMMUNICATION_ERROR.create(e, e.getSieveHost(), Integer.valueOf(e.getSieveHostPort()), credentials.getRightUsername(), credentials.getContextString());
         }
 
         if (e.isParseError()) {
@@ -350,12 +347,7 @@ public enum MailFilterExceptionCode implements DisplayableOXExceptionCode {
             return MailFilterExceptionCode.AUTH_TIMEOUT.create(e, e.getSieveHost(), e.getSieveHostPort(), saneMessage(e.getMessage()));
         }
 
-        return MailFilterExceptionCode.SIEVE_COMMUNICATION_ERROR.create(
-            e,
-            e.getSieveHost(),
-            Integer.valueOf(e.getSieveHostPort()),
-            credentials.getRightUsername(),
-            credentials.getContextString());
+        return MailFilterExceptionCode.SIEVE_COMMUNICATION_ERROR.create(e, e.getSieveHost(), Integer.valueOf(e.getSieveHostPort()), credentials.getRightUsername(), credentials.getContextString());
     }
 
     private static final Pattern CONTROL = Pattern.compile("[\\x00-\\x1F\\x7F]+");
@@ -382,22 +374,22 @@ public enum MailFilterExceptionCode implements DisplayableOXExceptionCode {
      */
     private static Category sieveResponse2OXCategory(final SieveResponse.Code code) {
         switch (code) {
-        case ENCRYPT_NEEDED:
-        case QUOTA:
-        case REFERRAL:
-        case SASL:
-        case TRANSITION_NEEDED:
-        case TRYLATER:
-        case ACTIVE:
-        case ALREADYEXISTS:
-        case NONEXISTENT:
-        case TAG:
-            break;
-        case WARNINGS:
-            return Category.CATEGORY_USER_INPUT;
+            case ENCRYPT_NEEDED:
+            case QUOTA:
+            case REFERRAL:
+            case SASL:
+            case TRANSITION_NEEDED:
+            case TRYLATER:
+            case ACTIVE:
+            case ALREADYEXISTS:
+            case NONEXISTENT:
+            case TAG:
+                break;
+            case WARNINGS:
+                return Category.CATEGORY_USER_INPUT;
 
-        default:
-            break;
+            default:
+                break;
         }
         return Category.CATEGORY_ERROR;
     }

@@ -73,6 +73,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.geolocation.DefaultGeoInformation;
 import com.openexchange.geolocation.GeoInformation;
 import com.openexchange.geolocation.GeoLocationService;
+import com.openexchange.geolocation.maxmind.osgi.MaxMindGeoLocationServiceActivator;
 import com.openexchange.java.Streams;
 import com.openexchange.osgi.BundleResourceLoader;
 
@@ -153,7 +154,20 @@ public class MaxMindGeoLocationService implements GeoLocationService {
 
             InputStream in = new BundleResourceLoader(bundle).getResourceAsStream(resourceName);
             if (null == in) {
-                throw OXException.general("No such resource available: " + resourceName);
+                // Retry...
+                String filePattern = resourceName;
+                int i = resourceName.lastIndexOf('/');
+                if (i > 0) {
+                    if (i < resourceName.length() - 1) {
+                        filePattern = resourceName.substring(i + 1);
+                    }
+                }
+
+                in = MaxMindGeoLocationServiceActivator.class.getClassLoader().getResourceAsStream(filePattern);
+
+                if (null == in) {
+                    throw OXException.general("No such resource available: " + resourceName);
+                }
             }
 
             return in;

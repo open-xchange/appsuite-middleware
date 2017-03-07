@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,43 +47,17 @@
  *
  */
 
-package com.openexchange.mailfilter.internal;
-
-import org.slf4j.Logger;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Interests;
-import com.openexchange.config.Reloadable;
-import com.openexchange.config.Reloadables;
-import com.openexchange.mailfilter.osgi.MailFilterActivator;
+package com.openexchange.mailfilter.properties;
 
 /**
- * {@link MailFilterReloadable}
+ * {@link PreferredSASLMech}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since 7.6.0
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class MailFilterReloadable implements Reloadable {
-
-    /**
-     * Initializes a new {@link MailFilterReloadable}.
-     */
-    public MailFilterReloadable() {
-        super();
-    }
-
-    @Override
-    public void reloadConfiguration(ConfigurationService configService) {
-        try {
-            MailFilterActivator.checkConfigfile();
-        } catch (Exception e) {
-            Logger logger = org.slf4j.LoggerFactory.getLogger(MailFilterReloadable.class);
-            logger.error("Error reloading configuration for bundle com.openexchange.mail.filter: {}", e);
-        }
-    }
-
-    @Override
-    public Interests getInterests() {
-        return Reloadables.interestsForFiles("mailfilter.properties");
-    }
-
+public enum PreferredSASLMech {
+    PLAIN,
+    LOGIN,
+    GSSAPI,
+    XOAUTH2,
+    OAUTHBEARER;
 }

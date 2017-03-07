@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2017-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,28 +47,60 @@
  *
  */
 
-package com.openexchange.unifiedinbox.config;
+package com.openexchange.mailfilter.properties;
 
-import com.openexchange.mail.config.MailAccountProperties;
-import com.openexchange.mailaccount.MailAccount;
+import java.util.Map;
+import com.google.common.collect.ImmutableMap;
+import com.openexchange.exception.OXException;
+import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
 
 /**
- * {@link MailAccountUnifiedINBOXProperties} - TODO Short description of this class' purpose.
+ * {@link LoginType}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class MailAccountUnifiedINBOXProperties extends MailAccountProperties implements IUnifiedInboxProperties {
-
+public enum LoginType {
     /**
-     * Initializes a new {@link MailAccountUnifiedINBOXProperties}.
-     *
-     * @param mailAccount The mail account
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @throws IllegalArgumentException If provided mail account is <code>null</code>
+     * Use the sieve server given in this config file for all users
      */
-    public MailAccountUnifiedINBOXProperties(MailAccount mailAccount, int userId, int contextId) {
-        super(mailAccount, userId, contextId);
+    GLOBAL("global"),
+    /**
+     * Use the imap server setting stored for user in the database
+     */
+    USER("user");
+
+    private static final Map<String, LoginType> MAP;
+    static {
+        ImmutableMap.Builder<String, LoginType> b = ImmutableMap.builder();
+        for (LoginType loginType : LoginType.values()) {
+            b.put(loginType.name, loginType);
+        }
+        MAP = b.build();
     }
 
+    public final String name;
+
+    /**
+     * Initialises a new {@link LoginType}.
+     * 
+     * @param name The login type name
+     */
+    private LoginType(final String name) {
+        this.name = name;
+    }
+
+    /**
+     * The name of the {@link LoginType}
+     * 
+     * @param name The name of the {@link LoginType} as string
+     * @return The {@link LoginType}
+     * @throws OXException if an invalid {@link LoginType} is requested
+     */
+    public static LoginType loginTypeFor(String name) throws OXException {
+        LoginType loginType = MAP.get(name);
+        if (loginType == null) {
+            throw MailFilterExceptionCode.NO_VALID_LOGIN_TYPE.create();
+        }
+        return loginType;
+    }
 }

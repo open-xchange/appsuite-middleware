@@ -50,13 +50,14 @@
 package com.openexchange.mailfilter.json.ajax.actions;
 
 import javax.security.auth.Subject;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailfilter.Credentials;
-import com.openexchange.mailfilter.MailFilterProperties;
 import com.openexchange.mailfilter.json.ajax.Action;
 import com.openexchange.mailfilter.json.ajax.Parameter;
 import com.openexchange.mailfilter.json.osgi.Services;
+import com.openexchange.mailfilter.properties.CredentialSource;
+import com.openexchange.mailfilter.properties.MailFilterConfigurationService;
+import com.openexchange.mailfilter.properties.MailFilterProperty;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -125,18 +126,22 @@ public abstract class AbstractRequest {
         this.session = session;
     }
 
+    /**
+     * Returns the {@link Credentials} for the user
+     * 
+     * @return the {@link Credentials} for the user
+     * @throws OXException if an error is occurred
+     */
     public Credentials getCredentials() throws OXException {
-        final ConfigurationService config = Services.getService(ConfigurationService.class);
-        final String credsrc = config.getProperty(MailFilterProperties.Values.SIEVE_CREDSRC.property);
-        final String loginName;
-        if (MailFilterProperties.CredSrc.SESSION_FULL_LOGIN.name.equals(credsrc)) {
-            loginName = session.getLogin();
-        } else {
-            loginName = session.getLoginName();
-        }
-        final String password = session.getPassword();
+        MailFilterConfigurationService config = Services.getService(MailFilterConfigurationService.class);
+
         final int userId = session.getUserId();
         final int contextId = session.getContextId();
+
+        final String credentialSource = config.getProperty(userId, contextId, MailFilterProperty.credentialSource);
+        final String loginName = CredentialSource.SESSION_FULL_LOGIN.name.equals(credentialSource) ? session.getLogin() : session.getLoginName();
+        final String password = session.getPassword();
+
         final Subject subject = (Subject) session.getParameter(KERBEROS_SESSION_SUBJECT);
         final String oauthToken = (String) session.getParameter(Session.PARAM_OAUTH_ACCESS_TOKEN);
 

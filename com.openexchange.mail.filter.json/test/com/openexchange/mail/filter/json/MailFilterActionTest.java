@@ -2,7 +2,6 @@
 package com.openexchange.mail.filter.json;
 
 import org.junit.After;
-
 /*
  *
  *    OPEN-XCHANGE legal information
@@ -51,18 +50,18 @@ import org.junit.After;
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.export.SieveHandlerFactory;
 import com.openexchange.mailfilter.Credentials;
-import com.openexchange.mailfilter.MailFilterProperties;
 import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
 import com.openexchange.mailfilter.json.ajax.actions.MailFilterAction;
 import com.openexchange.mailfilter.json.osgi.Services;
+import com.openexchange.mailfilter.properties.MailFilterConfigurationService;
+import com.openexchange.mailfilter.properties.MailFilterProperty;
+import com.openexchange.mailfilter.properties.PasswordSource;
 
 public class MailFilterActionTest extends MailFilterAction {
 
@@ -76,9 +75,9 @@ public class MailFilterActionTest extends MailFilterAction {
     }
 
     @After
-     @Test
-     public void testGetRightPasswordNothing() throws OXException {
-        final ConfigurationService config = Services.getService(ConfigurationService.class);
+    @Test
+    public void testGetRightPasswordNothing() throws OXException {
+        final MailFilterConfigurationService config = Services.getService(MailFilterConfigurationService.class);
         final String credsPW = "pw2";
         final Credentials creds = new Credentials("", credsPW, 0, 0, null);
         try {
@@ -89,24 +88,20 @@ public class MailFilterActionTest extends MailFilterAction {
         }
     }
 
-     @Test
-     public void testGetRightPasswordSession() throws OXException {
-        Common.simConfigurationService.stringProperties.put(
-            MailFilterProperties.Values.SIEVE_PASSWORDSRC.property,
-            MailFilterProperties.PasswordSource.SESSION.name);
-        final ConfigurationService config = Services.getService(ConfigurationService.class);
+    @Test
+    public void testGetRightPasswordSession() throws OXException {
+        Common.simMailFilterConfigurationService.delegateConfigurationService.stringProperties.put(MailFilterProperty.passwordSource.getFQPropertyName(), PasswordSource.SESSION.name);
+        final MailFilterConfigurationService config = Services.getService(MailFilterConfigurationService.class);
         final String credsPW = "pw2";
         final Credentials creds = new Credentials("", credsPW, 0, 0, null);
         final String rightPassword = SieveHandlerFactory.getRightPassword(config, creds);
         Assert.assertEquals("Password should be equal to \"" + credsPW + "\"", credsPW, rightPassword);
     }
 
-     @Test
-     public void testGetRightPasswordGlobalNoMasterPW() throws OXException {
-        Common.simConfigurationService.stringProperties.put(
-            MailFilterProperties.Values.SIEVE_PASSWORDSRC.property,
-            MailFilterProperties.PasswordSource.GLOBAL.name);
-        final ConfigurationService config = Services.getService(ConfigurationService.class);
+    @Test
+    public void testGetRightPasswordGlobalNoMasterPW() throws OXException {
+        Common.simMailFilterConfigurationService.delegateConfigurationService.stringProperties.put(MailFilterProperty.passwordSource.getFQPropertyName(), PasswordSource.GLOBAL.name);
+        final MailFilterConfigurationService config = Services.getService(MailFilterConfigurationService.class);
         final String credsPW = "pw2";
         final Credentials creds = new Credentials("", credsPW, 0, 0, null);
         try {
@@ -117,14 +112,12 @@ public class MailFilterActionTest extends MailFilterAction {
         }
     }
 
-     @Test
-     public void testGetRightPasswordGlobal() throws OXException {
+    @Test
+    public void testGetRightPasswordGlobal() throws OXException {
         final String masterPW = "masterPW";
-        Common.simConfigurationService.stringProperties.put(
-            MailFilterProperties.Values.SIEVE_PASSWORDSRC.property,
-            MailFilterProperties.PasswordSource.GLOBAL.name);
-        Common.simConfigurationService.stringProperties.put(MailFilterProperties.Values.SIEVE_MASTERPASSWORD.property, masterPW);
-        final ConfigurationService config = Services.getService(ConfigurationService.class);
+        Common.simMailFilterConfigurationService.delegateConfigurationService.stringProperties.put(MailFilterProperty.passwordSource.getFQPropertyName(), PasswordSource.GLOBAL.name);
+        Common.simMailFilterConfigurationService.delegateConfigurationService.stringProperties.put(MailFilterProperty.masterPassword.getFQPropertyName(), masterPW);
+        final MailFilterConfigurationService config = Services.getService(MailFilterConfigurationService.class);
         final String credsPW = "pw2";
         final Credentials creds = new Credentials("", credsPW, 0, 0, null);
         final String rightPassword = SieveHandlerFactory.getRightPassword(config, creds);

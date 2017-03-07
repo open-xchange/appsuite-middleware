@@ -46,28 +46,27 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.mailfilter.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.Properties;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.jsieve.commands.TestCommand.Commands;
 import com.openexchange.jsieve.registry.TestCommandRegistry;
 import com.openexchange.mailfilter.MailFilterInterceptorRegistry;
-import com.openexchange.mailfilter.MailFilterProperties;
 import com.openexchange.mailfilter.MailFilterService;
-import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
 import com.openexchange.mailfilter.internal.MailFilterInterceptorRegistryImpl;
 import com.openexchange.mailfilter.internal.MailFilterPreferencesItem;
-import com.openexchange.mailfilter.internal.MailFilterReloadable;
 import com.openexchange.mailfilter.internal.MailFilterServiceImpl;
+import com.openexchange.mailfilter.properties.MailFilterConfigurationService;
+import com.openexchange.mailfilter.properties.internal.MailFilterConfigurationServiceImpl;
 import com.openexchange.mailfilter.services.Services;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -86,7 +85,7 @@ public class MailFilterActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+        return new Class<?>[] { ConfigurationService.class, ConfigViewFactory.class };
     }
 
     @Override
@@ -94,7 +93,8 @@ public class MailFilterActivator extends HousekeepingActivator {
         try {
             Services.setServiceLookup(this);
 
-            checkConfigfile();
+            registerService(MailFilterConfigurationService.class, new MailFilterConfigurationServiceImpl(this));
+            trackService(MailFilterConfigurationService.class);
 
             registerService(MailFilterInterceptorRegistry.class, new MailFilterInterceptorRegistryImpl());
             trackService(MailFilterInterceptorRegistry.class);
@@ -126,11 +126,7 @@ public class MailFilterActivator extends HousekeepingActivator {
             }
 
             registerService(PreferencesItemService.class, new MailFilterPreferencesItem(), null);
-
-            registerService(Reloadable.class, new MailFilterReloadable(), null);
-
             registerService(MailFilterService.class, new MailFilterServiceImpl());
-
             registerTestCommandRegistry();
 
             Logger logger = org.slf4j.LoggerFactory.getLogger(MailFilterActivator.class);
@@ -152,45 +148,6 @@ public class MailFilterActivator extends HousekeepingActivator {
             LOG.error("", e);
             throw e;
         }
-    }
-
-
-    /**
-     * This method checks for a valid configfile and throws and exception if now configfile is there or one of the properties is missing
-     * @throws Exception
-     */
-    // protected to be able to test this
-    public static void checkConfigfile() throws Exception {
-        final ConfigurationService config = Services.getService(ConfigurationService.class);
-        final Properties file = config.getFile("mailfilter.properties");
-        if (file.isEmpty()) {
-            throw new Exception("No configfile found for mailfilter bundle");
-        }
-        for (final MailFilterProperties.Values type : MailFilterProperties.Values.values()) {
-            if (type.required && null == file.getProperty(type.property)) {
-                throw new Exception("Property for mailfilter not found: " + type.property);
-            }
-        }
-        try {
-            Integer.parseInt(file.getProperty(MailFilterProperties.Values.SIEVE_CONNECTION_TIMEOUT.property));
-        } catch (final NumberFormatException e) {
-            throw new Exception("Property " + MailFilterProperties.Values.SIEVE_CONNECTION_TIMEOUT.property + " is no integer value");
-        }
-
-        final String passwordsrc = config.getProperty(MailFilterProperties.Values.SIEVE_PASSWORDSRC.property);
-        if (null != passwordsrc) {
-            if (MailFilterProperties.PasswordSource.GLOBAL.name.equals(passwordsrc)) {
-                final String masterpassword = config.getProperty(MailFilterProperties.Values.SIEVE_MASTERPASSWORD.property);
-                if (masterpassword.length() == 0) {
-                    throw MailFilterExceptionCode.NO_MASTERPASSWORD_SET.create();
-                }
-            } else if (!MailFilterProperties.PasswordSource.SESSION.name.equals(passwordsrc)) {
-                throw MailFilterExceptionCode.NO_VALID_PASSWORDSOURCE.create();
-            }
-        } else {
-            throw MailFilterExceptionCode.NO_VALID_PASSWORDSOURCE.create();
-        }
-
     }
 
     /**

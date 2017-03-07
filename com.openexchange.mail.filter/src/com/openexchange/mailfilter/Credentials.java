@@ -50,16 +50,19 @@
 package com.openexchange.mailfilter;
 
 import javax.security.auth.Subject;
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.mailfilter.properties.CredentialSource;
+import com.openexchange.mailfilter.properties.MailFilterConfigurationService;
+import com.openexchange.mailfilter.properties.MailFilterProperty;
 import com.openexchange.mailfilter.services.Services;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * This class holds the credentials to login into the SIEVE server.
  */
 public class Credentials {
 
-    private static final String SESSION_FULL_LOGIN = MailFilterProperties.CredSrc.SESSION_FULL_LOGIN.name;
+    private static final String SESSION_FULL_LOGIN = CredentialSource.SESSION_FULL_LOGIN.name;
 
     private String username;
     private String authname;
@@ -77,9 +80,10 @@ public class Credentials {
      */
     public Credentials(Session session) {
         super();
-        ConfigurationService config = Services.getService(ConfigurationService.class);
-        String credsrc = config.getProperty(MailFilterProperties.Values.SIEVE_CREDSRC.property);
+        MailFilterConfigurationService config = Services.getService(MailFilterConfigurationService.class);
+        String credsrc = config.getProperty(session.getUserId(), session.getContextId(), MailFilterProperty.credentialSource);
         authname = SESSION_FULL_LOGIN.equals(credsrc) ? session.getLogin() : session.getLoginName();
+        
         password = session.getPassword();
         userid = session.getUserId();
         contextid = session.getContextId();
@@ -229,6 +233,7 @@ public class Credentials {
 
     /*
      * (non-Javadoc)
+     * 
      * @see java.lang.Object#toString()
      */
     @Override

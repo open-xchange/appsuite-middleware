@@ -75,6 +75,7 @@ import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.HeaderTestC
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.NotTestCommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.SizeTestCommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.TrueTestCommandParser;
+import com.openexchange.mailfilter.properties.MailFilterConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondService;
 
@@ -95,7 +96,7 @@ public class MailFilterJSONActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, MailFilterService.class, HttpService.class, SessiondService.class, DispatcherPrefixService.class, CapabilityService.class, TestCommandRegistry.class};
+        return new Class<?>[] { ConfigurationService.class, MailFilterService.class, MailFilterConfigurationService.class, HttpService.class, SessiondService.class, DispatcherPrefixService.class, CapabilityService.class, TestCommandRegistry.class };
     }
 
     @Override
