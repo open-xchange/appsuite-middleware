@@ -55,6 +55,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+import org.apache.jsieve.TagArgument;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -201,6 +202,25 @@ abstract class AbstractDateTestCommandParser extends AbstractTestCommandParser<T
             jsonObject.put(DateTestField.comparison.name(), ((List<String>) command.getArguments().get(compPos)).get(0));
         } else {
             jsonObject.put(DateTestField.comparison.name(), comparison);
+        }
+    }
+
+    private static final TagArgument ZONE_TAG = ArgumentUtil.createTagArgument("zone");
+
+    /**
+     * Parses the zone tag
+     *
+     * @param jsonObject the {@link JSONObject}
+     * @param command the test command
+     * @throws JSONException if a JSON error is occurred
+     */
+    void parseZone(JSONObject jsonObject, TestCommand command) throws JSONException {
+        for(int x=0; x<command.getArguments().size(); x++){
+            Object arg = command.getArguments().get(x);
+            if(ZONE_TAG.equals(arg)){
+                jsonObject.put(DateTestField.zone.name(), command.getArguments().get(x+1));
+                return;
+            }
         }
     }
 

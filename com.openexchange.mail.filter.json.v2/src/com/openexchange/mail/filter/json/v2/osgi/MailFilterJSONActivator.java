@@ -91,6 +91,7 @@ import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.TrueTestComm
 import com.openexchange.mail.filter.json.v2.mapper.parser.test.simplified.SimplifiedHeaderTestParser;
 import com.openexchange.mail.filter.json.v2.mapper.parser.test.simplified.SimplifiedHeaderTest;
 import com.openexchange.mailfilter.MailFilterService;
+import com.openexchange.mailfilter.properties.MailFilterConfigurationService;
 import com.openexchange.sessiond.SessiondService;
 
 /**
@@ -111,7 +112,7 @@ public class MailFilterJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, MailFilterService.class, HttpService.class, SessiondService.class, DispatcherPrefixService.class, CapabilityService.class, TestCommandRegistry.class, ActionCommandRegistry.class};
+        return new Class<?>[] { ConfigurationService.class, MailFilterService.class, HttpService.class, SessiondService.class, DispatcherPrefixService.class, CapabilityService.class, TestCommandRegistry.class, ActionCommandRegistry.class, MailFilterConfigurationService.class};
     }
 
     @Override

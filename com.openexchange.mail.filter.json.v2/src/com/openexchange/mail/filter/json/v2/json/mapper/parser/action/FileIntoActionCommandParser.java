@@ -54,7 +54,6 @@ import java.util.List;
 import org.apache.jsieve.SieveException;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.jsieve.commands.ActionCommand.Commands;
@@ -64,7 +63,8 @@ import com.openexchange.mail.filter.json.v2.json.mapper.parser.CommandParserJSON
 import com.openexchange.mail.filter.json.v2.mapper.ArgumentUtil;
 import com.openexchange.mail.filter.json.v2.osgi.Services;
 import com.openexchange.mail.utils.MailFolderUtility;
-import com.openexchange.mailfilter.MailFilterProperties;
+import com.openexchange.mailfilter.properties.MailFilterConfigurationService;
+import com.openexchange.mailfilter.properties.MailFilterProperty;
 import com.openexchange.tools.session.ServerSession;
 import com.sun.mail.imap.protocol.BASE64MailboxDecoder;
 import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
@@ -145,9 +145,9 @@ public class FileIntoActionCommandParser extends AbstractActionCommandParser {
      * @return The value of the 'com.openexchange.mail.filter.useUTF7FolderEncoding' property
      */
     private boolean useUTF7Encoding() {
-        ConfigurationService config = Services.getService(ConfigurationService.class);
-        String encodingProperty = config.getProperty(MailFilterProperties.Values.USE_UTF7_FOLDER_ENCODING.property);
-        return Boolean.parseBoolean(encodingProperty);
+        // TODO: get for user?
+        MailFilterConfigurationService config = Services.getService(MailFilterConfigurationService.class);
+        return config.getBooleanProperty(MailFilterProperty.useUTF7FolderEncoding);
     }
 
     @Override
