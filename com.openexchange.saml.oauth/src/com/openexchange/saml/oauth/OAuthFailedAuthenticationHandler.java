@@ -142,7 +142,7 @@ public class OAuthFailedAuthenticationHandler implements AuthenticationFailedHan
         }
 
         try {
-            OAuthAccessToken accessToken = tokenService.getAccessToken(OAuthGrantType.REFRESH_TOKEN, (String) session.getParameter(Session.PARAM_OAUTH_REFRESH_TOKEN), session.getUserId(), session.getContextId());
+            OAuthAccessToken accessToken = tokenService.getAccessToken(OAuthGrantType.REFRESH_TOKEN, (String) session.getParameter(Session.PARAM_OAUTH_REFRESH_TOKEN), session.getUserId(), session.getContextId(), null);
             if (accessToken == null) {
                 LOG.debug("Unable to refresh access token for user {} in context {}. Session will be invalidated.", I(session.getUserId()), I(session.getContextId()));
                 sessiondService.removeSession(session.getSessionID());

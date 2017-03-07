@@ -10,7 +10,7 @@ Specifies whether SAML-specific auto-login is enabled, that uses the SessionInde
       Related: 
       File: saml.properties
   - data:
-      Key: com.openexchange.saml.oauth.token
+      Key: com.openexchange.saml.oauth.tokenEndpoint
       Description: >
 Specifies the OAuth HTTP token end-point.
       Default: 
@@ -27,7 +27,7 @@ Specifies the client id used to authenticate the client against the OAuth token 
       Version: 7.8.4
       Reloadable: true
       Configcascade_Aware: true
-      Related: com.openexchange.saml.oauth.token
+      Related: com.openexchange.saml.oauth.tokenEndpoint
       File: saml.properties
   - data:
       Key: com.openexchange.saml.oauth.clientSecret
@@ -37,6 +37,6 @@ Specifies the client secret used to authenticate the client against the OAuth to
       Version: 7.8.4
       Reloadable: true
       Configcascade_Aware: true
-      Related: com.openexchange.saml.oauth.token
+      Related: com.openexchange.saml.oauth.tokenEndpoint
       File: saml.properties
   		

@@ -73,9 +73,10 @@ public class SAMLOAuthConfig {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SAMLOAuthConfig.class);
 
-    private static final String TOKEN_ENDPOINT_PROPERTY = "com.openexchange.saml.oauth.token";
+    private static final String TOKEN_ENDPOINT_PROPERTY = "com.openexchange.saml.oauth.tokenEndpoint";
     private static final String CLIENT_ID_PROPERTY = "com.openexchange.saml.oauth.clientId";
     private static final String CLIENT_SECRET_PROPERTY = "com.openexchange.saml.oauth.clientSecret";
+    private static final String SCOPE_PROPERTY = "com.openexchange.saml.oauth.scope";
 
     private static final Cache<UserAndContext, ImmutableReference<OAuthConfiguration>> CACHE_OAUTH_CONFIGS = CacheBuilder.newBuilder().maximumSize(262144).expireAfterAccess(30, TimeUnit.MINUTES).build();
 
@@ -137,17 +138,21 @@ public class SAMLOAuthConfig {
         if (null == clientId) {
             // No client ID configured
             LOG.debug("No client identifier configured for user {} in context {}", I(userId), I(contextId));
-            return null;
         }
 
         String clientSecret = ConfigViews.getNonEmptyPropertyFrom(CLIENT_SECRET_PROPERTY, view);
         if (null == clientSecret) {
             // No client secret configured
             LOG.debug("No client secret configured for user {} in context {}", I(userId), I(contextId));
-            return null;
         }
 
-        return new OAuthConfiguration(endpoint, clientId, clientSecret);
+        String scope = ConfigViews.getNonEmptyPropertyFrom(SCOPE_PROPERTY, view);
+        if (null == clientSecret) {
+            // No client secret configured
+            LOG.debug("No scope configured for user {} in context {}", I(userId), I(contextId));
+        }
+
+        return new OAuthConfiguration(endpoint, clientId, clientSecret, scope);
     }
 
     /**

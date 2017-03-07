@@ -85,10 +85,11 @@ public interface OAuthAccessTokenService {
      * @param data The data needed for the corresponding {@link OAuthGrantType}. E.g. a SAML response for {@link OAuthGrantType.SAML} or a refresh token for {@link OAuthGrantType.REFRESH_TOKEN}
      * @param userId The user identifier
      * @param contextId The context identifier
+     * @param scope An optional scope
      * @return The {@link OAuthAccessToken access token}
      * @throws OXException If the token couldn't be retrieved.
      */
-    OAuthAccessToken getAccessToken(OAuthGrantType type, String data, int userId, int contextId) throws OXException;
+    OAuthAccessToken getAccessToken(OAuthGrantType type, String data, int userId, int contextId, String scope) throws OXException;
 
     /**
      * Checks whether OAuth is configured for the given user.

@@ -67,6 +67,7 @@ import org.json.JSONObject;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Strings;
 import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.saml.oauth.service.OAuthAccessToken;
 import com.openexchange.saml.oauth.service.SAMLOAuthExceptionCodes;
@@ -101,6 +102,12 @@ public abstract class AbstractOAuthAccessTokenRequest {
     private static final String EXPIRE = "expires_in";
     private static final String REFRESH_TOKEN = "refresh_token";
     private static final String ACCESS_TOKEN = "access_token";
+    private static final String ERROR_DESCRIPTION = "error_description";
+    private static final String ERROR = "error";
+    private static final String SCOPE = "scope";
+
+    private static final String INVALID_GRANT = "invalid_grant";
+
 
     /**
      * Requests an OAuth access token.
@@ -108,10 +115,11 @@ public abstract class AbstractOAuthAccessTokenRequest {
      * @param accessInfo The access info; e.g. base64-encoded SAML response or refresh token
      * @param userId The user identifier
      * @param contextId The context identifier
+     * @param scope An optional scope
      * @return The OAuth access token
      * @throws OXException If OAuth access token cannot be returned
      */
-    public OAuthAccessToken requestAccessToken(String accessInfo, int userId, int contextId) throws OXException {
+    public OAuthAccessToken requestAccessToken(String accessInfo, int userId, int contextId, String scope) throws OXException {
         HttpPost requestAccessToken = null;
         HttpResponse validationResp = null;
         try {
@@ -125,7 +133,7 @@ public abstract class AbstractOAuthAccessTokenRequest {
             requestAccessToken.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
             // Build base64(<client-id> + ":" + <client-secret>) "Authorization" header
-            {
+            if(oAuthConfiguration.getClientId()!=null && oAuthConfiguration.getClientSecret()!=null){
                 String authString = new StringBuilder(oAuthConfiguration.getClientId()).append(':').append(oAuthConfiguration.getClientSecret()).toString();
                 String auth = "Basic " + Base64.encodeBase64String(authString.getBytes(Charsets.UTF_8));
                 requestAccessToken.addHeader("Authorization", auth);
@@ -134,6 +142,9 @@ public abstract class AbstractOAuthAccessTokenRequest {
             // Build the url-encoded pairs for the POST request
             List<NameValuePair> nvps = new ArrayList<NameValuePair>();
             nvps.add(new BasicNameValuePair("grant_type", getGrantType()));
+            if(!Strings.isEmpty(scope)){
+                nvps.add(new BasicNameValuePair(SCOPE, scope));
+            }
             addAccessInfo(accessInfo, nvps);
             requestAccessToken.setEntity(new UrlEncodedFormEntity(nvps, Charsets.UTF_8));
 
@@ -146,12 +157,31 @@ public abstract class AbstractOAuthAccessTokenRequest {
                 String responseStr = EntityUtils.toString(entity, Charsets.UTF_8);
                 if (responseStr != null) {
                     JSONObject jsonResponse = new JSONObject(responseStr);
+                    if(jsonResponse.has(ERROR)){
+                        if(jsonResponse.getString(ERROR).equals(INVALID_GRANT)){
+                            if(jsonResponse.has(ERROR_DESCRIPTION)) {
+                                throw SAMLOAuthExceptionCodes.NO_ACCESS_TOKEN.create("Invalid grant error: "+jsonResponse.getString(ERROR_DESCRIPTION));
+                            } else {
+                                throw SAMLOAuthExceptionCodes.NO_ACCESS_TOKEN.create("Invalid grant error.");
+                            }
+                        } else {
+                            if(jsonResponse.has(ERROR_DESCRIPTION)) {
+                                OXException e = SAMLOAuthExceptionCodes.NO_ACCESS_TOKEN.create(jsonResponse.getString(ERROR)+" error: "+jsonResponse.getString(ERROR_DESCRIPTION));
+                                throw e;
+                            } else {
+                                throw SAMLOAuthExceptionCodes.NO_ACCESS_TOKEN.create(jsonResponse.getString(ERROR)+" error for user {} in context {}.", userId, contextId);
+                            }
+                        }
+                    }
                     String accessToken = jsonResponse.optString(ACCESS_TOKEN, null);
                     if (null == accessToken) {
                         throw SAMLOAuthExceptionCodes.NO_ACCESS_TOKEN.create("Token response doesn't contain the access token.");
                     }
 
-                    return new OAuthAccessToken(accessToken, jsonResponse.getString(REFRESH_TOKEN), jsonResponse.getString(TOKEN_TYPE), jsonResponse.getInt(EXPIRE));
+                    String refreshToken = jsonResponse.has(REFRESH_TOKEN) ? jsonResponse.getString(REFRESH_TOKEN):null;
+                    int expires = jsonResponse.has(EXPIRE) ? jsonResponse.getInt(EXPIRE) : -1;
+                    String tokenType = jsonResponse.has(TOKEN_TYPE) ? jsonResponse.getString(TOKEN_TYPE) : null;
+                    return new OAuthAccessToken(accessToken, refreshToken, tokenType, expires);
                 }
             }
 

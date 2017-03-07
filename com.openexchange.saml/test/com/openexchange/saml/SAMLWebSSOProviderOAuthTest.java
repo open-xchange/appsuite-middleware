@@ -300,7 +300,7 @@ public class SAMLWebSSOProviderOAuthTest {
 
     private void mockSAMLConfig() throws Exception {
 
-        PowerMockito.when(mock.getAccessToken((OAuthGrantType) Mockito.any(), Mockito.anyString(), Mockito.anyInt(), Mockito.anyInt())).thenReturn(new OAuthAccessToken("access", "refresh", "oauth_bearer", 10));
+        PowerMockito.when(mock.getAccessToken((OAuthGrantType) Mockito.any(), Mockito.anyString(), Mockito.anyInt(), Mockito.anyInt(), Mockito.anyString())).thenReturn(new OAuthAccessToken("access", "refresh", "oauth_bearer", 10));
 
      }
 

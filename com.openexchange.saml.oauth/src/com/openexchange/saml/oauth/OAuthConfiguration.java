@@ -65,6 +65,7 @@ public class OAuthConfiguration {
     private final String tokenEndpoint;
     private final String clientId;
     private final String clientSecret;
+    private final String scope;
 
     /**
      * Initializes a new {@link OAuthConfiguration}.
@@ -73,11 +74,12 @@ public class OAuthConfiguration {
      * @param clientId The client identifier
      * @param clientSecret The client secret
      */
-    public OAuthConfiguration(String tokenEndpoint, String clientId, String clientSecret) {
+    public OAuthConfiguration(String tokenEndpoint, String clientId, String clientSecret, String scope) {
         super();
         this.tokenEndpoint = tokenEndpoint;
         this.clientId = clientId;
         this.clientSecret = clientSecret;
+        this.scope = scope;
     }
 
     /**
@@ -105,6 +107,15 @@ public class OAuthConfiguration {
      */
     public String getClientSecret() {
         return clientSecret;
+    }
+
+    /**
+     * Gets the scope
+     *
+     * @return The scope
+     */
+    public String getScope() {
+        return scope;
     }
 
 }

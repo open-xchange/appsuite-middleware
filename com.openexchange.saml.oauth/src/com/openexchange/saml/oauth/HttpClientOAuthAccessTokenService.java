@@ -52,6 +52,7 @@ package com.openexchange.saml.oauth;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
@@ -76,23 +77,42 @@ public class HttpClientOAuthAccessTokenService implements OAuthAccessTokenServic
     private final OAuthRefreshTokenRequest refreshTokenRequest;
     private static final Logger LOG = LoggerFactory.getLogger(OAuthAccessTokenService.class);
 
+    private static final String MAX_CONNECTIONS = "com.openexchange.saml.oauth.maxConnections";
+    private static final String MAX_CONNECTIONS_PER_HOST = "com.openexchange.saml.oauth.maxConnectionsPerHost";
+    private static final String CONNECTION_TIMEOUT = "com.openexchange.saml.oauth.connectionTimeout";
+    private static final String SOCKET_READ_TIMEOUT = "com.openexchange.saml.oauth.socketReadTimeout";
+
     /**
      * Initializes a new {@link HttpClientOAuthAccessTokenService}.
+     *
+     * @throws OXException
      */
-    public HttpClientOAuthAccessTokenService(ConfigViewFactory configViewFactory, SSLSocketFactoryProvider factoryProvider, SSLConfigurationService sslConfig) {
+    public HttpClientOAuthAccessTokenService(ConfigViewFactory configViewFactory, SSLSocketFactoryProvider factoryProvider, SSLConfigurationService sslConfig) throws OXException {
         super();
         this.configViewFactory = configViewFactory;
 
         // Initialize HttpClient
         ClientConfig config = ClientConfig.newInstance();
-        config.setConnectionTimeout(3000);
-        config.setSocketReadTimeout(10000);
         config.setUserAgent("Open-Xchange SAML OAuth Client");
+
+        init(config, configViewFactory.getView());
         httpClient = HttpClients.getHttpClient(config, factoryProvider, sslConfig);
 
         // Initialize request instances
         accessTokenRequest = new OAuthAccessTokenRequest(httpClient, configViewFactory);
         refreshTokenRequest = new OAuthRefreshTokenRequest(httpClient, configViewFactory);
+    }
+
+    private void init(ClientConfig config, ConfigView view) throws OXException{
+        int maxConnections = view.opt(MAX_CONNECTIONS, Integer.class, 100);
+        int maxConnectionsPerHost = view.opt(MAX_CONNECTIONS_PER_HOST, Integer.class, 100);
+        int connectionTimeout = view.opt(CONNECTION_TIMEOUT, Integer.class, 3000);
+        int socketReadTimeout = view.opt(SOCKET_READ_TIMEOUT, Integer.class, 6000);
+
+        config.setMaxTotalConnections(maxConnections);
+        config.setMaxConnectionsPerRoute(maxConnectionsPerHost);
+        config.setConnectionTimeout(connectionTimeout);
+        config.setSocketReadTimeout(socketReadTimeout);
     }
 
     /**
@@ -106,18 +126,18 @@ public class HttpClientOAuthAccessTokenService implements OAuthAccessTokenServic
     }
 
     @Override
-    public OAuthAccessToken getAccessToken(OAuthGrantType type, String data, int userId, int contextId) throws OXException {
+    public OAuthAccessToken getAccessToken(OAuthGrantType type, String data, int userId, int contextId, String scope) throws OXException {
         if (null == type) {
             throw new OXException(new IllegalArgumentException("Missing grant type"));
         }
 
         switch (type) {
             case SAML:
-                OAuthAccessToken result = accessTokenRequest.requestAccessToken(data, userId, contextId);
+                OAuthAccessToken result = accessTokenRequest.requestAccessToken(data, userId, contextId, scope);
                 LOG.debug("Successfully traded a saml assertion for an access token.");
                 return result;
             case REFRESH_TOKEN:
-                return refreshTokenRequest.requestAccessToken(data, userId, contextId);
+                return refreshTokenRequest.requestAccessToken(data, userId, contextId, scope);
         }
 
         // Should never occur
