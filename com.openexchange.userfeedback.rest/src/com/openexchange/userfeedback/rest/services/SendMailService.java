@@ -49,8 +49,6 @@
 
 package com.openexchange.userfeedback.rest.services;
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -107,8 +105,7 @@ public class SendMailService extends JAXRSService {
                 body = "";
             }
             FeedbackMailService service = getService(FeedbackMailService.class);
-            String content = new String(Files.readAllBytes(Paths.get(recipients)));
-            FeedbackMailFilter filter = new FeedbackMailFilter(contextGroup, parseCSV(content), "User Feedback", body, start, end, type);
+            FeedbackMailFilter filter = new FeedbackMailFilter(contextGroup, parseCSV(recipients), "User Feedback", body, start, end, type);
             String response = service.sendFeedbackMail(filter);
             builder = Response.status(200);
             if (Strings.isEmpty(response)) {

@@ -49,9 +49,12 @@
 
 package com.openexchange.userfeedback.clt;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Invocation.Builder;
@@ -63,6 +66,7 @@ import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.client.ClientConfig;
 import com.openexchange.cli.AbstractRestCLI;
 import com.openexchange.java.AsciiReader;
+import com.openexchange.java.Strings;
 
 
 /**
@@ -146,10 +150,18 @@ public class SendFeedbackViaMail extends AbstractRestCLI<Void> {
             if (cmd.hasOption(BODY_SHORT)) {
                 target = target.queryParam("body", cmd.getOptionValue(BODY_SHORT));
             }
-            target = target.queryParam("recipients", cmd.getOptionValue(RECIPIENTS_SHORT));
+            String recipients = cmd.getOptionValue(RECIPIENTS_SHORT);
+            if (null == recipients || Strings.isEmpty(recipients)) {
+                System.err.println(RECIPIENTS_SHORT + " option missing.");
+                return null;
+            }
+            String csv = new String(Files.readAllBytes(Paths.get(recipients)));
+            target = target.queryParam("recipients", csv);
             return target;
         } catch (URISyntaxException e) {
             System.err.print("Unable to return endpoint: " + e.getMessage());
+        } catch (IOException e) {
+            System.err.println("File not found: " + cmd.getOptionValue(RECIPIENTS_SHORT));
         }
         return null;
     }
