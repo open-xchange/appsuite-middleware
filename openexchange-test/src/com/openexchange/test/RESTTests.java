@@ -47,22 +47,22 @@
  *
  */
 
-package com.openexchange.rest.userfeedback;
+package com.openexchange.test;
 
-import org.glassfish.jersey.test.JerseyTest;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
- * {@link ExportTest}
+ * Test suite for all AJAX interface tests.
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since v7.8.4
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class ExportTest extends JerseyTest {
+@RunWith(ParallelSuite.class)
+@Suite.SuiteClasses({
+    com.openexchange.rest.userfeedback.UserFeedbackSuite.class,
 
-    @Override
-    public void setUp() throws Exception {
-        // TODO Auto-generated method stub
-        super.setUp();
-    }
+})
+public final class RESTTests {
 
 }
