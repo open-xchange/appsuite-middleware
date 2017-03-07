@@ -57,6 +57,8 @@
         description: Blank in case of success, error message from server in case of error.
       400:
         description: Bad request, response contains error message.
+      401:
+        description: Not authorized
 
     x-ox-examples:
       Example:
