@@ -251,6 +251,7 @@ public class FeedbackServiceImpl implements FeedbackService {
             List<Long> typeIdsToDelete = getTypeIds(ctxGroup, filter, writeCon);
             feedBackType.deleteFeedbacks(typeIdsToDelete, writeCon);
             deleteFeedback(writeCon, feedBackType, filter, ctxGroup);
+            writeCon.commit();
         } catch (SQLException e) {
             try {
                 writeCon.rollback();
