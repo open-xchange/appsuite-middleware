@@ -62,6 +62,7 @@ import com.openexchange.mail.filter.json.v2.json.fields.EnotifyActionField;
 import com.openexchange.mail.filter.json.v2.json.fields.GeneralField;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.CommandParserJSONUtil;
 import com.openexchange.mail.filter.json.v2.mapper.ArgumentUtil;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -75,8 +76,8 @@ public class EnotifyActionCommandParser extends AbstractActionCommandParser {
     /**
      * Initializes a new {@link EnotifyActionCommandParser}.
      */
-    public EnotifyActionCommandParser() {
-        super();
+    public EnotifyActionCommandParser(ServiceLookup services) {
+        super(services);
     }
 
     @Override

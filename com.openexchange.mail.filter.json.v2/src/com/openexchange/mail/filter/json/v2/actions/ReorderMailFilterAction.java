@@ -55,9 +55,9 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.filter.json.v2.Action;
-import com.openexchange.mail.filter.json.v2.osgi.Services;
 import com.openexchange.mailfilter.Credentials;
 import com.openexchange.mailfilter.MailFilterService;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -71,10 +71,17 @@ public class ReorderMailFilterAction extends AbstractMailFilterAction{
 
     public static final Action ACTION = Action.REORDER;
 
+    /**
+     * Initializes a new {@link ReorderMailFilterAction}.
+     */
+    public ReorderMailFilterAction(ServiceLookup services) {
+        super(services);
+    }
+
     @Override
     public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
         final Credentials credentials = new Credentials(session);
-        final MailFilterService mailFilterService = Services.getService(MailFilterService.class);
+        final MailFilterService mailFilterService = services.getService(MailFilterService.class);
 
         try {
             final JSONArray json = getJSONArrayBody(request.getData());

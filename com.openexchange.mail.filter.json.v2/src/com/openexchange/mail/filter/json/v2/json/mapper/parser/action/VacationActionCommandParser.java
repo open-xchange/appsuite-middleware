@@ -73,6 +73,7 @@ import com.openexchange.mail.filter.json.v2.mapper.ArgumentUtil;
 import com.openexchange.mail.json.parser.MessageParser;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -87,8 +88,8 @@ public class VacationActionCommandParser extends AbstractActionCommandParser {
     /**
      * Initializes a new {@link VacationActionCommandParser}.
      */
-    public VacationActionCommandParser() {
-        super();
+    public VacationActionCommandParser(ServiceLookup services) {
+        super(services);
     }
 
     @Override

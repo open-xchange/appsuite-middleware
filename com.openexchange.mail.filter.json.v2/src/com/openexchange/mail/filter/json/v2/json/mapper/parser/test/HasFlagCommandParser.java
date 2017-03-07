@@ -61,6 +61,7 @@ import com.openexchange.jsieve.commands.TestCommand.Commands;
 import com.openexchange.mail.filter.json.v2.json.fields.GeneralField;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.CommandParserJSONUtil;
 import com.openexchange.mail.filter.json.v2.mapper.ArgumentUtil;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -71,9 +72,18 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class HasFlagCommandParser extends AbstractTestCommandParser<TestCommand> {
 
-    private enum Fields {
+    private static enum Fields {
         comparison,
         values
+    }
+
+    // -------------------------------------------------------------------------------------
+
+    /**
+     * Initializes a new {@link HasFlagCommandParser}.
+     */
+    public HasFlagCommandParser(ServiceLookup services) {
+        super(services);
     }
 
     @Override

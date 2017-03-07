@@ -53,9 +53,9 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.filter.json.v2.Action;
-import com.openexchange.mail.filter.json.v2.osgi.Services;
 import com.openexchange.mailfilter.Credentials;
 import com.openexchange.mailfilter.MailFilterService;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -68,10 +68,17 @@ public class DeleteScriptMailFilterAction extends AbstractMailFilterAction {
 
     public static final Action ACTION = Action.DELETESCRIPT;
 
+    /**
+     * Initializes a new {@link DeleteScriptMailFilterAction}.
+     */
+    public DeleteScriptMailFilterAction(ServiceLookup services) {
+        super(services);
+    }
+
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         final Credentials credentials = new Credentials(session);
-        final MailFilterService mailFilterService = Services.getService(MailFilterService.class);
+        final MailFilterService mailFilterService = services.getService(MailFilterService.class);
         mailFilterService.purgeFilters(credentials);
         return new AJAXRequestResult();
     }

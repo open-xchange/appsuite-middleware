@@ -61,6 +61,7 @@ import com.openexchange.mail.filter.json.v2.json.fields.GeneralField;
 import com.openexchange.mail.filter.json.v2.json.fields.HeaderTestField;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.AbstractTestCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.HeaderTestCommandParser;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -71,15 +72,17 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class SimplifiedHeaderTestParser extends AbstractTestCommandParser<TestCommand>{
 
-    private static final SimplifiedHeaderTestParser INSTANCE = new SimplifiedHeaderTestParser();
-    private static final HeaderTestCommandParser HEADER_PARSER = new HeaderTestCommandParser();
-
-
-    public static SimplifiedHeaderTestParser getInstance(){
-        return INSTANCE;
+    public static SimplifiedHeaderTestParser newInstance(ServiceLookup services) {
+        return new SimplifiedHeaderTestParser(services);
     }
 
-    private SimplifiedHeaderTestParser (){
+    // --------------------------------------------------------------------------------------------------------------
+
+    private final HeaderTestCommandParser headerParser;
+
+    private SimplifiedHeaderTestParser(ServiceLookup services) {
+        super(services);
+        headerParser = new HeaderTestCommandParser(services);
     }
 
     @Override
@@ -87,7 +90,7 @@ public class SimplifiedHeaderTestParser extends AbstractTestCommandParser<TestCo
         String id = jsonObject.getString("id");
         if(Commands.HEADER.getCommandName().equals(id)){
             // Fall back to default behavior
-            return HEADER_PARSER.parse(jsonObject, session);
+            return headerParser.parse(jsonObject, session);
         }
         SimplifiedHeaderTest test = SimplifiedHeaderTest.getTestByName(id);
         // use contains as default comparator
@@ -97,22 +100,22 @@ public class SimplifiedHeaderTestParser extends AbstractTestCommandParser<TestCo
         switch(test){
             case From:
                 jsonObject.put(HeaderTestField.headers.name(), SimplifiedHeaderTest.From.getHeaderNames());
-                return HEADER_PARSER.parse(jsonObject, session);
+                return headerParser.parse(jsonObject, session);
             case To:
                 jsonObject.put(HeaderTestField.headers.name(), SimplifiedHeaderTest.To.getHeaderNames());
-                return HEADER_PARSER.parse(jsonObject, session);
+                return headerParser.parse(jsonObject, session);
             case Cc:
                 jsonObject.put(HeaderTestField.headers.name(), SimplifiedHeaderTest.Cc.getHeaderNames());
-                return HEADER_PARSER.parse(jsonObject, session);
+                return headerParser.parse(jsonObject, session);
             case Subject:
                 jsonObject.put(HeaderTestField.headers.name(), SimplifiedHeaderTest.Subject.getHeaderNames());
-                return HEADER_PARSER.parse(jsonObject, session);
+                return headerParser.parse(jsonObject, session);
             case MailingList:
                 jsonObject.put(HeaderTestField.headers.name(), SimplifiedHeaderTest.MailingList.getHeaderNames());
-                return HEADER_PARSER.parse(jsonObject, session);
+                return headerParser.parse(jsonObject, session);
             case AnyRecipient:
                 jsonObject.put(HeaderTestField.headers.name(), SimplifiedHeaderTest.AnyRecipient.getHeaderNames());
-                return HEADER_PARSER.parse(jsonObject, session);
+                return headerParser.parse(jsonObject, session);
         }
         // should never occur
         return null;
@@ -120,7 +123,7 @@ public class SimplifiedHeaderTestParser extends AbstractTestCommandParser<TestCo
 
     @Override
     public void parse(JSONObject jsonObject, TestCommand command) throws JSONException, OXException {
-        HEADER_PARSER.parse(jsonObject, command);
+        headerParser.parse(jsonObject, command);
 
         JSONArray headers = jsonObject.getJSONArray(HeaderTestField.headers.name());
 

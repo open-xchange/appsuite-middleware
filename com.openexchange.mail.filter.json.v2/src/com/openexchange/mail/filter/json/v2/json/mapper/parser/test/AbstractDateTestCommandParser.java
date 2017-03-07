@@ -65,6 +65,7 @@ import com.openexchange.mail.filter.json.v2.json.fields.DateTestField;
 import com.openexchange.mail.filter.json.v2.json.fields.GeneralField;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.CommandParserJSONUtil;
 import com.openexchange.mail.filter.json.v2.mapper.ArgumentUtil;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -87,6 +88,14 @@ abstract class AbstractDateTestCommandParser extends AbstractTestCommandParser<T
     private final static String dateFormatPattern = "yyyy-MM-dd";
     private final static String timeFormatPattern = "HH:mm";
 
+
+    /**
+     * Initializes a new {@link AbstractDateTestCommandParser}.
+     */
+    protected AbstractDateTestCommandParser(ServiceLookup services) {
+        super(services);
+    }
+
     /**
      * Parses the zone tag
      *
@@ -96,7 +105,7 @@ abstract class AbstractDateTestCommandParser extends AbstractTestCommandParser<T
      * @param commandName The command's name
      * @throws OXException if a parsing error is occurred
      */
-    void parseZone(List<Object> argList, JSONObject jsonObject, ServerSession session, String commandName) throws OXException {
+    protected void parseZone(List<Object> argList, JSONObject jsonObject, ServerSession session, String commandName) throws OXException {
         if (jsonObject.hasAndNotNull(DateTestField.zone.name())) {
             argList.add(ArgumentUtil.createTagArgument("zone"));
             String zone = CommandParserJSONUtil.getString(jsonObject, DateTestField.zone.name(), commandName);
@@ -120,7 +129,7 @@ abstract class AbstractDateTestCommandParser extends AbstractTestCommandParser<T
      * @param commandName The command's name
      * @throws OXException if a parsing error is occurred
      */
-    void parseComparisonTag(List<Object> argList, JSONObject jsonObject, String commandName) throws OXException {
+    protected void parseComparisonTag(List<Object> argList, JSONObject jsonObject, String commandName) throws OXException {
         // Parse the comparison tag
         final String comparisonTag = CommandParserJSONUtil.getString(jsonObject, DateTestField.comparison.name(), commandName);
         Comparison comparison = Comparison.valueOf(comparisonTag);
@@ -149,7 +158,7 @@ abstract class AbstractDateTestCommandParser extends AbstractTestCommandParser<T
      * @param commandName The command's name
      * @throws OXException if a parsing error is occurred
      */
-    void parseHeader(List<Object> argList, JSONObject jsonObject, String commandName) throws OXException {
+    protected void parseHeader(List<Object> argList, JSONObject jsonObject, String commandName) throws OXException {
         // Parse the header
         String header = CommandParserJSONUtil.getString(jsonObject, DateTestField.header.name(), commandName);
         argList.add(CommandParserJSONUtil.stringToList(header));
@@ -164,7 +173,7 @@ abstract class AbstractDateTestCommandParser extends AbstractTestCommandParser<T
      * @throws OXException if a parsing error is occurred
      * @throws JSONException if a JSON error is occurred
      */
-    void parseDatePart(List<Object> argList, JSONObject jsonObject, String commandName) throws OXException, JSONException {
+    protected void parseDatePart(List<Object> argList, JSONObject jsonObject, String commandName) throws OXException, JSONException {
         // Parse the date part
         final String datepart = CommandParserJSONUtil.getString(jsonObject, DateTestField.datepart.name(), commandName);
         DatePart datePart = DatePart.valueOf(datepart);
@@ -194,7 +203,7 @@ abstract class AbstractDateTestCommandParser extends AbstractTestCommandParser<T
      * @throws JSONException if a JSON error is occurred
      */
     @SuppressWarnings("unchecked")
-    void parseComparisonTag(JSONObject jsonObject, TestCommand command) throws JSONException {
+    protected void parseComparisonTag(JSONObject jsonObject, TestCommand command) throws JSONException {
         jsonObject.put(GeneralField.id.name(), command.getCommand().getCommandName());
         final String comparison = command.getMatchType().substring(1);
         if ("value".equals(comparison)) {
@@ -232,7 +241,7 @@ abstract class AbstractDateTestCommandParser extends AbstractTestCommandParser<T
      * @throws JSONException if a JSON error is occurred
      */
     @SuppressWarnings("unchecked")
-    void parseHeader(JSONObject jsonObject, TestCommand command) throws JSONException {
+    protected void parseHeader(JSONObject jsonObject, TestCommand command) throws JSONException {
         final List<String> headers = (List<String>) command.getArguments().get(command.getArguments().size() - 3);
         String header = headers.get(0);
         jsonObject.put(DateTestField.header.name(), header);
@@ -247,7 +256,7 @@ abstract class AbstractDateTestCommandParser extends AbstractTestCommandParser<T
      * @throws JSONException if a JSON error is occurred
      */
     @SuppressWarnings("unchecked")
-    void parseDatePart(JSONObject jsonObject, TestCommand command) throws JSONException, OXException {
+    protected void parseDatePart(JSONObject jsonObject, TestCommand command) throws JSONException, OXException {
         final List<String> value = (List<String>) command.getArguments().get(command.getArguments().size() - 2);
         String datepart = value.get(0);
         jsonObject.put(DateTestField.datepart.name(), datepart);

@@ -50,6 +50,7 @@
 package com.openexchange.mail.filter.json.v2.json.mapper.parser.test;
 
 import java.util.ArrayList;
+import java.util.List;
 import org.apache.jsieve.SieveException;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -64,7 +65,7 @@ import com.openexchange.mail.filter.json.v2.json.mapper.parser.CommandParserJSON
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.CommandParserRegistry;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.TestCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.TestCommandParserRegistry;
-import com.openexchange.mail.filter.json.v2.osgi.Services;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -78,16 +79,18 @@ abstract class AbstractAllAnyOfTestCommandParser extends AbstractTestCommandPars
     /**
      * Initialises a new {@link AbstractAllAnyOfTestCommandParser}.
      */
-    public AbstractAllAnyOfTestCommandParser() {
-        super();
+    protected AbstractAllAnyOfTestCommandParser(ServiceLookup services) {
+        super(services);
     }
 
     TestCommand parse(JSONObject jsonObject, Commands command, ServerSession session) throws OXException, JSONException, SieveException {
         final JSONArray jarray = CommandParserJSONUtil.getJSONArray(jsonObject, AllOfOrAnyOfTestField.tests.name(), command.getCommandName());
-        final ArrayList<TestCommand> commandlist = new ArrayList<TestCommand>(jarray.length());
-        CommandParserRegistry<TestCommand, TestCommandParser<TestCommand>> parserRegistry = Services.getService(TestCommandParserRegistry.class);
+        int length = jarray.length();
 
-        for (int i = 0; i < jarray.length(); i++) {
+        final ArrayList<TestCommand> commandlist = new ArrayList<TestCommand>(length);
+        CommandParserRegistry<TestCommand, TestCommandParser<TestCommand>> parserRegistry = services.getService(TestCommandParserRegistry.class);
+
+        for (int i = 0; i < length; i++) {
             final JSONObject object = jarray.getJSONObject(i);
             String commandName = CommandParserJSONUtil.getString(object, GeneralField.id.name(), command.getCommandName());
             CommandParser<TestCommand> parser = parserRegistry.get(commandName);
@@ -98,11 +101,13 @@ abstract class AbstractAllAnyOfTestCommandParser extends AbstractTestCommandPars
 
     void parse(JSONObject jsonObject, TestCommand testCommand, Commands command) throws JSONException, OXException {
         jsonObject.put(GeneralField.id.name(), command.getCommandName());
-        final JSONArray array = new JSONArray();
-        CommandParserRegistry<TestCommand, TestCommandParser<TestCommand>> parserRegistry = Services.getService(TestCommandParserRegistry.class);
-        for (final TestCommand testCommand2 : testCommand.getTestCommands()) {
-            final JSONObject object = new JSONObject();
+        CommandParserRegistry<TestCommand, TestCommandParser<TestCommand>> parserRegistry = services.getService(TestCommandParserRegistry.class);
+        List<TestCommand> testCommands = testCommand.getTestCommands();
+
+        final JSONArray array = new JSONArray(testCommands.size());
+        for (final TestCommand testCommand2 : testCommands) {
             CommandParser<TestCommand> parser = parserRegistry.get(testCommand2.getCommand().getCommandName());
+            final JSONObject object = new JSONObject();
             parser.parse(object, testCommand2);
             array.put(object);
         }

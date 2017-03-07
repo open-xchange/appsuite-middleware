@@ -55,6 +55,7 @@ import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.TestCommand;
 import com.openexchange.jsieve.commands.TestCommand.Commands;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -68,8 +69,8 @@ public class AllOfTestCommandParser extends AbstractAllAnyOfTestCommandParser {
     /**
      * Initialises a new {@link AllOfTestCommandParser}.
      */
-    public AllOfTestCommandParser() {
-        super();
+    public AllOfTestCommandParser(ServiceLookup services) {
+        super(services);
     }
 
     @Override

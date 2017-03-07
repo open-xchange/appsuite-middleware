@@ -63,7 +63,7 @@ import com.openexchange.mail.filter.json.v2.json.mapper.parser.CommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.CommandParserRegistry;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.TestCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.TestCommandParserRegistry;
-import com.openexchange.mail.filter.json.v2.osgi.Services;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -77,8 +77,8 @@ public class NotTestCommandParser extends AbstractTestCommandParser<TestCommand>
     /**
      * Initialises a new {@link NotTestCommandParser}.
      */
-    public NotTestCommandParser() {
-        super();
+    public NotTestCommandParser(ServiceLookup services) {
+        super(services);
     }
 
     @Override
@@ -88,7 +88,7 @@ public class NotTestCommandParser extends AbstractTestCommandParser<TestCommand>
 
         final JSONObject innerJsonObject = jsonObject.optJSONObject(NotTestField.test.name());
         if (null != innerJsonObject) {
-            CommandParserRegistry<TestCommand, TestCommandParser<TestCommand>> parserRegistry = Services.getService(TestCommandParserRegistry.class);
+            CommandParserRegistry<TestCommand, TestCommandParser<TestCommand>> parserRegistry = services.getService(TestCommandParserRegistry.class);
             CommandParser<TestCommand> parser = parserRegistry.get(innerJsonObject.optString(GeneralField.id.name()));
             if (null != parser) {
                 testcommands.add(parser.parse(innerJsonObject, session));
@@ -103,7 +103,7 @@ public class NotTestCommandParser extends AbstractTestCommandParser<TestCommand>
         final JSONObject testobject = new JSONObject();
 
         TestCommand nestedTestCommand = command.getTestCommands().get(0);
-        CommandParserRegistry<TestCommand, TestCommandParser<TestCommand>> parserRegistry = Services.getService(TestCommandParserRegistry.class);
+        CommandParserRegistry<TestCommand, TestCommandParser<TestCommand>> parserRegistry = services.getService(TestCommandParserRegistry.class);
         CommandParser<TestCommand> parser = parserRegistry.get(nestedTestCommand.getCommand().getCommandName());
         if (null != parser) {
             parser.parse(testobject, nestedTestCommand);

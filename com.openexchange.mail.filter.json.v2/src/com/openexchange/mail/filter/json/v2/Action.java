@@ -49,9 +49,8 @@
 
 package com.openexchange.mail.filter.json.v2;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 
 /**
  * Enumeration of all possible mail filter module actions.
@@ -94,33 +93,40 @@ public enum Action {
      */
     GETSCRIPT("getscript");
 
-
-
-    private String ajaxName;
+    private final String ajaxName;
 
     private Action(final String name) {
         this.ajaxName = name;
     }
 
     /**
-     * @return the name
+     * Gets the AJAX name for this action.
+     *
+     * @return The name
      */
     public String getAjaxName() {
         return ajaxName;
     }
 
+    // -----------------------------------------------------------------------------------
+
     private static final Map<String, Action> name2Action;
 
+    /**
+     * Gets the action by specified name.
+     *
+     * @param ajaxName The name to look-up
+     * @return The associated action or <code>null</code>
+     */
     public static Action byName(final String ajaxName) {
         return name2Action.get(ajaxName);
     }
 
     static {
-        final Map<String, Action> tmp = new HashMap<String, Action>(values()
-            .length, 1);
+        final ImmutableMap.Builder<String, Action> tmp = ImmutableMap.builder();
         for (final Action action : values()) {
             tmp.put(action.getAjaxName(), action);
         }
-        name2Action = Collections.unmodifiableMap(tmp);
+        name2Action = tmp.build();
     }
 }

@@ -63,6 +63,7 @@ import com.openexchange.mail.filter.json.v2.json.fields.GeneralField;
 import com.openexchange.mail.filter.json.v2.json.fields.SizeTestField;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.CommandParserJSONUtil;
 import com.openexchange.mail.filter.json.v2.mapper.ArgumentUtil;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -79,8 +80,8 @@ public class SizeTestCommandParser extends AbstractTestCommandParser<TestCommand
     /**
      * Initialises a new {@link SizeTestCommandParser}.
      */
-    public SizeTestCommandParser() {
-        super();
+    public SizeTestCommandParser(ServiceLookup services) {
+        super(services);
     }
 
     @Override

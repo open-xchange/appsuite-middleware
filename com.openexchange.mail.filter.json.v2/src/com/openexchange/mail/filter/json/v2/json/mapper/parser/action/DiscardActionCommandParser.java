@@ -57,6 +57,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.jsieve.commands.ActionCommand.Commands;
 import com.openexchange.mail.filter.json.v2.json.fields.GeneralField;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -70,8 +71,8 @@ public class DiscardActionCommandParser extends AbstractActionCommandParser {
     /**
      * Initializes a new {@link DiscardActionCommandParser}.
      */
-    public DiscardActionCommandParser() {
-        super();
+    public DiscardActionCommandParser(ServiceLookup services) {
+        super(services);
     }
 
     @Override

@@ -61,6 +61,7 @@ import com.openexchange.jsieve.commands.TestCommand.Commands;
 import com.openexchange.mail.filter.json.v2.json.fields.ExistsTestField;
 import com.openexchange.mail.filter.json.v2.json.fields.GeneralField;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.CommandParserJSONUtil;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -70,6 +71,13 @@ import com.openexchange.tools.session.ServerSession;
  * @since v7.8.4
  */
 public class ExistsTestCommandParser extends AbstractTestCommandParser<TestCommand> {
+
+    /**
+     * Initializes a new {@link ExistsTestCommandParser}.
+     */
+    public ExistsTestCommandParser(ServiceLookup services) {
+        super(services);
+    }
 
     @Override
     public TestCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException {

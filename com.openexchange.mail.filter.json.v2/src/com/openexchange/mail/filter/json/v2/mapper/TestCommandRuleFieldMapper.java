@@ -63,7 +63,7 @@ import com.openexchange.mail.filter.json.v2.json.mapper.parser.CommandParserRegi
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.TestCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.TestCommandParserRegistry;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.exceptions.CommandParserExceptionCodes;
-import com.openexchange.mail.filter.json.v2.osgi.Services;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -74,11 +74,14 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class TestCommandRuleFieldMapper implements RuleFieldMapper {
 
+    private final ServiceLookup services;
+
     /**
      * Initializes a new {@link TestCommandRuleFieldMapper}.
      */
-    public TestCommandRuleFieldMapper() {
+    public TestCommandRuleFieldMapper(ServiceLookup services) {
         super();
+        this.services = services;
     }
 
     @Override
@@ -98,7 +101,7 @@ public class TestCommandRuleFieldMapper implements RuleFieldMapper {
             TestCommand testCommand = rule.getTestCommand();
             if(testCommand!=null){
                 String commandName = testCommand.getCommand().getCommandName();
-                CommandParserRegistry<TestCommand, TestCommandParser<TestCommand>> parserRegistry = Services.getService(TestCommandParserRegistry.class);
+                CommandParserRegistry<TestCommand, TestCommandParser<TestCommand>> parserRegistry = services.getService(TestCommandParserRegistry.class);
                 CommandParser<TestCommand> parser = parserRegistry.get(commandName);
                 parser.parse(object, testCommand);
             }
@@ -112,7 +115,7 @@ public class TestCommandRuleFieldMapper implements RuleFieldMapper {
         String id = object.getString(GeneralField.id.name());
 
         TestCommand existingTestCommand = rule.getTestCommand();
-        CommandParserRegistry<TestCommand, TestCommandParser<TestCommand>> parserRegistry = Services.getService(TestCommandParserRegistry.class);
+        CommandParserRegistry<TestCommand, TestCommandParser<TestCommand>> parserRegistry = services.getService(TestCommandParserRegistry.class);
         CommandParser<TestCommand> parser = parserRegistry.get(id);
         if (parser == null) {
             throw CommandParserExceptionCodes.UNKNOWN_PARSER.create(id);

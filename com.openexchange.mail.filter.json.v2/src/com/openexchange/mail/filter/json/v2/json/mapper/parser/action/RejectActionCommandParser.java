@@ -60,6 +60,7 @@ import com.openexchange.jsieve.commands.ActionCommand.Commands;
 import com.openexchange.mail.filter.json.v2.json.fields.GeneralField;
 import com.openexchange.mail.filter.json.v2.json.fields.RejectActionField;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.CommandParserJSONUtil;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -73,8 +74,8 @@ public class RejectActionCommandParser extends AbstractActionCommandParser {
     /**
      * Initializes a new {@link RejectActionCommandParser}.
      */
-    public RejectActionCommandParser() {
-        super();
+    public RejectActionCommandParser(ServiceLookup services) {
+        super(services);
     }
 
     @Override

@@ -57,10 +57,10 @@ import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.Rule;
 import com.openexchange.mail.filter.json.v2.Action;
 import com.openexchange.mail.filter.json.v2.json.RuleParser;
-import com.openexchange.mail.filter.json.v2.osgi.Services;
 import com.openexchange.mailfilter.Credentials;
 import com.openexchange.mailfilter.MailFilterService;
 import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -75,13 +75,22 @@ public class NewMailFilterAction extends AbstractMailFilterAction{
 
     public static final Action ACTION = Action.NEW;
 
+    private final RuleParser ruleParser;
+
+    /**
+     * Initializes a new {@link NewMailFilterAction}.
+     */
+    public NewMailFilterAction(RuleParser ruleParser, ServiceLookup services) {
+        super(services);
+        this.ruleParser = ruleParser;
+    }
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
-        final MailFilterService mailFilterService = Services.getService(MailFilterService.class);
+        final MailFilterService mailFilterService = services.getService(MailFilterService.class);
         try {
             final Credentials credentials = new Credentials(session);
-            final Rule rule = RuleParser.getInstance().parse(getJSONBody(request.getData()), ServerSessionAdapter.valueOf(request.getSession()));
+            final Rule rule = ruleParser.parse(getJSONBody(request.getData()), ServerSessionAdapter.valueOf(request.getSession()));
             int id = mailFilterService.createFilterRule(credentials, rule);
             return new AJAXRequestResult(id);
         } catch (final SieveException e) {

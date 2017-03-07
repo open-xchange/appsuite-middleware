@@ -50,15 +50,14 @@
 package com.openexchange.mail.filter.json.v2.mapper;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.jsieve.SieveException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.jsieve.commands.ActionCommand.Commands;
@@ -77,6 +76,7 @@ import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.RemoveFlag
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.SetFlagActionCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.StopActionCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.VacationActionCommandParser;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.jsieve.commands.IfCommand;
 import com.openexchange.jsieve.commands.Rule;
 import com.openexchange.tools.session.ServerSession;
@@ -94,23 +94,23 @@ public class ActionCommandRuleFieldMapper implements RuleFieldMapper {
     /**
      * Initializes a new {@link ActionCommandRuleFieldMapper}.
      */
-    public ActionCommandRuleFieldMapper() {
+    public ActionCommandRuleFieldMapper(ServiceLookup services) {
         super();
 
-        Map<String, CommandParser<ActionCommand>> p = new HashMap<>();
-        p.put(Commands.KEEP.getJsonName(), new KeepActionCommandParser());
-        p.put(Commands.DISCARD.getJsonName(), new DiscardActionCommandParser());
-        p.put(Commands.REDIRECT.getJsonName(), new RedirectActionCommandParser());
-        p.put(Commands.REJECT.getJsonName(), new RejectActionCommandParser());
-        p.put(Commands.FILEINTO.getJsonName(), new FileIntoActionCommandParser());
-        p.put(Commands.STOP.getJsonName(), new StopActionCommandParser());
-        p.put(Commands.VACATION.getJsonName(), new VacationActionCommandParser());
-        p.put(Commands.ENOTIFY.getJsonName(), new EnotifyActionCommandParser());
-        p.put(Commands.SETFLAG.getJsonName(), new SetFlagActionCommandParser());
-        p.put(Commands.ADDFLAG.getJsonName(), new AddFlagActionCommandParser());
-        p.put(Commands.REMOVEFLAG.getJsonName(), new RemoveFlagActionCommandParser());
-        p.put(Commands.PGP_ENCRYPT.getJsonName(), new PGPEncryptActionCommandParser());
-        parsers = Collections.unmodifiableMap(p);
+        ImmutableMap.Builder<String, CommandParser<ActionCommand>> p = ImmutableMap.builder();
+        p.put(Commands.KEEP.getJsonName(), new KeepActionCommandParser(services));
+        p.put(Commands.DISCARD.getJsonName(), new DiscardActionCommandParser(services));
+        p.put(Commands.REDIRECT.getJsonName(), new RedirectActionCommandParser(services));
+        p.put(Commands.REJECT.getJsonName(), new RejectActionCommandParser(services));
+        p.put(Commands.FILEINTO.getJsonName(), new FileIntoActionCommandParser(services));
+        p.put(Commands.STOP.getJsonName(), new StopActionCommandParser(services));
+        p.put(Commands.VACATION.getJsonName(), new VacationActionCommandParser(services));
+        p.put(Commands.ENOTIFY.getJsonName(), new EnotifyActionCommandParser(services));
+        p.put(Commands.SETFLAG.getJsonName(), new SetFlagActionCommandParser(services));
+        p.put(Commands.ADDFLAG.getJsonName(), new AddFlagActionCommandParser(services));
+        p.put(Commands.REMOVEFLAG.getJsonName(), new RemoveFlagActionCommandParser(services));
+        p.put(Commands.PGP_ENCRYPT.getJsonName(), new PGPEncryptActionCommandParser(services));
+        parsers = p.build();
     }
 
     @Override

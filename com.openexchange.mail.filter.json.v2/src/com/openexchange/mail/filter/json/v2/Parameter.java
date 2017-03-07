@@ -49,9 +49,8 @@
 
 package com.openexchange.mail.filter.json.v2;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 
 /**
  *
@@ -65,7 +64,6 @@ public enum Parameter {
     FLAG("flag", false);
 
     private final String name;
-
     private final boolean required;
 
     private Parameter(final String name, final boolean required) {
@@ -74,18 +72,24 @@ public enum Parameter {
     }
 
     /**
-     * @return the name
+     * Gets the AJAX name for this parameter.
+     *
+     * @return The name
      */
     public String getName() {
         return name;
     }
 
     /**
-     * @return the required
+     * Checks whether this parameter is required
+     *
+     * @return <code>true</code> if required; otherwise <code>false</code>
      */
-    public final boolean isRequired() {
+    public boolean isRequired() {
         return required;
     }
+
+    // ----------------------------------------------------------------------------------------
 
     private static final Map<String, Parameter> name2Parameter;
 
@@ -94,12 +98,11 @@ public enum Parameter {
     }
 
     static {
-        final Map<String, Parameter> tmp = new HashMap<String, Parameter>(
-            values().length, 1);
+        final ImmutableMap.Builder<String, Parameter> tmp = ImmutableMap.builder();
         for (final Parameter action : values()) {
             tmp.put(action.getName(), action);
         }
-        name2Parameter = Collections.unmodifiableMap(tmp);
+        name2Parameter = tmp.build();
     }
 
 }

@@ -57,6 +57,7 @@ import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.TestCommand;
 import com.openexchange.jsieve.commands.TestCommand.Commands;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -70,8 +71,8 @@ public class CurrentDateTestCommandParser extends AbstractDateTestCommandParser 
     /**
      * Initialises a new {@link CurrentDateTestCommandParser}.
      */
-    public CurrentDateTestCommandParser() {
-        super();
+    public CurrentDateTestCommandParser(ServiceLookup services) {
+        super(services);
     }
 
     @Override

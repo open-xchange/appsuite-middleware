@@ -58,10 +58,10 @@ import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.Rule;
 import com.openexchange.mail.filter.json.v2.Action;
 import com.openexchange.mail.filter.json.v2.json.RuleParser;
-import com.openexchange.mail.filter.json.v2.osgi.Services;
 import com.openexchange.mailfilter.Credentials;
 import com.openexchange.mailfilter.MailFilterService;
 import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -76,10 +76,20 @@ public class UpdateMailFilterAction extends AbstractMailFilterAction {
 
     public static final Action ACTION = Action.UPDATE;
 
+    private final RuleParser ruleParser;
+
+    /**
+     * Initializes a new {@link UpdateMailFilterAction}.
+     */
+    public UpdateMailFilterAction(RuleParser ruleParser, ServiceLookup services) {
+        super(services);
+        this.ruleParser = ruleParser;
+    }
+
     @Override
     public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
         final Credentials credentials = new Credentials(session);
-        final MailFilterService mailFilterService = Services.getService(MailFilterService.class);
+        final MailFilterService mailFilterService = services.getService(MailFilterService.class);
         try {
             final JSONObject json = getJSONBody(request.getData());
             final Integer uid = getUniqueId(json);
@@ -87,7 +97,7 @@ public class UpdateMailFilterAction extends AbstractMailFilterAction {
             if (rule == null) {
                 throw MailFilterExceptionCode.NO_SUCH_ID.create(uid, credentials.getRightUsername(), credentials.getContextString());
             }
-            RuleParser.getInstance().parse(rule, json, ServerSessionAdapter.valueOf(request.getSession()));
+            ruleParser.parse(rule, json, ServerSessionAdapter.valueOf(request.getSession()));
             mailFilterService.updateFilterRule(credentials, rule, uid);
             return new AJAXRequestResult();
         } catch (JSONException e) {

@@ -61,6 +61,7 @@ import com.openexchange.jsieve.commands.ActionCommand.Commands;
 import com.openexchange.mail.filter.json.v2.json.fields.GeneralField;
 import com.openexchange.mail.filter.json.v2.json.fields.SetFlagsActionField;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.CommandParserJSONUtil;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -75,8 +76,8 @@ public class SetFlagActionCommandParser extends AbstractActionCommandParser {
     /**
      * Initializes a new {@link SetFlagActionCommandParser}.
      */
-    public SetFlagActionCommandParser() {
-        super();
+    public SetFlagActionCommandParser(ServiceLookup services) {
+        super(services);
     }
 
     @Override

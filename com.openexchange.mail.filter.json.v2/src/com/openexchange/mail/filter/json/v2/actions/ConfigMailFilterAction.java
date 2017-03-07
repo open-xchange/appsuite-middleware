@@ -67,10 +67,10 @@ import com.openexchange.mail.filter.json.v2.json.mapper.parser.ActionCommandPars
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.TestCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.TestCommandParserRegistry;
 import com.openexchange.mail.filter.json.v2.osgi.MailFilterExtensionCapabilities;
-import com.openexchange.mail.filter.json.v2.osgi.Services;
 import com.openexchange.mailfilter.Credentials;
 import com.openexchange.mailfilter.MailFilterService;
 import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -83,10 +83,17 @@ public class ConfigMailFilterAction extends AbstractMailFilterAction{
 
     public static final Action ACTION = Action.CONFIG;
 
+    /**
+     * Initializes a new {@link ConfigMailFilterAction}.
+     */
+    public ConfigMailFilterAction(ServiceLookup services) {
+        super(services);
+    }
+
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         final Credentials credentials = new Credentials(session);
-        final MailFilterService mailFilterService = Services.getService(MailFilterService.class);
+        final MailFilterService mailFilterService = services.getService(MailFilterService.class);
         final Set<String> capabilities = mailFilterService.getCapabilities(credentials);
         try {
             final JSONObject result = getTestAndActionObjects(capabilities);
@@ -113,7 +120,7 @@ public class ConfigMailFilterAction extends AbstractMailFilterAction{
     }
 
     private JSONArray getTestArray(final Set<String> capabilities) throws OXException, JSONException {
-        TestCommandParserRegistry service = Services.getService(TestCommandParserRegistry.class);
+        TestCommandParserRegistry service = services.getService(TestCommandParserRegistry.class);
         final JSONArray testarray = new JSONArray();
         Map<String, TestCommandParser<TestCommand>> map = service.getCommandParsers();
         for (String key : map.keySet()) {
@@ -141,7 +148,7 @@ public class ConfigMailFilterAction extends AbstractMailFilterAction{
 
     private JSONArray getActionArray(final Set<String> capabilities) throws OXException, JSONException {
 
-        ActionCommandParserRegistry service = Services.getService(ActionCommandParserRegistry.class);
+        ActionCommandParserRegistry service = services.getService(ActionCommandParserRegistry.class);
         final JSONArray testarray = new JSONArray();
         Map<String, ActionCommandParser<ActionCommand>> map = service.getCommandParsers();
         for (String key : map.keySet()) {

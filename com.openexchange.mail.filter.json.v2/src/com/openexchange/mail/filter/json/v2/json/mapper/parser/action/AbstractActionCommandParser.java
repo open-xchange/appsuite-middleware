@@ -55,7 +55,7 @@ import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.jsieve.commands.test.IActionCommand;
 import com.openexchange.jsieve.registry.ActionCommandRegistry;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.ActionCommandParser;
-import com.openexchange.mail.filter.json.v2.osgi.Services;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link AbstractActionCommandParser}
@@ -65,16 +65,26 @@ import com.openexchange.mail.filter.json.v2.osgi.Services;
  */
 public abstract class AbstractActionCommandParser implements ActionCommandParser<ActionCommand> {
 
+    protected final ServiceLookup services;
+
+    /**
+     * Initializes a new {@link AbstractActionCommandParser}.
+     */
+    protected AbstractActionCommandParser(ServiceLookup services) {
+        super();
+        this.services = services;
+    }
+
     @Override
     public boolean isCommandSupported(Set<String> capabilities) throws OXException {
-        ActionCommandRegistry service = Services.getService(ActionCommandRegistry.class);
+        ActionCommandRegistry service = services.getService(ActionCommandRegistry.class);
         IActionCommand command = service.get(getCommandName());
         return null == command.getRequired() || capabilities.containsAll(command.getRequired());
     }
 
     @Override
     public IActionCommand getCommand() throws OXException {
-        ActionCommandRegistry service = Services.getService(ActionCommandRegistry.class);
+        ActionCommandRegistry service = services.getService(ActionCommandRegistry.class);
         return service.get(getCommandName());
     }
 

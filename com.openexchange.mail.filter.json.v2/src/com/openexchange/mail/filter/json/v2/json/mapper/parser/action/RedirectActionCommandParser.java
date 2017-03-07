@@ -64,9 +64,9 @@ import com.openexchange.mail.filter.json.v2.json.fields.GeneralField;
 import com.openexchange.mail.filter.json.v2.json.fields.RedirectActionField;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.CommandParserJSONUtil;
 import com.openexchange.mail.filter.json.v2.mapper.ArgumentUtil;
-import com.openexchange.mail.filter.json.v2.osgi.Services;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -80,8 +80,8 @@ public class RedirectActionCommandParser extends AbstractActionCommandParser {
     /**
      * Initializes a new {@link RedirectActionCommandParser}.
      */
-    public RedirectActionCommandParser() {
-        super();
+    public RedirectActionCommandParser(ServiceLookup services) {
+        super(services);
     }
 
     @Override
@@ -101,7 +101,7 @@ public class RedirectActionCommandParser extends AbstractActionCommandParser {
             throw MailFilterExceptionCode.INVALID_REDIRECT_ADDRESS.create(e, stringParam);
         }
         // And finally check of that forward address is allowed
-        final ConfigurationService service = Services.getService(ConfigurationService.class);
+        final ConfigurationService service = services.getService(ConfigurationService.class);
         final Filter filter;
         if (null != service && (null != (filter = service.getFilterFromProperty("com.openexchange.mail.filter.redirectWhitelist"))) && !filter.accepts(stringParam)) {
             throw MailFilterExceptionCode.REJECTED_REDIRECT_ADDRESS.create(stringParam);

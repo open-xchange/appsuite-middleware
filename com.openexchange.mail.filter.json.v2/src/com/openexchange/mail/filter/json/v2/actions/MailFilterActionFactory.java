@@ -55,6 +55,8 @@ import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.filter.json.v2.json.RuleParser;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
@@ -65,10 +67,8 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  */
 public class MailFilterActionFactory implements AJAXActionServiceFactory{
 
-    private static final MailFilterActionFactory SINGLETON = new MailFilterActionFactory();
-
-    public static final MailFilterActionFactory getInstance() {
-        return SINGLETON;
+    public static final MailFilterActionFactory newInstance(RuleParser ruleParser, ServiceLookup services) {
+        return new MailFilterActionFactory(ruleParser, services);
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -78,23 +78,23 @@ public class MailFilterActionFactory implements AJAXActionServiceFactory{
     /**
      * Initializes a new {@link AdvertisementActionFactory}.
      */
-    private MailFilterActionFactory() {
+    private MailFilterActionFactory(RuleParser ruleParser, ServiceLookup services) {
         super();
-        actions = initActions();
+        actions = initActions(ruleParser, services);
     }
 
-    private Map<String, AJAXActionService> initActions() {
+    private Map<String, AJAXActionService> initActions(RuleParser ruleParser, ServiceLookup services) {
         ImmutableMap.Builder<String, AJAXActionService> tmp = ImmutableMap.builder();
-        tmp.put(NewMailFilterAction.ACTION.getAjaxName(), new NewMailFilterAction());
-        tmp.put(UpdateMailFilterAction.ACTION.getAjaxName(), new UpdateMailFilterAction());
-        tmp.put(ListMailFilterAction.ACTION.getAjaxName(), new ListMailFilterAction());
-        tmp.put(ReorderMailFilterAction.ACTION.getAjaxName(), new ReorderMailFilterAction());
-        tmp.put(DeleteMailFilterAction.ACTION.getAjaxName(), new DeleteMailFilterAction());
+        tmp.put(NewMailFilterAction.ACTION.getAjaxName(), new NewMailFilterAction(ruleParser, services));
+        tmp.put(UpdateMailFilterAction.ACTION.getAjaxName(), new UpdateMailFilterAction(ruleParser, services));
+        tmp.put(ListMailFilterAction.ACTION.getAjaxName(), new ListMailFilterAction(ruleParser, services));
+        tmp.put(ReorderMailFilterAction.ACTION.getAjaxName(), new ReorderMailFilterAction(services));
+        tmp.put(DeleteMailFilterAction.ACTION.getAjaxName(), new DeleteMailFilterAction(services));
 
-        tmp.put(ConfigMailFilterAction.ACTION.getAjaxName(), new ConfigMailFilterAction());
+        tmp.put(ConfigMailFilterAction.ACTION.getAjaxName(), new ConfigMailFilterAction(services));
 
-        tmp.put(GetScriptMailFilterAction.ACTION.getAjaxName(), new GetScriptMailFilterAction());
-        tmp.put(DeleteScriptMailFilterAction.ACTION.getAjaxName(), new DeleteScriptMailFilterAction());
+        tmp.put(GetScriptMailFilterAction.ACTION.getAjaxName(), new GetScriptMailFilterAction(services));
+        tmp.put(DeleteScriptMailFilterAction.ACTION.getAjaxName(), new DeleteScriptMailFilterAction(services));
 
         return tmp.build();
     }

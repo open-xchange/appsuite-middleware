@@ -61,10 +61,10 @@ import com.openexchange.mail.filter.json.v2.json.fields.GeneralField;
 import com.openexchange.mail.filter.json.v2.json.fields.MoveActionField;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.CommandParserJSONUtil;
 import com.openexchange.mail.filter.json.v2.mapper.ArgumentUtil;
-import com.openexchange.mail.filter.json.v2.osgi.Services;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailfilter.properties.MailFilterConfigurationService;
 import com.openexchange.mailfilter.properties.MailFilterProperty;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 import com.sun.mail.imap.protocol.BASE64MailboxDecoder;
 import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
@@ -80,8 +80,8 @@ public class FileIntoActionCommandParser extends AbstractActionCommandParser {
     /**
      * Initializes a new {@link FileIntoActionCommandParser}.
      */
-    public FileIntoActionCommandParser() {
-        super();
+    public FileIntoActionCommandParser(ServiceLookup services) {
+        super(services);
     }
 
     @Override
@@ -146,7 +146,7 @@ public class FileIntoActionCommandParser extends AbstractActionCommandParser {
      */
     private boolean useUTF7Encoding() {
         // TODO: get for user?
-        MailFilterConfigurationService config = Services.getService(MailFilterConfigurationService.class);
+        MailFilterConfigurationService config = services.getService(MailFilterConfigurationService.class);
         return config.getBooleanProperty(MailFilterProperty.useUTF7FolderEncoding);
     }
 

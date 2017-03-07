@@ -57,6 +57,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.TestCommand;
 import com.openexchange.jsieve.commands.TestCommand.Commands;
 import com.openexchange.mail.filter.json.v2.json.fields.GeneralField;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -70,8 +71,8 @@ public class TrueTestCommandParser extends AbstractTestCommandParser<TestCommand
     /**
      * Initialises a new {@link TrueTestCommandParser}.
      */
-    public TrueTestCommandParser() {
-        super();
+    public TrueTestCommandParser(ServiceLookup services) {
+        super(services);
     }
 
     @Override

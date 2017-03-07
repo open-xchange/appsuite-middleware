@@ -62,6 +62,7 @@ import com.openexchange.jsieve.commands.TestCommand.Commands;
 import com.openexchange.jsieve.registry.ActionCommandRegistry;
 import com.openexchange.jsieve.registry.TestCommandRegistry;
 import com.openexchange.mail.filter.json.v2.actions.MailFilterActionFactory;
+import com.openexchange.mail.filter.json.v2.json.RuleParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.ActionCommandParserRegistry;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.TestCommandParserRegistry;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.AddFlagActionCommandParser;
@@ -117,55 +118,50 @@ public class MailFilterJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-
         registerTestCommandParserRegistry();
         registerActionCommandParserRegistry();
+        openTrackers();
 
         getService(CapabilityService.class).declareCapability(MailFilterChecker.CAPABILITY);
 
         Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
         properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, MailFilterChecker.CAPABILITY);
         registerService(CapabilityChecker.class, new MailFilterChecker(), properties);
-        registerModule(MailFilterActionFactory.getInstance(), "mailfilter/v2");
 
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        Services.setServiceLookup(null);
-        super.stopBundle();
+        RuleParser ruleParser = RuleParser.newInstance(this);
+        registerModule(MailFilterActionFactory.newInstance(ruleParser, this), "mailfilter/v2");
     }
 
     /**
      * Registers the {@link TestCommandParserRegistry} along with all available {@link TestCommandParser}s
      */
     private void registerTestCommandParserRegistry() {
-        TestCommandParserRegistry registry = new TestCommandParserRegistry();
-        registry.register(Commands.ADDRESS.getCommandName(), new AddressTestCommandParser());
-        registry.register(Commands.ALLOF.getCommandName(), new AllOfTestCommandParser());
-        registry.register(Commands.ANYOF.getCommandName(), new AnyOfTestCommandParser());
-        registry.register(Commands.BODY.getCommandName(), new BodyTestCommandParser());
-        registry.register(Commands.DATE.getCommandName(), new DateTestCommandParser());
-        registry.register(Commands.EXISTS.getCommandName(), new ExistsTestCommandParser());
-        registry.register(Commands.CURRENTDATE.getCommandName(), new CurrentDateTestCommandParser());
-        registry.register(Commands.ENVELOPE.getCommandName(), new EnvelopeTestCommandParser());
-        registry.register(Commands.HEADER.getCommandName(), SimplifiedHeaderTestParser.getInstance());
-        registry.register(Commands.NOT.getCommandName(), new NotTestCommandParser());
-        registry.register(Commands.SIZE.getCommandName(), new SizeTestCommandParser());
-        registry.register(Commands.TRUE.getCommandName(), new TrueTestCommandParser());
-        registry.register(Commands.HASFLAG.getCommandName(), new HasFlagCommandParser());
+        SimplifiedHeaderTestParser simplifiedHeaderTestParser = SimplifiedHeaderTestParser.newInstance(this);
 
-        registry.register(SimplifiedHeaderTest.From.getCommandName(), SimplifiedHeaderTestParser.getInstance());
-        registry.register(SimplifiedHeaderTest.To.getCommandName(), SimplifiedHeaderTestParser.getInstance());
-        registry.register(SimplifiedHeaderTest.Cc.getCommandName(), SimplifiedHeaderTestParser.getInstance());
-        registry.register(SimplifiedHeaderTest.Subject.getCommandName(), SimplifiedHeaderTestParser.getInstance());
-        registry.register(SimplifiedHeaderTest.AnyRecipient.getCommandName(), SimplifiedHeaderTestParser.getInstance());
-        registry.register(SimplifiedHeaderTest.MailingList.getCommandName(), SimplifiedHeaderTestParser.getInstance());
+        TestCommandParserRegistry registry = new TestCommandParserRegistry();
+        registry.register(Commands.ADDRESS.getCommandName(), new AddressTestCommandParser(this));
+        registry.register(Commands.ALLOF.getCommandName(), new AllOfTestCommandParser(this));
+        registry.register(Commands.ANYOF.getCommandName(), new AnyOfTestCommandParser(this));
+        registry.register(Commands.BODY.getCommandName(), new BodyTestCommandParser(this));
+        registry.register(Commands.DATE.getCommandName(), new DateTestCommandParser(this));
+        registry.register(Commands.EXISTS.getCommandName(), new ExistsTestCommandParser(this));
+        registry.register(Commands.CURRENTDATE.getCommandName(), new CurrentDateTestCommandParser(this));
+        registry.register(Commands.ENVELOPE.getCommandName(), new EnvelopeTestCommandParser(this));
+        registry.register(Commands.HEADER.getCommandName(), simplifiedHeaderTestParser);
+        registry.register(Commands.NOT.getCommandName(), new NotTestCommandParser(this));
+        registry.register(Commands.SIZE.getCommandName(), new SizeTestCommandParser(this));
+        registry.register(Commands.TRUE.getCommandName(), new TrueTestCommandParser(this));
+        registry.register(Commands.HASFLAG.getCommandName(), new HasFlagCommandParser(this));
+
+        registry.register(SimplifiedHeaderTest.From.getCommandName(), simplifiedHeaderTestParser);
+        registry.register(SimplifiedHeaderTest.To.getCommandName(), simplifiedHeaderTestParser);
+        registry.register(SimplifiedHeaderTest.Cc.getCommandName(), simplifiedHeaderTestParser);
+        registry.register(SimplifiedHeaderTest.Subject.getCommandName(), simplifiedHeaderTestParser);
+        registry.register(SimplifiedHeaderTest.AnyRecipient.getCommandName(), simplifiedHeaderTestParser);
+        registry.register(SimplifiedHeaderTest.MailingList.getCommandName(), simplifiedHeaderTestParser);
 
         registerService(TestCommandParserRegistry.class, registry);
         trackService(TestCommandParserRegistry.class);
-        openTrackers();
     }
 
     /**
@@ -173,21 +169,20 @@ public class MailFilterJSONActivator extends AJAXModuleActivator {
      */
     private void registerActionCommandParserRegistry() {
         ActionCommandParserRegistry registry = new ActionCommandParserRegistry();
-        registry.register(ActionCommand.Commands.KEEP.getJsonName(), new KeepActionCommandParser());
-        registry.register(ActionCommand.Commands.DISCARD.getJsonName(), new DiscardActionCommandParser());
-        registry.register(ActionCommand.Commands.REDIRECT.getJsonName(), new RedirectActionCommandParser());
-        registry.register(ActionCommand.Commands.REJECT.getJsonName(), new RejectActionCommandParser());
-        registry.register(ActionCommand.Commands.FILEINTO.getJsonName(), new FileIntoActionCommandParser());
-        registry.register(ActionCommand.Commands.STOP.getJsonName(), new StopActionCommandParser());
-        registry.register(ActionCommand.Commands.VACATION.getJsonName(), new VacationActionCommandParser());
-        registry.register(ActionCommand.Commands.ENOTIFY.getJsonName(), new EnotifyActionCommandParser());
-        registry.register(ActionCommand.Commands.SETFLAG.getJsonName(), new SetFlagActionCommandParser());
-        registry.register(ActionCommand.Commands.ADDFLAG.getJsonName(), new AddFlagActionCommandParser());
-        registry.register(ActionCommand.Commands.REMOVEFLAG.getJsonName(), new RemoveFlagActionCommandParser());
-        registry.register(ActionCommand.Commands.PGP_ENCRYPT.getJsonName(), new PGPEncryptActionCommandParser());
+        registry.register(ActionCommand.Commands.KEEP.getJsonName(), new KeepActionCommandParser(this));
+        registry.register(ActionCommand.Commands.DISCARD.getJsonName(), new DiscardActionCommandParser(this));
+        registry.register(ActionCommand.Commands.REDIRECT.getJsonName(), new RedirectActionCommandParser(this));
+        registry.register(ActionCommand.Commands.REJECT.getJsonName(), new RejectActionCommandParser(this));
+        registry.register(ActionCommand.Commands.FILEINTO.getJsonName(), new FileIntoActionCommandParser(this));
+        registry.register(ActionCommand.Commands.STOP.getJsonName(), new StopActionCommandParser(this));
+        registry.register(ActionCommand.Commands.VACATION.getJsonName(), new VacationActionCommandParser(this));
+        registry.register(ActionCommand.Commands.ENOTIFY.getJsonName(), new EnotifyActionCommandParser(this));
+        registry.register(ActionCommand.Commands.SETFLAG.getJsonName(), new SetFlagActionCommandParser(this));
+        registry.register(ActionCommand.Commands.ADDFLAG.getJsonName(), new AddFlagActionCommandParser(this));
+        registry.register(ActionCommand.Commands.REMOVEFLAG.getJsonName(), new RemoveFlagActionCommandParser(this));
+        registry.register(ActionCommand.Commands.PGP_ENCRYPT.getJsonName(), new PGPEncryptActionCommandParser(this));
 
         registerService(ActionCommandParserRegistry.class, registry);
         trackService(ActionCommandParserRegistry.class);
-        openTrackers();
     }
 }

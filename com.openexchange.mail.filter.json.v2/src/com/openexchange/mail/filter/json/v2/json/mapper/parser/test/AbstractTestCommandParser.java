@@ -54,7 +54,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.test.ITestCommand;
 import com.openexchange.jsieve.registry.TestCommandRegistry;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.TestCommandParser;
-import com.openexchange.mail.filter.json.v2.osgi.Services;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link AbstractTestCommandParser}
@@ -64,16 +64,26 @@ import com.openexchange.mail.filter.json.v2.osgi.Services;
  */
 public abstract class AbstractTestCommandParser<TestCommand> implements TestCommandParser<TestCommand>{
 
+    protected final ServiceLookup services;
+
+    /**
+     * Initializes a new {@link AbstractTestCommandParser}.
+     */
+    protected AbstractTestCommandParser(ServiceLookup services) {
+        super();
+        this.services = services;
+    }
+
     @Override
     public boolean isCommandSupported(Set<String> capabilities) throws OXException {
-        TestCommandRegistry service = Services.getService(TestCommandRegistry.class);
+        TestCommandRegistry service = services.getService(TestCommandRegistry.class);
         ITestCommand command = service.get(getCommandName());
         return null == command.getRequired() || capabilities.contains(command.getRequired());
     }
 
     @Override
     public ITestCommand getCommand() throws OXException {
-        TestCommandRegistry service = Services.getService(TestCommandRegistry.class);
+        TestCommandRegistry service = services.getService(TestCommandRegistry.class);
         return service.get(getCommandName());
     }
 

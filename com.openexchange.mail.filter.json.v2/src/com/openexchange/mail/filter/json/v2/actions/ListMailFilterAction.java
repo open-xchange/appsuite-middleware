@@ -60,11 +60,11 @@ import com.openexchange.jsieve.commands.Rule;
 import com.openexchange.mail.filter.json.v2.Action;
 import com.openexchange.mail.filter.json.v2.Parameter;
 import com.openexchange.mail.filter.json.v2.json.RuleParser;
-import com.openexchange.mail.filter.json.v2.osgi.Services;
 import com.openexchange.mailfilter.Credentials;
 import com.openexchange.mailfilter.MailFilterService;
 import com.openexchange.mailfilter.MailFilterService.FilterType;
 import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -78,11 +78,21 @@ public class ListMailFilterAction extends AbstractMailFilterAction{
 
     public static final Action ACTION = Action.LIST;
 
+    private final RuleParser ruleParser;
+
+    /**
+     * Initializes a new {@link ListMailFilterAction}.
+     */
+    public ListMailFilterAction(RuleParser ruleParser, ServiceLookup services) {
+        super(services);
+        this.ruleParser = ruleParser;
+    }
+
     @Override
     public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
         final Map<String, String> parameters = request.getParameters();
         final Credentials credentials = new Credentials(session);
-        final MailFilterService mailFilterService = Services.getService(MailFilterService.class);
+        final MailFilterService mailFilterService = services.getService(MailFilterService.class);
         final String flag = parameters.get(Parameter.FLAG);
         FilterType filterType;
         if (flag != null) {
@@ -96,7 +106,7 @@ public class ListMailFilterAction extends AbstractMailFilterAction{
         }
         final List<Rule> rules = mailFilterService.listRules(credentials, filterType);
         try {
-            JSONArray result = RuleParser.getInstance().write(rules.toArray(new Rule[rules.size()]));
+            JSONArray result = ruleParser.write(rules.toArray(new Rule[rules.size()]));
             return new AJAXRequestResult(result);
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e);

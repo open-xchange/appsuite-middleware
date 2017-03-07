@@ -61,6 +61,7 @@ import com.openexchange.jsieve.commands.ActionCommand.Commands;
 import com.openexchange.mail.filter.json.v2.json.fields.AddFlagsActionField;
 import com.openexchange.mail.filter.json.v2.json.fields.GeneralField;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.CommandParserJSONUtil;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -75,8 +76,8 @@ public class RemoveFlagActionCommandParser extends AbstractActionCommandParser {
     /**
      * Initializes a new {@link RemoveFlagActionCommandParser}.
      */
-    public RemoveFlagActionCommandParser() {
-        super();
+    public RemoveFlagActionCommandParser(ServiceLookup services) {
+        super(services);
     }
 
     @Override

@@ -49,13 +49,12 @@
 
 package com.openexchange.mail.filter.json.v2.json;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import org.apache.jsieve.SieveException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.google.common.collect.ImmutableList;
 import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.Rule;
 import com.openexchange.mail.filter.json.v2.json.fields.RuleField;
@@ -69,6 +68,7 @@ import com.openexchange.mail.filter.json.v2.mapper.RuleFieldMapper;
 import com.openexchange.mail.filter.json.v2.mapper.RuleNameRuleFieldMapper;
 import com.openexchange.mail.filter.json.v2.mapper.TestCommandRuleFieldMapper;
 import com.openexchange.mail.filter.json.v2.mapper.TextRuleFieldMapper;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -79,33 +79,33 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class RuleParser {
 
-    private final List<RuleFieldMapper> mappers;
-
-    private static final RuleParser INSTANCE = new RuleParser();
-
-    public static RuleParser getInstance(){
-        return INSTANCE;
+    public static RuleParser newInstance(ServiceLookup services){
+        return new RuleParser(services);
     }
+
+    // ---------------------------------------------------------------------------
+
+    private final List<RuleFieldMapper> mappers;
 
     /**
      * Initialises a new {@link RuleParser}.
      */
-    private RuleParser() {
+    private RuleParser(ServiceLookup services) {
         super();
 
         // Order of processing
-        List<RuleFieldMapper> list = new ArrayList<RuleFieldMapper>(9);
+        ImmutableList.Builder<RuleFieldMapper> list = ImmutableList.builder();
         list.add(new IDRuleFieldMapper());
         list.add(new PositionRuleFieldMapper());
         list.add(new RuleNameRuleFieldMapper());
         list.add(new ActiveRuleFieldMapper());
         list.add(new FlagsRuleFieldMapper());
-        list.add(new TestCommandRuleFieldMapper());
-        list.add(new ActionCommandRuleFieldMapper());
+        list.add(new TestCommandRuleFieldMapper(services));
+        list.add(new ActionCommandRuleFieldMapper(services));
         list.add(new TextRuleFieldMapper());
         list.add(new ErrorMessageRuleFieldMapper());
 
-        mappers = Collections.unmodifiableList(list);
+        mappers = list.build();
     }
 
     /**

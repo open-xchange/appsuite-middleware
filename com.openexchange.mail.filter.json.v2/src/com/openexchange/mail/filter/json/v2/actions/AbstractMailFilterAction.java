@@ -55,6 +55,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
@@ -65,7 +66,17 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  */
 public abstract class AbstractMailFilterAction implements AJAXActionService{
 
-    JSONObject getJSONBody(Object data) throws OXException {
+    protected final ServiceLookup services;
+
+    /**
+     * Initializes a new {@link AbstractMailFilterAction}.
+     */
+    protected AbstractMailFilterAction(ServiceLookup services) {
+        super();
+        this.services = services;
+    }
+
+    protected JSONObject getJSONBody(Object data) throws OXException {
 
         if(!(data instanceof JSONObject)){
             throw AjaxExceptionCodes.INVALID_REQUEST_BODY.create(JSONObject.class.getSimpleName(), data.getClass().getSimpleName());
@@ -74,7 +85,7 @@ public abstract class AbstractMailFilterAction implements AJAXActionService{
         return (JSONObject) data;
     }
 
-    JSONArray getJSONArrayBody(Object data) throws OXException {
+    protected JSONArray getJSONArrayBody(Object data) throws OXException {
 
         if(!(data instanceof JSONArray)){
             throw AjaxExceptionCodes.INVALID_REQUEST_BODY.create(JSONObject.class.getSimpleName(), data.getClass().getSimpleName());
@@ -83,7 +94,7 @@ public abstract class AbstractMailFilterAction implements AJAXActionService{
         return (JSONArray) data;
     }
 
-    Integer getUniqueId(final JSONObject json) throws OXException {
+    protected Integer getUniqueId(final JSONObject json) throws OXException {
         if (json.has("id") && !json.isNull("id")) {
             try {
                 return Integer.valueOf(json.getInt("id"));
