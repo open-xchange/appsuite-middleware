@@ -462,7 +462,7 @@ public class SieveHandler {
                 try {
                     configuredPreferredSASLMechanism = PreferredSASLMech.valueOf(psm);
                 } catch (IllegalArgumentException e) {
-                    log.warn("Invalid property for {} found in mailfilter.properties.", MailFilterProperty.preferredSaslMech.getFQPropertyName());
+                    log.warn("Invalid property '{}' for '{}' found in mailfilter.properties.", psm, MailFilterProperty.preferredSaslMech.getFQPropertyName());
                 }
             }
             if (null == configuredPreferredSASLMechanism) {
