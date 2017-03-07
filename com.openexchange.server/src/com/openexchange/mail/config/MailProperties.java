@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.config;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -67,6 +68,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.cascade.ConfigViews;
+import com.openexchange.exception.ExceptionUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
@@ -719,6 +721,7 @@ public final class MailProperties implements IMailProperties {
                 mailFetchLimit = Integer.parseInt(mailFetchLimitStr);
                 logBuilder.append("\tMail Fetch Limit: ").append(mailFetchLimit).append('\n');
             } catch (final NumberFormatException e) {
+                LOG.debug("", e);
                 mailFetchLimit = 1000;
                 logBuilder.append("\tMail Fetch Limit: Non parseable value \"").append(mailFetchLimitStr).append(fallbackPrefix).append(
                     mailFetchLimit).append('\n');
@@ -731,6 +734,7 @@ public final class MailProperties implements IMailProperties {
                 bodyDisplaySize = Integer.parseInt(bodyDisplaySizeStr);
                 logBuilder.append("\tBody Display Size Limit: ").append(bodyDisplaySize).append('\n');
             } catch (final NumberFormatException e) {
+                LOG.debug("", e);
                 bodyDisplaySize = 10485760;
                 logBuilder.append("\tBody Display Size Limit: Non parseable value \"").append(bodyDisplaySizeStr).append(
                     fallbackPrefix).append(bodyDisplaySize).append('\n');
@@ -743,6 +747,7 @@ public final class MailProperties implements IMailProperties {
                 attachDisplaySize = Integer.parseInt(attachDisplaySizeStr);
                 logBuilder.append("\tAttachment Display Size Limit: ").append(attachDisplaySize).append('\n');
             } catch (final NumberFormatException e) {
+                LOG.debug("", e);
                 attachDisplaySize = 8192;
                 logBuilder.append("\tAttachment Display Size Limit: Non parseable value \"").append(attachDisplaySizeStr).append(
                     fallbackPrefix).append(attachDisplaySize).append('\n');
@@ -755,6 +760,7 @@ public final class MailProperties implements IMailProperties {
                 mailAccessCacheShrinkerSeconds = Integer.parseInt(tmp);
                 logBuilder.append("\tMail Access Cache shrinker-interval seconds: ").append(mailAccessCacheShrinkerSeconds).append('\n');
             } catch (final NumberFormatException e) {
+                LOG.debug("", e);
                 mailAccessCacheShrinkerSeconds = 3;
                 logBuilder.append("\tMail Access Cache shrinker-interval seconds: Non parseable value \"").append(tmp).append(
                     fallbackPrefix).append(mailAccessCacheShrinkerSeconds).append('\n');
@@ -767,6 +773,7 @@ public final class MailProperties implements IMailProperties {
                 mailAccessCacheIdleSeconds = Integer.parseInt(tmp);
                 logBuilder.append("\tMail Access Cache idle seconds: ").append(mailAccessCacheIdleSeconds).append('\n');
             } catch (final NumberFormatException e) {
+                LOG.debug("", e);
                 mailAccessCacheIdleSeconds = 4;
                 logBuilder.append("\tMail Access Cache idle seconds: Non parseable value \"").append(tmp).append(fallbackPrefix).append(
                     mailAccessCacheIdleSeconds).append('\n');
@@ -796,6 +803,8 @@ public final class MailProperties implements IMailProperties {
                 defaultMimeCharset = defaultMimeCharsetStr;
                 logBuilder.append("\tDefault MIME Charset: ").append(defaultMimeCharset).append('\n');
             } catch (final Throwable t) {
+                ExceptionUtils.handleThrowable(t);
+                LOG.debug("", t);
                 defaultMimeCharset = "UTF-8";
                 logBuilder.append("\tDefault MIME Charset: Unsupported charset \"").append(defaultMimeCharsetStr).append(fallbackPrefix).append(
                     defaultMimeCharset).append('\n');
@@ -857,6 +866,7 @@ public final class MailProperties implements IMailProperties {
                         ipAddressRenderer = IpAddressRenderer.createRendererFor(tmp);
                         logBuilder.append("\tIP Address Pattern: Pattern syntax \u0060\u0060").append(tmp).append("\u00b4\u00b4 accepted.").append('\n');
                     } catch (Exception e) {
+                        LOG.debug("", e);
                         logBuilder.append("\tIP Address Pattern: Unsupported pattern syntax \"").append(tmp).append("\". Using simple renderer.").append('\n');
                     }
                 }
@@ -905,6 +915,7 @@ public final class MailProperties implements IMailProperties {
                 watcherTime = Integer.parseInt(watcherTimeStr);
                 logBuilder.append("\tWatcher Time: ").append(watcherTime).append('\n');
             } catch (final NumberFormatException e) {
+                LOG.debug("", e);
                 watcherTime = 60000;
                 logBuilder.append("\tWatcher Time: Invalid value \"").append(watcherTimeStr).append(fallbackPrefix).append(watcherTime).append(
                     '\n');
@@ -917,6 +928,7 @@ public final class MailProperties implements IMailProperties {
                 watcherFrequency = Integer.parseInt(watcherFeqStr);
                 logBuilder.append("\tWatcher Frequency: ").append(watcherFrequency).append('\n');
             } catch (final NumberFormatException e) {
+                LOG.debug("", e);
                 watcherFrequency = 10000;
                 logBuilder.append("\tWatcher Frequency: Invalid value \"").append(watcherFeqStr).append(fallbackPrefix).append(
                     watcherFrequency).append('\n');
@@ -950,6 +962,7 @@ public final class MailProperties implements IMailProperties {
                 rateLimit = Integer.parseInt(rateLimitStr);
                 logBuilder.append("\tSent Rate limit: ").append(rateLimit).append('\n');
             } catch (final NumberFormatException e) {
+                LOG.debug("", e);
                 rateLimit = 0;
                 logBuilder.append("\tSend Rate limit: Invalid value \"").append(rateLimitStr).append("\". Setting to fallback ").append(
                     rateLimit).append('\n');
@@ -973,6 +986,7 @@ public final class MailProperties implements IMailProperties {
                 defaultArchiveDays = Strings.parseInt(tmp);
                 logBuilder.append("\tDefault archive days: ").append(defaultArchiveDays).append('\n');
             } catch (final NumberFormatException e) {
+                LOG.debug("", e);
                 defaultArchiveDays = 90;
                 logBuilder.append("\tDefault archive days: Invalid value \"").append(tmp).append("\". Setting to fallback ").append(
                     defaultArchiveDays).append('\n');
@@ -986,6 +1000,7 @@ public final class MailProperties implements IMailProperties {
                 maxToCcBcc = Integer.parseInt(maxToCcBccStr);
                 logBuilder.append("\tmaxToCcBcc: ").append(maxToCcBcc).append('\n');
             } catch (final NumberFormatException e) {
+                LOG.debug("", e);
                 maxToCcBcc = 0;
                 logBuilder.append("\tmaxToCcBcc: Invalid value \"").append(maxToCcBccStr).append("\". Setting to fallback ").append(
                     maxToCcBcc).append('\n');
@@ -999,6 +1014,7 @@ public final class MailProperties implements IMailProperties {
                 maxDriveAttachments = Integer.parseInt(maxDriveAttachmentsStr);
                 logBuilder.append("\tmaxDriveAttachments: ").append(maxDriveAttachments).append('\n');
             } catch (final NumberFormatException e) {
+                LOG.debug("", e);
                 maxDriveAttachments = 20;
                 logBuilder.append("\tmaxDriveAttachments: Invalid value \"").append(maxDriveAttachmentsStr).append("\". Setting to fallback ").append(
                     maxDriveAttachments).append('\n');
@@ -1017,6 +1033,7 @@ public final class MailProperties implements IMailProperties {
                         javaMailProperties = null;
                     }
                 } catch (final FileNotFoundException e) {
+                    LOG.debug("", e);
                     javaMailProperties = null;
                 }
             }
@@ -1175,7 +1192,7 @@ public final class MailProperties implements IMailProperties {
             PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
             return primaryMailProps.preferSentDate;
         } catch (Exception e) {
-            LOG.error("Failed to get whether a mail's sent date (<code>\"Date\"</code> header) is preferred over its received date for user {} in context {}. Using default {} instead.", userId, contextId, preferSentDate, e);
+            LOG.error("Failed to get whether a mail's sent date (<code>\"Date\"</code> header) is preferred over its received date for user {} in context {}. Using default {} instead.", I(userId), I(contextId), Boolean.valueOf(preferSentDate), e);
             return preferSentDate;
         }
     }
@@ -1185,7 +1202,7 @@ public final class MailProperties implements IMailProperties {
             PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
             return primaryMailProps.hidePOP3StorageFolders;
         } catch (Exception e) {
-            LOG.error("Failed to get hide-POP3-storage-folders flag for user {} in context {}. Using default instead.", userId, contextId, e);
+            LOG.error("Failed to get hide-POP3-storage-folders flag for user {} in context {}. Using default instead.", I(userId), I(contextId), e);
             return hidePOP3StorageFolders;
         }
     }
@@ -1236,7 +1253,7 @@ public final class MailProperties implements IMailProperties {
             PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
             return primaryMailProps.loginSource;
         } catch (Exception e) {
-            LOG.error("Failed to get login source for user {} in context {}. Using default {} instead.", userId, contextId, loginSource, e);
+            LOG.error("Failed to get login source for user {} in context {}. Using default {} instead.", I(userId), I(contextId), loginSource, e);
             return loginSource;
         }
     }
@@ -1253,7 +1270,7 @@ public final class MailProperties implements IMailProperties {
             PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
             return primaryMailProps.passwordSource;
         } catch (Exception e) {
-            LOG.error("Failed to get password source for user {} in context {}. Using default {} instead.", userId, contextId, passwordSource, e);
+            LOG.error("Failed to get password source for user {} in context {}. Using default {} instead.", I(userId), I(contextId), passwordSource, e);
             return passwordSource;
         }
     }
@@ -1270,7 +1287,7 @@ public final class MailProperties implements IMailProperties {
             PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
             return primaryMailProps.mailServerSource;
         } catch (Exception e) {
-            LOG.error("Failed to get mail server source for user {} in context {}. Using default {} instead.", userId, contextId, mailServerSource, e);
+            LOG.error("Failed to get mail server source for user {} in context {}. Using default {} instead.", I(userId), I(contextId), mailServerSource, e);
             return mailServerSource;
         }
     }
@@ -1287,7 +1304,7 @@ public final class MailProperties implements IMailProperties {
             PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
             return primaryMailProps.transportServerSource;
         } catch (Exception e) {
-            LOG.error("Failed to get transport server source for user {} in context {}. Using default {} instead.", userId, contextId, transportServerSource, e);
+            LOG.error("Failed to get transport server source for user {} in context {}. Using default {} instead.", I(userId), I(contextId), transportServerSource, e);
             return transportServerSource;
         }
     }
@@ -1304,7 +1321,7 @@ public final class MailProperties implements IMailProperties {
             PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
             return primaryMailProps.mailServer;
         } catch (Exception e) {
-            LOG.error("Failed to get mail server for user {} in context {}. Using default {} instead.", userId, contextId, mailServer, e);
+            LOG.error("Failed to get mail server for user {} in context {}. Using default {} instead.", I(userId), I(contextId), mailServer, e);
             return mailServer;
         }
     }
@@ -1321,7 +1338,7 @@ public final class MailProperties implements IMailProperties {
             PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
             return primaryMailProps.transportServer;
         } catch (Exception e) {
-            LOG.error("Failed to get transport server for user {} in context {}. Using default {} instead.", userId, contextId, transportServer, e);
+            LOG.error("Failed to get transport server for user {} in context {}. Using default {} instead.", I(userId), I(contextId), transportServer, e);
             return transportServer;
         }
     }
@@ -1338,7 +1355,7 @@ public final class MailProperties implements IMailProperties {
             PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
             return primaryMailProps.mailStartTls;
         } catch (Exception e) {
-            LOG.error("Failed to get STARTTLS flag for mail access for user {} in context {}. Using default {} instead.", userId, contextId, mailStartTls, e);
+            LOG.error("Failed to get STARTTLS flag for mail access for user {} in context {}. Using default {} instead.", I(userId), I(contextId), Boolean.valueOf(mailStartTls), e);
             return mailStartTls;
         }
     }
@@ -1355,7 +1372,7 @@ public final class MailProperties implements IMailProperties {
             PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
             return primaryMailProps.transportStartTls;
         } catch (Exception e) {
-            LOG.error("Failed to get STARTTLS flag for mail transport for user {} in context {}. Using default {} instead.", userId, contextId, transportStartTls, e);
+            LOG.error("Failed to get STARTTLS flag for mail transport for user {} in context {}. Using default {} instead.", I(userId), I(contextId), Boolean.valueOf(transportStartTls), e);
             return transportStartTls;
         }
     }
@@ -1372,7 +1389,7 @@ public final class MailProperties implements IMailProperties {
             PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
             return primaryMailProps.masterPassword;
         } catch (Exception e) {
-            LOG.error("Failed to get transport server source for user {} in context {}. Using default instead.", userId, contextId, e);
+            LOG.error("Failed to get transport server source for user {} in context {}. Using default instead.", I(userId), I(contextId), e);
             return masterPassword;
         }
     }
@@ -1389,7 +1406,7 @@ public final class MailProperties implements IMailProperties {
             PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
             return primaryMailProps.maxToCcBcc;
         } catch (Exception e) {
-            LOG.error("Failed to get max. number of recipient addresses for user {} in context {}. Using default instead.", userId, contextId, e);
+            LOG.error("Failed to get max. number of recipient addresses for user {} in context {}. Using default instead.", I(userId), I(contextId), e);
             return maxToCcBcc;
         }
     }
@@ -1406,7 +1423,7 @@ public final class MailProperties implements IMailProperties {
             PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
             return primaryMailProps.maxDriveAttachments;
         } catch (Exception e) {
-            LOG.error("Failed to get max. number of Drive attachments for user {} in context {}. Using default instead.", userId, contextId, e);
+            LOG.error("Failed to get max. number of Drive attachments for user {} in context {}. Using default instead.", I(userId), I(contextId), e);
             return maxDriveAttachments;
         }
     }
@@ -1423,7 +1440,7 @@ public final class MailProperties implements IMailProperties {
             PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
             return primaryMailProps.quoteLineColors;
         } catch (Exception e) {
-            LOG.error("Failed to get max. number of Drive attachments for user {} in context {}. Using default instead.", userId, contextId, e);
+            LOG.error("Failed to get max. number of Drive attachments for user {} in context {}. Using default instead.", I(userId), I(contextId), e);
             return quoteLineColors;
         }
     }
@@ -1441,7 +1458,7 @@ public final class MailProperties implements IMailProperties {
             PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
             phishingHeaders = primaryMailProps.phishingHeaders;
         } catch (Exception e) {
-            LOG.error("Failed to get phishing headers for user {} in context {}. Using default instead.", userId, contextId, e);
+            LOG.error("Failed to get phishing headers for user {} in context {}. Using default instead.", I(userId), I(contextId), e);
             phishingHeaders = this.phishingHeaders;
         }
 
@@ -1465,7 +1482,7 @@ public final class MailProperties implements IMailProperties {
             PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
             return primaryMailProps.rateLimit;
         } catch (Exception e) {
-            LOG.error("Failed to get send rate limit for user {} in context {}. Using default instead.", userId, contextId, e);
+            LOG.error("Failed to get send rate limit for user {} in context {}. Using default instead.", I(userId), I(contextId), e);
             return rateLimit;
         }
     }
@@ -1482,7 +1499,7 @@ public final class MailProperties implements IMailProperties {
             PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
             return primaryMailProps.rateLimitPrimaryOnly;
         } catch (Exception e) {
-            LOG.error("Failed to get rateLimitPrimaryOnly flag for user {} in context {}. Using default instead.", userId, contextId, e);
+            LOG.error("Failed to get rateLimitPrimaryOnly flag for user {} in context {}. Using default instead.", I(userId), I(contextId), e);
             return rateLimitPrimaryOnly;
         }
     }
@@ -1497,7 +1514,7 @@ public final class MailProperties implements IMailProperties {
             PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
             return primaryMailProps.ranges;
         } catch (Exception e) {
-            LOG.error("Failed to get IP ranges for user {} in context {}. Using default instead.", userId, contextId, e);
+            LOG.error("Failed to get IP ranges for user {} in context {}. Using default instead.", I(userId), I(contextId), e);
             return ranges;
         }
     }
@@ -1534,7 +1551,7 @@ public final class MailProperties implements IMailProperties {
             PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
             return primaryMailProps.supportMsisdnAddresses;
         } catch (Exception e) {
-            LOG.error("Failed to get IP ranges for user {} in context {}. Using default instead.", userId, contextId, e);
+            LOG.error("Failed to get IP ranges for user {} in context {}. Using default instead.", I(userId), I(contextId), e);
             return supportMsisdnAddresses;
         }
     }
@@ -1549,7 +1566,7 @@ public final class MailProperties implements IMailProperties {
             PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
             return primaryMailProps.defaultArchiveDays;
         } catch (Exception e) {
-            LOG.error("Failed to get default days when archiving messages for user {} in context {}. Using default instead.", userId, contextId, e);
+            LOG.error("Failed to get default days when archiving messages for user {} in context {}. Using default instead.", I(userId), I(contextId), e);
             return defaultArchiveDays;
         }
     }
