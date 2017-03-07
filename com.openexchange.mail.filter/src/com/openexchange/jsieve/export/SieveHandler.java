@@ -458,7 +458,7 @@ public class SieveHandler {
         String psm = null;
         {
             psm = mailFilterConfig.getProperty(userId, contextId, MailFilterProperty.preferredSaslMech);
-            if (psm != null) {
+            if (!Strings.isEmpty(psm)) {
                 try {
                     configuredPreferredSASLMechanism = PreferredSASLMech.valueOf(psm);
                 } catch (IllegalArgumentException e) {
