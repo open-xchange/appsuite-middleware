@@ -137,6 +137,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     private static final String INSERT_FEEDBACK_SQL = "INSERT INTO feedback (groupId, type, date, cid, user, login_name, typeId) VALUES (?,?,?,?,?,?,?);";
     private static final String SELECT_FEEDBACK_SQL = "SELECT date, cid, user, login_name, typeId FROM feedback WHERE groupId=? AND type=? AND date >? AND date <?";
     private static final String DELETE_FEEDBACK_SQL = "DELETE FROM feedback WHERE groupId = ? AND type = ? AND date > ? AND date < ?";
+    private static final String TYPEID_FEEDBACK_SQL = "SELECT typeId FROM feedback WHERE groupId = ? AND type = ? AND date > ? AND data < ?";
 
     /**
      * @param writeCon The global db write connection
@@ -238,16 +239,51 @@ public class FeedbackServiceImpl implements FeedbackService {
         if (dbService == null) {
             throw ServiceExceptionCode.absentService(DatabaseService.class);
         }
+
+        if (!dbService.isGlobalDatabaseAvailable()) {
+            throw FeedbackExceptionCodes.GLOBAL_DB_NOT_CONFIGURED.create();
+        }
+
         Connection writeCon = null;
         try {
             writeCon = dbService.getWritableForGlobal(ctxGroup);
+            writeCon.setAutoCommit(false);
+            List<Long> typeIdsToDelete = getTypeIds(ctxGroup, filter, writeCon);
+            feedBackType.deleteFeedbacks(typeIdsToDelete, writeCon);
             deleteFeedback(writeCon, feedBackType, filter, ctxGroup);
         } catch (SQLException e) {
+            try {
+                writeCon.rollback();
+            } catch (SQLException x) {
+                // ignore
+            }
             throw FeedbackExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            dbService.backWritableForGlobal(ctxGroup, writeCon);
+            if (null != writeCon) {
+                DBUtils.autocommit(writeCon);
+                dbService.backWritableForGlobal(ctxGroup, writeCon);
+            }
         }
+    }
 
+    private List<Long> getTypeIds(String ctxGroup, FeedbackFilter filter, Connection con) throws SQLException {
+        List<Long> result = new ArrayList<>();
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement(TYPEID_FEEDBACK_SQL);
+            stmt.setString(1, ctxGroup);
+            stmt.setString(2, filter.getType());
+            stmt.setLong(3, filter.start());
+            stmt.setLong(4, filter.end());
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                result.add(rs.getLong("typeId"));
+            }
+            return result;
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+        }
     }
 
     private void deleteFeedback(Connection writeCon, FeedbackType feedbackType, FeedbackFilter filter, String ctxGroup) throws SQLException {

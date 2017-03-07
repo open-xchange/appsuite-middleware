@@ -92,6 +92,7 @@ public class StarRatingV1 extends AbstractFeedbackType {
     private static final String TYPE = "star-rating-v1";
     private static final String INSERT_SQL = "INSERT INTO star_rating_v1 (data) VALUES (?)";
     private static final String SELECT_SQL = "SELECT id, data FROM star_rating_v1 WHERE id IN (";
+    private static final String DELETE_SQL = "DELETE FROM star_rating_v1 WHERE id = ?";
 
     @Override
     public long storeFeedbackInternal(Object feedback, Connection con) throws OXException {
@@ -131,7 +132,7 @@ public class StarRatingV1 extends AbstractFeedbackType {
 
     /**
      * Aligns the feedback to store (provided via the jsonFeedback parameter) against the JSON keys expected by the implementation
-     * 
+     *
      * @param jsonFeedback The JSON object provided by the client
      * @return {@link JSONObject} that is aligned to be stored
      */
@@ -148,7 +149,7 @@ public class StarRatingV1 extends AbstractFeedbackType {
      * Enhances the given JSON by dummy entries for every missing key defined in the parameter list. If keys parameter is empty the origin object will be returned.<br>
      * <br>
      * <b>Caution:</> this check is case sensitive. Having 'comment' in keys parameter will add it even 'Comment' is available within the provided {@link JSONObject}.
-     * 
+     *
      * @param feedback The provided feedback that will be adapted.
      * @param keys The keys that should be available within the object
      */
@@ -176,7 +177,7 @@ public class StarRatingV1 extends AbstractFeedbackType {
      * Removes JSON entries from provided object that aren't expected. Expected keys are defined by the 'keys' parameter). If keys parameter is empty the origin object will be returned.<br>
      * <br>
      * <b>Caution:</> this check is case sensitive. Having 'comment' in keys parameter will remove 'Comment' from provided {@link JSONObject} as it is not expected.
-     * 
+     *
      * @param feedback The provided feedback that will be adapted
      * @param expectedKeys The keys that are expected
      */
@@ -201,7 +202,7 @@ public class StarRatingV1 extends AbstractFeedbackType {
 
     /**
      * Ensures that the provided feedback only has lower case keys!
-     * 
+     *
      * @param feedback The feedback that should be normalized
      * @return {@link JSONObject} with lower case keys
      */
@@ -285,8 +286,20 @@ public class StarRatingV1 extends AbstractFeedbackType {
     }
 
     @Override
-    public void deleteFeedbacks(List<Long> ids, Connection con) {
-        // TODO Auto-generated method stub
+    public void deleteFeedbacks(List<Long> ids, Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement(DELETE_SQL);
+            for (Long l : ids) {
+                stmt.setLong(1, l.longValue());
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+        } catch (SQLException e) {
+            throw FeedbackExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
     }
 
     @Override
