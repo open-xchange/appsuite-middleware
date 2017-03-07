@@ -33,10 +33,22 @@
         required: false
         type: long
         default: 0
+
+      - in: query
+        name: subject
+        description: The mail subject. Default: "User Feedback Report: [time range]".
+        required: false
+        type: String
+
+      - in: query
+        name: body
+        description: The mail body (plain text).
+        required: false
+        type: String
  
       - in: query
         name: recipients
-        description: Comma-separated list of recipients for exported feedback.
+        description: CSV file containing the recipients.
         required: true
         type: String
 
