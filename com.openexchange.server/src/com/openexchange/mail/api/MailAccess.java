@@ -80,8 +80,6 @@ import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.api.AuthenticationFailedHandler.Service;
 import com.openexchange.mail.api.AuthenticationFailureHandlerResult.Type;
-import com.openexchange.mail.api.permittance.Permittance;
-import com.openexchange.mail.api.permittance.Permitter;
 import com.openexchange.mail.cache.EnqueueingMailAccessCache;
 import com.openexchange.mail.cache.IMailAccessCache;
 import com.openexchange.mail.cache.SingletonMailAccessCache;
@@ -416,22 +414,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
         checkLogin(session, accountId);
 
         // Return instance
-        Permitter permitter = Permittance.acquireFor(accountId, session);
-        if (null == permitter) {
-            // Non-restricted
-            return doGetInstance(session, accountId);
-        }
-
-        // Acquire permit, then return instance
-        permitter.acquire();
-        try {
-            return doGetInstance(session, accountId);
-        } finally {
-            boolean lastOne = permitter.release();
-            if (lastOne) {
-                Permittance.release(permitter);
-            }
-        }
+        return doGetInstance(session, accountId);
     }
 
     private static MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> doGetInstance(Session session, int accountId) throws OXException {
