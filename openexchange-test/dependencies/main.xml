@@ -4,8 +4,6 @@
         Enhances test libs by the rest client
     </description>
 	
-    <property name="tmp_dir" value="rest_tmp" />
-
     <target name="download_check_and_add_jar" depends="already_downloaded_test" unless="jar.found">
         <antcall target="download">
             <param name="url" value="${jar.url}" />

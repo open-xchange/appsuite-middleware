@@ -6,6 +6,8 @@
 	
     <import file="./main.xml" />
 
+	<property name="tmp_dir" value="./rest_tmp" />
+
     <property name="rest.jar.url" value="https://artifactory.open-xchange.com/artifactory/qa/com/openexchange/testing/httpClient-java/develop-5/httpClient-java-develop-5.jar"/>
 
     <target name="download_check_and_add_rest_jar">
