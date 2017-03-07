@@ -91,6 +91,11 @@ public final class TrashAction extends AbstractFolderAction {
 
     public static final String ACTION = AJAXServlet.ACTION_TRASH;
 
+    private static final String NEW_PATH = "new_path";
+    private static final String PATH = "path";
+    private static final String HAS_FAILED = "hasFailed";
+    private static final String IS_TRASHED = "isTrashed";
+
     /**
      * Initializes a new {@link TrashAction}.
      */
@@ -177,11 +182,12 @@ public final class TrashAction extends AbstractFolderAction {
             for (TrashResult trashResult : results) {
                 JSONObject obj = new JSONObject(3);
                 if (trashResult.isTrashed()) {
-                    obj.put("isTrashed", true);
-                    obj.put("path", trashResult.getNewPath());
+                    obj.put(IS_TRASHED, true);
+                    obj.put(NEW_PATH, trashResult.getNewPath());
+                    obj.put(PATH, trashResult.getOldPath());
                 } else {
-                    obj.put("isTrashed", false);
-                    obj.put("path", trashResult.getOldPath());
+                    obj.put(IS_TRASHED, false);
+                    obj.put(PATH, trashResult.getOldPath());
                 }
                 resultArray.put(obj);
             }
@@ -210,16 +216,16 @@ public final class TrashAction extends AbstractFolderAction {
             for (TrashResult trashResult : results) {
                 JSONObject obj = new JSONObject(3);
                 if (trashResult.hasFailed()) {
-                    obj.put("hasFailed", true);
-                    obj.put("path", trashResult.getOldPath());
+                    obj.put(HAS_FAILED, true);
+                    obj.put(PATH, trashResult.getOldPath());
                 } else {
-                    obj.put("hasFailed", false);
                     if (trashResult.isTrashed()) {
-                        obj.put("isTrashed", true);
-                        obj.put("path", trashResult.getNewPath());
+                        obj.put(IS_TRASHED, true);
+                        obj.put(PATH, trashResult.getOldPath());
+                        obj.put(NEW_PATH, trashResult.getNewPath());
                     } else {
-                        obj.put("isTrashed", false);
-                        obj.put("path", trashResult.getOldPath());
+                        obj.put(IS_TRASHED, false);
+                        obj.put(PATH, trashResult.getOldPath());
                     }
                 }
                 resultArray.put(obj);

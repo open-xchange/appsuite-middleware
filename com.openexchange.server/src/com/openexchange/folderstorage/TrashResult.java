@@ -87,7 +87,7 @@ public class TrashResult {
         super();
         this.trashed = false;
         this.path = null;
-        this.oldPath = path;
+        this.oldPath = oldPath;
         this.failed = failed;
     }
 
