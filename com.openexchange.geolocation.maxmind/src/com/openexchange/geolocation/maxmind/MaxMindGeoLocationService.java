@@ -215,7 +215,7 @@ public class MaxMindGeoLocationService implements GeoLocationService {
      * Retrieves the {@link CityResponse} from the GeoDB for the specified IP address
      *
      * @param ipAddress The IP address
-     * @return The {@link CityResponse} that maps to the specified IP addresss
+     * @return The {@link CityResponse} that maps to the specified IP address
      * @throws OXException If the IP address is invalid or not found in the GeoDB
      */
     private CityResponse getCityResponse(String ipAddress) throws OXException {
