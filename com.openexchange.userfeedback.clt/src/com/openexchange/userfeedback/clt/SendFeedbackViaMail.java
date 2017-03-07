@@ -87,6 +87,12 @@ public class SendFeedbackViaMail extends AbstractRestCLI<Void> {
     private static final String TYPE_SHORT = "t";
     private static final String TYPE_DEFAULT = "star-rating-v1";
 
+    private static final String SUBJECT_LONG = "subject";
+    private static final String SUBJECT_SHORT = "S";
+
+    private static final String BODY_LONG = "body";
+    private static final String BODY_SHORT = "b";
+
     private static final String RECIPIENTS_SHORT = "r";
     private static final String RECIPIENT_LONG = "recipients";
 
@@ -108,7 +114,9 @@ public class SendFeedbackViaMail extends AbstractRestCLI<Void> {
         options.addOption(CONTEXT_GROUP_SHORT, CONTEXT_GROUP_LONG, true, "The context group identifying the global DB where the feedback is stored. Default: 'default'.");
         options.addOption(START_SHORT, START_LONG, true, "Start time in seconds since 1970-01-01 00:00:00 UTC. Only feedback given after this time is sent. If not set, all feedback up to -e is sent.");
         options.addOption(END_SHORT, END_LONG, true, "End time in seconds since 1970-01-01 00:00:00 UTC. Only feedback given before this time is sent. If not set, all feedback since -s is sent.");
-        options.addOption(RECIPIENTS_SHORT, RECIPIENT_LONG, true, "Comma-separated list of recipients.");
+        options.addOption(SUBJECT_SHORT, SUBJECT_LONG, true, " The mail subject. Default: \"User Feedback Report: [time range]\".");
+        options.addOption(BODY_SHORT, BODY_LONG, true, "The mail body (plain text).");
+        options.addOption(RECIPIENTS_SHORT, RECIPIENT_LONG, true, "CSV file containing the recipients.");
         options.addOption(null, ENDPOINT_LONG, true, " URL to an alternative HTTP API endpoint. Example: 'https://192.168.0.1:8443/userfeedback/v1'");
     }
 
@@ -131,6 +139,12 @@ public class SendFeedbackViaMail extends AbstractRestCLI<Void> {
             }
             if (cmd.hasOption(END_SHORT)) {
                 target = target.queryParam("end", cmd.getOptionValue(END_SHORT));
+            }
+            if (cmd.hasOption(SUBJECT_SHORT)) {
+                target = target.queryParam("subject", cmd.getOptionValue(SUBJECT_SHORT));
+            }
+            if (cmd.hasOption(BODY_SHORT)) {
+                target = target.queryParam("body", cmd.getOptionValue(BODY_SHORT));
             }
             target = target.queryParam("recipients", cmd.getOptionValue(RECIPIENTS_SHORT));
             return target;
