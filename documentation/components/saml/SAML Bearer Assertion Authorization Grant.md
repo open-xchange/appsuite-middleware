@@ -3,7 +3,7 @@ Title: SAML Bearer Assertion Authorization Grant
 ---
 
 With version 7.8.4 the middleware supports OAuth authentication for the primary mail account via SAML Bearer Assertion Authorization Grant.
-This document describes how to configure the middleware to use an rfc6749 compliant token endpoint to gain oauth access and refresh tokens.
+This document describes how to configure the middleware to use an rfc6749 compliant token endpoint to gain oauth token pair.
 Furthermore this document describes how to extend a custom SAML implementation to support OAuth authentication.
 
 
@@ -26,18 +26,9 @@ com.openexchange.saml.oauth.clientId = <the client id>
 com.openexchange.saml.oauth.clientSecret = <the client secret>
 ```
 
-Once configured the workflow is the following:
+Once configured the flow is the following:
 
-1. A user initiates the login to the middleware
-2. The user is redirected to the identity provider.
-3. The user enters his credentials and is redirected back to the middleware with a signed SAML 2.0 bearer token
-4. The middleware validates the token
-5. The middleware requests an access token from the token endpoint using the SAML bearer assertion authorization grant
-6. The middleware creates a session and the user is then logged in
-7. The user accesses the primary mail account
-8. The middleware connects to the mail server using the access tokens previously obtained from the token endpoint
-9. The mail server validates the token against a rfc7662 introspection endpoint
-10. The user is logged into the mailserver
+![SAML oauth flow](SAML_oauth_workflow.png "SAML oauth flow")
 
 
 # How to adapt a custom SAML implementation
