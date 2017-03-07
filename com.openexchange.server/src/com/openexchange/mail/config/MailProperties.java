@@ -141,7 +141,6 @@ public final class MailProperties implements IMailProperties {
             boolean transportStartTls;
             int maxToCcBcc;
             int maxDriveAttachments;
-            String[] quoteLineColors;
             boolean rateLimitPrimaryOnly;
             int rateLimit;
             String[] phishingHeaders;
@@ -169,7 +168,6 @@ public final class MailProperties implements IMailProperties {
         final boolean transportStartTls;
         final int maxToCcBcc;
         final int maxDriveAttachments;
-        final String[] quoteLineColors;
         final boolean rateLimitPrimaryOnly;
         final int rateLimit;
         final HostList ranges;
@@ -192,7 +190,6 @@ public final class MailProperties implements IMailProperties {
             this.transportStartTls = params.transportStartTls;
             this.maxToCcBcc = params.maxToCcBcc;
             this.maxDriveAttachments = params.maxDriveAttachments;
-            this.quoteLineColors = params.quoteLineColors;
             this.rateLimitPrimaryOnly = params.rateLimitPrimaryOnly;
             this.rateLimit = params.rateLimit;
             this.ranges = params.ranges;
@@ -348,22 +345,6 @@ public final class MailProperties implements IMailProperties {
             } catch (final NumberFormatException e) {
                 params.maxDriveAttachments = 20;
                 logBuilder.append("\tmaxDriveAttachments: Invalid value \"").append(e.getMessage()).append("\". Setting to fallback ").append(params.maxDriveAttachments).append('\n');
-            }
-        }
-
-        {
-            String quoteColors = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.mail.quoteLineColors", view);
-            if (null == quoteColors) {
-                quoteColors = "#666666";
-            }
-            quoteColors = quoteColors.trim();
-
-            if (Pattern.matches("((#[0-9a-fA-F&&[^,]]{6})(?:\r?\n|\\z|\\s*,\\s*))+", quoteColors)) {
-                params.quoteLineColors = quoteColors.split("\\s*,\\s*");
-                logBuilder.append("\tHTML Quote Colors: ").append(quoteColors).append('\n');
-            } else {
-                params.quoteLineColors = new String[] { "#666666" };
-                logBuilder.append("\tHTML Quote Colors: Invalid sequence of colors \"").append(quoteColors).append("\". Setting to fallback: #666666").append('\n');
             }
         }
 
@@ -1431,18 +1412,10 @@ public final class MailProperties implements IMailProperties {
     /**
      * Gets the quote line colors.
      *
-     * @param userId The user identifier
-     * @param contextId The context identifier
      * @return The quote line colors
      */
-    public String[] getQuoteLineColors(int userId, int contextId) {
-        try {
-            PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
-            return primaryMailProps.quoteLineColors;
-        } catch (Exception e) {
-            LOG.error("Failed to get max. number of Drive attachments for user {} in context {}. Using default instead.", I(userId), I(contextId), e);
-            return quoteLineColors;
-        }
+    public String[] getQuoteLineColors() {
+        return quoteLineColors;
     }
 
     /**
