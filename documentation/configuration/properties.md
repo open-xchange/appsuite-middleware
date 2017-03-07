@@ -902,7 +902,7 @@ If you would like to add a reference to another property use the following appro
 | __File__ | saml.properties  |
 
 ---
-| Key | <span style="font-weight:normal">com.openexchange.saml.oauth.token</span> |
+| Key | <span style="font-weight:normal">com.openexchange.saml.oauth.tokenEndpoint</span> |
 |:----------------|:--------|
 | __Description__ | Specifies the OAuth HTTP token end-point.<br> |
 | __Default__ |  |
@@ -919,7 +919,7 @@ If you would like to add a reference to another property use the following appro
 | __Version__ | 7.8.4  |
 | __Reloadable__ | true  |
 | __Configcascade Aware__ | true  |
-| __Related__ | com.openexchange.saml.oauth.token  |
+| __Related__ | com.openexchange.saml.oauth.tokenEndpoint  |
 | __File__ | saml.properties  |
 
 ---
@@ -930,7 +930,7 @@ If you would like to add a reference to another property use the following appro
 | __Version__ | 7.8.4  |
 | __Reloadable__ | true  |
 | __Configcascade Aware__ | true  |
-| __Related__ | com.openexchange.saml.oauth.token  |
+| __Related__ | com.openexchange.saml.oauth.tokenEndpoint  |
 | __File__ | saml.properties  |
 
 ---
