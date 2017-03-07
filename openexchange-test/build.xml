@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="openexchange-test" default="default" basedir=".">
 
-    <import file="./dependencies/rest-client.xml" />
-    <import file="./dependencies/http-client.xml" />
+    <import file="rest-client.xml" />
+    <import file="http-client.xml" />
 
     <!-- Customizable values -->
     <property name="bundlesDir" value="bundles"/>

@@ -4,9 +4,9 @@
         Enhances test libs by the rest client
     </description>
 	
-    <import file="./main.xml" />
+    <import file="main.xml" />
 
-	<property name="tmp_dir" value="./rest_tmp" />
+	<property name="tmp_dir" value="rest_tmp" />
 
     <property name="rest.jar.url" value="https://artifactory.open-xchange.com/artifactory/qa/com/openexchange/testing/httpClient-java/develop-5/httpClient-java-develop-5.jar"/>
 

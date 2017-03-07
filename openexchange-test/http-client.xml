@@ -4,9 +4,9 @@
         Enhances test libs by the http client
     </description>
 
-    <import file="./main.xml" />
+    <import file="main.xml" />
 
-    <property name="tmp_dir" value="./http_tmp" />
+    <property name="tmp_dir" value="http_tmp" />
 
 	<property name="http.jar.url" value="https://artifactory.open-xchange.com/artifactory/qa/com/openexchange/testing/httpClient-java/develop-4/httpClient-java-develop-4.jar" />
 

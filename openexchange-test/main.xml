@@ -21,7 +21,7 @@
 
     <target name="already_downloaded_test">
         <basename property="jar.filename" file="${jar.url}" />
-        <available file="../lib/${jar.filename}" property="jar.found" />
+        <available file="lib/${jar.filename}" property="jar.found" />
     </target>
 
     <target name="mktmp">
@@ -48,7 +48,7 @@
     </target>
 
     <target name="add_to_lib" depends="remove_other_versions">
-        <move file="${tmp_dir}/${file}" todir="../lib" />
+        <move file="${tmp_dir}/${file}" todir="lib" />
     </target>
 
     <target name="remove_other_versions">
@@ -74,7 +74,7 @@
         </fail>
 
         <delete verbose="true">
-            <fileset dir="../lib">
+            <fileset dir="lib">
                 <include name="**/${rest-client.delete.prefix}" />
             </fileset>
         </delete>
