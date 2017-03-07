@@ -397,7 +397,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
             if ( !Strings.isEmpty(accountDescription.getLogin())) {
                 mailConfig.setLogin(accountDescription.getLogin());
             }
-            if ( !isDefault || !PasswordSource.GLOBAL.equals(MailProperties.getInstance().getPasswordSource())) {
+            if ( !isDefault || !PasswordSource.GLOBAL.equals(MailProperties.getInstance().getPasswordSource(session.getUserId(), session.getContextId()))) {
                 mailConfig.setPassword(accountDescription.getPassword());
             }
             // Set server and port
@@ -407,7 +407,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
             } catch (final URISyntaxException e) {
                 throw MailExceptionCode.URI_PARSE_FAILED.create(e, mailServerURL);
             }
-            if (!isDefault || !ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource())) {
+            if (!isDefault || !ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource(session.getUserId(), session.getContextId()))) {
                 if (null != uri) {
                     mailConfig.setServer(uri.getHost());
                     mailConfig.setPort(uri.getPort());

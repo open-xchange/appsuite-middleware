@@ -211,7 +211,7 @@ public class CourierEntity2ACL extends Entity2ACL {
             userLoginInfo = userService.getUser(userId, ctx).getLoginInfo();
         }
         try {
-            return MailConfig.getMailLogin(storageService.getMailAccount(accountId, userId, ctx.getContextId()), userLoginInfo);
+            return MailConfig.getMailLogin(storageService.getMailAccount(accountId, userId, ctx.getContextId()), userLoginInfo, userId, ctx.getContextId());
         } catch (final OXException e) {
             throw Entity2ACLExceptionCode.UNKNOWN_USER.create(
                 Integer.valueOf(userId),
@@ -258,7 +258,7 @@ public class CourierEntity2ACL extends Entity2ACL {
     }
 
     private static int getUserIDInternal(final String pattern, final Context ctx, final int accountId, final String serverUrl, final int sessionUser) throws OXException {
-        final int[] ids = MailConfig.getUserIDsByMailLogin(pattern, MailAccount.DEFAULT_ID == accountId, serverUrl, ctx);
+        final int[] ids = MailConfig.getUserIDsByMailLogin(pattern, MailAccount.DEFAULT_ID == accountId, serverUrl, sessionUser, ctx);
         if (0 == ids.length) {
             throw Entity2ACLExceptionCode.RESOLVE_USER_FAILED.create(pattern);
         }

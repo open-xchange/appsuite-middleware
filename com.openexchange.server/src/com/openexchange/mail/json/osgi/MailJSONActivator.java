@@ -107,6 +107,7 @@ import com.openexchange.mail.attachment.storage.MailAttachmentStorageRegistry;
 import com.openexchange.mail.categories.MailCategoriesConfigService;
 import com.openexchange.mail.categories.internal.MailCategoriesPreferenceItem;
 import com.openexchange.mail.compose.CompositionSpace;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.config.MaliciousFolders;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -290,6 +291,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
             public void reloadConfiguration(ConfigurationService configService) {
                 MailConfig.invalidateAuthTypeCache();
                 MaliciousFolders.invalidateCache();
+                MailProperties.invalidateCache();
             }
 
             @Override

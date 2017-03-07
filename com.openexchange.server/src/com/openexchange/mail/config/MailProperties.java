@@ -56,9 +56,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.Properties;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
@@ -71,7 +79,9 @@ import com.openexchange.mail.partmodifier.DummyPartModifier;
 import com.openexchange.mail.partmodifier.PartModifier;
 import com.openexchange.mail.utils.IpAddressRenderer;
 import com.openexchange.net.HostList;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.UserAndContext;
 import com.openexchange.tools.net.URIDefaults;
 
 /**
@@ -115,6 +125,158 @@ public final class MailProperties implements IMailProperties {
             }
         }
     }
+
+    private static final class PrimaryMailProps {
+
+        final LoginSource loginSource;
+        final PasswordSource passwordSource;
+        final ServerSource mailServerSource;
+        final ServerSource transportServerSource;
+        final ConfiguredServer mailServer;
+        final ConfiguredServer transportServer;
+        final String masterPassword;
+
+        PrimaryMailProps(LoginSource loginSource, PasswordSource passwordSource, ServerSource mailServerSource, ServerSource transportServerSource, ConfiguredServer mailServer, ConfiguredServer transportServer, String masterPassword) {
+            super();
+            this.loginSource = loginSource;
+            this.passwordSource = passwordSource;
+            this.mailServerSource = mailServerSource;
+            this.transportServerSource = transportServerSource;
+            this.mailServer = mailServer;
+            this.transportServer = transportServer;
+            this.masterPassword = masterPassword;
+        }
+
+    }
+
+    private static final Cache<UserAndContext, PrimaryMailProps> CACHE_PRIMARY_PROPS = CacheBuilder.newBuilder().maximumSize(65536).expireAfterAccess(30, TimeUnit.MINUTES).build();
+
+    /**
+     * Clears the cache.
+     */
+    public static void invalidateCache() {
+        CACHE_PRIMARY_PROPS.invalidateAll();
+    }
+
+    private static PrimaryMailProps getPrimaryMailProps(final int userId, final int contextId) throws OXException {
+        UserAndContext key = UserAndContext.newInstance(userId, contextId);
+        PrimaryMailProps primaryMailProps = CACHE_PRIMARY_PROPS.getIfPresent(key);
+        if (null != primaryMailProps) {
+            return primaryMailProps;
+        }
+
+        Callable<PrimaryMailProps> loader = new Callable<MailProperties.PrimaryMailProps>() {
+
+            @Override
+            public PrimaryMailProps call() throws Exception {
+                return doGetPrimaryMailProps(userId, contextId);
+            }
+        };
+
+        try {
+            return CACHE_PRIMARY_PROPS.get(key, loader);
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            throw cause instanceof OXException ? (OXException) cause : new OXException(cause);
+        }
+    }
+
+    static PrimaryMailProps doGetPrimaryMailProps(int userId, int contextId) throws OXException {
+        ConfigViewFactory viewFactory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+        if (null == viewFactory) {
+            throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
+        }
+
+        ConfigView view = viewFactory.getView(userId, contextId);
+
+        StringBuilder logBuilder = new StringBuilder(1024);
+        logBuilder.append("\nLoading primary mail properties for user ").append(userId).append(" in context ").append(contextId).append("...\n");
+
+        LoginSource loginSource;
+        {
+            final String loginStr = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.mail.loginSource", view);
+            if (loginStr == null) {
+                throw MailConfigException.create("Property \"com.openexchange.mail.loginSource\" not set");
+            }
+            loginSource = LoginSource.parse(loginStr.trim());
+            if (null == loginSource) {
+                throw MailConfigException.create(new StringBuilder(256).append("Unknown value in property \"com.openexchange.mail.loginSource\": ").append(loginStr).toString());
+            }
+            logBuilder.append("\tLogin Source: ").append(loginSource.toString()).append('\n');
+        }
+
+        PasswordSource passwordSource;
+        {
+            final String pwStr = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.mail.passwordSource", view);
+            if (pwStr == null) {
+                throw MailConfigException.create("Property \"com.openexchange.mail.passwordSource\" not set");
+            }
+            passwordSource = PasswordSource.parse(pwStr.trim());
+            if (null == passwordSource) {
+                throw MailConfigException.create(new StringBuilder(256).append("Unknown value in property \"com.openexchange.mail.passwordSource\": ").append(pwStr).toString());
+            }
+            logBuilder.append("\tPassword Source: ").append(passwordSource.toString()).append('\n');
+        }
+
+        ServerSource mailServerSource;
+        {
+            final String mailSrcStr = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.mail.mailServerSource", view);
+            if (mailSrcStr == null) {
+                throw MailConfigException.create("Property \"com.openexchange.mail.mailServerSource\" not set");
+            }
+            mailServerSource = ServerSource.parse(mailSrcStr.trim());
+            if (null == mailServerSource) {
+                throw MailConfigException.create(new StringBuilder(256).append(
+                    "Unknown value in property \"com.openexchange.mail.mailServerSource\": ").append(mailSrcStr).toString());
+            }
+            logBuilder.append("\tMail Server Source: ").append(mailServerSource.toString()).append('\n');
+        }
+
+        ServerSource transportServerSource;
+        {
+            final String transSrcStr = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.mail.transportServerSource", view);
+            if (transSrcStr == null) {
+                throw MailConfigException.create("Property \"com.openexchange.mail.transportServerSource\" not set");
+            }
+            transportServerSource = ServerSource.parse(transSrcStr.trim());
+            if (null == transportServerSource) {
+                throw MailConfigException.create(new StringBuilder(256).append("Unknown value in property \"com.openexchange.mail.transportServerSource\": ").append(transSrcStr).toString());
+            }
+            logBuilder.append("\tTransport Server Source: ").append(transportServerSource.toString()).append('\n');
+        }
+
+        ConfiguredServer mailServer = null;
+        {
+            String tmp = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.mail.mailServer", view);
+            if (tmp != null) {
+                mailServer = ConfiguredServer.parseFrom(tmp.trim(), URIDefaults.IMAP);
+            }
+        }
+
+        ConfiguredServer transportServer = null;
+        {
+            String tmp = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.mail.transportServer", view);
+            if (tmp != null) {
+                transportServer = ConfiguredServer.parseFrom(tmp.trim(), URIDefaults.SMTP);
+            }
+        }
+
+        String masterPassword;
+        {
+            masterPassword = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.mail.masterPassword", view);
+            if (masterPassword != null) {
+                masterPassword = masterPassword.trim();
+            }
+        }
+
+        PrimaryMailProps primaryMailProps = new PrimaryMailProps(loginSource, passwordSource, mailServerSource, transportServerSource, mailServer, transportServer, masterPassword);
+        logBuilder.append("Primary mail properties successfully loaded for user ").append(userId).append(" in context ").append(contextId).append('!');
+        LOG.info(logBuilder.toString());
+        return primaryMailProps;
+    }
+
+
+    // -----------------------------------------------------------------------------------------------------
 
     private final AtomicBoolean loaded;
 
@@ -914,62 +1076,122 @@ public final class MailProperties implements IMailProperties {
     }
 
     /**
-     * Gets the login source.
+     * Gets the login source for specified user.
      *
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @return The login source
      */
-    public LoginSource getLoginSource() {
-        return loginSource;
+    public LoginSource getLoginSource(int userId, int contextId) {
+        try {
+            PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
+            return primaryMailProps.loginSource;
+        } catch (Exception e) {
+            LOG.error("Failed to get login source for user {} in context {}. Using default {} instead.", userId, contextId, loginSource, e);
+            return loginSource;
+        }
     }
 
     /**
-     * Gets the password source.
+     * Gets the password source for specified user.
      *
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @return The password source
      */
-    public PasswordSource getPasswordSource() {
-        return passwordSource;
+    public PasswordSource getPasswordSource(int userId, int contextId) {
+        try {
+            PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
+            return primaryMailProps.passwordSource;
+        } catch (Exception e) {
+            LOG.error("Failed to get password source for user {} in context {}. Using default {} instead.", userId, contextId, passwordSource, e);
+            return passwordSource;
+        }
     }
 
     /**
-     * Gets the mail server source.
+     * Gets the mail server source for specified user.
      *
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @return The mail server source
      */
-    public ServerSource getMailServerSource() {
-        return mailServerSource;
+    public ServerSource getMailServerSource(int userId, int contextId) {
+        try {
+            PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
+            return primaryMailProps.mailServerSource;
+        } catch (Exception e) {
+            LOG.error("Failed to get mail server source for user {} in context {}. Using default {} instead.", userId, contextId, mailServerSource, e);
+            return mailServerSource;
+        }
     }
 
     /**
-     * Gets the transport server source.
+     * Gets the transport server source for specified user.
      *
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @return The transport server source
      */
-    public ServerSource getTransportServerSource() {
-        return transportServerSource;
-    }
-
-    @Override
-    public int getMailFetchLimit() {
-        return mailFetchLimit;
+    public ServerSource getTransportServerSource(int userId, int contextId) {
+        try {
+            PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
+            return primaryMailProps.transportServerSource;
+        } catch (Exception e) {
+            LOG.error("Failed to get transport server source for user {} in context {}. Using default {} instead.", userId, contextId, transportServerSource, e);
+            return transportServerSource;
+        }
     }
 
     /**
-     * Gets the global mail server.
+     * Gets the global mail server for specified user.
      *
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @return The global mail server
      */
-    public ConfiguredServer getMailServer() {
-        return mailServer;
+    public ConfiguredServer getMailServer(int userId, int contextId) {
+        try {
+            PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
+            return primaryMailProps.mailServer;
+        } catch (Exception e) {
+            LOG.error("Failed to get mail server source for user {} in context {}. Using default {} instead.", userId, contextId, mailServer, e);
+            return mailServer;
+        }
     }
 
     /**
-     * Gets the master password.
+     * Gets the global transport server for specified user.
      *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The global transport server
+     */
+    public ConfiguredServer getTransportServer(int userId, int contextId) {
+        try {
+            PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
+            return primaryMailProps.transportServer;
+        } catch (Exception e) {
+            LOG.error("Failed to get transport server source for user {} in context {}. Using default {} instead.", userId, contextId, transportServer, e);
+            return transportServer;
+        }
+    }
+
+    /**
+     * Gets the master password for specified user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @return The master password
      */
-    public String getMasterPassword() {
-        return masterPassword;
+    public String getMasterPassword(int userId, int contextId) {
+        try {
+            PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
+            return primaryMailProps.masterPassword;
+        } catch (Exception e) {
+            LOG.error("Failed to get transport server source for user {} in context {}. Using default instead.", userId, contextId, e);
+            return masterPassword;
+        }
     }
 
     /**
@@ -1017,13 +1239,9 @@ public final class MailProperties implements IMailProperties {
         return rateLimitPrimaryOnly;
     }
 
-    /**
-     * Gets the global transport server
-     *
-     * @return The global transport server
-     */
-    public ConfiguredServer getTransportServer() {
-        return transportServer;
+    @Override
+    public int getMailFetchLimit() {
+        return mailFetchLimit;
     }
 
     @Override

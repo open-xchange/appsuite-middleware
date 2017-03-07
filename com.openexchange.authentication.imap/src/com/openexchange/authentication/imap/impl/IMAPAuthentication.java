@@ -259,7 +259,7 @@ public class IMAPAuthentication implements AuthenticationService {
 	            /*
 	             * Set user according to configured login source if different from LoginSource.USER_NAME
 	             */
-	            final LoginSource loginSource = MailProperties.getInstance().getLoginSource();
+	            final LoginSource loginSource = MailProperties.getInstance().getLoginSource(userId, ctxId);
 	            if (LoginSource.USER_IMAPLOGIN.equals(loginSource)) {
 	                imapLogin = defaultMailAccount.getLogin();
 	            }

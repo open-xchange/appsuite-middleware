@@ -90,19 +90,21 @@ public abstract class TransportConfig extends MailConfig {
         /*
          * Fetch mail account
          */
-        TransportAccount transportAccount = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true).getTransportAccount(accountId, session.getUserId(), session.getContextId());
+        int userId = session.getUserId();
+        int contextId = session.getContextId();
+        TransportAccount transportAccount = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true).getTransportAccount(accountId, userId, contextId);
         transportConfig.account = transportAccount;
         transportConfig.accountId = accountId;
         transportConfig.session = session;
         fillLoginAndPassword(transportConfig, session, getUser(session).getLoginInfo(), transportAccount, false);
 
-        UrlInfo urlInfo = TransportConfig.getTransportServerURL(transportAccount);
+        UrlInfo urlInfo = TransportConfig.getTransportServerURL(transportAccount, userId, contextId);
         String serverURL = urlInfo.getServerURL();
         if (serverURL == null) {
-            if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getTransportServerSource())) {
+            if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getTransportServerSource(userId, contextId))) {
                 throw MailConfigException.create(new StringBuilder(128).append("Property \"").append("com.openexchange.mail.transportServer").append("\" not set in mail properties").toString());
             }
-            throw MailConfigException.create(new StringBuilder(128).append("Cannot determine transport server URL for user ").append(session.getUserId()).append(" in context ").append(session.getContextId()).toString());
+            throw MailConfigException.create(new StringBuilder(128).append("Cannot determine transport server URL for user ").append(userId).append(" in context ").append(contextId).toString());
         }
 
         transportConfig.parseServerURL(urlInfo);
@@ -114,14 +116,16 @@ public abstract class TransportConfig extends MailConfig {
      * Gets the transport server URL appropriate to configured transport server source.
      *
      * @param transportAccount The mail account
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @return The appropriate transport server URL or <code>null</code>
      */
-    public static UrlInfo getTransportServerURL(final TransportAccount transportAccount) {
+    public static UrlInfo getTransportServerURL(final TransportAccount transportAccount, int userId, int contextId) {
         if (!transportAccount.isDefaultAccount()) {
             return new UrlInfo(transportAccount.generateTransportServerURL(), transportAccount.isTransportStartTls());
         }
-        if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getTransportServerSource())) {
-            return new UrlInfo(MailProperties.getInstance().getTransportServer().getUrlString(true), MailProperties.getInstance().isTransportStartTls());
+        if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getTransportServerSource(userId, contextId))) {
+            return new UrlInfo(MailProperties.getInstance().getTransportServer(userId, contextId).getUrlString(true), MailProperties.getInstance().isTransportStartTls());
         }
         return new UrlInfo(transportAccount.generateTransportServerURL(), transportAccount.isTransportStartTls());
     }
@@ -136,7 +140,7 @@ public abstract class TransportConfig extends MailConfig {
      */
     public static UrlInfo getTransportServerURL(final Session session, final int accountId) throws OXException {
         final MailAccountStorageService storage = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-        return getTransportServerURL(storage.getTransportAccount(accountId, session.getUserId(), session.getContextId()));
+        return getTransportServerURL(storage.getTransportAccount(accountId, session.getUserId(), session.getContextId()), session.getUserId(), session.getContextId());
     }
 
     @Override

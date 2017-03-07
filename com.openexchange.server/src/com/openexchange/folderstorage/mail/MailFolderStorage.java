@@ -2207,7 +2207,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
     }
 
     private boolean cannotConnect(Session session) throws OXException {
-        PasswordSource passwordSource = MailProperties.getInstance().getPasswordSource();
+        PasswordSource passwordSource = MailProperties.getInstance().getPasswordSource(session.getUserId(), session.getContextId());
         if (passwordSource == PasswordSource.SESSION && session.getPassword() == null) {
             return true;
         }

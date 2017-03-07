@@ -348,19 +348,21 @@ public abstract class MailConfig {
         /*
          * Fetch mail account
          */
-        MailAccount mailAccount = ServerServiceRegistry.getServize(MailAccountStorageService.class, true).getMailAccount(accountId, session.getUserId(), session.getContextId());
+        int userId = session.getUserId();
+        int contextId = session.getContextId();
+        MailAccount mailAccount = ServerServiceRegistry.getServize(MailAccountStorageService.class, true).getMailAccount(accountId, userId, contextId);
         mailConfig.account = mailAccount;
         mailConfig.accountId = accountId;
         mailConfig.session = session;
         mailConfig.applyStandardNames(mailAccount);
         fillLoginAndPassword(mailConfig, session, getUser(session).getLoginInfo(), mailAccount, true);
-        UrlInfo urlInfo = MailConfig.getMailServerURL(mailAccount);
+        UrlInfo urlInfo = MailConfig.getMailServerURL(mailAccount, userId, contextId);
         String serverURL = urlInfo.getServerURL();
         if (serverURL == null) {
-            if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource())) {
-                throw MailConfigException.create("Property \"com.openexchange.mail.mailServer\" not set in mail properties");
+            if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource(userId, contextId))) {
+                throw MailConfigException.create("Property \"com.openexchange.mail.mailServer\" not set in mail properties for user " + userId + " in context " + contextId);
             }
-            throw MailConfigException.create(new StringBuilder(64).append("Cannot determine mail server URL for user ").append(session.getUserId()).append(" in context ").append(session.getContextId()).toString());
+            throw MailConfigException.create(new StringBuilder(64).append("Cannot determine mail server URL for user ").append(userId).append(" in context ").append(contextId).toString());
         }
 
         mailConfig.parseServerURL(urlInfo);
@@ -387,11 +389,13 @@ public abstract class MailConfig {
      *
      * @param mailAccount The mail account used to determine the login
      * @param userLoginInfo The login information of the user
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @return The mail login of specified user
      * @throws OXException If login cannot be determined
      */
-    public static final String getMailLogin(final Account mailAccount, final String userLoginInfo) throws OXException {
-        return saneLogin(getMailLogin0(mailAccount, userLoginInfo));
+    public static final String getMailLogin(Account mailAccount, String userLoginInfo, int userId, int contextId) throws OXException {
+        return saneLogin(getMailLogin0(mailAccount, userLoginInfo, userId, contextId));
     }
 
     /**
@@ -399,17 +403,19 @@ public abstract class MailConfig {
      *
      * @param mailAccount The mail account used to determine the login
      * @param userLoginInfo The login information of the user
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @return The mail login of specified user
      * @throws OXException If login cannot be determined
      */
-    private static final String getMailLogin0(final Account mailAccount, final String userLoginInfo) throws OXException {
+    private static final String getMailLogin0(Account mailAccount, String userLoginInfo, int userId, int contextId) throws OXException {
         if (!mailAccount.isDefaultAccount()) {
             return mailAccount.getLogin();
         }
 
         // For primary mail account
         String login;
-        switch (MailProperties.getInstance().getLoginSource()) {
+        switch (MailProperties.getInstance().getLoginSource(userId, contextId)) {
             case USER_IMAPLOGIN:
                 login = mailAccount.getLogin();
                 break;
@@ -436,15 +442,17 @@ public abstract class MailConfig {
     /**
      * Gets the mail server URL appropriate to configured mail server source.
      *
-     * @param mailAccount The user
+     * @param mailAccount The mail account
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @return The appropriate mail server URL or <code>null</code>
      */
-    public static final UrlInfo getMailServerURL(final MailAccount mailAccount) {
+    public static final UrlInfo getMailServerURL(MailAccount mailAccount, int userId, int contextId) {
         if (!mailAccount.isDefaultAccount()) {
             return new UrlInfo(mailAccount.generateMailServerURL(), mailAccount.isMailStartTls());
         }
-        if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource())) {
-            return new UrlInfo(MailProperties.getInstance().getMailServer().getUrlString(true), MailProperties.getInstance().isMailStartTls());
+        if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource(userId, contextId))) {
+            return new UrlInfo(MailProperties.getInstance().getMailServer(userId, contextId).getUrlString(true), MailProperties.getInstance().isMailStartTls());
         }
         return new UrlInfo(mailAccount.generateMailServerURL(), mailAccount.isMailStartTls());
     }
@@ -458,8 +466,8 @@ public abstract class MailConfig {
      * @throws OXException If mail server URL cannot be returned
      */
     public static final UrlInfo getMailServerURL(final Session session, final int accountId) throws OXException {
-        if (MailAccount.DEFAULT_ID == accountId && ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource())) {
-            return new UrlInfo(MailProperties.getInstance().getMailServer().getUrlString(true), MailProperties.getInstance().isMailStartTls());
+        if (MailAccount.DEFAULT_ID == accountId && ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource(session.getUserId(), session.getContextId()))) {
+            return new UrlInfo(MailProperties.getInstance().getMailServer(session.getUserId(), session.getContextId()).getUrlString(true), MailProperties.getInstance().isMailStartTls());
         }
         final MailAccountStorageService storage = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
         return new UrlInfo(storage.getMailAccount(accountId, session.getUserId(), session.getContextId()).generateMailServerURL(), storage.getMailAccount(accountId, session.getUserId(), session.getContextId()).isMailStartTls());
@@ -479,16 +487,19 @@ public abstract class MailConfig {
         final Context context;
         final String pattern;
         final String serverUrl;
+        final int userId;
         private final int hash;
 
-        protected UserID(final String pattern, final String serverUrl, final Context context) {
+        protected UserID(final String pattern, final String serverUrl, int userId, final Context context) {
             super();
             this.pattern = pattern;
             this.serverUrl = serverUrl;
+            this.userId = userId;
             this.context = context;
 
             int prime = 31;
             int result = prime * 1 + ((context == null) ? 0 : context.getContextId());
+            result = prime * result + userId;
             result = prime * result + ((pattern == null) ? 0 : pattern.hashCode());
             result = prime * result + ((serverUrl == null) ? 0 : serverUrl.hashCode());
             hash = result;
@@ -508,6 +519,9 @@ public abstract class MailConfig {
                 return false;
             }
             final UserID other = (UserID) obj;
+            if (userId != other.userId) {
+                return false;
+            }
             if (context == null) {
                 if (other.context != null) {
                     return false;
@@ -538,7 +552,7 @@ public abstract class MailConfig {
         @Override
         public int[] load(UserID userID) throws Exception {
             MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-            return forDefaultAccount(userID.pattern, userID.serverUrl, userID.context, storageService);
+            return forDefaultAccount(userID.pattern, userID.serverUrl, userID.userId, userID.context, storageService);
         }
     });
 
@@ -547,13 +561,14 @@ public abstract class MailConfig {
      *
      * @param pattern The pattern
      * @param serverUrl The server URL; e.g. <code>"mail.company.org:143"</code>
+     * @param userId The user identifier
      * @param ctx The context
      * @return The user IDs from specified pattern dependent on configuration's setting for mail login source
      * @throws OXException If resolving user by specified pattern fails
      */
-    public static int[] getUserIDsByMailLogin(final String pattern, final boolean isDefaultAccount, final String serverUrl, final Context ctx) throws OXException {
+    public static int[] getUserIDsByMailLogin(String pattern, boolean isDefaultAccount, String serverUrl, int userId, Context ctx) throws OXException {
         if (isDefaultAccount) {
-            UserID userID = new UserID(pattern, serverUrl, ctx);
+            UserID userID = new UserID(pattern, serverUrl, userId, ctx);
             boolean remove = true;
             try {
                 int[] retval = USER_ID_CACHE.get(userID);
@@ -581,12 +596,13 @@ public abstract class MailConfig {
     /**
      * Resolves the user IDs by specified pattern dependent on configuration's setting for mail login source for default account
      */
-    protected static int[] forDefaultAccount(final String pattern, final String serverUrl, final Context ctx, final MailAccountStorageService storageService) throws OXException {
-        switch (MailProperties.getInstance().getLoginSource()) {
+    protected static int[] forDefaultAccount(final String pattern, final String serverUrl, final int iUserId, final Context ctx, final MailAccountStorageService storageService) throws OXException {
+        LoginSource loginSource = MailProperties.getInstance().getLoginSource(iUserId, ctx.getContextId());
+        switch (loginSource) {
         case USER_IMAPLOGIN:
         case PRIMARY_EMAIL:
             final MailAccount[] accounts;
-            switch (MailProperties.getInstance().getLoginSource()) {
+            switch (loginSource) {
             case USER_IMAPLOGIN:
                 accounts = storageService.resolveLogin(pattern, ctx.getContextId());
                 break;
@@ -606,13 +622,13 @@ public abstract class MailConfig {
                 userIds = new TIntHashSet(accounts.length);
                 for (final MailAccount candidate : accounts) {
                     final String shouldMatch;
-                    switch (MailProperties.getInstance().getMailServerSource()) {
+                    switch (MailProperties.getInstance().getMailServerSource(iUserId, ctx.getContextId())) {
                     case USER:
                         shouldMatch = toSocketAddrString(candidate.generateMailServerURL(), 143);
                         break;
                     case GLOBAL:
                         {
-                            ConfiguredServer server = MailProperties.getInstance().getMailServer();
+                            ConfiguredServer server = MailProperties.getInstance().getMailServer(iUserId, ctx.getContextId());
                             shouldMatch = toSocketAddrString(server.getHostName(), server.getPort());
                         }
                         break;
@@ -820,7 +836,7 @@ public abstract class MailConfig {
             if (proxyDelimiter != null && slogin.contains(proxyDelimiter)) {
                 mailConfig.login = saneLogin(slogin);
             } else {
-                mailConfig.login = getMailLogin(account, userLoginInfo);
+                mailConfig.login = getMailLogin(account, userLoginInfo, session.getUserId(), session.getContextId());
             }
         }
 
@@ -838,9 +854,9 @@ public abstract class MailConfig {
                 mailConfig.authType = configuredAuthType;
             } else {
                 // Common handling based on configuration
-                PasswordSource cur = MailProperties.getInstance().getPasswordSource();
+                PasswordSource cur = MailProperties.getInstance().getPasswordSource(session.getUserId(), session.getContextId());
                 if (PasswordSource.GLOBAL.equals(cur)) {
-                    final String masterPw = MailProperties.getInstance().getMasterPassword();
+                    final String masterPw = MailProperties.getInstance().getMasterPassword(session.getUserId(), session.getContextId());
                     if (masterPw == null) {
                         throw MailConfigException.create("Property \"com.openexchange.mail.masterPassword\" not set");
                     }

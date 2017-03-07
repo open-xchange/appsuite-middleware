@@ -1274,11 +1274,11 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
      */
     private void checkDefaultAccountConfiguration(AbstractMailAccount retval, int userId, int contextId) throws OXException {
 
-        if (PasswordSource.GLOBAL.equals(MailProperties.getInstance().getPasswordSource())) {
+        if (PasswordSource.GLOBAL.equals(MailProperties.getInstance().getPasswordSource(userId, contextId))) {
             retval.setPassword(null);
         }
 
-        switch(MailProperties.getInstance().getLoginSource()){
+        switch(MailProperties.getInstance().getLoginSource(userId, contextId)){
             case PRIMARY_EMAIL:
                 retval.setLogin(UserStorage.getInstance().getUser(userId, contextId).getMail());
                 break;
@@ -1291,10 +1291,10 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 break;
         }
 
-        switch(MailProperties.getInstance().getMailServerSource()){
+        switch(MailProperties.getInstance().getMailServerSource(userId, contextId)){
             case GLOBAL:
                 {
-                    ConfiguredServer server = MailProperties.getInstance().getMailServer();
+                    ConfiguredServer server = MailProperties.getInstance().getMailServer(userId, contextId);
                     retval.setMailServer(server.getHostName());
                     String protocol = server.getProtocol();
                     if (null != protocol) {
@@ -1315,10 +1315,10 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
         }
 
-        switch(MailProperties.getInstance().getTransportServerSource()){
+        switch(MailProperties.getInstance().getTransportServerSource(userId, contextId)){
             case GLOBAL:
                 {
-                    ConfiguredServer server = MailProperties.getInstance().getTransportServer();
+                    ConfiguredServer server = MailProperties.getInstance().getTransportServer(userId, contextId);
                     retval.setTransportServer(server.getHostName());
                     String protocol = server.getProtocol();
                     if (null != protocol) {
