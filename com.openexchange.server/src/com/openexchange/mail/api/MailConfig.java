@@ -452,7 +452,7 @@ public abstract class MailConfig {
             return new UrlInfo(mailAccount.generateMailServerURL(), mailAccount.isMailStartTls());
         }
         if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource(userId, contextId))) {
-            return new UrlInfo(MailProperties.getInstance().getMailServer(userId, contextId).getUrlString(true), MailProperties.getInstance().isMailStartTls());
+            return new UrlInfo(MailProperties.getInstance().getMailServer(userId, contextId).getUrlString(true), MailProperties.getInstance().isMailStartTls(userId, contextId));
         }
         return new UrlInfo(mailAccount.generateMailServerURL(), mailAccount.isMailStartTls());
     }
@@ -466,11 +466,14 @@ public abstract class MailConfig {
      * @throws OXException If mail server URL cannot be returned
      */
     public static final UrlInfo getMailServerURL(final Session session, final int accountId) throws OXException {
-        if (MailAccount.DEFAULT_ID == accountId && ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource(session.getUserId(), session.getContextId()))) {
-            return new UrlInfo(MailProperties.getInstance().getMailServer(session.getUserId(), session.getContextId()).getUrlString(true), MailProperties.getInstance().isMailStartTls());
+        int userId = session.getUserId();
+        int contextId = session.getContextId();
+        if (MailAccount.DEFAULT_ID == accountId && ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource(userId, contextId))) {
+            return new UrlInfo(MailProperties.getInstance().getMailServer(userId, contextId).getUrlString(true), MailProperties.getInstance().isMailStartTls(userId, contextId));
         }
-        final MailAccountStorageService storage = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-        return new UrlInfo(storage.getMailAccount(accountId, session.getUserId(), session.getContextId()).generateMailServerURL(), storage.getMailAccount(accountId, session.getUserId(), session.getContextId()).isMailStartTls());
+
+        MailAccountStorageService storage = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+        return new UrlInfo(storage.getMailAccount(accountId, userId, contextId).generateMailServerURL(), storage.getMailAccount(accountId, userId, contextId).isMailStartTls());
     }
 
     /**

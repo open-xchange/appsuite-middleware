@@ -103,4 +103,32 @@ public class ConfigViews {
         return property.isDefined() ? property.get() : null;
     }
 
+    /**
+     * Gets the defined property from given view associated with specified name.
+     *
+     * @param propertyName The property name
+     * @param def The default value to return
+     * @param view The config view to grab from
+     * @return The defined property value or <code>null</code> (if not defined)
+     * @throws OXException If defined property cannot be returned
+     */
+    public static boolean getDefinedBoolPropertyFrom(String propertyName, boolean def, ConfigView view) throws OXException {
+        ComposedConfigProperty<Boolean> property = view.property(propertyName, boolean.class);
+        return property.isDefined() ? property.get().booleanValue() : def;
+    }
+
+    /**
+     * Gets the defined property from given view associated with specified name.
+     *
+     * @param propertyName The property name
+     * @param def The default value to return
+     * @param view The config view to grab from
+     * @return The defined property value or <code>null</code> (if not defined)
+     * @throws OXException If defined property cannot be returned
+     */
+    public static int getDefinedIntPropertyFrom(String propertyName, int def, ConfigView view) throws OXException {
+        ComposedConfigProperty<Integer> property = view.property(propertyName, int.class);
+        return property.isDefined() ? property.get().intValue() : def;
+    }
+
 }

@@ -99,7 +99,7 @@ public class DefaultArchiveDays implements PreferencesItemService {
             @Override
             public void getValue(Session session, Context ctx, User user,
                     UserConfiguration userConfig, Setting setting) throws OXException {
-                setting.setSingleValue(Integer.valueOf(MailProperties.getInstance().getDefaultArchiveDays()));
+                setting.setSingleValue(Integer.valueOf(MailProperties.getInstance().getDefaultArchiveDays(session.getUserId(), session.getContextId())));
             }
         };
     }

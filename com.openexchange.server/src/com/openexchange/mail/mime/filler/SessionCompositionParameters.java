@@ -171,7 +171,7 @@ public final class SessionCompositionParameters implements CompositionParameters
             for (final String alias : user.getAliases()) {
                 aliases.add(new QuotedInternetAddress(alias));
             }
-            if (MailProperties.getInstance().isSupportMsisdnAddresses()) {
+            if (MailProperties.getInstance().isSupportMsisdnAddresses(session.getUserId(), session.getContextId())) {
                 MsisdnUtility.addMsisdnAddress(aliases, session);
                 final String address = from.getAddress();
                 final int pos = address.indexOf('/');

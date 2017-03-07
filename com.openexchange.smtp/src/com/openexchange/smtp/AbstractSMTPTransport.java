@@ -399,7 +399,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                 }
             }
         }
-        if (MailProperties.getInstance().isSupportMsisdnAddresses()) {
+        if (MailProperties.getInstance().isSupportMsisdnAddresses(session.getUserId(), session.getContextId())) {
             InternetAddress internetAddress;
             for (final Address address : recipients) {
                 if (MimeMessageUtility.POISON_ADDRESS == address) {

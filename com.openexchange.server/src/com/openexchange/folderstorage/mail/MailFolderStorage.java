@@ -1068,7 +1068,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
                         /*
                          * Filter against possible POP3 storage folders
                          */
-                        if (MailAccount.DEFAULT_ID == accountId && MailProperties.getInstance().isHidePOP3StorageFolders()) {
+                        if (MailAccount.DEFAULT_ID == accountId && MailProperties.getInstance().isHidePOP3StorageFolders(storageParameters.getUserId(), storageParameters.getContextId())) {
                             filterPOP3StorageFolderInfos(folderInfos, session);
                         }
                         final boolean translate = !StorageParametersUtility.getBoolParameter("ignoreTranslation", storageParameters);
@@ -1088,7 +1088,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
                     /*
                      * Filter against possible POP3 storage folders
                      */
-                    if (MailAccount.DEFAULT_ID == accountId && MailProperties.getInstance().isHidePOP3StorageFolders()) {
+                    if (MailAccount.DEFAULT_ID == accountId && MailProperties.getInstance().isHidePOP3StorageFolders(storageParameters.getUserId(), storageParameters.getContextId())) {
                         filterPOP3StorageFolders(children, session);
                     }
                     Collections.sort(children, new SimpleMailFolderComparator(storageParameters.getUser().getLocale(), false, isArchive));
@@ -1322,7 +1322,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
                     /*
                      * Filter against possible POP3 storage folders
                      */
-                    if (MailAccount.DEFAULT_ID == accountId && MailProperties.getInstance().isHidePOP3StorageFolders()) {
+                    if (MailAccount.DEFAULT_ID == accountId && MailProperties.getInstance().isHidePOP3StorageFolders(storageParameters.getUserId(), storageParameters.getContextId())) {
                         filterPOP3StorageFolderInfos(folderInfos, session);
                     }
                     addWarnings(mailAccess, storageParameters);
@@ -1399,7 +1399,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
             /*
              * Filter against possible POP3 storage folders
              */
-            if (MailAccount.DEFAULT_ID == accountId && MailProperties.getInstance().isHidePOP3StorageFolders()) {
+            if (MailAccount.DEFAULT_ID == accountId && MailProperties.getInstance().isHidePOP3StorageFolders(storageParameters.getUserId(), storageParameters.getContextId())) {
                 filterPOP3StorageFolders(children, session);
             }
             addWarnings(mailAccess, storageParameters);

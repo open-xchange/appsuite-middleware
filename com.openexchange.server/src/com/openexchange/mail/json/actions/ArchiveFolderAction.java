@@ -80,13 +80,13 @@ public final class ArchiveFolderAction extends AbstractArchiveMailAction {
 
     @Override
     protected AJAXRequestResult performArchive(final MailRequest req) throws OXException {
+        ServerSession session = req.getSession();
         int days;
         {
             String sDays = req.getRequest().getParameter("days");
-            days = Strings.isEmpty(sDays) ? MailProperties.getInstance().getDefaultArchiveDays() : Strings.parsePositiveInt(sDays.trim());
+            days = Strings.isEmpty(sDays) ? MailProperties.getInstance().getDefaultArchiveDays(session.getUserId(), session.getContextId()) : Strings.parsePositiveInt(sDays.trim());
         }
         try {
-            final ServerSession session = req.getSession();
             /*
              * Read in parameters
              */

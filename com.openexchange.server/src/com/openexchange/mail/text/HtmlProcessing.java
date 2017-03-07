@@ -343,7 +343,7 @@ public final class HtmlProcessing {
                         }
                         retval = htmlService.htmlFormat(retval.getContent(), true, COMMENT_ID, maxContentSize);
                         if (usm.isUseColorQuote()) {
-                            retval.setContent(replaceHTMLSimpleQuotesForDisplay(retval.getContent()));
+                            retval.setContent(replaceHTMLSimpleQuotesForDisplay(retval.getContent(), session));
                         }
                         if (DisplayMode.DOCUMENT.equals(mode)) {
                             retval.setContent(htmlService.getConformHTML(retval.getContent(), "UTF-8"));
@@ -877,8 +877,8 @@ public final class HtmlProcessing {
      * @param quotelevel - the quote level
      * @return The color for given <code>quotelevel</code>
      */
-    private static String getLevelColor(final int quotelevel) {
-        final String[] colors = MailProperties.getInstance().getQuoteLineColors();
+    private static String getLevelColor(final int quotelevel, Session session) {
+        final String[] colors = MailProperties.getInstance().getQuoteLineColors(session.getUserId(), session.getContextId());
         return (colors != null) && (colors.length > 0) ? (quotelevel >= colors.length ? colors[colors.length - 1] : colors[quotelevel]) : DEFAULT_COLOR;
     }
 
@@ -895,9 +895,10 @@ public final class HtmlProcessing {
      * quote colors.
      *
      * @param htmlText The HTML text
+     * @param session The session
      * @return The HTML text with simple quotes replaced with block quotes
      */
-    private static String replaceHTMLSimpleQuotesForDisplay(final String htmlText) {
+    private static String replaceHTMLSimpleQuotesForDisplay(final String htmlText, Session session) {
         final StringBuilder sb = new StringBuilder(htmlText.length());
         final String[] lines = htmlText.split(STR_SPLIT_BR);
         int levelBefore = 0;
@@ -936,7 +937,7 @@ public final class HtmlProcessing {
             }
             if (levelBefore < currentLevel) {
                 for (; levelBefore < currentLevel; levelBefore++) {
-                    final String color = getLevelColor(levelBefore);
+                    final String color = getLevelColor(levelBefore, session);
                     sb.append(String.format(BLOCKQUOTE_START_TEMPLATE, color, color));
                 }
             } else if (levelBefore > currentLevel) {

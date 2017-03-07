@@ -473,7 +473,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
                     for (final String alias : aliases) {
                         validAddrs.add(new QuotedInternetAddress(alias));
                     }
-                    if (MailProperties.getInstance().isSupportMsisdnAddresses()) {
+                    if (MailProperties.getInstance().isSupportMsisdnAddresses(session.getUserId(), session.getContextId())) {
                         MsisdnUtility.addMsisdnAddress(validAddrs, session);
                         final String address = from.getAddress();
                         final int pos = address.indexOf('/');

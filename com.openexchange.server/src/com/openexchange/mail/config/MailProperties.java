@@ -128,6 +128,36 @@ public final class MailProperties implements IMailProperties {
 
     private static final class PrimaryMailProps {
 
+        static class Params {
+
+            LoginSource loginSource;
+            PasswordSource passwordSource;
+            ServerSource mailServerSource;
+            ServerSource transportServerSource;
+            ConfiguredServer mailServer;
+            ConfiguredServer transportServer;
+            String masterPassword;
+            boolean mailStartTls;
+            boolean transportStartTls;
+            int maxToCcBcc;
+            int maxDriveAttachments;
+            String[] quoteLineColors;
+            boolean rateLimitPrimaryOnly;
+            int rateLimit;
+            String[] phishingHeaders;
+            HostList ranges;
+            boolean supportMsisdnAddresses;
+            int defaultArchiveDays;
+            boolean preferSentDate;
+            boolean hidePOP3StorageFolders;
+
+            Params() {
+                super();
+            }
+        }
+
+        // --------------------------------------------------------------------------------
+
         final LoginSource loginSource;
         final PasswordSource passwordSource;
         final ServerSource mailServerSource;
@@ -135,16 +165,42 @@ public final class MailProperties implements IMailProperties {
         final ConfiguredServer mailServer;
         final ConfiguredServer transportServer;
         final String masterPassword;
+        final boolean mailStartTls;
+        final boolean transportStartTls;
+        final int maxToCcBcc;
+        final int maxDriveAttachments;
+        final String[] quoteLineColors;
+        final boolean rateLimitPrimaryOnly;
+        final int rateLimit;
+        final HostList ranges;
+        final String[] phishingHeaders;
+        final boolean supportMsisdnAddresses;
+        final int defaultArchiveDays;
+        final boolean preferSentDate;
+        final boolean hidePOP3StorageFolders;
 
-        PrimaryMailProps(LoginSource loginSource, PasswordSource passwordSource, ServerSource mailServerSource, ServerSource transportServerSource, ConfiguredServer mailServer, ConfiguredServer transportServer, String masterPassword) {
+        PrimaryMailProps(Params params) {
             super();
-            this.loginSource = loginSource;
-            this.passwordSource = passwordSource;
-            this.mailServerSource = mailServerSource;
-            this.transportServerSource = transportServerSource;
-            this.mailServer = mailServer;
-            this.transportServer = transportServer;
-            this.masterPassword = masterPassword;
+            this.loginSource = params.loginSource;
+            this.passwordSource = params.passwordSource;
+            this.mailServerSource = params.mailServerSource;
+            this.transportServerSource = params.transportServerSource;
+            this.mailServer = params.mailServer;
+            this.transportServer = params.transportServer;
+            this.masterPassword = params.masterPassword;
+            this.mailStartTls = params.mailStartTls;
+            this.transportStartTls = params.transportStartTls;
+            this.maxToCcBcc = params.maxToCcBcc;
+            this.maxDriveAttachments = params.maxDriveAttachments;
+            this.quoteLineColors = params.quoteLineColors;
+            this.rateLimitPrimaryOnly = params.rateLimitPrimaryOnly;
+            this.rateLimit = params.rateLimit;
+            this.ranges = params.ranges;
+            this.phishingHeaders = params.phishingHeaders;
+            this.supportMsisdnAddresses = params.supportMsisdnAddresses;
+            this.defaultArchiveDays = params.defaultArchiveDays;
+            this.preferSentDate = params.preferSentDate;
+            this.hidePOP3StorageFolders = params.hidePOP3StorageFolders;
         }
 
     }
@@ -192,84 +248,186 @@ public final class MailProperties implements IMailProperties {
         StringBuilder logBuilder = new StringBuilder(1024);
         logBuilder.append("\nLoading primary mail properties for user ").append(userId).append(" in context ").append(contextId).append("...\n");
 
-        LoginSource loginSource;
+        PrimaryMailProps.Params params = new PrimaryMailProps.Params();
         {
             final String loginStr = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.mail.loginSource", view);
             if (loginStr == null) {
                 throw MailConfigException.create("Property \"com.openexchange.mail.loginSource\" not set");
             }
-            loginSource = LoginSource.parse(loginStr.trim());
+            LoginSource loginSource = LoginSource.parse(loginStr.trim());
             if (null == loginSource) {
                 throw MailConfigException.create(new StringBuilder(256).append("Unknown value in property \"com.openexchange.mail.loginSource\": ").append(loginStr).toString());
             }
+            params.loginSource = loginSource;
             logBuilder.append("\tLogin Source: ").append(loginSource.toString()).append('\n');
         }
 
-        PasswordSource passwordSource;
         {
             final String pwStr = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.mail.passwordSource", view);
             if (pwStr == null) {
                 throw MailConfigException.create("Property \"com.openexchange.mail.passwordSource\" not set");
             }
-            passwordSource = PasswordSource.parse(pwStr.trim());
+            PasswordSource passwordSource = PasswordSource.parse(pwStr.trim());
             if (null == passwordSource) {
                 throw MailConfigException.create(new StringBuilder(256).append("Unknown value in property \"com.openexchange.mail.passwordSource\": ").append(pwStr).toString());
             }
+            params.passwordSource = passwordSource;
             logBuilder.append("\tPassword Source: ").append(passwordSource.toString()).append('\n');
         }
 
-        ServerSource mailServerSource;
         {
             final String mailSrcStr = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.mail.mailServerSource", view);
             if (mailSrcStr == null) {
                 throw MailConfigException.create("Property \"com.openexchange.mail.mailServerSource\" not set");
             }
-            mailServerSource = ServerSource.parse(mailSrcStr.trim());
+            ServerSource mailServerSource = ServerSource.parse(mailSrcStr.trim());
             if (null == mailServerSource) {
                 throw MailConfigException.create(new StringBuilder(256).append(
                     "Unknown value in property \"com.openexchange.mail.mailServerSource\": ").append(mailSrcStr).toString());
             }
+            params.mailServerSource = mailServerSource;
             logBuilder.append("\tMail Server Source: ").append(mailServerSource.toString()).append('\n');
         }
 
-        ServerSource transportServerSource;
         {
             final String transSrcStr = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.mail.transportServerSource", view);
             if (transSrcStr == null) {
                 throw MailConfigException.create("Property \"com.openexchange.mail.transportServerSource\" not set");
             }
-            transportServerSource = ServerSource.parse(transSrcStr.trim());
+            ServerSource transportServerSource = ServerSource.parse(transSrcStr.trim());
             if (null == transportServerSource) {
                 throw MailConfigException.create(new StringBuilder(256).append("Unknown value in property \"com.openexchange.mail.transportServerSource\": ").append(transSrcStr).toString());
             }
+            params.transportServerSource = transportServerSource;
             logBuilder.append("\tTransport Server Source: ").append(transportServerSource.toString()).append('\n');
         }
 
-        ConfiguredServer mailServer = null;
         {
+            ConfiguredServer mailServer = null;
             String tmp = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.mail.mailServer", view);
             if (tmp != null) {
                 mailServer = ConfiguredServer.parseFrom(tmp.trim(), URIDefaults.IMAP);
             }
+            params.mailServer = mailServer;
         }
 
-        ConfiguredServer transportServer = null;
         {
+            ConfiguredServer transportServer = null;
             String tmp = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.mail.transportServer", view);
             if (tmp != null) {
                 transportServer = ConfiguredServer.parseFrom(tmp.trim(), URIDefaults.SMTP);
             }
+            params.transportServer = transportServer;
         }
 
-        String masterPassword;
         {
-            masterPassword = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.mail.masterPassword", view);
+            String masterPassword = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.mail.masterPassword", view);
             if (masterPassword != null) {
                 masterPassword = masterPassword.trim();
             }
+            params.masterPassword = masterPassword;
         }
 
-        PrimaryMailProps primaryMailProps = new PrimaryMailProps(loginSource, passwordSource, mailServerSource, transportServerSource, mailServer, transportServer, masterPassword);
+        params.mailStartTls = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.mailStartTls", false, view);
+        params.transportStartTls = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.transportStartTls", false, view);
+
+        {
+            try {
+                params.maxToCcBcc = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.mail.maxToCcBcc", 0, view);
+                logBuilder.append("\tmaxToCcBcc: ").append(params.maxToCcBcc).append('\n');
+            } catch (final NumberFormatException e) {
+                params.maxToCcBcc = 0;
+                logBuilder.append("\tmaxToCcBcc: Invalid value \"").append(e.getMessage()).append("\". Setting to fallback ").append(params.maxToCcBcc).append('\n');
+            }
+        }
+
+        {
+            try {
+                params.maxDriveAttachments = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.mail.maxDriveAttachments", 20, view);
+                logBuilder.append("\tmaxDriveAttachments: ").append(params.maxDriveAttachments).append('\n');
+            } catch (final NumberFormatException e) {
+                params.maxDriveAttachments = 20;
+                logBuilder.append("\tmaxDriveAttachments: Invalid value \"").append(e.getMessage()).append("\". Setting to fallback ").append(params.maxDriveAttachments).append('\n');
+            }
+        }
+
+        {
+            String quoteColors = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.mail.quoteLineColors", view);
+            if (null == quoteColors) {
+                quoteColors = "#666666";
+            }
+            quoteColors = quoteColors.trim();
+
+            if (Pattern.matches("((#[0-9a-fA-F&&[^,]]{6})(?:\r?\n|\\z|\\s*,\\s*))+", quoteColors)) {
+                params.quoteLineColors = quoteColors.split("\\s*,\\s*");
+                logBuilder.append("\tHTML Quote Colors: ").append(quoteColors).append('\n');
+            } else {
+                params.quoteLineColors = new String[] { "#666666" };
+                logBuilder.append("\tHTML Quote Colors: Invalid sequence of colors \"").append(quoteColors).append("\". Setting to fallback: #666666").append('\n');
+            }
+        }
+
+        {
+            String phishingHdrsStr = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.mail.phishingHeader", view);
+            if (null != phishingHdrsStr && phishingHdrsStr.length() > 0) {
+                params.phishingHeaders = phishingHdrsStr.split(" *, *");
+            } else {
+                params.phishingHeaders = null;
+            }
+        }
+
+        {
+            params.rateLimitPrimaryOnly = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.rateLimitPrimaryOnly", true, view);
+            logBuilder.append("\tRate limit primary only: ").append(params.rateLimitPrimaryOnly).append('\n');
+        }
+
+        {
+            try {
+                params.rateLimit = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.mail.rateLimit", 0, view);
+                logBuilder.append("\tSent Rate limit: ").append(params.rateLimit).append('\n');
+            } catch (final NumberFormatException e) {
+                params.rateLimit = 0;
+                logBuilder.append("\tSend Rate limit: Invalid value \"").append(e.getMessage()).append("\". Setting to fallback ").append(params.rateLimit).append('\n');
+            }
+        }
+
+        {
+            HostList ranges = HostList.EMPTY;
+            String tmp = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.mail.rateLimitDisabledRange", view);
+            if (false == Strings.isEmpty(tmp)) {
+                ranges = HostList.valueOf(tmp);
+            }
+            params.ranges = ranges;
+            logBuilder.append("\tWhite-listed from send rate limit: ").append(ranges).append('\n');
+        }
+
+        {
+            params.supportMsisdnAddresses = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.supportMsisdnAddresses", false, view);
+            logBuilder.append("\tSupports MSISDN addresses: ").append(params.supportMsisdnAddresses).append('\n');
+        }
+
+        {
+            try {
+                params.defaultArchiveDays = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.mail.archive.defaultDays", 90, view);
+                logBuilder.append("\tDefault archive days: ").append(params.defaultArchiveDays).append('\n');
+            } catch (final NumberFormatException e) {
+                params.defaultArchiveDays = 90;
+                logBuilder.append("\tDefault archive days: Invalid value \"").append(e.getMessage()).append("\". Setting to fallback ").append(params.defaultArchiveDays).append('\n');
+
+            }
+        }
+
+        {
+            params.preferSentDate = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.preferSentDate", false, view);
+            logBuilder.append("\tPrefer Sent Date: ").append(params.preferSentDate).append('\n');
+        }
+
+        {
+            params.hidePOP3StorageFolders = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.hidePOP3StorageFolders", false, view);
+            logBuilder.append("\tHide POP3 Storage Folders: ").append(params.hidePOP3StorageFolders).append('\n');
+        }
+
+        PrimaryMailProps primaryMailProps = new PrimaryMailProps(params);
         logBuilder.append("Primary mail properties successfully loaded for user ").append(userId).append(" in context ").append(contextId).append('!');
         LOG.info(logBuilder.toString());
         return primaryMailProps;
@@ -1031,14 +1189,28 @@ public final class MailProperties implements IMailProperties {
     /**
      * Signals whether a mail's sent date (<code>"Date"</code> header) is preferred over its received date when serving the special {@link MailListField#DATE} field.
      *
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @return <code>true</code> to prefer sent date; otherwise <code>false</code> for received date
      */
-    public boolean isPreferSentDate() {
-        return preferSentDate;
+    public boolean isPreferSentDate(int userId, int contextId) {
+        try {
+            PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
+            return primaryMailProps.preferSentDate;
+        } catch (Exception e) {
+            LOG.error("Failed to get whether a mail's sent date (<code>\"Date\"</code> header) is preferred over its received date for user {} in context {}. Using default {} instead.", userId, contextId, preferSentDate, e);
+            return preferSentDate;
+        }
     }
 
-    public boolean isHidePOP3StorageFolders() {
-        return hidePOP3StorageFolders;
+    public boolean isHidePOP3StorageFolders(int userId, int contextId) {
+        try {
+            PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
+            return primaryMailProps.hidePOP3StorageFolders;
+        } catch (Exception e) {
+            LOG.error("Failed to get hide-POP3-storage-folders flag for user {} in context {}. Using default instead.", userId, contextId, e);
+            return hidePOP3StorageFolders;
+        }
     }
 
     @Override
@@ -1155,7 +1327,7 @@ public final class MailProperties implements IMailProperties {
             PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
             return primaryMailProps.mailServer;
         } catch (Exception e) {
-            LOG.error("Failed to get mail server source for user {} in context {}. Using default {} instead.", userId, contextId, mailServer, e);
+            LOG.error("Failed to get mail server for user {} in context {}. Using default {} instead.", userId, contextId, mailServer, e);
             return mailServer;
         }
     }
@@ -1172,8 +1344,42 @@ public final class MailProperties implements IMailProperties {
             PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
             return primaryMailProps.transportServer;
         } catch (Exception e) {
-            LOG.error("Failed to get transport server source for user {} in context {}. Using default {} instead.", userId, contextId, transportServer, e);
+            LOG.error("Failed to get transport server for user {} in context {}. Using default {} instead.", userId, contextId, transportServer, e);
             return transportServer;
+        }
+    }
+
+    /**
+     * Checks whether STARTTLS is required for mail access for specified user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> if STARTTLS is required; otherwise <code>false</code>
+     */
+    public boolean isMailStartTls(int userId, int contextId) {
+        try {
+            PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
+            return primaryMailProps.mailStartTls;
+        } catch (Exception e) {
+            LOG.error("Failed to get STARTTLS flag for mail access for user {} in context {}. Using default {} instead.", userId, contextId, mailStartTls, e);
+            return mailStartTls;
+        }
+    }
+
+    /**
+     * Checks whether STARTTLS is required for mail transport for specified user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> if STARTTLS is required; otherwise <code>false</code>
+     */
+    public boolean isTransportStartTls(int userId, int contextId) {
+        try {
+            PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
+            return primaryMailProps.transportStartTls;
+        } catch (Exception e) {
+            LOG.error("Failed to get STARTTLS flag for mail transport for user {} in context {}. Using default {} instead.", userId, contextId, transportStartTls, e);
+            return transportStartTls;
         }
     }
 
@@ -1195,48 +1401,180 @@ public final class MailProperties implements IMailProperties {
     }
 
     /**
-     * Gets the max. number of recipient addresses that can be specified
+     * Gets the max. number of recipient addresses that can be specified for given user.
      *
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @return The max. number of recipient addresses
      */
-    public int getMaxToCcBcc() {
-        return maxToCcBcc;
+    public int getMaxToCcBcc(int userId, int contextId) {
+        try {
+            PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
+            return primaryMailProps.maxToCcBcc;
+        } catch (Exception e) {
+            LOG.error("Failed to get max. number of recipient addresses for user {} in context {}. Using default instead.", userId, contextId, e);
+            return maxToCcBcc;
+        }
     }
 
     /**
      * Gets the max. number of Drive attachments that can be attached to a mail
      *
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @return The max. number of Drive attachments
      */
-    public int getMaxDriveAttachments() {
-        return maxDriveAttachments;
+    public int getMaxDriveAttachments(int userId, int contextId) {
+        try {
+            PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
+            return primaryMailProps.maxDriveAttachments;
+        } catch (Exception e) {
+            LOG.error("Failed to get max. number of Drive attachments for user {} in context {}. Using default instead.", userId, contextId, e);
+            return maxDriveAttachments;
+        }
     }
 
     /**
      * Gets the quote line colors.
      *
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @return The quote line colors
      */
-    public String[] getQuoteLineColors() {
-        return quoteLineColors;
+    public String[] getQuoteLineColors(int userId, int contextId) {
+        try {
+            PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
+            return primaryMailProps.quoteLineColors;
+        } catch (Exception e) {
+            LOG.error("Failed to get max. number of Drive attachments for user {} in context {}. Using default instead.", userId, contextId, e);
+            return quoteLineColors;
+        }
     }
 
     /**
-     * Gets the sent mail rate limit (how many mails can be sent in
+     * Gets the phishing headers.
      *
-     * @return
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The phishing headers or <code>null</code> if none defined
      */
-    public int getRateLimit() {
-        return rateLimit;
+    public String[] getPhishingHeaders(int userId, int contextId) {
+        String[] phishingHeaders;
+        try {
+            PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
+            phishingHeaders = primaryMailProps.phishingHeaders;
+        } catch (Exception e) {
+            LOG.error("Failed to get phishing headers for user {} in context {}. Using default instead.", userId, contextId, e);
+            phishingHeaders = this.phishingHeaders;
+        }
+
+        if (null == phishingHeaders) {
+            return null;
+        }
+        final String[] retval = new String[phishingHeaders.length];
+        System.arraycopy(phishingHeaders, 0, retval, 0, phishingHeaders.length);
+        return retval;
+    }
+
+    /**
+     * Gets the send mail rate limit (how many mails can be sent in
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The send rate limit
+     */
+    public int getRateLimit(int userId, int contextId) {
+        try {
+            PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
+            return primaryMailProps.rateLimit;
+        } catch (Exception e) {
+            LOG.error("Failed to get send rate limit for user {} in context {}. Using default instead.", userId, contextId, e);
+            return rateLimit;
+        }
     }
 
     /**
      * Gets the setting if the rate limit should only affect the primary account or all accounts
      *
-     * @return
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The flag
      */
-    public boolean getRateLimitPrimaryOnly() {
-        return rateLimitPrimaryOnly;
+    public boolean getRateLimitPrimaryOnly(int userId, int contextId) {
+        try {
+            PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
+            return primaryMailProps.rateLimitPrimaryOnly;
+        } catch (Exception e) {
+            LOG.error("Failed to get rateLimitPrimaryOnly flag for user {} in context {}. Using default instead.", userId, contextId, e);
+            return rateLimitPrimaryOnly;
+        }
+    }
+
+    /**
+     * Gets the IP ranges for which a rate limit must not be applied
+     *
+     * @return The IP ranges
+     */
+    public HostList getDisabledRateLimitRanges(int userId, int contextId) {
+        try {
+            PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
+            return primaryMailProps.ranges;
+        } catch (Exception e) {
+            LOG.error("Failed to get IP ranges for user {} in context {}. Using default instead.", userId, contextId, e);
+            return ranges;
+        }
+    }
+
+    /**
+     * Gets the proxy authentication delimiter.
+     * <p>
+     * <b>Note</b>: Applies only to primary mail account
+     *
+     * @return The proxy authentication delimiter or <code>null</code> if not set
+     */
+    public final String getAuthProxyDelimiter() {
+        return authProxyDelimiter;
+    }
+
+    /**
+     * Sets the authProxyDelimiter
+     *
+     * @param authProxyDelimiter The authProxyDelimiter to set
+     */
+    public void setAuthProxyDelimiter(String authProxyDelimiter) {
+        this.authProxyDelimiter = authProxyDelimiter;
+    }
+
+    /**
+     * Signals if MSISDN addresses are supported or not.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code>, if MSISDN addresses are supported; otherwise <code>false</code>
+     */
+    public boolean isSupportMsisdnAddresses(int userId, int contextId) {
+        try {
+            PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
+            return primaryMailProps.supportMsisdnAddresses;
+        } catch (Exception e) {
+            LOG.error("Failed to get IP ranges for user {} in context {}. Using default instead.", userId, contextId, e);
+            return supportMsisdnAddresses;
+        }
+    }
+
+    /**
+     * Gets the default days when archiving messages.
+     *
+     * @return The default days
+     */
+    public int getDefaultArchiveDays(int userId, int contextId) {
+        try {
+            PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
+            return primaryMailProps.defaultArchiveDays;
+        } catch (Exception e) {
+            LOG.error("Failed to get default days when archiving messages for user {} in context {}. Using default instead.", userId, contextId, e);
+            return defaultArchiveDays;
+        }
     }
 
     @Override
@@ -1269,20 +1607,6 @@ public final class MailProperties implements IMailProperties {
         return watcherTime;
     }
 
-    /**
-     * Gets the phishing headers.
-     *
-     * @return The phishing headers or <code>null</code> if none defined
-     */
-    public String[] getPhishingHeaders() {
-        if (null == phishingHeaders) {
-            return null;
-        }
-        final String[] retval = new String[phishingHeaders.length];
-        System.arraycopy(phishingHeaders, 0, retval, 0, phishingHeaders.length);
-        return retval;
-    }
-
     @Override
     public int getMailAccessCacheShrinkerSeconds() {
         return mailAccessCacheShrinkerSeconds;
@@ -1291,61 +1615,6 @@ public final class MailProperties implements IMailProperties {
     @Override
     public int getMailAccessCacheIdleSeconds() {
         return mailAccessCacheIdleSeconds;
-    }
-
-    /**
-     * Gets the proxy authentication delimiter.
-     * <p>
-     * <b>Note</b>: Applies only to primary mail account
-     *
-     * @return The proxy authentication delimiter or <code>null</code> if not set
-     */
-    public final String getAuthProxyDelimiter() {
-        return authProxyDelimiter;
-    }
-
-    /**
-     * Sets the authProxyDelimiter
-     *
-     * @param authProxyDelimiter The authProxyDelimiter to set
-     */
-    public void setAuthProxyDelimiter(String authProxyDelimiter) {
-        this.authProxyDelimiter = authProxyDelimiter;
-    }
-
-    /**
-     * Signals if MSISDN addresses are supported or not.
-     *
-     * @return <code>true</code>, if MSISDN addresses are supported; otherwise <code>false</code>
-     */
-    public boolean isSupportMsisdnAddresses() {
-        return supportMsisdnAddresses;
-    }
-
-    /**
-     * Gets the default days when archiving messages.
-     *
-     * @return The default days
-     */
-    public int getDefaultArchiveDays() {
-        return defaultArchiveDays;
-    }
-
-    /**
-     * Gets the IP ranges for which a rate limit must not be applied
-     *
-     * @return The IP ranges
-     */
-    public HostList getDisabledRateLimitRanges() {
-        return ranges;
-    }
-
-    public boolean isMailStartTls() {
-        return mailStartTls;
-    }
-
-    public boolean isTransportStartTls() {
-        return transportStartTls;
     }
 
 }

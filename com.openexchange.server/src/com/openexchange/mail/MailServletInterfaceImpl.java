@@ -1344,7 +1344,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         /*
          * Filter against possible POP3 storage folders
          */
-        if (MailAccount.DEFAULT_ID == accountId && MailProperties.getInstance().isHidePOP3StorageFolders()) {
+        if (MailAccount.DEFAULT_ID == accountId && MailProperties.getInstance().isHidePOP3StorageFolders(session.getUserId(), session.getContextId())) {
             Set<String> pop3StorageFolders = RdbMailAccountStorage.getPOP3StorageFolders(session);
             for (Iterator<MailFolder> it = children.iterator(); it.hasNext();) {
                 MailFolder mailFolder = it.next();
@@ -2597,7 +2597,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 for (String alias : user.getAliases()) {
                     validAddrs.add(new QuotedInternetAddress(alias));
                 }
-                boolean supportMsisdnAddresses = MailProperties.getInstance().isSupportMsisdnAddresses();
+                boolean supportMsisdnAddresses = MailProperties.getInstance().isSupportMsisdnAddresses(session.getUserId(), session.getContextId());
                 if (supportMsisdnAddresses) {
                     MsisdnUtility.addMsisdnAddress(validAddrs, this.session);
                 }
@@ -3368,11 +3368,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                  * Finally send mail
                  */
                 MailProperties properties = MailProperties.getInstance();
-                if (isWhitelistedFromRateLimit(session.getLocalIp(), properties.getDisabledRateLimitRanges())) {
+                if (isWhitelistedFromRateLimit(session.getLocalIp(), properties.getDisabledRateLimitRanges(session.getUserId(), session.getContextId()))) {
                     transport.sendMailMessage(composedMail, ComposeType.NEW);
-                } else if (!properties.getRateLimitPrimaryOnly() || MailAccount.DEFAULT_ID == accountId) {
-                    int rateLimit = properties.getRateLimit();
-                    rateLimitChecks(composedMail, rateLimit, properties.getMaxToCcBcc());
+                } else if (!properties.getRateLimitPrimaryOnly(session.getUserId(), session.getContextId()) || MailAccount.DEFAULT_ID == accountId) {
+                    int rateLimit = properties.getRateLimit(session.getUserId(), session.getContextId());
+                    rateLimitChecks(composedMail, rateLimit, properties.getMaxToCcBcc(session.getUserId(), session.getContextId()));
                     transport.sendMailMessage(composedMail, ComposeType.NEW);
                     setRateLimitTime(rateLimit);
                 } else {
@@ -3445,12 +3445,12 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                             if (first) {
                                 MailProperties properties = MailProperties.getInstance();
                                 String remoteAddr = null == remoteAddress ? session.getLocalIp() : remoteAddress;
-                                if (isWhitelistedFromRateLimit(remoteAddr, properties.getDisabledRateLimitRanges())) {
+                                if (isWhitelistedFromRateLimit(remoteAddr, properties.getDisabledRateLimitRanges(session.getUserId(), session.getContextId()))) {
                                     sentMail = transport.sendMailMessage(composedMail, type, null, statusInfo);
-                                } else if (!properties.getRateLimitPrimaryOnly() || MailAccount.DEFAULT_ID == accountId) {
-                                    int rateLimit = properties.getRateLimit();
+                                } else if (!properties.getRateLimitPrimaryOnly(session.getUserId(), session.getContextId()) || MailAccount.DEFAULT_ID == accountId) {
+                                    int rateLimit = properties.getRateLimit(session.getUserId(), session.getContextId());
                                     LOG.debug("Checking rate limit {} for request with IP {} ({}) from user {} in context {}", rateLimit, remoteAddr, null == remoteAddress ? "from session" : "from request", session.getUserId(), session.getContextId());
-                                    rateLimitChecks(composedMail, rateLimit, properties.getMaxToCcBcc());
+                                    rateLimitChecks(composedMail, rateLimit, properties.getMaxToCcBcc(session.getUserId(), session.getContextId()));
                                     sentMail = transport.sendMailMessage(composedMail, type, null, statusInfo);
                                     setRateLimitTime(rateLimit);
                                 } else {
@@ -4032,7 +4032,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                         validAddrs.add(new QuotedInternetAddress(alias));
                     }
                     QuotedInternetAddress fromAddress = new QuotedInternetAddress(fromAddr);
-                    if (MailProperties.getInstance().isSupportMsisdnAddresses()) {
+                    if (MailProperties.getInstance().isSupportMsisdnAddresses(session.getUserId(), session.getContextId())) {
                         MsisdnUtility.addMsisdnAddress(validAddrs, session);
                         String address = fromAddress.getAddress();
                         int pos = address.indexOf('/');

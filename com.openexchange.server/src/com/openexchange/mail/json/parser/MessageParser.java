@@ -236,7 +236,7 @@ public final class MessageParser {
                 int length = datasourceArray.length();
                 if (length > 0) {
                     // Check max. allowed Drive attachments
-                    int max = MailProperties.getInstance().getMaxDriveAttachments();
+                    int max = MailProperties.getInstance().getMaxDriveAttachments(session.getUserId(), session.getContextId());
                     if (max > 0 && length > max) {
                         throw MailExceptionCode.MAX_DRIVE_ATTACHMENTS_EXCEEDED.create(Integer.toString(max));
                     }
@@ -279,7 +279,7 @@ public final class MessageParser {
                 int length = ja.length();
                 if (length > 0) {
                     // Check max. allowed Drive attachments
-                    int max = MailProperties.getInstance().getMaxDriveAttachments();
+                    int max = MailProperties.getInstance().getMaxDriveAttachments(session.getUserId(), session.getContextId());
                     if (max > 0 && length > max) {
                         throw MailExceptionCode.MAX_DRIVE_ATTACHMENTS_EXCEEDED.create(Integer.toString(max));
                     }

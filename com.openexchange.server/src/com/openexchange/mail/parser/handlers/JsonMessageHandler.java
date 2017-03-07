@@ -368,8 +368,12 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 jsonObject.put(ACCOUNT_ID, mail.getAccountId());
                 jsonObject.put(MALICIOUS, usm.isSuppressLinks());
                 // Guard info
-                if (mail.containsSecurityInfo()) jsonObject.put(SECURITY_INFO, securityInfoToJSON(mail.getSecurityInfo()));
-                if (mail.hasSecurityResult()) jsonObject.put(SECURITY, securityResultToJSON(mail.getSecurityResult()));
+                if (mail.containsSecurityInfo()) {
+                    jsonObject.put(SECURITY_INFO, securityInfoToJSON(mail.getSecurityInfo()));
+                }
+                if (mail.hasSecurityResult()) {
+                    jsonObject.put(SECURITY, securityResultToJSON(mail.getSecurityResult()));
+                }
 
                 this.initialiserSequenceId = mail.getSequenceId();
 
@@ -1433,7 +1437,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
         try {
             Object value = receivedDate == null ? JSONObject.NULL : Long.valueOf(MessageWriter.addUserTimezone(receivedDate.getTime(), getTimeZone()));
             jsonObject.put(MailJSONField.RECEIVED_DATE.getKey(), value);
-            if (false == MailProperties.getInstance().isPreferSentDate()) {
+            if (false == MailProperties.getInstance().isPreferSentDate(session.getUserId(), session.getContextId())) {
                 jsonObject.put(MailJSONField.DATE.getKey(), value);
             }
             return true;
@@ -1447,7 +1451,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
         try {
             Object value = sentDate == null ? JSONObject.NULL : Long.valueOf(MessageWriter.addUserTimezone(sentDate.getTime(), getTimeZone()));
             jsonObject.put(MailJSONField.SENT_DATE.getKey(), value);
-            if (MailProperties.getInstance().isPreferSentDate()) {
+            if (MailProperties.getInstance().isPreferSentDate(session.getUserId(), session.getContextId())) {
                 jsonObject.put(MailJSONField.DATE.getKey(), value);
             }
             return true;
