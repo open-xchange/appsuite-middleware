@@ -83,8 +83,6 @@ import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.oauth.MailOAuthService;
 import com.openexchange.mail.oauth.TokenInfo;
-import com.openexchange.mail.partmodifier.DummyPartModifier;
-import com.openexchange.mail.partmodifier.PartModifier;
 import com.openexchange.mail.utils.ImmutableReference;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.MailPasswordUtil;
@@ -476,15 +474,6 @@ public abstract class MailConfig {
         return new UrlInfo(storage.getMailAccount(accountId, userId, contextId).generateMailServerURL(), storage.getMailAccount(accountId, userId, contextId).isMailStartTls());
     }
 
-    /**
-     * Gets the part modifier.
-     *
-     * @return the part modifier.
-     */
-    public static final PartModifier getPartModifier() {
-        return PartModifier.getInstance();
-    }
-
     private static final class UserID {
 
         final Context context;
@@ -694,40 +683,17 @@ public abstract class MailConfig {
         return null;
     }
 
-    static volatile Boolean usePartModifier;
-
-    /**
-     * Checks if a part modifier shall be used, that is {@link PartModifier#getInstance()} is not <code>null</code> and not
-     * assignment-compatible to {@link DummyPartModifier} (which does nothing at all).
-     *
-     * @return <code>true</code> if part modifier shall be used; otherwise <code>false</code>
-     */
-    public static final boolean usePartModifier() {
-        Boolean tmp = usePartModifier;
-        if (tmp == null) {
-            synchronized (MailConfig.class) {
-                tmp = usePartModifier;
-                if (tmp == null) {
-                    final PartModifier pm = PartModifier.getInstance();
-                    tmp = usePartModifier = Boolean.valueOf(pm != null && !DummyPartModifier.class.isInstance(pm));
-                }
-            }
-        }
-        return tmp.booleanValue();
-    }
-
     static {
         MailReloadable.getInstance().addReloadable(new Reloadable() {
 
             @Override
             public void reloadConfiguration(ConfigurationService configService) {
-                usePartModifier = null;
                 doSaneLogin = null;
             }
 
             @Override
             public Interests getInterests() {
-                return Reloadables.interestsForProperties("com.openexchange.mail.partModifierImpl", "com.openexchange.mail.saneLogin");
+                return Reloadables.interestsForProperties("com.openexchange.mail.saneLogin");
             }
         });
     }

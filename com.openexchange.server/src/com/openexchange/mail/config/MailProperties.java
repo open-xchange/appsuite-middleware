@@ -75,8 +75,6 @@ import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailConfig.LoginSource;
 import com.openexchange.mail.api.MailConfig.PasswordSource;
 import com.openexchange.mail.api.MailConfig.ServerSource;
-import com.openexchange.mail.partmodifier.DummyPartModifier;
-import com.openexchange.mail.partmodifier.PartModifier;
 import com.openexchange.mail.utils.IpAddressRenderer;
 import com.openexchange.net.HostList;
 import com.openexchange.server.ServiceExceptionCode;
@@ -880,27 +878,6 @@ public final class MailProperties implements IMailProperties {
             } else {
                 defaultSeparator = defaultSep;
                 logBuilder.append("\tDefault Separator: ").append(defaultSeparator).append('\n');
-            }
-        }
-
-        {
-            final String partModifierStr = configuration.getProperty(
-                "com.openexchange.mail.partModifierImpl",
-                DummyPartModifier.class.getName()).trim();
-            try {
-                PartModifier.init(partModifierStr);
-                logBuilder.append("\tPartModifier Implementation: ").append(PartModifier.getInstance().getClass().getName()).append('\n');
-            } catch (final OXException e) {
-                try {
-                    PartModifier.init(DummyPartModifier.class.getName());
-                } catch (final OXException e1) {
-                    /*
-                     * Cannot occur
-                     */
-                    LOG.error("", e);
-                }
-                logBuilder.append("\tPartModifier Implementation: Unknown class \"").append(partModifierStr).append(fallbackPrefix).append(
-                    DummyPartModifier.class.getName()).append('\n');
             }
         }
 
