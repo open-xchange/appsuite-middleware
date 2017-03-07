@@ -56,12 +56,16 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
+import org.slf4j.MDC;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.openexchange.config.ConfigurationService;
@@ -242,9 +246,7 @@ public final class MailProperties implements IMailProperties {
 
         ConfigView view = viewFactory.getView(userId, contextId);
 
-        StringBuilder logBuilder = new StringBuilder(1024);
-        logBuilder.append("\nLoading primary mail properties for user ").append(userId).append(" in context ").append(contextId).append("...\n");
-
+        Set<String> toRemove = new HashSet<>(32);
         PrimaryMailProps.Params params = new PrimaryMailProps.Params();
         {
             final String loginStr = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.mail.loginSource", view);
@@ -256,7 +258,10 @@ public final class MailProperties implements IMailProperties {
                 throw MailConfigException.create(new StringBuilder(256).append("Unknown value in property \"com.openexchange.mail.loginSource\": ").append(loginStr).toString());
             }
             params.loginSource = loginSource;
-            logBuilder.append("\tLogin Source: ").append(loginSource.toString()).append('\n');
+
+            String key = "  Login Source";
+            MDC.put(key, loginSource.toString());
+            toRemove.add(key);
         }
 
         {
@@ -269,7 +274,10 @@ public final class MailProperties implements IMailProperties {
                 throw MailConfigException.create(new StringBuilder(256).append("Unknown value in property \"com.openexchange.mail.passwordSource\": ").append(pwStr).toString());
             }
             params.passwordSource = passwordSource;
-            logBuilder.append("\tPassword Source: ").append(passwordSource.toString()).append('\n');
+
+            String key = "  Password Source";
+            MDC.put(key, passwordSource.toString());
+            toRemove.add(key);
         }
 
         {
@@ -283,7 +291,10 @@ public final class MailProperties implements IMailProperties {
                     "Unknown value in property \"com.openexchange.mail.mailServerSource\": ").append(mailSrcStr).toString());
             }
             params.mailServerSource = mailServerSource;
-            logBuilder.append("\tMail Server Source: ").append(mailServerSource.toString()).append('\n');
+
+            String key = "  Mail Server Source";
+            MDC.put(key, mailServerSource.toString());
+            toRemove.add(key);
         }
 
         {
@@ -296,7 +307,10 @@ public final class MailProperties implements IMailProperties {
                 throw MailConfigException.create(new StringBuilder(256).append("Unknown value in property \"com.openexchange.mail.transportServerSource\": ").append(transSrcStr).toString());
             }
             params.transportServerSource = transportServerSource;
-            logBuilder.append("\tTransport Server Source: ").append(transportServerSource.toString()).append('\n');
+
+            String key = "  Transport Server Source";
+            MDC.put(key, transportServerSource.toString());
+            toRemove.add(key);
         }
 
         {
@@ -304,8 +318,13 @@ public final class MailProperties implements IMailProperties {
             String tmp = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.mail.mailServer", view);
             if (tmp != null) {
                 mailServer = ConfiguredServer.parseFrom(tmp.trim(), URIDefaults.IMAP);
+
+                String key = "  Mail Server";
+                MDC.put(key, mailServer.toString());
+                toRemove.add(key);
             }
             params.mailServer = mailServer;
+
         }
 
         {
@@ -313,6 +332,10 @@ public final class MailProperties implements IMailProperties {
             String tmp = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.mail.transportServer", view);
             if (tmp != null) {
                 transportServer = ConfiguredServer.parseFrom(tmp.trim(), URIDefaults.SMTP);
+
+                String key = "  Transport Server";
+                MDC.put(key, transportServer.toString());
+                toRemove.add(key);
             }
             params.transportServer = transportServer;
         }
@@ -321,6 +344,10 @@ public final class MailProperties implements IMailProperties {
             String masterPassword = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.mail.masterPassword", view);
             if (masterPassword != null) {
                 masterPassword = masterPassword.trim();
+
+                String key = "  Master Password";
+                MDC.put(key, "XXXXXXX");
+                toRemove.add(key);
             }
             params.masterPassword = masterPassword;
         }
@@ -331,27 +358,35 @@ public final class MailProperties implements IMailProperties {
         {
             try {
                 params.maxToCcBcc = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.mail.maxToCcBcc", 0, view);
-                logBuilder.append("\tmaxToCcBcc: ").append(params.maxToCcBcc).append('\n');
             } catch (final NumberFormatException e) {
                 params.maxToCcBcc = 0;
-                logBuilder.append("\tmaxToCcBcc: Invalid value \"").append(e.getMessage()).append("\". Setting to fallback ").append(params.maxToCcBcc).append('\n');
             }
+
+            String key = "  maxToCcBcc";
+            MDC.put(key, Integer.toString(params.maxToCcBcc));
+            toRemove.add(key);
         }
 
         {
             try {
                 params.maxDriveAttachments = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.mail.maxDriveAttachments", 20, view);
-                logBuilder.append("\tmaxDriveAttachments: ").append(params.maxDriveAttachments).append('\n');
             } catch (final NumberFormatException e) {
                 params.maxDriveAttachments = 20;
-                logBuilder.append("\tmaxDriveAttachments: Invalid value \"").append(e.getMessage()).append("\". Setting to fallback ").append(params.maxDriveAttachments).append('\n');
             }
+
+            String key = "  maxDriveAttachments";
+            MDC.put(key, Integer.toString(params.maxDriveAttachments));
+            toRemove.add(key);
         }
 
         {
             String phishingHdrsStr = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.mail.phishingHeader", view);
             if (null != phishingHdrsStr && phishingHdrsStr.length() > 0) {
                 params.phishingHeaders = phishingHdrsStr.split(" *, *");
+
+                String key = "  Phishing Headers";
+                MDC.put(key, Arrays.toString(params.phishingHeaders));
+                toRemove.add(key);
             } else {
                 params.phishingHeaders = null;
             }
@@ -359,17 +394,22 @@ public final class MailProperties implements IMailProperties {
 
         {
             params.rateLimitPrimaryOnly = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.rateLimitPrimaryOnly", true, view);
-            logBuilder.append("\tRate limit primary only: ").append(params.rateLimitPrimaryOnly).append('\n');
+
+            String key = "  Rate limit primary only";
+            MDC.put(key, Boolean.toString(params.rateLimitPrimaryOnly));
+            toRemove.add(key);
         }
 
         {
             try {
                 params.rateLimit = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.mail.rateLimit", 0, view);
-                logBuilder.append("\tSent Rate limit: ").append(params.rateLimit).append('\n');
             } catch (final NumberFormatException e) {
                 params.rateLimit = 0;
-                logBuilder.append("\tSend Rate limit: Invalid value \"").append(e.getMessage()).append("\". Setting to fallback ").append(params.rateLimit).append('\n');
             }
+
+            String key = "  Sent Rate limit";
+            MDC.put(key, Integer.toString(params.rateLimit));
+            toRemove.add(key);
         }
 
         {
@@ -379,38 +419,53 @@ public final class MailProperties implements IMailProperties {
                 ranges = HostList.valueOf(tmp);
             }
             params.ranges = ranges;
-            logBuilder.append("\tWhite-listed from send rate limit: ").append(ranges).append('\n');
+
+            String key = "  White-listed from send rate limit";
+            MDC.put(key, ranges.toString());
+            toRemove.add(key);
         }
 
         {
             params.supportMsisdnAddresses = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.supportMsisdnAddresses", false, view);
-            logBuilder.append("\tSupports MSISDN addresses: ").append(params.supportMsisdnAddresses).append('\n');
+
+            String key = "  Supports MSISDN addresses";
+            MDC.put(key, Boolean.toString(params.supportMsisdnAddresses));
+            toRemove.add(key);
         }
 
         {
             try {
                 params.defaultArchiveDays = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.mail.archive.defaultDays", 90, view);
-                logBuilder.append("\tDefault archive days: ").append(params.defaultArchiveDays).append('\n');
             } catch (final NumberFormatException e) {
                 params.defaultArchiveDays = 90;
-                logBuilder.append("\tDefault archive days: Invalid value \"").append(e.getMessage()).append("\". Setting to fallback ").append(params.defaultArchiveDays).append('\n');
-
             }
+
+            String key = "  Default archive days";
+            MDC.put(key, Integer.toString(params.defaultArchiveDays));
+            toRemove.add(key);
         }
 
         {
             params.preferSentDate = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.preferSentDate", false, view);
-            logBuilder.append("\tPrefer Sent Date: ").append(params.preferSentDate).append('\n');
+
+            String key = "  Prefer Sent Date";
+            MDC.put(key, Boolean.toString(params.preferSentDate));
+            toRemove.add(key);
         }
 
         {
             params.hidePOP3StorageFolders = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.hidePOP3StorageFolders", false, view);
-            logBuilder.append("\tHide POP3 Storage Folders: ").append(params.hidePOP3StorageFolders).append('\n');
+
+            String key = "  Hide POP3 Storage Folder";
+            MDC.put(key, Boolean.toString(params.hidePOP3StorageFolders));
+            toRemove.add(key);
         }
 
         PrimaryMailProps primaryMailProps = new PrimaryMailProps(params);
-        logBuilder.append("Primary mail properties successfully loaded for user ").append(userId).append(" in context ").append(contextId).append('!');
-        LOG.info(logBuilder.toString());
+        LOG.info("Primary mail properties successfully loaded for user {} in context {}!", userId, contextId);
+        for (String key : toRemove) {
+            MDC.remove(key);
+        }
         return primaryMailProps;
     }
 
