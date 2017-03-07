@@ -72,7 +72,7 @@ import com.openexchange.java.AsciiReader;
  * @since v7.8.4
  */
 public class DeleteUserFeedback extends AbstractRestCLI<Void> {
-    
+
     private static final String END_LONG = "end-time";
     private static final String END_SHORT = "e";
 
@@ -88,7 +88,7 @@ public class DeleteUserFeedback extends AbstractRestCLI<Void> {
     private static final String TYPE_DEFAULT = "star-rating-v1";
 
     private static final String ENDPOINT_LONG = "api-root";
-    private static final String ENDPOINT_DEFAULT = "http://localhost:8009/userfeedback/v1/mail";
+    private static final String ENDPOINT_DEFAULT = "http://localhost:8009/userfeedback/v1/delete";
 
     /**
      * @param args
@@ -146,7 +146,7 @@ public class DeleteUserFeedback extends AbstractRestCLI<Void> {
     @Override
     protected Void invoke(Options option, CommandLine cmd, Builder context) throws Exception {
         context.accept(MediaType.APPLICATION_JSON_TYPE, MediaType.APPLICATION_OCTET_STREAM_TYPE);
-        InputStream response = context.get(InputStream.class);
+        InputStream response = context.delete(InputStream.class);
         System.out.println(IOUtils.toCharArray(new AsciiReader(response)));
         return null;
     }
