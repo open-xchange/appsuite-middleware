@@ -49,23 +49,31 @@
 
 package com.openexchange.ipcheck.countrycode;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.ipcheck.IPCheckConfiguration;
 import com.openexchange.ajax.ipcheck.IPCheckers;
 import com.openexchange.ajax.ipcheck.spi.IPChecker;
 import com.openexchange.exception.OXException;
 import com.openexchange.geolocation.GeoInformation;
 import com.openexchange.geolocation.GeoLocationService;
+import com.openexchange.ipcheck.countrycode.mbean.IPCheckMetrics;
+import com.openexchange.management.MetricAware;
 import com.openexchange.session.Session;
 
 /**
  * {@link CountryCodeIpChecker}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.8.4
  */
-public class CountryCodeIpChecker implements IPChecker {
+public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetrics> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CountryCodeIpChecker.class);
 
     private final GeoLocationService service;
+    private final IPCheckMetrics metrics;
 
     /**
      * Initializes a new {@link CountryCodeIpChecker}.
@@ -73,10 +81,12 @@ public class CountryCodeIpChecker implements IPChecker {
     public CountryCodeIpChecker(GeoLocationService service) {
         super();
         this.service = service;
+        metrics = new IPCheckMetrics();
     }
 
     @Override
     public void handleChangedIp(String current, String previous, Session session, IPCheckConfiguration configuration) throws OXException {
+        metrics.incrementTotalIPChanges();
         if (!IPCheckers.isWhiteListed(current, previous, session, configuration)) {
             GeoInformation geoInformationCurrent = service.getGeoInformation(current);
             GeoInformation geoInformationPrevious = service.getGeoInformation(previous);
@@ -87,11 +97,14 @@ public class CountryCodeIpChecker implements IPChecker {
             }
 
             if (countryChanged) {
+                LOGGER.info("Country was changed for session '{}' from '{}' to '{}'", session.getSessionID(), geoInformationPrevious.getCountry(), geoInformationCurrent.getCountry());
                 IPCheckers.kick(current, session);
+                metrics.incrementDeniedIPChanges();
             }
         }
 
         IPCheckers.apply(true, current, session, configuration);
+        metrics.incrementAcceptedIPChanges();
     }
 
     @Override
@@ -99,4 +112,13 @@ public class CountryCodeIpChecker implements IPChecker {
         return "countrycode";
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.management.MetricAware#getMetricsObject()
+     */
+    @Override
+    public IPCheckMetrics getMetricsObject() {
+        return metrics;
+    }
 }

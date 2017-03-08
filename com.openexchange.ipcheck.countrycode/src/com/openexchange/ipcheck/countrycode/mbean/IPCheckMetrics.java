@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2017-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,51 +47,52 @@
  *
  */
 
-package com.openexchange.ipcheck.countrycode.osgi;
+package com.openexchange.ipcheck.countrycode.mbean;
 
-import javax.management.ObjectName;
-import com.openexchange.ajax.ipcheck.spi.IPChecker;
-import com.openexchange.geolocation.GeoLocationService;
-import com.openexchange.ipcheck.countrycode.CountryCodeIpChecker;
-import com.openexchange.ipcheck.countrycode.mbean.IPCheckMBean;
-import com.openexchange.ipcheck.countrycode.mbean.IPCheckMBeanImpl;
-import com.openexchange.ipcheck.countrycode.mbean.IPCheckMetrics;
-import com.openexchange.management.ManagementService;
-import com.openexchange.management.MetricAware;
-import com.openexchange.osgi.HousekeepingActivator;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * {@link CountryCodeIpCheckerActivator}
+ * {@link IPCheckMetrics}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.4
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class CountryCodeIpCheckerActivator extends HousekeepingActivator {
+public class IPCheckMetrics {
+
+    private final AtomicInteger totalIPChanges;
+    private final AtomicInteger acceptedIPChanges;
+    private final AtomicInteger deniedIPChanges;
 
     /**
-     * Initializes a new {@link CountryCodeIpCheckerActivator}.
+     * Initialises a new {@link IPCheckMetrics}.
      */
-    public CountryCodeIpCheckerActivator() {
+    public IPCheckMetrics() {
         super();
+        totalIPChanges = new AtomicInteger();
+        acceptedIPChanges = new AtomicInteger();
+        deniedIPChanges = new AtomicInteger();
     }
 
-    @Override
-    protected boolean stopOnServiceUnavailability() {
-        return true;
+    public void incrementTotalIPChanges() {
+        totalIPChanges.incrementAndGet();
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { GeoLocationService.class, ManagementService.class };
+    public void incrementAcceptedIPChanges() {
+        acceptedIPChanges.incrementAndGet();
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        IPChecker service = new CountryCodeIpChecker(getService(GeoLocationService.class));
-        registerService(IPChecker.class, service);
-        ObjectName objectName = new ObjectName(IPCheckMBean.DOMAIN, "name", IPCheckMBean.NAME);
-        IPCheckMBean metricsMBean = new IPCheckMBeanImpl(this, (MetricAware<IPCheckMetrics>) service);
-        ManagementService managementService = getService(ManagementService.class);
-        managementService.registerMBean(objectName, metricsMBean);
+    public void incrementDeniedIPChanges() {
+        deniedIPChanges.incrementAndGet();
+    }
+
+    public int getTotalIPChanges() {
+        return totalIPChanges.get();
+    }
+
+    public int getAcceptedIPChanges() {
+        return acceptedIPChanges.get();
+    }
+
+    public int getDeniedIPChanges() {
+        return deniedIPChanges.get();
     }
 }

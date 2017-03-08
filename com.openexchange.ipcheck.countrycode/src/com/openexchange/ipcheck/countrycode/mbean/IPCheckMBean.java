@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2017-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,51 +47,37 @@
  *
  */
 
-package com.openexchange.ipcheck.countrycode.osgi;
-
-import javax.management.ObjectName;
-import com.openexchange.ajax.ipcheck.spi.IPChecker;
-import com.openexchange.geolocation.GeoLocationService;
-import com.openexchange.ipcheck.countrycode.CountryCodeIpChecker;
-import com.openexchange.ipcheck.countrycode.mbean.IPCheckMBean;
-import com.openexchange.ipcheck.countrycode.mbean.IPCheckMBeanImpl;
-import com.openexchange.ipcheck.countrycode.mbean.IPCheckMetrics;
-import com.openexchange.management.ManagementService;
-import com.openexchange.management.MetricAware;
-import com.openexchange.osgi.HousekeepingActivator;
+package com.openexchange.ipcheck.countrycode.mbean;
 
 /**
- * {@link CountryCodeIpCheckerActivator}
+ * {@link IPCheckMBean}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.4
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class CountryCodeIpCheckerActivator extends HousekeepingActivator {
+public interface IPCheckMBean {
+    
+    static final String DOMAIN = "com.openexchange.ipcheck.countrycode";
+    
+    static String NAME = "IPCheck MBean";
 
     /**
-     * Initializes a new {@link CountryCodeIpCheckerActivator}.
+     * Returns the total amount of IP changes that were observed in sessions
+     * 
+     * @return the total amount of IP changes
      */
-    public CountryCodeIpCheckerActivator() {
-        super();
-    }
+    int getIPChanges();
 
-    @Override
-    protected boolean stopOnServiceUnavailability() {
-        return true;
-    }
+    /**
+     * Returns the total amount of accepted IP changes
+     * 
+     * @return the total amount of accepted IP changes
+     */
+    int getAcceptedIPChanges();
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { GeoLocationService.class, ManagementService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        IPChecker service = new CountryCodeIpChecker(getService(GeoLocationService.class));
-        registerService(IPChecker.class, service);
-        ObjectName objectName = new ObjectName(IPCheckMBean.DOMAIN, "name", IPCheckMBean.NAME);
-        IPCheckMBean metricsMBean = new IPCheckMBeanImpl(this, (MetricAware<IPCheckMetrics>) service);
-        ManagementService managementService = getService(ManagementService.class);
-        managementService.registerMBean(objectName, metricsMBean);
-    }
+    /**
+     * Returns the total amount of denied IP changes
+     * 
+     * @return the total amount of denied IP changes
+     */
+    int getDeniedIPChanges();
 }
