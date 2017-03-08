@@ -219,7 +219,7 @@ public class MailAccountTransportProperties implements ITransportProperties {
                     return defaultValue;
                 }
 
-                Boolean.parseBoolean(value.trim());
+                return Boolean.parseBoolean(value.trim());
             } catch (OXException e) {
                 LOG.error("Failed to query property {} from config-cascade for user {} in context {}", name, userId, contextId, e);
             }
