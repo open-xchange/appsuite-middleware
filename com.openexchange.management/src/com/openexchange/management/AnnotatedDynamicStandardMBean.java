@@ -99,8 +99,6 @@ public abstract class AnnotatedDynamicStandardMBean extends AnnotatedStandardMBe
     @Override
     public AttributeList getAttributes(String[] attributes) {
         // Refresh information (if necessary)
-        refresh();
-
         AttributeList list = new AttributeList(attributes.length);
         try {
             for (String attribute : attributes) {
