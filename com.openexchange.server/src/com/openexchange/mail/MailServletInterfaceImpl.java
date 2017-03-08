@@ -92,12 +92,6 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Interests;
-import com.openexchange.config.Reloadable;
-import com.openexchange.config.Reloadables;
-import com.openexchange.config.cascade.ComposedConfigProperty;
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.contact.ContactService;
 import com.openexchange.dataretention.DataRetentionService;
@@ -143,7 +137,6 @@ import com.openexchange.mail.api.unified.UnifiedFullName;
 import com.openexchange.mail.api.unified.UnifiedViewService;
 import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.config.MailProperties;
-import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -1462,39 +1455,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         return mailAccess.getFolderStorage().getFolder(fullName);
     }
 
-    private static volatile Integer maxForwardCount;
-
-    private static int maxForwardCount() {
-        Integer tmp = maxForwardCount;
-        if (null == tmp) {
-            synchronized (MailServletInterfaceImpl.class) {
-                tmp = maxForwardCount;
-                if (null == tmp) {
-                    ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    if (null == service) {
-                        return 8;
-                    }
-                    tmp = Integer.valueOf(service.getIntProperty("com.openexchange.mail.maxForwardCount", 8));
-                    maxForwardCount = tmp;
-                }
-            }
-        }
-        return tmp.intValue();
-    }
-
-    static {
-        MailReloadable.getInstance().addReloadable(new Reloadable() {
-
-            @Override
-            public void reloadConfiguration(ConfigurationService configService) {
-                maxForwardCount = null;
-            }
-
-            @Override
-            public Interests getInterests() {
-                return Reloadables.interestsForProperties("com.openexchange.mail.maxForwardCount");
-            }
-        });
+    private static int maxForwardCount(int userId, int contextId) {
+        return MailProperties.getInstance().getMaxForwardCount(userId, contextId);
     }
 
     @Override
@@ -1502,7 +1464,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         if ((null == folders) || (null == fowardMsgUIDs) || (folders.length != fowardMsgUIDs.length)) {
             throw new IllegalArgumentException("Illegal arguments");
         }
-        int maxForwardCount = maxForwardCount();
+        int maxForwardCount = maxForwardCount(session.getUserId(), session.getContextId());
         if (maxForwardCount > 0 && folders.length > maxForwardCount) {
             throw MailExceptionCode.TOO_MANY_FORWARD_MAILS.create(Integer.valueOf(maxForwardCount));
         }
@@ -3553,17 +3515,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                             } else if (ComposeType.DRAFT_NO_DELETE_ON_TRANSPORT.equals(type)) {
                                 // Do not delete draft!
                             } else if (ComposeType.DRAFT.equals(type)) {
-                                ConfigViewFactory configViewFactory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
-                                if (null != configViewFactory) {
-                                    try {
-                                        ConfigView view = configViewFactory.getView(session.getUserId(), session.getContextId());
-                                        ComposedConfigProperty<Boolean> property = view.property("com.openexchange.mail.deleteDraftOnTransport", boolean.class);
-                                        if (property.isDefined() && property.get().booleanValue()) {
-                                            deleteDraft(composedMail.getMsgref());
-                                        }
-                                    } catch (Exception e) {
-                                        LOG.warn("Draft mail cannot be deleted.", e);
-                                    }
+                                if (MailProperties.getInstance().isDeleteDraftOnTransport(session.getUserId(), session.getContextId())) {
+                                    deleteDraft(composedMail.getMsgref());
                                 }
                             } else if (ComposeType.DRAFT_DELETE_ON_TRANSPORT.equals(type)) {
                                 try {

@@ -153,6 +153,11 @@ public final class MailProperties implements IMailProperties {
             int defaultArchiveDays;
             boolean preferSentDate;
             boolean hidePOP3StorageFolders;
+            boolean translateDefaultFolders;
+            boolean deleteDraftOnTransport;
+            boolean forwardUnquoted;
+            long maxMailSize;
+            int maxForwardCount;
 
             Params() {
                 super();
@@ -180,6 +185,11 @@ public final class MailProperties implements IMailProperties {
         final int defaultArchiveDays;
         final boolean preferSentDate;
         final boolean hidePOP3StorageFolders;
+        final boolean translateDefaultFolders;
+        final boolean deleteDraftOnTransport;
+        final boolean forwardUnquoted;
+        final long maxMailSize;
+        final int maxForwardCount;
 
         PrimaryMailProps(Params params) {
             super();
@@ -202,6 +212,11 @@ public final class MailProperties implements IMailProperties {
             this.defaultArchiveDays = params.defaultArchiveDays;
             this.preferSentDate = params.preferSentDate;
             this.hidePOP3StorageFolders = params.hidePOP3StorageFolders;
+            this.translateDefaultFolders = params.translateDefaultFolders;
+            this.deleteDraftOnTransport = params.deleteDraftOnTransport;
+            this.forwardUnquoted = params.forwardUnquoted;
+            this.maxMailSize = params.maxMailSize;
+            this.maxForwardCount = params.maxForwardCount;
         }
 
     }
@@ -462,6 +477,63 @@ public final class MailProperties implements IMailProperties {
 
             String key = "  Hide POP3 Storage Folder";
             MDC.put(key, Boolean.toString(params.hidePOP3StorageFolders));
+            toRemove.add(key);
+        }
+
+        {
+            params.translateDefaultFolders = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.translateDefaultFolders", true, view);
+
+            String key = "  Translate Default Folders";
+            MDC.put(key, Boolean.toString(params.translateDefaultFolders));
+            toRemove.add(key);
+        }
+
+        {
+            params.deleteDraftOnTransport = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.deleteDraftOnTransport", false, view);
+
+            String key = "  Delete Draft On Transport";
+            MDC.put(key, Boolean.toString(params.deleteDraftOnTransport));
+            toRemove.add(key);
+        }
+
+        {
+            params.forwardUnquoted = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.forwardUnquoted", false, view);
+
+            String key = "  Forward Unquoted";
+            MDC.put(key, Boolean.toString(params.forwardUnquoted));
+            toRemove.add(key);
+        }
+
+        {
+            long maxMailSize;
+            String tmp = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.mail.maxMailSize", view);
+            if (null == tmp) {
+                maxMailSize = -1L;
+            } else {
+                try {
+                    maxMailSize = Long.parseLong(tmp);
+                } catch (NumberFormatException e) {
+                    LOG.debug("", e);
+                    maxMailSize = -1L;
+                }
+            }
+            params.maxMailSize = maxMailSize;
+
+            String key = "  Max. Mail Size";
+            MDC.put(key, Long.toString(params.maxMailSize));
+            toRemove.add(key);
+        }
+
+        {
+            try {
+                params.maxForwardCount = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.mail.maxForwardCount", 8, view);
+            } catch (final NumberFormatException e) {
+                LOG.debug("", e);
+                params.maxForwardCount = 8;
+            }
+
+            String key = "  Max. Forward Count";
+            MDC.put(key, Integer.toString(params.maxForwardCount));
             toRemove.add(key);
         }
 
@@ -1234,6 +1306,91 @@ public final class MailProperties implements IMailProperties {
         } catch (Exception e) {
             LOG.error("Failed to get whether a mail's sent date (<code>\"Date\"</code> header) is preferred over its received date for user {} in context {}. Using default {} instead.", I(userId), I(contextId), Boolean.valueOf(preferSentDate), e);
             return preferSentDate;
+        }
+    }
+
+    /**
+     * Signals whether standard folder names are supposed to be translated.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> to translate; otherwise <code>false</code>
+     */
+    public boolean isTranslateDefaultFolders(int userId, int contextId) {
+        try {
+            PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
+            return primaryMailProps.translateDefaultFolders;
+        } catch (Exception e) {
+            LOG.error("Failed to get whether standard folder names are supposed to be translated for user {} in context {}. Using default {} instead.", I(userId), I(contextId), Boolean.valueOf(true), e);
+            return true;
+        }
+    }
+
+    /**
+     * Signals whether Draft messages are supposed to be deleted when sent out.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> to delete; otherwise <code>false</code>
+     */
+    public boolean isDeleteDraftOnTransport(int userId, int contextId) {
+        try {
+            PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
+            return primaryMailProps.deleteDraftOnTransport;
+        } catch (Exception e) {
+            LOG.error("Failed to get whether Draft messages are supposed to be deleted for user {} in context {}. Using default {} instead.", I(userId), I(contextId), Boolean.valueOf(false), e);
+            return false;
+        }
+    }
+
+    /**
+     * Signals whether to forward messages unquoted.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> to forward messages unquoted; otherwise <code>false</code>
+     */
+    public boolean isForwardUnquoted(int userId, int contextId) {
+        try {
+            PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
+            return primaryMailProps.forwardUnquoted;
+        } catch (Exception e) {
+            LOG.error("Failed to get whether to forward messages unquoted for user {} in context {}. Using default {} instead.", I(userId), I(contextId), Boolean.valueOf(false), e);
+            return false;
+        }
+    }
+
+    /**
+     * Gets max. mail size allowed being transported
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The max. mail size allowed being transported
+     */
+    public long getMaxMailSize(int userId, int contextId) {
+        try {
+            PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
+            return primaryMailProps.maxMailSize;
+        } catch (Exception e) {
+            LOG.error("Failed to get max. mail size for user {} in context {}. Using default {} instead.", I(userId), I(contextId), "-1", e);
+            return -1L;
+        }
+    }
+
+    /**
+     * Gets max. number of message attachments that are allowed to be forwarded as attachment.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The max. number of message attachments that are allowed to be forwarded as attachment
+     */
+    public int getMaxForwardCount(int userId, int contextId) {
+        try {
+            PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
+            return primaryMailProps.maxForwardCount;
+        } catch (Exception e) {
+            LOG.error("Failed to get max. forward count for user {} in context {}. Using default {} instead.", I(userId), I(contextId), "8", e);
+            return 8;
         }
     }
 

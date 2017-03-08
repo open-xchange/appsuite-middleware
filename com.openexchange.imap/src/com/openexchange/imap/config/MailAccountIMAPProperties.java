@@ -427,17 +427,22 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
     public boolean isImapSearch() {
         String tmp = getAccountProperty("com.openexchange.imap.imapSearch");
         if (null != tmp) {
-            return Boolean.parseBoolean(tmp.trim());
+            return "force-imap".equalsIgnoreCase(tmp) || Boolean.parseBoolean(tmp.trim());
         }
 
         if (mailAccountId == PRIMARY) {
             tmp = lookUpProperty("com.openexchange.imap.primary.imapSearch");
             if (null != tmp) {
-                return Boolean.parseBoolean(tmp.trim());
+                return "force-imap".equalsIgnoreCase(tmp) || Boolean.parseBoolean(tmp.trim());
             }
         }
 
-        return lookUpBoolProperty("com.openexchange.imap.imapSearch", IMAPProperties.getInstance().isImapSearch());
+        tmp = lookUpProperty("com.openexchange.imap.imapSearch");
+        if (null != tmp) {
+            return "force-imap".equalsIgnoreCase(tmp) || Boolean.parseBoolean(tmp.trim());
+        }
+
+        return IMAPProperties.getInstance().isImapSearch();
     }
 
     @Override

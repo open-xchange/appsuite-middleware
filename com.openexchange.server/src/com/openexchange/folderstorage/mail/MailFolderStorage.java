@@ -75,7 +75,6 @@ import javax.mail.Message;
 import org.apache.commons.lang.StringUtils;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
@@ -145,7 +144,6 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.internal.RdbMailAccountStorage;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -917,8 +915,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
             TIntObjectMap<MailAccount> accounts = new TIntObjectHashMap<>(2);
             List<Folder> ret = new ArrayList<>(folderIds.size());
 
-            ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-            boolean translatePrimaryAccountDefaultFolders = (null == configurationService || configurationService.getBoolProperty("com.openexchange.mail.translateDefaultFolders", true));
+            boolean translatePrimaryAccountDefaultFolders = MailProperties.getInstance().isTranslateDefaultFolders(storageParameters.getUserId(), storageParameters.getContextId());
 
             for (String folderId : folderIds) {
                 FullnameArgument argument = prepareMailFolderParam(folderId);
@@ -966,8 +963,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
             }
             mailAccess = mailAccessFor(session, argument.getAccountId());
 
-            ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-            boolean translatePrimaryAccountDefaultFolders = (null == configurationService || configurationService.getBoolProperty("com.openexchange.mail.translateDefaultFolders", true));
+            boolean translatePrimaryAccountDefaultFolders = MailProperties.getInstance().isTranslateDefaultFolders(storageParameters.getUserId(), storageParameters.getContextId());
 
             return getFolder(treeId, argument, storageParameters, mailAccess, session, mailAccount, translatePrimaryAccountDefaultFolders);
         } finally {

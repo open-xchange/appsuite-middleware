@@ -85,10 +85,7 @@ import javax.mail.internet.idn.IDNA;
 import javax.security.auth.Subject;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Filter;
-import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigProviderService;
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -1374,24 +1371,8 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
         return MailAccount.DEFAULT_ID == accountId && null != kerberosSubject;
     }
 
-    private long getMaxMailSize() throws OXException {
-        final ConfigViewFactory factory = Services.getService(ConfigViewFactory.class);
-
-        if (factory != null) {
-
-            final ConfigView view = factory.getView(getUserId(), ctx.getContextId());
-            final ConfigProperty<Long> property = view.property("com.openexchange.mail.maxMailSize", Long.class);
-
-            if (property.isDefined()) {
-                final Long l = property.get();
-                final long maxMailSize = null == l ? -1 : l.longValue();
-                if (maxMailSize > 0) {
-                    return maxMailSize;
-                }
-            }
-        }
-
-        return -1;
+    private long getMaxMailSize() {
+        return MailProperties.getInstance().getMaxMailSize(getUserId(), ctx.getContextId());
     }
 
     private int getUserId() {
