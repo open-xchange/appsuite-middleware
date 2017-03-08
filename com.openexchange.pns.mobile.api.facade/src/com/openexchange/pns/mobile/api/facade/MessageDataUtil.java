@@ -54,12 +54,17 @@ import java.util.Map;
 public class MessageDataUtil {
 
     private static final String KEY_CID = "cid";
+    private static final String KEY_DISPLAYNAME = "displayname";
     private static final String KEY_SENDER = "email";
     private static final String KEY_SUBJECT = "subject";
     private static final String KEY_UNREAD = "unread";
 
     public static String getPath(Map<String, Object> messageData) {
         return getString(messageData, KEY_CID);
+    }
+
+    public static String getDisplayName(Map<String, Object> messageData) {
+        return getString(messageData, KEY_DISPLAYNAME);
     }
 
     public static String getSender(Map<String, Object> messageData) {

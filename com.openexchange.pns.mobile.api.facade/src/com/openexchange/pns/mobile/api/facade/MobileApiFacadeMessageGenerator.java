@@ -50,14 +50,13 @@
 package com.openexchange.pns.mobile.api.facade;
 
 import java.util.Map;
-
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.pns.KnownTransport;
 import com.openexchange.pns.Message;
 import com.openexchange.pns.PushExceptionCodes;
 import com.openexchange.pns.PushMessageGenerator;
 import com.openexchange.pns.PushNotification;
-
 import javapns.json.JSONException;
 import javapns.notification.PushNotificationPayload;
 
@@ -76,11 +75,16 @@ public class MobileApiFacadeMessageGenerator implements PushMessageGenerator {
 
     // ------------------------------------------------------------------------------------------------------------------------
 
+    private final ConfigViewFactory viewFactory;
+
     /**
      * Initializes a new {@link MobileApiFacadeMessageGenerator}.
+     *
+     * @param viewFactory The service to use
      */
-    public MobileApiFacadeMessageGenerator() {
+    public MobileApiFacadeMessageGenerator(ConfigViewFactory viewFactory) {
         super();
+        this.viewFactory = viewFactory;
     }
 
     @Override
@@ -124,7 +128,9 @@ public class MobileApiFacadeMessageGenerator implements PushMessageGenerator {
             Map<String, Object> messageData = notification.getMessageData();
             try {
                 String subject = MessageDataUtil.getSubject(messageData);
-                String sender = MessageDataUtil.getSender(messageData);
+                String displayName = MessageDataUtil.getDisplayName(messageData);
+                String senderAddress = MessageDataUtil.getSender(messageData);
+                String sender = displayName.length() != 0 ? displayName : senderAddress;
                 String path = MessageDataUtil.getPath(messageData);
                 int unread = MessageDataUtil.getUnread(messageData);
 
@@ -134,8 +140,13 @@ public class MobileApiFacadeMessageGenerator implements PushMessageGenerator {
 
                 payload.addAlert(sb.toString());
 
-                if (unread > -1) {
-                  payload.addBadge(unread);
+                MobileApiFacadePushConfiguration config = MobileApiFacadePushConfiguration.getConfigFor(notification.getUserId(), notification.getContextId(), viewFactory);
+                if (config.isApnBadgeEnabled() && unread > -1) {
+                    payload.addBadge(unread);
+                }
+
+                if (config.isApnSoundEnabled()) {
+                    payload.addSound(config.getApnSoundFile());
                 }
 
                 payload.addCustomDictionary("cid", path);
