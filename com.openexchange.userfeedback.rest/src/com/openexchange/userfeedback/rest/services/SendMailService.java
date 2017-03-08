@@ -105,7 +105,7 @@ public class SendMailService extends JAXRSService {
                 body = "";
             }
             FeedbackMailService service = getService(FeedbackMailService.class);
-            FeedbackMailFilter filter = new FeedbackMailFilter(contextGroup, parseCSV(recipients), "User Feedback", body, start, end, type);
+            FeedbackMailFilter filter = new FeedbackMailFilter(contextGroup, parseCSV(recipients), subject, body, start, end, type);
             String response = service.sendFeedbackMail(filter);
             builder = Response.status(200);
             if (Strings.isEmpty(response)) {
