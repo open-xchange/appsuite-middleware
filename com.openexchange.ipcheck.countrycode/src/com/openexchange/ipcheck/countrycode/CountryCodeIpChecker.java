@@ -49,8 +49,10 @@
 
 package com.openexchange.ipcheck.countrycode;
 
+import java.net.Inet4Address;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.google.common.net.InetAddresses;
 import com.openexchange.ajax.ipcheck.IPCheckConfiguration;
 import com.openexchange.ajax.ipcheck.IPCheckers;
 import com.openexchange.ajax.ipcheck.spi.IPChecker;
@@ -87,24 +89,60 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
     @Override
     public void handleChangedIp(String current, String previous, Session session, IPCheckConfiguration configuration) throws OXException {
         metrics.incrementTotalIPChanges();
-        if (!IPCheckers.isWhiteListed(current, previous, session, configuration)) {
-            GeoInformation geoInformationCurrent = service.getGeoInformation(current);
-            GeoInformation geoInformationPrevious = service.getGeoInformation(previous);
 
-            boolean countryChanged = false;
-            if (geoInformationPrevious.hasCountry() && geoInformationCurrent.hasCountry()) {
-                countryChanged = !geoInformationPrevious.getCountry().equals(geoInformationCurrent.getCountry());
-            }
-
-            if (countryChanged) {
-                LOGGER.info("Country was changed for session '{}' from '{}' to '{}'", session.getSessionID(), geoInformationPrevious.getCountry(), geoInformationCurrent.getCountry());
-                IPCheckers.kick(current, session);
-                metrics.incrementDeniedIPChanges();
-            }
+        // ACCEPT: If one of the given IP address lies with in the private range
+        if (isPrivateV4Address(current) || isPrivateV4Address(previous)) {
+            accept(current, session, configuration);
+            return;
         }
 
+        // ACCEPT: if the IP address are whitelisted
+        if (IPCheckers.isWhiteListed(current, previous, session, configuration)) {
+            accept(current, session, configuration);
+        }
+
+        GeoInformation geoInformationCurrent = service.getGeoInformation(current);
+        GeoInformation geoInformationPrevious = service.getGeoInformation(previous);
+
+        boolean countryChanged = false;
+        if (geoInformationPrevious.hasCountry() && geoInformationCurrent.hasCountry()) {
+            countryChanged = !geoInformationPrevious.getCountry().equals(geoInformationCurrent.getCountry());
+        }
+
+        // DENY: if country code changed
+        if (countryChanged) {
+            deny(current, session, geoInformationCurrent, geoInformationPrevious);
+        }
+
+        // ACCEPT: in any other case
+        accept(current, session, configuration);
+    }
+
+    /**
+     * Accepts the IP change and applies it to the specified {@link Session}
+     * 
+     * @param current The current IP address
+     * @param session The {@link Session}
+     * @param configuration The {@link IPCheckConfiguration}
+     */
+    private void accept(String current, Session session, IPCheckConfiguration configuration) {
         IPCheckers.apply(true, current, session, configuration);
         metrics.incrementAcceptedIPChanges();
+    }
+
+    /**
+     * Denies the IP change and kicks the specified {@link Session}
+     * 
+     * @param current The current IP
+     * @param session The {@link Session}
+     * @param geoInformationCurrent the {@link GeoInformation} of the current IP
+     * @param geoInformationPrevious the {@link GeoInformation} of the previous IP
+     * @throws OXException To actually kick the session
+     */
+    private void deny(String current, Session session, GeoInformation geoInformationCurrent, GeoInformation geoInformationPrevious) throws OXException {
+        LOGGER.info("Country was changed for session '{}' from '{}' to '{}'", session.getSessionID(), geoInformationPrevious.getCountry(), geoInformationCurrent.getCountry());
+        metrics.incrementDeniedIPChanges();
+        IPCheckers.kick(current, session);
     }
 
     @Override
@@ -120,5 +158,29 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
     @Override
     public IPCheckMetrics getMetricsObject() {
         return metrics;
+    }
+
+    /**
+     * <p>Checks whether the specified IP address lies in the private range.</p>
+     * 
+     * <ul>
+     * <li>Class A range: 10.0.0.0 - 10.255.255.255</li>
+     * <li>Class B range: 172.16.0.0 - 172.31.255.255</li>
+     * <li>Class C range: 192.168.0.0 - 192.168.255.255</li>
+     * </ul>
+     * 
+     * <p>
+     * Based on {@link Inet4Address#isSiteLocalAddress()}, with addition of the check for the 172.16.0.0 - 172.31.255.255 block
+     * </p>
+     * 
+     * @param ip The IP address to check
+     * @return <code>true</code> if the IP address lies within the private range of class A, B, or C;
+     *         <code>false</code> otherwise
+     */
+    private boolean isPrivateV4Address(String ip) {
+        int address = InetAddresses.coerceToInteger(InetAddresses.forString(ip));
+        return (((address >>> 24) & 0xFF) == 10) // Class A
+            || ((((address >>> 24) & 0xFF) == 172) && ((address >>> 16) & 0xFF) >= 16 && ((address >>> 16) & 0xFF) <= 31) // Class B 
+            || ((((address >>> 24) & 0xFF) == 192) && (((address >>> 16) & 0xFF) == 168)); // Class C
     }
 }

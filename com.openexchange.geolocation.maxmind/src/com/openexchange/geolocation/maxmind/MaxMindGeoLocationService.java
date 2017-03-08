@@ -77,7 +77,6 @@ import com.openexchange.geolocation.maxmind.osgi.MaxMindGeoLocationServiceActiva
 import com.openexchange.java.Streams;
 import com.openexchange.osgi.BundleResourceLoader;
 
-
 /**
  * {@link MaxMindGeoLocationService} - The MaxMind Geo location service.
  *
@@ -286,5 +285,4 @@ public class MaxMindGeoLocationService implements GeoLocationService {
             // Ignore
         }
     }
-
 }
