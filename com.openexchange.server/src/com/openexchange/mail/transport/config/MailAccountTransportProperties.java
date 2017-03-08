@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.transport.config;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.config.cascade.ConfigView;
@@ -159,7 +160,7 @@ public class MailAccountTransportProperties implements ITransportProperties {
                     LOG.error("Non parseable integer value for property {}: {}", name, value, e);
                 }
             } catch (OXException e) {
-                LOG.error("Failed to query property {} from config-cascade for user {} in context {}", name, userId, contextId, e);
+                LOG.error("Failed to query property {} from config-cascade for user {} in context {}", name, I(userId), I(contextId), e);
             }
         }
 
@@ -195,7 +196,7 @@ public class MailAccountTransportProperties implements ITransportProperties {
 
                 return value.charAt(0);
             } catch (OXException e) {
-                LOG.error("Failed to query property {} from config-cascade for user {} in context {}", name, userId, contextId, e);
+                LOG.error("Failed to query property {} from config-cascade for user {} in context {}", name, I(userId), I(contextId), e);
             }
         }
 
@@ -226,7 +227,7 @@ public class MailAccountTransportProperties implements ITransportProperties {
 
                 return Boolean.parseBoolean(value.trim());
             } catch (OXException e) {
-                LOG.error("Failed to query property {} from config-cascade for user {} in context {}", name, userId, contextId, e);
+                LOG.error("Failed to query property {} from config-cascade for user {} in context {}", name, I(userId), I(contextId), e);
             }
         }
 
@@ -253,7 +254,7 @@ public class MailAccountTransportProperties implements ITransportProperties {
                 value = ConfigViews.getNonEmptyPropertyFrom(name, view);
                 return null == value ? defaultValue : value;
             } catch (OXException e) {
-                LOG.error("Failed to query property {} from config-cascade for user {} in context {}", name, userId, contextId, e);
+                LOG.error("Failed to query property {} from config-cascade for user {} in context {}", name, I(userId), I(contextId), e);
             }
         }
 

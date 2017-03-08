@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.config;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Map;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -95,6 +96,7 @@ public class MailAccountProperties implements IMailProperties {
         try {
             tmp = mailAccount.generateMailServerURL();
         } catch (final Exception e) {
+            LOG.warn("Failed to generate mail server URL from account {} of user {} in contrext {}.", I(mailAccount.getId()), I(userId), I(contextId), e);
             tmp = null;
         }
         url = tmp;
@@ -152,7 +154,7 @@ public class MailAccountProperties implements IMailProperties {
                     LOG.error("Non parseable integer value for property {}: {}", name, value, e);
                 }
             } catch (OXException e) {
-                LOG.error("Failed to query property {} from config-cascade for user {} in context {}", name, userId, contextId, e);
+                LOG.error("Failed to query property {} from config-cascade for user {} in context {}", name, I(userId), I(contextId), e);
             }
         }
 
@@ -188,7 +190,7 @@ public class MailAccountProperties implements IMailProperties {
 
                 return value.charAt(0);
             } catch (OXException e) {
-                LOG.error("Failed to query property {} from config-cascade for user {} in context {}", name, userId, contextId, e);
+                LOG.error("Failed to query property {} from config-cascade for user {} in context {}", name, I(userId), I(contextId), e);
             }
         }
 
@@ -219,7 +221,7 @@ public class MailAccountProperties implements IMailProperties {
 
                 return Boolean.parseBoolean(value.trim());
             } catch (OXException e) {
-                LOG.error("Failed to query property {} from config-cascade for user {} in context {}", name, userId, contextId, e);
+                LOG.error("Failed to query property {} from config-cascade for user {} in context {}", name, I(userId), I(contextId), e);
             }
         }
 
@@ -246,7 +248,7 @@ public class MailAccountProperties implements IMailProperties {
                 value = ConfigViews.getNonEmptyPropertyFrom(name, view);
                 return null == value ? defaultValue : value;
             } catch (OXException e) {
-                LOG.error("Failed to query property {} from config-cascade for user {} in context {}", name, userId, contextId, e);
+                LOG.error("Failed to query property {} from config-cascade for user {} in context {}", name, I(userId), I(contextId), e);
             }
         }
 
