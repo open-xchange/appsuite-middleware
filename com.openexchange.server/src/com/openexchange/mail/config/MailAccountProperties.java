@@ -50,30 +50,22 @@
 package com.openexchange.mail.config;
 
 import static com.openexchange.java.Autoboxing.I;
-import java.util.Map;
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.config.cascade.ConfigViews;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link MailAccountProperties} - Mail properties read from mail account with fallback to properties read from properties file.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MailAccountProperties implements IMailProperties {
+public class MailAccountProperties extends AbstractMailAccountProperties implements IMailProperties {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailAccountProperties.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailAccountProperties.class);
 
     protected Boolean enforceSecureConnection;
-    protected final Map<String, String> properties;
-    protected final boolean hasAccountProperties;
+
+    /** The mail server URL */
     protected final String url;
-    protected final int userId;
-    protected final int contextId;
 
     /**
      * Initializes a new {@link MailAccountProperties}.
@@ -84,14 +76,10 @@ public class MailAccountProperties implements IMailProperties {
      * @throws IllegalArgumentException If provided mail account is <code>null</code>
      */
     public MailAccountProperties(MailAccount mailAccount, int userId, int contextId) {
-        super();
-        this.userId = userId;
-        this.contextId = contextId;
+        super(mailAccount, userId, contextId);
         if (null == mailAccount) {
             throw new IllegalArgumentException("mail account is null.");
         }
-        properties = mailAccount.getProperties();
-        hasAccountProperties = null != properties && !properties.isEmpty();
         String tmp;
         try {
             tmp = mailAccount.generateMailServerURL();
@@ -100,159 +88,6 @@ public class MailAccountProperties implements IMailProperties {
             tmp = null;
         }
         url = tmp;
-    }
-
-    /**
-     * Gets the value for named property from {@link #properties account properties}.
-     *
-     * @param name The name to look-up
-     * @return The value or <code>null</code>
-     */
-    protected String getAccountProperty(String name) {
-        return hasAccountProperties ? properties.get(name) : null;
-    }
-
-    /**
-     * Looks-up the denoted property.
-     *
-     * @param name The property name
-     * @return The looked-up value or <code>null</code>
-     */
-    protected String lookUpProperty(String name) {
-        return lookUpProperty(name, null);
-    }
-
-    /**
-     * Looks-up the denoted property.
-     *
-     * @param name The property name
-     * @param defaultValue The default value to return if absent
-     * @return The looked-up value or given <code>defaultValue</code>
-     */
-    protected int lookUpIntProperty(String name, int defaultValue) {
-        String value = hasAccountProperties ? properties.get(name) : null;
-        if (null != value) {
-            try {
-                return Integer.parseInt(value.trim());
-            } catch (final NumberFormatException e) {
-                LOG.error("Non parseable integer value for property {}: {}", name, value, e);
-            }
-        }
-
-        ConfigViewFactory viewFactory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
-        if (null != viewFactory) {
-            try {
-                ConfigView view = viewFactory.getView(userId, contextId);
-                value = ConfigViews.getNonEmptyPropertyFrom(name, view);
-                if (null == value) {
-                    return defaultValue;
-                }
-
-                try {
-                    return Integer.parseInt(value.trim());
-                } catch (NumberFormatException e) {
-                    LOG.error("Non parseable integer value for property {}: {}", name, value, e);
-                }
-            } catch (OXException e) {
-                LOG.error("Failed to query property {} from config-cascade for user {} in context {}", name, I(userId), I(contextId), e);
-            }
-        }
-
-        return defaultValue;
-    }
-
-    /**
-     * Looks-up the denoted property.
-     *
-     * @param name The property name
-     * @param defaultValue The default value to return if absent
-     * @return The looked-up value or given <code>defaultValue</code>
-     */
-    protected char lookUpCharProperty(String name, char defaultValue) {
-        String value = hasAccountProperties ? properties.get(name) : null;
-        if (null != value) {
-            return value.trim().charAt(0);
-        }
-
-        ConfigViewFactory viewFactory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
-        if (null != viewFactory) {
-            try {
-                ConfigView view = viewFactory.getView(userId, contextId);
-                value = ConfigViews.getNonEmptyPropertyFrom(name, view);
-                if (null == value) {
-                    return defaultValue;
-                }
-
-                value = value.trim();
-                if (value.length() <= 0) {
-                    return defaultValue;
-                }
-
-                return value.charAt(0);
-            } catch (OXException e) {
-                LOG.error("Failed to query property {} from config-cascade for user {} in context {}", name, I(userId), I(contextId), e);
-            }
-        }
-
-        return defaultValue;
-    }
-
-    /**
-     * Looks-up the denoted property.
-     *
-     * @param name The property name
-     * @param defaultValue The default value to return if absent
-     * @return The looked-up value or given <code>defaultValue</code>
-     */
-    protected boolean lookUpBoolProperty(String name, boolean defaultValue) {
-        String value = hasAccountProperties ? properties.get(name) : null;
-        if (null != value) {
-            return Boolean.parseBoolean(value.trim());
-        }
-
-        ConfigViewFactory viewFactory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
-        if (null != viewFactory) {
-            try {
-                ConfigView view = viewFactory.getView(userId, contextId);
-                value = ConfigViews.getNonEmptyPropertyFrom(name, view);
-                if (null == value) {
-                    return defaultValue;
-                }
-
-                return Boolean.parseBoolean(value.trim());
-            } catch (OXException e) {
-                LOG.error("Failed to query property {} from config-cascade for user {} in context {}", name, I(userId), I(contextId), e);
-            }
-        }
-
-        return defaultValue;
-    }
-
-    /**
-     * Looks-up the denoted property.
-     *
-     * @param name The property name
-     * @param defaultValue The default value to return if absent
-     * @return The looked-up value or given <code>defaultValue</code>
-     */
-    protected String lookUpProperty(String name, String defaultValue) {
-        String value = hasAccountProperties ? properties.get(name) : null;
-        if (null != value) {
-            return value;
-        }
-
-        ConfigViewFactory viewFactory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
-        if (null != viewFactory) {
-            try {
-                ConfigView view = viewFactory.getView(userId, contextId);
-                value = ConfigViews.getNonEmptyPropertyFrom(name, view);
-                return null == value ? defaultValue : value;
-            } catch (OXException e) {
-                LOG.error("Failed to query property {} from config-cascade for user {} in context {}", name, I(userId), I(contextId), e);
-            }
-        }
-
-        return defaultValue;
     }
 
     @Override
