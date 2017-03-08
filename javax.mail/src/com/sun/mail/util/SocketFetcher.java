@@ -75,6 +75,8 @@ public class SocketFetcher {
     private SocketFetcher() {
     }
 
+    private static final SecureRandom RANDOM = new SecureRandom();
+
     /**
      * This method returns a Socket.  Properties control the use of
      * socket factories and other socket characteristics.  The properties
@@ -145,7 +147,18 @@ public class SocketFetcher {
     public static Socket getSocket(String host, int port, Properties props,
 				String prefix, boolean useSSL)
 				throws IOException {
+        InetAddress[] addresses = InetAddress.getAllByName(host);
+        if (addresses.length == 1) {            
+            return getSocket(addresses[0], host, port, props, prefix, useSSL);
+        }
+        
+        int pos = RANDOM.nextInt(addresses.length);
+        return new RoundRobinSocket(addresses, addresses[pos], host, port, props, prefix, useSSL);
+    }
 
+    static Socket getSocket(InetAddress address, String host, int port, Properties props,
+        String prefix, boolean useSSL)
+        throws IOException {
 	if (logger.isLoggable(Level.FINER))
 	    logger.finer("getSocket" + ", host " + host + ", port " + port +
 				", prefix " + prefix + ", useSSL " + useSSL);
@@ -215,7 +228,7 @@ public class SocketFetcher {
 		if (sfPort == -1)
 		    sfPort = port;
 		socket = createSocket(localaddr, localport,
-		    host, sfPort, cto, to, props, prefix, sf, useSSL);
+		    host, address, sfPort, cto, to, props, prefix, sf, useSSL);
 	    }
 	} catch (SocketTimeoutException sex) {
 	    throw sex;
@@ -236,7 +249,7 @@ public class SocketFetcher {
 
 	if (socket == null) {
 	    socket = createSocket(localaddr, localport,
-		    host, port, cto, to, props, prefix, null, useSSL);
+		    host, address, port, cto, to, props, prefix, null, useSSL);
 
 	} else {
 	    if (to >= 0) {
@@ -262,7 +275,23 @@ public class SocketFetcher {
      * SSLSocketFactory if useSSL is true.
      */
     private static Socket createSocket(InetAddress localaddr, int localport,
-				String host, int port, int cto, int to,
+                String host, int port, int cto, int to,
+                Properties props, String prefix,
+                SocketFactory sf, boolean useSSL)
+                throws IOException {
+        InetAddress address = InetAddress.getAllByName(host)[0];
+        return createSocket(localaddr, localport, host, address, port, cto, to, props, prefix, sf, useSSL);
+    }
+
+    /**
+     * Create a socket with the given local address and connected to
+     * the given host and port.  Use the specified connection timeout
+     * and read timeout.
+     * If a socket factory is specified, use it.  Otherwise, use the
+     * SSLSocketFactory if useSSL is true.
+     */
+    private static Socket createSocket(InetAddress localaddr, int localport,
+                String host, InetAddress address, int port, int cto, int to,
 				Properties props, String prefix,
 				SocketFactory sf, boolean useSSL)
 				throws IOException {
@@ -326,9 +355,9 @@ public class SocketFetcher {
 	try {
 	    logger.finest("connecting...");
 	    if (cto >= 0)
-		socket.connect(new InetSocketAddress(host, port), cto);
+	    socket.connect(new InetSocketAddress(host, port), cto);
 	    else
-		socket.connect(new InetSocketAddress(host, port));
+	    socket.connect(new InetSocketAddress(host, port));
 	    logger.finest("success!");
 	} catch (IOException ex) {
 	    logger.log(Level.FINEST, "connection failed", ex);
