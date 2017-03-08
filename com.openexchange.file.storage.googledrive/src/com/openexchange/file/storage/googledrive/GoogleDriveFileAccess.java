@@ -63,6 +63,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -80,7 +81,6 @@ import com.google.api.services.drive.model.ChildReference;
 import com.google.api.services.drive.model.FileList;
 import com.google.api.services.drive.model.ParentReference;
 import com.google.api.services.drive.model.Revision;
-import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
@@ -198,11 +198,54 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 if (FileStorageFileAccess.NEW != file.getId()) {
                     savedFile.setId(file.getId());
                     if ((null == modifiedFields || modifiedFields.contains(Field.FILENAME)) && false == Strings.isEmpty(file.getFileName())) {
+                        /*
+                         * first check if there is already such a file
+                         */
+                        {
+                            String fileName = file.getFileName();
+                            List<File> hits = searchByFileNamePattern(fileName, file.getFolderId(), false, Arrays.asList(Field.ID, Field.FILENAME), null, null, 0);
+                            boolean found = false;
+                            for (Iterator<File> it = hits.iterator(); !found && it.hasNext();) {
+                                if (it.next().getFileName().equals(fileName)) {
+                                    found = true;
+                                }
+                            }
+
+                            if (found) {
+                                throw FileStorageExceptionCodes.FILE_ALREADY_EXISTS.create();
+                            }
+                        }
                         savedFile.setTitle(file.getFileName());
                         savedFile = drive.files().patch(file.getId(), savedFile).execute();
                     }
                 } else {
-                    savedFile.setTitle(file.getFileName());
+                    /*
+                     * first check if there is already such a file
+                     */
+                    String fileNameToUse = null;
+                    {
+                        List<Field> fields = Arrays.asList(Field.ID, Field.FILENAME);
+                        String name = file.getFileName();
+                        String fileName = name;
+                        int count = 0;
+
+                        while (null == fileNameToUse) {
+                            List<File> hits = searchByFileNamePattern(fileName, file.getFolderId(), false, fields, null, null, 0);
+                            boolean found = false;
+                            for (Iterator<File> it = hits.iterator(); !found && it.hasNext();) {
+                                if (it.next().getFileName().equals(fileName)) {
+                                    found = true;
+                                }
+                            }
+
+                            if (found) {
+                                fileName = FileStorageUtility.enhance(name, ++count);
+                            } else {
+                                fileNameToUse = fileName;
+                            }
+                        }
+                    }
+                    savedFile.setTitle(fileNameToUse);
                     savedFile = drive.files().insert(savedFile).execute();
                 }
                 return new IDTuple(file.getFolderId(), savedFile.getId());
@@ -345,13 +388,53 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 }
             }
 
+            String title = srcFile.getTitle();
+
             // Create patch file
             com.google.api.services.drive.model.File patch = new com.google.api.services.drive.model.File();
-            patch.setParents(Collections.<ParentReference> singletonList(new ParentReference().setId(destFolder)));
+            patch.setParents(Collections.<ParentReference> singletonList(new ParentReference().setId(destId)));
             if (null != update) {
                 if (false == Strings.isEmpty(update.getTitle()) && (null == modifiedFields || modifiedFields.contains(File.Field.FILENAME)) && false == update.getTitle().equals(srcFile.getTitle())) {
                     patch.setTitle(update.getTitle());
+                    title=update.getTitle();
                 }
+            }
+
+
+            // Check destination folder
+
+            boolean changedName = false;
+            {
+                String baseName;
+                String ext;
+                {
+                    int dotPos = title.lastIndexOf('.');
+                    if (dotPos > 0) {
+                        baseName = title.substring(0, dotPos);
+                        ext = title.substring(dotPos);
+                    } else {
+                        baseName = title;
+                        ext = "";
+                    }
+                }
+                int count = 1;
+                boolean keepOn = true;
+                while (keepOn) {
+                    Drive.Children.List list = drive.children().list(destId);
+                    list.setQ(new StringBuilder().append("title = '").append(title).append("' and ").append(QUERY_STRING_FILES_ONLY_EXCLUDING_TRASH).toString());
+
+                    ChildList childList = list.execute();
+                    if (!childList.getItems().isEmpty()) {
+                        title = new StringBuilder(baseName).append(" (").append(count++).append(')').append(ext).toString();
+                        changedName = true;
+                    } else {
+                        keepOn = false;
+                    }
+                }
+            }
+
+            if(changedName){
+                patch.setTitle(title);
             }
 
             // Patch the file
@@ -502,38 +585,48 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
         try {
             Drive drive = googleDriveAccess.<Drive> getClient().client;
             if (FileStorageFileAccess.NEW == file.getId()) {
-                /*
-                 * Insert new file
-                 */
-                ThresholdFileHolder sink = null;
                 try {
-                    sink = new ThresholdFileHolder();
-                    sink.write(data);
+                    /*
+                     * first check if there is already such a file
+                     */
+                    String fileNameToUse = null;
+                    {
+                        List<Field> fields = Arrays.asList(Field.ID, Field.FILENAME);
+                        String name = file.getFileName();
+                        String fileName = name;
+                        int count = 0;
 
-                    String name = file.getFileName();
-                    String fileName = name;
-                    int count = 0;
-
-                    while (true) {
-                        try {
-                            fileMetadata.setTitle(fileName);
-                            Drive.Files.Insert insert = drive.files().insert(fileMetadata, new InputStreamContent(file.getFileMIMEType(), sink.getStream()));
-                            insert.getMediaHttpUploader().setDirectUploadEnabled(true);
-                            com.google.api.services.drive.model.File gDriveFile = insert.execute();
-                            String newId = gDriveFile.getId();
-                            file.setId(newId);
-                            return new IDTuple(file.getFolderId(), newId);
-                        } catch (com.google.api.client.http.HttpResponseException e) {
-                            if (SC_CONFLICT != e.getStatusCode()) {
-                                throw e;
+                        while (null == fileNameToUse) {
+                            List<File> hits = searchByFileNamePattern(fileName, file.getFolderId(), false, fields, null, null, 0);
+                            boolean found = false;
+                            for (Iterator<File> it = hits.iterator(); !found && it.hasNext();) {
+                                if (it.next().getFileName().equals(fileName)) {
+                                    found = true;
+                                }
                             }
 
-                            fileName = FileStorageUtility.enhance(name, ++count);
+                            if (found) {
+                                fileName = FileStorageUtility.enhance(name, ++count);
+                            } else {
+                                fileNameToUse = fileName;
+                            }
                         }
                     }
 
+                    fileMetadata.setTitle(fileNameToUse);
+                    Drive.Files.Insert insert = drive.files().insert(fileMetadata, new InputStreamContent(file.getFileMIMEType(), data));
+                    insert.getMediaHttpUploader().setDirectUploadEnabled(true);
+                    com.google.api.services.drive.model.File gDriveFile = insert.execute();
+                    String newId = gDriveFile.getId();
+                    file.setId(newId);
+                    return new IDTuple(file.getFolderId(), newId);
+                } catch (com.google.api.client.http.HttpResponseException e) {
+                    if (SC_CONFLICT != e.getStatusCode()) {
+                        throw e;
+                    }
+                    throw FileStorageExceptionCodes.FILE_ALREADY_EXISTS.create();
                 } finally {
-                    Streams.close(sink);
+                    Streams.close(data);
                 }
             }
 
@@ -543,6 +636,24 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
              * Upload new version of existing file, adjusting metadata as requested
              */
             if (null != file.getFileName() && (null == modifiedFields || modifiedFields.contains(Field.FILENAME))) {
+                /*
+                 * first check if there is already such a file
+                 */
+                {
+                    String fileName = file.getFileName();
+                    List<File> hits = searchByFileNamePattern(fileName, file.getFolderId(), false, Arrays.asList(Field.ID, Field.FILENAME), null, null, 0);
+                    boolean found = false;
+                    for (Iterator<File> it = hits.iterator(); !found && it.hasNext();) {
+                        if (it.next().getFileName().equals(fileName)) {
+                            found = true;
+                        }
+                    }
+
+                    if (found) {
+                        throw FileStorageExceptionCodes.FILE_ALREADY_EXISTS.create();
+                    }
+                }
+
                 fileMetadata.setTitle(file.getFileName());
             }
             Drive.Files.Update update = drive.files().update(file.getId(), fileMetadata, new InputStreamContent(file.getFileMIMEType(), data));

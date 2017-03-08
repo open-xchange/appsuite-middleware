@@ -759,6 +759,9 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     
     private void checkFolderExistence(String folderId) throws OXException{
         try {
+            if(Strings.isEmpty(folderId) || folderId.equals("/")){
+                return; // The root folder is always present
+            }
             getFolderMetadata(folderId);
         } catch (GetMetadataErrorException e) {
             OXException interpretedException = DropboxExceptionHandler.handleGetMetadataErrorException(e, folderId, "");
