@@ -640,7 +640,7 @@ public final class IMAPFolderConverter {
              * Check if subfolder creation is allowed
              */
             final ACLPermission ownPermission = new ACLPermission();
-            final int fp = RootSubfoldersEnabledCache.isRootSubfoldersEnabled(imapConfig, rootFolder) ? OCLPermission.CREATE_SUB_FOLDERS : OCLPermission.READ_FOLDER;
+            final int fp = RootSubfoldersEnabledCache.isRootSubfoldersEnabled(imapConfig, rootFolder, session) ? OCLPermission.CREATE_SUB_FOLDERS : OCLPermission.READ_FOLDER;
             ownPermission.setEntity(session.getUserId());
             ownPermission.setAllPermission(fp, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
             ownPermission.setFolderAdmin(false);

@@ -59,19 +59,13 @@ import java.util.concurrent.FutureTask;
 import javax.mail.MessagingException;
 import javax.mail.Store;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Interests;
-import com.openexchange.config.Reloadable;
-import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.config.IMAPConfig;
-import com.openexchange.imap.config.IMAPReloadable;
-import com.openexchange.imap.services.Services;
-import com.openexchange.imap.util.ImmutableReference;
-import com.openexchange.java.Strings;
+import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.session.Session;
 import com.sun.mail.imap.DefaultFolder;
 import com.sun.mail.imap.IMAPStore;
 
@@ -126,64 +120,6 @@ public final class RootSubfoldersEnabledCache {
         map.clear();
     }
 
-    private static volatile ImmutableReference<Boolean> rootSubfoldersAllowed;
-    private static Boolean rootSubfoldersAllowed() {
-        ImmutableReference<Boolean> tmp = rootSubfoldersAllowed;
-        if (null == tmp) {
-            synchronized (RootSubfoldersEnabledCache.class) {
-                tmp = rootSubfoldersAllowed;
-                if (null == tmp) {
-                    ConfigurationService service = Services.optService(ConfigurationService.class);
-                    Boolean defaultValue = null;
-                    if (null == service) {
-                        return defaultValue;
-                    }
-
-                    String property = service.getProperty("com.openexchange.imap.rootSubfoldersAllowed");
-                    tmp = new ImmutableReference<Boolean>(Strings.isEmpty(property) ? null : Boolean.valueOf(property.trim()));
-                    rootSubfoldersAllowed = tmp;
-                }
-            }
-        }
-        return tmp.getValue();
-    }
-
-    private static volatile Boolean namespacePerUser;
-    private static boolean namespacePerUser() {
-        Boolean tmp = namespacePerUser;
-        if (null == tmp) {
-            synchronized (RootSubfoldersEnabledCache.class) {
-                tmp = namespacePerUser;
-                if (null == tmp) {
-                    ConfigurationService service = Services.optService(ConfigurationService.class);
-                    boolean defaultValue = true;
-                    if (null == service) {
-                        return defaultValue;
-                    }
-                    tmp = Boolean.valueOf(service.getBoolProperty("com.openexchange.imap.namespacePerUser", defaultValue));
-                    namespacePerUser = tmp;
-                }
-            }
-        }
-        return tmp.booleanValue();
-    }
-
-    static {
-        IMAPReloadable.getInstance().addReloadable(new Reloadable() {
-
-            @Override
-            public void reloadConfiguration(ConfigurationService configService) {
-                namespacePerUser = null;
-                rootSubfoldersAllowed = null;
-            }
-
-            @Override
-            public Interests getInterests() {
-                return Reloadables.interestsForProperties("com.openexchange.imap.rootSubfoldersAllowed", "com.openexchange.imap.namespacePerUser");
-            }
-        });
-    }
-
     private static String getKeyFor(Store store, IMAPConfig imapConfig, boolean namespacePerUser) {
         if (namespacePerUser) {
             return store.getURLName().toString();
@@ -196,19 +132,20 @@ public final class RootSubfoldersEnabledCache {
      *
      * @param imapConfig The IMAP configuration
      * @param imapStore The IMAP store to test with
+     * @param session The session
      * @return <code>true</code> if MBox feature is enabled; otherwise <code>false</code>
      * @throws OXException If a mail error occurs
      */
-    public static boolean isRootSubfoldersEnabled(final IMAPConfig imapConfig, final IMAPStore imapStore) throws OXException {
+    public static boolean isRootSubfoldersEnabled(IMAPConfig imapConfig, IMAPStore imapStore, Session session) throws OXException {
         if (MailAccount.DEFAULT_ID == imapConfig.getAccountId()) {
-            Boolean rootSubfoldersAllowed = rootSubfoldersAllowed();
+            Boolean rootSubfoldersAllowed = IMAPProperties.getInstance().areRootSubfoldersAllowed(session.getUserId(), session.getContextId());
             if (null != rootSubfoldersAllowed) {
                 return rootSubfoldersAllowed.booleanValue();
             }
         }
 
         try {
-            boolean namespacePerUser = namespacePerUser();
+            boolean namespacePerUser =  IMAPProperties.getInstance().isNamespacePerUser(session.getUserId(), session.getContextId());
             return isRootSubfoldersEnabled0(getKeyFor(imapStore, imapConfig, namespacePerUser), imapConfig, (DefaultFolder) imapStore.getDefaultFolder(), namespacePerUser);
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e, imapConfig);
@@ -220,18 +157,19 @@ public final class RootSubfoldersEnabledCache {
      *
      * @param imapConfig The IMAP configuration
      * @param imapDefaultFolder The IMAP default folder to test with
+     * @param session The session
      * @return <code>true</code> if MBox feature is enabled; otherwise <code>false</code>
      * @throws OXException If a mail error occurs
      */
-    public static boolean isRootSubfoldersEnabled(final IMAPConfig imapConfig, final DefaultFolder imapDefaultFolder) throws OXException {
+    public static boolean isRootSubfoldersEnabled(IMAPConfig imapConfig, DefaultFolder imapDefaultFolder, Session session) throws OXException {
         if (MailAccount.DEFAULT_ID == imapConfig.getAccountId()) {
-            Boolean rootSubfoldersAllowed = rootSubfoldersAllowed();
+            Boolean rootSubfoldersAllowed = IMAPProperties.getInstance().areRootSubfoldersAllowed(session.getUserId(), session.getContextId());
             if (null != rootSubfoldersAllowed) {
                 return rootSubfoldersAllowed.booleanValue();
             }
         }
 
-        boolean namespacePerUser = namespacePerUser();
+        boolean namespacePerUser = IMAPProperties.getInstance().isNamespacePerUser(session.getUserId(), session.getContextId());
         return isRootSubfoldersEnabled0(getKeyFor(imapDefaultFolder.getStore(), imapConfig, namespacePerUser), imapConfig, imapDefaultFolder, namespacePerUser);
     }
 

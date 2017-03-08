@@ -87,4 +87,9 @@ public class HostExtractingGreetingListener implements GreetingListener {
         }
     }
 
+    @Override
+    public String toString() {
+        return pattern.toString();
+    }
+
 }

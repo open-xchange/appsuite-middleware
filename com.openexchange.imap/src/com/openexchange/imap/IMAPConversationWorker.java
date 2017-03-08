@@ -1107,7 +1107,7 @@ public final class IMAPConversationWorker {
                 /*
                  * Preselect message list according to given search pattern
                  */
-                filter = IMAPSearch.searchMessages(imapMessageStorage.getImapFolder(), searchTerm, imapMessageStorage.getImapConfig());
+                filter = IMAPSearch.searchMessages(imapMessageStorage.getImapFolder(), searchTerm, imapMessageStorage.getImapConfig(), imapMessageStorage.session);
                 if ((filter == null) || (filter.length == 0)) {
                     return IMAPMessageStorage.EMPTY_RETVAL;
                 }

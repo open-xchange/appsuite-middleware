@@ -263,21 +263,14 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         return b.booleanValue();
     }
 
-    private static volatile Boolean allowESORT;
     /** Whether ESORT is allowed to be utilized */
-    static boolean allowESORT() {
-        Boolean b = allowESORT;
-        if (null == b) {
-            synchronized (IMAPMessageStorage.class) {
-                b = allowESORT;
-                if (null == b) {
-                    final ConfigurationService service = Services.getService(ConfigurationService.class);
-                    b = Boolean.valueOf(null == service || service.getBoolProperty("com.openexchange.imap.allowESORT", true));
-                    allowESORT = b;
-                }
-            }
-        }
-        return b.booleanValue();
+    static boolean allowESORT(Session session) {
+        return allowESORT(session.getUserId(), session.getContextId());
+    }
+
+    /** Whether ESORT is allowed to be utilized */
+    static boolean allowESORT(int userId, int contextId) {
+        return IMAPProperties.getInstance().allowESORT(userId, contextId);
     }
 
     /** Whether SORT=DISPLAY is allowed to be utilized */
@@ -297,8 +290,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
         }
 
-        ComposedConfigProperty<Boolean> property = view.property("com.openexchange.imap.allowSORTDISPLAY", boolean.class);
-        return property.isDefined() ? property.get().booleanValue() : false;
+        return IMAPProperties.getInstance().allowSORTDISPLAY(userId, contextId);
     }
 
     /** Whether in-app sort is supposed to be utilized if IMAP-side SORT fails with a "NO" response */
@@ -318,8 +310,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
         }
 
-        ComposedConfigProperty<Boolean> property = view.property("com.openexchange.imap.fallbackOnFailedSORT", boolean.class);
-        return property.isDefined() ? property.get().booleanValue() : false;
+        return IMAPProperties.getInstance().fallbackOnFailedSORT(userId, contextId);
     }
 
     /** The full name for the virtual "all messages" folder */
@@ -348,12 +339,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             @Override
             public void reloadConfiguration(final ConfigurationService configService) {
                 useImapThreaderIfSupported = null;
-                allowESORT = null;
             }
 
             @Override
             public Interests getInterests() {
-                return Reloadables.interestsForProperties("com.openexchange.imap.useImapThreaderIfSupported", "com.openexchange.imap.allowESORT");
+                return Reloadables.interestsForProperties("com.openexchange.imap.useImapThreaderIfSupported");
             }
         });
     }
@@ -1731,7 +1721,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
         try {
             SearchTerm<?> unseenSearchTerm = new ANDTerm(searchTerm, new FlagTerm(MailMessage.FLAG_SEEN, false));
-            return IMAPSearch.searchMessages(imapFolder, unseenSearchTerm, imapConfig).length;
+            return IMAPSearch.searchMessages(imapFolder, unseenSearchTerm, imapConfig, session).length;
         } catch (MessagingException e) {
             if (ImapUtility.isInvalidMessageset(e)) {
                 return 0;
@@ -1815,7 +1805,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             boolean sortedByLocalPart;
             int[] msgIds;
             {
-                ImapSortResult result = IMAPSort.sortMessages(imapFolder, searchTerm, sortField, order, indexRange, allowESORT(), allowSORTDISPLAY(session, accountId), fallbackOnFailedSORT, imapConfig);
+                ImapSortResult result = IMAPSort.sortMessages(imapFolder, searchTerm, sortField, order, indexRange, allowESORT(session), allowSORTDISPLAY(session, accountId), fallbackOnFailedSORT, imapConfig, session);
                 sortedByLocalPart = result.sortedByLocalPart;
                 msgIds = result.msgIds;
                 if (false == result.rangeApplied) {
@@ -1865,7 +1855,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
             if (OrderDirection.ASC.equals(order)) {
                 SearchTerm<?> flagSearchTerm = createFlagsSearchTermFor(sortField, false);
-                unflaggedSeqNums = IMAPSort.sortMessages(imapFolder, flagSearchTerm, MailSortField.RECEIVED_DATE, OrderDirection.DESC, null, false, false, fallbackOnFailedSORT, imapConfig).msgIds;
+                unflaggedSeqNums = IMAPSort.sortMessages(imapFolder, flagSearchTerm, MailSortField.RECEIVED_DATE, OrderDirection.DESC, null, false, false, fallbackOnFailedSORT, imapConfig, session).msgIds;
 
                 if (unflaggedSeqNums.length == 0) {
                     // No unseen messages at all
@@ -1878,7 +1868,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 }
             } else {
                 SearchTerm<?> flagSearchTerm = createFlagsSearchTermFor(sortField, true);
-                flaggedSeqNums = IMAPSort.sortMessages(imapFolder, flagSearchTerm, MailSortField.RECEIVED_DATE, OrderDirection.DESC, null, false, false, fallbackOnFailedSORT, imapConfig).msgIds;
+                flaggedSeqNums = IMAPSort.sortMessages(imapFolder, flagSearchTerm, MailSortField.RECEIVED_DATE, OrderDirection.DESC, null, false, false, fallbackOnFailedSORT, imapConfig, session).msgIds;
 
                 if (flaggedSeqNums.length == 0) {
                     // No seen messages at all
@@ -1894,11 +1884,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             if (null == seqNumsToFetch) {
                 if (null == unflaggedSeqNums) {
                     SearchTerm<?> unseenSearchterm = createFlagsSearchTermFor(sortField, false);
-                    unflaggedSeqNums = IMAPSort.sortMessages(imapFolder, unseenSearchterm, MailSortField.RECEIVED_DATE, OrderDirection.DESC, null, false, false, fallbackOnFailedSORT, imapConfig).msgIds;
+                    unflaggedSeqNums = IMAPSort.sortMessages(imapFolder, unseenSearchterm, MailSortField.RECEIVED_DATE, OrderDirection.DESC, null, false, false, fallbackOnFailedSORT, imapConfig, session).msgIds;
                 }
                 if (null == flaggedSeqNums) {
                     SearchTerm<?> seenSearchterm = createFlagsSearchTermFor(sortField, true);
-                    flaggedSeqNums = IMAPSort.sortMessages(imapFolder, seenSearchterm, MailSortField.RECEIVED_DATE, OrderDirection.DESC, null, false, false, fallbackOnFailedSORT, imapConfig).msgIds;
+                    flaggedSeqNums = IMAPSort.sortMessages(imapFolder, seenSearchterm, MailSortField.RECEIVED_DATE, OrderDirection.DESC, null, false, false, fallbackOnFailedSORT, imapConfig, session).msgIds;
                 }
 
                 int[] sortedSeqNums;
@@ -1970,7 +1960,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
 
         // Fall-back path...
-        int[] msgIds = null == searchTerm ? null : IMAPSearch.issueIMAPSearch(imapFolder, searchTerm);
+        int[] msgIds = null == searchTerm ? null : IMAPSearch.issueIMAPSearch(imapFolder, searchTerm, session.getUserId(), session.getContextId());
         /*
          * Do application sort
          */

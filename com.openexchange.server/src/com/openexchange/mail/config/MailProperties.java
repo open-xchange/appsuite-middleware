@@ -359,6 +359,7 @@ public final class MailProperties implements IMailProperties {
             try {
                 params.maxToCcBcc = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.mail.maxToCcBcc", 0, view);
             } catch (final NumberFormatException e) {
+                LOG.debug("", e);
                 params.maxToCcBcc = 0;
             }
 
@@ -371,6 +372,7 @@ public final class MailProperties implements IMailProperties {
             try {
                 params.maxDriveAttachments = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.mail.maxDriveAttachments", 20, view);
             } catch (final NumberFormatException e) {
+                LOG.debug("", e);
                 params.maxDriveAttachments = 20;
             }
 
@@ -404,6 +406,7 @@ public final class MailProperties implements IMailProperties {
             try {
                 params.rateLimit = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.mail.rateLimit", 0, view);
             } catch (final NumberFormatException e) {
+                LOG.debug("", e);
                 params.rateLimit = 0;
             }
 
@@ -437,6 +440,7 @@ public final class MailProperties implements IMailProperties {
             try {
                 params.defaultArchiveDays = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.mail.archive.defaultDays", 90, view);
             } catch (final NumberFormatException e) {
+                LOG.debug("", e);
                 params.defaultArchiveDays = 90;
             }
 
@@ -462,7 +466,7 @@ public final class MailProperties implements IMailProperties {
         }
 
         PrimaryMailProps primaryMailProps = new PrimaryMailProps(params);
-        LOG.info("Primary mail properties successfully loaded for user {} in context {}!", userId, contextId);
+        LOG.info("Primary mail properties successfully loaded for user {} in context {}!", I(userId), I(contextId));
         for (String key : toRemove) {
             MDC.remove(key);
         }

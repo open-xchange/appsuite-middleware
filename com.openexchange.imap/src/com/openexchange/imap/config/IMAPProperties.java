@@ -49,16 +49,26 @@
 
 package com.openexchange.imap.config;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
+import org.slf4j.MDC;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.HostExtractingGreetingListener;
 import com.openexchange.imap.IMAPProtocol;
@@ -70,7 +80,11 @@ import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailConfig.BoolCapVal;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailProperties;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.session.UserAndContext;
 import com.openexchange.spamhandler.SpamHandler;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * {@link IMAPProperties}
@@ -91,6 +105,199 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     public static IMAPProperties getInstance() {
         return instance;
     }
+
+    private static final class PrimaryIMAPProperties {
+
+        private static class Params {
+
+            HostExtractingGreetingListener hostExtractingGreetingListener;
+            Boolean rootSubfoldersAllowed;
+            boolean namespacePerUser;
+            int umlautFilterThreshold;
+            int maxMailboxNameLength;
+            TIntSet invalidChars;
+            boolean allowESORT;
+            boolean allowSORTDISPLAY;
+            boolean fallbackOnFailedSORT;
+
+            Params() {
+                super();
+            }
+        }
+
+        // -------------------------------------------------------------------------------------------------------
+
+        final HostExtractingGreetingListener hostExtractingGreetingListener;
+        final Boolean rootSubfoldersAllowed;
+        final boolean namespacePerUser;
+        final int umlautFilterThreshold;
+        final int maxMailboxNameLength;
+        final TIntSet invalidChars;
+        final boolean allowESORT;
+        final boolean allowSORTDISPLAY;
+        final boolean fallbackOnFailedSORT;
+
+        PrimaryIMAPProperties(Params params) {
+            super();
+            this.hostExtractingGreetingListener = params.hostExtractingGreetingListener;
+            this.rootSubfoldersAllowed = params.rootSubfoldersAllowed;
+            this.namespacePerUser = params.namespacePerUser;
+            this.umlautFilterThreshold = params.umlautFilterThreshold;
+            this.maxMailboxNameLength = params.maxMailboxNameLength;
+            this.invalidChars = params.invalidChars;
+            this.allowESORT = params.allowESORT;
+            this.allowSORTDISPLAY = params.allowSORTDISPLAY;
+            this.fallbackOnFailedSORT = params.fallbackOnFailedSORT;
+        }
+    }
+
+    private static final Cache<UserAndContext, PrimaryIMAPProperties> CACHE_PRIMARY_PROPS = CacheBuilder.newBuilder().maximumSize(65536).expireAfterAccess(30, TimeUnit.MINUTES).build();
+
+    /**
+     * Clears the cache.
+     */
+    public static void invalidateCache() {
+        CACHE_PRIMARY_PROPS.invalidateAll();
+    }
+
+    private static PrimaryIMAPProperties getPrimaryIMAPProps(final int userId, final int contextId) throws OXException {
+        UserAndContext key = UserAndContext.newInstance(userId, contextId);
+        PrimaryIMAPProperties primaryMailProps = CACHE_PRIMARY_PROPS.getIfPresent(key);
+        if (null != primaryMailProps) {
+            return primaryMailProps;
+        }
+
+        Callable<PrimaryIMAPProperties> loader = new Callable<PrimaryIMAPProperties>() {
+
+            @Override
+            public PrimaryIMAPProperties call() throws Exception {
+                return doGetPrimaryIMAPProps(userId, contextId);
+            }
+        };
+
+        try {
+            return CACHE_PRIMARY_PROPS.get(key, loader);
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            throw cause instanceof OXException ? (OXException) cause : new OXException(cause);
+        }
+    }
+
+    static PrimaryIMAPProperties doGetPrimaryIMAPProps(int userId, int contextId) throws OXException {
+        ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
+        if (null == viewFactory) {
+            throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
+        }
+
+        ConfigView view = viewFactory.getView(userId, contextId);
+
+        Set<String> toRemove = new HashSet<>(32);
+        PrimaryIMAPProperties.Params params = new PrimaryIMAPProperties.Params();
+
+        {
+            String tmp = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.imap.greeting.host.regex", view);
+            tmp = Strings.isEmpty(tmp) ? null : tmp;
+            if (null != tmp) {
+                try {
+                    Pattern pattern = Pattern.compile(tmp);
+                    params.hostExtractingGreetingListener = new HostExtractingGreetingListener(pattern);
+
+                    String key = "  Host name regular expression";
+                    MDC.put(key, tmp);
+                    toRemove.add(key);
+                } catch (PatternSyntaxException e) {
+                    LOG.warn("Invalid expression for host name", e);
+                    String key = "  Host name regular expression";
+                    MDC.put(key, "<none>");
+                    toRemove.add(key);
+                }
+            }
+        }
+
+        {
+            String tmp = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.imap.rootSubfoldersAllowed", view);
+            if (null == tmp) {
+                params.rootSubfoldersAllowed = Boolean.FALSE;
+            } else {
+                params.rootSubfoldersAllowed = Boolean.valueOf(tmp);
+                String key = "  Root sub-folders allowed";
+                MDC.put(key, params.rootSubfoldersAllowed.toString());
+                toRemove.add(key);
+            }
+        }
+
+        {
+            params.namespacePerUser = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.imap.namespacePerUser", false, view);
+            String key = "  Namespace per User";
+            MDC.put(key, Boolean.toString(params.namespacePerUser));
+            toRemove.add(key);
+        }
+
+        {
+            params.umlautFilterThreshold = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.imap.umlautFilterThreshold", 50, view);
+            String key = "  Umlaut filter threhold";
+            MDC.put(key, Integer.toString(params.umlautFilterThreshold));
+            toRemove.add(key);
+        }
+
+        {
+            params.maxMailboxNameLength = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.imap.maxMailboxNameLength", 60, view);
+            String key = "  Max. Mailbox Name Length";
+            MDC.put(key, Integer.toString(params.maxMailboxNameLength));
+            toRemove.add(key);
+        }
+
+        {
+            TIntSet invalidChars;
+            String invalids = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.imap.invalidMailboxNameCharacters", view);
+            if (Strings.isEmpty(invalids)) {
+                invalidChars = new TIntHashSet(0);
+            } else {
+                final String[] sa = Strings.splitByWhitespaces(Strings.unquote(invalids));
+                final int length = sa.length;
+                invalidChars = new TIntHashSet(length);
+                for (int i = 0; i < length; i++) {
+                    invalidChars.add(sa[i].charAt(0));
+                }
+
+                params.invalidChars = invalidChars;
+                String key = "  Invalid Mailbox Characters";
+                MDC.put(key, invalids);
+                toRemove.add(key);
+            }
+
+        }
+
+        {
+            params.allowESORT = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.imap.allowESORT", true, view);
+            String key = "  Allow ESORT";
+            MDC.put(key, Boolean.toString(params.allowESORT));
+            toRemove.add(key);
+        }
+
+        {
+            params.allowSORTDISPLAY = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.imap.allowSORTDISPLAY", false, view);
+            String key = "  Allow SORT-DSIPLAY";
+            MDC.put(key, Boolean.toString(params.allowSORTDISPLAY));
+            toRemove.add(key);
+        }
+
+        {
+            params.fallbackOnFailedSORT = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.imap.fallbackOnFailedSORT", false, view);
+            String key = "  Fallback On Failed SORT";
+            MDC.put(key, Boolean.toString(params.fallbackOnFailedSORT));
+            toRemove.add(key);
+        }
+
+        PrimaryIMAPProperties primaryIMAPProps = new PrimaryIMAPProperties(params);
+        LOG.info("Primary IMAP properties successfully loaded for user {} in context {}!", userId, contextId);
+        for (String key : toRemove) {
+            MDC.remove(key);
+        }
+        return primaryIMAPProps;
+    }
+
+    // --------------------------------------------------------------------------------------------------------------
 
     /*-
      * Fields for global properties
@@ -117,8 +324,6 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     private int imapTimeout;
 
     private int imapConnectionTimeout;
-
-    private int fetchTimeout;
 
     private int imapTemporaryDown;
 
@@ -436,7 +641,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             this.cipherSuites = Strings.isEmpty(tmp) ? null : tmp;
             logBuilder.append("\tSupported SSL cipher suites: ").append(null == this.cipherSuites ? "<default>" : cipherSuites).append("\n");
         }
-        
+
         {
             String tmp = configuration.getProperty("com.openexchange.imap.greeting.host.regex", "").trim();
             tmp = Strings.isEmpty(tmp) ? null : tmp;
@@ -469,7 +674,6 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         supportsACLs = null;
         imapTimeout = 0;
         imapConnectionTimeout = 0;
-        fetchTimeout = 10000;
         imapTemporaryDown = 0;
         imapAuthEnc = null;
         entity2AclImpl = null;
@@ -484,6 +688,188 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         cipherSuites = null;
         hostExtractingGreetingListener = null;
     }
+
+    /**
+     * Gets the container type.
+     *
+     * @return The container type
+     */
+    public String getsContainerType() {
+        return sContainerType;
+    }
+
+    /**
+     * Gets the {@link Entity2ACL}.
+     *
+     * @return The {@link Entity2ACL}
+     */
+    public String getEntity2AclImpl() {
+        return entity2AclImpl;
+    }
+
+    /**
+     * Gets the spam handler name.
+     *
+     * @return The spam handler name
+     */
+    public String getSpamHandlerName() {
+        return spamHandlerName;
+    }
+
+    /**
+     * Gets the greeting listener to parse the host name information from <b><i>primary</i></b> IMAP server's greeting string.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The host name extractor or <code>null</code>
+     */
+    public HostExtractingGreetingListener getHostNameRegex(int userId, int contextId) {
+        try {
+            PrimaryIMAPProperties primaryIMAPProps = getPrimaryIMAPProps(userId, contextId);
+            return primaryIMAPProps.hostExtractingGreetingListener;
+        } catch (Exception e) {
+            LOG.error("Failed to get host name expression for user {} in context {}. Using default default {} instead.", I(userId), I(contextId), hostExtractingGreetingListener, e);
+            return hostExtractingGreetingListener;
+        }
+    }
+
+    /**
+     * Checks whether root sub-folders are allowed for primary IMAP server.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> if allowed; otherwise <code>false</code>
+     */
+    public Boolean areRootSubfoldersAllowed(int userId, int contextId) {
+        try {
+            PrimaryIMAPProperties primaryIMAPProps = getPrimaryIMAPProps(userId, contextId);
+            return primaryIMAPProps.rootSubfoldersAllowed;
+        } catch (Exception e) {
+            LOG.error("Failed to get rootSubfoldersAllowed for user {} in context {}. Using default default instead.", I(userId), I(contextId), e);
+            return null;
+        }
+    }
+
+    /**
+     * Checks whether to assume a namespace per user for primary IMAP server.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> to assume a namespace per user; otherwise <code>false</code>
+     */
+    public boolean isNamespacePerUser(int userId, int contextId) {
+        try {
+            PrimaryIMAPProperties primaryIMAPProps = getPrimaryIMAPProps(userId, contextId);
+            return primaryIMAPProps.namespacePerUser;
+        } catch (Exception e) {
+            LOG.error("Failed to get namespacePerUser for user {} in context {}. Using default default instead.", I(userId), I(contextId), e);
+            return true;
+        }
+    }
+
+    /**
+     * Gets the threshold when to manually search with respect to umlauts.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The threshold
+     */
+    public int getUmlautFilterThreshold(int userId, int contextId) {
+        try {
+            PrimaryIMAPProperties primaryIMAPProps = getPrimaryIMAPProps(userId, contextId);
+            return primaryIMAPProps.umlautFilterThreshold;
+        } catch (Exception e) {
+            LOG.error("Failed to get umlautFilterThreshold for user {} in context {}. Using default default instead.", I(userId), I(contextId), e);
+            return 50;
+        }
+    }
+
+    /**
+     * Gets max. length for a mailbox name.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The length
+     */
+    public int getMaxMailboxNameLength(int userId, int contextId) {
+        try {
+            PrimaryIMAPProperties primaryIMAPProps = getPrimaryIMAPProps(userId, contextId);
+            return primaryIMAPProps.maxMailboxNameLength;
+        } catch (Exception e) {
+            LOG.error("Failed to get maxMailboxNameLength for user {} in context {}. Using default default instead.", I(userId), I(contextId), e);
+            return 60;
+        }
+    }
+
+    /**
+     * Gets the threshold when to manually search with respect to umlauts.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The threshold
+     */
+    public TIntSet getInvalidChars(int userId, int contextId) {
+        try {
+            PrimaryIMAPProperties primaryIMAPProps = getPrimaryIMAPProps(userId, contextId);
+            return primaryIMAPProps.invalidChars;
+        } catch (Exception e) {
+            LOG.error("Failed to get invalidChars for user {} in context {}. Using default default instead.", I(userId), I(contextId), e);
+            return new TIntHashSet(0);
+        }
+    }
+
+    /**
+     * Whether ESORT is allowed to be utilized
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> if allowed; otherwise <code>false</code>
+     */
+    public boolean allowESORT(int userId, int contextId) {
+        try {
+            PrimaryIMAPProperties primaryIMAPProps = getPrimaryIMAPProps(userId, contextId);
+            return primaryIMAPProps.allowESORT;
+        } catch (Exception e) {
+            LOG.error("Failed to get allowESORT for user {} in context {}. Using default default instead.", I(userId), I(contextId), e);
+            return true;
+        }
+    }
+
+    /**
+     * Whether ESORT is allowed to be utilized
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> if allowed; otherwise <code>false</code>
+     */
+    public boolean allowSORTDISPLAY(int userId, int contextId) {
+        try {
+            PrimaryIMAPProperties primaryIMAPProps = getPrimaryIMAPProps(userId, contextId);
+            return primaryIMAPProps.allowSORTDISPLAY;
+        } catch (Exception e) {
+            LOG.error("Failed to get allowSORTDISPLAY for user {} in context {}. Using default default instead.", I(userId), I(contextId), e);
+            return false;
+        }
+    }
+
+    /**
+     * Whether in-app sort is supposed to be utilized if IMAP-side SORT fails with a "NO" response
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> if allowed; otherwise <code>false</code>
+     */
+    public boolean fallbackOnFailedSORT(int userId, int contextId) {
+        try {
+            PrimaryIMAPProperties primaryIMAPProps = getPrimaryIMAPProps(userId, contextId);
+            return primaryIMAPProps.fallbackOnFailedSORT;
+        } catch (Exception e) {
+            LOG.error("Failed to get fallbackOnFailedSORT for user {} in context {}. Using default default instead.", I(userId), I(contextId), e);
+            return false;
+        }
+    }
+
+    // -----------------------------------------------------------------------------------------------------------
 
     @Override
     public boolean isFastFetch() {
@@ -535,17 +921,6 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         return imapConnectionTimeout;
     }
 
-    /**
-     * Gets the special timeout for FETCH commands.
-     * <p>
-     * Default is 10.000 milliseconds
-     *
-     * @return The special timeout for FETCH commands
-     */
-    public int getFetchTimeout() {
-        return fetchTimeout;
-    }
-
     @Override
     public int getImapTemporaryDown() {
         return imapTemporaryDown;
@@ -576,15 +951,6 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         return supportsACLs;
     }
 
-    /**
-     * Gets the {@link Entity2ACL}.
-     *
-     * @return The {@link Entity2ACL}
-     */
-    public String getEntity2AclImpl() {
-        return entity2AclImpl;
-    }
-
     @Override
     public int getBlockSize() {
         return blockSize;
@@ -598,15 +964,6 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     @Override
     public Map<String, Boolean> getNewACLExtMap() {
         return newACLExtMap;
-    }
-
-    /**
-     * Gets the spam handler name.
-     *
-     * @return The spam handler name
-     */
-    public String getSpamHandlerName() {
-        return spamHandlerName;
     }
 
     @Override
@@ -694,15 +1051,6 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         return allowFetchSingleHeaders;
     }
 
-    /**
-     * Gets the container type.
-     *
-     * @return The container type
-     */
-    public String getsContainerType() {
-        return sContainerType;
-    }
-
     @Override
     public String getSSLProtocols() {
         return sslProtocols;
@@ -711,15 +1059,6 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     @Override
     public String getSSLCipherSuites() {
         return cipherSuites;
-    }
-
-    /**
-     * Gets the greeting listener to parse the host name information from <b><i>primary</i></b> IMAP server's greeting string.
-     *
-     * @return The host name extractor or <code>null</code>
-     */
-    public HostExtractingGreetingListener getHostNameRegex() {
-        return hostExtractingGreetingListener;
     }
 
 }

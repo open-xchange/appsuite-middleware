@@ -274,7 +274,7 @@ public final class MailAccountSMTPProperties extends MailAccountTransportPropert
             }
         }
 
-        return lookUpProperty("com.openexchange.smtp.ssl.protocols", SMTPProperties.getInstance().getSSLCipherSuites());
+        return lookUpProperty("com.openexchange.smtp.ssl.ciphersuites", SMTPProperties.getInstance().getSSLCipherSuites());
     }
 
 }

@@ -75,7 +75,7 @@ public interface IIMAPProperties extends IMailProperties {
      * @return <code>true</code> to issue STARTTLS command; otherwise <code>false</code>
      */
     public boolean isEnableTls();
-    
+
     /**
      * Whether to audit log is enabled or not to trace issued IMAP commands.
      *
