@@ -181,7 +181,12 @@ public class MailAccountProperties implements IMailProperties {
                     return defaultValue;
                 }
 
-                return value.trim().charAt(0);
+                value = value.trim();
+                if (value.length() <= 0) {
+                    return defaultValue;
+                }
+
+                return value.charAt(0);
             } catch (OXException e) {
                 LOG.error("Failed to query property {} from config-cascade for user {} in context {}", name, userId, contextId, e);
             }
