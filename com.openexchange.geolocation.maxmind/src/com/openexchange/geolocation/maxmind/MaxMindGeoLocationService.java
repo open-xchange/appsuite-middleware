@@ -62,6 +62,7 @@ import java.net.UnknownHostException;
 import org.osgi.framework.Bundle;
 import com.maxmind.db.CHMCache;
 import com.maxmind.geoip2.DatabaseReader;
+import com.maxmind.geoip2.exception.AddressNotFoundException;
 import com.maxmind.geoip2.exception.GeoIp2Exception;
 import com.maxmind.geoip2.model.CityResponse;
 import com.maxmind.geoip2.record.City;
@@ -72,6 +73,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.geolocation.DefaultGeoInformation;
 import com.openexchange.geolocation.GeoInformation;
+import com.openexchange.geolocation.GeoLocationExceptionCodes;
 import com.openexchange.geolocation.GeoLocationService;
 import com.openexchange.geolocation.maxmind.osgi.MaxMindGeoLocationServiceActivator;
 import com.openexchange.java.Streams;
@@ -81,6 +83,7 @@ import com.openexchange.osgi.BundleResourceLoader;
  * {@link MaxMindGeoLocationService} - The MaxMind Geo location service.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.8.4
  */
 public class MaxMindGeoLocationService implements GeoLocationService {
@@ -119,7 +122,7 @@ public class MaxMindGeoLocationService implements GeoLocationService {
             // Pass DatabaseReader to a new instance
             return new MaxMindGeoLocationService(reader);
         } catch (IOException e) {
-            throw OXException.general("Failed to read " + databasePath, e);
+            throw GeoLocationExceptionCodes.IO_ERROR.create(e, "Failed to read " + databasePath);
         } finally {
             Streams.close(in);
         }
@@ -142,7 +145,7 @@ public class MaxMindGeoLocationService implements GeoLocationService {
         } catch (MalformedURLException e) {
             throw OXException.general("No such protocol handler for URI: " + uri, e);
         } catch (IOException e) {
-            throw OXException.general("Stream could not be obtained from URI: " + uri, e);
+            throw GeoLocationExceptionCodes.IO_ERROR.create(e, "Stream could not be obtained from URI: " + uri);
         }
     }
 
@@ -171,7 +174,7 @@ public class MaxMindGeoLocationService implements GeoLocationService {
 
             return in;
         } catch (IOException e) {
-            throw OXException.general("Stream could not be obtained from resource: " + uri, e);
+            throw GeoLocationExceptionCodes.IO_ERROR.create(e, "Stream could not be obtained from resource: " + uri);
         }
     }
 
@@ -206,7 +209,7 @@ public class MaxMindGeoLocationService implements GeoLocationService {
         try {
             return InetAddress.getByName(ipAddress);
         } catch (UnknownHostException e) {
-            throw new OXException(e);
+            throw GeoLocationExceptionCodes.UNABLE_TO_RESOLVE_HOST.create(e, ipAddress);
         }
     }
 
@@ -222,9 +225,12 @@ public class MaxMindGeoLocationService implements GeoLocationService {
         try {
             return reader.city(inetAddress);
         } catch (IOException e) {
-            throw new OXException(e);
+            throw GeoLocationExceptionCodes.IO_ERROR.create(e);
         } catch (GeoIp2Exception e) {
-            throw new OXException(e);
+            if (e instanceof AddressNotFoundException) {
+                throw GeoLocationExceptionCodes.ADDRESS_NOT_FOUND.create(e, ipAddress);
+            }
+            throw GeoLocationExceptionCodes.UNEXPECTED_ERROR.create(e);
         }
     }
 
