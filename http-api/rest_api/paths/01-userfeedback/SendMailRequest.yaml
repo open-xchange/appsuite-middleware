@@ -63,4 +63,4 @@
       Example:
         description: Export user feedback from 2016-01-01 to 2016-12-31 and send it via mail to user1@example.org and user2@example.org
         example: POST http://localhost:8009/userfeedback/v1/mail/default/star-rating-v1?start=1451606400&end=1483228799
-                 user1@example.org,User%201,,user2@example.org,User@202
+                 user1@example.org,User%201,user2@example.org,User@202
