@@ -50,8 +50,13 @@
 package com.openexchange.ipcheck.countrycode;
 
 import java.net.Inet4Address;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.net.InetAddresses;
 import com.openexchange.ajax.ipcheck.IPCheckConfiguration;
 import com.openexchange.ajax.ipcheck.IPCheckers;
@@ -122,7 +127,7 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
 
     /**
      * Accepts the IP change and applies it to the specified {@link Session}
-     * 
+     *
      * @param current The current IP address
      * @param session The {@link Session}
      * @param configuration The {@link IPCheckConfiguration}
@@ -134,7 +139,7 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
 
     /**
      * Denies the IP change and kicks the specified {@link Session}
-     * 
+     *
      * @param current The current IP
      * @param session The {@link Session}
      * @param geoInformationCurrent the {@link GeoInformation} of the current IP
@@ -154,7 +159,7 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.management.MetricAware#getMetricsObject()
      */
     @Override
@@ -162,27 +167,57 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
         return metrics;
     }
 
+    private static final Cache<String, Boolean> CACHE_PRIVATE_IPS = CacheBuilder.newBuilder().maximumSize(65536).expireAfterAccess(90, TimeUnit.MINUTES).build();
+
+    /**
+     * Checks whether the specified IP address lies in the private range.
+     *
+     * @param ip The IP address to check
+     * @return <code>true</code> if the IP address lies within the private range of class A, B, or C; <code>false</code> otherwise
+     */
+    private boolean isPrivateV4Address(final String ip) {
+        Boolean isPrivate = CACHE_PRIVATE_IPS.getIfPresent(ip);
+        if (null != isPrivate) {
+            return isPrivate.booleanValue();
+        }
+
+        Callable<Boolean> loader = new Callable<Boolean>() {
+
+            @Override
+            public Boolean call() throws Exception {
+                return Boolean.valueOf(doCheckForPrivateV4Address(ip));
+            }
+        };
+
+        try {
+            return CACHE_PRIVATE_IPS.get(ip, loader).booleanValue();
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            throw cause instanceof RuntimeException ? (RuntimeException) cause : new IllegalStateException(cause);
+        }
+    }
+
     /**
      * <p>Checks whether the specified IP address lies in the private range.</p>
-     * 
+     *
      * <ul>
      * <li>Class A range: 10.0.0.0 - 10.255.255.255</li>
      * <li>Class B range: 172.16.0.0 - 172.31.255.255</li>
      * <li>Class C range: 192.168.0.0 - 192.168.255.255</li>
      * </ul>
-     * 
+     *
      * <p>
      * Based on {@link Inet4Address#isSiteLocalAddress()}, with addition of the check for the 172.16.0.0 - 172.31.255.255 block
      * </p>
-     * 
+     *
      * @param ip The IP address to check
      * @return <code>true</code> if the IP address lies within the private range of class A, B, or C;
      *         <code>false</code> otherwise
      */
-    private boolean isPrivateV4Address(String ip) {
+    static boolean doCheckForPrivateV4Address(String ip) {
         int address = InetAddresses.coerceToInteger(InetAddresses.forString(ip));
         return (((address >>> 24) & 0xFF) == 10) // Class A
-            || ((((address >>> 24) & 0xFF) == 172) && ((address >>> 16) & 0xFF) >= 16 && ((address >>> 16) & 0xFF) <= 31) // Class B 
+            || ((((address >>> 24) & 0xFF) == 172) && ((address >>> 16) & 0xFF) >= 16 && ((address >>> 16) & 0xFF) <= 31) // Class B
             || ((((address >>> 24) & 0xFF) == 192) && (((address >>> 16) & 0xFF) == 168)); // Class C
     }
 }
