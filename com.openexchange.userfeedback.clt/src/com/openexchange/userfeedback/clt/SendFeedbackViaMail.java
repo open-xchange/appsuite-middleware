@@ -49,12 +49,14 @@
 
 package com.openexchange.userfeedback.clt;
 
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Iterator;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -64,10 +66,16 @@ import javax.ws.rs.core.MediaType;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.client.ClientConfig;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import com.openexchange.cli.AbstractRestCLI;
 import com.openexchange.java.AsciiReader;
+import com.openexchange.java.Strings;
 
 /**
  * {@link SendFeedbackViaMail}
@@ -175,15 +183,44 @@ public class SendFeedbackViaMail extends AbstractRestCLI<Void> {
     protected Void invoke(Options option, CommandLine cmd, Builder context) throws Exception {
         context.accept(MediaType.APPLICATION_JSON_TYPE, MediaType.APPLICATION_OCTET_STREAM_TYPE);
         String recipients = cmd.getOptionValue(RECIPIENTS_SHORT);
-        String csv = "";
+        JSONArray array = new JSONArray();
+        CSVParser parser = null;
+        FileReader reader = null;
         try {
-            csv = new String(Files.readAllBytes(Paths.get(recipients)));
+            reader = new FileReader(recipients);
+            parser = new CSVParser(reader, CSVFormat.DEFAULT);
+            Iterator<CSVRecord> it = parser.iterator();
+            while (it.hasNext()) {
+                CSVRecord record = it.next();
+                String address = record.get(0);
+                String displayName = record.get(1);
+                String pgp = record.get(2);
+                JSONObject json = new JSONObject();
+                json.put("address", address);
+                json.put("displayName", displayName);
+                if (null != pgp && Strings.isNotEmpty(pgp)) {
+                    try {
+                        pgp = new String(Files.readAllBytes(Paths.get(pgp)));
+                        json.put("pgpKey", pgp);
+                    } catch (IOException e) {
+                        System.err.println("Could not load PGP key " + pgp);
+                    }
+                }
+                array.add(0, json);
+            }
         } catch (IOException e) {
             System.err.println("File not found: " + cmd.getOptionValue(RECIPIENTS_SHORT));
             System.exit(1);
             return null;
+        } finally {
+            if (null != parser) {
+                parser.close();
+            }
+            if (null != reader) {
+                reader.close();
+            }
         }
-        InputStream response = context.post(Entity.text(csv), InputStream.class);
+        InputStream response = context.post(Entity.json(array.toString()), InputStream.class);
         System.out.println(IOUtils.toCharArray(new AsciiReader(response)));
         return null;
     }

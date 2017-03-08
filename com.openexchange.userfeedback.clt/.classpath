@@ -16,5 +16,7 @@
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.io_2.2.0.v201405211200.jar" sourcepath="/com.openexchange.bundles/source/org.apache.commons.io.source_2.2.0.v201405211200.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.global"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.java"/>
+	<classpathentry kind="lib" path="lib/commons-csv-1.4.jar" sourcepath="lib/sources/commons-csv-1.4-sources.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/org.json"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

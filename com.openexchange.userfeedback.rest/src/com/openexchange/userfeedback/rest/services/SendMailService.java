@@ -49,12 +49,9 @@
 
 package com.openexchange.userfeedback.rest.services;
 
-import java.io.IOException;
-import java.io.StringReader;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
@@ -68,9 +65,9 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.java.Strings;
 import com.openexchange.rest.services.JAXRSService;
 import com.openexchange.rest.services.annotation.Role;
@@ -96,75 +93,60 @@ public class SendMailService extends JAXRSService {
 
     @POST
     @Path("/{context-group}/{type}")
-    @Consumes(MediaType.TEXT_PLAIN)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response sendMail(@QueryParam("start") final long start, @QueryParam("end") final long end, @PathParam("type") final String type, @PathParam("context-group") final String contextGroup,
-        @QueryParam("subject") String subject, @QueryParam("body") String body, String recipients) {
-        return sendMail(start, end, type, contextGroup, subject, body, "false", recipients);
+        @QueryParam("subject") String subject, @QueryParam("body") String body, String json) {
+        return send(contextGroup, type, start, end, subject, body, json, false);
     }
 
     @POST
     @Path("/{context-group}/{type}/pgp")
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response sendMail(@QueryParam("start") final long start, @QueryParam("end") final long end, @PathParam("type") final String type, @PathParam("context-group") final String contextGroup,
-        @QueryParam("subject") String subject, @QueryParam("body") String body, @QueryParam("usePgp") String usePgp, String recipients) {
-
-        boolean pgp = Boolean.parseBoolean(usePgp);
-        if (pgp) {
-            return Response.status(501).build();
-        } else {
-            ResponseBuilder builder = null;
-            try {
-                if (null == subject || Strings.isEmpty(subject)) {
-                    StringBuilder sb = new StringBuilder();
-                    SimpleDateFormat df = new SimpleDateFormat();
-                    df.setTimeZone(TimeZone.getTimeZone("UTC"));
-                    sb.append("User Feedback Report: ").append(df.format(new Date(TimeUnit.SECONDS.toMillis(start)))).append(" to ").append(df.format(new Date(TimeUnit.SECONDS.toMillis(end))));
-                    subject = sb.toString();
-                }
-                if (null == body) {
-                    body = "";
-                }
-                Map<String, String> recipientsMap = parseCSV(recipients, false);
-                Map<String, String> pgpKeysMap = parseCSV(recipients, true);
-                FeedbackMailService service = getService(FeedbackMailService.class);
-                FeedbackMailFilter filter = new FeedbackMailFilter(contextGroup, recipientsMap, subject, body, start, end, type);
-                String response = service.sendFeedbackMail(filter);
-                builder = Response.status(200);
-                if (Strings.isEmpty(response)) {
-                    return builder.build();
-                }
-                builder.entity(response);
-                builder.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM + "; charset=utf-8");
-                return builder.build();
-            } catch (Exception e) {
-                builder = Response.status(400).entity("Could not parse CSV.");
-                return builder.build();
-            }
-        }
+        @QueryParam("subject") String subject, @QueryParam("body") String body, @QueryParam("usePgp") String usePgp, String json) {
+        return send(contextGroup, type, start, end, subject, body, json, true);
     }
 
-    private Map<String, String> parseCSV(String csv, boolean pgpKeys) throws IOException {
-        Map<String, String> result = new HashMap<>();
-        StringReader reader = null;
-        CSVParser parser = null;
+    private Response send(String contextGroup, String type, long start, long end, String subject, String mailBody, String json, boolean usePgp) {
+        JSONArray array = null;
         try {
-            reader = new StringReader(csv);
-            parser = new CSVParser(reader, CSVFormat.RFC4180);
-            Iterator<CSVRecord> i = parser.iterator();
-            while (i.hasNext()) {
-                CSVRecord record = i.next();
-                result.put(record.get(0), pgpKeys ? record.get(2) : record.get(1));
+            array = new JSONArray(json);
+            ResponseBuilder builder = null;
+            if (null == subject || Strings.isEmpty(subject)) {
+                StringBuilder sb = new StringBuilder();
+                SimpleDateFormat df = new SimpleDateFormat();
+                df.setTimeZone(TimeZone.getTimeZone("UTC"));
+                sb.append("User Feedback Report: ").append(df.format(new Date(TimeUnit.SECONDS.toMillis(start)))).append(" to ").append(df.format(new Date(TimeUnit.SECONDS.toMillis(end))));
+                subject = sb.toString();
             }
-        } finally {
-            if (null != parser) {
-                parser.close();
+            if (null == mailBody) {
+                mailBody = "";
             }
-            if (null != reader) {
-                reader.close();
+            Map<String, String> recipients = new HashMap<>(array.length());
+            Map<String, String> pgpKeys = new HashMap<>(array.length());
+            for (int i = 0; i < array.length(); i++) {
+                JSONObject object = array.getJSONObject(i);
+                String address = object.getString("address");
+                String displayName = object.getString("displayName");
+                String pgpKey = object.getString("pgpKey");
+                recipients.put(address, displayName);
+                pgpKeys.put(address, pgpKey);
             }
+            FeedbackMailService service = getService(FeedbackMailService.class);
+            FeedbackMailFilter filter = new FeedbackMailFilter(contextGroup, recipients, subject, mailBody, start, end, type);
+            String response = service.sendFeedbackMail(filter);
+            builder = Response.status(200);
+            if (Strings.isEmpty(response)) {
+                return builder.build();
+            }
+            builder.entity(response);
+            builder.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM + "; charset=utf-8");
+            return builder.build();
+        } catch (JSONException e) {
+            return null;
         }
-        return result;
     }
 
 }

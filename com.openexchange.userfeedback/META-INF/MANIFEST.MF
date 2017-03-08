@@ -23,7 +23,5 @@ Import-Package: com.openexchange.ajax.container,
  org.osgi.util.tracker
 Export-Package: com.openexchange.userfeedback,
  com.openexchange.userfeedback.exception,
- com.openexchange.userfeedback.filter,
- org.apache.commons.csv
-Bundle-ClassPath: .,
- lib/commons-csv-1.4.jar
+ com.openexchange.userfeedback.filter
+Bundle-ClassPath: .
