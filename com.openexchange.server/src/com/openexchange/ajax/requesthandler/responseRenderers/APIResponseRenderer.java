@@ -278,7 +278,7 @@ public class APIResponseRenderer implements ResponseRenderer {
      * @return <code>true</code> if a JavaScript call-back is expected; otherwise <code>false</code>
      */
     public static boolean expectsJsCallback(HttpServletRequest req) {
-        return isPlainJson(req) ? false : (isRespondWithHTML(req) || req.getParameter(CALLBACK) != null);
+        return isPlainJson(req) ? false : (isMultipartContent(req) || isRespondWithHTML(req) || req.getParameter(CALLBACK) != null);
     }
 
     /**
