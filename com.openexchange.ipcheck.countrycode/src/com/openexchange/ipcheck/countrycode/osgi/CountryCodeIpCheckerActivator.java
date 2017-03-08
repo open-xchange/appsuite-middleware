@@ -87,11 +87,11 @@ public class CountryCodeIpCheckerActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        IPChecker service = new CountryCodeIpChecker(getService(GeoLocationService.class));
+        CountryCodeIpChecker service = new CountryCodeIpChecker(getService(GeoLocationService.class));
         registerService(IPChecker.class, service);
-        
+
         ObjectName objectName = new ObjectName(IPCheckMBean.DOMAIN, "name", IPCheckMBean.NAME);
-        IPCheckMBean metricsMBean = new IPCheckMBeanImpl(this, (MetricAware<IPCheckMetrics>) service);
+        IPCheckMBean metricsMBean = new IPCheckMBeanImpl(this, service);
         ManagementService managementService = getService(ManagementService.class);
         managementService.registerMBean(objectName, metricsMBean);
     }
