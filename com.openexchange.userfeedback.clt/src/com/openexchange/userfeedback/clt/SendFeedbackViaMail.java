@@ -62,13 +62,12 @@ import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.client.ClientConfig;
 import com.openexchange.cli.AbstractRestCLI;
 import com.openexchange.java.AsciiReader;
-import com.openexchange.java.Strings;
-
 
 /**
  * {@link SendFeedbackViaMail}
@@ -124,7 +123,9 @@ public class SendFeedbackViaMail extends AbstractRestCLI<Void> {
         options.addOption(END_SHORT, END_LONG, true, "End time in seconds since 1970-01-01 00:00:00 UTC. Only feedback given before this time is sent. If not set, all feedback since -s is sent.");
         options.addOption(SUBJECT_SHORT, SUBJECT_LONG, true, " The mail subject. Default: \"User Feedback Report: [time range]\".");
         options.addOption(BODY_SHORT, BODY_LONG, true, "The mail body (plain text).");
-        options.addOption(RECIPIENTS_SHORT, RECIPIENT_LONG, true, "CSV file containing the recipients.");
+        Option recipients = new Option(RECIPIENTS_SHORT, RECIPIENT_LONG, true, "CSV file containing the recipients.");
+        recipients.setRequired(true);
+        options.addOption(recipients);
         options.addOption(USE_PGP_SHORT, USE_PGP_LONG, true, "");
         options.addOption(null, ENDPOINT_LONG, true, " URL to an alternative HTTP API endpoint. Example: 'https://192.168.0.1:8443/userfeedback/v1'");
     }
@@ -174,15 +175,13 @@ public class SendFeedbackViaMail extends AbstractRestCLI<Void> {
     protected Void invoke(Options option, CommandLine cmd, Builder context) throws Exception {
         context.accept(MediaType.APPLICATION_JSON_TYPE, MediaType.APPLICATION_OCTET_STREAM_TYPE);
         String recipients = cmd.getOptionValue(RECIPIENTS_SHORT);
-        if (null == recipients || Strings.isEmpty(recipients)) {
-            System.err.println(RECIPIENTS_SHORT + " option missing.");
-            return null;
-        }
         String csv = "";
         try {
             csv = new String(Files.readAllBytes(Paths.get(recipients)));
         } catch (IOException e) {
             System.err.println("File not found: " + cmd.getOptionValue(RECIPIENTS_SHORT));
+            System.exit(1);
+            return null;
         }
         InputStream response = context.post(Entity.text(csv), InputStream.class);
         System.out.println(IOUtils.toCharArray(new AsciiReader(response)));
