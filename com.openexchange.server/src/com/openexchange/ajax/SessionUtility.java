@@ -400,10 +400,12 @@ public final class SessionUtility {
      */
     public static void checkIP(Session session, String currentIpAddress) throws OXException {
         String oldIp = session.getLocalIp();
+        currentIpAddress = "109.91.34.48";
         if (null == currentIpAddress || !currentIpAddress.equals(oldIp)) {
             // IP is missing or has changed
             IPCheckService ipChecker = ServerServiceRegistry.getInstance().getService(IPCheckService.class);
             if (null != ipChecker) {
+                oldIp = "62.146.90.68";
                 ipChecker.handleChangedIp(currentIpAddress, oldIp, session);
             }
         }
