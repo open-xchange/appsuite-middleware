@@ -49,9 +49,12 @@
 
 package com.openexchange.userfeedback.rest.services;
 
+import java.io.IOException;
+import java.io.StringReader;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
@@ -65,6 +68,9 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import com.openexchange.java.Strings;
 import com.openexchange.rest.services.JAXRSService;
 import com.openexchange.rest.services.annotation.Role;
@@ -119,8 +125,10 @@ public class SendMailService extends JAXRSService {
                 if (null == body) {
                     body = "";
                 }
+                Map<String, String> recipientsMap = parseCSV(recipients, false);
+                Map<String, String> pgpKeysMap = parseCSV(recipients, true);
                 FeedbackMailService service = getService(FeedbackMailService.class);
-                FeedbackMailFilter filter = new FeedbackMailFilter(contextGroup, parseCSV(recipients), subject, body, start, end, type);
+                FeedbackMailFilter filter = new FeedbackMailFilter(contextGroup, recipientsMap, subject, body, start, end, type);
                 String response = service.sendFeedbackMail(filter);
                 builder = Response.status(200);
                 if (Strings.isEmpty(response)) {
@@ -130,20 +138,31 @@ public class SendMailService extends JAXRSService {
                 builder.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM + "; charset=utf-8");
                 return builder.build();
             } catch (Exception e) {
-                builder = Response.status(400).entity(recipients + " is not a valid file.");
+                builder = Response.status(400).entity("Could not parse CSV.");
                 return builder.build();
             }
         }
     }
 
-    private Map<String, String> parseCSV(String csv) throws Exception {
-        String[] parsed = csv.split(",");
-        if (parsed.length % 2 != 0) {
-            throw new Exception();
-        }
+    private Map<String, String> parseCSV(String csv, boolean pgpKeys) throws IOException {
         Map<String, String> result = new HashMap<>();
-        for (int i = 0; i < parsed.length; i++) {
-            result.put(parsed[i], parsed[++i]);
+        StringReader reader = null;
+        CSVParser parser = null;
+        try {
+            reader = new StringReader(csv);
+            parser = new CSVParser(reader, CSVFormat.RFC4180);
+            Iterator<CSVRecord> i = parser.iterator();
+            while (i.hasNext()) {
+                CSVRecord record = i.next();
+                result.put(record.get(0), pgpKeys ? record.get(2) : record.get(1));
+            }
+        } finally {
+            if (null != parser) {
+                parser.close();
+            }
+            if (null != reader) {
+                reader.close();
+            }
         }
         return result;
     }
