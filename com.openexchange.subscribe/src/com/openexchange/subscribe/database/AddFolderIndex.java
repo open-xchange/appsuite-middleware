@@ -49,50 +49,62 @@
 
 package com.openexchange.subscribe.database;
 
-import com.openexchange.database.AbstractCreateTableImpl;
+import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.rollback;
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.update.Tools;
 
 /**
- * Creates the tables needed for the subscription part of PubSub
+ * Adds an index for "cid" and "folder_id" columns.
  *
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class CreateSubscriptionTables extends AbstractCreateTableImpl {
+public final class AddFolderIndex extends UpdateTaskAdapter {
 
-    @Override
-    public String[] getCreateStatements() {
-        return new String[] {
-            "CREATE TABLE subscriptions (" +
-            "cid INT4 UNSIGNED NOT NULL," +
-            "id INT4 UNSIGNED NOT NULL," +
-            "user_id INT4 UNSIGNED NOT NULL," +
-            "configuration_id INT4 UNSIGNED NOT NULL," +
-            "source_id VARCHAR(255) NOT NULL," +
-            "folder_id VARCHAR(255) NOT NULL," +
-            "last_update INT8 UNSIGNED NOT NULL," +
-            "enabled BOOLEAN DEFAULT true NOT NULL," +
-            "created INT8 NOT NULL DEFAULT 0," +
-            "lastModified INT8 NOT NULL DEFAULT 0," +
-            "PRIMARY KEY (cid,id)," +
-            "INDEX `folderIndex` (`cid`, `folder_id`)," +
-            "FOREIGN KEY(cid,user_id) REFERENCES user(cid,id)" +
-            ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;",
+    private static final String TABLE = "subscriptions";
+    private static final String[] COLUMNS = { "cid", "folder_id" };
+    private final DatabaseService dbService;
 
-            "CREATE TABLE sequence_subscriptions (" +
-            "cid INT4 UNSIGNED NOT NULL," +
-            "id INT4 UNSIGNED NOT NULL," +
-            "PRIMARY KEY (cid)" +
-            ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;"
-        };
+    public AddFolderIndex(DatabaseService service) {
+        super();
+        this.dbService = service;
     }
 
     @Override
-    public String[] requiredTables() {
-        return new String[]{"user"};
+    public String[] getDependencies() {
+        return new String[] { FixSubscriptionTablePrimaryKey.class.getName() };
     }
 
     @Override
-    public String[] tablesToCreate() {
-        return new String[]{"subscriptions","sequence_subscriptions"};
+    public void perform(PerformParameters params) throws OXException {
+        int cid = params.getContextId();
+        Connection con = dbService.getForUpdateTask(cid);
+        boolean rollback = false;
+        try {
+            con.setAutoCommit(false);
+            rollback = true;
+
+            if (null == Tools.existsIndex(con, TABLE, COLUMNS)) {
+                Tools.createIndex(con, TABLE, "folderIndex", COLUMNS, false);
+            }
+
+            con.commit();
+            rollback = false;
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                rollback(con);
+            }
+            autocommit(con);
+            dbService.backForUpdateTask(cid, con);
+        }
     }
 
 }

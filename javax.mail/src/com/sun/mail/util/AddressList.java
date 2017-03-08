@@ -47,52 +47,51 @@
  *
  */
 
-package com.openexchange.subscribe.database;
+package com.sun.mail.util;
 
-import com.openexchange.database.AbstractCreateTableImpl;
+import java.net.InetAddress;
+import java.util.Collection;
 
 /**
- * Creates the tables needed for the subscription part of PubSub
- *
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * {@link AddressList} - Infinitely iterates over addresses.
  */
-public class CreateSubscriptionTables extends AbstractCreateTableImpl {
+public class AddressList {
 
-    @Override
-    public String[] getCreateStatements() {
-        return new String[] {
-            "CREATE TABLE subscriptions (" +
-            "cid INT4 UNSIGNED NOT NULL," +
-            "id INT4 UNSIGNED NOT NULL," +
-            "user_id INT4 UNSIGNED NOT NULL," +
-            "configuration_id INT4 UNSIGNED NOT NULL," +
-            "source_id VARCHAR(255) NOT NULL," +
-            "folder_id VARCHAR(255) NOT NULL," +
-            "last_update INT8 UNSIGNED NOT NULL," +
-            "enabled BOOLEAN DEFAULT true NOT NULL," +
-            "created INT8 NOT NULL DEFAULT 0," +
-            "lastModified INT8 NOT NULL DEFAULT 0," +
-            "PRIMARY KEY (cid,id)," +
-            "INDEX `folderIndex` (`cid`, `folder_id`)," +
-            "FOREIGN KEY(cid,user_id) REFERENCES user(cid,id)" +
-            ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;",
+    private final Collection<InetAddress> collection;
+    private InetAddress offset;
 
-            "CREATE TABLE sequence_subscriptions (" +
-            "cid INT4 UNSIGNED NOT NULL," +
-            "id INT4 UNSIGNED NOT NULL," +
-            "PRIMARY KEY (cid)" +
-            ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;"
-        };
+    public AddressList(Collection<InetAddress> collection) {
+        this(collection, null);
     }
 
-    @Override
-    public String[] requiredTables() {
-        return new String[]{"user"};
+    public AddressList(Collection<InetAddress> collection, InetAddress offset) {
+        super();
+        this.collection = collection;
+        this.offset = offset;
     }
 
-    @Override
-    public String[] tablesToCreate() {
-        return new String[]{"subscriptions","sequence_subscriptions"};
+    /**
+     * Gets the next address.
+     *
+     * @return The next address
+     */
+    public InetAddress next() {
+        if (offset != null) {
+            boolean found = false;
+            for (InetAddress element : collection) {
+                if (element == offset) {
+                    found = true;
+                } else if (found) {
+                    offset = element;
+                    return element;
+                }
+            }
+        }
+
+        // Start with new iterator
+        InetAddress element = collection.iterator().next();
+        offset = element;
+        return element;
     }
 
 }

@@ -58,6 +58,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskV2;
+import com.openexchange.subscribe.database.AddFolderIndex;
 import com.openexchange.subscribe.database.EnabledColumn;
 import com.openexchange.subscribe.database.FixSubscriptionTablePrimaryKey;
 import com.openexchange.subscribe.database.SubscriptionsCreatedAndLastModifiedColumn;
@@ -88,7 +89,8 @@ public final class UpdateTaskRegisterer implements ServiceTrackerCustomizer<Data
                 return Arrays.asList(
                     (UpdateTaskV2) new EnabledColumn(service),
                     new SubscriptionsCreatedAndLastModifiedColumn(service),
-                    new FixSubscriptionTablePrimaryKey(service));
+                    new FixSubscriptionTablePrimaryKey(service),
+                    new AddFolderIndex(service));
             }
         }, null);
         return service;

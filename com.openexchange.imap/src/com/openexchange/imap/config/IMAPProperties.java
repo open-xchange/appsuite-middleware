@@ -136,10 +136,12 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
     private boolean propagateClientIPAddress;
 
+    private boolean useMultipleAddresses;
+
     private boolean enableTls;
 
     private boolean auditLogEnabled;
-    
+
     private boolean overwritePreLoginCapabilities;
 
     private Set<String> propagateHostNames;
@@ -238,6 +240,12 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             final String tmp = configuration.getProperty("com.openexchange.imap.propagateClientIPAddress", STR_FALSE).trim();
             propagateClientIPAddress = Boolean.parseBoolean(tmp);
             logBuilder.append("\tPropagate Client IP Address: ").append(propagateClientIPAddress).append('\n');
+        }
+
+        {
+            String tmp = configuration.getProperty("com.openexchange.imap.useMultipleAddresses", STR_FALSE).trim();
+            useMultipleAddresses = Boolean.parseBoolean(tmp);
+            logBuilder.append("\tUse Multiple Addresses: ").append(useMultipleAddresses).append('\n');
         }
 
         {
@@ -445,7 +453,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             this.cipherSuites = Strings.isEmpty(tmp) ? null : tmp;
             logBuilder.append("\tSupported SSL cipher suites: ").append(null == this.cipherSuites ? "<default>" : cipherSuites).append("\n");
         }
-        
+
         {
             String tmp = configuration.getProperty("com.openexchange.imap.greeting.host.regex", "").trim();
             tmp = Strings.isEmpty(tmp) ? null : tmp;
@@ -472,6 +480,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         forceImapSearch = false;
         fastFetch = true;
         propagateClientIPAddress = false;
+        useMultipleAddresses = false;
         enableTls = true;
         auditLogEnabled = false;
         overwritePreLoginCapabilities = false;
@@ -735,6 +744,15 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
      */
     public HostExtractingGreetingListener getHostNameRegex() {
         return hostExtractingGreetingListener;
+    }
+
+    /**
+     * Checks whether possible multiple IP addresses for a host name are supposed to be considered.
+     *
+     * @return <code>true</code> to use multiple IP addresses; otherwise <code>false</code>
+     */
+    public boolean isUseMultipleAddresses() {
+        return useMultipleAddresses;
     }
 
 }
