@@ -170,6 +170,7 @@ public class SendFeedbackViaMail extends AbstractRestCLI<Void> {
             return target;
         } catch (URISyntaxException e) {
             System.err.print("Unable to return endpoint: " + e.getMessage());
+            System.exit(1);
         }
         return null;
     }
@@ -220,8 +221,16 @@ public class SendFeedbackViaMail extends AbstractRestCLI<Void> {
                 reader.close();
             }
         }
-        InputStream response = context.post(Entity.json(array.toString()), InputStream.class);
+        InputStream response = null;
+        try {
+            response = context.post(Entity.json(array.toString()), InputStream.class);
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            System.exit(1);
+            return null;
+        }
         System.out.println(IOUtils.toCharArray(new AsciiReader(response)));
+        System.exit(0);
         return null;
     }
 

@@ -65,15 +65,18 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.Response.Status;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.rest.services.JAXRSService;
 import com.openexchange.rest.services.annotation.Role;
 import com.openexchange.rest.services.annotation.RoleAllowed;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.userfeedback.exception.FeedbackExceptionCodes;
 import com.openexchange.userfeedback.mail.FeedbackMailService;
 import com.openexchange.userfeedback.mail.filter.FeedbackMailFilter;
 
@@ -87,6 +90,8 @@ import com.openexchange.userfeedback.mail.filter.FeedbackMailFilter;
 @RoleAllowed(Role.BASIC_AUTHENTICATED)
 @Path("/userfeedback/v1/mail")
 public class SendMailService extends JAXRSService {
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SendMailService.class);
 
     public SendMailService(ServiceLookup services) {
         super(services);
@@ -131,14 +136,14 @@ public class SendMailService extends JAXRSService {
                 JSONObject object = array.getJSONObject(i);
                 String address = object.getString("address");
                 String displayName = object.getString("displayName");
-                String pgpKey = object.getString("pgpKey");
+                String pgpKey = object.optString("pgpKey");
                 recipients.put(address, displayName);
                 pgpKeys.put(address, pgpKey);
             }
             FeedbackMailService service = getService(FeedbackMailService.class);
             FeedbackMailFilter filter = new FeedbackMailFilter(contextGroup, recipients, subject, mailBody, start, end, type);
             String response = service.sendFeedbackMail(filter);
-            builder = Response.status(200);
+            builder = Response.status(Status.OK);
             if (Strings.isEmpty(response)) {
                 return builder.build();
             }
@@ -146,11 +151,36 @@ public class SendMailService extends JAXRSService {
             builder.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM + "; charset=utf-8");
             return builder.build();
         } catch (JSONException e) {
-            return null;
+            LOG.error(e.getMessage());
+            ResponseBuilder builder = Response.status(Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON);
+            builder.entity(e.getMessage());
+            return builder.build();
         } catch (OXException e) {
-            // TODO Interpret all potential OXException and react accordingly
-            return null;
+            LOG.error("An error occurred while retrieving user feedback.", e);
+            JSONObject errorJson = generateError(e);
+            if (e.similarTo(FeedbackExceptionCodes.GLOBAL_DB_NOT_CONFIGURED)) {
+                ResponseBuilder builder = Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON);
+                builder.entity(errorJson);
+                return builder.build();
+            } else if (e.similarTo(FeedbackExceptionCodes.INVALID_PARAMETER_VALUE)) {
+                ResponseBuilder builder = Response.status(Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON);
+                builder.entity(errorJson);
+                return builder.build();
+            }
+            ResponseBuilder builder = Response.status(Status.NOT_FOUND).type(MediaType.APPLICATION_JSON);
+            builder.entity(errorJson);
+            return builder.build();
         }
+    }
+
+    private JSONObject generateError(OXException ex) {
+        JSONObject main = new JSONObject();
+        try {
+            ResponseWriter.addException(main, ex);
+        } catch (JSONException e) {
+            LOG.error("Error while generating error for client.", e);
+        }
+        return main;
     }
 
 }
