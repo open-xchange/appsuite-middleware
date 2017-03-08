@@ -314,20 +314,16 @@ public final class MailJSONActivator extends AJAXModuleActivator {
             }
         });
 
-        MailColorModePreferenceItem colorItem = new MailColorModePreferenceItem();
-        registerService(PreferencesItemService.class, colorItem);
+        MailColorModePreferenceItem colorItem = new MailColorModePreferenceItem(); // --> Statically registered via ConfigTree class
         registerService(ConfigTreeEquivalent.class, colorItem);
 
-        MailFlaggedModePreferenceItem flaggedItem = new MailFlaggedModePreferenceItem();
-        registerService(PreferencesItemService.class, flaggedItem);
+        MailFlaggedModePreferenceItem flaggedItem = new MailFlaggedModePreferenceItem(); // --> Statically registered via ConfigTree class
         registerService(ConfigTreeEquivalent.class, flaggedItem);
 
-        MaliciousCheck maliciousCheck = new MaliciousCheck();
-        registerService(PreferencesItemService.class, maliciousCheck);
+        MaliciousCheck maliciousCheck = new MaliciousCheck(); // --> Statically registered via ConfigTree class
         registerService(ConfigTreeEquivalent.class, maliciousCheck);
 
-        MaliciousListing maliciousListing = new MaliciousListing();
-        registerService(PreferencesItemService.class, maliciousListing);
+        MaliciousListing maliciousListing = new MaliciousListing(); // --> Statically registered via ConfigTree class
         registerService(ConfigTreeEquivalent.class, maliciousListing);
 
         DeleteDraftOnTransport deleteDraftOnTransport = new DeleteDraftOnTransport(); // --> Statically registered via ConfigTree class
