@@ -92,31 +92,43 @@ public class SendMailService extends JAXRSService {
     @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response sendMail(@QueryParam("start") final long start, @QueryParam("end") final long end, @PathParam("type") final String type, @PathParam("context-group") final String contextGroup,
         @QueryParam("recipients") final String recipients, @QueryParam("subject") String subject, @QueryParam("body") String body) {
-        ResponseBuilder builder = null;
-        try {
-            if (null == subject || Strings.isEmpty(subject)) {
-                StringBuilder sb = new StringBuilder();
-                SimpleDateFormat df = new SimpleDateFormat();
-                df.setTimeZone(TimeZone.getTimeZone("UTC"));
-                sb.append("User Feedback Report: ").append(df.format(new Date(TimeUnit.SECONDS.toMillis(start)))).append(" to ").append(df.format(new Date(TimeUnit.SECONDS.toMillis(end))));
-                subject = sb.toString();
-            }
-            if (null == body) {
-                body = "";
-            }
-            FeedbackMailService service = getService(FeedbackMailService.class);
-            FeedbackMailFilter filter = new FeedbackMailFilter(contextGroup, parseCSV(recipients), subject, body, start, end, type);
-            String response = service.sendFeedbackMail(filter);
-            builder = Response.status(200);
-            if (Strings.isEmpty(response)) {
+        return sendMail(start, end, type, contextGroup, recipients, subject, body, false);
+    }
+
+    @GET
+    @Path("/{context-group}/{type}/pgp")
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
+    public Response sendMail(@QueryParam("start") final long start, @QueryParam("end") final long end, @PathParam("type") final String type, @PathParam("context-group") final String contextGroup,
+        @QueryParam("recipients") final String recipients, @QueryParam("subject") String subject, @QueryParam("body") String body, boolean usePgp) {
+        if (usePgp) {
+            return Response.status(501).build();
+        } else {
+            ResponseBuilder builder = null;
+            try {
+                if (null == subject || Strings.isEmpty(subject)) {
+                    StringBuilder sb = new StringBuilder();
+                    SimpleDateFormat df = new SimpleDateFormat();
+                    df.setTimeZone(TimeZone.getTimeZone("UTC"));
+                    sb.append("User Feedback Report: ").append(df.format(new Date(TimeUnit.SECONDS.toMillis(start)))).append(" to ").append(df.format(new Date(TimeUnit.SECONDS.toMillis(end))));
+                    subject = sb.toString();
+                }
+                if (null == body) {
+                    body = "";
+                }
+                FeedbackMailService service = getService(FeedbackMailService.class);
+                FeedbackMailFilter filter = new FeedbackMailFilter(contextGroup, parseCSV(recipients), subject, body, start, end, type);
+                String response = service.sendFeedbackMail(filter);
+                builder = Response.status(200);
+                if (Strings.isEmpty(response)) {
+                    return builder.build();
+                }
+                builder.entity(response);
+                builder.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM + "; charset=utf-8");
+                return builder.build();
+            } catch (Exception e) {
+                builder = Response.status(400).entity(recipients + " is not a valid file.");
                 return builder.build();
             }
-            builder.entity(response);
-            builder.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM + "; charset=utf-8");
-            return builder.build();
-        } catch (Exception e) {
-            builder = Response.status(400).entity(recipients + " is not a valid file.");
-            return builder.build();
         }
     }
 
