@@ -47,6 +47,9 @@ postFix() {
         ox_add_property $NEWNAME "$VALUE" $PFILE
         ox_remove_property $OLDNAME $PFILE
     done
+
+    # SoftwareChange_Request-4007
+    ox_add_property com.openexchange.mail.filter.authTimeout 6000 $PFILE
 }
 
 setConfigFilePermissions() {

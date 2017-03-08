@@ -77,6 +77,9 @@ if [ ${1:-0} -eq 2 ]; then
         ox_add_property $NEWNAME "$VALUE" $PFILE
         ox_remove_property $OLDNAME $PFILE
     done
+
+    # SoftwareChange_Request-4007
+    ox_add_property com.openexchange.mail.filter.authTimeout 6000 $PFILE
 fi
 
 %clean
