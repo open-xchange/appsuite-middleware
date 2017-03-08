@@ -58,7 +58,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.Rule;
 import com.openexchange.mail.filter.json.v2.Action;
-import com.openexchange.mail.filter.json.v2.Parameter;
 import com.openexchange.mail.filter.json.v2.json.RuleParser;
 import com.openexchange.mailfilter.Credentials;
 import com.openexchange.mailfilter.MailFilterService;
@@ -78,6 +77,8 @@ public class ListMailFilterAction extends AbstractMailFilterAction{
 
     public static final Action ACTION = Action.LIST;
 
+    private static final String FLAG_PARAMETER = "flag";
+
     private final RuleParser ruleParser;
 
     /**
@@ -93,7 +94,7 @@ public class ListMailFilterAction extends AbstractMailFilterAction{
         final Map<String, String> parameters = request.getParameters();
         final Credentials credentials = new Credentials(session);
         final MailFilterService mailFilterService = services.getService(MailFilterService.class);
-        final String flag = parameters.get(Parameter.FLAG);
+        final String flag = parameters.get(FLAG_PARAMETER);
         FilterType filterType;
         if (flag != null) {
             try {
