@@ -97,32 +97,38 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
 
         // ACCEPT: If one of the given IP address lies with in the private range
         if (isPrivateV4Address(current) || isPrivateV4Address(previous)) {
-            accept(current, session, configuration);
+            accept(current, previous, session, configuration, ChangeReason.PRIVATE_IPV4.getMessage());
             return;
         }
 
-        // ACCEPT: if the IP address are whitelisted
+        // ACCEPT: if the IP address are white-listed
         if (IPCheckers.isWhiteListed(current, previous, session, configuration)) {
-            accept(current, session, configuration);
+            accept(current, previous, session, configuration, ChangeReason.WHITE_LISTED.getMessage());
             return;
         }
 
-        GeoInformation geoInformationCurrent = service.getGeoInformation(current);
-        GeoInformation geoInformationPrevious = service.getGeoInformation(previous);
+        boolean countryChanged = true;
+        try {
+            GeoInformation geoInformationCurrent = service.getGeoInformation(current);
+            GeoInformation geoInformationPrevious = service.getGeoInformation(previous);
 
-        boolean countryChanged = false;
-        if (geoInformationPrevious.hasCountry() && geoInformationCurrent.hasCountry()) {
-            countryChanged = !geoInformationPrevious.getCountry().equals(geoInformationCurrent.getCountry());
+            if (geoInformationPrevious.hasCountry() && geoInformationCurrent.hasCountry()) {
+                countryChanged = !geoInformationPrevious.getCountry().equals(geoInformationCurrent.getCountry());
+            }
+        } catch (OXException e) {
+            String message = e.getMessage();
+            LOGGER.error("{}", message, e);
+            deny(current, previous, session, message);
         }
 
         // ACCEPT: if country code did not change
         if (!countryChanged) {
-            accept(current, session, configuration);
+            accept(current, previous, session, configuration, ChangeReason.NO_COUNTRY_CHANGE.getMessage());
             return;
         }
 
         // DENY: in any other case
-        deny(current, session, geoInformationCurrent, geoInformationPrevious);
+        deny(current, previous, session, ChangeReason.DEFAULT.getMessage());
     }
 
     /**
@@ -132,7 +138,8 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
      * @param session The {@link Session}
      * @param configuration The {@link IPCheckConfiguration}
      */
-    private void accept(String current, Session session, IPCheckConfiguration configuration) {
+    private void accept(String current, String previous, Session session, IPCheckConfiguration configuration, String reason) {
+        LOGGER.debug("The IP change from '{}' to '{}' was accepted. Reason: '{}'", previous, current, reason);
         IPCheckers.apply(true, current, session, configuration);
         metrics.incrementAcceptedIPChanges();
     }
@@ -142,12 +149,10 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
      *
      * @param current The current IP
      * @param session The {@link Session}
-     * @param geoInformationCurrent the {@link GeoInformation} of the current IP
-     * @param geoInformationPrevious the {@link GeoInformation} of the previous IP
      * @throws OXException To actually kick the session
      */
-    private void deny(String current, Session session, GeoInformation geoInformationCurrent, GeoInformation geoInformationPrevious) throws OXException {
-        LOGGER.info("Country was changed for session '{}' from '{}' to '{}'", session.getSessionID(), geoInformationPrevious.getCountry(), geoInformationCurrent.getCountry());
+    private void deny(String current, String previous, Session session, String reason) throws OXException {
+        LOGGER.debug("The IP change from '{}' to '{}' was denied. Reason: '{}'", previous, current, reason);
         metrics.incrementDeniedIPChanges();
         IPCheckers.kick(current, session);
     }
