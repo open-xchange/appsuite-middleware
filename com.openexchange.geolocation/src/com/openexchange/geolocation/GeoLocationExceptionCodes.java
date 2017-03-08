@@ -80,7 +80,7 @@ public enum GeoLocationExceptionCodes implements DisplayableOXExceptionCode {
 
     private final int number;
     private final Category category;
-    private static final String PREFIX = "GLS";
+    public static final String PREFIX = "GLS";
     private final String message;
     private final String displayMessage;
 

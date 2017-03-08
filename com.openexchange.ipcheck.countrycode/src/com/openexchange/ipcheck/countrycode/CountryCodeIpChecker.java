@@ -63,6 +63,7 @@ import com.openexchange.ajax.ipcheck.IPCheckers;
 import com.openexchange.ajax.ipcheck.spi.IPChecker;
 import com.openexchange.exception.OXException;
 import com.openexchange.geolocation.GeoInformation;
+import com.openexchange.geolocation.GeoLocationExceptionCodes;
 import com.openexchange.geolocation.GeoLocationService;
 import com.openexchange.ipcheck.countrycode.mbean.IPCheckMetrics;
 import com.openexchange.management.MetricAware;
@@ -116,6 +117,9 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
                 countryChanged = !geoInformationPrevious.getCountry().equals(geoInformationCurrent.getCountry());
             }
         } catch (OXException e) {
+            if (!e.getPrefix().equals(GeoLocationExceptionCodes.PREFIX)) {
+                throw e;
+            }
             String message = e.getMessage();
             LOGGER.error("{}", message, e);
             deny(current, previous, session, message);
