@@ -91,6 +91,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.tree.modules.mail.DeleteDraftOnTransport;
 import com.openexchange.groupware.settings.tree.modules.mail.MailColorModePreferenceItem;
 import com.openexchange.groupware.settings.tree.modules.mail.MailFlaggedModePreferenceItem;
 import com.openexchange.groupware.settings.tree.modules.mail.MaliciousCheck;
@@ -328,6 +329,9 @@ public final class MailJSONActivator extends AJAXModuleActivator {
         MaliciousListing maliciousListing = new MaliciousListing();
         registerService(PreferencesItemService.class, maliciousListing);
         registerService(ConfigTreeEquivalent.class, maliciousListing);
+
+        DeleteDraftOnTransport deleteDraftOnTransport = new DeleteDraftOnTransport(); // --> Statically registered via ConfigTree class
+        registerService(ConfigTreeEquivalent.class, deleteDraftOnTransport);
     }
 
     @Override

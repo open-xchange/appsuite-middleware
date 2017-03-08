@@ -365,6 +365,7 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.modules.mail.Colorquoted.class,
             com.openexchange.groupware.settings.tree.modules.mail.DefaultAddress.class,
             com.openexchange.groupware.settings.tree.modules.mail.DefaultSeparator.class,
+            com.openexchange.groupware.settings.tree.modules.mail.DeleteDraftOnTransport.class,
             com.openexchange.groupware.settings.tree.modules.mail.DeleteMail.class,
             com.openexchange.groupware.settings.tree.modules.mail.SaveNoCopy.class,
             com.openexchange.groupware.settings.tree.modules.mail.DisplayReceiptNotification.class,
