@@ -59,6 +59,9 @@ import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.googledrive.access.GoogleDriveAccess;
+import com.openexchange.java.Strings;
+import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.session.Session;
 
 /**
@@ -140,6 +143,17 @@ public abstract class AbstractGoogleDriveAccess {
             return FileStorageExceptionCodes.FILE_NOT_FOUND.create(e, identifier, "");
         }
 
+        if (SC_CONFLICT == e.getStatusCode()) {
+            return FileStorageExceptionCodes.FILE_ALREADY_EXISTS.create();
+        }
+
+        if (SC_BAD_REQUEST == e.getStatusCode()) {
+            if (hasInvalidGrant(e)) {
+                return createInvalidAccessTokenException();
+            }
+            return OAuthExceptionCodes.OAUTH_ERROR.create(e.getMessage(), e);
+        }
+
         if (SC_UNAUTHORIZED == e.getStatusCode()) {
             return FileStorageExceptionCodes.AUTHENTICATION_FAILED.create(account.getId(), GoogleDriveConstants.ID, e.getMessage());
         }
@@ -155,6 +169,28 @@ public abstract class AbstractGoogleDriveAccess {
         }
 
         return FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", Integer.valueOf(e.getStatusCode()) + " " + e.getStatusMessage());
+    }
+
+    /**
+     * Creates an access token invalid {@link OXException}
+     *
+     * @return The {@link OXException}
+     */
+    private OXException createInvalidAccessTokenException() {
+        OAuthAccount oAuthAccount = googleDriveAccess.getGoogleAccount();
+        return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create("Google", oAuthAccount.getId(), session.getUserId(), session.getContextId());
+    }
+
+    /**
+     * Determines whether the specified {@link HttpResponseException} is caused due to an 'invalid_grant'.
+     *
+     * @param e The {@link HttpResponseException}
+     * @return <code>true</code> if the exception was caused due to an 'invalid_grant'; <code>false</code>
+     *         otherwise
+     */
+    private boolean hasInvalidGrant(HttpResponseException e) {
+        String content = e.getContent();
+        return !Strings.isEmpty(content) && content.contains("invalid_grant");
     }
 
     /**
