@@ -60,6 +60,7 @@ import com.datastax.driver.core.Metrics;
 import com.datastax.driver.core.Metrics.Errors;
 import com.datastax.driver.core.TokenRange;
 import com.openexchange.exception.OXException;
+import com.openexchange.management.AnnotatedDynamicStandardMBean;
 import com.openexchange.nosql.cassandra.CassandraService;
 import com.openexchange.nosql.cassandra.mbean.CassandraClusterMBean;
 import com.openexchange.server.ServiceLookup;
@@ -69,7 +70,7 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class CassandraClusterMBeanImpl extends AbstractCassandraMBean implements CassandraClusterMBean {
+public class CassandraClusterMBeanImpl extends AnnotatedDynamicStandardMBean implements CassandraClusterMBean {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CassandraClusterMBeanImpl.class);
 
@@ -96,9 +97,9 @@ public class CassandraClusterMBeanImpl extends AbstractCassandraMBean implements
      * @see com.openexchange.nosql.cassandra.beans.AbstractCassandraMBean#refresh()
      */
     @Override
-    void refresh() {
+    protected void refresh() {
         try {
-            CassandraService cassandraService = services.getService(CassandraService.class);
+            CassandraService cassandraService = getService(CassandraService.class);
             cluster = cassandraService.getCluster();
             metrics = cluster.getMetrics();
             errors = metrics.getErrorMetrics();
