@@ -89,7 +89,7 @@ public abstract class AnnotatedDynamicStandardMBean extends AnnotatedStandardMBe
     /**
      * Performs a refresh of the metrics/statistics if necessary.
      */
-    abstract void refresh();
+    protected abstract void refresh();
 
     /*
      * (non-Javadoc)
