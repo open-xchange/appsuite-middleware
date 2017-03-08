@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import javax.mail.Address;
 import javax.mail.MessagingException;
@@ -62,21 +63,21 @@ public class FeedbackMimeMessageUtilityTest {
     }
 
     @Test
-    public void extractRecipientsTest_NoneNotNullResult() throws UnsupportedEncodingException {
+    public void extractRecipientsTest_NoneNotNullResult() throws UnsupportedEncodingException, OXException {
         FeedbackMimeMessageUtility messageUtility = new FeedbackMimeMessageUtility(false, false);
         FeedbackMailFilter filter = getDefaultFilter();
-        Address[] extractRecipients = messageUtility.extractRecipients(filter);
+        Address[] extractRecipients = messageUtility.extractValidRecipients(filter, new ArrayList<InternetAddress>());
         assertTrue(extractRecipients != null);
     }
 
     @Test
-    public void extractRecipientsTest_AdressNoPrivate() throws UnsupportedEncodingException {
+    public void extractRecipientsTest_AdressNoPrivate() throws UnsupportedEncodingException, OXException {
         FeedbackMimeMessageUtility messageUtility = new FeedbackMimeMessageUtility(false, false);
         HashMap<String, String> recipients = new HashMap<>();
         final String recipient = "recipient1@ox.de";
         recipients.put(recipient, "");
         FeedbackMailFilter filter = new FeedbackMailFilter("1", recipients, "subject", "Mail body", 0l, 0l, "");
-        InternetAddress[] extractRecipients = (InternetAddress[]) messageUtility.extractRecipients(filter);
+        InternetAddress[] extractRecipients = (InternetAddress[]) messageUtility.extractValidRecipients(filter, new ArrayList<InternetAddress>());
         // created adress with empty personal information
         assertTrue(extractRecipients.length == 1);
         assertTrue(!extractRecipients[0].getAddress().isEmpty());
@@ -84,7 +85,7 @@ public class FeedbackMimeMessageUtilityTest {
     }
 
     @Test
-    public void extractRecipientsTest_MultipleAdresses() throws UnsupportedEncodingException {
+    public void extractRecipientsTest_MultipleAdresses() throws UnsupportedEncodingException, OXException {
         FeedbackMimeMessageUtility messageUtility = new FeedbackMimeMessageUtility(false, false);
         HashMap<String, String> recipients = new HashMap<>();
         final String recipient = "recipient1@ox.de";
@@ -92,7 +93,7 @@ public class FeedbackMimeMessageUtilityTest {
         final String recipient2 = "recipient2@ox.de";
         recipients.put(recipient2, "recipient2");
         FeedbackMailFilter filter = new FeedbackMailFilter("1", recipients, "subject", "Mail body", 0l, 0l, "");
-        InternetAddress[] extractRecipients = (InternetAddress[]) messageUtility.extractRecipients(filter);
+        InternetAddress[] extractRecipients = (InternetAddress[]) messageUtility.extractValidRecipients(filter, new ArrayList<InternetAddress>());
         // created adress with empty personal information
         assertTrue(extractRecipients.length == 2);
         assertTrue(!extractRecipients[0].getAddress().isEmpty());

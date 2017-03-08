@@ -92,6 +92,36 @@ public enum FeedbackExceptionCodes implements DisplayableOXExceptionCode {
      * Provided value '%1$s' for parameter '%2$s' is invalid.
      */
     INVALID_PARAMETER_VALUE("Provided value(s) for parameter(s) '%1$s' is/are invalid.", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 6),
+    
+    /**
+     * Provided SMTP configuration is invalid, unable to connect to server
+     */
+    INVALID_SMTP_CONFIGURATION("Provided SMTP configuration is invalid, unable to connect to server.", OXExceptionStrings.MESSAGE, CATEGORY_CONFIGURATION, 7),
+    
+    /**
+     * Provided addresses are invalid.
+     */
+    INVALID_EMAIL_ADDRESSES("Provided addresses are invalid.", OXExceptionStrings.MESSAGE, CATEGORY_USER_INPUT, 8),
+    
+    /**
+     * Provided API credentials are invalid.
+     */
+    INVALID_API_CREDENTIALS("Provided API credentials are invalid.", OXExceptionStrings.MESSAGE, CATEGORY_USER_INPUT, 9),
+    
+    /**
+     * Unknown context group provided, unable to gather user feedback.
+     */
+    INVALID_CONTEXT_GROUP("Unknown context group provided, unable to gather user feedback.",OXExceptionStrings.MESSAGE, CATEGORY_USER_INPUT, 10),
+    
+    /**
+     * The provided start and/or end date is/are invalid, unable to gather user feedback.
+     */
+    INVALID_START_OR_END_DATE("The provided start and/or end date is/are invalid, unable to gather user feedback.", OXExceptionStrings.MESSAGE, CATEGORY_USER_INPUT, 11),
+    
+    /**
+     * The provided end date is before the provided start date, unable to gather user feedback.
+     */
+    INVALID_END_DATE("The provided end date is before the provided start date, unable to gather user feedback.", OXExceptionStrings.MESSAGE, CATEGORY_USER_INPUT, 12)
     ;
 
     /**

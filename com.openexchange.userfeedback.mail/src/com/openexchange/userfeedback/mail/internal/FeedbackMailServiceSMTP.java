@@ -1,105 +1,128 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the OX Software GmbH group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
 
 package com.openexchange.userfeedback.mail.internal;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 import javax.mail.Address;
-import javax.mail.BodyPart;
 import javax.mail.MessagingException;
-import javax.mail.Multipart;
-import javax.mail.NoSuchProviderException;
 import javax.mail.Session;
 import javax.mail.Transport;
-import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
-import org.apache.commons.io.IOUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
-import com.openexchange.userfeedback.ExportResult;
-import com.openexchange.userfeedback.ExportResultConverter;
-import com.openexchange.userfeedback.ExportType;
-import com.openexchange.userfeedback.FeedbackService;
+import com.openexchange.userfeedback.exception.FeedbackExceptionCodes;
 import com.openexchange.userfeedback.mail.FeedbackMailService;
 import com.openexchange.userfeedback.mail.config.MailProperties;
 import com.openexchange.userfeedback.mail.filter.FeedbackMailFilter;
 import com.openexchange.userfeedback.mail.osgi.Services;
 
+/**
+ * {@link FeedbackMailServiceSMTP}
+ * 
+ * Send user feedback in form of a csv-file to a set of given recipients. Ensure a valid smtp server
+ * configuration beforehand, see {@link MailProperties} for more information.
+ *
+ * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
+ * @since 7.8.4
+ */
 public class FeedbackMailServiceSMTP implements FeedbackMailService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FeedbackMailServiceSMTP.class);
     public static final String FILENAME = "feedback";
     public static final String FILE_TYPE = ".csv";
     private List<InternetAddress> invalidAddresses;
+    private FeedbackMimeMessageUtility messageUtility;
 
     @Override
-    public String sendFeedbackMail(FeedbackMailFilter filter) {
+    public String sendFeedbackMail(FeedbackMailFilter filter) throws OXException {
         invalidAddresses = new ArrayList<>();
+        if (this.messageUtility == null) {
+            messageUtility = new FeedbackMimeMessageUtility(false, false);
+        }
         String result = "Sending email(s) failed for unkown reason, please contact the administrator or see the server logs";
-        try {
-            File feedbackfile = getFeedbackfile(filter);
-            if (feedbackfile != null) {
-                result = sendMail(feedbackfile, filter);
-            }
-        } catch (OXException e) {
-            e.printStackTrace();
-            result = "Failure";
-        } catch (IOException e) {
-            e.printStackTrace();
+        File feedbackfile = messageUtility.getFeedbackfile(filter);
+        if (feedbackfile != null) {
+            result = sendMail(feedbackfile, filter);
         }
 
         return result;
     }
 
-    private File getFeedbackfile(FeedbackMailFilter filter) throws OXException, IOException {
-        FeedbackService feedbackService = Services.getService(FeedbackService.class);
-        ExportResultConverter feedbackProvider = feedbackService.export(filter.getCtxGroup(), filter);
-        ExportResult feedbackResult = feedbackProvider.get(ExportType.CSV);
-        // get the csv file
-        File result = null;
-        try (InputStream stream = (InputStream) feedbackResult.getResult()) {
-            result = getFileFromStream(stream);
-        }
-        return result;
-    }
-
-    private String sendMail(File feedbackFile, FeedbackMailFilter filter) {
+    private String sendMail(File feedbackFile, FeedbackMailFilter filter) throws OXException {
         Properties smtpProperties = getSMTPProperties();
         Session smtpSession = Session.getInstance(smtpProperties);
         Transport transport = null;
-        
+
         String result = "";
-        
+
         try {
-            Address[] recipients = extractValidRecipients(filter);
-            MimeMessage mail = createMailMessage(feedbackFile, filter, smtpProperties, smtpSession);
+            Address[] recipients = this.messageUtility.extractValidRecipients(filter, this.invalidAddresses);
+            if (recipients.length == 0) {
+                throw FeedbackExceptionCodes.INVALID_EMAIL_ADDRESSES.create();
+            }
+            MimeMessage mail = messageUtility.createMailMessage(feedbackFile, filter, smtpSession);
             transport = smtpSession.getTransport("smtp");
             transport.connect(MailProperties.getSmtpHostname(), MailProperties.getSmtpPort(), MailProperties.getSmtpUsername(), MailProperties.getSmtpPassword());
             transport.sendMessage(mail, recipients);
             result = getPositiveSendingResult(recipients);
-        } catch (NoSuchProviderException e) {
-            e.printStackTrace();
         } catch (MessagingException e) {
-            result = result.concat(e.getMessage());
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
+            throw FeedbackExceptionCodes.INVALID_SMTP_CONFIGURATION.create(e.getMessage());
         } finally {
             closeTransport(transport);
         }
-        
+
         result = result.concat(appendWarnings());
 
         return result;
@@ -120,53 +143,9 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
             try {
                 transport.close();
             } catch (MessagingException e) {
-                e.printStackTrace();
+                LOG.error(e.getMessage(), e);
             }
         }
-    }
-
-    private MimeMessage createMailMessage(File feedbackFile, FeedbackMailFilter filter, Properties smtpProperties, Session session) throws MessagingException, IOException {
-        MimeMessage email = new MimeMessage(session);
-        
-        email.setSubject(filter.getSubject());
-        email.setFrom(new InternetAddress(MailProperties.getSenderAddress(), MailProperties.getSenderName()));
-        
-        BodyPart messageBody = new MimeBodyPart();
-        messageBody.setText(filter.getBody());
-        Multipart completeMailContent = new MimeMultipart(messageBody);
-        MimeBodyPart attachment = new MimeBodyPart();
-        attachment.attachFile(feedbackFile);
-        completeMailContent.addBodyPart(attachment);
-        email.setContent(completeMailContent);
-        
-        return email;
-    }
-
-    private Address[] extractValidRecipients(FeedbackMailFilter filter) throws UnsupportedEncodingException {
-        Map<String, String> recipients = filter.getRecipients();
-        InternetAddress[] result = new InternetAddress[recipients.size()];
-        int index = 0;
-        for (Entry<String, String> recipient : recipients.entrySet()) {
-            InternetAddress address = new InternetAddress(recipient.getKey(), recipient.getValue());
-            try {
-                address.validate();
-                result[index] = address;
-                index++;
-            } catch (AddressException e) {
-                this.invalidAddresses.add(address);
-                e.printStackTrace();
-            }
-        }
-        
-        return result;
-    }
-    
-    private File getFileFromStream (InputStream stream) throws IOException {
-        final File tempFile = File.createTempFile(FILENAME, FILE_TYPE);
-        try (FileOutputStream out = new FileOutputStream(tempFile)) {
-            IOUtils.copy(stream, out);
-        }
-        return tempFile;
     }
 
     private Properties getSMTPProperties() {
@@ -177,16 +156,16 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
         properties.put("mail.smtp.ssl.socketFactory.port", MailProperties.getSmtpPort());
         properties.put("mail.smtp.starttls.enable", true);
         properties.put("mail.smtp.ssl.trust", "*");
-        
+
         properties.put("mail.smtp.host", MailProperties.getSmtpHostname());
         properties.put("mail.smtp.port", MailProperties.getSmtpPort());
         properties.put("mail.smtp.connectiontimeout", MailProperties.getSmtpConnectionTimeout());
         properties.put("mail.smtp.timeout", MailProperties.getSmtpTimeout());
         properties.put("mail.smtp.ssl.protocols", MailProperties.getSmtpProtocol());
-        
+
         return properties;
     }
-    
+
     private String appendWarnings() {
         String result = "";
         if (invalidAddresses.size() > 0) {

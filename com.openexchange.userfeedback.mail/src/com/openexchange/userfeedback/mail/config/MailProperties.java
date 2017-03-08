@@ -57,7 +57,7 @@ import com.openexchange.userfeedback.mail.osgi.Services;
 
 /**
  * {@link MailProperties}
- *
+ * 
  * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  * @since 7.8.4
  */

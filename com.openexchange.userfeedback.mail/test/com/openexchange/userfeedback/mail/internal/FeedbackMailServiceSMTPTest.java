@@ -25,7 +25,6 @@ import com.openexchange.userfeedback.ExportType;
 import com.openexchange.userfeedback.FeedbackService;
 import com.openexchange.userfeedback.mail.filter.FeedbackMailFilter;
 import com.openexchange.userfeedback.mail.osgi.Services;
-import com.openexchange.userfeedback.mail.transport.TransportHandler;
 
 /**
  * {@link FeedbackMailServiceSMTPTest}
@@ -34,7 +33,7 @@ import com.openexchange.userfeedback.mail.transport.TransportHandler;
  * @since v7.8.4
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ Services.class, FeedbackService.class, SSLSocketFactoryProvider.class, TransportHandler.class, FeedbackMailServiceSMTP.class})
+@PrepareForTest({ Services.class, FeedbackService.class, SSLSocketFactoryProvider.class, FeedbackMailServiceSMTP.class})
 public class FeedbackMailServiceSMTPTest {
 
     @Mock
@@ -86,7 +85,7 @@ public class FeedbackMailServiceSMTPTest {
         FeedbackMailServiceSMTP service = new FeedbackMailServiceSMTP();
         FeedbackMailServiceSMTP serviceSpy = PowerMockito.spy(service);
         
-        PowerMockito.doReturn("Name").when(serviceSpy, PowerMockito.method(FeedbackMailServiceSMTP.class, "getSocketFactoryClassName")).withNoArguments();
+//        PowerMockito.doReturn("Name").when(serviceSpy, PowerMockito.method(FeedbackMailServiceSMTP.class, "getSocketFactoryClassName")).withNoArguments();
         PowerMockito.doReturn(true).when(serviceSpy, PowerMockito.method(FeedbackMailServiceSMTP.class, "send")).withArguments(Matchers.any(Session.class), Matchers.any(Address[].class), Matchers.any(MimeMessage.class));
         
         serviceSpy.sendFeedbackMail(filter);

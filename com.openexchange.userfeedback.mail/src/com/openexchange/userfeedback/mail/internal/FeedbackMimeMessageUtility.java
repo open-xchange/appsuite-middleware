@@ -50,10 +50,12 @@
 package com.openexchange.userfeedback.mail.internal;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import javax.mail.Address;
@@ -61,6 +63,7 @@ import javax.mail.BodyPart;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Session;
+import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
@@ -76,22 +79,24 @@ import com.openexchange.userfeedback.mail.filter.FeedbackMailFilter;
 import com.openexchange.userfeedback.mail.osgi.Services;
 
 /**
- * TODO QS-VS: comment
  * {@link FeedbackMimeMessageUtility}
+ * 
+ * Utility class for creation of {@link MimeMessage}s and related operations for user feedback purposes.
  *
  * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  * @since 7.8.4
  */
 public class FeedbackMimeMessageUtility {
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FeedbackMimeMessageUtility.class);
     private static final String FILENAME = "feedback";
     private static final String FILE_TYPE = ".csv";
     private boolean isPGPEncrypted;
     private boolean isSigned;
 
     /**
-     * TODO QS-VS: comment
      * Initializes a new {@link FeedbackMimeMessageUtility}.
+     * 
      * @param isPGPEncrypted
      * @param isSigned
      */
@@ -102,51 +107,61 @@ public class FeedbackMimeMessageUtility {
     }
 
     /**
-     * TODO QS-VS: comment
-     * @param feedbackFile
-     * @param filter
-     * @param session
-     * @return
-     * @throws MessagingException
-     * @throws IOException
+     * Create a {@link MimeMessage} which can be send via email for the given {@link File} and {@link FeedbackMailFilter}.
+     *
+     * @param feedbackFile, the file that should be attached to the email
+     * @param filter, the filter to use
+     * @param session, the session for MimeMessage creation purposes
+     * @return a MimeMessage with the gathered user feedback, which can be send
+     * @throws OXException
      */
-    public MimeMessage createMailMessage(File feedbackFile, FeedbackMailFilter filter, Session session) throws MessagingException, IOException {
+    public MimeMessage createMailMessage(File feedbackFile, FeedbackMailFilter filter, Session session) throws OXException {
         MimeMessage mimeMessage = new MimeMessage(session);
         if (isPGPEncrypted) {
             //Not ready yet
         } else if (isSigned) {
-          //Not ready yet
+            //Not ready yet
         } else {
             mimeMessage = getNotEncryptedUnsignedMail(feedbackFile, filter, session);
         }
         return mimeMessage;
     }
 
-    private MimeMessage getNotEncryptedUnsignedMail(File feedbackFile, FeedbackMailFilter filter, Session session) throws MessagingException, UnsupportedEncodingException, IOException {
+    private MimeMessage getNotEncryptedUnsignedMail(File feedbackFile, FeedbackMailFilter filter, Session session) throws OXException {
         MimeMessage email = new MimeMessage(session);
 
-        email.setSubject(filter.getSubject());
-        email.setFrom(new InternetAddress(MailProperties.getSenderAddress(), MailProperties.getSenderName()));
+        try {
+            email.setSubject(filter.getSubject());
 
-        BodyPart messageBody = new MimeBodyPart();
-        messageBody.setText(filter.getBody());
-        Multipart completeMailContent = new MimeMultipart(messageBody);
-        MimeBodyPart attachment = new MimeBodyPart();
-        attachment.attachFile(feedbackFile);
-        completeMailContent.addBodyPart(attachment);
-        email.setContent(completeMailContent);
+            email.setFrom(new InternetAddress(MailProperties.getSenderAddress(), MailProperties.getSenderName()));
+
+            BodyPart messageBody = new MimeBodyPart();
+            messageBody.setText(filter.getBody());
+            Multipart completeMailContent = new MimeMultipart(messageBody);
+            MimeBodyPart attachment = new MimeBodyPart();
+            attachment.attachFile(feedbackFile);
+            completeMailContent.addBodyPart(attachment);
+            email.setContent(completeMailContent);
+        } catch (MessagingException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (UnsupportedEncodingException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (IOException e) {
+            LOG.error(e.getMessage(), e);
+        }
 
         return email;
     }
-    
+
     /**
-     * TODO QS-VS: comment
-     * @param filter
-     * @return
-     * @throws OXException
-     * @throws IOException
+     * Loads the file with all user feedback from the {@link FeedbackService} and translates
+     * the result into a file, that is returned.
+     * 
+     * @param filter, all necessary filter informations
+     * @return, a file with all user feedback for the given filter
+     * @throws OXException, when something during the export goes wrong
      */
-    public File getFeedbackfile(FeedbackMailFilter filter) throws OXException, IOException {
+    public File getFeedbackfile(FeedbackMailFilter filter) throws OXException {
         FeedbackService feedbackService = Services.getService(FeedbackService.class);
         ExportResultConverter feedbackProvider = feedbackService.export(filter.getCtxGroup(), filter);
         ExportResult feedbackResult = feedbackProvider.get(ExportType.CSV);
@@ -154,35 +169,51 @@ public class FeedbackMimeMessageUtility {
         File result = null;
         try (InputStream stream = (InputStream) feedbackResult.getResult()) {
             result = getFileFromStream(stream);
+        } catch (IOException e) {
+            LOG.error(e.getMessage(), e);
         }
         return result;
     }
-    
-    private File getFileFromStream (InputStream stream) throws IOException {
-        final File tempFile = File.createTempFile(FILENAME, FILE_TYPE);
+
+    private File getFileFromStream(InputStream stream) throws OXException, IOException {
+        File tempFile = File.createTempFile(FILENAME, FILE_TYPE);
         try (FileOutputStream out = new FileOutputStream(tempFile)) {
             IOUtils.copy(stream, out);
+        } catch (FileNotFoundException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (IOException e) {
+            LOG.error(e.getMessage(), e);
         }
         return tempFile;
     }
-    
+
     /**
-     * TODO QS-VS: comment
+     * Extract all valid email addresses from the given filter and also put all invalid addresses into
+     * the given list of "invalidAddresses".
      * 
-     * @param filter
-     * @return
-     * @throws UnsupportedEncodingException
+     * @param filter, the filter object with all needed information
+     * @param invalidAddresses, the list where all invalid email addresses should be stored
+     * @return an Array with {@link InternetAddress}s
      */
-    public Address[] extractRecipients(FeedbackMailFilter filter) throws UnsupportedEncodingException {
+    public Address[] extractValidRecipients(FeedbackMailFilter filter, List<InternetAddress> invalidAddresses) {
         Map<String, String> recipients = filter.getRecipients();
         InternetAddress[] result = new InternetAddress[recipients.size()];
         int index = 0;
         for (Entry<String, String> recipient : recipients.entrySet()) {
-            InternetAddress adress = new InternetAddress(recipient.getKey(), recipient.getValue());
-            result[index] = adress;
-            index++;
+            InternetAddress address = null;
+            try {
+                address = new InternetAddress(recipient.getKey(), recipient.getValue());
+                address.validate();
+                result[index] = address;
+                index++;
+            } catch (UnsupportedEncodingException e) {
+                LOG.error(e.getMessage(), e);
+            } catch (AddressException e) {
+                invalidAddresses.add(address);
+                // validation exception does not trigger any logging
+            }
         }
-        
+
         return result;
     }
 }
