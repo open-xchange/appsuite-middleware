@@ -411,6 +411,10 @@ public class DispatcherServlet extends SessionServlet {
      * @return <code>true</code> to ignore; otherwise <code>false</code> for common error handling
      */
     protected static boolean ignore(OXException e) {
+        if (e.isLightWeight()) {
+            return true;
+        }
+
         Category category = e.getCategory();
         for (Category cat : CAT_IGNOREES) {
             if (cat == category) {

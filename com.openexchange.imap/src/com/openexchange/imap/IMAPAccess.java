@@ -1092,9 +1092,9 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         if (range != null) {
             if (System.currentTimeMillis() - range.longValue() <= imapConfProps.getImapTemporaryDown()) {
                 /*
-                 * Still treated as being temporary broken
+                 * Still considered as being temporary broken
                  */
-                throw MimeMailExceptionCode.READ_TIMEOUT.create(mailConfig.getServer(), mailConfig.getLogin());
+                throw MimeMailExceptionCode.CONNECT_ERROR.create(mailConfig.getServer(), mailConfig.getLogin()).markLightWeight();
             }
             map.remove(key);
         }
