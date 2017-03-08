@@ -65,9 +65,10 @@ import com.openexchange.authentication.Authenticated;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.Strings;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.saml.SAMLConfig;
-import com.openexchange.saml.impl.DefaultConfigReference;
+import com.openexchange.saml.impl.SAMLConfigRegistryImpl;
 import com.openexchange.saml.state.AuthnRequestInfo;
 import com.openexchange.saml.state.DefaultAuthnRequestInfo;
 import com.openexchange.saml.state.StateManagement;
@@ -237,7 +238,7 @@ public abstract class AbstractSAMLBackend implements SAMLBackend {
 
     @Override
     public SAMLConfig getConfig() {
-        return DefaultConfigReference.getDefaultConfig();
+        return SAMLConfigRegistryImpl.getInstance().getDefaultConfig();
     }
 
     @Override
@@ -264,5 +265,18 @@ public abstract class AbstractSAMLBackend implements SAMLBackend {
      */
     protected String doGetStaticLoginRedirectLocation(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
         return null;
+    }
+
+    /**
+     * Retrieves the {@link SAMLConfig} with the given id from the {@link SAMLConfigRegistry}.
+     * @param path The {@link SAMLConfig} id
+     * @return the {@link SAMLConfig} or the default config if path is empty
+     */
+    public SAMLConfig getConfig(String path) {
+        if(Strings.isEmpty(path)){
+            return SAMLConfigRegistryImpl.getInstance().getDefaultConfig();
+        } else {
+            return SAMLConfigRegistryImpl.getInstance().getConfigById(path);
+        }
     }
 }

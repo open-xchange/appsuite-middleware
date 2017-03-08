@@ -49,31 +49,55 @@
 
 package com.openexchange.saml.impl;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.config.ConfigurationService;
+import java.util.HashMap;
+import java.util.Map;
 import com.openexchange.saml.SAMLConfig;
+import com.openexchange.saml.spi.SAMLConfigRegistry;
 
 /**
- * Default implementation of {@link SAMLConfig} based on {@link ConfigurationService} and
- * <code>saml.properties</code>.
+ * A registry for {@link SAMLConfig}s
  *
- * @author <a href="mailto:felix.marx@open-xchange.com">Felix Marx</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-public class DefaultConfigReference {
+public class SAMLConfigRegistryImpl implements SAMLConfigRegistry{
 
-    private static final AtomicReference<DefaultConfig> REGISTRY = new AtomicReference<DefaultConfig>();
+    private static final SAMLConfigRegistryImpl INSTANCE = new SAMLConfigRegistryImpl();
 
-    public static DefaultConfig getDefaultConfig() {
-        DefaultConfig defaultConfig = REGISTRY.get();
+    public static SAMLConfigRegistryImpl getInstance(){
+        return INSTANCE;
+    }
+
+    private final Map<String,SAMLConfig> configs = new HashMap<String, SAMLConfig>();
+    public static final String DEFAULT_KEY = "";
+
+    @Override
+    public SAMLConfig getDefaultConfig() {
+        SAMLConfig defaultConfig = configs.get(DEFAULT_KEY);
         if (null == defaultConfig) {
             throw new IllegalArgumentException("DefaultConfig not started");
         }
         return defaultConfig;
     }
 
-    public static void setDefaultConfig(DefaultConfig defaultConfig) {
-        REGISTRY.set(defaultConfig);
+    @Override
+    public void registerSAMLConfig(String id, SAMLConfig config){
+        configs.put(id, config);
+    }
+
+    @Override
+    public SAMLConfig getConfigById(String id){
+        return configs.get(id);
+    }
+
+    @Override
+    public void clear() {
+        configs.clear();
+    }
+
+    @Override
+    public void removeSAMLConfig(String id) {
+        configs.remove(id);
     }
 
 }

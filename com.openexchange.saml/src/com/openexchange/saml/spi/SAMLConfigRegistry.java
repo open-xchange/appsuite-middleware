@@ -47,46 +47,51 @@
  *
  */
 
-package com.openexchange.saml.osgi;
+package com.openexchange.saml.spi;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.saml.impl.DefaultConfig;
-import com.openexchange.saml.impl.SAMLConfigRegistryImpl;
-import com.openexchange.saml.spi.SAMLConfigRegistry;
+import com.openexchange.saml.SAMLConfig;
 
 /**
- * OSGi activator for com.openexchange.saml.
+ * {@link SAMLConfigRegistry}
  *
- *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.1
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.4
  */
-public class SAMLActivator extends HousekeepingActivator {
+public interface SAMLConfigRegistry {
 
-    private SAMLFeature samlFeature;
+    /**
+     * Retrieves the default {@link SAMLConfig}
+     *
+     * @return the default {@link SAMLConfig}
+     */
+    public SAMLConfig getDefaultConfig();
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[]{ConfigurationService.class};
-    }
+    /**
+     * Registers a {@link SAMLConfig} under a given id
+     *
+     * @param id The id of the config
+     * @param config The {@link SAMLConfig}
+     */
+    public void registerSAMLConfig(String id, SAMLConfig config);
 
-    @Override
-    protected void startBundle() throws Exception {
-        samlFeature = new SAMLFeature(context);
-        samlFeature.open();
-        DefaultConfig config = DefaultConfig.init(getService(ConfigurationService.class));
-        SAMLConfigRegistryImpl.getInstance().registerSAMLConfig(SAMLConfigRegistryImpl.DEFAULT_KEY, config);
-        registerService(SAMLConfigRegistry.class, SAMLConfigRegistryImpl.getInstance());
+    /**
+     * Removes the {@link SAMLConfig} with the given id
+     *
+     * @param id The id of the config
+     */
+    public void removeSAMLConfig(String id);
 
-    }
+    /**
+     * Retrieves the {@link SAMLConfig} for the given id
+     * 
+     * @param id The id of the config
+     * @return the {@link SAMLConfig}
+     */
+    public SAMLConfig getConfigById(String id);
 
-    @Override
-    protected void stopBundle() throws Exception {
-        if (samlFeature != null) {
-            samlFeature.close();
-        }
-        super.stopBundle();
-    }
+    /**
+     * Removes all configs
+     */
+    public void clear();
 
 }

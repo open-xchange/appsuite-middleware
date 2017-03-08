@@ -66,8 +66,7 @@ import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.osgi.DependentServiceStarter;
 import com.openexchange.saml.SAMLProperties;
-import com.openexchange.saml.impl.DefaultConfig;
-import com.openexchange.saml.impl.DefaultConfigReference;
+import com.openexchange.saml.impl.SAMLConfigRegistryImpl;
 import com.openexchange.saml.impl.SAMLSessionInspector;
 import com.openexchange.saml.impl.hz.PortableAuthnRequestInfoFactory;
 import com.openexchange.saml.impl.hz.PortableLogoutRequestInfoFactory;
@@ -125,8 +124,6 @@ public class SAMLFeature extends DependentServiceStarter {
         if (enabled) {
             LOG.info("Starting SAML 2.0 support...");
             SessiondService sessiondService = services.getService(SessiondService.class);
-            DefaultConfig config = DefaultConfig.init(configService);
-            DefaultConfigReference.setDefaultConfig(config);
             serviceRegistrations.push(context.registerService(SessionInspectorService.class, new SAMLSessionInspector(sessiondService), null));
             serviceRegistrations.push(context.registerService(CustomPortableFactory.class, new PortableAuthnRequestInfoFactory(), null));
             serviceRegistrations.push(context.registerService(CustomPortableFactory.class, new PortableLogoutRequestInfoFactory(), null));
@@ -166,7 +163,7 @@ public class SAMLFeature extends DependentServiceStarter {
             samlBackends.stop();
             samlBackends = null;
         }
-        DefaultConfigReference.setDefaultConfig(null);
+        SAMLConfigRegistryImpl.getInstance().clear();
     }
 
 }
