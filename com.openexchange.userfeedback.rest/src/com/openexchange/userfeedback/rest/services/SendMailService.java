@@ -55,7 +55,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
-import javax.ws.rs.GET;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -87,20 +88,23 @@ public class SendMailService extends JAXRSService {
         super(services);
     }
 
-    @GET
+    @POST
     @Path("/{context-group}/{type}")
+    @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response sendMail(@QueryParam("start") final long start, @QueryParam("end") final long end, @PathParam("type") final String type, @PathParam("context-group") final String contextGroup,
-        @QueryParam("recipients") final String recipients, @QueryParam("subject") String subject, @QueryParam("body") String body) {
-        return sendMail(start, end, type, contextGroup, recipients, subject, body, false);
+        @QueryParam("subject") String subject, @QueryParam("body") String body, String recipients) {
+        return sendMail(start, end, type, contextGroup, subject, body, "false", recipients);
     }
 
-    @GET
+    @POST
     @Path("/{context-group}/{type}/pgp")
     @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response sendMail(@QueryParam("start") final long start, @QueryParam("end") final long end, @PathParam("type") final String type, @PathParam("context-group") final String contextGroup,
-        @QueryParam("recipients") final String recipients, @QueryParam("subject") String subject, @QueryParam("body") String body, boolean usePgp) {
-        if (usePgp) {
+        @QueryParam("subject") String subject, @QueryParam("body") String body, @QueryParam("usePgp") String usePgp, String recipients) {
+
+        boolean pgp = Boolean.parseBoolean(usePgp);
+        if (pgp) {
             return Response.status(501).build();
         } else {
             ResponseBuilder builder = null;

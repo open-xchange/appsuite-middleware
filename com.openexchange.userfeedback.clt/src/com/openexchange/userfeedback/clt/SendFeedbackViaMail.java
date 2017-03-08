@@ -57,6 +57,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
@@ -100,6 +101,9 @@ public class SendFeedbackViaMail extends AbstractRestCLI<Void> {
     private static final String RECIPIENTS_SHORT = "r";
     private static final String RECIPIENT_LONG = "recipients";
 
+    private static final String USE_PGP_SHORT = "p";
+    private static final String USE_PGP_LONG = "use-pgp";
+
     private static final String ENDPOINT_LONG = "api-root";
     private static final String ENDPOINT_DEFAULT = "http://localhost:8009/userfeedback/v1/mail";
 
@@ -121,6 +125,7 @@ public class SendFeedbackViaMail extends AbstractRestCLI<Void> {
         options.addOption(SUBJECT_SHORT, SUBJECT_LONG, true, " The mail subject. Default: \"User Feedback Report: [time range]\".");
         options.addOption(BODY_SHORT, BODY_LONG, true, "The mail body (plain text).");
         options.addOption(RECIPIENTS_SHORT, RECIPIENT_LONG, true, "CSV file containing the recipients.");
+        options.addOption(USE_PGP_SHORT, USE_PGP_LONG, true, "");
         options.addOption(null, ENDPOINT_LONG, true, " URL to an alternative HTTP API endpoint. Example: 'https://192.168.0.1:8443/userfeedback/v1'");
     }
 
@@ -150,18 +155,12 @@ public class SendFeedbackViaMail extends AbstractRestCLI<Void> {
             if (cmd.hasOption(BODY_SHORT)) {
                 target = target.queryParam("body", cmd.getOptionValue(BODY_SHORT));
             }
-            String recipients = cmd.getOptionValue(RECIPIENTS_SHORT);
-            if (null == recipients || Strings.isEmpty(recipients)) {
-                System.err.println(RECIPIENTS_SHORT + " option missing.");
-                return null;
+            if (cmd.hasOption(USE_PGP_SHORT)) {
+                target = target.queryParam("usePgp", cmd.getOptionValue(USE_PGP_SHORT));
             }
-            String csv = new String(Files.readAllBytes(Paths.get(recipients)));
-            target = target.queryParam("recipients", csv);
             return target;
         } catch (URISyntaxException e) {
             System.err.print("Unable to return endpoint: " + e.getMessage());
-        } catch (IOException e) {
-            System.err.println("File not found: " + cmd.getOptionValue(RECIPIENTS_SHORT));
         }
         return null;
     }
@@ -174,7 +173,18 @@ public class SendFeedbackViaMail extends AbstractRestCLI<Void> {
     @Override
     protected Void invoke(Options option, CommandLine cmd, Builder context) throws Exception {
         context.accept(MediaType.APPLICATION_JSON_TYPE, MediaType.APPLICATION_OCTET_STREAM_TYPE);
-        InputStream response = context.get(InputStream.class);
+        String recipients = cmd.getOptionValue(RECIPIENTS_SHORT);
+        if (null == recipients || Strings.isEmpty(recipients)) {
+            System.err.println(RECIPIENTS_SHORT + " option missing.");
+            return null;
+        }
+        String csv = "";
+        try {
+            csv = new String(Files.readAllBytes(Paths.get(recipients)));
+        } catch (IOException e) {
+            System.err.println("File not found: " + cmd.getOptionValue(RECIPIENTS_SHORT));
+        }
+        InputStream response = context.post(Entity.text(csv), InputStream.class);
         System.out.println(IOUtils.toCharArray(new AsciiReader(response)));
         return null;
     }
