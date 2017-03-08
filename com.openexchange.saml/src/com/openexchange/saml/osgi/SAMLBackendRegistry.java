@@ -209,7 +209,7 @@ public final class SAMLBackendRegistry extends ServiceTracker<SAMLBackend, SAMLB
         if (null == path) {
             throw new IllegalArgumentException("path is null");
         }
-        if (path.matches(".*[^a-zA-Z].*")) {
+        if (path.matches(".*[^a-zA-Z0-9].*")) {
             throw new IllegalArgumentException("path contains not allowed parameters");
         }
     }
