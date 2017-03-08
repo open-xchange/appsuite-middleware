@@ -93,9 +93,15 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
         String result = "Sending email(s) failed for unkown reason, please contact the administrator or see the server logs";
         File feedbackfile = messageUtility.getFeedbackfile(filter);
         if (feedbackfile != null) {
-            result = sendMail(feedbackfile, filter);
+            try {
+                result = sendMail(feedbackfile, filter);
+            } catch (OXException e) {
+                feedbackfile.delete();
+                throw e;
+            }
+            feedbackfile.delete();
         }
-
+        
         return result;
     }
 
@@ -108,7 +114,7 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
 
         try {
             Address[] recipients = this.messageUtility.extractValidRecipients(filter, this.invalidAddresses);
-            if (recipients.length == 0) {
+            if (recipients.length == 0 || (recipients.length == 1 && recipients[0] == null)) {
                 throw FeedbackExceptionCodes.INVALID_EMAIL_ADDRESSES.create();
             }
             MimeMessage mail = messageUtility.createMailMessage(feedbackFile, filter, smtpSession);
