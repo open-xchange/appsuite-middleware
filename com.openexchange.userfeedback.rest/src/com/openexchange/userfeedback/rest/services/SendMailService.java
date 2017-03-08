@@ -68,6 +68,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.rest.services.JAXRSService;
 import com.openexchange.rest.services.annotation.Role;
@@ -145,6 +146,9 @@ public class SendMailService extends JAXRSService {
             builder.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM + "; charset=utf-8");
             return builder.build();
         } catch (JSONException e) {
+            return null;
+        } catch (OXException e) {
+            // TODO Interpret all potential OXException and react accordingly
             return null;
         }
     }
