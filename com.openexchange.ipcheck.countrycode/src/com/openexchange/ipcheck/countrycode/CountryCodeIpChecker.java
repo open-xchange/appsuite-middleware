@@ -99,6 +99,7 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
         // ACCEPT: if the IP address are whitelisted
         if (IPCheckers.isWhiteListed(current, previous, session, configuration)) {
             accept(current, session, configuration);
+            return;
         }
 
         GeoInformation geoInformationCurrent = service.getGeoInformation(current);
@@ -109,13 +110,14 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
             countryChanged = !geoInformationPrevious.getCountry().equals(geoInformationCurrent.getCountry());
         }
 
-        // DENY: if country code changed
-        if (countryChanged) {
-            deny(current, session, geoInformationCurrent, geoInformationPrevious);
+        // ACCEPT: if country code did not change
+        if (!countryChanged) {
+            accept(current, session, configuration);
+            return;
         }
 
-        // ACCEPT: in any other case
-        accept(current, session, configuration);
+        // DENY: in any other case
+        deny(current, session, geoInformationCurrent, geoInformationPrevious);
     }
 
     /**
