@@ -194,8 +194,14 @@ public class SendFeedbackViaMail extends AbstractRestCLI<Void> {
             while (it.hasNext()) {
                 CSVRecord record = it.next();
                 String address = record.get(0);
-                String displayName = record.get(1);
-                String pgp = record.get(2);
+                String displayName = "";
+                String pgp = "";
+                if (record.size() >= 2) {
+                    displayName = record.get(1);
+                }
+                if (record.size() == 3) {
+                    pgp = record.get(2);
+                }
                 JSONObject json = new JSONObject();
                 json.put("address", address);
                 json.put("displayName", displayName);
