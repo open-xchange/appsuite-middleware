@@ -56,7 +56,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -208,7 +207,7 @@ public class FeedbackMimeMessageUtility {
                 validRecipients.add(address);
             } catch (UnsupportedEncodingException e) {
                 LOG.error(e.getMessage(), e);
-            } catch (AddressException e) {
+            } catch (@SuppressWarnings("unused") AddressException e) {
                 invalidAddresses.add(address);
                 // validation exception does not trigger any logging
             }

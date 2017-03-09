@@ -111,7 +111,7 @@ public class Services {
     public static <S extends Object> S optService(final Class<? extends S> clazz) {
         try {
             return getService(clazz);
-        } catch (final IllegalStateException e) {
+        } catch (@SuppressWarnings("unused") final IllegalStateException e) {
             return null;
         }
     }
