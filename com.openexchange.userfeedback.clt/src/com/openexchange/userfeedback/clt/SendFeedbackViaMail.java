@@ -228,13 +228,7 @@ public class SendFeedbackViaMail extends AbstractRestCLI<Void> {
             }
         }
         InputStream response = null;
-        try {
-            response = context.post(Entity.json(array.toString()), InputStream.class);
-        } catch (Exception e) {
-            System.err.println(e.getMessage());
-            System.exit(1);
-            return null;
-        }
+        response = context.post(Entity.json(array.toString()), InputStream.class);
         System.out.println(IOUtils.toCharArray(new AsciiReader(response)));
         System.exit(0);
         return null;

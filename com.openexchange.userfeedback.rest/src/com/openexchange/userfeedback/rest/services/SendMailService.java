@@ -166,7 +166,15 @@ public class SendMailService extends JAXRSService {
                 ResponseBuilder builder = Response.status(Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON);
                 builder.entity(errorJson);
                 return builder.build();
-            }
+            } else if (e.similarTo(FeedbackExceptionCodes.INVALID_EMAIL_ADDRESSES)) {
+                ResponseBuilder builder = Response.status(Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON);
+                builder.entity(errorJson);
+                return builder.build();
+            } else if (e.similarTo(FeedbackExceptionCodes.INVALID_SMTP_CONFIGURATION)) {
+                ResponseBuilder builder = Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON);
+                builder.entity(errorJson);
+                return builder.build();
+            } 
             ResponseBuilder builder = Response.status(Status.NOT_FOUND).type(MediaType.APPLICATION_JSON);
             builder.entity(errorJson);
             return builder.build();
