@@ -116,4 +116,49 @@ public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements I
     public int getDeniedIPChanges() {
         return metrics.getDeniedIPChanges();
     }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.ipcheck.countrycode.mbean.IPCheckMBean#getAcceptedPrivateIPChanges()
+     */
+    @Override
+    public int getAcceptedPrivateIPChanges() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.ipcheck.countrycode.mbean.IPCheckMBean#getAcceptedWhiteListedIPChanges()
+     */
+    @Override
+    public int getAcceptedWhiteListedIPChanges() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.ipcheck.countrycode.mbean.IPCheckMBean#getAcceptedCountryCodeNotChanged()
+     */
+    @Override
+    public int getAcceptedCountryCodeNotChanged() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.ipcheck.countrycode.mbean.IPCheckMBean#getDeniedExceptionIPChanges()
+     */
+    @Override
+    public int getDeniedExceptionIPChanges() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.ipcheck.countrycode.mbean.IPCheckMBean#getDeniedDefaultIPChanges()
+     */
+    @Override
+    public int getDeniedDefaultIPChanges() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
 }
