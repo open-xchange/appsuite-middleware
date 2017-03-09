@@ -146,7 +146,7 @@ public class SocketFetcher {
 				String prefix, boolean useSSL)
 				throws IOException {
         InetAddress[] addresses = InetAddress.getAllByName(host);
-        if (!PropUtil.getBooleanProperty(props, prefix + ".multiAddress", false) || addresses.length == 1) {            
+        if (!PropUtil.getBooleanProperty(props, prefix + ".multiAddress", false) || addresses.length == 1) {
             return getSocket(addresses[0], host, port, props, prefix, useSSL);
         }
         
