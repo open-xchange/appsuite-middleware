@@ -1,40 +1,36 @@
-array:
-  - data:
-      Key: com.openexchange.http.grizzly.wsTimeoutMillis
-      Description: >
-Specifies the Web Socket timeout in milliseconds
-Default is 900000 (15 Minutes).
-      Default: 900000
-      Version: 7.8.3
-      Reloadable: false
-      Configcascade_Aware: false
-      Related: com.openexchange.websockets.enabled
-      File: grizzly.properties
-  - data:
-      Key: com.openexchange.http.grizzly.sessionExpiryCheckInterval
-      Description: >
-Specifies the interval in seconds when to check for expired/invalid HTTP sessions
-This value should be aligned to property "com.openexchange.servlet.maxInactiveInterval"
-that defines how long (in seconds) a HTTP session may stay idle/inactive until considered
-as invalid
-Default is 60 seconds
-      Default: 60
-      Version: 7.8.4
-      Reloadable: false
-      Configcascade_Aware: false
-      File: grizzly.properties
-  - data:
-      Key: com.openexchange.http.grizzly.maxNumberOfConcurrentRequests
-      Description: >
-Specifies the number of concurrent HTTP requests that are allowed being processed.
-Those requests exceeding that limit will encounter a 503 "The server is temporary overloaded..." status code and accompanying error page
-A value of less than or equal to 0 (zero) effectively disables that limitation.
-The chosen value for this property should be aligned to the configured "ulimit" of the backing operating system. E.g. having "ulimit" set
-to 8,192 (given that JVM is the only main process running for OS user) implies that ~6,000 should be considered for this property leaving
-some room for threads not associated with an HTTP request.
-Default is 0 (infinite)
-      Default: 0
-      Version: 7.8.4
-      Reloadable: false
-      Configcascade_Aware: false
-      File: grizzly.properties
+feature_name: Grizzly
+properties:
+    - key: com.openexchange.http.grizzly.wsTimeoutMillis
+      description: |
+        Specifies the Web Socket timeout in milliseconds
+        Default is 900000 (15 Minutes).
+      default: 900000
+      version: 7.8.3
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.websockets.enabled
+      file: grizzly.properties
+    - key: com.openexchange.http.grizzly.sessionExpiryCheckInterval
+      description: |
+        Specifies the interval in seconds when to check for expired/invalid HTTP sessions
+        This value should be aligned to property "com.openexchange.servlet.maxInactiveInterval"
+        that defines how long (in seconds) a HTTP session may stay idle/inactive until considered
+        as invalid
+      default: 60
+      version: 7.8.4
+      reloadable: false
+      configcascadeAware: false
+      file: grizzly.properties
+    - key: com.openexchange.http.grizzly.maxNumberOfConcurrentRequests
+      description: |
+        Specifies the number of concurrent HTTP requests that are allowed being processed.
+        Those requests exceeding that limit will encounter a 503 "The server is temporary overloaded..." status code and accompanying error page
+        A value of less than or equal to 0 (zero) effectively disables that limitation.
+        The chosen value for this property should be aligned to the configured "ulimit" of the backing operating system. E.g. having "ulimit" set
+        to 8,192 (given that JVM is the only main process running for OS user) implies that ~6,000 should be considered for this property leaving
+        some room for threads not associated with an HTTP request.
+      default: 0
+      version: 7.8.4
+      reloadable: false
+      configcascadeAware: false
+      file: grizzly.properties

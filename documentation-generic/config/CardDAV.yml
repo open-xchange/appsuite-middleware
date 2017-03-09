@@ -1,64 +1,59 @@
-array:
-  - data:
-      Key: com.openexchange.carddav.push.apsd.enabled
-      Description: >
+feature_name: CardDAV
+properties:
+    - key: com.openexchange.carddav.push.apsd.enabled
+      description: |
         Enables or disables push event notifications using the Apple Push Notification service (APNS), targeting the Apple Contacts client on iOS and mac OS. This requires a valid configuration for the APNS certificate and keys, see options below.
-      Default: false
-      Version: 7.8.4
-      Reloadable: true
-      Configcascade_Aware: false
-      Related:
-      File: carddav.properties
-  - data:
-      Key: com.openexchange.carddav.push.apsd.bundleId
-      Description: >
+      default: false
+      version: 7.8.4
+      reloadable: true
+      configcascadeAware: false
+      related:
+      file: carddav.properties
+    - key: com.openexchange.carddav.push.apsd.bundleId
+      description: |
         Defines the bundle identifier referring to the Apple Push "topic", which is extracted from the UID portion of the subject of the certificate acquired from Apple, e.g. "com.apple.contact.XServer.a5243d3e-b635-11e6-80f5-76304dec7eb7". 
         Required if com.openexchange.carddav.push.apsd.enabled is "true".
-      Default: 
-      Version: 7.8.4
-      Reloadable: true
-      Configcascade_Aware: false
-      Related: com.openexchange.carddav.push.apsd.enabled
-      File: carddav.properties
-  - data:
-      Key: com.openexchange.carddav.push.apsd.keystore
-      Description: >
+      default: 
+      version: 7.8.4
+      reloadable: true
+      configcascadeAware: false
+      related: com.openexchange.carddav.push.apsd.enabled
+      file: carddav.properties
+    - key: com.openexchange.carddav.push.apsd.keystore
+      description: |
         Specifies the path to the local keystore file (PKCS #12) containing the APNS certificate and keys to use, e.g. "/opt/open-xchange/etc/com.apple.servermgrd.apns.contact.p12". 
         Required if com.openexchange.carddav.push.apsd.enabled is "true".   
-      Default: 
-      Version: 7.8.4
-      Reloadable: true
-      Configcascade_Aware: false
-      Related: com.openexchange.carddav.push.apsd.enabled
-      File: carddav.properties
-  - data:
-      Key: com.openexchange.carddav.push.apsd.password
-      Description: >
+      default: 
+      version: 7.8.4
+      reloadable: true
+      configcascadeAware: false
+      related: com.openexchange.carddav.push.apsd.enabled
+      file: carddav.properties
+    - key: com.openexchange.carddav.push.apsd.password
+      description: |
         Specifies the password used when creating the referenced keystore containing the APNS certificate.  
         Required if com.openexchange.carddav.push.apsd.enabled is "true".   
-      Default: 
-      Version: 7.8.4
-      Reloadable: true
-      Configcascade_Aware: false
-      Related: com.openexchange.carddav.push.apsd.enabled
-      File: carddav.properties
-  - data:
-      Key: com.openexchange.carddav.push.apsd.production
-      Description: >
+      default: 
+      version: 7.8.4
+      reloadable: true
+      configcascadeAware: false
+      related: com.openexchange.carddav.push.apsd.enabled
+      file: carddav.properties
+    - key: com.openexchange.carddav.push.apsd.production
+      description: |
         Indicates which APNS service is used when sending push notifications. A value of "true" will use the production service, a value of "false" the sandbox service. 
-      Default: true
-      Version: 7.8.4
-      Reloadable: true
-      Configcascade_Aware: false
-      Related: 
-      File: carddav.properties
-  - data:
-      Key: com.openexchange.carddav.push.apsd.refreshInterval
-      Description: >
+      default: true
+      version: 7.8.4
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: carddav.properties
+    - key: com.openexchange.carddav.push.apsd.refreshInterval
+      description: |
         Defines a timespan (in seconds) that is advertised to clients to indicate how often they should refresh their push subscriptions. 
-      Default: 172800
-      Version: 7.8.4
-      Reloadable: true
-      Configcascade_Aware: false
-      Related: 
-      File: carddav.properties
+      default: 172800
+      version: 7.8.4
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: carddav.properties

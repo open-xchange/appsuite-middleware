@@ -1,22 +1,21 @@
-array:
-  - data:
-      Key: com.openexchange.mailaccount.failedAuth.limit
-      Description: >
-Specifies the max. number of failed authentication attempts until the associated mail account is disabled.
-      Default: 5
-      Version: 7.8.4
-      Reloadable: true
-      Configcascade_Aware: true
-      Related: 
-      File: mailaccount.properties
-  - data:
-      Key: com.openexchange.mailaccount.failedAuth.span
-      Description: >
-Specifies the time span in which the failed authentication attempts are tracked.
-The value accepts known time span syntax like "1W" or "5m"
-      Default: 30m
-      Version: 7.8.4
-      Reloadable: true
-      Configcascade_Aware: true
-      Related: 
-      File: mailaccount.properties
+feature_name: MailAccount
+properties:
+    - key: com.openexchange.mailaccount.failedAuth.limit
+      description: |
+        Specifies the max. number of failed authentication attempts until the associated mail account is disabled.
+      default: 5
+      version: 7.8.4
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: mailaccount.properties
+    - key: com.openexchange.mailaccount.failedAuth.span
+      description: |
+        Specifies the time span in which the failed authentication attempts are tracked.
+        The value accepts known time span syntax like "1W" or "5m"
+      default: 30m
+      version: 7.8.4
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: mailaccount.properties
