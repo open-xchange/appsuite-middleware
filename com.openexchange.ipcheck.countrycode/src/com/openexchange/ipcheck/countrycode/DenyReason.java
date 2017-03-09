@@ -56,9 +56,9 @@ package com.openexchange.ipcheck.countrycode;
  */
 public enum DenyReason {
     /**
-     * An exception was thrown: %1$s
+     * An exception was thrown
      */
-    EXCEPTION("An exception was thrown: %1$s"),
+    EXCEPTION("An exception was thrown"),
     /**
      * Change is not eligible.
      */
