@@ -64,9 +64,9 @@ enum AcceptReason {
      */
     WHITE_LISTED("One of the IP addresses is white-listed."),
     /**
-     * No country change was observed.
+     * The IP change was eligible
      */
-    NO_COUNTRY_CHANGE("No country change was observed.");
+    ELIGIBLE("Change was eligible");
 
     private final String message;
 

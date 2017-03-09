@@ -60,9 +60,9 @@ public enum DenyReason {
      */
     EXCEPTION("An exception was thrown"),
     /**
-     * Change is not eligible.
+     * Ccountry change was observed.
      */
-    DEFAULT("Change is not eligible.");
+    COUNTRY_CHANGE("Country change was observed.");
 
     private final String message;
 

@@ -64,10 +64,10 @@ public class IPCheckMetrics {
 
     private final AtomicInteger acceptedPrivateIP;
     private final AtomicInteger acceptedWhiteListed;
-    private final AtomicInteger acceptedCountryNotChanged;
+    private final AtomicInteger acceptedEligibleIPChange;
 
     private final AtomicInteger deniedException;
-    private final AtomicInteger deniedDefault;
+    private final AtomicInteger deniedCountryChanged;
 
     /**
      * Initialises a new {@link IPCheckMetrics}.
@@ -79,10 +79,10 @@ public class IPCheckMetrics {
         deniedIPChanges = new AtomicInteger();
         acceptedPrivateIP = new AtomicInteger();
         acceptedWhiteListed = new AtomicInteger();
-        acceptedCountryNotChanged = new AtomicInteger();
+        acceptedEligibleIPChange = new AtomicInteger();
 
         deniedException = new AtomicInteger();
-        deniedDefault = new AtomicInteger();
+        deniedCountryChanged = new AtomicInteger();
     }
 
     public void incrementTotalIPChanges() {
@@ -105,16 +105,16 @@ public class IPCheckMetrics {
         acceptedWhiteListed.incrementAndGet();
     }
 
-    public void incrementAcceptedContryNotChanged() {
-        acceptedCountryNotChanged.incrementAndGet();
+    public void incrementAcceptedEligibleIPChange() {
+        acceptedEligibleIPChange.incrementAndGet();
     }
 
     public void incrementDeniedException() {
         deniedException.incrementAndGet();
     }
 
-    public void incrementDeniedDefault() {
-        deniedDefault.incrementAndGet();
+    public void incrementDeniedCountryChange() {
+        deniedCountryChanged.incrementAndGet();
     }
 
     public int getTotalIPChanges() {
@@ -157,8 +157,8 @@ public class IPCheckMetrics {
      *
      * @return The acceptedCountryNotChanged
      */
-    public int getAcceptedCountryNotChanged() {
-        return acceptedCountryNotChanged.get();
+    public int getAcceptedEligibleIPChange() {
+        return acceptedEligibleIPChange.get();
     }
 
     /**
@@ -175,7 +175,7 @@ public class IPCheckMetrics {
      *
      * @return The deniedDefault
      */
-    public int getDeniedDefault() {
-        return deniedDefault.get();
+    public int getDeniedCountryChange() {
+        return deniedCountryChanged.get();
     }
 }

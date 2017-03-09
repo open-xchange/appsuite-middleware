@@ -108,13 +108,17 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
             return;
         }
 
-        boolean countryChanged = true;
         try {
             GeoInformation geoInformationCurrent = service.getGeoInformation(current);
             GeoInformation geoInformationPrevious = service.getGeoInformation(previous);
 
+            boolean countryChanged = true;
             if (geoInformationPrevious.hasCountry() && geoInformationCurrent.hasCountry()) {
                 countryChanged = !geoInformationPrevious.getCountry().equals(geoInformationCurrent.getCountry());
+            }
+            // DENY: if country code did change
+            if (countryChanged) {
+                deny(current, previous, session, DenyReason.COUNTRY_CHANGE);
             }
         } catch (OXException e) {
             if (!e.getPrefix().equals(GeoLocationExceptionCodes.PREFIX)) {
@@ -125,14 +129,8 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
             deny(current, previous, session, DenyReason.EXCEPTION, e);
         }
 
-        // ACCEPT: if country code did not change
-        if (!countryChanged) {
-            accept(current, previous, session, configuration, AcceptReason.NO_COUNTRY_CHANGE);
-            return;
-        }
-
-        // DENY: in any other case
-        deny(current, previous, session, DenyReason.DEFAULT);
+        // ACCEPT
+        accept(current, previous, session, configuration, AcceptReason.ELIGIBLE);
     }
 
     @Override
@@ -163,15 +161,15 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
         LOGGER.debug("The IP change from '{}' to '{}' was accepted. Reason: '{}'", previous, current, acceptReason.getMessage());
         IPCheckers.apply(true, current, session, configuration);
         switch (acceptReason) {
-            case NO_COUNTRY_CHANGE:
-                metrics.incrementAcceptedContryNotChanged();
-                break;
             case PRIVATE_IPV4:
                 metrics.incrementAcceptedPrivateIP();
                 break;
             case WHITE_LISTED:
                 metrics.incrementAcceptedWhiteListed();
                 break;
+            case ELIGIBLE:
+            default:
+                metrics.incrementAcceptedEligibleIPChange();
         }
         metrics.incrementAcceptedIPChanges();
     }
@@ -201,11 +199,10 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
             case EXCEPTION:
                 metrics.incrementDeniedException();
                 break;
-            case DEFAULT:
+            case COUNTRY_CHANGE:
+                metrics.incrementDeniedCountryChange();
             default:
-                metrics.incrementDeniedDefault();
                 break;
-
         }
         metrics.incrementDeniedIPChanges();
         IPCheckers.kick(current, session);

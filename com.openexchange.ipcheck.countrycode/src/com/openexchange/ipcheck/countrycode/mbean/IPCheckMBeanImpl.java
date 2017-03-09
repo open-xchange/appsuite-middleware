@@ -144,7 +144,7 @@ public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements I
      */
     @Override
     public int getAcceptedCountryCodeNotChanged() {
-        return metrics.getAcceptedCountryNotChanged();
+        return metrics.getAcceptedEligibleIPChange();
     }
 
     /*
@@ -164,6 +164,6 @@ public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements I
      */
     @Override
     public int getDeniedDefaultIPChanges() {
-        return metrics.getDeniedDefault();
+        return metrics.getDeniedCountryChange();
     }
 }
