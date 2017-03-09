@@ -62,6 +62,13 @@ public class IPCheckMetrics {
     private final AtomicInteger acceptedIPChanges;
     private final AtomicInteger deniedIPChanges;
 
+    private final AtomicInteger acceptedPrivateIP;
+    private final AtomicInteger acceptedWhiteListed;
+    private final AtomicInteger acceptedCountryNotChanged;
+
+    private final AtomicInteger deniedException;
+    private final AtomicInteger deniedDefault;
+
     /**
      * Initialises a new {@link IPCheckMetrics}.
      */
@@ -70,6 +77,12 @@ public class IPCheckMetrics {
         totalIPChanges = new AtomicInteger();
         acceptedIPChanges = new AtomicInteger();
         deniedIPChanges = new AtomicInteger();
+        acceptedPrivateIP = new AtomicInteger();
+        acceptedWhiteListed = new AtomicInteger();
+        acceptedCountryNotChanged = new AtomicInteger();
+
+        deniedException = new AtomicInteger();
+        deniedDefault = new AtomicInteger();
     }
 
     public void incrementTotalIPChanges() {
@@ -84,6 +97,26 @@ public class IPCheckMetrics {
         deniedIPChanges.incrementAndGet();
     }
 
+    public void incrementAcceptedPrivateIP() {
+        acceptedPrivateIP.incrementAndGet();
+    }
+
+    public void incrementAcceptedWhiteListed() {
+        acceptedWhiteListed.incrementAndGet();
+    }
+
+    public void incrementAcceptedContryNotChanged() {
+        acceptedCountryNotChanged.incrementAndGet();
+    }
+
+    public void incrementDeniedException() {
+        deniedException.incrementAndGet();
+    }
+
+    public void incrementDeniedDefault() {
+        deniedDefault.incrementAndGet();
+    }
+
     public int getTotalIPChanges() {
         return totalIPChanges.get();
     }
@@ -92,7 +125,57 @@ public class IPCheckMetrics {
         return acceptedIPChanges.get();
     }
 
+    /**
+     * Gets the denied ip changes
+     * 
+     * @return the denied ip changes
+     */
     public int getDeniedIPChanges() {
         return deniedIPChanges.get();
+    }
+
+    /**
+     * Gets the acceptedPrivateIP
+     *
+     * @return The acceptedPrivateIP
+     */
+    public int getAcceptedPrivateIP() {
+        return acceptedPrivateIP.get();
+    }
+
+    /**
+     * Gets the acceptedWhiteListed
+     *
+     * @return The acceptedWhiteListed
+     */
+    public int getAcceptedWhiteListed() {
+        return acceptedWhiteListed.get();
+    }
+
+    /**
+     * Gets the acceptedCountryNotChanged
+     *
+     * @return The acceptedCountryNotChanged
+     */
+    public int getAcceptedCountryNotChanged() {
+        return acceptedCountryNotChanged.get();
+    }
+
+    /**
+     * Gets the deniedException
+     *
+     * @return The deniedException
+     */
+    public int getDeniedException() {
+        return deniedException.get();
+    }
+
+    /**
+     * Gets the deniedDefault
+     *
+     * @return The deniedDefault
+     */
+    public int getDeniedDefault() {
+        return deniedDefault.get();
     }
 }

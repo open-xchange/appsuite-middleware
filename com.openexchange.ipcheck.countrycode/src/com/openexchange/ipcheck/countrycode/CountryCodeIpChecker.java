@@ -98,13 +98,13 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
 
         // ACCEPT: If one of the given IP address lies with in the private range
         if (isPrivateV4Address(current) || isPrivateV4Address(previous)) {
-            accept(current, previous, session, configuration, ChangeReason.PRIVATE_IPV4.getMessage());
+            accept(current, previous, session, configuration, AcceptReason.PRIVATE_IPV4);
             return;
         }
 
         // ACCEPT: if the IP address are white-listed
         if (IPCheckers.isWhiteListed(current, previous, session, configuration)) {
-            accept(current, previous, session, configuration, ChangeReason.WHITE_LISTED.getMessage());
+            accept(current, previous, session, configuration, AcceptReason.WHITE_LISTED);
             return;
         }
 
@@ -122,43 +122,17 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
             }
             String message = e.getMessage();
             LOGGER.error("{}", message, e);
-            deny(current, previous, session, message);
+            deny(current, previous, session, DenyReason.EXCEPTION, e);
         }
 
         // ACCEPT: if country code did not change
         if (!countryChanged) {
-            accept(current, previous, session, configuration, ChangeReason.NO_COUNTRY_CHANGE.getMessage());
+            accept(current, previous, session, configuration, AcceptReason.NO_COUNTRY_CHANGE);
             return;
         }
 
         // DENY: in any other case
-        deny(current, previous, session, ChangeReason.DEFAULT.getMessage());
-    }
-
-    /**
-     * Accepts the IP change and applies it to the specified {@link Session}
-     *
-     * @param current The current IP address
-     * @param session The {@link Session}
-     * @param configuration The {@link IPCheckConfiguration}
-     */
-    private void accept(String current, String previous, Session session, IPCheckConfiguration configuration, String reason) {
-        LOGGER.debug("The IP change from '{}' to '{}' was accepted. Reason: '{}'", previous, current, reason);
-        IPCheckers.apply(true, current, session, configuration);
-        metrics.incrementAcceptedIPChanges();
-    }
-
-    /**
-     * Denies the IP change and kicks the specified {@link Session}
-     *
-     * @param current The current IP
-     * @param session The {@link Session}
-     * @throws OXException To actually kick the session
-     */
-    private void deny(String current, String previous, Session session, String reason) throws OXException {
-        LOGGER.debug("The IP change from '{}' to '{}' was denied. Reason: '{}'", previous, current, reason);
-        metrics.incrementDeniedIPChanges();
-        IPCheckers.kick(current, session);
+        deny(current, previous, session, DenyReason.DEFAULT);
     }
 
     @Override
@@ -174,6 +148,67 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
     @Override
     public IPCheckMetrics getMetricsObject() {
         return metrics;
+    }
+
+    ///////////////////////////////////////////// HELPERS //////////////////////////////////////////////////
+
+    /**
+     * Accepts the IP change and applies it to the specified {@link Session}
+     *
+     * @param current The current IP address
+     * @param session The {@link Session}
+     * @param configuration The {@link IPCheckConfiguration}
+     */
+    private void accept(String current, String previous, Session session, IPCheckConfiguration configuration, AcceptReason acceptReason) {
+        LOGGER.debug("The IP change from '{}' to '{}' was accepted. Reason: '{}'", previous, current, acceptReason.getMessage());
+        IPCheckers.apply(true, current, session, configuration);
+        switch (acceptReason) {
+            case NO_COUNTRY_CHANGE:
+                metrics.incrementAcceptedContryNotChanged();
+                break;
+            case PRIVATE_IPV4:
+                metrics.incrementAcceptedPrivateIP();
+                break;
+            case WHITE_LISTED:
+                metrics.incrementAcceptedWhiteListed();
+                break;
+        }
+        metrics.incrementAcceptedIPChanges();
+    }
+
+    /**
+     * Denies the IP change and kicks the specified {@link Session}
+     *
+     * @param current The current IP
+     * @param session The {@link Session}
+     * @throws OXException To actually kick the session
+     */
+    private void deny(String current, String previous, Session session, DenyReason reason) throws OXException {
+        deny(current, previous, session, reason, null);
+    }
+
+    /**
+     * Denies the IP change and kicks the specified {@link Session}
+     *
+     * @param current The current IP
+     * @param session The {@link Session}
+     * @param t The exception
+     * @throws OXException To actually kick the session
+     */
+    private void deny(String current, String previous, Session session, DenyReason reason, Throwable t) throws OXException {
+        LOGGER.debug("The IP change from '{}' to '{}' was denied. Reason: '{}', '{}'", previous, current, reason.getMessage(), t.getMessage());
+        switch (reason) {
+            case EXCEPTION:
+                metrics.incrementDeniedException();
+                break;
+            case DEFAULT:
+            default:
+                metrics.incrementDeniedDefault();
+                break;
+
+        }
+        metrics.incrementDeniedIPChanges();
+        IPCheckers.kick(current, session);
     }
 
     private static final Cache<String, Boolean> CACHE_PRIVATE_IPS = CacheBuilder.newBuilder().maximumSize(65536).expireAfterAccess(90, TimeUnit.MINUTES).build();

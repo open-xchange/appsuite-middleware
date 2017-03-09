@@ -50,11 +50,11 @@
 package com.openexchange.ipcheck.countrycode;
 
 /**
- * {@link ChangeReason}
+ * {@link AcceptReason}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-enum ChangeReason {
+enum AcceptReason {
     /**
      * One of the IP addresses lies with in the private range
      */
@@ -66,18 +66,14 @@ enum ChangeReason {
     /**
      * No country change was observed.
      */
-    NO_COUNTRY_CHANGE("No country change was observed."),
-    /**
-     * Change is not eligible.
-     */
-    DEFAULT("Change is not eligible.");
+    NO_COUNTRY_CHANGE("No country change was observed.");
 
     private final String message;
 
     /**
-     * Initialises a new {@link ChangeReason}.
+     * Initialises a new {@link AcceptReason}.
      */
-    private ChangeReason(String message) {
+    private AcceptReason(String message) {
         this.message = message;
     }
 
