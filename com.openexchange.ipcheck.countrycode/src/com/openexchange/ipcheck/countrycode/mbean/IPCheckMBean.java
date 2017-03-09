@@ -55,9 +55,9 @@ package com.openexchange.ipcheck.countrycode.mbean;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public interface IPCheckMBean {
-    
+
     static final String DOMAIN = "com.openexchange.ipcheck.countrycode";
-    
+
     static String NAME = "IPCheck MBean";
 
     /**
@@ -80,4 +80,39 @@ public interface IPCheckMBean {
      * @return the total amount of denied IP changes
      */
     int getDeniedIPChanges();
+
+    /**
+     * Returns the amount of accepted IP changes due to a private IPv4 change
+     * 
+     * @return the amount of accepted IP changes due to a private IPv4 change
+     */
+    int getAcceptedPrivateIPChanges();
+
+    /**
+     * Returns the amount of accepted IP changes due to a white-listed IP
+     * 
+     * @return the amount of accepted IP changes due to a white-listed IP
+     */
+    int getAcceptedWhiteListedIPChanges();
+
+    /**
+     * Returns the amount of accepted IP changes due to country code not being changed
+     * 
+     * @return the amount of accepted IP changes due to country code not being changed
+     */
+    int getAcceptedCountryCodeNotChanged();
+
+    /**
+     * Returns the amount of denied IP changes due to an exception
+     * 
+     * @return the amount of denied IP changes due to an exception
+     */
+    int getDeniedExceptionIPChanges();
+
+    /**
+     * Returns the amount of denied IP changes due to deny-by-default policy
+     * 
+     * @return the amount of denied IP changes due to deny-by-default policy
+     */
+    int getDeniedDefaultIPChanges();
 }
