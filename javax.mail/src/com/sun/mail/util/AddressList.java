@@ -49,35 +49,36 @@
 
 package com.sun.mail.util;
 
+import java.net.InetAddress;
 import java.util.Collection;
 
 /**
- * {@link InfiniteIterator} - Infinitely iterates over a collection.
+ * {@link AddressList} - Infinitely iterates over addresses.
  */
-public class InfiniteIterator<V> {
+public class AddressList {
 
-    private final Collection<? extends V> collection;
-    private V offset;
+    private final Collection<InetAddress> collection;
+    private InetAddress offset;
 
-    public InfiniteIterator(Collection<? extends V> collection) {
+    public AddressList(Collection<InetAddress> collection) {
         this(collection, null);
     }
 
-    public InfiniteIterator(Collection<? extends V> collection, V offset) {
+    public AddressList(Collection<InetAddress> collection, InetAddress offset) {
         super();
         this.collection = collection;
         this.offset = offset;
     }
 
     /**
-     * Gets the next item.
+     * Gets the next address.
      *
-     * @return The next item
+     * @return The next address
      */
-    public V next() {
+    public InetAddress next() {
         if (offset != null) {
             boolean found = false;
-            for (V element : collection) {
+            for (InetAddress element : collection) {
                 if (element == offset) {
                     found = true;
                 } else if (found) {
@@ -88,7 +89,7 @@ public class InfiniteIterator<V> {
         }
 
         // Start with new iterator
-        V element = collection.iterator().next();
+        InetAddress element = collection.iterator().next();
         offset = element;
         return element;
     }

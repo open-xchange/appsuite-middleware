@@ -41,6 +41,7 @@
 package com.sun.mail.util;
 
 import java.io.IOException;
+import java.net.InetAddress;
 
 /**
  * An IOException that indicates a socket connection attempt failed.
@@ -57,6 +58,10 @@ public class SocketConnectException extends IOException {
      * The socket host name.
      */
     private String host;
+    /**
+     * The socket address.
+     */
+    private InetAddress address;
     /**
      * The socket port.
      */
@@ -80,10 +85,11 @@ public class SocketConnectException extends IOException {
      * @param	cto	the timeout for the connection attempt
      */
     public SocketConnectException(String msg, Exception cause,
-				    String host, int port, int cto) {
+				    String host, InetAddress address, int port, int cto) {
 	super(msg);
 	initCause(cause);
 	this.host = host;
+	this.address = address;
 	this.port = port;
 	this.cto = cto;
     }
@@ -107,6 +113,15 @@ public class SocketConnectException extends IOException {
      */
     public String getHost() {
 	return host;
+    }
+
+    /**
+     * The host address we were trying to connect to.
+     *
+     * @return  the address
+     */
+    public InetAddress getAddress() {
+    return address;
     }
 
     /**

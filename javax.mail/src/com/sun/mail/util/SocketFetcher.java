@@ -75,8 +75,6 @@ public class SocketFetcher {
     private SocketFetcher() {
     }
 
-    private static final SecureRandom RANDOM = new SecureRandom();
-
     /**
      * This method returns a Socket.  Properties control the use of
      * socket factories and other socket characteristics.  The properties
@@ -148,14 +146,26 @@ public class SocketFetcher {
 				String prefix, boolean useSSL)
 				throws IOException {
         InetAddress[] addresses = InetAddress.getAllByName(host);
-        if (addresses.length == 1) {            
+        if (!PropUtil.getBooleanProperty(props, prefix + ".multiAddress", false) || addresses.length == 1) {            
             return getSocket(addresses[0], host, port, props, prefix, useSSL);
         }
         
-        int pos = RANDOM.nextInt(addresses.length);
-        return new RoundRobinSocket(addresses, addresses[pos], host, port, props, prefix, useSSL);
+        RoundRobinSelector selector = RoundRobinSelector.getSharedSelectorFor(host, addresses);
+        return new RoundRobinSocket(selector, host, port, props, prefix, useSSL);
     }
 
+    /**
+     * This method returns a Socket.
+     *
+     * @param address The concrete address to use
+     * @param host The host to connect to
+     * @param port The port to connect to at the host
+     * @param props Properties object containing socket properties
+     * @param prefix Property name prefix, e.g., "mail.imap"
+     * @param useSSL use the SSL socket factory as the default
+     * @return The connected socket
+     * @exception IOException for I/O errors
+     */
     static Socket getSocket(InetAddress address, String host, int port, Properties props,
         String prefix, boolean useSSL)
         throws IOException {
@@ -243,7 +253,7 @@ public class SocketFetcher {
 		if (ex instanceof IOException)
 		    throw (IOException)ex;
 		throw new SocketConnectException("Using " + sfErr, ex,
-						host, sfPort, cto);
+						host, address, sfPort, cto);
 	    }
 	}
 
@@ -300,7 +310,7 @@ public class SocketFetcher {
 	if (logger.isLoggable(Level.FINEST))
 	    logger.finest("create socket: prefix " + prefix +
 		", localaddr " + localaddr + ", localport " + localport +
-		", host " + host + ", port " + port +
+		", host " + host + "(address " + address +"), port " + port +
 		", connection timeout " + cto + ", timeout " + to +
 		", socket factory " + sf + ", useSSL " + useSSL);
 		
@@ -355,13 +365,13 @@ public class SocketFetcher {
 	try {
 	    logger.finest("connecting...");
 	    if (cto >= 0)
-	    socket.connect(new InetSocketAddress(host, port), cto);
+	    socket.connect(new InetSocketAddress(address, port), cto);
 	    else
-	    socket.connect(new InetSocketAddress(host, port));
+	    socket.connect(new InetSocketAddress(address, port));
 	    logger.finest("success!");
 	} catch (IOException ex) {
 	    logger.log(Level.FINEST, "connection failed", ex);
-	    throw new SocketConnectException(err, ex, host, port, cto);
+	    throw new SocketConnectException(err, ex, host, address, port, cto);
 	}
 
 	/*

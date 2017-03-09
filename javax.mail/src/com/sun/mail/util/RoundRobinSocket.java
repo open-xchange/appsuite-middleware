@@ -59,8 +59,10 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.channels.SocketChannel;
-import java.util.Arrays;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.LockSupport;
+import java.util.logging.Level;
 
 /**
  * {@link RoundRobinSocket}
@@ -68,6 +70,13 @@ import java.util.Properties;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class RoundRobinSocket extends Socket {
+
+    private static MailLogger logger = new MailLogger(
+        RoundRobinSocket.class,
+        "socket",
+        "DEBUG RoundRobinSocket",
+        PropUtil.getBooleanSystemProperty("mail.socket.debug", false),
+        System.out);
 
     private static class WrappingInputStream extends FilterInputStream {
 
@@ -155,7 +164,7 @@ public class RoundRobinSocket extends Socket {
 
     private volatile Socket socket;
 
-    private final InfiniteIterator<InetAddress> addresses;
+    private final RoundRobinSelector selector;
     private final String host;
     private final int port;
     private final Properties props;
@@ -170,15 +179,37 @@ public class RoundRobinSocket extends Socket {
      *
      * @throws IOException If socket cannot be created
      */
-    public RoundRobinSocket(InetAddress[] addresses, InetAddress initialAddress, String host, int port, Properties props, String prefix, boolean useSSL) throws IOException {
+    public RoundRobinSocket(RoundRobinSelector selector, String host, int port, Properties props, String prefix, boolean useSSL) throws IOException {
         super();
         this.host = host;
         this.port = port;
         this.props = props;
         this.prefix = prefix;
         this.useSSL = useSSL;
-        this.addresses = new InfiniteIterator<>(Arrays.asList(addresses));
-        socket = SocketFetcher.getSocket(initialAddress, host, port, props, prefix, useSSL);
+        this.selector = selector;
+        this.socket = connectToNext(0);
+    }
+    
+    private Socket connectToNext(int retryCount) throws IOException {        
+        // Grab the IP address to use
+        InetAddress addressToUse = selector.nextAddress();
+        
+        // Try to establish a socket connection
+        try {
+            return SocketFetcher.getSocket(addressToUse, host, port, props, prefix, useSSL);
+        } catch (com.sun.mail.util.SocketConnectException e) {
+            // Connect attempt failed. Retry using exponential backoff.
+            int retry = retryCount + 1;
+            if (retry >= selector.length()) {
+                throw e;
+            }
+            long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long) (Math.random() * 1000)), TimeUnit.MILLISECONDS);
+            if (logger.isLoggable(Level.FINER)) {
+                logger.finer("Failed to connect to " + e.getHost() + " (address " + e.getAddress() + "), port " + e.getPort() + ". Retrying in " + TimeUnit.NANOSECONDS.toMillis(nanosToWait) + " milliseconds");
+            }
+            LockSupport.parkNanos(nanosToWait);
+            return connectToNext(retry);
+        }
     }
 
     /**
@@ -196,8 +227,8 @@ public class RoundRobinSocket extends Socket {
                 // Ignore
             }
         }
-
-        socket = SocketFetcher.getSocket(this.addresses.next(), host, port, props, prefix, useSSL);
+        
+        socket = connectToNext(0);
         this.socket = socket;
         return socket;
     }
