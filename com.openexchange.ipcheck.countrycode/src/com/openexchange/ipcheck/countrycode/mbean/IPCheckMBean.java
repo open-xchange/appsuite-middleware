@@ -96,11 +96,11 @@ public interface IPCheckMBean {
     int getAcceptedWhiteListedIPChanges();
 
     /**
-     * Returns the amount of accepted IP changes due to country code not being changed
+     * Returns the amount of denied IP changes due to country changes
      * 
-     * @return the amount of accepted IP changes due to country code not being changed
+     * @return the amount of denied IP changes due to country changes
      */
-    int getAcceptedCountryCodeNotChanged();
+    int getDeniedCountryChanges();
 
     /**
      * Returns the amount of denied IP changes due to an exception
@@ -110,9 +110,9 @@ public interface IPCheckMBean {
     int getDeniedExceptionIPChanges();
 
     /**
-     * Returns the amount of denied IP changes due to deny-by-default policy
+     * Returns the amount of accepted eligible IP changes
      * 
-     * @return the amount of denied IP changes due to deny-by-default policy
+     * @return the amount of accepted eligible IP changes
      */
-    int getDeniedDefaultIPChanges();
+    int getAcceptedEligibleIPChanges();
 }

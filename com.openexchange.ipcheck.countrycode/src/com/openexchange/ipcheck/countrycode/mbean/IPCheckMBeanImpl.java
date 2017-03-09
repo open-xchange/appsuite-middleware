@@ -143,8 +143,8 @@ public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements I
      * @see com.openexchange.ipcheck.countrycode.mbean.IPCheckMBean#getAcceptedCountryCodeNotChanged()
      */
     @Override
-    public int getAcceptedCountryCodeNotChanged() {
-        return metrics.getAcceptedEligibleIPChange();
+    public int getDeniedCountryChanges() {
+        return metrics.getAcceptedEligibleIPChanges();
     }
 
     /*
@@ -163,7 +163,7 @@ public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements I
      * @see com.openexchange.ipcheck.countrycode.mbean.IPCheckMBean#getDeniedDefaultIPChanges()
      */
     @Override
-    public int getDeniedDefaultIPChanges() {
-        return metrics.getDeniedCountryChange();
+    public int getAcceptedEligibleIPChanges() {
+        return metrics.getDeniedCountryChanges();
     }
 }

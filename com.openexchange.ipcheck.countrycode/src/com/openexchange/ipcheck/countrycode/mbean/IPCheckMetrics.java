@@ -64,7 +64,7 @@ public class IPCheckMetrics {
 
     private final AtomicInteger acceptedPrivateIP;
     private final AtomicInteger acceptedWhiteListed;
-    private final AtomicInteger acceptedEligibleIPChange;
+    private final AtomicInteger acceptedEligibleIPChanges;
 
     private final AtomicInteger deniedException;
     private final AtomicInteger deniedCountryChanged;
@@ -79,7 +79,7 @@ public class IPCheckMetrics {
         deniedIPChanges = new AtomicInteger();
         acceptedPrivateIP = new AtomicInteger();
         acceptedWhiteListed = new AtomicInteger();
-        acceptedEligibleIPChange = new AtomicInteger();
+        acceptedEligibleIPChanges = new AtomicInteger();
 
         deniedException = new AtomicInteger();
         deniedCountryChanged = new AtomicInteger();
@@ -106,7 +106,7 @@ public class IPCheckMetrics {
     }
 
     public void incrementAcceptedEligibleIPChange() {
-        acceptedEligibleIPChange.incrementAndGet();
+        acceptedEligibleIPChanges.incrementAndGet();
     }
 
     public void incrementDeniedException() {
@@ -157,8 +157,8 @@ public class IPCheckMetrics {
      *
      * @return The acceptedCountryNotChanged
      */
-    public int getAcceptedEligibleIPChange() {
-        return acceptedEligibleIPChange.get();
+    public int getAcceptedEligibleIPChanges() {
+        return acceptedEligibleIPChanges.get();
     }
 
     /**
@@ -175,7 +175,7 @@ public class IPCheckMetrics {
      *
      * @return The deniedDefault
      */
-    public int getDeniedCountryChange() {
+    public int getDeniedCountryChanges() {
         return deniedCountryChanged.get();
     }
 }
