@@ -55,6 +55,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -197,15 +199,13 @@ public class FeedbackMimeMessageUtility {
      */
     public Address[] extractValidRecipients(FeedbackMailFilter filter, List<InternetAddress> invalidAddresses) {
         Map<String, String> recipients = filter.getRecipients();
-        InternetAddress[] result = new InternetAddress[recipients.size()];
-        int index = 0;
+        List<InternetAddress> validRecipients = new ArrayList<>();
         for (Entry<String, String> recipient : recipients.entrySet()) {
             InternetAddress address = null;
             try {
                 address = new InternetAddress(recipient.getKey(), recipient.getValue());
                 address.validate();
-                result[index] = address;
-                index++;
+                validRecipients.add(address);
             } catch (UnsupportedEncodingException e) {
                 LOG.error(e.getMessage(), e);
             } catch (AddressException e) {
@@ -213,7 +213,6 @@ public class FeedbackMimeMessageUtility {
                 // validation exception does not trigger any logging
             }
         }
-
-        return result;
+        return validRecipients.toArray(new InternetAddress[validRecipients.size()]);
     }
 }

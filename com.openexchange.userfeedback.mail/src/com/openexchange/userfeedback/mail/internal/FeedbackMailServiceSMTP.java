@@ -114,7 +114,7 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
 
         try {
             Address[] recipients = this.messageUtility.extractValidRecipients(filter, this.invalidAddresses);
-            if (recipients.length == 0 || (recipients.length == 1 && recipients[0] == null)) {
+            if (recipients.length == 0) {
                 throw FeedbackExceptionCodes.INVALID_EMAIL_ADDRESSES.create();
             }
             MimeMessage mail = messageUtility.createMailMessage(feedbackFile, filter, smtpSession);
