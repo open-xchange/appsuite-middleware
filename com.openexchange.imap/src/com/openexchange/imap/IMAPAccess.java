@@ -1329,6 +1329,13 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             }
         }
         /*
+         * Allow round-robin address election for primary IMAP account
+         */
+        if (config.getAccountId() == MailAccount.DEFAULT_ID) {
+            boolean useMultipleAddresses = IMAPProperties.getInstance().isUseMultipleAddresses(userId, contextId);
+            imapProps.put("mail.imap.multiAddress", useMultipleAddresses ? "true" : "false");
+        }
+        /*
          * Enable XOAUTH2/OAUTHBEARER (if appropriate)
          */
         if (AuthType.OAUTH == config.getAuthType()) {

@@ -119,6 +119,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             boolean allowESORT;
             boolean allowSORTDISPLAY;
             boolean fallbackOnFailedSORT;
+            boolean useMultipleAddresses;
 
             Params() {
                 super();
@@ -136,6 +137,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         final boolean allowESORT;
         final boolean allowSORTDISPLAY;
         final boolean fallbackOnFailedSORT;
+        final boolean useMultipleAddresses;
 
         PrimaryIMAPProperties(Params params) {
             super();
@@ -148,6 +150,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             this.allowESORT = params.allowESORT;
             this.allowSORTDISPLAY = params.allowSORTDISPLAY;
             this.fallbackOnFailedSORT = params.fallbackOnFailedSORT;
+            this.useMultipleAddresses = params.useMultipleAddresses;
         }
     }
 
@@ -286,6 +289,13 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             params.fallbackOnFailedSORT = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.imap.fallbackOnFailedSORT", false, view);
             String key = "  Fallback On Failed SORT";
             MDC.put(key, Boolean.toString(params.fallbackOnFailedSORT));
+            toRemove.add(key);
+        }
+
+        {
+            params.useMultipleAddresses = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.imap.useMultipleAddresses", false, view);
+            String key = "  Use Multiple IP addresses";
+            MDC.put(key, Boolean.toString(params.useMultipleAddresses));
             toRemove.add(key);
         }
 
@@ -730,6 +740,23 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         } catch (Exception e) {
             LOG.error("Failed to get host name expression for user {} in context {}. Using default default {} instead.", I(userId), I(contextId), hostExtractingGreetingListener, e);
             return hostExtractingGreetingListener;
+        }
+    }
+
+    /**
+     * Checks whether possible multiple IP addresses for a host name are supposed to be considered.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> to use multiple IP addresses; otherwise <code>false</code>
+     */
+    public boolean isUseMultipleAddresses(int userId, int contextId) {
+        try {
+            PrimaryIMAPProperties primaryIMAPProps = getPrimaryIMAPProps(userId, contextId);
+            return primaryIMAPProps.useMultipleAddresses;
+        } catch (Exception e) {
+            LOG.error("Failed to get host name expression for user {} in context {}. Using default default {} instead.", I(userId), I(contextId), "false", e);
+            return false;
         }
     }
 
