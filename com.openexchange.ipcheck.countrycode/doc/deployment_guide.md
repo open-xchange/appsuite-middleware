@@ -131,4 +131,20 @@ com.openexchange.geolocation.maxmind.databasePath=/path/of/geolite2-city.mmdb
 Defines the source of the [GeoLite2 City MaxMind GeoDB](http://dev.maxmind.com/geoip/geoip2/geolite2/).
 
 ## Monitoring
-There are different metrics captured during the operation of the GeoLocation service
+There are different metrics captured during the operation of the Country Code IP Checker Service. Two graphs are generated over a 5 minute interval, plotting the amount of accepted and denied IP changes. Each graph plots different metrics regarding the reason of accepted/denied IP changes.
+
+The "Accepted IP Changes" graph plots the total amount of:
+ * Accepted IP changes
+ * Accepted IP changes due to a private IPv4 change
+ * Accepted IP changes due to white listed IPs
+ * Accepted IP changes that don't fall under any of the previous categories
+
+The "Denied IP Changes" graph plots the total amount of:
+ * Denied IP changes
+ * Denied IP changes due to country change
+ * Denied IP changes due to an exception
+
+## Logging
+Different levels of logging are involved in the CountryCodeIPChecker Service's logger `com.openexchange.ipcheck.countrycode`.
+
+If the IP change of a session is either accepted or kicked due to any number of reasons, then there will be a log entry in DEBUG level indicating that. If any error happens during the acquisition of the GeoInformation of any IP, then that error is logged in ERROR level (the session will be kicked in that case).
