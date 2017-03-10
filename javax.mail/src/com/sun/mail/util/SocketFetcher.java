@@ -318,7 +318,7 @@ public class SocketFetcher {
 	if (logger.isLoggable(Level.FINEST)) {
         logger.finest("create socket: prefix " + prefix +
 		", localaddr " + localaddr + ", localport " + localport +
-		", host " + host + "(address " + address +"), port " + port +
+		", host " + host + "(address " + address.getHostAddress() + "), port " + port +
 		", connection timeout " + cto + ", timeout " + to +
 		", socket factory " + sf + ", useSSL " + useSSL);
     }
