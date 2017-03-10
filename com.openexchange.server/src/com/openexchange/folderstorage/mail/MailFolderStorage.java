@@ -839,7 +839,8 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
             } else {
                 if (mailFolderStorage instanceof IMailFolderStorageTrashAware) {
                     String newFullName = ((IMailFolderStorageTrashAware) mailFolderStorage).trashFolder(fullName);
-                    result = new TrashResult(newFullName, fullName);
+                    newFullName = MailFolderUtility.prepareFullname(arg.getAccountId(), newFullName);
+                    result = new TrashResult(newFullName, folderId);
                 } else {
                     throw FolderExceptionErrorMessage.UNSUPPORTED_OPERATION.create();
                 }
