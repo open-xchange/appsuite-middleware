@@ -47,33 +47,56 @@
  *
  */
 
-package com.openexchange.passwordchange.script.services;
+package com.openexchange.ajax.passwordchange;
 
-import com.openexchange.osgi.ServiceRegistry;
+import static org.junit.Assert.assertEquals;
+import java.io.IOException;
+import org.json.JSONException;
+import org.junit.Test;
+import org.xml.sax.SAXException;
+import com.openexchange.ajax.framework.Executor;
+import com.openexchange.ajax.passwordchange.actions.PasswordChangeScriptResultRequest;
+import com.openexchange.ajax.passwordchange.actions.PasswordChangeScriptResultResponse;
+import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateRequest;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link SPWServiceRegistry} - A registry for services
+ * {@link PasswordChangeScriptUpdateAJAXTest} - Tests the UPDATE request on password
+ * change servlet in combination with an external password change script. Especially
+ * verify that UTF-8 characters reach the script.
  *
- * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ *
  */
-public final class SPWServiceRegistry {
-
-    private static final ServiceRegistry REGISTRY = new ServiceRegistry(2);
+public final class PasswordChangeScriptUpdateAJAXTest extends AbstractPasswordChangeAJAXTest {
 
     /**
-     * Gets the service registry
+     * Initializes a new {@link PasswordChangeScriptUpdateAJAXTest}
      *
-     * @return The service registry
-     */
-    public static ServiceRegistry getServiceRegistry() {
-        return REGISTRY;
-    }
-
-    /**
-     * Initializes a new {@link SPWServiceRegistry}
-     */
-    private SPWServiceRegistry() {
+     **/
+    public PasswordChangeScriptUpdateAJAXTest() {
         super();
     }
 
+    /**
+     * Tests the <code>action=update</code> request
+     * 
+     * @throws JSONException
+     * @throws IOException
+     * @throws OXException
+     */
+    @Test
+    public void testUpdate() throws OXException, IOException, JSONException {
+        /*
+         * Perform update request
+         */
+        final String newPassword = "(\u0298\u203f\u0298)";
+        final String oldPassword = testUser.getPassword();
+        Executor.execute(getSession(), new PasswordChangeUpdateRequest(newPassword, oldPassword, true));
+
+        //verify file contains same text
+        PasswordChangeScriptResultResponse resultResponse = Executor.execute(getSession(), new PasswordChangeScriptResultRequest());
+        String resultPassword = resultResponse.getPassword();
+        assertEquals("Passwords differ", newPassword, resultPassword);
+    }
 }

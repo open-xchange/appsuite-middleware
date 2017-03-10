@@ -47,75 +47,84 @@
  *
  */
 
-package com.openexchange.passwordchange.script.osgi;
+package com.openexchange.ajax.passwordchange.actions;
 
-import static com.openexchange.passwordchange.script.services.SPWServiceRegistry.getServiceRegistry;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.ServiceRegistry;
-import com.openexchange.passwordchange.PasswordChangeService;
-import com.openexchange.passwordchange.script.impl.ScriptPasswordChange;
-import com.openexchange.passwordchange.script.impl.ScriptPasswordChangeConfig;
-import com.openexchange.user.UserService;
+import java.io.IOException;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.fields.ResponseFields;
+import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.framework.Header;
+import com.openexchange.ajax.writer.ResponseWriter;
 
 /**
- * {@link ScriptPasswordChangeActivator}
+ * {@link PasswordChangeScriptResultRequest}
  *
- * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @since v7.8.4
  */
-public final class ScriptPasswordChangeActivator extends HousekeepingActivator {
+public class PasswordChangeScriptResultRequest implements AJAXRequest<PasswordChangeScriptResultResponse> {
 
-    /**
-     * Initializes a new {@link ScriptPasswordChangeActivator}
-     */
-    public ScriptPasswordChangeActivator() {
+    private final boolean failOnError;
+
+    public PasswordChangeScriptResultRequest() {
+        this(true);
+    }
+
+    public PasswordChangeScriptResultRequest(boolean failOnError) {
         super();
+        this.failOnError = failOnError;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, UserService.class };
+    public Method getMethod() {
+        return Method.GET;
     }
 
     @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        getServiceRegistry().addService(clazz, getService(clazz));
+    public String getServletPath() {
+        return "/ajax/logintest";
     }
 
     @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        getServiceRegistry().removeService(clazz);
+    public Parameter[] getParameters() {
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, "pwdchangeresult") };
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        /*
-         * (Re-)Initialize service registry with available services
-         */
-        {
-            final ServiceRegistry registry = getServiceRegistry();
-            registry.clearRegistry();
-            final Class<?>[] classes = getNeededServices();
-            for (int i = 0; i < classes.length; i++) {
-                final Object service = getService(classes[i]);
-                if (null != service) {
-                    registry.addService(classes[i], service);
-                }
-            }
+    public PasswordParser getParser() {
+        return new PasswordParser(failOnError);
+    }
+
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        return null;
+    }
+
+    @Override
+    public Header[] getHeaders() {
+        return NO_HEADER;
+    }
+
+    private static final class PasswordParser extends AbstractAJAXParser<PasswordChangeScriptResultResponse> {
+
+        PasswordParser(final boolean failOnError) {
+            super(failOnError);
         }
-        ScriptPasswordChangeConfig changeConfig = ScriptPasswordChangeConfig.getInstance();
-        registerService(Reloadable.class, changeConfig);
-        registerService(PasswordChangeService.class, new ScriptPasswordChange(), null);
-    }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        cleanUp();
-        /*
-         * Clear service registry
-         */
-        getServiceRegistry().clearRegistry();
+        @Override
+        protected PasswordChangeScriptResultResponse createResponse(final Response response) throws JSONException {
+            PasswordChangeScriptResultResponse pwdResultResponse = new PasswordChangeScriptResultResponse(response);
+            JSONObject json = ResponseWriter.getJSON(response);
+            if (json.has(ResponseFields.DATA)) {
+                JSONObject pwData = (JSONObject) json.get(ResponseFields.DATA);
+                pwdResultResponse.setPassword(pwData.optString("password"));
+            }
+            return pwdResultResponse;
+        }
     }
 
 }
