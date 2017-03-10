@@ -57,8 +57,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.context.ContextService;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogProperties;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.ShareExceptionCodes;
 
@@ -151,6 +153,16 @@ public class PeriodicCleaner implements Runnable {
      * @param guestExpiry the timespan (in milliseconds) after which an unused guest user can be deleted permanently
      */
     private void cleanupContext(int contextID) throws OXException {
+        /*
+         * Track DB schema
+         */
+        {
+            DatabaseService dbService = services.getOptionalService(DatabaseService.class);
+            if (null != dbService) {
+                String dbSchema = dbService.getSchemaName(contextID);
+                LogProperties.put(LogProperties.Name.DATABASE_SCHEMA, dbSchema);
+            }
+        }
         /*
          * execute context- and resulting guest cleanup tasks in current thread
          */
