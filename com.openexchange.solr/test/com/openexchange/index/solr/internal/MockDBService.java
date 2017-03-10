@@ -243,7 +243,7 @@ public class MockDBService implements DatabaseService {
     }
 
     @Override
-    public void lock(Connection con, int writePoolId) {
+    public void lock(Connection con, int writePoolId, String schemaName) {
         // Nothing to do
     }
 

@@ -442,9 +442,9 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     }
 
     @Override
-    public void createDatabase(final Database db) throws StorageException {
+    public void createDatabase(final Database db, Connection con) throws StorageException {
         final OXUtilMySQLStorageCommon oxutilcommon = new OXUtilMySQLStorageCommon();
-        oxutilcommon.createDatabase(db);
+        oxutilcommon.createDatabase(db, con);
     }
 
     @Override

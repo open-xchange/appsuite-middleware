@@ -299,7 +299,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             throw new InvalidDataException(e.getMessage());
         }
 
-        oxutil.createDatabase(db);
+        oxutil.createDatabase(db, null);
     }
 
     public void deleteDatabase(final Database db, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {

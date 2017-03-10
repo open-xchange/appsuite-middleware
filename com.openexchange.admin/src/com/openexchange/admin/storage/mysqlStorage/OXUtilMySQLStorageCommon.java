@@ -124,16 +124,18 @@ public class OXUtilMySQLStorageCommon {
 
     private static AdminCache cache = ClientAdminThread.cache;
 
-    public void createDatabase(final Database db) throws StorageException {
+    public void createDatabase(final Database db, Connection configdbCon) throws StorageException {
         final Connection con;
-        final Connection configdbCon;
         String sql_pass = "";
         if (db.getPassword() != null) {
             sql_pass = db.getPassword();
         }
+        boolean isOwnConfigDbCon = configdbCon == null;
         try {
             con = cache.getSimpleSQLConnectionWithoutTimeout(db.getUrl(), db.getLogin(), sql_pass, db.getDriver());
-            configdbCon = cache.getConnectionForConfigDB();
+            if (null == configdbCon) {
+                configdbCon = cache.getConnectionForConfigDB();
+            }
         } catch (final SQLException e) {
             LOG.error("SQL Error", e);
             throw new StorageException(e.toString(), e);
@@ -148,7 +150,9 @@ public class OXUtilMySQLStorageCommon {
         PreparedStatement stmt = null;
         try {
             con.setAutoCommit(false);
-            configdbCon.setAutoCommit(false);
+            if (isOwnConfigDbCon) {
+                configdbCon.setAutoCommit(false);
+            }
             if (existsDatabase(con, db.getScheme())) {
                 throw new StorageException("Database \"" + db.getScheme() + "\" already exists");
             }
@@ -167,7 +171,9 @@ public class OXUtilMySQLStorageCommon {
             stmt.setInt(3, 0);
             stmt.executeUpdate();
             stmt.close();
-            configdbCon.commit();
+            if (isOwnConfigDbCon) {
+                configdbCon.commit();
+            }
         } catch (final SQLException e) {
             rollback(con);
             if (created) {
@@ -182,9 +188,11 @@ public class OXUtilMySQLStorageCommon {
             throw e;
         } finally {
             autocommit(con);
-            autocommit(configdbCon);
             cache.closeSimpleConnection(con);
-            cache.closeConfigDBSqlStuff(configdbCon, stmt);
+            if (isOwnConfigDbCon) {
+                autocommit(configdbCon);
+                cache.closeConfigDBSqlStuff(configdbCon, stmt);
+            }
         }
     }
 

@@ -310,9 +310,9 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
     }
 
     @Override
-    public void lock(Connection con, int writePoolId) throws PoolException {
+    public void lock(Connection con, int writePoolId, String schemaName) throws PoolException {
         try {
-            getService().lock(con, writePoolId);
+            getService().lock(con, writePoolId, schemaName);
         } catch (OXException e) {
             log.error("Error locking context_server2db_pool table", e);
             throw new PoolException(e.getMessage());

@@ -49,6 +49,9 @@
 
 package com.openexchange.admin.storage.sqlStorage;
 
+import java.sql.Connection;
+import com.openexchange.admin.rmi.dataobjects.Database;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
 
 /**
@@ -60,5 +63,10 @@ import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
  *
  */
 public abstract class OXUtilSQLStorage extends OXUtilStorageInterface {
+
+    public void createDatabase(Database db, Connection con) throws StorageException {
+        // TODO Auto-generated method stub
+        
+    }
 
 }

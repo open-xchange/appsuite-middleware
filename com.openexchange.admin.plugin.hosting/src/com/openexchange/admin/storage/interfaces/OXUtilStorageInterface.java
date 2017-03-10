@@ -51,8 +51,7 @@ package com.openexchange.admin.storage.interfaces;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-
-
+import java.sql.Connection;
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
@@ -255,7 +254,7 @@ public abstract class OXUtilStorageInterface {
      *            a database object to create
      * @throws StorageException
      */
-    public abstract void createDatabase(final Database db) throws StorageException;
+    public abstract void createDatabase(final Database db, Connection con) throws StorageException;
 
     /**
      * Delete a complete database(scheme) from the given database host. Is used

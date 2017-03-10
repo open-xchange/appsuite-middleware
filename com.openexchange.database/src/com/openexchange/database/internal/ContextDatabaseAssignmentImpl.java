@@ -91,7 +91,7 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
     private static final String DELETE = "DELETE FROM context_server2db_pool WHERE cid=? AND server_id=?";
     private static final String CONTEXTS_IN_SCHEMA = "SELECT cid FROM context_server2db_pool WHERE server_id=? AND write_db_pool_id=? AND db_schema=?";
     private static final String CONTEXTS_IN_DATABASE = "SELECT cid FROM context_server2db_pool WHERE read_db_pool_id=? OR write_db_pool_id=?";
-    private static final String NOTFILLED = "SELECT schemaname,count FROM contexts_per_dbschema WHERE db_pool_id=? AND count<? ORDER BY count ASC FOR UPDATE";
+    private static final String NOTFILLED = "SELECT schemaname,count FROM contexts_per_dbschema WHERE db_pool_id=? AND count<? ORDER BY count ASC";
     private final ConfigDatabaseService configDatabaseService;
 
     private static final String CACHE_NAME = "OXDBPoolCache";
@@ -375,17 +375,23 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
     }
 
     @Override
-    public void lock(Connection con, int writePoolId) throws OXException {
-//        PreparedStatement stmt = null;
-//        try {
-//            stmt = con.prepareStatement("SELECT count FROM contexts_per_dbpool WHERE db_pool_id=? FOR UPDATE");
-//            stmt.setInt(1, writePoolId);
-//            stmt.execute();
-//        } catch (SQLException e) {
-//            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-//        } finally {
-//            closeSQLStuff(stmt);
-//        }
+    public void lock(Connection con, int writePoolId, String schemaName) throws OXException {
+        PreparedStatement stmt = null;
+        try {
+            if (null != schemaName) {
+                stmt = con.prepareStatement("SELECT count FROM contexts_per_dbschema WHERE db_pool_id=? AND schemaname=? FOR UPDATE");
+                stmt.setInt(1, writePoolId);
+                stmt.setString(2, schemaName);
+            } else {
+                stmt = con.prepareStatement("SELECT count FROM contexts_per_dbschema WHERE db_pool_id=? FOR UPDATE");
+                stmt.setInt(1, writePoolId);
+            }
+            stmt.execute();
+        } catch (SQLException e) {
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+        }
     }
 
     void setCacheService(final CacheService service) {

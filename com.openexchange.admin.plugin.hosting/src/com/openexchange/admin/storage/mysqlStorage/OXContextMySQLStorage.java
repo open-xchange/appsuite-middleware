@@ -179,7 +179,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
     public OXContextMySQLStorage() {
         try {
-            this.CONTEXTS_PER_SCHEMA = Integer.parseInt(prop.getProp("CONTEXTS_PER_SCHEMA", "1"));
+//            this.CONTEXTS_PER_SCHEMA = Integer.parseInt(prop.getProp("CONTEXTS_PER_SCHEMA", "1"));
+            this.CONTEXTS_PER_SCHEMA = 10;
             if (this.CONTEXTS_PER_SCHEMA <= 0) {
                 throw new OXContextException("CONTEXTS_PER_SCHEMA MUST BE > 0");
             }
@@ -1158,6 +1159,13 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 contextCommon.fillContextAndServer2DBPool(ctx, configCon, db);
                 contextCommon.fillLogin2ContextTable(ctx, configCon);
 
+                // FIXME: rollback below
+                stmt = configCon.prepareStatement("UPDATE contexts_per_dbschema SET count=count+1 WHERE db_pool_id=? AND schemaname=?");
+                stmt.setInt(1, db.getId());
+                stmt.setString(2, db.getScheme());
+                stmt.executeUpdate();
+                stmt.close();
+
                 /*-
                  * Continue with context creation depending on utilized schema-select strategy:
                  *
@@ -1171,12 +1179,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     // Write context data before COMMIT
                     retval = writeContext(ctx, adminUser, access);
 
-                    stmt = configCon.prepareStatement("UPDATE contexts_per_dbschema SET count=count+1 WHERE db_pool_id=? AND schemaname=?");
-                    stmt.setInt(1, db.getId());
-                    stmt.setString(2, db.getScheme());
-                    stmt.executeUpdate();
-                    stmt.close();
-
                     // Commit transaction and unmark to perform a roll-back
                     configCon.commit();
                     rollback = false;
@@ -1188,11 +1190,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
                     // Write context data after COMMIT and unmark to perform a roll-back
                     retval = writeContext(ctx, adminUser, access);
-                    stmt = configCon.prepareStatement("UPDATE contexts_per_dbschema SET count=count+1 WHERE db_pool_id=? AND schemaname=?");
-                    stmt.setInt(1, db.getId());
-                    stmt.setString(2, db.getScheme());
-                    stmt.executeUpdate();
-                    stmt.close();
                     rollback = false;
                 }
 
@@ -1458,7 +1455,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
             String schemaName = db.getName() + '_' + schemaUnique;
             db.setScheme(schemaName);
-            OXUtilStorageInterface.getInstance().createDatabase(db);
+            OXUtilStorageInterface.getInstance().createDatabase(db,configCon);
             return SchemaResult.AUTOMATIC;
         }
 
@@ -1466,6 +1463,12 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         SchemaSelectStrategy effectiveStrategy = null == schemaSelectStrategy ? SchemaSelectStrategy.getDefault() : schemaSelectStrategy;
 
         // Determine the schema name according to effective strategy
+        OXAdminPoolInterface pool = ClientAdminThread.cache.getPool();
+        try {
+            pool.lock(configCon, db.getId(), null);
+        } catch (PoolException e) {
+            throw new StorageException(e.getMessage(), e);
+        }
         switch (effectiveStrategy.getStrategy()) {
             case SCHEMA:
                 // Pre-defined schema name
@@ -1542,7 +1545,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
             schemaName = db.getName() + '_' + schemaUnique;
             db.setScheme(schemaName);
-            OXUtilStorageInterface.getInstance().createDatabase(db);
+            OXUtilStorageInterface.getInstance().createDatabase(db,configCon);
         } else {
             db.setScheme(schemaName);
         }
@@ -1601,7 +1604,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         OXAdminPoolInterface pool = ClientAdminThread.cache.getPool();
         final String[] unfilledSchemas;
         try {
-            pool.lock(con, i(poolId));
+//            pool.lock(con, i(poolId), null);
             unfilledSchemas = pool.getUnfilledSchemas(con, i(poolId), this.CONTEXTS_PER_SCHEMA);
         } catch (PoolException e) {
             LOG.error("Pool Error", e);
@@ -2882,7 +2885,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
             String schemaName = database.getName() + '_' + schemaUnique;
             database.setScheme(schemaName);
-            OXUtilStorageInterface.getInstance().createDatabase(database);
+            OXUtilStorageInterface.getInstance().createDatabase(database,configCon);
             configCon.commit();
             return database.getScheme();
         } catch (SQLException e) {
