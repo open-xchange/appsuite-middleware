@@ -1333,7 +1333,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
          */
         if (config.getAccountId() == MailAccount.DEFAULT_ID) {
             boolean useMultipleAddresses = IMAPProperties.getInstance().isUseMultipleAddresses(userId, contextId);
-            imapProps.put("mail.imap.multiAddress", useMultipleAddresses ? "true" : "false");
+            imapProps.put("mail.imap.multiAddress.enabled", useMultipleAddresses ? "true" : "false");
+
         }
         /*
          * Enable XOAUTH2/OAUTHBEARER (if appropriate)
