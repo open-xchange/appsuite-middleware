@@ -3,7 +3,7 @@ properties:
     - key: com.openexchange.nosql.cassandra.clusterName
       description: |
         Defines the name of the Cassandra cluster. Technically this name does not correlate with the name configured in the real Cassandra cluster, but it's rather used to distinguish exposed JMX metrics when multiple Cluster instances live in the same JVM 
-      default: ox
+      defaultValue: ox
       version: 7.8.4
       reloadable: false
       configcascadeAware: false
@@ -12,7 +12,7 @@ properties:
     - key: com.openexchange.nosql.cassandra.clusterContactPoints
       description: |
         Defines the Cassandra seed node(s) as a comma separated list
-      default: 
+      defaultValue: 
       version: 7.8.4
       reloadable: false
       configcascadeAware: false
@@ -21,7 +21,7 @@ properties:
     - key: com.openexchange.nosql.cassandra.port
       description: |
         Defines the port on which the Cassandra server is running
-      default: 9042
+      defaultValue: 9042
       version: 7.8.4
       reloadable: false
       configcascadeAware: false
@@ -40,7 +40,7 @@ properties:
         If used with a single data center, this policy is equivalent to the <code|RoundRobin</code|, but its DC awareness incurs a slight overhead so the latter should be preferred to this policy in that case. 
         <b|<u|DCTokenAwareRoundRobin</u|</b|
         Same as the <code|DCAwareRoundRobin</code| load balancing policy but with added token awareness. 
-      default: RoundRobin
+      defaultValue: RoundRobin
       version: 7.8.4
       reloadable: false
       configcascadeAware: false
@@ -58,7 +58,7 @@ properties:
         <b|BEWARE</b|: this policy may retry queries using a lower consistency level than the one initially requested. By doing so, it may break consistency guarantees. In other words, if you use this retry policy, there are cases where a read at QUORUM may NOT see a preceding write at QUORUM. Do not use this policy unless you have understood the cases where this can happen and are ok with that. It is also highly recommended to always enable the <code|logRetryPolicy</code| to log the occurrences of such consistency breaks. 
         <b|<u|fallthroughRetryPolicy</u|</b|
         A retry policy that never retries (nor ignores). 
-      default: defaultRetryPolicy
+      defaultValue: defaultRetryPolicy
       version: 7.8.4
       reloadable: false
       configcascadeAware: false
@@ -67,7 +67,7 @@ properties:
     - key: com.openexchange.nosql.cassandra.logRetryPolicy
       description: |
         Logs the retry decision of the policy
-      default: false
+      defaultValue: false
       version: 7.8.4
       reloadable: false
       configcascadeAware: false
@@ -76,7 +76,7 @@ properties:
     - key: com.openexchange.nosql.cassandra.enableQueryLogger
       description: |
         Enables the query logger which logs all executed statements
-      default: false
+      defaultValue: false
       version: 7.8.4
       reloadable: false
       configcascadeAware: false
@@ -85,7 +85,7 @@ properties:
     - key: com.openexchange.nosql.cassandra.queryLatencyThreshold
       description: |
         Defines the latency threshold in milliseconds beyond which queries are considered 'slow' and logged as such by the Cassandra service. Used in conjunction with the <code|enableQueryLogger</code| property 
-      default: 5000
+      defaultValue: 5000
       version: 7.8.4
       reloadable: false
       configcascadeAware: false
@@ -95,7 +95,7 @@ properties:
       description: |
         Defines the amount of time (in seconds) for connection keepalive in the form of a heartbeat. When a connection has been idle for the given amount of time, the Cassandra service will simulate activity by writing a dummy request to it (by sending an <code|OPTIONS</code| message). 
         To disable heartbeat, set the interval to 0. 
-      default: 30
+      defaultValue: 30
       version: 7.8.4
       reloadable: false
       configcascadeAware: false
@@ -105,7 +105,7 @@ properties:
       description: |
         The Cassandra service's connection pools have a variable size, which gets adjusted automatically depending on the current load. There will always be at least a minimum number of connections, and at most a maximum number. These values can be configured independently by host distance (the distance is determined by your <code|loadBalancingPolicy</code|, and will generally indicate whether a host is in the same datacenter or not).
         This property defines the minimum connections to the local datacenter
-      default: 4
+      defaultValue: 4
       version: 7.8.4
       reloadable: false
       configcascadeAware: false
@@ -113,7 +113,7 @@ properties:
       file: cassandra.properties
     - key: com.openexchange.nosql.cassandra.maximumLocalConnectionsPerNode
       description: Defines the amount of maximum connections to the local Datacenter
-      default: 10
+      defaultValue: 10
       version: 7.8.4
       reloadable: false
       configcascadeAware: false
@@ -121,7 +121,7 @@ properties:
       file: cassandra.properties
     - key: com.openexchange.nosql.cassandra.minimumRemoteConnectionsPerNode
       description: Defines the amount of minimum connections to the remote Datacenter
-      default: 2
+      defaultValue: 2
       version: 7.8.4
       reloadable: false
       configcascadeAware: false
@@ -129,7 +129,7 @@ properties:
       file: cassandra.properties
     - key: com.openexchange.nosql.cassandra.maximumRemoteConnectionsPerNode
       description: Defines the amount of maximum connections to the remote Datacenter
-      default: 4
+      defaultValue: 4
       version: 7.8.4
       reloadable: false
       configcascadeAware: false
@@ -138,7 +138,7 @@ properties:
     - key: com.openexchange.nosql.cassandra.maximumRemoteConnectionsPerNode
       description: |
         When activity goes down, the driver will "trash" connections if the maximum number of requests in a 10 second time period can be satisfied by less than the number of connections opened. Trashed connections are kept open but do not accept new requests. After the given timeout, trashed connections are closed and removed. If during that idle period activity increases again, those connections will be resurrected back into the active pool and reused. 
-      default: 120
+      defaultValue: 120
       version: 7.8.4
       reloadable: false
       configcascadeAware: false
@@ -150,7 +150,7 @@ properties:
         For Cassandra clusters that use a protocol v2 and below, there is no reason to throttle. It should be set to 128 (the max) 
         For Cassandra clusters that use a protocol v3 and up, it is set by default to 1024. These low defaults were chosen so that the default configuration for protocol v2 and v3 allow the same total number of simultaneous requests (to avoid bad surprises when clients migrate from v2 to v3). This threshold can be raised, or even set it to the max which is 32768 for LOCAL nodes.
         Note that that high values will give clients more bandwidth and therefore put more pressure on the cluster. This might require some tuning, especially with many clients. 
-      default: 1024
+      defaultValue: 1024
       version: 7.8.4
       reloadable: false
       configcascadeAware: false
@@ -162,7 +162,7 @@ properties:
         For Cassandra clusters that use a protocol v2 and below, there is no reason to throttle. It should be set to 128 (the max) 
         For Cassandra clusters that use a protocol v3 and up, it is set by default to 256. These low defaults were chosen so that the default configuration for protocol v2 and v3 allow the same total number of simultaneous requests (to avoid bad surprises when clients migrate from v2 to v3). This threshold can be raised, or even set it to the max which is 2000 for REMOTE nodes.
         Note that that high values will give clients more bandwidth and therefore put more pressure on the cluster. This might require some tuning, especially with many clients. 
-      default: 256
+      defaultValue: 256
       version: 7.8.4
       reloadable: false
       configcascadeAware: false
@@ -173,7 +173,7 @@ properties:
         When the CassandraService tries to send a request to a host, it will first try to acquire a connection from this host's pool. If the pool is busy (i.e. all connections are already handling their maximum number of in flight requests), the acquisition attempt gets enqueued until a connection becomes available again. 
         If the queue has already reached its limit, further attempts to acquire a connection will be rejected immediately: the CassandraService will move on and try to acquire a connection from the next host's pool. The limit can be set to 0 to disable queueing entirely. 
         If all hosts are busy with a full queue, the request will fail with a <code|NoHostAvailableException</code|.
-      default: 256
+      defaultValue: 256
       version: 7.8.4
       reloadable: false
       configcascadeAware: false
@@ -182,7 +182,7 @@ properties:
     - key: com.openexchange.nosql.cassandra.connectTimeout
       description: |
         Specifies the connect timeout in milliseconds
-      default: 5000
+      defaultValue: 5000
       version: 7.8.4
       reloadable: false
       configcascadeAware: false
@@ -191,7 +191,7 @@ properties:
     - key: com.openexchange.nosql.cassandra.readTimeout
       description: |
         Specifies the read timeout in milliseconds
-      default: 12000
+      defaultValue: 12000
       version: 7.8.4
       reloadable: false
       configcascadeAware: false

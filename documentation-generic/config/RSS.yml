@@ -3,7 +3,7 @@ properties:
     - key: com.openexchange.messaging.rss.feed.schemes
       description: |
         Defines the URL schemes that are allowed while adding new RSS feeds. An empty value means all (by URL supported) schemes are allowed.
-      default: http, https, ftp
+      defaultValue: http, https, ftp
       version: 7.8.3
       reloadable: false
       configcascadeAware: false
@@ -12,7 +12,7 @@ properties:
     - key: com.openexchange.rss
       description: |
         If set to false disables the rss capability.
-      default: true
+      defaultValue: true
       version: 7.2.1
       reloadable: true
       configcascadeAware: true

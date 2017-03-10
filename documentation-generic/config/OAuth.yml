@@ -14,7 +14,7 @@ properties:
          -contacts
          -drive
          -generic 
-      default: null
+      defaultValue: null
       version: 7.8.3
       reloadable: true
       configcascadeAware: true

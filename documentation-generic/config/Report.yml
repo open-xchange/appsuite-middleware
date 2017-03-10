@@ -3,7 +3,7 @@ properties:
   - key: com.openexchange.report.appsuite.fileStorage
     description: |
       Reports filestorage directory for storage of report parts and composed data.
-    default: /tmp
+    defaultValue: /tmp
     version: 7.8.3
     reloadable: true
     configcascadeAware: false
@@ -13,7 +13,7 @@ properties:
     description: |
       Determines how many chunks of data can be kept in the report before saving them in the folder described in the 
       com.openexchange.report.client.fileStorage property
-    default: 200
+    defaultValue: 200
     version: 7.8.3
     reloadable: true
     configcascadeAware: false
@@ -22,7 +22,7 @@ properties:
   - key: com.openexchange.report.appsuite.maxThreadPoolSize
     description: |
       Number of threads allowed to work on the report at the same time.
-    default: 20
+    defaultValue: 20
     version: 7.8.3
     reloadable: true
     configcascadeAware: false
@@ -31,7 +31,7 @@ properties:
   - key: com.openexchange.report.appsuite.threadPriority
     description: |
       The priority that threads, working on the report have. Allowed value range is 1-10. 1 is the lowest, 10 the highest priority.
-    default: 1
+    defaultValue: 1
     version: 7.8.3
     reloadable: true
     configcascadeAware: false

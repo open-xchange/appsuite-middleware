@@ -4,7 +4,7 @@ array:
       Description: >
         Specifies if badges are enabled when using push notifications for the OX Mail app for iOS.
         These get displayed on the app icon.
-      Default: true
+      defaultValue: true
       Version: 7.8.4
       Reloadable: true
       Configcascade_Aware: true
@@ -15,7 +15,7 @@ array:
       Key: com.openexchange.pns.mobile.api.facade.apn.sound.enabled
       Description: >
         Specifies if a sound should be played when the OX Mail app on iOS receives a push notification.
-      Default: true
+      defaultValue: true
       Version: 7.8.4
       Reloadable: true
       Configcascade_Aware: true
@@ -28,7 +28,7 @@ array:
         Specifies the filename of the sound to play when a push notification is received in the OX Mail app on iOS.
         This file needs to be included in the app, otherwise a default sound is played. the string 'default' also causes
         the default iOS sound to be played.
-      Default: default
+      defaultValue: default
       Version: 7.8.4
       Reloadable: true
       Configcascade_Aware: true

@@ -10,7 +10,7 @@ properties:
         Note: The "com.openexchange.IPCheck" property still has precedence over this property;
         i.e. if "com.openexchange.IPCheck" is set to "true", strict IP check is enabled.
         Default is empty
-      default: 
+      defaultValue: 
       version: 7.8.4
       reloadable: true
       configcascadeAware: true

@@ -3,7 +3,7 @@ properties:
     - key: com.openexchange.dovecot.doveadm.enabled
       description: >
         Specifies whether the connector for the Dovecot DoveAdm REST interface will be enabled or not
-      default: false
+      defaultValue: false
       version: 7.8.3
       reloadable: false
       configcascadeAware: false
@@ -30,7 +30,7 @@ properties:
         com.openexchange.dovecot.doveadm.endpoints.checkInterval=60000
 
         The values can be configured within a dedicated .properties file; e.g. 'doveadm.properties'.
-      default: 
+      defaultValue: 
       version: 7.8.3
       reloadable: false
       configcascadeAware: false
@@ -39,7 +39,7 @@ properties:
     - key: com.openexchange.dovecot.doveadm.apiSecret
       description: |
         Specifies the API secret to communicate with the Dovecot DoveAdm REST interface
-      default: 
+      defaultValue: 
       version: 7.8.3
       reloadable: false
       configcascadeAware: false

@@ -26,7 +26,7 @@ properties:
         Example
         2=group_2@2.4.0.0,admin_user_5@8.4.4.4&#124;15=admin_group_2@8.8.8.8
         2=group_2@viewer,admin_user_5@author&#124;15=admin_group_2@writer
-      default: No defaut value
+      defaultValue: No defaut value
       version: 7.8.4
       reloadable: true
       configcascadeAware: true
@@ -35,7 +35,7 @@ properties:
     - key: com.openexchange.folderstorage.inheritParentPermissions
       description: |
         Specifies if permissions of new parent folder should be applied when moving a folder into the public folder tree.
-      default: false
+      defaultValue: false
       version: 7.8.4
       reloadable: false
       configcascadeAware: false

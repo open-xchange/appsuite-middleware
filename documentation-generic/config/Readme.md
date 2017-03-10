@@ -13,7 +13,7 @@ properties:
         line1
         line2
         line3
-      default: true
+      defaultValue: true
       version: 7.8.3
       reloadable: true
       configcascadeAware: false
@@ -23,7 +23,7 @@ properties:
       description: |
         line1
         line2
-      default: true
+      defaultValue: true
       version: 7.8.0
       reloadable: true
       configcascadeAware: true

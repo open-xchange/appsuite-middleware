@@ -4,7 +4,7 @@ properties:
       description: |
         The time in milliseconds a notification is queued in buffer to possible aggregate
         with similar notifications that arrive during that time
-      default: 1000
+      defaultValue: 1000
       version: 7.8.3
       reloadable: true
       configcascadeAware: false
@@ -14,7 +14,7 @@ properties:
       description: |
         The frequency/delay in milliseconds when the buffering queue will be checked for due
         notifications (the ones exceeding delayDuration in queue)
-      default: 500
+      defaultValue: 500
       version: 7.8.3
       reloadable: true
       configcascadeAware: false
@@ -24,7 +24,7 @@ properties:
       description: |
         Specifies the number of threads that concurrently handle due notifications that were transferred
         from buffering queue to processing queue.
-      default: 500
+      defaultValue: 500
       version: 7.8.3
       reloadable: true
       configcascadeAware: false
@@ -34,7 +34,7 @@ properties:
       description: |
         Specifies the buffer size for due notifications that were transferred from buffering queue to
         processing queue.
-      default: 65536
+      defaultValue: 65536
       version: 7.8.3
       reloadable: true
       configcascadeAware: false
@@ -56,7 +56,7 @@ properties:
 
         That allows the client "open-xchange-appsuite" (App Suite UI) to receive "new mail" notifications
         via APNS, but not for "new appointment".
-      default: false
+      defaultValue: false
       version: 7.8.3
       reloadable: true
       configcascadeAware: true
@@ -66,7 +66,7 @@ properties:
       description: |
         Specifies the frequency in milliseconds when to query the Apple feedback service to check for expired
         and/or invalid tokens.
-      default: 3600000
+      defaultValue: 3600000
       version: 7.8.3
       reloadable: true
       configcascadeAware: false
@@ -88,7 +88,7 @@ properties:
 
         That allows the client "open-xchange-appsuite" (App Suite UI) to receive "new mail" notifications
         via GCM, but not for "new appointment".
-      default: false
+      defaultValue: false
       version: 7.8.3
       reloadable: true
       configcascadeAware: true
@@ -110,7 +110,7 @@ properties:
 
         That allows the client "open-xchange-appsuite" (App Suite UI) to receive "new mail" notifications
         via WNS, but not for "new appointment".
-      default: false
+      defaultValue: false
       version: 7.8.3
       reloadable: true
       configcascadeAware: true
@@ -132,7 +132,7 @@ properties:
 
         That allows the client "open-xchange-appsuite" (App Suite UI) to receive "new mail" notifications
         via Web Socket, but not for "new appointment".
-      default: true
+      defaultValue: true
       version: 7.8.3
       reloadable: true
       configcascadeAware: true
