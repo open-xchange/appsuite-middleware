@@ -68,10 +68,17 @@ import com.openexchange.tools.session.ServerSession;
  * {@link SimplifiedHeaderTestParser}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.8.4
  */
 public class SimplifiedHeaderTestParser extends AbstractTestCommandParser {
 
+    /**
+     * Creates a new {@link SimplifiedHeaderTestParser} instance
+     * 
+     * @param services The {@link ServiceLookup} instance
+     * @return The {@link SimplifiedHeaderTestParser} instance
+     */
     public static SimplifiedHeaderTestParser newInstance(ServiceLookup services) {
         return new SimplifiedHeaderTestParser(services);
     }
@@ -80,6 +87,11 @@ public class SimplifiedHeaderTestParser extends AbstractTestCommandParser {
 
     private final HeaderTestCommandParser headerParser;
 
+    /**
+     * Initialises a new {@link SimplifiedHeaderTestParser}.
+     * 
+     * @param services The {@link ServiceLookup} instance
+     */
     private SimplifiedHeaderTestParser(ServiceLookup services) {
         super(services, Commands.HEADER);
         headerParser = new HeaderTestCommandParser(services);
@@ -147,6 +159,13 @@ public class SimplifiedHeaderTestParser extends AbstractTestCommandParser {
         }
     }
 
+    /**
+     * Adds the id of the simplified rule to the specified {@link JSONObject}
+     * 
+     * @param id The id to add
+     * @param jsonObject The {@link JSONObject}
+     * @throws JSONException if a JSON parsing error is occurred
+     */
     private void simplify(String id, JSONObject jsonObject) throws JSONException {
         jsonObject.put(GeneralField.id.name(), id);
         jsonObject.remove(HeaderTestField.headers.name());
