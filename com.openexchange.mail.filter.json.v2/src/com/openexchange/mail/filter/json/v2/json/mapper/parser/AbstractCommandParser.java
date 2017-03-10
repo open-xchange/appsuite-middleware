@@ -47,27 +47,71 @@
  *
  */
 
-package com.openexchange.jsieve.commands.test;
+package com.openexchange.mail.filter.json.v2.json.mapper.parser;
 
-import java.util.Hashtable;
+import java.util.Set;
+import com.openexchange.exception.OXException;
+import com.openexchange.jsieve.commands.test.ICommand;
+import com.openexchange.jsieve.registry.CommandRegistry;
+import com.openexchange.mailfilter.MailFilterService;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link IActionCommand}
+ * {@link AbstractCommandParser}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.4
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface IActionCommand extends ICommand {
+public abstract class AbstractCommandParser<I extends ICommand> {
+
+    protected final ServiceLookup services;
+    private final I command;
 
     /**
-     * Retrieves the number of arguments of this {@link IActionCommand}
-     * @return the number of arguments
+     * Initialises a new {@link AbstractCommandParser}.
      */
-    int getMinNumberOfArguments();
+    public AbstractCommandParser(ServiceLookup services, I command) {
+        super();
+        this.services = services;
+        this.command = command;
+    }
 
     /**
-     * Retrieves the tag arguments the the number of corresponding arguments
-     * @return a map of the tag arguments and their number of arguments
+     * Checks whether this command is supported
+     *
+     * @param capabilities The capabilities previously obtained from the {@link MailFilterService} service
+     * @return true if it is supported, false otherwise
+     * @throws OXException
      */
-    Hashtable<String, Integer> getTagArgs();
+    public boolean isCommandSupported(Set<String> capabilities) throws OXException {
+        CommandRegistry<I> commandRegistry = getCommandRegistry();
+        I c = commandRegistry.get(command.getCommandName());
+        return null == c.getRequired() || capabilities.contains(c.getRequired());
+    }
+
+    /**
+     * Retrieves the corresponding {@link ICommand}
+     * 
+     * @return The {@link ICommand}
+     * @throws OXException if an error is occurred
+     */
+    public I getCommand() throws OXException {
+        CommandRegistry<I> commandRegistry = getCommandRegistry();
+        return commandRegistry.get(getCommandName());
+    }
+
+    /**
+     * The corresponding {@link ICommand} name
+     * 
+     * @return The command name
+     */
+    protected String getCommandName() {
+        return command.getCommandName();
+    }
+
+    /**
+     * Returns the corresponding {@link CommandRegistry}
+     * 
+     * @return the corresponding {@link CommandRegistry}
+     */
+    protected abstract <T> CommandRegistry<T> getCommandRegistry();
 }

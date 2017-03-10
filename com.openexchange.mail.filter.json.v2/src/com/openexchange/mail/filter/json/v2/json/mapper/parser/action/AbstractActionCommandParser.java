@@ -49,12 +49,12 @@
 
 package com.openexchange.mail.filter.json.v2.json.mapper.parser.action;
 
-import java.util.Set;
-import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.jsieve.commands.ActionCommand.Commands;
 import com.openexchange.jsieve.commands.test.IActionCommand;
 import com.openexchange.jsieve.registry.ActionCommandRegistry;
+import com.openexchange.jsieve.registry.CommandRegistry;
+import com.openexchange.mail.filter.json.v2.json.mapper.parser.AbstractCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.ActionCommandParser;
 import com.openexchange.server.ServiceLookup;
 
@@ -64,40 +64,23 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-public abstract class AbstractActionCommandParser implements ActionCommandParser<ActionCommand> {
-
-    protected final ServiceLookup services;
-    private Commands actionCommand;
+public abstract class AbstractActionCommandParser extends AbstractCommandParser<IActionCommand> implements ActionCommandParser<ActionCommand> {
 
     /**
      * Initializes a new {@link AbstractActionCommandParser}.
      */
     protected AbstractActionCommandParser(ServiceLookup services, Commands actionCommand) {
-        super();
-        this.services = services;
-        this.actionCommand = actionCommand;
+        super(services, actionCommand);
     }
 
-    @Override
-    public boolean isCommandSupported(Set<String> capabilities) throws OXException {
-        ActionCommandRegistry service = services.getService(ActionCommandRegistry.class);
-        IActionCommand command = service.get(getCommandName());
-        return null == command.getRequired() || capabilities.containsAll(command.getRequired());
-    }
-
-    @Override
-    public IActionCommand getCommand() throws OXException {
-        ActionCommandRegistry service = services.getService(ActionCommandRegistry.class);
-        return service.get(getCommandName());
-    }
-
-    /**
-     * The corresponding {@link ActionCommand.Commands} name
+    /*
+     * (non-Javadoc)
      * 
-     * @return The command name
+     * @see com.openexchange.mail.filter.json.v2.json.mapper.parser.AbstractCommandParser#getCommandRegistry()
      */
-    private String getCommandName() {
-        return actionCommand.getCommandName();
+    @SuppressWarnings("unchecked")
+    @Override
+    protected <T> CommandRegistry<T> getCommandRegistry() {
+        return (CommandRegistry<T>) services.getService(ActionCommandRegistry.class);
     }
-
 }

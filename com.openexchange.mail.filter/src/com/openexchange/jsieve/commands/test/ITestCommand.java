@@ -58,7 +58,7 @@ import java.util.List;
  * @author <a href="mailto:felix.marx@open-xchange.com">Felix Marx</a>
  * @since v7.8.0
  */
-public interface ITestCommand {
+public interface ITestCommand extends ICommand {
 
     /**
      * @return
@@ -79,11 +79,6 @@ public interface ITestCommand {
      * @return
      */
     int getMaxNumberOfArguments();
-
-    /**
-     * @return
-     */
-    String getCommandName();
 
     /**
      * @return

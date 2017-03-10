@@ -49,12 +49,12 @@
 
 package com.openexchange.mail.filter.json.v2.json.mapper.parser.test;
 
-import java.util.Set;
-import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.TestCommand;
 import com.openexchange.jsieve.commands.TestCommand.Commands;
 import com.openexchange.jsieve.commands.test.ITestCommand;
+import com.openexchange.jsieve.registry.CommandRegistry;
 import com.openexchange.jsieve.registry.TestCommandRegistry;
+import com.openexchange.mail.filter.json.v2.json.mapper.parser.AbstractCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.TestCommandParser;
 import com.openexchange.server.ServiceLookup;
 
@@ -65,39 +65,36 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.8.4
  */
-public abstract class AbstractTestCommandParser implements TestCommandParser<TestCommand> {
-
-    protected final ServiceLookup services;
-    private final Commands testCommand;
+public abstract class AbstractTestCommandParser extends AbstractCommandParser<ITestCommand> implements TestCommandParser<TestCommand> {
 
     /**
      * Initializes a new {@link AbstractTestCommandParser}.
      */
     protected AbstractTestCommandParser(ServiceLookup services, Commands testCommand) {
-        super();
-        this.services = services;
-        this.testCommand = testCommand;
+        super(services, testCommand);
     }
 
-    @Override
-    public boolean isCommandSupported(Set<String> capabilities) throws OXException {
-        TestCommandRegistry service = services.getService(TestCommandRegistry.class);
-        ITestCommand command = service.get(getCommandName());
-        return null == command.getRequired() || capabilities.contains(command.getRequired());
-    }
+    //    @Override
+    //    public boolean isCommandSupported(Set<String> capabilities) throws OXException {
+    //        TestCommandRegistry service = services.getService(TestCommandRegistry.class);
+    //        ITestCommand command = service.get(getCommandName());
+    //        return null == command.getRequired() || capabilities.contains(command.getRequired());
+    //    }
 
-    @Override
-    public ITestCommand getCommand() throws OXException {
-        TestCommandRegistry service = services.getService(TestCommandRegistry.class);
-        return service.get(getCommandName());
-    }
+    //    @Override
+    //    public ITestCommand getCommand() throws OXException {
+    //        TestCommandRegistry service = services.getService(TestCommandRegistry.class);
+    //        return service.get(getCommandName());
+    //    }
 
-    /**
-     * The corresponding {@link TestCommand.Commands} name
+    /*
+     * (non-Javadoc)
      * 
-     * @return The command name
+     * @see com.openexchange.mail.filter.json.v2.json.mapper.parser.AbstractCommandParser#getCommandRegistry()
      */
-    private String getCommandName() {
-        return testCommand.getCommandName();
+    @SuppressWarnings("unchecked")
+    @Override
+    protected <T> CommandRegistry<T> getCommandRegistry() {
+        return (CommandRegistry<T>) services.getService(TestCommandRegistry.class);
     }
 }

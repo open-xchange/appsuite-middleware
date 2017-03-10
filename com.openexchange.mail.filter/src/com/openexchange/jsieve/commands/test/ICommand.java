@@ -49,25 +49,24 @@
 
 package com.openexchange.jsieve.commands.test;
 
-import java.util.Hashtable;
-
 /**
- * {@link IActionCommand}
+ * {@link ICommand}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.4
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface IActionCommand extends ICommand {
+public interface ICommand {
 
     /**
-     * Retrieves the number of arguments of this {@link IActionCommand}
-     * @return the number of arguments
+     * The name of the command
+     * 
+     * @return The command name
      */
-    int getMinNumberOfArguments();
+    String getCommandName();
 
     /**
-     * Retrieves the tag arguments the the number of corresponding arguments
-     * @return a map of the tag arguments and their number of arguments
+     * The required sieve server capabilities
+     * 
+     * @return The required capabilities
      */
-    Hashtable<String, Integer> getTagArgs();
+    String getRequired();
 }
