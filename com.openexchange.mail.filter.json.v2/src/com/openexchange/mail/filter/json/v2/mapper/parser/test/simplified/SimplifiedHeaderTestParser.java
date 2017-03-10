@@ -116,9 +116,10 @@ public class SimplifiedHeaderTestParser extends AbstractTestCommandParser {
             case AnyRecipient:
                 jsonObject.put(HeaderTestField.headers.name(), SimplifiedHeaderTest.AnyRecipient.getHeaderNames());
                 return headerParser.parse(jsonObject, session);
+            default:
+                // should never occur
+                throw new IllegalArgumentException("Unknown/Unhandled SimplifiedHeaderTest '" + test.getCommandName() + "'");
         }
-        // should never occur
-        return null;
     }
 
     @Override
