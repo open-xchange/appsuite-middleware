@@ -55,13 +55,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.Strings;
 import com.openexchange.passwordchange.PasswordChangeEvent;
 import com.openexchange.passwordchange.PasswordChangeService;
-import com.openexchange.passwordchange.script.services.SPWServiceRegistry;
+import com.openexchange.passwordchange.script.impl.ScriptPasswordChangeConfig.ConfigData;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.tools.encoding.Base64;
 import com.openexchange.user.UserService;
 
 /**
@@ -71,146 +72,136 @@ import com.openexchange.user.UserService;
  */
 public final class ScriptPasswordChange extends PasswordChangeService {
 
-	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ScriptPasswordChange.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ScriptPasswordChange.class);
 
-	/**
-	 * Initializes a new {@link ScriptPasswordChange}
-	 */
-	public ScriptPasswordChange() {
-		super();
-	}
-
-    private String getShellCommand() throws OXException {
-        return SPWServiceRegistry.getServiceRegistry().getService(ConfigurationService.class, true).getProperty("com.openexchange.passwordchange.script.shellscript");
+    /**
+     * Initializes a new {@link ScriptPasswordChange}
+     */
+    public ScriptPasswordChange() {
+        super();
     }
 
-	@Override
-	protected void update(final PasswordChangeEvent event) throws OXException {
+    @Override
+    protected void update(final PasswordChangeEvent event) throws OXException {
+        ConfigData configData = ScriptPasswordChangeConfig.getInstance().getData();
+        String shellscript_to_execute = configData.getScriptPath();
+        boolean asBase64 = configData.asBase64();
 
-		String shellscript_to_execute = getShellCommand();
-		if (isEmpty(shellscript_to_execute)) {
-		    final String message = "Shell command is empty. Please check property \"com.openexchange.passwordchange.script.shellscript\" in file change_pwd_script.properties";
+        if (Strings.isEmpty(shellscript_to_execute)) {
+            final String message = "Shell command is empty. Please check property \"com.openexchange.passwordchange.script.shellscript\" in file change_pwd_script.properties";
             LOG.error(message);
-		    throw PasswordExceptionCode.PASSWORD_FAILED_WITH_MSG.create(message);
+            throw PasswordExceptionCode.PASSWORD_FAILED_WITH_MSG.create(message);
         }
-		User user = null;
-		{
-			final UserService userService = getServiceRegistry().getService(UserService.class);
-			if (userService == null) {
-				throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserService.class.getName());
-			}
-			user = userService.getUser(event.getSession().getUserId(), event.getContext());
+        User user = null;
+        {
+            final UserService userService = getServiceRegistry().getService(UserService.class);
+            if (userService == null) {
+                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserService.class.getName());
+            }
+            user = userService.getUser(event.getSession().getUserId(), event.getContext());
 
-		}
-		final String usern = user.getLoginInfo();
-		if (null == usern) {
+        }
+        String usern = user.getLoginInfo();
+        if (null == usern) {
             final String message = "User name is null.";
             LOG.error(message);
             throw PasswordExceptionCode.PASSWORD_FAILED_WITH_MSG.create(message);
         }
-		final String oldpw = event.getOldPassword();
-		if (null == oldpw) {
+        String oldpw = event.getOldPassword();
+        if (null == oldpw) {
             final String message = "Old password is null.";
             LOG.error(message);
             throw PasswordExceptionCode.PASSWORD_FAILED_WITH_MSG.create(message);
         }
-		final String newpw = event.getNewPassword();
-		if (null == newpw) {
+        String newpw = event.getNewPassword();
+        if (null == newpw) {
             final String message = "New password is null.";
             LOG.error(message);
             throw PasswordExceptionCode.PASSWORD_FAILED_WITH_MSG.create(message);
         }
-		final String cid = Integer.toString(event.getContext().getContextId());
-		final String userid = Integer.toString(user.getId());
+        final String cid = Integer.toString(event.getContext().getContextId());
+        final String userid = Integer.toString(user.getId());
 
-		/*
-		 * Update passwd via executing a shell script
-		 *
-		 * Following values must be passed to the script in given order:
-		 *
-		 *  0. cid -  Context ID
-		 *  1. user - Username of the logged in user
-		 *  2. userid - User ID of the logged in user
-		 *  3. oldpwd - Old user password
-		 *  4. newpwd - New user password
-		 */
+        // Convert UTF-8 bytes of String to base64 
+        if (asBase64) {
+            usern = Base64.encode(usern);
+            oldpw= Base64.encode(oldpw);
+            newpw = Base64.encode(newpw);
+        }
 
-		final String[] cmd = new String[11];
-		cmd[0] = shellscript_to_execute; // the script, after that, the parameters
-		cmd[1] = "--cid";
-		cmd[2] = cid;
-		cmd[3] = "--username";
-		cmd[4] = usern;
-		cmd[5] = "--userid";
-		cmd[6] = userid;
-		cmd[7] = "--oldpassword";
-		cmd[8] = oldpw;
-		cmd[9] = "--newpassword";
-		cmd[10] = newpw; //
+        /*
+         * Update passwd via executing a shell script
+         *
+         * Following values must be passed to the script in given order:
+         *
+         * 0. cid - Context ID
+         * 1. user - Username of the logged in user
+         * 2. userid - User ID of the logged in user
+         * 3. oldpwd - Old user password
+         * 4. newpwd - New user password
+         */
 
-		LOG.debug("Executing following command to change password: {}", Arrays.toString(cmd));
+        final String[] cmd = new String[11];
+        cmd[0] = shellscript_to_execute; // the script, after that, the parameters
+        cmd[1] = "--cid";
+        cmd[2] = cid;
+        cmd[3] = "--username";
+        cmd[4] = usern;
+        cmd[5] = "--userid";
+        cmd[6] = userid;
+        cmd[7] = "--oldpassword";
+        cmd[8] = oldpw;
+        cmd[9] = "--newpassword";
+        cmd[10] = newpw; //
 
-		try {
-		    final int ret = executePasswordUpdateShell(cmd);
-		    if(ret!=0) {
-		        LOG.error("Passwordchange script returned exit code != 0, ret={}", ret);
-		        switch(ret){
-		        case 1:
-		            throw PasswordExceptionCode.PASSWORD_FAILED.create(" failed with return code "+ret+" ");
-		        case 2:
-		            throw PasswordExceptionCode.PASSWORD_SHORT.create();
-		        case 3:
-		            throw PasswordExceptionCode.PASSWORD_WEAK.create();
-		        case 4:
-		            throw PasswordExceptionCode.PASSWORD_NOUSER.create();
-		        case 5:
-		            throw PasswordExceptionCode.LDAP_ERROR.create();
-		        default:
-		            throw ServiceExceptionCode.IO_ERROR.create();
-		        }
-		    }
-		} catch (final IOException e) {
-			LOG.error("IO error while changing password for user {} in context {}\n", usern, cid,e);
-			throw ServiceExceptionCode.IO_ERROR.create(e);
-		} catch (final InterruptedException e) {
+        LOG.debug("Executing following command to change password: {}", Arrays.toString(cmd));
+
+        try {
+            final int ret = executePasswordUpdateShell(cmd);
+            if (ret != 0) {
+                LOG.error("Passwordchange script returned exit code != 0, ret={}", ret);
+                switch (ret) {
+                    case 1:
+                        throw PasswordExceptionCode.PASSWORD_FAILED.create(" failed with return code " + ret + " ");
+                    case 2:
+                        throw PasswordExceptionCode.PASSWORD_SHORT.create();
+                    case 3:
+                        throw PasswordExceptionCode.PASSWORD_WEAK.create();
+                    case 4:
+                        throw PasswordExceptionCode.PASSWORD_NOUSER.create();
+                    case 5:
+                        throw PasswordExceptionCode.LDAP_ERROR.create();
+                    default:
+                        throw ServiceExceptionCode.IO_ERROR.create();
+                }
+            }
+        } catch (final IOException e) {
+            LOG.error("IO error while changing password for user {} in context {}\n", usern, cid, e);
+            throw ServiceExceptionCode.IO_ERROR.create(e);
+        } catch (final InterruptedException e) {
             // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
             Thread.currentThread().interrupt();
-			LOG.error("Error while changing password for user {} in context {}\n", usern, cid,e);
-			throw ServiceExceptionCode.IO_ERROR.create(e);
-		}
-
-	}
-
-	private int executePasswordUpdateShell(final String[] cmd) throws IOException, InterruptedException {
-
-		final Runtime rt = Runtime.getRuntime();
-		final Process proc = rt.exec(cmd);
-		final InputStream stderr = proc.getInputStream();
-		final InputStreamReader isr = new InputStreamReader(stderr);
-		final BufferedReader br = new BufferedReader(isr);
-		String line = null;
-
-		while ((line = br.readLine()) != null){
-			LOG.debug("PWD CHANGE: {}", line);
-		}
-
-		return proc.waitFor();
-
-
-	}
-
-	/** Check for an empty string */
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
+            LOG.error("Error while changing password for user {} in context {}\n", usern, cid, e);
+            throw ServiceExceptionCode.IO_ERROR.create(e);
         }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
+
     }
-    
+
+    private int executePasswordUpdateShell(final String[] cmd) throws IOException, InterruptedException {
+
+        final Runtime rt = Runtime.getRuntime();
+        final Process proc = rt.exec(cmd);
+        final InputStream stderr = proc.getInputStream();
+        final InputStreamReader isr = new InputStreamReader(stderr);
+        final BufferedReader br = new BufferedReader(isr);
+        String line = null;
+
+        while ((line = br.readLine()) != null) {
+            LOG.debug("PWD CHANGE: {}", line);
+        }
+
+        return proc.waitFor();
+
+    }
 
 }

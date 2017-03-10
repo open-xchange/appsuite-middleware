@@ -47,33 +47,44 @@
  *
  */
 
-package com.openexchange.passwordchange.script.services;
+package com.openexchange.ajax.passwordchange.actions;
 
-import com.openexchange.osgi.ServiceRegistry;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
- * {@link SPWServiceRegistry} - A registry for services
+ * {@link PasswordChangeScriptResultResponse}
  *
- * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @since v7.8.4
  */
-public final class SPWServiceRegistry {
+public class PasswordChangeScriptResultResponse extends AbstractAJAXResponse {
 
-    private static final ServiceRegistry REGISTRY = new ServiceRegistry(2);
+    private String password;
 
     /**
-     * Gets the service registry
-     *
-     * @return The service registry
+     * Initializes a new {@link PasswordChangeScriptResultResponse}.
+     * 
+     * @param response the server response
      */
-    public static ServiceRegistry getServiceRegistry() {
-        return REGISTRY;
+    protected PasswordChangeScriptResultResponse(Response response) {
+        super(response);
     }
 
     /**
-     * Initializes a new {@link SPWServiceRegistry}
+     * Get the password that was found persisted by the special pwd_change script
+     * 
+     * @return the password
      */
-    private SPWServiceRegistry() {
-        super();
+    public String getPassword() {
+        return this.password;
+    }
+
+    /**
+     * Set the password that was found persisted by the special pwd_change script
+     */
+    public void setPassword(String password) {
+        this.password = password;
     }
 
 }
