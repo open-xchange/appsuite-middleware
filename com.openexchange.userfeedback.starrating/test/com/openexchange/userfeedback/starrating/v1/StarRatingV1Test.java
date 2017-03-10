@@ -184,7 +184,7 @@ public class StarRatingV1Test {
     @Test
     public void testAddRequired_everythingFine_nothingToDo() throws JSONException {
         JSONObject feedback = new JSONObject(wellPreparedFeedbackStr);
-        JSONObject addRequired = starRating.addRequired(feedback, StarRatingV1JsonFields.storingKeys());
+        JSONObject addRequired = starRating.addRequired(feedback, StarRatingV1JsonFields.requiredJsonKeys());
 
         assertTrue(feedback.equals(addRequired));
     }
@@ -193,7 +193,7 @@ public class StarRatingV1Test {
     public void testAddRequired_upperCaseKeys_addLowerCases() throws JSONException {
         JSONObject feedback = new JSONObject(contentOkButUpperCaseFeedbackStr);
 
-        JSONObject addRequired = starRating.addRequired(feedback, StarRatingV1JsonFields.storingKeys());
+        JSONObject addRequired = starRating.addRequired(feedback, StarRatingV1JsonFields.requiredJsonKeys());
 
         assertTrue(addRequired.has("Comment"));
         assertTrue(addRequired.has("comment"));
@@ -204,7 +204,7 @@ public class StarRatingV1Test {
     @Test
     public void testAddRequired_nothingToAddButAdditionalAvailable_leaveAdditional() throws JSONException {
         JSONObject feedback = new JSONObject(additionalFieldsFeedbackStr);
-        JSONObject addRequired = starRating.addRequired(feedback, StarRatingV1JsonFields.storingKeys());
+        JSONObject addRequired = starRating.addRequired(feedback, StarRatingV1JsonFields.requiredJsonKeys());
         
         assertTrue(addRequired.has("score"));
         assertFalse(addRequired.has("Score"));
@@ -217,7 +217,7 @@ public class StarRatingV1Test {
     @Test
     public void testAddRequired_requiredMissing_addRequired() throws JSONException {
         JSONObject feedback = new JSONObject(missingFieldsFeedbackStr);
-        JSONObject addRequired = starRating.addRequired(feedback, StarRatingV1JsonFields.storingKeys());
+        JSONObject addRequired = starRating.addRequired(feedback, StarRatingV1JsonFields.requiredJsonKeys());
         
         assertTrue(addRequired.has("score"));
         assertFalse(addRequired.has("Score"));
@@ -251,7 +251,7 @@ public class StarRatingV1Test {
     public void testRemoveAdditional_mixedKeys_onlyKeepExpectedLowerCaseKeys() throws JSONException {
         JSONObject feedback = new JSONObject(contentOkButUpperCaseFeedbackStr);
 
-        JSONObject remove = starRating.remove(feedback, StarRatingV1JsonFields.storingKeys());
+        JSONObject remove = starRating.remove(feedback, StarRatingV1JsonFields.requiredJsonKeys());
         
         assertTrue(remove.has("score"));
         assertTrue(remove.has("app"));

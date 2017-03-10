@@ -7,6 +7,7 @@ Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Activator: com.openexchange.userfeedback.starrating.osgi.Activator
 Import-Package: com.fasterxml.jackson.core,
+ com.google.common.hash,
  com.openexchange.ajax.container,
  com.openexchange.database,
  com.openexchange.exception,

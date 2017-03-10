@@ -51,6 +51,7 @@ package com.openexchange.userfeedback.starrating.v1;
 
 import java.util.HashSet;
 import java.util.Set;
+import org.json.JSONObject;
 
 /**
  * {@link StarRatingV1JsonFields}
@@ -60,6 +61,7 @@ import java.util.Set;
  */
 public enum StarRatingV1JsonFields {
     date("Date"),
+    user("User"),
     score("Score"),
     app("App"),
     entry_point("Entry Point"),
@@ -97,9 +99,15 @@ public enum StarRatingV1JsonFields {
         return displayName;
     }
 
-    public static Set<String> storingKeys() {
+    /**
+     * Returns keys that are required within the to persist JSONObject. Those removed from {@link com.openexchange.userfeedback.starrating.v1.StarRatingV1JsonFields#values()} are retrieved from other tables.
+     * 
+     * @return Set of {@link String} that are required within the {@link JSONObject}
+     */
+    public static Set<String> requiredJsonKeys() {
         Set<String> copy = new HashSet<>(INTERNAL_KEYS);
         copy.remove("date");
+        copy.remove("user");
         return copy;
     }
 }

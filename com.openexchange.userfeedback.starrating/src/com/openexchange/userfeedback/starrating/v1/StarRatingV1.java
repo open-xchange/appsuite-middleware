@@ -50,6 +50,7 @@
 package com.openexchange.userfeedback.starrating.v1;
 
 import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -66,6 +67,7 @@ import java.util.Map;
 import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.google.common.hash.Hashing;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.AsciiReader;
@@ -139,7 +141,7 @@ public class StarRatingV1 extends AbstractFeedbackType {
     protected Object cleanUpFeedback(JSONObject jsonFeedback) {
         JSONObject returnFeedback = new JSONObject(jsonFeedback);
 
-        Set<String> keys = new HashSet<String>(StarRatingV1JsonFields.storingKeys());
+        Set<String> keys = new HashSet<String>(StarRatingV1JsonFields.requiredJsonKeys());
         JSONObject removeAdditional = remove(returnFeedback, keys);
         JSONObject cleanedFeedback = addRequired(removeAdditional, keys);
         return cleanedFeedback;
@@ -265,9 +267,7 @@ public class StarRatingV1 extends AbstractFeedbackType {
                 long id = rs.getLong(1);
                 try {
                     Feedback current = feedbacks.get(id);
-                    JSONObject content = new JSONObject(new AsciiReader(rs.getBinaryStream(2)));
-                    content.put("date", new Date(current.getDate())); // add date to content for easy export
-                    current.setContent(content);
+                    enrichContent(new AsciiReader(rs.getBinaryStream(2)), current);
                 } catch (JSONException e) {
                     LOG.error("Unable to read feedback with id {}. Won't return it.", id, e);
                 }
@@ -278,6 +278,22 @@ public class StarRatingV1 extends AbstractFeedbackType {
             DBUtils.closeSQLStuff(rs, stmt);
         }
         return createExportObject(feedbacks.values());
+    }
+
+    /**
+     * Adds required export fields to content.
+     * 
+     * @param asciiReader The initial content
+     * @param current The feedback object to update
+     * @throws JSONException
+     */
+    private void enrichContent(AsciiReader asciiReader, Feedback current) throws JSONException {
+        JSONObject content = new JSONObject(asciiReader);
+        content.put("date", new Date(current.getDate())); // add date to content for easy export
+        String userContextTupel = current.getCtxId() + ":" + current.getUserId();
+        String hashedTupel = Hashing.md5().hashString(userContextTupel, StandardCharsets.UTF_8).toString();
+        content.put("user", hashedTupel);
+        current.setContent(content);
     }
 
     private ExportResultConverter createExportObject(Collection<Feedback> feedbacks) {
