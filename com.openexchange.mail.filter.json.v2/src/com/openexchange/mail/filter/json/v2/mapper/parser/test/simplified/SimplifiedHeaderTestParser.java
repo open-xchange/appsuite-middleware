@@ -130,21 +130,20 @@ public class SimplifiedHeaderTestParser extends AbstractTestCommandParser {
 
         for (SimplifiedHeaderTest test : SimplifiedHeaderTest.values()) {
             List<String> simplifiedHeaders = test.getHeaderNames();
-            if (simplifiedHeaders.size() == headers.length()) {
-                boolean isEqual = true;
-                for (Object header : headers) {
-                    if (!simplifiedHeaders.contains(header)) {
-                        isEqual = false;
-                        break;
-                    }
-                }
-                if (!isEqual) {
-                    continue;
-                }
-                simplify(test.getCommandName(), jsonObject);
-            } else {
+            if (simplifiedHeaders.size() != headers.length()) {
                 continue;
             }
+            boolean isEqual = true;
+            for (Object header : headers) {
+                if (!simplifiedHeaders.contains(header)) {
+                    isEqual = false;
+                    break;
+                }
+            }
+            if (!isEqual) {
+                continue;
+            }
+            simplify(test.getCommandName(), jsonObject);
         }
     }
 
