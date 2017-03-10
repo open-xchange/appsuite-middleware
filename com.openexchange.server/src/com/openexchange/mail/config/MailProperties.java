@@ -149,7 +149,6 @@ public final class MailProperties implements IMailProperties {
             int rateLimit;
             String[] phishingHeaders;
             HostList ranges;
-            boolean supportMsisdnAddresses;
             int defaultArchiveDays;
             boolean preferSentDate;
             boolean hidePOP3StorageFolders;
@@ -181,7 +180,6 @@ public final class MailProperties implements IMailProperties {
         final int rateLimit;
         final HostList ranges;
         final String[] phishingHeaders;
-        final boolean supportMsisdnAddresses;
         final int defaultArchiveDays;
         final boolean preferSentDate;
         final boolean hidePOP3StorageFolders;
@@ -208,7 +206,6 @@ public final class MailProperties implements IMailProperties {
             this.rateLimit = params.rateLimit;
             this.ranges = params.ranges;
             this.phishingHeaders = params.phishingHeaders;
-            this.supportMsisdnAddresses = params.supportMsisdnAddresses;
             this.defaultArchiveDays = params.defaultArchiveDays;
             this.preferSentDate = params.preferSentDate;
             this.hidePOP3StorageFolders = params.hidePOP3StorageFolders;
@@ -440,14 +437,6 @@ public final class MailProperties implements IMailProperties {
 
             String key = "  White-listed from send rate limit";
             MDC.put(key, ranges.toString());
-            toRemove.add(key);
-        }
-
-        {
-            params.supportMsisdnAddresses = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.supportMsisdnAddresses", false, view);
-
-            String key = "  Supports MSISDN addresses";
-            MDC.put(key, Boolean.toString(params.supportMsisdnAddresses));
             toRemove.add(key);
         }
 
@@ -1731,18 +1720,10 @@ public final class MailProperties implements IMailProperties {
     /**
      * Signals if MSISDN addresses are supported or not.
      *
-     * @param userId The user identifier
-     * @param contextId The context identifier
      * @return <code>true</code>, if MSISDN addresses are supported; otherwise <code>false</code>
      */
-    public boolean isSupportMsisdnAddresses(int userId, int contextId) {
-        try {
-            PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
-            return primaryMailProps.supportMsisdnAddresses;
-        } catch (Exception e) {
-            LOG.error("Failed to get IP ranges for user {} in context {}. Using default instead.", I(userId), I(contextId), e);
-            return supportMsisdnAddresses;
-        }
+    public boolean isSupportMsisdnAddresses() {
+        return supportMsisdnAddresses;
     }
 
     /**

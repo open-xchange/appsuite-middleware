@@ -2559,7 +2559,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 for (String alias : user.getAliases()) {
                     validAddrs.add(new QuotedInternetAddress(alias));
                 }
-                boolean supportMsisdnAddresses = MailProperties.getInstance().isSupportMsisdnAddresses(session.getUserId(), session.getContextId());
+                boolean supportMsisdnAddresses = MailProperties.getInstance().isSupportMsisdnAddresses();
                 if (supportMsisdnAddresses) {
                     MsisdnUtility.addMsisdnAddress(validAddrs, this.session);
                 }
@@ -3985,7 +3985,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                         validAddrs.add(new QuotedInternetAddress(alias));
                     }
                     QuotedInternetAddress fromAddress = new QuotedInternetAddress(fromAddr);
-                    if (MailProperties.getInstance().isSupportMsisdnAddresses(session.getUserId(), session.getContextId())) {
+                    if (MailProperties.getInstance().isSupportMsisdnAddresses()) {
                         MsisdnUtility.addMsisdnAddress(validAddrs, session);
                         String address = fromAddress.getAddress();
                         int pos = address.indexOf('/');

@@ -141,7 +141,7 @@ public class SendAddress implements PreferencesItemService {
                     }
 
                     // Add MSISDN addresses if supported
-                    if (MailProperties.getInstance().isSupportMsisdnAddresses(session.getUserId(), session.getContextId())) {
+                    if (MailProperties.getInstance().isSupportMsisdnAddresses()) {
                         MsisdnUtility.addMsisdnAddress(allAliases, session);
                     }
 
