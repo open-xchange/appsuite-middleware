@@ -56,6 +56,7 @@ import com.openexchange.jsieve.commands.test.ITestCommand;
  * {@link TestCommandParser}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.8.4
  */
 public interface TestCommandParser<T> extends CommandParser<T> {
@@ -64,7 +65,7 @@ public interface TestCommandParser<T> extends CommandParser<T> {
      * Retrieves the corresponding {@link ITestCommand}
      *
      * @return The {@link ITestCommand}
-     * @throws OXException
+     * @throws OXException if an error is occurred
      */
     ITestCommand getCommand() throws OXException;
 
