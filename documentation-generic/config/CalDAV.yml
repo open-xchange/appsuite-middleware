@@ -54,6 +54,6 @@ properties:
       defaultValue: 172800
       version: 7.8.4
       reloadable: true
-      configcascade_Aware: false
+      configcascadeAware: false
       related: 
       file: caldav.properties
