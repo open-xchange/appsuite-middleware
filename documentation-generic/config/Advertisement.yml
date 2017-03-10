@@ -1,6 +1,6 @@
 feature_name: Advertisement
 feature_description: |
-  This page describes the properties of the advertisement feature.
+  This page describes the properties related to the advertisement feature.
 properties:
   - key: com.openexchange.advertisement.&#91;reseller&#93;.packageScheme
     description: |
