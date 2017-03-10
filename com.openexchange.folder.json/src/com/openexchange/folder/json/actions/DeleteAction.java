@@ -49,6 +49,7 @@
 
 package com.openexchange.folder.json.actions;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -58,6 +59,7 @@ import java.util.List;
 import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
@@ -69,6 +71,8 @@ import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
+import com.openexchange.folderstorage.TrashAwareFolderService;
+import com.openexchange.folderstorage.TrashResult;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.oauth.provider.resourceserver.OAuthAccess;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
@@ -85,6 +89,11 @@ import com.openexchange.tools.session.ServerSession;
 public final class DeleteAction extends AbstractFolderAction {
 
     public static final String ACTION = AJAXServlet.ACTION_DELETE;
+    private static final String NEW_PATH = "new_path";
+    private static final String PATH = "path";
+    private static final String HAS_FAILED = "hasFailed";
+    private static final String IS_TRASHED = "isTrashed";
+    private static final String EXTENDED_RESPONSE = "extendedResponse";
 
     /**
      * Initializes a new {@link DeleteAction}.
@@ -95,6 +104,12 @@ public final class DeleteAction extends AbstractFolderAction {
 
     @Override
     protected AJAXRequestResult doPerform(final AJAXRequestData request, final ServerSession session) throws OXException, JSONException {
+
+        Boolean extendedResponse = request.getParameter(EXTENDED_RESPONSE, boolean.class, true);
+        if (extendedResponse != null && extendedResponse) {
+            return performExtendedResponse(request, session);
+        }
+
         /*
          * Parse parameters
          */
@@ -177,6 +192,140 @@ public final class DeleteAction extends AbstractFolderAction {
                 }
             }
             result = new AJAXRequestResult(responseArray).addWarnings(warnings);
+        }
+        /*
+         * Return appropriate result
+         */
+        return result;
+    }
+
+    private AJAXRequestResult performExtendedResponse(final AJAXRequestData request, final ServerSession session) throws OXException, JSONException {
+        /*
+         * Parse parameters
+         */
+        String treeId = request.getParameter("tree");
+        if (null == treeId) {
+            /*
+             * Fallback to default tree identifier
+             */
+            treeId = getDefaultTreeIdentifier();
+        }
+        final Date timestamp;
+        {
+            final String timestampStr = request.getParameter("timestamp");
+            if (null == timestampStr) {
+                timestamp = null;
+            } else {
+                try {
+                    timestamp = new Date(Long.parseLong(timestampStr));
+                } catch (final NumberFormatException e) {
+                    throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("timestamp", timestampStr);
+                }
+            }
+        }
+        /*
+         * Compose JSON array with id
+         */
+        final JSONArray jsonArray = (JSONArray) request.requireData();
+        final int len = jsonArray.length();
+        /*
+         * Delete
+         */
+        final boolean failOnError = AJAXRequestDataTools.parseBoolParameter("failOnError", request, false);
+        final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
+        FolderServiceDecorator decorator = new FolderServiceDecorator().put("hardDelete", request.getParameter("hardDelete"));
+        List<TrashResult> results = new ArrayList<>(len);
+        final AJAXRequestResult result;
+        if (failOnError) {
+            final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DeleteAction.class);
+            Map<String, OXException> foldersWithError = new HashMap<String, OXException>(len);
+            for (int i = 0; i < len; i++) {
+                final String folderId = jsonArray.getString(i);
+                try {
+
+                    if (!(folderService instanceof TrashAwareFolderService)) {
+                        throw FolderExceptionErrorMessage.UNSUPPORTED_OPERATION.create();
+                    }
+
+                    final FolderResponse<TrashResult> response = ((TrashAwareFolderService) folderService).trashFolder(treeId, folderId, timestamp, session, decorator);
+                    final Collection<OXException> warnings = response.getWarnings();
+                    if (null != warnings && !warnings.isEmpty()) {
+                        throw warnings.iterator().next();
+                    }
+                    results.add(response.getResponse());
+                } catch (final OXException e) {
+                    e.setCategory(Category.CATEGORY_ERROR);
+                    log.error("Failed to delete folder {} in tree {}.", folderId, treeId, e);
+                    foldersWithError.put(folderId, e);
+                }
+            }
+            final int size = foldersWithError.size();
+            if (size > 0) {
+                if (1 == size) {
+                    throw foldersWithError.values().iterator().next();
+                }
+                final StringBuilder sb = new StringBuilder(64);
+                Iterator<String> iterator = foldersWithError.keySet().iterator();
+                sb.append(getFolderNameSafe(folderService, iterator.next(), treeId, session));
+                while (iterator.hasNext()) {
+                    sb.append(", ").append(getFolderNameSafe(folderService, iterator.next(), treeId, session));
+                }
+                throw FolderExceptionErrorMessage.FOLDER_DELETION_FAILED.create(sb.toString());
+            }
+
+            JSONArray resultArray = new JSONArray(results.size());
+            for (TrashResult trashResult : results) {
+                JSONObject obj = new JSONObject(3);
+                if (trashResult.isTrashed()) {
+                    obj.put(IS_TRASHED, true);
+                    obj.put(NEW_PATH, trashResult.getNewPath());
+                    obj.put(PATH, trashResult.getOldPath());
+                } else {
+                    obj.put(IS_TRASHED, false);
+                    obj.put(PATH, trashResult.getOldPath());
+                }
+                resultArray.put(obj);
+            }
+            result = new AJAXRequestResult(resultArray);
+        } else {
+            final List<OXException> warnings = new LinkedList<OXException>();
+            for (int i = 0; i < len; i++) {
+                final String folderId = jsonArray.getString(i);
+                try {
+                    if (!(folderService instanceof TrashAwareFolderService)) {
+                        throw FolderExceptionErrorMessage.UNSUPPORTED_OPERATION.create();
+                    }
+
+                    final FolderResponse<TrashResult> response = ((TrashAwareFolderService) folderService).trashFolder(treeId, folderId, timestamp, session, decorator);
+                    results.add(response.getResponse());
+
+                } catch (final OXException e) {
+                    final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DeleteAction.class);
+                    log.error("Failed to delete folder {} in tree {}.", folderId, treeId, e);
+                    e.setCategory(Category.CATEGORY_WARNING);
+                    warnings.add(e);
+                    results.add(new TrashResult(folderId, true));
+                }
+            }
+            JSONArray resultArray = new JSONArray(results.size());
+            for (TrashResult trashResult : results) {
+                JSONObject obj = new JSONObject(3);
+                if (trashResult.hasFailed()) {
+                    obj.put(HAS_FAILED, true);
+                    obj.put(PATH, trashResult.getOldPath());
+                } else {
+                    if (trashResult.isTrashed()) {
+                        obj.put(IS_TRASHED, true);
+                        obj.put(PATH, trashResult.getOldPath());
+                        obj.put(NEW_PATH, trashResult.getNewPath());
+                    } else {
+                        obj.put(IS_TRASHED, false);
+                        obj.put(PATH, trashResult.getOldPath());
+                    }
+                }
+                resultArray.put(obj);
+            }
+            result = new AJAXRequestResult(resultArray).addWarnings(warnings);
         }
         /*
          * Return appropriate result

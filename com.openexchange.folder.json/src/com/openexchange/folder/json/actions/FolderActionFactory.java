@@ -115,7 +115,6 @@ public final class FolderActionFactory implements AJAXActionServiceFactory {
         tmp.put(SubscribeAction.ACTION, new SubscribeAction());
         tmp.put(SharesAction.ACTION, new SharesAction());
         tmp.put(NotifyAction.ACTION, new NotifyAction());
-        tmp.put(TrashAction.ACTION, new TrashAction());
         return tmp.build();
     }
 
