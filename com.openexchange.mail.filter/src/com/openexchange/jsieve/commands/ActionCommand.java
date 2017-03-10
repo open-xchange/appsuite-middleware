@@ -148,7 +148,7 @@ public class ActionCommand extends ControlOrActionCommand {
          * <code>setflag [&lt;variablename: string&gt;] &lt;list-of-flags: string-list&gt;</code>
          * <p><a href="https://tools.ietf.org/html/rfc5232#section-3.1">RFC-5232: Action setflag</a></p>
          */
-        SETFLAG("setflag", 1, new Hashtable<String, Integer>(), "setflags", java.util.Arrays.asList("imapflags", "imap4flags")),
+        SETFLAG("setflag", 1, new Hashtable<String, Integer>(), "setflags", Collections.singletonList("imap4flags")),
         /**
          * <p>Addflag is used to add flags to a list of [IMAP] flags. It doesn't
          * replace any previously set flags. This means that multiple
@@ -156,7 +156,7 @@ public class ActionCommand extends ControlOrActionCommand {
          * <code>addflag [&lt;variablename: string&gt;] &lt;list-of-flags: string-list&gt;</code>
          * <p><a href="https://tools.ietf.org/html/rfc5232#section-3.2">RFC-5232: Action addflag</a></p>
          */
-        ADDFLAG("addflag", 1, new Hashtable<String, Integer>(), "addflags", java.util.Arrays.asList("imapflags", "imap4flags")),
+        ADDFLAG("addflag", 1, new Hashtable<String, Integer>(), "addflags", Collections.singletonList("imap4flags")),
         /**
          * <p>Addflag is used to add flags to a list of [IMAP] flags. It doesn't
          * replace any previously set flags. This means that multiple
@@ -164,7 +164,7 @@ public class ActionCommand extends ControlOrActionCommand {
          * <code>removeflag [&lt;variablename: string&gt;] &lt;list-of-flags: string-list&gt;</code>
          * <p><a href="https://tools.ietf.org/html/rfc5232#section-3.3">RFC-5232: Action removeflag</a></p>
          */
-        REMOVEFLAG("removeflag", 1, new Hashtable<String, Integer>(), "removeflags", java.util.Arrays.asList("imapflags", "imap4flags")),
+        REMOVEFLAG("removeflag", 1, new Hashtable<String, Integer>(), "removeflags", Collections.singletonList("imap4flags")),
         PGP_ENCRYPT("pgp_encrypt", 0, pgpEncryptTags(), "pgp", java.util.Arrays.asList("vnd.dovecot.pgp-encrypt")),
         /**
          * <p>The addheader action adds a header field to the existing message header.</p>

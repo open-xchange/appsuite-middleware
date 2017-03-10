@@ -51,6 +51,7 @@ package com.openexchange.mail.filter.json.v2.actions;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -123,13 +124,13 @@ public class ConfigMailFilterAction extends AbstractMailFilterAction{
         TestCommandParserRegistry service = services.getService(TestCommandParserRegistry.class);
         final JSONArray testarray = new JSONArray();
         Map<String, TestCommandParser<TestCommand>> map = service.getCommandParsers();
-        for (String key : map.keySet()) {
-            TestCommandParser<TestCommand> parser = map.get(key);
+        for (Map.Entry<String, TestCommandParser<TestCommand>> entry : map.entrySet()) {
+            TestCommandParser<TestCommand> parser = entry.getValue();;
             if (parser.isCommandSupported(capabilities)) {
                 ITestCommand command = parser.getCommand();
                 final JSONObject object = new JSONObject();
                 final JSONArray comparison = new JSONArray();
-                object.put("test", key);
+                object.put("test", entry.getKey());
                 final List<String[]> jsonMatchTypes = command.getJsonMatchTypes();
                 if (null != jsonMatchTypes) {
                     for (final String[] matchtype : jsonMatchTypes) {
@@ -151,12 +152,12 @@ public class ConfigMailFilterAction extends AbstractMailFilterAction{
         ActionCommandParserRegistry service = services.getService(ActionCommandParserRegistry.class);
         final JSONArray testarray = new JSONArray();
         Map<String, ActionCommandParser<ActionCommand>> map = service.getCommandParsers();
-        for (String key : map.keySet()) {
-            ActionCommandParser<ActionCommand> parser = map.get(key);
+        for (Map.Entry<String, ActionCommandParser<ActionCommand>> entry : map.entrySet()) {
+            ActionCommandParser<ActionCommand> parser = entry.getValue();
 
             if (parser.isCommandSupported(capabilities)) {
                 final JSONObject object = new JSONObject();
-                object.put("action", key);
+                object.put("action", entry.getKey());
                 testarray.put(object);
             }
         }
