@@ -1,4 +1,4 @@
-feature_name: Advertisement
+feature_name: Mail
 properties:
     - key: com.openexchange.mail.useStaticDefaultFolders
       description: |
