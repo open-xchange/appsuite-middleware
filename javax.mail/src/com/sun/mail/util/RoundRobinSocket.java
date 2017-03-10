@@ -164,7 +164,7 @@ public class RoundRobinSocket extends Socket {
 
     private volatile Socket socket;
 
-    private final RoundRobinSelector selector;
+    private final AddressSelector selector;
     private final String host;
     private final int port;
     private final Properties props;
@@ -179,7 +179,7 @@ public class RoundRobinSocket extends Socket {
      *
      * @throws IOException If socket cannot be created
      */
-    public RoundRobinSocket(RoundRobinSelector selector, String host, int port, Properties props, String prefix, boolean useSSL) throws IOException {
+    public RoundRobinSocket(AddressSelector selector, String host, int port, Properties props, String prefix, boolean useSSL) throws IOException {
         super();
         this.host = host;
         this.port = port;
@@ -189,11 +189,11 @@ public class RoundRobinSocket extends Socket {
         this.selector = selector;
         this.socket = connectToNext(0);
     }
-    
-    private Socket connectToNext(int retryCount) throws IOException {        
+
+    private Socket connectToNext(int retryCount) throws IOException {
         // Grab the IP address to use
         InetAddress addressToUse = selector.nextAddress();
-        
+
         // Try to establish a socket connection
         try {
             return SocketFetcher.getSocket(addressToUse, host, port, props, prefix, useSSL);
@@ -227,7 +227,7 @@ public class RoundRobinSocket extends Socket {
                 // Ignore
             }
         }
-        
+
         socket = connectToNext(0);
         this.socket = socket;
         return socket;
