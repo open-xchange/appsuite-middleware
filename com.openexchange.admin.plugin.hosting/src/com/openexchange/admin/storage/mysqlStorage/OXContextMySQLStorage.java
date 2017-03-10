@@ -179,8 +179,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
     public OXContextMySQLStorage() {
         try {
-//            this.CONTEXTS_PER_SCHEMA = Integer.parseInt(prop.getProp("CONTEXTS_PER_SCHEMA", "1"));
-            this.CONTEXTS_PER_SCHEMA = 10;
+            this.CONTEXTS_PER_SCHEMA = Integer.parseInt(prop.getProp("CONTEXTS_PER_SCHEMA", "1"));
             if (this.CONTEXTS_PER_SCHEMA <= 0) {
                 throw new OXContextException("CONTEXTS_PER_SCHEMA MUST BE > 0");
             }
