@@ -22,4 +22,3 @@ properties:
       configcascadeAware: true
       related: com.openexchange.spamhandler.name
       file: spamhandler.properties
-      

@@ -10,4 +10,3 @@ properties:
       configcascadeAware: true
       related: 
       file: share.properties
-  		
