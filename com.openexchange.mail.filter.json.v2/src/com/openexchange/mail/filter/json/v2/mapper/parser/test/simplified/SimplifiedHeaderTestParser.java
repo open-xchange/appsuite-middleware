@@ -140,14 +140,14 @@ public class SimplifiedHeaderTestParser extends AbstractTestCommandParser {
                 if (!isEqual) {
                     continue;
                 }
-                simplyfy(test.getCommandName(), jsonObject);
+                simplify(test.getCommandName(), jsonObject);
             } else {
                 continue;
             }
         }
     }
 
-    private void simplyfy(String id, JSONObject jsonObject) throws JSONException {
+    private void simplify(String id, JSONObject jsonObject) throws JSONException {
         jsonObject.put(GeneralField.id.name(), id);
         jsonObject.remove(HeaderTestField.headers.name());
     }
