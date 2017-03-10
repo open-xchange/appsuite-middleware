@@ -74,19 +74,6 @@ public abstract class AbstractTestCommandParser extends AbstractCommandParser<IT
         super(services, testCommand);
     }
 
-    //    @Override
-    //    public boolean isCommandSupported(Set<String> capabilities) throws OXException {
-    //        TestCommandRegistry service = services.getService(TestCommandRegistry.class);
-    //        ITestCommand command = service.get(getCommandName());
-    //        return null == command.getRequired() || capabilities.contains(command.getRequired());
-    //    }
-
-    //    @Override
-    //    public ITestCommand getCommand() throws OXException {
-    //        TestCommandRegistry service = services.getService(TestCommandRegistry.class);
-    //        return service.get(getCommandName());
-    //    }
-
     /*
      * (non-Javadoc)
      * 

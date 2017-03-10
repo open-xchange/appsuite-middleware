@@ -62,6 +62,7 @@ import com.openexchange.server.ServiceLookup;
  * {@link AbstractActionCommandParser}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.8.4
  */
 public abstract class AbstractActionCommandParser extends AbstractCommandParser<IActionCommand> implements ActionCommandParser<ActionCommand> {
