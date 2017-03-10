@@ -1,4 +1,6 @@
-# Saml
+---
+title: Saml
+---
 
 | __Key__ | com.openexchange.saml.enableSessionIndexAutoLogin |
 |:----------------|:--------|

@@ -1,4 +1,6 @@
-# CardDAV
+---
+title: CardDAV
+---
 
 | __Key__ | com.openexchange.carddav.push.apsd.enabled |
 |:----------------|:--------|

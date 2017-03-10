@@ -1,4 +1,6 @@
-# RSS
+---
+title: RSS
+---
 
 | __Key__ | com.openexchange.messaging.rss.feed.schemes |
 |:----------------|:--------|

@@ -1,4 +1,6 @@
-# SSL
+---
+title: SSL
+---
 
 | __Key__ | com.openexchange.net.ssl.default.truststore.enabled |
 |:----------------|:--------|

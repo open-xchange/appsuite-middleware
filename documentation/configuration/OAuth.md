@@ -1,4 +1,6 @@
-# OAuth
+---
+title: OAuth
+---
 
 | __Key__ | com.openexchange.oauth.modules.enabled.[oauth_provider] |
 |:----------------|:--------|

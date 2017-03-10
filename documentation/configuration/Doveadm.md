@@ -1,4 +1,6 @@
-# Doveadm
+---
+title: Doveadm
+---
 
 | __Key__ | com.openexchange.dovecot.doveadm.enabled |
 |:----------------|:--------|

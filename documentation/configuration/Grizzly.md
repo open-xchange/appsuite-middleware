@@ -1,4 +1,6 @@
-# Grizzly
+---
+title: Grizzly
+---
 
 | __Key__ | com.openexchange.http.grizzly.wsTimeoutMillis |
 |:----------------|:--------|

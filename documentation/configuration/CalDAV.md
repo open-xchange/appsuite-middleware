@@ -1,4 +1,6 @@
-# CalDAV
+---
+title: CalDAV
+---
 
 | __Key__ | com.openexchange.caldav.push.apsd.enabled |
 |:----------------|:--------|

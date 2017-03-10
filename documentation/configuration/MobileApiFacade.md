@@ -1,4 +1,6 @@
-# MobileApiFacade
+---
+title: MobileApiFacade
+---
 
 | __Key__ | com.openexchange.pns.mobile.api.facade.apn.badge.enabled |
 |:----------------|:--------|

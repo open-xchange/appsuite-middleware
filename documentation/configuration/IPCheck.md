@@ -1,4 +1,6 @@
-# IPCheck
+---
+title: IPCheck
+---
 
 | __Key__ | com.openexchange.ipcheck.mode |
 |:----------------|:--------|

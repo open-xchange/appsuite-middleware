@@ -1,4 +1,6 @@
-# Mail
+---
+title: Mail
+---
 
 | __Key__ | com.openexchange.mail.useStaticDefaultFolders |
 |:----------------|:--------|

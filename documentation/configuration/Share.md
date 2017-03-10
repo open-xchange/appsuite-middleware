@@ -1,4 +1,6 @@
-# Share
+---
+title: Share
+---
 
 | __Key__ | com.openexchange.share.notification.usePersonalEmailAddress |
 |:----------------|:--------|

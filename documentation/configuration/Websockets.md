@@ -1,4 +1,6 @@
-# Websockets
+---
+title: Websockets
+---
 
 | __Key__ | com.openexchange.websockets.enabled |
 |:----------------|:--------|

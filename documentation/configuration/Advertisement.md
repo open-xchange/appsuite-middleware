@@ -1,4 +1,6 @@
-# Advertisement
+---
+title: Advertisement
+---
 
 This page describes the properties related to the advertisement feature.
 

@@ -1,4 +1,6 @@
-# Cassandra
+---
+title: Cassandra
+---
 
 | __Key__ | com.openexchange.nosql.cassandra.clusterName |
 |:----------------|:--------|

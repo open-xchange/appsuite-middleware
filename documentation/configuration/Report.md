@@ -1,4 +1,6 @@
-# Report
+---
+title: Report
+---
 
 | __Key__ | com.openexchange.report.appsuite.fileStorage |
 |:----------------|:--------|

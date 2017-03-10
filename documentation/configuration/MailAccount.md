@@ -1,4 +1,6 @@
-# MailAccount
+---
+title: MailAccount
+---
 
 | __Key__ | com.openexchange.mailaccount.failedAuth.limit |
 |:----------------|:--------|

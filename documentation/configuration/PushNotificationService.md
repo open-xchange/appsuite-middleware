@@ -1,4 +1,6 @@
-# PushNotificationService
+---
+title: PushNotificationService
+---
 
 | __Key__ | com.openexchange.pns.delayDuration |
 |:----------------|:--------|

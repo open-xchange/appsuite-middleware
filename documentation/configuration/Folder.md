@@ -1,4 +1,6 @@
-# Folder
+---
+title: Folder
+---
 
 | __Key__ | com.openexchange.folderstorage.defaultPermissions |
 |:----------------|:--------|

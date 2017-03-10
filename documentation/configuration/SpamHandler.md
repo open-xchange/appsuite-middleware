@@ -1,4 +1,6 @@
-# SpamHandler
+---
+title: SpamHandler
+---
 
 | __Key__ | com.openexchange.spamhandler.name |
 |:----------------|:--------|
