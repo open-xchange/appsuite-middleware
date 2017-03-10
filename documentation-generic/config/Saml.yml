@@ -36,4 +36,3 @@ properties:
       configcascadeAware: true
       related: com.openexchange.saml.oauth.tokenEndpoint
       file: saml.properties
-  		
