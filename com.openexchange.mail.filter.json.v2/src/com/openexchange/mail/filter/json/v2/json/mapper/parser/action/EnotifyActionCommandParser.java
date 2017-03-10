@@ -76,7 +76,7 @@ public class EnotifyActionCommandParser extends AbstractActionCommandParser {
      * Initializes a new {@link EnotifyActionCommandParser}.
      */
     public EnotifyActionCommandParser(ServiceLookup services) {
-        super(services);
+        super(services, Commands.ENOTIFY);
     }
 
     @Override
@@ -109,10 +109,5 @@ public class EnotifyActionCommandParser extends AbstractActionCommandParser {
             jsonObject.put(EnotifyActionField.message.getFieldName(), message.get(0));
         }
         jsonObject.put(EnotifyActionField.method.getFieldName(), ((List<String>) arguments.get(arguments.size() - 1)).get(0));
-    }
-
-    @Override
-    public String getCommandName() {
-        return Commands.ENOTIFY.getCommandName();
     }
 }

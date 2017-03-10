@@ -52,6 +52,7 @@ package com.openexchange.mail.filter.json.v2.json.mapper.parser.action;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.ActionCommand;
+import com.openexchange.jsieve.commands.ActionCommand.Commands;
 import com.openexchange.jsieve.commands.test.IActionCommand;
 import com.openexchange.jsieve.registry.ActionCommandRegistry;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.ActionCommandParser;
@@ -66,13 +67,15 @@ import com.openexchange.server.ServiceLookup;
 public abstract class AbstractActionCommandParser implements ActionCommandParser<ActionCommand> {
 
     protected final ServiceLookup services;
+    private Commands actionCommand;
 
     /**
      * Initializes a new {@link AbstractActionCommandParser}.
      */
-    protected AbstractActionCommandParser(ServiceLookup services) {
+    protected AbstractActionCommandParser(ServiceLookup services, Commands actionCommand) {
         super();
         this.services = services;
+        this.actionCommand = actionCommand;
     }
 
     @Override
@@ -90,8 +93,11 @@ public abstract class AbstractActionCommandParser implements ActionCommandParser
 
     /**
      * The corresponding {@link ActionCommand.Commands} name
+     * 
      * @return The command name
      */
-    public abstract String getCommandName();
+    public String getCommandName() {
+        return actionCommand.getCommandName();
+    }
 
 }

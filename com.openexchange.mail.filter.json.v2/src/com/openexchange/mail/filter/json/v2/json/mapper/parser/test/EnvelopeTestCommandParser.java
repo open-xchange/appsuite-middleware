@@ -71,13 +71,13 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  */
-public class EnvelopeTestCommandParser extends AbstractTestCommandParser<TestCommand> {
+public class EnvelopeTestCommandParser extends AbstractTestCommandParser {
 
     /**
      * Initialises a new {@link EnvelopeTestCommandParser}.
      */
     public EnvelopeTestCommandParser(ServiceLookup services) {
-        super(services);
+        super(services, Commands.ENVELOPE);
     }
 
     @Override
@@ -107,10 +107,5 @@ public class EnvelopeTestCommandParser extends AbstractTestCommandParser<TestCom
         }
         jsonObject.put(EnvelopeTestField.headers.name(), new JSONArray((List) command.getArguments().get(command.getTagArguments().size())));
         jsonObject.put(EnvelopeTestField.values.name(), new JSONArray((List) command.getArguments().get(command.getTagArguments().size() + 1)));
-    }
-
-    @Override
-    public String getCommandName() {
-        return Commands.ENVELOPE.getCommandName();
     }
 }

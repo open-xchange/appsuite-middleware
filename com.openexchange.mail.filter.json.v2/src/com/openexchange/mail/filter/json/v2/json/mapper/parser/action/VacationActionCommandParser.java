@@ -88,7 +88,7 @@ public class VacationActionCommandParser extends AbstractActionCommandParser {
      * Initializes a new {@link VacationActionCommandParser}.
      */
     public VacationActionCommandParser(ServiceLookup services) {
-        super(services);
+        super(services, Commands.VACATION);
     }
 
     @Override
@@ -220,10 +220,5 @@ public class VacationActionCommandParser extends AbstractActionCommandParser {
         } catch (UnsupportedEncodingException e) {
             throw CommandParserExceptionCodes.UNABLE_TO_DECODE.create(field.name(), "Vacation");
         }
-    }
-
-    @Override
-    public String getCommandName() {
-        return Commands.VACATION.getCommandName();
     }
 }

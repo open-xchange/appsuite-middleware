@@ -72,7 +72,7 @@ public class DateTestCommandParser extends AbstractDateTestCommandParser {
      * Initialises a new {@link DateTestCommandParser}.
      */
     public DateTestCommandParser(ServiceLookup services) {
-        super(services);
+        super(services, Commands.DATE);
     }
 
     @Override
@@ -94,10 +94,5 @@ public class DateTestCommandParser extends AbstractDateTestCommandParser {
         parseComparisonTag(jsonObject, command);
         parseHeader(jsonObject, command);
         parseDatePart(jsonObject, command);
-    }
-
-    @Override
-    public String getCommandName() {
-        return Commands.DATE.getCommandName();
     }
 }

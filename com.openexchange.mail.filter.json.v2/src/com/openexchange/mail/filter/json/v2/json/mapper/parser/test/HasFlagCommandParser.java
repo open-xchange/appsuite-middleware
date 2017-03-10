@@ -70,7 +70,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-public class HasFlagCommandParser extends AbstractTestCommandParser<TestCommand> {
+public class HasFlagCommandParser extends AbstractTestCommandParser {
 
     private static enum Fields {
         comparison,
@@ -83,7 +83,7 @@ public class HasFlagCommandParser extends AbstractTestCommandParser<TestCommand>
      * Initializes a new {@link HasFlagCommandParser}.
      */
     public HasFlagCommandParser(ServiceLookup services) {
-        super(services);
+        super(services, Commands.HASFLAG);
     }
 
     @Override
@@ -102,10 +102,4 @@ public class HasFlagCommandParser extends AbstractTestCommandParser<TestCommand>
         jsonObject.put(Fields.values.name(), new JSONArray((List<?>) command.getArguments().get(command.getTagArguments().size())));
 
     }
-
-    @Override
-    public String getCommandName() {
-        return Commands.HASFLAG.getCommandName();
-    }
-
 }

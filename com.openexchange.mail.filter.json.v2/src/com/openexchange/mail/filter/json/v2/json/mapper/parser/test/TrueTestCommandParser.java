@@ -65,13 +65,13 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class TrueTestCommandParser extends AbstractTestCommandParser<TestCommand> {
+public class TrueTestCommandParser extends AbstractTestCommandParser {
 
     /**
      * Initialises a new {@link TrueTestCommandParser}.
      */
     public TrueTestCommandParser(ServiceLookup services) {
-        super(services);
+        super(services, Commands.TRUE);
     }
 
     @Override
@@ -82,10 +82,5 @@ public class TrueTestCommandParser extends AbstractTestCommandParser<TestCommand
     @Override
     public void parse(JSONObject jsonObject, TestCommand command) throws JSONException, OXException {
         jsonObject.put(GeneralField.id.name(), TestCommand.Commands.TRUE.getCommandName());
-    }
-
-    @Override
-    public String getCommandName() {
-        return Commands.TRUE.getCommandName();
     }
 }

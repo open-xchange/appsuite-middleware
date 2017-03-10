@@ -80,7 +80,7 @@ public class FileIntoActionCommandParser extends AbstractActionCommandParser {
      * Initializes a new {@link FileIntoActionCommandParser}.
      */
     public FileIntoActionCommandParser(ServiceLookup services) {
-        super(services);
+        super(services, Commands.FILEINTO);
     }
 
     @Override
@@ -147,10 +147,5 @@ public class FileIntoActionCommandParser extends AbstractActionCommandParser {
         // TODO: get for user?
         MailFilterConfigurationService config = services.getService(MailFilterConfigurationService.class);
         return config.getBooleanProperty(MailFilterProperty.useUTF7FolderEncoding);
-    }
-
-    @Override
-    public String getCommandName() {
-        return Commands.FILEINTO.getCommandName();
     }
 }

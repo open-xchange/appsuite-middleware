@@ -61,6 +61,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.TestCommand;
+import com.openexchange.jsieve.commands.TestCommand.Commands;
 import com.openexchange.mail.filter.json.v2.json.fields.DateTestField;
 import com.openexchange.mail.filter.json.v2.json.fields.GeneralField;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.CommandParserJSONUtil;
@@ -76,7 +77,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-abstract class AbstractDateTestCommandParser extends AbstractTestCommandParser<TestCommand> {
+abstract class AbstractDateTestCommandParser extends AbstractTestCommandParser {
 
     private enum Comparison {
         is, ge, le
@@ -92,8 +93,8 @@ abstract class AbstractDateTestCommandParser extends AbstractTestCommandParser<T
     /**
      * Initializes a new {@link AbstractDateTestCommandParser}.
      */
-    protected AbstractDateTestCommandParser(ServiceLookup services) {
-        super(services);
+    protected AbstractDateTestCommandParser(ServiceLookup services, Commands testCommand) {
+        super(services, testCommand);
     }
 
     /**

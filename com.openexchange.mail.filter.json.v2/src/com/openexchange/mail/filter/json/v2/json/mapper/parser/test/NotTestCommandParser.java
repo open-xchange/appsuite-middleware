@@ -71,13 +71,13 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class NotTestCommandParser extends AbstractTestCommandParser<TestCommand> {
+public class NotTestCommandParser extends AbstractTestCommandParser {
 
     /**
      * Initialises a new {@link NotTestCommandParser}.
      */
     public NotTestCommandParser(ServiceLookup services) {
-        super(services);
+        super(services, Commands.NOT);
     }
 
     @Override
@@ -109,10 +109,5 @@ public class NotTestCommandParser extends AbstractTestCommandParser<TestCommand>
         }
 
         jsonObject.put(NotTestField.test.name(), testobject);
-    }
-
-    @Override
-    public String getCommandName() {
-        return Commands.NOT.getCommandName();
     }
 }

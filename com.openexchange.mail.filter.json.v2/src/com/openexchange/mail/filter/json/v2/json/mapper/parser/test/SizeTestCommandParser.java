@@ -72,7 +72,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SizeTestCommandParser extends AbstractTestCommandParser<TestCommand> {
+public class SizeTestCommandParser extends AbstractTestCommandParser {
 
     private final static Pattern DIGITS = Pattern.compile("^\\-?\\d+$");
 
@@ -80,7 +80,7 @@ public class SizeTestCommandParser extends AbstractTestCommandParser<TestCommand
      * Initialises a new {@link SizeTestCommandParser}.
      */
     public SizeTestCommandParser(ServiceLookup services) {
-        super(services);
+        super(services, Commands.SIZE);
     }
 
     @Override
@@ -198,10 +198,4 @@ public class SizeTestCommandParser extends AbstractTestCommandParser<TestCommand
             jsonObject.put(SizeTestField.size.name(), value);
         }
     }
-
-    @Override
-    public String getCommandName() {
-        return Commands.SIZE.getCommandName();
-    }
-
 }

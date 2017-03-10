@@ -82,7 +82,7 @@ public class RedirectActionCommandParser extends AbstractActionCommandParser {
      * Initializes a new {@link RedirectActionCommandParser}.
      */
     public RedirectActionCommandParser(ServiceLookup services) {
-        super(services);
+        super(services, Commands.REDIRECT);
     }
 
     @Override
@@ -90,7 +90,7 @@ public class RedirectActionCommandParser extends AbstractActionCommandParser {
         final ArrayList<Object> argList = new ArrayList<Object>();
 
         Boolean copy = jsonObject.optBoolean(RedirectActionField.copy.name(), false);
-        if(copy){
+        if (copy) {
             argList.add(ArgumentUtil.createTagArgument(RedirectActionField.copy.name()));
         }
 
@@ -108,8 +108,8 @@ public class RedirectActionCommandParser extends AbstractActionCommandParser {
             throw MailFilterExceptionCode.REJECTED_REDIRECT_ADDRESS.create(stringParam);
         }
         argList.add(CommandParserJSONUtil.stringToList(stringParam));
-        ActionCommand result =  new ActionCommand(Commands.REDIRECT, argList);
-        if(copy){
+        ActionCommand result = new ActionCommand(Commands.REDIRECT, argList);
+        if (copy) {
             result.addOptionalRequired(RedirectActionField.copy.name());
         }
         return result;
@@ -121,7 +121,7 @@ public class RedirectActionCommandParser extends AbstractActionCommandParser {
         ArrayList<Object> arguments = actionCommand.getArguments();
 
         jsonObject.put(GeneralField.id.name(), Commands.REDIRECT.getJsonName());
-        if(arguments.size()==1){
+        if (arguments.size() == 1) {
             jsonObject.put(RedirectActionField.to.name(), ((List<String>) arguments.get(0)).get(0));
         } else {
             String copyCommandString = ArgumentUtil.createTagArgument(RedirectActionField.copy.name()).toString();
@@ -130,10 +130,5 @@ public class RedirectActionCommandParser extends AbstractActionCommandParser {
             }
             jsonObject.put(RedirectActionField.to.name(), ((List<String>) arguments.get(1)).get(0));
         }
-    }
-
-    @Override
-    public String getCommandName() {
-        return Commands.REDIRECT.getCommandName();
     }
 }

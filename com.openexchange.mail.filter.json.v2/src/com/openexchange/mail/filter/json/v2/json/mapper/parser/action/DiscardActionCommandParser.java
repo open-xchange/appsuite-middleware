@@ -71,7 +71,7 @@ public class DiscardActionCommandParser extends AbstractActionCommandParser {
      * Initializes a new {@link DiscardActionCommandParser}.
      */
     public DiscardActionCommandParser(ServiceLookup services) {
-        super(services);
+        super(services, Commands.DISCARD);
     }
 
     /*
@@ -92,15 +92,5 @@ public class DiscardActionCommandParser extends AbstractActionCommandParser {
     @Override
     public void parse(JSONObject jsonObject, ActionCommand actionCommand) throws JSONException, OXException {
         jsonObject.put(GeneralField.id.name(), Commands.DISCARD.getJsonName());
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mail.filter.json.v2.json.mapper.parser.action.AbstractActionCommandParser#getCommandName()
-     */
-    @Override
-    public String getCommandName() {
-        return Commands.DISCARD.getCommandName();
     }
 }

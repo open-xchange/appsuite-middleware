@@ -76,7 +76,7 @@ public class AddFlagActionCommandParser extends AbstractActionCommandParser {
      * Initializes a new {@link AddFlagActionCommandParser}.
      */
     public AddFlagActionCommandParser(ServiceLookup services) {
-        super(services);
+        super(services, Commands.ADDFLAG);
     }
 
     /*
@@ -109,10 +109,4 @@ public class AddFlagActionCommandParser extends AbstractActionCommandParser {
         jsonObject.put(GeneralField.id.name(), ActionCommand.Commands.ADDFLAG.getJsonName());
         jsonObject.put(AddFlagsActionField.flags.name(), (List<String>) arguments.get(0));
     }
-
-    @Override
-    public String getCommandName() {
-        return Commands.ADDFLAG.getCommandName();
-    }
-
 }

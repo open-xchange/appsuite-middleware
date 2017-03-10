@@ -71,13 +71,13 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  */
-public class HeaderTestCommandParser extends AbstractTestCommandParser<TestCommand> {
+public class HeaderTestCommandParser extends AbstractTestCommandParser {
 
     /**
      * Initialises a new {@link HeaderTestCommandParser}.
      */
     public HeaderTestCommandParser(ServiceLookup services) {
-        super(services);
+        super(services, Commands.HEADER);
     }
 
     @Override
@@ -96,10 +96,5 @@ public class HeaderTestCommandParser extends AbstractTestCommandParser<TestComma
         jsonObject.put(HeaderTestField.comparison.name(), command.getMatchType().substring(1));
         jsonObject.put(HeaderTestField.headers.name(), new JSONArray((List) command.getArguments().get(command.getTagArguments().size())));
         jsonObject.put(HeaderTestField.values.name(), new JSONArray((List) command.getArguments().get(command.getTagArguments().size() + 1)));
-    }
-
-    @Override
-    public String getCommandName() {
-        return Commands.HEADER.getCommandName();
     }
 }

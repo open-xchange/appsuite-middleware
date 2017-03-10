@@ -70,7 +70,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-public class SimplifiedHeaderTestParser extends AbstractTestCommandParser<TestCommand>{
+public class SimplifiedHeaderTestParser extends AbstractTestCommandParser {
 
     public static SimplifiedHeaderTestParser newInstance(ServiceLookup services) {
         return new SimplifiedHeaderTestParser(services);
@@ -81,23 +81,23 @@ public class SimplifiedHeaderTestParser extends AbstractTestCommandParser<TestCo
     private final HeaderTestCommandParser headerParser;
 
     private SimplifiedHeaderTestParser(ServiceLookup services) {
-        super(services);
+        super(services, Commands.HEADER);
         headerParser = new HeaderTestCommandParser(services);
     }
 
     @Override
     public TestCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException {
         String id = jsonObject.getString("id");
-        if(Commands.HEADER.getCommandName().equals(id)){
+        if (Commands.HEADER.getCommandName().equals(id)) {
             // Fall back to default behavior
             return headerParser.parse(jsonObject, session);
         }
         SimplifiedHeaderTest test = SimplifiedHeaderTest.getTestByName(id);
         // use contains as default comparator
-        if(!jsonObject.has(HeaderTestField.comparison.name())){
+        if (!jsonObject.has(HeaderTestField.comparison.name())) {
             jsonObject.put(HeaderTestField.comparison.name(), "contains");
         }
-        switch(test){
+        switch (test) {
             case From:
                 jsonObject.put(HeaderTestField.headers.name(), SimplifiedHeaderTest.From.getHeaderNames());
                 return headerParser.parse(jsonObject, session);
@@ -127,37 +127,28 @@ public class SimplifiedHeaderTestParser extends AbstractTestCommandParser<TestCo
 
         JSONArray headers = jsonObject.getJSONArray(HeaderTestField.headers.name());
 
-
-        for(SimplifiedHeaderTest test: SimplifiedHeaderTest.values()){
-           List<String> simplifiedHeaders = test.getHeaderNames();
-           if(simplifiedHeaders.size() == headers.length()){
-               boolean isEqual = true;
-               for(Object header: headers){
-                   if(!simplifiedHeaders.contains(header)){
-                       isEqual=false;
-                       break;
-                   }
-               }
-               if(!isEqual){
-                   continue;
-               }
-               simplyfy(test.getCommandName(), jsonObject);
-           } else {
-               continue;
-           }
+        for (SimplifiedHeaderTest test : SimplifiedHeaderTest.values()) {
+            List<String> simplifiedHeaders = test.getHeaderNames();
+            if (simplifiedHeaders.size() == headers.length()) {
+                boolean isEqual = true;
+                for (Object header : headers) {
+                    if (!simplifiedHeaders.contains(header)) {
+                        isEqual = false;
+                        break;
+                    }
+                }
+                if (!isEqual) {
+                    continue;
+                }
+                simplyfy(test.getCommandName(), jsonObject);
+            } else {
+                continue;
+            }
         }
     }
 
-    private void simplyfy(String id, JSONObject jsonObject) throws JSONException{
+    private void simplyfy(String id, JSONObject jsonObject) throws JSONException {
         jsonObject.put(GeneralField.id.name(), id);
         jsonObject.remove(HeaderTestField.headers.name());
     }
-
-    @Override
-    public String getCommandName() {
-        return Commands.HEADER.getCommandName();
-    }
-
-
-
 }

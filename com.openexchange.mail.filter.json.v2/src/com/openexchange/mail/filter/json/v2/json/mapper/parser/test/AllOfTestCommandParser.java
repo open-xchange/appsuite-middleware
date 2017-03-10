@@ -69,7 +69,7 @@ public class AllOfTestCommandParser extends AbstractAllAnyOfTestCommandParser {
      * Initialises a new {@link AllOfTestCommandParser}.
      */
     public AllOfTestCommandParser(ServiceLookup services) {
-        super(services);
+        super(services, Commands.ALLOF);
     }
 
     @Override
@@ -81,10 +81,4 @@ public class AllOfTestCommandParser extends AbstractAllAnyOfTestCommandParser {
     public void parse(JSONObject jsonObject, TestCommand command) throws JSONException, OXException {
         parse(jsonObject, command, Commands.ALLOF);
     }
-
-    @Override
-    public String getCommandName() {
-        return Commands.ALLOF.getCommandName();
-    }
-
 }

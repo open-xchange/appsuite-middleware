@@ -77,7 +77,7 @@ public class SetFlagActionCommandParser extends AbstractActionCommandParser {
      * Initializes a new {@link SetFlagActionCommandParser}.
      */
     public SetFlagActionCommandParser(ServiceLookup services) {
-        super(services);
+        super(services, Commands.SETFLAG);
     }
 
     @Override
@@ -99,10 +99,4 @@ public class SetFlagActionCommandParser extends AbstractActionCommandParser {
         jsonObject.put(GeneralField.id.name(), ActionCommand.Commands.SETFLAG.getJsonName());
         jsonObject.put(SetFlagsActionField.flags.name(), (List<String>) arguments.get(0));
     }
-
-    @Override
-    public String getCommandName() {
-       return Commands.SETFLAG.getCommandName();
-    }
-
 }

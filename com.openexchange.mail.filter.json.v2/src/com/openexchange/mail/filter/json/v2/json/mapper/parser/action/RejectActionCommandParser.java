@@ -74,7 +74,7 @@ public class RejectActionCommandParser extends AbstractActionCommandParser {
      * Initializes a new {@link RejectActionCommandParser}.
      */
     public RejectActionCommandParser(ServiceLookup services) {
-        super(services);
+        super(services, Commands.REJECT);
     }
 
     @Override
@@ -89,10 +89,5 @@ public class RejectActionCommandParser extends AbstractActionCommandParser {
         ArrayList<Object> arguments = actionCommand.getArguments();
         jsonObject.put(GeneralField.id.name(), actionCommand.getCommand().getJsonName());
         jsonObject.put(RejectActionField.text.name(), ((List<String>) arguments.get(0)).get(0));
-    }
-
-    @Override
-    public String getCommandName() {
-        return Commands.REJECT.getCommandName();
     }
 }

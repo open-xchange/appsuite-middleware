@@ -71,7 +71,7 @@ public class KeepActionCommandParser extends AbstractActionCommandParser {
      * Initializes a new {@link KeepActionCommandParser}.
      */
     public KeepActionCommandParser(ServiceLookup services) {
-        super(services);
+        super(services, Commands.KEEP);
     }
 
     @Override
@@ -82,10 +82,5 @@ public class KeepActionCommandParser extends AbstractActionCommandParser {
     @Override
     public void parse(JSONObject jsonObject, ActionCommand actionCommand) throws JSONException, OXException {
         jsonObject.put(GeneralField.id.name(), Commands.KEEP.getJsonName());
-    }
-
-    @Override
-    public String getCommandName() {
-        return Commands.KEEP.getCommandName();
     }
 }

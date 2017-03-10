@@ -72,13 +72,13 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class BodyTestCommandParser extends AbstractTestCommandParser<TestCommand> {
+public class BodyTestCommandParser extends AbstractTestCommandParser {
 
     /**
      * Initialises a new {@link BodyTestCommandParser}.
      */
     public BodyTestCommandParser(ServiceLookup services) {
-        super(services);
+        super(services, Commands.BODY);
     }
 
     @Override
@@ -128,10 +128,5 @@ public class BodyTestCommandParser extends AbstractTestCommandParser<TestCommand
             jsonObject.put(BodyTestField.extensionsvalue.name(), JSONObject.NULL);
             jsonObject.put(BodyTestField.values.name(), new JSONArray((List) command.getArguments().get(1)));
         }
-    }
-
-    @Override
-    public String getCommandName() {
-        return Commands.BODY.getCommandName();
     }
 }

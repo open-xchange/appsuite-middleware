@@ -73,13 +73,13 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-abstract class AbstractAllAnyOfTestCommandParser extends AbstractTestCommandParser<TestCommand> {
+abstract class AbstractAllAnyOfTestCommandParser extends AbstractTestCommandParser {
 
     /**
      * Initialises a new {@link AbstractAllAnyOfTestCommandParser}.
      */
-    protected AbstractAllAnyOfTestCommandParser(ServiceLookup services) {
-        super(services);
+    protected AbstractAllAnyOfTestCommandParser(ServiceLookup services, Commands testCommand) {
+        super(services, testCommand);
     }
 
     TestCommand parse(JSONObject jsonObject, Commands command, ServerSession session) throws OXException, JSONException, SieveException {

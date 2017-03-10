@@ -71,7 +71,7 @@ public class CurrentDateTestCommandParser extends AbstractDateTestCommandParser 
      * Initialises a new {@link CurrentDateTestCommandParser}.
      */
     public CurrentDateTestCommandParser(ServiceLookup services) {
-        super(services);
+        super(services, Commands.CURRENTDATE);
     }
 
     @Override
@@ -90,10 +90,5 @@ public class CurrentDateTestCommandParser extends AbstractDateTestCommandParser 
         parseZone(jsonObject, command);
         parseComparisonTag(jsonObject, command);
         parseDatePart(jsonObject, command);
-    }
-
-    @Override
-    public String getCommandName() {
-        return Commands.CURRENTDATE.getCommandName();
     }
 }

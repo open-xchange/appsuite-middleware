@@ -51,6 +51,8 @@ package com.openexchange.mail.filter.json.v2.json.mapper.parser.test;
 
 import java.util.Set;
 import com.openexchange.exception.OXException;
+import com.openexchange.jsieve.commands.TestCommand;
+import com.openexchange.jsieve.commands.TestCommand.Commands;
 import com.openexchange.jsieve.commands.test.ITestCommand;
 import com.openexchange.jsieve.registry.TestCommandRegistry;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.TestCommandParser;
@@ -60,18 +62,21 @@ import com.openexchange.server.ServiceLookup;
  * {@link AbstractTestCommandParser}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.8.4
  */
-public abstract class AbstractTestCommandParser<TestCommand> implements TestCommandParser<TestCommand>{
+public abstract class AbstractTestCommandParser implements TestCommandParser<TestCommand> {
 
     protected final ServiceLookup services;
+    private final Commands testCommand;
 
     /**
      * Initializes a new {@link AbstractTestCommandParser}.
      */
-    protected AbstractTestCommandParser(ServiceLookup services) {
+    protected AbstractTestCommandParser(ServiceLookup services, Commands testCommand) {
         super();
         this.services = services;
+        this.testCommand = testCommand;
     }
 
     @Override
@@ -89,8 +94,10 @@ public abstract class AbstractTestCommandParser<TestCommand> implements TestComm
 
     /**
      * The corresponding {@link TestCommand.Commands} name
+     * 
      * @return The command name
      */
-    public abstract String getCommandName();
-
+    public String getCommandName() {
+        return testCommand.getCommandName();
+    }
 }
