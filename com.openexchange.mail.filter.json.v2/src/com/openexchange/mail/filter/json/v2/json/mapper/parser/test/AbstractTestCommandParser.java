@@ -97,7 +97,7 @@ public abstract class AbstractTestCommandParser implements TestCommandParser<Tes
      * 
      * @return The command name
      */
-    public String getCommandName() {
+    private String getCommandName() {
         return testCommand.getCommandName();
     }
 }

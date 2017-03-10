@@ -96,7 +96,7 @@ public abstract class AbstractActionCommandParser implements ActionCommandParser
      * 
      * @return The command name
      */
-    public String getCommandName() {
+    private String getCommandName() {
         return actionCommand.getCommandName();
     }
 
