@@ -59,7 +59,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 /**
  * {@link MailFilterChecker}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.4
  */
 public class MailFilterChecker implements CapabilityChecker {

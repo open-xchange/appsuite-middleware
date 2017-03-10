@@ -68,8 +68,8 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * {@link EnvelopeTestCommandParser}
  *
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.4
  */
 public class EnvelopeTestCommandParser extends AbstractTestCommandParser<TestCommand> {
 

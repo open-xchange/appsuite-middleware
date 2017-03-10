@@ -55,8 +55,7 @@ import com.google.common.collect.ImmutableMap;
 /**
  * Enumeration of all possible mail filter module actions.
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.4
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public enum Action {
     /**

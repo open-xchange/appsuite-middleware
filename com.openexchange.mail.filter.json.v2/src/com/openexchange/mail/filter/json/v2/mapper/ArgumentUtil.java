@@ -57,8 +57,7 @@ import com.openexchange.mail.filter.json.v2.json.fields.ActionField;
 /**
  * {@link ArgumentUtil}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.4
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public final class ArgumentUtil {
 

@@ -63,10 +63,9 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * {@link TrueTestCommandParser}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.4
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class TrueTestCommandParser extends AbstractTestCommandParser<TestCommand>{
+public class TrueTestCommandParser extends AbstractTestCommandParser<TestCommand> {
 
     /**
      * Initialises a new {@link TrueTestCommandParser}.

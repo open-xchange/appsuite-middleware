@@ -61,6 +61,8 @@ import com.google.common.collect.ImmutableMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.jsieve.commands.ActionCommand.Commands;
+import com.openexchange.jsieve.commands.IfCommand;
+import com.openexchange.jsieve.commands.Rule;
 import com.openexchange.mail.filter.json.v2.json.fields.GeneralField;
 import com.openexchange.mail.filter.json.v2.json.fields.RuleField;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.CommandParser;
@@ -77,15 +79,12 @@ import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.SetFlagAct
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.StopActionCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.VacationActionCommandParser;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.jsieve.commands.IfCommand;
-import com.openexchange.jsieve.commands.Rule;
 import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ActionCommandRuleFieldMapper}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.4
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class ActionCommandRuleFieldMapper implements RuleFieldMapper {
 
@@ -206,7 +205,7 @@ public class ActionCommandRuleFieldMapper implements RuleFieldMapper {
                 if (isFileInto(actionCommand1)) {
                     if (i < msize) {
                         int swap = -1;
-                        for (int j = i+1; j <= msize; j++) {
+                        for (int j = i + 1; j <= msize; j++) {
                             ActionCommand actionCommand2 = actionCommands.get(j);
                             if (isMessageOp(actionCommand2)) {
                                 swap = j;

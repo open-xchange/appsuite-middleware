@@ -57,9 +57,9 @@ import com.openexchange.mail.filter.json.v2.json.mapper.parser.exceptions.Comman
 
 /**
  * {@link TestCommandParserRegistry}
- *
+ * 
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.4
  */
 public class TestCommandParserRegistry implements CommandParserRegistry<TestCommand, TestCommandParser<TestCommand>> {
 

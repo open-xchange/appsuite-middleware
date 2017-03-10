@@ -68,10 +68,10 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * {@link HeaderTestCommandParser}
  *
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.4
  */
-public class HeaderTestCommandParser extends AbstractTestCommandParser<TestCommand>{
+public class HeaderTestCommandParser extends AbstractTestCommandParser<TestCommand> {
 
     /**
      * Initialises a new {@link HeaderTestCommandParser}.

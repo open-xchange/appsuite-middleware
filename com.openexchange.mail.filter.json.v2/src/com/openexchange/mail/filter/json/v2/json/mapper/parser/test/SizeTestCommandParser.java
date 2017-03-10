@@ -70,10 +70,9 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * {@link SizeTestCommandParser}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.4
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SizeTestCommandParser extends AbstractTestCommandParser<TestCommand>{
+public class SizeTestCommandParser extends AbstractTestCommandParser<TestCommand> {
 
     private final static Pattern DIGITS = Pattern.compile("^\\-?\\d+$");
 
@@ -95,7 +94,7 @@ public class SizeTestCommandParser extends AbstractTestCommandParser<TestCommand
                 if (size.length() == 1) {
                     sizeToSend = "0";
                 } else {
-                    String substring = size.substring(0, size.length()-1);
+                    String substring = size.substring(0, size.length() - 1);
                     checkSize(substring, commandName);
                     sizeToSend = substring + "K";
                 }
@@ -103,7 +102,7 @@ public class SizeTestCommandParser extends AbstractTestCommandParser<TestCommand
                 if (size.length() == 2) {
                     sizeToSend = "0";
                 } else {
-                    String substring = size.substring(0, size.length()-2);
+                    String substring = size.substring(0, size.length() - 2);
                     checkSize(substring, commandName);
                     sizeToSend = substring + "K";
                 }
@@ -111,7 +110,7 @@ public class SizeTestCommandParser extends AbstractTestCommandParser<TestCommand
                 if (size.length() == 1) {
                     sizeToSend = "0";
                 } else {
-                    String substring = size.substring(0, size.length()-1);
+                    String substring = size.substring(0, size.length() - 1);
                     checkSize(substring, commandName);
                     sizeToSend = substring + "M";
                 }
@@ -119,7 +118,7 @@ public class SizeTestCommandParser extends AbstractTestCommandParser<TestCommand
                 if (size.length() == 2) {
                     sizeToSend = "0";
                 } else {
-                    String substring = size.substring(0, size.length()-2);
+                    String substring = size.substring(0, size.length() - 2);
                     checkSize(substring, commandName);
                     sizeToSend = substring + "M";
                 }
@@ -127,7 +126,7 @@ public class SizeTestCommandParser extends AbstractTestCommandParser<TestCommand
                 if (size.length() == 1) {
                     sizeToSend = "0";
                 } else {
-                    String substring = size.substring(0, size.length()-1);
+                    String substring = size.substring(0, size.length() - 1);
                     checkSize(substring, commandName);
                     sizeToSend = substring + "G";
                 }
@@ -135,7 +134,7 @@ public class SizeTestCommandParser extends AbstractTestCommandParser<TestCommand
                 if (size.length() == 2) {
                     sizeToSend = "0";
                 } else {
-                    String substring = size.substring(0, size.length()-2);
+                    String substring = size.substring(0, size.length() - 2);
                     checkSize(substring, commandName);
                     sizeToSend = substring + "G";
                 }
@@ -143,7 +142,7 @@ public class SizeTestCommandParser extends AbstractTestCommandParser<TestCommand
                 if (size.length() == 1) {
                     sizeToSend = "0";
                 } else {
-                    String substring = size.substring(0, size.length()-1);
+                    String substring = size.substring(0, size.length() - 1);
                     checkSize(substring, commandName);
                     sizeToSend = substring;
                 }
@@ -182,7 +181,7 @@ public class SizeTestCommandParser extends AbstractTestCommandParser<TestCommand
             } else if (intVal % 1048576 == 0) {
                 returnVal = intVal / 1048576;
                 type = "M";
-            }  else if (intVal % 1024 == 0) {
+            } else if (intVal % 1024 == 0) {
                 returnVal = intVal / 1024;
                 type = "K";
             } else {

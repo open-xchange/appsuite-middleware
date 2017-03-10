@@ -72,8 +72,7 @@ import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
 /**
  * {@link FileIntoActionCommandParser}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.4
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class FileIntoActionCommandParser extends AbstractActionCommandParser {
 
@@ -89,7 +88,7 @@ public class FileIntoActionCommandParser extends AbstractActionCommandParser {
         final ArrayList<Object> argList = new ArrayList<Object>();
 
         Boolean copy = jsonObject.optBoolean(MoveActionField.copy.name(), false);
-        if(copy){
+        if (copy) {
             argList.add(ArgumentUtil.createTagArgument(MoveActionField.copy.name()));
         }
 
@@ -103,8 +102,8 @@ public class FileIntoActionCommandParser extends AbstractActionCommandParser {
         }
 
         argList.add(CommandParserJSONUtil.stringToList(folderName));
-        ActionCommand result =  new ActionCommand(Commands.FILEINTO, argList);
-        if(copy){
+        ActionCommand result = new ActionCommand(Commands.FILEINTO, argList);
+        if (copy) {
             result.addOptionalRequired(MoveActionField.copy.name());
         }
         return result;
@@ -118,7 +117,7 @@ public class FileIntoActionCommandParser extends AbstractActionCommandParser {
         jsonObject.put(GeneralField.id.name(), actionCommand.getCommand().getJsonName());
 
         final String folderName;
-        if(arguments.size()==1){
+        if (arguments.size() == 1) {
             if (useUTF7Encoding()) {
                 folderName = BASE64MailboxDecoder.decode(((List<String>) arguments.get(0)).get(0));
             } else {

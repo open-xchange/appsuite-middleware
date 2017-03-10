@@ -71,11 +71,12 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AbstractDateTestCommandParser}
- *
+ * 
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-abstract class AbstractDateTestCommandParser extends AbstractTestCommandParser<TestCommand>{
+abstract class AbstractDateTestCommandParser extends AbstractTestCommandParser<TestCommand> {
 
     private enum Comparison {
         is, ge, le
@@ -87,7 +88,6 @@ abstract class AbstractDateTestCommandParser extends AbstractTestCommandParser<T
 
     private final static String dateFormatPattern = "yyyy-MM-dd";
     private final static String timeFormatPattern = "HH:mm";
-
 
     /**
      * Initializes a new {@link AbstractDateTestCommandParser}.
@@ -224,10 +224,10 @@ abstract class AbstractDateTestCommandParser extends AbstractTestCommandParser<T
      * @throws JSONException if a JSON error is occurred
      */
     void parseZone(JSONObject jsonObject, TestCommand command) throws JSONException {
-        for(int x=0; x<command.getArguments().size(); x++){
+        for (int x = 0; x < command.getArguments().size(); x++) {
             Object arg = command.getArguments().get(x);
-            if(ZONE_TAG.equals(arg)){
-                jsonObject.put(DateTestField.zone.name(), command.getArguments().get(x+1));
+            if (ZONE_TAG.equals(arg)) {
+                jsonObject.put(DateTestField.zone.name(), command.getArguments().get(x + 1));
                 return;
             }
         }
