@@ -206,6 +206,7 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
                 break;
             case COUNTRY_CHANGE:
                 metrics.incrementDeniedCountryChange();
+                break;
             default:
                 break;
         }
