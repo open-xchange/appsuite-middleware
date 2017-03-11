@@ -194,7 +194,12 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
      * @throws OXException To actually kick the session
      */
     private void deny(String current, String previous, Session session, DenyReason reason, Throwable t) throws OXException {
-        LOGGER.debug("The IP change from '{}' to '{}' was denied. Reason: '{}', '{}'", previous, current, reason.getMessage(), t.getMessage());
+        if (null == t) {
+            LOGGER.debug("The IP change from '{}' to '{}' was denied. Reason: '{}'", previous, current, reason.getMessage());
+        } else {
+            LOGGER.debug("The IP change from '{}' to '{}' was denied. Reason: '{}', '{}'", previous, current, reason.getMessage(), t.getMessage());
+        }
+
         switch (reason) {
             case EXCEPTION:
                 metrics.incrementDeniedException();
