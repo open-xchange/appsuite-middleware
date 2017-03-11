@@ -53,6 +53,7 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import org.apache.commons.lang3.RandomStringUtils;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.rmi.AbstractTest;
@@ -80,26 +81,17 @@ public abstract class OXResellerAbstractTest extends AbstractTest {
     protected static final String TESTRESTRICTIONUSER = "testwithrestriction";
     protected static final String TESTRESTCHANGERICTIONUSER = "testchangewithrestriction";
 
-    protected static Credentials ResellerFooCredentials() {
-        return new Credentials("foo", "secret");
+    protected static Credentials ResellerRandomCredentials(String user) {
+        return new Credentials(user, "secret");
     }
 
     protected static Credentials TestUserCredentials() {
         return new Credentials(TESTUSER, "secret");
     }
 
-    protected static Credentials ResellerBarCredentials() {
-        return new Credentials("bar", "secret");
-    }
-
-    protected static ResellerAdmin FooAdminUser() {
-        ResellerAdmin adm = TestAdminUser("foo", "Foo Admin");
-        adm.setPassword("secret");
-        return adm;
-    }
-
-    protected static ResellerAdmin BarAdminUser() {
-        ResellerAdmin adm = TestAdminUser("bar", "Bar Admin");
+    protected static ResellerAdmin RandomAdmin() {
+        String user = RandomStringUtils.randomAscii(10);
+        ResellerAdmin adm = TestAdminUser(user, user + " display");
         adm.setPassword("secret");
         return adm;
     }
