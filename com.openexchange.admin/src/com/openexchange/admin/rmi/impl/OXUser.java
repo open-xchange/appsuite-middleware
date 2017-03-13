@@ -1775,7 +1775,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 if (check != null && check.booleanValue()) {
                     ConfigProperty<Boolean> prop = view.property("user", "com.openexchange.mail.specialuse.check", Boolean.class);
                     prop.set(Boolean.TRUE);
+                    usr.setUserAttribute("config", "com.openexchange.mail.specialuse.check", Boolean.TRUE.toString());
                 }
+
             } catch (OXException e) {
                 LOGGER.error("Unable to set special use check property!");
             }
