@@ -106,6 +106,9 @@ if [ ${1:-0} -eq 2 ]; then
 
     # SoftwareChange_Request-3524
     ox_add_property com.openexchange.imap.setSpecialUseFlags false $PFILE
+
+    # SoftwareChange_Request-4006
+    ox_add_property com.openexchange.imap.greeting.host.regex "" $PFILE
 fi
 
 %clean
