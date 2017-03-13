@@ -25,5 +25,5 @@ Enable to use Cassandra in Cloud-Plugins' configuration:
 
  - `com.openexchange.cloudplugins.useCassandra=true` in file `cloudplugins-cassandra.properties`
 
-As stated before, unified quota is only applicable for contexts/tenants, in which every user has its own Drive quota configured. Moreover, those users are required to have `com.openexchange.cloudplugins.unifiedquota.enabled` configuration option be set to `true` (which is config-cascade aware).
+As stated before, unified quota is only applicable for contexts/tenants, in which every user has its own Drive quota configured. Moreover, those users are required to have `com.openexchange.cloudplugins.unifiedquota.enabled` configuration option be set to `true` (which is [config-cascade aware](http://oxpedia.org/wiki/index.php?title=ConfigCascade)).
 
