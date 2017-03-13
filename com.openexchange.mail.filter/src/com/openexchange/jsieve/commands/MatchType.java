@@ -70,8 +70,8 @@ public enum MatchType {
     le("relational"),
 
     // Size match types
-    over("not over"),
-    under("not under");
+    over,
+    under;
 
     private String argumentName;
     private String require;
