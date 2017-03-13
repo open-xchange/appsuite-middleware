@@ -84,6 +84,13 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
     private List<InternetAddress> invalidAddresses;
     private FeedbackMimeMessageUtility messageUtility;
 
+    /**
+     * Initialises a new {@link FeedbackMailServiceSMTP}.
+     */
+    public FeedbackMailServiceSMTP() {
+        super();
+    }
+
     @Override
     public String sendFeedbackMail(FeedbackMailFilter filter) throws OXException {
         invalidAddresses = new ArrayList<>();
@@ -101,7 +108,7 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
             }
             feedbackfile.delete();
         }
-        
+
         return result;
     }
 
@@ -109,8 +116,6 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
         Properties smtpProperties = getSMTPProperties();
         Session smtpSession = Session.getInstance(smtpProperties);
         Transport transport = null;
-
-        String result = "";
 
         try {
             Address[] recipients = this.messageUtility.extractValidRecipients(filter, this.invalidAddresses);
@@ -121,27 +126,32 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
             transport = smtpSession.getTransport("smtp");
             transport.connect(MailProperties.getSmtpHostname(), MailProperties.getSmtpPort(), MailProperties.getSmtpUsername(), MailProperties.getSmtpPassword());
             transport.sendMessage(mail, recipients);
-            result = getPositiveSendingResult(recipients);
+
+            StringBuilder result = new StringBuilder();
+            appendPositiveSendingResult(recipients, result);
+            appendWarnings(result);
+            return result.toString();
         } catch (MessagingException e) {
             LOG.error(e.getMessage(), e);
             throw FeedbackExceptionCodes.INVALID_SMTP_CONFIGURATION.create(e.getMessage());
         } finally {
             closeTransport(transport);
         }
-
-        result = result.concat(appendWarnings());
-
-        return result;
     }
 
-    private String getPositiveSendingResult(Address[] recipients) {
-        String result = "An email with userfeedback was send to \n";
+    /**
+     * Appends the sending result to the specified {@link StringBuilder}
+     * 
+     * @param recipients The recipients
+     * @param builder The {@link StringBuilder}
+     */
+    private void appendPositiveSendingResult(Address[] recipients, StringBuilder builder) {
+        builder.append("An email with user feedback was send to \n");
         for (int i = 0; i < recipients.length; i++) {
             InternetAddress address = (InternetAddress) recipients[i];
             String personalPart = address.getPersonal();
-            result += address.getAddress().concat(" ").concat(personalPart != null && !personalPart.isEmpty() ? personalPart : "").concat("\n");
+            builder.append(address.getAddress()).append(" ").append(personalPart != null && !personalPart.isEmpty() ? personalPart : "").append("\n");
         }
-        return result;
     }
 
     private void closeTransport(Transport transport) {
@@ -172,14 +182,17 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
         return properties;
     }
 
-    private String appendWarnings() {
-        String result = "";
+    /**
+     * Appends any warnings to the specified {@link StringBuilder}
+     * 
+     * @param builder The {@link StringBuilder} to append the warnings to
+     */
+    private void appendWarnings(StringBuilder builder) {
         if (invalidAddresses.size() > 0) {
-            result = "\nThe following addresses are invalid and therefore igonred\n=======================\n";
+            builder.append("\nThe following addresses are invalid and therefore ignored\n=======================\n");
             for (InternetAddress internetAddress : invalidAddresses) {
-                result = result.concat(internetAddress.getAddress().concat("\n"));
+                builder.append(internetAddress.getAddress()).append("\n");
             }
         }
-        return result;
     }
 }
