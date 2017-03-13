@@ -49,13 +49,22 @@
 
 package com.openexchange.config.lean.internal;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.config.lean.Property;
+import com.openexchange.config.lean.PropertyValueParser;
+import com.openexchange.config.lean.internal.parser.BooleanPropertyValueParser;
+import com.openexchange.config.lean.internal.parser.FloatPropertyValueParser;
+import com.openexchange.config.lean.internal.parser.IntegerPropertyValueParser;
+import com.openexchange.config.lean.internal.parser.LongPropertyValueParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -71,12 +80,22 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
 
     private ServiceLookup services;
 
+    private Map<Class<?>, PropertyValueParser<?>> valueParsers;
+
     /**
      * Initialises a new {@link LeanConfigurationServiceImpl}.
      */
     public LeanConfigurationServiceImpl(ServiceLookup services) {
         super();
         this.services = services;
+
+        // Load parsers
+        Map<Class<?>, PropertyValueParser<?>> vps = new HashMap<>();
+        vps.put(Integer.class, new IntegerPropertyValueParser());
+        vps.put(Long.class, new LongPropertyValueParser());
+        vps.put(Float.class, new FloatPropertyValueParser());
+        vps.put(Boolean.class, new BooleanPropertyValueParser());
+        valueParsers = Collections.unmodifiableMap(vps);
     }
 
     /*
@@ -86,7 +105,7 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
      */
     @Override
     public String getProperty(Property property) {
-        return getProperty(property, -1, -1, String.class);
+        return getProperty(property, String.class);
     }
 
     /*
@@ -96,7 +115,7 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
      */
     @Override
     public int getIntProperty(Property property) {
-        return getProperty(property, -1, -1, Integer.class);
+        return getProperty(property, Integer.class);
     }
 
     /*
@@ -106,7 +125,7 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
      */
     @Override
     public boolean getBooleanProperty(Property property) {
-        return getProperty(property, -1, -1, Boolean.class);
+        return getProperty(property, Boolean.class);
     }
 
     /*
@@ -116,7 +135,7 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
      */
     @Override
     public float getFloatProperty(Property property) {
-        return getProperty(property, -1, -1, Float.class);
+        return getProperty(property, Float.class);
     }
 
     /*
@@ -126,7 +145,7 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
      */
     @Override
     public long getLongProperty(Property property) {
-        return getProperty(property, -1, -1, Long.class);
+        return getProperty(property, Long.class);
     }
 
     /*
@@ -180,6 +199,36 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
     }
 
     ////////////////////////////////////////HELPERS ///////////////////////////////////////
+
+    /**
+     * Get the value T of specified property and coerce it to the specified type T
+     *
+     * @param property The {@link MailFilterProperty}
+     * @param coerceTo The type T to coerce the value of the property
+     * @return The value T of the property from the {@link ConfigurationService} or the default value
+     * @throws OXException If an error is occurred while getting the property
+     */
+    private <T> T getProperty(Property property, Class<T> coerseTo) {
+        T defaultValue = property.getDefaultValue(coerseTo);
+        String value = null;
+        try {
+            ConfigurationService configService = getService(ConfigurationService.class);
+            value = configService.getProperty(property.getFQPropertyName());
+            if (value == null) {
+                LOGGER.debug("The value of property '{}' was 'null'. Returning default value '{}' instead.", property.getFQPropertyName(), defaultValue);
+                return defaultValue;
+            }
+
+            PropertyValueParser<?> propertyValueParser = valueParsers.get(coerseTo);
+
+            Object parse = propertyValueParser.parse(value);
+            return coerseTo.cast(parse);
+        } catch (ClassCastException | OXException e) {
+            LOGGER.warn("The value '{}' of property '{}' cannot be cast as '{}'. Returning default value '{}' instead.", value, property.getFQPropertyName(), coerseTo.getSimpleName(), defaultValue, e);
+        }
+        return defaultValue;
+
+    }
 
     /**
      * Get the value T of specified property for the specified user in the specified context and coerce it to the specified type T
