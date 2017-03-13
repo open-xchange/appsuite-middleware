@@ -15,16 +15,20 @@
         description: The feedback type to delete.
         required: true
         type: String
-      - in: query
+      - 
         name: start
+        in: query
         description: Start time in seconds since 1970-01-01 00:00:00 UTC. Only feedback given after this time is deleted. If not set, all feedback up to -e is deleted.
         required: false
-        type: long
-      - in: query
+        type: integer
+        format: int64
+      - 
         name: end
+        in: query
         description: End time in seconds since 1970-01-01 00:00:00 UTC. Only feedback given before this time is deleted. If not set, all feedback since -s is deleted.
         required: false
-        type: long
+        type: integer
+        format: int64
     responses:
       200:
         description: Blank in case of success, error message from server in case of error.
