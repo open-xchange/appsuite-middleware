@@ -64,6 +64,7 @@ import com.openexchange.tools.session.ServerSession;
  * {@link TrueTestCommandParser}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  */
 public class TrueTestCommandParser extends AbstractTestCommandParser {
 
@@ -80,7 +81,7 @@ public class TrueTestCommandParser extends AbstractTestCommandParser {
     }
 
     @Override
-    public void parse(JSONObject jsonObject, TestCommand command) throws JSONException, OXException {
+    public void parse(JSONObject jsonObject, TestCommand command, boolean transformToNotMatcher) throws JSONException, OXException {
         jsonObject.put(GeneralField.id.name(), TestCommand.Commands.TRUE.getCommandName());
     }
 }

@@ -64,11 +64,12 @@ import com.openexchange.tools.session.ServerSession;
  * {@link CurrentDateTestCommandParser}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  */
 public class CurrentDateTestCommandParser extends AbstractDateTestCommandParser {
 
     /**
-     * Initialises a new {@link CurrentDateTestCommandParser}.
+     * Initializes a new {@link CurrentDateTestCommandParser}.
      */
     public CurrentDateTestCommandParser(ServiceLookup services) {
         super(services, Commands.CURRENTDATE);
@@ -79,16 +80,20 @@ public class CurrentDateTestCommandParser extends AbstractDateTestCommandParser 
         String commandName = Commands.CURRENTDATE.getCommandName();
         final List<Object> argList = new ArrayList<Object>();
         parseZone(argList, jsonObject, session, commandName);
-        parseComparisonTag(argList, jsonObject, commandName);
+        boolean isNotMatcher = parseComparisonTag(argList, jsonObject, commandName);
         parseDatePart(argList, jsonObject, commandName);
 
-        return new TestCommand(TestCommand.Commands.CURRENTDATE, argList, new ArrayList<TestCommand>());
+        if(isNotMatcher){
+            return NotTestCommandUtil.wrapTestCommand(new TestCommand(TestCommand.Commands.CURRENTDATE, argList, new ArrayList<TestCommand>()));
+        } else {
+            return new TestCommand(TestCommand.Commands.CURRENTDATE, argList, new ArrayList<TestCommand>());
+        }
     }
 
     @Override
-    public void parse(JSONObject jsonObject, TestCommand command) throws JSONException, OXException {
+    public void parse(JSONObject jsonObject, TestCommand command, boolean transformToNotMatcher) throws JSONException, OXException {
         parseZone(jsonObject, command);
-        parseComparisonTag(jsonObject, command);
+        parseComparisonTag(jsonObject, command, transformToNotMatcher);
         parseDatePart(jsonObject, command);
     }
 }

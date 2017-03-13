@@ -56,6 +56,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.jsieve.commands.MatchType;
 import com.openexchange.jsieve.commands.TestCommand;
 import com.openexchange.jsieve.commands.TestCommand.Commands;
 import com.openexchange.mail.filter.json.v2.json.fields.AddressTestField;
@@ -67,7 +68,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AddressTestCommandParser}
- * 
+ *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  */
@@ -83,23 +84,43 @@ public class AddressTestCommandParser extends AbstractTestCommandParser {
     @Override
     public TestCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException {
         final List<Object> argList = new ArrayList<Object>();
-        argList.add(ArgumentUtil.createTagArgument(CommandParserJSONUtil.getString(jsonObject, AddressTestField.comparison.name(), Commands.ADDRESS.getCommandName())));
-        if (jsonObject.hasAndNotNull(AddressTestField.addresspart.name())) {
-            argList.add(ArgumentUtil.createTagArgument(CommandParserJSONUtil.getString(jsonObject, AddressTestField.addresspart.name(), Commands.ADDRESS.getCommandName())));
+
+        String matcher = CommandParserJSONUtil.getString(jsonObject, AddressTestField.comparison.name(), Commands.ADDRESS.getCommandName());
+        String normalizedMatcher = MatchType.getNormalName(matcher);
+        if(normalizedMatcher != null){
+            argList.add(ArgumentUtil.createTagArgument(normalizedMatcher));
+            if (jsonObject.hasAndNotNull(AddressTestField.addresspart.name())) {
+                argList.add(ArgumentUtil.createTagArgument(CommandParserJSONUtil.getString(jsonObject, AddressTestField.addresspart.name(), Commands.ADDRESS.getCommandName())));
+            }
+            argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, AddressTestField.headers.name(), Commands.ADDRESS.getCommandName())));
+            argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, AddressTestField.values.name(), Commands.ADDRESS.getCommandName())));
+
+            return NotTestCommandUtil.wrapTestCommand(new TestCommand(Commands.ADDRESS, argList, new ArrayList<TestCommand>()));
+        } else {
+            argList.add(ArgumentUtil.createTagArgument(matcher));
+            if (jsonObject.hasAndNotNull(AddressTestField.addresspart.name())) {
+                argList.add(ArgumentUtil.createTagArgument(CommandParserJSONUtil.getString(jsonObject, AddressTestField.addresspart.name(), Commands.ADDRESS.getCommandName())));
+            }
+            argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, AddressTestField.headers.name(), Commands.ADDRESS.getCommandName())));
+            argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, AddressTestField.values.name(), Commands.ADDRESS.getCommandName())));
+            return new TestCommand(Commands.ADDRESS, argList, new ArrayList<TestCommand>());
         }
-        argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, AddressTestField.headers.name(), Commands.ADDRESS.getCommandName())));
-        argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, AddressTestField.values.name(), Commands.ADDRESS.getCommandName())));
-        return new TestCommand(Commands.ADDRESS, argList, new ArrayList<TestCommand>());
     }
 
     @Override
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public void parse(JSONObject jsonObject, TestCommand command) throws JSONException, OXException {
+    public void parse(JSONObject jsonObject, TestCommand command, boolean transformToNotMatcher) throws JSONException, OXException {
         jsonObject.put(GeneralField.id.name(), command.getCommand().getCommandName());
-        if (command.getMatchType() == null) {
-            jsonObject.put(AddressTestField.comparison.name(), "is");
+        String matchType = command.getMatchType();
+        if (matchType == null) {
+            jsonObject.put(AddressTestField.comparison.name(), MatchType.is.name());
         } else {
-            jsonObject.put(AddressTestField.comparison.name(), command.getMatchType().substring(1));
+            if(transformToNotMatcher){
+                String notMatchType = MatchType.getNorNameForArgumentName(matchType);
+                jsonObject.put(AddressTestField.comparison.name(), notMatchType);
+            } else {
+                jsonObject.put(AddressTestField.comparison.name(), matchType.substring(1));
+            }
         }
         if (command.getAddressPart() != null) {
             jsonObject.put(AddressTestField.addresspart.name(), command.getAddressPart().substring(1));

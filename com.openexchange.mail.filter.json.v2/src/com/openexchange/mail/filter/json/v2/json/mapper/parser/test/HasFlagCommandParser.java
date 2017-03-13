@@ -56,6 +56,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.jsieve.commands.MatchType;
 import com.openexchange.jsieve.commands.TestCommand;
 import com.openexchange.jsieve.commands.TestCommand.Commands;
 import com.openexchange.mail.filter.json.v2.json.fields.GeneralField;
@@ -89,16 +90,34 @@ public class HasFlagCommandParser extends AbstractTestCommandParser {
     @Override
     public TestCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException {
         List<Object> flagArgList = new ArrayList<Object>(4);
-        flagArgList.add(ArgumentUtil.createTagArgument(CommandParserJSONUtil.getString(jsonObject, Fields.comparison.name(), Commands.HASFLAG.getCommandName())));
-        flagArgList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, Fields.values.name(), Commands.HASFLAG.getCommandName())));
-        return new TestCommand(Commands.HASFLAG, flagArgList, new ArrayList<TestCommand>());
-
+        String matcher = CommandParserJSONUtil.getString(jsonObject, Fields.comparison.name(), Commands.HASFLAG.getCommandName());
+        String normalizedMatcher = MatchType.getNormalName(matcher);
+        if (normalizedMatcher != null) {
+            flagArgList.add(ArgumentUtil.createTagArgument(normalizedMatcher));
+            flagArgList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, Fields.values.name(), Commands.HASFLAG.getCommandName())));
+            return NotTestCommandUtil.wrapTestCommand(new TestCommand(Commands.HASFLAG, flagArgList, new ArrayList<TestCommand>()));
+        } else {
+            flagArgList.add(ArgumentUtil.createTagArgument(matcher));
+            flagArgList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, Fields.values.name(), Commands.HASFLAG.getCommandName())));
+            return new TestCommand(Commands.HASFLAG, flagArgList, new ArrayList<TestCommand>());
+        }
     }
 
     @Override
-    public void parse(JSONObject jsonObject, TestCommand command) throws JSONException, OXException {
+    public void parse(JSONObject jsonObject, TestCommand command, boolean transformToNotMatcher) throws JSONException, OXException {
         jsonObject.put(GeneralField.id.name(), command.getCommand().getCommandName());
-        jsonObject.put(Fields.comparison.name(), command.getMatchType().substring(1));
+        String matchType = command.getMatchType();
+        if (matchType == null) {
+            jsonObject.put(Fields.comparison.name(), MatchType.is.name());
+        } else {
+            if(transformToNotMatcher){
+                String notMatchType = MatchType.getNorNameForArgumentName(matchType);
+                jsonObject.put(Fields.comparison.name(), notMatchType);
+            } else {
+                jsonObject.put(Fields.comparison.name(), matchType.substring(1));
+            }
+        }
+
         jsonObject.put(Fields.values.name(), new JSONArray((List<?>) command.getArguments().get(command.getTagArguments().size())));
 
     }

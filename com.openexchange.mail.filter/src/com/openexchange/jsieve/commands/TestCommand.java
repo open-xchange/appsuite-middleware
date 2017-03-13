@@ -204,7 +204,7 @@ public class TestCommand extends Command {
          * <code>hasflag [MATCH-TYPE] [COMPARATOR] [&lt;variable-list: string-list&gt;] &lt;list-of-flags: string-list&gt;</code>
          * <p><a href="https://tools.ietf.org/html/rfc5232#section-4">RFC-5232: Test hasflag</a></p>
          */
-        HASFLAG("hasflag", 1, Integer.MAX_VALUE, null, standardComparators(), standardMatchTypes(), standardJSONMatchTypes(), null, null);
+        HASFLAG("hasflag", 1, Integer.MAX_VALUE, null, standardComparators(), standardMatchTypes(), standardJSONMatchTypes(), "imap4flags", null);
 
         ////////////////////////////////// MATCH TYPES /////////////////////////////////////////////////
 
@@ -216,8 +216,8 @@ public class TestCommand extends Command {
          */
         private static Hashtable<String, String> matchTypeSize() {
             final Hashtable<String, String> match_type_size = new Hashtable<String, String>(2);
-            match_type_size.put(":over", "");
-            match_type_size.put(":under", "");
+            match_type_size.put(MatchType.over.getArgumentName(), MatchType.over.getRequire());
+            match_type_size.put(MatchType.under.getArgumentName(), MatchType.under.getRequire());
             return match_type_size;
         }
 
@@ -273,12 +273,12 @@ public class TestCommand extends Command {
          */
         private static Hashtable<String, String> standardMatchTypes() {
             final Hashtable<String, String> standard_match_types = new Hashtable<String, String>(4);
-            standard_match_types.put(":is", "");
-            standard_match_types.put(":contains", "");
-            standard_match_types.put(":matches", "");
+            standard_match_types.put(MatchType.is.getArgumentName(), MatchType.is.getRequire());
+            standard_match_types.put(MatchType.contains.getArgumentName(), MatchType.contains.getRequire());
+            standard_match_types.put(MatchType.matches.getArgumentName(), MatchType.matches.getRequire());
             // Add further extensions here... and don't forget to raise the
             // initial number
-            standard_match_types.put(":regex", "regex");
+            standard_match_types.put(MatchType.regex.getArgumentName(), MatchType.regex.getRequire());
             return standard_match_types;
         }
 
@@ -289,10 +289,10 @@ public class TestCommand extends Command {
          */
         private static Hashtable<String, String> dateMatchTypes() {
             final Hashtable<String, String> standard_match_types = new Hashtable<String, String>(2);
-            standard_match_types.put(":is", "");
-            standard_match_types.put(":contains", "");
-            standard_match_types.put(":matches", "");
-            standard_match_types.put(":value", "relational");
+            standard_match_types.put(MatchType.is.getArgumentName(), MatchType.is.getRequire());
+            standard_match_types.put(MatchType.contains.getArgumentName(), MatchType.contains.getRequire());
+            standard_match_types.put(MatchType.matches.getArgumentName(), MatchType.matches.getRequire());
+            standard_match_types.put(MatchType.value.getArgumentName(), MatchType.value.getRequire());
             return standard_match_types;
         }
 
@@ -303,9 +303,9 @@ public class TestCommand extends Command {
          * @return A hashtable with the argument
          */
         private static Hashtable<String, String> dateOtherArguments() {
-            final Hashtable<String, String> standard_match_types = new Hashtable<String, String>(1);
-            standard_match_types.put(":zone", "");
-            return standard_match_types;
+            final Hashtable<String, String> arguments = new Hashtable<String, String>(1);
+            arguments.put(":zone", "");
+            return arguments;
         }
 
         ///////////////////////////////////// JSON MAPPINGS ////////////////////////////////////////////
@@ -315,10 +315,15 @@ public class TestCommand extends Command {
          *
          * @return A {@link List} with the mappings
          */
-        private static List<String[]> standardJSONSizeMatchTypes() {
-            final List<String[]> standard_match_types = Collections.synchronizedList(new ArrayList<String[]>(2));
-            standard_match_types.add(new String[] { "", "over" });
-            standard_match_types.add(new String[] { "", "under" });
+        private static List<JSONMatchType> standardJSONSizeMatchTypes() {
+            final List<JSONMatchType> standard_match_types = Collections.synchronizedList(new ArrayList<JSONMatchType>(4));
+            standard_match_types.add(new JSONMatchType(MatchType.over.name(), MatchType.over.getRequire(), 0));
+            standard_match_types.add(new JSONMatchType(MatchType.under.name(), MatchType.under.getRequire(), 0));
+
+            // add not matchers
+            standard_match_types.add(new JSONMatchType(MatchType.over.getNotName(), MatchType.over.getRequire(), 2));
+            standard_match_types.add(new JSONMatchType(MatchType.under.getNotName(), MatchType.under.getRequire(), 2));
+
             return standard_match_types;
         }
 
@@ -327,12 +332,19 @@ public class TestCommand extends Command {
          *
          * @return A {@link List} with the mappings
          */
-        private static List<String[]> standardJSONMatchTypes() {
-            final List<String[]> standard_match_types = Collections.synchronizedList(new ArrayList<String[]>(4));
-            standard_match_types.add(new String[] { "regex", "regex" });
-            standard_match_types.add(new String[] { "", "is" });
-            standard_match_types.add(new String[] { "", "contains" });
-            standard_match_types.add(new String[] { "", "matches" });
+        private static List<JSONMatchType> standardJSONMatchTypes() {
+            final List<JSONMatchType> standard_match_types = Collections.synchronizedList(new ArrayList<JSONMatchType>(8));
+            standard_match_types.add(new JSONMatchType(MatchType.regex.name(), MatchType.regex.getRequire(), 0));
+            standard_match_types.add(new JSONMatchType(MatchType.is.name(), MatchType.is.getRequire(), 0));
+            standard_match_types.add(new JSONMatchType(MatchType.contains.name(), MatchType.contains.getRequire(), 0));
+            standard_match_types.add(new JSONMatchType(MatchType.matches.name(), MatchType.matches.getRequire(), 0));
+
+            // add not matchers
+            standard_match_types.add(new JSONMatchType(MatchType.regex.getNotName(), MatchType.regex.getRequire(), 2));
+            standard_match_types.add(new JSONMatchType(MatchType.is.getNotName(), MatchType.is.getRequire(), 2));
+            standard_match_types.add(new JSONMatchType(MatchType.contains.getNotName(), MatchType.contains.getRequire(), 2));
+            standard_match_types.add(new JSONMatchType(MatchType.matches.getNotName(), MatchType.matches.getRequire(), 2));
+
             return standard_match_types;
         }
 
@@ -341,13 +353,21 @@ public class TestCommand extends Command {
          *
          * @return A {@link List} with the mappings
          */
-        private static List<String[]> dateJSONMatchTypes() {
-            final List<String[]> standard_match_types = Collections.synchronizedList(new ArrayList<String[]>(2));
-            standard_match_types.add(new String[] { "relational", "ge" });
-            standard_match_types.add(new String[] { "relational", "le" });
-            standard_match_types.add(new String[] { "", "is" });
-            standard_match_types.add(new String[] { "", "contains" });
-            standard_match_types.add(new String[] { "", "matches" });
+        private static List<JSONMatchType> dateJSONMatchTypes() {
+            final List<JSONMatchType> standard_match_types = Collections.synchronizedList(new ArrayList<JSONMatchType>(10));
+            standard_match_types.add(new JSONMatchType(MatchType.ge.name(), MatchType.ge.getRequire(), 0));
+            standard_match_types.add(new JSONMatchType(MatchType.le.name(), MatchType.le.getRequire(), 0));
+            standard_match_types.add(new JSONMatchType(MatchType.is.name(), MatchType.is.getRequire(), 0));
+            standard_match_types.add(new JSONMatchType(MatchType.contains.name(), MatchType.contains.getRequire(), 0));
+            standard_match_types.add(new JSONMatchType(MatchType.matches.name(), MatchType.matches.getRequire(), 0));
+
+            // add not matchers
+            standard_match_types.add(new JSONMatchType(MatchType.ge.getNotName(), MatchType.ge.getRequire(), 2));
+            standard_match_types.add(new JSONMatchType(MatchType.le.getNotName(), MatchType.le.getRequire(), 2));
+            standard_match_types.add(new JSONMatchType(MatchType.is.getNotName(), MatchType.is.getRequire(), 2));
+            standard_match_types.add(new JSONMatchType(MatchType.contains.getNotName(), MatchType.contains.getRequire(), 2));
+            standard_match_types.add(new JSONMatchType(MatchType.matches.getNotName(), MatchType.matches.getRequire(), 2));
+
             return standard_match_types;
         }
 
@@ -406,7 +426,7 @@ public class TestCommand extends Command {
         /**
          * Needed for the resolution of the configuration parameters for JSON
          */
-        private final List<String[]> jsonMatchTypes;
+        private final List<JSONMatchType> jsonMatchTypes;
 
         /**
          * Defines if this command needs a require or not
@@ -414,7 +434,7 @@ public class TestCommand extends Command {
         private String required;
 
         /**
-         * Initialises a new {@link Commands}.
+         * Initializes a new {@link Commands}.
          *
          * @param commandName The command's name
          * @param numberOfArguments The minimum number of arguments
@@ -426,7 +446,7 @@ public class TestCommand extends Command {
          * @param required The 'require'
          * @param otherArguments Other optional arguments
          */
-        Commands(final String commandName, final int numberOfArguments, int maxNumberOfArguments, final Hashtable<String, String> address, final Hashtable<String, String> comparator, final Hashtable<String, String> matchTypes, List<String[]> jsonMatchTypes, final String required, final Hashtable<String, String> otherArguments) {
+        Commands(final String commandName, final int numberOfArguments, int maxNumberOfArguments, final Hashtable<String, String> address, final Hashtable<String, String> comparator, final Hashtable<String, String> matchTypes, List<JSONMatchType> jsonMatchTypes, final String required, final Hashtable<String, String> otherArguments) {
             this.commandName = commandName;
             this.numberOfArguments = numberOfArguments;
             this.maxNumberOfArguments = maxNumberOfArguments;
@@ -503,7 +523,7 @@ public class TestCommand extends Command {
         }
 
         @Override
-        public List<String[]> getJsonMatchTypes() {
+        public List<JSONMatchType> getJsonMatchTypes() {
             return jsonMatchTypes;
         }
     }
@@ -648,6 +668,9 @@ public class TestCommand extends Command {
      * @return
      */
     public final String getMatchType() {
+        if(this.command.getMatchTypes()==null){
+            return null;
+        }
         final ArrayList<String> arrayList = new ArrayList<String>(this.command.getMatchTypes().keySet());
         arrayList.retainAll(this.tagArguments);
         if (1 == arrayList.size()) {

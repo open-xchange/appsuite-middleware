@@ -47,50 +47,90 @@
  *
  */
 
-package com.openexchange.mail.filter.json.v2.json.mapper.parser.test;
+package com.openexchange.jsieve.commands;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.apache.jsieve.SieveException;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.exception.OXException;
-import com.openexchange.jsieve.commands.TestCommand;
-import com.openexchange.jsieve.commands.TestCommand.Commands;
-import com.openexchange.mail.filter.json.v2.json.fields.ExistsTestField;
-import com.openexchange.mail.filter.json.v2.json.fields.GeneralField;
-import com.openexchange.mail.filter.json.v2.json.mapper.parser.CommandParserJSONUtil;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ExistsTestCommandParser} parses exists sieve tests.
+ * {@link MatchType}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-public class ExistsTestCommandParser extends AbstractTestCommandParser {
+public enum MatchType {
+    is,
+    contains,
+    matches,
+
+    // regex match type
+    regex("regex"),
+
+    // relational match types
+    value("relational"),
+    ge("relational"),
+    le("relational"),
+
+    // Size match types
+    over("not over"),
+    under("not under");
+
+    private String argumentName;
+    private String require;
+    private String notName;
+
 
     /**
-     * Initializes a new {@link ExistsTestCommandParser}.
+     * Initializes a new {@link MatchType}.
      */
-    public ExistsTestCommandParser(ServiceLookup services) {
-        super(services, Commands.EXISTS);
+    private MatchType() {
+       this.argumentName = ":"+this.name();
+       this.require = "";
+       this.notName = "not "+this.name();
     }
 
-    @Override
-    public TestCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException {
-        String commandName = Commands.EXISTS.getCommandName();
-        final List<Object> argList = new ArrayList<Object>();
-        JSONArray array = CommandParserJSONUtil.getJSONArray(jsonObject, ExistsTestField.headers.name(), commandName);
-        argList.add(CommandParserJSONUtil.coerceToStringList(array));
-        return new TestCommand(TestCommand.Commands.EXISTS, argList, new ArrayList<TestCommand>());
+    /**
+     * Initializes a new {@link MatchType}.
+     */
+    private MatchType(String require) {
+       this.argumentName = ":"+this.name();
+       this.require = require;
+       this.notName = "not "+this.name();
     }
 
-    @Override
-    public void parse(JSONObject jsonObject, TestCommand command, boolean transformToNotMatcher) throws JSONException, OXException {
-        jsonObject.put(GeneralField.id.name(), command.getCommand().getCommandName());
-        jsonObject.put(ExistsTestField.headers.name(), command.getArguments().get(0));
+    public String getArgumentName(){
+        return argumentName;
     }
+
+    public String getRequire(){
+        return require;
+    }
+
+    public String getNotName(){
+        return notName;
+    }
+
+    /**
+     * Retrieves the name of the matcher if the given string is a "not name".
+     *
+     * @param notName The name of the matcher
+     * @return The normal name or null
+     */
+    public static String getNormalName(String notName){
+        for(MatchType type: MatchType.values()){
+            if(notName.equals(type.getNotName())){
+                return type.name();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Retrieves the not name of the {@link MatchType} with the given argument name
+     *
+     * @param argumentName The name of the matcher
+     * @return The normal name or null
+     */
+    public static String getNorNameForArgumentName(String argumentName){
+        return MatchType.valueOf(argumentName.substring(1)).getNotName();
+    }
+
 }

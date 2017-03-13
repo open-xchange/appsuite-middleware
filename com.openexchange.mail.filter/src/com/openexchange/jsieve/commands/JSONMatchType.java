@@ -47,50 +47,61 @@
  *
  */
 
-package com.openexchange.mail.filter.json.v2.json.mapper.parser.test;
+package com.openexchange.jsieve.commands;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.apache.jsieve.SieveException;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.exception.OXException;
-import com.openexchange.jsieve.commands.TestCommand;
-import com.openexchange.jsieve.commands.TestCommand.Commands;
-import com.openexchange.mail.filter.json.v2.json.fields.ExistsTestField;
-import com.openexchange.mail.filter.json.v2.json.fields.GeneralField;
-import com.openexchange.mail.filter.json.v2.json.mapper.parser.CommandParserJSONUtil;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ExistsTestCommandParser} parses exists sieve tests.
+ * {@link JSONMatchType}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-public class ExistsTestCommandParser extends AbstractTestCommandParser {
+public class JSONMatchType {
+
+    private final String jsonName;
+    private final String required;
+    private final int versionRequirement;
 
     /**
-     * Initializes a new {@link ExistsTestCommandParser}.
+     * Initializes a new {@link JSONMatchType}.
      */
-    public ExistsTestCommandParser(ServiceLookup services) {
-        super(services, Commands.EXISTS);
+    public JSONMatchType(String jsonName, String required, int versionRequirement) {
+        super();
+        this.jsonName = jsonName;
+        this.required=required;
+        this.versionRequirement = versionRequirement;
     }
 
-    @Override
-    public TestCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException {
-        String commandName = Commands.EXISTS.getCommandName();
-        final List<Object> argList = new ArrayList<Object>();
-        JSONArray array = CommandParserJSONUtil.getJSONArray(jsonObject, ExistsTestField.headers.name(), commandName);
-        argList.add(CommandParserJSONUtil.coerceToStringList(array));
-        return new TestCommand(TestCommand.Commands.EXISTS, argList, new ArrayList<TestCommand>());
+
+    /**
+     * Gets the jsonName
+     *
+     * @return The jsonName
+     */
+    public String getJsonName() {
+        return jsonName;
     }
 
-    @Override
-    public void parse(JSONObject jsonObject, TestCommand command, boolean transformToNotMatcher) throws JSONException, OXException {
-        jsonObject.put(GeneralField.id.name(), command.getCommand().getCommandName());
-        jsonObject.put(ExistsTestField.headers.name(), command.getArguments().get(0));
+
+    /**
+     * Gets the required
+     *
+     * @return The required
+     */
+    public String getRequired() {
+        return required;
     }
+
+
+    /**
+     * Gets the minimum version requirement or 0 for no requirement.
+     *
+     * @return The versionRequirement
+     */
+    public int getVersionRequirement() {
+        return versionRequirement;
+    }
+
+
+
 }

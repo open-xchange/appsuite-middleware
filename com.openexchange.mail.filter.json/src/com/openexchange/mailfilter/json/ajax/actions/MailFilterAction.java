@@ -63,6 +63,7 @@ import org.json.JSONValue;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.jsieve.commands.ActionCommand;
+import com.openexchange.jsieve.commands.JSONMatchType;
 import com.openexchange.jsieve.commands.Rule;
 import com.openexchange.jsieve.commands.test.ITestCommand;
 import com.openexchange.jsieve.registry.TestCommandRegistry;
@@ -329,12 +330,12 @@ public class MailFilterAction extends AbstractAction<Rule, MailFilterRequest> {
             if (null == command.getRequired() || capabilities.contains(command.getRequired())) {
                 final JSONArray comparison = new JSONArray();
                 object.put("test", command.getCommandName());
-                final List<String[]> jsonMatchTypes = command.getJsonMatchTypes();
+                final List<JSONMatchType> jsonMatchTypes = command.getJsonMatchTypes();
                 if (null != jsonMatchTypes) {
-                    for (final String[] matchtype : jsonMatchTypes) {
-                        final String value = matchtype[0];
-                        if ("".equals(value) || capabilities.contains(value)) {
-                            comparison.put(matchtype[1]);
+                    for (final JSONMatchType matchtype : jsonMatchTypes) {
+                        final String value = matchtype.getRequired();
+                        if (matchtype.getVersionRequirement()<=1 && ("".equals(value) || capabilities.contains(value))) {
+                            comparison.put(matchtype.getJsonName());
                         }
                     }
                 }

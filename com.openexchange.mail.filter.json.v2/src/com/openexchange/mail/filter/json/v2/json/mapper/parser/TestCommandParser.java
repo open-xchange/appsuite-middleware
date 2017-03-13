@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.filter.json.v2.json.mapper.parser;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.test.ITestCommand;
 
@@ -68,5 +70,16 @@ public interface TestCommandParser<T> extends CommandParser<T> {
      * @throws OXException if an error is occurred
      */
     ITestCommand getCommand() throws OXException;
+
+    /**
+     * Parses the specified {@link T} object to the specified {@link JSONObject}
+     *
+     * @param jsonObject The {@link JSONObject} to parse the {@link T} object into
+     * @param command The {@link T} to parse
+     * @param transformToNotMatcher Indicates whether the matchers should be parsed to not matchers or not.
+     * @throws JSONException if a JSON parsing error occurs
+     * @throws OXException if a semantic error occurs
+     */
+    void parse(JSONObject jsonObject, T command, boolean transformToNotMatcher) throws JSONException, OXException;
 
 }

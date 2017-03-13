@@ -52,45 +52,27 @@ package com.openexchange.mail.filter.json.v2.json.mapper.parser.test;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.jsieve.SieveException;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.TestCommand;
-import com.openexchange.jsieve.commands.TestCommand.Commands;
-import com.openexchange.mail.filter.json.v2.json.fields.ExistsTestField;
-import com.openexchange.mail.filter.json.v2.json.fields.GeneralField;
-import com.openexchange.mail.filter.json.v2.json.mapper.parser.CommandParserJSONUtil;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ExistsTestCommandParser} parses exists sieve tests.
+ * {@link NotTestCommandUtil}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-public class ExistsTestCommandParser extends AbstractTestCommandParser {
+public class NotTestCommandUtil {
 
     /**
-     * Initializes a new {@link ExistsTestCommandParser}.
+     * Wraps a given {@link TestCommand} in a {@link TestCommand.Commands.NOT} {@link TestCommand}
+     * @param com
+     * @return
+     * @throws SieveException
      */
-    public ExistsTestCommandParser(ServiceLookup services) {
-        super(services, Commands.EXISTS);
+    public static TestCommand wrapTestCommand(TestCommand com) throws SieveException{
+        ArrayList<TestCommand> testcommands = new ArrayList<TestCommand>();
+        final List<Object> argList0 = new ArrayList<Object>();
+        testcommands.add(com);
+        return new TestCommand(TestCommand.Commands.NOT, argList0, testcommands);
     }
 
-    @Override
-    public TestCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException {
-        String commandName = Commands.EXISTS.getCommandName();
-        final List<Object> argList = new ArrayList<Object>();
-        JSONArray array = CommandParserJSONUtil.getJSONArray(jsonObject, ExistsTestField.headers.name(), commandName);
-        argList.add(CommandParserJSONUtil.coerceToStringList(array));
-        return new TestCommand(TestCommand.Commands.EXISTS, argList, new ArrayList<TestCommand>());
-    }
-
-    @Override
-    public void parse(JSONObject jsonObject, TestCommand command, boolean transformToNotMatcher) throws JSONException, OXException {
-        jsonObject.put(GeneralField.id.name(), command.getCommand().getCommandName());
-        jsonObject.put(ExistsTestField.headers.name(), command.getArguments().get(0));
-    }
 }

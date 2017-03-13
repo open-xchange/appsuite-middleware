@@ -75,7 +75,7 @@ public class SimplifiedHeaderTestParser extends AbstractTestCommandParser {
 
     /**
      * Creates a new {@link SimplifiedHeaderTestParser} instance
-     * 
+     *
      * @param services The {@link ServiceLookup} instance
      * @return The {@link SimplifiedHeaderTestParser} instance
      */
@@ -88,8 +88,8 @@ public class SimplifiedHeaderTestParser extends AbstractTestCommandParser {
     private final HeaderTestCommandParser headerParser;
 
     /**
-     * Initialises a new {@link SimplifiedHeaderTestParser}.
-     * 
+     * Initializes a new {@link SimplifiedHeaderTestParser}.
+     *
      * @param services The {@link ServiceLookup} instance
      */
     private SimplifiedHeaderTestParser(ServiceLookup services) {
@@ -135,8 +135,8 @@ public class SimplifiedHeaderTestParser extends AbstractTestCommandParser {
     }
 
     @Override
-    public void parse(JSONObject jsonObject, TestCommand command) throws JSONException, OXException {
-        headerParser.parse(jsonObject, command);
+    public void parse(JSONObject jsonObject, TestCommand command, boolean transformToNotMatcher) throws JSONException, OXException {
+        headerParser.parse(jsonObject, command, transformToNotMatcher);
 
         JSONArray headers = jsonObject.getJSONArray(HeaderTestField.headers.name());
 

@@ -51,7 +51,6 @@ package com.openexchange.mail.filter.json.v2.actions;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -60,6 +59,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.ActionCommand;
+import com.openexchange.jsieve.commands.JSONMatchType;
 import com.openexchange.jsieve.commands.TestCommand;
 import com.openexchange.jsieve.commands.test.ITestCommand;
 import com.openexchange.mail.filter.json.v2.Action;
@@ -131,12 +131,12 @@ public class ConfigMailFilterAction extends AbstractMailFilterAction{
                 final JSONObject object = new JSONObject();
                 final JSONArray comparison = new JSONArray();
                 object.put("test", entry.getKey());
-                final List<String[]> jsonMatchTypes = command.getJsonMatchTypes();
+                final List<JSONMatchType> jsonMatchTypes = command.getJsonMatchTypes();
                 if (null != jsonMatchTypes) {
-                    for (final String[] matchtype : jsonMatchTypes) {
-                        final String value = matchtype[0];
-                        if ("".equals(value) || capabilities.contains(value)) {
-                            comparison.put(matchtype[1]);
+                    for (final JSONMatchType matchtype : jsonMatchTypes) {
+                        final String value = matchtype.getRequired();
+                        if (matchtype.getVersionRequirement()<=2 && ("".equals(value) || capabilities.contains(value))) {
+                            comparison.put(matchtype.getJsonName());
                         }
                     }
                 }

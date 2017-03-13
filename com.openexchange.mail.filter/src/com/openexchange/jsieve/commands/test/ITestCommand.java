@@ -51,6 +51,7 @@ package com.openexchange.jsieve.commands.test;
 
 import java.util.Hashtable;
 import java.util.List;
+import com.openexchange.jsieve.commands.JSONMatchType;
 
 /**
  * {@link ITestCommand}
@@ -83,17 +84,12 @@ public interface ITestCommand extends ICommand {
     /**
      * @return
      */
-    String getRequired();
-
-    /**
-     * @return
-     */
     Hashtable<String, String> getComparator();
 
     /**
      * @return
      */
-    List<String[]> getJsonMatchTypes();
+    List<JSONMatchType> getJsonMatchTypes();
 
     /**
      * @return

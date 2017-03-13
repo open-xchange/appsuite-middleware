@@ -70,11 +70,12 @@ import com.openexchange.tools.session.ServerSession;
  * {@link NotTestCommandParser}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  */
 public class NotTestCommandParser extends AbstractTestCommandParser {
 
     /**
-     * Initialises a new {@link NotTestCommandParser}.
+     * Initializes a new {@link NotTestCommandParser}.
      */
     public NotTestCommandParser(ServiceLookup services) {
         super(services, Commands.NOT);
@@ -97,17 +98,25 @@ public class NotTestCommandParser extends AbstractTestCommandParser {
     }
 
     @Override
-    public void parse(JSONObject jsonObject, TestCommand command) throws JSONException, OXException {
+    public void parse(JSONObject jsonObject, TestCommand command, boolean transformToNotMatcher) throws JSONException, OXException {
         jsonObject.put(GeneralField.id.name(), Commands.NOT.getCommandName());
         final JSONObject testobject = new JSONObject();
 
         TestCommand nestedTestCommand = command.getTestCommands().get(0);
+
+        String matchType = nestedTestCommand.getMatchType();
         CommandParserRegistry<TestCommand, TestCommandParser<TestCommand>> parserRegistry = services.getService(TestCommandParserRegistry.class);
-        CommandParser<TestCommand> parser = parserRegistry.get(nestedTestCommand.getCommand().getCommandName());
-        if (null != parser) {
-            parser.parse(testobject, nestedTestCommand);
+        TestCommandParser<TestCommand> parser = parserRegistry.get(nestedTestCommand.getCommand().getCommandName());
+        if(matchType!= null){
+            parser.parse(jsonObject, nestedTestCommand, transformToNotMatcher==false);
+        } else {
+
+            if (null != parser) {
+                parser.parse(testobject, nestedTestCommand);
+            }
+
+            jsonObject.put(NotTestField.test.name(), testobject);
         }
 
-        jsonObject.put(NotTestField.test.name(), testobject);
     }
 }

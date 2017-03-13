@@ -49,6 +49,9 @@
 
 package com.openexchange.mail.filter.json.v2.json.mapper.parser.test;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.TestCommand;
 import com.openexchange.jsieve.commands.TestCommand.Commands;
 import com.openexchange.jsieve.commands.test.ITestCommand;
@@ -74,14 +77,15 @@ public abstract class AbstractTestCommandParser extends AbstractCommandParser<IT
         super(services, testCommand);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mail.filter.json.v2.json.mapper.parser.AbstractCommandParser#getCommandRegistry()
-     */
     @SuppressWarnings("unchecked")
     @Override
     protected <T> CommandRegistry<T> getCommandRegistry() {
         return (CommandRegistry<T>) services.getService(TestCommandRegistry.class);
     }
+
+    @Override
+    public void parse(JSONObject jsonObject, TestCommand command) throws JSONException, OXException {
+        this.parse(jsonObject, command, false);
+    }
+
 }

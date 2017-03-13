@@ -57,8 +57,10 @@ import org.apache.jsieve.SieveException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.jsieve.commands.MatchType;
 import com.openexchange.jsieve.commands.TestCommand;
 import com.openexchange.jsieve.commands.TestCommand.Commands;
+import com.openexchange.mail.filter.json.v2.json.fields.BodyTestField;
 import com.openexchange.mail.filter.json.v2.json.fields.GeneralField;
 import com.openexchange.mail.filter.json.v2.json.fields.SizeTestField;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.CommandParserJSONUtil;
@@ -71,6 +73,7 @@ import com.openexchange.tools.session.ServerSession;
  * {@link SizeTestCommandParser}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  */
 public class SizeTestCommandParser extends AbstractTestCommandParser {
 
@@ -152,9 +155,17 @@ public class SizeTestCommandParser extends AbstractTestCommandParser {
                 sizeToSend = size;
             }
             final List<Object> argList = new ArrayList<Object>();
-            argList.add(ArgumentUtil.createTagArgument(CommandParserJSONUtil.getString(jsonObject, SizeTestField.comparison.name(), commandName)));
-            argList.add(ArgumentUtil.createNumberArgument(sizeToSend));
-            return new TestCommand(TestCommand.Commands.SIZE, argList, new ArrayList<TestCommand>());
+            String matcher = CommandParserJSONUtil.getString(jsonObject, BodyTestField.comparison.name(), commandName);
+            String normalizedMatcher = MatchType.getNormalName(matcher);
+            if(normalizedMatcher != null){
+                argList.add(ArgumentUtil.createTagArgument(normalizedMatcher));
+                argList.add(ArgumentUtil.createNumberArgument(sizeToSend));
+                return NotTestCommandUtil.wrapTestCommand(new TestCommand(TestCommand.Commands.SIZE, argList, new ArrayList<TestCommand>()));
+            } else {
+                argList.add(ArgumentUtil.createTagArgument(matcher));
+                argList.add(ArgumentUtil.createNumberArgument(sizeToSend));
+                return new TestCommand(TestCommand.Commands.SIZE, argList, new ArrayList<TestCommand>());
+            }
         } catch (NumberFormatException e) {
             throw OXJSONExceptionCodes.TOO_BIG_NUMBER.create(e, commandName);
         }
@@ -167,9 +178,21 @@ public class SizeTestCommandParser extends AbstractTestCommandParser {
     }
 
     @Override
-    public void parse(JSONObject jsonObject, TestCommand command) throws JSONException, OXException {
+    public void parse(JSONObject jsonObject, TestCommand command, boolean transformToNotMatcher) throws JSONException, OXException {
         jsonObject.put(GeneralField.id.name(), TestCommand.Commands.SIZE.getCommandName());
-        jsonObject.put(SizeTestField.comparison.name(), command.getMatchType().substring(1));
+
+        String matchType = command.getMatchType();
+        if (matchType == null) {
+            jsonObject.put(SizeTestField.comparison.name(), MatchType.is.name());
+        } else {
+            if(transformToNotMatcher){
+                String notMatchType = MatchType.getNorNameForArgumentName(matchType);
+                jsonObject.put(SizeTestField.comparison.name(), notMatchType);
+            } else {
+                jsonObject.put(SizeTestField.comparison.name(), matchType.substring(1));
+            }
+        }
+
         Object value = command.getArguments().get(1);
         if (value instanceof NumberArgument) {
             Integer intVal = ((NumberArgument) value).getInteger();

@@ -56,6 +56,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.jsieve.commands.MatchType;
 import com.openexchange.jsieve.commands.TestCommand;
 import com.openexchange.jsieve.commands.TestCommand.Commands;
 import com.openexchange.mail.filter.json.v2.json.fields.GeneralField;
@@ -74,7 +75,7 @@ import com.openexchange.tools.session.ServerSession;
 public class HeaderTestCommandParser extends AbstractTestCommandParser {
 
     /**
-     * Initialises a new {@link HeaderTestCommandParser}.
+     * Initializes a new {@link HeaderTestCommandParser}.
      */
     public HeaderTestCommandParser(ServiceLookup services) {
         super(services, Commands.HEADER);
@@ -83,18 +84,39 @@ public class HeaderTestCommandParser extends AbstractTestCommandParser {
     @Override
     public TestCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException {
         final List<Object> argList = new ArrayList<Object>();
-        argList.add(ArgumentUtil.createTagArgument(CommandParserJSONUtil.getString(jsonObject, HeaderTestField.comparison.name(), Commands.HEADER.getCommandName())));
-        argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, HeaderTestField.headers.name(), Commands.HEADER.getCommandName())));
-        argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, HeaderTestField.values.name(), Commands.HEADER.getCommandName())));
-        return new TestCommand(Commands.HEADER, argList, new ArrayList<TestCommand>());
+        String matcher = CommandParserJSONUtil.getString(jsonObject, HeaderTestField.comparison.name(), Commands.HEADER.getCommandName());
+        String normalizedMatcher = MatchType.getNormalName(matcher);
+        if (normalizedMatcher != null) {
+            argList.add(ArgumentUtil.createTagArgument(normalizedMatcher));
+            argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, HeaderTestField.headers.name(), Commands.HEADER.getCommandName())));
+            argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, HeaderTestField.values.name(), Commands.HEADER.getCommandName())));
+            return NotTestCommandUtil.wrapTestCommand(new TestCommand(Commands.HEADER, argList, new ArrayList<TestCommand>()));
+        } else {
+            argList.add(ArgumentUtil.createTagArgument(matcher));
+            argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, HeaderTestField.headers.name(), Commands.HEADER.getCommandName())));
+            argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, HeaderTestField.values.name(), Commands.HEADER.getCommandName())));
+            return new TestCommand(Commands.HEADER, argList, new ArrayList<TestCommand>());
+        }
     }
 
+
     @Override
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    public void parse(JSONObject jsonObject, TestCommand command) throws JSONException, OXException {
+    public void parse(JSONObject jsonObject, TestCommand command, boolean transformToNotMatcher) throws JSONException, OXException {
         jsonObject.put(GeneralField.id.name(), command.getCommand().getCommandName());
-        jsonObject.put(HeaderTestField.comparison.name(), command.getMatchType().substring(1));
-        jsonObject.put(HeaderTestField.headers.name(), new JSONArray((List) command.getArguments().get(command.getTagArguments().size())));
-        jsonObject.put(HeaderTestField.values.name(), new JSONArray((List) command.getArguments().get(command.getTagArguments().size() + 1)));
+
+        String matchType = command.getMatchType();
+        if (matchType == null) {
+            jsonObject.put(HeaderTestField.comparison.name(), MatchType.is.name());
+        } else {
+            if(transformToNotMatcher){
+                String notMatchType = MatchType.getNorNameForArgumentName(matchType);
+                jsonObject.put(HeaderTestField.comparison.name(), notMatchType);
+            } else {
+                jsonObject.put(HeaderTestField.comparison.name(), matchType.substring(1));
+            }
+        }
+
+        jsonObject.put(HeaderTestField.headers.name(), new JSONArray((List<?>) command.getArguments().get(command.getTagArguments().size())));
+        jsonObject.put(HeaderTestField.values.name(), new JSONArray((List<?>) command.getArguments().get(command.getTagArguments().size() + 1)));
     }
 }
