@@ -59,11 +59,11 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.userfeedback.exception.FeedbackExceptionCodes;
 import com.openexchange.userfeedback.mail.FeedbackMailService;
-import com.openexchange.userfeedback.mail.config.MailProperties;
 import com.openexchange.userfeedback.mail.filter.FeedbackMailFilter;
 import com.openexchange.userfeedback.mail.osgi.Services;
 
@@ -124,7 +124,8 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
             }
             MimeMessage mail = messageUtility.createMailMessage(feedbackFile, filter, smtpSession);
             transport = smtpSession.getTransport("smtp");
-            transport.connect(MailProperties.getSmtpHostname(), MailProperties.getSmtpPort(), MailProperties.getSmtpUsername(), MailProperties.getSmtpPassword());
+            LeanConfigurationService leanConfig = Services.getService(LeanConfigurationService.class);
+            transport.connect(leanConfig.getProperty(UserFeedbackMailProperty.hostname), leanConfig.getIntProperty(UserFeedbackMailProperty.port), leanConfig.getProperty(UserFeedbackMailProperty.username), leanConfig.getProperty(UserFeedbackMailProperty.password));
             transport.sendMessage(mail, recipients);
 
             StringBuilder result = new StringBuilder();
@@ -165,19 +166,21 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
     }
 
     private Properties getSMTPProperties() {
+        LeanConfigurationService leanConfig = Services.getService(LeanConfigurationService.class);
         Properties properties = new Properties();
         SSLSocketFactoryProvider factoryProvider = Services.getService(SSLSocketFactoryProvider.class);
         String socketFactoryClass = factoryProvider.getDefault().getClass().getName();
         properties.put("mail.smtp.ssl.socketFactory.class", socketFactoryClass);
-        properties.put("mail.smtp.ssl.socketFactory.port", MailProperties.getSmtpPort());
+        properties.put("mail.smtp.ssl.socketFactory.port", leanConfig.getIntProperty(UserFeedbackMailProperty.port));
         properties.put("mail.smtp.starttls.enable", true);
         properties.put("mail.smtp.ssl.trust", "*");
 
-        properties.put("mail.smtp.host", MailProperties.getSmtpHostname());
-        properties.put("mail.smtp.port", MailProperties.getSmtpPort());
-        properties.put("mail.smtp.connectiontimeout", MailProperties.getSmtpConnectionTimeout());
-        properties.put("mail.smtp.timeout", MailProperties.getSmtpTimeout());
-        properties.put("mail.smtp.ssl.protocols", MailProperties.getSmtpProtocol());
+        properties.put("mail.smtp.host", leanConfig.getProperty(UserFeedbackMailProperty.hostname));
+        properties.put("mail.smtp.port", leanConfig.getIntProperty(UserFeedbackMailProperty.port));
+        ;
+        properties.put("mail.smtp.connectiontimeout", leanConfig.getIntProperty(UserFeedbackMailProperty.connectionTimeout));
+        properties.put("mail.smtp.timeout", leanConfig.getIntProperty(UserFeedbackMailProperty.timeout));
+        properties.put("mail.smtp.ssl.protocols", leanConfig.getIntProperty(UserFeedbackMailProperty.protocol));
 
         return properties;
     }

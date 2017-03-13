@@ -20,25 +20,25 @@ import org.junit.runner.RunWith;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.userfeedback.mail.config.MailProperties;
 import com.openexchange.userfeedback.mail.filter.FeedbackMailFilter;
 import com.openexchange.userfeedback.mail.osgi.Services;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ Services.class, MailProperties.class })
+@PrepareForTest({ Services.class, LeanConfigurationService.class })
 public class FeedbackMimeMessageUtilityTest {
 
     private final String TESTFILES_PATH = "./test/testfiles/";
 
     @Before
     public void setUp() throws Exception {
-        
+
         PowerMockito.mockStatic(Services.class);
-        
-        PowerMockito.spy(MailProperties.class);
-        PowerMockito.doReturn("sender@ox.de").when(MailProperties.class, "getSenderAddress");
-        PowerMockito.doReturn("Sender").when(MailProperties.class, "getSenderName");
+
+        PowerMockito.spy(LeanConfigurationService.class);
+        PowerMockito.doReturn("sender@ox.de").when(LeanConfigurationService.class, "getProperty", UserFeedbackMailProperty.senderAddress);
+        PowerMockito.doReturn("Sender").when(LeanConfigurationService.class, "getProperty", UserFeedbackMailProperty.senderName);
     }
 
     @Test

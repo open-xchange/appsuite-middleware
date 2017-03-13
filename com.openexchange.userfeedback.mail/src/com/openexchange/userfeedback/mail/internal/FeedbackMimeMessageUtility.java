@@ -70,12 +70,12 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import org.apache.commons.io.IOUtils;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.userfeedback.ExportResult;
 import com.openexchange.userfeedback.ExportResultConverter;
 import com.openexchange.userfeedback.ExportType;
 import com.openexchange.userfeedback.FeedbackService;
-import com.openexchange.userfeedback.mail.config.MailProperties;
 import com.openexchange.userfeedback.mail.filter.FeedbackMailFilter;
 import com.openexchange.userfeedback.mail.osgi.Services;
 
@@ -133,8 +133,8 @@ public class FeedbackMimeMessageUtility {
 
         try {
             email.setSubject(filter.getSubject());
-
-            email.setFrom(new InternetAddress(MailProperties.getSenderAddress(), MailProperties.getSenderName()));
+            LeanConfigurationService leanConfigService = Services.getService(LeanConfigurationService.class);
+            email.setFrom(new InternetAddress(leanConfigService.getProperty(UserFeedbackMailProperty.senderAddress), leanConfigService.getProperty(UserFeedbackMailProperty.senderName)));
 
             BodyPart messageBody = new MimeBodyPart();
             messageBody.setText(filter.getBody());
@@ -159,7 +159,7 @@ public class FeedbackMimeMessageUtility {
      * the result into a file, that is returned.
      * 
      * @param filter, all necessary filter informations
-     * @return, a file with all user feedback for the given filter
+     * @return a file with all user feedback for the given filter
      * @throws OXException, when something during the export goes wrong
      */
     public File getFeedbackfile(FeedbackMailFilter filter) throws OXException {
