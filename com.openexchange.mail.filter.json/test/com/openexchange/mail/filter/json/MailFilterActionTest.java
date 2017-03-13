@@ -53,13 +53,13 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.export.SieveHandlerFactory;
 import com.openexchange.mailfilter.Credentials;
 import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
 import com.openexchange.mailfilter.json.ajax.actions.MailFilterAction;
 import com.openexchange.mailfilter.json.osgi.Services;
-import com.openexchange.mailfilter.properties.MailFilterConfigurationService;
 import com.openexchange.mailfilter.properties.MailFilterProperty;
 import com.openexchange.mailfilter.properties.PasswordSource;
 
@@ -77,7 +77,7 @@ public class MailFilterActionTest extends MailFilterAction {
     @After
     @Test
     public void testGetRightPasswordNothing() throws OXException {
-        final MailFilterConfigurationService config = Services.getService(MailFilterConfigurationService.class);
+        final LeanConfigurationService config = Services.getService(LeanConfigurationService.class);
         final String credsPW = "pw2";
         final Credentials creds = new Credentials("", credsPW, 0, 0, null);
         try {
@@ -91,7 +91,7 @@ public class MailFilterActionTest extends MailFilterAction {
     @Test
     public void testGetRightPasswordSession() throws OXException {
         Common.simMailFilterConfigurationService.delegateConfigurationService.stringProperties.put(MailFilterProperty.passwordSource.getFQPropertyName(), PasswordSource.SESSION.name);
-        final MailFilterConfigurationService config = Services.getService(MailFilterConfigurationService.class);
+        final LeanConfigurationService config = Services.getService(LeanConfigurationService.class);
         final String credsPW = "pw2";
         final Credentials creds = new Credentials("", credsPW, 0, 0, null);
         final String rightPassword = SieveHandlerFactory.getRightPassword(config, creds);
@@ -101,7 +101,7 @@ public class MailFilterActionTest extends MailFilterAction {
     @Test
     public void testGetRightPasswordGlobalNoMasterPW() throws OXException {
         Common.simMailFilterConfigurationService.delegateConfigurationService.stringProperties.put(MailFilterProperty.passwordSource.getFQPropertyName(), PasswordSource.GLOBAL.name);
-        final MailFilterConfigurationService config = Services.getService(MailFilterConfigurationService.class);
+        final LeanConfigurationService config = Services.getService(LeanConfigurationService.class);
         final String credsPW = "pw2";
         final Credentials creds = new Credentials("", credsPW, 0, 0, null);
         try {
@@ -117,7 +117,7 @@ public class MailFilterActionTest extends MailFilterAction {
         final String masterPW = "masterPW";
         Common.simMailFilterConfigurationService.delegateConfigurationService.stringProperties.put(MailFilterProperty.passwordSource.getFQPropertyName(), PasswordSource.GLOBAL.name);
         Common.simMailFilterConfigurationService.delegateConfigurationService.stringProperties.put(MailFilterProperty.masterPassword.getFQPropertyName(), masterPW);
-        final MailFilterConfigurationService config = Services.getService(MailFilterConfigurationService.class);
+        final LeanConfigurationService config = Services.getService(LeanConfigurationService.class);
         final String credsPW = "pw2";
         final Credentials creds = new Credentials("", credsPW, 0, 0, null);
         final String rightPassword = SieveHandlerFactory.getRightPassword(config, creds);

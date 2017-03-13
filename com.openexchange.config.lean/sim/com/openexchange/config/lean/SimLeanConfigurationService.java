@@ -47,27 +47,23 @@
  *
  */
 
-package com.openexchange.mail.filter;
+package com.openexchange.config.lean;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Interests;
 import com.openexchange.config.SimConfigurationService;
-import com.openexchange.mailfilter.properties.MailFilterConfigurationService;
-import com.openexchange.mailfilter.properties.MailFilterProperty;
 
 /**
- * {@link SimMailFilterConfigurationService}
+ * {@link SimLeanConfigurationService}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SimMailFilterConfigurationService implements MailFilterConfigurationService {
+public class SimLeanConfigurationService implements LeanConfigurationService {
 
     public SimConfigurationService delegateConfigurationService;
 
     /**
      * Initialises a new {@link SimMailFilterConfigurationService}.
      */
-    public SimMailFilterConfigurationService(SimConfigurationService simConfigurationService) {
+    public SimLeanConfigurationService(SimConfigurationService simConfigurationService) {
         super();
         this.delegateConfigurationService = simConfigurationService;
     }
@@ -75,82 +71,101 @@ public class SimMailFilterConfigurationService implements MailFilterConfiguratio
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.config.Reloadable#reloadConfiguration(com.openexchange.config.ConfigurationService)
+     * @see com.openexchange.config.lean.LeanConfigurationService#getProperty(com.openexchange.config.lean.Property)
      */
     @Override
-    public void reloadConfiguration(ConfigurationService configService) {
-        // TODO Auto-generated method stub
-
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.config.Reloadable#getInterests()
-     */
-    @Override
-    public Interests getInterests() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mailfilter.properties.MailFilterConfigurationService#getProperty(com.openexchange.mailfilter.properties.MailFilterProperty)
-     */
-    @Override
-    public String getProperty(MailFilterProperty property) {
+    public String getProperty(Property property) {
         return delegateConfigurationService.getProperty(property.getFQPropertyName());
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.mailfilter.properties.MailFilterConfigurationService#getProperty(int, int, com.openexchange.mailfilter.properties.MailFilterProperty)
+     * @see com.openexchange.config.lean.LeanConfigurationService#getIntProperty(com.openexchange.config.lean.Property)
      */
     @Override
-    public String getProperty(int userId, int contextId, MailFilterProperty property) {
+    public int getIntProperty(Property property) {
+        return delegateConfigurationService.getIntProperty(property.getFQPropertyName(), property.getDefaultValue(Integer.class));
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.config.lean.LeanConfigurationService#getBooleanProperty(com.openexchange.config.lean.Property)
+     */
+    @Override
+    public boolean getBooleanProperty(Property property) {
+        return delegateConfigurationService.getBoolProperty(property.getFQPropertyName(), property.getDefaultValue(Boolean.class));
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.config.lean.LeanConfigurationService#getFloatProperty(com.openexchange.config.lean.Property)
+     */
+    @Override
+    public float getFloatProperty(Property property) {
+        return Float.parseFloat(delegateConfigurationService.getProperty(property.getFQPropertyName(), property.getDefaultValue(String.class)));
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.config.lean.LeanConfigurationService#getLongProperty(com.openexchange.config.lean.Property)
+     */
+    @Override
+    public long getLongProperty(Property property) {
+        return Long.parseLong(delegateConfigurationService.getProperty(property.getFQPropertyName(), property.getDefaultValue(String.class)));
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.config.lean.LeanConfigurationService#getProperty(int, int, com.openexchange.config.lean.Property)
+     */
+    @Override
+    public String getProperty(int userId, int contextId, Property property) {
         return delegateConfigurationService.getProperty(property.getFQPropertyName());
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.mailfilter.properties.MailFilterConfigurationService#getIntProperty(com.openexchange.mailfilter.properties.MailFilterProperty)
+     * @see com.openexchange.config.lean.LeanConfigurationService#getIntProperty(int, int, com.openexchange.config.lean.Property)
      */
     @Override
-    public int getIntProperty(MailFilterProperty property) {
+    public int getIntProperty(int userId, int contextId, Property property) {
         return delegateConfigurationService.getIntProperty(property.getFQPropertyName(), property.getDefaultValue(Integer.class));
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.mailfilter.properties.MailFilterConfigurationService#getIntProperty(int, int, com.openexchange.mailfilter.properties.MailFilterProperty)
+     * @see com.openexchange.config.lean.LeanConfigurationService#getBooleanProperty(int, int, com.openexchange.config.lean.Property)
      */
     @Override
-    public int getIntProperty(int userId, int contextId, MailFilterProperty property) {
-        return delegateConfigurationService.getIntProperty(property.getFQPropertyName(), property.getDefaultValue(Integer.class));
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mailfilter.properties.MailFilterConfigurationService#getBooleanProperty(com.openexchange.mailfilter.properties.MailFilterProperty)
-     */
-    @Override
-    public boolean getBooleanProperty(MailFilterProperty property) {
+    public boolean getBooleanProperty(int userId, int contextId, Property property) {
         return delegateConfigurationService.getBoolProperty(property.getFQPropertyName(), property.getDefaultValue(Boolean.class));
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.mailfilter.properties.MailFilterConfigurationService#getBooleanProperty(int, int, com.openexchange.mailfilter.properties.MailFilterProperty)
+     * @see com.openexchange.config.lean.LeanConfigurationService#getFloatProperty(int, int, com.openexchange.config.lean.Property)
      */
     @Override
-    public boolean getBooleanProperty(int userId, int contextId, MailFilterProperty property) {
-        return delegateConfigurationService.getBoolProperty(property.getFQPropertyName(), property.getDefaultValue(Boolean.class));
+    public float getFloatProperty(int userId, int contextId, Property property) {
+        return Float.parseFloat(delegateConfigurationService.getProperty(property.getFQPropertyName(), property.getDefaultValue(String.class)));
     }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.config.lean.LeanConfigurationService#getLongProperty(int, int, com.openexchange.config.lean.Property)
+     */
+    @Override
+    public long getLongProperty(int userId, int contextId, Property property) {
+        return Long.parseLong(delegateConfigurationService.getProperty(property.getFQPropertyName(), property.getDefaultValue(String.class)));
+    }
+
 }

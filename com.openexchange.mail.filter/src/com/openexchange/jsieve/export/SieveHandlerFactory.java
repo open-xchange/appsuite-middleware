@@ -52,6 +52,7 @@ package com.openexchange.jsieve.export;
 import java.net.URI;
 import java.net.URISyntaxException;
 import javax.mail.internet.idn.IDNA;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -59,7 +60,6 @@ import com.openexchange.mailfilter.Credentials;
 import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
 import com.openexchange.mailfilter.properties.CredentialSource;
 import com.openexchange.mailfilter.properties.LoginType;
-import com.openexchange.mailfilter.properties.MailFilterConfigurationService;
 import com.openexchange.mailfilter.properties.MailFilterProperty;
 import com.openexchange.mailfilter.properties.PasswordSource;
 import com.openexchange.mailfilter.services.Services;
@@ -93,7 +93,7 @@ public final class SieveHandlerFactory {
      * @throws OXException
      */
     public static SieveHandler getSieveHandler(Credentials creds, boolean onlyWelcome) throws OXException {
-        MailFilterConfigurationService mailFilterConfig = Services.getService(MailFilterConfigurationService.class);
+        LeanConfigurationService mailFilterConfig = Services.getService(LeanConfigurationService.class);
 
         int userId = creds.getUserid();
         int contextId = creds.getContextid();
@@ -218,7 +218,7 @@ public final class SieveHandlerFactory {
      * @return The sieve port
      * @throws OXException if an error is occurred
      */
-    private static int getPort(MailFilterConfigurationService mailFilterConfig, int userId, int contextId) throws OXException {
+    private static int getPort(LeanConfigurationService mailFilterConfig, int userId, int contextId) throws OXException {
         try {
             return mailFilterConfig.getIntProperty(userId, contextId, MailFilterProperty.port);
         } catch (final RuntimeException e) {
@@ -234,7 +234,7 @@ public final class SieveHandlerFactory {
      * @return
      * @throws OXException
      */
-    public static String getRightPassword(final MailFilterConfigurationService config, final Credentials creds) throws OXException {
+    public static String getRightPassword(final LeanConfigurationService config, final Credentials creds) throws OXException {
         int userId = creds.getUserid();
         int contextId = creds.getContextid();
         String sPasswordsrc = config.getProperty(userId, contextId, MailFilterProperty.passwordSource);

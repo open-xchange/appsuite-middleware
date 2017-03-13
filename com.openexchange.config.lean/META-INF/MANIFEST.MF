@@ -14,3 +14,4 @@ Import-Package: com.openexchange.config,
  org.osgi.framework,
  org.slf4j
 Bundle-Activator: com.openexchange.config.lean.osgi.LeanConfigurationActivator
+Export-Package: com.openexchange.config.lean

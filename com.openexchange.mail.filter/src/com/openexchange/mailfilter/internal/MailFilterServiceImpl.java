@@ -59,6 +59,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -74,6 +75,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ConfigurationServices;
+import com.openexchange.config.DefaultInterests;
+import com.openexchange.config.Interests;
+import com.openexchange.config.Reloadable;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.jsieve.commands.ActionCommand;
@@ -94,16 +101,17 @@ import com.openexchange.jsieve.export.exceptions.OXSieveHandlerInvalidCredential
 import com.openexchange.mailfilter.Credentials;
 import com.openexchange.mailfilter.MailFilterService;
 import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
-import com.openexchange.mailfilter.properties.MailFilterConfigurationService;
 import com.openexchange.mailfilter.properties.MailFilterProperty;
-import com.openexchange.mailfilter.services.Services;
+import com.openexchange.mailfilter.properties.PasswordSource;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link MailFilterServiceImpl}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class MailFilterServiceImpl implements MailFilterService {
+public final class MailFilterServiceImpl implements MailFilterService, Reloadable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MailFilterServiceImpl.class);
 
@@ -162,12 +170,65 @@ public final class MailFilterServiceImpl implements MailFilterService {
 
     private final Cache<HostAndPort, Capabilities> staticCapabilities;
 
+    private final ServiceLookup services;
+
     /**
-     * Initializes a new {@link MailFilterServiceImpl}.
+     * Initialises a new {@link MailFilterServiceImpl}.
+     * 
+     * @param services The {@link ServiceLookup} instance
+     * @throws OXException
      */
-    public MailFilterServiceImpl() {
+    public MailFilterServiceImpl(ServiceLookup services) throws OXException {
         super();
+        this.services = services;
         staticCapabilities = CacheBuilder.newBuilder().maximumSize(10).expireAfterWrite(30, TimeUnit.MINUTES).build();
+        checkConfigfile();
+    }
+
+    /**
+     * This method checks for a valid properties' file and throws and exception if none is there or one of the properties is missing
+     * 
+     * @throws OXException If the properties' file is invalid
+     */
+    private void checkConfigfile() throws OXException {
+        final ConfigurationService config = getService(ConfigurationService.class);
+        try {
+            Properties file = ConfigurationServices.loadPropertiesFrom(config.getFileByName("mailfilter.properties"));
+            if (file.isEmpty()) {
+                throw MailFilterExceptionCode.NO_PROPERTIES_FILE_FOUND.create();
+            }
+            for (final MailFilterProperty property : MailFilterProperty.values()) {
+                if (!property.isOptional() && null == file.getProperty(property.getFQPropertyName())) {
+                    throw MailFilterExceptionCode.PROPERTY_NOT_FOUND.create(property.getFQPropertyName());
+                }
+            }
+            try {
+                Integer.parseInt(file.getProperty(MailFilterProperty.connectionTimeout.getFQPropertyName()));
+            } catch (final NumberFormatException e) {
+                throw MailFilterExceptionCode.PROPERTY_ERROR.create("Property " + MailFilterProperty.connectionTimeout.getFQPropertyName() + " is not an integer value", e);
+            }
+        } catch (IOException e) {
+            throw MailFilterExceptionCode.IO_ERROR.create(e.getMessage(), e);
+        }
+
+        // Check password source
+        final String passwordSrc = config.getProperty(MailFilterProperty.passwordSource.getFQPropertyName());
+        if (passwordSrc == null) {
+            throw MailFilterExceptionCode.NO_VALID_PASSWORDSOURCE.create();
+        }
+        PasswordSource passwordSource = PasswordSource.passwordSourceFor(passwordSrc);
+        switch (passwordSource) {
+            case GLOBAL:
+                final String masterpassword = config.getProperty(MailFilterProperty.masterPassword.getFQPropertyName());
+                if (masterpassword.length() == 0) {
+                    throw MailFilterExceptionCode.NO_MASTERPASSWORD_SET.create();
+                }
+                break;
+            case SESSION:
+                break;
+            default:
+                throw MailFilterExceptionCode.NO_VALID_PASSWORDSOURCE.create();
+        }
     }
 
     /**
@@ -649,6 +710,35 @@ public final class MailFilterServiceImpl implements MailFilterService {
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.config.Reloadable#reloadConfiguration(com.openexchange.config.ConfigurationService)
+     */
+    @Override
+    public void reloadConfiguration(ConfigurationService configService) {
+        try {
+            checkConfigfile();
+        } catch (OXException e) {
+            LOGGER.error("Error while reloading 'mailfilter.properties': {}", e.getMessage(), e);
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.config.Reloadable#getInterests()
+     */
+    @Override
+    public Interests getInterests() {
+        String[] configFileNames = new String[MailFilterProperty.values().length];
+        int index = 0;
+        for (MailFilterProperty mailFilterProperty : MailFilterProperty.values()) {
+            configFileNames[index++] = mailFilterProperty.getFQPropertyName();
+        }
+        return DefaultInterests.builder().configFileNames("mailfilter.properties").configFileNames(configFileNames).build();
+    }
+
     // ----------------------------------------------------------------------------------------------------------------------- //
 
     /**
@@ -659,7 +749,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
      * @return The script name
      */
     private String getScriptName(int userId, int contextId) {
-        MailFilterConfigurationService config = Services.getService(MailFilterConfigurationService.class);
+        LeanConfigurationService config = services.getService(LeanConfigurationService.class);
         return config.getProperty(userId, contextId, MailFilterProperty.scriptName);
     }
 
@@ -670,7 +760,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
      * @return
      */
     private boolean useSIEVEResponseCodes(int userId, int contextId) {
-        MailFilterConfigurationService config = Services.getService(MailFilterConfigurationService.class);
+        LeanConfigurationService config = services.getService(LeanConfigurationService.class);
         return config.getBooleanProperty(userId, contextId, MailFilterProperty.useSIEVEResponseCodes);
     }
 
@@ -742,7 +832,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
      * @throws SieveException
      */
     private void changeIncomingVacationRule(int userId, int contextId, Rule rule) throws SieveException {
-        MailFilterConfigurationService config = Services.getService(MailFilterConfigurationService.class);
+        LeanConfigurationService config = services.getService(LeanConfigurationService.class);
         String vacationdomains = config.getProperty(userId, contextId, MailFilterProperty.vacationDomains);
 
         if (null != vacationdomains && 0 != vacationdomains.length()) {
@@ -783,7 +873,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
      * @throws SieveException
      */
     private void changeOutgoingVacationRule(int userId, int contextId, List<Rule> clientrules) throws SieveException {
-        MailFilterConfigurationService config = Services.getService(MailFilterConfigurationService.class);
+        LeanConfigurationService config = services.getService(LeanConfigurationService.class);
         String vacationdomains = config.getProperty(userId, contextId, MailFilterProperty.vacationDomains);
 
         if (null != vacationdomains && 0 != vacationdomains.length()) {
@@ -968,6 +1058,21 @@ public final class MailFilterServiceImpl implements MailFilterService {
         return nextUid;
     }
 
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The requested service
+     * @throws OXException If the service is not available
+     */
+    private <S extends Object> S getService(final Class<? extends S> clazz) throws OXException {
+        final S service = services.getService(clazz);
+        if (service == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(clazz.getSimpleName());
+        }
+        return service;
+    }
+
     // ----------------------------------------------------- Helper classes -------------------------------------------------------
 
     private static final class Key {
@@ -1058,5 +1163,4 @@ public final class MailFilterServiceImpl implements MailFilterService {
             return true;
         }
     }
-
 }

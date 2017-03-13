@@ -57,6 +57,7 @@ import org.osgi.service.http.HttpService;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.jsieve.commands.TestCommand.Commands;
 import com.openexchange.jsieve.registry.TestCommandRegistry;
@@ -75,7 +76,6 @@ import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.HeaderTestC
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.NotTestCommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.SizeTestCommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.TrueTestCommandParser;
-import com.openexchange.mailfilter.properties.MailFilterConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondService;
 
@@ -96,7 +96,7 @@ public class MailFilterJSONActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, MailFilterService.class, MailFilterConfigurationService.class, HttpService.class, SessiondService.class, DispatcherPrefixService.class, CapabilityService.class, TestCommandRegistry.class };
+        return new Class<?>[] { ConfigurationService.class, MailFilterService.class, LeanConfigurationService.class, HttpService.class, SessiondService.class, DispatcherPrefixService.class, CapabilityService.class, TestCommandRegistry.class };
     }
 
     @Override

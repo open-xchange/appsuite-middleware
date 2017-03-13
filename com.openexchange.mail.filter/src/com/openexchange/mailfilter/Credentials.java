@@ -50,8 +50,8 @@
 package com.openexchange.mailfilter;
 
 import javax.security.auth.Subject;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.mailfilter.properties.CredentialSource;
-import com.openexchange.mailfilter.properties.MailFilterConfigurationService;
 import com.openexchange.mailfilter.properties.MailFilterProperty;
 import com.openexchange.mailfilter.services.Services;
 import com.openexchange.session.Session;
@@ -80,10 +80,10 @@ public class Credentials {
      */
     public Credentials(Session session) {
         super();
-        MailFilterConfigurationService config = Services.getService(MailFilterConfigurationService.class);
+        LeanConfigurationService config = Services.getService(LeanConfigurationService.class);
         String credsrc = config.getProperty(session.getUserId(), session.getContextId(), MailFilterProperty.credentialSource);
         authname = SESSION_FULL_LOGIN.equals(credsrc) ? session.getLogin() : session.getLoginName();
-        
+
         password = session.getPassword();
         userid = session.getUserId();
         contextid = session.getContextId();
