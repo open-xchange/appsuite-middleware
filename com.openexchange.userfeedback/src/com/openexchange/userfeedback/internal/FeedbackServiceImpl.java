@@ -121,11 +121,7 @@ public class FeedbackServiceImpl implements FeedbackService {
             saveFeedBackInternal(writeCon, session.getUserId(), session.getContextId(), contextGroupId == null ? "default" : contextGroupId, session.getLoginName(), System.currentTimeMillis(), type, fid);
             writeCon.commit();
         } catch (SQLException e) {
-            try {
-                writeCon.rollback();
-            } catch (SQLException sqlEx) {
-                // ignore
-            }
+            DBUtils.rollback(writeCon);
         } finally {
             if (writeCon != null) {
                 DBUtils.autocommit(writeCon);
@@ -255,11 +251,7 @@ public class FeedbackServiceImpl implements FeedbackService {
             }
             writeCon.commit();
         } catch (SQLException e) {
-            try {
-                writeCon.rollback();
-            } catch (SQLException x) {
-                // ignore
-            }
+            DBUtils.rollback(writeCon);
             throw FeedbackExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             if (null != writeCon) {
