@@ -8,7 +8,7 @@
 
     <property name="tmp_dir" value="http_tmp" />
 
-	<property name="http.jar.url" value="https://artifactory.open-xchange.com/artifactory/qa/com/openexchange/testing/httpClient-java/develop-4/httpClient-java-develop-4.jar" />
+	<property name="http.jar.url" value="https://artifactory.open-xchange.com/artifactory/qa/com/openexchange/testing/httpClient-java/develop-SNAPSHOT/httpClient-java-develop-SNAPSHOT.jar" />
 
 	<target name="download_check_and_add_http_jar">
 		<antcall target="download_check_and_add_jar">
