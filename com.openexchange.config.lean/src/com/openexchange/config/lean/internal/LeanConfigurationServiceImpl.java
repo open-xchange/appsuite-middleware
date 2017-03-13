@@ -78,9 +78,9 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LeanConfigurationServiceImpl.class);
 
-    private ServiceLookup services;
+    private final ServiceLookup services;
 
-    private Map<Class<?>, PropertyValueParser<?>> valueParsers;
+    private final Map<Class<?>, PropertyValueParser<?>> valueParsers;
 
     /**
      * Initialises a new {@link LeanConfigurationServiceImpl}.
