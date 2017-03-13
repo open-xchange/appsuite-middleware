@@ -36,7 +36,7 @@
 
       - in: query
         name: subject
-        description: The mail subject. Default: User Feedback Report: [time range].
+        description: "The mail subject. Default: User Feedback Report: [time range]"
         required: false
         type: String
 
