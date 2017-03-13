@@ -57,6 +57,7 @@ import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.jsieve.commands.TestCommand;
@@ -86,7 +87,7 @@ public class MailFilterActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, ConfigViewFactory.class };
+        return new Class<?>[] { ConfigurationService.class, ConfigViewFactory.class, LeanConfigurationService.class };
     }
 
     @Override
