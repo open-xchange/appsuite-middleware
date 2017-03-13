@@ -5,51 +5,44 @@
       - Userfeedback
     summary: Exports user feedback and sends exported data to provided recipients
     parameters:
-
       - in: path
         name: context-group
         description: The context group identifying the global DB where the feedback is stored.
         required: true
-        type: String
+        type: string
         default: default
-
       - in: path
         name: type
         description: The feedback type to send.
         required: true
-        type: String
+        type: string
         default: star-rating-v1
-
       - in: query
         name: start
         description: Start time in seconds since 1970-01-01 00:00:00 UTC. Only feedback given after this time is sent. If not set, all feedback up to -e is sent.
         required: false
         type: long
         default: 0
-
       - in: query
         name: end
         description: End time in seconds since 1970-01-01 00:00:00 UTC. Only feedback given before this time is sent. If not set, all feedback since -s is sent.
         required: false
         type: long
         default: 0
-
       - in: query
         name: subject
         description: "The mail subject. Default: User Feedback Report: [time range]"
         required: false
-        type: String
-
+        type: string
       - in: query
         name: body
         description: The mail body (plain text).
         required: false
-        type: String
- 
+        type: string
       - in: body
         description: JSON Array containing address, display name and PGP key (if available) for every recipient.
         required: true
-        type: String
+        type: string
 
     responses:
       200:
