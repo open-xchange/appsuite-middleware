@@ -49,39 +49,63 @@
 
 package com.openexchange.conversion;
 
+import java.util.ArrayList;
+import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
 
 /**
- * {@link DataHandler} - A data handler that converts specified data to a certain object.
+ * {@link ConversionResult}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @since v7.8.0
  */
-public interface DataHandler {
+public class ConversionResult {
+
+    private Object data;
+
+    private List<OXException> warnings;
 
     /**
-     * Gets the required arguments which must be present in corresponding instance of {@link DataArguments} when performing the
-     * {@link #processData(Object, DataArguments, Session)} method
+     * Gets the data
      *
-     * @return The required arguments
+     * @return The data
      */
-    public String[] getRequiredArguments();
+    public Object getData() {
+        return data;
+    }
 
     /**
-     * Gets the supported types of this data handler
+     * Sets the data
      *
-     * @return The supported types of this data handler
+     * @param data The data to set
      */
-    public Class<?>[] getTypes();
+    public void setData(Object data) {
+        this.data = data;
+    }
 
     /**
-     * Processes given data.
+     * Gets the warnings
      *
-     * @param data The data to process
-     * @param dataArguments The data arguments needed for processing data
-     * @param session The session providing needed user data
-     * @return The result of converted data ready for being put into JSON response
-     * @throws OXException If data cannot be handled by this data handler
+     * @return The warnings
      */
-    public ConversionResult processData(Data<? extends Object> data, DataArguments dataArguments, Session session) throws OXException;
+    public List<OXException> getWarnings() {
+        return warnings;
+    }
+
+    /**
+     * Sets the warnings
+     *
+     * @param warnings The warnings to set
+     */
+    public void setWarnings(List<OXException> warnings) {
+        this.warnings = warnings;
+    }
+
+    public void addWarning(OXException warning) {
+        if (this.warnings == null) {
+            this.warnings = new ArrayList<OXException>();
+        }
+        this.warnings.add(warning);
+    }
+
 }

@@ -55,7 +55,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
+import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.conversion.ConversionResult;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.servlet.ConversionAJAXRequest;
@@ -64,7 +67,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
-
 
 /**
  * {@link ConvertAction}
@@ -85,6 +87,7 @@ public final class ConvertAction extends AbstractConversionAction {
 
     /**
      * Initializes a new {@link ConvertAction}.
+     * 
      * @param services
      */
     public ConvertAction(final ServiceLookup services) {
@@ -97,7 +100,7 @@ public final class ConvertAction extends AbstractConversionAction {
          * Check for data source in JSON body
          */
         final JSONObject jsonBody = req.getData();
-        if(jsonBody==null){
+        if (jsonBody == null) {
             throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
         }
         if (!jsonBody.has(JSON_DATASOURCE) || jsonBody.isNull(JSON_DATASOURCE)) {
@@ -118,15 +121,13 @@ public final class ConvertAction extends AbstractConversionAction {
          */
         final ServerSession session = req.getSession();
         final ConversionService conversionService = getService(ConversionService.class);
-        final Object result = conversionService.convert(
-            jsonDataSource.getString(JSON_IDENTIFIER),
-            parseDataSourceOrHandlerArguments(jsonDataSource),
-            jsonDataHandler.getString(JSON_IDENTIFIER),
-            parseDataSourceOrHandlerArguments(jsonDataHandler),
-            session);
+        final Object result = conversionService.convert(jsonDataSource.getString(JSON_IDENTIFIER), parseDataSourceOrHandlerArguments(jsonDataSource), jsonDataHandler.getString(JSON_IDENTIFIER), parseDataSourceOrHandlerArguments(jsonDataHandler), session);
         /*
          * Compose response
          */
+        if (result instanceof ConversionResult) {
+            return getResultFromConversion(result);
+        }
         if (result instanceof JSONValue) {
             return new AJAXRequestResult(result, "json");
         }
@@ -137,6 +138,16 @@ public final class ConvertAction extends AbstractConversionAction {
             return new AJAXRequestResult(result, "date");
         }
         return new AJAXRequestResult(result.toString(), "string");
+    }
+
+    private AJAXRequestResult getResultFromConversion(final Object result) throws JSONException {
+        Response response = new Response();
+        ConversionResult conversionResult = (ConversionResult) result;
+        response.setData(conversionResult.getData());
+        if (conversionResult.getWarnings() != null) {
+            response.addWarnings(conversionResult.getWarnings());
+        }
+        return new AJAXRequestResult(ResponseWriter.getJSON(response), "json");
     }
 
     private static void checkDataSourceOrHandler(final JSONObject json) throws OXException {

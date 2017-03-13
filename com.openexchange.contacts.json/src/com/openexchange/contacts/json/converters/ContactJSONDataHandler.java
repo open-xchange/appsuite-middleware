@@ -60,6 +60,7 @@ import org.json.JSONObject;
 import com.openexchange.contact.vcard.VCardImport;
 import com.openexchange.contact.vcard.VCardService;
 import com.openexchange.contacts.json.mapping.ContactMapper;
+import com.openexchange.conversion.ConversionResult;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataHandler;
@@ -108,7 +109,7 @@ public class ContactJSONDataHandler implements DataHandler {
     }
 
     @Override
-    public Object processData(Data<? extends Object> data, DataArguments dataArguments, Session session) throws OXException {
+    public ConversionResult processData(Data<? extends Object> data, DataArguments dataArguments, Session session) throws OXException {
         ServerSession serverSession = ServerSessionAdapter.valueOf(session);
         InputStream inputStream = (InputStream) data.getData();
         int folderID = optIntProperty(data.getDataProperties(), DataProperties.PROPERTY_FOLDER_ID);
@@ -147,7 +148,9 @@ public class ContactJSONDataHandler implements DataHandler {
             /*
              * return JSON array of converted contacts
              */
-            return jsonArray;
+            ConversionResult result = new ConversionResult();
+            result.setData(jsonArray);
+            return result;
         } finally {
             SearchIterators.close(searchIterator);
             Streams.close(inputStream);
