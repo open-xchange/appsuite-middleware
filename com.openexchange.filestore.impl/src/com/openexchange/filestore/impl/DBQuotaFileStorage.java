@@ -184,6 +184,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
         if (false == iter.hasNext()) {
             // No one available...
             LOGGER.debug("No quota backend service available for file storage '{}' of user {} in context {}.", uri, Integer.valueOf(userId), Integer.valueOf(contextId));
+            return null;
         }
 
         do {
