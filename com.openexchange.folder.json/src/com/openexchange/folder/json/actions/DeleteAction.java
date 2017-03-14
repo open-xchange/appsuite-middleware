@@ -107,7 +107,14 @@ public final class DeleteAction extends AbstractFolderAction {
 
         Boolean extendedResponse = request.getParameter(EXTENDED_RESPONSE, boolean.class, true);
         if (extendedResponse != null && extendedResponse) {
-            return performExtendedResponse(request, session);
+            try {
+                return performExtendedResponse(request, session);
+            } catch (OXException e) {
+                if (!e.equalsCode(1041, "FLD")) {
+                    throw e;
+                }
+                // else continue with normal operation
+            }
         }
 
         /*
@@ -254,6 +261,9 @@ public final class DeleteAction extends AbstractFolderAction {
                     }
                     results.add(response.getResponse());
                 } catch (final OXException e) {
+                    if(e.equalsCode(1041, "FLD")){
+                        throw e;
+                    }
                     e.setCategory(Category.CATEGORY_ERROR);
                     log.error("Failed to delete folder {} in tree {}.", folderId, treeId, e);
                     foldersWithError.put(folderId, e);
@@ -300,6 +310,9 @@ public final class DeleteAction extends AbstractFolderAction {
                     results.add(response.getResponse());
 
                 } catch (final OXException e) {
+                    if(e.equalsCode(1041, "FLD")){
+                        throw e;
+                    }
                     final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DeleteAction.class);
                     log.error("Failed to delete folder {} in tree {}.", folderId, treeId, e);
                     e.setCategory(Category.CATEGORY_WARNING);
