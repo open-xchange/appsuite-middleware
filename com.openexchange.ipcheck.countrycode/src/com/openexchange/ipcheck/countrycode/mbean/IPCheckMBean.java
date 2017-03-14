@@ -115,4 +115,53 @@ public interface IPCheckMBean {
      * @return the amount of accepted eligible IP changes
      */
     int getAcceptedEligibleIPChanges();
+
+    /**
+     * Gets the acceptedPercentage
+     *
+     * @return The acceptedPercentage
+     */
+    float getAcceptedPercentage();
+
+    /**
+     * Gets the deniedPercentage
+     *
+     * @return The deniedPercentage
+     */
+    float getDeniedPercentage();
+
+    /**
+     * Gets the acceptedPrivatePercentage
+     *
+     * @return The acceptedPrivatePercentage
+     */
+    float getAcceptedPrivatePercentage();
+
+    /**
+     * Gets the acceptedWhiteListedPercentage
+     *
+     * @return The acceptedWhiteListedPercentage
+     */
+    float getAcceptedWhiteListedPercentage();
+
+    /**
+     * Gets the acceptedEligilePercentage
+     *
+     * @return The acceptedEligilePercentage
+     */
+    float getAcceptedEligilePercentage();
+
+    /**
+     * Gets the deniedExceptionPercentage
+     *
+     * @return The deniedExceptionPercentage
+     */
+    float getDeniedExceptionPercentage();
+
+    /**
+     * Gets the deniedCountryChangedPercentage
+     *
+     * @return The deniedCountryChangedPercentage
+     */
+    float getDeniedCountryChangedPercentage();
 }
