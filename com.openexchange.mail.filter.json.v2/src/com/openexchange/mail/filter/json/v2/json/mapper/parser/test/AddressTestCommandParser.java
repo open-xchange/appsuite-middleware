@@ -72,7 +72,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  */
-public class AddressTestCommandParser extends AbstractTestCommandParser {
+public class AddressTestCommandParser extends AbstractSimplifiedMatcherAwareCommandParser {
 
     /**
      * Initializes a new {@link AddressTestCommandParser}.
@@ -88,44 +88,67 @@ public class AddressTestCommandParser extends AbstractTestCommandParser {
         String matcher = CommandParserJSONUtil.getString(jsonObject, AddressTestField.comparison.name(), Commands.ADDRESS.getCommandName());
         String normalizedMatcher = MatchType.getNormalName(matcher);
         if(normalizedMatcher != null){
-            argList.add(ArgumentUtil.createTagArgument(normalizedMatcher));
-            if (jsonObject.hasAndNotNull(AddressTestField.addresspart.name())) {
-                argList.add(ArgumentUtil.createTagArgument(CommandParserJSONUtil.getString(jsonObject, AddressTestField.addresspart.name(), Commands.ADDRESS.getCommandName())));
+            if(StartsOrEndsWithMatcherUtil.isSimplifiedMatcher(normalizedMatcher)){
+                handleSimplifiedMatcher(normalizedMatcher, argList, jsonObject);
+            } else {
+                argList.add(ArgumentUtil.createTagArgument(normalizedMatcher));
+                if (jsonObject.hasAndNotNull(AddressTestField.addresspart.name())) {
+                    argList.add(ArgumentUtil.createTagArgument(CommandParserJSONUtil.getString(jsonObject, AddressTestField.addresspart.name(), Commands.ADDRESS.getCommandName())));
+                }
+                argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, AddressTestField.headers.name(), Commands.ADDRESS.getCommandName())));
+                argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, AddressTestField.values.name(), Commands.ADDRESS.getCommandName())));
             }
-            argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, AddressTestField.headers.name(), Commands.ADDRESS.getCommandName())));
-            argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, AddressTestField.values.name(), Commands.ADDRESS.getCommandName())));
-
             return NotTestCommandUtil.wrapTestCommand(new TestCommand(Commands.ADDRESS, argList, new ArrayList<TestCommand>()));
         } else {
-            argList.add(ArgumentUtil.createTagArgument(matcher));
-            if (jsonObject.hasAndNotNull(AddressTestField.addresspart.name())) {
-                argList.add(ArgumentUtil.createTagArgument(CommandParserJSONUtil.getString(jsonObject, AddressTestField.addresspart.name(), Commands.ADDRESS.getCommandName())));
+            if(StartsOrEndsWithMatcherUtil.isSimplifiedMatcher(matcher)){
+                handleSimplifiedMatcher(matcher, argList, jsonObject);
+            } else {
+                argList.add(ArgumentUtil.createTagArgument(matcher));
+                if (jsonObject.hasAndNotNull(AddressTestField.addresspart.name())) {
+                    argList.add(ArgumentUtil.createTagArgument(CommandParserJSONUtil.getString(jsonObject, AddressTestField.addresspart.name(), Commands.ADDRESS.getCommandName())));
+                }
+                argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, AddressTestField.headers.name(), Commands.ADDRESS.getCommandName())));
+                argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, AddressTestField.values.name(), Commands.ADDRESS.getCommandName())));
             }
-            argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, AddressTestField.headers.name(), Commands.ADDRESS.getCommandName())));
-            argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, AddressTestField.values.name(), Commands.ADDRESS.getCommandName())));
             return new TestCommand(Commands.ADDRESS, argList, new ArrayList<TestCommand>());
         }
+    }
+
+    @Override
+    void handleSimplifiedMatcher(String matcher, List<Object> argList, JSONObject data) throws JSONException, OXException{
+        StartsOrEndsWithMatcherUtil.insertMatchesMatcher(argList);
+        if (data.hasAndNotNull(AddressTestField.addresspart.name())) {
+            argList.add(ArgumentUtil.createTagArgument(CommandParserJSONUtil.getString(data, AddressTestField.addresspart.name(), Commands.ADDRESS.getCommandName())));
+        }
+        argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(data, AddressTestField.headers.name(), Commands.ADDRESS.getCommandName())));
+        List<String> list = CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(data, AddressTestField.values.name(), Commands.ENVELOPE.getCommandName()));
+        StartsOrEndsWithMatcherUtil.insertValuesArgumentWithWildcards(list, matcher, argList);
     }
 
     @Override
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public void parse(JSONObject jsonObject, TestCommand command, boolean transformToNotMatcher) throws JSONException, OXException {
         jsonObject.put(GeneralField.id.name(), command.getCommand().getCommandName());
+        List<String> values = (List<String>) command.getArguments().get(command.getTagArguments().size()+1);
         String matchType = command.getMatchType();
+        MatchType type;
         if (matchType == null) {
             jsonObject.put(AddressTestField.comparison.name(), MatchType.is.name());
+            type = MatchType.is;
         } else {
+            matchType = matchType.substring(1);
+            type = MatchType.valueOf(matchType);
+            type = StartsOrEndsWithMatcherUtil.checkMatchType(type, values);
             if(transformToNotMatcher){
-                String notMatchType = MatchType.getNorNameForArgumentName(matchType);
-                jsonObject.put(AddressTestField.comparison.name(), notMatchType);
+                jsonObject.put(AddressTestField.comparison.name(), type.getNotName());
             } else {
-                jsonObject.put(AddressTestField.comparison.name(), matchType.substring(1));
+                jsonObject.put(AddressTestField.comparison.name(), type.name());
             }
         }
         if (command.getAddressPart() != null) {
             jsonObject.put(AddressTestField.addresspart.name(), command.getAddressPart().substring(1));
         }
         jsonObject.put(AddressTestField.headers.name(), new JSONArray((List) command.getArguments().get(command.getTagArguments().size())));
-        jsonObject.put(AddressTestField.values.name(), new JSONArray((List) command.getArguments().get(command.getTagArguments().size() + 1)));
+        jsonObject.put(AddressTestField.values.name(), new JSONArray(StartsOrEndsWithMatcherUtil.retrieveListForMatchType(values, type)));
     }
 }

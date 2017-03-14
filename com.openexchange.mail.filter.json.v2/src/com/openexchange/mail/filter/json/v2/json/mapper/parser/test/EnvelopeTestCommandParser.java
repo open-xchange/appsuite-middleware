@@ -72,7 +72,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  */
-public class EnvelopeTestCommandParser extends AbstractTestCommandParser {
+public class EnvelopeTestCommandParser extends AbstractSimplifiedMatcherAwareCommandParser {
 
     /**
      * Initializes a new {@link EnvelopeTestCommandParser}.
@@ -88,37 +88,62 @@ public class EnvelopeTestCommandParser extends AbstractTestCommandParser {
         String matcher = CommandParserJSONUtil.getString(jsonObject, EnvelopeTestField.comparison.name(), Commands.ENVELOPE.getCommandName());
         String normalizedMatcher = MatchType.getNormalName(matcher);
         if(normalizedMatcher != null){
-            argList.add(ArgumentUtil.createTagArgument(normalizedMatcher));
-            if (jsonObject.hasAndNotNull(EnvelopeTestField.addresspart.name())) {
-                argList.add(ArgumentUtil.createTagArgument(CommandParserJSONUtil.getString(jsonObject, EnvelopeTestField.addresspart.name(), Commands.ENVELOPE.getCommandName())));
+            if(StartsOrEndsWithMatcherUtil.isSimplifiedMatcher(normalizedMatcher)){
+                handleSimplifiedMatcher(normalizedMatcher, argList, jsonObject);
+            } else {
+                argList.add(ArgumentUtil.createTagArgument(normalizedMatcher));
+                if (jsonObject.hasAndNotNull(EnvelopeTestField.addresspart.name())) {
+                    argList.add(ArgumentUtil.createTagArgument(CommandParserJSONUtil.getString(jsonObject, EnvelopeTestField.addresspart.name(), Commands.ENVELOPE.getCommandName())));
+                }
+                argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, EnvelopeTestField.headers.name(), Commands.ENVELOPE.getCommandName())));
+                argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, EnvelopeTestField.values.name(), Commands.ENVELOPE.getCommandName())));
+
             }
-            argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, EnvelopeTestField.headers.name(), Commands.ENVELOPE.getCommandName())));
-            argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, EnvelopeTestField.values.name(), Commands.ENVELOPE.getCommandName())));
             return NotTestCommandUtil.wrapTestCommand(new TestCommand(Commands.ENVELOPE, argList, new ArrayList<TestCommand>()));
         } else {
-            argList.add(ArgumentUtil.createTagArgument(matcher));
-            if (jsonObject.hasAndNotNull(EnvelopeTestField.addresspart.name())) {
-                argList.add(ArgumentUtil.createTagArgument(CommandParserJSONUtil.getString(jsonObject, EnvelopeTestField.addresspart.name(), Commands.ENVELOPE.getCommandName())));
+            if(StartsOrEndsWithMatcherUtil.isSimplifiedMatcher(matcher)){
+                handleSimplifiedMatcher(matcher, argList, jsonObject);
+            } else {
+                argList.add(ArgumentUtil.createTagArgument(matcher));
+                if (jsonObject.hasAndNotNull(EnvelopeTestField.addresspart.name())) {
+                    argList.add(ArgumentUtil.createTagArgument(CommandParserJSONUtil.getString(jsonObject, EnvelopeTestField.addresspart.name(), Commands.ENVELOPE.getCommandName())));
+                }
+                argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, EnvelopeTestField.headers.name(), Commands.ENVELOPE.getCommandName())));
+                argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, EnvelopeTestField.values.name(), Commands.ENVELOPE.getCommandName())));
             }
-            argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, EnvelopeTestField.headers.name(), Commands.ENVELOPE.getCommandName())));
-            argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, EnvelopeTestField.values.name(), Commands.ENVELOPE.getCommandName())));
             return new TestCommand(Commands.ENVELOPE, argList, new ArrayList<TestCommand>());
         }
     }
 
     @Override
+    void handleSimplifiedMatcher(String matcher, List<Object> argList, JSONObject data) throws JSONException, OXException{
+        StartsOrEndsWithMatcherUtil.insertMatchesMatcher(argList);
+        if (data.hasAndNotNull(EnvelopeTestField.addresspart.name())) {
+            argList.add(ArgumentUtil.createTagArgument(CommandParserJSONUtil.getString(data, EnvelopeTestField.addresspart.name(), Commands.ENVELOPE.getCommandName())));
+        }
+        argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(data, EnvelopeTestField.headers.name(), Commands.ENVELOPE.getCommandName())));
+        List<String> list = CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(data, EnvelopeTestField.values.name(), Commands.ENVELOPE.getCommandName()));
+        StartsOrEndsWithMatcherUtil.insertValuesArgumentWithWildcards(list, matcher, argList);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
     public void parse(JSONObject jsonObject, TestCommand command, boolean transformToNotMatcher) throws JSONException, OXException {
         jsonObject.put(GeneralField.id.name(), command.getCommand().getCommandName());
-
+        List<String> values = (List<String>) command.getArguments().get(command.getTagArguments().size()+1);
         String matchType = command.getMatchType();
+        MatchType type;
         if (matchType == null) {
             jsonObject.put(EnvelopeTestField.comparison.name(), MatchType.is.name());
+            type = MatchType.is;
         } else {
+            matchType = matchType.substring(1);
+            type = MatchType.valueOf(matchType);
+            type = StartsOrEndsWithMatcherUtil.checkMatchType(type, values);
             if(transformToNotMatcher){
-                String notMatchType = MatchType.getNorNameForArgumentName(matchType);
-                jsonObject.put(EnvelopeTestField.comparison.name(), notMatchType);
+                jsonObject.put(EnvelopeTestField.comparison.name(), type.getNotName());
             } else {
-                jsonObject.put(EnvelopeTestField.comparison.name(), matchType.substring(1));
+                jsonObject.put(EnvelopeTestField.comparison.name(), type.name());
             }
         }
 
@@ -126,7 +151,7 @@ public class EnvelopeTestCommandParser extends AbstractTestCommandParser {
             jsonObject.put(EnvelopeTestField.addresspart.name(), command.getAddressPart().substring(1));
         }
         jsonObject.put(EnvelopeTestField.headers.name(), new JSONArray((List<?>) command.getArguments().get(command.getTagArguments().size())));
-        jsonObject.put(EnvelopeTestField.values.name(), new JSONArray((List<?>) command.getArguments().get(command.getTagArguments().size() + 1)));
+        jsonObject.put(EnvelopeTestField.values.name(), new JSONArray(StartsOrEndsWithMatcherUtil.retrieveListForMatchType(values, type)));
 
     }
 }

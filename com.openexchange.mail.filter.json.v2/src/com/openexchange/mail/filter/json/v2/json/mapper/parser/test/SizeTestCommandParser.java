@@ -186,7 +186,7 @@ public class SizeTestCommandParser extends AbstractTestCommandParser {
             jsonObject.put(SizeTestField.comparison.name(), MatchType.is.name());
         } else {
             if(transformToNotMatcher){
-                String notMatchType = MatchType.getNorNameForArgumentName(matchType);
+                String notMatchType = MatchType.getNotNameForArgumentName(matchType);
                 jsonObject.put(SizeTestField.comparison.name(), notMatchType);
             } else {
                 jsonObject.put(SizeTestField.comparison.name(), matchType.substring(1));

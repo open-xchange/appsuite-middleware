@@ -240,7 +240,7 @@ abstract class AbstractDateTestCommandParser extends AbstractTestCommandParser {
             comparison = MatchType.is.name();
         } else {
             if(transformToNotMatcher){
-                String notMatchType = MatchType.getNorNameForArgumentName(matchType);
+                String notMatchType = MatchType.getNotNameForArgumentName(matchType);
                 comparison = notMatchType;
             } else {
                 comparison = matchType.substring(1);

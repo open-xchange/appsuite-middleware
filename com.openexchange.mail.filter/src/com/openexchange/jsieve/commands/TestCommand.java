@@ -190,7 +190,7 @@ public class TestCommand extends Command {
          * <p><a href="https://tools.ietf.org/html/rfc5260#section-4">RFC-5260: Date Test</a></p>
          *
          */
-        DATE("date", 3, Integer.MAX_VALUE, null, null, dateMatchTypes(), null, "date", dateOtherArguments()),
+        DATE("date", 3, Integer.MAX_VALUE, null, null, dateMatchTypes(), dateJSONMatchTypes(), "date", dateOtherArguments()),
         /**
          * <p>The currentdate test is similar to the date test, except that it
          * operates on the current date/time rather than a value extracted from
@@ -290,8 +290,6 @@ public class TestCommand extends Command {
         private static Hashtable<String, String> dateMatchTypes() {
             final Hashtable<String, String> standard_match_types = new Hashtable<String, String>(2);
             standard_match_types.put(MatchType.is.getArgumentName(), MatchType.is.getRequire());
-            standard_match_types.put(MatchType.contains.getArgumentName(), MatchType.contains.getRequire());
-            standard_match_types.put(MatchType.matches.getArgumentName(), MatchType.matches.getRequire());
             standard_match_types.put(MatchType.value.getArgumentName(), MatchType.value.getRequire());
             return standard_match_types;
         }
@@ -316,15 +314,15 @@ public class TestCommand extends Command {
          * @return A {@link List} with the mappings
          */
         private static List<JSONMatchType> standardJSONSizeMatchTypes() {
-            final List<JSONMatchType> standard_match_types = Collections.synchronizedList(new ArrayList<JSONMatchType>(4));
-            standard_match_types.add(new JSONMatchType(MatchType.over.name(), MatchType.over.getRequire(), 0));
-            standard_match_types.add(new JSONMatchType(MatchType.under.name(), MatchType.under.getRequire(), 0));
+            final List<JSONMatchType> sizeMatchTypes = Collections.synchronizedList(new ArrayList<JSONMatchType>(4));
+            sizeMatchTypes.add(new JSONMatchType(MatchType.over.name(), MatchType.over.getRequire(), 0));
+            sizeMatchTypes.add(new JSONMatchType(MatchType.under.name(), MatchType.under.getRequire(), 0));
 
             // add not matchers
-            standard_match_types.add(new JSONMatchType(MatchType.over.getNotName(), MatchType.over.getRequire(), 2));
-            standard_match_types.add(new JSONMatchType(MatchType.under.getNotName(), MatchType.under.getRequire(), 2));
+            sizeMatchTypes.add(new JSONMatchType(MatchType.over.getNotName(), MatchType.over.getRequire(), 2));
+            sizeMatchTypes.add(new JSONMatchType(MatchType.under.getNotName(), MatchType.under.getRequire(), 2));
 
-            return standard_match_types;
+            return sizeMatchTypes;
         }
 
         /**
@@ -333,17 +331,23 @@ public class TestCommand extends Command {
          * @return A {@link List} with the mappings
          */
         private static List<JSONMatchType> standardJSONMatchTypes() {
-            final List<JSONMatchType> standard_match_types = Collections.synchronizedList(new ArrayList<JSONMatchType>(8));
+            final List<JSONMatchType> standard_match_types = Collections.synchronizedList(new ArrayList<JSONMatchType>(12));
+
+            // add normal matcher
             standard_match_types.add(new JSONMatchType(MatchType.regex.name(), MatchType.regex.getRequire(), 0));
             standard_match_types.add(new JSONMatchType(MatchType.is.name(), MatchType.is.getRequire(), 0));
             standard_match_types.add(new JSONMatchType(MatchType.contains.name(), MatchType.contains.getRequire(), 0));
             standard_match_types.add(new JSONMatchType(MatchType.matches.name(), MatchType.matches.getRequire(), 0));
+            standard_match_types.add(new JSONMatchType(MatchType.startswith.name(), MatchType.startswith.getRequire(), 2));
+            standard_match_types.add(new JSONMatchType(MatchType.endswith.name(), MatchType.endswith.getRequire(), 2));
 
             // add not matchers
             standard_match_types.add(new JSONMatchType(MatchType.regex.getNotName(), MatchType.regex.getRequire(), 2));
             standard_match_types.add(new JSONMatchType(MatchType.is.getNotName(), MatchType.is.getRequire(), 2));
             standard_match_types.add(new JSONMatchType(MatchType.contains.getNotName(), MatchType.contains.getRequire(), 2));
             standard_match_types.add(new JSONMatchType(MatchType.matches.getNotName(), MatchType.matches.getRequire(), 2));
+            standard_match_types.add(new JSONMatchType(MatchType.startswith.getNotName(), MatchType.startswith.getRequire(), 2));
+            standard_match_types.add(new JSONMatchType(MatchType.endswith.getNotName(), MatchType.endswith.getRequire(), 2));
 
             return standard_match_types;
         }
@@ -354,21 +358,19 @@ public class TestCommand extends Command {
          * @return A {@link List} with the mappings
          */
         private static List<JSONMatchType> dateJSONMatchTypes() {
-            final List<JSONMatchType> standard_match_types = Collections.synchronizedList(new ArrayList<JSONMatchType>(10));
-            standard_match_types.add(new JSONMatchType(MatchType.ge.name(), MatchType.ge.getRequire(), 0));
-            standard_match_types.add(new JSONMatchType(MatchType.le.name(), MatchType.le.getRequire(), 0));
-            standard_match_types.add(new JSONMatchType(MatchType.is.name(), MatchType.is.getRequire(), 0));
-            standard_match_types.add(new JSONMatchType(MatchType.contains.name(), MatchType.contains.getRequire(), 0));
-            standard_match_types.add(new JSONMatchType(MatchType.matches.name(), MatchType.matches.getRequire(), 0));
+            final List<JSONMatchType> dateMatchTypes = Collections.synchronizedList(new ArrayList<JSONMatchType>(14));
+            // add normal matcher
+            dateMatchTypes.add(new JSONMatchType(MatchType.is.name(), MatchType.is.getRequire(), 0));
+            dateMatchTypes.add(new JSONMatchType(MatchType.ge.name(), MatchType.ge.getRequire(), 0));
+            dateMatchTypes.add(new JSONMatchType(MatchType.le.name(), MatchType.le.getRequire(), 0));
 
             // add not matchers
-            standard_match_types.add(new JSONMatchType(MatchType.ge.getNotName(), MatchType.ge.getRequire(), 2));
-            standard_match_types.add(new JSONMatchType(MatchType.le.getNotName(), MatchType.le.getRequire(), 2));
-            standard_match_types.add(new JSONMatchType(MatchType.is.getNotName(), MatchType.is.getRequire(), 2));
-            standard_match_types.add(new JSONMatchType(MatchType.contains.getNotName(), MatchType.contains.getRequire(), 2));
-            standard_match_types.add(new JSONMatchType(MatchType.matches.getNotName(), MatchType.matches.getRequire(), 2));
+            dateMatchTypes.add(new JSONMatchType(MatchType.is.getNotName(), MatchType.is.getRequire(), 2));
+            dateMatchTypes.add(new JSONMatchType(MatchType.ge.getNotName(), MatchType.ge.getRequire(), 2));
+            dateMatchTypes.add(new JSONMatchType(MatchType.le.getNotName(), MatchType.le.getRequire(), 2));
 
-            return standard_match_types;
+
+            return dateMatchTypes;
         }
 
         ///////////////////////////////////// COMPARATORS ///////////////////////////////////////////////////

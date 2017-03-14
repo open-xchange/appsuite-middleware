@@ -47,95 +47,41 @@
  *
  */
 
-package com.openexchange.jsieve.commands;
+package com.openexchange.mail.filter.json.v2.json.mapper.parser.test;
 
+import java.util.List;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.exception.OXException;
+import com.openexchange.jsieve.commands.TestCommand.Commands;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link MatchType}
+ * {@link AbstractSimplifiedMatcherAwareCommandParser}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-public enum MatchType {
-    is,
-    contains,
-    matches,
-
-    // regex match type
-    regex("regex"),
-
-    // relational match types
-    value("relational"),
-    ge("relational"),
-    le("relational"),
-
-    // Size match types
-    over,
-    under,
-
-    // simplified matcher
-    startswith,
-    endswith
-    ;
-
-    private String argumentName;
-    private String require;
-    private String notName;
-
+public abstract class AbstractSimplifiedMatcherAwareCommandParser extends AbstractTestCommandParser {
 
     /**
-     * Initializes a new {@link MatchType}.
+     * Initializes a new {@link AbstractSimplifiedMatcherAwareCommandParser}.
+     * @param services
+     * @param testCommand
      */
-    private MatchType() {
-       this.argumentName = ":"+this.name();
-       this.require = "";
-       this.notName = "not "+this.name();
+    protected AbstractSimplifiedMatcherAwareCommandParser(ServiceLookup services, Commands testCommand) {
+        super(services, testCommand);
     }
 
     /**
-     * Initializes a new {@link MatchType}.
-     */
-    private MatchType(String require) {
-       this.argumentName = ":"+this.name();
-       this.require = require;
-       this.notName = "not "+this.name();
-    }
-
-    public String getArgumentName(){
-        return argumentName;
-    }
-
-    public String getRequire(){
-        return require;
-    }
-
-    public String getNotName(){
-        return notName;
-    }
-
-    /**
-     * Retrieves the name of the matcher if the given string is a "not name".
+     * Handles simplified matchers like "startswith" and "endwith"
      *
-     * @param notName The name of the matcher
-     * @return The normal name or null
+     * @param matcher The matcher name
+     * @param argList The argument list
+     * @param data The input data
+     * @throws JSONException
+     * @throws OXException
      */
-    public static String getNormalName(String notName){
-        for(MatchType type: MatchType.values()){
-            if(notName.equals(type.getNotName())){
-                return type.name();
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Retrieves the not name of the {@link MatchType} with the given argument name
-     *
-     * @param argumentName The name of the matcher
-     * @return The normal name or null
-     */
-    public static String getNotNameForArgumentName(String argumentName){
-        return MatchType.valueOf(argumentName.substring(1)).getNotName();
-    }
+    abstract void handleSimplifiedMatcher(String matcher, List<Object> argList, JSONObject data) throws JSONException, OXException;
 
 }
