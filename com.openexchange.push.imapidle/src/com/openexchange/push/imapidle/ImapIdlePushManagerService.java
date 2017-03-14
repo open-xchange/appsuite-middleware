@@ -58,12 +58,13 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
+import com.openexchange.lock.AccessControl;
 import com.openexchange.lock.LockService;
+import com.openexchange.lock.ReentrantLockAccessControl;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushListenerService;
 import com.openexchange.push.PushManagerExtendedService;
@@ -132,7 +133,7 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
     private final ImapIdleClusterLock clusterLock;
     private final long delay;
     private final ScheduledTimerTask timerTask;
-    private final Lock globalLock;
+    private final AccessControl globalLock;
 
     /**
      * Initializes a new {@link ImapIdlePushManagerService}.
@@ -157,17 +158,17 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
         timerTask = timerService.scheduleWithFixedDelay(new ImapIdleControlTask(control), 30, 30, TimeUnit.SECONDS);
 
         // The fall-back lock
-        globalLock = new ReentrantLock();
+        globalLock = new ReentrantLockAccessControl();
     }
 
-    private Lock getlockFor(int userId, int contextId) {
+    private AccessControl getlockFor(int userId, int contextId) {
         LockService lockService = services.getOptionalService(LockService.class);
         if (null == lockService) {
             return globalLock;
         }
 
         try {
-            return lockService.getSelfCleaningLockFor(new StringBuilder(32).append("imapidle-").append(contextId).append('-').append(userId).toString());
+            return lockService.getAccessControlFor("imapidle", 1, userId, contextId);
         } catch (Exception e) {
             LOGGER.warn("Failed to acquire lock for user {} in context {}. Using global lock instead.", I(userId), I(contextId), e);
             return globalLock;
@@ -246,9 +247,9 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
 
         SessionInfo sessionInfo = new SessionInfo(session, true, false);
         if (clusterLock.acquireLock(sessionInfo)) {
-            Lock lock = getlockFor(userId, contextId);
-            lock.lock();
+            AccessControl lock = getlockFor(userId, contextId);
             try {
+                lock.acquireGrant();
                 // Locked...
                 boolean unlock = true;
                 try {
@@ -276,8 +277,11 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
                         releaseLock(sessionInfo);
                     }
                 }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new OXException(e);
             } finally {
-                lock.unlock();
+                Streams.close(lock);
             }
         } else {
             LOGGER.info("Could not acquire lock to start IMAP-IDLE listener for user {} in context {} with session {} as there is already an associated listener", I(userId), I(contextId), session.getSessionID());
@@ -320,9 +324,9 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
 
         SessionInfo sessionInfo = new SessionInfo(session, false, isTransient(session, services));
         if (clusterLock.acquireLock(sessionInfo)) {
-            Lock lock = getlockFor(userId, contextId);
-            lock.lock();
+            AccessControl lock = getlockFor(userId, contextId);
             try {
+                lock.acquireGrant();
                 // Locked...
                 boolean unlock = true;
                 try {
@@ -341,8 +345,11 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
                         releaseLock(sessionInfo);
                     }
                 }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new OXException(e);
             } finally {
-                lock.unlock();
+                Streams.close(lock);
             }
         } else {
             LOGGER.info("Could not acquire lock to start IMAP-IDLE listener for user {} in context {} with session {} ({}) as there is already an associated listener", I(userId), I(contextId), session.getSessionID(), session.getClient());
@@ -386,9 +393,9 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
      * @return The stop result
      */
     public StopResult stopListener(boolean tryToReconnect, boolean stopIfPermanent, int userId, int contextId) {
-        Lock lock = getlockFor(userId, contextId);
-        lock.lock();
+        AccessControl lock = getlockFor(userId, contextId);
         try {
+            lock.acquireGrant();
             SimpleKey key = SimpleKey.valueOf(userId, contextId);
             ImapIdlePushListener listener = listeners.get(key);
             if (null != listener) {
@@ -409,8 +416,11 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
                 return (null != newListener && newListener.isPermanent()) ? StopResult.RECONNECTED_AS_PERMANENT : StopResult.RECONNECTED;
             }
             return StopResult.NONE;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException(e);
         } finally {
-            lock.unlock();
+            Streams.close(lock);
         }
     }
 
