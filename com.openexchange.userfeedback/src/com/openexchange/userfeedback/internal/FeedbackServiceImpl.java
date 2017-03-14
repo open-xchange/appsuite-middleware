@@ -100,7 +100,7 @@ public class FeedbackServiceImpl implements FeedbackService {
         FeedbackType feedBackType = registry.getFeedbackType(type);
 
         if (feedBackType == null) {
-            throw FeedbackExceptionCodes.INVALID_FEEDBACK_TYPE.create();
+            throw FeedbackExceptionCodes.INVALID_FEEDBACK_TYPE.create(type);
         }
 
         DatabaseService dbService = Services.getService(DatabaseService.class);
@@ -228,7 +228,7 @@ public class FeedbackServiceImpl implements FeedbackService {
         FeedbackType feedBackType = registry.getFeedbackType(filter.getType());
 
         if (feedBackType == null) {
-            throw FeedbackExceptionCodes.INVALID_FEEDBACK_TYPE.create();
+            throw FeedbackExceptionCodes.INVALID_FEEDBACK_TYPE.create(filter.getType());
         }
 
         DatabaseService dbService = Services.getService(DatabaseService.class);
