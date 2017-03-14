@@ -83,6 +83,9 @@ if [ ${1:-0} -eq 2 ]; then
 
     # SoftwareChange_Request-2576
     ox_add_property com.openexchange.hazelcast.configuration.map.indexes.attributes altId $PFILE
+
+    ox_set_property com.openexchange.hazelcast.configuration.map.name "sessions-7" $PFILE
+    ox_set_property com.openexchange.hazelcast.configuration.map.indexes.attributes "altId, contextId, userId" $PFILE
 fi
 
 %clean
