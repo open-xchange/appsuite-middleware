@@ -67,16 +67,11 @@ public class FloatPropertyValueParser extends AbstractPropertyValueParser implem
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.config.lean.PropertyValueParser#parse(java.lang.String)
-     */
     @Override
     public Float parse(String value) throws OXException {
         checkEmpty(value);
         try {
-            return Float.parseFloat(value);
+            return Float.valueOf(value);
         } catch (NumberFormatException e) {
             throw LeanConfigurationExceptionCode.CANNOT_PARSE_VALUE.create(e, "float");
         }

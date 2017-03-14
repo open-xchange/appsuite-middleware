@@ -49,6 +49,7 @@
 
 package com.openexchange.config.lean.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -100,7 +101,7 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.config.lean.LeanConfigurationService#getProperty(com.openexchange.config.lean.Property)
      */
     @Override
@@ -110,47 +111,47 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.config.lean.LeanConfigurationService#getIntProperty(com.openexchange.config.lean.Property)
      */
     @Override
     public int getIntProperty(Property property) {
-        return getProperty(property, Integer.class);
+        return getProperty(property, Integer.class).intValue();
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.config.lean.LeanConfigurationService#getBooleanProperty(com.openexchange.config.lean.Property)
      */
     @Override
     public boolean getBooleanProperty(Property property) {
-        return getProperty(property, Boolean.class);
+        return getProperty(property, Boolean.class).booleanValue();
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.config.lean.LeanConfigurationService#getFloatProperty(com.openexchange.config.lean.Property)
      */
     @Override
     public float getFloatProperty(Property property) {
-        return getProperty(property, Float.class);
+        return getProperty(property, Float.class).floatValue();
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.config.lean.LeanConfigurationService#getLongProperty(com.openexchange.config.lean.Property)
      */
     @Override
     public long getLongProperty(Property property) {
-        return getProperty(property, Long.class);
+        return getProperty(property, Long.class).longValue();
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.config.lean.LeanConfigurationService#getProperty(int, int, com.openexchange.config.lean.Property)
      */
     @Override
@@ -160,42 +161,42 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.config.lean.LeanConfigurationService#getIntProperty(int, int, com.openexchange.config.lean.Property)
      */
     @Override
     public int getIntProperty(int userId, int contextId, Property property) {
-        return getProperty(property, userId, contextId, Integer.class);
+        return getProperty(property, userId, contextId, Integer.class).intValue();
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.config.lean.LeanConfigurationService#getBooleanProperty(int, int, com.openexchange.config.lean.Property)
      */
     @Override
     public boolean getBooleanProperty(int userId, int contextId, Property property) {
-        return getProperty(property, userId, contextId, Boolean.class);
+        return getProperty(property, userId, contextId, Boolean.class).booleanValue();
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.config.lean.LeanConfigurationService#getFloatProperty(int, int, com.openexchange.config.lean.Property)
      */
     @Override
     public float getFloatProperty(int userId, int contextId, Property property) {
-        return getProperty(property, userId, contextId, Float.class);
+        return getProperty(property, userId, contextId, Float.class).floatValue();
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.config.lean.LeanConfigurationService#getLongProperty(int, int, com.openexchange.config.lean.Property)
      */
     @Override
     public long getLongProperty(int userId, int contextId, Property property) {
-        return getProperty(property, userId, contextId, Long.class);
+        return getProperty(property, userId, contextId, Long.class).longValue();
     }
 
     ////////////////////////////////////////HELPERS ///////////////////////////////////////
@@ -208,26 +209,27 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
      * @return The value T of the property from the {@link ConfigurationService} or the default value
      * @throws OXException If an error is occurred while getting the property
      */
-    private <T> T getProperty(Property property, Class<T> coerseTo) {
-        T defaultValue = property.getDefaultValue(coerseTo);
+    private <T> T getProperty(Property property, Class<T> coerceTo) {
+        T defaultValue = null;
         String value = null;
         try {
             ConfigurationService configService = getService(ConfigurationService.class);
             value = configService.getProperty(property.getFQPropertyName());
             if (value == null) {
+                defaultValue = property.getDefaultValue(coerceTo);
                 LOGGER.debug("The value of property '{}' was 'null'. Returning default value '{}' instead.", property.getFQPropertyName(), defaultValue);
                 return defaultValue;
             }
 
-            PropertyValueParser<?> propertyValueParser = valueParsers.get(coerseTo);
+            PropertyValueParser<?> propertyValueParser = valueParsers.get(coerceTo);
 
             Object parse = propertyValueParser.parse(value);
-            return coerseTo.cast(parse);
-        } catch (ClassCastException | OXException e) {
-            LOGGER.warn("The value '{}' of property '{}' cannot be cast as '{}'. Returning default value '{}' instead.", value, property.getFQPropertyName(), coerseTo.getSimpleName(), defaultValue, e);
+            return coerceTo.cast(parse);
+        } catch (Exception e) {
+            defaultValue = property.getDefaultValue(coerceTo);
+            LOGGER.warn("The value '{}' of property '{}' cannot be cast as '{}'. Returning default value '{}' instead.", value, property.getFQPropertyName(), coerceTo.getSimpleName(), defaultValue, e);
+            return defaultValue;
         }
-        return defaultValue;
-
     }
 
     /**
@@ -241,21 +243,23 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
      * @throws OXException If an error is occurred while getting the property
      */
     private <T> T getProperty(Property property, int userId, int contextId, Class<T> coerceTo) {
-        T defaultValue = property.getDefaultValue(coerceTo);
+        T defaultValue = null;
         try {
             ConfigViewFactory factory = getService(ConfigViewFactory.class);
             ConfigView view = factory.getView(userId, contextId);
 
             ComposedConfigProperty<T> p = view.property(property.getFQPropertyName(), coerceTo);
             if (!p.isDefined()) {
+                defaultValue = property.getDefaultValue(coerceTo);
                 return defaultValue;
             }
 
             return p.get();
-        } catch (OXException e) {
-            LOGGER.error("Error getting '{}' property for user '{}' in context '{}'. Returning the default value of '{}'", property, userId, contextId, defaultValue, e);
+        } catch (Exception e) {
+            defaultValue = property.getDefaultValue(coerceTo);
+            LOGGER.error("Error getting '{}' property for user '{}' in context '{}'. Returning the default value of '{}'", property, I(userId), I(contextId), defaultValue, e);
+            return defaultValue;
         }
-        return defaultValue;
     }
 
     /**

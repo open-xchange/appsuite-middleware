@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,33 +47,41 @@
  *
  */
 
-package com.openexchange.config.lean.internal.parser;
+package com.openexchange.config.lean;
 
-import com.openexchange.config.lean.PropertyValueParser;
-import com.openexchange.config.lean.exception.LeanConfigurationExceptionCode;
-import com.openexchange.exception.OXException;
 
 /**
- * {@link BooleanPropertyValueParser}
+ * {@link DefaultProperty} - The default property implementation.
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.4
  */
-public class BooleanPropertyValueParser extends AbstractPropertyValueParser implements PropertyValueParser<Boolean> {
+public class DefaultProperty implements Property {
+
+    private final String propertyName;
+    private final Object def;
 
     /**
-     * Initialises a new {@link BooleanPropertyValueParser}.
+     * Initializes a new {@link DefaultProperty}.
      */
-    public BooleanPropertyValueParser() {
+    public DefaultProperty(String propertyName, Object def) {
         super();
+        this.propertyName = propertyName;
+        this.def = def;
     }
 
     @Override
-    public Boolean parse(String value) throws OXException {
-        checkEmpty(value);
-        try {
-            return Boolean.valueOf(value);
-        } catch (NumberFormatException e) {
-            throw LeanConfigurationExceptionCode.CANNOT_PARSE_VALUE.create(e, "boolean");
-        }
+    public String getFQPropertyName() {
+        return propertyName;
     }
+
+    @Override
+    public <T> T getDefaultValue(Class<T> clazz) {
+        if (false == def.getClass().isAssignableFrom(clazz)) {
+            throw new IllegalArgumentException("The object cannot be converted to the specified type '" + clazz.getCanonicalName() + "'");
+        }
+
+        return clazz.cast(def);
+    }
+
 }

@@ -58,14 +58,14 @@ public interface Property {
 
     /**
      * Returns the fully qualified name of the {@link Property}
-     * 
+     *
      * @return the fully qualified name of the {@link Property}
      */
     String getFQPropertyName();
 
     /**
      * Returns the default value of the {@link Property}
-     * 
+     *
      * @param clazz The type of the {@link Property}
      * @return the default value of the {@link Property}
      */

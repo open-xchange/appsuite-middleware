@@ -67,16 +67,11 @@ public class LongPropertyValueParser extends AbstractPropertyValueParser impleme
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.config.lean.PropertyValueParser#parse(java.lang.String)
-     */
     @Override
     public Long parse(String value) throws OXException {
         checkEmpty(value);
         try {
-            return Long.parseLong(value);
+            return Long.valueOf(value);
         } catch (NumberFormatException e) {
             throw LeanConfigurationExceptionCode.CANNOT_PARSE_VALUE.create(e, "long");
         }

@@ -67,16 +67,11 @@ public class IntegerPropertyValueParser extends AbstractPropertyValueParser impl
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.config.lean.PropertyValueParser#parse(java.lang.String)
-     */
     @Override
     public Integer parse(String value) throws OXException {
         checkEmpty(value);
         try {
-            return Integer.parseInt(value);
+            return Integer.valueOf(value);
         } catch (NumberFormatException e) {
             throw LeanConfigurationExceptionCode.CANNOT_PARSE_VALUE.create(e, "int");
         }
