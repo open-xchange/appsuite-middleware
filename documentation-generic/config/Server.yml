@@ -1,0 +1,20 @@
+feature_name: Basic Server Configuration
+properties:
+    - key: com.openexchange.servlet.useRobotsMetaTag
+      description: |
+        Specifies whether the special "X-Robots-Tag" HTTP response header is set
+      defaultValue: true
+      version: 7.8.4
+      reloadable: false
+      configcascadeAware: false
+      file: server.properties
+    - key: com.openexchange.servlet.robotsMetaTag
+      description: |
+        Specifies the value for the "X-Robots-Tag" HTTP response. Default value is "none".
+        See https://developers.google.com/webmasters/control-crawl-index/docs/robots_meta_tag
+      defaultValue: none
+      version: 7.8.4
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.servlet.useRobotsMetaTag
+      file: server.properties
