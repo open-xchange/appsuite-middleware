@@ -92,6 +92,8 @@ public class AccessControlImpl implements AccessControl {
                 } else if (accessControl.isNotAlive()) {
                     // No more alive... Retry
                     accessControl = null;
+                } else if (accessControl.maxAccess != max) {
+                    throw OXException.general("Access control requested with different max. number of grants");
                 }
             } else if (accessControl.isNotAlive()) {
                 // No more alive... Retry
