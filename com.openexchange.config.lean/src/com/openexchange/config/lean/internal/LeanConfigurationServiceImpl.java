@@ -97,7 +97,7 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
         vps.put(Long.class, new LongPropertyValueParser());
         vps.put(Float.class, new FloatPropertyValueParser());
         vps.put(Boolean.class, new BooleanPropertyValueParser());
-        vps.put(Boolean.class, new StringPropertyValueParser());
+        vps.put(String.class, new StringPropertyValueParser());
         valueParsers = Collections.unmodifiableMap(vps);
     }
 
