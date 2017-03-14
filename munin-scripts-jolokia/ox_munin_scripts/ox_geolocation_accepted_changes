@@ -16,12 +16,9 @@ if ( $ARGV[0] and $ARGV[0] eq "autoconf")
 if ( $ARGV[0] and $ARGV[0] eq "config")
 {
     print "graph_title Geolocation Accepted IP Changes\n";
-    print "graph_args --base 1000 -l 0\n";
+    print "graph_args --base 1000 -l 0 -u 100 -r\n";
     print "graph_category Open Xchange\n";
-    print "graph_vlabel Number\n";
-    
-    print "acceptedIPChanges.label Accepted IP Changes\n";
-    print "acceptedIPChanges.draw LINE1\n";
+    print "graph_vlabel %\n";
     
     print "acceptedPrivateIPChanges.label Accepted Private IP Changes\n";
     print "acceptedPrivateIPChanges.draw AREA\n";
@@ -39,10 +36,9 @@ my $url = $ENV{oxJolokiaUrl};
 my $username = $ENV{oxJolokiaUser};
 my $password = $ENV{oxJolokiaPassword};
 
-callUrl("acceptedIPChanges","/read/com.openexchange.ipcheck.countrycode:name=IPCheck%20MBean/AcceptedIPChanges");
-callUrl("acceptedPrivateIPChanges","/read/com.openexchange.ipcheck.countrycode:name=IPCheck%20MBean/acceptedPrivateIPChanges");
-callUrl("acceptedWhiteListedIPChanges","/read/com.openexchange.ipcheck.countrycode:name=IPCheck%20MBean/acceptedWhiteListedIPChanges");
-callUrl("eligibleIPChanges","/read/com.openexchange.ipcheck.countrycode:name=IPCheck%20MBean/eligibleIPChanges");
+callUrl("acceptedPrivateIPChanges","/read/com.openexchange.ipcheck.countrycode:name=IPCheck%20MBean/AcceptedPrivatePercentage");
+callUrl("acceptedWhiteListedIPChanges","/read/com.openexchange.ipcheck.countrycode:name=IPCheck%20MBean/AcceptedWhiteListedPercentage");
+callUrl("eligibleIPChanges","/read/com.openexchange.ipcheck.countrycode:name=IPCheck%20MBean/AcceptedEligilePercentage");
 
 sub callUrl {
 	my $ua = LWP::UserAgent->new();

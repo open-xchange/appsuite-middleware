@@ -16,12 +16,9 @@ if ( $ARGV[0] and $ARGV[0] eq "autoconf")
 if ( $ARGV[0] and $ARGV[0] eq "config")
 {
     print "graph_title Geolocation Denied IP Changes\n";
-    print "graph_args --base 1000 -l 0\n";
+    print "graph_args --base 1000 -l 0 -u 100 -r\n";
     print "graph_category Open Xchange\n";
-    print "graph_vlabel Number\n";
-    
-    print "deniedIPChanges.label Denied IP Changes\n";
-    print "deniedIPChanges.draw LINE\n";
+    print "graph_vlabel %\n";
     
     print "deniedCountryChanges.label Denied Country Changes\n";
     print "deniedCountryChanges.draw AREA\n";
@@ -36,9 +33,8 @@ my $url = $ENV{oxJolokiaUrl};
 my $username = $ENV{oxJolokiaUser};
 my $password = $ENV{oxJolokiaPassword};
 
-callUrl("deniedIPChanges","/read/com.openexchange.ipcheck.countrycode:name=IPCheck%20MBean/DeniedIPChanges");
-callUrl("deniedCountryChanges","/read/com.openexchange.ipcheck.countrycode:name=IPCheck%20MBean/DeniedCountryChanges");
-callUrl("deniedException","/read/com.openexchange.ipcheck.countrycode:name=IPCheck%20MBean/DeniedException");
+callUrl("deniedCountryChanges","/read/com.openexchange.ipcheck.countrycode:name=IPCheck%20MBean/DeniedCountryChangedPercentage");
+callUrl("deniedException","/read/com.openexchange.ipcheck.countrycode:name=IPCheck%20MBean/DeniedExceptionPercentage");
 
 sub callUrl {
 	my $ua = LWP::UserAgent->new();
