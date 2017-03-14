@@ -66,6 +66,7 @@ import com.openexchange.config.lean.internal.parser.BooleanPropertyValueParser;
 import com.openexchange.config.lean.internal.parser.FloatPropertyValueParser;
 import com.openexchange.config.lean.internal.parser.IntegerPropertyValueParser;
 import com.openexchange.config.lean.internal.parser.LongPropertyValueParser;
+import com.openexchange.config.lean.internal.parser.StringPropertyValueParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -96,6 +97,7 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
         vps.put(Long.class, new LongPropertyValueParser());
         vps.put(Float.class, new FloatPropertyValueParser());
         vps.put(Boolean.class, new BooleanPropertyValueParser());
+        vps.put(Boolean.class, new StringPropertyValueParser());
         valueParsers = Collections.unmodifiableMap(vps);
     }
 
