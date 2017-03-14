@@ -73,23 +73,23 @@ public class StoreAction implements AJAXActionService {
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         Object data = requestData.getData();
-        if (null != data) {
-            if (false == JSONObject.class.isInstance(data)) {
-                throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
-            }
-            JSONObject dataObject = (JSONObject) data;
+        if ((data == null) || (false == JSONObject.class.isInstance(data))) {
+            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
 
-            String type = requestData.getParameter("type");
-            if (null == type || Strings.isEmpty(type)) {
-                throw AjaxExceptionCodes.MISSING_PARAMETER.create("type");
-            }
-
-            FeedbackService service = Services.getService(FeedbackService.class);
-            if (service == null) {
-                throw ServiceExceptionCode.absentService(FeedbackService.class);
-            }
-            service.store(session, type, dataObject);
         }
+        JSONObject dataObject = (JSONObject) data;
+
+        String type = requestData.getParameter("type");
+        if (null == type || Strings.isEmpty(type)) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("type");
+        }
+
+        FeedbackService service = Services.getService(FeedbackService.class);
+        if (service == null) {
+            throw ServiceExceptionCode.absentService(FeedbackService.class);
+        }
+        service.store(session, type, dataObject);
+
         return new AJAXRequestResult();
     }
 }
