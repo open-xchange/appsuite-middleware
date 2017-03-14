@@ -49,7 +49,6 @@
 
 package com.openexchange.passwordchange.script.impl;
 
-import static com.openexchange.passwordchange.script.services.SPWServiceRegistry.getServiceRegistry;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -60,8 +59,8 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
 import com.openexchange.passwordchange.PasswordChangeEvent;
 import com.openexchange.passwordchange.PasswordChangeService;
-import com.openexchange.passwordchange.script.impl.ScriptPasswordChangeConfig.ConfigData;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.encoding.Base64;
 import com.openexchange.user.UserService;
 
@@ -74,27 +73,30 @@ public final class ScriptPasswordChange extends PasswordChangeService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ScriptPasswordChange.class);
 
+    private final ScriptPasswordChangeConfig config;
+    private final ServiceLookup services;
+
     /**
      * Initializes a new {@link ScriptPasswordChange}
      */
-    public ScriptPasswordChange() {
+    public ScriptPasswordChange(ScriptPasswordChangeConfig config, ServiceLookup services) {
         super();
+        this.config = config;
+        this.services = services;
     }
 
     @Override
     protected void update(final PasswordChangeEvent event) throws OXException {
-        ConfigData configData = ScriptPasswordChangeConfig.getInstance().getData();
-        String shellscript_to_execute = configData.getScriptPath();
-        boolean asBase64 = configData.asBase64();
-
+        String shellscript_to_execute = config.getScriptPath();
         if (Strings.isEmpty(shellscript_to_execute)) {
-            final String message = "Shell command is empty. Please check property \"com.openexchange.passwordchange.script.shellscript\" in file change_pwd_script.properties";
+            final String message = "Shell command is empty. Please check property \"com.openexchange.passwordchange.script.shellscript\"";
             LOG.error(message);
             throw PasswordExceptionCode.PASSWORD_FAILED_WITH_MSG.create(message);
         }
+
         User user = null;
         {
-            final UserService userService = getServiceRegistry().getService(UserService.class);
+            final UserService userService = services.getOptionalService(UserService.class);
             if (userService == null) {
                 throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserService.class.getName());
             }
@@ -122,7 +124,8 @@ public final class ScriptPasswordChange extends PasswordChangeService {
         final String cid = Integer.toString(event.getContext().getContextId());
         final String userid = Integer.toString(user.getId());
 
-        // Convert UTF-8 bytes of String to base64 
+        // Convert UTF-8 bytes of String to base64
+        boolean asBase64 = config.asBase64();
         if (asBase64) {
             usern = Base64.encode(usern);
             oldpw= Base64.encode(oldpw);
@@ -159,7 +162,7 @@ public final class ScriptPasswordChange extends PasswordChangeService {
         try {
             final int ret = executePasswordUpdateShell(cmd);
             if (ret != 0) {
-                LOG.error("Passwordchange script returned exit code != 0, ret={}", ret);
+                LOG.error("Passwordchange script returned exit code != 0, ret={}", Integer.valueOf(ret));
                 switch (ret) {
                     case 1:
                         throw PasswordExceptionCode.PASSWORD_FAILED.create(" failed with return code " + ret + " ");

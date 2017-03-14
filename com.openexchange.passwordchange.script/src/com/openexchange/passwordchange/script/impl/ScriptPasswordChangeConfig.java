@@ -50,127 +50,128 @@
 package com.openexchange.passwordchange.script.impl;
 
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.DefaultInterests;
-import com.openexchange.config.DefaultInterests.Builder;
 import com.openexchange.config.Interests;
-import com.openexchange.config.Reloadable;
-import com.openexchange.exception.OXException;
-import com.openexchange.osgi.ServiceRegistry;
-import com.openexchange.passwordchange.script.services.SPWServiceRegistry;
+import com.openexchange.config.Reloadables;
 
 /**
  * {@link ScriptPasswordChangeConfig} Collects and exposes configuration
  * parameters needed by the ScriptPasswordChange.
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ScriptPasswordChangeConfig implements Reloadable {
+public class ScriptPasswordChangeConfig {
 
-    private final static String CONFIG_FILE_NAME = "change_pwd_script.properties";
     private final static String SCRIPT_PATH_KEY = "com.openexchange.passwordchange.script.shellscript";
     private final static String BASE64_KEY = "com.openexchange.passwordchange.script.base64";
 
-    private static String scriptPath;
-    private static boolean asBase64;
-
-    private static ScriptPasswordChangeConfig INSTANCE;
+    private static final Interests INTERESTS = Reloadables.interestsForProperties(SCRIPT_PATH_KEY, BASE64_KEY);
 
     /**
-     * Prevent initialization of multiple {@link ScriptPasswordChangeConfig}.
-     */
-    private ScriptPasswordChangeConfig() {}
-
-    /**
-     * Get an initialized instance of {@link ScriptPasswordChangeConfig}
-     * 
-     * @return an initialized instance of {@link ScriptPasswordChangeConfig}
-     * @throws OXException if the service needed for initialization is missing.
-     */
-    public static ScriptPasswordChangeConfig getInstance() throws OXException {
-        if (ScriptPasswordChangeConfig.INSTANCE == null) {
-            synchronized (ScriptPasswordChangeConfig.class) {
-                if (ScriptPasswordChangeConfig.INSTANCE == null) {
-                    ServiceRegistry serviceRegistry = SPWServiceRegistry.getServiceRegistry();
-                    ConfigurationService configurationService = serviceRegistry.getService(ConfigurationService.class, true);
-                    initFromConfigService(configurationService);
-                    INSTANCE = new ScriptPasswordChangeConfig();
-                }
-            }
-        }
-        return INSTANCE;
-    }
-
-    /**
-     * Get consistent config data in a way that
-     * {@link Reloadable#reloadConfiguration(ConfigurationService)} can't
-     * interfere.  
-     * @return A consistent {@link ScriptPasswordChangeConfig.ConfigData} view.
-     */
-    public synchronized ConfigData getData() {
-        return new ConfigData();
-    }
-
-    /**
-     * Initialize the configuration values.
-     * 
-     * @param configService The {@link ConfigurationService} needed for initialization
-     */
-    private static void initFromConfigService(ConfigurationService configService) {
-        scriptPath = configService.getProperty(SCRIPT_PATH_KEY, "");
-        asBase64 = configService.getBoolProperty(BASE64_KEY, false);
-    }
-
-    @Override
-    public synchronized void reloadConfiguration(ConfigurationService configService) {
-        initFromConfigService(configService);
-    }
-
-    @Override
-    public Interests getInterests() {
-        Builder builder = DefaultInterests.builder();
-        builder.propertiesOfInterest(SCRIPT_PATH_KEY, BASE64_KEY);
-        builder.configFileNames(CONFIG_FILE_NAME);
-        return builder.build();
-    }
-
-    /**
-     * Immutable data container to guarantee data consistency during config
-     * reloads and password changes.
-     * {@link ConfigData}
+     * Gets the interests
      *
-     * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
-     * @since v7.8.4
+     * @return The interests
      */
-    final class ConfigData {
+    public static Interests getInterests() {
+        return INTERESTS;
+    }
 
-        private final String scriptPath;
-        private final boolean asBase64;
+    /**
+     * Creates a new builder.
+     *
+     * @return The builder
+     */
+    public static Builder builder() {
+        return new Builder();
+    }
 
-        private ConfigData() {
-            this.scriptPath = ScriptPasswordChangeConfig.scriptPath;
-            this.asBase64 = ScriptPasswordChangeConfig.asBase64;
+    /** The builder class */
+    public static final class Builder {
+
+        private String scriptPath;
+        private boolean asBase64;
+
+        Builder() {
+            super();
+            scriptPath = "";
+            asBase64 = false;
         }
 
         /**
-         * Get the FS path to the password change script.
-         * 
-         * @return The path
+         * Initializes this builder using given configuration service
+         *
+         * @param configService The configuration service to use
+         * @return This builder
          */
-        public String getScriptPath() {
-            return scriptPath;
+        public Builder init(ConfigurationService configService) {
+            scriptPath = configService.getProperty(SCRIPT_PATH_KEY, "");
+            asBase64 = configService.getBoolProperty(BASE64_KEY, false);
+            return this;
         }
 
         /**
-         * Indicates if the string based script parameters like username,
-         * oldpassword and newpassword should be encoded as Base64 to circumvent
-         * character encoding issues on improperly configured distributions not
-         * providing an unicode environment for the process.
-         * 
-         * @return true if the parameters should be Base64 encoded, false otherwise.
+         * Sets whether to encode in base64
+         *
+         * @param asBase64 The flag to set
+         * @return This builder
          */
-        public boolean asBase64() {
-            return asBase64;
+        public Builder asBase64(boolean asBase64) {
+            this.asBase64 = asBase64;
+            return this;
         }
+
+        /**
+         * Sets the script path
+         *
+         * @param scriptPath The scriptPath to set
+         * @return This builder
+         */
+        public Builder scriptPath(String scriptPath) {
+            this.scriptPath = scriptPath;
+            return this;
+        }
+
+        /**
+         * Builds the ScriptPasswordChangeConfig from this builder's arguments
+         *
+         * @return The ScriptPasswordChangeConfig instance
+         */
+        public ScriptPasswordChangeConfig build() {
+            return new ScriptPasswordChangeConfig(scriptPath, asBase64);
+        }
+
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------
+
+    private final String scriptPath;
+    private final boolean asBase64;
+
+    ScriptPasswordChangeConfig(String scriptPath, boolean asBase64) {
+        super();
+        this.scriptPath = scriptPath;
+        this.asBase64 = asBase64;
+    }
+
+    /**
+     * Get the FS path to the password change script.
+     *
+     * @return The path
+     */
+    public String getScriptPath() {
+        return scriptPath;
+    }
+
+    /**
+     * Indicates if the string based script parameters like username,
+     * oldpassword and newpassword should be encoded as Base64 to circumvent
+     * character encoding issues on improperly configured distributions not
+     * providing an unicode environment for the process.
+     *
+     * @return true if the parameters should be Base64 encoded, false otherwise.
+     */
+    public boolean asBase64() {
+        return asBase64;
     }
 
 }

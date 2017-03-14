@@ -49,11 +49,11 @@
 
 package com.openexchange.passwordchange.script.osgi;
 
-import static com.openexchange.passwordchange.script.services.SPWServiceRegistry.getServiceRegistry;
+import org.osgi.framework.ServiceRegistration;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.passwordchange.script.impl.ScriptPasswordChange;
 import com.openexchange.passwordchange.script.impl.ScriptPasswordChangeConfig;
@@ -64,7 +64,9 @@ import com.openexchange.user.UserService;
  *
  * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a>
  */
-public final class ScriptPasswordChangeActivator extends HousekeepingActivator {
+public final class ScriptPasswordChangeActivator extends HousekeepingActivator implements Reloadable {
+
+    private ServiceRegistration<PasswordChangeService> registration;
 
     /**
      * Initializes a new {@link ScriptPasswordChangeActivator}
@@ -79,43 +81,42 @@ public final class ScriptPasswordChangeActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        getServiceRegistry().addService(clazz, getService(clazz));
-    }
-
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        getServiceRegistry().removeService(clazz);
-    }
-
-    @Override
     protected void startBundle() throws Exception {
-        /*
-         * (Re-)Initialize service registry with available services
-         */
-        {
-            final ServiceRegistry registry = getServiceRegistry();
-            registry.clearRegistry();
-            final Class<?>[] classes = getNeededServices();
-            for (int i = 0; i < classes.length; i++) {
-                final Object service = getService(classes[i]);
-                if (null != service) {
-                    registry.addService(classes[i], service);
-                }
-            }
+        registerService(Reloadable.class, this);
+        registerScriptPasswordChange(getService(ConfigurationService.class));
+    }
+
+    private synchronized void registerScriptPasswordChange(ConfigurationService configService) {
+        unregisterScriptPasswordChange();
+
+        ScriptPasswordChangeConfig changeConfig = ScriptPasswordChangeConfig.builder().init(configService).build();
+        registration = context.registerService(PasswordChangeService.class, new ScriptPasswordChange(changeConfig, this), null);
+    }
+
+    private synchronized void unregisterScriptPasswordChange() {
+        ServiceRegistration<PasswordChangeService> registration = this.registration;
+        if (null != registration) {
+            this.registration = null;
+            registration.unregister();
         }
-        ScriptPasswordChangeConfig changeConfig = ScriptPasswordChangeConfig.getInstance();
-        registerService(Reloadable.class, changeConfig);
-        registerService(PasswordChangeService.class, new ScriptPasswordChange(), null);
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        cleanUp();
-        /*
-         * Clear service registry
-         */
-        getServiceRegistry().clearRegistry();
+        unregisterScriptPasswordChange();
+        super.stopBundle();
+    }
+
+    // -------------------------------------------------------------------------------------
+
+    @Override
+    public Interests getInterests() {
+        return ScriptPasswordChangeConfig.getInterests();
+    }
+
+    @Override
+    public void reloadConfiguration(ConfigurationService configService) {
+        registerScriptPasswordChange(configService);
     }
 
 }
