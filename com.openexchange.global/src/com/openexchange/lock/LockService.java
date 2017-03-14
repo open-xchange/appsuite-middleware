@@ -166,4 +166,28 @@ public interface LockService {
      */
     void removeLockFor(String identifier);
 
+    /**
+     * Gets the access control for specified number of permits.
+     * <pre>
+     * AccessControl accessControl = lockService.getAccessControlFor(...);
+     * try {
+     *     accessControl.acquireGrant();
+     *      ...
+     * } catch (InterruptedException e) {
+     *     Thread.currentThread().interrupt();
+     *     throw ...
+     * } finally {
+     *    accessControl.close();
+     * }
+     * </pre>
+     *
+     * @param identifier The identifier associated with the access control
+     * @param permits The number of permits
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The access control
+     * @throws OXException If access control cannot be returned
+     */
+    AccessControl getAccessControlFor(String identifier, int permits, int userId, int contextId) throws OXException;
+
 }
