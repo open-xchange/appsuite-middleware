@@ -131,7 +131,7 @@ public class SendFeedbackViaMail extends AbstractRestCLI<Void> {
         options.addOption(END_SHORT, END_LONG, true, "End time in seconds since 1970-01-01 00:00:00 UTC. Only feedback given before this time is sent. If not set, all feedback since -s is sent.");
         options.addOption(SUBJECT_SHORT, SUBJECT_LONG, true, " The mail subject. Default: \"User Feedback Report: [time range]\".");
         options.addOption(BODY_SHORT, BODY_LONG, true, "The mail body (plain text).");
-        Option recipients = new Option(RECIPIENTS_SHORT, RECIPIENT_LONG, true, "Recipient's mail address or CSV file containing the recipients.");
+        Option recipients = new Option(RECIPIENTS_SHORT, RECIPIENT_LONG, true, "Recipient's mail address starting with an '@' or the local path to a CSV file containing the recipients. A custom display name can be set after the address, seperated by a comma.");
         recipients.setRequired(true);
         options.addOption(recipients);
         options.addOption(USE_PGP_SHORT, USE_PGP_LONG, true, "");
@@ -251,7 +251,12 @@ public class SendFeedbackViaMail extends AbstractRestCLI<Void> {
 
     @Override
     protected String getName() {
-        return "senduserfeedbackmail";
+        return "senduserfeedback [OPTIONS]";
+    }
+    
+    @Override
+    protected String getHeader() {
+        return "senduserfeedback -s 1487348317 -r @reports@example.com,Feedback Reports";
     }
 
 }

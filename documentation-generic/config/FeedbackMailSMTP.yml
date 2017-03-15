@@ -1,0 +1,83 @@
+feature_name: Feedback Mail SMTP-Service
+properties:
+  - key: com.openexchange.userfeedback.mail.senderName
+    description: |
+      The sender name, that should be displayed to the recepients.
+    defaultValue: 
+    version: 7.8.4
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: userfeedbackmail.properties
+  - key: com.openexchange.userfeedback.mail.senderAddress
+    description: |
+      The address that should be displayed for the recepients.
+    defaultValue: 
+    version: 7.8.4
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: userfeedbackmail.properties
+  - key: com.openexchange.userfeedback.smtp.hostname
+    description: |
+      The SMTP server to connect to.
+    defaultValue: 
+    version: 7.8.4
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: userfeedbackmail.properties
+  - key: com.openexchange.userfeedback.smtp.port
+    description: |
+      The SMTP server port to connect to.
+    defaultValue: 587
+    version: 7.8.4
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: userfeedbackmail.properties              
+  - key: com.openexchange.userfeedback.smtp.protocol
+    description: |
+      Specifies the SSL protocols that will be enabled for SSL connections. The property value is a whitespace separated list of tokens acceptable to the javax.net.ssl.SSLSocket.setEnabledProtocols method.
+    defaultValue: TLSv1
+    version: 7.8.4
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: userfeedbackmail.properties    
+  - key: com.openexchange.userfeedback.smtp.timeout
+    description: |
+      Socket read timeout value in milliseconds.
+    defaultValue: 50000
+    version: 7.8.4
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: userfeedbackmail.properties
+  - key: com.openexchange.userfeedback.smtp.connectionTimeout
+    description: |
+      Socket connection timeout value in milliseconds.
+    defaultValue: 10000
+    version: 7.8.4
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: userfeedbackmail.properties    
+  - key: com.openexchange.userfeedback.smtp.username
+    description: |
+      Default username for SMTP.
+    defaultValue: 
+    version: 7.8.4
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: userfeedbackmail.properties
+  - key: com.openexchange.userfeedback.smtp.password
+    description: |
+      Password for the provided username
+    defaultValue: 
+    version: 7.8.4
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: userfeedbackmail.properties

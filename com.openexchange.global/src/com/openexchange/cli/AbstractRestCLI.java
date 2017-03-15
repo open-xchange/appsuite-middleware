@@ -101,20 +101,21 @@ public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Bu
                 user.setRequired(true);
                 options.addOption(user);
             }
-
+            
             // Add other options
             addOptions(options);
+            
+            // Check if help output is requested
+            if (showHelp(args)) {
+                printHelp(options);
+                System.exit(0);
+                return null;
+            }
 
             // Initialize command-line parser & parse arguments
             final CommandLineParser parser = new PosixParser();
             final CommandLine cmd = parser.parse(options, args);
 
-            // Check if help output is requested
-            if (cmd.hasOption('h')) {
-                printHelp(options);
-                System.exit(0);
-                return null;
-            }
             checkArguments(cmd);
 
             // Check other mandatory options
@@ -166,6 +167,15 @@ public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Bu
             }
         }
         return null;
+    }
+
+    private boolean showHelp(String[] args) {
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].equals("-h")) {
+                return true;
+            }
+        }    
+        return false;
     }
 
     protected abstract void checkArguments(CommandLine cmd);

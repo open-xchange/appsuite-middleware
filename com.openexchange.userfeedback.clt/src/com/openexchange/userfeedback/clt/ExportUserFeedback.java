@@ -120,7 +120,13 @@ public class ExportUserFeedback extends AbstractRestCLI<Void> {
 
     @Override
     protected String getName() {
-        return "exportuserfeedback";
+        return "exportuserfeedback [OPTIONS] output_file";
+    }
+    
+    @Override
+    protected String getHeader() {
+        return "exportuserfeedback [-t type] [-g ctx_grp] [-s time] [-e time] output_file\n" +
+            "exportuserfeedback -s 1487348317 /tmp/feedback.csv";
     }
 
     @Override

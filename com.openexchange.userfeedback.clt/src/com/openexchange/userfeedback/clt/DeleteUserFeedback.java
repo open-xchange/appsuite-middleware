@@ -163,7 +163,12 @@ public class DeleteUserFeedback extends AbstractRestCLI<Void> {
 
     @Override
     protected String getName() {
-        return "deleteuserfeedback";
+        return "deleteuserfeedback [OPTIONS]";
     }
 
+    @Override
+    protected String getHeader() {
+        return "deleteuserfeedback [-t type] [-g ctx_grp] [-s time] [-e time]\n" + 
+       "deleteuserfeedback -s 1487348317";
+    }
 }
