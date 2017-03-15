@@ -111,8 +111,8 @@ if ! pidof systemd > /dev/null 2>&1
 then
   NRFILES=${NRFILES:-65536}
   NPROC=${NPROC:-65536}
-  ulimit -n ${NRFILE} 2> ${CONSOLELOG}
-  ulimit -u ${NPROC} 2> ${CONSOLELOG}
+  ulimit -n ${NRFILES} 2>> ${CONSOLELOG}
+  ulimit -u ${NPROC} 2>> ${CONSOLELOG}
 fi
 
 # Bug 51074: wrong locale will break encoding of started processes
