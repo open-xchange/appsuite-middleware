@@ -53,6 +53,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.login.Interface;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginRequest;
@@ -120,8 +121,16 @@ public class LastLoginRecorder implements LoginHandlerService {
         if (context.isReadOnly()) {
             return;
         }
+
         // Set attribute and add current time stamp
-        userService.setAttribute(null, "client:" + client, String.valueOf(System.currentTimeMillis()), origUser.getId(), context, false);
+        try {
+            userService.setAttribute(null, "client:" + client, String.valueOf(System.currentTimeMillis()), origUser.getId(), context, false);
+        } catch (OXException e) {
+            if (!UserExceptionCode.CONCURRENT_ATTRIBUTES_UPDATE.equals(e)) {
+                throw e;
+            }
+            // Ignore. Another thread updated in the meantime
+        }
     }
 
     private static boolean isWhitelistedClient(String client) {
