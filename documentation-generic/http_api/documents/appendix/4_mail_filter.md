@@ -62,19 +62,28 @@ The mailfilter v2 api suppports some simplified rules.
 | Name | Description |
 |:------|:-------------|
 | is | If a field is equal to a given value. |
+| not is | If a field is unequal to a given value. |
 | contains | If a field contains a given value at any position. |
-| matches | Tests if the value matches the value in the specified field ("*" matches zero or more characters, "?" matches a single character, to use these characters themselves they have to be escaped via backslash). | 
+| not contains | If a field not contains a given value at any position. |
+| matches | Tests if the value matches the value in the specified field ("*" matches zero or more characters, "?" matches a single character, to use these characters themselves they have to be escaped via backslash). |
+| not matches | Tests if the value doesn't matches the value in the specified field ("*" matches zero or more characters, "?" matches a single character, to use these characters themselves they have to be escaped via backslash). | 
 | regex | Tests if a given regular expression matches with the value present in the specified field. |
-| user | Tests if the user part of an e-mail address is the value given here. This means in herbert+mustermann@example.com. The user checks the part herbert (only possible in conjunction with the `address` test). | 
-| detail | Tests if the detail part of an e-mail address is the value given here. In the example above this evaluates to mustermann (only possible in conjunction with the `address` test). |
+| not regex | Tests if a given regular expression doesn't matches with the value present in the specified field. |
+| startswith | Like matches but adds an additional wildcard character at the end of the value. |
+| not startswith | Like 'not matches' but adds an additional wildcard character at the end of the value. |
+| endswith | Like matches but adds an additional wildcard character at the beginning of the value. |
+| not endswith | Like 'not matches' but adds an additional wildcard character at the beginning of the value. |
 
 ### Possible currentdate comparisons
 
 | Name | Description |
 |:------|:-------------|
 | is | Used in the date test to check for a value equal to the given one. |
+| not is | Used in the date test to check for a value unequal to the given one. |
 | ge | Used in the date test to check for a value greater or equal to the given one. |
+| not ge | Used in the date test to check for a value smaller to the given one. |
 | le | Used in the date test to check for a value less or equal to the given one. |
+| not le | Used in the date test to check for a value greater to the given one. |
 
 ### Possible address parts
 
@@ -89,7 +98,9 @@ The mailfilter v2 api suppports some simplified rules.
 | Name | Description |
 |:------|:-------------|
 | over | Used in the size test to check for a value greater than the given one.|
+| not over | Used in the size test to check for a value smaller or equal to the given one.|
 | under | Used in the size test to check for a value less than the given one. |
+| not under | Used in the size test to check for a value greater or equal to the given one. |
 
 ### Possible extensions
 
