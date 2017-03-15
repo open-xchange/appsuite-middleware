@@ -64,7 +64,7 @@ public class TaskExceptionMessage implements LocalizableStrings {
 
     public static final String INSERT_FAILED_MSG = "Error while inserting task.";
 
-    public static final String NOT_TASK_FOLDER_MSG = "Folder \"%1$s\" is not a task folder.";
+    public static final String NOT_TASK_FOLDER_MSG = "This is not a task folder.";
 
     public static final String MODIFIED_MSG = "Edit conflict. Your change cannot be completed because somebody else has made a conflicting change to the same item. Please refresh or synchronize and try again.";
 
@@ -80,11 +80,11 @@ public class TaskExceptionMessage implements LocalizableStrings {
 
     public static final String WRONG_DATE_RANGE_MSG = "Date range in search must contain 2 and not %d values.";
 
-    public static final String NO_READ_PERMISSION_MSG = "You do not have the appropriate permissions to read the contents of the folder with id %1$d.";
+    public static final String NO_READ_PERMISSION_MSG = "You do not have the appropriate permissions to read the contents in that folder.";
 
     public static final String NO_TASKS_MSG = "Tasks are disabled for you.";
 
-    public static final String NO_CREATE_PERMISSION_MSG = "You do not have the appropriate permissions to create tasks in folder \"%1$s\".";
+    public static final String NO_CREATE_PERMISSION_MSG = "You do not have the appropriate permissions to create tasks in that folder.";
 
     public static final String NO_DELEGATE_PERMISSION_MSG = "You do not have the appropriate permission to delegate tasks.";
 
@@ -94,9 +94,9 @@ public class TaskExceptionMessage implements LocalizableStrings {
 
     public static final String PERCENTAGE_NOT_ZERO_MSG = "Tasks that have not been started yet need to have a 'Done' percentage of 0 and not %d.";
 
-    public static final String NO_WRITE_PERMISSION_MSG = "You do not have the appropriate permissions to edit tasks in the folder with id %1$d.";
+    public static final String NO_WRITE_PERMISSION_MSG = "You do not have the appropriate permissions to edit tasks in that folder";
 
-    public static final String NO_SHARED_MOVE_MSG = "Moving items from or into shared folder \"%1$s\" is not allowed.";
+    public static final String NO_SHARED_MOVE_MSG = "Moving items from or into a shared folder is not allowed.";
 
     public static final String UNKNOWN_RECURRENCE_MSG = "Unknown recurrence type %d.";
 
@@ -109,17 +109,15 @@ public class TaskExceptionMessage implements LocalizableStrings {
     public static final String TRUNCATED_MSG = "The task could not be saved. Please shorten the \"%1$s\" and try again. Current length \"%3$d\" is more than allowed length"
         + " of \"%2$d\" characters.";
 
-    public static final String NO_PRIVATE_MOVE_TO_PUBLIC_MSG = "Tasks with private flag cannot be moved to a public folder \"%1$s\".";
+    public static final String NO_PRIVATE_MOVE_TO_PUBLIC_MSG = "Tasks with private flag cannot be moved to a public folder.";
 
     public static final String ONLY_CREATOR_PRIVATE_MSG = "Only the task creator is allowed to set the private flag.";
 
     public static final String EXTERNAL_WITHOUT_MAIL_MSG = "External participants without E-Mail address can not be added.";
 
-    public static final String NO_PERMISSION_MSG = "You do not have the appropriate permisson to see the task %1$d in folder %2$s.";
+    public static final String NO_PERMISSION_MSG = "You do not have the appropriate permisson to see the task.";
 
     public static final String INVALID_DATA_MSG = "Task contains invalid data: \"%1$s\".";
-
-    public static final String NOT_IN_FOLDER_MSG = "The task %1$d is not stored in folder %2$s.";
 
     public static final String PATTERN_TOO_SHORT_MSG = "In order to accomplish the search, %1$d or more characters are required.";
 
@@ -131,5 +129,5 @@ public class TaskExceptionMessage implements LocalizableStrings {
 
     public final static String INCORRECT_STRING_DISPLAY = "The character \"%1$s\" in field \"%2$s\" can't be saved. Please remove the problematic character and try again.";
 
-    public static final String NOT_VISIBLE = "This folder (%1$d) is not visible.";
+    public static final String NOT_VISIBLE = "You do not have the appropriate permisson to see the folder.";
 }
