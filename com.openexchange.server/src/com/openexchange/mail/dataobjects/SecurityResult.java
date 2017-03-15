@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.dataobjects;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * {@link SecurityResult}
@@ -66,7 +66,7 @@ public abstract class SecurityResult {
      * @author <a href="mailto:greg.hill@open-xchange.com">Greg Hill</a>
      * @since v2.8.0
      */
-    public enum EncryptionType {
+    public static enum EncryptionType {
         PGP ("PGP"),
         SMIME ("SMIME");
 
@@ -76,16 +76,26 @@ public abstract class SecurityResult {
             this.name = name;
         }
 
+        @Override
         public String toString() {
             return this.name;
         }
     }
 
-    protected boolean decryptSuccess;  // If sucessfully decoded
+    // ---------------------------------------------------------------------------------------------
+
+    protected boolean decryptSuccess;  // If successfully decoded
     protected String error; // Any error messages
-    protected ArrayList<SignatureResult> signatureResults;
+    protected List<SignatureResult> signatureResults;
     protected EncryptionType type;  // Type of encryption
     protected boolean pgpInline;
+
+    /**
+     * Initializes a new {@link SecurityResult}.
+     */
+    protected SecurityResult() {
+        super();
+    }
 
     /**
      * Return true if E-Mail action successful
@@ -115,7 +125,7 @@ public abstract class SecurityResult {
      * Get list of signature results
      * @return
      */
-    public ArrayList<SignatureResult> getSignatureResults() {
+    public List<SignatureResult> getSignatureResults() {
         return signatureResults;
     }
 
