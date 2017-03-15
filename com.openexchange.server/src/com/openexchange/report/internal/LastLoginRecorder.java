@@ -69,17 +69,19 @@ public class LastLoginRecorder implements LoginHandlerService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LastLoginRecorder.class);
 
-    private int maxClientCount = -1;
+    private final int maxClientCount;
     private final UserService userService;
 
-    public LastLoginRecorder(ConfigurationService confService, UserService userService) {
+    /**
+     * Initializes a new {@link LastLoginRecorder}.
+     *
+     * @param configService The configuration service to use
+     * @param userService The user service to use
+     */
+    public LastLoginRecorder(ConfigurationService configService, UserService userService) {
         super();
         this.userService = userService;
-        readConfiguration(confService);
-    }
-
-    private void readConfiguration(ConfigurationService confService) {
-        maxClientCount = confService.getIntProperty("com.openexchange.user.maxClientCount", -1);
+        maxClientCount = configService.getIntProperty("com.openexchange.user.maxClientCount", -1);
     }
 
     @Override
@@ -98,11 +100,12 @@ public class LastLoginRecorder implements LoginHandlerService {
 
         Context context = login.getContext();
         User user = login.getUser();
-        if (!isWhitelistedClient(client) && maxClientCount > 0) {
+        if (maxClientCount > 0 && !isWhitelistedClient(client)) {
             int count = 0;
             for (String origKey : user.getAttributes().keySet()) {
                 if (origKey.startsWith("client:") && ++count > maxClientCount) {
-                    LOG.warn("Login of client {} for login {} (Context: {}, User: {}) will not be recorded in the database.", client, login, context.getContextId(), user.getId());
+                    LOG.warn("Login of client {} for login {} (Context: {}, User: {}) will not be recorded in the database.", client, login, Integer.valueOf(context.getContextId()), Integer.valueOf(user.getId()));
+                    return;
                 }
             }
         }
@@ -111,6 +114,7 @@ public class LastLoginRecorder implements LoginHandlerService {
 
     /**
      * Updates the last-accessed time stamp for given user's client.
+     *
      * @param userService UserService to update the user attributes.
      * @param client The client identifier
      * @param origUser The associated user
