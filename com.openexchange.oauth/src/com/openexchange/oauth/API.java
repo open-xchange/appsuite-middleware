@@ -49,117 +49,41 @@
 
 package com.openexchange.oauth;
 
+
 /**
- * {@link API} - An enumeration for available APIs.
+ * {@link API}
+ *
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.4
  */
-public enum API {
-    /**
-     * Twitter
-     */
-    TWITTER("Twitter", "com.openexchange.oauth.twitter"),
-    /**
-     * LinkedIn
-     */
-    LINKEDIN("LinkedIn", "com.openexchange.oauth.linkedin"),
-    /**
-     * Other/unknown
-     */
-    OTHER("Other", "com.openexchange.oauth.other"),
-    /**
-     * MSN
-     */
-    MSN("MSN", "com.openexchange.oauth.msn"),
-    /**
-     * Yahoo
-     */
-    YAHOO("Yahoo", "com.openexchange.oauth.yahoo"),
-    /**
-     * Tumblr
-     */
-    TUMBLR("Tumblr", "com.openexchange.oauth.tumblr"),
-    /**
-     * Flickr
-     */
-    FLICKR("Flickr", "com.openexchange.oauth.flickr"),
-    /**
-     * Dropbox
-     */
-    DROPBOX("Dropbox", "com.openexchange.oauth.dropbox"),
-    /**
-     * XING
-     */
-    XING("XING", "com.openexchange.oauth.xing"),
-    /**
-     * vkontakte
-     */
-    VKONTAKTE("Vkontakte.ru", "com.openexchange.oauth.vkontakte"),
-    /**
-     * Google
-     */
-    GOOGLE("Google", "com.openexchange.oauth.google"),
-    /**
-     * Box.com
-     */
-    BOX_COM("Box.com", "com.openexchange.oauth.boxcom"),
-    /**
-     * Microsoft Live Connect
-     */
-    MS_LIVE_CONNECT("Microsoft Live Connect", "com.openexchange.oauth.msliveconnect"),
-    /**
-     * Copy.com
-     */
-    COPY_COM("Copy.com", "com.openexchange.oauth.copycom"),
-    /**
-     * SurDoc
-     */
-    SURDOC("SurDoc", "com.openexchange.oauth.surdoc"),
-    ;
+public class API {
 
-    private final String shortName;
-    private final String fullName;
+    private final String serviceId;
+    private final String name;
 
-    /**
-     * Initialises a new {@link API}.
-     * 
-     * @param shortName The short name of the API
-     * @param fullName The full name of the API
-     */
-    private API(String shortName, String fullName) {
-        this.shortName = shortName;
-        this.fullName = fullName;
+    public API(String serviceId, String name){
+        this.serviceId=serviceId;
+        this.name=name;
     }
 
+
     /**
-     * Gets the shortName
+     * Gets the serviceId
      *
-     * @return The shortName
+     * @return The serviceId
      */
-    public String getShortName() {
-        return shortName;
+    public String getServiceId() {
+        return serviceId;
     }
 
+
     /**
-     * Gets the fullName
+     * Gets the name
      *
-     * @return The fullName
+     * @return The name
      */
-    public String getFullName() {
-        return fullName;
+    public String getName() {
+        return name;
     }
 
-    /**
-     * Resolves the specified service identifier to a known OAuth {@link API}
-     * 
-     * @param serviceId The service identifier to resolve
-     * @return The resolved OAuth {@link API}
-     * @throws IllegalArgumentException if the specified service identifier cannot be resolved to any known OAuth {@link API}
-     */
-    public static API resolveFromServiceId(String serviceId) {
-        for (API api : values()) {
-            if (api.fullName.equals(serviceId)) {
-                return api;
-            }
-        }
-        throw new IllegalArgumentException("The serviceId '" + serviceId + "' cannot be resolved to any known OAuth API");
-    }
 }

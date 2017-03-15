@@ -49,100 +49,112 @@
 
 package com.openexchange.oauth;
 
-import java.util.HashSet;
-import java.util.Set;
-import com.openexchange.oauth.scope.OAuthScope;
-
 /**
- * {@link DefaultOAuthAccount}
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * {@link STANDARD_API} - An enumeration for available APIs.
  */
-public class DefaultOAuthAccount extends DefaultOAuthToken implements OAuthAccount {
+public enum STANDARD_API {
+    /**
+     * Twitter
+     */
+    TWITTER("Twitter", "com.openexchange.oauth.twitter"),
+    /**
+     * LinkedIn
+     */
+    LINKEDIN("LinkedIn", "com.openexchange.oauth.linkedin"),
+    /**
+     * Other/unknown
+     */
+    OTHER("Other", "com.openexchange.oauth.other"),
+    /**
+     * MSN
+     */
+    MSN("MSN", "com.openexchange.oauth.msn"),
+    /**
+     * Yahoo
+     */
+    YAHOO("Yahoo", "com.openexchange.oauth.yahoo"),
+    /**
+     * Tumblr
+     */
+    TUMBLR("Tumblr", "com.openexchange.oauth.tumblr"),
+    /**
+     * Flickr
+     */
+    FLICKR("Flickr", "com.openexchange.oauth.flickr"),
+    /**
+     * Dropbox
+     */
+    DROPBOX("Dropbox", "com.openexchange.oauth.dropbox"),
+    /**
+     * XING
+     */
+    XING("XING", "com.openexchange.oauth.xing"),
+    /**
+     * vkontakte
+     */
+    VKONTAKTE("Vkontakte.ru", "com.openexchange.oauth.vkontakte"),
+    /**
+     * Google
+     */
+    GOOGLE("Google", "com.openexchange.oauth.google"),
+    /**
+     * Box.com
+     */
+    BOX_COM("Box.com", "com.openexchange.oauth.boxcom"),
+    /**
+     * Microsoft Live Connect
+     */
+    MS_LIVE_CONNECT("Microsoft Live Connect", "com.openexchange.oauth.msliveconnect"),
+    /**
+     * Copy.com
+     */
+    COPY_COM("Copy.com", "com.openexchange.oauth.copycom"),
+    /**
+     * SurDoc
+     */
+    SURDOC("SurDoc", "com.openexchange.oauth.surdoc"),
+    ;
 
-    private int id;
-    private String displayName;
-    private OAuthServiceMetaData metaData;
-    private Set<OAuthScope> enabledScopes;
+    private API api;
 
     /**
-     * Initialises a new {@link DefaultOAuthAccount}.
-     */
-    public DefaultOAuthAccount() {
-        super();
-        enabledScopes = new HashSet<>();
-    }
-
-    @Override
-    public int getId() {
-        return id;
-    }
-
-    @Override
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    @Override
-    public OAuthServiceMetaData getMetaData() {
-        return metaData;
-    }
-
-    /**
-     * Sets the id
+     * Initialises a new {@link STANDARD_API}.
      *
-     * @param id The id to set
+     * @param shortName The short name of the API
+     * @param fullName The full name of the API
      */
-    public void setId(final int id) {
-        this.id = id;
-    }
-
-    /**
-     * Sets the display name
-     *
-     * @param displayName The display name to set
-     */
-    public void setDisplayName(final String displayName) {
-        this.displayName = displayName;
-    }
-
-    /**
-     * Sets the meta data
-     *
-     * @param metaData The meta data to set
-     */
-    public void setMetaData(final OAuthServiceMetaData metaData) {
-        this.metaData = metaData;
-    }
-
-    @Override
-    public String toString() {
-        final String delim = ", ";
-        return new StringBuilder(64).append("( id = ").append(this.id).append(delim).append("displayName = ").append(this.displayName).append(delim).append("metaData = ").append(this.metaData).append(delim).append(" )").toString();
-    }
-
-    @Override
-    public API getAPI() {
-        return metaData.getAPI();
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.OAuthAccount#getEnabledScopes()
-     */
-    @Override
-    public Set<OAuthScope> getEnabledScopes() {
-        return enabledScopes;
+    private STANDARD_API(String shortName, String fullName) {
+       this.api = new API(fullName, shortName);
     }
 
     /**
-     * Sets the enabledScopes
+     * Gets the shortName
      *
-     * @param enabledScopes The enabledScopes to set
+     * @return The shortName
      */
-    public void setEnabledScopes(Set<OAuthScope> enabledScopes) {
-        this.enabledScopes = enabledScopes;
+    public String getShortName() {
+        return api.getName();
+    }
+
+    /**
+     * Gets the fullName
+     *
+     * @return The fullName
+     */
+    public String getFullName() {
+        return api.getServiceId();
+    }
+
+    public API getAPI(){
+        return api;
+    }
+
+    public static STANDARD_API getApiByServiceId(String serviceId){
+        for(STANDARD_API api : STANDARD_API.values()){
+            if(api.getFullName().equals(serviceId)){
+                return api;
+            }
+        }
+        return null;
     }
 }

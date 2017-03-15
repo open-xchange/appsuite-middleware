@@ -61,7 +61,7 @@ import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.dropbox.DropboxServices;
-import com.openexchange.oauth.API;
+import com.openexchange.oauth.STANDARD_API;
 import com.openexchange.oauth.access.AbstractOAuthAccess;
 import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthAccessRegistry;
@@ -107,7 +107,7 @@ public final class DropboxAccountAccess implements FileStorageAccountAccess, Cap
     @Override
     public void connect() throws OXException {
         OAuthAccessRegistryService service = DropboxServices.getService(OAuthAccessRegistryService.class);
-        OAuthAccessRegistry registry = service.get(API.DROPBOX.getFullName());
+        OAuthAccessRegistry registry = service.get(STANDARD_API.DROPBOX.getFullName());
         OAuthAccess dropboxOAuthAccess = registry.get(session.getContextId(), session.getUserId());
         if (dropboxOAuthAccess == null) {
             AbstractOAuthAccess newInstance = new DropboxOAuth2Access(account, session);

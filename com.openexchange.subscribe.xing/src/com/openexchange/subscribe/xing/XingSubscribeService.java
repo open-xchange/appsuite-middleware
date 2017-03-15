@@ -68,7 +68,7 @@ import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.groupware.generic.FolderUpdaterService;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
-import com.openexchange.oauth.API;
+import com.openexchange.oauth.STANDARD_API;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
@@ -352,7 +352,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
         if (null == oAuthService) {
             throw ServiceExceptionCode.absentService(OAuthService.class);
         }
-        return oAuthService.getDefaultAccount(API.XING, session);
+        return oAuthService.getDefaultAccount(STANDARD_API.XING.getAPI(), session);
     }
 
     @Override

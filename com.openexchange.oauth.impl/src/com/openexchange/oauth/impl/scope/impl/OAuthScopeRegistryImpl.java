@@ -84,7 +84,7 @@ public class OAuthScopeRegistryImpl implements OAuthScopeRegistry {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.scope.OAuthScopeRegistry#registerScope(com.openexchange.oauth.API, com.openexchange.oauth.scope.OAuthScope)
      */
     @Override
@@ -99,7 +99,7 @@ public class OAuthScopeRegistryImpl implements OAuthScopeRegistry {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.scope.OAuthScopeRegistry#registrerScopes(com.openexchange.oauth.API, com.openexchange.oauth.scope.OAuthScope[])
      */
     @Override
@@ -111,7 +111,7 @@ public class OAuthScopeRegistryImpl implements OAuthScopeRegistry {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.scope.OAuthScopeRegistry#unregisterScope(com.openexchange.oauth.API, com.openexchange.oauth.scope.Module)
      */
     @Override
@@ -132,7 +132,7 @@ public class OAuthScopeRegistryImpl implements OAuthScopeRegistry {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.scope.OAuthScopeRegistry#unregisterScopes(com.openexchange.oauth.API)
      */
     @Override
@@ -142,7 +142,7 @@ public class OAuthScopeRegistryImpl implements OAuthScopeRegistry {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.scope.OAuthScopeRegistry#purge()
      */
     @Override
@@ -152,21 +152,21 @@ public class OAuthScopeRegistryImpl implements OAuthScopeRegistry {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.scope.OAuthScopeRegistry#getAvailableScopes(com.openexchange.oauth.API)
      */
     @Override
     public Set<OAuthScope> getAvailableScopes(API api) throws OXException {
         Set<OAuthScope> scopes = registry.get(api);
         if (scopes == null) {
-            throw OAuthScopeExceptionCodes.NO_SCOPES.create(api.getFullName());
+            throw OAuthScopeExceptionCodes.NO_SCOPES.create(api.getName());
         }
         return Collections.unmodifiableSet(scopes);
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.scope.OAuthScopeRegistry#getLegacyScopes(com.openexchange.oauth.API)
      */
     @Override
@@ -179,14 +179,14 @@ public class OAuthScopeRegistryImpl implements OAuthScopeRegistry {
             }
         }
         if (legacyScopes.isEmpty()) {
-            throw OAuthScopeExceptionCodes.NO_LEGACY_SCOPES.create(api.getFullName());
+            throw OAuthScopeExceptionCodes.NO_LEGACY_SCOPES.create(api.getName());
         }
         return Collections.unmodifiableSet(legacyScopes);
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.scope.OAuthScopeRegistry#getAvailableScopes(com.openexchange.oauth.API, com.openexchange.oauth.scope.Module[])
      */
     @Override
@@ -200,7 +200,7 @@ public class OAuthScopeRegistryImpl implements OAuthScopeRegistry {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.scope.OAuthScopeRegistry#getScope(com.openexchange.oauth.API, com.openexchange.oauth.scope.Module)
      */
     @Override
@@ -211,6 +211,6 @@ public class OAuthScopeRegistryImpl implements OAuthScopeRegistry {
                 return scope;
             }
         }
-        throw OAuthScopeExceptionCodes.NO_SCOPE_FOR_MODULE.create(module, api.getFullName());
+        throw OAuthScopeExceptionCodes.NO_SCOPE_FOR_MODULE.create(module, api.getName());
     }
 }

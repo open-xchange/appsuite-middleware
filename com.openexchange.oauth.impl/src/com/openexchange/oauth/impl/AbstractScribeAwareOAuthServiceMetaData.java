@@ -58,6 +58,7 @@ import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.Reloadables;
 import com.openexchange.java.Strings;
+import com.openexchange.oauth.STANDARD_API;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthConfigurationProperty;
 import com.openexchange.oauth.scope.OAuthScope;
@@ -76,13 +77,13 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
 
     private static final String PROP_PREFIX = "com.openexchange.oauth";
 
-    private API api;
+    private final API api;
 
     /**
      * Initialises a new {@link AbstractScribeAwareOAuthServiceMetaData}.
      *
      * @param services the service lookup instance
-     * @param api The {@link API}
+     * @param api The {@link STANDARD_API}
      * @param scopes The {@link Scope}s
      */
     public AbstractScribeAwareOAuthServiceMetaData(final ServiceLookup services, API api, OAuthScope... scopes) {
@@ -90,8 +91,8 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
         this.services = services;
         this.api = api;
 
-        setId(api.getFullName());
-        setDisplayName(api.getShortName());
+        setId(api.getServiceId());
+        setDisplayName(api.getName());
 
         // Common properties for all OAuthServiceMetaData implementations.
         propertyNames = new ArrayList<>();

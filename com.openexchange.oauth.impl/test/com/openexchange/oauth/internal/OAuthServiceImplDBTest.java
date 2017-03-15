@@ -60,6 +60,7 @@ import java.util.Set;
 import com.openexchange.context.SimContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.id.SimIDGenerator;
+import com.openexchange.oauth.STANDARD_API;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.DefaultOAuthAccount;
 import com.openexchange.oauth.OAuthAccount;
@@ -112,7 +113,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
 
             @Override
             public API getAPI() {
-                return API.OTHER;
+                return STANDARD_API.OTHER.getAPI();
             }
 
             @Override

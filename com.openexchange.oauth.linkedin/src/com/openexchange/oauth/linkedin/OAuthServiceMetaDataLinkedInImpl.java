@@ -53,7 +53,7 @@ import java.util.Collection;
 import java.util.Collections;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.LinkedInApi;
-import com.openexchange.oauth.API;
+import com.openexchange.oauth.STANDARD_API;
 import com.openexchange.oauth.impl.AbstractScribeAwareOAuthServiceMetaData;
 import com.openexchange.server.ServiceLookup;
 
@@ -67,7 +67,7 @@ import com.openexchange.server.ServiceLookup;
 public class OAuthServiceMetaDataLinkedInImpl extends AbstractScribeAwareOAuthServiceMetaData {
 
     public OAuthServiceMetaDataLinkedInImpl(ServiceLookup services) {
-        super(services, API.LINKEDIN, LinkedInOAuthScope.values());
+        super(services, STANDARD_API.LINKEDIN.getAPI(), LinkedInOAuthScope.values());
     }
 
     @Override

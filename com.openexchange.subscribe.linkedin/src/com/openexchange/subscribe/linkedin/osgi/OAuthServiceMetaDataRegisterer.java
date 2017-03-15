@@ -52,7 +52,7 @@ package com.openexchange.subscribe.linkedin.osgi;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.oauth.API;
+import com.openexchange.oauth.STANDARD_API;
 import com.openexchange.oauth.OAuthServiceMetaData;
 
 /**
@@ -74,7 +74,7 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<
     public OAuthServiceMetaData addingService(final ServiceReference<OAuthServiceMetaData> reference) {
         final OAuthServiceMetaData oAuthServiceMetaData = context.getService(reference);
         // TODO Please use a service property or the service description to let the ServiceTracker filter the only wanted service.
-        if (API.LINKEDIN.getFullName().equals(oAuthServiceMetaData.getId())) {
+        if (STANDARD_API.LINKEDIN.getFullName().equals(oAuthServiceMetaData.getId())) {
             activator.setOAuthServiceMetadata(oAuthServiceMetaData);
             activator.registerServices();
         }
@@ -89,7 +89,7 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<
     @Override
     public void removedService(final ServiceReference<OAuthServiceMetaData> reference, final OAuthServiceMetaData arg1) {
         final OAuthServiceMetaData oAuthServiceMetaData = arg1;
-        if (API.LINKEDIN.getFullName().equals(oAuthServiceMetaData.getId())) {
+        if (STANDARD_API.LINKEDIN.getFullName().equals(oAuthServiceMetaData.getId())) {
             activator.setOAuthServiceMetadata(null);
             activator.unregisterServices();
         }

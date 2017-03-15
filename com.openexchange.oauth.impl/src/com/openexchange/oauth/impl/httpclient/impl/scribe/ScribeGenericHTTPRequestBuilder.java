@@ -73,6 +73,7 @@ import org.scribe.oauth.OAuthService;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.client.builder.HTTPGenericRequestBuilder;
 import com.openexchange.http.client.builder.HTTPRequest;
+import com.openexchange.oauth.STANDARD_API;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
@@ -122,33 +123,37 @@ public abstract class ScribeGenericHTTPRequestBuilder<T extends HTTPGenericReque
      * @throws IllegalStateException If given API cannot be mapped to a Scribe provider
      */
     protected static Class<? extends Api> getProvider(final API api) {
-        switch (api) {
-        case LINKEDIN:
-            return LinkedInApi.class;
-        case TWITTER:
-            return TwitterApi.class;
-        case YAHOO:
-            return YahooApi.class;
-        case TUMBLR:
-            return TumblrApi.class;
-        case FLICKR:
-            return FlickrApi.class;
-        case DROPBOX:
-            return DropBoxApi.class;
-        case XING:
-            return XingApi.class;
-        case GOOGLE:
-            return Google2Api.class;
-        case BOX_COM:
-            return BoxApi.class;
-        case MS_LIVE_CONNECT:
-            return MsLiveConnectApi.class;
-        case VKONTAKTE:
-            return VkontakteApi.class;
+        STANDARD_API stdApi = STANDARD_API.getApiByServiceId(api.getServiceId());
+        if(stdApi==null){
+            throw new IllegalStateException("Unsupported API type: " + api);
+        }
+        switch (stdApi) {
+            case LINKEDIN:
+                return LinkedInApi.class;
+            case TWITTER:
+                return TwitterApi.class;
+            case YAHOO:
+                return YahooApi.class;
+            case TUMBLR:
+                return TumblrApi.class;
+            case FLICKR:
+                return FlickrApi.class;
+            case DROPBOX:
+                return DropBoxApi.class;
+            case XING:
+                return XingApi.class;
+            case GOOGLE:
+                return Google2Api.class;
+            case BOX_COM:
+                return BoxApi.class;
+            case MS_LIVE_CONNECT:
+                return MsLiveConnectApi.class;
+            case VKONTAKTE:
+                return VkontakteApi.class;
             // Add new API enums above
 
-        case OTHER: // fall-through
-        default:
+            case OTHER: // fall-through
+            default:
         }
         throw new IllegalStateException("Unsupported API type: " + api);
     }

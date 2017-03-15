@@ -90,7 +90,7 @@ public interface OAuthServiceMetaData {
 
     /**
      * Gets the API key that belongs to a given session
-     * 
+     *
      * @param session
      * @return The API key
      * @throws OXException
@@ -99,7 +99,7 @@ public interface OAuthServiceMetaData {
 
     /**
      * Gets the API secret that belongs to a given session
-     * 
+     *
      * @param session
      * @return The API key
      * @throws OXException
@@ -108,21 +108,21 @@ public interface OAuthServiceMetaData {
 
     /**
      * Get the consumer key (upsell)
-     * 
+     *
      * @return the consumer key
      */
     String getConsumerKey();
 
     /**
      * Get the consumer secret (upsell)
-     * 
+     *
      * @return the consumer secret
      */
     String getConsumerSecret();
 
     /**
      * Returns the product name of the registered OAuth application
-     * 
+     *
      * @return the product name of the registered OAuth application
      */
     String getProductName();
@@ -221,7 +221,7 @@ public interface OAuthServiceMetaData {
 
     /**
      * Returns an unmodifiable {@link Set} with all available {@link OAuthScope}s
-     * 
+     *
      * @param userId The user id
      * @param ctxId The context id
      * @return an unmodifiable {@link Set} with all available {@link OAuthScope}s

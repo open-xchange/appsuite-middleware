@@ -69,7 +69,7 @@ import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.net.ssl.exception.SSLExceptionCode;
-import com.openexchange.oauth.API;
+import com.openexchange.oauth.STANDARD_API;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.scope.OXScope;
@@ -174,7 +174,7 @@ public class YahooClient {
         scribeService.signRequest(accessToken, request);
         final Response response = execute(request);
         if (response.getCode() == 403) {
-            throw OAuthExceptionCodes.NO_SCOPE_PERMISSION.create(API.YAHOO.getShortName(), OXScope.contacts_ro.getDisplayName());
+            throw OAuthExceptionCodes.NO_SCOPE_PERMISSION.create(STANDARD_API.YAHOO.getShortName(), OXScope.contacts_ro.getDisplayName());
         }
         final String contentType = response.getHeader("Content-Type");
         if (null == contentType || false == contentType.toLowerCase().contains("application/json")) {

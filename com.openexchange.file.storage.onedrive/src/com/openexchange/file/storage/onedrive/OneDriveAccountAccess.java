@@ -62,7 +62,7 @@ import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.onedrive.access.OneDriveOAuthAccess;
 import com.openexchange.file.storage.onedrive.osgi.Services;
-import com.openexchange.oauth.API;
+import com.openexchange.oauth.STANDARD_API;
 import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthAccessRegistry;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
@@ -109,7 +109,7 @@ public final class OneDriveAccountAccess implements FileStorageAccountAccess, Ca
     @Override
     public void connect() throws OXException {
         OAuthAccessRegistryService service = Services.getService(OAuthAccessRegistryService.class);
-        OAuthAccessRegistry registry = service.get(API.MS_LIVE_CONNECT.getFullName());
+        OAuthAccessRegistry registry = service.get(STANDARD_API.MS_LIVE_CONNECT.getFullName());
         OAuthAccess oneDriveAccess = registry.get(session.getContextId(), session.getUserId());
         if (oneDriveAccess == null) {
             OneDriveOAuthAccess access = new OneDriveOAuthAccess(account, session);

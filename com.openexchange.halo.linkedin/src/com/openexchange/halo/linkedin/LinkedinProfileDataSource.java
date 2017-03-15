@@ -64,7 +64,7 @@ import com.openexchange.halo.Picture;
 import com.openexchange.halo.linkedin.helpers.ContactEMailCompletor;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.oauth.API;
+import com.openexchange.oauth.STANDARD_API;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -105,7 +105,7 @@ public class LinkedinProfileDataSource extends AbstractLinkedinDataSource implem
         final ContactEMailCompletor cc = new ContactEMailCompletor(session, contactService, userService);
         cc.complete(contact);
 
-        final List<OAuthAccount> accounts = getOauthService().getAccounts(API.LINKEDIN.getFullName(), session, uid, cid);
+        final List<OAuthAccount> accounts = getOauthService().getAccounts(STANDARD_API.LINKEDIN.getFullName(), session, uid, cid);
         if (accounts.size() == 0) {
             throw LinkedinHaloExceptionCodes.NO_ACCOUNT.create();
         }
@@ -159,7 +159,7 @@ public class LinkedinProfileDataSource extends AbstractLinkedinDataSource implem
             throw LinkedinHaloExceptionCodes.MISSING_EMAIL_ADDR.create();
         }
 
-        final List<OAuthAccount> accounts = getOauthService().getAccounts(API.LINKEDIN.getFullName(), session, uid, cid);
+        final List<OAuthAccount> accounts = getOauthService().getAccounts(STANDARD_API.LINKEDIN.getFullName(), session, uid, cid);
         if (accounts.isEmpty()) {
             throw LinkedinHaloExceptionCodes.NO_ACCOUNT.create();
         }
