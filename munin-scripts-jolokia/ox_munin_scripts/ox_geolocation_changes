@@ -33,8 +33,8 @@ my $url = $ENV{oxJolokiaUrl};
 my $username = $ENV{oxJolokiaUser};
 my $password = $ENV{oxJolokiaPassword};
 
-callUrl("acceptedIPChanges","/read/com.openexchange.ipcheck.countrycode:name=IPCheck%20MBean/acceptedPercentage");
-callUrl("deniedIPChanges","/read/com.openexchange.ipcheck.countrycode:name=IPCheck%20MBean/deniedPercentage");
+callUrl("acceptedIPChanges","/read/com.openexchange.ipcheck.countrycode:name=IPCheck%20MBean/AcceptedPercentage");
+callUrl("deniedIPChanges","/read/com.openexchange.ipcheck.countrycode:name=IPCheck%20MBean/DeniedPercentage");
 
 sub callUrl {
 	my $ua = LWP::UserAgent->new();
