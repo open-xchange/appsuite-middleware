@@ -72,10 +72,24 @@ public class Tools {
      * @throws InvalidSyntaxException if the syntax of the generated filter is not correct.
      */
     public static final Filter generateServiceFilter(final BundleContext context, final Class<?>... classes) throws InvalidSyntaxException {
-        if (classes.length < 2) {
-            throw new IllegalArgumentException("At least the classes of 2 services must be given.");
+        if (null == classes) {
+            throw new IllegalArgumentException("classes is null.");
         }
-        final StringBuilder sb = new StringBuilder("(|(");
+
+        if (0 == classes.length) {
+            throw new IllegalArgumentException("classes is empty.");
+        }
+
+        if (classes.length == 1) {
+            StringBuilder sb = new StringBuilder(64).append("(");
+            sb.append(Constants.OBJECTCLASS);
+            sb.append('=');
+            sb.append(classes[0].getName());
+            sb.append(")");
+            return context.createFilter(sb.toString());
+        }
+
+        StringBuilder sb = new StringBuilder("(|(");
         for (final Class<?> clazz : classes) {
             sb.append(Constants.OBJECTCLASS);
             sb.append('=');
