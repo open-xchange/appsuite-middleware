@@ -49,6 +49,7 @@
 
 package com.openexchange.mailaccount.json.fields;
 
+import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.AttributeSwitch;
 import com.openexchange.mailaccount.MailAccountDescription;
@@ -78,7 +79,7 @@ public class SetSwitch implements AttributeSwitch {
     }
 
     public void setValue(final Object value) {
-        this.value = value;
+        this.value = value == JSONObject.NULL ? null : value;
     }
 
     @Override
