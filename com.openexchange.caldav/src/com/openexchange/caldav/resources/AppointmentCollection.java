@@ -71,6 +71,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
@@ -355,6 +356,59 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
     }
 
     /**
+     * Removes sensitive properties from the supplied appointments in case they are marked as <i>private</i>, and the current user is
+     * neither creator nor participant.
+     *
+     * @param appointments The appointments to anonymize
+     * @return The passed appointments, anonymized as needed
+     */
+    private CalendarDataObject[] anonymizeAsNeeded(CalendarDataObject[] appointments) {
+        if (null != appointments && 0 < appointments.length) {
+            for (CalendarDataObject appointment : appointments) {
+                anonymizeAsNeeded(appointment);
+            }
+        }
+        return appointments;
+    }
+
+    /**
+     * Removes sensitive properties from the supplied appointment in case it is marked as <i>private</i>, and the current user is neither
+     * creator nor participant.
+     *
+     * @param appointment The appointment to anonymize
+     * @return The passed appointment, anonymized as needed
+     */
+    private CalendarDataObject anonymizeAsNeeded(CalendarDataObject appointment) {
+        // taken from com.openexchange.calendar.json.actions.AppointmentAction.anonymize(Appointment)
+        if (appointment.getPrivateFlag()) {
+            int userID = factory.getUser().getId();
+            if (appointment.getCreatedBy() == userID) {
+                return appointment;
+            }
+            if (null != appointment.getUsers()) {
+                for (UserParticipant user : appointment.getUsers()) {
+                    if (user.getIdentifier() == userID) {
+                        return appointment;
+                    }
+                }
+            }
+            appointment.setTitle("Private");
+            appointment.removeAlarm();
+            appointment.removeCategories();
+            appointment.removeConfirm();
+            appointment.removeConfirmMessage();
+            appointment.removeLabel();
+            appointment.removeLocation();
+            appointment.removeNote();
+            appointment.removeNotification();
+            appointment.removeParticipants();
+            appointment.removeShownAs();
+            appointment.removeUsers();
+        }
+        return appointment;
+    }
+
+    /**
      * Gets a list of appointments that are 'significant' for iCal synchronization, i.e. all non-recurring appointments, all recurring
      * appointment masters, as well as all recurring appointment exceptions where no corresponding master appointment is available.
      *
@@ -382,7 +436,7 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
         if (null == appointmentsByUids || 0 == appointmentsByUids.size()) {
             return Collections.emptyList();
         }
-        List<Appointment> appointments = new ArrayList<Appointment>(appointmentsByUids.size());
+        List<Appointment> appointments = new ArrayList<>(appointmentsByUids.size());
         for (List<Appointment> appointmentsWithUid : appointmentsByUids.values()) {
              if (1 == appointmentsWithUid.size()) {
                  appointments.add(appointmentsWithUid.get(0));
@@ -411,7 +465,7 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
      * @return The appointments, mapped by their UID
      */
     private static Map<String, List<Appointment>> mapAppointmentsByUids(SearchIterator<Appointment> searchIterator) throws OXException {
-        Map<String, List<Appointment>> appointmentsByUid = new HashMap<String, List<Appointment>>();
+        Map<String, List<Appointment>> appointmentsByUid = new HashMap<>();
         while (searchIterator.hasNext()) {
             Appointment appointment = searchIterator.next();
             String uid = appointment.getUid();
@@ -421,7 +475,7 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
             }
             List<Appointment> appointments = appointmentsByUid.get(uid);
             if (null == appointments) {
-                appointments = new ArrayList<Appointment>();
+                appointments = new ArrayList<>();
                 appointmentsByUid.put(uid, appointments);
             }
             appointments.add(appointment);
