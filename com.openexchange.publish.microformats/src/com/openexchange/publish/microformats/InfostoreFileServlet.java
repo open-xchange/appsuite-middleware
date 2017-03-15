@@ -252,20 +252,30 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
         if (Strings.isEmpty(pathInfo)) {
             throw new OXException(1, "Request is missing the necessary path info.");
         }
-        final String[] path = SPLIT.split(pathInfo, 0);
-        final List<String> normalized = new ArrayList<>(path.length);
+
+        String[] path = SPLIT.split(pathInfo, 0);
+        if (path.length <= 0) {
+            throw new OXException(1, "Request is missing the necessary path info.");
+        }
+
+        List<String> normalized = new ArrayList<>(path.length);
         for (int i = 0; i < path.length; i++) {
             if (!path[i].equals("")) {
                 normalized.add(path[i]);
             }
         }
 
-        final String site = Strings.join(HelperClass.decode(normalized.subList(1, normalized.size()-2), req, SPLIT2), "/");
-        final Map<String, String> args = new HashMap<>(6);
+        int size = normalized.size();
+        if (size < 4) {
+            throw new OXException(1, "Request is missing the necessary path info.");
+        }
+
+        String site = Strings.join(HelperClass.decode(normalized.subList(1, size-2), req, SPLIT2), "/");
+        Map<String, String> args = new HashMap<>(6);
         args.put(CONTEXTID, normalized.get(0));
         args.put(SITE, site);
         args.put(SECRET, req.getParameter(SECRET));
-        args.put(INFOSTORE_ID, normalized.get(normalized.size()-2));
+        args.put(INFOSTORE_ID, normalized.get(size-2));
         return args;
     }
 
