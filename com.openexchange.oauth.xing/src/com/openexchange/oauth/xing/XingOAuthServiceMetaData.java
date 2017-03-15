@@ -56,7 +56,7 @@ import java.util.Set;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.XingApi;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.API;
+import com.openexchange.oauth.STANDARD_API;
 import com.openexchange.oauth.impl.AbstractExtendedScribeAwareOAuthServiceMetaData;
 import com.openexchange.oauth.OAuthToken;
 import com.openexchange.oauth.scope.OAuthScope;
@@ -77,7 +77,7 @@ public final class XingOAuthServiceMetaData extends AbstractExtendedScribeAwareO
      * @throws IllegalStateException If either API key or secret is missing
      */
     public XingOAuthServiceMetaData(final ServiceLookup services) {
-        super(services, API.XING, true, true, XingOAuthScope.values());
+        super(services, STANDARD_API.XING.getAPI(), true, true, XingOAuthScope.values());
     }
 
     @Override

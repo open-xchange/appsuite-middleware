@@ -61,7 +61,7 @@ import com.openexchange.mail.autoconfig.ImmutableAutoconfig;
 import com.openexchange.mail.oauth.DefaultTokenInfo;
 import com.openexchange.mail.oauth.MailOAuthProvider;
 import com.openexchange.mail.oauth.TokenInfo;
-import com.openexchange.oauth.API;
+import com.openexchange.oauth.STANDARD_API;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.session.Session;
@@ -148,6 +148,6 @@ public class GoogleMailOAuthProvider implements MailOAuthProvider {
 
     @Override
     public String getProviderId() {
-        return API.GOOGLE.getFullName();
+        return STANDARD_API.GOOGLE.getFullName();
     }
 }

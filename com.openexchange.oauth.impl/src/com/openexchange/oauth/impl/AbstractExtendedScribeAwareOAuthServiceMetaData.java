@@ -86,7 +86,7 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
 
     /**
      * Initialises a new {@link AbstractExtendedScribeAwareOAuthServiceMetaData}.
-     * 
+     *
      * @param services The {@link ServiceLookup}
      * @param api The {@link API}
      * @param scopes The {@link OAuthScope}s
@@ -97,7 +97,7 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
 
     /**
      * Initialises a new {@link AbstractExtendedScribeAwareOAuthServiceMetaData}.
-     * 
+     *
      * @param services The {@link ServiceLookup} instance
      * @param api The {@link API}
      * @param needsRequestToken Whether it needs a request token
@@ -111,7 +111,7 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.AbstractOAuthServiceMetaData#getRegisterToken(java.lang.String)
      */
     @Override
@@ -127,7 +127,7 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.AbstractOAuthServiceMetaData#processAuthorizationURL(java.lang.String)
      */
     @Override
@@ -158,7 +158,7 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.AbstractOAuthServiceMetaData#processArguments(java.util.Map, java.util.Map, java.util.Map)
      */
     @Override
@@ -180,7 +180,7 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.AbstractOAuthServiceMetaData#getOAuthToken(java.util.Map)
      */
     @Override
@@ -222,7 +222,7 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.AbstractOAuthServiceMetaData#modifyCallbackURL(java.lang.String, java.lang.String, com.openexchange.session.Session)
      */
     @Override
@@ -245,7 +245,7 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
 
     /**
      * Trims the specified redirect URI (strips the protocol)
-     * 
+     *
      * @param redirectUri The redirect URI to trim
      * @return The trimmed redirect URI
      */
@@ -263,7 +263,7 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
 
     /**
      * Strips the protocol from the specified URL
-     * 
+     *
      * @param encodedUrl The encoded URL
      * @return the encoded URL without the protocol
      */
@@ -278,7 +278,7 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
 
     /**
      * Extracts the protocol from the specified URL
-     * 
+     *
      * @param url The URL
      * @return The extracted protocol (either http or https)
      */
@@ -288,7 +288,7 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
 
     /**
      * Defers the specified URL
-     * 
+     *
      * @param url The URL to defer
      * @param domain The domain
      * @return The deferred URL
@@ -316,7 +316,7 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
 
     /**
      * Checks whether the specified URL is already deferred
-     * 
+     *
      * @param url The URL to check
      * @param deferrerURL The deferred URL
      * @param path The path

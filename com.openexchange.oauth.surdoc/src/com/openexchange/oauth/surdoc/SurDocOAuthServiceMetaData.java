@@ -53,7 +53,7 @@ import java.util.Collection;
 import java.util.Collections;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.SurDocApi;
-import com.openexchange.oauth.API;
+import com.openexchange.oauth.STANDARD_API;
 import com.openexchange.oauth.impl.AbstractExtendedScribeAwareOAuthServiceMetaData;
 import com.openexchange.server.ServiceLookup;
 
@@ -71,7 +71,7 @@ public final class SurDocOAuthServiceMetaData extends AbstractExtendedScribeAwar
      * @param services the service lookup instance
      */
     public SurDocOAuthServiceMetaData(final ServiceLookup services) {
-        super(services, API.SURDOC);
+        super(services, STANDARD_API.SURDOC.getAPI());
     }
 
     @Override

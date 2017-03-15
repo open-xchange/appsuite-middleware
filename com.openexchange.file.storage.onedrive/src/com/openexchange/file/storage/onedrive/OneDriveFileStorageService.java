@@ -54,7 +54,7 @@ import com.openexchange.file.storage.CompositeFileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.oauth.AbstractOAuthFileStorageService;
-import com.openexchange.oauth.API;
+import com.openexchange.oauth.STANDARD_API;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -69,17 +69,17 @@ public final class OneDriveFileStorageService extends AbstractOAuthFileStorageSe
      * Initializes a new {@link BoxFileStorageService}.
      */
     public OneDriveFileStorageService(ServiceLookup services) {
-        super(services, API.MS_LIVE_CONNECT, OneDriveConstants.DISPLAY_NAME, OneDriveConstants.ID);
+        super(services, STANDARD_API.MS_LIVE_CONNECT.getAPI(), OneDriveConstants.DISPLAY_NAME, OneDriveConstants.ID);
     }
 
     /**
      * Initialises a new {@link BoxFileStorageService}.
-     * 
+     *
      * @param services
      * @param compositeFileStorageAccountManagerProvider
      */
     public OneDriveFileStorageService(ServiceLookup services, CompositeFileStorageAccountManagerProvider compositeFileStorageAccountManagerProvider) {
-        super(services, API.MS_LIVE_CONNECT, OneDriveConstants.DISPLAY_NAME, OneDriveConstants.ID, compositeFileStorageAccountManagerProvider);
+        super(services, STANDARD_API.MS_LIVE_CONNECT.getAPI(), OneDriveConstants.DISPLAY_NAME, OneDriveConstants.ID, compositeFileStorageAccountManagerProvider);
     }
 
     @Override

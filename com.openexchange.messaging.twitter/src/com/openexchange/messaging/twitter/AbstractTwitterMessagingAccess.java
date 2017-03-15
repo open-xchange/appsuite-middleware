@@ -58,7 +58,7 @@ import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingAccountManager;
 import com.openexchange.messaging.twitter.osgi.Services;
 import com.openexchange.messaging.twitter.session.TwitterAccessRegistry;
-import com.openexchange.oauth.API;
+import com.openexchange.oauth.STANDARD_API;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthService;
@@ -136,7 +136,7 @@ public abstract class AbstractTwitterMessagingAccess {
                                 arguments.put(OAuthConstants.ARGUMENT_SECRET, tokenSecret);
                                 arguments.put(OAuthConstants.ARGUMENT_SESSION, session);
                                 OAuthScopeRegistry scopeRegistry = Services.getService(OAuthScopeRegistry.class);
-                                Set<OAuthScope> scopes = scopeRegistry.getAvailableScopes(API.TWITTER);
+                                Set<OAuthScope> scopes = scopeRegistry.getAvailableScopes(STANDARD_API.TWITTER.getAPI());
                                 oAuthAccount = oAuthService.createAccount("com.openexchange.oauth.twitter", arguments, userId, contextId, scopes);
                                 /*
                                  * Write to configuration

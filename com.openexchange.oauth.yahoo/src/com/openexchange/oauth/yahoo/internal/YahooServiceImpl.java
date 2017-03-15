@@ -67,7 +67,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.oauth.API;
+import com.openexchange.oauth.STANDARD_API;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthAccessRegistry;
@@ -118,7 +118,7 @@ public class YahooServiceImpl implements YahooService, OAuthAccountDeleteListene
     @Override
     public void onAfterOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
         OAuthAccessRegistryService registryService = services.getService(OAuthAccessRegistryService.class);
-        OAuthAccessRegistry registry = registryService.get(API.YAHOO.getFullName());
+        OAuthAccessRegistry registry = registryService.get(STANDARD_API.YAHOO.getFullName());
         OAuthAccess oAuthAccess = registry.get(cid, user);
         if (oAuthAccess == null || oAuthAccess.getAccountId() != id) {
             return;
@@ -222,7 +222,7 @@ public class YahooServiceImpl implements YahooService, OAuthAccountDeleteListene
      */
     private OAuthAccess getOAuthAccess(Session session, int accountId) throws OXException {
         OAuthAccessRegistryService service = services.getService(OAuthAccessRegistryService.class);
-        OAuthAccessRegistry oAuthAccessRegistry = service.get(API.YAHOO.getFullName());
+        OAuthAccessRegistry oAuthAccessRegistry = service.get(STANDARD_API.YAHOO.getFullName());
         OAuthAccess oAuthAccess = oAuthAccessRegistry.get(session.getContextId(), session.getUserId());
         if (oAuthAccess == null) {
             OAuthAccess access = new YahooOAuthAccess(session, accountId);

@@ -105,7 +105,7 @@ final class DropboxExceptionHandler {
         // Invalid token or account was unlinked
         if (InvalidAccessTokenException.class.isInstance(e)) {
             API api = oauthAccount.getAPI();
-            return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(api.getShortName(), oauthAccount.getId(), session.getUserId(), session.getContextId());
+            return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(api.getName(), oauthAccount.getId(), session.getUserId(), session.getContextId());
         }
 
         // Bad request
@@ -113,7 +113,7 @@ final class DropboxExceptionHandler {
             String message = e.getMessage();
             if (null != message && message.indexOf("access token is malformed") >= 0) {
                 API api = oauthAccount.getAPI();
-                return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(api.getShortName(), oauthAccount.getId(), session.getUserId(), session.getContextId());
+                return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(api.getName(), oauthAccount.getId(), session.getUserId(), session.getContextId());
             }
         }
 

@@ -76,7 +76,7 @@ public class MockOAuthService implements OAuthService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.OAuthService#createAccount(java.lang.String, com.openexchange.oauth.OAuthInteractionType, java.util.Map, int, int)
      */
     @Override
@@ -87,7 +87,7 @@ public class MockOAuthService implements OAuthService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.OAuthService#deleteAccount(int, int, int)
      */
     @Override
@@ -98,7 +98,7 @@ public class MockOAuthService implements OAuthService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.OAuthService#getAccount(int, int, int)
      */
     @Override
@@ -111,7 +111,7 @@ public class MockOAuthService implements OAuthService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.OAuthService#getAccounts(int, int)
      */
     @Override
@@ -122,7 +122,7 @@ public class MockOAuthService implements OAuthService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.OAuthService#getAccounts(java.lang.String, int, int)
      */
     @Override
@@ -137,7 +137,7 @@ public class MockOAuthService implements OAuthService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.OAuthService#getMetaDataRegistry()
      */
     @Override
@@ -148,7 +148,7 @@ public class MockOAuthService implements OAuthService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.OAuthService#initOAuth(java.lang.String, java.lang.String)
      */
     @Override
@@ -159,7 +159,7 @@ public class MockOAuthService implements OAuthService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.OAuthService#updateAccount(int, java.util.Map, int, int)
      */
     @Override
@@ -176,7 +176,7 @@ public class MockOAuthService implements OAuthService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.OAuthService#updateAccount(int, java.lang.String, com.openexchange.oauth.OAuthInteractionType, java.util.Map, int, int)
      */
     @Override

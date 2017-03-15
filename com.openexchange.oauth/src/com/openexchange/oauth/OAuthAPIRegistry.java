@@ -49,100 +49,29 @@
 
 package com.openexchange.oauth;
 
-import java.util.HashSet;
-import java.util.Set;
-import com.openexchange.oauth.scope.OAuthScope;
-
 /**
- * {@link DefaultOAuthAccount}
+ * {@link OAuthAPIRegistry}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.4
  */
-public class DefaultOAuthAccount extends DefaultOAuthToken implements OAuthAccount {
-
-    private int id;
-    private String displayName;
-    private OAuthServiceMetaData metaData;
-    private Set<OAuthScope> enabledScopes;
+public interface OAuthAPIRegistry {
 
     /**
-     * Initialises a new {@link DefaultOAuthAccount}.
+     * Registers an OAuth API
+     *
+     * @param serviceId The service id
+     * @param API the OAuth API
      */
-    public DefaultOAuthAccount() {
-        super();
-        enabledScopes = new HashSet<>();
-    }
-
-    @Override
-    public int getId() {
-        return id;
-    }
-
-    @Override
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    @Override
-    public OAuthServiceMetaData getMetaData() {
-        return metaData;
-    }
+    void registerAPI(String serviceId, API api);
 
     /**
-     * Sets the id
+     * Resolves the specified service identifier to a known OAuth {@link STANDARD_API}
      *
-     * @param id The id to set
+     * @param serviceId The service identifier to resolve
+     * @return The resolved OAuth API
+     * @throws IllegalArgumentException if the specified service identifier cannot be resolved to any known OAuth API
      */
-    public void setId(final int id) {
-        this.id = id;
-    }
+    API resolveFromServiceId(String serviceId);
 
-    /**
-     * Sets the display name
-     *
-     * @param displayName The display name to set
-     */
-    public void setDisplayName(final String displayName) {
-        this.displayName = displayName;
-    }
-
-    /**
-     * Sets the meta data
-     *
-     * @param metaData The meta data to set
-     */
-    public void setMetaData(final OAuthServiceMetaData metaData) {
-        this.metaData = metaData;
-    }
-
-    @Override
-    public String toString() {
-        final String delim = ", ";
-        return new StringBuilder(64).append("( id = ").append(this.id).append(delim).append("displayName = ").append(this.displayName).append(delim).append("metaData = ").append(this.metaData).append(delim).append(" )").toString();
-    }
-
-    @Override
-    public API getAPI() {
-        return metaData.getAPI();
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.OAuthAccount#getEnabledScopes()
-     */
-    @Override
-    public Set<OAuthScope> getEnabledScopes() {
-        return enabledScopes;
-    }
-
-    /**
-     * Sets the enabledScopes
-     *
-     * @param enabledScopes The enabledScopes to set
-     */
-    public void setEnabledScopes(Set<OAuthScope> enabledScopes) {
-        this.enabledScopes = enabledScopes;
-    }
 }

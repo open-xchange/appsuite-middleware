@@ -54,7 +54,7 @@ import com.openexchange.file.storage.CompositeFileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.oauth.AbstractOAuthFileStorageService;
-import com.openexchange.oauth.API;
+import com.openexchange.oauth.STANDARD_API;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -69,14 +69,14 @@ public final class GoogleDriveFileStorageService extends AbstractOAuthFileStorag
      * Initializes a new {@link GoogleDriveFileStorageService}.
      */
     public GoogleDriveFileStorageService(ServiceLookup services) {
-        super(services, API.GOOGLE, GoogleDriveConstants.DISPLAY_NAME, GoogleDriveConstants.ID);
+        super(services, STANDARD_API.GOOGLE.getAPI(), GoogleDriveConstants.DISPLAY_NAME, GoogleDriveConstants.ID);
     }
 
     /**
      * Initializes a new {@link GoogleDriveFileStorageService}.
      */
     public GoogleDriveFileStorageService(ServiceLookup services, CompositeFileStorageAccountManagerProvider compositeFileStorageAccountManagerProvider) {
-        super(services, API.GOOGLE, GoogleDriveConstants.DISPLAY_NAME, GoogleDriveConstants.ID, compositeFileStorageAccountManagerProvider);
+        super(services, STANDARD_API.GOOGLE.getAPI(), GoogleDriveConstants.DISPLAY_NAME, GoogleDriveConstants.ID, compositeFileStorageAccountManagerProvider);
     }
 
     @Override

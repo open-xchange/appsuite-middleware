@@ -53,7 +53,7 @@ import java.util.Collection;
 import java.util.Collections;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.MsLiveConnectApi;
-import com.openexchange.oauth.API;
+import com.openexchange.oauth.STANDARD_API;
 import com.openexchange.oauth.impl.AbstractExtendedScribeAwareOAuthServiceMetaData;
 import com.openexchange.server.ServiceLookup;
 
@@ -71,7 +71,7 @@ public final class MsLiveConnectOAuthServiceMetaData extends AbstractExtendedScr
      * @param services the service lookup instance
      */
     public MsLiveConnectOAuthServiceMetaData(final ServiceLookup services) {
-        super(services, API.MS_LIVE_CONNECT, MSLiveConnectOAuthScope.values());
+        super(services, STANDARD_API.MS_LIVE_CONNECT.getAPI(), MSLiveConnectOAuthScope.values());
     }
 
     @Override
