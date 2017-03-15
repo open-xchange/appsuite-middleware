@@ -52,14 +52,11 @@ package com.openexchange.dav.caldav.bugs;
 import static org.junit.Assert.*;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
 import java.util.TimeZone;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
-import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.caldav.CalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
 import com.openexchange.groupware.calendar.TimeTools;
@@ -127,11 +124,6 @@ public class Bug52255Test extends CalDAVTest {
         calendar.add(Calendar.HOUR_OF_DAY, 1);
         Date endTime = calendar.getTime();
         /*
-         * fetch sync token for later synchronization
-         */
-        String sharedFolderID = String.valueOf(sharedFolder.getObjectID());
-        SyncToken syncToken = new SyncToken(fetchSyncToken(sharedFolderID));
-        /*
          * create private appointment in shared folder for user b on server
          */
         String uid = randomUID();
@@ -147,20 +139,9 @@ public class Bug52255Test extends CalDAVTest {
         /*
          * verify appointment on client as user a
          */
-        ICalResource iCalResource = get(sharedFolderID, uid);
+        ICalResource iCalResource = get(String.valueOf(sharedFolder.getObjectID()), uid);
         assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
         String classification = iCalResource.getVEvent().getPropertyValue("CLASS");
-        assertTrue("CLASS wrong", "PRIVATE".equals(classification) || "CONFIDENTIAL".equals(classification));
-        assertNotEquals("SUMMARY is readable", appointment.getTitle(), iCalResource.getVEvent().getSummary());
-        /*
-         * verify appointment on client as user a via sync-collection report
-         */
-        Map<String, String> eTags = syncCollection(syncToken, sharedFolderID).getETagsStatusOK();
-        assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
-        List<ICalResource> calendarData = super.calendarMultiget(eTags.keySet());
-        iCalResource = assertContains(appointment.getUid(), calendarData);
-        assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
-        classification = iCalResource.getVEvent().getPropertyValue("CLASS");
         assertTrue("CLASS wrong", "PRIVATE".equals(classification) || "CONFIDENTIAL".equals(classification));
         assertNotEquals("SUMMARY is readable", appointment.getTitle(), iCalResource.getVEvent().getSummary());
     }
