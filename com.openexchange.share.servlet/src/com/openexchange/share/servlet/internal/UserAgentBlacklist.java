@@ -88,6 +88,7 @@ public class UserAgentBlacklist {
 
         String[] wps = wildcardPatterns.split(" *, *", 0);
         List<Matcher> blacklistMatchers = new ArrayList<>(wps.length);
+        List<String> containees = new ArrayList<>(wps.length);
         for (String wildcardPattern : wps) {
             if (!Strings.isEmpty(wildcardPattern)) {
                 String expr = wildcardPattern.trim();
@@ -97,17 +98,21 @@ public class UserAgentBlacklist {
                         LOG.warn("Ignoring empty pattern expression: {}", expr);
                     } else {
                         String contains = isContainsMatcher(unquoted);
-                        if (null != contains) {
-                            blacklistMatchers.add(new ContainsMatcher(ignoreCase ? Strings.asciiLowerCase(contains) : contains, ignoreCase));
-                        } else {
+                        if (null == contains) {
                             Pattern pattern = Pattern.compile(Strings.wildcardToRegex(unquoted), ignoreCase ? Pattern.CASE_INSENSITIVE : 0);
                             blacklistMatchers.add(new PatternMatcher(pattern));
+                        } else {
+                            containees.add(ignoreCase ? Strings.asciiLowerCase(contains) : contains);
                         }
                     }
                 } catch (PatternSyntaxException e) {
                     LOG.warn("Ignoring invalid pattern expression: {}", expr, e);
                 }
             }
+        }
+
+        if (false == containees.isEmpty()) {
+            blacklistMatchers.add(0, new ContainsMatcher(ignoreCase, containees));
         }
 
         ImmutableMap.Builder<Matcher, Matcher> map = ImmutableMap.builder();
@@ -131,7 +136,7 @@ public class UserAgentBlacklist {
 
         for (int i = len - 1; i-- > 1;) {
             char ch = expr.charAt(i);
-            if (false == Strings.isAsciiLetter(ch)) {
+            if (false == Strings.isAsciiLetter(ch) && ch != ' ' && ch != '-' && ch != '_') {
                 return null;
             }
         }
@@ -196,22 +201,38 @@ public class UserAgentBlacklist {
         public boolean matches(String userAgent) {
             return pattern.matcher(userAgent).matches();
         }
+
+        @Override
+        public String toString() {
+            return pattern.toString();
+        }
     }
 
     private static final class ContainsMatcher implements Matcher {
 
-        private final String contained;
+        private final List<String> containees;
         private final boolean ignoreCase;
 
-        ContainsMatcher(String contained, boolean ignoreCase) {
+        ContainsMatcher(boolean ignoreCase, List<String> containees) {
             super();
-            this.contained = contained;
+            this.containees = containees;
             this.ignoreCase = ignoreCase;
         }
 
         @Override
         public boolean matches(String userAgent) {
-            return (ignoreCase ? Strings.asciiLowerCase(userAgent) : userAgent).indexOf(contained) >= 0;
+            String toCheck = ignoreCase ? Strings.asciiLowerCase(userAgent) : userAgent;
+            for (String contained : containees) {
+                if (toCheck.indexOf(contained) >= 0) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public String toString() {
+            return containees.toString();
         }
     }
 
