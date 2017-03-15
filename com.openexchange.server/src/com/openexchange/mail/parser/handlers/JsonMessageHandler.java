@@ -415,6 +415,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
         if (result.hasError()) {
             json.put("error", result.getError());
         }
+        json.put("pgpInline", result.isPgpInline());
         if (result.hasSignatureResults()) {
             JSONArray signatures = new JSONArray();
             for (SignatureResult res : result.getSignatureResults()) {

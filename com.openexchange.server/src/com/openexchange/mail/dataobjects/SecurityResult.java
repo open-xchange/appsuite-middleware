@@ -85,6 +85,7 @@ public abstract class SecurityResult {
     protected String error; // Any error messages
     protected ArrayList<SignatureResult> signatureResults;
     protected EncryptionType type;  // Type of encryption
+    protected boolean pgpInline;
 
     /**
      * Return true if E-Mail action successful
@@ -132,6 +133,14 @@ public abstract class SecurityResult {
      */
     public EncryptionType getType () {
         return type;
+    }
+
+    /**
+     * Returns true if pgpInline
+     * @return
+     */
+    public boolean isPgpInline() {
+        return pgpInline;
     }
 
 
