@@ -50,6 +50,7 @@
 package com.openexchange.userfeedback.mail.osgi;
 
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.userfeedback.FeedbackService;
@@ -66,7 +67,7 @@ public class UserFeedbackMailActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ConfigurationService.class, FeedbackService.class, SSLSocketFactoryProvider.class };
+        return new Class[] { ConfigurationService.class, FeedbackService.class, SSLSocketFactoryProvider.class, LeanConfigurationService.class };
     }
 
     @Override

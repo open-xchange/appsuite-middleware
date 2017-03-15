@@ -180,7 +180,7 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
         ;
         properties.put("mail.smtp.connectiontimeout", leanConfig.getIntProperty(UserFeedbackMailProperty.connectionTimeout));
         properties.put("mail.smtp.timeout", leanConfig.getIntProperty(UserFeedbackMailProperty.timeout));
-        properties.put("mail.smtp.ssl.protocols", leanConfig.getIntProperty(UserFeedbackMailProperty.protocol));
+        properties.put("mail.smtp.ssl.protocols", leanConfig.getProperty(UserFeedbackMailProperty.protocol));
 
         return properties;
     }
