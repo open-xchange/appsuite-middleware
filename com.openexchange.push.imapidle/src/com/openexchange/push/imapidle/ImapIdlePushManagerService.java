@@ -482,12 +482,15 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
                 }
             }
 
-            // Look-up remote sessions, too, if possible
-            if (sessiondService instanceof SessiondServiceExtended) {
-                sessions = ((SessiondServiceExtended) sessiondService).getSessions(userId, contextId, true);
-                for (Session session : sessions) {
-                    if (!oldSessionId.equals(session.getSessionID()) && PushUtility.allowedClient(session.getClient(), session, true)) {
-                        return injectAnotherListenerUsing(session, false).injectedPushListener;
+            // If we're running a node-local lock, there is no need to check for session s at other nodes
+            if (ImapIdleClusterLock.Type.LOCAL != clusterLock.getType()) {
+                // Look-up remote sessions, too, if possible
+                if (sessiondService instanceof SessiondServiceExtended) {
+                    sessions = ((SessiondServiceExtended) sessiondService).getSessions(userId, contextId, true);
+                    for (Session session : sessions) {
+                        if (!oldSessionId.equals(session.getSessionID()) && PushUtility.allowedClient(session.getClient(), session, true)) {
+                            return injectAnotherListenerUsing(session, false).injectedPushListener;
+                        }
                     }
                 }
             }
