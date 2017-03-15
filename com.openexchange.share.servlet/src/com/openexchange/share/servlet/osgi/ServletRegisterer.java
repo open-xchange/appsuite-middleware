@@ -170,7 +170,7 @@ public final class ServletRegisterer implements ServiceTrackerCustomizer<Object,
     private UserAgentBlacklist parseBlacklist(ConfigurationService configService) {
         String blacklist = configService.getProperty("com.openexchange.share.userAgentBlacklist");
         if (Strings.isEmpty(blacklist)) {
-            return null;
+            return UserAgentBlacklist.DEFAULT_BLACKLIST;
         }
 
         UserAgentBlacklist userAgentBlacklist = new UserAgentBlacklist(blacklist, true);
