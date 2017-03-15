@@ -53,9 +53,11 @@ import java.util.Iterator;
 import java.util.Random;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.glassfish.grizzly.http.Cookie;
+import org.glassfish.grizzly.http.server.util.Globals;
 import org.glassfish.grizzly.utils.DataStructures;
 import org.slf4j.Logger;
 import com.openexchange.http.grizzly.GrizzlyConfig;
@@ -87,6 +89,7 @@ public class OXSessionManager implements SessionManager {
     private final int max;
     private final boolean considerSessionCount;
     private final Lock lock;
+    private final AtomicReference<String> sessionCookieName = new AtomicReference<String>(Globals.SESSION_COOKIE_NAME);
     private int sessionsCount;  // protected by lock
     private long lastCleanUp;   // protected by lock
 
@@ -156,6 +159,18 @@ public class OXSessionManager implements SessionManager {
         } finally {
             lock.unlock();
         }
+    }
+
+    @Override
+    public void setSessionCookieName(final String name) {
+        if (name != null && !name.isEmpty()) {
+            sessionCookieName.set(name);
+        }
+    }
+
+    @Override
+    public String getSessionCookieName() {
+        return sessionCookieName.get();
     }
 
     @Override

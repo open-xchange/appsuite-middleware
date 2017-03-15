@@ -314,6 +314,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 if (false == containsChanges(originalAppointment, appointmentToSave)) {
                     LOG.debug("No further changes detected in {}, skipping update.", appointmentToSave);
                 } else {
+                    CalendarDataObject appointmentToSave = this.appointmentToSave.clone();
                     Appointment[] hardConflicts = getAppointmentInterface().updateAppointmentObject(appointmentToSave, parentFolderID, clientLastModified, checkPermissions);
                     if (null != hardConflicts && 0 < hardConflicts.length) {
                         throw new PreconditionException(
@@ -321,6 +322,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                     }
                     if (null != appointmentToSave.getLastModified()) {
                         clientLastModified = appointmentToSave.getLastModified();
+                        this.appointmentToSave.setLastModified(clientLastModified);
                     }
                 }
                 /*
@@ -485,12 +487,18 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             }
             handlePrivateComments(appointmentToSave);
             ReminderObject nextReminder = handleReminders(null, appointmentToSave, null);
-            Appointment[] hardConflicts = getAppointmentInterface().insertAppointmentObject(appointmentToSave);
-            if (null != hardConflicts && 0 < hardConflicts.length) {
-                throw new PreconditionException(
-                    DAVProtocol.CAL_NS.getURI(), "allowed-organizer-scheduling-object-change", getUrl(), HttpServletResponse.SC_FORBIDDEN);
+            Date clientLastModified;
+            {
+                CalendarDataObject appointmentToSave = this.appointmentToSave.clone();
+                Appointment[] hardConflicts = getAppointmentInterface().insertAppointmentObject(appointmentToSave);
+                if (null != hardConflicts && 0 < hardConflicts.length) {
+                    throw new PreconditionException(
+                        DAVProtocol.CAL_NS.getURI(), "allowed-organizer-scheduling-object-change", getUrl(), HttpServletResponse.SC_FORBIDDEN);
+                }
+                clientLastModified = appointmentToSave.getLastModified();
+                this.appointmentToSave.setLastModified(clientLastModified);
+                this.appointmentToSave.setObjectID(appointmentToSave.getObjectID());
             }
-            Date clientLastModified = appointmentToSave.getLastModified();
             /*
              * process attachments & reminders
              */
@@ -516,7 +524,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 exception.setObjectID(appointmentToSave.getObjectID());
                 Patches.Incoming.removeParticipantsForPrivateAppointmentInPublicfolder(
                     factory.getSession().getUserId(), parent.getFolder(), exception);
-                hardConflicts = getAppointmentInterface().updateAppointmentObject(exception, parentFolderID, clientLastModified);
+                Appointment[] hardConflicts = getAppointmentInterface().updateAppointmentObject(exception, parentFolderID, clientLastModified);
                 if (null != hardConflicts && 0 < hardConflicts.length) {
                     throw new PreconditionException(
                         DAVProtocol.CAL_NS.getURI(), "allowed-organizer-scheduling-object-change", getUrl(), HttpServletResponse.SC_FORBIDDEN);

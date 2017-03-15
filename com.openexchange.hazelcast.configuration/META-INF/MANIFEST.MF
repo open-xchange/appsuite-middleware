@@ -10,6 +10,7 @@ Eclipse-BuddyPolicy: registered
 Import-Package: com.hazelcast.config,
  com.hazelcast.instance,
  com.hazelcast.nio.serialization,
+ com.hazelcast.spi.properties,
  com.openexchange.config,
  com.openexchange.configuration,
  com.openexchange.exception,

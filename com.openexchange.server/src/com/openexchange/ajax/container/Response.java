@@ -454,11 +454,11 @@ public final class Response {
      */
     public Response addWarnings(final Collection<OXException> warnings) {
         for (final OXException warning : warnings) {
-            if (!Category.CATEGORY_WARNING.equals(exception.getCategory())) {
+            if (!Category.CATEGORY_WARNING.equals(warning.getCategory())) {
                 warning.setCategory(Category.CATEGORY_WARNING);
             }
         }
-        warnings.addAll(warnings);
+        this.warnings.addAll(warnings);
         return this;
     }
 

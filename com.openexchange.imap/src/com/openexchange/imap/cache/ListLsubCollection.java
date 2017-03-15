@@ -72,14 +72,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.mail.Folder;
 import javax.mail.MessagingException;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Interests;
-import com.openexchange.config.Reloadable;
-import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCommandsCollection;
-import com.openexchange.imap.config.IMAPReloadable;
-import com.openexchange.imap.services.Services;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.mime.MimeMailException;
@@ -295,7 +289,11 @@ final class ListLsubCollection implements Serializable {
      * @param forceNewConnection <code>true</code> to enforce a new connection; otherwise <code>false</code>
      */
     public void clear(boolean forceNewConnection) {
-        if (deprecated.compareAndSet(State.INITIALIZED, forceNewConnection ? State.DEPRECATED_FORCE_NEW : State.DEPRECATED)) {
+        if (forceNewConnection) {
+            deprecated.set(State.DEPRECATED_FORCE_NEW);
+            stamp = 0;
+            LOG.debug("Cleared LIST/LSUB cache.", new Throwable());
+        } else if (deprecated.compareAndSet(State.INITIALIZED, State.DEPRECATED)) {
             stamp = 0;
             LOG.debug("Cleared LIST/LSUB cache.", new Throwable());
         }
@@ -433,52 +431,6 @@ final class ListLsubCollection implements Serializable {
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
-    }
-
-    private static volatile Integer initAclThreshold;
-    private static int initAclThreshold() {
-        Integer tmp = initAclThreshold;
-        if (null == tmp) {
-            synchronized (ListLsubCollection.class) {
-                tmp = initAclThreshold;
-                if (null == tmp) {
-                    final ConfigurationService service = Services.getService(ConfigurationService.class);
-                    tmp = Integer.valueOf(null == service ? 500 : service.getIntProperty("com.openexchange.imap.initAclThreshold", 500));
-                }
-            }
-        }
-        return tmp.intValue();
-    }
-
-    private static volatile Integer initStatusThreshold;
-    private static int initStatusThreshold() {
-        Integer tmp = initStatusThreshold;
-        if (null == tmp) {
-            synchronized (ListLsubCollection.class) {
-                tmp = initStatusThreshold;
-                if (null == tmp) {
-                    final ConfigurationService service = Services.getService(ConfigurationService.class);
-                    tmp = Integer.valueOf(null == service ? 500 : service.getIntProperty("com.openexchange.imap.initStatusThreshold", 500));
-                }
-            }
-        }
-        return tmp.intValue();
-    }
-
-    static {
-        IMAPReloadable.getInstance().addReloadable(new Reloadable() {
-
-            @Override
-            public void reloadConfiguration(final ConfigurationService configService) {
-                initAclThreshold = null;
-                initStatusThreshold = null;
-            }
-
-            @Override
-            public Interests getInterests() {
-                return Reloadables.interestsForProperties("com.openexchange.imap.initStatusThreshold", "com.openexchange.imap.initAclThreshold");
-            }
-        });
     }
 
     private void init(boolean clearMaps, IMAPFolder imapFolder, final boolean ignoreSubscriptions, IMAPStore imapStore) throws MessagingException {

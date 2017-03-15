@@ -52,6 +52,7 @@ package com.openexchange.oauth.impl.osgi;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.EventAdmin;
+import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
@@ -71,8 +72,10 @@ import com.openexchange.oauth.OAuthAccountReauthorizedListener;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
+import com.openexchange.oauth.association.OAuthAccountAssociationService;
 import com.openexchange.oauth.http.OAuthHTTPClientFactory;
 import com.openexchange.oauth.impl.access.impl.OAuthAccessRegistryServiceImpl;
+import com.openexchange.oauth.impl.association.OAuthAccountAssociationServiceImpl;
 import com.openexchange.oauth.impl.httpclient.impl.scribe.ScribeHTTPClientFactoryImpl;
 import com.openexchange.oauth.impl.internal.CallbackRegistryImpl;
 import com.openexchange.oauth.impl.internal.DeleteListenerRegistry;
@@ -145,6 +148,9 @@ public final class OAuthActivator extends HousekeepingActivator {
             registerService(OAuthScopeRegistry.class, oauthScopeRegistry);
             trackService(OAuthScopeRegistry.class);
 
+            OAuthAccountAssociationServiceImpl associationService = new OAuthAccountAssociationServiceImpl(context);
+            rememberTracker(associationService);
+
             /*
              * Start other trackers
              */
@@ -193,6 +199,7 @@ public final class OAuthActivator extends HousekeepingActivator {
             registerService(CustomRedirectURLDetermination.class, cbRegistry);
             registerService(OAuthService.class, oauthService);
             registerService(OAuthServiceMetaDataRegistry.class, registry);
+            registerService(OAuthAccountAssociationService.class, associationService);
             registerService(EncryptedItemDetectorService.class, oauthService);
             registerService(SecretMigrator.class, oauthService);
             registerService(EncryptedItemCleanUpService.class, oauthService);
@@ -213,8 +220,8 @@ public final class OAuthActivator extends HousekeepingActivator {
                 }
 
             };
-            track(HTTPResponseProcessor.class, listener);
-
+            ServiceTracker<HTTPResponseProcessor, HTTPResponseProcessor> tracker = track(HTTPResponseProcessor.class, listener);
+            tracker.open();
         } catch (final Exception e) {
             log.error("Starting bundle \"com.openexchange.oauth\" failed.", e);
             throw e;

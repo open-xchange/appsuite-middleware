@@ -68,6 +68,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Autoboxing;
+import com.openexchange.osgi.ServiceListing;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
@@ -77,6 +78,10 @@ import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.groupware.TargetUpdate;
+import com.openexchange.share.groupware.spi.AccessibleModulesExtension;
+import com.openexchange.share.groupware.spi.FolderHandlerModuleExtension;
+import com.openexchange.share.impl.osgi.AccessibleModulesExtensionTracker;
+import com.openexchange.share.impl.osgi.FolderHandlerModuleExtensionTracker;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -95,12 +100,19 @@ public class ModuleSupportImpl implements ModuleSupport {
     private final ServiceLookup services;
     private final ModuleHandlerRegistry handlers;
     private final ModuleAdjusterRegistry adjusters;
+    private final ServiceListing<FolderHandlerModuleExtension> folderExtensions;
+    private final ServiceListing<AccessibleModulesExtension> accessibleModulesExtensions;
 
-    public ModuleSupportImpl(ServiceLookup services) {
+    /**
+     * Initializes a new {@link ModuleSupportImpl}.
+     */
+    public ModuleSupportImpl(ServiceLookup services, FolderHandlerModuleExtensionTracker folderExtensions, AccessibleModulesExtensionTracker accessibleModulesExtensions) {
         super();
         this.services = services;
         handlers = new ModuleHandlerRegistry(services);
         adjusters = new ModuleAdjusterRegistry(services);
+        this.folderExtensions = folderExtensions;
+        this.accessibleModulesExtensions = accessibleModulesExtensions;
     }
 
     @Override
@@ -141,6 +153,12 @@ public class ModuleSupportImpl implements ModuleSupport {
 
         if (null == Module.getForFolderConstant(module)) {
             return true;
+        }
+
+        for (FolderHandlerModuleExtension folderHandler : folderExtensions.getServiceList()) {
+            if (folderHandler.isApplicableFor(folder)) {
+                return folderHandler.isVisible(folder, item, contextID, guestID);
+            }
         }
 
         try {
@@ -191,6 +209,12 @@ public class ModuleSupportImpl implements ModuleSupport {
             return true;
         }
 
+        for (FolderHandlerModuleExtension folderHandler : folderExtensions.getServiceList()) {
+            if (folderHandler.isApplicableFor(folder)) {
+                return folderHandler.exists(folder, item, contextID, guestID);
+            }
+        }
+
         try {
             UserService userService = requireService(UserService.class, services);
             Context context = userService.getContext(contextID);
@@ -209,6 +233,14 @@ public class ModuleSupportImpl implements ModuleSupport {
 
     @Override
     public TargetProxy resolveTarget(ShareTargetPath targetPath, int contextId, int guestId) throws OXException {
+        for (FolderHandlerModuleExtension folderHandler : folderExtensions.getServiceList()) {
+            if (folderHandler.isApplicableFor(targetPath.getFolder())) {
+                TargetProxy resolvedTarget = folderHandler.resolveTarget(targetPath, contextId, guestId);
+                if (null != resolvedTarget) {
+                    return resolvedTarget;
+                }
+            }
+        }
         TargetProxy proxy = loadAsAdmin(targetPath.getModule(), targetPath.getFolder(), targetPath.getItem(), contextId, guestId);
         return proxy;
     }
@@ -249,6 +281,9 @@ public class ModuleSupportImpl implements ModuleSupport {
                     accessibleModules.add(moduleID);
                 }
             }
+        }
+        for (AccessibleModulesExtension extension : accessibleModulesExtensions.getServiceList()) {
+            accessibleModules = extension.extendAccessibleModules(accessibleModules, contextID, guestID);
         }
         return accessibleModules;
     }

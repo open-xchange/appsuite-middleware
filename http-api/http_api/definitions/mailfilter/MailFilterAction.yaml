@@ -42,3 +42,6 @@ properties:
     description: The public keys which should be used for encryption (for pgp-command).
     items:
       type: string
+  copy:
+    type: boolean
+    description: An optional boolean flag indicating whether a copy tag should be added to the fileinto or redirect command or not.

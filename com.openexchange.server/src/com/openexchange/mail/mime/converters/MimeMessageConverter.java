@@ -110,6 +110,7 @@ import com.openexchange.mail.MailPath;
 import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.dataobjects.SecurityInfo;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.json.osgi.MailJSONActivator;
@@ -2024,7 +2025,7 @@ public final class MimeMessageConverter {
              */
             mail.setSubject(getSubject(mail));
             mail.setThreadLevel(0);
-            mail.setEncrypted(isEncrypted(mail));
+            mail.setSecurityInfo(getSecurityInfo(mail));
             return mail;
         } catch (final MessageRemovedException e) {
             final String[] sa = getFolderAndIdSafe(msg);
@@ -2045,26 +2046,26 @@ public final class MimeMessageConverter {
     }
 
     /**
-     * Checks if given mail is an encrypted PGP email
+     * Checks if given mail is an encrypted or signed PGP email
      *
      * @return <code>true</code> if mail is an encrypted; otherwise <code>false</code>
      */
-    private static boolean isEncrypted (MimeMailMessage mail) {
+    private static SecurityInfo getSecurityInfo (MimeMailMessage mail) {
         ServiceLookup services = MailJSONActivator.SERVICES.get();
         if (null == services) {
-            return false;
+            return null;
         }
 
         PGPMailRecognizer recognizer = services.getOptionalService(PGPMailRecognizer.class);
         if (null == recognizer) {
-            return false;
+            return null;
         }
 
         try {
-            return recognizer.isPGPMessage(mail);
-        } catch (OXException e) {
+            return new SecurityInfo (recognizer.isPGPMessage(mail), recognizer.isPGPSignedMessage(mail));
+        } catch (Exception e) {
             LOG.warn("Failed to check if mail is encrypted", e);
-            return false;
+            return null;
         }
     }
 

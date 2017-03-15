@@ -76,6 +76,7 @@ import com.openexchange.log.LogProperties;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
+import com.openexchange.session.Session;
 import com.sun.mail.iap.Argument;
 import com.sun.mail.iap.BadCommandException;
 import com.sun.mail.iap.CommandFailedException;
@@ -386,7 +387,7 @@ public final class IMAPSort {
      * @throws MessagingException
      * @throws OXException
      */
-    public static ImapSortResult sortMessages(IMAPFolder imapFolder, com.openexchange.mail.search.SearchTerm<?> searchTerm, MailSortField sortField, OrderDirection order, IndexRange indexRange, boolean allowESORT, boolean allowSORTDISPLAY, boolean fallbackOnCommandFailed, IMAPConfig imapConfig) throws MessagingException, OXException {
+    public static ImapSortResult sortMessages(IMAPFolder imapFolder, com.openexchange.mail.search.SearchTerm<?> searchTerm, MailSortField sortField, OrderDirection order, IndexRange indexRange, boolean allowESORT, boolean allowSORTDISPLAY, boolean fallbackOnCommandFailed, IMAPConfig imapConfig, Session session) throws MessagingException, OXException {
         SortTerm[] sortTerms = IMAPSort.getSortTermsForIMAPCommand(sortField, order == OrderDirection.DESC, allowSORTDISPLAY && imapConfig.asMap().containsKey("SORT=DISPLAY"));
         if (sortTerms == null) {
             throw IMAPException.create(Code.UNSUPPORTED_SORT_FIELD, sortField.toString());
@@ -450,7 +451,7 @@ public final class IMAPSort {
             seqNums = sort(sortTerms, jmsSearchTerm, imapFolder, fallbackOnCommandFailed);
         }
 
-        int umlautFilterThreshold = IMAPSearch.umlautFilterThreshold();
+        int umlautFilterThreshold = IMAPSearch.umlautFilterThreshold(session.getUserId(), session.getContextId());
         if (searchTerm != null && umlautFilterThreshold > 0 && seqNums.length <= umlautFilterThreshold && !searchTerm.isAscii()) {
             /*
              * Search with respect to umlauts in pre-selected messages

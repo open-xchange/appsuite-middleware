@@ -49,12 +49,12 @@
 
 package com.openexchange.geolocation.maxmind.osgi;
 
+import static com.openexchange.geolocation.maxmind.MaxMindGeoLocationService.newInstance;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.Reloadables;
-import com.openexchange.exception.OXException;
 import com.openexchange.geolocation.GeoLocationService;
 import com.openexchange.geolocation.maxmind.MaxMindGeoLocationService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -68,6 +68,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 public class MaxMindGeoLocationServiceActivator extends HousekeepingActivator implements Reloadable {
 
     private ServiceRegistration<GeoLocationService> serviceRegistration;
+    private MaxMindGeoLocationService maxMindGeoLocationService;
 
     /**
      * Initializes a new {@link MaxMindGeoLocationServiceActivator}.
@@ -84,31 +85,42 @@ public class MaxMindGeoLocationServiceActivator extends HousekeepingActivator im
     @Override
     protected synchronized void startBundle() throws Exception {
         registerService(Reloadable.class, this);
-        serviceRegistration = context.registerService(GeoLocationService.class, new MaxMindGeoLocationService(context.getBundle(), getService(ConfigurationService.class)), null);
+        registerMaxMindGeoLocationService();
     }
 
     @Override
     protected synchronized void stopBundle() throws Exception {
+        unregisterMaxMindGeoLocationService();
+        super.stopBundle();
+    }
+
+    private void registerMaxMindGeoLocationService() throws Exception {
+        MaxMindGeoLocationService maxMindGeoLocationService = newInstance(context.getBundle(), getService(ConfigurationService.class));
+        this.maxMindGeoLocationService = maxMindGeoLocationService;
+        serviceRegistration = context.registerService(GeoLocationService.class, maxMindGeoLocationService, null);
+    }
+
+    private void unregisterMaxMindGeoLocationService() {
         ServiceRegistration<GeoLocationService> serviceRegistration = this.serviceRegistration;
         if (null != serviceRegistration) {
             this.serviceRegistration = null;
             serviceRegistration.unregister();
         }
 
-        super.stopBundle();
+        MaxMindGeoLocationService maxMindGeoLocationService = this.maxMindGeoLocationService;
+        if (null != maxMindGeoLocationService) {
+            this.maxMindGeoLocationService = null;
+            maxMindGeoLocationService.stop();
+        }
     }
 
     @Override
     public synchronized void reloadConfiguration(ConfigurationService configService) {
-        ServiceRegistration<GeoLocationService> serviceRegistration = this.serviceRegistration;
-        if (null != serviceRegistration) {
-            this.serviceRegistration = null;
-            serviceRegistration.unregister();
-        }
+        unregisterMaxMindGeoLocationService();
 
         try {
-            this.serviceRegistration = context.registerService(GeoLocationService.class, new MaxMindGeoLocationService(context.getBundle(), getService(ConfigurationService.class)), null);
-        } catch (OXException e) {
+            registerMaxMindGeoLocationService();
+        } catch (Exception e) {
             org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(MaxMindGeoLocationServiceActivator.class);
             logger.error("", e);
         }

@@ -112,8 +112,9 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
         try {
 
             {
-                int timeout = 3000;
-                HttpClients.ClientConfig clientConfig = HttpClients.ClientConfig.newInstance().setConnectionTimeout(timeout).setSocketReadTimeout(timeout).setUserAgent("Open-Xchange Auto-Config Client");
+                int readTimeout = 10000;
+                int connecTimeout = 3000;
+                HttpClients.ClientConfig clientConfig = HttpClients.ClientConfig.newInstance().setConnectionTimeout(connecTimeout).setSocketReadTimeout(readTimeout).setUserAgent("Open-Xchange Auto-Config Client");
                 httpclient = HttpClients.getHttpClient(clientConfig);
             }
 

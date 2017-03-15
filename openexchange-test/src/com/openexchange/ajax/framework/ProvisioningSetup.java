@@ -104,6 +104,7 @@ public class ProvisioningSetup {
     public static void init() throws OXException {
         synchronized (ProvisioningSetup.class) {
             if (!initialized.get()) {
+                LOG.info("Starting initialization of contexts.");
                 AJAXConfig.init();
                 Properties contextsAndUsers = getProperties();
 
@@ -113,6 +114,7 @@ public class ProvisioningSetup {
                 TestContextPool.startWatcher();
 
                 initialized.compareAndSet(false, true);
+                LOG.info("Finished initialization for {} contexts.", TestContextPool.getAllTimeAvailableContexts().size());
             }
         }
     }

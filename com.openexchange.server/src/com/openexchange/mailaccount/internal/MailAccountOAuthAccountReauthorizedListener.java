@@ -80,23 +80,23 @@ public class MailAccountOAuthAccountReauthorizedListener extends MailAccountOAut
             MailAccount[] userMailAccounts = mass.getUserMailAccounts(user, contextId, con);
             for (MailAccount mailAccount : userMailAccounts) {
                 if (false == mailAccount.isDefaultAccount() && false == isUnifiedINBOXAccount(mailAccount)) {
-                    enbledMailAccount(mailAccount, oauthAccountId, user, contextId, mass);
+                    enbledMailAccount(mailAccount, oauthAccountId, user, contextId, con, mass);
                 }
             }
         }
     }
 
-    private void enbledMailAccount(MailAccount mailAccount, int oauthAccountId, int userId, int contextId, MailAccountStorageService mass) throws OXException {
+    private void enbledMailAccount(MailAccount mailAccount, int oauthAccountId, int userId, int contextId, Connection con, MailAccountStorageService mass) throws OXException {
         boolean updated = false;
         if (mailAccount.isMailOAuthAble()) {
             if (mailAccount.getMailOAuthId() == oauthAccountId) {
-                mass.enableMailAccount(mailAccount.getId(), userId, contextId);
+                mass.enableMailAccount(mailAccount.getId(), userId, contextId, con);
                 updated = true;
             }
         }
         if (!updated && mailAccount.isTransportOAuthAble()) {
             if (mailAccount.getTransportOAuthId() == oauthAccountId) {
-                mass.enableMailAccount(mailAccount.getId(), userId, contextId);
+                mass.enableMailAccount(mailAccount.getId(), userId, contextId, con);
             }
         }
     }

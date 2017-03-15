@@ -384,9 +384,12 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
         MailConfig mailConfig = null;
         try {
             // Create a mail access instance
-            int accountId = accountDescription.getId();
-            boolean isDefault = accountId==MailAccount.DEFAULT_ID;
-            MailAccess<?, ?> mailAccess = accountId >= 0 ? mailProvider.createNewMailAccess(session, accountId) : mailProvider.createNewMailAccess(session);
+            MailAccess<?, ?> mailAccess;
+            {
+                int accountId = accountDescription.getId();
+                mailAccess = accountId >= 0 ? mailProvider.createNewMailAccess(session, accountId) : mailProvider.createNewMailAccess(session);
+            }
+            boolean isDefault = mailAccess.getAccountId() == MailAccount.DEFAULT_ID;
             mailConfig = mailAccess.getMailConfig();
             // Set auth-type, login and password
             if(isDefault){
@@ -397,7 +400,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
             if ( !Strings.isEmpty(accountDescription.getLogin())) {
                 mailConfig.setLogin(accountDescription.getLogin());
             }
-            if ( !isDefault || !PasswordSource.GLOBAL.equals(MailProperties.getInstance().getPasswordSource())) {
+            if ( !isDefault || !PasswordSource.GLOBAL.equals(MailProperties.getInstance().getPasswordSource(session.getUserId(), session.getContextId()))) {
                 mailConfig.setPassword(accountDescription.getPassword());
             }
             // Set server and port
@@ -407,7 +410,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
             } catch (final URISyntaxException e) {
                 throw MailExceptionCode.URI_PARSE_FAILED.create(e, mailServerURL);
             }
-            if (!isDefault || !ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource())) {
+            if (!isDefault || !ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource(session.getUserId(), session.getContextId()))) {
                 if (null != uri) {
                     mailConfig.setServer(uri.getHost());
                     mailConfig.setPort(uri.getPort());

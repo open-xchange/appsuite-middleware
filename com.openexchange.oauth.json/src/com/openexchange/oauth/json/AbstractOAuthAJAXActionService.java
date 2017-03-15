@@ -52,6 +52,7 @@ package com.openexchange.oauth.json;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.oauth.OAuthService;
+import com.openexchange.oauth.association.OAuthAccountAssociationService;
 import com.openexchange.secret.SecretService;
 import com.openexchange.session.Session;
 
@@ -68,6 +69,7 @@ public abstract class AbstractOAuthAJAXActionService implements AJAXActionServic
     public static final java.util.concurrent.atomic.AtomicReference<DispatcherPrefixService> PREFIX = new java.util.concurrent.atomic.AtomicReference<DispatcherPrefixService>();
 
     private static volatile OAuthService oAuthService;
+    private static volatile OAuthAccountAssociationService oAuthAccountAssociationService;
     private static volatile SecretService secretService;
 
     /**
@@ -94,6 +96,24 @@ public abstract class AbstractOAuthAJAXActionService implements AJAXActionServic
 
     public static String secret(final Session session) {
         return secretService.getSecret(session);
+    }
+
+    /**
+     * Sets the <code>OAuthAccountAssociationService</code> instance
+     *
+     * @param oAuthAccountAssociationService The instance
+     */
+    public static void setOAuthAccountAssociationService(final OAuthAccountAssociationService oAuthAccountAssociationService) {
+        AbstractOAuthAJAXActionService.oAuthAccountAssociationService = oAuthAccountAssociationService;
+    }
+
+    /**
+     * Gets the <code>OAuthAccountAssociationService</code> instance
+     *
+     * @return The instance or <code>null</code>
+     */
+    public static OAuthAccountAssociationService getOAuthAccountAssociationService() {
+        return oAuthAccountAssociationService;
     }
 
     /**

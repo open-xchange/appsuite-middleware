@@ -55,6 +55,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.lock.LockService;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.pns.PushNotificationService;
@@ -92,7 +93,8 @@ public class DovecotPushActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { DatabaseService.class, TimerService.class, MailService.class, ConfigurationService.class, ConfigViewFactory.class,
-            SessiondService.class, ThreadPoolService.class, ContextService.class, UserService.class, PushListenerService.class, ObfuscatorService.class };
+            SessiondService.class, ThreadPoolService.class, ContextService.class, UserService.class, PushListenerService.class, ObfuscatorService.class,
+            LockService.class };
     }
 
     @Override

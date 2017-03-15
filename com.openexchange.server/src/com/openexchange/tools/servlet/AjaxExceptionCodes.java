@@ -65,11 +65,11 @@ public enum AjaxExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Unknown AJAX action.
      */
-    UNKNOWN_ACTION("Unknown AJAX action.", MESSAGE, Category.CATEGORY_ERROR, 1, false),
+    UNKNOWN_ACTION("Unknown AJAX action.", MESSAGE, Category.CATEGORY_USER_INPUT, 1, false),
     /**
      * Missing the following request parameter: %1$s
      */
-    MISSING_PARAMETER("Missing the following request parameter: %1$s", MESSAGE, Category.CATEGORY_ERROR, 2),
+    MISSING_PARAMETER("Missing the following request parameter: %1$s", MESSAGE, Category.CATEGORY_USER_INPUT, 2),
     /**
      * Missing upload image.
      */
@@ -77,7 +77,7 @@ public enum AjaxExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Invalid parameter: %s
      */
-    IMVALID_PARAMETER("Invalid parameter: %s", MESSAGE, Category.CATEGORY_ERROR, 4),
+    IMVALID_PARAMETER("Invalid parameter: %s", MESSAGE, Category.CATEGORY_USER_INPUT, 4),
     /**
      * I/O error while writing to Writer object: %s
      */
@@ -89,7 +89,7 @@ public enum AjaxExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Unknown module.
      */
-    UNKNOWN_MODULE("Unknown module.", MESSAGE, Category.CATEGORY_ERROR, 7, false),
+    UNKNOWN_MODULE("Unknown module.", MESSAGE, Category.CATEGORY_USER_INPUT, 7, false),
     /**
      * JSON error: %s
      */
@@ -97,7 +97,7 @@ public enum AjaxExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Invalid parameter "%1$s": %2$s
      */
-    INVALID_PARAMETER_VALUE("Invalid parameter \"%1$s\": %2$s", MESSAGE, Category.CATEGORY_ERROR, 10),
+    INVALID_PARAMETER_VALUE("Invalid parameter \"%1$s\": %2$s", MESSAGE, Category.CATEGORY_USER_INPUT, 10),
     /**
      * Unexpected error: %1$s
      */

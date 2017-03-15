@@ -120,6 +120,30 @@ public abstract class MailServletInterface implements Closeable {
     }
 
     /**
+     * Gets a proper implementation of {@link MailServletInterface} which supports email decryption.
+     * <p>
+     * <b>NOTE:</b> Don't forget to invoke {@link #close(boolean)} after usage
+     *
+     * <pre>
+     * MailInterface mailInterface = MailInterface.getInstance(session);
+     * try {
+     *     //Do some stuff here...
+     * } finally {
+     *     mailInterface.close(true);
+     * }
+     * </pre>
+     *
+     * @param session The session
+     * @param cryptoAuthentication authentication for decrypting emails
+     * @return An instance of {@link MailServletInterface}
+     * @throws OXException
+     */
+    public static final MailServletInterface getInstanceWithDecryptionSupport(Session session, String cryptoAuthentication) throws OXException {
+        final boolean doDecryption = true;
+        return new MailServletInterfaceImpl(session, doDecryption, cryptoAuthentication);
+    }
+
+    /**
      * Mail monitor
      */
     public static final MailInterfaceMonitor mailInterfaceMonitor = new MailInterfaceMonitor();

@@ -60,7 +60,6 @@ import com.openexchange.folderstorage.type.MailType;
 import com.openexchange.folderstorage.type.SystemType;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
@@ -93,7 +92,7 @@ public class ExternalMailAccountRootFolder extends AbstractFolder {
      * @param session The session
      * @throws OXException If creation fails
      */
-    public ExternalMailAccountRootFolder(final MailAccount mailAccount, final MailConfig mailConfig, final ServerSession session) throws OXException {
+    public ExternalMailAccountRootFolder(final MailAccount mailAccount, /*final MailConfig mailConfig,*/ final ServerSession session) throws OXException {
         super();
         userId = session.getUserId();
         contexctId = session.getContextId();
@@ -121,7 +120,7 @@ public class ExternalMailAccountRootFolder extends AbstractFolder {
         type = SystemType.getInstance();
         subscribed = true;
         subscribedSubfolders = true;
-        this.capabilities = mailConfig.getCapabilities().getCapabilities();
+        this.capabilities = com.openexchange.mail.api.MailCapabilities.EMPTY_CAPS.getCapabilities(); //mailConfig.getCapabilities().getCapabilities();
         summary = "";
         deefault = false;
         total = 0;

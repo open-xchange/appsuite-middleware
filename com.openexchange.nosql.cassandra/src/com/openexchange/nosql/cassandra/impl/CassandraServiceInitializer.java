@@ -59,10 +59,11 @@ import com.datastax.driver.core.Configuration;
 import com.datastax.driver.core.Host.StateListener;
 import com.datastax.driver.core.HostDistance;
 import com.datastax.driver.core.PoolingOptions;
+import com.datastax.driver.core.SocketOptions;
 import com.datastax.driver.core.policies.LoadBalancingPolicy;
 import com.datastax.driver.core.policies.Policies;
 import com.datastax.driver.core.policies.RetryPolicy;
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 
@@ -73,7 +74,7 @@ import com.openexchange.server.ServiceLookup;
  */
 class CassandraServiceInitializer implements Initializer {
 
-    private final ConfigurationService configurationService;
+    private final LeanConfigurationService leanConfigurationService;
     private final ServiceLookup services;
 
     /**
@@ -84,7 +85,7 @@ class CassandraServiceInitializer implements Initializer {
     public CassandraServiceInitializer(ServiceLookup services) {
         super();
         this.services = services;
-        configurationService = services.getService(ConfigurationService.class);
+        leanConfigurationService = services.getService(LeanConfigurationService.class);
     }
 
     /*
@@ -94,7 +95,7 @@ class CassandraServiceInitializer implements Initializer {
      */
     @Override
     public String getClusterName() {
-        return configurationService.getProperty(CassandraProperty.clusterName.getName(), CassandraProperty.clusterName.getDefaultValue(String.class));
+        return leanConfigurationService.getProperty(CassandraProperty.clusterName);
     }
 
     /*
@@ -104,8 +105,8 @@ class CassandraServiceInitializer implements Initializer {
      */
     @Override
     public List<InetSocketAddress> getContactPoints() {
-        int port = configurationService.getIntProperty(CassandraProperty.port.getName(), CassandraProperty.port.getDefaultValue(Integer.class));
-        String cps = configurationService.getProperty(CassandraProperty.clusterContactPoints.getName(), CassandraProperty.clusterContactPoints.getDefaultValue(String.class));
+        int port = leanConfigurationService.getIntProperty(CassandraProperty.port);
+        String cps = leanConfigurationService.getProperty(CassandraProperty.clusterContactPoints);
         String[] cpsSplit = Strings.splitByComma(cps);
 
         List<InetSocketAddress> contactPoints = new ArrayList<>();
@@ -123,25 +124,28 @@ class CassandraServiceInitializer implements Initializer {
     @Override
     public Configuration getConfiguration() {
         // Retry Policies
-        String rp = configurationService.getProperty(CassandraProperty.retryPolicy.getName(), CassandraProperty.retryPolicy.getDefaultValue(String.class));
-        boolean logRetryPolicy = configurationService.getBoolProperty(CassandraProperty.logRetryPolicy.getName(), CassandraProperty.logRetryPolicy.getDefaultValue(Boolean.class));
+        String rp = leanConfigurationService.getProperty(CassandraProperty.retryPolicy);
+        boolean logRetryPolicy = leanConfigurationService.getBooleanProperty(CassandraProperty.logRetryPolicy);
         RetryPolicy retryPolicy = logRetryPolicy ? CassandraRetryPolicy.valueOf(rp).getLoggingRetryPolicy() : CassandraRetryPolicy.valueOf(rp).getRetryPolicy();
+
         // Load Balancing Policies
-        String lbPolicy = configurationService.getProperty(CassandraProperty.loadBalancingPolicy.getName(), CassandraProperty.loadBalancingPolicy.getDefaultValue(String.class));
+        String lbPolicy = leanConfigurationService.getProperty(CassandraProperty.loadBalancingPolicy);
         LoadBalancingPolicy loadBalancingPolicy = CassandraLoadBalancingPolicy.createLoadBalancingPolicy(lbPolicy);
+
         // Build policies
         Policies policies = Policies.builder().withRetryPolicy(retryPolicy).withLoadBalancingPolicy(loadBalancingPolicy).build();
+
         // Build pooling options
         PoolingOptions poolingOptions = new PoolingOptions();
-        int heartbeatInterval = configurationService.getIntProperty(CassandraProperty.poolingHeartbeat.getName(), CassandraProperty.poolingHeartbeat.getDefaultValue(Integer.class));
-        int minLocal = configurationService.getIntProperty(CassandraProperty.minimumLocalConnectionsPerNode.getName(), CassandraProperty.minimumLocalConnectionsPerNode.getDefaultValue(Integer.class));
-        int maxLocal = configurationService.getIntProperty(CassandraProperty.maximumLocalConnectionsPerNode.getName(), CassandraProperty.maximumLocalConnectionsPerNode.getDefaultValue(Integer.class));
-        int minRemote = configurationService.getIntProperty(CassandraProperty.minimumRemoteConnectionsPerNode.getName(), CassandraProperty.minimumRemoteConnectionsPerNode.getDefaultValue(Integer.class));
-        int maxRemote = configurationService.getIntProperty(CassandraProperty.maximumRemoteConnectionsPerNode.getName(), CassandraProperty.maximumRemoteConnectionsPerNode.getDefaultValue(Integer.class));
-        int idleTimeoutSeconds = configurationService.getIntProperty(CassandraProperty.idleConnectionTrashTimeout.getName(), CassandraProperty.idleConnectionTrashTimeout.getDefaultValue(Integer.class));
-        int localMaxRequests = configurationService.getIntProperty(CassandraProperty.maximumRequestsPerLocalConnection.getName(), CassandraProperty.maximumRequestsPerLocalConnection.getDefaultValue(Integer.class));
-        int remoteMaxRequests = configurationService.getIntProperty(CassandraProperty.maximumRequestsPerRemoteConnection.getName(), CassandraProperty.maximumRequestsPerRemoteConnection.getDefaultValue(Integer.class));
-        int maxQueueSize = configurationService.getIntProperty(CassandraProperty.acquisitionQueueMaxSize.getName(), CassandraProperty.acquisitionQueueMaxSize.getDefaultValue(Integer.class));
+        int heartbeatInterval = leanConfigurationService.getIntProperty(CassandraProperty.poolingHeartbeat);
+        int minLocal = leanConfigurationService.getIntProperty(CassandraProperty.minimumLocalConnectionsPerNode);
+        int maxLocal = leanConfigurationService.getIntProperty(CassandraProperty.maximumLocalConnectionsPerNode);
+        int minRemote = leanConfigurationService.getIntProperty(CassandraProperty.minimumRemoteConnectionsPerNode);
+        int maxRemote = leanConfigurationService.getIntProperty(CassandraProperty.maximumRemoteConnectionsPerNode);
+        int idleTimeoutSeconds = leanConfigurationService.getIntProperty(CassandraProperty.idleConnectionTrashTimeout);
+        int localMaxRequests = leanConfigurationService.getIntProperty(CassandraProperty.maximumRequestsPerLocalConnection);
+        int remoteMaxRequests = leanConfigurationService.getIntProperty(CassandraProperty.maximumRequestsPerRemoteConnection);
+        int maxQueueSize = leanConfigurationService.getIntProperty(CassandraProperty.acquisitionQueueMaxSize);
         poolingOptions.setHeartbeatIntervalSeconds(heartbeatInterval);
         poolingOptions.setConnectionsPerHost(HostDistance.LOCAL, minLocal, maxLocal);
         poolingOptions.setConnectionsPerHost(HostDistance.REMOTE, minRemote, maxRemote);
@@ -149,8 +153,20 @@ class CassandraServiceInitializer implements Initializer {
         poolingOptions.setMaxRequestsPerConnection(HostDistance.LOCAL, localMaxRequests);
         poolingOptions.setMaxRequestsPerConnection(HostDistance.REMOTE, remoteMaxRequests);
         poolingOptions.setMaxQueueSize(maxQueueSize);
+
+        // Build socket options
+        SocketOptions socketOptions = new SocketOptions();
+        {
+            int connectTimeout = leanConfigurationService.getIntProperty(CassandraProperty.connectTimeout);
+            socketOptions.setConnectTimeoutMillis(connectTimeout);
+        }
+        {
+            int readTimeout = leanConfigurationService.getIntProperty(CassandraProperty.readTimeout);
+            socketOptions.setConnectTimeoutMillis(readTimeout);
+        }
+
         // Build configuration
-        return Configuration.builder().withPolicies(policies).withPoolingOptions(poolingOptions).build();
+        return Configuration.builder().withPolicies(policies).withPoolingOptions(poolingOptions).withSocketOptions(socketOptions).build();
     }
 
     /*

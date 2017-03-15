@@ -49,7 +49,9 @@
 
 package com.openexchange.ajax.framework;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.slf4j.LoggerFactory;
@@ -60,9 +62,12 @@ public abstract class AbstractSmtpAJAXSession extends AbstractAJAXSession {
 
     protected TestUser noReplyUser;
     private AJAXClient noReplyClient;
-    
+
+    private static final AtomicInteger counter = new AtomicInteger();
+
     @BeforeClass
     public static void before() throws Exception {
+        counter.incrementAndGet();
         SmtpMockSetup.init();
     }
 
@@ -87,8 +92,20 @@ public abstract class AbstractSmtpAJAXSession extends AbstractAJAXSession {
             super.tearDown();
         }
     }
-    
+
     public AJAXClient getNoReplyClient() {
         return noReplyClient;
     }
+
+    @AfterClass
+    public static void afterClass() throws Exception {
+        synchronized (AbstractSmtpAJAXSession.class) {
+            int get = counter.decrementAndGet();
+            System.out.println(get);
+            if (get == 0) {
+                SmtpMockSetup.restore();
+            }
+        }
+    }
+
 }

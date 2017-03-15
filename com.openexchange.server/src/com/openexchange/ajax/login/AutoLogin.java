@@ -72,6 +72,9 @@ import com.openexchange.login.LoginRampUpService;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
+import com.openexchange.login.listener.AutoLoginAwareLoginListener;
+import com.openexchange.login.listener.LoginListener;
+import com.openexchange.login.listener.internal.LoginListenerRegistryImpl;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.server.services.SessionInspector;
 import com.openexchange.session.Reply;
@@ -154,6 +157,14 @@ public class AutoLogin extends AbstractLoginRequestHandler {
             /*
              * auto-login successful, prepare result
              */
+            {
+                List<LoginListener> listeners = LoginListenerRegistryImpl.getInstance().getLoginListeners();
+                for (LoginListener loginListener : listeners) {
+                    if (loginListener instanceof AutoLoginAwareLoginListener) {
+                        ((AutoLoginAwareLoginListener) loginListener).onSucceededAutoLogin(loginResult);
+                    }
+                }
+            }
             ServerSession serverSession = ServerSessionAdapter.valueOf(loginResult.getSession(), loginResult.getContext(), loginResult.getUser());
             session = serverSession;
 

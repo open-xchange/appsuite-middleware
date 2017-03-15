@@ -675,11 +675,11 @@ public final class NewAction extends AbstractMailAction {
          */
         if (isOAuthRequest(request)) {
             if (MailAccount.DEFAULT_ID == accountId) {
-                PasswordSource passwordSource = MailProperties.getInstance().getPasswordSource();
+                PasswordSource passwordSource = MailProperties.getInstance().getPasswordSource(session.getUserId(), session.getContextId());
                 switch (passwordSource) {
                     case GLOBAL: {
                         // Just for convenience
-                        String masterPassword = MailProperties.getInstance().getMasterPassword();
+                        String masterPassword = MailProperties.getInstance().getMasterPassword(session.getUserId(), session.getContextId());
                         if (masterPassword == null) {
                             throw MailConfigException.create("Property \"com.openexchange.mail.masterPassword\" not set");
                         }

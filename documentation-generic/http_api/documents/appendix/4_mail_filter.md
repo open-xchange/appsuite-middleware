@@ -39,6 +39,24 @@ Furthermore some tests use a comparison field as stated above which specifies ho
 
 </div>
 
+
+### Simplified tests
+
+The mailfilter v2 api suppports some simplified rules.
+
+<div class="mailFilterToc">
+
+| Name | Description |
+|:------|:-------------|
+| [subject](#simplified-header-test) | A convenience test to match against a mails subject. |
+| [from](#simplified-header-test) | A convenience test to match against a mails From header. |
+| [to](#simplified-header-test) | A convenience test to match against a mails To header. |
+| [cc](#simplified-header-test) | A convenience test to match against a mails Cc header. |
+| [anyRecipient](#simplified-header-test) | A convenience test to match against a mails To and Cc headers. |
+| [mailingList](#simplified-header-test) | Matches against common mailing list headers for simple filtering of mailing list mails. |
+
+</div>
+
 ### Possible comparisons
 
 | Name | Description |
@@ -57,6 +75,14 @@ Furthermore some tests use a comparison field as stated above which specifies ho
 | is | Used in the date test to check for a value equal to the given one. |
 | ge | Used in the date test to check for a value greater or equal to the given one. |
 | le | Used in the date test to check for a value less or equal to the given one. |
+
+### Possible address parts
+
+| Name | Description |
+|:------|:-------------|
+| all | The hole mail address. This is also the default. |
+| localpart | The local part of the mail address. |
+| domain | The domain part of the mail address. |
 
 ### Possible size comparisons
 
@@ -82,6 +108,7 @@ This section describes the structures of tests.
 |:----|:---|:----|:----------|
 |id | String |address | A string describing the test command.|
 |comparison | String ||	Available types can be found in the config object. (see [Possible comparisons](#possible-comparisons)).|
+|addresspart| String || The address part which should be tested, see [Possible address parts](#possible-address-parts).
 |headers | Array ||	A string array containing the header fields.|
 |values | Array || A string array containing the value for the header fields. The test will be true if any of the strings matches.|
 
@@ -91,6 +118,7 @@ This section describes the structures of tests.
 |:----|:---|:----|:----------|
 |id | String | envelope | A string describing the test command. |
 |comparison | String || Available types can be found in the config object. (see [Possible comparisons](#possible-comparisons)).|
+|addresspart| String || The address part which should be tested, see [Possible address parts](#possible-address-parts).
 |headers | Array || A string array containing the header fields.|
 |values | Array || A string array containing the value for the header fields. The test will be true if any of the strings matches.|
 
@@ -175,6 +203,14 @@ This section describes the structures of tests.
 |:----|:---|:----|:----------|
 |id | String | exists | A string describing the test command.|
 |headers | Array || A string array containing the header fields.|
+
+### simplified-header-test
+
+|Name |Type|Value|Description|
+|:----|:---|:----|:----------|
+|id | String ||	A string describing a simplified test command.|
+|comparison | String || Available types can be found in the config object (see [Possible comparisons](#possible-comparisons)). Defaults to "contains".|
+|values | Array || A string array containing the values for the header fields. The test will be true if any of the strings matches.|
 
 
 

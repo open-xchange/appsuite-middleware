@@ -1,0 +1,37 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Saml OAuth Bundle
+Bundle-SymbolicName: com.openexchange.saml.oauth
+Bundle-Version: 7.8.4
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-Activator: com.openexchange.saml.oauth.osgi.Activator
+Import-Package: com.google.common.annotations,
+ com.google.common.base,
+ com.google.common.cache,
+ com.openexchange.config,
+ com.openexchange.config.cascade,
+ com.openexchange.exception,
+ com.openexchange.java,
+ com.openexchange.lock,
+ com.openexchange.mail.api,
+ com.openexchange.net.ssl,
+ com.openexchange.net.ssl.config,
+ com.openexchange.osgi,
+ com.openexchange.rest.client.httpclient,
+ com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.sessiond,
+ org.apache.commons.codec.binary,
+ org.apache.http,
+ org.apache.http.client,
+ org.apache.http.client.entity,
+ org.apache.http.client.methods,
+ org.apache.http.impl.client,
+ org.apache.http.message,
+ org.apache.http.util,
+ org.apache.log4j.spi,
+ org.json,
+ org.osgi.framework,
+ org.slf4j
+Export-Package: com.openexchange.saml.oauth.service

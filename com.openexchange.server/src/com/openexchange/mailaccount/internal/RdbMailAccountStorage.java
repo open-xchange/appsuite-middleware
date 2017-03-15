@@ -1274,11 +1274,11 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
      */
     private void checkDefaultAccountConfiguration(AbstractMailAccount retval, int userId, int contextId) throws OXException {
 
-        if (PasswordSource.GLOBAL.equals(MailProperties.getInstance().getPasswordSource())) {
+        if (PasswordSource.GLOBAL.equals(MailProperties.getInstance().getPasswordSource(userId, contextId))) {
             retval.setPassword(null);
         }
 
-        switch(MailProperties.getInstance().getLoginSource()){
+        switch(MailProperties.getInstance().getLoginSource(userId, contextId)){
             case PRIMARY_EMAIL:
                 retval.setLogin(UserStorage.getInstance().getUser(userId, contextId).getMail());
                 break;
@@ -1291,10 +1291,10 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 break;
         }
 
-        switch(MailProperties.getInstance().getMailServerSource()){
+        switch(MailProperties.getInstance().getMailServerSource(userId, contextId)){
             case GLOBAL:
                 {
-                    ConfiguredServer server = MailProperties.getInstance().getMailServer();
+                    ConfiguredServer server = MailProperties.getInstance().getMailServer(userId, contextId);
                     retval.setMailServer(server.getHostName());
                     String protocol = server.getProtocol();
                     if (null != protocol) {
@@ -1315,10 +1315,10 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
         }
 
-        switch(MailProperties.getInstance().getTransportServerSource()){
+        switch(MailProperties.getInstance().getTransportServerSource(userId, contextId)){
             case GLOBAL:
                 {
-                    ConfiguredServer server = MailProperties.getInstance().getTransportServer();
+                    ConfiguredServer server = MailProperties.getInstance().getTransportServer(userId, contextId);
                     retval.setTransportServer(server.getHostName());
                     String protocol = server.getProtocol();
                     if (null != protocol) {
@@ -1649,10 +1649,16 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
      * @param con The connection to use
      * @throws OXException If enabling the account fails
      */
+    @Override
     public void enableMailAccount(int accountId, int userId, int contextId, Connection con) throws OXException {
+        if (null == con) {
+            enableMailAccount(accountId, userId, contextId);
+            return;
+        }
+
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("UPDATE user_mail_account SET failed_auth_count=0, failed_auth_date=0, disabled=0 WHERE cid=? AND id=? AND user=? AND disabled=1");
+            stmt = con.prepareStatement("UPDATE user_mail_account SET failed_auth_count=0, failed_auth_date=0, disabled=0 WHERE cid=? AND id=? AND user=?");
             int pos = 1;
             stmt.setLong(pos++, contextId);
             stmt.setLong(pos++, accountId);
@@ -1661,7 +1667,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             Databases.closeSQLStuff(stmt);
             stmt = null;
 
-            stmt = con.prepareStatement("UPDATE user_transport_account SET failed_auth_count=0, failed_auth_date=0, disabled=0 WHERE cid=? AND id=? AND user=? AND disabled=1");
+            stmt = con.prepareStatement("UPDATE user_transport_account SET failed_auth_count=0, failed_auth_date=0, disabled=0 WHERE cid=? AND id=? AND user=?");
             pos = 1;
             stmt.setLong(pos++, contextId);
             stmt.setLong(pos++, accountId);

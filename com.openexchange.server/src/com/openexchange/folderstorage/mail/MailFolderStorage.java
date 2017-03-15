@@ -75,7 +75,6 @@ import javax.mail.Message;
 import org.apache.commons.lang.StringUtils;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
@@ -145,7 +144,6 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.internal.RdbMailAccountStorage;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -917,8 +915,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
             TIntObjectMap<MailAccount> accounts = new TIntObjectHashMap<>(2);
             List<Folder> ret = new ArrayList<>(folderIds.size());
 
-            ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-            boolean translatePrimaryAccountDefaultFolders = (null == configurationService || configurationService.getBoolProperty("com.openexchange.mail.translateDefaultFolders", true));
+            boolean translatePrimaryAccountDefaultFolders = MailProperties.getInstance().isTranslateDefaultFolders(storageParameters.getUserId(), storageParameters.getContextId());
 
             for (String folderId : folderIds) {
                 FullnameArgument argument = prepareMailFolderParam(folderId);
@@ -966,8 +963,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
             }
             mailAccess = mailAccessFor(session, argument.getAccountId());
 
-            ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-            boolean translatePrimaryAccountDefaultFolders = (null == configurationService || configurationService.getBoolProperty("com.openexchange.mail.translateDefaultFolders", true));
+            boolean translatePrimaryAccountDefaultFolders = MailProperties.getInstance().isTranslateDefaultFolders(storageParameters.getUserId(), storageParameters.getContextId());
 
             return getFolder(treeId, argument, storageParameters, mailAccess, session, mailAccount, translatePrimaryAccountDefaultFolders);
         } finally {
@@ -1010,9 +1006,9 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
                  * An external account folder
                  */
                 if (IGNORABLES.contains(mailAccount.getMailProtocol())) {
-                    retval = new ExternalMailAccountRootFolder(mailAccount, mailAccess.getMailConfig(), session);
+                    retval = new ExternalMailAccountRootFolder(mailAccount, /*mailAccess.getMailConfig(),*/ session);
                 } else {
-                    retval = new RemoveAfterAccessExtRootFolder(mailAccount, mailAccess.getMailConfig(), session);
+                    retval = new RemoveAfterAccessExtRootFolder(mailAccount, /*mailAccess.getMailConfig(),*/ session);
                 }
                 /*
                  * Load on demand (or in FolderMap)
@@ -1068,7 +1064,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
                         /*
                          * Filter against possible POP3 storage folders
                          */
-                        if (MailAccount.DEFAULT_ID == accountId && MailProperties.getInstance().isHidePOP3StorageFolders()) {
+                        if (MailAccount.DEFAULT_ID == accountId && MailProperties.getInstance().isHidePOP3StorageFolders(storageParameters.getUserId(), storageParameters.getContextId())) {
                             filterPOP3StorageFolderInfos(folderInfos, session);
                         }
                         final boolean translate = !StorageParametersUtility.getBoolParameter("ignoreTranslation", storageParameters);
@@ -1088,7 +1084,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
                     /*
                      * Filter against possible POP3 storage folders
                      */
-                    if (MailAccount.DEFAULT_ID == accountId && MailProperties.getInstance().isHidePOP3StorageFolders()) {
+                    if (MailAccount.DEFAULT_ID == accountId && MailProperties.getInstance().isHidePOP3StorageFolders(storageParameters.getUserId(), storageParameters.getContextId())) {
                         filterPOP3StorageFolders(children, session);
                     }
                     Collections.sort(children, new SimpleMailFolderComparator(storageParameters.getUser().getLocale(), false, isArchive));
@@ -1322,7 +1318,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
                     /*
                      * Filter against possible POP3 storage folders
                      */
-                    if (MailAccount.DEFAULT_ID == accountId && MailProperties.getInstance().isHidePOP3StorageFolders()) {
+                    if (MailAccount.DEFAULT_ID == accountId && MailProperties.getInstance().isHidePOP3StorageFolders(storageParameters.getUserId(), storageParameters.getContextId())) {
                         filterPOP3StorageFolderInfos(folderInfos, session);
                     }
                     addWarnings(mailAccess, storageParameters);
@@ -1399,7 +1395,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
             /*
              * Filter against possible POP3 storage folders
              */
-            if (MailAccount.DEFAULT_ID == accountId && MailProperties.getInstance().isHidePOP3StorageFolders()) {
+            if (MailAccount.DEFAULT_ID == accountId && MailProperties.getInstance().isHidePOP3StorageFolders(storageParameters.getUserId(), storageParameters.getContextId())) {
                 filterPOP3StorageFolders(children, session);
             }
             addWarnings(mailAccess, storageParameters);
@@ -2207,7 +2203,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
     }
 
     private boolean cannotConnect(Session session) throws OXException {
-        PasswordSource passwordSource = MailProperties.getInstance().getPasswordSource();
+        PasswordSource passwordSource = MailProperties.getInstance().getPasswordSource(session.getUserId(), session.getContextId());
         if (passwordSource == PasswordSource.SESSION && session.getPassword() == null) {
             return true;
         }

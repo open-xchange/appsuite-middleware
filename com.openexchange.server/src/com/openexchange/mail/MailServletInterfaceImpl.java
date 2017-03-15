@@ -92,12 +92,6 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Interests;
-import com.openexchange.config.Reloadable;
-import com.openexchange.config.Reloadables;
-import com.openexchange.config.cascade.ComposedConfigProperty;
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.contact.ContactService;
 import com.openexchange.dataretention.DataRetentionService;
@@ -138,11 +132,11 @@ import com.openexchange.mail.api.ISimplifiedThreadStructure;
 import com.openexchange.mail.api.ISimplifiedThreadStructureEnhanced;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.api.crypto.CryptographicAwareMailAccessFactory;
 import com.openexchange.mail.api.unified.UnifiedFullName;
 import com.openexchange.mail.api.unified.UnifiedViewService;
 import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.config.MailProperties;
-import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -261,6 +255,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     private MailAccount mailAccount;
     private final MailFields folderAndId;
     private final boolean checkParameters;
+    private final boolean doDecryption;
+    private final String cryptoAuthentication;
 
     /**
      * Initializes a new {@link MailServletInterfaceImpl}.
@@ -268,6 +264,18 @@ final class MailServletInterfaceImpl extends MailServletInterface {
      * @throws OXException If user has no mail access or properties cannot be successfully loaded
      */
     MailServletInterfaceImpl(Session session) throws OXException {
+        this(session, false, null);
+    }
+
+    /**
+     * Initializes a new {@link MailServletInterfaceImpl}.
+     *
+     * @param session The session
+     * @param doDecryption True in order to perform email decryption, false to use the raw messages.
+     * @param cryptoAuthentication Authentication for decrypting emails.
+     * @throws OXException If user has no mail access or properties cannot be successfully loaded
+     */
+    MailServletInterfaceImpl(Session session, boolean doDecryption, String cryptoAuthentication) throws OXException {
         super();
         warnings = new ArrayList<>(2);
         mailImportResults = new ArrayList<>();
@@ -290,6 +298,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         contextId = session.getContextId();
         folderAndId = new MailFields(MailField.ID, MailField.FOLDER_ID);
         checkParameters = false;
+        this.doDecryption = doDecryption;
+        this.cryptoAuthentication = cryptoAuthentication;
     }
 
     @Override
@@ -1327,7 +1337,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         /*
          * Filter against possible POP3 storage folders
          */
-        if (MailAccount.DEFAULT_ID == accountId && MailProperties.getInstance().isHidePOP3StorageFolders()) {
+        if (MailAccount.DEFAULT_ID == accountId && MailProperties.getInstance().isHidePOP3StorageFolders(session.getUserId(), session.getContextId())) {
             Set<String> pop3StorageFolders = RdbMailAccountStorage.getPOP3StorageFolders(session);
             for (Iterator<MailFolder> it = children.iterator(); it.hasNext();) {
                 MailFolder mailFolder = it.next();
@@ -1445,39 +1455,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         return mailAccess.getFolderStorage().getFolder(fullName);
     }
 
-    private static volatile Integer maxForwardCount;
-
-    private static int maxForwardCount() {
-        Integer tmp = maxForwardCount;
-        if (null == tmp) {
-            synchronized (MailServletInterfaceImpl.class) {
-                tmp = maxForwardCount;
-                if (null == tmp) {
-                    ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    if (null == service) {
-                        return 8;
-                    }
-                    tmp = Integer.valueOf(service.getIntProperty("com.openexchange.mail.maxForwardCount", 8));
-                    maxForwardCount = tmp;
-                }
-            }
-        }
-        return tmp.intValue();
-    }
-
-    static {
-        MailReloadable.getInstance().addReloadable(new Reloadable() {
-
-            @Override
-            public void reloadConfiguration(ConfigurationService configService) {
-                maxForwardCount = null;
-            }
-
-            @Override
-            public Interests getInterests() {
-                return Reloadables.interestsForProperties("com.openexchange.mail.maxForwardCount");
-            }
-        });
+    private static int maxForwardCount(int userId, int contextId) {
+        return MailProperties.getInstance().getMaxForwardCount(userId, contextId);
     }
 
     @Override
@@ -1485,7 +1464,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         if ((null == folders) || (null == fowardMsgUIDs) || (folders.length != fowardMsgUIDs.length)) {
             throw new IllegalArgumentException("Illegal arguments");
         }
-        int maxForwardCount = maxForwardCount();
+        int maxForwardCount = maxForwardCount(session.getUserId(), session.getContextId());
         if (maxForwardCount > 0 && folders.length > maxForwardCount) {
             throw MailExceptionCode.TOO_MANY_FORWARD_MAILS.create(Integer.valueOf(maxForwardCount));
         }
@@ -2930,6 +2909,20 @@ final class MailServletInterfaceImpl extends MailServletInterface {
          * Fetch a mail access (either from cache or a new instance)
          */
         MailAccess<?, ?> mailAccess = null == access ? MailAccess.getInstance(session, accountId) : access;
+
+        /**
+         *  Decorate the MailAccess with crypto functionality
+         */
+        if(doDecryption) {
+            CryptographicAwareMailAccessFactory cryptoMailAccessFactory = Services.getServiceLookup().getOptionalService(CryptographicAwareMailAccessFactory.class);
+            if(cryptoMailAccessFactory != null) {
+                mailAccess = cryptoMailAccessFactory.createAccess(
+                    (MailAccess<IMailFolderStorage, IMailMessageStorage>) mailAccess,
+                    session,
+                    cryptoAuthentication /* might be null in order to let the impl. obtain the authentication*/);
+            }
+        }
+
         if (!mailAccess.isConnected()) {
             /*
              * Get new mail configuration
@@ -3337,11 +3330,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                  * Finally send mail
                  */
                 MailProperties properties = MailProperties.getInstance();
-                if (isWhitelistedFromRateLimit(session.getLocalIp(), properties.getDisabledRateLimitRanges())) {
+                if (isWhitelistedFromRateLimit(session.getLocalIp(), properties.getDisabledRateLimitRanges(session.getUserId(), session.getContextId()))) {
                     transport.sendMailMessage(composedMail, ComposeType.NEW);
-                } else if (!properties.getRateLimitPrimaryOnly() || MailAccount.DEFAULT_ID == accountId) {
-                    int rateLimit = properties.getRateLimit();
-                    rateLimitChecks(composedMail, rateLimit, properties.getMaxToCcBcc());
+                } else if (!properties.getRateLimitPrimaryOnly(session.getUserId(), session.getContextId()) || MailAccount.DEFAULT_ID == accountId) {
+                    int rateLimit = properties.getRateLimit(session.getUserId(), session.getContextId());
+                    rateLimitChecks(composedMail, rateLimit, properties.getMaxToCcBcc(session.getUserId(), session.getContextId()));
                     transport.sendMailMessage(composedMail, ComposeType.NEW);
                     setRateLimitTime(rateLimit);
                 } else {
@@ -3414,12 +3407,12 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                             if (first) {
                                 MailProperties properties = MailProperties.getInstance();
                                 String remoteAddr = null == remoteAddress ? session.getLocalIp() : remoteAddress;
-                                if (isWhitelistedFromRateLimit(remoteAddr, properties.getDisabledRateLimitRanges())) {
+                                if (isWhitelistedFromRateLimit(remoteAddr, properties.getDisabledRateLimitRanges(session.getUserId(), session.getContextId()))) {
                                     sentMail = transport.sendMailMessage(composedMail, type, null, statusInfo);
-                                } else if (!properties.getRateLimitPrimaryOnly() || MailAccount.DEFAULT_ID == accountId) {
-                                    int rateLimit = properties.getRateLimit();
+                                } else if (!properties.getRateLimitPrimaryOnly(session.getUserId(), session.getContextId()) || MailAccount.DEFAULT_ID == accountId) {
+                                    int rateLimit = properties.getRateLimit(session.getUserId(), session.getContextId());
                                     LOG.debug("Checking rate limit {} for request with IP {} ({}) from user {} in context {}", rateLimit, remoteAddr, null == remoteAddress ? "from session" : "from request", session.getUserId(), session.getContextId());
-                                    rateLimitChecks(composedMail, rateLimit, properties.getMaxToCcBcc());
+                                    rateLimitChecks(composedMail, rateLimit, properties.getMaxToCcBcc(session.getUserId(), session.getContextId()));
                                     sentMail = transport.sendMailMessage(composedMail, type, null, statusInfo);
                                     setRateLimitTime(rateLimit);
                                 } else {
@@ -3522,17 +3515,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                             } else if (ComposeType.DRAFT_NO_DELETE_ON_TRANSPORT.equals(type)) {
                                 // Do not delete draft!
                             } else if (ComposeType.DRAFT.equals(type)) {
-                                ConfigViewFactory configViewFactory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
-                                if (null != configViewFactory) {
-                                    try {
-                                        ConfigView view = configViewFactory.getView(session.getUserId(), session.getContextId());
-                                        ComposedConfigProperty<Boolean> property = view.property("com.openexchange.mail.deleteDraftOnTransport", boolean.class);
-                                        if (property.isDefined() && property.get().booleanValue()) {
-                                            deleteDraft(composedMail.getMsgref());
-                                        }
-                                    } catch (Exception e) {
-                                        LOG.warn("Draft mail cannot be deleted.", e);
-                                    }
+                                if (MailProperties.getInstance().isDeleteDraftOnTransport(session.getUserId(), session.getContextId())) {
+                                    deleteDraft(composedMail.getMsgref());
                                 }
                             } else if (ComposeType.DRAFT_DELETE_ON_TRANSPORT.equals(type)) {
                                 try {

@@ -56,6 +56,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.Assert;
+import com.openexchange.java.ConcurrentList;
 
 /**
  * {@link TestContextPool} - This class will manage the context handling, esp. providing unused contexts and queue related requests
@@ -69,14 +70,25 @@ public class TestContextPool {
 
     private static BlockingQueue<TestContext> contexts = new LinkedBlockingQueue<>(50);
 
+    private static List<TestContext> allTimeContexts = new ConcurrentList<>();
+
     private static AtomicReference<TestContextWatcher> contextWatcher = new AtomicReference<>();
 
     private static AtomicBoolean watcherInitialized = new AtomicBoolean(false);
 
     public static synchronized void addContext(TestContext context) {
+        remember(context);
         contexts.add(context);
         startWatcher();
         LOG.info("Added context '{}' with id {} to pool.", context.getName(), context.getId());
+    }
+
+    private static void remember(TestContext context) {
+        if (allTimeContexts.contains(context)) {
+            return;
+        }
+        allTimeContexts.add(context);
+        LOG.info("Added context {} to all time available context list.", context.getName());
     }
 
     public static TestContext acquireContext(String acquiredBy) {
@@ -131,7 +143,7 @@ public class TestContextPool {
         }
     }
 
-    public static synchronized List<TestContext> getCopyOfCurrentlyAvailableContexts() {
-        return new ArrayList<>(contexts);
+    public static synchronized List<TestContext> getAllTimeAvailableContexts() {
+        return new ArrayList<>(allTimeContexts);
     }
 }

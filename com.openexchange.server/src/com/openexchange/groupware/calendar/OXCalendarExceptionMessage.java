@@ -72,9 +72,9 @@ public class OXCalendarExceptionMessage implements LocalizableStrings {
     public static final String UPDATE_WITHOUT_PARTICIPANTS_DISPLAY = "Appointments must have at least one participant.";
 
     /**
-     * You do not have the appropriate permissions to read appointments in folder %1$d.
+     * You do not have the appropriate permissions to read appointments that folder.
      */
-    public static final String NO_PERMISSION_MSG = "You do not have the appropriate permissions to read appointments in folder %1$d.";
+    public static final String NO_PERMISSION_MSG = "You do not have the appropriate permissions to read appointments that folder.";
 
     /**
      * End date must not be before start date.
@@ -118,9 +118,9 @@ public class OXCalendarExceptionMessage implements LocalizableStrings {
     public static final String MANDATORY_FIELD_TITLE_MSG = "Required value \"Title\" was not supplied.";
 
     /**
-     * Move not supported: Cannot move an appointment from folder %d to folder %d.
+     * Move not supported. You cannot move an appointment into that folder.
      */
-    public static final String MOVE_NOT_SUPPORTED_MSG = "Move not supported: Cannot move an appointment from folder %d to folder %d.";
+    public static final String MOVE_NOT_SUPPORTED_MSG = "Move not supported. You cannot move an appointment into that folder.";
 
     /**
      * Move not allowed from shared folders.
@@ -213,14 +213,14 @@ public class OXCalendarExceptionMessage implements LocalizableStrings {
     public static final String RECURRING_FOLDER_MOVE_MSG = "Moving a recurring appointment to another folder is not supported.";
 
     /**
-     * Cannot insert appointment (%1$s). An appointment with the unique identifier (%2$s) already exists.
+     * Cannot create that appointment. An appointment having the same unique identifier already exists.
      */
-    public static final String UID_ALREDY_EXISTS_MSG = "Cannot insert appointment (%1$s). An appointment with the unique identifier (%2$s) already exists.";
+    public static final String UID_ALREDY_EXISTS_MSG = "Cannot create that appointment. An appointment having the same unique identifier already exists.";
 
     /**
-     * Cannot insert task (%1$s). A task with the unique identifier (%2$s) already exists.
+     * Cannot create that task. A task having the same unique identifier already exists.
      */
-    public static final String TASK_UID_ALREDY_EXISTS_MSG = "Cannot insert task (%1$s). A task with the unique identifier (%2$s) already exists.";
+    public static final String TASK_UID_ALREDY_EXISTS_MSG = "Cannot create that task. A task having the same unique identifier already exists.";
 
     //Sequence number is outdated.
     public static final String OUTDATED_SEQUENCE = "Sequence number is outdated.";

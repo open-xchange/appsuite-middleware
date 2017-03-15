@@ -101,6 +101,8 @@ public class WrappingFilter implements Filter {
     private final String contentSecurityPolicy;
     private final boolean considerContentSecurityPolicy;
     private final boolean checkTrackingIdInRequestParameters;
+    private final String robotsMetaTag;
+    private final boolean considerRobotsMetaTag;
 
     /**
      * Initializes a new {@link WrappingFilter}.
@@ -113,6 +115,8 @@ public class WrappingFilter implements Filter {
         this.isConsiderXForwards = config.isConsiderXForwards();
         this.echoHeaderName = config.getEchoHeader();
         this.considerEchoHeader = !Strings.isEmpty(echoHeaderName);
+        this.robotsMetaTag = config.getRobotsMetaTag();
+        this.considerRobotsMetaTag = !Strings.isEmpty(robotsMetaTag);
         this.contentSecurityPolicy = config.getContentSecurityPolicy();
         this.considerContentSecurityPolicy = !Strings.isEmpty(contentSecurityPolicy);
 
@@ -142,6 +146,10 @@ public class WrappingFilter implements Filter {
             httpResponse.setHeader("Content-Security-Policy", contentSecurityPolicy);
             httpResponse.setHeader("X-WebKit-CSP", contentSecurityPolicy);
             httpResponse.setHeader("X-Content-Security-Policy", contentSecurityPolicy);
+        }
+
+        if (considerRobotsMetaTag) {
+            httpResponse.setHeader("X-Robots-Tag", robotsMetaTag);
         }
 
         // Inspect X-Forwarded headers and create HttpServletRequestWrapper accordingly

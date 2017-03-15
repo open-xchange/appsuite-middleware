@@ -65,8 +65,6 @@ import com.openexchange.test.concurrent.ParallelSuite;
     TokenEndpointTest.class, 
     ProtocolFlowTest.class, 
     RevokeTokensTest.class, 
-    ReadFoldersTest.class, 
-    JSONApiTest.class, 
     ClientManagementTest.class
 })
 public class OAuthProviderTests {

@@ -83,6 +83,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.userconfiguration.RdbUserPermissionBitsStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * @author choeger
@@ -386,30 +387,36 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
     private ResellerAdmin getRestrictionDataForAdmin(final ResellerAdmin admin, final Connection con) throws SQLException {
         final PreparedStatement prep = con.prepareStatement("SELECT subadmin_restrictions.rid,sid,name,value FROM subadmin_restrictions INNER JOIN restrictions ON subadmin_restrictions.rid=restrictions.rid WHERE sid=?");
-        if( admin.getParentId() > 0 ) {
-            prep.setInt(1, admin.getParentId());
-        } else {
-            prep.setInt(1, admin.getId());
-        }
-        final ResultSet rs = prep.executeQuery();
-
-        final HashSet<Restriction> res = new HashSet<Restriction>();
-        while (rs.next()) {
-            final Restriction r = new Restriction();
-            r.setId(rs.getInt(DATABASE_COLUMN_ID));
-            r.setName(rs.getString(DATABASE_COLUMN_NAME));
-            r.setValue(rs.getString(DATABASE_COLUMN_VALUE));
-            if( admin.getParentId() > 0 && r.getName().equals(Restriction.SUBADMIN_CAN_CREATE_SUBADMINS)) {
-                continue;
+        ResultSet rs = null;
+        try {
+            if (admin.getParentId() > 0) {
+                prep.setInt(1, admin.getParentId());
+            } else {
+                prep.setInt(1, admin.getId());
             }
-            res.add(r);
+
+            rs = prep.executeQuery();
+
+            final HashSet<Restriction> res = new HashSet<Restriction>();
+            while (rs.next()) {
+                final Restriction r = new Restriction();
+                r.setId(rs.getInt(DATABASE_COLUMN_ID));
+                r.setName(rs.getString(DATABASE_COLUMN_NAME));
+                r.setValue(rs.getString(DATABASE_COLUMN_VALUE));
+                if (admin.getParentId() > 0 && r.getName().equals(Restriction.SUBADMIN_CAN_CREATE_SUBADMINS)) {
+                    continue;
+                }
+                res.add(r);
+            }
+            if (res.size() > 0) {
+                admin.setRestrictions(res.toArray(new Restriction[res.size()]));
+            }
+            rs.close();
+            prep.close();
+            return admin;
+        } finally {
+            DBUtils.closeSQLStuff(rs, prep);
         }
-        if (res.size() > 0) {
-            admin.setRestrictions(res.toArray(new Restriction[res.size()]));
-        }
-        rs.close();
-        prep.close();
-        return admin;
     }
 
     @Override
@@ -1752,18 +1759,26 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
     private void removeRestriction(final Connection con, final String name) throws SQLException {
         final PreparedStatement prep = con.prepareStatement("DELETE FROM restrictions WHERE name = ?");
-        prep.setString(1, name);
-        prep.executeUpdate();
-        prep.close();
+        try {
+            prep.setString(1, name);
+            prep.executeUpdate();
+            prep.close();
+        } finally {
+            DBUtils.closeSQLStuff(prep);
+        }
     }
 
     private void addRestriction(final Connection con, final String name) throws SQLException {
         final int rid = IDGenerator.getId(con);
         final PreparedStatement prep = con.prepareStatement("INSERT INTO restrictions (rid,name) VALUES (?,?)");
-        prep.setInt(1, rid);
-        prep.setString(2, name);
-        prep.executeUpdate();
-        prep.close();
+        try {
+            prep.setInt(1, rid);
+            prep.setString(2, name);
+            prep.executeUpdate();
+            prep.close();
+        } finally {
+            DBUtils.closeSQLStuff(prep);
+        }
     }
 
     /*

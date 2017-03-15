@@ -177,6 +177,7 @@ import com.openexchange.log.audit.AuditLogService;
 import com.openexchange.login.BlockingLoginHandlerService;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.internal.LoginNameRecorder;
+import com.openexchange.login.listener.AutoLoginAwareLoginListener;
 import com.openexchange.login.listener.LoginListener;
 import com.openexchange.mail.MailCounterImpl;
 import com.openexchange.mail.MailIdleCounterImpl;
@@ -196,7 +197,6 @@ import com.openexchange.mail.json.compose.share.internal.EnabledCheckerRegistry;
 import com.openexchange.mail.json.compose.share.internal.MessageGeneratorRegistry;
 import com.openexchange.mail.json.compose.share.internal.ShareLinkGeneratorRegistry;
 import com.openexchange.mail.loginhandler.MailLoginHandler;
-import com.openexchange.mail.loginhandler.TransportLoginHandler;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.oauth.MailOAuthService;
 import com.openexchange.mail.osgi.AuthenticationFailedHandlerServiceImpl;
@@ -229,6 +229,7 @@ import com.openexchange.objectusecount.service.ObjectUseCountServiceTracker;
 import com.openexchange.osgi.BundleServiceTracker;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
+import com.openexchange.osgi.Tools;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.passwordmechs.PasswordMechFactory;
 import com.openexchange.pns.PushNotificationService;
@@ -585,7 +586,7 @@ public final class ServerActivator extends HousekeepingActivator {
         track(LoginHandlerService.class, new LoginHandlerCustomizer(context));
         track(BlockingLoginHandlerService.class, new BlockingLoginHandlerCustomizer(context));
         // Login listener
-        track(LoginListener.class, new LoginListenerCustomizer(context));
+        track(Tools.generateServiceFilter(context, LoginListener.class, AutoLoginAwareLoginListener.class), new LoginListenerCustomizer(context));
         // Multiple handler factory services
         track(MultipleHandlerFactoryService.class, new MultipleHandlerServiceTracker(context));
 
@@ -722,10 +723,10 @@ public final class ServerActivator extends HousekeepingActivator {
                 }
             });
         }
-        registerService(NoReplyConfigFactory.class, new DefaultNoReplyConfigFactory(contextService, getService(ConfigViewFactory.class)));
+        ConfigViewFactory configViewFactory = getService(ConfigViewFactory.class);
+        registerService(NoReplyConfigFactory.class, new DefaultNoReplyConfigFactory(contextService, configViewFactory));
         // TODO: Register server's login handler here until its encapsulated in an own bundle
         registerService(LoginHandlerService.class, new MailLoginHandler());
-        registerService(LoginHandlerService.class, new TransportLoginHandler());
         registerService(LoginHandlerService.class, new LoginNameRecorder(userService));
         // registrationList.add(context.registerService(LoginHandlerService.class.getName(), new PasswordCrypter(), null));
         // Register table creation for mail account storage.
@@ -851,7 +852,7 @@ public final class ServerActivator extends HousekeepingActivator {
          * Register servlets
          */
         registerServlets(getService(HttpService.class));
-        
+
         ShardingSubdomains shardingSubdomains = new ShardingSubdomains();
         registerService(PreferencesItemService.class, shardingSubdomains);
         registerService(ConfigTreeEquivalent.class, shardingSubdomains);

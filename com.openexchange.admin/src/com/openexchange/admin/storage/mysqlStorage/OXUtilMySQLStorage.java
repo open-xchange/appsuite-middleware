@@ -2852,36 +2852,43 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 ppool = configdb_con.prepareStatement("SELECT db_schema FROM context_server2db_pool WHERE write_db_pool_id=?");
                 ppool.setInt(1, pool_id);
                 final ResultSet rpool = ppool.executeQuery();
-                while (rpool.next()) {
-                    final String schema = rpool.getString("db_schema");
-                    ResultSet rsi = null;
-                    try {
-                        Connection rcon = AdminCacheExtended.getSimpleSqlConnection(IDNA.toASCII(db.getUrl()) + schema, db.getLogin(), db.getPassword(), db.getDriver());
-                        ps = rcon.prepareStatement("SELECT COUNT(id) FROM user");
+                try {
+                    while (rpool.next()) {
+                        final String schema = rpool.getString("db_schema");
+                        ResultSet rsi = null;
+                        Connection rcon = null;
+                        try {
+                            rcon = AdminCacheExtended.getSimpleSqlConnection(IDNA.toASCII(db.getUrl()) + schema, db.getLogin(), db.getPassword(), db.getDriver());
+                            ps = rcon.prepareStatement("SELECT COUNT(id) FROM user");
 
-                        rsi = ps.executeQuery();
-                        if (!rsi.next()) {
-                            throw new StorageException("Unable to count users of db_pool_id=" + pool_id);
-                        }
-                        count += rsi.getInt("COUNT(id)");
-                        rcon.close();
-                        ps.close();
-                        rsi.close();
-                        rsi = null;
-                        rcon = null;
-                    } catch (final ClassNotFoundException e) {
-                        LOG.error("Error counting users of db pool", e);
-                        throw new StorageException(e.toString());
-                    } finally {
-                        if (null != rsi) {
-                            try {
-                                rsi.close();
-                            } catch (Exception e) { /* ignore */
+                            rsi = ps.executeQuery();
+                            if (!rsi.next()) {
+                                throw new StorageException("Unable to count users of db_pool_id=" + pool_id);
+                            }
+                            count += rsi.getInt("COUNT(id)");
+                        } catch (final ClassNotFoundException e) {
+                            LOG.error("Error counting users of db pool", e);
+                            throw new StorageException(e.toString());
+                        } finally {
+                            closeSQLStuff(rsi, ps);
+                            if (null != rcon) {
+                                try {
+                                    rcon.close();
+                                } catch (Exception e) {
+                                    LOG.error("Error closing simple CONNECTION!", e);
+                                }
                             }
                         }
                     }
+                } finally {
+                    if (rpool != null) {
+                        try {
+                            rpool.close();
+                        } catch (Exception e) {
+                            LOG.error("Error closing pool", e);
+                        }
+                    }
                 }
-                rpool.close();
                 LOG.debug("***** found {} users on {}", count, pool_id);
             } else {
                 throw new StorageException("UNKNOWN UNIT TO COUNT: " + this.USE_UNIT);

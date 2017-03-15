@@ -108,6 +108,7 @@ public class OnboardingConfig {
      */
     public static Map<String, ConfiguredScenario> parseScenarios(ConfigurationService configService) throws OXException {
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(OnboardingConfig.class);
+        ConfiguredLinkImage.clear();
 
         Map<String, ConfiguredScenario> scenarios = null;
 
@@ -179,16 +180,17 @@ public class OnboardingConfig {
                             }
                         }
                     }
+                    String imageInfo = (String) linkValues.get("image");
                     String sUrl = (String) linkValues.get("url");
                     if (!Strings.isEmpty(sUrl)) {
                         try {
                             URI uri = new URI(sUrl);
                             if ("property".equalsIgnoreCase(uri.getScheme())) {
                                 // E.g. "property://com.openexchange.client.onboarding.app.link"
-                                link = new ConfiguredLink(uri.getAuthority(), true, linkType);
+                                link = new ConfiguredLink(uri.getAuthority(), true, linkType, imageInfo);
                             } else {
                                 // E.g. "https://itunes.apple.com/us/app/keynote/id361285480?mt=8"
-                                link = new ConfiguredLink(sUrl, false, linkType);
+                                link = new ConfiguredLink(sUrl, false, linkType, imageInfo);
                             }
                         } catch (URISyntaxException e) {
                             throw OnboardingExceptionCodes.INVALID_SCENARIO_CONFIGURATION.create(e, id);

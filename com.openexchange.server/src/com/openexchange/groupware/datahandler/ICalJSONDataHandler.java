@@ -69,6 +69,7 @@ import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.ajax.writer.TaskWriter;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.configuration.ServerConfig;
+import com.openexchange.conversion.ConversionResult;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataExceptionCodes;
@@ -138,7 +139,7 @@ public final class ICalJSONDataHandler implements DataHandler {
     }
 
     @Override
-    public Object processData(final Data<? extends Object> data, final DataArguments dataArguments, final Session session) throws OXException {
+    public ConversionResult processData(final Data<? extends Object> data, final DataArguments dataArguments, final Session session) throws OXException {
         final Context ctx = ContextStorage.getStorageContext(session);
         final ICalParser iCalParser = ServerServiceRegistry.getInstance().getService(ICalParser.class);
         if (iCalParser == null) {
@@ -276,7 +277,9 @@ public final class ICalJSONDataHandler implements DataHandler {
                 throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
             }
         }
-        return objects;
+        ConversionResult result = new ConversionResult();
+        result.setData(objects);
+        return result;
     }
 
     /**

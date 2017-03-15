@@ -57,6 +57,7 @@ import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.Interests;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.conversion.simple.SimpleConverter;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.NearRegistryServiceTracker;
 import com.openexchange.serverconfig.ClientServerConfigFilter;
@@ -68,6 +69,7 @@ import com.openexchange.serverconfig.impl.values.Capabilities;
 import com.openexchange.serverconfig.impl.values.ForcedHttpsValue;
 import com.openexchange.serverconfig.impl.values.Hosts;
 import com.openexchange.serverconfig.impl.values.Languages;
+import com.openexchange.serverconfig.impl.values.Prefix;
 import com.openexchange.serverconfig.impl.values.ServerVersion;
 
 /**
@@ -105,6 +107,7 @@ public class ServerConfigActivator extends HousekeepingActivator {
             ClientServerConfigFilter.class
         );
         rememberTracker(configFilterTracker);
+        trackService(DispatcherPrefixService.class);
         openTrackers();
 
         ServerConfigServicesLookup serverConfigServicesLookup = new ServerConfigServicesLookup() {
@@ -140,6 +143,7 @@ public class ServerConfigActivator extends HousekeepingActivator {
         registerService(ComputedServerConfigValueService.class, new Languages(this));
         registerService(ComputedServerConfigValueService.class, new ServerVersion());
         registerService(ComputedServerConfigValueService.class, new Capabilities(this));
+        registerService(ComputedServerConfigValueService.class, new Prefix(this));
 
         // The actual config service
         ServerConfigServiceImpl serverConfigServiceImpl = new ServerConfigServiceImpl(this, serverConfigServicesLookup);

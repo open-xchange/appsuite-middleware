@@ -59,6 +59,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -75,6 +76,11 @@ import org.slf4j.LoggerFactory;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ConfigurationServices;
+import com.openexchange.config.DefaultInterests;
+import com.openexchange.config.Interests;
+import com.openexchange.config.Reloadable;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.jsieve.commands.ActionCommand;
@@ -93,17 +99,19 @@ import com.openexchange.jsieve.export.SieveTextFilter.RuleListAndNextUid;
 import com.openexchange.jsieve.export.exceptions.OXSieveHandlerException;
 import com.openexchange.jsieve.export.exceptions.OXSieveHandlerInvalidCredentialsException;
 import com.openexchange.mailfilter.Credentials;
-import com.openexchange.mailfilter.MailFilterProperties;
 import com.openexchange.mailfilter.MailFilterService;
 import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
-import com.openexchange.mailfilter.services.Services;
+import com.openexchange.mailfilter.properties.MailFilterProperty;
+import com.openexchange.mailfilter.properties.PasswordSource;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link MailFilterServiceImpl}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class MailFilterServiceImpl implements MailFilterService {
+public final class MailFilterServiceImpl implements MailFilterService, Reloadable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MailFilterServiceImpl.class);
 
@@ -160,19 +168,67 @@ public final class MailFilterServiceImpl implements MailFilterService {
 
     // ---------------------------------------------------------------------------------------------------------------- //
 
-    private final String scriptname;
-    final boolean useSIEVEResponseCodes;
     private final Cache<HostAndPort, Capabilities> staticCapabilities;
 
+    private final ServiceLookup services;
+
     /**
-     * Initializes a new {@link MailFilterServiceImpl}.
+     * Initialises a new {@link MailFilterServiceImpl}.
+     * 
+     * @param services The {@link ServiceLookup} instance
+     * @throws OXException
      */
-    public MailFilterServiceImpl() {
+    public MailFilterServiceImpl(ServiceLookup services) throws OXException {
         super();
-        ConfigurationService config = Services.getService(ConfigurationService.class);
-        scriptname = config.getProperty(MailFilterProperties.Values.SCRIPT_NAME.property);
-        useSIEVEResponseCodes = Boolean.parseBoolean(config.getProperty(MailFilterProperties.Values.USE_SIEVE_RESPONSE_CODES.property));
+        this.services = services;
         staticCapabilities = CacheBuilder.newBuilder().maximumSize(10).expireAfterWrite(30, TimeUnit.MINUTES).build();
+        checkConfigfile();
+    }
+
+    /**
+     * This method checks for a valid properties' file and throws and exception if none is there or one of the properties is missing
+     * 
+     * @throws OXException If the properties' file is invalid
+     */
+    private void checkConfigfile() throws OXException {
+        final ConfigurationService config = getService(ConfigurationService.class);
+        try {
+            Properties file = ConfigurationServices.loadPropertiesFrom(config.getFileByName("mailfilter.properties"));
+            if (file.isEmpty()) {
+                throw MailFilterExceptionCode.NO_PROPERTIES_FILE_FOUND.create();
+            }
+            for (final MailFilterProperty property : MailFilterProperty.values()) {
+                if (!property.isOptional() && null == file.getProperty(property.getFQPropertyName())) {
+                    throw MailFilterExceptionCode.PROPERTY_NOT_FOUND.create(property.getFQPropertyName());
+                }
+            }
+            try {
+                Integer.parseInt(file.getProperty(MailFilterProperty.connectionTimeout.getFQPropertyName()));
+            } catch (final NumberFormatException e) {
+                throw MailFilterExceptionCode.PROPERTY_ERROR.create("Property " + MailFilterProperty.connectionTimeout.getFQPropertyName() + " is not an integer value", e);
+            }
+        } catch (IOException e) {
+            throw MailFilterExceptionCode.IO_ERROR.create(e.getMessage(), e);
+        }
+
+        // Check password source
+        final String passwordSrc = config.getProperty(MailFilterProperty.passwordSource.getFQPropertyName());
+        if (passwordSrc == null) {
+            throw MailFilterExceptionCode.NO_VALID_PASSWORDSOURCE.create();
+        }
+        PasswordSource passwordSource = PasswordSource.passwordSourceFor(passwordSrc);
+        switch (passwordSource) {
+            case GLOBAL:
+                final String masterpassword = config.getProperty(MailFilterProperty.masterPassword.getFQPropertyName());
+                if (masterpassword.length() == 0) {
+                    throw MailFilterExceptionCode.NO_MASTERPASSWORD_SET.create();
+                }
+                break;
+            case SESSION:
+                break;
+            default:
+                throw MailFilterExceptionCode.NO_VALID_PASSWORDSOURCE.create();
+        }
     }
 
     /**
@@ -232,19 +288,19 @@ public final class MailFilterServiceImpl implements MailFilterService {
                     }
                 }
 
-                changeIncomingVacationRule(rule);
+                changeIncomingVacationRule(credentials.getUserid(), credentials.getContextid(), rule);
 
                 int nextuid = insertIntoPosition(rule, rules, clientrulesandrequire);
                 String writeback = sieveTextFilter.writeback(clientrulesandrequire, new HashSet<String>(sieveHandler.getCapabilities().getSieve()));
                 writeback = sieveTextFilter.rewriteRequire(writeback, script);
                 LOGGER.debug("The following sieve script will be written:\n{}", writeback);
-                writeScript(sieveHandler, activeScript, writeback);
+                writeScript(sieveHandler, activeScript, writeback, getScriptName(credentials.getUserid(), credentials.getContextid()));
 
                 return nextuid;
             } catch (UnsupportedEncodingException e) {
                 throw MailFilterExceptionCode.UNSUPPORTED_ENCODING.create(e);
             } catch (OXSieveHandlerException e) {
-                throw MailFilterExceptionCode.handleParsingException(e, credentials, useSIEVEResponseCodes);
+                throw MailFilterExceptionCode.handleParsingException(e, credentials, useSIEVEResponseCodes(credentials.getUserid(), credentials.getContextid()));
             } catch (IOException e) {
                 throw MailFilterExceptionCode.IO_CONNECTION_ERROR.create(e, sieveHandler.getSieveHost(), Integer.valueOf(sieveHandler.getSievePort()));
             } catch (ParseException e) {
@@ -277,7 +333,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
 
                 ClientRulesAndRequire clientRulesAndReq = sieveTextFilter.splitClientRulesAndRequire(rules.getRulelist(), null, rules.isError());
                 RuleAndPosition rightRule = getRightRuleForUniqueId(clientRulesAndReq.getRules(), uid);
-                changeIncomingVacationRule(rightRule.rule);
+                changeIncomingVacationRule(credentials.getUserid(), credentials.getContextid(), rightRule.rule);
                 if (rightRule.position == rule.getPosition()) {
                     clientRulesAndReq.getRules().set(rightRule.position, rule);
                 } else {
@@ -288,13 +344,13 @@ public final class MailFilterServiceImpl implements MailFilterService {
                 writeback = sieveTextFilter.rewriteRequire(writeback, script);
                 LOGGER.debug("The following sieve script will be written:\n{}", writeback);
 
-                writeScript(sieveHandler, activeScript, writeback);
+                writeScript(sieveHandler, activeScript, writeback, getScriptName(credentials.getUserid(), credentials.getContextid()));
             } catch (ParseException e) {
                 throw MailFilterExceptionCode.SIEVE_ERROR.create(e, e.getMessage());
             } catch (SieveException e) {
                 throw MailFilterExceptionCode.handleSieveException(e);
             } catch (OXSieveHandlerException e) {
-                throw MailFilterExceptionCode.handleParsingException(e, credentials, useSIEVEResponseCodes);
+                throw MailFilterExceptionCode.handleParsingException(e, credentials, useSIEVEResponseCodes(credentials.getUserid(), credentials.getContextid()));
             } catch (IOException e) {
                 throw MailFilterExceptionCode.IO_CONNECTION_ERROR.create(e, sieveHandler.getSieveHost(), Integer.valueOf(sieveHandler.getSievePort()));
             } finally {
@@ -336,11 +392,11 @@ public final class MailFilterServiceImpl implements MailFilterService {
                 }
                 String writeback = sieveTextFilter.writeback(clientrulesandrequire, new HashSet<String>(sieveHandler.getCapabilities().getSieve()));
                 writeback = sieveTextFilter.rewriteRequire(writeback, script);
-                writeScript(sieveHandler, activeScript, writeback);
+                writeScript(sieveHandler, activeScript, writeback, getScriptName(credentials.getUserid(), credentials.getContextid()));
             } catch (UnsupportedEncodingException e) {
                 throw MailFilterExceptionCode.UNSUPPORTED_ENCODING.create(e);
             } catch (OXSieveHandlerException e) {
-                throw MailFilterExceptionCode.handleParsingException(e, credentials, useSIEVEResponseCodes);
+                throw MailFilterExceptionCode.handleParsingException(e, credentials, useSIEVEResponseCodes(credentials.getUserid(), credentials.getContextid()));
             } catch (IOException e) {
                 throw MailFilterExceptionCode.IO_CONNECTION_ERROR.create(e, sieveHandler.getSieveHost(), Integer.valueOf(sieveHandler.getSievePort()));
             } catch (ParseException e) {
@@ -363,11 +419,11 @@ public final class MailFilterServiceImpl implements MailFilterService {
                 String activeScript = sieveHandler.getActiveScript();
                 SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
                 String writeback = sieveTextFilter.writeEmptyScript();
-                writeScript(sieveHandler, activeScript, writeback);
+                writeScript(sieveHandler, activeScript, writeback, getScriptName(credentials.getUserid(), credentials.getContextid()));
             } catch (UnsupportedEncodingException e) {
                 throw MailFilterExceptionCode.UNSUPPORTED_ENCODING.create(e);
             } catch (OXSieveHandlerException e) {
-                throw MailFilterExceptionCode.handleParsingException(e, credentials, useSIEVEResponseCodes);
+                throw MailFilterExceptionCode.handleParsingException(e, credentials, useSIEVEResponseCodes(credentials.getUserid(), credentials.getContextid()));
             } catch (IOException e) {
                 throw MailFilterExceptionCode.IO_CONNECTION_ERROR.create(e, sieveHandler.getSieveHost(), Integer.valueOf(sieveHandler.getSievePort()));
             } finally {
@@ -389,7 +445,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
             } catch (IOException e) {
                 throw MailFilterExceptionCode.IO_CONNECTION_ERROR.create(e, sieveHandler.getSieveHost(), Integer.valueOf(sieveHandler.getSievePort()));
             } catch (OXSieveHandlerException e) {
-                throw MailFilterExceptionCode.handleParsingException(e, credentials, useSIEVEResponseCodes);
+                throw MailFilterExceptionCode.handleParsingException(e, credentials, useSIEVEResponseCodes(credentials.getUserid(), credentials.getContextid()));
             } catch (NumberFormatException nfe) {
                 throw MailFilterExceptionCode.NAN.create(nfe, MailFilterExceptionCode.getNANString(nfe));
             } catch (RuntimeException re) {
@@ -420,7 +476,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
 
                 ClientRulesAndRequire clientrulesandrequire = sieveTextFilter.splitClientRulesAndRequire(rules.getRulelist(), flag, rules.isError());
                 List<Rule> clientRules = clientrulesandrequire.getRules();
-                changeOutgoingVacationRule(clientRules);
+                changeOutgoingVacationRule(credentials.getUserid(), credentials.getContextid(), clientRules);
                 if (!flag.equals(CATEGORY_FLAG)) {
                     removeRules(clientRules, CATEGORY_FLAG);
                 }
@@ -438,7 +494,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
             } catch (UnsupportedEncodingException e) {
                 throw MailFilterExceptionCode.UNSUPPORTED_ENCODING.create(e);
             } catch (OXSieveHandlerException e) {
-                throw MailFilterExceptionCode.handleParsingException(e, credentials, useSIEVEResponseCodes);
+                throw MailFilterExceptionCode.handleParsingException(e, credentials, useSIEVEResponseCodes(credentials.getUserid(), credentials.getContextid()));
             } catch (IOException e) {
                 throw MailFilterExceptionCode.IO_CONNECTION_ERROR.create(e, sieveHandler.getSieveHost(), Integer.valueOf(sieveHandler.getSievePort()));
             } finally {
@@ -490,7 +546,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
             } catch (UnsupportedEncodingException e) {
                 throw MailFilterExceptionCode.UNSUPPORTED_ENCODING.create(e);
             } catch (OXSieveHandlerException e) {
-                throw MailFilterExceptionCode.handleParsingException(e, credentials, useSIEVEResponseCodes);
+                throw MailFilterExceptionCode.handleParsingException(e, credentials, useSIEVEResponseCodes(credentials.getUserid(), credentials.getContextid()));
             } catch (IOException e) {
                 throw MailFilterExceptionCode.IO_CONNECTION_ERROR.create(e, sieveHandler.getSieveHost(), Integer.valueOf(sieveHandler.getSievePort()));
             } finally {
@@ -531,7 +587,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
 
                     String writeback = sieveTextFilter.writeback(clientrulesandrequire, new HashSet<String>(sieveHandler.getCapabilities().getSieve()));
                     writeback = sieveTextFilter.rewriteRequire(writeback, script);
-                    writeScript(sieveHandler, activeScript, writeback);
+                    writeScript(sieveHandler, activeScript, writeback, getScriptName(credentials.getUserid(), credentials.getContextid()));
                 } else {
                     throw MailFilterExceptionCode.NO_ACTIVE_SCRIPT.create();
                 }
@@ -542,7 +598,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
             } catch (UnsupportedEncodingException e) {
                 throw MailFilterExceptionCode.UNSUPPORTED_ENCODING.create(e);
             } catch (OXSieveHandlerException e) {
-                throw MailFilterExceptionCode.handleParsingException(e, credentials, useSIEVEResponseCodes);
+                throw MailFilterExceptionCode.handleParsingException(e, credentials, useSIEVEResponseCodes(credentials.getUserid(), credentials.getContextid()));
             } catch (IOException e) {
                 throw MailFilterExceptionCode.IO_CONNECTION_ERROR.create(e, sieveHandler.getSieveHost(), Integer.valueOf(sieveHandler.getSievePort()));
             } finally {
@@ -590,7 +646,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
             } catch (UnsupportedEncodingException e) {
                 throw MailFilterExceptionCode.UNSUPPORTED_ENCODING.create(e);
             } catch (OXSieveHandlerException e) {
-                throw MailFilterExceptionCode.handleParsingException(e, credentials, useSIEVEResponseCodes);
+                throw MailFilterExceptionCode.handleParsingException(e, credentials, useSIEVEResponseCodes(credentials.getUserid(), credentials.getContextid()));
             } catch (IOException e) {
                 throw MailFilterExceptionCode.IO_CONNECTION_ERROR.create(e, sieveHandler.getSieveHost(), Integer.valueOf(sieveHandler.getSievePort()));
             } catch (ParseException e) {
@@ -613,7 +669,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
                 Capabilities capabilities = sieveHandler.getCapabilities();
                 return new HashSet<String>(capabilities.getSieve());
             } catch (OXSieveHandlerException e) {
-                throw MailFilterExceptionCode.handleParsingException(e, credentials, useSIEVEResponseCodes);
+                throw MailFilterExceptionCode.handleParsingException(e, credentials, useSIEVEResponseCodes(credentials.getUserid(), credentials.getContextid()));
             } finally {
                 closeSieveHandler(sieveHandler);
             }
@@ -637,7 +693,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
                             handlerConnect(sieveHandler, credentials.getSubject());
                             return sieveHandler.getCapabilities();
                         } catch (OXSieveHandlerException e) {
-                            throw MailFilterExceptionCode.handleParsingException(e, credentials, useSIEVEResponseCodes);
+                            throw MailFilterExceptionCode.handleParsingException(e, credentials, useSIEVEResponseCodes(credentials.getUserid(), credentials.getContextid()));
                         } finally {
                             closeSieveHandler(sieveHandler);
                         }
@@ -654,7 +710,59 @@ public final class MailFilterServiceImpl implements MailFilterService {
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.config.Reloadable#reloadConfiguration(com.openexchange.config.ConfigurationService)
+     */
+    @Override
+    public void reloadConfiguration(ConfigurationService configService) {
+        try {
+            checkConfigfile();
+        } catch (OXException e) {
+            LOGGER.error("Error while reloading 'mailfilter.properties': {}", e.getMessage(), e);
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.config.Reloadable#getInterests()
+     */
+    @Override
+    public Interests getInterests() {
+        String[] configFileNames = new String[MailFilterProperty.values().length];
+        int index = 0;
+        for (MailFilterProperty mailFilterProperty : MailFilterProperty.values()) {
+            configFileNames[index++] = mailFilterProperty.getFQPropertyName();
+        }
+        return DefaultInterests.builder().configFileNames("mailfilter.properties").configFileNames(configFileNames).build();
+    }
+
     // ----------------------------------------------------------------------------------------------------------------------- //
+
+    /**
+     * Get the script name for the specified user in the specified context
+     * 
+     * @param userId The user identifier
+     * @param contextId the context identifier
+     * @return The script name
+     */
+    private String getScriptName(int userId, int contextId) {
+        LeanConfigurationService config = services.getService(LeanConfigurationService.class);
+        return config.getProperty(userId, contextId, MailFilterProperty.scriptName);
+    }
+
+    /**
+     * 
+     * @param userId
+     * @param contextId
+     * @return
+     */
+    private boolean useSIEVEResponseCodes(int userId, int contextId) {
+        LeanConfigurationService config = services.getService(LeanConfigurationService.class);
+        return config.getBooleanProperty(userId, contextId, MailFilterProperty.useSIEVEResponseCodes);
+    }
 
     private List<Rule> exclude(Map<String, List<Rule>> flagged, List<FilterType> exclusionFlags) {
         List<Rule> ret = new ArrayList<Rule>();
@@ -723,9 +831,9 @@ public final class MailFilterServiceImpl implements MailFilterService {
      * @param rule the rule to be changed
      * @throws SieveException
      */
-    private void changeIncomingVacationRule(Rule rule) throws SieveException {
-        ConfigurationService config = Services.getService(ConfigurationService.class);
-        String vacationdomains = config.getProperty(MailFilterProperties.Values.VACATION_DOMAINS.property);
+    private void changeIncomingVacationRule(int userId, int contextId, Rule rule) throws SieveException {
+        LeanConfigurationService config = services.getService(LeanConfigurationService.class);
+        String vacationdomains = config.getProperty(userId, contextId, MailFilterProperty.vacationDomains);
 
         if (null != vacationdomains && 0 != vacationdomains.length()) {
             IfCommand ifCommand = rule.getIfCommand();
@@ -764,9 +872,9 @@ public final class MailFilterServiceImpl implements MailFilterService {
      * @param clientrules
      * @throws SieveException
      */
-    private void changeOutgoingVacationRule(List<Rule> clientrules) throws SieveException {
-        ConfigurationService config = Services.getService(ConfigurationService.class);
-        String vacationdomains = config.getProperty(MailFilterProperties.Values.VACATION_DOMAINS.property);
+    private void changeOutgoingVacationRule(int userId, int contextId, List<Rule> clientrules) throws SieveException {
+        LeanConfigurationService config = services.getService(LeanConfigurationService.class);
+        String vacationdomains = config.getProperty(userId, contextId, MailFilterProperty.vacationDomains);
 
         if (null != vacationdomains && 0 != vacationdomains.length()) {
             for (Rule rule : clientrules) {
@@ -842,19 +950,20 @@ public final class MailFilterServiceImpl implements MailFilterService {
      * @param sieveHandler the sieveHandler to use
      * @param activeScript the activeScript
      * @param writeback the write-back String
+     * @param scriptName TODO
      * @throws OXSieveHandlerException
      * @throws IOException
      * @throws UnsupportedEncodingException
      */
-    private void writeScript(SieveHandler sieveHandler, String activeScript, String writeback) throws OXSieveHandlerException, IOException, UnsupportedEncodingException {
+    private void writeScript(SieveHandler sieveHandler, String activeScript, String writeback, String scriptName) throws OXSieveHandlerException, IOException, UnsupportedEncodingException {
         StringBuilder commandBuilder = new StringBuilder(64);
 
-        if (null != activeScript && activeScript.equals(this.scriptname)) {
+        if (null != activeScript && activeScript.equals(scriptName)) {
             sieveHandler.setScript(activeScript, writeback.getBytes(com.openexchange.java.Charsets.UTF_8), commandBuilder);
             sieveHandler.setScriptStatus(activeScript, true, commandBuilder);
         } else {
-            sieveHandler.setScript(this.scriptname, writeback.getBytes(com.openexchange.java.Charsets.UTF_8), commandBuilder);
-            sieveHandler.setScriptStatus(this.scriptname, true, commandBuilder);
+            sieveHandler.setScript(scriptName, writeback.getBytes(com.openexchange.java.Charsets.UTF_8), commandBuilder);
+            sieveHandler.setScriptStatus(scriptName, true, commandBuilder);
         }
     }
 
@@ -949,6 +1058,21 @@ public final class MailFilterServiceImpl implements MailFilterService {
         return nextUid;
     }
 
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The requested service
+     * @throws OXException If the service is not available
+     */
+    private <S extends Object> S getService(final Class<? extends S> clazz) throws OXException {
+        final S service = services.getService(clazz);
+        if (service == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(clazz.getSimpleName());
+        }
+        return service;
+    }
+
     // ----------------------------------------------------- Helper classes -------------------------------------------------------
 
     private static final class Key {
@@ -1039,5 +1163,4 @@ public final class MailFilterServiceImpl implements MailFilterService {
             return true;
         }
     }
-
 }

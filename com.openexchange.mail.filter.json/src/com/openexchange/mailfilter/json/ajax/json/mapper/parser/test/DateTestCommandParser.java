@@ -49,189 +49,61 @@
 
 package com.openexchange.mailfilter.json.ajax.json.mapper.parser.test;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 import org.apache.jsieve.SieveException;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.TestCommand;
 import com.openexchange.jsieve.commands.TestCommand.Commands;
-import com.openexchange.mailfilter.json.ajax.json.fields.DateTestField;
-import com.openexchange.mailfilter.json.ajax.json.fields.GeneralField;
-import com.openexchange.mailfilter.json.ajax.json.mapper.ArgumentUtil;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
-import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserJSONUtil;
-import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link DateTestCommandParser} parses date sieve tests.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.8.4
  */
-public class DateTestCommandParser implements CommandParser<TestCommand> {
-
-    private enum Comparison {
-        is, ge, le
-    }
-
-    private enum DatePart {
-        date, time, weekday
-    }
-
-    private final static String dateFormatPattern = "yyyy-MM-dd";
-    private final static String timeFormatPattern = "HH:mm";
+public class DateTestCommandParser extends AbstractDateTestCommandParser implements CommandParser<TestCommand> {
 
     /**
-     * Initializes a new {@link DateTestCommandParser}.
+     * Initialises a new {@link DateTestCommandParser}.
      */
     public DateTestCommandParser() {
         super();
     }
 
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser#parse(org.json.JSONObject, com.openexchange.tools.session.ServerSession)
+     */
     @Override
     public TestCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException {
         String commandName = Commands.DATE.getCommandName();
         final List<Object> argList = new ArrayList<Object>();
 
-        if(jsonObject.has(DateTestField.zone.name())){
-           argList.add(ArgumentUtil.createTagArgument("zone"));
-           String zone = CommandParserJSONUtil.getString(jsonObject, DateTestField.zone.name(), commandName);
-           argList.add(CommandParserJSONUtil.stringToList(zone));
-        } else {
-            // add the zone tag
-            if (session != null && session.getUser().getTimeZone() != null) {
-                argList.add(ArgumentUtil.createTagArgument("zone"));
-                TimeZone tZone = TimeZone.getTimeZone(session.getUser().getTimeZone());
-                String zone = String.format("%+03d%02d", tZone.getRawOffset() / 3600000, Math.abs((tZone.getRawOffset() / 60000) % 60));
-                argList.add(CommandParserJSONUtil.stringToList(zone));
-            }
-        }
-
-        // Parse the comparison tag
-        final String comparisonTag = CommandParserJSONUtil.getString(jsonObject, DateTestField.comparison.name(), commandName);
-        Comparison comparison = Comparison.valueOf(comparisonTag);
-        switch (comparison) {
-            case ge:
-                argList.add(ArgumentUtil.createTagArgument("value"));
-                argList.add(CommandParserJSONUtil.stringToList("ge"));
-                break;
-            case is:
-                argList.add(ArgumentUtil.createTagArgument(comparison.name()));
-                break;
-            case le:
-                argList.add(ArgumentUtil.createTagArgument("value"));
-                argList.add(CommandParserJSONUtil.stringToList("le"));
-                break;
-            default:
-                throw OXJSONExceptionCodes.JSON_READ_ERROR.create("Date rule: The comparison \"" + comparison + "\" is not a valid comparison");
-
-        }
-
-        // Parse the header
-        String header = CommandParserJSONUtil.getString(jsonObject, DateTestField.header.name(), commandName);
-        argList.add(CommandParserJSONUtil.stringToList(header));
-
-        // Parse the date part
-        final String datepart = CommandParserJSONUtil.getString(jsonObject, DateTestField.datepart.name(), commandName);
-        DatePart datePart = DatePart.valueOf(datepart);
-        switch (datePart) {
-            case date:
-                argList.add(CommandParserJSONUtil.stringToList(datepart));
-                argList.add(JSONDateArrayToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, DateTestField.datevalue.name(), commandName), dateFormatPattern));
-                break;
-            case time:
-                argList.add(CommandParserJSONUtil.stringToList(datepart));
-                argList.add(JSONDateArrayToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, DateTestField.datevalue.name(), commandName), timeFormatPattern));
-                break;
-            case weekday:
-                argList.add(CommandParserJSONUtil.stringToList(datepart));
-                argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, DateTestField.datevalue.name(), commandName)));
-                break;
-            default:
-                throw OXJSONExceptionCodes.JSON_READ_ERROR.create("Date rule: The datepart \"" + datepart + "\" is not a valid datepart");
-        }
+        parseZone(argList, jsonObject, session, commandName);
+        parseComparisonTag(argList, jsonObject, commandName);
+        parseHeader(argList, jsonObject, commandName);
+        parseDatePart(argList, jsonObject, commandName);
 
         return new TestCommand(TestCommand.Commands.DATE, argList, new ArrayList<TestCommand>());
     }
 
-    @SuppressWarnings("unchecked")
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser#parse(org.json.JSONObject, java.lang.Object)
+     */
     @Override
     public void parse(JSONObject jsonObject, TestCommand command) throws JSONException, OXException {
-        jsonObject.put(GeneralField.id.name(), command.getCommand().getCommandName());
-        final String comparison = command.getMatchType().substring(1);
-        if ("value".equals(comparison)) {
-            int compPos = command.getTagArguments().size() == 1 ? 1 : 3;
-            jsonObject.put(DateTestField.comparison.name(), ((List<String>) command.getArguments().get(compPos)).get(0));
-        } else {
-            jsonObject.put(DateTestField.comparison.name(), comparison);
-        }
-
-        final List<String> headers = (List<String>) command.getArguments().get(command.getArguments().size() - 3);
-        String header = headers.get(0);
-        jsonObject.put(DateTestField.header.name(), header);
-
-        final List<String> value = (List<String>) command.getArguments().get(command.getArguments().size() - 2);
-        String datepart = value.get(0);
-        jsonObject.put(DateTestField.datepart.name(), datepart);
-
-        DatePart datePart = DatePart.valueOf(datepart);
-        int index = command.getArguments().size() - 1;
-        switch (datePart) {
-            case date:
-                jsonObject.put(DateTestField.datevalue.name(), getJSONDateArray((List<String>) command.getArguments().get(index), dateFormatPattern));
-                break;
-            case time:
-                jsonObject.put(DateTestField.datevalue.name(), getJSONDateArray((List<String>) command.getArguments().get(index), timeFormatPattern));
-                break;
-            case weekday:
-                jsonObject.put(DateTestField.datevalue.name(), new JSONArray((List<String>) command.getArguments().get(index)));
-                break;
-            default:
-                throw OXJSONExceptionCodes.JSON_READ_ERROR.create("Date rule: The datepart \"" + datepart + "\" is not a valid datepart");
-        }
-    }
-
-    private List<String> JSONDateArrayToStringList(JSONArray jarray, String formatPattern) throws JSONException {
-        int length = jarray.length();
-        List<String> retval = new ArrayList<String>(length);
-        for (int i = 0; i < length; i++) {
-            retval.add(convertJSONDate2Sieve(jarray.getString(i), formatPattern));
-        }
-        return retval;
-    }
-
-    private String convertJSONDate2Sieve(final String dateString, final String formatPattern) throws JSONException {
-        try {
-            final Date date = new Date(Long.parseLong(dateString));
-            final SimpleDateFormat df = new SimpleDateFormat(formatPattern);
-            df.setTimeZone(TimeZone.getTimeZone("UTC"));
-            return df.format(date);
-        } catch (NumberFormatException e) {
-            throw new JSONException("Date field \"" + dateString + "\" is no date value");
-        }
-    }
-
-    private JSONArray getJSONDateArray(final List<String> dateStringCollection, final String formatPattern) throws JSONException {
-        final SimpleDateFormat df = new SimpleDateFormat(formatPattern);
-        df.setTimeZone(TimeZone.getTimeZone("UTC"));
-        final JSONArray retval = new JSONArray();
-        for (final String part : dateStringCollection) {
-            Date parse;
-            try {
-                parse = df.parse(part);
-                retval.put(parse.getTime());
-            } catch (ParseException e) {
-                throw new JSONException("Error while parsing date from string \"" + part + "\"");
-            }
-        }
-        return retval;
+        parseZone(jsonObject, command);
+        parseComparisonTag(jsonObject, command);
+        parseHeader(jsonObject, command);
+        parseDatePart(jsonObject, command);
     }
 }

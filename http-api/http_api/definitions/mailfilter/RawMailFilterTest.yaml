@@ -4,6 +4,9 @@ id:
 comparison:
   type: string
   description: The comparison type, see [Possible comparisons](#possible-comparisons).
+addresspart:
+  type: string
+  description: The addresspart which shall be used for envelope or address tests, see [Possible address parts](#possible-address-parts).
 headers:
   type: array
   description: An array containing the header fields (for address-, envelope-, exists- and header-test).
@@ -32,7 +35,7 @@ datevalue:
     format: int64
 zone: 
   type: string
-  description: The timezone which should be used for a date or currentdate test. E.g. "+0100". If omitted the current timezone of the user is used.
+  description: Containing the timezone of date or currentdate tests. E.g. "+0100". If omitted the current timezone of the user is used.
 extensionskey:
   type: string
   description: The [extension key](#possible-extensions) (for body-test).

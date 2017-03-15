@@ -51,6 +51,7 @@ package com.openexchange.share.servlet.internal;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.exception.OXException;
@@ -91,16 +92,27 @@ public class ShareServlet extends AbstractShareServlet {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ShareServlet.class);
 
     private final RankingAwareNearRegistryServiceTracker<ShareHandler> shareHandlerRegistry;
+    private final AtomicReference<UserAgentBlacklist> userAgentBlacklistRef;
 
     /**
      * Initializes a new {@link ShareServlet}.
      *
-     * @param shareLoginConfig The share login configuration to use
+     * @param userAgentBlacklist The User-Agent black-list to use
      * @param shareHandlerRegistry The handler registry
      */
-    public ShareServlet(RankingAwareNearRegistryServiceTracker<ShareHandler> shareHandlerRegistry) {
+    public ShareServlet(UserAgentBlacklist userAgentBlacklist, RankingAwareNearRegistryServiceTracker<ShareHandler> shareHandlerRegistry) {
         super();
+        this.userAgentBlacklistRef = new AtomicReference<UserAgentBlacklist>(userAgentBlacklist);
         this.shareHandlerRegistry = shareHandlerRegistry;
+    }
+
+    /**
+     * Sets a new User-Agent black-list that shall be used by this servlet.
+     *
+     * @param newBlacklist The new black-list to apply
+     */
+    public void setUserAgentBlacklist(UserAgentBlacklist newBlacklist) {
+        this.userAgentBlacklistRef.set(newBlacklist);
     }
 
     @Override
@@ -125,6 +137,18 @@ public class ShareServlet extends AbstractShareServlet {
                 LOG.debug("No share found at '{}'", pathInfo);
                 sendNotFound(response, translator);
                 return;
+            }
+
+            {
+                UserAgentBlacklist userAgentBlacklist = userAgentBlacklistRef.get();
+                if (null != userAgentBlacklist) {
+                    String userAgent = request.getHeader("User-Agent");
+                    if (userAgentBlacklist.isBlacklisted(userAgent)) {
+                        LOG.debug("User-Agent black-listed: '{}'", userAgent);
+                        sendNotFound(response, translator);
+                        return;
+                    }
+                }
             }
 
             GuestInfo guest = ShareServiceLookup.getService(ShareService.class, true).resolveGuest(paths.get(0));

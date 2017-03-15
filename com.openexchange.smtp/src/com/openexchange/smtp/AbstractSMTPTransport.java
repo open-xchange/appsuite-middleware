@@ -85,10 +85,7 @@ import javax.mail.internet.idn.IDNA;
 import javax.security.auth.Subject;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Filter;
-import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigProviderService;
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -108,6 +105,8 @@ import com.openexchange.mail.MailPath;
 import com.openexchange.mail.api.AuthType;
 import com.openexchange.mail.api.AuthenticationFailedHandler.Service;
 import com.openexchange.mail.api.AuthenticationFailedHandlerService;
+import com.openexchange.mail.api.AuthenticationFailureHandlerResult;
+import com.openexchange.mail.api.AuthenticationFailureHandlerResult.Type;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
@@ -659,11 +658,15 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                     if (account.isTransportOAuthAble() && account.getTransportOAuthId() >= 0) {
                         OAuthService oauthService = Services.optService(OAuthService.class);
                         if (null != oauthService) {
+                            OAuthAccount oAuthAccount;
                             try {
-                                OAuthAccount oAuthAccount = oauthService.getAccount(account.getTransportOAuthId(), session, session.getUserId(), session.getContextId());
-                                throw MailExceptionCode.MAIL_TRANSPORT_DISABLED_OAUTH.create(smtpConfig.getServer(), smtpConfig.getLogin(), I(session.getUserId()), I(session.getContextId()), oAuthAccount.getDisplayName());
+                                oAuthAccount = oauthService.getAccount(account.getTransportOAuthId(), session, session.getUserId(), session.getContextId());
                             } catch (Exception x) {
                                 LOG.warn("Failed to load transport-associated OAuth account", x);
+                                oAuthAccount = null;
+                            }
+                            if (null != oAuthAccount) {
+                                throw MailExceptionCode.MAIL_TRANSPORT_DISABLED_OAUTH.create(smtpConfig.getServer(), smtpConfig.getLogin(), I(session.getUserId()), I(session.getContextId()), oAuthAccount.getDisplayName());
                             }
                         }
                     }
@@ -696,15 +699,16 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
         final String login = smtpConfig.getLogin();
         try {
             if (smtpConfig.getSMTPProperties().isSmtpAuth()) {
-                final String encodedPassword = encodePassword(smtpConfig.getPassword());
+                final String encodedPassword = authEncode(smtpConfig.getPassword());
+                final String encodedLogin = authEncode(login);
                 if (isKerberosAuth()) {
                     try {
-                        Subject.doAs(kerberosSubject, new SaslSmtpLoginAction(transport, server, port, login, encodedPassword));
+                        Subject.doAs(kerberosSubject, new SaslSmtpLoginAction(transport, server, port, encodedLogin, encodedPassword));
                     } catch (final PrivilegedActionException e) {
                         handlePrivilegedActionException(e);
                     }
                 } else {
-                    doConnectTransport(transport, server, port, null == login ? "" : login, null == encodedPassword ? "" : encodedPassword, smtpConfig, session);
+                    doConnectTransport(transport, server, port, null == encodedLogin ? "" : encodedLogin, null == encodedPassword ? "" : encodedPassword, smtpConfig, session);
                 }
             } else {
                 doConnectTransport(transport, server, port, null, null, smtpConfig, session);
@@ -789,8 +793,17 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                 AuthenticationFailedHandlerService handlerService = Services.getService(AuthenticationFailedHandlerService.class);
                 if (handlerService != null) {
                     OXException oxe = MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
-                    handlerService.handleAuthenticationFailed(oxe, Service.TRANSPORT, smtpConfig, session);
-                    throw e;
+                    AuthenticationFailureHandlerResult result = handlerService.handleAuthenticationFailed(oxe, Service.TRANSPORT, smtpConfig, session);
+                    Type type = result.getType();
+                    switch (type) {
+                        case RETRY:
+                            transport.connect(host, port, user, password);
+                            break;
+                        case EXCEPTION:
+                            throw result.getError();
+                        default:
+                            throw e;
+                    }
                 }
             }
 
@@ -1358,24 +1371,8 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
         return MailAccount.DEFAULT_ID == accountId && null != kerberosSubject;
     }
 
-    private long getMaxMailSize() throws OXException {
-        final ConfigViewFactory factory = Services.getService(ConfigViewFactory.class);
-
-        if (factory != null) {
-
-            final ConfigView view = factory.getView(getUserId(), ctx.getContextId());
-            final ConfigProperty<Long> property = view.property("com.openexchange.mail.maxMailSize", Long.class);
-
-            if (property.isDefined()) {
-                final Long l = property.get();
-                final long maxMailSize = null == l ? -1 : l.longValue();
-                if (maxMailSize > 0) {
-                    return maxMailSize;
-                }
-            }
-        }
-
-        return -1;
+    private long getMaxMailSize() {
+        return MailProperties.getInstance().getMaxMailSize(getUserId(), ctx.getContextId());
     }
 
     private int getUserId() {
@@ -1415,17 +1412,17 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
         }
     }
 
-    private String encodePassword(final String password) throws OXException {
-        String tmpPass = password;
-        if (tmpPass != null) {
+    private String authEncode(final String s) throws OXException {
+        String tmp = s;
+        if (tmp != null) {
             try {
-                tmpPass = new String(password.getBytes(Charsets.forName(getTransportConfig().getSMTPProperties().getSmtpAuthEnc())), Charsets.ISO_8859_1);
+                tmp = new String(s.getBytes(Charsets.forName(getTransportConfig().getSMTPProperties().getSmtpAuthEnc())), Charsets.ISO_8859_1);
             } catch (final UnsupportedCharsetException e) {
                 LOG.error("Unsupported encoding in a message detected and monitored", e);
                 mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
             }
         }
-        return tmpPass;
+        return tmp;
     }
 
     private void prepareAddresses(final Address[] addresses) {

@@ -118,7 +118,7 @@ public final class MDaemonEntity2ACL extends Entity2ACL {
             throw Entity2ACLExceptionCode.MISSING_ARG.create();
         }
         try {
-            return MailConfig.getMailLogin(storageService.getMailAccount(((Integer) args[0]).intValue(), userId, ctx.getContextId()), userLoginInfo);
+            return MailConfig.getMailLogin(storageService.getMailAccount(((Integer) args[0]).intValue(), userId, ctx.getContextId()), userLoginInfo, userId, ctx.getContextId());
         } catch (final OXException e) {
             throw Entity2ACLExceptionCode.UNKNOWN_USER.create(Integer.valueOf(userId), Integer.valueOf(ctx.getContextId()), args[1].toString());
         }
@@ -144,7 +144,7 @@ public final class MDaemonEntity2ACL extends Entity2ACL {
     }
 
     private static int getUserIDInternal(final String pattern, final Context ctx, final int accountId, final String serverUrl, final int sessionUser) throws OXException {
-        final int[] ids = MailConfig.getUserIDsByMailLogin(pattern, MailAccount.DEFAULT_ID == accountId, serverUrl, ctx);
+        final int[] ids = MailConfig.getUserIDsByMailLogin(pattern, MailAccount.DEFAULT_ID == accountId, serverUrl, sessionUser, ctx);
         if (0 == ids.length) {
             throw Entity2ACLExceptionCode.RESOLVE_USER_FAILED.create(pattern);
         }

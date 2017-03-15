@@ -1,12 +1,38 @@
-array:
-  - data:
-      Key: com.openexchange.saml.enableSessionIndexAutoLogin
-      Description: >
-Specifies whether SAML-specific auto-login is enabled, that uses the SessionIndex of the AuthnResponse.
-      Default: false
-      Version: 7.8.4
-      Reloadable: false
-      Configcascade_Aware: false
-      Related: 
-      File: saml.properties
-  		
+feature_name: Saml
+properties:
+    - key: com.openexchange.saml.enableSessionIndexAutoLogin
+      description: |
+        Specifies whether SAML-specific auto-login is enabled, that uses the SessionIndex of the AuthnResponse.
+      defaultValue: false
+      version: 7.8.4
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: saml.properties
+    - key: com.openexchange.saml.oauth.tokenEndpoint
+      description: |
+        Specifies the OAuth HTTP token end-point.
+      defaultValue: 
+      version: 7.8.4
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: saml.properties
+    - key: com.openexchange.saml.oauth.clientId
+      description: |
+        Specifies the client id used to authenticate the client against the OAuth token end-point.
+      defaultValue: 
+      version: 7.8.4
+      reloadable: true
+      configcascadeAware: true
+      related: com.openexchange.saml.oauth.tokenEndpoint
+      file: saml.properties
+    - key: com.openexchange.saml.oauth.clientSecret
+      description: |
+        Specifies the client secret used to authenticate the client against the OAuth token end-point.
+      defaultValue: 
+      version: 7.8.4
+      reloadable: true
+      configcascadeAware: true
+      related: com.openexchange.saml.oauth.tokenEndpoint
+      file: saml.properties

@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.settings.tree.modules.mail;
 
+import java.util.List;
+import org.json.JSONArray;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -62,6 +64,7 @@ import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.Strings;
 import com.openexchange.jslob.ConfigTreeEquivalent;
+import com.openexchange.mail.config.MaliciousFolders;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
@@ -96,31 +99,22 @@ public class MaliciousListing implements PreferencesItemService, ConfigTreeEquiv
 
             @Override
             public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
-                ConfigViewFactory factory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
-                if (factory == null) {
-                    setting.setSingleValue(Boolean.FALSE);
-                    return;
-                }
+                MaliciousFolders maliciousFolders = MaliciousFolders.instanceFor(session);
+                
+                List<String> listing = maliciousFolders.getFolderListing();
+                int size = listing.size();
 
-                String listing;
-                {
-                    ConfigView view = factory.getView(session.getUserId(), session.getContextId());
-                    String tmp = "$Spam, $Confirmed-spam";
-                    ComposedConfigProperty<String> property = view.property("com.openexchange.mail.maliciousFolders.listing", String.class);
-                    if (property.isDefined()) {
-                        String folders = property.get();
-                        if (false == Strings.isEmpty(folders)) {
-                            tmp = folders;
-                        }
+                JSONArray jListing;
+                if (size <= 0) {
+                    jListing = new JSONArray(0);
+                } else {
+                    jListing = new JSONArray(size);
+                    for (String token : listing) {
+                        jListing.put(token);
                     }
-                    listing = tmp;
                 }
 
-                if (Strings.isEmpty(listing) || "none".equalsIgnoreCase(listing)) {
-                    listing = null;
-                }
-
-                setting.setSingleValue(listing);
+                setting.setSingleValue(jListing);
             }
         };
     }

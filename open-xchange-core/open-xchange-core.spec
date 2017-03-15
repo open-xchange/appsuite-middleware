@@ -43,6 +43,8 @@ Provides:      open-xchange-common = %{version}
 Obsoletes:     open-xchange-common < %{version}
 Provides:      open-xchange-config-cascade = %{version}
 Obsoletes:     open-xchange-config-cascade < %{version}
+Provides:      open-xchange-config-lean = %{version}
+Obsoletes:     open-xchange-config-lean < %{version}
 Provides:      open-xchange-config-cascade-context = %{version}
 Obsoletes:     open-xchange-config-cascade-context < %{version}
 Provides:      open-xchange-config-cascade-user = %{version}

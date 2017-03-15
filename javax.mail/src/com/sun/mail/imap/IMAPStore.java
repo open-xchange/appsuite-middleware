@@ -234,6 +234,7 @@ public class IMAPStore extends Store
     // enable notification of IMAP responses during IDLE
     private boolean enableImapEvents = false;
     private String propagateClientIpAddress = null;
+    private volatile String generatedExternalId = null;
     private Map<String, String> clientParameters = null;
     private ExternalIdGenerator externalIdGenerator = null;
     private boolean failOnNOFetch = false;
@@ -749,6 +750,15 @@ public class IMAPStore extends Store
     }
 
     /**
+     * Gets the generated external session identifier.
+     *
+     * @return The generated external session identifier or <code>null</code>
+     */
+    public String getGeneratedExternalId() {
+        return generatedExternalId;
+    }
+
+    /**
      * Implementation of protocolConnect().  Will create a connection
      * to the server and authenticate the user using the mechanisms
      * specified by various properties. <p>
@@ -915,6 +925,7 @@ public class IMAPStore extends Store
                     clientParams = new LinkedHashMap<String, String>(this.clientParameters);
                 }
                 clientParams.put("x-session-ext-id", generatedExternalId);
+                this.generatedExternalId = generatedExternalId;
             }
         }
         

@@ -84,6 +84,7 @@ import org.scribe.builder.api.YahooApi;
 import org.scribe.model.Token;
 import org.scribe.model.Verifier;
 import com.openexchange.context.ContextService;
+import com.openexchange.crypto.CryptoErrorMessage;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
@@ -720,11 +721,21 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             if (!rs.next()) {
                 throw OAuthExceptionCodes.ACCOUNT_NOT_FOUND.create(Integer.valueOf(accountId), Integer.valueOf(user), Integer.valueOf(contextId));
             }
-            final DefaultOAuthAccount account = new DefaultOAuthAccount();
+
+            DefaultOAuthAccount account = new DefaultOAuthAccount();
             account.setId(accountId);
-            account.setDisplayName(rs.getString(1));
-            account.setToken(encryptionService.decrypt(session, rs.getString(2), new PWUpdate("accessToken", contextId, accountId)));
-            account.setSecret(encryptionService.decrypt(session, rs.getString(3), new PWUpdate("accessSecret", contextId, accountId)));
+            String displayName = rs.getString(1);
+            account.setDisplayName(displayName);
+            try {
+                account.setToken(encryptionService.decrypt(session, rs.getString(2), new PWUpdate("accessToken", contextId, accountId)));
+                account.setSecret(encryptionService.decrypt(session, rs.getString(3), new PWUpdate("accessSecret", contextId, accountId)));
+            } catch (OXException e) {
+                if (false == CryptoErrorMessage.BadPassword.equals(e)) {
+                    throw e;
+                }
+
+                throw OAuthExceptionCodes.INVALID_ACCOUNT_EXTENDED.create(e.getCause(), displayName, accountId);
+            }
 
             account.setMetaData(registry.getService(rs.getString(4), user, contextId));
             String scopes = rs.getString(5);

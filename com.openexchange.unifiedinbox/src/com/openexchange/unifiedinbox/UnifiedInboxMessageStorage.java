@@ -512,6 +512,9 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
 
     @Override
     public MailPart getImageAttachment(String fullName, String mailId, String contentId) throws OXException {
+        if (null == contentId) {
+            return null;
+        }
         if (DEFAULT_FOLDER_ID.equals(fullName)) {
             throw UnifiedInboxException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
         }

@@ -49,9 +49,13 @@
 
 package com.openexchange.imap;
 
+import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import java.io.IOException;
 import java.nio.charset.UnsupportedCharsetException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
@@ -115,6 +119,7 @@ import com.openexchange.mail.cache.IMailAccessCache;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.MimeSessionPropertyNames;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -130,6 +135,7 @@ import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.sun.mail.iap.ConnectQuotaExceededException;
 import com.sun.mail.iap.StarttlsRequiredException;
+import com.sun.mail.imap.GreetingListener;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.JavaIMAPStore;
@@ -605,14 +611,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              * Try to connect to IMAP server
              */
             final IIMAPProperties imapConfProps = (IIMAPProperties) config.getMailProperties();
-            String tmpPass = getMailConfig().getPassword();
-            if (tmpPass != null) {
-                try {
-                    tmpPass = new String(tmpPass.getBytes(Charsets.forName(imapConfProps.getImapAuthEnc())), Charsets.ISO_8859_1);
-                } catch (final UnsupportedCharsetException e) {
-                    LOG.error("", e);
-                }
-            }
+            String tmpPass = authEncode(getMailConfig().getPassword(), imapConfProps.getImapAuthEnc());
+            String login = authEncode(config.getLogin(), imapConfProps.getImapAuthEnc());
             /*
              * Get properties
              */
@@ -626,7 +626,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             javax.mail.Session imapSession;
             {
                 boolean forceSecure = imapConfig.isRequireTls() || imapConfProps.isEnforceSecureConnection();
-                imapSession = setConnectProperties(config, imapConfProps.getImapTimeout(), imapConfProps.getImapConnectionTimeout(), imapProps, JavaIMAPStore.class, forceSecure);
+                imapSession = setConnectProperties(config, imapConfProps.getImapTimeout(), imapConfProps.getImapConnectionTimeout(), imapProps, JavaIMAPStore.class, forceSecure, session.getUserId(), session.getContextId());
             }
             /*
              * Check if debug should be enabled
@@ -642,7 +642,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 /*
                  * Get connected store
                  */
-                imapStore = newConnectedImapStore(imapSession, IDNA.toASCII(config.getServer()), config.getPort(), config.getLogin(), tmpPass, -1, preAuthStartTlsCap, true);
+                imapStore = newConnectedImapStore(imapSession, IDNA.toASCII(config.getServer()), config.getPort(), login, tmpPass, -1, preAuthStartTlsCap, true);
                 /*
                  * Add warning if non-secure
                  */
@@ -716,40 +716,30 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                  */
                 checkTemporaryDown(imapConfProps);
             }
-            String tmpPass = config.getPassword();
-            if (tmpPass != null) {
-                try {
-                    tmpPass = new String(tmpPass.getBytes(Charsets.forName(imapConfProps.getImapAuthEnc())), Charsets.ISO_8859_1);
-                } catch (final UnsupportedCharsetException e) {
-                    LOG.error("", e);
-                }
-            }
+            String encodedPassword = authEncode(config.getPassword(), imapConfProps.getImapAuthEnc());
             boolean certainPassword = false;
             if (certainPassword) {
-                tmpPass = "secret";
+                encodedPassword = "secret";
             }
-            final String proxyDelimiter = MailAccount.DEFAULT_ID == accountId ? MailProperties.getInstance().getAuthProxyDelimiter() : null;
             /*
              * Check for already failed authentication
              */
-            String login;
-            try {
-                login = new String(config.getLogin().getBytes(Charsets.forName(imapConfProps.getImapAuthEnc())), Charsets.ISO_8859_1);
-            } catch (final UnsupportedCharsetException e) {
-                LOG.error("", e);
-                login = config.getLogin();
-            }
-            String user = login;
+            String user = config.getLogin();
             String proxyUser = null;
             boolean isProxyAuth = false;
-            if (proxyDelimiter != null) {
-                final int pos = login.indexOf(proxyDelimiter);
-                if (pos >= 0) {
-                    isProxyAuth = true;
-                    proxyUser = login.substring(0, pos);
-                    user = login.substring(pos + proxyDelimiter.length());
+            {
+                String proxyDelimiter = MailAccount.DEFAULT_ID == accountId ? MailProperties.getInstance().getAuthProxyDelimiter() : null;
+                if (proxyDelimiter != null) {
+                    int pos = user.indexOf(proxyDelimiter);
+                    if (pos >= 0) {
+                        isProxyAuth = true;
+                        proxyUser = user.substring(0, pos);
+                        user = user.substring(pos + proxyDelimiter.length());
+                    }
                 }
             }
+            user = authEncode(user, imapConfProps.getImapAuthEnc());
+            proxyUser = authEncode(proxyUser, imapConfProps.getImapAuthEnc());
             /*
              * Get properties
              */
@@ -777,7 +767,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             {
                 final Class<? extends IMAPStore> clazz = useIMAPStoreCache() ? IMAPStoreCache.getInstance().getStoreClass() : JavaIMAPStore.class;
                 boolean forceSecure = accountId > 0 && (imapConfig.isRequireTls() || imapConfProps.isEnforceSecureConnection());
-                imapSession = setConnectProperties(config, imapConfProps.getImapTimeout(), imapConfProps.getImapConnectionTimeout(), imapProps, clazz, forceSecure);
+                imapSession = setConnectProperties(config, imapConfProps.getImapTimeout(), imapConfProps.getImapConnectionTimeout(), imapProps, clazz, forceSecure, session.getUserId(), session.getContextId());
             }
             /*
              * Check if debug should be enabled
@@ -803,7 +793,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             this.server = IDNA.toASCII(config.getServer());
             this.port = config.getPort();
             this.login = isProxyAuth ? proxyUser : user;
-            this.password = tmpPass;
+            this.password = encodedPassword;
             this.clientIp = clientIp;
             maxCount = getMaxCount();
             try {
@@ -967,7 +957,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
          */
         LogProperties.put(LogProperties.Name.MAIL_ACCOUNT_ID, Integer.valueOf(accountId));
         LogProperties.put(LogProperties.Name.MAIL_HOST, server + ":" + port);
-        LogProperties.put(LogProperties.Name.MAIL_LOGIN, login);
+        LogProperties.put(LogProperties.Name.MAIL_LOGIN, imapConfig.getLogin());
         /*-
          * Get connected IMAP store
          *
@@ -1015,7 +1005,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 }
             }
         }
-        throw new MessagingException("Unable to connect to IMAP store: " + new URLName("imap", server, port, null, login, "xxxx"));
+        throw new MessagingException("Unable to connect to IMAP store: " + new URLName("imap", server, port, null, imapConfig.getLogin(), "xxxx"));
     }
 
     private IMAPStore newConnectedImapStore(javax.mail.Session imapSession, String server, int port, String login, String pw, int accountId) throws MessagingException {
@@ -1104,9 +1094,9 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         if (range != null) {
             if (System.currentTimeMillis() - range.longValue() <= imapConfProps.getImapTemporaryDown()) {
                 /*
-                 * Still treated as being temporary broken
+                 * Still considered as being temporary broken
                  */
-                throw IMAPException.create(IMAPException.Code.CONNECT_ERROR, mailConfig.getServer(), mailConfig.getLogin());
+                throw MimeMailExceptionCode.CONNECT_ERROR.create(mailConfig.getServer(), mailConfig.getLogin()).markLightWeight();
             }
             map.remove(key);
         }
@@ -1298,10 +1288,12 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     @Override
     protected IMailProperties createNewMailProperties() throws OXException {
         final MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
-        return new MailAccountIMAPProperties(storageService.getMailAccount(accountId, session.getUserId(), session.getContextId()));
+        int userId = session.getUserId();
+        int contextId = session.getContextId();
+        return new MailAccountIMAPProperties(storageService.getMailAccount(accountId, userId, contextId), userId, contextId);
     }
 
-    private static javax.mail.Session setConnectProperties(final IMAPConfig config, final int timeout, final int connectionTimeout, final Properties imapProps, final Class<? extends IMAPStore> storeClass, final boolean forceSecure) throws OXException {
+    private static javax.mail.Session setConnectProperties(IMAPConfig config, int timeout, int connectionTimeout, Properties imapProps, Class<? extends IMAPStore> storeClass, boolean forceSecure, int userId, int contextId) throws OXException {
         /*
          * Custom IMAP store
          */
@@ -1328,6 +1320,26 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
          */
         if (config.getIMAPProperties().isAuditLogEnabled()) {
             imapProps.put("mail.imap.auditLog.enabled", "true");
+        }
+        /*
+         * Greeting listener (for primary IMAP)
+         */
+        if (config.getAccountId() == MailAccount.DEFAULT_ID) {
+            GreetingListener greetingListener = IMAPProperties.getInstance().getHostNameRegex(userId, contextId);
+            if (null != greetingListener) {
+                imapProps.put("mail.imap.greeting.listeners", Collections.singletonList(greetingListener));
+            }
+        }
+        /*
+         * Allow round-robin address election for primary IMAP account
+         */
+        if (config.getAccountId() == MailAccount.DEFAULT_ID) {
+            boolean useMultipleAddresses = IMAPProperties.getInstance().isUseMultipleAddresses(userId, contextId);
+            if (useMultipleAddresses) {
+                imapProps.put("mail.imap.multiAddress.enabled", "true");
+                int hash = getHashFor(userId, contextId);
+                imapProps.put("mail.imap.multiAddress.key", Integer.toString(hash));
+            }
         }
         /*
          * Enable XOAUTH2/OAUTHBEARER (if appropriate)
@@ -1439,6 +1451,27 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         return imapSession;
     }
 
+    private static int getHashFor(int user, int context) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+
+            md.update((byte) user);
+            md.update((byte) context);
+
+            // Calculate hash & create its string representation
+            byte[] bytes = md.digest();
+
+            int i = 0;
+            for (byte b : bytes) {
+                i += b;
+            }
+            return (i < 0) ? -i : i;
+        } catch (NoSuchAlgorithmException e) {
+            // Ignore
+        }
+        return 0;
+    }
+
     @Override
     public String toString() {
         IMAPStore imapStore = this.imapStore;
@@ -1490,6 +1523,19 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 LOG.error("Error while closing IMAP store.", e);
             }
         }
+    }
+
+    private static String authEncode(String s, String charset) {
+        String tmp = s;
+        if (tmp != null) {
+            try {
+                tmp = new String(s.getBytes(Charsets.forName(charset)), Charsets.ISO_8859_1);
+            } catch (final UnsupportedCharsetException e) {
+                LOG.error("Unsupported encoding in a message detected and monitored", e);
+                mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
+            }
+        }
+        return tmp;
     }
 
 }

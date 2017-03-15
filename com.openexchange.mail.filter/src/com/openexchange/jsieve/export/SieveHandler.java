@@ -58,6 +58,7 @@ import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
@@ -71,12 +72,14 @@ import javax.security.sasl.Sasl;
 import javax.security.sasl.SaslClient;
 import javax.security.sasl.SaslException;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 import com.openexchange.jsieve.export.exceptions.OXSieveHandlerException;
 import com.openexchange.jsieve.export.exceptions.OXSieveHandlerInvalidCredentialsException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.mailfilter.MailFilterProperties;
+import com.openexchange.mailfilter.properties.MailFilterProperty;
+import com.openexchange.mailfilter.properties.PreferredSASLMech;
 import com.openexchange.mailfilter.services.Services;
 import com.openexchange.tools.encoding.Base64;
 
@@ -90,7 +93,7 @@ public class SieveHandler {
 
     private static final Pattern LITERAL_S2C_PATTERN = Pattern.compile("^.*\\{([^\\}]*)\\}.*$");
 
-	/**
+    /**
      * The logger.
      */
     private static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SieveHandler.class);
@@ -164,6 +167,8 @@ public class SieveHandler {
     private boolean useSIEVEResponseCodes = false;
     private Long connectTimeout = null;
     private Long readTimeout = null;
+    private int userId = -1;
+    private int contextId = -1;
 
     /**
      * Initializes a new {@link SieveHandler}.
@@ -176,7 +181,7 @@ public class SieveHandler {
      * @param authEnc The encoding to use when transferring credential bytes to SIEVE end-point
      * @param oauthToken The optional OAuth token; relevant in case <code>"XOAUTH2"</code> or <code>"OAUTHBEARER"</code> SASL authentication is supposed to be performed
      */
-    public SieveHandler(String userName, String authUserName, String authUserPasswd, String host, int port, String authEnc, String oauthToken) {
+    public SieveHandler(String userName, String authUserName, String authUserPasswd, String host, int port, String authEnc, String oauthToken, int userId, int contextId) {
         super();
         sieve_user = null == userName ? authUserName : userName;
         sieve_auth = authUserName;
@@ -186,6 +191,8 @@ public class SieveHandler {
         sieve_host_port = port; // 2000
         onlyWelcome = false;
         this.oauthToken = oauthToken;
+        this.userId = userId;
+        this.contextId = contextId;
     }
 
     /**
@@ -306,15 +313,15 @@ public class SieveHandler {
      */
     public void initializeConnection() throws IOException, OXSieveHandlerException, UnsupportedEncodingException, OXSieveHandlerInvalidCredentialsException {
         measureStart();
-        final ConfigurationService config = Services.getService(ConfigurationService.class);
+        final LeanConfigurationService mailFilterConfig = Services.getService(LeanConfigurationService.class);
 
-        useSIEVEResponseCodes = Boolean.parseBoolean(config.getProperty(MailFilterProperties.Values.USE_SIEVE_RESPONSE_CODES.property));
+        useSIEVEResponseCodes = mailFilterConfig.getBooleanProperty(userId, contextId, MailFilterProperty.useSIEVEResponseCodes);
 
         s_sieve = new Socket();
         /*
          * Connect with the connect-timeout of the config file or the one which was explicitly set
          */
-        int configuredTimeout = Integer.parseInt(config.getProperty(MailFilterProperties.Values.SIEVE_CONNECTION_TIMEOUT.property));
+        int configuredTimeout = mailFilterConfig.getIntProperty(userId, contextId, MailFilterProperty.connectionTimeout);
         try {
             s_sieve.connect(new InetSocketAddress(sieve_host, sieve_host_port), getEffectiveConnectTimeout(configuredTimeout));
         } catch (final java.net.ConnectException e) {
@@ -344,11 +351,11 @@ public class SieveHandler {
             List<String> sasl = capa.getSasl();
             measureEnd("capa.getSasl");
 
-            final boolean tlsenabled = Boolean.parseBoolean(config.getProperty(MailFilterProperties.Values.TLS.property));
+            final boolean tlsenabled = mailFilterConfig.getBooleanProperty(userId, contextId, MailFilterProperty.tls);
 
             final boolean issueTLS = tlsenabled && capa.getStarttls().booleanValue();
 
-            punycode = Boolean.parseBoolean(config.getProperty(MailFilterProperties.Values.PUNYCODE.property));
+            punycode = mailFilterConfig.getBooleanProperty(userId, contextId, MailFilterProperty.punycode);
 
             final StringBuilder commandBuilder = new StringBuilder(64);
 
@@ -396,13 +403,12 @@ public class SieveHandler {
                  * directly as response for the STARTTLS command.
                  */
                 final String implementation = capa.getImplementation();
-
-                if (implementation.matches(config.getProperty(MailFilterProperties.Values.NON_RFC_COMPLIANT_TLS_REGEX.property))) {
-    	            measureStart();
-    	            bos_sieve.write(commandBuilder.append("CAPABILITY").append(CRLF).toString().getBytes(com.openexchange.java.Charsets.UTF_8));
-    	            bos_sieve.flush();
-    	            measureEnd("capability");
-    	            commandBuilder.setLength(0);
+                if (implementation.matches(mailFilterConfig.getProperty(userId, contextId, MailFilterProperty.nonRFCCompliantTLSRegex))) {
+                    measureStart();
+                    bos_sieve.write(commandBuilder.append("CAPABILITY").append(CRLF).toString().getBytes(com.openexchange.java.Charsets.UTF_8));
+                    bos_sieve.flush();
+                    measureEnd("capability");
+                    commandBuilder.setLength(0);
                 }
                 /*
                  * Read capabilities
@@ -423,42 +429,63 @@ public class SieveHandler {
                 throw new OXSieveHandlerException(message, sieve_host, sieve_host_port, null);
             }
             measureStart();
-            String useAuth = "PLAIN";
-            {
-                String preferredSaslMech = null;
-                {
-                    ConfigurationService service = Services.getService(ConfigurationService.class);
-                    if (null != service) {
-                        preferredSaslMech = service.getProperty("com.openexchange.mail.filter.preferredSaslMech");
-                        if (null == preferredSaslMech) {
-                            // Check old property to keep compatibility
-                            boolean preferGSSAPI = service.getBoolProperty("com.openexchange.mail.filter.preferGSSAPI", false);
-                            if (preferGSSAPI) {
-                                useAuth = "GSSAPI";
-                            }
-                        }
-                    }
-                }
-                if ("GSSAPI".equals(preferredSaslMech) && sasl.contains("GSSAPI")) {
-                    useAuth = "GSSAPI";
-                }
-                if ("XOAUTH2".equals(preferredSaslMech) && sasl.contains("XOAUTH2")) {
-                    useAuth = "XOAUTH2";
-                }
-                if ("OAUTHBEARER".equals(preferredSaslMech) && sasl.contains("OAUTHBEARER")) {
-                    useAuth = "OAUTHBEARER";
-                }
-            }
-            if (!sasl.contains(useAuth)) {
-                String message = new StringBuilder(64).append("The server doesn't support ").append(useAuth).append(" authentication over a ").append(issueTLS ? "TLS" : "plain-text").append(" connection.").toString();
+            PreferredSASLMech saslMech = getPreferredSASLMechanism(mailFilterConfig, sasl);
+
+            if (!sasl.contains(saslMech.name())) {
+                String message = new StringBuilder(64).append("The server doesn't support ").append(saslMech.name()).append(" authentication over a ").append(issueTLS ? "TLS" : "plain-text").append(" connection.").toString();
                 throw new OXSieveHandlerException(message, sieve_host, sieve_host_port, null);
             }
-            if (!selectAuth(useAuth, commandBuilder)) {
+
+            int configuredAuthTimeout = mailFilterConfig.getIntProperty(userId, contextId, MailFilterProperty.authTimeout);
+            if (!selectAuth(saslMech, commandBuilder, configuredAuthTimeout)) {
                 throw new OXSieveHandlerInvalidCredentialsException("Authentication failed");
             }
             log.debug("Authentication to sieve successful");
             measureEnd("selectAuth");
         }
+    }
+
+    /**
+     * Returns the {@link PreferredSASLMech}
+     * 
+     * @param leanConfigService The {@link LeanConfigurationService}
+     * @param sasl The server SASL
+     * @return The {@link PreferredSASLMech}
+     */
+    private PreferredSASLMech getPreferredSASLMechanism(final LeanConfigurationService leanConfigService, List<String> sasl) {
+        PreferredSASLMech preferredSASLMechanism = PreferredSASLMech.PLAIN;
+        PreferredSASLMech configuredPreferredSASLMechanism = null;
+        String psm = null;
+        {
+            psm = leanConfigService.getProperty(userId, contextId, MailFilterProperty.preferredSaslMech);
+            if (!Strings.isEmpty(psm)) {
+                try {
+                    configuredPreferredSASLMechanism = PreferredSASLMech.valueOf(psm);
+                } catch (IllegalArgumentException e) {
+                    log.warn("Invalid property '{}' for '{}' found in mailfilter.properties.", psm, MailFilterProperty.preferredSaslMech.getFQPropertyName());
+                }
+            }
+            if (null == configuredPreferredSASLMechanism) {
+                // Check old property to keep compatibility
+                ConfigurationService service = Services.getService(ConfigurationService.class);
+                if (null != service) {
+                    boolean preferGSSAPI = service.getBoolProperty("com.openexchange.mail.filter.preferGSSAPI", false);
+                    if (preferGSSAPI) {
+                        preferredSASLMechanism = PreferredSASLMech.GSSAPI;
+                    }
+                }
+            }
+        }
+        if (PreferredSASLMech.GSSAPI.equals(configuredPreferredSASLMechanism) && sasl.contains(PreferredSASLMech.GSSAPI.name())) {
+            preferredSASLMechanism = PreferredSASLMech.GSSAPI;
+        }
+        if (PreferredSASLMech.XOAUTH2.equals(configuredPreferredSASLMechanism) && sasl.contains(PreferredSASLMech.XOAUTH2.name())) {
+            preferredSASLMechanism = PreferredSASLMech.XOAUTH2;
+        }
+        if (PreferredSASLMech.OAUTHBEARER.equals(configuredPreferredSASLMechanism) && sasl.contains(PreferredSASLMech.OAUTHBEARER.name())) {
+            preferredSASLMechanism = PreferredSASLMech.OAUTHBEARER;
+        }
+        return preferredSASLMechanism;
     }
 
     /**
@@ -500,7 +527,7 @@ public class SieveHandler {
         }
     }
 
-	/**
+    /**
      * Activate/Deactivate sieve script. Is status is true, activate this script.
      *
      * @param script_name
@@ -571,11 +598,10 @@ public class SieveHandler {
         while (true) {
             int ch = bis_sieve.read();
             switch (ch) {
-            case -1:
-                // End of stream
-                throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port, null);
-            case '\\':
-                {
+                case -1:
+                    // End of stream
+                    throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port, null);
+                case '\\': {
                     okStart = false;
                     sb.append((char) ch);
                     final StringBuilder octetBuilder = new StringBuilder();
@@ -587,7 +613,7 @@ public class SieveHandler {
                             // End of stream
                             throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port, null);
                         } else if (ch >= 48 && ch <= 55) {
-                            octetBuilder.append((char)ch);
+                            octetBuilder.append((char) ch);
                             limit = 3;
                             index++;
                         } else {
@@ -596,12 +622,11 @@ public class SieveHandler {
                     } while (index < limit);
                     if (octetBuilder.length() > 1) {
                         sb.setLength(sb.length() - 1);
-                        sb.append((char)Integer.parseInt(octetBuilder.toString()));
+                        sb.append((char) Integer.parseInt(octetBuilder.toString()));
                     }
                 }
-                break;
-            case '"':
-                {
+                    break;
+                case '"': {
                     if (!inComment) {
                         if (inQuote) {
                             inQuote = false;
@@ -612,16 +637,16 @@ public class SieveHandler {
                     okStart = false;
                     sb.append((char) ch);
                 }
-                break;
-            case 'O': // OK\r\n
+                    break;
+                case 'O': // OK\r\n
                 {
                     if (!inQuote) {
                         okStart = true;
                     }
                     sb.append((char) ch);
                 }
-                break;
-            case 'K': // OK\r\n
+                    break;
+                case 'K': // OK\r\n
                 {
                     if (!inQuote && okStart && !inComment) {
                         sb.setLength(sb.length() - 1);
@@ -631,27 +656,25 @@ public class SieveHandler {
                     okStart = false;
                     sb.append((char) ch);
                 }
-                break;
-            case '#':
-                {
+                    break;
+                case '#': {
                     if (!inQuote) {
                         inComment = true;
                     }
                     sb.append((char) ch);
                 }
-                break;
-            case '\n':
-                {
+                    break;
+                case '\n': {
                     if (inComment) {
                         inComment = false;
                     }
                     sb.append((char) ch);
                 }
-                break;
-            default:
-                okStart = false;
-                sb.append((char) ch);
-                break;
+                    break;
+                default:
+                    okStart = false;
+                    sb.append((char) ch);
+                    break;
             }
         }
         /*-
@@ -955,7 +978,6 @@ public class SieveHandler {
     }
 
     private boolean authGSSAPI(final StringBuilder commandBuilder) throws IOException, UnsupportedEncodingException, OXSieveHandlerException {
-        final String user = getRightEncodedString(sieve_user, "username");
         final String authname = getRightEncodedString(sieve_auth, "authname");
 
         final HashMap<String, String> saslProps = new HashMap<String, String>();
@@ -963,15 +985,19 @@ public class SieveHandler {
         // Mutual authentication
         saslProps.put("javax.security.sasl.server.authentication", "true");
         /**
-         *  TODO: do we want encrypted transfer after auth without ssl?
-         *  if yes, we need to wrap the whole rest of the communication with sc.wrap/sc.unwrap
-         *  and qop to auth-int or auth-conf
+         * TODO: do we want encrypted transfer after auth without ssl?
+         * if yes, we need to wrap the whole rest of the communication with sc.wrap/sc.unwrap
+         * and qop to auth-int or auth-conf
          */
         saslProps.put("javax.security.sasl.qop", "auth");
 
         SaslClient sc = null;
         try {
-            sc = Sasl.createSaslClient(new String[]{"GSSAPI"}, authname, "sieve", sieve_host, saslProps, null);
+            sc = Sasl.createSaslClient(new String[] { "GSSAPI" }, authname, "sieve", sieve_host, saslProps, null);
+            if (sc == null) {
+                log.error("Unable to crate a SaslClient");
+                return false;
+            }
             byte[] response = sc.evaluateChallenge(new byte[0]);
             String b64resp = com.openexchange.tools.encoding.Base64.encode(response);
 
@@ -982,7 +1008,6 @@ public class SieveHandler {
             bos_sieve.write(CRLF.getBytes());
             bos_sieve.flush();
 
-
             while (true) {
                 String temp = bis_sieve.readLine();
                 if (null != temp) {
@@ -992,16 +1017,16 @@ public class SieveHandler {
                     } else if (temp.startsWith(SIEVE_NO)) {
                         AUTH = false;
                         return false;
-                    } else if ( temp.length() == 0 ) {
+                    } else if (temp.length() == 0) {
                         // cyrus managesieve sends empty answers and it looks like these have to be ignored?!?
                         continue;
                     } else {
                         // continuation
                         // -> https://tools.ietf.org/html/rfc5804#section-1.2
-                        byte []cont;
+                        byte[] cont;
                         // some implementations such as cyrus timsieved always use literals
-                        if (temp.startsWith("{") ) {
-                            int cnt = Integer.parseInt(temp.substring(1, temp.length()-1));
+                        if (temp.startsWith("{")) {
+                            int cnt = Integer.parseInt(temp.substring(1, temp.length() - 1));
                             char[] buf = new char[cnt];
                             bis_sieve.read(buf, 0, cnt);
                             cont = com.openexchange.tools.encoding.Base64.decode(new String(buf));
@@ -1009,20 +1034,20 @@ public class SieveHandler {
                             // dovecot managesieve sends quoted strings
                             cont = com.openexchange.tools.encoding.Base64.decode(temp.replaceAll("\"", ""));
                         }
-                        if( sc.isComplete() ) {
+                        if (sc.isComplete()) {
                             AUTH = true;
                             return true;
                         }
                         response = sc.evaluateChallenge(cont);
                         String respLiteral;
-                        if( null == response || response.length == 0 ) {
+                        if (null == response || response.length == 0) {
                             respLiteral = "{0+}";
                         } else {
                             b64resp = com.openexchange.tools.encoding.Base64.encode(response);
                             respLiteral = "{" + b64resp.length() + "+}";
                         }
-                        bos_sieve.write(new String(respLiteral+CRLF).getBytes());
-                        if( null != response && response.length > 0 ) {
+                        bos_sieve.write(new String(respLiteral + CRLF).getBytes());
+                        if (null != response && response.length > 0) {
                             bos_sieve.write(new String(b64resp + CRLF).getBytes());
                         } else {
                             bos_sieve.write(CRLF.getBytes());
@@ -1038,7 +1063,7 @@ public class SieveHandler {
             log.error("SASL challenge failed", e);
             throw e;
         } finally {
-            if( null != sc ) {
+            if (null != sc) {
                 sc.dispose();
             }
         }
@@ -1047,9 +1072,7 @@ public class SieveHandler {
     private boolean authPLAIN(final StringBuilder commandBuilder) throws IOException, UnsupportedEncodingException, OXSieveHandlerException {
         final String username = getRightEncodedString(sieve_user, "username");
         final String authname = getRightEncodedString(sieve_auth, "authname");
-        final String to64 = commandBuilder.append(username).append('\0')
-            .append(authname).append('\0')
-            .append(sieve_auth_passwd).toString();
+        final String to64 = commandBuilder.append(username).append('\0').append(authname).append('\0').append(sieve_auth_passwd).toString();
         commandBuilder.setLength(0);
 
         final String user_auth_pass_64 = commandBuilder.append(convertStringToBase64(to64, sieve_auth_enc)).append(CRLF).toString();
@@ -1164,28 +1187,29 @@ public class SieveHandler {
     /**
      * Parse the https://tools.ietf.org/html/rfc5804#section-1.3 Response code of a SIEVE
      * response line.
+     * 
      * @param multiline TODO
      * @param response line
      * @return null, if no response code in line, the @{SIEVEResponse.Code} otherwise.
      */
     protected SieveResponse.Code parseSIEVEResponse(final String resp, final String multiline) {
-        if( ! useSIEVEResponseCodes ) {
+        if (!useSIEVEResponseCodes) {
             return null;
         }
 
         final Pattern p = Pattern.compile("^(?:NO|OK|BYE)\\s+\\((.*?)\\)\\s+(.*$)");
         final Matcher m = p.matcher(resp);
-        if( m.matches() ) {
+        if (m.matches()) {
             final int gcount = m.groupCount();
-            if( gcount > 1 ) {
+            if (gcount > 1) {
                 final SieveResponse.Code ret = SieveResponse.Code.getCode(m.group(1));
                 final String group = m.group(2);
                 if (group.startsWith("{")) {
-                	// Multi line, use the multiline parsed before here
-                	ret.setMessage(multiline);
+                    // Multi line, use the multiline parsed before here
+                    ret.setMessage(multiline);
                 } else {
-                	// Single line
-                	ret.setMessage(group);
+                    // Single line
+                    ret.setMessage(group);
                 }
                 return ret;
             }
@@ -1198,8 +1222,7 @@ public class SieveHandler {
             throw new OXSieveHandlerException("Activate a script not possible. Auth first.", sieve_host, sieve_host_port, null);
         }
 
-        final String active =
-            commandBuilder.append(SIEVE_ACTIVE).append('\"').append(sieve_script_name).append('\"').append(CRLF).toString();
+        final String active = commandBuilder.append(SIEVE_ACTIVE).append('\"').append(sieve_script_name).append('\"').append(CRLF).toString();
         commandBuilder.setLength(0);
 
         bos_sieve.write(active.getBytes(com.openexchange.java.Charsets.UTF_8));
@@ -1252,9 +1275,7 @@ public class SieveHandler {
             try {
                 retval = QuotedInternetAddress.toACE(username);
             } catch (final AddressException e) {
-                final OXSieveHandlerException oxSieveHandlerException = new OXSieveHandlerException("The " + description + " \""
-                    + username
-                    + "\" could not be transformed to punycode.", this.sieve_host, this.sieve_host_port, null);
+                final OXSieveHandlerException oxSieveHandlerException = new OXSieveHandlerException("The " + description + " \"" + username + "\" could not be transformed to punycode.", this.sieve_host, this.sieve_host_port, null);
                 log.error("", e);
                 throw oxSieveHandlerException;
             }
@@ -1265,25 +1286,50 @@ public class SieveHandler {
     }
 
     /**
-     * @param auth_mech
+     * @param auth_mech The selected SASL authentication mechanism
+     * @param commandBuilder The command builder to use
+     * @param timeout The special read timeout to apply for doing authentication
      * @return
      * @throws IOException
      * @throws UnsupportedEncodingException
      * @throws OXSieveHandlerException
      */
-    private boolean selectAuth(final String auth_mech, final StringBuilder commandBuilder) throws IOException, UnsupportedEncodingException, OXSieveHandlerException {
-        if (auth_mech.equals("PLAIN")) {
-            return authPLAIN(commandBuilder);
-        } else if (auth_mech.equals("LOGIN")) {
-            return authLOGIN(commandBuilder);
-        } else if (auth_mech.equals("GSSAPI")) {
-            return authGSSAPI(commandBuilder);
-        } else if (auth_mech.equals("XOAUTH2")) {
-            return authXOAUTH2(commandBuilder);
-        } else if (auth_mech.equals("OAUTHBEARER")) {
-            return authOAUTHBEARER(commandBuilder);
+    private boolean selectAuth(PreferredSASLMech auth_mech, StringBuilder commandBuilder, int timeout) throws IOException, UnsupportedEncodingException, OXSieveHandlerException {
+        // Adjust timeout if necessary
+        int toRestore = s_sieve.getSoTimeout();
+        if (toRestore > timeout) {
+            s_sieve.setSoTimeout(timeout);
+        } else {
+            toRestore = -1;
         }
-        return false;
+
+        // Perform authentication
+        try {
+            switch (auth_mech) {
+                case GSSAPI:
+                    return authGSSAPI(commandBuilder);
+                case LOGIN:
+                    return authLOGIN(commandBuilder);
+                case OAUTHBEARER:
+                    return authOAUTHBEARER(commandBuilder);
+                case PLAIN:
+                    return authPLAIN(commandBuilder);
+                case XOAUTH2:
+                    return authXOAUTH2(commandBuilder);
+                default:
+                    return false;
+
+            }
+        } catch (SocketTimeoutException e) {
+            // Read timeout while doing auth
+            String message = "Exceeded timeout of " + s_sieve.getSoTimeout() + "milliseconds while performing \"" + auth_mech.name() + "\" SASL authentication for " + sieve_auth;
+            throw new OXSieveHandlerException(message, sieve_host, sieve_host_port, null, e).setAuthTimeoutError(true);
+        } finally {
+            // Restore read timeout
+            if (toRestore > 0) {
+                s_sieve.setSoTimeout(toRestore);
+            }
+        }
     }
 
     private void parseCAPA(final String line) {
@@ -1366,38 +1412,38 @@ public class SieveHandler {
         StringBuilder errMsgBuilder = new StringBuilder();
         loop: for (char c : msgChars) {
             switch (c) {
-            case '"':
-                if (inQuotes) {
+                case '"':
+                    if (inQuotes) {
+                        if (inEscape) {
+                            errMsgBuilder.append(c);
+                            inEscape = false;
+                        } else {
+                            inQuotes = false;
+                            break loop;
+                        }
+                    } else {
+                        inQuotes = true;
+                    }
+                    break;
+
+                case '\\':
                     if (inEscape) {
                         errMsgBuilder.append(c);
                         inEscape = false;
                     } else {
-                        inQuotes = false;
-                        break loop;
+                        inEscape = true;
                     }
-                } else {
-                    inQuotes = true;
-                }
-                break;
+                    break;
 
-            case '\\':
-                if (inEscape) {
-                    errMsgBuilder.append(c);
-                    inEscape = false;
-                } else {
-                    inEscape = true;
-                }
-                break;
+                default:
+                    if (inEscape) {
+                        inEscape = false;
+                    }
 
-            default:
-                if (inEscape) {
-                    inEscape = false;
-                }
-
-                if (inQuotes) {
-                    errMsgBuilder.append(c);
-                }
-                break;
+                    if (inQuotes) {
+                        errMsgBuilder.append(c);
+                    }
+                    break;
             }
         }
 

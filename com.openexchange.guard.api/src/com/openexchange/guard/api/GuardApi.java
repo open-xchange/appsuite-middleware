@@ -95,7 +95,7 @@ public interface GuardApi {
      * @throws OXException If GET fails
      * @see GuardApis#mapFor(String...)
      */
-    <R> R doCallGet(Map<String, String> parameters, Class<? extends R> clazz) throws OXException;
+    <R> R doCallGet(Map<String, String> parameters, Class<? extends R> clazz, Session session) throws OXException;
 
     /**
      * Performs a POST using given parameters.
@@ -107,7 +107,7 @@ public interface GuardApi {
      * @throws OXException
      * @see GuardApis#mapFor(String...)
      */
-    public <R> R doCallPost(Map<String, String> parameters, Map<String, String> bodyParameters, Class<? extends R> clazz) throws OXException;
+    public <R> R doCallPost(Map<String, String> parameters, Map<String, String> bodyParameters, Class<? extends R> clazz, Session session) throws OXException;
 
     /**
      * Performs the PUT using given parameters.
@@ -117,7 +117,7 @@ public interface GuardApi {
      * @throws OXException If PUT fails
      * @see GuardApis#mapFor(String...)
      */
-    <R> R doCallPut(Map<String, String> parameters, JSONValue jsonBody, Class<? extends R> clazz) throws OXException;
+    <R> R doCallPut(Map<String, String> parameters, JSONValue jsonBody, Class<? extends R> clazz, Session session) throws OXException;
 
     /**
      * Requests a resource from Guard end-point.
@@ -127,7 +127,7 @@ public interface GuardApi {
      * @throws OXException If resource data cannot be returned
      * @see GuardApis#mapFor(String...)
      */
-    InputStream requestResource(Map<String, String> parameters) throws OXException;
+    InputStream requestResource(Map<String, String> parameters, Session session) throws OXException;
 
     /**
      * Requests Guard end-point to process specified resource.
@@ -140,7 +140,7 @@ public interface GuardApi {
      * @throws OXException If resource data cannot be returned
      * @see GuardApis#mapFor(String...)
      */
-    InputStream processResource(Map<String, String> parameters, InputStream resource, String contentType, String name) throws OXException;
+    InputStream processResource(Map<String, String> parameters, InputStream resource, String contentType, String name, Session session) throws OXException;
 
     /**
      * Requests Guard end-point to process multiply resources.
@@ -152,7 +152,7 @@ public interface GuardApi {
      * @throws OXException If resource data cannot be returned
      * @see GuardApis#mapFor(String...)
      */
-    InputStream processResources(Map<String, String> parameters, Map<String, InputStream> resources, String contentType) throws OXException;
+    InputStream processResources(Map<String, String> parameters, Map<String, InputStream> resources, String contentType, Session session) throws OXException;
 
     /**
      * Performs the GET using given parameters.

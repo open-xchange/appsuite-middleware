@@ -40,6 +40,7 @@
 
 package com.sun.mail.util;
 
+import java.net.InetAddress;
 import javax.mail.MessagingException;
 
 /**
@@ -57,6 +58,7 @@ public class MailConnectException extends MessagingException {
     private String host;
     private int port;
     private int cto;
+    private InetAddress address;
 
     private static final long serialVersionUID = -3818807731125317729L;
 
@@ -68,11 +70,12 @@ public class MailConnectException extends MessagingException {
     public MailConnectException(SocketConnectException cex) {
 	super(
 	    "Couldn't connect to host, port: " +
-	    cex.getHost() + ", " + cex.getPort() +
+	    cex.getHost() + " (" + cex.getAddress().getHostAddress() + "), " + cex.getPort() +
 	    "; timeout " + cex.getConnectionTimeout() +
 	    (cex.getMessage() != null ? ("; " + cex.getMessage()) : ""));
 	// extract the details and save them here
 	this.host = cex.getHost();
+	this.address = cex.getAddress();
 	this.port = cex.getPort();
 	this.cto = cex.getConnectionTimeout();
 	setNextException(cex.getException());
@@ -85,6 +88,15 @@ public class MailConnectException extends MessagingException {
      */
     public String getHost() {
 	return host;
+    }
+
+    /**
+     * The address we were trying to connect to.
+     *
+     * @return  the address
+     */
+    public InetAddress getAddress() {
+    return address;
     }
 
     /**

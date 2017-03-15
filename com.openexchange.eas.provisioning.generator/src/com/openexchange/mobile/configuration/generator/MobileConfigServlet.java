@@ -156,6 +156,9 @@ public class MobileConfigServlet extends HttpServlet {
      */
     protected static String[] splitUsernameAndDomain(final String username) throws ConfigurationException {
         final String domain_user = MobileConfigProperties.getProperty(Property.DomainUser);
+        if (domain_user == null) {
+            throw new ConfigurationException("Missing login pattern. Please configure " + Property.DomainUser);
+        }
         final String separator = domain_user.replaceAll("\\$USER|\\$DOMAIN", "");
         final String[] split = username.split(Pattern.quote(separator));
         if (split.length > 2) {

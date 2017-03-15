@@ -52,7 +52,6 @@ package com.openexchange.share.core.tools;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.java.Autoboxing.i;
-import static org.slf4j.LoggerFactory.getLogger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -94,6 +93,8 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class PermissionResolver {
+
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(PermissionResolver.class);
 
     private static final ContactField[] CONTACT_FIELDS = {
         ContactField.INTERNAL_USERID, ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.LAST_MODIFIED,
@@ -183,7 +184,7 @@ public class PermissionResolver {
         try {
             return services.getService(ShareService.class).optLink(session, target);
         } catch (OXException e) {
-            getLogger(PermissionResolver.class).error("Error getting share link for folder {}, item {} in module {}", folder, item, module, e);
+            LOGGER.error("Error getting share link for folder {}, item {} in module {}", folder, item, module, e);
         }
         return null;
     }
@@ -204,7 +205,7 @@ public class PermissionResolver {
                     knownGuests.put(key, guest);
                 }
             } catch (OXException e) {
-                getLogger(PermissionResolver.class).error("Error getting guest {}", key, e);
+                LOGGER.error("Error getting guest {}", key, e);
             }
         }
         return guest;
@@ -224,7 +225,7 @@ public class PermissionResolver {
                 try {
                     return imageData.getFirst().generateUrl(imageData.getSecond(), session);
                 } catch (OXException e) {
-                    getLogger(PermissionResolver.class).error("Error generating image URL for user {}", I(userID), e);
+                    LOGGER.error("Error generating image URL for user {}", I(userID), e);
                 }
             }
         }
@@ -245,7 +246,7 @@ public class PermissionResolver {
                 group = services.getService(GroupService.class).getGroup(session.getContext(), groupID);
                 knownGroups.put(key, group);
             } catch (OXException e) {
-                getLogger(PermissionResolver.class).error("Error getting group {}", key, e);
+                LOGGER.error("Error getting group {}", key, e);
             }
         }
         return group;
@@ -265,7 +266,7 @@ public class PermissionResolver {
                 user = services.getService(UserService.class).getUser(userID, session.getContext());
                 knownUsers.put(key, user);
             } catch (OXException e) {
-                getLogger(PermissionResolver.class).error("Error getting user {}", key, e);
+                LOGGER.error("Error getting user {}", key, e);
             }
         }
         return user;
@@ -286,9 +287,9 @@ public class PermissionResolver {
                 knownUserContacts.put(key, userContact);
             } catch (OXException e) {
                 if ("CON-0125".equals(e.getErrorCode())) {
-                    getLogger(PermissionResolver.class).debug("Error getting user contact {}", key, e);
+                    LOGGER.debug("Error getting user contact {}", key, e);
                 } else {
-                    getLogger(PermissionResolver.class).error("Error getting user contact {}", key, e);
+                    LOGGER.error("Error getting user contact {}", key, e);
                 }
             }
         }
@@ -400,7 +401,7 @@ public class PermissionResolver {
                     }
                 }
             } catch (OXException e) {
-                getLogger(PermissionResolver.class).error("Error getting users for permission entities", e);
+                LOGGER.error("Error getting users for permission entities", e);
             }
             if (0 < regularUserIDs.size()) {
                 SearchIterator<Contact> searchIterator = null;
@@ -411,7 +412,7 @@ public class PermissionResolver {
                         knownUserContacts.put(I(userContact.getInternalUserId()), userContact);
                     }
                 } catch (OXException e) {
-                    getLogger(PermissionResolver.class).error("Error getting user contacts for permission entities", e);
+                    LOGGER.error("Error getting user contacts for permission entities", e);
                 } finally {
                     SearchIterators.close(searchIterator);
                 }
@@ -423,7 +424,7 @@ public class PermissionResolver {
                         Contact guestContact = contactUserStorage.getGuestContact(session.getContextId(), i(guestID), CONTACT_FIELDS);
                         knownUserContacts.put(guestID, guestContact);
                     } catch (OXException e) {
-                        getLogger(PermissionResolver.class).error("Error getting user contact for guest permission entity", e);
+                        LOGGER.error("Error getting user contact for guest permission entity", e);
                     }
                 }
             }
@@ -437,7 +438,7 @@ public class PermissionResolver {
                 try {
                     knownGroups.put(groupID, groupService.getGroup(session.getContext(), i(groupID)));
                 } catch (OXException e) {
-                    getLogger(PermissionResolver.class).error("Error getting groups for permission entities", e);
+                    LOGGER.error("Error getting groups for permission entities", e);
                 }
             }
         }

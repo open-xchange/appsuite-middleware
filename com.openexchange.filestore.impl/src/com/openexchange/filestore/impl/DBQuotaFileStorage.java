@@ -61,6 +61,7 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -151,27 +152,23 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
      * @return A valid user identifier in case usage/limit service should be called; otherwise <code>0</code> (zero)
      */
     private int considerService() {
-        /*-
-         * Expression reflects:
-         *
-         *  if (purpose == Purpose.ADMINISTRATIVE) {
-         *    // Do not invoke services for administrative purpose(s)
-         *    return 0;
-         *  }
-         *
-         *  // Check for a dedicated storage
-         *  int ownerId = ownerInfo.getOwnerId();
-         *  boolean dedicatedStorage = ownerId > 0;
-         *  if (dedicatedStorage && ownerInfo.isMaster()) {
-         *    // User-associated storage is valid
-         *    return ownerId;
-         *  }
-         *
-         *  // Do not invoke services as this storage is not adequate for call-backs to those services
-         *  return 0;
-         */
+        if (purpose == Purpose.ADMINISTRATIVE) {
+            LOGGER.debug("Not considering another quota backend service for file storage '{}' since used for administrative purpose.", uri);
+            return 0;
+        }
 
-        return (purpose != Purpose.ADMINISTRATIVE) && ownerInfo.isMaster() && (ownerInfo.getOwnerId() > 0) ? ownerInfo.getOwnerId() : 0;
+        if (false == ownerInfo.isMaster()) {
+            LOGGER.debug("Not considering another quota backend service for file storage '{}' since owned by another user.", uri);
+            return 0;
+        }
+
+        if (ownerInfo.getOwnerId() <= 0) {
+            LOGGER.debug("Not considering another quota backend service for file storage '{}' since not user-associated, but context-associated ({}).", uri, Integer.valueOf(contextId));
+            return 0;
+        }
+
+        LOGGER.debug("Considering another quota backend service for file storage '{}' of user {} in context {}.", uri, Integer.valueOf(ownerInfo.getOwnerId()), Integer.valueOf(contextId));
+        return ownerInfo.getOwnerId();
     }
 
     private DatabaseService getDatabaseService() throws OXException {
@@ -183,11 +180,23 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
             return null;
         }
 
-        for (QuotaBackendService backendService : backendServices) {
+        Iterator<QuotaBackendService> iter = backendServices.iterator();
+        if (false == iter.hasNext()) {
+            // No one available...
+            LOGGER.debug("No quota backend service available for file storage '{}' of user {} in context {}.", uri, Integer.valueOf(userId), Integer.valueOf(contextId));
+            return null;
+        }
+
+        do {
+            QuotaBackendService backendService = iter.next();
             if (backendService.isApplicableFor(userId, contextId)) {
+                LOGGER.debug("Using quota backend service '{}' for file storage '{}' of user {} in context {}.", backendService.getMode(), uri, Integer.valueOf(userId), Integer.valueOf(contextId));
                 return backendService;
             }
-        }
+            LOGGER.debug("Quota backend service '{}' is not applicable for file storage '{}' of user {} in context {}.", backendService.getMode(), uri, Integer.valueOf(userId), Integer.valueOf(contextId));
+        } while (iter.hasNext());
+
+        LOGGER.debug("No quota backend service applicable for file storage '{}' of user {} in context {}.", uri, Integer.valueOf(userId), Integer.valueOf(contextId));
         return null;
     }
 

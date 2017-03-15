@@ -59,6 +59,7 @@ import com.openexchange.ajax.smtptest.actions.StartSMTPRequest;
 import com.openexchange.ajax.smtptest.actions.StopSMTPRequest;
 import com.openexchange.ajax.smtptest.actions.UpdateMailAccountRequest;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.test.pool.TestContext;
 import com.openexchange.test.pool.TestContextPool;
 import com.openexchange.test.pool.TestUser;
@@ -80,17 +81,20 @@ public class SmtpMockSetup {
     public static void init() throws OXException {
         synchronized (SmtpMockSetup.class) {
             if (!initialized.get()) {
+                LOG.info("Starting SMTP mock initialization.");
                 ProvisioningSetup.init();
 
                 startSmtpMockForAllContexts();
 
                 initialized.compareAndSet(false, true);
+                LOG.info("Finished initialization of the following contexts: {}.", Strings.concat(",", contextsWithStartedMock));
             }
         }
     }
 
     private static void startSmtpMockForAllContexts() {
-        contextsWithStartedMock = TestContextPool.getCopyOfCurrentlyAvailableContexts();
+        contextsWithStartedMock = TestContextPool.getAllTimeAvailableContexts();
+        LOG.info("Retrieved {} contexts to start SMTP mock server for.", contextsWithStartedMock.size());
 
         for (TestContext testContext : contextsWithStartedMock) {
             TestUser noReplyUser = testContext.getNoReplyUser();
@@ -104,6 +108,7 @@ public class SmtpMockSetup {
     }
 
     private static SmtpMockConfig startSmtpMockServerAndSetNoReply(TestUser userNoReply) {
+        LOG.info("Try to start SMTP mock server for user {} in context {}.", userNoReply.getLogin(), userNoReply.getContext());
         try {
             AJAXClient client = new AJAXClient(userNoReply);
             StartSMTPRequest request = new StartSMTPRequest(true, client.getValues().getContextId(), userNoReply.getLogin());

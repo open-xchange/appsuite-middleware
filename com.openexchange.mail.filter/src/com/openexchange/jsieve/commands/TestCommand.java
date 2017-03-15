@@ -112,7 +112,7 @@ public class TestCommand extends Command {
          * <code>address [ADDRESS-PART] [COMPARATOR] [MATCH-TYPE] &lt;header-list: string-list&gt; &lt;key-list: string-list&gt;</code>
          * <p><a href="https://tools.ietf.org/html/rfc5228#section-5.1">RFC-5228: Test address</a></p>
          */
-        ADDRESS("address", 2, Integer.MAX_VALUE, standardAddressPart(), standardComparators(), standardAddressMatchTypes(), standardJSONAddressMatchTypes(), null, null),
+        ADDRESS("address", 2, Integer.MAX_VALUE, addressParts(), standardComparators(), standardMatchTypes(), standardJSONMatchTypes(), null, null),
         /**
          * <p>The "envelope" test is true if the specified part of the [SMTP] (or equivalent)
          * envelope matches the specified key. The type of match is specified by the optional
@@ -120,7 +120,7 @@ public class TestCommand extends Command {
          * <code>envelope [COMPARATOR] [ADDRESS-PART] [MATCH-TYPE] &lt;envelope-part: string-list&gt; &lt;key-list: string-list&gt;</code>
          * <p><a href="https://tools.ietf.org/html/rfc5228#section-5.4">RFC-5228: Test envelope</a></p>
          */
-        ENVELOPE("envelope", 2, Integer.MAX_VALUE, standardAddressPart(), standardComparators(), standardMatchTypes(), standardJSONMatchTypes(), "envelope", null),
+        ENVELOPE("envelope", 2, Integer.MAX_VALUE, addressParts(), standardComparators(), standardMatchTypes(), standardJSONMatchTypes(), "envelope", null),
         /**
          * <p>The "exists" test is true if the headers listed in the header-names argument exist within the message. All of the headers must exist or the test is false.
          * <code>exists &lt;header-names: string-list&gt;</code>
@@ -190,7 +190,7 @@ public class TestCommand extends Command {
          * <p><a href="https://tools.ietf.org/html/rfc5260#section-4">RFC-5260: Date Test</a></p>
          *
          */
-        DATE("date", 3, Integer.MAX_VALUE, null, null, dateMatchTypes(), null, "date", dateOtherArguments()),
+        DATE("date", 3, Integer.MAX_VALUE, null, null, dateMatchTypes(), dateJSONMatchTypes(), "date", dateOtherArguments()),
         /**
          * <p>The currentdate test is similar to the date test, except that it
          * operates on the current date/time rather than a value extracted from
@@ -204,7 +204,7 @@ public class TestCommand extends Command {
          * <code>hasflag [MATCH-TYPE] [COMPARATOR] [&lt;variable-list: string-list&gt;] &lt;list-of-flags: string-list&gt;</code>
          * <p><a href="https://tools.ietf.org/html/rfc5232#section-4">RFC-5232: Test hasflag</a></p>
          */
-        HASFLAG("hasflag", 1, Integer.MAX_VALUE, null, standardComparators(), standardMatchTypes(), standardJSONMatchTypes(), null, null);
+        HASFLAG("hasflag", 1, Integer.MAX_VALUE, null, standardComparators(), standardMatchTypes(), standardJSONMatchTypes(), "imap4flags", null);
 
         ////////////////////////////////// MATCH TYPES /////////////////////////////////////////////////
 
@@ -216,16 +216,16 @@ public class TestCommand extends Command {
          */
         private static Hashtable<String, String> matchTypeSize() {
             final Hashtable<String, String> match_type_size = new Hashtable<String, String>(2);
-            match_type_size.put(":over", "");
-            match_type_size.put(":under", "");
+            match_type_size.put(MatchType.over.getArgumentName(), MatchType.over.getRequire());
+            match_type_size.put(MatchType.under.getArgumentName(), MatchType.under.getRequire());
             return match_type_size;
         }
 
         /**
-         * <p>Specifies the comparison optional arguments ':localpart', ':domain', ':all' as described
+         * <p>Specifies the addresspart arguments ':localpart', ':domain', ':all' as described
          * in <a href="href=https://tools.ietf.org/html/rfc5228#section-2.7.4">RFC-5228</a>.</p>
          *
-         * @return A {@link Hashtable} with the standard match types
+         * @return A {@link Hashtable} with the standard addressparts
          */
         private static Hashtable<String, String> standardAddressPart() {
             final Hashtable<String, String> standard_address_part = new Hashtable<String, String>(3);
@@ -252,17 +252,17 @@ public class TestCommand extends Command {
         }
 
         /**
-         * <p>Specifies the match types ':user' and ':detail' as described
+         * <p>Specifies the addressparts ':user' and ':detail' as described
          * in <a href="https://tools.ietf.org/html/rfc5233#section-4">RFC-5233: Subaddress Comparisons</a>.</p>
          *
-         * @return A {@link Hashtable} with the subaddress match types
+         * @return A {@link Hashtable} with the subaddress addressparts
          */
-        private static Hashtable<String, String> standardAddressMatchTypes() {
-            final Hashtable<String, String> standard_match_types = standardMatchTypes();
-            standard_match_types.putAll(standardAddressPart());
-            standard_match_types.put(":user", "subaddress");
-            standard_match_types.put(":detail", "subaddress");
-            return standard_match_types;
+        private static Hashtable<String, String> addressParts() {
+            final Hashtable<String, String> standard_address_parts = new Hashtable<>(5);
+            standard_address_parts.putAll(standardAddressPart());
+            standard_address_parts.put(":user", "subaddress");
+            standard_address_parts.put(":detail", "subaddress");
+            return standard_address_parts;
         }
 
         /**
@@ -273,12 +273,12 @@ public class TestCommand extends Command {
          */
         private static Hashtable<String, String> standardMatchTypes() {
             final Hashtable<String, String> standard_match_types = new Hashtable<String, String>(4);
-            standard_match_types.put(":is", "");
-            standard_match_types.put(":contains", "");
-            standard_match_types.put(":matches", "");
+            standard_match_types.put(MatchType.is.getArgumentName(), MatchType.is.getRequire());
+            standard_match_types.put(MatchType.contains.getArgumentName(), MatchType.contains.getRequire());
+            standard_match_types.put(MatchType.matches.getArgumentName(), MatchType.matches.getRequire());
             // Add further extensions here... and don't forget to raise the
             // initial number
-            standard_match_types.put(":regex", "regex");
+            standard_match_types.put(MatchType.regex.getArgumentName(), MatchType.regex.getRequire());
             return standard_match_types;
         }
 
@@ -289,10 +289,8 @@ public class TestCommand extends Command {
          */
         private static Hashtable<String, String> dateMatchTypes() {
             final Hashtable<String, String> standard_match_types = new Hashtable<String, String>(2);
-            standard_match_types.put(":is", "");
-            standard_match_types.put(":contains", "");
-            standard_match_types.put(":matches", "");
-            standard_match_types.put(":value", "relational");
+            standard_match_types.put(MatchType.is.getArgumentName(), MatchType.is.getRequire());
+            standard_match_types.put(MatchType.value.getArgumentName(), MatchType.value.getRequire());
             return standard_match_types;
         }
 
@@ -303,9 +301,9 @@ public class TestCommand extends Command {
          * @return A hashtable with the argument
          */
         private static Hashtable<String, String> dateOtherArguments() {
-            final Hashtable<String, String> standard_match_types = new Hashtable<String, String>(1);
-            standard_match_types.put(":zone", "");
-            return standard_match_types;
+            final Hashtable<String, String> arguments = new Hashtable<String, String>(1);
+            arguments.put(":zone", "");
+            return arguments;
         }
 
         ///////////////////////////////////// JSON MAPPINGS ////////////////////////////////////////////
@@ -315,26 +313,16 @@ public class TestCommand extends Command {
          *
          * @return A {@link List} with the mappings
          */
-        private static List<String[]> standardJSONSizeMatchTypes() {
-            final List<String[]> standard_match_types = Collections.synchronizedList(new ArrayList<String[]>(2));
-            standard_match_types.add(new String[] { "", "over" });
-            standard_match_types.add(new String[] { "", "under" });
-            return standard_match_types;
-        }
+        private static List<JSONMatchType> standardJSONSizeMatchTypes() {
+            final List<JSONMatchType> sizeMatchTypes = Collections.synchronizedList(new ArrayList<JSONMatchType>(4));
+            sizeMatchTypes.add(new JSONMatchType(MatchType.over.name(), MatchType.over.getRequire(), 0));
+            sizeMatchTypes.add(new JSONMatchType(MatchType.under.name(), MatchType.under.getRequire(), 0));
 
-        /**
-         * The JSON mappings of all address match types ({@link #standardAddressMatchTypes()})
-         *
-         * @return A {@link List} with the mappings
-         */
-        private static List<String[]> standardJSONAddressMatchTypes() {
-            final List<String[]> standard_match_types = Collections.synchronizedList(new ArrayList<String[]>(2));
-            standard_match_types.add(new String[] { "subaddress", "user" });
-            standard_match_types.add(new String[] { "subaddress", "detail" });
-            standard_match_types.add(new String[] { "", "all" });
-            standard_match_types.add(new String[] { "", "domain" });
-            standard_match_types.add(new String[] { "", "localpart" });
-            return standard_match_types;
+            // add not matchers
+            sizeMatchTypes.add(new JSONMatchType(MatchType.over.getNotName(), MatchType.over.getRequire(), 2));
+            sizeMatchTypes.add(new JSONMatchType(MatchType.under.getNotName(), MatchType.under.getRequire(), 2));
+
+            return sizeMatchTypes;
         }
 
         /**
@@ -342,12 +330,25 @@ public class TestCommand extends Command {
          *
          * @return A {@link List} with the mappings
          */
-        private static List<String[]> standardJSONMatchTypes() {
-            final List<String[]> standard_match_types = Collections.synchronizedList(new ArrayList<String[]>(4));
-            standard_match_types.add(new String[] { "regex", "regex" });
-            standard_match_types.add(new String[] { "", "is" });
-            standard_match_types.add(new String[] { "", "contains" });
-            standard_match_types.add(new String[] { "", "matches" });
+        private static List<JSONMatchType> standardJSONMatchTypes() {
+            final List<JSONMatchType> standard_match_types = Collections.synchronizedList(new ArrayList<JSONMatchType>(12));
+
+            // add normal matcher
+            standard_match_types.add(new JSONMatchType(MatchType.regex.name(), MatchType.regex.getRequire(), 0));
+            standard_match_types.add(new JSONMatchType(MatchType.is.name(), MatchType.is.getRequire(), 0));
+            standard_match_types.add(new JSONMatchType(MatchType.contains.name(), MatchType.contains.getRequire(), 0));
+            standard_match_types.add(new JSONMatchType(MatchType.matches.name(), MatchType.matches.getRequire(), 0));
+            standard_match_types.add(new JSONMatchType(MatchType.startswith.name(), MatchType.startswith.getRequire(), 2));
+            standard_match_types.add(new JSONMatchType(MatchType.endswith.name(), MatchType.endswith.getRequire(), 2));
+
+            // add not matchers
+            standard_match_types.add(new JSONMatchType(MatchType.regex.getNotName(), MatchType.regex.getRequire(), 2));
+            standard_match_types.add(new JSONMatchType(MatchType.is.getNotName(), MatchType.is.getRequire(), 2));
+            standard_match_types.add(new JSONMatchType(MatchType.contains.getNotName(), MatchType.contains.getRequire(), 2));
+            standard_match_types.add(new JSONMatchType(MatchType.matches.getNotName(), MatchType.matches.getRequire(), 2));
+            standard_match_types.add(new JSONMatchType(MatchType.startswith.getNotName(), MatchType.startswith.getRequire(), 2));
+            standard_match_types.add(new JSONMatchType(MatchType.endswith.getNotName(), MatchType.endswith.getRequire(), 2));
+
             return standard_match_types;
         }
 
@@ -356,14 +357,20 @@ public class TestCommand extends Command {
          *
          * @return A {@link List} with the mappings
          */
-        private static List<String[]> dateJSONMatchTypes() {
-            final List<String[]> standard_match_types = Collections.synchronizedList(new ArrayList<String[]>(2));
-            standard_match_types.add(new String[] { "relational", "ge" });
-            standard_match_types.add(new String[] { "relational", "le" });
-            standard_match_types.add(new String[] { "", "is" });
-            standard_match_types.add(new String[] { "", "contains" });
-            standard_match_types.add(new String[] { "", "matches" });
-            return standard_match_types;
+        private static List<JSONMatchType> dateJSONMatchTypes() {
+            final List<JSONMatchType> dateMatchTypes = Collections.synchronizedList(new ArrayList<JSONMatchType>(14));
+            // add normal matcher
+            dateMatchTypes.add(new JSONMatchType(MatchType.is.name(), MatchType.is.getRequire(), 0));
+            dateMatchTypes.add(new JSONMatchType(MatchType.ge.name(), MatchType.ge.getRequire(), 0));
+            dateMatchTypes.add(new JSONMatchType(MatchType.le.name(), MatchType.le.getRequire(), 0));
+
+            // add not matchers
+            dateMatchTypes.add(new JSONMatchType(MatchType.is.getNotName(), MatchType.is.getRequire(), 2));
+            dateMatchTypes.add(new JSONMatchType(MatchType.ge.getNotName(), MatchType.ge.getRequire(), 2));
+            dateMatchTypes.add(new JSONMatchType(MatchType.le.getNotName(), MatchType.le.getRequire(), 2));
+
+
+            return dateMatchTypes;
         }
 
         ///////////////////////////////////// COMPARATORS ///////////////////////////////////////////////////
@@ -421,7 +428,7 @@ public class TestCommand extends Command {
         /**
          * Needed for the resolution of the configuration parameters for JSON
          */
-        private final List<String[]> jsonMatchTypes;
+        private final List<JSONMatchType> jsonMatchTypes;
 
         /**
          * Defines if this command needs a require or not
@@ -429,7 +436,7 @@ public class TestCommand extends Command {
         private String required;
 
         /**
-         * Initialises a new {@link Commands}.
+         * Initializes a new {@link Commands}.
          *
          * @param commandName The command's name
          * @param numberOfArguments The minimum number of arguments
@@ -441,7 +448,7 @@ public class TestCommand extends Command {
          * @param required The 'require'
          * @param otherArguments Other optional arguments
          */
-        Commands(final String commandName, final int numberOfArguments, int maxNumberOfArguments, final Hashtable<String, String> address, final Hashtable<String, String> comparator, final Hashtable<String, String> matchTypes, List<String[]> jsonMatchTypes, final String required, final Hashtable<String, String> otherArguments) {
+        Commands(final String commandName, final int numberOfArguments, int maxNumberOfArguments, final Hashtable<String, String> address, final Hashtable<String, String> comparator, final Hashtable<String, String> matchTypes, List<JSONMatchType> jsonMatchTypes, final String required, final Hashtable<String, String> otherArguments) {
             this.commandName = commandName;
             this.numberOfArguments = numberOfArguments;
             this.maxNumberOfArguments = maxNumberOfArguments;
@@ -518,7 +525,7 @@ public class TestCommand extends Command {
         }
 
         @Override
-        public List<String[]> getJsonMatchTypes() {
+        public List<JSONMatchType> getJsonMatchTypes() {
             return jsonMatchTypes;
         }
     }
@@ -591,25 +598,7 @@ public class TestCommand extends Command {
             if (null != otherArguments) {
                 tagArray.removeAll(otherArguments.keySet());
             }
-            //            final Hashtable<String, String> comparator = this.command.getComparator();
-            //            if (null != comparator) {
-            //                final boolean comparatorrule = tagarray.remove(":comparator");
-            //                if (comparatorrule) {
-            //                    // The argument of the comparator is located one after the
-            //                    // comparator tag itself
-            //                    indexOfComparator = searchcomparator() + 1;
-            //                    final Object object = this.arguments.get(indexOfComparator);
-            //                    if (object instanceof ArrayList) {
-            //                        final ArrayList<String> new_name = (ArrayList<String>) object;
-            //                        final String comparatorarg = new_name.get(0);
-            //                        if (!comparator.containsKey(comparatorarg)) {
-            //                            throw new SieveException(comparatorarg + " is no valid comparator for " + this.command.getCommandname());
-            //                        }
-            //                    } else {
-            //                        throw new SieveException(object + " is no valid comparator for " + this.command.getCommandname());
-            //                    }
-            //                }
-            //            }
+
             if (!tagArray.isEmpty()) {
                 throw new SieveException("One of the tagArguments: " + tagArray + " is not valid for " + this.command.getCommandName());
             }
@@ -626,27 +615,6 @@ public class TestCommand extends Command {
 
         // Add test for testcommands here only anyof and allof are allowed to
         // take further tests
-    }
-
-    /**
-     * This method searches for the comparator tag in the array and returns its
-     * position. This method must find the right tag, otherwise this is an
-     * error. So an exception is thrown here if the comparator tag isn't found
-     *
-     * @return
-     * @throws SieveException
-     */
-    private int searchComparator() throws SieveException {
-        for (int i = 0; i < this.arguments.size(); i++) {
-            final Object obj = this.arguments.get(i);
-            if (obj instanceof TagArgument) {
-                final TagArgument tag = (TagArgument) obj;
-                if (":comparator".equals(tag.getTag())) {
-                    return i;
-                }
-            }
-        }
-        throw new SieveException("An error occured while search the comparator tag in the arguments");
     }
 
     /**
@@ -702,7 +670,25 @@ public class TestCommand extends Command {
      * @return
      */
     public final String getMatchType() {
+        if(this.command.getMatchTypes()==null){
+            return null;
+        }
         final ArrayList<String> arrayList = new ArrayList<String>(this.command.getMatchTypes().keySet());
+        arrayList.retainAll(this.tagArguments);
+        if (1 == arrayList.size()) {
+            return arrayList.get(0);
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * This method returns the addresspart of this command
+     *
+     * @return
+     */
+    public final String getAddressPart() {
+        final ArrayList<String> arrayList = new ArrayList<String>(this.command.getAddress().keySet());
         arrayList.retainAll(this.tagArguments);
         if (1 == arrayList.size()) {
             return arrayList.get(0);

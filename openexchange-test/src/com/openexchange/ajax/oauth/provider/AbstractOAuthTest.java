@@ -56,7 +56,7 @@ import java.util.UUID;
 import org.junit.After;
 import org.junit.Before;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.AbstractSmtpAJAXSession;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
@@ -77,7 +77,7 @@ import com.openexchange.test.pool.TestUser;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public abstract class AbstractOAuthTest extends AbstractAJAXSession {
+public abstract class AbstractOAuthTest extends AbstractSmtpAJAXSession {
 
     protected ClientDto clientApp;
 

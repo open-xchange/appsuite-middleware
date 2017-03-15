@@ -79,7 +79,7 @@ public enum SSLExceptionCode implements DisplayableOXExceptionCode {
     /**
      * The certificate with fingerprint '%1$s' is self-signed
      */
-    SELF_SIGNED_CERTIFICATE("The certificate with finderprint '%1$s' is self-signed", CATEGORY_ERROR, 4, SSLExceptionMessages.SELF_SIGNED_CERTIFICATE),
+    SELF_SIGNED_CERTIFICATE("The certificate with fingerprint '%1$s' is self-signed", CATEGORY_ERROR, 4, SSLExceptionMessages.SELF_SIGNED_CERTIFICATE),
     /**
      * The certificate with fingerprint '%1$s' is expired
      */

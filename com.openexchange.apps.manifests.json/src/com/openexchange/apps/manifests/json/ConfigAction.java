@@ -66,6 +66,7 @@ import com.openexchange.apps.manifests.json.exception.ManifestsExceptionCodes;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.serverconfig.ServerConfig;
@@ -100,7 +101,8 @@ public class ConfigAction implements AJAXActionService {
 
         String hostname = null;
         if (hostNameService != null) {
-            if (session.getUser().isGuest()) {
+            User user = session.getUser();
+            if (null != user && user.isGuest()) {
                 hostname = hostNameService.getGuestHostname(session.getUserId(), session.getContextId());
             } else {
                 hostname = hostNameService.getHostname(session.getUserId(), session.getContextId());

@@ -843,6 +843,11 @@ public final class Tools {
             return true;
         }
 
+        // Explicitly requested by client
+        if (AJAXRequestDataTools.parseBoolParameter(request.getParameter("plainJson"))) {
+            return true;
+        }
+
         // E.g. "Accept: application/json, text/javascript, ..."
         String acceptHdr = request.getHeader(ACCEPT);
         if (Strings.isEmpty(acceptHdr)) {

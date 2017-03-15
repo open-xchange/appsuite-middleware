@@ -502,13 +502,13 @@ public abstract class MailMessage extends MailPart {
     private boolean b_originalId;
 
     /**
-     * Email is encrypted
+     * Email Security Info, encrypted or signed
      */
-    private boolean encrypted;
-    private boolean b_encrypted;
+    private SecurityInfo securityInfo;
+    private boolean b_securityInfo;
 
     /**
-     * Email security data
+     * Email security results from decryption/signature verification
      */
     private SecurityResult securityResult;
     private boolean b_securityResult;
@@ -1990,40 +1990,41 @@ public abstract class MailMessage extends MailPart {
         b_references = true;
     }
 
+
     /**
-     * Sets the encrypted flag
+     * Sets the security info (encrypted, signed, etc)
      *
-     * @param encrypted The encrypted flag to set
+     * @param securityInfo The security info to set
      */
-    public void setEncrypted (boolean encrypted) {
-        this.encrypted = encrypted;
-        b_encrypted = true;
+    public void setSecurityInfo(SecurityInfo securityInfo) {
+        this.securityInfo = securityInfo;
+        b_securityInfo = (securityInfo != null);
     }
 
     /**
-     * Checks whether encrypted flag is set
+     * Gets the security info (encypted, signed, etc)
      *
-     * @return <code>true</code> if set; otherwise <code>false</code>
+     * @return The security info or <code>null</code>
      */
-    public boolean containsEncrypted () {
-        return b_encrypted;
+    public SecurityInfo getSecurityInfo () {
+        return this.securityInfo;
     }
 
     /**
-     * Checks if this mail is marked as encrypted.
+     * Checks if security info is contained
      *
-     * @return <code>true</code> if encrypted; otherwise <code>false</code>
+     * @return <code>true</code> if contained; otherwise <code>false</code>
      */
-    public boolean isEncrypted () {
-        return this.encrypted;
+    public boolean containsSecurityInfo () {
+        return b_securityInfo;
     }
 
     /**
-     * Removes the encrypted flag.
+     * Removes the security info
      */
-    public void removeEncrypted () {
-        encrypted = false;
-        b_encrypted = false;
+    public void removeSecurityInfo () {
+        this.securityInfo = null;
+        b_securityInfo = false;
     }
 
     /**

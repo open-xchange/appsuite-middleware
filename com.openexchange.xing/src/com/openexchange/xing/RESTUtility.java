@@ -461,7 +461,8 @@ public class RESTUtility {
 
     private static void checkForError(final JSONObject responseObject) throws XingApiException, XingUnlinkedException, XingPermissionDeniedException {
         if (responseObject.has("error_name")) {
-            if ("Invalid OAuth token".equals(responseObject.optString("message"))) {
+            String message = responseObject.optString("message");
+            if (message.indexOf("Invalid OAuth token") >= 0) {
                 throw new XingUnlinkedException("Invalid OAuth token");
             }
             if ("INSUFFICIENT_PRIVILEGES".equals(responseObject.optString("error_name"))) {

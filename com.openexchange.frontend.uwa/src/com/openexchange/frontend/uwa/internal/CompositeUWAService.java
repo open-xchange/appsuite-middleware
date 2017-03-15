@@ -101,7 +101,12 @@ public class CompositeUWAService implements UWAWidgetService {
         final String filename = view.get("com.openexchange.frontend.uwa.widgetFile", String.class);
         Map<String, Map<String, Object>> configValues = null;
         if (filename != null) {
-            configValues = ensureType(config.getYaml(filename));
+            Object yaml = config.getYaml(filename);
+            if (yaml != null) {
+                configValues = ensureType(yaml);
+            } else {
+                configValues = Collections.emptyMap();
+            }
         } else {
             configValues = Collections.emptyMap();
         }

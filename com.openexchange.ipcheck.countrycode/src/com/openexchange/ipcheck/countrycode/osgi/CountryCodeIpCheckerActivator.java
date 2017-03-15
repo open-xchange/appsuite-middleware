@@ -49,11 +49,16 @@
 
 package com.openexchange.ipcheck.countrycode.osgi;
 
+import javax.management.ObjectName;
 import com.openexchange.ajax.ipcheck.spi.IPChecker;
 import com.openexchange.geolocation.GeoLocationService;
 import com.openexchange.ipcheck.countrycode.CountryCodeIpChecker;
+import com.openexchange.ipcheck.countrycode.mbean.IPCheckMBean;
+import com.openexchange.ipcheck.countrycode.mbean.IPCheckMBeanImpl;
+import com.openexchange.ipcheck.countrycode.mbean.IPCheckMetrics;
+import com.openexchange.management.ManagementService;
+import com.openexchange.management.MetricAware;
 import com.openexchange.osgi.HousekeepingActivator;
-
 
 /**
  * {@link CountryCodeIpCheckerActivator}
@@ -77,12 +82,17 @@ public class CountryCodeIpCheckerActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { GeoLocationService.class };
+        return new Class<?>[] { GeoLocationService.class, ManagementService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        registerService(IPChecker.class, new CountryCodeIpChecker(getService(GeoLocationService.class)));
-    }
+        CountryCodeIpChecker service = new CountryCodeIpChecker(getService(GeoLocationService.class));
+        registerService(IPChecker.class, service);
 
+        ObjectName objectName = new ObjectName(IPCheckMBean.DOMAIN, "name", IPCheckMBean.NAME);
+        IPCheckMBean metricsMBean = new IPCheckMBeanImpl(this, service);
+        ManagementService managementService = getService(ManagementService.class);
+        managementService.registerMBean(objectName, metricsMBean);
+    }
 }

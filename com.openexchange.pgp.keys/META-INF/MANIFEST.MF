@@ -1,0 +1,22 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: PGP key handling functionality
+Bundle-SymbolicName: com.openexchange.pgp.keys
+Bundle-Version: 7.8.4
+Bundle-Activator: com.openexchange.pgp.keys.osgi.PGPKeysActivator
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: com.openexchange.exception,
+ com.openexchange.osgi,
+ com.openexchange.tools.io,
+ org.bouncycastle.bcpg;version="1.56.0",
+ org.bouncycastle.bcpg.sig;version="1.56.0",
+ org.bouncycastle.openpgp;version="1.56.0",
+ org.bouncycastle.openpgp.operator;version="1.56.0",
+ org.bouncycastle.openpgp.operator.bc;version="1.56.0",
+ org.bouncycastle.openpgp.operator.jcajce;version="1.56.0",
+ org.bouncycastle.util;version="1.56.0",
+ org.osgi.framework;version="1.3.0",
+ org.slf4j;version="1.7.5"
+Export-Package: com.openexchange.pgp.keys.parsing,
+ com.openexchange.pgp.keys.tools

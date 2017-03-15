@@ -74,7 +74,7 @@ public class MailFilterInterceptorRegistryImpl implements MailFilterInterceptorR
     /**
      * {@link MailFilterInterceptorComparator}
      */
-    private class MailFilterInterceptorComparator implements Comparator<MailFilterInterceptor> {
+    private static class MailFilterInterceptorComparator implements Comparator<MailFilterInterceptor> {
 
         /**
          * Initializes a new {@link MailFilterInterceptorComparator}.

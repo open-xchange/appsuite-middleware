@@ -49,9 +49,15 @@
 
 package com.openexchange.pns.mobile.api.facade.osgi;
 
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
+import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.pns.PushMessageGenerator;
 import com.openexchange.pns.mobile.api.facade.MobileApiFacadeMessageGenerator;
+import com.openexchange.pns.mobile.api.facade.MobileApiFacadePushConfiguration;
 
 /**
  * {@link MobileApiFacadePushStuffActivator}
@@ -59,7 +65,7 @@ import com.openexchange.pns.mobile.api.facade.MobileApiFacadeMessageGenerator;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.4
  */
-public class MobileApiFacadePushStuffActivator extends HousekeepingActivator {
+public class MobileApiFacadePushStuffActivator extends HousekeepingActivator implements Reloadable {
 
     /**
      * Initializes a new {@link MobileApiFacadePushStuffActivator}.
@@ -70,12 +76,30 @@ public class MobileApiFacadePushStuffActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {};
+        return new Class<?>[] { ConfigViewFactory.class };
+    }
+
+    @Override
+    protected boolean stopOnServiceUnavailability() {
+        return true;
     }
 
     @Override
     protected void startBundle() throws Exception {
-        registerService(PushMessageGenerator.class, new MobileApiFacadeMessageGenerator());
+        registerService(Reloadable.class, this);
+        registerService(PushMessageGenerator.class, new MobileApiFacadeMessageGenerator(getService(ConfigViewFactory.class)));
+    }
+
+    // ----------------------------------------------------------------------------------------------------------
+
+    @Override
+    public void reloadConfiguration(ConfigurationService configService) {
+        MobileApiFacadePushConfiguration.invalidateCache();
+    }
+
+    @Override
+    public Interests getInterests() {
+        return Reloadables.interestsForFiles("pns-mobile-api-facade.properties");
     }
 
 }

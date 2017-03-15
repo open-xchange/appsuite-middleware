@@ -59,7 +59,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 @RunWith(ParallelSuite.class)
-@SuiteClasses({
+@SuiteClasses({ // @formatter:off
     Bug21794Test.class,
     Bug22094Test.class,
     Bug22352Test.class,
@@ -115,8 +115,9 @@ import com.openexchange.test.concurrent.ParallelSuite;
     Bug48242Test.class,
     Bug26293Test.class,
     Bug51462Test.class,
-})
-
+    Bug51768Test.class,
+    Bug52255Test.class
+}) // @formatter:on
 public final class CalDAVBugSuite {
 
 }

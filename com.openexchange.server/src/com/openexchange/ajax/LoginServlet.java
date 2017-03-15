@@ -57,8 +57,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.UndeclaredThrowableException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -1031,12 +1034,37 @@ public class LoginServlet extends AJAXServlet {
         final String domain = getDomainValue(null == serverName ? determineServerNameByLogProperty() : serverName);
         if (null != domain) {
             cookie.setDomain(domain);
-        } else {
-            if (!"localhost".equalsIgnoreCase(serverName) && (null == textToNumericFormatV4(serverName)) && (null == textToNumericFormatV6(serverName))) {
-                cookie.setDomain(serverName);
-            }
+        } 
+        else if (useShardingForHost(serverName) && null != serverName && !"localhost".equalsIgnoreCase(serverName) && (null == textToNumericFormatV4(serverName)) && (null == textToNumericFormatV6(serverName))) {
+            cookie.setDomain(serverName);
         }
         return cookie;
+    }
+    
+    
+
+    private static boolean useShardingForHost(String serverName) {
+        boolean result = false;
+        ServerConfigService serverConfigService = ServerServiceRegistry.getInstance().getService(ServerConfigService.class);
+        try {
+            List<Map<String, Object>> customHostConfigurations = serverConfigService.getCustomHostConfigurations(serverName, -1, -1);
+            if (customHostConfigurations != null) {
+                result = areShardingHostsAvailable(customHostConfigurations);
+            }
+        } catch (OXException e) {
+            LOG.error("Unable to load custom host configuration", e);
+        }
+        return result;
+    }
+    
+    private static boolean areShardingHostsAvailable(List<Map<String, Object>> customHostConfigurations) {
+        List<String> shardingSubdomains = new ArrayList<>();
+        for (Map<String, Object> map : customHostConfigurations) {
+            if (map.containsKey("shardingSubdomains")) {
+                shardingSubdomains = (List<String>) map.get("shardingSubdomains");
+            }
+        }
+        return shardingSubdomains.isEmpty() ? false : true;
     }
 
     /**

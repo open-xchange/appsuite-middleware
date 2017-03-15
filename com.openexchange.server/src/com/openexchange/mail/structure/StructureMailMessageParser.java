@@ -84,7 +84,6 @@ import com.openexchange.java.Charsets;
 import com.openexchange.java.CountingOutputStream;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -304,14 +303,10 @@ public final class StructureMailMessageParser {
         }
     }
 
-    private void parseMailContent(final MailPart mailPartArg, final StructureHandler handler, final String prefix, final int partCountArg) throws OXException, IOException {
+    private void parseMailContent(final MailPart mailPart, final StructureHandler handler, final String prefix, final int partCountArg) throws OXException, IOException {
         if (stop) {
             return;
         }
-        /*
-         * Part modifier
-         */
-        final MailPart mailPart = MailConfig.usePartModifier() ? MailConfig.getPartModifier().modifyPart(mailPartArg) : mailPartArg;
         /*
          * Set part information
          */
@@ -724,7 +719,7 @@ public final class StructureMailMessageParser {
                                     HDR_CONTENT_DISPOSITION,
                                     MimeMessageUtility.foldContentDisposition(cd.toString()));
                             }
-                            try (CountingOutputStream counter = new CountingOutputStream()) {                                
+                            try (CountingOutputStream counter = new CountingOutputStream()) {
                                 attachment.writeTo(counter);
                                 bodyPart.setSize((int) counter.getCount());
                             }
