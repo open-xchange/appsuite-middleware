@@ -62,9 +62,31 @@ import com.openexchange.exception.OXException;
  */
 public interface AttendeeStorage {
 
+    /**
+     * Loads all attendees for a specific event.
+     *
+     * @param objectID The identifier of the event to load the attendees for
+     * @return The attendees
+     */
     List<Attendee> loadAttendees(int objectID) throws OXException;
 
+    /**
+     * Loads the attendees for specific events.
+     *
+     * @param objectIDs The identifiers of the events to load the attendees for
+     * @return The attendees, mapped to the identifiers of the corresponding events
+     */
     Map<Integer, List<Attendee>> loadAttendees(int[] objectIDs) throws OXException;
+
+    /**
+     * Loads the attendees for specific events.
+     *
+     * @param objectIDs The identifiers of the events to load the attendees for
+     * @param internal {@link Boolean#TRUE} to only consider internal entities, {@link Boolean#FALSE} for non-internal ones,
+     *            or <code>null</code> to not filter by internal/external
+     * @return The attendees, mapped to the identifiers of the corresponding events
+     */
+    Map<Integer, List<Attendee>> loadAttendees(int[] objectIDs, Boolean internal) throws OXException;
 
     void deleteAttendees(int objectID) throws OXException;
 

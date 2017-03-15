@@ -61,7 +61,6 @@ import static com.openexchange.chronos.impl.Utils.asList;
 import static com.openexchange.chronos.impl.Utils.getFields;
 import static com.openexchange.chronos.impl.Utils.getTimeZone;
 import static com.openexchange.chronos.impl.Utils.isIgnoreConflicts;
-import static com.openexchange.chronos.impl.Utils.loadAdditionalEventData;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -374,7 +373,7 @@ public class ConflictCheckPerformer extends AbstractQueryPerformer {
         if (0 == eventsInPeriod.size()) {
             return Collections.emptyList();
         }
-        return loadAdditionalEventData(storage, -1, eventsInPeriod, new EventField[] { EventField.ATTENDEES });
+        return readAttendeeData(eventsInPeriod, Boolean.TRUE);
     }
 
     /**

@@ -637,7 +637,7 @@ public class Utils {
         if (null != events && 0 < events.size() && (null == fields || contains(fields, EventField.ATTENDEES) || contains(fields, EventField.ATTACHMENTS) || contains(fields, EventField.ALARMS))) {
             int[] objectIDs = getObjectIDs(events);
             if (null == fields || contains(fields, EventField.ATTENDEES)) {
-                Map<Integer, List<Attendee>> attendeesById = storage.getAttendeeStorage().loadAttendees(getObjectIDs(events));
+                Map<Integer, List<Attendee>> attendeesById = storage.getAttendeeStorage().loadAttendees(objectIDs);
                 for (Event event : events) {
                     event.setAttendees(attendeesById.get(I(event.getId())));
                 }

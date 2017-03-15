@@ -167,6 +167,11 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
 
     @Override
     public Map<Integer, List<Attendee>> loadAttendees(int[] objectIDs) throws OXException {
+        return loadAttendees(objectIDs, null);
+    }
+
+    @Override
+    public Map<Integer, List<Attendee>> loadAttendees(int[] objectIDs, Boolean internal) throws OXException {
         Map<Integer, List<Attendee>> attendeesById = new HashMap<Integer, List<Attendee>>(objectIDs.length);
         Connection connection = null;
         try {
@@ -174,16 +179,32 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
             /*
              * select raw attendee data & pre-fetch referenced internal entities
              */
-            Map<Integer, List<Attendee>> userAttendeeData = selectUserAttendeeData(connection, context.getContextId(), objectIDs);
-            Map<Integer, List<Attendee>> internalAttendeeData = selectInternalAttendeeData(connection, context.getContextId(), objectIDs);
-            Map<Integer, List<Attendee>> externalAttendeeData = selectExternalAttendeeData(connection, context.getContextId(), objectIDs);
-            prefetchEntities(internalAttendeeData.values(), userAttendeeData.values());
+            Map<Integer, List<Attendee>> userAttendeeData;
+            Map<Integer, List<Attendee>> internalAttendeeData;
+            Map<Integer, List<Attendee>> externalAttendeeData;
+            if (false == Boolean.FALSE.equals(internal)) {
+                userAttendeeData = selectUserAttendeeData(connection, context.getContextId(), objectIDs);
+                internalAttendeeData = selectInternalAttendeeData(connection, context.getContextId(), objectIDs);
+                prefetchEntities(internalAttendeeData.values(), userAttendeeData.values());
+            } else {
+                userAttendeeData = null;
+                internalAttendeeData = null;
+            }
+            if (false == Boolean.TRUE.equals(internal)) {
+                externalAttendeeData = selectExternalAttendeeData(connection, context.getContextId(), objectIDs);
+            } else {
+                externalAttendeeData = null;
+            }
             /*
              * generate resulting attendee lists per object ID
              */
             for (int objectID : objectIDs) {
                 Integer key = I(objectID);
-                attendeesById.put(key, getAttendees(internalAttendeeData.get(key), userAttendeeData.get(key), externalAttendeeData.get(key)));
+                attendeesById.put(key, getAttendees(
+                    null != internalAttendeeData ? internalAttendeeData.get(key) : null,
+                    null != userAttendeeData ? userAttendeeData.get(key) : null,
+                    null != externalAttendeeData ? externalAttendeeData.get(key) : null))
+                ;
             }
             return attendeesById;
         } catch (SQLException e) {
@@ -228,9 +249,9 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
     /**
      * Constructs the final attendee list for an event my pre-processing and merging the supplied lists of loaded attendees.
      *
-     * @param internalAttendees The internal attendees as loaded from the storag
-     * @param userAttendees The user attendees as loaded from the storag
-     * @param externalAttendees The external attendees as loaded from the storag
+     * @param internalAttendees The internal attendees as loaded from the storage
+     * @param userAttendees The user attendees as loaded from the storage
+     * @param externalAttendees The external attendees as loaded from the storage
      * @return The merged list of attendees
      */
     private List<Attendee> getAttendees(List<Attendee> internalAttendees, List<Attendee> userAttendees, List<Attendee> externalAttendees) throws OXException {

@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.impl.performer;
 
+import static com.openexchange.chronos.common.CalendarUtils.getObjectIDs;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.anonymizeIfNeeded;
@@ -72,6 +73,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
@@ -145,6 +148,17 @@ public abstract class AbstractQueryPerformer {
 
     protected List<Event> readAdditionalEventData(List<Event> events, int userID, EventField[] fields) throws OXException {
         return Utils.loadAdditionalEventData(storage, userID, events, fields);
+    }
+
+    protected List<Event> readAttendeeData(List<Event> events, Boolean internal) throws OXException {
+        if (null != events && 0 < events.size()) {
+            int[] objectIDs = getObjectIDs(events);
+            Map<Integer, List<Attendee>> attendeesById = storage.getAttendeeStorage().loadAttendees(objectIDs, Boolean.TRUE);
+            for (Event event : events) {
+                event.setAttendees(attendeesById.get(I(event.getId())));
+            }
+        }
+        return events;
     }
 
     protected Event readAdditionalEventData(Event event, int userID, EventField[] fields) throws OXException {

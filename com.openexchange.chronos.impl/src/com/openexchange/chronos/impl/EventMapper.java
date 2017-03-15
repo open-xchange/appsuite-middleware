@@ -342,7 +342,7 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
 
             @Override
             public boolean isSet(Event object) {
-                return object.containsSequence();
+                return object.containsCreated();
             }
 
             @Override

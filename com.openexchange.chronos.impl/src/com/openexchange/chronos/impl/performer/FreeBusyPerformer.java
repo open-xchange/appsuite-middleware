@@ -152,7 +152,7 @@ public class FreeBusyPerformer extends AbstractQueryPerformer {
         if (0 == eventsInPeriod.size()) {
             return eventsPerAttendee;
         }
-        readAdditionalEventData(eventsInPeriod, -1, new EventField[] { EventField.ATTENDEES });
+        readAttendeeData(eventsInPeriod, Boolean.TRUE);
         List<UserizedFolder> visibleFolders = getVisibleFolders(session);
         /*
          * step through events & build free/busy per requested attendee

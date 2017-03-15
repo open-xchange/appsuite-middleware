@@ -122,7 +122,7 @@ public class CalendarConfigImpl implements CalendarConfig {
 
     @Override
     public boolean isUseLegacyStack() {
-        return 1 == 2 || getConfigValue("com.openexchange.chronos.useLegacyStack", Boolean.class, Boolean.FALSE).booleanValue();
+        return getConfigValue("com.openexchange.chronos.useLegacyStack", Boolean.class, Boolean.FALSE).booleanValue();
     }
 
     @Override
