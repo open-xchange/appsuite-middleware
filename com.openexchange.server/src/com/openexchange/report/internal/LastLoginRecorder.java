@@ -49,6 +49,9 @@
 
 package com.openexchange.report.internal;
 
+import java.util.Set;
+import com.google.common.collect.ImmutableSet;
+import com.openexchange.ajax.Client;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -71,6 +74,7 @@ public class LastLoginRecorder implements LoginHandlerService {
 
     private final int maxClientCount;
     private final UserService userService;
+    private final Set<String> whiteList;
 
     /**
      * Initializes a new {@link LastLoginRecorder}.
@@ -82,6 +86,25 @@ public class LastLoginRecorder implements LoginHandlerService {
         super();
         this.userService = userService;
         maxClientCount = configService.getIntProperty("com.openexchange.user.maxClientCount", -1);
+
+        ImmutableSet.Builder<String> whiteList = ImmutableSet.builder();
+        for (Interface iface : Interface.values()) {
+            whiteList.add(iface.toString());
+        }
+
+        String[] knownClients = {
+            Client.OX6_UI.getClientId(),                   // OX6 frontend
+            Client.APPSUITE_UI.getClientId(),              // AppSuite frontend
+            Client.MOBILE_APP.getClientId(),               // Mobile Web Interface
+            Client.OUTLOOK_OXTENDER2_ADDIN.getClientId(),  // Outlook OXtender2 AddIn
+            Client.OXNOTIFIER.getClientId(),               // OXNotifier
+            Client.OUTLOOK_UPDATER1.getClientId(),         // Outlook Updater 1
+            Client.OUTLOOK_UPDATER2.getClientId()          // Outlook Updater 2
+        };
+        for (String knownClient : knownClients) {
+            whiteList.add(knownClient);
+        }
+        this.whiteList = whiteList.build();
     }
 
     @Override
@@ -137,18 +160,8 @@ public class LastLoginRecorder implements LoginHandlerService {
         }
     }
 
-    private static boolean isWhitelistedClient(String client) {
-        for (Interface iface : Interface.values()) {
-            if (iface.toString().equals(client)) {
-                return true;
-            }
-        }
-        for (String known : KNOWN_CLIENTS) {
-            if (known.equals(client)) {
-                return true;
-            }
-        }
-        return false;
+    private boolean isWhitelistedClient(String client) {
+        return null != client && whiteList.contains(client);
     }
 
     @Override
@@ -156,13 +169,4 @@ public class LastLoginRecorder implements LoginHandlerService {
         // Nothing to to.
     }
 
-    private static final String[] KNOWN_CLIENTS = {
-        "com.openexchange.ox.gui.dhtml",     // OX6 frontend
-        "open-xchange-appsuite",             // AppSuite frontend
-        "com.openexchange.mobileapp",        // Mobile Web Interface
-        "OpenXchange.HTTPClient.OXAddIn",    // Outlook OXtender2 AddIn
-        "OpenXchange.HTTPClient.OXNotifier", // OXNotifier
-        "com.open-xchange.updater.olox1",    // Outlook Updater 1
-        "com.open-xchange.updater.olox2"     // Outlook Updater 2
-    };
 }
