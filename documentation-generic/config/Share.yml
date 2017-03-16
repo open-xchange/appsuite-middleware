@@ -14,7 +14,7 @@ properties:
       description: |
         Specifies a comma-separated list (ignore-case) of such User-Agents that are supposed to receive a "404 Not Found" when trying to
         access a share link. White-card notation is supported; e.g. "*aolbuild*"
-      defaultValue: *aolbuild*, *baidu*, *bingbot*, *bingpreview*, *msnbot*, *duckduckgo*, *adsbot-google*, *googlebot*, *mediapartners-google*, *teoma*, *slurp*, *yandex*
+      defaultValue: *aolbuild*, *baiduspider*, *baidu*search*, *bingbot*, *bingpreview*, *msnbot*, *duckduckgo*, *adsbot-google*, *googlebot*, *mediapartners-google*, *teoma*, *slurp*, *yandex*bot*
       version: 7.8.4
       reloadable: true
       configcascadeAware: false

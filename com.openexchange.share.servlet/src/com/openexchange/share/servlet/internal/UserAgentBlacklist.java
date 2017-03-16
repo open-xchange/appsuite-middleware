@@ -56,6 +56,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import org.slf4j.Logger;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.java.Strings;
 
@@ -73,7 +74,7 @@ public class UserAgentBlacklist {
      * The default User-Agent black-list based on <a href="https://perishablepress.com/list-all-user-agents-top-search-engines/">this article</a>.
      */
     public static UserAgentBlacklist DEFAULT_BLACKLIST = new UserAgentBlacklist(
-        "*aolbuild*, *baidu*, *bingbot*, *bingpreview*, *msnbot*, *duckduckgo*, *adsbot-google*, *googlebot*, *mediapartners-google*, *teoma*, *slurp*, *yandex*", true);
+        "*aolbuild*, *baiduspider*, *baidu*search*, *bingbot*, *bingpreview*, *msnbot*, *duckduckgo*, *adsbot-google*, *googlebot*, *mediapartners-google*, *teoma*, *slurp*, *yandex*bot*", true);
 
     // ----------------------------------------------------------------------------------------------------------------
 
@@ -88,7 +89,7 @@ public class UserAgentBlacklist {
 
         String[] wps = wildcardPatterns.split(" *, *", 0);
         List<Matcher> blacklistMatchers = new ArrayList<>(wps.length);
-        List<String> containees = new ArrayList<>(wps.length);
+        List<String[]> containees = new ArrayList<>(wps.length);
         for (String wildcardPattern : wps) {
             if (!Strings.isEmpty(wildcardPattern)) {
                 String expr = wildcardPattern.trim();
@@ -97,12 +98,12 @@ public class UserAgentBlacklist {
                     if (Strings.isEmpty(unquoted)) {
                         LOG.warn("Ignoring empty pattern expression: {}", expr);
                     } else {
-                        String contains = isContainsMatcher(unquoted);
+                        String[] contains = isContainsMatcher(unquoted);
                         if (null == contains) {
                             Pattern pattern = Pattern.compile(Strings.wildcardToRegex(unquoted), ignoreCase ? Pattern.CASE_INSENSITIVE : 0);
                             blacklistMatchers.add(new PatternMatcher(pattern));
                         } else {
-                            containees.add(ignoreCase ? Strings.asciiLowerCase(contains) : contains);
+                            containees.add(contains);
                         }
                     }
                 } catch (PatternSyntaxException e) {
@@ -124,7 +125,7 @@ public class UserAgentBlacklist {
         deniedCache = new ConcurrentHashMap<String, Boolean>(1024, 0.9f, 1);
     }
 
-    private static String isContainsMatcher(String expr) {
+    private static String[] isContainsMatcher(String expr) {
         int len = expr.length();
         if (len <= 2) {
             return null;
@@ -134,14 +135,22 @@ public class UserAgentBlacklist {
             return null;
         }
 
-        for (int i = len - 1; i-- > 1;) {
-            char ch = expr.charAt(i);
-            if (false == Strings.isAsciiLetter(ch) && ch != ' ' && ch != '-' && ch != '_') {
-                return null;
+        String[] tokens = expr.split("\\*");
+        List<String> retval = new ArrayList<>(tokens.length);
+        for (String token : tokens) {
+            if (false == Strings.isEmpty(token)) {
+                for (int i = token.length() - 1; i-- > 1;) {
+                    char ch = token.charAt(i);
+                    if (false == Strings.isAsciiLetter(ch) && ch != ' ' && ch != '-' && ch != '_') {
+                        return null;
+                    }
+                }
+                retval.add(token);
             }
         }
 
-        return expr.substring(1, len - 1);
+        int size = retval.size();
+        return size <= 0 ? null : retval.toArray(new String[size]);
     }
 
     /**
@@ -210,20 +219,38 @@ public class UserAgentBlacklist {
 
     private static final class ContainsMatcher implements Matcher {
 
-        private final List<String> containees;
+        private final List<String[]> containees;
         private final boolean ignoreCase;
 
-        ContainsMatcher(boolean ignoreCase, List<String> containees) {
+        ContainsMatcher(boolean ignoreCase, List<String[]> containees) {
             super();
-            this.containees = containees;
+            ImmutableList.Builder<String[]> builder = ImmutableList.builder();
+            for (String[] contained : containees) {
+                if (ignoreCase) {
+                    String[] arr = new String[contained.length];
+                    for (int i = 0; i < arr.length; i++) {
+                        arr[i] = Strings.asciiLowerCase(contained[i]);
+                    }
+                    builder.add(arr);
+                } else {
+                    builder.add(contained);
+                }
+            }
+            this.containees = builder.build();
             this.ignoreCase = ignoreCase;
         }
 
         @Override
         public boolean matches(String userAgent) {
             String toCheck = ignoreCase ? Strings.asciiLowerCase(userAgent) : userAgent;
-            for (String contained : containees) {
-                if (toCheck.indexOf(contained) >= 0) {
+            for (String[] contained : containees) {
+                boolean allContained = true;
+                for (int i = contained.length; allContained && i-- > 0;) {
+                    if (toCheck.indexOf(contained[i]) < 0) {
+                        allContained = false;
+                    }
+                }
+                if (allContained) {
                     return true;
                 }
             }
