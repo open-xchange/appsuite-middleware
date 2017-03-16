@@ -132,14 +132,14 @@ public class ExportUserFeedback extends AbstractRestCLI<Void> {
     @Override
     protected void checkArguments(CommandLine cmd) {
         if (cmd.getArgs().length < 1) {
-            System.out.println("Please add a destination file for export.");
+            System.err.println("Please add a destination file for export.");
             System.exit(1);
             return;
         }
         pathStr = cmd.getArgs()[0];
         File file = new File(pathStr);
         if (file.exists()) {
-            System.out.println("File " + file.getAbsolutePath() + " does already exist! Please choose another location.");
+            System.err.println("File " + file.getAbsolutePath() + " does already exist! Please choose another location.");
             System.exit(1);
             return;
         }
@@ -147,7 +147,7 @@ public class ExportUserFeedback extends AbstractRestCLI<Void> {
 
     @Override
     protected Void invoke(Options option, CommandLine cmd, Builder builder) throws Exception {
-        builder.accept(MediaType.APPLICATION_JSON_TYPE, MediaType.APPLICATION_OCTET_STREAM_TYPE, MediaType.TEXT_PLAIN_TYPE);
+        builder.accept(MediaType.APPLICATION_JSON_TYPE, MediaType.APPLICATION_OCTET_STREAM_TYPE, MediaType.TEXT_PLAIN_TYPE, new MediaType("text", "csv"));
         builder.acceptEncoding("UTF-8");
 
         InputStream response = builder.get(InputStream.class);

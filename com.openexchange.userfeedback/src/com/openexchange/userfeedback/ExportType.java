@@ -49,7 +49,6 @@
 
 package com.openexchange.userfeedback;
 
-
 /**
  * {@link ExportType}
  *
@@ -57,6 +56,22 @@ package com.openexchange.userfeedback;
  * @since v7.8.4
  */
 public enum ExportType {
-    RAW,
-    CSV
+    RAW("application", "json"),
+    CSV("text", "csv");
+
+    private String mediaType;
+    private String mediaSubType;
+
+    private ExportType(String mediaType, String mediaSubType) {
+        this.mediaType = mediaType;
+        this.mediaSubType = mediaSubType;
+    }
+
+    public String getMediaType() {
+        return mediaType;
+    }
+
+    public String getMediaSubType() {
+        return mediaSubType;
+    }
 }

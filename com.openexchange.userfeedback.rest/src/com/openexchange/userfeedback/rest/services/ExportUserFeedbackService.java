@@ -95,7 +95,6 @@ public class ExportUserFeedbackService extends JAXRSService {
 
     @GET
     @Path("/{context-group}/{type}")
-    @Produces(MediaType.APPLICATION_OCTET_STREAM + ";charset=UTF-8")
     public Response export(@QueryParam("start") final long start, @QueryParam("end") final long end, @PathParam("type") final String type, @PathParam("context-group") final String contextGroup) {
         Response response = export(start, end, type, contextGroup, ExportType.CSV);
         return response;
@@ -103,7 +102,6 @@ public class ExportUserFeedbackService extends JAXRSService {
 
     @GET
     @Path("/{context-group}/{type}/raw")
-    @Produces(MediaType.APPLICATION_JSON)
     public Response exportRaw(@QueryParam("start") final long start, @QueryParam("end") final long end, @PathParam("type") final String type, @PathParam("context-group") final String contextGroup) {
         Response response = export(start, end, type, contextGroup, ExportType.RAW);
         return response;
@@ -117,6 +115,8 @@ public class ExportUserFeedbackService extends JAXRSService {
             ExportResultConverter converter = feedbackService.export(contextGroup, new DateOnlyFilter(type, start, end));
             ExportResult export = converter.get(exportType);
             ResponseBuilder builder = Response.status(Status.OK);
+            builder.type(new MediaType(exportType.getMediaType(), exportType.getMediaSubType()));
+            builder.encoding("UTF-8");
             builder.entity(export.getResult());
             return builder.build();
         } catch (OXException e) {
