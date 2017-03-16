@@ -190,8 +190,13 @@ public class WrappingFilter implements Filter {
             }
 
             // Tracking identifier
-            String trackingId = checkTrackingIdInRequestParameters ? request.getParameter("trackingId") : null;
-            if (trackingId == null) {
+            String trackingId;
+            if (checkTrackingIdInRequestParameters) {
+                trackingId = request.getParameter("trackingId");
+                if (trackingId == null) {
+                    trackingId = generateTrackingId();
+                }
+            } else {
                 trackingId = generateTrackingId();
             }
             LogProperties.putProperty(LogProperties.Name.REQUEST_TRACKING_ID, trackingId);
