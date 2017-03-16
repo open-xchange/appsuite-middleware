@@ -71,6 +71,10 @@ if [ ${1:-0} -eq 2 ]; then
 
     # SoftwareChange_Request-2572
     ox_add_property com.openexchange.push.imapidle.supportsPermanentListeners false $PFILE
+
+    # SCR-4030
+    ox_set_property com.openexchange.push.imapidle.clusterLock local $PFILE
+
 fi
 
 %clean
