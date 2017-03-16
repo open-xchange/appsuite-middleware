@@ -49,6 +49,7 @@
 
 package com.openexchange.userfeedback.clt;
 
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -72,6 +73,7 @@ import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.client.ClientConfig;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.cli.AbstractRestCLI;
 import com.openexchange.java.AsciiReader;
@@ -131,7 +133,7 @@ public class SendFeedbackViaMail extends AbstractRestCLI<Void> {
         options.addOption(END_SHORT, END_LONG, true, "End time in seconds since 1970-01-01 00:00:00 UTC. Only feedback given before this time is sent. If not set, all feedback since -s is sent.");
         options.addOption(SUBJECT_SHORT, SUBJECT_LONG, true, " The mail subject. Default: \"User Feedback Report: [time range]\".");
         options.addOption(BODY_SHORT, BODY_LONG, true, "The mail body (plain text).");
-        Option recipients = new Option(RECIPIENTS_SHORT, RECIPIENT_LONG, true, "Recipient's mail address starting with an '@' or the local path to a CSV file containing the recipients. A custom display name can be set after the address, seperated by a comma.");
+        Option recipients = new Option(RECIPIENTS_SHORT, RECIPIENT_LONG, true, "Single Recipient's mail address like \"Displayname <email@example.com>\" or the local path to a CSV file containing all the recipients, starting with an '@' (@/tmp/file.csv). Where the address is followed by the display name, seperated by a comma.");
         recipients.setRequired(true);
         options.addOption(recipients);
         options.addOption(USE_PGP_SHORT, USE_PGP_LONG, true, "");
@@ -185,16 +187,32 @@ public class SendFeedbackViaMail extends AbstractRestCLI<Void> {
         context.accept(MediaType.APPLICATION_JSON_TYPE, MediaType.APPLICATION_OCTET_STREAM_TYPE);
         String recipients = cmd.getOptionValue(RECIPIENTS_SHORT);
         JSONArray array = new JSONArray();
+        if (recipients.startsWith("@")) {
+            recipients = recipients.substring(1, recipients.length());
+            try {
+                array = extractRecipientsFromFile(recipients);
+            } catch (IOException e) {
+                System.err.println("File not found: " + cmd.getOptionValue(RECIPIENTS_SHORT));
+                System.exit(1);
+                return null;
+            }
+        } else {
+            array.add(0, extractSingleRecipient(recipients));
+        }
+        InputStream response = null;
+        response = context.post(Entity.json(array.toString()), InputStream.class);
+        System.out.println(IOUtils.toCharArray(new AsciiReader(response)));
+        System.exit(0);
+        return null;
+    }
+
+    private JSONArray extractRecipientsFromFile(String filename) throws IOException, JSONException {
+        JSONArray array = new JSONArray();
         CSVParser parser = null;
         FileReader reader = null;
         try {
-            if (recipients.startsWith("@")) {
-                recipients = recipients.substring(1, recipients.length());
-                parser = CSVParser.parse(recipients, CSVFormat.DEFAULT);
-            } else {
-                reader = new FileReader(recipients);
-                parser = new CSVParser(reader, CSVFormat.DEFAULT);
-            }
+            reader = new FileReader(filename);
+            parser = new CSVParser(reader, CSVFormat.DEFAULT);
             Iterator<CSVRecord> it = parser.iterator();
             while (it.hasNext()) {
                 CSVRecord record = it.next();
@@ -207,9 +225,7 @@ public class SendFeedbackViaMail extends AbstractRestCLI<Void> {
                 if (record.size() == 3) {
                     pgp = record.get(2);
                 }
-                JSONObject json = new JSONObject();
-                json.put("address", address);
-                json.put("displayName", displayName);
+                JSONObject json = getAddressJSON(address, displayName);
                 if (null != pgp && Strings.isNotEmpty(pgp)) {
                     try {
                         pgp = new String(Files.readAllBytes(Paths.get(pgp)));
@@ -220,10 +236,7 @@ public class SendFeedbackViaMail extends AbstractRestCLI<Void> {
                 }
                 array.add(0, json);
             }
-        } catch (IOException e) {
-            System.err.println("File not found: " + cmd.getOptionValue(RECIPIENTS_SHORT));
-            System.exit(1);
-            return null;
+
         } finally {
             if (null != parser) {
                 parser.close();
@@ -232,11 +245,21 @@ public class SendFeedbackViaMail extends AbstractRestCLI<Void> {
                 reader.close();
             }
         }
-        InputStream response = null;
-        response = context.post(Entity.json(array.toString()), InputStream.class);
-        System.out.println(IOUtils.toCharArray(new AsciiReader(response)));
-        System.exit(0);
-        return null;
+        return array;
+    }
+
+    private JSONObject extractSingleRecipient(String recipients) throws JSONException {
+        String address = recipients.substring(recipients.lastIndexOf("<") + 1, recipients.lastIndexOf(">"));
+        String displayName = recipients.substring(0, recipients.lastIndexOf("<") - 1);
+        JSONObject json = getAddressJSON(address, displayName);
+        return json;
+    }
+
+    private JSONObject getAddressJSON(String address, String displayName) throws JSONException {
+        JSONObject json = new JSONObject();
+        json.put("address", address);
+        json.put("displayName", displayName);
+        return json;
     }
 
     @Override
@@ -253,7 +276,7 @@ public class SendFeedbackViaMail extends AbstractRestCLI<Void> {
     protected String getName() {
         return "senduserfeedback [OPTIONS]";
     }
-    
+
     @Override
     protected String getHeader() {
         return "senduserfeedback -s 1487348317 -r @reports@example.com,Feedback Reports";

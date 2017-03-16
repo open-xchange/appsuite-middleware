@@ -29,7 +29,7 @@ The mail body (plain text).
 - ``-S,--subject <arg>``
 The mail subject. Default: "User Feedback Report: [time range]".
 - ``-r,--recipients <arg>``
-Recipient's mail address starting with an '@' or the local path to a CSV file containing the recipients. A custom display name can be set after the address, seperated by a comma.
+Single Recipient's mail address like \"Displayname \<email@example.com\>\" or the local path to a CSV file containing all the recipients, starting with an '@' (@/tmp/file.csv). Where the address is followed by the display name, seperated by a comma.
 
 ### Examples
 
