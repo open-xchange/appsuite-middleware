@@ -378,15 +378,17 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
     public void lock(Connection con, int writePoolId, String schemaName) throws OXException {
         PreparedStatement stmt = null;
         try {
-            if (null != schemaName) {
-                stmt = con.prepareStatement("SELECT count FROM contexts_per_dbschema WHERE db_pool_id=? AND schemaname=? FOR UPDATE");
-                stmt.setInt(1, writePoolId);
-                stmt.setString(2, schemaName);
-            } else {
-                stmt = con.prepareStatement("SELECT count FROM contexts_per_dbschema WHERE db_pool_id=? FOR UPDATE");
-                stmt.setInt(1, writePoolId);
-            }
-            stmt.execute();
+            stmt = con.prepareStatement("UPDATE ctx_per_schema_sem SET id=id+1");
+            stmt.executeUpdate();
+//            if (null != schemaName) {
+//                stmt = con.prepareStatement("SELECT count FROM contexts_per_dbschema WHERE db_pool_id=? AND schemaname=? FOR UPDATE");
+//                stmt.setInt(1, writePoolId);
+//                stmt.setString(2, schemaName);
+//            } else {
+//                stmt = con.prepareStatement("SELECT count FROM contexts_per_dbschema FOR UPDATE");
+////                stmt.setInt(1, writePoolId);
+//            }
+//            stmt.execute();
         } catch (SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {

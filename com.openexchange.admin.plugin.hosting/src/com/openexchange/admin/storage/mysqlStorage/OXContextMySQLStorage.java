@@ -1463,11 +1463,11 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
         // Determine the schema name according to effective strategy
         OXAdminPoolInterface pool = ClientAdminThread.cache.getPool();
-        try {
-            pool.lock(configCon, db.getId(), null);
-        } catch (PoolException e) {
-            throw new StorageException(e.getMessage(), e);
-        }
+//        try {
+//            pool.lock(configCon, db.getId(), null);
+//        } catch (PoolException e) {
+//            throw new StorageException(e.getMessage(), e);
+//        }
         switch (effectiveStrategy.getStrategy()) {
             case SCHEMA:
                 // Pre-defined schema name
@@ -1603,7 +1603,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         OXAdminPoolInterface pool = ClientAdminThread.cache.getPool();
         final String[] unfilledSchemas;
         try {
-//            pool.lock(con, i(poolId), null);
+            pool.lock(con, i(poolId), null);
             unfilledSchemas = pool.getUnfilledSchemas(con, i(poolId), this.CONTEXTS_PER_SCHEMA);
         } catch (PoolException e) {
             LOG.error("Pool Error", e);
