@@ -54,8 +54,10 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.rest.services.JAXRSService;
@@ -130,11 +132,18 @@ public class DeleteUserFeedbackService extends JAXRSService {
         Response resp = null;
         try {
             service.delete(contextGroup, filter);
-            resp = Response.ok().build();
+            ResponseBuilder builder = Response.ok();
+            builder.entity(new GenericEntity<String>(getPositiveRespone(filter, contextGroup), String.class));
+            resp = builder.build();
         } catch (OXException e) {
             resp = Response.serverError().entity(e.getMessage()).build();
         }
         return resp;
+    }
+
+    private String getPositiveRespone(FeedbackFilter filter, String contextGroup) {
+        String result = "Feedback data deleted for type: " + filter.getType() + " ,context group: " + contextGroup + (filter.start() != Long.MIN_VALUE ? (" ,start time: " + filter.start()) : "" ) + (filter.end() != Long.MAX_VALUE ? (" ,end time: " + filter.end()) : "");
+        return result;
     }
 
 }

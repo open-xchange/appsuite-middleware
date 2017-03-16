@@ -145,7 +145,7 @@ public class DeleteUserFeedback extends AbstractRestCLI<Void> {
 
     @Override
     protected Void invoke(Options option, CommandLine cmd, Builder context) throws Exception {
-        context.accept(MediaType.APPLICATION_JSON_TYPE, MediaType.APPLICATION_OCTET_STREAM_TYPE);
+        context.accept(MediaType.APPLICATION_JSON_TYPE, MediaType.APPLICATION_OCTET_STREAM_TYPE, MediaType.TEXT_PLAIN_TYPE);
         InputStream response = context.delete(InputStream.class);
         System.out.println(IOUtils.toCharArray(new AsciiReader(response)));
         return null;
