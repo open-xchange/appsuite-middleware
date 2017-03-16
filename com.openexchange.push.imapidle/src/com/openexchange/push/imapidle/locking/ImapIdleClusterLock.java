@@ -68,6 +68,7 @@ public interface ImapIdleClusterLock {
     public static enum Type {
         HAZELCAST,
         DATABASE,
+        LOCAL,
         NONE,
         ;
     }

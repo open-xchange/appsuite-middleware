@@ -202,7 +202,7 @@ public class POSTAction extends DAVAction {
         DAVObjectResource<?> resource = requireResource(request, DAVObjectResource.class);
         String contentType = getContentType(request);
         String fileName = AttachmentUtils.parseFileName(request);
-        String[] recurrenceIDs = Strings.splitByComma(request.getHeader("rid"));
+        String[] recurrenceIDs = Strings.splitByComma(request.getParameter("rid"));
         long size = getContentLength(request);
         /*
          * save attachment
@@ -234,7 +234,7 @@ public class POSTAction extends DAVAction {
          * get targeted resource & attachment related parameters
          */
         DAVObjectResource<?> resource = requireResource(request, DAVObjectResource.class);
-        String managedId = request.getHeader("managed-id");
+        String managedId = request.getParameter("managed-id");
         if (Strings.isEmpty(managedId)) {
             throw WebdavProtocolException.generalError(request.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
         }
@@ -244,7 +244,7 @@ public class POSTAction extends DAVAction {
         } catch (NumberFormatException e) {
             throw WebdavProtocolException.generalError(e, request.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
         }
-        String[] recurrenceIDs = Strings.splitByComma(request.getHeader("rid"));
+        String[] recurrenceIDs = Strings.splitByComma(request.getParameter("rid"));
         /*
          * remove attachment & apply response headers for successful removal
          */
@@ -264,7 +264,7 @@ public class POSTAction extends DAVAction {
         String contentType = getContentType(request);
         String fileName = AttachmentUtils.parseFileName(request);
         long size = getContentLength(request);
-        String managedId = request.getHeader("managed-id");
+        String managedId = request.getParameter("managed-id");
         if (Strings.isEmpty(managedId)) {
             throw WebdavProtocolException.generalError(request.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
         }

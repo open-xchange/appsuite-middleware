@@ -403,22 +403,25 @@ public final class JsonMessageHandler implements MailMessageHandler {
     }
 
     /**
-     * Transform SecurityResult to JSON
-     * @param result JSON representation of securityResult
-     * @return
-     * @throws JSONException
+     * Transforms given security result to JSON.
+     *
+     * @param result The security result associated with the mail
+     * @return The JSON representation of security result
+     * @throws JSONException If JSON cannot be returned
      */
     public JSONObject securityResultToJSON (SecurityResult result) throws JSONException {
-        JSONObject json = new JSONObject();
+        JSONObject json = new JSONObject(10);
         json.put("decrypted", result.getSuccess());
         json.put("type", result.getType().toString());
         if (result.hasError()) {
             json.put("error", result.getError());
         }
+        json.put("pgpInline", result.isPgpInline());
         if (result.hasSignatureResults()) {
-            JSONArray signatures = new JSONArray();
-            for (SignatureResult res : result.getSignatureResults()) {
-                JSONObject sig = new JSONObject();
+            List<SignatureResult> signatureResults = result.getSignatureResults();
+            JSONArray signatures = new JSONArray(signatureResults.size());
+            for (SignatureResult res : signatureResults) {
+                JSONObject sig = new JSONObject(4);
                 sig.put("verified", res.isVerified());
                 sig.put("missing", res.isMissing());
                 sig.put("date", res.getDate());

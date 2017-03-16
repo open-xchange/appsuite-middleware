@@ -1614,8 +1614,9 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                                     }
                                 }
                                 if (!np[a].containsConfirmMessage()) {
-                                    np[a].setIsModified(true);
                                     np[a].setConfirmMessage(op[bs].getConfirmMessage());
+                                } else {
+                                    np[a].setIsModified(true);                                    
                                 }
                                 if (np[a].getPersonalFolderId() <= 0 && op[bs].getPersonalFolderId() > 0) {
                                     np[a].setPersonalFolderId(op[bs].getPersonalFolderId());

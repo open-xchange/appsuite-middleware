@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -258,10 +259,21 @@ public final class Conversation {
      * @return <code>true</code> if the intersection of the collections is non-empty
      */
     private static boolean containsAny(final Set<String> set, final Collection<String> col) {
-        final Iterator<String> it = col.iterator();
-        for (int i = col.size(); i-- > 0;) {
-            if (set.contains(it.next())) {
-                return true;
+        int retry = 3;
+        while (retry-- > 0) {
+            try {
+                Iterator<String> it = col.iterator();
+                for (int i = col.size(); i-- > 0;) {
+                    if (set.contains(it.next())) {
+                        return true;
+                    }
+                }
+                return false;
+            } catch (ConcurrentModificationException e) {
+                // Start over again
+                if (retry <= 0) {
+                    throw e;
+                }
             }
         }
         return false;

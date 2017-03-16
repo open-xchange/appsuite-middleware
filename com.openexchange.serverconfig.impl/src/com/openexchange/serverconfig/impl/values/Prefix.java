@@ -52,6 +52,7 @@ package com.openexchange.serverconfig.impl.values;
 import java.util.Map;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.serverconfig.ComputedServerConfigValueService;
 import com.openexchange.session.Session;
@@ -77,10 +78,19 @@ public class Prefix implements ComputedServerConfigValueService {
     public void addValue(Map<String, Object> serverConfig, String hostName, int userId, int contextId, Session optSession) throws OXException {
         DispatcherPrefixService service = services.getOptionalService(DispatcherPrefixService.class);
         if (null == service) {
-            serverConfig.put("prefix", DispatcherPrefixService.DEFAULT_PREFIX);
+            serverConfig.put("prefix", stripTrailingSlash(DispatcherPrefixService.DEFAULT_PREFIX));
         } else {
-            serverConfig.put("prefix", service.getPrefix());
+            serverConfig.put("prefix", stripTrailingSlash(service.getPrefix()));
         }
+    }
+
+    private String stripTrailingSlash(String prefix) {
+        if (Strings.isEmpty(prefix)) {
+            return prefix;
+        }
+
+        int mlen = prefix.length() - 1;
+        return prefix.charAt(mlen) == '/' ? prefix.substring(0, mlen) : prefix;
     }
 
 }
