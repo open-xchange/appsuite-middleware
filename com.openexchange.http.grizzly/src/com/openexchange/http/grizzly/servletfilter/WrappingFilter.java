@@ -54,7 +54,7 @@ import static com.openexchange.http.grizzly.http.servlet.HttpServletRequestWrapp
 import java.io.IOException;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -65,12 +65,12 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
+import com.openexchange.exception.OXException;
 import com.openexchange.http.grizzly.GrizzlyConfig;
 import com.openexchange.http.grizzly.http.servlet.HttpServletRequestWrapper;
 import com.openexchange.http.grizzly.http.servlet.HttpServletResponseWrapper;
 import com.openexchange.http.grizzly.util.IPTools;
 import com.openexchange.java.Strings;
-import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogProperties;
 
 /**
@@ -92,6 +92,8 @@ public class WrappingFilter implements Filter {
 
     // ----------------------------------------------------------------------------------------------------------------------------------
 
+    private final AtomicLong counter;
+    private final int serverId;
     private final String forHeader;
     private final Set<String> knownProxies;
     private final String protocolHeader;
@@ -109,6 +111,8 @@ public class WrappingFilter implements Filter {
      */
     public WrappingFilter(GrizzlyConfig config) {
         super();
+        serverId = Math.abs(OXException.getServerId());
+        counter = new AtomicLong(serverId >> 1);
         this.forHeader = config.getForHeader();
         this.knownProxies = new LinkedHashSet<>(config.getKnownProxies());
         this.protocolHeader = config.getProtocolHeader();
@@ -188,12 +192,22 @@ public class WrappingFilter implements Filter {
             // Tracking identifier
             String trackingId = checkTrackingIdInRequestParameters ? request.getParameter("trackingId") : null;
             if (trackingId == null) {
-                trackingId = UUIDs.getUnformattedString(UUID.randomUUID());
+                trackingId = generateTrackingId();
             }
             LogProperties.putProperty(LogProperties.Name.REQUEST_TRACKING_ID, trackingId);
         }
 
         chain.doFilter(httpRequest, httpResponse);
+    }
+
+    private String generateTrackingId() {
+        long count = counter.incrementAndGet();
+        while (count < 0) {
+            long newNext = 1;
+            count = counter.compareAndSet(count, newNext) ? newNext : counter.incrementAndGet();
+        }
+
+        return new StringBuilder(16).append(serverId).append('-').append(count).toString();
     }
 
     private HttpServletRequestWrapper buildHttpServletRequestWrapper(HttpServletRequest httpRequest) {
