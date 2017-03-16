@@ -60,6 +60,8 @@ import java.util.List;
 import java.util.Set;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.net.URLCodec;
+import com.hazelcast.nio.serialization.ClassDefinition;
+import com.hazelcast.nio.serialization.ClassDefinitionBuilder;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
 import com.openexchange.hazelcast.serialization.CustomPortable;
@@ -121,6 +123,26 @@ public class PortableSession extends StoredSession implements CustomPortable {
     public static final String PARAMETER_REMOTE_PARAMETER_NAMES = "remoteParameterNames";
     public static final String PARAMETER_REMOTE_PARAMETER_VALUES = "remoteParameterValues";
     public static final String PARAMETER_NAME_XOAUTH2_TOKEN = "xoauth2";
+
+    /** The class definition for PortableCacheEvent */
+    public static ClassDefinition CLASS_DEFINITION = new ClassDefinitionBuilder(FACTORY_ID, CLASS_ID)
+        .addUTFField(PARAMETER_LOGIN_NAME)
+        .addUTFField(PARAMETER_PASSWORD)
+        .addIntField(PARAMETER_CONTEXT_ID)
+        .addIntField(PARAMETER_USER_ID)
+        .addUTFField(PARAMETER_SESSION_ID)
+        .addUTFField(PARAMETER_SECRET)
+        .addUTFField(PARAMETER_LOGIN)
+        .addUTFField(PARAMETER_RANDOM_TOKEN)
+        .addUTFField(PARAMETER_LOCAL_IP)
+        .addUTFField(PARAMETER_AUTH_ID)
+        .addUTFField(PARAMETER_HASH)
+        .addUTFField(PARAMETER_CLIENT)
+        .addUTFField(PARAMETER_USER_LOGIN)
+        .addUTFField(PARAMETER_ALT_ID)
+        .addUTFField(PARAMETER_REMOTE_PARAMETER_NAMES)
+        .addUTFField(PARAMETER_REMOTE_PARAMETER_VALUES)
+        .build();
 
     // -------------------------------------------------------------------------------------------------
 

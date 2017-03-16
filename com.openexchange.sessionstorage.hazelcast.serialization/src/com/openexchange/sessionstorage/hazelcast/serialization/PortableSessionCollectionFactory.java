@@ -54,25 +54,25 @@ import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
 import com.openexchange.hazelcast.serialization.CustomPortable;
 
 /**
- * {@link PortableSessionFactory} - The portable factory for {@link PortableSession} type.
+ * {@link PortableSessionCollectionFactory} - The portable factory for {@link PortableSession} type.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class PortableSessionFactory extends AbstractCustomPortableFactory {
+public class PortableSessionCollectionFactory extends AbstractCustomPortableFactory {
 
     @Override
     public CustomPortable create() {
-        return new PortableSession();
+        return new PortableSessionCollection();
     }
 
     @Override
     public int getClassId() {
-        return PortableSession.CLASS_ID;
+        return PortableSessionCollection.CLASS_ID;
     }
 
     @Override
     public ClassDefinition getClassDefinition() {
-        return PortableSession.CLASS_DEFINITION;
+        return PortableSessionCollection.CLASS_DEFINITION;
     }
 
 }
