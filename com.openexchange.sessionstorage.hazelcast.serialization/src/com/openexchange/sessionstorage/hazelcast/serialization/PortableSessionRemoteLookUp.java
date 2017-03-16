@@ -116,7 +116,7 @@ public class PortableSessionRemoteLookUp extends AbstractCustomPortable implemen
     private int contextId;
 
     /**
-     * Initializes a new {@link PortableCheckForExtendedServiceCallable}.
+     * Initializes a new {@link PortableSessionRemoteLookUp}.
      */
     public PortableSessionRemoteLookUp() {
         super();
