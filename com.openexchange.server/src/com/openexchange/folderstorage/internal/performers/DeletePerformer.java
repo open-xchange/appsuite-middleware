@@ -217,6 +217,7 @@ public final class DeletePerformer extends AbstractUserizedFolderPerformer {
             if (null == folderStorage) {
                 throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
             }
+            checkTrashAware(folderStorage);
             if (null != timeStamp) {
                 storageParameters.setTimeStamp(timeStamp);
             }
@@ -276,6 +277,7 @@ public final class DeletePerformer extends AbstractUserizedFolderPerformer {
             if (null == folderStorage) {
                 throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
             }
+            checkTrashAware(folderStorage);
 
             if (!(folderStorage instanceof TrashAwareFolderStorage)) {
                 throw FolderExceptionErrorMessage.UNSUPPORTED_OPERATION.create();
@@ -285,6 +287,12 @@ public final class DeletePerformer extends AbstractUserizedFolderPerformer {
             return result;
         } else {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Delete not supported by tree " + treeId);
+        }
+    }
+
+    private void checkTrashAware(FolderStorage storage) throws OXException {
+        if(!(storage instanceof TrashAwareFolderStorage)){
+            throw FolderExceptionErrorMessage.UNSUPPORTED_OPERATION.create();
         }
     }
 

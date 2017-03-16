@@ -80,6 +80,21 @@ public class TrashResult {
     /**
      * Initializes a new {@link TrashResult}.
      *
+     * @param path The new path (maybe null)
+     * @param oldPath The old path
+     * @param isTrashed Flag indicating whether the folder is trashed or not.
+     */
+    public TrashResult(String path, String oldPath, boolean isTrashed) {
+        super();
+        this.trashed = isTrashed;
+        this.path = path;
+        this.oldPath = oldPath;
+        this.failed = false;
+    }
+
+    /**
+     * Initializes a new {@link TrashResult}.
+     *
      * @param oldPath The old path
      * @param failed Indicating whether the delete operations has failed or not
      */

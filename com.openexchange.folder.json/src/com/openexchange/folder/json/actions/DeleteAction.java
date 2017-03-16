@@ -106,16 +106,7 @@ public final class DeleteAction extends AbstractFolderAction {
     protected AJAXRequestResult doPerform(final AJAXRequestData request, final ServerSession session) throws OXException, JSONException {
 
         Boolean extendedResponse = request.getParameter(EXTENDED_RESPONSE, boolean.class, true);
-        if (extendedResponse != null && extendedResponse) {
-            try {
-                return performExtendedResponse(request, session);
-            } catch (OXException e) {
-                if (!e.equalsCode(1041, "FLD")) {
-                    throw e;
-                }
-                // else continue with normal operation
-            }
-        }
+        extendedResponse = extendedResponse != null ? extendedResponse : false;
 
         /*
          * Parse parameters
@@ -155,10 +146,30 @@ public final class DeleteAction extends AbstractFolderAction {
         if (failOnError) {
             final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DeleteAction.class);
             Map<String, OXException> foldersWithError = new HashMap<String, OXException>(len);
+            List<TrashResult> trashResults = new ArrayList<>(len);
             for (int i = 0; i < len; i++) {
                 final String folderId = jsonArray.getString(i);
                 try {
-                    final FolderResponse<Void> response = folderService.deleteFolder(treeId, folderId, timestamp, session, decorator);
+                    FolderResponse<?> response = null;
+                    if (extendedResponse && folderService instanceof TrashAwareFolderService) {
+                        try {
+                            response = ((TrashAwareFolderService) folderService).trashFolder(treeId, folderId, timestamp, session, decorator);
+                        } catch (OXException e) {
+                            if (!e.equalsCode(1041, "FLD")) {
+                                throw e;
+                            }
+                            // else continue with normal operation
+                        }
+                    }
+
+                    if(response == null){
+                        response = folderService.deleteFolder(treeId, folderId, timestamp, session, decorator);
+                        if(extendedResponse){
+                            trashResults.add(new TrashResult(folderId, false));
+                        }
+                    } else {
+                        trashResults.add((TrashResult)response.getResponse());
+                    }
                     final Collection<OXException> warnings = response.getWarnings();
                     if (null != warnings && !warnings.isEmpty()) {
                         throw warnings.iterator().next();
@@ -182,23 +193,54 @@ public final class DeleteAction extends AbstractFolderAction {
                 }
                 throw FolderExceptionErrorMessage.FOLDER_DELETION_FAILED.create(sb.toString());
             }
-            result = new AJAXRequestResult(new JSONArray(0));
+            if(extendedResponse){
+                result = createExtendedResponse(trashResults, true);
+            } else {
+                result = new AJAXRequestResult(new JSONArray(0));
+            }
         } else {
             final JSONArray responseArray = new JSONArray();
             final List<OXException> warnings = new LinkedList<OXException>();
+            List<TrashResult> trashResults = new ArrayList<>(len);
             for (int i = 0; i < len; i++) {
                 final String folderId = jsonArray.getString(i);
                 try {
-                    folderService.deleteFolder(treeId, folderId, timestamp, session, decorator);
+                    FolderResponse<?> response = null;
+                    if (extendedResponse && folderService instanceof TrashAwareFolderService) {
+                        try {
+                            response = ((TrashAwareFolderService) folderService).trashFolder(treeId, folderId, timestamp, session, decorator);
+                        } catch (OXException e) {
+                            if (!e.equalsCode(1041, "FLD")) {
+                                throw e;
+                            }
+                            // else continue with normal operation
+                        }
+                    }
+                    if(response == null){
+                        response = folderService.deleteFolder(treeId, folderId, timestamp, session, decorator);
+                        if(extendedResponse){
+                            trashResults.add(new TrashResult(folderId, false));
+                        }
+                    } else {
+                        trashResults.add((TrashResult)response.getResponse());
+                    }
                 } catch (final OXException e) {
                     final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DeleteAction.class);
                     log.error("Failed to delete folder {} in tree {}.", folderId, treeId, e);
                     e.setCategory(Category.CATEGORY_WARNING);
                     warnings.add(e);
                     responseArray.put(folderId);
+                    if(extendedResponse){
+                        trashResults.add(new TrashResult(folderId, true));
+                    }
                 }
             }
-            result = new AJAXRequestResult(responseArray).addWarnings(warnings);
+            if(extendedResponse){
+                result = createExtendedResponse(trashResults, false).addWarnings(warnings);
+            } else {
+                result = new AJAXRequestResult(responseArray).addWarnings(warnings);
+            }
+
         }
         /*
          * Return appropriate result
@@ -206,84 +248,10 @@ public final class DeleteAction extends AbstractFolderAction {
         return result;
     }
 
-    private AJAXRequestResult performExtendedResponse(final AJAXRequestData request, final ServerSession session) throws OXException, JSONException {
-        /*
-         * Parse parameters
-         */
-        String treeId = request.getParameter("tree");
-        if (null == treeId) {
-            /*
-             * Fallback to default tree identifier
-             */
-            treeId = getDefaultTreeIdentifier();
-        }
-        final Date timestamp;
-        {
-            final String timestampStr = request.getParameter("timestamp");
-            if (null == timestampStr) {
-                timestamp = null;
-            } else {
-                try {
-                    timestamp = new Date(Long.parseLong(timestampStr));
-                } catch (final NumberFormatException e) {
-                    throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("timestamp", timestampStr);
-                }
-            }
-        }
-        /*
-         * Compose JSON array with id
-         */
-        final JSONArray jsonArray = (JSONArray) request.requireData();
-        final int len = jsonArray.length();
-        /*
-         * Delete
-         */
-        final boolean failOnError = AJAXRequestDataTools.parseBoolParameter("failOnError", request, false);
-        final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
-        FolderServiceDecorator decorator = new FolderServiceDecorator().put("hardDelete", request.getParameter("hardDelete"));
-        List<TrashResult> results = new ArrayList<>(len);
-        final AJAXRequestResult result;
+    private AJAXRequestResult createExtendedResponse(List<TrashResult> results, boolean failOnError) throws JSONException{
+        JSONArray resultArray = new JSONArray(results.size());
         if (failOnError) {
-            final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DeleteAction.class);
-            Map<String, OXException> foldersWithError = new HashMap<String, OXException>(len);
-            for (int i = 0; i < len; i++) {
-                final String folderId = jsonArray.getString(i);
-                try {
 
-                    if (!(folderService instanceof TrashAwareFolderService)) {
-                        throw FolderExceptionErrorMessage.UNSUPPORTED_OPERATION.create();
-                    }
-
-                    final FolderResponse<TrashResult> response = ((TrashAwareFolderService) folderService).trashFolder(treeId, folderId, timestamp, session, decorator);
-                    final Collection<OXException> warnings = response.getWarnings();
-                    if (null != warnings && !warnings.isEmpty()) {
-                        throw warnings.iterator().next();
-                    }
-                    results.add(response.getResponse());
-                } catch (final OXException e) {
-                    if(e.equalsCode(1041, "FLD")){
-                        throw e;
-                    }
-                    e.setCategory(Category.CATEGORY_ERROR);
-                    log.error("Failed to delete folder {} in tree {}.", folderId, treeId, e);
-                    foldersWithError.put(folderId, e);
-                }
-            }
-            final int size = foldersWithError.size();
-            if (size > 0) {
-                if (1 == size) {
-                    throw foldersWithError.values().iterator().next();
-                }
-                final StringBuilder sb = new StringBuilder(64);
-                Iterator<String> iterator = foldersWithError.keySet().iterator();
-                sb.append(getFolderNameSafe(folderService, iterator.next(), treeId, session));
-                while (iterator.hasNext()) {
-                    sb.append(", ").append(getFolderNameSafe(folderService, iterator.next(), treeId, session));
-                }
-                throw FolderExceptionErrorMessage.FOLDER_DELETION_FAILED.create(sb.toString());
-            }
-
-            JSONArray resultArray = new JSONArray(results.size());
             for (TrashResult trashResult : results) {
                 JSONObject obj = new JSONObject(3);
                 if (trashResult.isTrashed()) {
@@ -296,31 +264,7 @@ public final class DeleteAction extends AbstractFolderAction {
                 }
                 resultArray.put(obj);
             }
-            result = new AJAXRequestResult(resultArray);
         } else {
-            final List<OXException> warnings = new LinkedList<OXException>();
-            for (int i = 0; i < len; i++) {
-                final String folderId = jsonArray.getString(i);
-                try {
-                    if (!(folderService instanceof TrashAwareFolderService)) {
-                        throw FolderExceptionErrorMessage.UNSUPPORTED_OPERATION.create();
-                    }
-
-                    final FolderResponse<TrashResult> response = ((TrashAwareFolderService) folderService).trashFolder(treeId, folderId, timestamp, session, decorator);
-                    results.add(response.getResponse());
-
-                } catch (final OXException e) {
-                    if(e.equalsCode(1041, "FLD")){
-                        throw e;
-                    }
-                    final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DeleteAction.class);
-                    log.error("Failed to delete folder {} in tree {}.", folderId, treeId, e);
-                    e.setCategory(Category.CATEGORY_WARNING);
-                    warnings.add(e);
-                    results.add(new TrashResult(folderId, true));
-                }
-            }
-            JSONArray resultArray = new JSONArray(results.size());
             for (TrashResult trashResult : results) {
                 JSONObject obj = new JSONObject(3);
                 if (trashResult.hasFailed()) {
@@ -338,13 +282,10 @@ public final class DeleteAction extends AbstractFolderAction {
                 }
                 resultArray.put(obj);
             }
-            result = new AJAXRequestResult(resultArray).addWarnings(warnings);
         }
-        /*
-         * Return appropriate result
-         */
-        return result;
+        return new AJAXRequestResult(resultArray);
     }
+
 
     /**
      * Tries to get the name of a folder, not throwing an exception in case retrieval fails, but falling back to the folder identifier.
@@ -391,5 +332,4 @@ public final class DeleteAction extends AbstractFolderAction {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }
-
 }
