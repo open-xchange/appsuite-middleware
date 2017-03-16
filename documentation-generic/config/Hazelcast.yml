@@ -1,0 +1,12 @@
+feature_name: Hazelcast
+properties:
+    - key: com.openexchange.hazelcast.liteMember
+      description: |
+        Allows to configure a node as "lite" member. 
+        Lite members are the Hazelcast cluster members that do not store data. These members are used mainly to execute tasks and register listeners, and they do not have partitions.
+      defaultValue: false
+      version: 7.8.4
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.websockets.enabled
+      file: hazelcast.properties
