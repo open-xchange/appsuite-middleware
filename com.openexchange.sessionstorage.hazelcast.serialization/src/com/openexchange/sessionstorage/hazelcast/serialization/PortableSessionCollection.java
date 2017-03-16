@@ -49,30 +49,83 @@
 
 package com.openexchange.sessionstorage.hazelcast.serialization;
 
+import java.io.IOException;
 import com.hazelcast.nio.serialization.ClassDefinition;
-import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
+import com.hazelcast.nio.serialization.ClassDefinitionBuilder;
+import com.hazelcast.nio.serialization.Portable;
+import com.hazelcast.nio.serialization.PortableReader;
+import com.hazelcast.nio.serialization.PortableWriter;
 import com.openexchange.hazelcast.serialization.CustomPortable;
+import com.openexchange.session.Session;
 
 /**
- * {@link PortableSessionFactory} - The portable factory for {@link PortableSession} type.
+ * {@link PortableSessionCollection} - The portable representation for {@link Session} type.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class PortableSessionFactory extends AbstractCustomPortableFactory {
+public class PortableSessionCollection implements CustomPortable {
+
+    /** The unique portable class ID of the {@link PortableSessionCollection} */
+    public static final int CLASS_ID = 403;
+
+    /** The class definition for PortableCacheEvent */
+    public static ClassDefinition CLASS_DEFINITION = new ClassDefinitionBuilder(FACTORY_ID, CLASS_ID)
+        .addPortableArrayField("sessions", PortableSession.CLASS_DEFINITION)
+        .build();
+
+    // -------------------------------------------------------------------------------------------------
+
+    private PortableSession[] sessions;
+
+    /**
+     * Initializes a new {@link PortableSessionCollection}.
+     */
+    public PortableSessionCollection() {
+        super();
+        sessions = new PortableSession[0];
+    }
+
+    /**
+     * Initializes a new {@link PortableSessionCollection}.
+     *
+     * @param session The underlying session
+     */
+    public PortableSessionCollection(PortableSession[] sessions) {
+        super();
+        this.sessions = sessions;
+    }
+
+    /**
+     * Gets the sessions
+     *
+     * @return The sessions
+     */
+    public PortableSession[] getSessions() {
+        return sessions;
+    }
 
     @Override
-    public CustomPortable create() {
-        return new PortableSession();
+    public int getFactoryId() {
+        return FACTORY_ID;
     }
 
     @Override
     public int getClassId() {
-        return PortableSession.CLASS_ID;
+        return CLASS_ID;
     }
 
     @Override
-    public ClassDefinition getClassDefinition() {
-        return PortableSession.CLASS_DEFINITION;
+    public void writePortable(PortableWriter writer) throws IOException {
+        writer.writePortableArray("sessions", sessions);
+    }
+
+    @Override
+    public void readPortable(PortableReader reader) throws IOException {
+        Portable[] portables = reader.readPortableArray("sessions");
+        sessions = new PortableSession[portables.length];
+        for (int i = 0; i < portables.length; i++) {
+            sessions[i] = (PortableSession) portables[i];
+        }
     }
 
 }

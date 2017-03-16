@@ -59,6 +59,8 @@ import org.slf4j.Logger;
 import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.session.ObfuscatorService;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessionstorage.hazelcast.serialization.PortableMultipleSessionRemoteLookupFactory;
+import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionCollectionFactory;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionExistenceCheckFactory;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionFactory;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionRemoteLookupFactory;
@@ -99,7 +101,7 @@ public class PortableSessionActivator implements BundleActivator {
                 tracker.open();
             }
 
-            List<ServiceRegistration<CustomPortableFactory>> portablesRegistrations = new ArrayList<ServiceRegistration<CustomPortableFactory>>(4);
+            List<ServiceRegistration<CustomPortableFactory>> portablesRegistrations = new ArrayList<ServiceRegistration<CustomPortableFactory>>(6);
             this.portablesRegistrations = portablesRegistrations;
 
             // Create & register portable session factory
@@ -110,6 +112,12 @@ public class PortableSessionActivator implements BundleActivator {
 
             // Create & register portable factory
             portablesRegistrations.add(context.registerService(CustomPortableFactory.class, new PortableSessionRemoteLookupFactory(), null));
+
+            // Create & register portable factory
+            portablesRegistrations.add(context.registerService(CustomPortableFactory.class, new PortableSessionCollectionFactory(), null));
+
+            // Create & register portable factory
+            portablesRegistrations.add(context.registerService(CustomPortableFactory.class, new PortableMultipleSessionRemoteLookupFactory(), null));
 
             logger.info("Successfully started bundle {}", context.getBundle().getSymbolicName());
         } catch (Exception e) {

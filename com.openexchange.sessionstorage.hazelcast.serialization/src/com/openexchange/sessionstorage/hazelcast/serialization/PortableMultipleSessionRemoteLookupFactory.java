@@ -49,30 +49,24 @@
 
 package com.openexchange.sessionstorage.hazelcast.serialization;
 
-import com.hazelcast.nio.serialization.ClassDefinition;
 import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
 import com.openexchange.hazelcast.serialization.CustomPortable;
 
 /**
- * {@link PortableSessionFactory} - The portable factory for {@link PortableSession} type.
+ * {@link PortableMultipleSessionRemoteLookupFactory} - The portable factory for {@link PortableSessionExistenceCheck} type.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class PortableSessionFactory extends AbstractCustomPortableFactory {
+public class PortableMultipleSessionRemoteLookupFactory extends AbstractCustomPortableFactory {
 
     @Override
     public CustomPortable create() {
-        return new PortableSession();
+        return new PortableMultipleSessionRemoteLookUp();
     }
 
     @Override
     public int getClassId() {
-        return PortableSession.CLASS_ID;
-    }
-
-    @Override
-    public ClassDefinition getClassDefinition() {
-        return PortableSession.CLASS_DEFINITION;
+        return PortableMultipleSessionRemoteLookUp.CLASS_ID;
     }
 
 }
