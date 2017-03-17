@@ -201,6 +201,11 @@ public class LoginPerformerTest {
             public boolean isStoreLanguage() {
                 return false;
             }
+
+            @Override
+            public Map<String, String[]> getRequestParameter() {
+                return null;
+            }
         };
     }
 
