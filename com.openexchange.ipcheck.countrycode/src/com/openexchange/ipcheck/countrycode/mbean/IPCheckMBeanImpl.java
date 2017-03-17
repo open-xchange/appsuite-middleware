@@ -227,7 +227,7 @@ public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements I
         }
 
         double deniedPerMillis = 0L;
-        if (accepted > 0L && meantimes > 0L) {
+        if (denied > 0L && meantimes > 0L) {
             deniedPerMillis = denied / (double) meantimes;
         }
 
