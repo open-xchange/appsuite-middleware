@@ -57,6 +57,7 @@ import com.openexchange.ipcheck.countrycode.mbean.IPCheckMBean;
 import com.openexchange.ipcheck.countrycode.mbean.IPCheckMBeanImpl;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link CountryCodeIpCheckerActivator}
@@ -82,7 +83,7 @@ public class CountryCodeIpCheckerActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { GeoLocationService.class, ManagementService.class };
+        return new Class<?>[] { GeoLocationService.class, ManagementService.class, TimerService.class };
     }
 
     @Override
