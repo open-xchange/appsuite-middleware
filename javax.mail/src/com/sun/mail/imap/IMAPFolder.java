@@ -188,6 +188,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
     protected volatile String[] attributes;// name attributes from LIST response
 
     protected volatile IMAPProtocol protocol; // this folder's protocol object
+    protected volatile ConnectionException byeConnectionException; // the ConnectionException is set if a BYE is received
     protected MessageCache messageCache;// message cache
     // accessor lock for message cache
     protected final Object messageCacheLock = new Object();
@@ -484,7 +485,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	    	);
 	    else // Folder was closed "implicitly"
 		throw new FolderClosedException(this,
-		    "Lost folder connection to server"
+		    "Lost folder connection to server", byeConnectionException
 		);
 	}
     }
@@ -1022,7 +1023,9 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 
 	MailboxInfo mi = null;
 	// Request store for our own protocol connection.
-	protocol = ((IMAPStore)store).getProtocol(this);
+	IMAPProtocol protocol = ((IMAPStore)store).getProtocol(this);
+	this.protocol = protocol;
+	byeConnectionException = null;
 
 	List<MailEvent> openEvents = null;
 	synchronized(messageCacheLock) { // Acquire messageCacheLock
@@ -1202,6 +1205,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 			throws MessagingException {
     // cache this information in case connection is closed and
 	// protocol is set to null
+    IMAPProtocol protocol = this.protocol;
 	boolean isRev1;
 	FetchItem[] fitems;
         synchronized (messageCacheLock) {
@@ -3591,8 +3595,11 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	 * handle appropriately.
 	 */
 	if (r.isBYE()) {
-	    if (opened)		// XXX - accessed without holding folder lock
-		cleanup(false);
+	    if (opened)	{	// XXX - accessed without holding folder lock
+	    Exception byeException = r.getByeException();
+	    byeConnectionException = null != byeException ? new ConnectionException(protocol, r, byeException) : new ConnectionException(protocol, r);
+	    cleanup(false);
+	    }
 	    return;
 	} else if (r.isOK()) {
 	    // HIGHESTMODSEQ can be updated on any OK response
@@ -3810,6 +3817,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	// time we get here and our protocol object will have been
 	// released, so if we no longer have a protocol object we base
 	// this decision on whether we *think* the folder is open.
+    IMAPProtocol protocol = this.protocol;
 	if ((protocol != null && cex.getProtocol() == protocol) ||
 		(protocol == null && !reallyClosed))
             throw new FolderClosedException(this, cex.getMessage(), cex);
@@ -4036,6 +4044,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
      * @param	returnToPool	return the protocol object to the pool?
      */
     protected void releaseProtocol(boolean returnToPool) {
+        IMAPProtocol protocol = this.protocol;
         if (protocol != null) {
             protocol.removeResponseHandler(this);
 
@@ -4045,7 +4054,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		protocol.disconnect();	// make sure it's disconnected
                 ((IMAPStore)store).releaseProtocol(this, null);
 	    }
-	    protocol = null;
+	    this.protocol = null;
         }
     }
 
@@ -4064,11 +4073,13 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
                     throws ProtocolException {
 
 	assert Thread.holdsLock(messageCacheLock);
+    IMAPProtocol protocol = this.protocol;
 	if (protocol == null)	// in case connection was closed
 	    return;
         
 	if (issueNoopToKeepConnectionAlive && (System.currentTimeMillis() - protocol.getTimestamp() > 1000)) {
 	    waitIfIdle();
+	    protocol = this.protocol;
 	    if (protocol != null)
 		protocol.noop();
 	}
