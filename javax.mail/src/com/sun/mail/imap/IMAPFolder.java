@@ -1565,7 +1565,6 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	    boolean reuseProtocol = true;
 	    try {
 		waitIfIdle();
-		IMAPProtocol protocol = this.protocol;
 		if (force) {
 		    logger.log(Level.FINE, "forcing folder {0} to close",
 								    fullName);
