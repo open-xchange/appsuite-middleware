@@ -152,6 +152,11 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      */
     MISSING_CAPABILITY("Missing capability [%1$s]", MISSING_CAPABILITY_MSG, Category.CATEGORY_PERMISSION_DENIED, 4036),
     /**
+     * <li>The operation could not be completed due to insufficient permissions.</li>
+     * <li>Access to event restricted by classification [folder %1$d, id %2$d, classification %3$s]</li>
+     */
+    RESTRICTED_BY_CLASSIFICATION("Access to event restricted by classification [folder %1$d, id %2$d, classification %3$s]", NO_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 4037),
+    /**
      * <li>The supplied folder is not supported. Please select a valid folder and try again.</li>
      * <li>Unsupported folder [id %1$s, content type %2$s]</li>
      */

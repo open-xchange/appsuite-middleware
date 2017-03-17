@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.impl;
 
+import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.impl.Utils.getCalendarUser;
 import static com.openexchange.chronos.impl.Utils.i;
 import static com.openexchange.java.Autoboxing.I;
@@ -272,6 +273,23 @@ public class Check {
             }
         }
         return classification;
+    }
+
+    /**
+     * Checks that an update or delete operation is allowed based on the original event's classification.
+     *
+     * @param folder The parent folder of the event
+     * @param originalEvent The original event to check
+     * @throws OXException {@link CalendarExceptionCodes#RESTRICTED_BY_CLASSIFICATION}
+     */
+    public static void classificationAllowsUpdate(UserizedFolder folder, Event originalEvent) throws OXException {
+        Classification classification = originalEvent.getClassification();
+        if (null != classification && false == Classification.PUBLIC.equals(classification)) {
+            int userID = folder.getUser().getId();
+            if (originalEvent.getCreatedBy() != userID && false == contains(originalEvent.getAttendees(), userID)) {
+                throw CalendarExceptionCodes.RESTRICTED_BY_CLASSIFICATION.create(I(i(folder)), I(originalEvent.getId()), String.valueOf(classification));
+            }
+        }
     }
 
     /**

@@ -847,6 +847,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         } else {
             requireCalendarPermission(folder, READ_FOLDER, READ_ALL_OBJECTS, WRITE_ALL_OBJECTS, NO_PERMISSIONS);
         }
+        Check.classificationAllowsUpdate(folder, originalEvent);
     }
 
     private void requireWritePermissions(Event originalEvent, List<Attendee> updatedAttendees) throws OXException {

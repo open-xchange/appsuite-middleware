@@ -115,11 +115,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
          * check current session user's permissions
          */
         Check.eventIsInFolder(originalEvent, folder);
-        if (session.getUser().getId() != originalEvent.getCreatedBy()) {
-            requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, DELETE_ALL_OBJECTS);
-        } else {
-            requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, DELETE_OWN_OBJECTS);
-        }
+        requireDeletePermissions(originalEvent);
         requireUpToDateTimestamp(originalEvent, clientTimestamp);
         if (null == recurrenceID) {
             deleteEvent(originalEvent);
@@ -337,6 +333,15 @@ public class DeletePerformer extends AbstractUpdatePerformer {
         Event originalMasterEvent = loadEventData(seriesID);
         touch(seriesID);
         result.addUpdate(new UpdateResultImpl(originalMasterEvent, loadEventData(seriesID)));
+    }
+
+    private void requireDeletePermissions(Event originalEvent) throws OXException {
+        if (session.getUser().getId() == originalEvent.getCreatedBy()) {
+            requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, DELETE_OWN_OBJECTS);
+        } else {
+            requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, DELETE_ALL_OBJECTS);
+        }
+        Check.classificationAllowsUpdate(folder, originalEvent);
     }
 
 }
