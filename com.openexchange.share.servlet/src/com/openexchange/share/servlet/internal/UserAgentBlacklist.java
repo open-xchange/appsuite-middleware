@@ -98,20 +98,11 @@ public class UserAgentBlacklist {
         /**
          * Initializes a new {@link DefaultTokens}.
          *
-         * @param initialCapacity The initial capacity of this token collection
+         * @param tokens The contained token collection
          */
-        DefaultTokens(int initialCapacity) {
+        DefaultTokens(List<String> tokens) {
             super();
-            tokens = new ArrayList<>(initialCapacity);
-        }
-
-        /**
-         * Adds specified token to this collection.
-         *
-         * @param token The token to add
-         */
-        public void add(String token) {
-            tokens.add(token);
+            this.tokens = tokens;
         }
 
         @Override
@@ -241,17 +232,7 @@ public class UserAgentBlacklist {
             return null;
         }
 
-        if (numTokens == 1) {
-            String token = tokens[0];
-            if (Strings.isEmpty(token)) {
-                return null;
-            }
-
-            return new SingletonTokens(ignoreCase ? Strings.asciiLowerCase(token) : token);
-        }
-
-
-        DefaultTokens retval = new DefaultTokens(numTokens);
+        List<String> list = new ArrayList<>(numTokens);
         for (String token : tokens) {
             if (false == Strings.isEmpty(token)) {
                 for (int i = token.length() - 1; i-- > 1;) {
@@ -260,12 +241,16 @@ public class UserAgentBlacklist {
                         return null;
                     }
                 }
-                retval.add(ignoreCase ? Strings.asciiLowerCase(token) : token);
+                list.add(ignoreCase ? Strings.asciiLowerCase(token) : token);
             }
         }
 
-        int size = retval.size();
-        return size <= 0 ? null : retval;
+        int size = list.size();
+        if (0 == size) {
+            return null;
+        }
+
+        return 1 == size ? new SingletonTokens(list.get(0)) : new DefaultTokens(list);
     }
 
     /**
