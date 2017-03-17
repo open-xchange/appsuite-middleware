@@ -106,6 +106,7 @@ public class ConflictCheckPerformer extends AbstractQueryPerformer {
     private final Date today;
 
     private Map<Integer, Permission> folderPermissions;
+    private List<UserizedFolder> visibleFolders;
 
     /**
      * Initializes a new {@link ConflictCheckPerformer}.
@@ -330,6 +331,7 @@ public class ConflictCheckPerformer extends AbstractQueryPerformer {
         if (detailsVisible(event)) {
             eventData.setSummary(event.getSummary());
             eventData.setLocation(event.getLocation());
+            eventData.setFolderId(chooseFolderID(event, getVisibleFolders()));
         }
         return new EventConflictImpl(eventData, conflictingAttendees, null != hardConflict ? hardConflict.booleanValue() : false);
     }
@@ -355,6 +357,7 @@ public class ConflictCheckPerformer extends AbstractQueryPerformer {
         if (detailsVisible(seriesMaster)) {
             eventData.setSummary(seriesMaster.getSummary());
             eventData.setLocation(seriesMaster.getLocation());
+            eventData.setFolderId(chooseFolderID(seriesMaster, getVisibleFolders()));
         }
         return new EventConflictImpl(eventData, conflictingAttendees, null != hardConflict ? hardConflict.booleanValue() : false);
     }
@@ -447,9 +450,16 @@ public class ConflictCheckPerformer extends AbstractQueryPerformer {
         }
     }
 
+    private List<UserizedFolder> getVisibleFolders() throws OXException {
+        if (null == visibleFolders) {
+            visibleFolders = Utils.getVisibleFolders(session);
+        }
+        return visibleFolders;
+    }
+
     private Map<Integer, Permission> getFolderPermissions() throws OXException {
         if (null == folderPermissions) {
-            List<UserizedFolder> folders = Utils.getVisibleFolders(session);
+            List<UserizedFolder> folders = getVisibleFolders();
             folderPermissions = new HashMap<Integer, Permission>(folders.size());
             for (UserizedFolder folder : folders) {
                 folderPermissions.put(Integer.valueOf(folder.getID()), folder.getOwnPermission());
