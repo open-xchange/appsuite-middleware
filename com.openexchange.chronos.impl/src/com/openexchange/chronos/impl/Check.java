@@ -138,16 +138,16 @@ public class Check {
         }
         Permission ownPermission = folder.getOwnPermission();
         if (ownPermission.getFolderPermission() < requiredFolderPermission) {
-            throw CalendarExceptionCodes.NO_READ_PERMISSION.create(I(folder.getContext().getContextId()), I(folder.getUser().getId()), I(i(folder)));
+            throw CalendarExceptionCodes.NO_READ_PERMISSION.create(I(i(folder)));
         }
         if (ownPermission.getReadPermission() < requiredReadPermission) {
-            throw CalendarExceptionCodes.NO_READ_PERMISSION.create(I(folder.getContext().getContextId()), I(folder.getUser().getId()), I(i(folder)));
+            throw CalendarExceptionCodes.NO_READ_PERMISSION.create(I(i(folder)));
         }
         if (ownPermission.getWritePermission() < requiredWritePermission) {
-            throw CalendarExceptionCodes.NO_WRITE_PERMISSION.create(I(folder.getContext().getContextId()), I(folder.getUser().getId()), I(i(folder)));
+            throw CalendarExceptionCodes.NO_WRITE_PERMISSION.create(I(i(folder)));
         }
         if (ownPermission.getDeletePermission() < requiredDeletePermission) {
-            throw CalendarExceptionCodes.NO_DELETE_PERMISSION.create(I(folder.getContext().getContextId()), I(folder.getUser().getId()), I(i(folder)));
+            throw CalendarExceptionCodes.NO_DELETE_PERMISSION.create(I(i(folder)));
         }
     }
 
