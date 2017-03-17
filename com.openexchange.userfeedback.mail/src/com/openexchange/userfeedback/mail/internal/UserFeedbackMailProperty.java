@@ -74,14 +74,14 @@ public enum UserFeedbackMailProperty implements Property {
     private final Object defaultValue;
 
     /**
-     * Initialises a new {@link MailFilterProperty}.
+     * Initialises a new {@link UserFeedbackMailProperty}.
      */
     private UserFeedbackMailProperty() {
         this(EMPTY);
     }
 
     /**
-     * Initialises a new {@link MailFilterProperty}.
+     * Initialises a new {@link UserFeedbackMailProperty}.
      * 
      * @param defaultValue The default value of the property
      */
@@ -90,7 +90,7 @@ public enum UserFeedbackMailProperty implements Property {
     }
 
     /**
-     * Initialises a new {@link MailFilterProperty}.
+     * Initialises a new {@link UserFeedbackMailProperty}.
      * 
      * @param defaultValue The default value of the property
      * @param optional Whether the property is optional
