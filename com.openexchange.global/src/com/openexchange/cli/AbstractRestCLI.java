@@ -50,7 +50,9 @@
 package com.openexchange.cli;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
+import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
 import org.apache.commons.cli.CommandLine;
@@ -60,6 +62,11 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.java.AsciiReader;
+import com.openexchange.java.Strings;
 
 /**
  * 
@@ -146,9 +153,9 @@ public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Bu
         } catch (final javax.ws.rs.InternalServerErrorException e) {
             System.err.println("An error occurred on endpoint side. Please check the server logs.");
         } catch (final javax.ws.rs.BadRequestException e) {
-            System.err.println("The provided request parameters seem to be invalid. Please check them and additionally the server logs for further information.");
+            System.err.println(printClientException(e, "The provided request parameters seem to be invalid. Please check them and additionally the server logs for further information."));
         } catch (final javax.ws.rs.NotFoundException e) {
-            System.err.println("The requested resource cannot be found. Please check the provided parameters and additionally the server logs for further information.");
+            System.err.println(printClientException(e, "The requested resource cannot be found. Please check the provided parameters and additionally the server logs for further information."));
         } catch (final RuntimeException e) {
             String message = e.getMessage();
             String clazzName = e.getClass().getName();
@@ -169,12 +176,29 @@ public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Bu
         return null;
     }
 
+    private String printClientException(ClientErrorException exception, String defaultMessage) {
+        String result = defaultMessage;
+        InputStream response = (InputStream) exception.getResponse().getEntity();
+        if (response != null) {
+            try {
+                String parsedResponse = new String(IOUtils.toCharArray(new AsciiReader(response)));
+                JSONObject errorJson = new JSONObject(parsedResponse);
+                String errorMessage = (String) errorJson.get("error_desc");
+                result = Strings.isEmpty(errorMessage) ? defaultMessage : errorMessage;
+            } catch (IOException | JSONException e) {
+                //do nothing
+            }
+        }
+        
+        return result;
+    }
+
     private boolean showHelp(String[] args) {
         for (int i = 0; i < args.length; i++) {
             if (args[i].equals("-h")) {
                 return true;
             }
-        }    
+        }
         return false;
     }
 
