@@ -156,6 +156,7 @@ public final class JerichoParser {
         if (checkSize) {
             int maxLength = HtmlServices.htmlThreshold();
             if (html.length() > maxLength) {
+                LOG.info("HTML content is too big: max. '{}', but is '{}'.", maxLength, html.length());
                 throw HtmlExceptionCodes.TOO_BIG.create(maxLength, html.length());
             }
         }
@@ -366,8 +367,7 @@ public final class JerichoParser {
             }
         }
 
-        @SuppressWarnings("resource")
-        StreamedSource nestedSource = new StreamedSource(dropWeirdAttributes(startTag)); // No need to close since String-backed (all in memory)!
+        @SuppressWarnings("resource") StreamedSource nestedSource = new StreamedSource(dropWeirdAttributes(startTag)); // No need to close since String-backed (all in memory)!
         Thread thread = Thread.currentThread();
 
         Iterator<Segment> iter = nestedSource.iterator();

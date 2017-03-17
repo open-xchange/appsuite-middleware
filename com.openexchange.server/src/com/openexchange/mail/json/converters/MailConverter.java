@@ -69,6 +69,7 @@ import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
+import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.helper.ParamContainer;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -101,8 +102,8 @@ import com.openexchange.mail.json.MailRequestSha1Calculator;
 import com.openexchange.mail.json.actions.AbstractMailAction;
 import com.openexchange.mail.json.utils.Column;
 import com.openexchange.mail.json.writer.MessageWriter;
-import com.openexchange.mail.json.writer.MessageWriterParams;
 import com.openexchange.mail.json.writer.MessageWriter.MailFieldWriter;
+import com.openexchange.mail.json.writer.MessageWriterParams;
 import com.openexchange.mail.mime.MimeFilter;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.usersetting.UserSettingMail;
@@ -754,6 +755,17 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                                                             .build();
             jMail = MessageWriter.writeMailMessage(params);
         } catch (final OXException e) {
+            if (DisplayMode.DOCUMENT.isIncluded(displayMode)) {
+                HttpServletResponse resp = paramContainer.getHttpServletResponse();
+                if (resp != null) {
+                    try {
+                        SessionServlet.writeErrorPage(HttpServletResponse.SC_NOT_FOUND, e.getDisplayMessage(session.getUser().getLocale()), resp);
+                    } catch (IOException e1) {
+                        LOG.warn("Unable to write error page.", e1);
+                    }
+                    return null;
+                }
+            }
             if (MailExceptionCode.MESSAGING_ERROR.equals(e)) {
                 final Throwable cause = e.getCause();
                 if (cause instanceof javax.mail.MessageRemovedException) {
