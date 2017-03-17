@@ -33,7 +33,7 @@ Single Recipient's mail address like \"Displayname \<email@example.com\>\" or th
 
 ### Examples
 
-<code>senduserfeedback -s 1489536000 -r @reports@example.com,Feedback Reports</code>
+<code>senduserfeedback -s 1489536000 -r \"Displayname \<email@example.com\>\"</code>
 
 Sends all data, stored from 17.02.17 00:00 until now for the context group ``default`` and the feedback type ``star-rating-v1`` to the address ``reports@example.com`` with the display name ``Feedback Reports``.
 

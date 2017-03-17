@@ -249,8 +249,9 @@ public class SendFeedbackViaMail extends AbstractRestCLI<Void> {
     }
 
     private JSONObject extractSingleRecipient(String recipients) throws JSONException {
-        String address = recipients.substring(recipients.lastIndexOf("<") + 1, recipients.lastIndexOf(">"));
-        String displayName = recipients.substring(0, recipients.lastIndexOf("<") - 1);
+        int startOfAddress = recipients.lastIndexOf("<");
+        String address = recipients.substring(startOfAddress + 1, recipients.lastIndexOf(">"));
+        String displayName = startOfAddress != 0 ? recipients.substring(0,  startOfAddress - 1) : "" ;
         JSONObject json = getAddressJSON(address, displayName);
         return json;
     }
@@ -279,7 +280,7 @@ public class SendFeedbackViaMail extends AbstractRestCLI<Void> {
 
     @Override
     protected String getHeader() {
-        return "senduserfeedback -s 1487348317 -r @reports@example.com,Feedback Reports";
+        return "senduserfeedback -s 1487348317 -r \"Displayname <email@example.com>\"";
     }
 
 }
