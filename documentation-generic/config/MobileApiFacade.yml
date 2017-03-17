@@ -10,6 +10,7 @@ properties:
     configcascadeAware: true
     related: 
     file: pns-mobile-api-facade.properties
+    tags: ["Mail","Push"]
   - key: com.openexchange.pns.mobile.api.facade.apn.sound.enabled
     description: |
       Specifies if a sound should be played when the OX Mail app on iOS receives a push notification.
@@ -19,6 +20,7 @@ properties:
     configcascadeAware: true
     related: 
     file: pns-mobile-api-facade.properties
+    tags: ["Mail","Push"]
   - key: com.openexchange.pns.mobile.api.facade.apn.sound.filename
     description: |
       Specifies the filename of the sound to play when a push notification is received in the OX Mail app on iOS.
@@ -30,3 +32,4 @@ properties:
     configcascadeAware: true
     related: 
     file: pns-mobile-api-facade.properties
+    tags: ["Mail","Push"]

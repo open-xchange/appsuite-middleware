@@ -10,6 +10,7 @@ properties:
       configcascadeAware: true
       related: 
       file: websockets.properties
+      tags: ["Websockets"]
     - key: com.openexchange.websockets.grizzly.remote.delayDuration
       description: |
         The time in milliseconds a message (that is supposed to be transferred to a remote cluster member)
@@ -20,6 +21,7 @@ properties:
       configcascadeAware: false
       related: 
       file: websockets.properties
+      tags: ["Websockets"]
     - key: com.openexchange.websockets.grizzly.remote.maxDelayDuration
       description: |
         The time in milliseconds a message (that is supposed to be transferred to a remote cluster member)
@@ -32,6 +34,7 @@ properties:
       configcascadeAware: false
       related: 
       file: websockets.properties
+      tags: ["Websockets","Limit"]
     - key: com.openexchange.websockets.grizzly.remote.timerFrequency
       description: |
         The frequency/delay in milliseconds when the buffering queue will be checked for due
@@ -42,3 +45,4 @@ properties:
       configcascadeAware: false
       related: 
       file: websockets.properties
+      tags: ["Websockets"]

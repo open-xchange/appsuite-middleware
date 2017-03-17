@@ -20,3 +20,4 @@ properties:
       configcascadeAware: true
       related: 
       file: oauth.properties
+      tags: ["OAuth"]

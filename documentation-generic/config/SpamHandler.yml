@@ -11,6 +11,7 @@ properties:
       configcascadeAware: true
       related: 
       file: spamhandler.properties
+      tags: ["Spam Handler", "Mail"]
     - key: com.openexchange.spamhandler.enabled
       description: |
         Allows to enable/disable spam handling per user/context/server via ConfigCascade (based on the configured spam handler).
@@ -22,3 +23,4 @@ properties:
       configcascadeAware: true
       related: com.openexchange.spamhandler.name
       file: spamhandler.properties
+      tags: ["Spam Handler","Mail"]

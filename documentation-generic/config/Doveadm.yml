@@ -8,7 +8,8 @@ properties:
       reloadable: false
       configcascadeAware: false
       related: 
-      file: doveadm.properties  
+      file: doveadm.properties
+      tags: ["Mail","Rest"]
     - key: com.openexchange.dovecot.doveadm.endpoints
       description: |
         Specifies the URIs to the Dovecot DoveAdm REST interface end-points. 
@@ -36,6 +37,7 @@ properties:
       configcascadeAware: false
       related: 
       file: doveadm.properties
+      tags: ["Mail","Rest"]
     - key: com.openexchange.dovecot.doveadm.apiSecret
       description: |
         Specifies the API secret to communicate with the Dovecot DoveAdm REST interface
@@ -45,3 +47,4 @@ properties:
       configcascadeAware: false
       related: 
       file: doveadm.properties
+      tags: ["Mail","Rest"]

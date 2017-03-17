@@ -8,6 +8,7 @@ properties:
       reloadable: false
       configcascadeAware: false
       file: server.properties
+      tags: ["Server"]
     - key: com.openexchange.servlet.robotsMetaTag
       description: |
         Specifies the value for the "X-Robots-Tag" HTTP response. Default value is "none".
@@ -18,3 +19,4 @@ properties:
       configcascadeAware: false
       related: com.openexchange.servlet.useRobotsMetaTag
       file: server.properties
+      tags: ["Server"]

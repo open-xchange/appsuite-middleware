@@ -9,6 +9,7 @@ properties:
       configcascadeAware: false
       related:
       file: caldav.properties
+      tags: ["CalDAV","Push"]
     - key: com.openexchange.caldav.push.apsd.bundleId
       description: |
         Defines the bundle identifier referring to the Apple Push "topic", which is extracted from the UID portion of the subject of the certificate acquired from Apple, e.g. "com.apple.calendar.XServer.934668ca-125e-4246-afee-8cf2df37aab8". 
@@ -19,6 +20,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.caldav.push.apsd.enabled
       file: caldav.properties
+      tags: ["CalDAV","Push"]
     - key: com.openexchange.caldav.push.apsd.keystore
       description: |
         Specifies the path to the local keystore file (PKCS #12) containing the APNS certificate and keys to use, e.g. "/opt/open-xchange/etc/com.apple.servermgrd.apns.calendar.p12". 
@@ -29,6 +31,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.caldav.push.apsd.enabled
       file: caldav.properties
+      tags: ["CalDAV","Push"]
     - key: com.openexchange.caldav.push.apsd.password
       description: |
         Specifies the password used when creating the referenced keystore containing the APNS certificate.  
@@ -39,6 +42,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.caldav.push.apsd.enabled
       file: caldav.properties
+      tags: ["CalDAV","Push"]
     - key: com.openexchange.caldav.push.apsd.production
       description: |
         Indicates which APNS service is used when sending push notifications. A value of "true" will use the production service, a value of "false" the sandbox service. 
@@ -48,6 +52,7 @@ properties:
       configcascadeAware: false
       related: 
       file: caldav.properties
+      tags: ["CalDAV","Push"]
     - key: com.openexchange.caldav.push.apsd.refreshInterval
       description: |
         Defines a timespan (in seconds) that is advertised to clients to indicate how often they should refresh their push subscriptions. 
@@ -57,3 +62,4 @@ properties:
       configcascadeAware: false
       related: 
       file: caldav.properties
+      tags: ["CalDAV","Push"]

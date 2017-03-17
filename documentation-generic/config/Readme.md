@@ -19,6 +19,7 @@ properties:
       configcascadeAware: false
       related: 
       file:
+      tags:[]
     - key: c.o.some.property2
       description: |
         line1
@@ -29,6 +30,7 @@ properties:
       configcascadeAware: true
       related: c.o.some.property
       file: somefile.properties
+      tags: ["tagA","tagB"]
 
 
 If you would like to add a reference to another property in the same file use the following approach:
