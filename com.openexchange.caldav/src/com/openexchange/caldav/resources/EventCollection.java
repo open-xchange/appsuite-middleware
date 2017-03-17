@@ -169,6 +169,7 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
         if (null == calendarSession) {
             try {
                 calendarSession = factory.getService(CalendarService.class).init(factory.getSession());
+                calendarSession.set(CalendarParameters.PARAMETER_INCLUDE_PRIVATE, Boolean.TRUE);
                 calendarSession.set(CalendarParameters.PARAMETER_RECURRENCE_MASTER, Boolean.TRUE);
                 calendarSession.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.TRUE);
             } catch (OXException e) {
@@ -282,10 +283,10 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
 
     @Override
     protected Collection<Event> getObjects() throws OXException {
-        CalendarSession calendarSession = factory.getService(CalendarService.class).init(factory.getSession());
+        CalendarSession calendarSession = getCalendarSession();
+        calendarSession.set(CalendarParameters.PARAMETER_FIELDS, BASIC_FIELDS);
         calendarSession.set(CalendarParameters.PARAMETER_RANGE_START, minDateTime.getMinDateTime());
         calendarSession.set(CalendarParameters.PARAMETER_RANGE_END, maxDateTime.getMaxDateTime());
-        calendarSession.set(CalendarParameters.PARAMETER_RECURRENCE_MASTER, Boolean.TRUE);
         return calendarSession.getCalendarService().getEventsInFolder(calendarSession, folderID);
     }
 
