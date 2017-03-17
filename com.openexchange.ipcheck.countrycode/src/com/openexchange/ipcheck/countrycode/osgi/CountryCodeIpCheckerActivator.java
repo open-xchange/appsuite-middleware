@@ -55,9 +55,7 @@ import com.openexchange.geolocation.GeoLocationService;
 import com.openexchange.ipcheck.countrycode.CountryCodeIpChecker;
 import com.openexchange.ipcheck.countrycode.mbean.IPCheckMBean;
 import com.openexchange.ipcheck.countrycode.mbean.IPCheckMBeanImpl;
-import com.openexchange.ipcheck.countrycode.mbean.IPCheckMetrics;
 import com.openexchange.management.ManagementService;
-import com.openexchange.management.MetricAware;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -67,6 +65,8 @@ import com.openexchange.osgi.HousekeepingActivator;
  * @since v7.8.4
  */
 public class CountryCodeIpCheckerActivator extends HousekeepingActivator {
+
+    private IPCheckMBeanImpl metricsMBean;
 
     /**
      * Initializes a new {@link CountryCodeIpCheckerActivator}.
@@ -91,8 +91,27 @@ public class CountryCodeIpCheckerActivator extends HousekeepingActivator {
         registerService(IPChecker.class, service);
 
         ObjectName objectName = new ObjectName(IPCheckMBean.DOMAIN, "name", IPCheckMBean.NAME);
-        IPCheckMBean metricsMBean = new IPCheckMBeanImpl(this, service);
+
+        metricsMBean = new IPCheckMBeanImpl(this, service);
         ManagementService managementService = getService(ManagementService.class);
         managementService.registerMBean(objectName, metricsMBean);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.osgi.HousekeepingActivator#stopBundle()
+     */
+    @Override
+    protected void stopBundle() throws Exception {
+        unregisterService(IPChecker.class);
+
+        if (metricsMBean != null) {
+            metricsMBean.stop();
+        }
+        ObjectName objectName = new ObjectName(IPCheckMBean.DOMAIN, "name", IPCheckMBean.NAME);
+        ManagementService managementService = getService(ManagementService.class);
+        managementService.unregisterMBean(objectName);
+        super.stopBundle();
     }
 }
