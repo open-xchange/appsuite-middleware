@@ -100,7 +100,7 @@ public abstract class ICalTest {
     //		}
     //	}
 
-    protected CalendarImport importICal(String iCal) throws Exception {
+    protected ImportedCalendar importICal(String iCal) throws Exception {
         ByteArrayInputStream inputStream = Streams.newByteArrayInputStream(iCal.getBytes("UTF-8"));
         return iCalService.importICal(inputStream, null);
     }

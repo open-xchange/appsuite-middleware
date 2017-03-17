@@ -54,12 +54,11 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.chronos.ical.CalendarExport;
-import com.openexchange.chronos.ical.CalendarImport;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalService;
+import com.openexchange.chronos.ical.ImportedCalendar;
 import com.openexchange.chronos.ical.ical4j.mapping.ICalMapper;
 import com.openexchange.exception.OXException;
-import net.fortuna.ical4j.model.Calendar;
 
 /**
  * {@link ICalServiceImpl}
@@ -87,10 +86,10 @@ public class ICalServiceImpl implements ICalService {
     }
 
     @Override
-    public CalendarImport importICal(InputStream iCalFile, ICalParameters parameters) throws OXException {
+    public ImportedCalendar importICal(InputStream iCalFile, ICalParameters parameters) throws OXException {
         ICalParameters iCalParameters = getParametersOrDefault(parameters);
-        Calendar calendar = ICalUtils.importCalendar(iCalFile, iCalParameters);
-        return new CalendarImportImpl(calendar, mapper, iCalParameters);
+        ImportedCalendar calendar = ICalUtils.importCalendar(iCalFile, mapper, iCalParameters);
+        return calendar;
     }
 
     @Override

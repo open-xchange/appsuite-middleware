@@ -70,7 +70,7 @@ public interface ICalService {
      * @return A calendar import providing access to the imported data
      * @throws OXException If importing the iCalendar data fails; non-fatal conversion warnings are accessible within each imported component
      */
-    CalendarImport importICal(InputStream inputStream, ICalParameters parameters) throws OXException;
+    ImportedCalendar importICal(InputStream inputStream, ICalParameters parameters) throws OXException;
 
     /**
      * Initializes a new {@link CalendarExport} for adding events or other iCalendar components to the export.

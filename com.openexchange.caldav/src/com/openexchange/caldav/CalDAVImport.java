@@ -54,11 +54,12 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.caldav.resources.EventResource;
+import com.openexchange.chronos.Calendar;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.ical.CalendarImport;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalProperty;
 import com.openexchange.chronos.ical.ICalService;
+import com.openexchange.chronos.ical.ImportedCalendar;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.PreconditionException;
 import com.openexchange.exception.OXException;
@@ -76,11 +77,12 @@ public class CalDAVImport {
     private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CalDAVImport.class);
 
     private static final String[] EXTRA_PROPERTIES = {
-        "X-CALENDARSERVER-ATTENDEE-COMMENT", "X-CALENDARSERVER-PRIVATE-COMMENT",
+        "X-CALENDARSERVER-ATTENDEE-COMMENT", "X-CALENDARSERVER-PRIVATE-COMMENT", "X-CALENDARSERVER-ACCESS",
         "X-MOZ-FAKED-MASTER", "X-MOZ-SNOOZE", "X-MOZ-SNOOZE-TIME*", "X-MOZ-LASTACK"
     };
 
     private final WebdavPath url;
+    private final Calendar calendar;
     private final String uid;
     private final List<Event> changeExceptions;
     private final Event event;
@@ -92,20 +94,21 @@ public class CalDAVImport {
      * @param inputStream The input stream to deserialize
      */
     public CalDAVImport(EventResource resource, InputStream inputStream) throws OXException {
-        this(resource.getUrl(), importEvents(resource, inputStream));
+        this(resource.getUrl(), importICal(resource, inputStream));
     }
 
     /**
      * Initializes a new {@link CalDAVImport}.
      *
      * @param url The resource's WebDAV path
-     * @param importedEvents The imported events as sent by the client
+     * @param importedCalendar The imported calendar as sent by the client
      */
-    public CalDAVImport(WebdavPath url, List<Event> importedEvents) throws OXException {
+    private CalDAVImport(WebdavPath url, ImportedCalendar importedCalendar) throws OXException {
         super();
         /*
          * ensure there are events
          */
+        List<Event> importedEvents = importedCalendar.getEvents();
         if (null == importedEvents || importedEvents.isEmpty()) {
             throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "supported-calendar-component", url, HttpServletResponse.SC_FORBIDDEN);
         }
@@ -140,6 +143,7 @@ public class CalDAVImport {
             }
         }
         this.url = url;
+        this.calendar = importedCalendar;
         this.event = event;
         this.changeExceptions = changeExceptions;
         this.uid = uid;
@@ -149,15 +153,21 @@ public class CalDAVImport {
      * Initializes a new {@link CalDAVImport}.
      *
      * @param url The resource's WebDAV path
+     * @param calendar The calendar of the import
      * @param event The event of the import, or <code>null</code> if only change exceptions are available
      * @param changeExceptions The change exceptions, or an empty list if there are none.
      */
-    public CalDAVImport(WebdavPath url, Event event, List<Event> changeExceptions) {
+    public CalDAVImport(WebdavPath url, Calendar calendar, Event event, List<Event> changeExceptions) {
         super();
         this.url = url;
+        this.calendar = calendar;
         this.event = event;
         this.changeExceptions = changeExceptions;
         this.uid = getUID(event, changeExceptions);
+    }
+
+    public Calendar getCalender() {
+        return calendar;
     }
 
     /**
@@ -201,16 +211,11 @@ public class CalDAVImport {
         return null != event.getRecurrenceId();
     }
 
-    private static CalendarImport importICal(EventResource resource, InputStream inputStream) throws OXException {
+    private static ImportedCalendar importICal(EventResource resource, InputStream inputStream) throws OXException {
         ICalService iCalService = resource.getFactory().requireService(ICalService.class);
         ICalParameters iCalParameters = EventPatches.applyIgnoredProperties(resource, iCalService.initParameters());
         iCalParameters.set(ICalParameters.EXTRA_PROPERTIES, EXTRA_PROPERTIES);
         return iCalService.importICal(inputStream, iCalParameters);
-    }
-
-    private static List<Event> importEvents(EventResource resource, InputStream inputStream) throws OXException {
-        CalendarImport calendarImport = importICal(resource, inputStream);
-        return null != calendarImport ? calendarImport.getEvents() : null;
     }
 
     private static String extractResourceName(WebdavPath url) {

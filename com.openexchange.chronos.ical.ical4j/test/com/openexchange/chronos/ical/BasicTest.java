@@ -184,7 +184,7 @@ public class BasicTest extends ICalTest {
                 " conf/bkgrnd.ps\r\n" +
                 "END:VEVENT\r\n" +
                 "END:VCALENDAR\r\n";
-        CalendarImport vCalendarImport = importICal(iCal);
+        ImportedCalendar vCalendarImport = importICal(iCal);
         assertEquals("xyz", vCalendarImport.getMethod());
         Event event = importEvent(iCal);
         assertEquals(0, event.getSequence());

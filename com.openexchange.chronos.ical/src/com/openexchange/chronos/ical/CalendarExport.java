@@ -89,7 +89,9 @@ public interface CalendarExport {
      * @param timeZoneID The time zone identifier to add
      * @return A self reference
      */
-    CalendarExport add(String timeZoneID) throws OXException;
+    CalendarExport add(String timeZoneID);
+
+    CalendarExport add(ICalProperty property);
 
     /**
      * Sets the method to be declared in the <code>VCALENDAR</code> component.

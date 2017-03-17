@@ -74,8 +74,10 @@ import com.openexchange.chronos.ical.ICalExceptionCodes;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalProperty;
 import com.openexchange.chronos.ical.ImportedAlarm;
+import com.openexchange.chronos.ical.ImportedCalendar;
 import com.openexchange.chronos.ical.ImportedEvent;
 import com.openexchange.chronos.ical.ical4j.ICal4JParser;
+import com.openexchange.chronos.ical.ical4j.VCalendar;
 import com.openexchange.chronos.ical.ical4j.mapping.ICalMapper;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Autoboxing;
@@ -171,6 +173,37 @@ public class ICalUtils {
         return calendar;
     }
 
+    static ImportedCalendar importCalendar(InputStream iCalFile, ICalMapper mapper, ICalParameters parameters) throws OXException {
+        ICalParameters iCalParameters = getParametersOrDefault(parameters);
+        CalendarBuilder calendarBuilder = getCalendarBuilder(iCalParameters);
+        Calendar calendar;
+        try {
+            if (Boolean.TRUE.equals(parameters.get(ICalParameters.SANITIZE_INPUT, Boolean.class))) {
+                calendar = new ICal4JParser().parse(calendarBuilder, iCalFile);
+            } else {
+                calendar = calendarBuilder.build(iCalFile);
+            }
+        } catch (IOException e) {
+            throw ICalExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (ParserException e) {
+            throw asOXException(e);
+        }
+        if (null == calendar) {
+            throw ICalExceptionCodes.NO_CALENDAR.create();
+        }
+        return importCalendar(new VCalendar(calendar), mapper, iCalParameters);
+    }
+
+    static ImportedCalendar importCalendar(VCalendar vCalendar, ICalMapper mapper, ICalParameters parameters) throws OXException {
+        List<OXException> warnings = new ArrayList<OXException>();
+        removeProperties(vCalendar, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
+        ImportedCalendar importedCalendar = new ImportedCalendar(mapper.importVCalendar(vCalendar, parameters, warnings), warnings);
+        importedCalendar.setProperties(importProperties(vCalendar, parameters.get(ICalParameters.EXTRA_PROPERTIES, String[].class)));
+        importedCalendar.setEvents(importEvents(vCalendar.getEvents(), mapper, parameters));
+        importedCalendar.setFreeBusyDatas(importFreeBusys(vCalendar.getFreeBusys(), mapper, parameters));
+        return importedCalendar;
+    }
+
     static List<Event> importEvents(ComponentList eventComponents, ICalMapper mapper, ICalParameters parameters) throws OXException {
         if (null == eventComponents) {
             return null;
@@ -247,6 +280,17 @@ public class ICalUtils {
         }
     }
 
+    static void exportCalendar(VCalendar vCalendar, ICalParameters parameters, OutputStream outputStream) throws OXException {
+        CalendarOutputter outputter = new CalendarOutputter(false);
+        try {
+            outputter.output(vCalendar.getCalendar(), outputStream);
+        } catch (IOException e) {
+            throw ICalExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (ValidationException e) {
+            throw asOXException(e);
+        }
+    }
+
     static ThresholdFileHolder exportComponent(Component component, ICalParameters parameters) throws OXException {
         ThresholdFileHolder fileHolder = new ThresholdFileHolder();
         FoldingWriter writer = null;
@@ -290,7 +334,7 @@ public class ICalUtils {
         return properties;
     }
 
-    private static Property exportProperty(ICalProperty iCalProperty) {
+    static Property exportProperty(ICalProperty iCalProperty) {
         return new XProperty(iCalProperty.getName(), exportParameters(iCalProperty.getParameters()), iCalProperty.getValue());
     }
 

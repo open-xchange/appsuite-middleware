@@ -69,10 +69,10 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.FreeBusyData;
 import com.openexchange.chronos.FreeBusyTime;
 import com.openexchange.chronos.ical.CalendarExport;
-import com.openexchange.chronos.ical.CalendarImport;
 import com.openexchange.chronos.ical.ICalExceptionCodes;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalService;
+import com.openexchange.chronos.ical.ImportedCalendar;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.dav.DAVProtocol;
@@ -162,8 +162,8 @@ public class ScheduleOutboxCollection extends DAVCollection {
         try {
             ICalService iCalService = getFactory().requireService(ICalService.class);
             ICalParameters parameters = iCalService.initParameters();
-            CalendarImport calendarImport = iCalService.importICal(inputStream, parameters);
-            return calendarImport.getFreeBusy();
+            ImportedCalendar calendarImport = iCalService.importICal(inputStream, parameters);
+            return calendarImport.getFreeBusyDatas();
         } catch (OXException e) {
             throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), HttpServletResponse.SC_BAD_REQUEST);
         }

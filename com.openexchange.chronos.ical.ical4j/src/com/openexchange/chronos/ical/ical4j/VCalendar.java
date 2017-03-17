@@ -50,6 +50,7 @@
 package com.openexchange.chronos.ical.ical4j;
 
 import net.fortuna.ical4j.model.Component;
+import net.fortuna.ical4j.model.ComponentList;
 import net.fortuna.ical4j.model.ValidationException;
 
 /**
@@ -62,11 +63,69 @@ public class VCalendar extends Component {
 
     private static final long serialVersionUID = 6337610616448759858L;
 
+    private final net.fortuna.ical4j.model.Calendar calendar;
+
     /**
      * Initializes a new {@link VCalendar}.
      */
     public VCalendar() {
-        super("VCALENDAR");
+        this(new net.fortuna.ical4j.model.Calendar());
+    }
+
+    /**
+     * Initializes a new {@link VCalendar}.
+     *
+     * @param calendar The underlying iCal4j calendar
+     */
+    public VCalendar(net.fortuna.ical4j.model.Calendar calendar) {
+        super(net.fortuna.ical4j.model.Calendar.VCALENDAR, calendar.getProperties());
+        this.calendar = calendar;
+    }
+
+    /**
+     * Gets the underlying iCal4j calendar
+     *
+     * @return The underlying iCal4j calendar
+     */
+    public net.fortuna.ical4j.model.Calendar getCalendar() {
+        return calendar;
+    }
+
+    /**
+     * Gets the contained <code>VEVENT</code> components.
+     *
+     * @return The event components
+     */
+    public ComponentList getEvents() {
+        return calendar.getComponents(Component.VEVENT);
+    }
+
+    /**
+     * Gets the contained <code>VFREEBUSY</code> components.
+     *
+     * @return The free/busy components
+     */
+    public ComponentList getFreeBusys() {
+        return calendar.getComponents(Component.VFREEBUSY);
+    }
+
+    /**
+     * Adds an additional component.
+     *
+     * @param component The component to add
+     */
+    public void add(Component component) {
+        calendar.getComponents().add(component);
+    }
+
+    /**
+     * Adds an additional component.
+     *
+     * @param index The index to add the component at
+     * @param component The component to add
+     */
+    public void add(int index, Component component) {
+        calendar.getComponents().add(index, component);
     }
 
     @Override

@@ -241,6 +241,10 @@ public class EventResource extends DAVObjectResource<Event> {
                     calendarExport.add(changeException);
                 }
             }
+            /*
+             * add any extended properties
+             */
+            EventPatches.Outgoing.applyExport(this, calendarExport);
             inputStream = calendarExport.getClosingStream();
             return Streams.stream2bytes(inputStream);
         } catch (IOException e) {

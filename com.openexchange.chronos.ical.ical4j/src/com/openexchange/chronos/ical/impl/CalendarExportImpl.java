@@ -62,10 +62,11 @@ import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.ical.CalendarExport;
 import com.openexchange.chronos.ical.ICalExceptionCodes;
 import com.openexchange.chronos.ical.ICalParameters;
+import com.openexchange.chronos.ical.ICalProperty;
+import com.openexchange.chronos.ical.ical4j.VCalendar;
 import com.openexchange.chronos.ical.ical4j.mapping.ICalMapper;
 import com.openexchange.exception.OXException;
 import net.fortuna.ical4j.extensions.property.WrCalName;
-import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.PropertyFactoryImpl;
@@ -88,7 +89,7 @@ public class CalendarExportImpl implements CalendarExport {
     private final List<OXException> warnings;
     private final ICalMapper mapper;
     private final ICalParameters parameters;
-    private final Calendar calendar;
+    private final VCalendar vCalendar;
     private final Set<String> timezoneIDs;
 
     /**
@@ -104,43 +105,49 @@ public class CalendarExportImpl implements CalendarExport {
         this.parameters = parameters;
         this.warnings = warnings;
         this.timezoneIDs = new HashSet<String>();
-        this.calendar = initCalendar();
+        this.vCalendar = initCalendar();
+    }
+
+    @Override
+    public CalendarExport add(ICalProperty property) {
+        vCalendar.getProperties().add(ICalUtils.exportProperty(property));
+        return this;
     }
 
     public void setProductId(String prodId) {
-        ProdId property = calendar.getProductId();
+        ProdId property = (ProdId) vCalendar.getProperty(Property.PRODID);
         if (null == property) {
             property = new ProdId();
-            calendar.getProperties().add(property);
+            vCalendar.getProperties().add(property);
         }
         property.setValue(prodId);
     }
 
     public void setVersion(String version) {
-        Version property = calendar.getVersion();
+        Version property = (Version) vCalendar.getProperty(Property.VERSION);
         if (null == property) {
             property = new Version();
-            calendar.getProperties().add(property);
+            vCalendar.getProperties().add(property);
         }
         property.setValue(version);
     }
 
     @Override
     public void setName(String name) {
-        WrCalName property = (WrCalName) calendar.getProperty(WrCalName.PROPERTY_NAME);
+        WrCalName property = (WrCalName) vCalendar.getProperty(WrCalName.PROPERTY_NAME);
         if (null == property) {
             property = new WrCalName(PropertyFactoryImpl.getInstance());
-            calendar.getProperties().add(property);
+            vCalendar.getProperties().add(property);
         }
         property.setValue(name);
     }
 
     @Override
     public void setMethod(String method) {
-        Method property = (Method) calendar.getProperty(Property.METHOD);
+        Method property = (Method) vCalendar.getProperty(Property.METHOD);
         if (null == property) {
             property = new Method();
-            calendar.getProperties().add(property);
+            vCalendar.getProperties().add(property);
         }
         property.setValue(method);
     }
@@ -152,18 +159,18 @@ public class CalendarExportImpl implements CalendarExport {
 
     @Override
     public CalendarExport add(Event event) throws OXException {
-        calendar.getComponents().add(exportEvent(event));
+        vCalendar.add(exportEvent(event));
         return this;
     }
 
     @Override
     public CalendarExport add(FreeBusyData freeBusyData) throws OXException {
-        calendar.getComponents().add(exportFreeBusy(freeBusyData));
+        vCalendar.add(exportFreeBusy(freeBusyData));
         return this;
     }
 
     @Override
-    public CalendarExport add(String timeZoneID) throws OXException {
+    public CalendarExport add(String timeZoneID) {
         trackTimezones(timeZoneID);
         return this;
     }
@@ -184,7 +191,7 @@ public class CalendarExportImpl implements CalendarExport {
             TimeZoneRegistry timeZoneRegistry = parameters.get(ICalParametersImpl.TIMEZONE_REGISTRY, TimeZoneRegistry.class);
             net.fortuna.ical4j.model.TimeZone timeZone = timeZoneRegistry.getTimeZone(timezoneID);
             if (null != timeZone) {
-                calendar.getComponents().add(0, timeZone.getVTimeZone());
+                vCalendar.add(0, timeZone.getVTimeZone());
             } else {
                 warnings.add(ICalExceptionCodes.CONVERSION_FAILED.create(Component.VTIMEZONE, "No timezone '" + timezoneID + "' registered."));
             }
@@ -192,7 +199,7 @@ public class CalendarExportImpl implements CalendarExport {
         /*
          * export calendar
          */
-        ICalUtils.exportCalendar(calendar, parameters, outputStream);
+        ICalUtils.exportCalendar(vCalendar, parameters, outputStream);
     }
 
     @Override
@@ -262,15 +269,15 @@ public class CalendarExportImpl implements CalendarExport {
         return added;
     }
 
-    private static Calendar initCalendar() {
-        Calendar calendar = new Calendar();
-        calendar.getProperties().add(Version.VERSION_2_0);
+    private static VCalendar initCalendar() {
+        VCalendar vCalendar = new VCalendar();
+        vCalendar.getProperties().add(Version.VERSION_2_0);
         String versionString = com.openexchange.version.Version.getInstance().optVersionString();
         if (null == versionString) {
             versionString = "<unknown version>";
         }
-        calendar.getProperties().add(new ProdId("-//" + com.openexchange.version.Version.NAME + "//" + versionString + "//EN"));
-        return calendar;
+        vCalendar.getProperties().add(new ProdId("-//" + com.openexchange.version.Version.NAME + "//" + versionString + "//EN"));
+        return vCalendar;
     }
 
 }

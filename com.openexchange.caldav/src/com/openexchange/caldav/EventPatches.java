@@ -50,7 +50,6 @@
 package com.openexchange.caldav;
 
 import static com.openexchange.chronos.common.CalendarUtils.find;
-import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
@@ -70,6 +69,7 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
@@ -77,20 +77,20 @@ import com.openexchange.chronos.RelatedTo;
 import com.openexchange.chronos.Trigger;
 import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.ical.CalendarExport;
 import com.openexchange.chronos.ical.DefaultICalProperty;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalProperty;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventUpdate;
-import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.dav.AttachmentUtils;
 import com.openexchange.dav.DAVUserAgent;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.attach.AttachmentMetadata;
+import com.openexchange.java.Enums;
 import com.openexchange.java.Strings;
-import com.openexchange.java.util.TimeZones;
 
 /**
  * {@link EventPatches}
@@ -483,6 +483,34 @@ public class EventPatches {
         }
 
         /**
+         * Takes over any <code>X-CALENDARSERVER-ACCESS</code> restrictions found in the imported calendar into the imported events.
+         *
+         * @param eventResource The event resource
+         * @param caldavImport The CalDAV import
+         */
+        private static void applyCalendarserverAccess(EventResource eventResource, CalDAVImport caldavImport) {
+            if (DAVUserAgent.IOS.equals(eventResource.getUserAgent()) || DAVUserAgent.MAC_CALENDAR.equals(eventResource.getUserAgent())) {
+                ICalProperty property = Tools.optICalProperty(caldavImport.getCalender(), "X-CALENDARSERVER-ACCESS");
+                if (null == property || Strings.isEmpty(property.getValue())) {
+                    return;
+                }
+                Classification classification = Enums.parse(Classification.class, property.getValue(), null);
+                if (null == classification) {
+                    LOG.warn("Ignoring unknown X-CALENDARSERVER-ACCESS '{}'", property.getValue());
+                    return;
+                }
+                if (null != caldavImport.getEvent()) {
+                    caldavImport.getEvent().setClassification(classification);
+                }
+                if (null != caldavImport.getChangeExceptions()) {
+                    for (Event changeException : caldavImport.getChangeExceptions()) {
+                        changeException.setClassification(classification);
+                    }
+                }
+            }
+        }
+
+        /**
          * Applies all known patches to an event after importing.
          *
          * @param resource The parent event resource
@@ -490,6 +518,10 @@ public class EventPatches {
          * @return The patched CalDAV import
          */
         public static CalDAVImport applyAll(EventResource resource, CalDAVImport caldavImport) {
+            /*
+             * patch the calendar
+             */
+            applyCalendarserverAccess(resource, caldavImport);
             Event importedEvent = caldavImport.getEvent();
             List<Event> importedChangeExceptions = caldavImport.getChangeExceptions();
             if (null != importedEvent) {
@@ -515,7 +547,7 @@ public class EventPatches {
                     removeAttachmentsFromExceptions(resource, importedChangeException);
                 }
             }
-            return new CalDAVImport(resource.getUrl(), importedEvent, importedChangeExceptions);
+            return new CalDAVImport(resource.getUrl(), caldavImport.getCalender(), importedEvent, importedChangeExceptions);
         }
 
     }
@@ -749,6 +781,16 @@ public class EventPatches {
             exportedEvent = prepareManagedAttachments(resource, exportedEvent);
             exportedEvent = removeAttachmentsFromExceptions(resource, exportedEvent);
             return exportedEvent;
+        }
+
+        public static CalendarExport applyExport(EventResource eventResource, CalendarExport calendarExport) {
+            if (DAVUserAgent.IOS.equals(eventResource.getUserAgent()) || DAVUserAgent.MAC_CALENDAR.equals(eventResource.getUserAgent())) {
+                Event event = eventResource.getEvent();
+                if (null != event && null != event.getClassification() && false == Classification.PUBLIC.equals(event.getClassification())) {
+                    calendarExport.add(new DefaultICalProperty("X-CALENDARSERVER-ACCESS", String.valueOf(event.getClassification())));
+                }
+            }
+            return calendarExport;
         }
 
     }

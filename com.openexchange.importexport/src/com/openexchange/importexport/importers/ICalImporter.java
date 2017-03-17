@@ -69,9 +69,9 @@ import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
-import com.openexchange.chronos.ical.CalendarImport;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalService;
+import com.openexchange.chronos.ical.ImportedCalendar;
 import com.openexchange.chronos.ical.ImportedComponent;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
@@ -384,7 +384,7 @@ public class ICalImporter extends AbstractImporter {
         /*
          * perform the import
          */
-        CalendarImport calendarImport;
+        ImportedCalendar calendarImport;
         try {
             calendarImport = iCalService.importICal(inputStream, iCalParameters);
         } catch (OXException e) {

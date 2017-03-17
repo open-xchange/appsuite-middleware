@@ -54,7 +54,9 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.FreeBusyData;
 import com.openexchange.chronos.ical.ICalParameters;
+import com.openexchange.chronos.ical.ical4j.VCalendar;
 import com.openexchange.chronos.ical.ical4j.mapping.alarm.AlarmMappings;
+import com.openexchange.chronos.ical.ical4j.mapping.calendar.CalendarMappings;
 import com.openexchange.chronos.ical.ical4j.mapping.event.EventMappings;
 import com.openexchange.chronos.ical.ical4j.mapping.freebusy.FreeBusyMappings;
 import com.openexchange.chronos.ical.impl.ICalUtils;
@@ -127,6 +129,23 @@ public class ICalMapper {
             mapping.export(freeBusyData, vFreeBusy, iCalParameters, warnings);
         }
         return vFreeBusy;
+    }
+
+    /**
+     * Imports a vCalendar.
+     *
+     * @param vCalendar The vCalendar to import
+     * @param parameters Further options to use, or <code>null</code> to stick with the defaults
+     * @param warnings A reference to a collection to store any warnings, or <code>null</code> if not used
+     * @return The imported calendar
+     */
+    public com.openexchange.chronos.Calendar importVCalendar(VCalendar vCalendar, ICalParameters parameters, List<OXException> warnings) {
+        com.openexchange.chronos.Calendar calendar = new com.openexchange.chronos.Calendar();
+        ICalParameters iCalParameters = ICalUtils.getParametersOrDefault(parameters);
+        for (ICalMapping<VCalendar, com.openexchange.chronos.Calendar> mapping : CalendarMappings.ALL) {
+            mapping.importICal(vCalendar, calendar, iCalParameters, warnings);
+        }
+        return calendar;
     }
 
     /**
