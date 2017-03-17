@@ -63,17 +63,10 @@ public class FeedbackMetaData {
     private final int userId;
     private final String loginName;
     private final long typeId;
+    private final String uiVersion;
+    private final String serverVersion;
 
-    /**
-     * Initializes a new {@link FeedbackMetaData}.
-     * 
-     * @param type
-     * @param date
-     * @param ctxId
-     * @param userId
-     * @param loginName
-     */
-    public FeedbackMetaData(String type, long date, int ctxId, int userId, String loginName, long typeId) {
+    FeedbackMetaData(String type, long date, int ctxId, int userId, String loginName, long typeId, String uiVersion, String serverVersion) {
         super();
         this.type = type;
         this.date = date;
@@ -81,6 +74,12 @@ public class FeedbackMetaData {
         this.userId = userId;
         this.loginName = loginName;
         this.typeId = typeId;
+        this.uiVersion = uiVersion;
+        this.serverVersion = serverVersion;
+    }
+
+    protected FeedbackMetaData(Builder builder) {
+        this(builder.type, builder.date, builder.ctxId, builder.userId, builder.loginName, builder.typeId, builder.uiVersion, builder.serverVersion);
     }
 
     /**
@@ -136,4 +135,147 @@ public class FeedbackMetaData {
     public long getTypeId() {
         return typeId;
     }
+
+    public String getUiVersion() {
+        return uiVersion;
+    }
+
+    public String getServerVersion() {
+        return serverVersion;
+    }
+
+    /**
+     * Creates a new builder instance.
+     *
+     * @return The builder instance
+     */
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    /** The builder for an <code>FeedbackMetaData</code> instance */
+    public static class Builder {
+
+        private String type;
+        private long date;
+        private int ctxId;
+        private int userId;
+        private String loginName;
+        private long typeId;
+        private String uiVersion;
+        private String serverVersion;
+
+        Builder() {
+            super();
+        }
+
+        Builder(FeedbackMetaData meta) {
+            type = meta.type;
+            date = meta.date;
+            ctxId = meta.ctxId;
+            userId = meta.userId;
+            loginName = meta.loginName;
+            typeId = meta.typeId;
+            uiVersion = meta.uiVersion;
+            serverVersion = meta.serverVersion;
+        }
+
+        /**
+         * Sets the feedback type
+         * 
+         * @param type The type to set
+         * @return This builder
+         */
+        public Builder setType(String type) {
+            this.type = type;
+            return this;
+        }
+
+        /**
+         * Sets the date
+         * 
+         * @param date The date to set
+         * @return This builder
+         */
+        public Builder setDate(long date) {
+            this.date = date;
+            return this;
+        }
+
+        /**
+         * Sets the context id
+         * 
+         * @param type The ctxId to set
+         * @return This builder
+         */
+        public Builder setCtxId(int ctxId) {
+            this.ctxId = ctxId;
+            return this;
+        }
+
+        /**
+         * Sets the user id
+         * 
+         * @param type The user id to set
+         * @return This builder
+         */
+        public Builder setUserId(int userId) {
+            this.userId = userId;
+            return this;
+        }
+
+        /**
+         * Sets the loginName
+         * 
+         * @param type The loginName to set
+         * @return This builder
+         */
+        public Builder setLoginName(String loginName) {
+            this.loginName = loginName;
+            return this;
+        }
+
+        /**
+         * Sets the feedback type id
+         * 
+         * @param type The type id to set
+         * @return This builder
+         */
+        public Builder setTypeId(long typeId) {
+            this.typeId = typeId;
+            return this;
+        }
+
+        /**
+         * Sets the UI Version
+         * 
+         * @param type The uiVersion to set
+         * @return This builder
+         */
+        public Builder setUiVersion(String uiVersion) {
+            this.uiVersion = uiVersion;
+            return this;
+        }
+
+        /**
+         * Sets the Server Version
+         * 
+         * @param type The serverVersion to set
+         * @return This builder
+         */
+        public Builder setServerVersion(String serverVersion) {
+            this.serverVersion = serverVersion;
+            return this;
+        }
+
+        /**
+         * Creates the <code>FeedbackMetaData</code> instance from this builder's arguments.
+         *
+         * @return The <code>FeedbackMetaData</code> instance
+         */
+        public FeedbackMetaData build() {
+            return new FeedbackMetaData(type, date, ctxId, userId, loginName, typeId, uiVersion, serverVersion);
+        }
+    }
+
 }

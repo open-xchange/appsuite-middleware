@@ -108,6 +108,8 @@ public enum StarRatingV1JsonFields {
         Set<String> copy = new HashSet<>(INTERNAL_KEYS);
         copy.remove("date");
         copy.remove("user");
+        copy.remove("client_version");
+        copy.remove("server_version");
         return copy;
     }
 }

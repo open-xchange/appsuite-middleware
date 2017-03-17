@@ -49,11 +49,14 @@
 
 package com.openexchange.userfeedback.json.actions;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -88,8 +91,28 @@ public class StoreAction implements AJAXActionService {
         if (service == null) {
             throw ServiceExceptionCode.absentService(FeedbackService.class);
         }
-        service.store(session, type, dataObject);
+        String hostname = getHostname(requestData);
+
+        Map<String, String> params = new HashMap<>();
+        params.put("type", type);
+        params.put("hostname", hostname);
+
+        service.store(session, dataObject, params);
 
         return new AJAXRequestResult();
+    }
+
+    private static String getHostname(AJAXRequestData request) {
+        String hostname = null;
+        HostnameService hostnameService = Services.getService(HostnameService.class);
+        if (hostnameService != null) {
+            hostname = hostnameService.getHostname(-1, -1);
+        }
+
+        if (hostname == null) {
+            hostname = request.getHostname();
+        }
+
+        return hostname;
     }
 }

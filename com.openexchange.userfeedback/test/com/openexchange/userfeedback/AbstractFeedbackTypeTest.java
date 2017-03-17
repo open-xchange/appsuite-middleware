@@ -47,34 +47,31 @@
  *
  */
 
-package com.openexchange.userfeedback.starrating.v1;
+package com.openexchange.userfeedback;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import java.sql.Connection;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.MockitoAnnotations;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link StarRatingV1Test}
+ * {@link AbstractFeedbackTypeTest}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.4
  */
-public class StarRatingV1Test {
-
-    @InjectMocks
-    private StarRatingV1 starRating;
+public class AbstractFeedbackTypeTest {
 
     // @formatter:off
     private final String wellPreparedFeedbackStr = new String("{ " +
@@ -151,24 +148,50 @@ public class StarRatingV1Test {
         "\"additional_key\":\"remove me\","+
         "\"client_version\":\"7.8.4 Rev11\""+
         "}");
+    
+    private AbstractFeedbackType classUnderTest = new AbstractFeedbackType() {
 
+        @Override
+        public String getType() {
+            // TODO Auto-generated method stub
+            return null;
+        }
 
+        @Override
+        public ExportResultConverter getFeedbacks(List<FeedbackMetaData> metaDataList, Connection con) throws OXException {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public void deleteFeedbacks(List<Long> ids, Connection con) throws OXException {
+            // TODO Auto-generated method stub
+
+        }
+
+        @Override
+        public long storeFeedbackInternal(Object feedback, Connection con) throws OXException {
+            // TODO Auto-generated method stub
+            return 0;
+        }
+
+        @Override
+        public JSONObject cleanUpFeedback(JSONObject jsonFeedback) throws OXException {
+            // TODO Auto-generated method stub
+            return null;
+        }
+    };
+
+    /**
+     * @throws java.lang.Exception
+     */
     @Before
-    public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-    }
-
-    @Test (expected=OXException.class)
-    public void testValidateFeedback() throws OXException {
-        starRating.validateFeedback(Collections.EMPTY_LIST);
-
-        fail();
-    }
+    public void setUp() throws Exception {}
 
     @Test
     public void testNormalizeFeedback_contentSizeNotChangedAndKeysLowerCased() throws JSONException {
         JSONObject origin = new JSONObject(wellPreparedFeedbackStr);
-        JSONObject normalizeFeedback = starRating.normalizeFeedback(origin);
+        JSONObject normalizeFeedback = classUnderTest.normalizeFeedback(origin);
         assertFalse(normalizeFeedback.has("Comment"));
         assertTrue(normalizeFeedback.has("comment"));
 
@@ -177,14 +200,14 @@ public class StarRatingV1Test {
 
         assertFalse(normalizeFeedback.has("Entry_Point"));
         assertTrue(normalizeFeedback.has("entry_point"));
-        
+
         assertEquals(origin.length(), normalizeFeedback.length());
     }
-    
+
     @Test
     public void testAddRequired_everythingFine_nothingToDo() throws JSONException {
         JSONObject feedback = new JSONObject(wellPreparedFeedbackStr);
-        JSONObject addRequired = starRating.addRequired(feedback, StarRatingV1JsonFields.requiredJsonKeys());
+        JSONObject addRequired = classUnderTest.addRequired(feedback, StarRatingV1JsonFieldsForTest.requiredJsonKeys());
 
         assertTrue(feedback.equals(addRequired));
     }
@@ -193,7 +216,7 @@ public class StarRatingV1Test {
     public void testAddRequired_upperCaseKeys_addLowerCases() throws JSONException {
         JSONObject feedback = new JSONObject(contentOkButUpperCaseFeedbackStr);
 
-        JSONObject addRequired = starRating.addRequired(feedback, StarRatingV1JsonFields.requiredJsonKeys());
+        JSONObject addRequired = classUnderTest.addRequired(feedback, StarRatingV1JsonFieldsForTest.requiredJsonKeys());
 
         assertTrue(addRequired.has("Comment"));
         assertTrue(addRequired.has("comment"));
@@ -204,12 +227,12 @@ public class StarRatingV1Test {
     @Test
     public void testAddRequired_nothingToAddButAdditionalAvailable_leaveAdditional() throws JSONException {
         JSONObject feedback = new JSONObject(additionalFieldsFeedbackStr);
-        JSONObject addRequired = starRating.addRequired(feedback, StarRatingV1JsonFields.requiredJsonKeys());
-        
+        JSONObject addRequired = classUnderTest.addRequired(feedback, StarRatingV1JsonFieldsForTest.requiredJsonKeys());
+
         assertTrue(addRequired.has("score"));
         assertFalse(addRequired.has("Score"));
         assertFalse(addRequired.has("Comment"));
-        assertTrue(addRequired.has("comment")); 
+        assertTrue(addRequired.has("comment"));
         assertTrue(addRequired.has("Martin_Schneider"));
         assertTrue(addRequired.has("schalke"));
     }
@@ -217,8 +240,8 @@ public class StarRatingV1Test {
     @Test
     public void testAddRequired_requiredMissing_addRequired() throws JSONException {
         JSONObject feedback = new JSONObject(missingFieldsFeedbackStr);
-        JSONObject addRequired = starRating.addRequired(feedback, StarRatingV1JsonFields.requiredJsonKeys());
-        
+        JSONObject addRequired = classUnderTest.addRequired(feedback, StarRatingV1JsonFieldsForTest.requiredJsonKeys());
+
         assertTrue(addRequired.has("score"));
         assertFalse(addRequired.has("Score"));
         assertTrue(addRequired.has("comment"));
@@ -226,14 +249,14 @@ public class StarRatingV1Test {
         assertTrue(addRequired.has("operating_system"));
         assertTrue(addRequired.has("screen_resolution"));
     }
-    
+
     @Test
     public void testAddRequired_keysEmpty_returnOrigin() throws JSONException {
         Set<String> keys = Collections.emptySet();
         JSONObject feedback = new JSONObject(missingFieldsFeedbackStr);
-        
-        JSONObject addRequired = starRating.addRequired(feedback, keys);
-        
+
+        JSONObject addRequired = classUnderTest.addRequired(feedback, keys);
+
         assertTrue(feedback.equals(addRequired));
     }
 
@@ -242,8 +265,8 @@ public class StarRatingV1Test {
         Set<String> keys = Collections.emptySet();
         JSONObject feedback = new JSONObject(contentOkButUpperCaseFeedbackStr);
 
-        JSONObject remove = starRating.remove(feedback, keys);
-        
+        JSONObject remove = classUnderTest.remove(feedback, keys);
+
         assertTrue(feedback.equals(remove));
     }
 
@@ -251,8 +274,8 @@ public class StarRatingV1Test {
     public void testRemoveAdditional_mixedKeys_onlyKeepExpectedLowerCaseKeys() throws JSONException {
         JSONObject feedback = new JSONObject(contentOkButUpperCaseFeedbackStr);
 
-        JSONObject remove = starRating.remove(feedback, StarRatingV1JsonFields.requiredJsonKeys());
-        
+        JSONObject remove = classUnderTest.remove(feedback, StarRatingV1JsonFieldsForTest.requiredJsonKeys());
+
         assertTrue(remove.has("score"));
         assertTrue(remove.has("app"));
         assertTrue(remove.has("entry_point"));
@@ -267,8 +290,8 @@ public class StarRatingV1Test {
         Set<String> keys = new HashSet<>(Arrays.asList("score", "server_version", "Entry_Point", "screen_resolution"));
         JSONObject feedback = new JSONObject(contentOkButUpperCaseFeedbackStr);
 
-        JSONObject remove = starRating.remove(feedback, keys);
-        
+        JSONObject remove = classUnderTest.remove(feedback, keys);
+
         assertFalse(remove.has("Screen_Resolution")); // not expected
         assertFalse(remove.has("entry_point")); // not in origin
         assertFalse(remove.has("Comment"));// not expected
@@ -277,11 +300,11 @@ public class StarRatingV1Test {
     }
 
     @Test
-    public void testCleanup() throws JSONException {
+    public void testCleanup() throws JSONException, OXException {
         JSONObject feedback = new JSONObject(this.mixedFeedbackStr);
 
-        JSONObject remove = (JSONObject) starRating.cleanUpFeedback(feedback);
-        
+        JSONObject remove = (JSONObject) classUnderTest.cleanUpFeedback(feedback);
+
         assertFalse(remove.has("additional_key"));
         assertTrue(remove.has("score"));
         assertFalse(remove.has("Score"));
@@ -289,5 +312,13 @@ public class StarRatingV1Test {
         assertFalse(remove.has("Screen_Resolution"));
         assertTrue(remove.has("operating_system"));
         assertTrue(remove.has("user_agent"));
+    }
+    
+
+    @Test (expected=OXException.class)
+    public void testValidateFeedback() throws OXException {
+        classUnderTest.validateFeedback(Collections.EMPTY_LIST);
+
+        fail();
     }
 }

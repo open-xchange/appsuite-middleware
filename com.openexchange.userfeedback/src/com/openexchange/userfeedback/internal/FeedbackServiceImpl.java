@@ -55,17 +55,22 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.json.JSONObject;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.serverconfig.ServerConfig;
+import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.session.Session;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.validate.ParameterValidator;
 import com.openexchange.userfeedback.ExportResultConverter;
 import com.openexchange.userfeedback.FeedbackMetaData;
+import com.openexchange.userfeedback.FeedbackMetaData.Builder;
 import com.openexchange.userfeedback.FeedbackService;
 import com.openexchange.userfeedback.FeedbackType;
 import com.openexchange.userfeedback.FeedbackTypeRegistry;
@@ -81,9 +86,11 @@ import com.openexchange.userfeedback.osgi.Services;
  */
 public class FeedbackServiceImpl implements FeedbackService {
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FeedbackServiceImpl.class);
+
     @Override
-    public void store(Session session, String type, JSONObject feedback) throws OXException {
-        ParameterValidator.checkString(type);
+    public void store(Session session, JSONObject feedback, Map<String, String> params) throws OXException {
+        ParameterValidator.checkObject(params);
         ParameterValidator.checkJSON(feedback);
 
         // Get context group id
@@ -94,6 +101,9 @@ public class FeedbackServiceImpl implements FeedbackService {
 
         ConfigView view = factory.getView(session.getUserId(), session.getContextId());
         String contextGroupId = view.opt("com.openexchange.context.group", String.class, null);
+
+        String type = params.get("type");
+        ParameterValidator.checkString(type);
 
         // Get type service
         FeedbackTypeRegistry registry = FeedbackTypeRegistryImpl.getInstance();
@@ -108,6 +118,20 @@ public class FeedbackServiceImpl implements FeedbackService {
             throw FeedbackExceptionCodes.GLOBAL_DB_NOT_CONFIGURED.create();
         }
 
+        String hostname = params.get("hostname");
+        hostname = hostname != null ? hostname : "";
+
+        String uiVersion = "";
+        String serverVersion = "";
+        if (Strings.isNotEmpty(hostname)) {
+            ServerConfigService serverConfigService = Services.getService(ServerConfigService.class);
+            ServerConfig serverConfig = serverConfigService.getServerConfig(hostname, session);
+            if (serverConfig != null) {
+                uiVersion = serverConfig.getUIVersion();
+                serverVersion = serverConfig.getServerVersion();
+            }
+        }
+
         Connection writeCon = null;
         try {
             writeCon = dbService.getWritableForGlobal(contextGroupId);
@@ -118,9 +142,13 @@ public class FeedbackServiceImpl implements FeedbackService {
                 writeCon.rollback();
                 throw FeedbackExceptionCodes.UNEXPECTED_ERROR.create("Unable to store feedback metadata.");
             }
-            saveFeedBackInternal(writeCon, session.getUserId(), session.getContextId(), contextGroupId == null ? "default" : contextGroupId, session.getLoginName(), System.currentTimeMillis(), type, fid);
+
+            Builder builder = FeedbackMetaData.builder().setCtxId(session.getContextId()).setDate(System.currentTimeMillis()).setLoginName(session.getLoginName()).setServerVersion(serverVersion).setUiVersion(uiVersion).setType(type).setTypeId(fid).setUserId(session.getUserId());
+
+            saveFeedBackInternal(writeCon, builder.build(), contextGroupId == null ? "default" : contextGroupId);
             writeCon.commit();
         } catch (SQLException e) {
+            LOG.error("Unable to store feedback data.", e);
             DBUtils.rollback(writeCon);
         } finally {
             if (writeCon != null) {
@@ -130,33 +158,34 @@ public class FeedbackServiceImpl implements FeedbackService {
         }
     }
 
-    private static final String INSERT_FEEDBACK_SQL = "INSERT INTO feedback (groupId, type, date, cid, user, login_name, typeId) VALUES (?,?,?,?,?,?,?);";
-    private static final String SELECT_FEEDBACK_SQL = "SELECT date, cid, user, login_name, typeId FROM feedback WHERE groupId=? AND type=? AND date >? AND date <?";
+    private static final String INSERT_FEEDBACK_SQL = "INSERT INTO feedback (groupId, type, date, cid, user, login_name, typeId, client_version, server_version) VALUES (?,?,?,?,?,?,?,?,?);";
+    private static final String SELECT_FEEDBACK_SQL = "SELECT date, cid, user, login_name, typeId, client_version, server_version FROM feedback WHERE groupId=? AND type=? AND date >? AND date <?";
     private static final String DELETE_FEEDBACK_SQL = "DELETE FROM feedback WHERE groupId = ? AND type = ? AND date > ? AND date < ?";
     private static final String TYPEID_FEEDBACK_SQL = "SELECT typeId FROM feedback WHERE groupId = ? AND type = ? AND date > ? AND date < ?";
 
     /**
      * @param writeCon The global db write connection
-     * @param userId The user id
-     * @param contextId The context id
-     * @param loginName The login name
-     * @param date The time of the feedback
+     * @param feedback The feedback to persist
+     * @param groupId The global db group id assigned to the context
      * @throws SQLException
      */
-    protected void saveFeedBackInternal(Connection writeCon, int userId, int contextId, String groupId, String loginName, long date, String type, long feedbackId) throws SQLException {
+    protected void saveFeedBackInternal(Connection writeCon, FeedbackMetaData feedbackMetaData, String groupId) throws SQLException {
         PreparedStatement statement = null;
         try {
             statement = writeCon.prepareStatement(INSERT_FEEDBACK_SQL);
             statement.setString(1, groupId);
-            statement.setString(2, type);
-            statement.setLong(3, date);
-            statement.setInt(4, contextId);
-            statement.setInt(5, userId);
+            statement.setString(2, feedbackMetaData.getType());
+            statement.setLong(3, feedbackMetaData.getDate());
+            statement.setInt(4, feedbackMetaData.getCtxId());
+            statement.setInt(5, feedbackMetaData.getUserId());
+            String loginName = feedbackMetaData.getLoginName();
             if (loginName == null) {
                 loginName = "";
             }
             statement.setString(6, loginName);
-            statement.setLong(7, feedbackId);
+            statement.setLong(7, feedbackMetaData.getTypeId());
+            statement.setString(8, feedbackMetaData.getUiVersion());
+            statement.setString(9, feedbackMetaData.getServerVersion());
             statement.execute();
         } finally {
             DBUtils.closeSQLStuff(statement);
@@ -195,7 +224,7 @@ public class FeedbackServiceImpl implements FeedbackService {
 
             return feedBackType.getFeedbacks(filteredFeedback, readCon);
         } catch (SQLException e) {
-            throw FeedbackExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage());
+            throw FeedbackExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage(), e);
         } finally {
             if (readCon != null) {
                 dbService.backReadOnlyForGlobal(ctxGroup, readCon);
@@ -214,7 +243,8 @@ public class FeedbackServiceImpl implements FeedbackService {
             ResultSet resultSet = statement.executeQuery();
             List<FeedbackMetaData> result = new ArrayList<>();
             while (resultSet.next()) {
-                result.add(new FeedbackMetaData(filter.getType(), resultSet.getLong(1), resultSet.getInt(2), resultSet.getInt(3), resultSet.getString(4), resultSet.getLong(5)));
+                FeedbackMetaData data = FeedbackMetaData.builder().setType(filter.getType()).setDate(resultSet.getLong(1)).setCtxId(resultSet.getInt(2)).setUserId(resultSet.getInt(3)).setLoginName(resultSet.getString(4)).setTypeId(resultSet.getLong(5)).setUiVersion(resultSet.getString(6)).setServerVersion(resultSet.getString(7)).build();
+                result.add(data);
             }
             return result;
         } finally {
@@ -252,7 +282,7 @@ public class FeedbackServiceImpl implements FeedbackService {
             writeCon.commit();
         } catch (SQLException e) {
             DBUtils.rollback(writeCon);
-            throw FeedbackExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            throw FeedbackExceptionCodes.SQL_ERROR.create(e.getMessage(), e);
         } finally {
             if (null != writeCon) {
                 DBUtils.autocommit(writeCon);

@@ -160,9 +160,11 @@
                 type VARCHAR(255) NOT NULL,
                 date BIGINT(20) UNSIGNED NOT NULL, 
                 cid INT(10) UNSIGNED NOT NULL, 
-				user INT(10) UNSIGNED NOT NULL,
-				login_name VARCHAR(255) NOT NULL,
-				typeId BIGINT UNSIGNED NOT NULL,
+                user INT(10) UNSIGNED NOT NULL,
+                login_name VARCHAR(255) NOT NULL,
+                typeId BIGINT UNSIGNED NOT NULL,
+                client_version VARCHAR(127) NOT NULL,
+                server_version VARCHAR(127) NOT NULL,
                 PRIMARY KEY (id)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
         </sql>
@@ -171,24 +173,24 @@
         </rollback>
     </changeSet>
     
-    <changeSet id="7.8.4:feedback:starrating:v1:create" author="kevin.ruthmann@open-xchange.com">
+    <changeSet id="7.8.4:feedback_star_rating_v1:create" author="kevin.ruthmann@open-xchange.com">
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="star_rating_v1" />
             </not>
         </preConditions>
         <comment>
-            Add table 'star_rating_v1' to save feedback data.
+            Add table 'feedback_star_rating_v1' to save feedback data.
         </comment>
         <sql>
-            CREATE TABLE star_rating_v1 (
+            CREATE TABLE feedback_star_rating_v1 (
                 id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
                 data BLOB NOT NULL,
                 PRIMARY KEY (id)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
         </sql>
         <rollback>
-            <dropTable tableName="star_rating_v1" />
+            <dropTable tableName="feedback_star_rating_v1" />
         </rollback>
     </changeSet>
 

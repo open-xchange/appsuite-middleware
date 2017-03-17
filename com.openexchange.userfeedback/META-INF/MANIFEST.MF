@@ -14,13 +14,15 @@ Import-Package: com.openexchange.ajax.container,
  com.openexchange.java,
  com.openexchange.osgi,
  com.openexchange.server,
+ com.openexchange.serverconfig,
  com.openexchange.session,
  com.openexchange.tools.sql,
  com.openexchange.tools.validate,
  com.openexchange.user,
  org.json,
  org.osgi.framework,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j
 Export-Package: com.openexchange.userfeedback,
  com.openexchange.userfeedback.exception,
  com.openexchange.userfeedback.filter

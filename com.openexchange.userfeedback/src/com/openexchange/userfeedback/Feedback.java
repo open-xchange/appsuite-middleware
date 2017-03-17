@@ -60,21 +60,56 @@ public class Feedback extends FeedbackMetaData {
 
     private Object content;
 
-    public Feedback(String type, long date, int ctxId, int userId, String loginName, long typeId, Object content) {
-        super(type, date, ctxId, userId, loginName, typeId);
-        this.setContent(content);
-    }
-
-    public Feedback(FeedbackMetaData metaData, Object content) {
-        super(metaData.getType(), metaData.getDate(), metaData.getCtxId(), metaData.getUserId(), metaData.getLoginName(), metaData.getTypeId());
-        this.setContent(content);
+    Feedback(Builder builder) {
+        super(builder);
+        this.content = builder.content;
     }
 
     public Object getContent() {
         return content;
     }
 
-    public void setContent(Object content) {
-        this.content = content;
+    public void setContent(Object pContent) {
+        content = pContent;
     }
+
+    /**
+     * Creates a new builder instance.
+     *
+     * @return The builder instance
+     */
+    public static Builder builder(FeedbackMetaData meta) {
+        return new Builder(meta);
+    }
+
+    public static class Builder extends FeedbackMetaData.Builder {
+
+        private Object content;
+
+        Builder(FeedbackMetaData meta) {
+            super(meta);
+        }
+
+        /**
+         * Sets the stored content for this feedback
+         * 
+         * @param content The content to set
+         * @return This builder
+         */
+        public Builder setContent(Object content) {
+            this.content = content;
+            return this;
+        }
+
+        /**
+         * Creates the <code>Feedback</code> instance from this builder's arguments.
+         *
+         * @return The <code>Feedback</code> instance
+         */
+        @Override
+        public Feedback build() {
+            return new Feedback(this);
+        }
+    }
+
 }

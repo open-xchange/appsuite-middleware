@@ -52,6 +52,7 @@ package com.openexchange.userfeedback.osgi;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.userfeedback.FeedbackService;
 import com.openexchange.userfeedback.FeedbackTypeRegistry;
 import com.openexchange.userfeedback.internal.FeedbackServiceImpl;
@@ -67,7 +68,7 @@ public class Activator extends HousekeepingActivator{
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[]{ConfigViewFactory.class, DatabaseService.class};
+        return new Class[] { ConfigViewFactory.class, DatabaseService.class, ServerConfigService.class };
     }
 
     @Override
