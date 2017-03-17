@@ -78,6 +78,12 @@ public class IPCheckMetrics {
     private float deniedExceptionPercentage;
     private float deniedCountryChangedPercentage;
 
+    private float acceptedPrivateOverallPercentage;
+    private float acceptedWhiteListedOverallPercentage;
+    private float acceptedEligileOverallPercentage;
+    private float deniedExceptionOverallPercentage;
+    private float deniedCountryChangedOverallPercentage;
+
     /**
      * Initialises a new {@link IPCheckMetrics}.
      */
@@ -111,11 +117,20 @@ public class IPCheckMetrics {
         int acceptedEligible = acceptedEligibleIPChanges.get();
         acceptedEligilePercentage = ((float) acceptedEligible / totalAccepted) * 100;
 
+        // Overall accepted percentages
+        acceptedPrivateOverallPercentage = ((float) acceptedPrivate / total) * 100;
+        acceptedWhiteListedOverallPercentage = ((float) acceptedWL / total) * 100;
+        acceptedEligileOverallPercentage = ((float) acceptedEligible / total) * 100;
+
         // Denied percentages
         int deniedEx = deniedException.get();
         deniedExceptionPercentage = ((float) deniedEx / totalDenied) * 100;
         int deniedCC = deniedCountryChanged.get();
         deniedCountryChangedPercentage = ((float) deniedCC / totalDenied) * 100;
+
+        // Overall denied percentages
+        deniedExceptionOverallPercentage = ((float) deniedEx / total) * 100;
+        deniedCountryChangedOverallPercentage = ((float) deniedCC / total) * 100;
     }
 
     public void incrementTotalIPChanges() {
@@ -282,5 +297,50 @@ public class IPCheckMetrics {
      */
     public float getDeniedCountryChangedPercentage() {
         return deniedCountryChangedPercentage;
+    }
+
+    /**
+     * Gets the acceptedPrivateOverallPercentage
+     *
+     * @return The acceptedPrivateOverallPercentage
+     */
+    public float getAcceptedPrivateOverallPercentage() {
+        return acceptedPrivateOverallPercentage;
+    }
+
+    /**
+     * Gets the acceptedWhiteListedOverallPercentage
+     *
+     * @return The acceptedWhiteListedOverallPercentage
+     */
+    public float getAcceptedWhiteListedOverallPercentage() {
+        return acceptedWhiteListedOverallPercentage;
+    }
+
+    /**
+     * Gets the acceptedEligileOverallPercentage
+     *
+     * @return The acceptedEligileOverallPercentage
+     */
+    public float getAcceptedEligileOverallPercentage() {
+        return acceptedEligileOverallPercentage;
+    }
+
+    /**
+     * Gets the deniedExceptionOverallPercentage
+     *
+     * @return The deniedExceptionOverallPercentage
+     */
+    public float getDeniedExceptionOverallPercentage() {
+        return deniedExceptionOverallPercentage;
+    }
+
+    /**
+     * Gets the deniedCountryChangedOverallPercentage
+     *
+     * @return The deniedCountryChangedOverallPercentage
+     */
+    public float getDeniedCountryChangedOverallPercentage() {
+        return deniedCountryChangedOverallPercentage;
     }
 }
