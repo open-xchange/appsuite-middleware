@@ -49,11 +49,18 @@
 
 package com.openexchange.ipcheck.countrycode.mbean;
 
+import java.util.Iterator;
+import java.util.concurrent.LinkedBlockingDeque;
 import javax.management.DynamicMBean;
+import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.management.AnnotatedDynamicStandardMBean;
 import com.openexchange.management.MetricAware;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link IPCheckMBeanImpl}
@@ -62,8 +69,53 @@ import com.openexchange.server.ServiceLookup;
  */
 public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements IPCheckMBean, DynamicMBean {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(IPCheckMBeanImpl.class);
+
     private final MetricAware<IPCheckMetrics> metricAware;
     private IPCheckMetrics metrics;
+
+    /** Window size for average calculation: 1 hour */
+    private static final long WINDOW_SIZE = 60L * 60000L;
+
+    /** Double ended queue holding measurements over an hour */
+    private final LinkedBlockingDeque<Measurement> measurements;
+
+    private ScheduledTimerTask timerTask;
+
+    private float acceptedPercentage;
+    private float deniedPercentage;
+
+    private float acceptedPrivatePercentage;
+    private float acceptedWhiteListedPercentage;
+    private float acceptedEligilePercentage;
+    private float deniedExceptionPercentage;
+    private float deniedCountryChangedPercentage;
+
+    private float acceptedPrivateOverallPercentage;
+    private float acceptedWhiteListedOverallPercentage;
+    private float acceptedEligileOverallPercentage;
+    private float deniedExceptionOverallPercentage;
+    private float deniedCountryChangedOverallPercentage;
+
+    private long acceptedChangesPerMinute;
+    private long deniedChangesPerMinute;
+
+    /**
+     * Represents a measurement of accepted and denied ip changes for a certain point in time.
+     */
+    static final class Measurement {
+
+        final long timestamp;
+        final long acceptedIPChanges;
+        final long deniedIPChanges;
+
+        Measurement(long accepted, long denied) {
+            super();
+            this.acceptedIPChanges = accepted;
+            this.deniedIPChanges = denied;
+            this.timestamp = System.currentTimeMillis();
+        }
+    }
 
     /**
      * Initialises a new {@link IPCheckMBeanImpl}.
@@ -74,7 +126,120 @@ public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements I
     public IPCheckMBeanImpl(ServiceLookup services, MetricAware<IPCheckMetrics> metricAware) throws NotCompliantMBeanException {
         super(services, IPCheckMBean.NAME, IPCheckMBean.class);
         this.metricAware = metricAware;
+        measurements = new LinkedBlockingDeque<Measurement>();
+
         refresh();
+        startTask();
+    }
+
+    /**
+     * Start the task
+     */
+    private void startTask() {
+        TimerService timerService = getService(TimerService.class);
+        Runnable task = new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    long accepted = metrics.getAcceptedIPChanges();
+                    long denied = metrics.getDeniedIPChanges();
+                    measurements.add(new Measurement(accepted, denied));
+                    cleanUp();
+                } catch (Exception e) {
+                    LOGGER.error("{}", e.getMessage(), e);
+                }
+            }
+
+            /**
+             * Cleans all metrics that are expired
+             */
+            private void cleanUp() {
+                long minTime = System.currentTimeMillis() - WINDOW_SIZE;
+                for (Measurement measurement; (measurement = measurements.peek()) != null && measurement.timestamp < minTime;) {
+                    measurements.poll();
+                }
+            }
+        };
+        timerTask = timerService.scheduleAtFixedRate(task, 0L, 60000L);
+    }
+
+    /**
+     * Calculates the percentages
+     */
+    private void calculatePercentages() {
+        // Work with local copies
+        int total = metrics.getTotalIPChanges();
+        int totalAccepted = metrics.getAcceptedIPChanges();
+        int totalDenied = metrics.getDeniedIPChanges();
+        acceptedPercentage = ((float) totalAccepted / total) * 100;
+        deniedPercentage = ((float) totalDenied / total) * 100;
+
+        // Accepted percentages
+        int acceptedPrivate = metrics.getAcceptedPrivateIP();
+        acceptedPrivatePercentage = ((float) acceptedPrivate / totalAccepted) * 100;
+        int acceptedWL = metrics.getAcceptedWhiteListed();
+        acceptedWhiteListedPercentage = ((float) acceptedWL / totalAccepted) * 100;
+        int acceptedEligible = metrics.getAcceptedEligibleIPChanges();
+        acceptedEligilePercentage = ((float) acceptedEligible / totalAccepted) * 100;
+
+        // Overall accepted percentages
+        acceptedPrivateOverallPercentage = ((float) acceptedPrivate / total) * 100;
+        acceptedWhiteListedOverallPercentage = ((float) acceptedWL / total) * 100;
+        acceptedEligileOverallPercentage = ((float) acceptedEligible / total) * 100;
+
+        // Denied percentages
+        int deniedEx = metrics.getDeniedException();
+        deniedExceptionPercentage = ((float) deniedEx / totalDenied) * 100;
+        int deniedCC = metrics.getAcceptedEligibleIPChanges();
+        deniedCountryChangedPercentage = ((float) deniedCC / totalDenied) * 100;
+
+        // Overall denied percentages
+        deniedExceptionOverallPercentage = ((float) deniedEx / total) * 100;
+        deniedCountryChangedOverallPercentage = ((float) deniedCC / total) * 100;
+    }
+
+    /**
+     * Calculates the changes per minute
+     * 
+     * @throws MBeanException
+     */
+    private void calculateChangesPerMinute() {
+        long meantimes = 0L;
+        long accepted = 0L;
+        long denied = 0L;
+
+        Measurement last = null;
+        for (Iterator<Measurement> it = measurements.iterator(); it.hasNext();) {
+            Measurement current = it.next();
+            if (last != null) {
+                meantimes += current.timestamp - last.timestamp;
+                accepted += current.acceptedIPChanges - last.acceptedIPChanges;
+                denied += current.deniedIPChanges - last.deniedIPChanges;
+            }
+
+            last = current;
+        }
+
+        double acceptedPerMillis = 0L;
+        if (accepted > 0L && meantimes > 0L) {
+            acceptedPerMillis = accepted / (double) meantimes;
+        }
+
+        double deniedPerMillis = 0L;
+        if (accepted > 0L && meantimes > 0L) {
+            deniedPerMillis = denied / (double) meantimes;
+        }
+
+        acceptedChangesPerMinute = Math.round(acceptedPerMillis * 60000L);
+        deniedChangesPerMinute = Math.round(deniedPerMillis * 60000L);
+    }
+
+    /**
+     * Stops this MBean.
+     */
+    public void stop() {
+        timerTask.cancel();
     }
 
     /*
@@ -85,7 +250,28 @@ public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements I
     @Override
     protected void refresh() {
         metrics = metricAware.getMetricsObject();
-        metrics.calculatePercentages();
+        calculatePercentages();
+        calculateChangesPerMinute();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ipcheck.countrycode.mbean.IPCheckMBean#getAcceptedIPChangesPerMinute()
+     */
+    @Override
+    public long getAcceptedIPChangesPerMinute() {
+        return acceptedChangesPerMinute;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ipcheck.countrycode.mbean.IPCheckMBean#deniedIPChangesPerMinute()
+     */
+    @Override
+    public long deniedIPChangesPerMinute() {
+        return deniedChangesPerMinute;
     }
 
     /*
@@ -175,7 +361,7 @@ public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements I
      */
     @Override
     public float getAcceptedPercentage() {
-        return metrics.getAcceptedPercentage();
+        return acceptedPercentage;
     }
 
     /*
@@ -185,7 +371,7 @@ public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements I
      */
     @Override
     public float getDeniedPercentage() {
-        return metrics.getDeniedPercentage();
+        return deniedPercentage;
     }
 
     /*
@@ -195,7 +381,7 @@ public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements I
      */
     @Override
     public float getAcceptedPrivatePercentage() {
-        return metrics.getAcceptedPrivatePercentage();
+        return acceptedPrivatePercentage;
     }
 
     /*
@@ -205,7 +391,7 @@ public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements I
      */
     @Override
     public float getAcceptedWhiteListedPercentage() {
-        return metrics.getAcceptedWhiteListedPercentage();
+        return acceptedWhiteListedPercentage;
     }
 
     /*
@@ -215,7 +401,7 @@ public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements I
      */
     @Override
     public float getAcceptedEligilePercentage() {
-        return metrics.getAcceptedEligilePercentage();
+        return acceptedEligilePercentage;
     }
 
     /*
@@ -225,7 +411,7 @@ public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements I
      */
     @Override
     public float getDeniedExceptionPercentage() {
-        return metrics.getDeniedExceptionPercentage();
+        return deniedExceptionPercentage;
     }
 
     /*
@@ -235,7 +421,7 @@ public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements I
      */
     @Override
     public float getDeniedCountryChangedPercentage() {
-        return metrics.getDeniedCountryChangedPercentage();
+        return deniedCountryChangedPercentage;
     }
 
     /*
@@ -245,7 +431,7 @@ public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements I
      */
     @Override
     public float getAcceptedPrivateOverallPercentage() {
-        return metrics.getAcceptedPrivateOverallPercentage();
+        return acceptedPrivateOverallPercentage;
     }
 
     /*
@@ -255,7 +441,7 @@ public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements I
      */
     @Override
     public float getAcceptedWhiteListedOverallPercentage() {
-        return metrics.getAcceptedWhiteListedOverallPercentage();
+        return acceptedWhiteListedOverallPercentage;
     }
 
     /*
@@ -265,7 +451,7 @@ public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements I
      */
     @Override
     public float getAcceptedEligileOverallPercentage() {
-        return metrics.getAcceptedEligileOverallPercentage();
+        return acceptedEligileOverallPercentage;
     }
 
     /*
@@ -275,7 +461,7 @@ public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements I
      */
     @Override
     public float getDeniedExceptionOverallPercentage() {
-        return metrics.getDeniedExceptionOverallPercentage();
+        return deniedExceptionOverallPercentage;
     }
 
     /*
@@ -285,6 +471,6 @@ public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements I
      */
     @Override
     public float getDeniedCountryChangedOverallPercentage() {
-        return metrics.getDeniedCountryChangedOverallPercentage();
+        return deniedCountryChangedOverallPercentage;
     }
 }

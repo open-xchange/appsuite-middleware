@@ -199,4 +199,8 @@ public interface IPCheckMBean {
      * @return The deniedCountryChangedOverallPercentage
      */
     float getDeniedCountryChangedOverallPercentage();
+    
+    long getAcceptedIPChangesPerMinute();
+    
+    long deniedIPChangesPerMinute();
 }
