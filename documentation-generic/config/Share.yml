@@ -10,13 +10,24 @@ properties:
       configcascadeAware: true
       related: 
       file: share.properties
-    - key: com.openexchange.share.userAgentBlacklist
+    - key: com.openexchange.share.userAgentBlacklist.enabled
       description: |
-        Specifies a comma-separated list (ignore-case) of such User-Agents that are supposed to receive a "404 Not Found" when trying to
-        access a share link. White-card notation is supported; e.g. "*aolbuild*"
-      defaultValue: *aolbuild*, *baiduspider*, *baidu*search*, *bingbot*, *bingpreview*, *msnbot*, *duckduckgo*, *adsbot-google*, *googlebot*, *mediapartners-google*, *teoma*, *slurp*, *yandex*bot*
+        Enables (default) or disables black-listing of User-Agents that are about to access a share link.
+        If enabled the "com.openexchange.share.userAgentBlacklist.values" configuration option specifies what User-Agents to black-list.
+      defaultValue: true
       version: 7.8.4
       reloadable: true
       configcascadeAware: false
       related: 
+      file: share.properties
+    - key: com.openexchange.share.userAgentBlacklist.values
+      description: |
+        Specifies a comma-separated list (ignore-case) of such User-Agents that are supposed to receive a "404 Not Found" when trying to
+        access a share link. White-card notation is supported; e.g. "*aolbuild*".
+        This configuration option is only effective if "com.openexchange.share.userAgentBlacklist.enabled" is set to "true"
+      defaultValue: *aolbuild*, *baiduspider*, *baidu*search*, *bingbot*, *bingpreview*, *msnbot*, *duckduckgo*, *adsbot-google*, *googlebot*, *mediapartners-google*, *teoma*, *slurp*, *yandex*bot*
+      version: 7.8.4
+      reloadable: true
+      configcascadeAware: false
+      related: com.openexchange.share.userAgentBlacklist.enabled
       file: share.properties
