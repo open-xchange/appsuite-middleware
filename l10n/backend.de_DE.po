@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2017-03-03 11:08+0100\n"
+"PO-Revision-Date: 2017-03-17 13:43+0100\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -1121,7 +1121,7 @@ msgstr "Endung"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreStrings.java:70
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/AttributeNames.java:96
 msgid "Title"
-msgstr "Titel"
+msgstr "Anrede"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:69
 msgid "Street (home)"
@@ -2114,7 +2114,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:80
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:81
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:135
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:124
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:122
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:136
 msgid ""
 "In order to accomplish the search, %1$d or more characters are required."
@@ -3520,11 +3520,9 @@ msgid "Unknown folder open mode %1$s"
 msgstr "Unbekannter Modus %1$s zum Öffnen des Ordners"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:130
-msgid ""
-"Message(s) %1$s in folder %2$s could not be deleted due to error \"%3$s\""
-msgstr ""
-"Die Nachricht(en) %1$s im Ordner %2$s konnten aufgrund folgenden Fehlers "
-"nicht gelöscht werden: \"%3$s\""
+#, fuzzy
+msgid "One or more message in folder %2$s could not be deleted"
+msgstr "Mindestens eine Nachricht im Ordner %2$s konnte nicht gelöscht werden"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:132
 msgid "Not allowed to open folder %1$s due to missing read access"
@@ -5252,6 +5250,22 @@ msgstr "Abgeschnittenes Element: %s"
 msgid "Invalid mail address for external participant: %1$s"
 msgstr "Ungültige E-Mail-Adresse für externen Teilnehmer: %1$s"
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:102
+msgid ""
+"The conversion yields some objects which could not be stored due to missing "
+"folder for appointments."
+msgstr ""
+"Die Konvertierung liefert einige Objekte, die aufgrund eines fehlenden "
+"Terminordners nicht gespeichert werden können."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:104
+msgid ""
+"The conversion yields some objects which could not be stored due to missing "
+"folder for tasks."
+msgstr ""
+"Die Konvertierung liefert einige Objekte, die aufgrund eines fehlenden "
+"Aufgabenordners nicht gespeichert werden können."
+
 #. You do not have a valid session. Please login again.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:62
 msgid "You do not have a valid session. Please login again."
@@ -5491,15 +5505,15 @@ msgid "Appointments must have at least one participant."
 msgstr "Termine müssen mindestens einen Teilnehmer haben."
 
 #. *
-#. * You do not have the appropriate permissions to read appointments in folder %1$d.
+#. * You do not have the appropriate permissions to read appointments that folder.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:77
+#, fuzzy
 msgid ""
-"You do not have the appropriate permissions to read appointments in folder "
-"%1$d."
+"You do not have the appropriate permissions to read appointments that folder."
 msgstr ""
-"Sie haben keine ausreichenden Berechtigungen zum Lesen von Terminen im "
-"Ordner %1$d."
+"Sie haben nicht die entsprechenden Berechtigungen zum Lesen von Terminen in "
+"diesem Ordner."
 
 #. *
 #. * End date must not be before start date.
@@ -5567,14 +5581,13 @@ msgid "Required value \"Title\" was not supplied."
 msgstr "Erfoderlicher Wert \"Titel\" nicht angegeben"
 
 #. *
-#. * Move not supported: Cannot move an appointment from folder %d to folder %d.
+#. * Move not supported. You cannot move an appointment into that folder.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:123
-msgid ""
-"Move not supported: Cannot move an appointment from folder %d to folder %d."
+msgid "Move not supported. You cannot move an appointment into that folder."
 msgstr ""
-"Verschieben nicht unterstützt: Ein Termin kann nicht vom Ordner %d in den "
-"Ordner %d verschoben werden."
+"Verschieben wird nicht unterstützt. Sie können keinen Termin in diesen "
+"Ordner verschieben."
 
 #. *
 #. * Move not allowed from shared folders.
@@ -5734,26 +5747,26 @@ msgid "Moving a recurring appointment to another folder is not supported."
 msgstr "Ein Serientermin darf nicht in einen anderen Ordner verschoben werden."
 
 #. *
-#. * Cannot insert appointment (%1$s). An appointment with the unique identifier (%2$s) already exists.
+#. * Cannot create that appointment. An appointment having the same unique identifier already exists.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:218
 msgid ""
-"Cannot insert appointment (%1$s). An appointment with the unique identifier "
-"(%2$s) already exists."
+"Cannot create that appointment. An appointment having the same unique "
+"identifier already exists."
 msgstr ""
-"Der Termin  (%1$s) kann nicht angelegt werden. Ein Termin mit der "
-"eindeutigen ID (%2$s) ist bereits vorhanden."
+"Dieser Termin kann nicht erstellt werden. Ein Termin mit dem gleichen "
+"eindeutigen Bezeichner ist bereits vorhanden."
 
 #. *
-#. * Cannot insert task (%1$s). A task with the unique identifier (%2$s) already exists.
+#. * Cannot create that task. A task having the same unique identifier already exists.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:223
 msgid ""
-"Cannot insert task (%1$s). A task with the unique identifier (%2$s) already "
+"Cannot create that task. A task having the same unique identifier already "
 "exists."
 msgstr ""
-"Die Aufgabe (%1$s) kann nicht angelegt werden. Eine Aufgabe mit der "
-"eindeutigen ID (%2$s) ist bereits vorhanden."
+"Diese Aufgabe kann nicht erstellt werden. Eine Aufgabe mit dem gleichen "
+"eindeutigen Bezeichner ist bereits vorhanden."
 
 #. Sequence number is outdated.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:226
@@ -5960,7 +5973,7 @@ msgid "Getting the value of %s requires at least a ContactObject"
 msgstr "Die Abfrage des Werts %s erfordert mindestens ein ContactObject"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:137
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:132
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:130
 msgid ""
 "The character \"%1$s\" in field \"%2$s\" can't be saved. Please remove the "
 "problematic character and try again."
@@ -8033,8 +8046,8 @@ msgid "Error while inserting task."
 msgstr "Fehler beim Einfügen der Aufgabe."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:67
-msgid "Folder \"%1$s\" is not a task folder."
-msgstr "Der Ordner \"%1$s\" ist kein Aufgabenordner."
+msgid "This is not a task folder."
+msgstr "Dies ist kein Aufgabenordner."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:69
 msgid ""
@@ -8075,11 +8088,11 @@ msgstr "Datumsbereich in Suche muss 2, nicht %d Werte enthalten"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:83
 msgid ""
-"You do not have the appropriate permissions to read the contents of the "
-"folder with id %1$d."
+"You do not have the appropriate permissions to read the contents in that "
+"folder."
 msgstr ""
-"Sie haben keine ausreichenden Berechtigungen zum Lesen der Inhalte des "
-"Ordners mit der ID %1$d."
+"Sie haben nicht die entsprechenden Berechtigungen zum Lesen der Inhalte "
+"dieses Ordners."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:85
 msgid "Tasks are disabled for you."
@@ -8087,11 +8100,10 @@ msgstr "Aufgaben sind für Sie deaktiviert."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:87
 msgid ""
-"You do not have the appropriate permissions to create tasks in folder \"%1$s"
-"\"."
+"You do not have the appropriate permissions to create tasks in that folder."
 msgstr ""
 "Sie haben nicht die entsprechenden Berechtigungen zum Anlegen von Aufgaben "
-"im Ordner \"%1$s\"."
+"in diesem Ordner."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:89
 msgid "You do not have the appropriate permission to delegate tasks."
@@ -8117,17 +8129,16 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:97
 msgid ""
-"You do not have the appropriate permissions to edit tasks in the folder with "
-"id %1$d."
+"You do not have the appropriate permissions to edit tasks in that folder"
 msgstr ""
 "Sie haben nicht die entsprechenden Berechtigungen zum Bearbeiten von "
-"Aufgaben im Ordner mit der ID %1$s."
+"Aufgaben in diesem Ordner."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:99
-msgid "Moving items from or into shared folder \"%1$s\" is not allowed."
+msgid "Moving items from or into a shared folder is not allowed."
 msgstr ""
-"Das Verschieben von Objekten aus oder in den freigegebenen Ordner \"%1$s\" "
-"ist nicht erlaubt."
+"Verschieben von Elementen aus einem oder in einen freigegebenen Ordner ist "
+"nicht zulässig."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:101
 msgid "Unknown recurrence type %d."
@@ -8157,10 +8168,10 @@ msgstr ""
 "Länge von \"%2$d\" Zeichen."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:112
-msgid "Tasks with private flag cannot be moved to a public folder \"%1$s\"."
+msgid "Tasks with private flag cannot be moved to a public folder."
 msgstr ""
 "Aufgaben mit Privatmarkierung (private flag) können nicht in öffentliche "
-"Ordner verschoben werden \"%1$s\"."
+"Ordner verschoben werden."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:114
 msgid "Only the task creator is allowed to set the private flag."
@@ -8173,38 +8184,32 @@ msgid "External participants without E-Mail address can not be added."
 msgstr "Externer Teilnehmer ohne E-Mail-Adresse kann nicht hinzugefügt werden."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:118
-msgid ""
-"You do not have the appropriate permisson to see the task %1$d in folder "
-"%2$s."
+msgid "You do not have the appropriate permisson to see the task."
 msgstr ""
-"Sie haben nicht die entsprechenden Berechtigungen zum Sehen der Aufgabe %1$d "
-"im Ordner %2$s."
+"Sie haben nicht die entsprechenden Berechtigungen zum Sehen der Aufgabe."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:120
 msgid "Task contains invalid data: \"%1$s\"."
 msgstr "Die Aufgabe enthält ungültige Daten: \"%1$s\"."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:122
-msgid "The task %1$d is not stored in folder %2$s."
-msgstr "Die Aufgabe %1$d ist nicht im Ordner %2$s gespeichert."
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:126
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:124
 msgid "Group %1$d is empty. You can not add an empty group to a task."
 msgstr ""
 "Die Gruppe %1$d ist leer. Eine leere Gruppe kann nicht zu einer Aufgabe "
 "hinzugefügt werden."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:128
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:126
 msgid "Value \"%1$s\" of attribute \"%2$s\" contains non digit characters."
 msgstr "Der Wert \"%1$s\" des Attributs \"%2$s\" darf nur Zahlen enthalten."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:130
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:128
 msgid "Priority is %d but must be between 1 and 3."
 msgstr "Priorität ist %d, muss jedoch zwischen 1 und 3 liegen."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:134
-msgid "This folder (%1$d) is not visible."
-msgstr "Dieser Ordner (%2$d) ist nicht sichtbar."
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:132
+msgid "You do not have the appropriate permisson to see the folder."
+msgstr ""
+"Sie haben nicht die entsprechenden Berechtigungen zum Sehen des Ordners."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:62
 msgid ""
@@ -9010,21 +9015,21 @@ msgstr ""
 #. * The provided login information seem to be wrong. Please try again.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:70
-msgid "The provided login information seem to be wrong. Please try again."
+msgid "The provided login data seem to be wrong. Please correct them."
 msgstr ""
-"Die angegebenen Anmeldedaten scheinen falsch zu sein. Bitte versuchen Sie es "
-"später erneut."
+"Die zur Verfügung gestellten Zugangsdaten scheinen falsch zu sein. Bitte "
+"korrigieren Sie sie."
 
 #. *
 #. * The provided login information to access mail server %1$s seem to be wrong. Please try again.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:75
 msgid ""
-"The provided login information to access mail server %1$s seem to be wrong. "
-"Please try again."
+"The provided login data to access mail server %1$s seem to be wrong. Please "
+"correct them."
 msgstr ""
-"Die angegebenen Anmelde-Informationen zum Zugriff auf den Mailserver %1$s "
-"scheinen falsch zu sein. Bitte versuchen Sie es erneut."
+"Die zur Verfügung gestellten Anmeldedaten zum Zugriff auf den E-Mail-Server "
+"%1$s scheinen falsch zu sein. Bitte korrigieren Sie sie."
 
 #. *
 #. * Mail folder "%1$s" could not be found.
@@ -9181,23 +9186,40 @@ msgstr ""
 "Zeitüberschreitung beim Versuch, eine Verbindung herzustellen."
 
 #. *
-#. * The allowed quota on mail server exceeded.
+#. * The connection to remote server %1$s timed out while awaiting the response.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:170
+msgid ""
+"The connection to remote server %1$s timed out while awaiting the response."
+msgstr ""
+"Zeitüberschreitung bei der Verbindung zum entfernten Server %1$s beim Warten "
+"auf Antwort."
+
+#. *
+#. * Mail server %1$s unexpectedly closed connection for user %2$s.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:175
+msgid "Mail server %1$s unexpectedly closed connection."
+msgstr "Die Verbindung zum Mailserver %1$s ist abgebrochen."
+
+#. *
+#. * The allowed quota on mail server exceeded.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:180
 msgid "The allowed quota on mail server exceeded."
 msgstr "Die zulässige Quota auf dem Mailserver wurde überschritten."
 
 #. *
 #. * The allowed quota on mail server "%1$s" exceeded.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:175
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:185
 msgid "The allowed quota on mail server \"%1$s\" exceeded."
 msgstr "Die zulässige Quota auf dem Mailserver \"%1$s\" wurde überschritten."
 
 #. *
 #. * The mailbox is already in use. Please try again later.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:180
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:190
 msgid "The mailbox is already in use. Please try again later."
 msgstr ""
 "Diese Mailbox wird bereits verwendet. Bitte versuchen Sie es später erneut. "
@@ -9205,7 +9227,7 @@ msgstr ""
 #. *
 #. * The mailbox on mail server %1$s for login %2$s is already in use by one of your other processes or clients. Please try again later.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:185
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:195
 msgid ""
 "The mailbox on mail server %1$s for login %2$s is already in use by one of "
 "your other processes or clients. Please try again later."
@@ -9215,7 +9237,7 @@ msgstr ""
 "später erneut."
 
 #. Wrong or missing login data to access mail transport server %1$s. Please check associated account's settings/credentials.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:188
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:198
 msgid ""
 "Wrong or missing login data to access mail transport server %1$s. Please "
 "check associated account's settings/credentials."
@@ -9227,7 +9249,7 @@ msgstr ""
 #. *
 #. * The message could not be sent due to a mail server temporary failure. Please try again later.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:193
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:203
 msgid ""
 "The message could not be sent due to a mail server temporary failure. Please "
 "try again later."
@@ -9236,7 +9258,7 @@ msgstr ""
 "nicht gesendet werden. Bitte versuchen Sie es später noch einmal."
 
 #. Timeout while trying to send to the following recipient: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:196
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:206
 msgid "Timeout while trying to send to the following recipient: %1$s"
 msgstr "Zeitüberschreitung beim Versuch, an folgende Empfänger zu senden: %1$s"
 
@@ -13242,33 +13264,98 @@ msgstr "UTC"
 msgid "Zulu"
 msgstr "Zulu"
 
-#~ msgid "The associated %2$s account does no more exist"
-#~ msgstr "Der zugehörige %2$s-Account ist nicht mehr vorhanden."
+#~ msgid ""
+#~ "Message(s) %1$s in folder %2$s could not be deleted due to error \"%3$s\""
+#~ msgstr ""
+#~ "Die Nachricht(en) %1$s im Ordner %2$s konnten aufgrund folgenden Fehlers "
+#~ "nicht gelöscht werden: \"%3$s\""
 
 #~ msgid ""
-#~ "You do not have the appropriate permissions to read the contents of "
-#~ "folder \"%1$s\"."
+#~ "You do not have the appropriate permissions to read appointments in "
+#~ "folder %1$d."
 #~ msgstr ""
-#~ "Sie haben nicht die entsprechenden Berechtigungen zum Lesen der Inhalte "
-#~ "des Ordners \"%1$s\"."
+#~ "Sie haben keine ausreichenden Berechtigungen zum Lesen von Terminen im "
+#~ "Ordner %1$d."
 
 #~ msgid ""
-#~ "You do not have the appropriate permissions to edit tasks in folder \"%1$s"
-#~ "\"."
+#~ "Move not supported: Cannot move an appointment from folder %d to folder "
+#~ "%d."
 #~ msgstr ""
-#~ "Sie haben nicht die entsprechenden Berechtigungen zum Bearbeiten von "
+#~ "Verschieben nicht unterstützt: Ein Termin kann nicht vom Ordner %d in den "
+#~ "Ordner %d verschoben werden."
+
+#~ msgid ""
+#~ "Cannot insert appointment (%1$s). An appointment with the unique "
+#~ "identifier (%2$s) already exists."
+#~ msgstr ""
+#~ "Der Termin  (%1$s) kann nicht angelegt werden. Ein Termin mit der "
+#~ "eindeutigen ID (%2$s) ist bereits vorhanden."
+
+#~ msgid ""
+#~ "Cannot insert task (%1$s). A task with the unique identifier (%2$s) "
+#~ "already exists."
+#~ msgstr ""
+#~ "Die Aufgabe (%1$s) kann nicht angelegt werden. Eine Aufgabe mit der "
+#~ "eindeutigen ID (%2$s) ist bereits vorhanden."
+
+#~ msgid "Folder \"%1$s\" is not a task folder."
+#~ msgstr "Der Ordner \"%1$s\" ist kein Aufgabenordner."
+
+#~ msgid ""
+#~ "You do not have the appropriate permissions to read the contents of the "
+#~ "folder with id %1$d."
+#~ msgstr ""
+#~ "Sie haben keine ausreichenden Berechtigungen zum Lesen der Inhalte des "
+#~ "Ordners mit der ID %1$d."
+
+#~ msgid ""
+#~ "You do not have the appropriate permissions to create tasks in folder "
+#~ "\"%1$s\"."
+#~ msgstr ""
+#~ "Sie haben nicht die entsprechenden Berechtigungen zum Anlegen von "
 #~ "Aufgaben im Ordner \"%1$s\"."
 
-#~ msgid "This folder (%2$d) is not visible."
-#~ msgstr "Dieser Ordner (%2$d) ist nicht sichtbar."
+#~ msgid ""
+#~ "You do not have the appropriate permissions to edit tasks in the folder "
+#~ "with id %1$d."
+#~ msgstr ""
+#~ "Sie haben nicht die entsprechenden Berechtigungen zum Bearbeiten von "
+#~ "Aufgaben im Ordner mit der ID %1$s."
+
+#~ msgid "Moving items from or into shared folder \"%1$s\" is not allowed."
+#~ msgstr ""
+#~ "Das Verschieben von Objekten aus oder in den freigegebenen Ordner \"%1$s"
+#~ "\" ist nicht erlaubt."
+
+#~ msgid "Tasks with private flag cannot be moved to a public folder \"%1$s\"."
+#~ msgstr ""
+#~ "Aufgaben mit Privatmarkierung (private flag) können nicht in öffentliche "
+#~ "Ordner verschoben werden \"%1$s\"."
 
 #~ msgid ""
-#~ "Accessing server %1$s is disabled. Please update the account and enter "
-#~ "valid credentials in order to use it again."
+#~ "You do not have the appropriate permisson to see the task %1$d in folder "
+#~ "%2$s."
 #~ msgstr ""
-#~ "Der Zugriff auf Server %1$s ist deaktiviert. Bitte aktualisieren Sie den "
-#~ "Account und geben Sie gültige Anmeldeinformationen ein, um ihn wieder "
-#~ "verwenden zu können."
+#~ "Sie haben nicht die entsprechenden Berechtigungen zum Sehen der Aufgabe "
+#~ "%1$d im Ordner %2$s."
+
+#~ msgid "The task %1$d is not stored in folder %2$s."
+#~ msgstr "Die Aufgabe %1$d ist nicht im Ordner %2$s gespeichert."
+
+#~ msgid "This folder (%1$d) is not visible."
+#~ msgstr "Dieser Ordner (%2$d) ist nicht sichtbar."
+
+#~ msgid "The provided login information seem to be wrong. Please try again."
+#~ msgstr ""
+#~ "Die angegebenen Anmeldedaten scheinen falsch zu sein. Bitte versuchen Sie "
+#~ "es später erneut."
+
+#~ msgid ""
+#~ "The provided login information to access mail server %1$s seem to be "
+#~ "wrong. Please try again."
+#~ msgstr ""
+#~ "Die angegebenen Anmelde-Informationen zum Zugriff auf den Mailserver %1$s "
+#~ "scheinen falsch zu sein. Bitte versuchen Sie es erneut."
 
 #~ msgid "America/Fort Nelson"
 #~ msgstr "Amerika / Fort Nelson"
@@ -13299,6 +13386,34 @@ msgstr "Zulu"
 
 #~ msgid "Europe/Ulyanovsk"
 #~ msgstr "Europa / Ulyanovsk"
+
+#~ msgid "The associated %2$s account does no more exist"
+#~ msgstr "Der zugehörige %2$s-Account ist nicht mehr vorhanden."
+
+#~ msgid ""
+#~ "You do not have the appropriate permissions to read the contents of "
+#~ "folder \"%1$s\"."
+#~ msgstr ""
+#~ "Sie haben nicht die entsprechenden Berechtigungen zum Lesen der Inhalte "
+#~ "des Ordners \"%1$s\"."
+
+#~ msgid ""
+#~ "You do not have the appropriate permissions to edit tasks in folder \"%1$s"
+#~ "\"."
+#~ msgstr ""
+#~ "Sie haben nicht die entsprechenden Berechtigungen zum Bearbeiten von "
+#~ "Aufgaben im Ordner \"%1$s\"."
+
+#~ msgid "This folder (%2$d) is not visible."
+#~ msgstr "Dieser Ordner (%2$d) ist nicht sichtbar."
+
+#~ msgid ""
+#~ "Accessing server %1$s is disabled. Please update the account and enter "
+#~ "valid credentials in order to use it again."
+#~ msgstr ""
+#~ "Der Zugriff auf Server %1$s ist deaktiviert. Bitte aktualisieren Sie den "
+#~ "Account und geben Sie gültige Anmeldeinformationen ein, um ihn wieder "
+#~ "verwenden zu können."
 
 #~ msgid "Can not import the format %2$s into folder %1$s."
 #~ msgstr "Kein Importier-Tool für Ordner %1$s in das Format %2$s gefunden"
